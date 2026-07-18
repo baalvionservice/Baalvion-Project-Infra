@@ -5,6 +5,7 @@
  * Hardened for multi-party negotiation and AI-assisted finalization.
  */
 import { apiClient } from '@/lib/api-client';
+import { toList } from '@/lib/api-list';
 import { TradeDeal, Message } from '@/types/institutional';
 export type { Message } from '@/types/institutional';
 import { logger, metricsService } from './observability-service';
@@ -63,8 +64,10 @@ class DealService {
    */
   async getDeals(): Promise<TradeDeal[]> {
     const res = await apiClient.get<any>('/deals');
-    const items = res.data?.items ?? [];
-    return items.map(mapDealFromApi);
+    // /deals may come back as either a bare array or a paginated { items } envelope
+    // depending on the backing store; toList() normalizes both so the list never
+    // silently renders empty (and the search box always has real data to filter).
+    return toList<any>(res).map(mapDealFromApi);
   }
 
   /**

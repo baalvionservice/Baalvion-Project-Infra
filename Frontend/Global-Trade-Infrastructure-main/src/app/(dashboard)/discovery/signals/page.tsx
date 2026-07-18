@@ -7,7 +7,9 @@
  */
 
 import { useEffect, useState } from 'react';
-import { riskIntelligenceService, RiskSignal } from '@/services/risk-intelligence-service';
+import { useRouter } from 'next/navigation';
+import { sigIntService } from '@/services/intelligence/signal-intelligence';
+import type { TradeSignal } from '@/types/institutional';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -35,11 +37,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
 
 export default function MarketSignalsPage() {
-  const [signals, setSignals] = useState<RiskSignal[]>([]);
+  const [signals, setSignals] = useState<TradeSignal[]>([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
-    riskIntelligenceService.getGlobalSignals().then(setSignals).finally(() => setLoading(false));
+    sigIntService.getActiveSignals().then(setSignals).finally(() => setLoading(false));
   }, []);
 
   if (loading) {
@@ -81,10 +84,16 @@ export default function MarketSignalsPage() {
                 <Radar className="h-8 w-8 text-primary opacity-30 animate-spin-slow" />
               </CardHeader>
               <CardContent className="p-0">
+                 {signals.length === 0 ? (
+                    <div className="p-16 text-center space-y-3">
+                       <ShieldCheck className="h-10 w-10 mx-auto text-emerald-500 opacity-60" />
+                       <p className="text-sm font-bold text-muted-foreground">No active signals — the network is quiet.</p>
+                    </div>
+                 ) : (
                  <div className="divide-y-2">
                     <AnimatePresence>
                        {signals.map((sig, i) => (
-                          <motion.div 
+                          <motion.div
                             key={sig.id}
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
@@ -100,21 +109,23 @@ export default function MarketSignalsPage() {
                              <div className="space-y-4 flex-1 min-w-0">
                                 <div className="flex items-center justify-between">
                                    <Badge className="text-[10px] font-black uppercase h-6 px-3 border-none bg-slate-900 text-white shadow-lg tracking-widest">{sig.type}</Badge>
-                                   <span className="text-[11px] font-mono text-muted-foreground opacity-40">LEDGER_REF: {sig.id}</span>
+                                   <span className="text-[11px] font-mono text-muted-foreground opacity-40">REF: {sig.id.slice(0, 8)}</span>
                                 </div>
-                                <h4 className="text-3xl font-black uppercase tracking-tighter text-foreground leading-[0.9] group-hover:text-primary transition-colors">{sig.title}</h4>
                                 <p className="text-lg font-medium leading-relaxed italic opacity-80 border-l-4 border-red-500/10 pl-8">"{sig.message}"</p>
                                 <div className="flex items-center gap-6 pt-4 text-[10px] font-black uppercase text-muted-foreground/60 tracking-wide">
-                                   <span className="flex items-center gap-2"><Globe className="h-4 w-4" /> Affected: {sig.affectedCorridors.join(', ')}</span>
-                                   <span className="flex items-center gap-2"><History className="h-4 w-4" /> {format(new Date(sig.createdAt), "HH:mm:ss")} UTC</span>
+                                   {sig.commodity && <span className="flex items-center gap-2"><Globe className="h-4 w-4" /> {sig.commodity}</span>}
+                                   {sig.source && <span className="flex items-center gap-2">Source: {sig.source}</span>}
+                                   <span className="flex items-center gap-2"><History className="h-4 w-4" /> {sig.createdAt ? format(new Date(sig.createdAt), "HH:mm:ss") : '—'} UTC</span>
                                 </div>
                              </div>
                              <div className="flex flex-col items-end gap-6 shrink-0 border-l-2 pl-12 border-muted/50">
-                                <div className="text-right space-y-1">
-                                   <p className="text-[9px] font-black uppercase opacity-40 leading-none">Impact Index</p>
-                                   <p className="text-4xl font-black tracking-tighter text-red-600 tabular-nums">{sig.impactScore}%</p>
-                                </div>
-                                <Button variant="ghost" size="icon" className="h-14 w-14 rounded-xl border-2 opacity-20 group-hover:opacity-100 group-hover:bg-primary group-hover:text-white transition-all">
+                                <Badge variant="outline" className="uppercase font-black text-[9px]">{sig.severity}</Badge>
+                                <Button
+                                   variant="ghost"
+                                   size="icon"
+                                   className="h-14 w-14 rounded-xl border-2 opacity-20 group-hover:opacity-100 group-hover:bg-primary group-hover:text-white transition-all"
+                                   onClick={() => router.push(`/discovery/signals/${sig.id}`)}
+                                >
                                    <ArrowRight className="h-6 w-6" />
                                 </Button>
                              </div>
@@ -122,6 +133,7 @@ export default function MarketSignalsPage() {
                        ))}
                     </AnimatePresence>
                  </div>
+                 )}
               </CardContent>
            </Card>
         </div>

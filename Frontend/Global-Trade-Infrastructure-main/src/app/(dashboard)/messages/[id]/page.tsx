@@ -41,17 +41,18 @@ export default function ConversationDetailPage() {
   const { id } = useParams();
   const router = useRouter();
   const [conv, setConv] = useState<Conversation | null>(null);
-  const [messages, setMessages] = useState<any[]>([]); 
+  const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   const fetchData = async () => {
     if (typeof id !== 'string') return;
-    
+
     const [c, m] = await Promise.all([getConversationById(id), getConversationMessages(id)]);
     setConv(c);
-    
+
     // Map service messages to UI message format
-    setMessages(m.map(msg => ({
+    setMessages((Array.isArray(m) ? m : []).map(msg => ({
       id: msg.id,
       dealId: msg.conversationId,
       sender: msg.sender === 'SYSTEM' ? 'system' : (msg.sender === 'Alexander Chen' ? 'buyer' : 'seller'),
@@ -63,9 +64,16 @@ export default function ConversationDetailPage() {
   };
 
   useEffect(() => {
-    fetchData().then(() => setLoading(false));
-    const interval = setInterval(fetchData, 5000); 
-    return () => clearInterval(interval);
+    let cancelled = false;
+    setLoading(true);
+    setLoadError(false);
+    fetchData()
+      .catch(() => { if (!cancelled) setLoadError(true); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    // A failed poll must never re-trigger the full-page loading state — only the initial
+    // mount does. Errors on subsequent polls are silently retried on the next tick.
+    const interval = setInterval(() => { fetchData().catch(() => {}); }, 5000);
+    return () => { cancelled = true; clearInterval(interval); };
   }, [id]);
 
   const handleSendMessage = async (content: string) => {
@@ -102,8 +110,14 @@ export default function ConversationDetailPage() {
   if (!conv) {
     return (
       <div className="flex h-[80vh] flex-col items-center justify-center p-8 text-center">
-        <h2 className="text-3xl font-black uppercase tracking-tighter">Dialogue Node Not Found</h2>
-        <p className="text-muted-foreground mb-10 font-medium italic">The requested coordination thread could not be establishment in this session.</p>
+        <h2 className="text-3xl font-black uppercase tracking-tighter">
+          {loadError ? 'Connection Failed' : 'Dialogue Node Not Found'}
+        </h2>
+        <p className="text-muted-foreground mb-10 font-medium italic">
+          {loadError
+            ? 'The coordination network could not be reached. Check your connection and try again.'
+            : 'The requested coordination thread could not be established in this session.'}
+        </p>
         <Button onClick={() => router.push('/messages')} className="h-14 px-6 font-black uppercase tracking-widest shadow-xl">Return to Inbox</Button>
       </div>
     );

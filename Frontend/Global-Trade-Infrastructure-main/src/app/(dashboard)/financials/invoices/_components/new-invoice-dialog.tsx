@@ -8,8 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Trash2 } from 'lucide-react';
 import { createInvoice, type CreateInvoiceInput, type InvoiceDirection, type InvoiceLineItem } from '@/services/invoice-service';
-
-const CURRENCIES = ['USD', 'EUR', 'GBP', 'SGD', 'INR', 'CNY', 'JPY', 'AED'];
+import { SUPPORTED_CURRENCIES as CURRENCIES } from '@/core/currencies';
 
 interface Props { onCreated: () => void }
 

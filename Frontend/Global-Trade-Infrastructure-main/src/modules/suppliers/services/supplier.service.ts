@@ -29,6 +29,14 @@ class SupplierService {
     return toList<any>(res).map(this.mapToProfile);
   }
 
+  /** Invites a supplier org to participate in a tender — a real, persisted notification. */
+  async inviteToTender(supplierId: string, message?: string, rfqId?: string): Promise<void> {
+    const res = await apiClient.post<any>(`/organizations/${supplierId}/invite-to-tender`, { message, rfqId });
+    if (!res.success) {
+      throw new Error(res.error?.message || 'Failed to send invitation.');
+    }
+  }
+
   /**
    * Resolves a single supplier identity with full performance trace.
    */

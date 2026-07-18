@@ -33,8 +33,9 @@ export default function CommodityPricesPage() {
 
   const selected = COMMODITIES.find((c) => c.name === sel)!;
   const quoteNum = Number(quote) || 0;
-  const delta = quoteNum && selected.benchmark90d ? Math.round(((quoteNum - selected.benchmark90d) / selected.benchmark90d) * 100) : 0;
-  const verdict = !quoteNum ? null : delta <= -8 ? 'Excellent' : delta <= 3 ? 'Fair' : delta <= 12 ? 'Above market' : 'Overpriced';
+  const isInvalidQuote = quote.trim().length > 0 && quoteNum <= 0;
+  const delta = quoteNum > 0 && selected.benchmark90d ? Math.round(((quoteNum - selected.benchmark90d) / selected.benchmark90d) * 100) : 0;
+  const verdict = quoteNum <= 0 ? null : delta <= -8 ? 'Excellent' : delta <= 3 ? 'Fair' : delta <= 12 ? 'Above market' : 'Overpriced';
   const verdictColor = verdict === 'Excellent' ? 'text-emerald-600' : verdict === 'Fair' ? 'text-blue-600' : verdict === 'Above market' ? 'text-amber-600' : 'text-red-600';
 
   return (
@@ -96,16 +97,22 @@ export default function CommodityPricesPage() {
               </div>
               <div className="space-y-3">
                 <Label className="text-[10px] font-black uppercase tracking-widest opacity-70">Quoted Price ({selected.unit})</Label>
-                <Input type="number" value={quote} onChange={(e) => setQuote(e.target.value)} placeholder={`${selected.benchmark90d}`} className="h-12 bg-white/10 border-white/20 text-white rounded-xl font-black text-lg placeholder:text-white/40" />
+                <Input type="number" min="0" value={quote} onChange={(e) => setQuote(e.target.value)} placeholder={`${selected.benchmark90d}`} className="h-12 bg-white/10 border-white/20 text-white rounded-xl font-black text-lg placeholder:text-white/40" />
               </div>
 
+              {isInvalidQuote && (
+                <div className="p-5 rounded-2xl bg-red-500/20 border border-red-300/30 space-y-1">
+                  <p className="text-sm font-black uppercase tracking-tight text-red-200">Invalid quote</p>
+                  <p className="text-xs font-bold opacity-90">A quoted price must be greater than zero.</p>
+                </div>
+              )}
               {verdict && (
                 <div className="p-5 rounded-2xl bg-white/10 border border-white/10 space-y-2">
                   <p className={cn('text-2xl font-black uppercase tracking-tighter', verdictColor.replace('text-', 'text-').replace('600', '300'))}>{verdict}</p>
                   <p className="text-sm font-bold opacity-90">{delta <= 0 ? `${Math.abs(delta)}% below` : `${delta}% above`} the 90-day benchmark of {formatCurrency(selected.benchmark90d)}.</p>
                 </div>
               )}
-              {!verdict && <p className="text-xs font-medium opacity-60 italic">Enter a quote to benchmark it against {selected.benchmark90d ? formatCurrency(selected.benchmark90d) : 'the market'}.</p>}
+              {!verdict && !isInvalidQuote && <p className="text-xs font-medium opacity-60 italic">Enter a quote to benchmark it against {selected.benchmark90d ? formatCurrency(selected.benchmark90d) : 'the market'}.</p>}
             </CardContent>
           </Card>
 

@@ -1,11 +1,13 @@
 /**
  * @file lib/search-client.ts
  * @description PROMPT 8 — browser client for the marketplace search engine. Calls
- * the same-origin GTI routes `GET /api/search` and `GET /api/search/suggest`;
- * identity + tenant are injected server-side by the auth-gateway (same model as the
- * goods-screening / sanctions clients), so the browser only sends the query. The
- * GTI `{ success, data, error }` envelope is unwrapped here.
+ * the same-origin GTI routes `GET /api/search` and `GET /api/search/suggest` via
+ * `fetchLocalApi`, which attaches a signed identity envelope minted for the
+ * browser's own session (see `lib/local-api-client.ts`) — these routes trust
+ * only that envelope, never client-supplied headers. The GTI
+ * `{ success, data, error }` envelope is unwrapped here.
  */
+import { fetchLocalApi } from './local-api-client';
 
 export type SearchSort = 'relevance' | 'price_asc' | 'price_desc' | 'newest';
 
@@ -101,9 +103,8 @@ async function unwrap<T>(res: Response, fallbackMsg: string): Promise<T> {
 export async function searchCatalog(params: SearchParams, signal?: AbortSignal): Promise<SearchResult> {
   let res: Response;
   try {
-    res = await fetch(`/api/search?${buildSearchQueryString(params)}`, {
+    res = await fetchLocalApi(`/api/search?${buildSearchQueryString(params)}`, {
       method: 'GET',
-      credentials: 'include',
       signal,
     });
   } catch (err) {
@@ -118,9 +119,8 @@ export async function suggestCatalog(prefix: string, signal?: AbortSignal): Prom
   const trimmed = prefix.trim();
   if (!trimmed) return [];
   try {
-    const res = await fetch(`/api/search/suggest?q=${encodeURIComponent(trimmed)}&limit=8`, {
+    const res = await fetchLocalApi(`/api/search/suggest?q=${encodeURIComponent(trimmed)}&limit=8`, {
       method: 'GET',
-      credentials: 'include',
       signal,
     });
     if (!res.ok) return [];

@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { 
   Search, 
   Filter, 
@@ -47,6 +48,7 @@ export default function MarketplacePage() {
   const [matches, setMatches] = useState<MatchResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [topologyOpen, setTopologyOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -64,10 +66,29 @@ export default function MarketplacePage() {
     fetchData();
   }, []);
 
-  const filtered = listings.filter(l => 
-    l.title.toLowerCase().includes(search.toLowerCase()) ||
-    l.category.toLowerCase().includes(search.toLowerCase())
-  );
+  const searchTerm = search.trim().toLowerCase();
+  const filtered = searchTerm
+    ? listings.filter((l) =>
+        [l.title, l.category, l.companyName, l.originCountry, l.description]
+          .filter(Boolean)
+          .some((field) => field!.toLowerCase().includes(searchTerm)),
+      )
+    : listings;
+
+  const countryBreakdown = Object.entries(
+    listings.reduce<Record<string, number>>((acc, l) => {
+      const key = l.originCountry || 'Unspecified';
+      acc[key] = (acc[key] ?? 0) + 1;
+      return acc;
+    }, {}),
+  ).sort((a, b) => b[1] - a[1]);
+  const categoryBreakdown = Object.entries(
+    listings.reduce<Record<string, number>>((acc, l) => {
+      acc[l.category] = (acc[l.category] ?? 0) + 1;
+      return acc;
+    }, {}),
+  ).sort((a, b) => b[1] - a[1]);
+  const distinctCompanies = new Set(listings.map((l) => l.companyId)).size;
 
   if (loading) {
     return (
@@ -135,6 +156,13 @@ export default function MarketplacePage() {
 
                {/* DISCOVERY LISTINGS GRID */}
                <div className="grid gap-8">
+                  {filtered.length === 0 && (
+                     <Card className="border-2 border-dashed rounded-2xl">
+                        <CardContent className="p-12 text-center text-muted-foreground font-medium">
+                           {searchTerm ? `No listings match "${search}".` : 'No listings available yet.'}
+                        </CardContent>
+                     </Card>
+                  )}
                   <AnimatePresence>
                      {filtered.map((listing, i) => (
                        <motion.div 
@@ -249,12 +277,86 @@ export default function MarketplacePage() {
                         "Baalvion intelligence is currently mapping 14,240 cross-jurisdictional nodes. Zero systemic failure patterns detected in the current cycle."
                      </p>
                   </div>
-                  <Button variant="outline" className="w-full h-12 border-2 font-black uppercase text-[9px] tracking-wide bg-background">AUDIT NETWORK TOPOLOGY</Button>
+                  <Button variant="outline" className="w-full h-12 border-2 font-black uppercase text-[9px] tracking-wide bg-background" onClick={() => setTopologyOpen(true)}>AUDIT NETWORK TOPOLOGY</Button>
                </Card>
             </div>
           </div>
         </TabsContent>
+
+        <TabsContent value="matchmaking">
+          <div className="grid gap-6 lg:grid-cols-12">
+            <div className="lg:col-span-12 space-y-6">
+              <div className="flex items-center gap-3">
+                <Sparkles className="h-5 w-5 text-primary" />
+                <h3 className="text-xl font-black uppercase tracking-tight">AI Matchmaking</h3>
+              </div>
+              {matches.length === 0 ? (
+                <Card className="border-2 border-dashed rounded-2xl">
+                  <CardContent className="p-12 text-center text-muted-foreground font-medium">
+                    No matches yet — matches are computed from your organization's trade profile against active counterparties.
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  {matches.map((match, i) => (
+                    <Card key={i} className="shadow-md border-2 rounded-2xl hover:border-primary/40 transition-all">
+                      <CardContent className="p-6 space-y-4">
+                        <div className="flex items-center justify-between">
+                          <Badge className="bg-primary text-white text-[9px] font-black border-none px-3 h-6">{match.matchScore}% AFFINITY</Badge>
+                        </div>
+                        <div className="space-y-1">
+                          <h4 className="text-lg font-black uppercase tracking-tight">{match.company.name}</h4>
+                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{match.company.country}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </TabsContent>
       </Tabs>
+
+      <Dialog open={topologyOpen} onOpenChange={setTopologyOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle>Network Topology Audit</DialogTitle></DialogHeader>
+          <div className="space-y-6 py-2">
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="p-4 rounded-xl bg-muted/40">
+                <p className="text-2xl font-black">{listings.length}</p>
+                <p className="text-[9px] font-black uppercase text-muted-foreground">Listings</p>
+              </div>
+              <div className="p-4 rounded-xl bg-muted/40">
+                <p className="text-2xl font-black">{distinctCompanies}</p>
+                <p className="text-[9px] font-black uppercase text-muted-foreground">Organizations</p>
+              </div>
+              <div className="p-4 rounded-xl bg-muted/40">
+                <p className="text-2xl font-black">{countryBreakdown.length}</p>
+                <p className="text-[9px] font-black uppercase text-muted-foreground">Jurisdictions</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">By Jurisdiction</p>
+              {countryBreakdown.slice(0, 6).map(([country, count]) => (
+                <div key={country} className="flex items-center justify-between text-sm py-1.5 border-b last:border-0">
+                  <span className="font-medium">{country}</span>
+                  <span className="font-black tabular-nums">{count}</span>
+                </div>
+              ))}
+            </div>
+            <div className="space-y-2">
+              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">By Category</p>
+              {categoryBreakdown.slice(0, 6).map(([category, count]) => (
+                <div key={category} className="flex items-center justify-between text-sm py-1.5 border-b last:border-0">
+                  <span className="font-medium">{category}</span>
+                  <span className="font-black tabular-nums">{count}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }

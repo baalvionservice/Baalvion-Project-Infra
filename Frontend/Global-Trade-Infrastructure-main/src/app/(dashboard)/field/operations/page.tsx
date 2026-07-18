@@ -31,12 +31,15 @@ import {
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
+import { NodeDetailDialog } from './_components/node-detail-dialog';
 
 export default function FieldOperationsPage() {
   const [tasks, setTasks] = useState<OperationalTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [completing, setCompleting] = useState<string | null>(null);
-  const { syncStatus, isOfflineMode } = useMobilityStore();
+  const [sectorOpen, setSectorOpen] = useState(false);
+  const [telemetryOpen, setTelemetryOpen] = useState(false);
+  const { syncStatus, isOfflineMode, syncQueue } = useMobilityStore();
   const { toast } = useToast();
 
   const fetchData = async () => {
@@ -99,7 +102,11 @@ export default function FieldOperationsPage() {
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-           <div className="p-4 bg-background border-2 rounded-2xl shadow-sm flex items-center gap-4">
+           <button
+             type="button"
+             onClick={() => setSectorOpen(true)}
+             className="p-4 bg-background border-2 rounded-2xl shadow-sm flex items-center gap-4 text-left hover:border-primary/40 hover:shadow-md transition-all"
+           >
               <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600">
                  <MapPin className="h-5 w-5" />
               </div>
@@ -107,8 +114,12 @@ export default function FieldOperationsPage() {
                  <span className="text-[8px] font-black text-muted-foreground uppercase leading-none">Sector</span>
                  <span className="text-xs font-black uppercase">Shanghai Hub</span>
               </div>
-           </div>
-           <div className="p-4 bg-background border-2 rounded-2xl shadow-sm flex items-center gap-4">
+           </button>
+           <button
+             type="button"
+             onClick={() => setTelemetryOpen(true)}
+             className="p-4 bg-background border-2 rounded-2xl shadow-sm flex items-center gap-4 text-left hover:border-primary/40 hover:shadow-md transition-all"
+           >
               <div className={cn(
                  "p-2.5 rounded-xl transition-colors",
                  isOfflineMode ? "bg-orange-50 text-orange-600" : "bg-blue-50 text-blue-600"
@@ -119,9 +130,35 @@ export default function FieldOperationsPage() {
                  <span className="text-[8px] font-black text-muted-foreground uppercase leading-none">Telemetry</span>
                  <span className="text-xs font-black uppercase">{isOfflineMode ? 'EDGE_LOCAL' : 'LINK_OPTIMAL'}</span>
               </div>
-           </div>
+           </button>
         </div>
       </div>
+
+      <NodeDetailDialog
+        open={sectorOpen}
+        onOpenChange={setSectorOpen}
+        icon={MapPin}
+        title="Shanghai Hub"
+        description="Operational sector for this field terminal."
+        rows={[
+          { label: 'Sector ID', value: 'SECTOR_SHANGHAI_HUB' },
+          { label: 'Active Tasks', value: String(tasks.length) },
+          { label: 'Pending Sync Items', value: String(syncQueue.length) },
+          { label: 'Mode', value: isOfflineMode ? 'Offline (Edge Local)' : 'Online' },
+        ]}
+      />
+      <NodeDetailDialog
+        open={telemetryOpen}
+        onOpenChange={setTelemetryOpen}
+        icon={Activity}
+        title={isOfflineMode ? 'EDGE_LOCAL' : 'LINK_OPTIMAL'}
+        description="Edge device telemetry and operational sensor status."
+        rows={[
+          { label: 'Sync Status', value: syncStatus },
+          { label: 'Connection', value: isOfflineMode ? 'Offline — staging locally' : 'Live satellite link' },
+          { label: 'Queued Mandates', value: String(syncQueue.length) },
+        ]}
+      />
 
       {/* TASK QUEUE */}
       <div className="space-y-6">

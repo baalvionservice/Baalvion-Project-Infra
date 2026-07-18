@@ -23,33 +23,17 @@ class SignalIntelligenceService {
 
   /**
    * Retrieves active geopolitical and operational signals affecting the network.
+   * Returns a genuinely empty array when none exist — no fabricated fallback.
    */
   async getActiveSignals(): Promise<TradeSignal[]> {
     const res = await apiClient.get<TradeSignal[]>('/trade_signals', { limit: 10 });
-    
-    // Simulate high-fidelity signals for the strategic observatory
-    return res.data || [
-      {
-        id: 'SIG-8821',
-        type: 'GEOPOLITICAL',
-        severity: 'high',
-        source: 'Sovereign Oracle Alpha',
-        message: 'Sudden congestion surge in Shanghai corridor predicted to impact electronics throughput by 14.2%.',
-        timestamp: new Date().toISOString(),
-        impactScore: 82,
-        tags: ['APAC', 'Supply Chain', 'Electronics']
-      },
-      {
-        id: 'SIG-8822',
-        type: 'TREASURY',
-        severity: 'medium',
-        source: 'Treasury Sync Node',
-        message: 'USD/INR volatility exceeding institutional baseline. Recommend rate locking for active LCs.',
-        timestamp: new Date().toISOString(),
-        impactScore: 45,
-        tags: ['FX', 'Treasury', 'Liquidity']
-      }
-    ];
+    return res.data ?? [];
+  }
+
+  /** A single signal by id, for the detail view. */
+  async getSignal(id: string): Promise<TradeSignal | null> {
+    const res = await apiClient.get<TradeSignal>(`/trade_signals/${id}`);
+    return res.data ?? null;
   }
 
   /**

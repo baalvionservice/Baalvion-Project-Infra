@@ -6,12 +6,7 @@
  * This is the read/command bridge the Trade Command Center UI uses.
  */
 import type { TradeTerms } from '@/orchestration/ports';
-
-export interface Auth {
-  userId: string;
-  role: string;
-  orgId: string;
-}
+import { fetchLocalApi } from '@/lib/local-api-client';
 
 export interface NamedRef {
   id: string;
@@ -191,22 +186,14 @@ interface Envelope<T> {
   error: string | null;
 }
 
-function authHeaders(auth?: Auth): Record<string, string> {
-  if (!auth) return {};
-  return {
-    'x-actor-id': auth.userId,
-    'x-actor-role': auth.role,
-    'x-organization-id': auth.orgId,
-  };
-}
-
-async function request<T>(path: string, init: RequestInit = {}, auth?: Auth): Promise<T> {
-  const res = await fetch(path, {
+// The /api/trades/* routes trust ONLY a signed gateway identity envelope, never client-supplied
+// actor/org headers (CR-1). fetchLocalApi mints one from the caller's own verified session (see
+// lib/local-api-client.ts) and attaches it.
+async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const res = await fetchLocalApi(path, {
     ...init,
-    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
-      ...authHeaders(auth),
       ...(init.headers as Record<string, string> | undefined),
     },
   });
@@ -264,39 +251,36 @@ export const tradeCommandService = {
     return request<Paginated<AuditRow>>(`/api/trades/${id}/audit?page=${page}`);
   },
 
-  create(body: CreateTradeBody, auth: Auth): Promise<TradeGraph> {
-    return request<TradeGraph>('/api/trades', { method: 'POST', body: JSON.stringify(body) }, auth);
+  create(body: CreateTradeBody): Promise<TradeGraph> {
+    return request<TradeGraph>('/api/trades', { method: 'POST', body: JSON.stringify(body) });
   },
 
-  cancel(id: string, reason: string, auth: Auth): Promise<TradeGraph> {
-    return request<TradeGraph>(`/api/trades/${id}/cancel`, { method: 'POST', body: JSON.stringify({ reason }) }, auth);
+  cancel(id: string, reason: string): Promise<TradeGraph> {
+    return request<TradeGraph>(`/api/trades/${id}/cancel`, { method: 'POST', body: JSON.stringify({ reason }) });
   },
 
-  complete(id: string, auth: Auth): Promise<TradeGraph> {
-    return request<TradeGraph>(`/api/trades/${id}/complete`, { method: 'POST', body: JSON.stringify({}) }, auth);
+  complete(id: string): Promise<TradeGraph> {
+    return request<TradeGraph>(`/api/trades/${id}/complete`, { method: 'POST', body: JSON.stringify({}) });
   },
 
   requestFinance(
     id: string,
     body: { type: string; amount: number; currency?: string },
-    auth: Auth,
   ): Promise<FinanceRequestRow> {
-    return request<FinanceRequestRow>(`/api/trades/${id}/finance`, { method: 'POST', body: JSON.stringify(body) }, auth);
+    return request<FinanceRequestRow>(`/api/trades/${id}/finance`, { method: 'POST', body: JSON.stringify(body) });
   },
 
   decideFinance(
     requestId: string,
     body: { decision: 'approved' | 'rejected'; reason?: string; provider?: string },
-    auth: Auth,
   ): Promise<unknown> {
-    return request(`/api/finance/${requestId}/decision`, { method: 'POST', body: JSON.stringify(body) }, auth);
+    return request(`/api/finance/${requestId}/decision`, { method: 'POST', body: JSON.stringify(body) });
   },
 
   addDocument(
     id: string,
     body: { kind: string; url?: string; metadata?: Record<string, unknown> },
-    auth: Auth,
   ): Promise<DocumentRow> {
-    return request<DocumentRow>(`/api/trades/${id}/documents`, { method: 'POST', body: JSON.stringify(body) }, auth);
+    return request<DocumentRow>(`/api/trades/${id}/documents`, { method: 'POST', body: JSON.stringify(body) });
   },
 };

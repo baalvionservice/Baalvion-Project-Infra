@@ -12,12 +12,11 @@ import { Calculator, Loader2, ArrowDownRight, BadgePercent } from 'lucide-react'
 import { cn } from '@/lib/utils';
 import type { CountrySummary } from '@/server/gckb/public-read';
 import type { DutyEstimate } from '@/server/gckb/duty-calculator';
+import { SUPPORTED_CURRENCIES as FALLBACK_CURRENCIES } from '@/core/currencies';
 
 type Props = {
   countries: CountrySummary[];
 };
-
-const FALLBACK_CURRENCIES = ['USD', 'EUR', 'GBP', 'INR', 'AED', 'SGD', 'JPY', 'CNY'];
 
 function money(value: number, currency: string): string {
   try {

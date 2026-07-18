@@ -22,6 +22,10 @@ export interface CorridorOpportunity {
   opportunityScore: number; // 0-100
   growthForecast: string;
   stabilityIndex: number;
+  commodities?: string[];
+  rfqCount?: number;
+  winRatePercent?: number;
+  avgTargetPrice?: number;
 }
 
 export interface SourcingCampaign {
@@ -48,12 +52,26 @@ export const commerceIntelligenceService = {
   /**
    * Forecasts emerging trade corridor opportunities based on node density and liquidity.
    */
+  /**
+   * Corridor-opportunity scores computed from this org's own RFQ + Quotation
+   * history (volume, growth, win-rate, price competitiveness) — see
+   * `intelligenceController.js` in trade-service. Deterministic, explainable,
+   * no fabricated values; a corridor with no RFQ history simply returns [].
+   */
   async getCorridorOpportunities(): Promise<CorridorOpportunity[]> {
-    return [
-      { id: 'OPP-1', originNode: 'Mumbai Hub', destinationNode: 'Newark Port', opportunityScore: 92, growthForecast: '+18.4% YoY', stabilityIndex: 88 },
-      { id: 'OPP-2', originNode: 'Shanghai Hub', destinationNode: 'Rotterdam Terminal', opportunityScore: 75, growthForecast: '+12.4% YoY', stabilityIndex: 72 },
-      { id: 'OPP-3', originNode: 'Ho Chi Minh Port', destinationNode: 'Long Beach Port', opportunityScore: 88, growthForecast: '+22.4% YoY', stabilityIndex: 81 }
-    ];
+    const res = await apiClient.post<{ corridors: CorridorOpportunity[] }>('/intelligence/corridor-forecast', {});
+    return res.data?.corridors ?? [];
+  },
+
+  /** Re-runs the balanced-weight scoring pass (the "Calibrate Forecast" action). */
+  async calibrateForecast(): Promise<CorridorOpportunity[]> {
+    return this.getCorridorOpportunities();
+  },
+
+  /** Re-scores with a priority profile (the "Execute Strategic Optimization" action). */
+  async executeStrategicOptimization(priority: 'cost' | 'speed' | 'balanced' = 'balanced'): Promise<CorridorOpportunity[]> {
+    const res = await apiClient.post<{ corridors: CorridorOpportunity[] }>('/intelligence/strategic-optimization', { priority });
+    return res.data?.corridors ?? [];
   },
 
   async getActiveCampaigns(companyId: string): Promise<SourcingCampaign[]> {
