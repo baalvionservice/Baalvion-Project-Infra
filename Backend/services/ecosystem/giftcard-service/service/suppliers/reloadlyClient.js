@@ -11,14 +11,17 @@
  * Base API URL == the audience value: https://giftcards-sandbox.reloadly.com (sandbox) or
  * https://giftcards.reloadly.com (production).
  *
- * ⚠ VERIFY AT EXECUTION TIME: the exact path/shape of the redeem-code retrieval endpoint
- * below (fetchRedeemCode) was not fully confirmed against Reloadly's live reference docs
- * (their docs site is a client-rendered SPA this environment could not render) — confirmed
- * from Reloadly's own blog/support articles: POST /orders returns a transactionId, and a
- * separate authenticated GET call using that transactionId returns the redeem code/PIN
- * (deliberately not inlined in the order response, for security). Re-verify the exact path
- * against a live sandbox call before going to production — a 404 here should fail loudly,
- * never silently return a fake code.
+ * Verified live against real production credentials (2026-07-18): auth + GET
+ * /countries/{iso}/products both confirmed working — including that the vendor-specific
+ * media type (application/com.reloadly.giftcards-v1+json) is REQUIRED on the Accept header
+ * for every request, not just POST bodies (a plain application/json Accept 406s).
+ *
+ * ⚠ VERIFY AT EXECUTION TIME: createOrder/fetchRedeemCode were NOT exercised against the
+ * live API (POST /orders spends real money against the account's Reloadly balance — never
+ * call it outside a real user checkout). fetchRedeemCode's path in particular was pieced
+ * together from Reloadly's blog/support articles, not their (client-rendered, unreadable
+ * here) API reference — re-verify against a real completed order before relying on it. A
+ * 404 there should fail loudly, never silently return a fake code.
  */
 
 const { AppError } = require('../../utils/errors');
@@ -75,7 +78,9 @@ class ReloadlyClient {
             method,
             headers: {
                 authorization: `Bearer ${token}`,
-                accept: 'application/json',
+                // Reloadly's Gift Cards API requires its vendor-specific media type on both
+                // Accept and Content-Type — a plain application/json Accept header 406s.
+                accept: 'application/com.reloadly.giftcards-v1+json',
                 ...(body ? { 'content-type': 'application/com.reloadly.giftcards-v1+json' } : {}),
             },
             ...(body ? { body: JSON.stringify(body) } : {}),
