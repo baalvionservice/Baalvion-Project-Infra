@@ -34,6 +34,9 @@ const CertificateOfAuthenticity  = require('./certificateOfAuthenticity')(sequel
 const Wishlist           = require('./wishlist')(sequelize, DataTypes);
 const WishlistItem       = require('./wishlistItem')(sequelize, DataTypes);
 const Appointment        = require('./appointment')(sequelize, DataTypes);
+// Cart-activity projection (Phase 3 admin cart visibility) — populated by
+// service/cartEventsPublisher.js draining the shared event_outbox, not written to directly.
+const CartEvent          = require('./cartEvent')(sequelize, DataTypes);
 
 // Associations
 OrdersCustomer.hasMany(OrdersAddress, { foreignKey: 'customerId', as: 'addresses' });
@@ -101,6 +104,7 @@ const db = {
     Wishlist,
     WishlistItem,
     Appointment,
+    CartEvent,
 };
 
 module.exports = db;

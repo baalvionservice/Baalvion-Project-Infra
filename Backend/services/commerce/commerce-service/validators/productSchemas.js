@@ -1,6 +1,20 @@
 'use strict';
 const { z } = require('zod');
 
+// Typed contract for the keys storefrontSerializer.serializeProductDetail() actually reads out of
+// seoMetadata (seoTitle←title, seoDescription←description, targetKeyword) — gives the frontend a
+// stable shape instead of guessing key names, without a migration (seoMetadata is already a JSONB
+// column). `.passthrough()` so any other key a caller sets survives validation unexamined — this
+// is a typed VIEW onto the free-form bag, not a hard schema; nothing here should silently drop data.
+const seoMetadataSchema = z.object({
+    title: z.string().max(70).optional(),
+    description: z.string().max(160).optional(),
+    targetKeyword: z.string().max(200).optional(),
+    canonicalPath: z.string().max(500).optional(),
+    ogImage: z.string().url().optional(),
+}).partial().passthrough();
+exports.seoMetadataSchema = seoMetadataSchema;
+
 // Luxury-resale / consignment provenance. All optional so the schemas stay backward compatible.
 // `condition` is constrained to the same allowlist as the DB CHECK + model validator.
 const PRODUCT_CONDITIONS = ['pristine', 'excellent', 'very_good', 'good', 'fair', 'vintage'];
@@ -15,6 +29,6 @@ const resaleFields = {
     serialNumber: z.string().max(120).optional().nullable(),
 };
 
-exports.createProductSchema = z.object({ categoryId: z.string().uuid().optional().nullable(), name: z.string().min(1).max(500), slug: z.string().max(500).regex(/^[a-z0-9-]+$/).optional(), shortDescription: z.string().max(1000).optional(), description: z.string().optional(), productType: z.enum(['simple', 'variable', 'grouped', 'bundle', 'digital']).default('simple'), sku: z.string().max(200).optional(), barcode: z.string().max(100).optional(), price: z.number().min(0).optional(), currencyCode: z.string().length(3).optional(), weight: z.number().min(0).optional(), weightUnit: z.string().max(10).default('kg'), dimensions: z.record(z.unknown()).optional(), materials: z.array(z.string()).default([]), specifications: z.record(z.unknown()).default({}), seoMetadata: z.record(z.unknown()).default({}), tags: z.array(z.string()).default([]), customFields: z.record(z.unknown()).default({}), isFeatured: z.boolean().default(false), isDigital: z.boolean().default(false), requiresShipping: z.boolean().default(true), stockQuantity: z.number().int().min(0).optional(), trackInventory: z.boolean().optional(), allowBackorder: z.boolean().optional(), ...resaleFields });
-exports.updateProductSchema = z.object({ categoryId: z.string().uuid().optional().nullable(), name: z.string().min(1).max(500).optional(), slug: z.string().max(500).regex(/^[a-z0-9-]+$/).optional(), shortDescription: z.string().max(1000).optional().nullable(), description: z.string().optional().nullable(), sku: z.string().max(200).optional(), weight: z.number().min(0).optional(), dimensions: z.record(z.unknown()).optional(), specifications: z.record(z.unknown()).optional(), seoMetadata: z.record(z.unknown()).optional(), tags: z.array(z.string()).optional(), customFields: z.record(z.unknown()).optional(), isFeatured: z.boolean().optional(), isDigital: z.boolean().optional(), requiresShipping: z.boolean().optional(), stockQuantity: z.number().int().min(0).optional(), trackInventory: z.boolean().optional(), allowBackorder: z.boolean().optional(), ...resaleFields });
+exports.createProductSchema = z.object({ categoryId: z.string().uuid().optional().nullable(), name: z.string().min(1).max(500), slug: z.string().max(500).regex(/^[a-z0-9-]+$/).optional(), shortDescription: z.string().max(1000).optional(), description: z.string().optional(), productType: z.enum(['simple', 'variable', 'grouped', 'bundle', 'digital']).default('simple'), sku: z.string().max(200).optional(), barcode: z.string().max(100).optional(), price: z.number().min(0).optional(), currencyCode: z.string().length(3).optional(), weight: z.number().min(0).optional(), weightUnit: z.string().max(10).default('kg'), dimensions: z.record(z.unknown()).optional(), materials: z.array(z.string()).default([]), specifications: z.record(z.unknown()).default({}), seoMetadata: seoMetadataSchema.default({}), tags: z.array(z.string()).default([]), customFields: z.record(z.unknown()).default({}), isFeatured: z.boolean().default(false), isDigital: z.boolean().default(false), requiresShipping: z.boolean().default(true), stockQuantity: z.number().int().min(0).optional(), trackInventory: z.boolean().optional(), allowBackorder: z.boolean().optional(), ...resaleFields });
+exports.updateProductSchema = z.object({ categoryId: z.string().uuid().optional().nullable(), name: z.string().min(1).max(500).optional(), slug: z.string().max(500).regex(/^[a-z0-9-]+$/).optional(), shortDescription: z.string().max(1000).optional().nullable(), description: z.string().optional().nullable(), sku: z.string().max(200).optional(), weight: z.number().min(0).optional(), dimensions: z.record(z.unknown()).optional(), specifications: z.record(z.unknown()).optional(), seoMetadata: seoMetadataSchema.optional(), tags: z.array(z.string()).optional(), customFields: z.record(z.unknown()).optional(), isFeatured: z.boolean().optional(), isDigital: z.boolean().optional(), requiresShipping: z.boolean().optional(), stockQuantity: z.number().int().min(0).optional(), trackInventory: z.boolean().optional(), allowBackorder: z.boolean().optional(), ...resaleFields });
 exports.bulkUpdateSchema = z.object({ ids: z.array(z.string().uuid()).min(1).max(100), action: z.enum(['publish', 'archive', 'delete', 'assign_category']), categoryId: z.string().uuid().optional() });

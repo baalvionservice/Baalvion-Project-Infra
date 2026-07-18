@@ -45,6 +45,14 @@ module.exports = {
     security: {
         ipRateLimit: Number(process.env.RATE_LIMIT_IP_MAX || 200),
     },
+    // Product-media envelope encryption (lib/encryption.js) — encrypts full-resolution uploaded
+    // images at rest. Thumbnails stay plaintext (public storefront grids need fast, CDN-cacheable
+    // access; only the full-res original carries the real cost/perf trade-off of per-request
+    // decrypt-and-stream). Same shape as trade-service's documents.encryptionKey.
+    // Generate: `openssl rand -base64 32`.
+    media: {
+        encryptionKey: process.env.MEDIA_ENCRYPTION_KEY || null,
+    },
     // RBAC service is the SINGLE SOURCE OF TRUTH for admin hierarchy + store-team roles.
     // Commerce is a Policy Enforcement Point: it forwards the caller's bearer token to
     // resolve their effective grants, and owns the country→store scope-chain resolution

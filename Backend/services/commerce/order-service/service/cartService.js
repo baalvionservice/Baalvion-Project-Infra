@@ -1,11 +1,24 @@
 'use strict';
-const { OrdersCart } = require('../models');
+const crypto = require('crypto');
+const { OrdersCart, sequelize } = require('../models');
 const { AppError } = require('../utils/errors');
 const cache = require('./cacheService');
 const config = require('../config/appConfig');
 const ownership = require('./ownership');
 const sessionToken = require('../utils/sessionToken');
 const securityAudit = require('./securityAudit');
+const cartEventsOutbox = require('./cartEventsOutbox');
+
+// Never persist/log a raw guest session id (matches present()'s existing redaction discipline
+// below) — only a one-way hash, for correlating a guest's cart activity without being able to
+// forge or replay their session token from the admin-visible event trail.
+function sessionHash(sessionId) {
+    return sessionId ? crypto.createHash('sha256').update(sessionId).digest('hex') : null;
+}
+
+function cartSnapshotOf(cart) {
+    return { itemCount: (cart.items || []).reduce((n, i) => n + i.quantity, 0), subtotal: Number(cart.subtotal), totalAmount: Number(cart.totalAmount), currencyCode: cart.currencyCode };
+}
 
 // API-boundary view of a cart: the raw sessionId is kept SERVER-SIDE for ownership (and in the
 // cache) but is NEVER returned in a response — the client only ever holds the signed token.
@@ -57,7 +70,13 @@ async function addItem(storeId, cartId, item, actor) {
     if (existing >= 0) items[existing].quantity += item.quantity;
     else items.push({ productId: item.productId, variantId: item.variantId || null, sku: item.sku, name: item.name, price: item.price, quantity: item.quantity, metadata: item.metadata || {} });
     const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-    await cart.update({ items, subtotal, totalAmount: subtotal - parseFloat(cart.discountAmount || 0) });
+    await sequelize.transaction(async (t) => {
+        await cart.update({ items, subtotal, totalAmount: subtotal - parseFloat(cart.discountAmount || 0) }, { transaction: t });
+        await cartEventsOutbox.enqueueCartEvent('item_added', {
+            cartId, storeId, userId: actor.userId ?? null, sessionIdHash: sessionHash(actor.sessionId || cart.sessionId),
+            itemSnapshot: item, cartSnapshot: cartSnapshotOf(cart),
+        }, t);
+    });
     await cache.del(cache.keys.cart(cartId));
     return present(cart.toJSON());
 }
@@ -65,28 +84,48 @@ async function addItem(storeId, cartId, item, actor) {
 async function updateItem(storeId, cartId, variantId, productId, quantity, actor) {
     const cart = await loadOwnedCart(storeId, cartId, actor, 'cart.update');
     let items = cart.items ? [...cart.items] : [];
+    const updated = items.find(i => (variantId ? i.variantId === variantId : i.productId === productId));
     items = items.map(i => {
         if (variantId ? i.variantId === variantId : i.productId === productId) return { ...i, quantity };
         return i;
     }).filter(i => i.quantity > 0);
     const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-    await cart.update({ items, subtotal, totalAmount: subtotal - parseFloat(cart.discountAmount || 0) });
+    await sequelize.transaction(async (t) => {
+        await cart.update({ items, subtotal, totalAmount: subtotal - parseFloat(cart.discountAmount || 0) }, { transaction: t });
+        await cartEventsOutbox.enqueueCartEvent('item_updated', {
+            cartId, storeId, userId: actor.userId ?? null, sessionIdHash: sessionHash(actor.sessionId || cart.sessionId),
+            itemSnapshot: updated ? { ...updated, quantity } : null, cartSnapshot: cartSnapshotOf(cart),
+        }, t);
+    });
     await cache.del(cache.keys.cart(cartId));
     return present(cart.toJSON());
 }
 
 async function removeItem(storeId, cartId, variantId, productId, actor) {
     const cart = await loadOwnedCart(storeId, cartId, actor, 'cart.update');
+    const removed = (cart.items || []).find(i => variantId ? i.variantId === variantId : i.productId === productId);
     const items = (cart.items || []).filter(i => variantId ? i.variantId !== variantId : i.productId !== productId);
     const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-    await cart.update({ items, subtotal, totalAmount: subtotal - parseFloat(cart.discountAmount || 0) });
+    await sequelize.transaction(async (t) => {
+        await cart.update({ items, subtotal, totalAmount: subtotal - parseFloat(cart.discountAmount || 0) }, { transaction: t });
+        await cartEventsOutbox.enqueueCartEvent('item_removed', {
+            cartId, storeId, userId: actor.userId ?? null, sessionIdHash: sessionHash(actor.sessionId || cart.sessionId),
+            itemSnapshot: removed || null, cartSnapshot: cartSnapshotOf(cart),
+        }, t);
+    });
     await cache.del(cache.keys.cart(cartId));
     return present(cart.toJSON());
 }
 
 async function clearCart(storeId, cartId, actor) {
     const cart = await loadOwnedCart(storeId, cartId, actor, 'cart.update');
-    await cart.update({ items: [], subtotal: 0, discountAmount: 0, totalAmount: 0, discountCode: null });
+    await sequelize.transaction(async (t) => {
+        await cart.update({ items: [], subtotal: 0, discountAmount: 0, totalAmount: 0, discountCode: null }, { transaction: t });
+        await cartEventsOutbox.enqueueCartEvent('cart_cleared', {
+            cartId, storeId, userId: actor.userId ?? null, sessionIdHash: sessionHash(actor.sessionId || cart.sessionId),
+            itemSnapshot: null, cartSnapshot: { itemCount: 0, subtotal: 0, totalAmount: 0, currencyCode: cart.currencyCode },
+        }, t);
+    });
     await cache.del(cache.keys.cart(cartId));
 }
 
@@ -118,8 +157,15 @@ async function claimCart(storeId, cartId, actor, targetCartId) {
         await ownership.enforce(actor, target.userId, { resourceType: 'cart', resourceId: targetCartId, storeId, action: 'cart.claim' });
         const merged = mergeItems(target.items || [], cart.items || []);
         const subtotal = merged.reduce((s, i) => s + i.price * i.quantity, 0);
-        await target.update({ items: merged, subtotal, totalAmount: subtotal - parseFloat(target.discountAmount || 0) });
-        await cart.destroy();
+        const guestSessionHash = sessionHash(cart.sessionId);
+        await sequelize.transaction(async (t) => {
+            await target.update({ items: merged, subtotal, totalAmount: subtotal - parseFloat(target.discountAmount || 0) }, { transaction: t });
+            await cart.destroy({ transaction: t });
+            await cartEventsOutbox.enqueueCartEvent('cart_claimed', {
+                cartId: targetCartId, storeId, userId: actor.userId, sessionIdHash: guestSessionHash,
+                itemSnapshot: null, cartSnapshot: cartSnapshotOf(target),
+            }, t);
+        });
         await cache.del(cache.keys.cart(cartId));
         await cache.del(cache.keys.cart(targetCartId));
         securityAudit.cart('claimed', 'allow', { userId: actor.userId, storeId, resource: { type: 'cart', id: targetCartId }, requestId: actor.requestId, metadata: { mergedFrom: cartId } });
@@ -127,7 +173,14 @@ async function claimCart(storeId, cartId, actor, targetCartId) {
     }
 
     // Adopt: reassign the guest cart to the authenticated user, clearing the session binding.
-    await cart.update({ userId: actor.userId, sessionId: null });
+    const guestSessionHash = sessionHash(cart.sessionId);
+    await sequelize.transaction(async (t) => {
+        await cart.update({ userId: actor.userId, sessionId: null }, { transaction: t });
+        await cartEventsOutbox.enqueueCartEvent('cart_claimed', {
+            cartId, storeId, userId: actor.userId, sessionIdHash: guestSessionHash,
+            itemSnapshot: null, cartSnapshot: cartSnapshotOf(cart),
+        }, t);
+    });
     await cache.del(cache.keys.cart(cartId));
     securityAudit.cart('claimed', 'allow', { userId: actor.userId, storeId, resource: { type: 'cart', id: cartId }, requestId: actor.requestId });
     return present(cart.toJSON());

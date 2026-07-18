@@ -22,3 +22,17 @@ exports.updateCartItemSchema = z.object({
     productId: z.string().uuid().optional().nullable(),
     quantity: z.number().int().min(0),
 });
+
+// Admin (cross-store) cart visibility query params — see adminCartRoutes.js.
+exports.adminListCartsQuerySchema = z.object({
+    storeId: z.string().uuid().optional(),
+    page: z.coerce.number().int().min(1).optional(),
+    limit: z.coerce.number().int().min(1).max(100).optional(),
+});
+exports.adminListAbandonedCartsQuerySchema = exports.adminListCartsQuerySchema.extend({
+    abandonedAfterMinutes: z.coerce.number().int().min(1).max(10080).optional(),
+});
+exports.adminCartHistoryQuerySchema = z.object({
+    page: z.coerce.number().int().min(1).optional(),
+    limit: z.coerce.number().int().min(1).max(100).optional(),
+});
