@@ -139,6 +139,22 @@ api.baalvion.com {
 		reverse_proxy app-platform:3015
 	}
 
+	# Imperialpedia public API. The frontend calls
+	# api.baalvion.com/api/v1/knowledge/imperialpedia/api/v1/*; imperialpedia-service
+	# (app-platform:3004) mounts its own router at /api/v1 and gates each route
+	# individually (assets/entities/world-config reads need no session; only
+	# writes like POST /assets require authMiddleware internally). Without this
+	# carve-out the request falls through to the proxy-service BFF below, which
+	# blanket-requires a bearer token and 401s before imperialpedia-service is
+	# ever reached — this was silently missing since the public market-data
+	# pipeline shipped, causing /market-news, /world and /markets/quote/* to hang
+	# (the frontend's fetch calls had no valid public route to resolve against).
+	@knowledge_imperialpedia path /api/v1/knowledge/imperialpedia /api/v1/knowledge/imperialpedia/*
+	handle @knowledge_imperialpedia {
+		uri strip_prefix /api/v1/knowledge/imperialpedia
+		reverse_proxy app-platform:3004
+	}
+
 	# Everything else → the consumer/admin BFF (proxy-service, session-gated) — unchanged.
 	handle {
 		reverse_proxy app-edge-realtime:4000
