@@ -8,17 +8,23 @@
 import { useEffect, useState } from 'react';
 import { insuranceService, InsurancePolicy, InsuranceClaim } from '@/services/insurance-service';
 import { adminService, PlatformStats } from '@/services/admin-service';
+import { apiClient } from '@/lib/api-client';
+import { toList } from '@/lib/api-list';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { 
-  ShieldCheck, 
-  ShieldAlert, 
-  Loader2, 
-  Activity, 
-  TrendingUp, 
-  FileText, 
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
+import {
+  ShieldCheck,
+  ShieldAlert,
+  Loader2,
+  Activity,
+  TrendingUp,
+  FileText,
   AlertTriangle,
   History,
   Zap,
@@ -33,19 +39,39 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { PATHS } from '@/lib/paths';
 
+const DEFAULT_REGIONS = [
+  { region: 'APAC Outbound', risk: 12, status: 'Optimal', color: 'bg-green-500' },
+  { region: 'EU Inbound', risk: 45, status: 'Elevated', color: 'bg-orange-500' },
+  { region: 'US East Corridor', risk: 28, status: 'Stable', color: 'bg-blue-500' },
+  { region: 'South Asia Trade', risk: 72, status: 'Critical', color: 'bg-red-500' },
+];
+
+const statusForRisk = (risk: number) => (risk >= 65 ? 'Critical' : risk >= 40 ? 'Elevated' : risk >= 20 ? 'Stable' : 'Optimal');
+const colorForRisk = (risk: number) => (risk >= 65 ? 'bg-red-500' : risk >= 40 ? 'bg-orange-500' : risk >= 20 ? 'bg-blue-500' : 'bg-green-500');
+
 export default function InsuranceDashboardPage() {
   const [policies, setPolicies] = useState<InsurancePolicy[]>([]);
   const [claims, setClaims] = useState<InsuranceClaim[]>([]);
+  const [regions, setRegions] = useState(DEFAULT_REGIONS);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
-      const [pData, cData] = await Promise.all([
+      const [pData, cData, thresholdsRes] = await Promise.all([
         insuranceService.getPolicies(),
-        insuranceService.getClaims()
+        insuranceService.getClaims(),
+        apiClient.get<any[]>('/insurance_risk_thresholds').catch(() => null),
       ]);
       setPolicies(pData);
       setClaims(cData);
+      const saved = toList<any>(thresholdsRes);
+      if (saved.length > 0) {
+        setRegions(DEFAULT_REGIONS.map((r) => {
+          const match = saved.find((s) => s.region === r.region);
+          const risk = match ? Number(match.threshold) : r.risk;
+          return { ...r, risk, status: statusForRisk(risk), color: colorForRisk(risk) };
+        }));
+      }
       setLoading(false);
     };
     fetchData();
@@ -158,12 +184,7 @@ export default function InsuranceDashboardPage() {
               </CardHeader>
               <CardContent className="p-6">
                  <div className="grid sm:grid-cols-2 gap-6">
-                    {[
-                      { region: 'APAC Outbound', risk: 12, status: 'Optimal', color: 'bg-green-500' },
-                      { region: 'EU Inbound', risk: 45, status: 'Elevated', color: 'bg-orange-500' },
-                      { region: 'US East Corridor', risk: 28, status: 'Stable', color: 'bg-blue-500' },
-                      { region: 'South Asia Trade', risk: 72, status: 'Critical', color: 'bg-red-500' }
-                    ].map(r => (
+                    {regions.map(r => (
                        <div key={r.region} className="space-y-4 p-6 rounded-3xl border-2 bg-muted/5 group hover:border-primary/20 transition-all">
                           <div className="flex justify-between items-center">
                              <span className="text-xs font-black uppercase tracking-tight">{r.region}</span>
@@ -207,9 +228,7 @@ export default function InsuranceDashboardPage() {
                        <span className="text-xl font-black text-blue-300">99.8%</span>
                     </div>
                  </div>
-                 <Button variant="secondary" className="w-full h-12 font-black uppercase text-[10px] tracking-wide shadow-2xl transition-all hover:scale-[1.02] bg-white text-primary border-none rounded-2xl">
-                    ADJUST RISK THRESHOLDS
-                 </Button>
+                 <AdjustRiskThresholdsDialog regions={regions} onSaved={setRegions} />
               </CardContent>
            </Card>
 
@@ -250,5 +269,77 @@ export default function InsuranceDashboardPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+function AdjustRiskThresholdsDialog({
+  regions,
+  onSaved,
+}: {
+  regions: typeof DEFAULT_REGIONS;
+  onSaved: (regions: typeof DEFAULT_REGIONS) => void;
+}) {
+  const { toast } = useToast();
+  const [open, setOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [draft, setDraft] = useState<Record<string, string>>(() =>
+    Object.fromEntries(regions.map((r) => [r.region, String(r.risk)]))
+  );
+
+  useEffect(() => {
+    if (open) setDraft(Object.fromEntries(regions.map((r) => [r.region, String(r.risk)])));
+  }, [open, regions]);
+
+  async function save() {
+    setSaving(true);
+    try {
+      const updated = await Promise.all(
+        DEFAULT_REGIONS.map(async (r) => {
+          const risk = Math.min(100, Math.max(0, Number(draft[r.region]) || 0));
+          await apiClient.post('/insurance_risk_thresholds', { region: r.region, threshold: risk, updatedAt: new Date().toISOString() });
+          return { ...r, risk, status: statusForRisk(risk), color: colorForRisk(risk) };
+        })
+      );
+      onSaved(updated);
+      toast({ title: 'Risk thresholds updated', description: 'New underwriting thresholds are live for incoming bookings.' });
+      setOpen(false);
+    } catch (e) {
+      toast({ variant: 'destructive', title: 'Update failed', description: e instanceof Error ? e.message : 'Could not persist thresholds.' });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="secondary" className="w-full h-12 font-black uppercase text-[10px] tracking-wide shadow-2xl transition-all hover:scale-[1.02] bg-white text-primary border-none rounded-2xl">
+          ADJUST RISK THRESHOLDS
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader><DialogTitle>Adjust Regional Risk Thresholds</DialogTitle></DialogHeader>
+        <div className="space-y-3 py-2">
+          {DEFAULT_REGIONS.map((r) => (
+            <div key={r.region} className="space-y-1.5">
+              <Label className="text-xs">{r.region} — Loss Probability %</Label>
+              <Input
+                type="number"
+                min={0}
+                max={100}
+                value={draft[r.region] ?? ''}
+                onChange={(e) => setDraft((d) => ({ ...d, [r.region]: e.target.value }))}
+              />
+            </div>
+          ))}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)} disabled={saving}>Cancel</Button>
+          <Button onClick={save} disabled={saving}>
+            {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null} Save Thresholds
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

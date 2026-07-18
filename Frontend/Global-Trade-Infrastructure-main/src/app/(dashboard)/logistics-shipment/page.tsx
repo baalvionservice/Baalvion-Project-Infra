@@ -5,22 +5,25 @@
  */
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { logisticsService } from '@/services/logistics-service';
+import { apiClient } from '@/lib/api-client';
+import { toList } from '@/lib/api-list';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { 
-  Globe, 
-  Zap, 
-  Activity, 
-  ShieldCheck, 
-  Loader2, 
-  ArrowRight, 
-  Truck, 
-  Anchor, 
-  Ship, 
+import { useToast } from '@/hooks/use-toast';
+import {
+  Globe,
+  Zap,
+  Activity,
+  ShieldCheck,
+  Loader2,
+  ArrowRight,
+  Truck,
+  Anchor,
+  Ship,
   MapPin,
   AlertTriangle,
   Siren,
@@ -32,24 +35,53 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { PATHS } from '@/lib/paths';
 
+const EMPTY_PULSE = { inTransit: 0, customsPending: 0, deliveredToday: 0, totalAssetValue: 0 };
+
 export default function LogisticsControlTowerPage() {
-  const [pulse, setPulse] = useState<any>(null);
+  const [pulse, setPulse] = useState<any>(EMPTY_PULSE);
   const [exceptions, setExceptions] = useState<any[]>([]);
+  const [registry, setRegistry] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [registryLoading, setRegistryLoading] = useState(true);
+  const [scanning, setScanning] = useState(false);
   const router = useRouter();
+  const { toast } = useToast();
+
+  const fetchPulse = useCallback(async () => {
+    const [pData, eData] = await Promise.all([
+      logisticsService.getGlobalFulfillmentPulse().catch(() => EMPTY_PULSE),
+      logisticsService.getOperationalExceptions().catch(() => []),
+    ]);
+    setPulse(pData);
+    setExceptions(eData);
+  }, []);
+
+  const fetchRegistry = useCallback(async () => {
+    setRegistryLoading(true);
+    try {
+      const res = await apiClient.get<any[]>('/shipments', { sortBy: 'updatedAt', order: 'desc', limit: 5 });
+      setRegistry(toList<any>(res));
+    } finally {
+      setRegistryLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const [pData, eData] = await Promise.all([
-        logisticsService.getGlobalFulfillmentPulse(),
-        logisticsService.getOperationalExceptions()
-      ]);
-      setPulse(pData);
-      setExceptions(eData);
-      setLoading(false);
-    };
-    fetchData();
-  }, []);
+    fetchPulse().finally(() => setLoading(false));
+    fetchRegistry();
+  }, [fetchPulse, fetchRegistry]);
+
+  async function runCorridorScan() {
+    setScanning(true);
+    try {
+      await Promise.all([fetchPulse(), fetchRegistry()]);
+      toast({ title: 'Global corridor scan complete', description: 'Telemetry and exception queues re-synced from the live fleet.' });
+    } catch (e) {
+      toast({ variant: 'destructive', title: 'Scan failed', description: e instanceof Error ? e.message : 'Could not reach logistics telemetry.' });
+    } finally {
+      setScanning(false);
+    }
+  }
 
   if (loading) {
     return (
@@ -72,8 +104,8 @@ export default function LogisticsControlTowerPage() {
           <h2 className="text-4xl font-black tracking-tight uppercase tracking-tighter leading-[0.8]">Execution <br />Control Tower.</h2>
         </div>
         <div className="flex gap-4">
-          <Button variant="outline" className="h-12 px-6 border-2 font-black uppercase tracking-widest text-xs bg-background shadow-md">
-            <Globe className="mr-3 h-4 w-4" /> Global Corridor Scan
+          <Button variant="outline" onClick={runCorridorScan} disabled={scanning} className="h-12 px-6 border-2 font-black uppercase tracking-widest text-xs bg-background shadow-md">
+            {scanning ? <Loader2 className="mr-3 h-4 w-4 animate-spin" /> : <Globe className="mr-3 h-4 w-4" />} Global Corridor Scan
           </Button>
           <Button className="h-12 px-6 bg-primary text-white font-black uppercase tracking-widest text-xs shadow-md hover:scale-[1.02] transition-all" onClick={() => router.push(`${PATHS.LOGISTICS_SHIPMENT}/booking`)}>
             <Plus className="mr-3 h-5 w-5" /> Book Cargo Node
@@ -139,37 +171,44 @@ export default function LogisticsControlTowerPage() {
                  <CardTitle className="text-lg font-black uppercase tracking-tighter">Operational Execution Registry</CardTitle>
               </CardHeader>
               <CardContent className="p-0">
+                 {registryLoading ? (
+                    <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground opacity-30" /></div>
+                 ) : registry.length === 0 ? (
+                    <div className="py-20 text-center opacity-30 italic text-sm">No shipments provisioned yet.</div>
+                 ) : (
                  <div className="divide-y-2">
-                    {[
-                      { id: 'SHP-4421', status: 'IN_TRANSIT', origin: 'Shanghai', dest: 'Long Beach', eta: '4d', health: 98 },
-                      { id: 'SHP-9912', status: 'PORT_PROCESSING', origin: 'Mumbai', dest: 'Rotterdam', eta: '12d', health: 84 },
-                      { id: 'SHP-8812', status: 'CUSTOMS_CLEARANCE', origin: 'Ho Chi Minh', dest: 'Newark', eta: '2d', health: 62 },
-                    ].map((shp) => (
-                       <div key={shp.id} className="p-6 flex items-center justify-between group hover:bg-primary/[0.01] transition-colors" onClick={() => router.push(`${PATHS.LOGISTICS_SHIPMENT}/${shp.id}`)}>
+                    {registry.map((shp) => {
+                      const status = String(shp.status || 'booked').toUpperCase();
+                      const health = status === 'DELIVERED' ? 100 : status === 'CUSTOMS_CLEARANCE' || status === 'CUSTOMS_HOLD' ? 60 : status === 'IN_TRANSIT' ? 85 : 75;
+                      const eta = shp.estimated_arrival ? new Date(shp.estimated_arrival).toLocaleDateString() : '—';
+                      return (
+                       <div key={shp.id} className="p-6 flex items-center justify-between group hover:bg-primary/[0.01] transition-colors cursor-pointer" onClick={() => router.push(`${PATHS.LOGISTICS_SHIPMENT}/${shp.id}`)}>
                           <div className="flex items-center gap-8">
                              <div className="h-12 w-16 rounded-2xl bg-muted border-2 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
                                 <Ship className="h-8 w-8 text-primary opacity-60" />
                              </div>
                              <div className="space-y-1.5">
                                 <div className="flex items-center gap-4">
-                                   <p className="font-black text-xl uppercase tracking-tighter leading-none">{shp.id}</p>
-                                   <Badge className="bg-primary text-white text-[8px] font-black h-5 px-2 border-none shadow-lg tracking-widest">{shp.status}</Badge>
+                                   <p className="font-black text-xl uppercase tracking-tighter leading-none">{shp.tracking_number || shp.id}</p>
+                                   <Badge className="bg-primary text-white text-[8px] font-black h-5 px-2 border-none shadow-lg tracking-widest">{status}</Badge>
                                 </div>
-                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">{shp.origin} ↔ {shp.dest} • ETA: {shp.eta}</p>
+                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">{shp.origin || '—'} ↔ {shp.destination || '—'} • ETA: {eta}</p>
                              </div>
                           </div>
                           <div className="flex items-center gap-6">
                              <div className="text-right hidden sm:block space-y-1">
                                 <p className="text-[9px] font-black text-muted-foreground uppercase opacity-40">Finality Index</p>
-                                <p className="text-2xl font-black text-emerald-600 tracking-tighter">{shp.health}%</p>
+                                <p className="text-2xl font-black text-emerald-600 tracking-tighter">{health}%</p>
                              </div>
                              <Button variant="ghost" size="icon" className="h-12 w-12 rounded-2xl border-2 opacity-20 group-hover:opacity-100 transition-all">
                                 <ArrowRight className="h-6 w-6" />
                              </Button>
                           </div>
                        </div>
-                    ))}
+                      );
+                    })}
                  </div>
+                 )}
               </CardContent>
            </Card>
         </div>
@@ -203,7 +242,11 @@ export default function LogisticsControlTowerPage() {
                                 <p className="text-sm font-black uppercase">DETECTED</p>
                              </div>
                           </div>
-                          <Button variant="secondary" className="w-full h-12 font-black uppercase text-[10px] tracking-wide shadow-md bg-white text-red-600 border-none rounded-2xl">
+                          <Button
+                             variant="secondary"
+                             onClick={() => router.push(exceptions[0].shipmentId ? `${PATHS.LOGISTICS_SHIPMENT}/${exceptions[0].shipmentId}` : `${PATHS.LOGISTICS_SHIPMENT}/alerts`)}
+                             className="w-full h-12 font-black uppercase text-[10px] tracking-wide shadow-md bg-white text-red-600 border-none rounded-2xl"
+                          >
                              OPEN ADJUDICATION DESK
                           </Button>
                        </motion.div>

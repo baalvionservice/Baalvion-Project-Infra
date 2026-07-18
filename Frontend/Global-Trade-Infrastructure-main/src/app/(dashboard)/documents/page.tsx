@@ -7,6 +7,9 @@
 
 import { useEffect, useState } from 'react';
 import { documentService, TradeDocument, DocumentType, DocumentClassification } from '@/services/document-service';
+import { apiClient } from '@/lib/api-client';
+import { toList } from '@/lib/api-list';
+import { resolveSessionOrgId } from '@/services/session-org';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -61,9 +64,19 @@ export default function InstitutionalVaultPage() {
   const [activeCategory, setActiveCategory] = useState<'all' | 'COMMERCIAL' | 'LOGISTICS' | 'COMPLIANCE' | 'GOVERNANCE'>('all');
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [encryptionOpen, setEncryptionOpen] = useState(false);
+  const [retentionOpen, setRetentionOpen] = useState(false);
+  const [retentionDays, setRetentionDays] = useState<Record<DocumentClassification, string>>({
+    CONFIDENTIAL: '3650', RESTRICTED: '3650', OPERATIONAL: '1825', GOVERNANCE: '3650',
+  });
+  const [savingRetention, setSavingRetention] = useState(false);
+  const [previewDoc, setPreviewDoc] = useState<TradeDocument | null>(null);
+  const [lineageDoc, setLineageDoc] = useState<TradeDocument | null>(null);
+  const [lineageVersions, setLineageVersions] = useState<TradeDocument[]>([]);
+  const [lineageLoading, setLineageLoading] = useState(false);
   const { toast } = useToast();
 
-  const companyId = 'COMP-101'; 
+  const companyId = 'COMP-101';
 
   const fetchData = async () => {
     setLoading(true);
@@ -74,7 +87,54 @@ export default function InstitutionalVaultPage() {
 
   useEffect(() => {
     fetchData();
+    apiClient.get<any[]>('/document_retention_policies', { companyId }).then((res) => {
+      const saved = toList<any>(res);
+      if (saved.length > 0) {
+        setRetentionDays((prev) => {
+          const next = { ...prev };
+          for (const s of saved) if (s.classification in next) next[s.classification as DocumentClassification] = String(s.retentionDays);
+          return next;
+        });
+      }
+    }).catch(() => {});
   }, []);
+
+  async function saveRetentionPolicy() {
+    setSavingRetention(true);
+    try {
+      const orgId = (await resolveSessionOrgId()) || companyId;
+      await Promise.all(
+        (Object.keys(retentionDays) as DocumentClassification[]).map((cls) =>
+          apiClient.post('/document_retention_policies', {
+            companyId: orgId,
+            classification: cls,
+            retentionDays: Math.max(1, Number(retentionDays[cls]) || 1),
+            updatedAt: new Date().toISOString(),
+          })
+        )
+      );
+      toast({ title: 'Retention policy updated', description: 'New retention windows apply to all future archival cycles.' });
+      setRetentionOpen(false);
+    } catch (e) {
+      toast({ variant: 'destructive', title: 'Update failed', description: e instanceof Error ? e.message : 'Could not persist retention policy.' });
+    } finally {
+      setSavingRetention(false);
+    }
+  }
+
+  async function openLineage(doc: TradeDocument) {
+    setLineageDoc(doc);
+    setLineageLoading(true);
+    try {
+      const versions = await documentService.getDossier(doc.referenceId);
+      versions.sort((a, b) => b.version - a.version);
+      setLineageVersions(versions);
+    } catch {
+      setLineageVersions([doc]);
+    } finally {
+      setLineageLoading(false);
+    }
+  }
 
   const handleUpload = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -121,10 +181,14 @@ export default function InstitutionalVaultPage() {
            <p className="text-muted-foreground font-medium italic text-lg max-w-2xl">"Authoritative planetary oversight of institutional trade dossiers and digital knowledge artifacts."</p>
         </div>
         <div className="flex gap-4">
-           <div className="flex items-center gap-2 px-6 py-3 bg-background rounded-2xl border-2 border-primary/5 shadow-xl text-xs font-black uppercase tracking-widest text-indigo-700">
+           <button
+              type="button"
+              onClick={() => setEncryptionOpen(true)}
+              className="flex items-center gap-2 px-6 py-3 bg-background rounded-2xl border-2 border-primary/5 shadow-xl text-xs font-black uppercase tracking-widest text-indigo-700 hover:border-primary/20 transition-colors cursor-pointer"
+           >
               <Lock className="h-4 w-4" />
               Encryption: AES-256 Verified
-           </div>
+           </button>
            <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
              <DialogTrigger asChild>
                 <Button className="h-12 px-6 bg-primary text-white font-black uppercase tracking-widest text-xs shadow-md hover:scale-[1.02] transition-all">
@@ -289,10 +353,10 @@ export default function InstitutionalVaultPage() {
                           )}
 
                           <div className="flex gap-4 pt-2">
-                             <Button variant="outline" className="flex-1 h-12 border-2 font-black text-[10px] uppercase tracking-widest rounded-xl">
+                             <Button variant="outline" onClick={() => setPreviewDoc(doc)} className="flex-1 h-12 border-2 font-black text-[10px] uppercase tracking-widest rounded-xl">
                                 <Eye className="mr-2 h-4 w-4 opacity-40" /> PREVIEW
                              </Button>
-                             <Button variant="outline" className="flex-1 h-12 border-2 font-black text-[10px] uppercase tracking-widest rounded-xl">
+                             <Button variant="outline" onClick={() => openLineage(doc)} className="flex-1 h-12 border-2 font-black text-[10px] uppercase tracking-widest rounded-xl">
                                 <History className="mr-2 h-4 w-4 opacity-40" /> LINEAGE
                              </Button>
                           </div>
@@ -367,10 +431,104 @@ export default function InstitutionalVaultPage() {
                     "Historical dossiers are programmatically archived to the cold-storage layer following the 10-year jurisdictional retention window. Zero data-loss verified."
                  </p>
               </div>
-              <Button variant="outline" className="w-full h-12 border-2 font-black uppercase text-[9px] tracking-wide bg-background">CONFIGURE RETENTION</Button>
+              <Button variant="outline" onClick={() => setRetentionOpen(true)} className="w-full h-12 border-2 font-black uppercase text-[9px] tracking-wide bg-background">CONFIGURE RETENTION</Button>
            </Card>
         </div>
       </div>
+
+      <Dialog open={encryptionOpen} onOpenChange={setEncryptionOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader><DialogTitle>Encryption Status — AES-256</DialogTitle></DialogHeader>
+          <div className="space-y-3 py-2 text-sm">
+            <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 px-4 py-2 rounded-xl">
+              <ShieldCheck className="h-4 w-4" /> <span className="font-black uppercase text-xs">AES-256-GCM at rest</span>
+            </div>
+            <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase text-[10px]">Documents in Vault</span><span className="font-black">{documents.length}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase text-[10px]">Cryptographically Fingerprinted</span><span className="font-black">{documents.filter((d) => d.fingerprint).length}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase text-[10px]">Confidential / Restricted</span><span className="font-black">{documents.filter((d) => d.classification === 'CONFIDENTIAL' || d.classification === 'RESTRICTED').length}</span></div>
+            <p className="text-xs text-muted-foreground italic pt-2">Every stored object is encrypted server-side; the file hash above is the tamper-evident fingerprint recorded at vault time.</p>
+          </div>
+          <DialogFooter><Button variant="outline" onClick={() => setEncryptionOpen(false)}>Close</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={retentionOpen} onOpenChange={setRetentionOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader><DialogTitle>Configure Retention Policy</DialogTitle></DialogHeader>
+          <div className="space-y-3 py-2">
+            {(Object.keys(retentionDays) as DocumentClassification[]).map((cls) => (
+              <div key={cls} className="space-y-1.5">
+                <Label className="text-xs">{cls} — Retention (days)</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={retentionDays[cls]}
+                  onChange={(e) => setRetentionDays((prev) => ({ ...prev, [cls]: e.target.value }))}
+                />
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRetentionOpen(false)} disabled={savingRetention}>Cancel</Button>
+            <Button onClick={saveRetentionPolicy} disabled={savingRetention}>
+              {savingRetention ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null} Save Policy
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!previewDoc} onOpenChange={(o) => !o && setPreviewDoc(null)}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader><DialogTitle>{previewDoc?.fileName}</DialogTitle></DialogHeader>
+          {previewDoc && (
+            <div className="space-y-3 py-2 text-sm">
+              <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase text-[10px]">Type</span><span className="font-bold">{previewDoc.type.replace(/_/g, ' ')}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase text-[10px]">Classification</span><Badge variant="outline">{previewDoc.classification}</Badge></div>
+              <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase text-[10px]">Version</span><span className="font-bold">V{previewDoc.version}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase text-[10px]">Status</span><span className="font-bold capitalize">{previewDoc.status}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase text-[10px]">Uploaded By</span><span className="font-bold">{previewDoc.uploadedBy}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase text-[10px]">Fingerprint</span><span className="font-mono text-[10px]">{previewDoc.fingerprint || 'pending'}</span></div>
+              {!previewDoc.fileUrl && (
+                <p className="text-xs text-muted-foreground italic pt-2">This record was vaulted without a retrievable file object — metadata only.</p>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            {previewDoc?.fileUrl ? (
+              <Button asChild>
+                <a href={previewDoc.fileUrl} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="mr-2 h-4 w-4" /> Open File
+                </a>
+              </Button>
+            ) : null}
+            <Button variant="outline" onClick={() => setPreviewDoc(null)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!lineageDoc} onOpenChange={(o) => { if (!o) { setLineageDoc(null); setLineageVersions([]); } }}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader><DialogTitle>Version Lineage — {lineageDoc?.fileName}</DialogTitle></DialogHeader>
+          <div className="space-y-2 py-2 max-h-96 overflow-y-auto">
+            {lineageLoading ? (
+              <div className="flex justify-center py-10"><Loader2 className="h-6 w-6 animate-spin opacity-30" /></div>
+            ) : lineageVersions.length === 0 ? (
+              <p className="text-sm italic opacity-50 text-center py-8">No prior versions on record.</p>
+            ) : (
+              lineageVersions.map((v) => (
+                <div key={v.id} className="p-3 rounded-lg border flex items-center justify-between text-xs gap-4">
+                  <div className="min-w-0">
+                    <p className="font-black uppercase truncate">V{v.version} — {v.status}</p>
+                    <p className="text-muted-foreground truncate">Uploaded by {v.uploadedBy}</p>
+                  </div>
+                  <span className="text-muted-foreground shrink-0">{new Date(v.createdAt).toLocaleString()}</span>
+                </div>
+              ))
+            )}
+          </div>
+          <DialogFooter><Button variant="outline" onClick={() => setLineageDoc(null)}>Close</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }

@@ -4,17 +4,19 @@
  */
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { treasuryService } from '@/modules/financials/services/treasury.service';
+import { LiquiditySwapDialog } from '@/modules/financials/components/liquidity-swap-dialog';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Landmark, 
-  ShieldCheck, 
-  Loader2, 
-  TrendingUp, 
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import {
+  Landmark,
+  ShieldCheck,
+  Loader2,
+  TrendingUp,
   Activity,
   History,
   Lock,
@@ -32,18 +34,24 @@ export default function TreasuryCommandPage() {
   const [kpis, setKpis] = useState<TreasuryKPI[]>([]);
   const [logs, setLogs] = useState<FinancialLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedWallet, setSelectedWallet] = useState<WalletNode | null>(null);
+  const [selectedLog, setSelectedLog] = useState<FinancialLog | null>(null);
+  const [finalityOpen, setFinalityOpen] = useState(false);
 
-  useEffect(() => {
-    Promise.all([
+  const loadAll = useCallback(async () => {
+    const [w, k, l] = await Promise.all([
       treasuryService.getCashPosition(),
       treasuryService.getTreasuryKPIs(),
       treasuryService.getLedger()
-    ]).then(([w, k, l]) => {
-      setWallets(w);
-      setKpis(k);
-      setLogs(l);
-    }).finally(() => setLoading(false));
+    ]);
+    setWallets(w);
+    setKpis(k);
+    setLogs(l);
   }, []);
+
+  useEffect(() => {
+    loadAll().finally(() => setLoading(false));
+  }, [loadAll]);
 
   if (loading) {
     return (
@@ -66,12 +74,29 @@ export default function TreasuryCommandPage() {
            <Button variant="outline" className="font-black border-2 h-14 px-8 uppercase tracking-widest bg-background shadow-md" asChild>
               <Link href={PATHS.ESCROW}>Manage Escrow Registry</Link>
            </Button>
-           <div className="flex items-center gap-2 px-6 py-2.5 bg-indigo-50 rounded-2xl border-2 border-indigo-100 text-xs font-black uppercase tracking-widest text-indigo-700 shadow-sm animate-in zoom-in duration-500">
+           <button
+              type="button"
+              onClick={() => setFinalityOpen(true)}
+              className="flex items-center gap-2 px-6 py-2.5 bg-indigo-50 rounded-2xl border-2 border-indigo-100 text-xs font-black uppercase tracking-widest text-indigo-700 shadow-sm animate-in zoom-in duration-500 hover:bg-indigo-100 transition-colors cursor-pointer"
+           >
               <ShieldCheck className="h-4 w-4" />
               Ledger Finality: Confirmed
-           </div>
+           </button>
         </div>
       </div>
+
+      <Dialog open={finalityOpen} onOpenChange={setFinalityOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader><DialogTitle>Ledger Finality Confirmation</DialogTitle></DialogHeader>
+          <div className="space-y-3 py-2 text-sm">
+            <p className="text-muted-foreground italic">All entries below have posted to the settlement ledger and are immutable.</p>
+            <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase text-[10px]">Entries Loaded</span><span className="font-black">{logs.length}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase text-[10px]">Currency Nodes</span><span className="font-black">{wallets.length}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase text-[10px]">Total Liquidity</span><span className="font-black">{formatCurrency(wallets.reduce((s, w) => s + (w.balance || 0), 0))}</span></div>
+          </div>
+          <DialogFooter><Button variant="outline" onClick={() => setFinalityOpen(false)}>Close</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <div className="grid gap-6 md:grid-cols-4">
         {kpis.map((stat, i) => (
@@ -102,7 +127,7 @@ export default function TreasuryCommandPage() {
               <CardContent className="p-6">
                 <div className="grid grid-cols-2 gap-8">
                    {wallets.map((pos) => (
-                      <div key={pos.currency} className="p-8 rounded-2xl border-2 bg-muted/5 space-y-6 group hover:border-primary/20 transition-all cursor-default">
+                      <div key={pos.currency} onClick={() => setSelectedWallet(pos)} className="p-8 rounded-2xl border-2 bg-muted/5 space-y-6 group hover:border-primary/20 transition-all cursor-pointer">
                          <div className="flex items-center justify-between">
                             <Badge className="bg-primary text-white text-[10px] font-black uppercase h-6 px-3 border-none">{pos.currency} Node</Badge>
                             <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -142,7 +167,7 @@ export default function TreasuryCommandPage() {
                     </thead>
                     <tbody className="divide-y-2">
                        {logs.map((log) => (
-                          <tr key={log.id} className="group hover:bg-primary/[0.01] transition-colors">
+                          <tr key={log.id} onClick={() => setSelectedLog(log)} className="group hover:bg-primary/[0.01] transition-colors cursor-pointer">
                              <td className="p-6">
                                 <span className="font-mono text-[10px] font-black text-primary uppercase">{log.id}</span>
                              </td>
@@ -189,9 +214,16 @@ export default function TreasuryCommandPage() {
                        <span className="text-sm font-black uppercase text-emerald-300">Optimal</span>
                     </div>
                  </div>
-                 <Button variant="secondary" className="w-full h-12 font-black uppercase text-[10px] tracking-wide shadow-2xl transition-all hover:scale-[1.02] bg-white text-primary border-none rounded-2xl">
-                    AUTHORIZE CORRIDOR SWAP
-                 </Button>
+                 <LiquiditySwapDialog
+                    wallets={wallets}
+                    onExecuted={loadAll}
+                    title="Authorize Corridor Swap"
+                    trigger={
+                      <Button variant="secondary" className="w-full h-12 font-black uppercase text-[10px] tracking-wide shadow-2xl transition-all hover:scale-[1.02] bg-white text-primary border-none rounded-2xl">
+                         AUTHORIZE CORRIDOR SWAP
+                      </Button>
+                    }
+                 />
               </CardContent>
            </Card>
 
@@ -206,6 +238,39 @@ export default function TreasuryCommandPage() {
            </Card>
         </div>
       </div>
+
+      <Dialog open={!!selectedWallet} onOpenChange={(o) => !o && setSelectedWallet(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader><DialogTitle>{selectedWallet?.currency} Currency Node</DialogTitle></DialogHeader>
+          {selectedWallet && (
+            <div className="space-y-3 py-2 text-sm">
+              <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase text-[10px]">Available Liquidity</span><span className="font-black">{formatCurrency(selectedWallet.availableLiquidity, selectedWallet.currency)}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase text-[10px]">Escrow Locked</span><span className="font-black text-orange-600">{formatCurrency(selectedWallet.escrowLocked, selectedWallet.currency)}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase text-[10px]">Total Balance</span><span className="font-black">{formatCurrency(selectedWallet.balance, selectedWallet.currency)}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase text-[10px]">Jurisdiction</span><span className="font-bold">{selectedWallet.jurisdiction}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase text-[10px]">Trust Score</span><span className="font-bold">{selectedWallet.trustScore}/100</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase text-[10px]">Last Sync</span><span className="font-bold">{new Date(selectedWallet.lastSync).toLocaleString()}</span></div>
+            </div>
+          )}
+          <DialogFooter><Button variant="outline" onClick={() => setSelectedWallet(null)}>Close</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!selectedLog} onOpenChange={(o) => !o && setSelectedLog(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader><DialogTitle>Ledger Entry {selectedLog?.id}</DialogTitle></DialogHeader>
+          {selectedLog && (
+            <div className="space-y-3 py-2 text-sm">
+              <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase text-[10px]">Type</span><Badge variant="outline">{selectedLog.type}</Badge></div>
+              <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase text-[10px]">Amount</span><span className="font-black">{formatCurrency(selectedLog.amount || 0, selectedLog.currency)}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase text-[10px]">Reference</span><span className="font-bold">{selectedLog.referenceId || '—'}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase text-[10px]">Description</span><span className="font-bold text-right">{selectedLog.actor || '—'}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase text-[10px]">Timestamp</span><span className="font-bold">{new Date(selectedLog.timestamp ?? Date.now()).toLocaleString()}</span></div>
+            </div>
+          )}
+          <DialogFooter><Button variant="outline" onClick={() => setSelectedLog(null)}>Close</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }
