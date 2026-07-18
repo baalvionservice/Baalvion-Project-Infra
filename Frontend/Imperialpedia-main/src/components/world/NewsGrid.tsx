@@ -11,22 +11,22 @@ export default function NewsGrid({ sections }: { sections: WorldData["sections"]
         const SectionHeading = sectionIndex === 0 ? "h2" : "h3";
         return (
         <div key={section.section} id={sectionAnchorId(section.section)} className="space-y-3 sm:space-y-4 scroll-mt-24">
-          <SectionHeading className="text-sm sm:text-base font-bold text-gray-900 border-b-2 border-gray-200 pb-2">
+          <SectionHeading className="text-sm sm:text-base font-bold text-foreground border-b-2 border-border pb-2">
             {section.section}
           </SectionHeading>
           <div className="space-y-3 sm:space-y-4">
             {section.items.map((item) => (
               <article
                 key={item.id}
-                className="group cursor-pointer border-b border-gray-100 pb-3 sm:pb-4 last:border-b-0"
+                className="group cursor-pointer border-b border-border pb-3 sm:pb-4 last:border-b-0"
               >
                 {item.image ? (
                   <div className="flex items-start justify-between w-full gap-3 sm:gap-4">
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-sm sm:text-lg font-bold leading-snug text-gray-900 group-hover:text-[#ce2b2b] group-hover:underline mt-0.5 line-clamp-3">
+                      <h3 className="text-sm sm:text-lg font-bold leading-snug text-foreground group-hover:text-[hsl(var(--cnbc-red))] group-hover:underline mt-0.5 line-clamp-3">
                         {item.headline}
                       </h3>
-                      <span className="text-[9px] sm:text-[10px] font-black text-gray-400 tracking-wide mt-1 block">
+                      <span className="text-[9px] sm:text-[10px] font-black text-muted-foreground tracking-wide mt-1 block">
                         {item.time}
                       </span>
                     </div>
@@ -42,10 +42,10 @@ export default function NewsGrid({ sections }: { sections: WorldData["sections"]
                   </div>
                 ) : (
                   <div className="w-full">
-                    <h3 className="text-sm sm:text-lg font-bold leading-snug text-gray-900 group-hover:text-[#ce2b2b] group-hover:underline line-clamp-3">
+                    <h3 className="text-sm sm:text-lg font-bold leading-snug text-foreground group-hover:text-[hsl(var(--cnbc-red))] group-hover:underline line-clamp-3">
                       {item.headline}
                     </h3>
-                    <span className="text-[9px] sm:text-[10px] font-black text-gray-400 tracking-wide mt-1 block">
+                    <span className="text-[9px] sm:text-[10px] font-black text-muted-foreground tracking-wide mt-1 block">
                       {item.time}
                     </span>
                   </div>

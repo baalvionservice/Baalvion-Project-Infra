@@ -61,6 +61,16 @@ export default function ImperialpediaAdminPage() {
             regions.
           </p>
         </Link>
+        <Link
+          href="/imperialpedia/market-data"
+          className="rounded-lg border bg-card p-4 transition-colors hover:border-primary/50 hover:bg-accent"
+        >
+          <div className="font-semibold">Market Data →</div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Sync health for the live asset_summaries pipeline powering /market-news, /world and
+            /markets/quote/* — last success/error, row counts, manual resync.
+          </p>
+        </Link>
       </div>
       <Card>
         <CardHeader><CardTitle>Entities ({entities.length})</CardTitle></CardHeader>

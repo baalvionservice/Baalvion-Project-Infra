@@ -32,11 +32,11 @@ export function BreakingTicker({ articles }: Props) {
 
   return (
     <div
-      className="sticky top-0 z-40 flex items-stretch bg-red-600 text-white dark:bg-red-700"
+      className="sticky top-0 z-40 flex items-stretch bg-breaking text-white dark:bg-red-700"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      <span className="shrink-0 flex items-center gap-1.5 px-3 py-2 text-xs font-bold uppercase tracking-widest bg-red-700 dark:bg-red-800">
+      <span className="shrink-0 flex items-center gap-1.5 px-3 py-2 text-xs font-bold uppercase tracking-widest bg-breaking brightness-90 dark:bg-red-800">
         <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
         Breaking
       </span>

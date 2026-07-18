@@ -6,25 +6,67 @@
 // service/payments.js's existing CMS-vault fetch: same env vars, same
 // x-internal-secret header, same AbortController timeout, same fail-open contract.
 const db = require('../models');
+const config = require('../config/appConfig');
 
-const CMS_BASE_URL = process.env.CMS_BASE_URL || '';
-const INTERNAL_SECRET = process.env.INTERNAL_SERVICE_SECRET || '';
+// Read through config/appConfig.js (which has a dev fallback for CMS_BASE_URL
+// and crashes at boot via requireEnv() if INTERNAL_SERVICE_SECRET is unset) —
+// previously this read process.env directly, bypassing that shared config
+// layer for no reason and making prod misconfiguration indistinguishable from
+// "everything is fine, there's just no data" (see _status below for the fix).
+const CMS_BASE_URL = config.cms.baseUrl;
+const INTERNAL_SECRET = config.internalSecret;
 const SYNC_TTL_MS = 60_000; // matches cms-service's own live-quote cache TTL
 
 let _lastSyncAt = 0;
 let _syncInFlight = null;
 
+// Sync health, surfaced via GET /market-data/sync-status (admin-platform's
+// SyncHealthPanel polls this). In-memory only, resets on process restart —
+// same tradeoff cms-service's own provider `health` object already accepts.
+// This exists because every failure branch below used to be silent: a
+// misconfigured/unreachable cms-service or a cms-service returning 200 with
+// all-null quotes (e.g. its own provider API keys never provisioned) both
+// left asset_summaries permanently empty with zero visible signal anywhere.
+const _status = {
+    lastAttemptAt: null,
+    lastSuccessAt: null,
+    lastErrorAt: null,
+    lastErrorMessage: null,
+    lastRowCount: null,
+    lastSkippedCount: null,
+    configOk: Boolean(CMS_BASE_URL && INTERNAL_SECRET),
+};
+
+function getSyncStatus() {
+    return { ..._status };
+}
+
 async function fetchLiveOverview() {
-    if (!CMS_BASE_URL || !INTERNAL_SECRET) return null;
+    if (!CMS_BASE_URL || !INTERNAL_SECRET) {
+        _status.configOk = false;
+        _status.lastErrorMessage = 'CMS_BASE_URL or INTERNAL_SERVICE_SECRET is not configured';
+        _status.lastErrorAt = new Date();
+        console.error('[marketSyncService] sync skipped: CMS_BASE_URL/INTERNAL_SERVICE_SECRET missing');
+        return null;
+    }
+    _status.configOk = true;
     const url = `${CMS_BASE_URL.replace(/\/$/, '')}/internal/market-data/overview`;
     const controller = new AbortController();
     const tid = setTimeout(() => controller.abort(), 8000);
     try {
         const res = await fetch(url, { headers: { 'x-internal-secret': INTERNAL_SECRET }, signal: controller.signal });
-        if (!res.ok) return null;
+        if (!res.ok) {
+            _status.lastErrorMessage = `cms-service responded ${res.status}`;
+            _status.lastErrorAt = new Date();
+            console.error(`[marketSyncService] fetchLiveOverview failed: cms-service returned ${res.status} ${res.statusText}`);
+            return null;
+        }
         const body = await res.json().catch(() => null);
         return body?.data ?? null;
-    } catch {
+    } catch (err) {
+        _status.lastErrorMessage = err.name === 'AbortError' ? 'cms-service request timed out' : err.message;
+        _status.lastErrorAt = new Date();
+        console.error(`[marketSyncService] fetchLiveOverview error: ${_status.lastErrorMessage}`);
         return null; // fail-open — callers keep serving whatever's already in the DB
     } finally {
         clearTimeout(tid);
@@ -62,8 +104,11 @@ function typeOf(overview, canonicalSymbol) {
 async function upsertSummaries(overview) {
     const instruments = flattenInstruments(overview);
     const now = new Date();
+    let upserted = 0;
+    let skipped = 0;
     await Promise.all(instruments.map((inst) => {
-        if (inst.price == null) return Promise.resolve(); // no live quote this cycle — leave prior value in place
+        if (inst.price == null) { skipped += 1; return Promise.resolve(); } // no live quote this cycle — leave prior value in place
+        upserted += 1;
         return db.AssetSummary.upsert({
             symbol: inst.symbol,
             name: inst.name,
@@ -73,6 +118,11 @@ async function upsertSummaries(overview) {
             last_updated_at: now,
         });
     }));
+    _status.lastRowCount = upserted;
+    _status.lastSkippedCount = skipped;
+    if (skipped > 0) {
+        console.error(`[marketSyncService] upsertSummaries: ${skipped}/${instruments.length} instruments had no live quote this cycle (cms-service returned null price — check its provider API keys) — ${upserted} upserted`);
+    }
     return instruments.length;
 }
 
@@ -83,10 +133,13 @@ async function ensureFresh() {
     const now = Date.now();
     if (now - _lastSyncAt < SYNC_TTL_MS) return;
     if (_syncInFlight) return _syncInFlight;
+    _status.lastAttemptAt = new Date();
     _syncInFlight = (async () => {
         const overview = await fetchLiveOverview();
         if (overview) {
             await upsertSummaries(overview);
+            _status.lastSuccessAt = new Date();
+            console.log(`[marketSyncService] sync ok: ${_status.lastRowCount} upserted, ${_status.lastSkippedCount} skipped`);
         }
         // Advance the TTL window on both success AND failure — otherwise a
         // persistently unreachable cms-service means every single request
@@ -96,6 +149,14 @@ async function ensureFresh() {
         _lastSyncAt = Date.now();
     })().finally(() => { _syncInFlight = null; });
     return _syncInFlight;
+}
+
+// Forces an immediate sync regardless of the TTL window — backs the admin
+// "Resync now" action (POST /market-data/resync). Resets the TTL clock so a
+// forced sync doesn't get treated as already-fresh by a concurrent request.
+async function forceSync() {
+    _lastSyncAt = 0;
+    return ensureFresh();
 }
 
 // Per-symbol chart/indicators/performance detail — lazy-cached in-memory (60s,
@@ -127,4 +188,4 @@ async function fetchAssetDetail(symbol, range) {
     }
 }
 
-module.exports = { ensureFresh, fetchLiveOverview, upsertSummaries, fetchAssetDetail };
+module.exports = { ensureFresh, forceSync, fetchLiveOverview, upsertSummaries, fetchAssetDetail, getSyncStatus };

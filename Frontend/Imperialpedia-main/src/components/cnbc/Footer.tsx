@@ -1,5 +1,11 @@
 import { ImperialpediaMark } from "@/components/icons/ImperialpediaMark";
 
+/**
+ * Shared dark footer for /world, /news, /market-news — promoted from
+ * world/Footer.tsx (already dark, just the `#ce2b2b` → canonical
+ * `hsl(var(--cnbc-red))` hex swap needed) so all three routes share one
+ * footer instead of three near-duplicate copies.
+ */
 export default function Footer() {
   const links = [
     ["News", "World Markets", "Business", "Tech", "Politics"],
@@ -13,7 +19,7 @@ export default function Footer() {
       <div className="max-w-screen-xl mx-auto px-4 py-10">
         {/* Logo */}
         <div className="flex items-center gap-3 mb-8">
-          <div className="world-kicker flex items-center gap-2 bg-[#ce2b2b] text-white font-black text-xl px-3 py-1 tracking-tight">
+          <div className="world-kicker flex items-center gap-2 bg-[hsl(var(--cnbc-red))] text-white font-black text-xl px-3 py-1 tracking-tight">
             <ImperialpediaMark className="h-5 w-5 text-white" />
             IMPERIALPEDIA
           </div>

@@ -146,17 +146,17 @@ export default function NewsroomPulse() {
   if (!loaded) return null;
 
   return (
-    <section className="bg-[#0a0e14] text-white">
+    <section className="bg-black text-white">
       <div className="max-w-screen-xl mx-auto px-4 py-6">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
           <div className="flex items-center gap-2">
             <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#ce2b2b] opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-[#ce2b2b]" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[hsl(var(--cnbc-red))] opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-[hsl(var(--cnbc-red))]" />
             </span>
             <h2 className="world-kicker text-xs font-black uppercase tracking-widest">Newsroom Pulse — Live</h2>
           </div>
-          <span className="text-[11px] text-gray-400">
+          <span className="text-[11px] text-white/50">
             {lastFetched ? `Updated ${secondsAgo}s ago` : "Loading…"} · {stats.total} stories tracked
           </span>
         </div>
@@ -165,35 +165,35 @@ export default function NewsroomPulse() {
           {/* Coverage map */}
           <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Coverage by Topic</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-2">Coverage by Topic</p>
               <div className="space-y-1">
                 {stats.byTopic.map(([topic, count]) => (
                   <div key={topic} className="flex items-center gap-2 text-xs">
-                    <span className="w-24 shrink-0 truncate text-gray-300">{topic}</span>
+                    <span className="w-24 shrink-0 truncate text-white/60">{topic}</span>
                     <div className="h-1.5 flex-1 rounded-full bg-white/10 overflow-hidden">
                       <div
-                        className="h-full rounded-full bg-[#ce2b2b]"
+                        className="h-full rounded-full bg-[hsl(var(--cnbc-red))]"
                         style={{ width: `${stats.byTopic[0][1] ? (count / stats.byTopic[0][1]) * 100 : 0}%` }}
                       />
                     </div>
-                    <span className="w-5 shrink-0 text-right font-semibold tabular-nums text-gray-200">{count}</span>
+                    <span className="w-5 shrink-0 text-right font-semibold tabular-nums text-white/90">{count}</span>
                   </div>
                 ))}
               </div>
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Coverage by Region</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-2">Coverage by Region</p>
               <div className="space-y-1">
                 {stats.byRegion.map(([region, count]) => (
                   <div key={region} className="flex items-center gap-2 text-xs">
-                    <span className="w-24 shrink-0 truncate text-gray-300">{region}</span>
+                    <span className="w-24 shrink-0 truncate text-white/60">{region}</span>
                     <div className="h-1.5 flex-1 rounded-full bg-white/10 overflow-hidden">
                       <div
                         className="h-full rounded-full bg-blue-500"
                         style={{ width: `${stats.byRegion[0][1] ? (count / stats.byRegion[0][1]) * 100 : 0}%` }}
                       />
                     </div>
-                    <span className="w-5 shrink-0 text-right font-semibold tabular-nums text-gray-200">{count}</span>
+                    <span className="w-5 shrink-0 text-right font-semibold tabular-nums text-white/90">{count}</span>
                   </div>
                 ))}
               </div>
@@ -202,18 +202,18 @@ export default function NewsroomPulse() {
 
           {/* Live feed */}
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Just Published</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-2">Just Published</p>
             {stats.recent.length === 0 ? (
-              <p className="text-xs text-gray-500">No stories published yet.</p>
+              <p className="text-xs text-white/50">No stories published yet.</p>
             ) : (
               <ul className="space-y-2">
                 {stats.recent.map((item) => (
                   <li key={item.id}>
                     <Link
                       href={newsArticleHref({ slug: item.slug, publishedAt: item.publishedAt ?? "", contentType: item.contentType })}
-                      className="block text-xs text-gray-200 hover:text-white hover:underline underline-offset-2 line-clamp-2"
+                      className="block text-xs text-white/20 hover:text-white hover:underline underline-offset-2 line-clamp-2"
                     >
-                      {item.isBreaking && <span className="text-[#ce2b2b] font-bold mr-1">BREAKING</span>}
+                      {item.isBreaking && <span className="text-[hsl(var(--cnbc-red))] font-bold mr-1">BREAKING</span>}
                       {item.title}
                     </Link>
                   </li>

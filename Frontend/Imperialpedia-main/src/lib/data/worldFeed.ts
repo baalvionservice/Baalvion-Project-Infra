@@ -200,7 +200,7 @@ interface Quote {
 // no dedicated proxy (Shenzhen, CSI 300, ChiNext, Nifty 50, STOXX 600) share the
 // closest broad China/India/Europe proxy already tracked — an approximation,
 // not a 1:1 match, same tradeoff the original 4-region World proxies already made.
-const CANONICAL_SYMBOL_MAP: Record<string, string> = {
+export const CANONICAL_SYMBOL_MAP: Record<string, string> = {
   "^DJI": "DJI", "^GSPC": "SPX", "^IXIC": "IXIC", "^RUT": "RUT", "^VIX": "VIX",
   "^BVSP": "BOVESPA", "^FTSE": "FTSE100", "^GDAXI": "DAX", "^FCHI": "CAC40",
   "^IBEX": "IBEX35", "^STOXX": "EUROPE", "FTSEMIB.MI": "FTSEMIB",

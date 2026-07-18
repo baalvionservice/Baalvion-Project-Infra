@@ -14,9 +14,9 @@ export default function SpecialReports({ featured }: { featured: FeaturedStory[]
   }
 
   return (
-    <div className="bg-white border-b border-gray-200 px-2 sm:px-4 py-4">
+    <div className="bg-card border-b border-border px-2 sm:px-4 py-4">
       <div className="flex items-center justify-between mb-3">
-        <span className="world-kicker text-sm font-black tracking-widest text-gray-900 uppercase border-l-4 border-[#002f6c] pl-2">
+        <span className="world-kicker text-sm font-black tracking-widest text-foreground uppercase border-l-4 border-[hsl(var(--cnbc-gold))] pl-2">
           Special Reports
         </span>
         <div className="flex items-center gap-1">
@@ -24,7 +24,7 @@ export default function SpecialReports({ featured }: { featured: FeaturedStory[]
             type="button"
             onClick={() => scrollBy(-1)}
             aria-label="Scroll left"
-            className="w-7 h-7 flex items-center justify-center border border-gray-300 rounded-sm hover:bg-gray-50"
+            className="w-7 h-7 flex items-center justify-center border border-border rounded-sm hover:bg-muted"
           >
             ‹
           </button>
@@ -32,7 +32,7 @@ export default function SpecialReports({ featured }: { featured: FeaturedStory[]
             type="button"
             onClick={() => scrollBy(1)}
             aria-label="Scroll right"
-            className="w-7 h-7 flex items-center justify-center border border-gray-300 rounded-sm hover:bg-gray-50"
+            className="w-7 h-7 flex items-center justify-center border border-border rounded-sm hover:bg-muted"
           >
             ›
           </button>
@@ -51,10 +51,10 @@ export default function SpecialReports({ featured }: { featured: FeaturedStory[]
               className="object-cover group-hover:scale-105 transition-transform duration-500"
               sizes="256px"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#002f6c]/95 via-[#002f6c]/40 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent" />
             <div className="absolute bottom-0 left-0 p-3">
               <p className="text-white text-xs font-bold leading-snug line-clamp-3">{story.headline}</p>
-              <p className="world-kicker text-[#fcb700] text-[10px] mt-1">{story.author}</p>
+              <p className="world-kicker text-[hsl(var(--cnbc-gold))] text-[10px] mt-1">{story.author}</p>
             </div>
           </div>
         ))}

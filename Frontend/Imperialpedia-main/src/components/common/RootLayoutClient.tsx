@@ -18,9 +18,19 @@ import { usePathname } from "next/navigation";
 
 type RootLayoutClientProps = Readonly<{ children: React.ReactNode }>;
 
+// Routes that ship their own CNBC-style masthead/footer (src/components/cnbc/*
+// via each route's own layout.tsx) and must not also get the sitewide
+// Investopedia-style Navbar/Footer stacked on top — previously only /admin
+// was excluded here, which meant /world silently double-stacked chrome
+// (sitewide Navbar -> world's own TopNav -> world's own Footer -> sitewide
+// Footer) despite world/layout.tsx's comment claiming otherwise.
+const CNBC_ROUTES = ["/world", "/news", "/market-news"];
+
 export default function RootLayoutClient({ children }: RootLayoutClientProps) {
     const pathname = usePathname();
-    const isAdminPath = pathname?.startsWith("/admin");
+    const suppressGlobalChrome =
+        pathname?.startsWith("/admin") ||
+        CNBC_ROUTES.some((p) => pathname === p || pathname?.startsWith(`${p}/`));
 
     useEffect(() => {
         trackPageView(pathname);
@@ -35,15 +45,15 @@ export default function RootLayoutClient({ children }: RootLayoutClientProps) {
                         <ThemeProvider>
                             <ToastProvider>
                                 <TooltipProvider>
-                                    {!isAdminPath && <Navbar />}
+                                    {!suppressGlobalChrome && <Navbar />}
                                     <main
                                         id="main-content"
-                                        className={cn("flex-grow outline-none", !isAdminPath && "pt-16 lg:pt-[108px]")}
+                                        className={cn("flex-grow outline-none", !suppressGlobalChrome && "pt-16 lg:pt-[108px]")}
                                         tabIndex={-1}
                                     >
                                         {children}
                                     </main>
-                                    {!isAdminPath && <Footer />}
+                                    {!suppressGlobalChrome && <Footer />}
                                     <Toaster />
                                     <SonnerToaster />
                                 </TooltipProvider>

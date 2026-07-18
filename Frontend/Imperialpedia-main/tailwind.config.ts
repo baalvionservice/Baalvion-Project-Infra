@@ -51,6 +51,17 @@ export default {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
         },
+        // Semantic finance up/down colors — the vars already existed
+        // (root + .dark) but were never wired into Tailwind, so nothing
+        // could reference them. Wired here for the CNBC re-theme (see
+        // .cnbc-shell in globals.css), usable sitewide going forward.
+        positive: "hsl(var(--positive))",
+        negative: "hsl(var(--negative))",
+        // BreakingTicker's own accent — defaults to its current red-600 look
+        // everywhere; remapped to the canonical CNBC red only inside
+        // .cnbc-shell (globals.css), so other pages using this component
+        // keep today's exact appearance.
+        breaking: "hsl(var(--breaking))",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

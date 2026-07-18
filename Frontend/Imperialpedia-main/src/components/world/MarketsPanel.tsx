@@ -29,17 +29,17 @@ export default function MarketsPanel({ markets, watchlist, indicators }: Props) 
   const fxCommodity = indicators.filter((i) => isFxOrCommodity(i.name));
 
   return (
-    <div className="bg-white">
+    <div className="bg-card">
       {/* Tabs */}
-      <div className="flex border-b border-gray-200">
+      <div className="flex border-b border-border">
         {TABS.map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`world-kicker flex-1 text-[10px] sm:text-xs font-black tracking-widest py-2 sm:py-3 transition-all uppercase ${
               activeTab === tab
-                ? "border-b-2 border-[#ce2b2b] text-[#ce2b2b]"
-                : "text-gray-500 hover:text-gray-800"
+                ? "border-b-2 border-[hsl(var(--cnbc-red))] text-[hsl(var(--cnbc-red))]"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             <span className="hidden sm:inline">{TAB_LABEL[tab].full}</span>
@@ -52,29 +52,29 @@ export default function MarketsPanel({ markets, watchlist, indicators }: Props) 
         <div>
           {markets.map((region) => (
             <div key={region.region}>
-              <div className="px-3 py-2 bg-gray-50 border-b border-gray-100">
-                <span className="world-kicker text-[10px] font-black tracking-widest text-gray-500 uppercase">
+              <div className="px-3 py-2 bg-muted border-b border-border">
+                <span className="world-kicker text-[10px] font-black tracking-widest text-muted-foreground uppercase">
                   {region.region}
                 </span>
               </div>
-              <div className="divide-y divide-gray-50">
+              <div className="divide-y divide-border">
                 {region.markets.map((m) => (
                   <div
                     key={m.name}
-                    className="flex items-center justify-between px-2 sm:px-3 py-1.5 sm:py-2 hover:bg-gray-50 cursor-pointer transition-colors"
+                    className="flex items-center justify-between px-2 sm:px-3 py-1.5 sm:py-2 hover:bg-muted cursor-pointer transition-colors"
                   >
                     <div className="min-w-0 flex-1">
-                      <span className="text-[10px] sm:text-xs font-bold text-gray-800 truncate block">
+                      <span className="text-[10px] sm:text-xs font-bold text-foreground truncate block">
                         {m.name}
                       </span>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <div className="text-[10px] sm:text-xs font-mono text-gray-900">
+                      <div className="text-[10px] sm:text-xs font-mono text-foreground">
                         {m.value}
                       </div>
                       <div
                         className={`text-[9px] sm:text-[11px] font-mono font-bold ${
-                          m.positive ? "text-[#00a857]" : "text-[#ce2b2b]"
+                          m.positive ? "text-[hsl(var(--cnbc-green))]" : "text-[hsl(var(--cnbc-red))]"
                         }`}
                       >
                         {m.positive ? "▲" : "▼"} {m.change}
@@ -86,7 +86,7 @@ export default function MarketsPanel({ markets, watchlist, indicators }: Props) 
             </div>
           ))}
           <div className="p-3">
-            <button className="world-kicker w-full text-[11px] font-bold text-[#005594] py-2 border border-[#005594] hover:bg-[#005594] hover:text-white transition-colors rounded-sm tracking-wide">
+            <button className="world-kicker w-full text-[11px] font-bold text-[hsl(var(--cnbc-red))] py-2 border border-[hsl(var(--cnbc-red))] hover:bg-[hsl(var(--cnbc-red))] hover:text-white transition-colors rounded-sm tracking-wide">
               VIEW FULL MARKETS →
             </button>
           </div>
@@ -95,22 +95,22 @@ export default function MarketsPanel({ markets, watchlist, indicators }: Props) 
 
       {activeTab === "fx" && (
         <div>
-          <div className="divide-y divide-gray-50">
+          <div className="divide-y divide-border">
             {fxCommodity.map((i) => (
               <div
                 key={i.name}
-                className="flex items-center justify-between px-2 sm:px-3 py-1.5 sm:py-2 hover:bg-gray-50 cursor-pointer transition-colors"
+                className="flex items-center justify-between px-2 sm:px-3 py-1.5 sm:py-2 hover:bg-muted cursor-pointer transition-colors"
               >
                 <div className="min-w-0 flex-1">
-                  <span className="text-[10px] sm:text-xs font-bold text-gray-800 truncate block">
+                  <span className="text-[10px] sm:text-xs font-bold text-foreground truncate block">
                     {i.name}
                   </span>
                 </div>
                 <div className="text-right flex-shrink-0">
-                  <div className="text-[10px] sm:text-xs font-mono text-gray-900">{i.value}</div>
+                  <div className="text-[10px] sm:text-xs font-mono text-foreground">{i.value}</div>
                   <div
                     className={`text-[9px] sm:text-[11px] font-mono font-bold ${
-                      i.positive ? "text-[#00a857]" : "text-[#ce2b2b]"
+                      i.positive ? "text-[hsl(var(--cnbc-green))]" : "text-[hsl(var(--cnbc-red))]"
                     }`}
                   >
                     {i.positive ? "▲" : "▼"} {i.percent}
@@ -119,7 +119,7 @@ export default function MarketsPanel({ markets, watchlist, indicators }: Props) 
               </div>
             ))}
             {fxCommodity.length === 0 && (
-              <p className="px-3 py-4 text-xs text-gray-400">No FX/commodity data for this region.</p>
+              <p className="px-3 py-4 text-xs text-muted-foreground">No FX/commodity data for this region.</p>
             )}
           </div>
         </div>
@@ -127,33 +127,33 @@ export default function MarketsPanel({ markets, watchlist, indicators }: Props) 
 
       {activeTab === "watchlist" && (
         <div>
-          <div className="world-kicker grid grid-cols-3 text-[8px] sm:text-[9px] font-black tracking-wider text-gray-400 px-2 sm:px-3 py-1.5 sm:py-2 bg-gray-50 border-b border-gray-100 uppercase">
+          <div className="world-kicker grid grid-cols-3 text-[8px] sm:text-[9px] font-black tracking-wider text-muted-foreground px-2 sm:px-3 py-1.5 sm:py-2 bg-muted border-b border-border uppercase">
             <span>Symbol</span>
             <span className="text-right">Price</span>
             <span className="text-right">Change</span>
           </div>
-          <div className="divide-y divide-gray-50">
+          <div className="divide-y divide-border">
             {watchlist.map((item) => (
               <div
                 key={item.ticker}
-                className="grid grid-cols-3 items-center px-2 sm:px-3 py-2 sm:py-2.5 hover:bg-gray-50 cursor-pointer transition-colors"
+                className="grid grid-cols-3 items-center px-2 sm:px-3 py-2 sm:py-2.5 hover:bg-muted cursor-pointer transition-colors"
               >
                 <div className="min-w-0">
-                  <div className="text-[10px] sm:text-xs font-black text-gray-900">
+                  <div className="text-[10px] sm:text-xs font-black text-foreground">
                     {item.ticker}
                   </div>
-                  <div className="text-[8px] sm:text-[10px] text-gray-400 truncate">
+                  <div className="text-[8px] sm:text-[10px] text-muted-foreground truncate">
                     {item.name}
                   </div>
                 </div>
                 <div className="text-right">
-                  <span className="text-[10px] sm:text-xs font-mono text-gray-800">
+                  <span className="text-[10px] sm:text-xs font-mono text-foreground">
                     {item.price}
                   </span>
                 </div>
                 <div
                   className={`text-right text-[10px] sm:text-xs font-mono font-bold ${
-                    item.positive ? "text-[#00a857]" : "text-[#ce2b2b]"
+                    item.positive ? "text-[hsl(var(--cnbc-green))]" : "text-[hsl(var(--cnbc-red))]"
                   }`}
                 >
                   {item.change}
@@ -162,7 +162,7 @@ export default function MarketsPanel({ markets, watchlist, indicators }: Props) 
             ))}
           </div>
           <div className="p-2 sm:p-3">
-            <button className="world-kicker w-full text-[10px] sm:text-[11px] font-bold text-[#ce2b2b] py-1.5 sm:py-2 border border-[#ce2b2b] hover:bg-[#ce2b2b] hover:text-white transition-colors rounded-sm tracking-wide">
+            <button className="world-kicker w-full text-[10px] sm:text-[11px] font-bold text-[hsl(var(--cnbc-red))] py-1.5 sm:py-2 border border-[hsl(var(--cnbc-red))] hover:bg-[hsl(var(--cnbc-red))] hover:text-white transition-colors rounded-sm tracking-wide">
               + ADD SYMBOL
             </button>
           </div>

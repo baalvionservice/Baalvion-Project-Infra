@@ -12,13 +12,13 @@ function Row({ asset }: { asset: MarketAssetRow }) {
   return (
     <Link
       href={`/markets/quote/${asset.symbol}`}
-      className="flex items-center justify-between px-3 py-2 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+      className="flex items-center justify-between px-3 py-2 hover:bg-muted/50 transition-colors border-b border-border last:border-b-0"
     >
       <span className="truncate text-[13px] font-medium text-foreground">{asset.name}</span>
       <span className="flex items-baseline gap-1.5 shrink-0 font-mono text-[12px]">
         <span className="font-semibold text-foreground tabular-nums">{fmt(asset.current_price)}</span>
         {pct != null && (
-          <span className={`font-bold tabular-nums ${up ? "text-emerald-600" : "text-red-600"}`}>
+          <span className={`font-bold tabular-nums ${up ? "text-positive" : "text-negative"}`}>
             {up ? "▲" : "▼"} {Math.abs(pct).toFixed(2)}%
           </span>
         )}
@@ -29,12 +29,12 @@ function Row({ asset }: { asset: MarketAssetRow }) {
 
 function Panel({ title, assets }: { title: string; assets: MarketAssetRow[] }) {
   return (
-    <div className="rounded-xl border border-gray-100 bg-white overflow-hidden">
-      <div className="px-3 py-2 border-b border-gray-100 bg-gray-50">
-        <h4 className="text-[11px] font-bold uppercase tracking-widest text-gray-400">{title}</h4>
+    <div className="rounded-sm border border-border bg-card overflow-hidden">
+      <div className="px-3 py-2 border-b border-border bg-muted">
+        <h4 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">{title}</h4>
       </div>
       {assets.length === 0 ? (
-        <p className="px-3 py-4 text-center text-[12px] text-gray-400">No data</p>
+        <p className="px-3 py-4 text-center text-[12px] text-muted-foreground">No data</p>
       ) : (
         assets.map((a) => <Row key={a.symbol} asset={a} />)
       )}
@@ -61,16 +61,17 @@ interface Props {
  * this codebase's next.config.ts already redirects the old standalone /markets
  * and /market URLs here ("removed in favour of the dynamic /market-news hub"),
  * so this IS the site's markets homepage; it previously only showed a static
- * 8-indicator snapshot. Styled to match MarketSnapshot's existing light-editorial
- * cards rather than a literal CNBC red/black clone, since this renders inline
- * inside an otherwise light-themed hub page — the dedicated black/red CNBC look
- * lives on the standalone /markets/quote/[symbol] pages instead. */
+ * 8-indicator snapshot. Now themed via semantic tokens (bg-card/border-border/
+ * text-muted-foreground/text-positive/text-negative) that resolve to the
+ * literal CNBC black/red look inside .cnbc-shell (globals.css) — matching the
+ * standalone /markets/quote/[symbol] pages, not a separate light-editorial
+ * clone as this component originally was before the CNBC re-theme. */
 export function MarketsBreakdown(props: Props) {
   return (
     <section>
       <div className="mb-5 flex items-center gap-2">
-        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-        <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400">All Markets</h2>
+        <span className="h-1.5 w-1.5 rounded-full bg-positive" />
+        <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">All Markets</h2>
       </div>
 
       <div className="space-y-6">

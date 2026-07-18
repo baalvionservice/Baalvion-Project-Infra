@@ -358,7 +358,7 @@ export async function MarketNewsHub() {
 
         {latestGrid.length > 0 && (
           <section>
-            <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+            <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-6 pb-2">
               Latest Market News
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -373,7 +373,7 @@ export async function MarketNewsHub() {
           <section className="grid grid-cols-1 lg:grid-cols-3 gap-10">
             {mostRead.length > 0 && (
               <div>
-                <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-5 pb-2">
+                <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-muted-foreground mb-5 pb-2">
                   <Flame className="h-4 w-4 text-orange-500" />
                   Most Read
                 </h3>
@@ -381,12 +381,12 @@ export async function MarketNewsHub() {
                   {mostRead.map((article, i) => (
                     <li key={article.id}>
                       <Link href={newsArticleHref(article)} className="group flex gap-3">
-                        <span className="text-xl font-black text-gray-200">{i + 1}</span>
+                        <span className="text-xl font-black text-muted-foreground/40">{i + 1}</span>
                         <div>
                           <h3 className="text-sm font-bold text-foreground leading-snug group-hover:underline line-clamp-2">
                             {article.title}
                           </h3>
-                          <p className="mt-1 text-xs text-gray-400">{article.readTimeMinutes} min read</p>
+                          <p className="mt-1 text-xs text-muted-foreground">{article.readTimeMinutes} min read</p>
                         </div>
                       </Link>
                     </li>
@@ -397,7 +397,7 @@ export async function MarketNewsHub() {
 
             {trendingNow.length > 0 && (
               <div>
-                <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-5 pb-2">
+                <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-muted-foreground mb-5 pb-2">
                   <Sparkles className="h-4 w-4 text-violet-500" />
                   Trending Now
                 </h3>
@@ -418,7 +418,7 @@ export async function MarketNewsHub() {
 
             {editorsPicks.length > 0 && (
               <div>
-                <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-5 pb-2">
+                <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-muted-foreground mb-5 pb-2">
                   <Award className="h-4 w-4 text-amber-500" />
                   Editor&apos;s Picks
                 </h3>
@@ -443,7 +443,7 @@ export async function MarketNewsHub() {
         {visibleTopics.map((topic) => (
           <section key={topic.slug}>
             <div className="flex items-center justify-between mb-6 pb-2">
-              <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400">
+              <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-muted-foreground">
                 <topic.icon className="h-4 w-4" />
                 {topic.label}
               </h3>
@@ -465,7 +465,7 @@ export async function MarketNewsHub() {
 
         {analysis.length > 0 && (
           <section>
-            <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+            <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-6 pb-2">
               Market Analysis
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -476,7 +476,7 @@ export async function MarketNewsHub() {
                     <h3 className="text-sm font-bold text-foreground leading-snug group-hover:underline line-clamp-2">
                       {article.title}
                     </h3>
-                    <p className="mt-1 text-xs text-gray-400">{article.readTimeMinutes} min read</p>
+                    <p className="mt-1 text-xs text-muted-foreground">{article.readTimeMinutes} min read</p>
                   </div>
                 </Link>
               ))}
@@ -487,7 +487,7 @@ export async function MarketNewsHub() {
         {/* Calendars — real published coverage in a calendar-table layout, never fabricated future dates. */}
         {(earningsCalendarRows.length > 0 || economicCalendarRows.length > 0) && (
           <section>
-            <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+            <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-muted-foreground mb-6 pb-2">
               <CalendarClock className="h-4 w-4" />
               Calendars
             </h3>
@@ -500,7 +500,7 @@ export async function MarketNewsHub() {
 
         {/* Market Guides — evergreen education, kept separate from daily news. */}
         <section>
-          <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+          <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-muted-foreground mb-6 pb-2">
             <BookOpen className="h-4 w-4" />
             Market Guides
           </h3>
@@ -509,7 +509,7 @@ export async function MarketNewsHub() {
               <Link
                 key={guide.href}
                 href={guide.href}
-                className="inline-flex items-center gap-2 rounded-full border border-gray-200 px-4 py-2 text-xs font-semibold text-foreground transition-colors hover:border-gray-900"
+                className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-xs font-semibold text-foreground transition-colors hover:border-foreground"
               >
                 {guide.label}
                 <ArrowRight className="h-3 w-3" />
@@ -527,10 +527,10 @@ export async function MarketNewsHub() {
         {/* FAQ */}
         {faqs.length > 0 && (
           <section>
-            <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+            <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-6 pb-2">
               Frequently Asked Questions
             </h3>
-            <div className="rounded-2xl border border-gray-100 px-4">
+            <div className="rounded-2xl border border-border px-4">
               {faqs.map((f) => (
                 <FAQItem key={f.question} question={f.question} answer={f.answer} />
               ))}
@@ -539,7 +539,7 @@ export async function MarketNewsHub() {
         )}
 
         {/* Newsletter signup */}
-        <section className="flex flex-col items-center gap-4 rounded-2xl bg-gray-50 py-12 text-center">
+        <section className="flex flex-col items-center gap-4 rounded-2xl bg-muted py-12 text-center">
           <h3 className="text-lg font-bold text-foreground">Never Miss the Market</h3>
           <p className="max-w-md text-sm text-muted-foreground">
             A 5-minute market briefing delivered every morning.
@@ -549,7 +549,7 @@ export async function MarketNewsHub() {
 
         {/* Explore More — internal cross-links to the other mega-menu categories */}
         <section>
-          <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+          <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-6 pb-2">
             Explore More
           </h3>
           <div className="flex flex-wrap gap-x-8 gap-y-3">

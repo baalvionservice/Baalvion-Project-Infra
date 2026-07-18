@@ -100,7 +100,7 @@ export function LatestFeed({ initialArticles, initialHasMore }: Props) {
               <TabsTrigger
                 key={t.value}
                 value={t.value}
-                className="border bg-card px-4 py-2 text-xs font-semibold uppercase tracking-wider text-foreground shadow-none data-[state=active]:border-gray-900 data-[state=active]:bg-gray-900 data-[state=active]:text-white"
+                className="border border-border bg-card px-4 py-2 text-xs font-semibold uppercase tracking-wider text-foreground shadow-none data-[state=active]:border-[hsl(var(--cnbc-red))] data-[state=active]:bg-[hsl(var(--cnbc-red))] data-[state=active]:text-white"
               >
                 {t.label}
               </TabsTrigger>

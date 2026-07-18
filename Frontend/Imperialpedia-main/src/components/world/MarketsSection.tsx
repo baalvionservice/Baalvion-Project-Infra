@@ -23,18 +23,18 @@ function MoverRow({
   return (
     <div className="py-1.5">
       <div className="flex items-center justify-between text-xs mb-1 gap-2">
-        <span className="font-bold text-gray-800 truncate">
-          {ticker} <span className="font-normal text-gray-400">{name}</span>
+        <span className="font-bold text-foreground truncate">
+          {ticker} <span className="font-normal text-muted-foreground">{name}</span>
         </span>
         <span
-          className={`font-mono font-bold shrink-0 ${positive ? "text-[#00a857]" : "text-[#ce2b2b]"}`}
+          className={`font-mono font-bold shrink-0 ${positive ? "text-[hsl(var(--cnbc-green))]" : "text-[hsl(var(--cnbc-red))]"}`}
         >
           {change}
         </span>
       </div>
-      <div className="h-1.5 bg-gray-100 rounded-sm overflow-hidden">
+      <div className="h-1.5 bg-muted rounded-sm overflow-hidden">
         <div
-          className={`h-full ${positive ? "bg-[#00a857]" : "bg-[#ce2b2b]"}`}
+          className={`h-full ${positive ? "bg-[hsl(var(--cnbc-green))]" : "bg-[hsl(var(--cnbc-red))]"}`}
           style={{ width: `${width}%` }}
         />
       </div>
@@ -54,18 +54,18 @@ export default function MarketsSection({ watchlist }: { watchlist: WorldData["wa
   const maxAbs = Math.max(1, ...sorted.map((w) => Math.abs(pctNum(w.change))));
 
   return (
-    <div className="border-b border-gray-200 px-2 sm:px-4 py-5">
-      <h2 className="world-kicker text-xl font-black tracking-widest text-gray-900 uppercase border-b-4 border-[#fcb700] inline-block pb-1 mb-4">
+    <div className="border-b border-border px-2 sm:px-4 py-5">
+      <h2 className="world-kicker text-xl font-black tracking-widest text-foreground uppercase border-b-4 border-[hsl(var(--cnbc-gold))] inline-block pb-1 mb-4">
         Markets
       </h2>
 
-      <div className="bg-gray-50 border border-gray-200 rounded-sm p-3 sm:p-4 mb-4">
-        <span className="world-kicker text-[10px] font-black tracking-widest text-gray-900 uppercase block mb-3">
+      <div className="bg-muted border border-border rounded-sm p-3 sm:p-4 mb-4">
+        <span className="world-kicker text-[10px] font-black tracking-widest text-foreground uppercase block mb-3">
           Market Movers
         </span>
         <div className="grid sm:grid-cols-2 gap-x-6">
           <div>
-            <p className="world-kicker text-[9px] font-bold text-gray-400 uppercase mb-1">Top</p>
+            <p className="world-kicker text-[9px] font-bold text-muted-foreground uppercase mb-1">Top</p>
             {top.map((w) => (
               <MoverRow
                 key={w.ticker}
@@ -78,7 +78,7 @@ export default function MarketsSection({ watchlist }: { watchlist: WorldData["wa
             ))}
           </div>
           <div>
-            <p className="world-kicker text-[9px] font-bold text-gray-400 uppercase mb-1">Bottom</p>
+            <p className="world-kicker text-[9px] font-bold text-muted-foreground uppercase mb-1">Bottom</p>
             {bottom.map((w) => (
               <MoverRow
                 key={w.ticker}
