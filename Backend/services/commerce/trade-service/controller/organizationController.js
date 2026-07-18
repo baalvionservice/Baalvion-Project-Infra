@@ -32,11 +32,12 @@ const ownsOrg = (req, org) =>
 
 const listOrgs = async (req, res, next) => {
     try {
-        const { type, country, status, search, page = 1, limit = 20 } = req.query;
+        const { type, country, status, search, industry, page = 1, limit = 20 } = req.query;
         const where = {};
         if (type) where.type = type;
         if (country) where.country = country;
         if (status) where.status = status;
+        if (industry) where.industry = industry;
         if (search) where.name = { [Op.iLike]: `%${search}%` };
         const offset = (Number(page) - 1) * Number(limit);
         const { count, rows } = await db.Organization.findAndCountAll({
@@ -133,4 +134,30 @@ const getLedgerAccount = async (req, res, next) => {
     }
 };
 
-module.exports = { listOrgs, getOrg, createOrg, updateOrg, deleteOrg, updateKyc, getLedgerAccount };
+// Invite a supplier org to a tender/RFQ. Real, persisted: creates a Notification the invited
+// org sees (mirrors the pattern already used for quotation/RFQ notifications) rather than
+// inventing a separate token-based invitation subsystem for what is fundamentally a message.
+const inviteToTender = async (req, res, next) => {
+    try {
+        const org = await resolveOrg(req.params.id);
+        if (!org) return next(new AppError('NOT_FOUND', 'Organization not found', 404));
+
+        const inviterName = (req.auth && (req.auth.orgName || req.auth.orgCode)) || 'A buyer organization';
+        const { rfqId, message } = req.body || {};
+
+        const notification = await db.Notification.create({
+            tenant_id: org.tenant_id,
+            recipient_org_id: String(org.id),
+            type: 'tender_invitation',
+            title: 'You have been invited to tender',
+            message: message || `${inviterName} has invited you to participate in a tender${rfqId ? ` (RFQ ${rfqId})` : ''}.`,
+            entity_type: rfqId ? 'rfq' : 'organization',
+            entity_id: rfqId ? String(rfqId) : String(org.id),
+        });
+        return sendSuccess(req, res, notification, 201);
+    } catch (err) {
+        return next(err);
+    }
+};
+
+module.exports = { listOrgs, getOrg, createOrg, updateOrg, deleteOrg, updateKyc, getLedgerAccount, inviteToTender };

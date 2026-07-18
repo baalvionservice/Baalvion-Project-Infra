@@ -34,9 +34,11 @@ function getTransporter() {
         host: config.email.host,
         port: config.email.port,
         secure: config.email.port === 465,
-        // STARTTLS for 587 (e.g. AWS SES email-smtp.<region>.amazonaws.com) so SMTP creds are
-        // never sent over an unencrypted connection. Port 465 is already implicit TLS.
-        requireTLS: config.email.port !== 465,
+        // STARTTLS for authenticated relays on 587 (e.g. AWS SES email-smtp.<region>.amazonaws.com)
+        // so SMTP creds are never sent over an unencrypted connection. Port 465 is already implicit
+        // TLS. Credential-less local/dev catchers (e.g. Mailpit) don't speak STARTTLS at all —
+        // forcing it there breaks every local email send with "Command not implemented".
+        requireTLS: config.email.port !== 465 && Boolean(config.email.user),
         // Auth only when credentials are provided — local/relay SMTP (e.g. Mailpit) needs none.
         ...(config.email.user ? { auth: { user: config.email.user, pass: config.email.pass } } : {}),
     });

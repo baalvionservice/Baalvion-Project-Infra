@@ -2,7 +2,7 @@
 const router = require('express').Router();
 const { authMiddleware, requireRole } = require('../middleware/authMiddleware');
 const {
-    listOrgs, getOrg, createOrg, updateOrg, deleteOrg, updateKyc, getLedgerAccount,
+    listOrgs, getOrg, createOrg, updateOrg, deleteOrg, updateKyc, getLedgerAccount, inviteToTender,
 } = require('../controller/organizationController');
 
 // The org directory is tenant data (names, KYC verdicts, risk scores) — it was previously
@@ -23,5 +23,8 @@ router.delete('/:id',     authMiddleware, requireRole('super_admin'), deleteOrg)
 // Resolves/provisions the org's account-service ledger account — a precursor to any
 // escrow/ledger money movement, so gated the same as other money-adjacent org actions.
 router.post('/:id/ledger-account', authMiddleware, requireRole('admin', 'owner', 'super_admin'), getLedgerAccount);
+// Any authenticated org may invite a supplier to a tender — it's a notification, not a
+// privileged administrative action.
+router.post('/:id/invite-to-tender', authMiddleware, inviteToTender);
 
 module.exports = router;

@@ -8,9 +8,11 @@
 
 const express = require('express');
 const ctrl = require('../controller/onboardingController');
+const { onboardingLimiter, contactLimiter } = require('../middleware/rateLimiter');
 
 const router = express.Router();
 
-router.post('/onboarding-application', ctrl.submitApplication);
+router.post('/onboarding-application', onboardingLimiter, ctrl.submitApplication);
+router.post('/contact-inquiry', contactLimiter, ctrl.submitContactInquiry);
 
 module.exports = router;

@@ -53,6 +53,10 @@ const otpVerifyLimiter    = createRateLimiter({ max: 15, window: 900,   prefix: 
 // invariant in emailLoginService bound abuse of any one address; this caps email-bombing across many.
 const emailOtpRequestLimiter = createRateLimiter({ max: 20, window: 3600, prefix: 'auth:rl:eotpreq', keyFn: (req) => req.ip, message: 'Too many login codes requested. Try again later.' });
 const emailOtpVerifyLimiter  = createRateLimiter({ max: 30, window: 900,  prefix: 'auth:rl:eotpver', keyFn: (req) => req.ip, message: 'Too many login attempts. Try again later.' });
+// Public onboarding intake — unauthenticated + DB-writing (creates a pending org), so it needs the
+// same IP-based ceiling as registration.
+const onboardingLimiter  = createRateLimiter({ max: 5,  window: 3600,  prefix: 'auth:rl:onboard', keyFn: (req) => req.ip, message: 'Too many applications from this IP. Try again in an hour.' });
+const contactLimiter     = createRateLimiter({ max: 10, window: 3600,  prefix: 'auth:rl:contact', keyFn: (req) => req.ip, message: 'Too many inquiries from this IP. Try again in an hour.' });
 
 module.exports = {
     createRateLimiter,
@@ -65,4 +69,6 @@ module.exports = {
     otpVerifyLimiter,
     emailOtpRequestLimiter,
     emailOtpVerifyLimiter,
+    onboardingLimiter,
+    contactLimiter,
 };
