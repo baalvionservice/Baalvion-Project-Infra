@@ -1,0 +1,278 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Deploy — community-service + giftcard-service → Amazon ECR → EC2 (baalvion-prod-01)
+#
+#   These two ecosystem services are standalone containers (app-community / app-giftcard
+#   in deploy/consolidated/docker-compose.prod.yml), NOT part of the memory-capped
+#   app-ecosystem PM2 group. Until this workflow, their ECR image refs
+#   (baalvion/community-service, baalvion/giftcard-service) were reserved but never
+#   actually built/pushed by any pipeline — see the comment above app-community in
+#   docker-compose.prod.yml. This mirrors deploy-consolidated.yml's build-push shape,
+#   scoped to these two services, plus applying their central schema migrations
+#   (031-036, all idempotent — ON CONFLICT/IF NOT EXISTS guarded) on every roll,
+#   the same way deploy-consolidated.yml re-runs cms-service's migrations every deploy.
+#
+#   git push main (community-service/** or giftcard-service/** or their migrations)
+#       ──▶ build + push both images to ECR (prod-<sha> + prod-latest)
+#       ──▶ SSH baalvion-prod-01, apply migrations, roll app-community + app-giftcard
+#
+# HARD INVARIANTS (same as deploy-consolidated.yml):
+#   • The EC2 box NEVER builds — all builds happen here in CI.
+#   • OIDC only — no static AWS keys. AWS_DEPLOY_ROLE_ARN assumed via GitHub OIDC.
+#   • The roll is gated behind the `production` environment + CORE_EC2_* secrets;
+#     a partial/unconfigured target SKIPS (stays green) rather than failing.
+# ─────────────────────────────────────────────────────────────────────────────
+name: Deploy — community + giftcard services (ECR → EC2)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "Backend/services/ecosystem/community-service/**"
+      - "Backend/services/ecosystem/giftcard-service/**"
+      - "Backend/database/migrations/031_community_forum_full*"
+      - "Backend/database/migrations/032_community_billing*"
+      - "Backend/database/migrations/033_community_access_tiers*"
+      - "Backend/database/migrations/034_community_vip_tier*"
+      - "Backend/database/migrations/035_community_is_platform_tier*"
+      - "Backend/database/migrations/036_giftcard_service*"
+      - ".github/workflows/community-giftcard-deploy.yml"
+  workflow_dispatch:
+    inputs:
+      roll:
+        description: "Also roll the EC2 containers after pushing images (true/false)"
+        required: false
+        default: "true"
+
+concurrency:
+  group: deploy-community-giftcard
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  id-token: write   # OIDC role assumption
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION || 'ap-south-1' }}
+  RELEASE_TAG: ${{ vars.RELEASE_TAG || 'v1.0.1-production' }}
+
+jobs:
+  # ════════════════════════════ 1) build + push community-service ════════════════════════════
+  build-push-community:
+    name: build community-service
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.tag.outputs.image_tag }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          role-session-name: gha-community-${{ github.run_id }}
+
+      - name: Log in to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Ensure ECR repository exists
+        run: |
+          aws ecr describe-repositories --repository-names "baalvion/community-service" --region "$AWS_REGION" >/dev/null 2>&1 \
+            || aws ecr create-repository \
+                 --repository-name "baalvion/community-service" \
+                 --image-tag-mutability MUTABLE \
+                 --image-scanning-configuration scanOnPush=true \
+                 --region "$AWS_REGION"
+
+      - name: Compute image tag (prod-<short-sha>)
+        id: tag
+        run: echo "image_tag=prod-$(echo "${{ github.sha }}" | cut -c1-8)" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve image tags
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ steps.ecr.outputs.registry }}/baalvion/community-service
+          tags: |
+            type=raw,value=prod-latest
+            type=raw,value=${{ env.RELEASE_TAG }}
+            type=raw,value=${{ steps.tag.outputs.image_tag }}
+
+      - name: Build and push to ECR
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: Backend/services/ecosystem/community-service/Dockerfile
+          push: true
+          provenance: false
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=community-service
+          cache-to: type=gha,mode=max,scope=community-service
+
+  # ════════════════════════════ 2) build + push giftcard-service ════════════════════════════
+  build-push-giftcard:
+    name: build giftcard-service
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.tag.outputs.image_tag }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          role-session-name: gha-giftcard-${{ github.run_id }}
+
+      - name: Log in to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Ensure ECR repository exists
+        run: |
+          aws ecr describe-repositories --repository-names "baalvion/giftcard-service" --region "$AWS_REGION" >/dev/null 2>&1 \
+            || aws ecr create-repository \
+                 --repository-name "baalvion/giftcard-service" \
+                 --image-tag-mutability MUTABLE \
+                 --image-scanning-configuration scanOnPush=true \
+                 --region "$AWS_REGION"
+
+      - name: Compute image tag (prod-<short-sha>)
+        id: tag
+        run: echo "image_tag=prod-$(echo "${{ github.sha }}" | cut -c1-8)" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve image tags
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ steps.ecr.outputs.registry }}/baalvion/giftcard-service
+          tags: |
+            type=raw,value=prod-latest
+            type=raw,value=${{ env.RELEASE_TAG }}
+            type=raw,value=${{ steps.tag.outputs.image_tag }}
+
+      - name: Build and push to ECR
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: Backend/services/ecosystem/giftcard-service/Dockerfile
+          push: true
+          provenance: false
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=giftcard-service
+          cache-to: type=gha,mode=max,scope=giftcard-service
+
+  # ════════════════════════════ 3) roll app-community + app-giftcard ════════════════════════════
+  deploy:
+    name: Roll community + giftcard containers
+    needs: [build-push-community, build-push-giftcard]
+    if: ${{ github.event_name == 'push' || github.event.inputs.roll != 'false' }}
+    runs-on: ubuntu-latest
+    environment: production       # protected environment — manual approval gate
+    env:
+      EC2_HOST: ${{ secrets.CORE_EC2_HOST }}
+      EC2_USER: ${{ secrets.CORE_EC2_USER }}
+      EC2_SSH_KEY: ${{ secrets.CORE_EC2_SSH_KEY }}
+      COMMUNITY_IMAGE_TAG: ${{ needs.build-push-community.outputs.image_tag }}
+      GIFTCARD_IMAGE_TAG: ${{ needs.build-push-giftcard.outputs.image_tag }}
+    steps:
+      - name: Check EC2 target is configured
+        id: gate
+        run: |
+          if [ -z "${EC2_HOST}" ] || [ -z "${EC2_USER}" ] || [ -z "${EC2_SSH_KEY}" ]; then
+            echo "::notice title=Roll skipped::CORE_EC2_* not fully configured. Images are in ECR (community=${COMMUNITY_IMAGE_TAG}, giftcard=${GIFTCARD_IMAGE_TAG}); roll skipped."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Apply community + giftcard schema migrations (idempotent)
+        if: steps.gate.outputs.ready == 'true'
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.CORE_EC2_HOST }}
+          username: ${{ secrets.CORE_EC2_USER }}
+          key: ${{ secrets.CORE_EC2_SSH_KEY }}
+          # Central raw-SQL migrations (Backend/database/migrations/, not sequelize-cli) — every
+          # file in this range is ON CONFLICT / IF NOT EXISTS guarded, so re-running the whole
+          # range on every deploy is safe (same idempotent-every-deploy pattern as cms-service's
+          # sequelize migrations below). Applied BEFORE the roll so a fresh container never boots
+          # against a schema it doesn't expect yet.
+          script: |
+            set -euo pipefail
+            cd /opt/baalvion-core
+            git fetch --all --prune
+            git checkout main
+            git pull --ff-only
+            ENV=deploy/consolidated/.env
+            DB_HOST="$(grep -E '^DB_HOST=' "$ENV" | head -1 | cut -d= -f2- | tr -d '\r')"
+            DB_PORT="$(grep -E '^DB_PORT=' "$ENV" | head -1 | cut -d= -f2- | tr -d '\r')"
+            DB_NAME="$(grep -E '^DB_NAME=' "$ENV" | head -1 | cut -d= -f2- | tr -d '\r')"
+            DB_USER="$(grep -E '^DB_USER=' "$ENV" | head -1 | cut -d= -f2- | tr -d '\r')"
+            DB_PASSWORD="$(grep -E '^DB_PASSWORD=' "$ENV" | head -1 | cut -d= -f2- | tr -d '\r')"
+            for f in 031_community_forum_full 032_community_billing 033_community_access_tiers 034_community_vip_tier 035_community_is_platform_tier 036_giftcard_service; do
+              PGSSLMODE=require PGPASSWORD="$DB_PASSWORD" psql \
+                "postgresql://${DB_USER}@${DB_HOST}:${DB_PORT}/${DB_NAME}" \
+                -v ON_ERROR_STOP=1 \
+                -f "Backend/database/migrations/${f}.sql"
+            done
+            echo "::notice title=Migrations applied::community-service (031-035) + giftcard-service (036) schema is current."
+
+      - name: Pull + roll app-community and app-giftcard on EC2
+        if: steps.gate.outputs.ready == 'true'
+        uses: appleboy/ssh-action@v1
+        env:
+          COMMUNITY_IMAGE_TAG: ${{ needs.build-push-community.outputs.image_tag }}
+          GIFTCARD_IMAGE_TAG: ${{ needs.build-push-giftcard.outputs.image_tag }}
+        with:
+          host: ${{ secrets.CORE_EC2_HOST }}
+          username: ${{ secrets.CORE_EC2_USER }}
+          key: ${{ secrets.CORE_EC2_SSH_KEY }}
+          envs: COMMUNITY_IMAGE_TAG,GIFTCARD_IMAGE_TAG
+          script: |
+            set -euo pipefail
+            cd /opt/baalvion-core
+            ENV=deploy/consolidated/.env
+            for pair in "COMMUNITY_IMAGE_TAG=${COMMUNITY_IMAGE_TAG}" "GIFTCARD_IMAGE_TAG=${GIFTCARD_IMAGE_TAG}"; do
+              key="${pair%%=*}"
+              if grep -q "^${key}=" "$ENV"; then
+                sed -i "s|^${key}=.*|${pair}|" "$ENV"
+              else
+                echo "$pair" >> "$ENV"
+              fi
+            done
+            REGION="$(grep -E '^AWS_REGION=' "$ENV" | head -1 | cut -d= -f2)"
+            REGISTRY="$(grep -E '^ECR_REGISTRY=' "$ENV" | head -1 | cut -d= -f2)"
+            aws ecr get-login-password --region "${REGION:-ap-south-1}" \
+              | docker login --username AWS --password-stdin "${REGISTRY}"
+            COMPOSE="docker compose --env-file $ENV \
+              --profile community --profile giftcard \
+              -f deploy/consolidated/docker-compose.prod.yml \
+              -f deploy/consolidated/docker-compose.ssl-override.yml"
+            $COMPOSE pull app-community app-giftcard
+            $COMPOSE up -d --no-deps app-community app-giftcard
+            docker image prune -f
+
+      - name: Smoke test public routes
+        if: steps.gate.outputs.ready == 'true'
+        continue-on-error: true
+        run: |
+          sleep 15
+          # /health isn't Caddy-exposed (container-internal healthcheck only) — hit each
+          # service's real unauthenticated public route through the actual gateway instead.
+          for url in \
+            "https://api.baalvion.com/api/v1/community/public/communities" \
+            "https://api.baalvion.com/api/v1/giftcards/catalog" ; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 "$url" || echo "000")
+            echo "  $url → $code (expect 200)"
+          done
