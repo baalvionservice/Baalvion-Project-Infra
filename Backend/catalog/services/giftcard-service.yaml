@@ -1,0 +1,22 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: giftcard-service
+  description: Gift card store for Market Underworld (community.marketunderworld.com/marketplace) — real supplier-backed catalog (Reloadly) and crypto-paid order fulfillment. Pluggable supplier registry for future providers.
+  domain: ecosystem
+  division: community
+  context: community
+  owner: "@baalvion/ecosystem"
+  tier: tier-2
+  repo: baalvion-platform
+  path: Backend/services/ecosystem/giftcard-service
+spec:
+  lifecycle: experimental
+  language: node
+  datastores: [postgres, redis]
+  dependsOn: [auth-service]
+  consumesEvents: []
+  producesEvents: []
+  apis: ["/v1/giftcards"]
+  slo: { availability: 0.99, latencyP95Ms: 600 }
+  deploy: { chart: baalvion-service, namespace: baalvion-ecosystem, minReplicas: 1, maxReplicas: 4 }

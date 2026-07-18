@@ -230,6 +230,71 @@ services:
         awslogs-region: ${AWS_REGION:-ap-south-1}
         awslogs-group: /baalvion/consolidated
 
+  # community-service (Market Underworld forum/access-tier membership) and
+  # giftcard-service (Reloadly-backed gift card store) are standalone containers —
+  # NOT part of the app-ecosystem PM2 group, which is already memory-capped (about-service
+  # was removed from it for exactly this reason). NOTE: unlike app-payments, no CI workflow
+  # currently builds+pushes these images to their own ECR repos — that pipeline still needs
+  # to be created (mirrors financial-services.yml's payment-service push step, but for a
+  # plain Node/Docker build). Until then, these image refs are ready but unfulfilled.
+  app-community:
+    image: ${ECR_REGISTRY}/baalvion/community-service:${COMMUNITY_IMAGE_TAG:-latest}
+    pull_policy: always
+    restart: unless-stopped
+    profiles: ["community"]
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      <<: [*db, *redis]
+      NODE_ENV: production
+      # JWT_PUBLIC_KEY, INTERNAL_SERVICE_SECRET, NODEBB_BASE_URL/NODEBB_WRITE_API_TOKEN,
+      # PAYMENT_SERVICE_URL are read from .env (env_file above) — never hardcoded.
+    depends_on:
+      redis: { condition: service_healthy }
+    mem_limit: 320m
+    mem_reservation: 128m
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:3064/health',r=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: ${AWS_REGION:-ap-south-1}
+        awslogs-group: /baalvion/consolidated
+
+  app-giftcard:
+    image: ${ECR_REGISTRY}/baalvion/giftcard-service:${GIFTCARD_IMAGE_TAG:-latest}
+    pull_policy: always
+    restart: unless-stopped
+    profiles: ["giftcard"]
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      <<: [*db, *redis]
+      NODE_ENV: production
+      # RELOADLY_CLIENT_ID/RELOADLY_CLIENT_SECRET/RELOADLY_ENV, INTERNAL_SERVICE_SECRET,
+      # PAYMENT_SERVICE_URL are read from .env (env_file above) — never hardcoded.
+    depends_on:
+      redis: { condition: service_healthy }
+    mem_limit: 320m
+    mem_reservation: 128m
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:3065/health',r=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: ${AWS_REGION:-ap-south-1}
+        awslogs-group: /baalvion/consolidated
+
   # ── Kafka + ZooKeeper — OPT-IN profile: kafka (event-driven ledger saga only) ─
   zookeeper:
     image: confluentinc/cp-zookeeper:7.6.1
