@@ -4,6 +4,7 @@ import "./globals.css";
 import { CryptoTicker } from "@/components/layout/ticker";
 import { IdentityProvider } from "@/context/identity-context";
 import { AuthProvider } from "@/context/auth-context";
+import { CartProvider } from "@/context/cart-context";
 import { NotificationProvider } from "@/context/notification-context";
 import { LanguageProvider } from "@/context/language-context";
 import { ToastContainer } from "@/components/notifications/toast-container";
@@ -73,18 +74,20 @@ export default function RootLayout({
       >
         <LanguageProvider>
           <AuthProvider>
-            <NotificationProvider>
-              <IdentityProvider>
-                <header>
-                  <CryptoTicker />
-                </header>
-                <main className="flex-1 flex flex-col">
-                  {children}
-                </main>
-                <ToastContainer />
-                <GlobalSearch />
-              </IdentityProvider>
-            </NotificationProvider>
+            <CartProvider>
+              <NotificationProvider>
+                <IdentityProvider>
+                  <header>
+                    <CryptoTicker />
+                  </header>
+                  <main className="flex-1 flex flex-col">
+                    {children}
+                  </main>
+                  <ToastContainer />
+                  <GlobalSearch />
+                </IdentityProvider>
+              </NotificationProvider>
+            </CartProvider>
           </AuthProvider>
         </LanguageProvider>
       </body>

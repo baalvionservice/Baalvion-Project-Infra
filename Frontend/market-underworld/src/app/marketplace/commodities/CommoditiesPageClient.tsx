@@ -24,6 +24,8 @@ import {
 import { motion, AnimatePresence } from "framer-motion"
 import Image from "next/image"
 import type { StorefrontProduct } from "@/lib/api/commerce"
+import { useCart } from "@/context/cart-context"
+import { useToast } from "@/hooks/use-toast"
 
 const DEPARTMENTS = [
   { name: 'Electronics', icon: Smartphone, color: 'from-blue-500/20 to-blue-600/20' },
@@ -41,10 +43,21 @@ interface CommoditiesPageClientProps {
 export function CommoditiesPageClient({ products }: CommoditiesPageClientProps) {
   const [selectedDept, setSelectedDept] = useState("All")
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const { addItem } = useCart();
+  const { toast } = useToast();
 
   const filteredProducts = useMemo(() => {
     return products.filter(p => selectedDept === "All" || p.categoryName === selectedDept);
   }, [products, selectedDept]);
+
+  const handleAddToCart = async (product: StorefrontProduct) => {
+    try {
+      await addItem({ productId: product.id, sku: product.id, name: product.name, price: product.price });
+      toast({ title: "Added to cart", description: `${product.name} is in your cart.` });
+    } catch (err) {
+      toast({ variant: "destructive", title: "Couldn't add to cart", description: err instanceof Error ? err.message : "Please try again." });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#0A0A0F] text-[#e5e7eb] selection:bg-[#00E676]/20">
@@ -212,7 +225,11 @@ export function CommoditiesPageClient({ products }: CommoditiesPageClientProps) 
                               <div className="text-lg font-bold text-white">{product.price} {product.currencyCode}</div>
                               <div className="text-[9px] text-gray-500 font-bold">{product.inStock ? `${product.stock} in stock` : 'Out of stock'}</div>
                             </div>
-                            <NexusButton className="w-full bg-white/5 border border-white/10 text-white hover:bg-[#00E676] hover:text-black hover:border-[#00E676] h-10 text-[10px] font-bold">
+                            <NexusButton
+                              onClick={() => handleAddToCart(product)}
+                              disabled={!product.inStock}
+                              className="w-full bg-white/5 border border-white/10 text-white hover:bg-[#00E676] hover:text-black hover:border-[#00E676] h-10 text-[10px] font-bold"
+                            >
                               Add to Cart
                             </NexusButton>
                           </div>
