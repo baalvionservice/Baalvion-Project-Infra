@@ -202,3 +202,42 @@ export async function getAllModerationLogs(): Promise<ModerationLogEntry[]> {
         return [];
     }
 }
+
+// Per-community member management (moderator+ can view, admin can change role/ban — see
+// community-service's requireCommunityRole gate on GET/POST/DELETE .../members).
+export type CommunityRole = 'member' | 'moderator' | 'admin';
+
+export interface CommunityMember {
+    userId: string;
+    email: string | null;
+    role: CommunityRole;
+    status: MembershipStatus;
+    tier: string | null;
+    createdAt: string;
+}
+
+export async function getCommunityMembers(slug: string): Promise<CommunityMember[]> {
+    try {
+        return await communityFetch<CommunityMember[]>(`/admin/communities/${slug}/members`);
+    } catch {
+        return [];
+    }
+}
+
+export async function setMemberRole(slug: string, userId: string, role: CommunityRole) {
+    return communityFetch(`/admin/communities/${slug}/members/${userId}`, {
+        method: 'POST',
+        body: JSON.stringify({ role }),
+    });
+}
+
+export async function setMemberStatus(slug: string, userId: string, status: 'approved' | 'banned') {
+    return communityFetch(`/admin/communities/${slug}/members/${userId}`, {
+        method: 'POST',
+        body: JSON.stringify({ status }),
+    });
+}
+
+export async function revokeMember(slug: string, userId: string) {
+    return communityFetch(`/admin/communities/${slug}/members/${userId}`, { method: 'DELETE' });
+}
