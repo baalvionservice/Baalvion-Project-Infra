@@ -5,6 +5,7 @@ const { authMiddleware, requireCommunityRole, requirePlatformAdmin } = require('
 
 const router = Router();
 
+router.get('/admin/communities/:slug/members', authMiddleware, requireCommunityRole('moderator'), ctrl.listMembers);
 router.post('/admin/communities/:slug/members/:userId', authMiddleware, requireCommunityRole('admin'), ctrl.setMember);
 router.delete('/admin/communities/:slug/members/:userId', authMiddleware, requireCommunityRole('admin'), ctrl.revokeMember);
 router.get('/admin/communities/:slug/moderation-logs', authMiddleware, requireCommunityRole('moderator'), ctrl.moderationLogs);

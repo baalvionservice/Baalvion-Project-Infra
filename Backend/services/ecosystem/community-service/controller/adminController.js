@@ -32,6 +32,22 @@ const revokeMember = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
+const listMembers = async (req, res, next) => {
+    try {
+        const community = await loadCommunity(req.params.slug);
+        const members = await membershipService.listMembers(community);
+        const withEmail = await Promise.all(members.map(async (m) => ({
+            userId: m.user_id,
+            email: await identityClient.getEmailByUserId(m.user_id),
+            role: m.role,
+            status: m.status,
+            tier: m.tier,
+            createdAt: m.created_at,
+        })));
+        return sendSuccess(req, res, withEmail);
+    } catch (err) { return next(err); }
+};
+
 const moderationLogs = async (req, res, next) => {
     try {
         const community = await loadCommunity(req.params.slug);
@@ -74,4 +90,4 @@ const allModerationLogs = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
-module.exports = { setMember, revokeMember, moderationLogs, listAllPendingJoinRequests, decideAnyJoinRequest, allModerationLogs };
+module.exports = { setMember, revokeMember, listMembers, moderationLogs, listAllPendingJoinRequests, decideAnyJoinRequest, allModerationLogs };
