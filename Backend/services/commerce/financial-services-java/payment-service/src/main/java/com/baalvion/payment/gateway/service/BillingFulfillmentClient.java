@@ -44,6 +44,7 @@ public class BillingFulfillmentClient {
   private final HttpClient httpClient;
   private final String fulfillUrl;
   private final String communityFulfillUrl;
+  private final String giftcardFulfillUrl;
   private final String internalSecret;
   private final boolean enabled;
 
@@ -51,16 +52,19 @@ public class BillingFulfillmentClient {
       ObjectMapper objectMapper,
       @Value("${app.billing.fulfill-url:http://app-edge-realtime:4000/v1/billing/fulfill}") String fulfillUrl,
       @Value("${app.billing.community-fulfill-url:http://app-community:3064/v1/community/billing/fulfill}") String communityFulfillUrl,
+      @Value("${app.billing.giftcard-fulfill-url:http://app-giftcard:3065/v1/giftcards/billing/fulfill}") String giftcardFulfillUrl,
       @Value("${app.billing.fulfill-enabled:true}") boolean enabled,
       @Value("${app.internal-secret:${INTERNAL_SERVICE_SECRET:}}") String internalSecret) {
     this.objectMapper = objectMapper;
     this.fulfillUrl = fulfillUrl;
     this.communityFulfillUrl = communityFulfillUrl;
+    this.giftcardFulfillUrl = giftcardFulfillUrl;
     this.enabled = enabled;
     this.internalSecret = internalSecret;
     if (enabled) {
       validateFulfillUrl(fulfillUrl);
       validateFulfillUrl(communityFulfillUrl);
+      validateFulfillUrl(giftcardFulfillUrl);
       if (internalSecret == null || internalSecret.isBlank()) {
         log.warn("Billing fulfillment is enabled but app.internal-secret/INTERNAL_SERVICE_SECRET is blank "
             + "— every CAPTURED webhook dispatch will fail until it is configured.");
@@ -91,13 +95,15 @@ public class BillingFulfillmentClient {
 
     Map<String, Object> metadata = parseMetadata(payment.getRawRequest());
 
-    // Community-membership fulfillment (per-USER, no orgId) — a separate target from the
-    // org-level SaaS billing path below, additive and checked FIRST so it never falls through
-    // to the orgId skip-check (a community charge legitimately has no orgId at all).
-    boolean isCommunityFulfillment = "community".equals(metadata.get("fulfillTarget"));
+    // Community-membership and gift-card fulfillment (both per-USER, no orgId) — separate
+    // targets from the org-level SaaS billing path below, additive and checked FIRST so they
+    // never fall through to the orgId skip-check (neither charge type carries an orgId at all).
+    String fulfillTarget = String.valueOf(metadata.get("fulfillTarget"));
     String targetUrl;
-    if (isCommunityFulfillment) {
+    if ("community".equals(fulfillTarget)) {
       targetUrl = communityFulfillUrl;
+    } else if ("giftcard".equals(fulfillTarget)) {
+      targetUrl = giftcardFulfillUrl;
     } else {
       Object orgId = metadata.get("orgId");
       if (orgId == null || String.valueOf(orgId).isBlank()) {

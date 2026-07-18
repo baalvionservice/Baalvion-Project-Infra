@@ -23,6 +23,9 @@ jest.mock('../models', () => {
             rows.set(key, row);
             return [row, true];
         }),
+        findAll: jest.fn(async ({ where }) => {
+            return [...rows.values()].filter((r) => r.community_id === where.community_id);
+        }),
         __rows: rows,
     };
     return {
@@ -105,5 +108,48 @@ describe('membershipService.decideJoinRequest', () => {
         db.CommunityJoinRequest.findOne.mockResolvedValue({ id: 'r1', status: 'approved' });
         await expect(membershipService.decideJoinRequest(mockRequestCommunity, 'r1', 'mod-1', true))
             .rejects.toMatchObject({ code: 'NOT_FOUND' });
+    });
+});
+
+describe('membershipService.adminSetMember / listMembers', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+        db.CommunityMembership.__rows.clear();
+    });
+
+    it('promotes a member to moderator', async () => {
+        await db.CommunityMembership.findOrCreate({
+            where: { community_id: mockCommunity.id, user_id: 'user-5' },
+            defaults: { community_id: mockCommunity.id, user_id: 'user-5', role: 'member', status: 'approved' },
+        });
+        const membership = await membershipService.adminSetMember(
+            mockCommunity, 'user-5', 'u5@example.com', { role: 'moderator' }, 'admin-1'
+        );
+        expect(membership.role).toBe('moderator');
+    });
+
+    it('bans a member via status change', async () => {
+        await db.CommunityMembership.findOrCreate({
+            where: { community_id: mockCommunity.id, user_id: 'user-6' },
+            defaults: { community_id: mockCommunity.id, user_id: 'user-6', role: 'member', status: 'approved' },
+        });
+        const membership = await membershipService.adminSetMember(
+            mockCommunity, 'user-6', 'u6@example.com', { status: 'banned' }, 'admin-1'
+        );
+        expect(membership.status).toBe('banned');
+    });
+
+    it('lists only members belonging to the given community', async () => {
+        await db.CommunityMembership.findOrCreate({
+            where: { community_id: mockCommunity.id, user_id: 'user-7' },
+            defaults: { community_id: mockCommunity.id, user_id: 'user-7', role: 'member', status: 'approved' },
+        });
+        await db.CommunityMembership.findOrCreate({
+            where: { community_id: mockInviteOnlyCommunity.id, user_id: 'user-8' },
+            defaults: { community_id: mockInviteOnlyCommunity.id, user_id: 'user-8', role: 'member', status: 'approved' },
+        });
+        const members = await membershipService.listMembers(mockCommunity);
+        expect(members).toHaveLength(1);
+        expect(members[0].user_id).toBe('user-7');
     });
 });

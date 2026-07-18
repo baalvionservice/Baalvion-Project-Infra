@@ -450,6 +450,10 @@ jobs:
           # name kept in sync — was the drifting `proxy-service` alias.
           - name: proxy-baalvionstack-proxy-service
             file: Backend/services/infrastructure/proxy-service/Dockerfile
+          - name: community-service
+            file: Backend/services/ecosystem/community-service/Dockerfile
+          - name: giftcard-service
+            file: Backend/services/ecosystem/giftcard-service/Dockerfile
           # ── Dev-only — NOT part of the deploy.yml 19-service production stack.
           #    dashboard-service deploys via the separate company-dashboard package and
           #    is build-verified in domain-services.yml; scanned here for CVE hygiene

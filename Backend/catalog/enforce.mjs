@@ -38,6 +38,7 @@ const JWT_ALLOWLIST = [
   ['Backend/services/ecosystem/law-elite/', 'acquired sub-stack, separately governed — migration tracked'],
   ['Backend/services/ecosystem/jobs-service/middleware/authMiddleware.js', 'jwt.decode() only to read the email claim — verification is via @baalvion/auth-node createAuthMiddleware'],
   ['Backend/services/ecosystem/community-service/middleware/authMiddleware.js', 'jwt.decode() only to read the email claim (for NodeBB account lookup) — verification is via @baalvion/auth-node createAuthMiddleware'],
+  ['Backend/services/ecosystem/giftcard-service/middleware/authMiddleware.js', 'jwt.decode() only to read the email claim (for order recipient email) — verification is via @baalvion/auth-node createAuthMiddleware'],
   ['Backend/services/platform/realtime-service/index.js', 'WebSocket upgrade auth — RS256 jwt.verify at the handshake; Express auth-node middleware does not apply to WS upgrades'],
   ['Backend/services/knowledge/cms-service/scripts/', 'dev seed scripts mint a local token for seeding — not a request-path auth surface'],
   ['Backend/services/knowledge/cms-service/service/seoPingService.js', 'signs a Google service-account OAuth2 JWT-bearer assertion to authenticate to the Google Indexing API — an outbound third-party API credential, not internal user/session auth'],

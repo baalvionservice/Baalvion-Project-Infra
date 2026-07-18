@@ -159,6 +159,15 @@ async function adminSetMember(community, targetUserId, targetEmail, { role, stat
     return membership;
 }
 
+// Every membership row for a community, regardless of status — the admin console needs to
+// see pending/banned/cancelled rows too, not just active members.
+async function listMembers(community) {
+    return db.CommunityMembership.findAll({
+        where: { community_id: community.id },
+        order: [['created_at', 'ASC']],
+    });
+}
+
 async function moderationLogs(community) {
     return db.CommunityModerationLog.findAll({ where: { community_id: community.id }, order: [['created_at', 'DESC']], limit: 200 });
 }
@@ -181,6 +190,7 @@ module.exports = {
     listAllPendingJoinRequests,
     decideJoinRequest,
     adminSetMember,
+    listMembers,
     moderationLogs,
     allModerationLogs,
 };
