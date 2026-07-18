@@ -18,7 +18,12 @@ COPY --from=pruner /repo/out/full/ ./
 RUN pnpm deploy --filter=giftcard-service --prod /out
 
 FROM node:20-alpine AS final
-RUN apk add --no-cache dumb-init \
+# Apply the Alpine security patch for OpenSSL in-place (CVE-2026-45447 HIGH: heap
+# use-after-free in PKCS7_verify). The pinned base image had not yet republished a digest
+# with the patched package, so --upgrade pulls it from the Alpine package index without
+# adding any new packages.
+RUN apk add --no-cache --upgrade openssl \
+    && apk add --no-cache dumb-init \
     && addgroup -S app && adduser -S app -G app
 ENV NODE_ENV=production
 WORKDIR /app
