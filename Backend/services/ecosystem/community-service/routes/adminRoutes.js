@@ -16,4 +16,9 @@ router.get('/admin/join-requests', authMiddleware, requirePlatformAdmin, ctrl.li
 router.post('/admin/join-requests/:requestId/decide', authMiddleware, requirePlatformAdmin, ctrl.decideAnyJoinRequest);
 router.get('/admin/moderation-logs', authMiddleware, requirePlatformAdmin, ctrl.allModerationLogs);
 
+// Reported-content queue — spans every community's NodeBB flags, platform-admin only (same
+// tier as the join-request/moderation-log console views above).
+router.get('/admin/flags', authMiddleware, requirePlatformAdmin, ctrl.listFlags);
+router.post('/admin/flags/:flagId/resolve', authMiddleware, requirePlatformAdmin, ctrl.resolveFlag);
+
 module.exports = router;
