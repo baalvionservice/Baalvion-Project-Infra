@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server';
-import companies from '@/data/companies.json';
+// The full 11-company dataset lives under data/companies/companies.json — this is the
+// same source src/lib/data/loaders.ts uses for /companies and /companies/[slug]. The
+// legacy top-level data/companies.json is a stale duplicate (1 record) kept only as a
+// fallback for src/lib/utils/entityHelpers.ts's older relation-graph helpers; routing
+// this API at the same source as the real pages prevents the two from drifting further.
+import companies from '@/data/companies/companies.json';
 import { getGraphRelatedEntities } from '@/lib/utils/entityHelpers';
 
 /**

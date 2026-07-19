@@ -27,7 +27,12 @@
     ],
     "created_at": "2024-01-01T00:00:00Z",
     "updated_at": "2024-01-01T00:00:00Z",
-    "ticker": "NVDA"
+    "ticker": "NVDA",
+    "legalName": "NVIDIA Corporation",
+    "founders": ["Jensen Huang", "Chris Malachowsky", "Curtis Priem"],
+    "stockExchange": "NASDAQ",
+    "isPublic": true,
+    "sameAs": ["https://en.wikipedia.org/wiki/Nvidia"]
   },
   {
     "id": "comp-2",
@@ -59,7 +64,12 @@
     ],
     "created_at": "2024-01-01T00:00:00Z",
     "updated_at": "2024-01-01T00:00:00Z",
-    "ticker": "AAPL"
+    "ticker": "AAPL",
+    "legalName": "Apple Inc.",
+    "founders": ["Steve Jobs", "Steve Wozniak", "Ronald Wayne"],
+    "stockExchange": "NASDAQ",
+    "isPublic": true,
+    "sameAs": ["https://en.wikipedia.org/wiki/Apple_Inc."]
   },
   {
     "id": "comp-3",
@@ -92,7 +102,12 @@
     ],
     "created_at": "2024-01-01T00:00:00Z",
     "updated_at": "2024-01-01T00:00:00Z",
-    "ticker": "MSFT"
+    "ticker": "MSFT",
+    "legalName": "Microsoft Corporation",
+    "founders": ["Bill Gates", "Paul Allen"],
+    "stockExchange": "NASDAQ",
+    "isPublic": true,
+    "sameAs": ["https://en.wikipedia.org/wiki/Microsoft"]
   },
   {
     "id": "comp-4",
@@ -123,7 +138,12 @@
     ],
     "created_at": "2024-01-01T00:00:00Z",
     "updated_at": "2024-01-01T00:00:00Z",
-    "ticker": "AMZN"
+    "ticker": "AMZN",
+    "legalName": "Amazon.com, Inc.",
+    "founders": ["Jeff Bezos"],
+    "stockExchange": "NASDAQ",
+    "isPublic": true,
+    "sameAs": ["https://en.wikipedia.org/wiki/Amazon_(company)"]
   },
   {
     "id": "comp-5",
@@ -154,7 +174,12 @@
     ],
     "created_at": "2024-01-01T00:00:00Z",
     "updated_at": "2024-01-01T00:00:00Z",
-    "ticker": "TSLA"
+    "ticker": "TSLA",
+    "legalName": "Tesla, Inc.",
+    "founders": ["Martin Eberhard", "Marc Tarpenning", "Elon Musk", "JB Straubel", "Ian Wright"],
+    "stockExchange": "NASDAQ",
+    "isPublic": true,
+    "sameAs": ["https://en.wikipedia.org/wiki/Tesla,_Inc."]
   },
   {
     "id": "comp-6",
@@ -185,7 +210,12 @@
     ],
     "created_at": "2024-01-01T00:00:00Z",
     "updated_at": "2024-01-01T00:00:00Z",
-    "ticker": "GOOGL"
+    "ticker": "GOOGL",
+    "legalName": "Alphabet Inc.",
+    "founders": ["Larry Page", "Sergey Brin"],
+    "stockExchange": "NASDAQ",
+    "isPublic": true,
+    "sameAs": ["https://en.wikipedia.org/wiki/Alphabet_Inc."]
   },
   {
     "id": "comp-7",
@@ -215,7 +245,12 @@
     ],
     "created_at": "2024-01-01T00:00:00Z",
     "updated_at": "2024-01-01T00:00:00Z",
-    "ticker": "META"
+    "ticker": "META",
+    "legalName": "Meta Platforms, Inc.",
+    "founders": ["Mark Zuckerberg", "Eduardo Saverin", "Andrew McCollum", "Dustin Moskovitz", "Chris Hughes"],
+    "stockExchange": "NASDAQ",
+    "isPublic": true,
+    "sameAs": ["https://en.wikipedia.org/wiki/Meta_Platforms"]
   },
   {
     "id": "comp-8",
@@ -240,7 +275,11 @@
     ],
     "created_at": "2024-01-01T00:00:00Z",
     "updated_at": "2024-01-01T00:00:00Z",
-    "ticker": "BRKB"
+    "ticker": "BRKB",
+    "legalName": "Berkshire Hathaway Inc.",
+    "stockExchange": "NYSE",
+    "isPublic": true,
+    "sameAs": ["https://en.wikipedia.org/wiki/Berkshire_Hathaway"]
   },
   {
     "id": "comp-9",
@@ -271,7 +310,12 @@
     ],
     "created_at": "2024-01-01T00:00:00Z",
     "updated_at": "2024-01-01T00:00:00Z",
-    "ticker": "INTC"
+    "ticker": "INTC",
+    "legalName": "Intel Corporation",
+    "founders": ["Robert Noyce", "Gordon Moore"],
+    "stockExchange": "NASDAQ",
+    "isPublic": true,
+    "sameAs": ["https://en.wikipedia.org/wiki/Intel"]
   },
   {
     "id": "comp-10",
@@ -299,7 +343,12 @@
     ],
     "created_at": "2024-01-01T00:00:00Z",
     "updated_at": "2024-01-01T00:00:00Z",
-    "ticker": "TSM"
+    "ticker": "TSM",
+    "legalName": "Taiwan Semiconductor Manufacturing Company Limited",
+    "founders": ["Morris Chang"],
+    "stockExchange": "NYSE",
+    "isPublic": true,
+    "sameAs": ["https://en.wikipedia.org/wiki/TSMC"]
   },
   {
     "id": "comp-11",
@@ -330,6 +379,9 @@
     ],
     "created_at": "2024-01-01T00:00:00Z",
     "updated_at": "2024-01-01T00:00:00Z",
-    "ticker": null
+    "ticker": null,
+    "founders": ["Sam Altman", "Elon Musk", "Greg Brockman", "Ilya Sutskever", "Wojciech Zaremba", "John Schulman"],
+    "isPublic": false,
+    "sameAs": ["https://en.wikipedia.org/wiki/OpenAI"]
   }
 ]

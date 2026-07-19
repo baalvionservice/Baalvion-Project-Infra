@@ -33,11 +33,20 @@ const STATIC: Record<string, unknown[]> = {
   technology: technologiesData as unknown[],
 };
 
+// Bounds every live-service call below so a slow/hung imperialpedia-service can never
+// block page rendering indefinitely — worst case we fall through to bundled static data.
+const ENTITY_FETCH_TIMEOUT_MS = 6000;
+// Entities change rarely relative to page traffic; revalidating on a short window (rather
+// than `no-store`) lets Next.js serve cached responses instead of round-tripping to the
+// live service on every single request, while still picking up edits within minutes.
+const ENTITY_REVALIDATE_SECONDS = 300;
+
 // List a type from the service; fall back to bundled static data on empty/error.
 async function fetchList<T>(type: string, fallback: unknown[]): Promise<T[]> {
   try {
     const res = await fetch(`${IMP_API}/entities?type=${type}&limit=500`, {
-      cache: 'no-store',
+      next: { revalidate: ENTITY_REVALIDATE_SECONDS },
+      signal: AbortSignal.timeout(ENTITY_FETCH_TIMEOUT_MS),
     });
     if (!res.ok) throw new Error(String(res.status));
     const json = await res.json();
@@ -52,7 +61,8 @@ async function fetchList<T>(type: string, fallback: unknown[]): Promise<T[]> {
 async function fetchOne<T>(type: string, slug: string, fallback: unknown[]): Promise<T | undefined> {
   try {
     const res = await fetch(`${IMP_API}/entities/${type}/${encodeURIComponent(slug)}`, {
-      cache: 'no-store',
+      next: { revalidate: ENTITY_REVALIDATE_SECONDS },
+      signal: AbortSignal.timeout(ENTITY_FETCH_TIMEOUT_MS),
     });
     if (res.ok) return ((await res.json())?.data ?? undefined) as T | undefined;
     if (res.status !== 404) throw new Error(String(res.status));
@@ -88,6 +98,19 @@ export async function getCountryBySlug(slug: string): Promise<CountryEntity | un
 
 export async function getCompanyBySlug(slug: string): Promise<CompanyEntity | undefined> {
   return fetchOne<CompanyEntity>('company', slug, STATIC.company);
+}
+
+/**
+ * Reverse lookup for the market quote pages (`/markets/quote/[symbol]`): finds the rich
+ * knowledge-graph `CompanyEntity` behind a ticker so quote pages can surface real
+ * description/leadership/headquarters/sameAs data instead of only the bare price feed.
+ * Reuses `loadCompanies()`'s existing cache — no dedicated backend lookup needed since the
+ * company roster is small (tens, not thousands) and already fully loaded for `/companies`.
+ */
+export async function getCompanyByTicker(ticker: string): Promise<CompanyEntity | undefined> {
+  const companies = await loadCompanies();
+  const needle = ticker.toUpperCase();
+  return companies.find((c) => c.ticker?.toUpperCase() === needle);
 }
 
 export async function getIndustryBySlug(slug: string): Promise<IndustryEntity | undefined> {
