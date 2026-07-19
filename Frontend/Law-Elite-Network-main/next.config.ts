@@ -70,7 +70,7 @@ const securityHeaders = [
       // avatars) — no stock/placeholder image hosts.
       "img-src 'self' data: blob: https://api.baalvion.com https://firebasestorage.googleapis.com https://lh3.googleusercontent.com https://*.razorpay.com",
       "font-src 'self' data: https://fonts.gstatic.com",
-      `connect-src 'self' ${extraConnect} https://api.baalvion.com https://*.razorpay.com https://lumberjack.razorpay.com https://*.googleapis.com https://*.algolianet.com https://*.algolia.net${
+      `connect-src 'self' ${extraConnect} https://api.baalvion.com https://*.razorpay.com https://lumberjack.razorpay.com https://*.googleapis.com https://*.algolianet.com https://*.algolia.net https://www.google-analytics.com https://*.google-analytics.com${
         isDev
           ? ' ws://localhost:* ws://127.0.0.1:* http://localhost:* http://127.0.0.1:*'
           : ''

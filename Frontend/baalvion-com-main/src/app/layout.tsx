@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { SITE, EXTERNAL, NETWORK, CONTACT } from '@/lib/content';
 import { fraunces, interTight, plexMono } from './fonts';
 import { Substrate } from '@/components/structure/substrate';
+import { GoogleAnalytics } from '@/components/google-analytics';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -68,6 +69,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${fraunces.variable} ${interTight.variable} ${plexMono.variable}`}
     >
       <head>
+        <GoogleAnalytics />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}

@@ -286,7 +286,8 @@ the app boots without configuration; production requires the `NEXT_PUBLIC_*` and
 | `NEXT_PUBLIC_ADMIN_PLATFORM_URL` | Central admin-platform base (cross-app navigation) |
 | `NEXT_PUBLIC_ADMIN_CONSOLE_URL` | This site's CMS console URL (admin redirect target) |
 | `NEXT_PUBLIC_REFRESH_COOKIE_NAME` | Refresh cookie name middleware gates on (default `baalvion_refresh`) |
-| `NEXT_PUBLIC_GA_ID` | Google Analytics / GTM ID (analytics only render when set) |
+| `NEXT_PUBLIC_GA_ID` | Google Analytics (GA4 gtag.js) measurement ID (only renders when set) |
+| `NEXT_PUBLIC_GTM_ID` | Google Tag Manager container ID (only renders when set) |
 | `NEXT_PUBLIC_ADSENSE_CLIENT` | Google AdSense client ID |
 | `NEXT_PUBLIC_CONTACT_EMAIL` / `NEXT_PUBLIC_SUPPORT_EMAIL` / `NEXT_PUBLIC_EXPERTS_EMAIL` | Public contact addresses shown on Contact/legal pages |
 
