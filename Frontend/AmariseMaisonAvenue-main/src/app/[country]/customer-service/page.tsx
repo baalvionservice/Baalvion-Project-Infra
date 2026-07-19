@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: CustomerServicePageProps): Pr
 
   return {
     title: `Customer Service & Support | AMARISÉ MAISON ${currentCountry.name} Help Center`,
-    description: `Get support for orders, shipping, returns, and more in ${currentCountry.name}. Our customer service team is available to assist with all your inquiries.`,
+    description: `Shipping to ${currentCountry.name}, returns, ${currentCountry.currency} payment methods and order support — reach our ${currentCountry.office.city} concierge team directly.`,
   };
 }
 

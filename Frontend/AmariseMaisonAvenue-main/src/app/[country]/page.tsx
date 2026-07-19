@@ -2,9 +2,10 @@ import React from 'react';
 import { Metadata } from 'next';
 import { buildAlternates } from '@/lib/seo';
 import { normalizeCountry, getCountryConfig } from '@/lib/i18n/countries';
-import { getHomepage, getPressItems } from '@/lib/cms';
+import { getHomepage, getPressItems, getMarketOffice } from '@/lib/cms';
 import { getProducts } from '@/lib/catalog';
-import { HOMEPAGE_FALLBACK, PRESS_FALLBACK } from '@/lib/mock-data';
+import { HOMEPAGE_FALLBACK, PRESS_FALLBACK, COUNTRIES } from '@/lib/mock-data';
+import { localBusinessJsonLd } from '@/lib/structured-data';
 import { HomeHero } from '@/components/home/HomeHero';
 import { ServiceCards } from '@/components/home/ServiceCards';
 import { FeaturedCollections } from '@/components/home/FeaturedCollections';
@@ -23,13 +24,18 @@ type CountryHomeProps = {
 export async function generateMetadata({ params }: CountryHomeProps): Promise<Metadata> {
   const cc = normalizeCountry((await params).country);
   const countryData = getCountryConfig(cc);
+  const office = await getMarketOffice(cc, COUNTRIES[cc]?.office ?? COUNTRIES.us.office);
+  // Genuinely distinct per market (city + currency), not the same paragraph with the
+  // country name swapped in — that reads as thin/duplicate content to search engines
+  // running 5 near-identical pages.
+  const description = `Rare and pre-owned Hermès, Chanel and fine jewelry, authenticated in-house and priced in ${countryData.currency}. Private showroom in ${office.city}, white-glove delivery across ${countryData.name} — curating the world's most exquisite treasures since 1924.`;
   return {
     title: `AMARISÉ MAISON AVENUE | Authenticated Luxury in ${countryData.name}`,
-    description: `Rare and pre-owned Hermès, Chanel and fine jewelry — every piece authenticated by Amarisé Maison Avenue, curating the world's most exquisite treasures since 1924.`,
+    description,
     alternates: buildAlternates(cc, ''),
     openGraph: {
-      title: `AMARISÉ MAISON AVENUE | The Art of Authenticated Luxury`,
-      description: `Authenticated pre-owned Hermès, Chanel and fine jewelry — curated since 1924.`,
+      title: `AMARISÉ MAISON AVENUE | Authenticated Luxury in ${countryData.name}`,
+      description,
       type: 'website',
     },
   };
@@ -51,8 +57,16 @@ export default async function CountryPage({ params }: CountryHomeProps) {
     collectionId: na.collectionId,
   });
 
+  const country = COUNTRIES[countryCode] ?? COUNTRIES.us;
+  const office = await getMarketOffice(countryCode, country.office);
+  const storeSchema = localBusinessJsonLd(countryCode, { ...country, office });
+
   return (
     <div className="animate-fade-in bg-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(storeSchema) }}
+      />
       <HomeHero hero={homepage.hero} countryCode={countryCode} />
       <ServiceCards services={homepage.services} countryCode={countryCode} />
       <FeaturedCollections
