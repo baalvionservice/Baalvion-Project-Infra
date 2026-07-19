@@ -121,6 +121,15 @@ function serializeProductListItem(p, opts = {}) {
         colors: Array.isArray(cf.colors) ? cf.colors : undefined,
         sizes: Array.isArray(cf.sizes) ? cf.sizes : undefined,
         vendorId: cf.vendorId,
+        // Curator-authored collector/investment notes — admin-settable per product via
+        // custom_fields (Commerce → Products → edit). Undefined (never a fabricated default)
+        // when the admin hasn't set them, so ProductCard only shows the badge for artifacts
+        // the Maison has actually assessed.
+        collectorValue: cf.collectorValue || undefined,
+        marketRange: cf.marketRange || undefined,
+        investmentInsight: cf.investmentInsight || undefined,
+        scarcityTag: cf.scarcityTag || undefined,
+        priceVisible: cf.priceVisible != null ? !!cf.priceVisible : true,
     };
 }
 
