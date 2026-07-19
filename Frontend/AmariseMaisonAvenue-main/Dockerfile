@@ -35,6 +35,7 @@ ARG NEXT_PUBLIC_STORE_ID
 ARG NEXT_PUBLIC_APP_URL
 ARG NEXT_PUBLIC_SITE_URL
 ARG NEXT_PUBLIC_MEDIA_HOST
+ARG NEXT_PUBLIC_GA_ID
 # CRITICAL: ARG alone is NOT visible to `next build`. Each value must be re-exported as a
 # NEXT_PUBLIC_* ENV so Next inlines it into the client bundle. Without these ENV lines the
 # build bakes the localhost code-defaults regardless of --build-arg.
@@ -48,7 +49,8 @@ ENV NEXT_TELEMETRY_DISABLED=1 NODE_ENV=production \
     NEXT_PUBLIC_STORE_ID=${NEXT_PUBLIC_STORE_ID} \
     NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL} \
     NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL} \
-    NEXT_PUBLIC_MEDIA_HOST=${NEXT_PUBLIC_MEDIA_HOST}
+    NEXT_PUBLIC_MEDIA_HOST=${NEXT_PUBLIC_MEDIA_HOST} \
+    NEXT_PUBLIC_GA_ID=${NEXT_PUBLIC_GA_ID}
 COPY --from=pruner /app/out/full/ ./
 RUN pnpm turbo run build --filter=amarise-maison-avenue-web
 

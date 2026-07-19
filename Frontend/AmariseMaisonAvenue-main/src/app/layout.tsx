@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import UnifiedAnalytics from "@/components/UnifiedAnalytics";
+import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { AppProvider } from "@/lib/store";
 import {
   normalizeCountry,
@@ -100,6 +101,7 @@ export default async function RootLayout({
       className={`${inter.variable} ${cormorant.variable} light scroll-smooth`}
     >
       <head>
+        <GoogleAnalytics />
         <link rel="preconnect" href="https://picsum.photos" />
         <link rel="preconnect" href="https://madisonavenuecouture.com" />
         {/* Organization + WebSite knowledge-graph entities (server-rendered, static). */}
