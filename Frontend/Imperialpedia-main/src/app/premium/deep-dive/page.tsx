@@ -1,24 +1,26 @@
-import React from 'react';
-import { Container } from '@/design-system/layout/container';
-import { PremiumDeepDiveClient } from './PremiumDeepDiveClient';
 import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
+import { FeatureUnavailable } from '@/components/system/FeatureUnavailable';
 
 export const metadata: Metadata = buildMetadata({
-  title: 'AI Portfolio Deep-Dive | Pro Intelligence',
-  description: 'Detailed audit of your investment nodes. Analyze structural imbalances, sector exposure, and AI-synthesized risk signals for the Imperialpedia Pro network.',
+  title: 'Portfolio Deep-Dive | Imperialpedia',
+  description: 'AI-assisted portfolio deep-dive analysis is in development for Imperialpedia.',
 });
 
 /**
- * AI Portfolio Deep Dive Page (Server Entry).
- * Orchestrates the discovery of complex portfolio analytics and risk mitigation strategies.
+ * Was rendering `mock-api/premium.getPortfolioDeepDiveData()` fabricated "AI risk
+ * signals". No real portfolio-analysis backend exists yet — see the mock-data
+ * remediation report.
  */
 export default function PremiumDeepDivePage() {
   return (
     <main className="min-h-screen bg-background pt-12">
-      <Container>
-        <PremiumDeepDiveClient />
-      </Container>
+      <FeatureUnavailable
+        title="Portfolio Deep-Dive"
+        reason="Portfolio deep-dive analysis isn't connected to a live data source yet."
+        backHref="/premium/subscribe"
+        backLabel="Back to Premium"
+      />
     </main>
   );
 }

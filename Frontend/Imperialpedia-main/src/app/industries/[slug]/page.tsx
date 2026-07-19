@@ -13,7 +13,6 @@ import { JsonLd } from "@/modules/seo-engine/components/JsonLd";
 import { breadcrumbService } from "@/modules/seo-engine/services/breadcrumb-service";
 import { QuickStats } from "@/components/entity/QuickStats";
 import { RelatedHighlights } from "@/components/entity/RelatedHighlights";
-import { AIInsight } from "@/components/ai/AIInsight";
 import { EntityAnalytics } from "@/components/entity/EntityAnalytics";
 import { EntityTags } from "@/components/entity/EntityTags";
 
@@ -125,7 +124,6 @@ export default async function Page({ params }: PageProps) {
           <aside className="lg:col-span-4 space-y-10">
             <div className="sticky top-24 space-y-10">
               <EntityTags entity={industry} type="industry" />
-              <AIInsight entityType="industry" slug={industry.slug} />
               <RelatedHighlights entityId={industry.id} />
             </div>
           </aside>

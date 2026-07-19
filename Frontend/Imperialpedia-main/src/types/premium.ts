@@ -22,7 +22,8 @@ export interface SubscriptionTier {
 export interface PremiumState {
   tiers: SubscriptionTier[];
   subscription_plans?: any[];
-  activeTier: string;
+  /** null when the visitor has no active subscription — do not default this to a paid tier. */
+  activeTier: string | null;
   trialInfo: {
     available: boolean;
     durationDays: number;

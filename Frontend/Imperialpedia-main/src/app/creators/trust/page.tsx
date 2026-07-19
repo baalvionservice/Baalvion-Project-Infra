@@ -1,25 +1,29 @@
-import React from 'react';
-import { Container } from '@/design-system/layout/container';
-import { TrustDirectoryClient } from './TrustDirectoryClient';
 import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
+import { FeatureUnavailable } from '@/components/system/FeatureUnavailable';
 
+// Previous metadata advertised "real-time trust scores" — the page was entirely
+// `mock-api/creators.getTrustDirectory()` fabricated data, so that claim was false.
 export const metadata: Metadata = buildMetadata({
   canonical: '/creators/trust',
-  title: 'Trusted Contributors Directory | Authority Matrix',
-  description: 'Discover verified experts and high-trust financial analysts. Audit contributor credibility using real-time trust scores and verification milestones.',
+  title: 'Trusted Contributors Directory | Imperialpedia',
+  description: 'Verified-contributor trust scoring is in development for Imperialpedia.',
 });
 
 /**
- * Trusted Contributors Directory Hub (Server Entry).
- * Orchestrates the discovery of verified authority nodes within the expert network.
+ * Was rendering `mock-api/creators.getTrustDirectory()` fabricated trust scores
+ * (0-100 "trust_score" per creator) as if real. No real trust-scoring backend
+ * exists yet — see the mock-data remediation report.
  */
 export default function TrustedContributorsPage() {
   return (
     <main className="min-h-screen bg-background pt-12">
-      <Container>
-        <TrustDirectoryClient />
-      </Container>
+      <FeatureUnavailable
+        title="Trusted Contributors Directory"
+        reason="Contributor trust scoring isn't connected to a live verification backend yet."
+        backHref="/creators"
+        backLabel="Back to Creators"
+      />
     </main>
   );
 }

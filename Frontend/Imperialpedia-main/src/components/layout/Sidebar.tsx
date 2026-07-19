@@ -18,8 +18,9 @@ import {
   Terminal
 } from 'lucide-react';
 import { Text } from '@/design-system/typography/text';
-import { useAppStore } from '@/lib/state/app-store';
 import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/providers/AuthProvider';
+import { useRouter } from 'next/navigation';
 
 interface SidebarItemProps {
   icon: React.ElementType;
@@ -66,8 +67,14 @@ const SidebarItem = ({
 
 const Sidebar = ({ className }: { className?: string }) => {
   const pathname = usePathname();
-  const { currentUser } = useAppStore();
-  
+  const router = useRouter();
+  const { user, loading, logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    router.push('/auth/sign-in');
+  };
+
   const navGroups = [
     {
       title: 'Control',
@@ -127,13 +134,20 @@ const Sidebar = ({ className }: { className?: string }) => {
             <ShieldCheck className="h-8 w-8 text-primary" />
           </div>
           <Text variant="caption" className="text-primary font-bold block uppercase text-[8px] tracking-widest mb-1">Authenticated</Text>
-          <Text variant="bodySmall" weight="bold" className="truncate text-foreground/90">{currentUser?.name || 'Administrator'}</Text>
-          <Badge variant="outline" className="mt-2 text-[8px] border-primary/20 text-primary font-bold uppercase tracking-widest h-5">
-            {currentUser?.role || 'Root'}
-          </Badge>
+          <Text variant="bodySmall" weight="bold" className="truncate text-foreground/90">
+            {loading ? 'Loading…' : user?.name || user?.email || 'Unknown user'}
+          </Text>
+          {!loading && user?.role && (
+            <Badge variant="outline" className="mt-2 text-[8px] border-primary/20 text-primary font-bold uppercase tracking-widest h-5">
+              {user.role}
+            </Badge>
+          )}
         </div>
-        
-        <button className="flex items-center gap-3 px-4 py-2 w-full text-muted-foreground hover:text-destructive transition-colors group outline-none">
+
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-3 px-4 py-2 w-full text-muted-foreground hover:text-destructive transition-colors group outline-none"
+        >
           <Terminal className="h-4 w-4 group-hover:text-destructive" />
           <span className="text-[10px] font-bold uppercase tracking-widest">Terminate Session</span>
         </button>
