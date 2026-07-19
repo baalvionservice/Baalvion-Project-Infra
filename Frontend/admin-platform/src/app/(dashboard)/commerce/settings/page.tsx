@@ -40,6 +40,25 @@ const COUNTRIES = [
   { code: 'SG', name: 'Singapore' },
 ];
 
+// Timezone choices are scoped to the selected country so users pick from a short,
+// relevant list instead of typing a raw IANA string from memory.
+const TIMEZONES_BY_COUNTRY: Record<string, { value: string; label: string }[]> = {
+  US: [
+    { value: 'America/New_York', label: 'Eastern Time (New York)' },
+    { value: 'America/Chicago', label: 'Central Time (Chicago)' },
+    { value: 'America/Denver', label: 'Mountain Time (Denver)' },
+    { value: 'America/Los_Angeles', label: 'Pacific Time (Los Angeles)' },
+  ],
+  GB: [{ value: 'Europe/London', label: 'London (GMT/BST)' }],
+  AE: [{ value: 'Asia/Dubai', label: 'Dubai (GST)' }],
+  IN: [{ value: 'Asia/Kolkata', label: 'India (IST)' }],
+  SG: [{ value: 'Asia/Singapore', label: 'Singapore (SGT)' }],
+};
+
+function defaultTimezoneForCountry(countryCode: string): string {
+  return TIMEZONES_BY_COUNTRY[countryCode]?.[0]?.value ?? 'UTC';
+}
+
 interface StoreForm {
   name: string;
   slug: string;
@@ -50,15 +69,49 @@ interface StoreForm {
   phone: string;
 }
 
+interface StoreFormErrors {
+  email?: string;
+  phone?: string;
+}
+
 const defaultForm: StoreForm = {
   name: '',
   slug: '',
   currencyCode: 'USD',
   countryCode: 'US',
-  timezone: 'UTC',
+  timezone: defaultTimezoneForCountry('US'),
   email: '',
   phone: '',
 };
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// E.164-ish: optional leading +, 7-15 digits, spaces/hyphens/parens allowed as separators.
+const PHONE_PATTERN = /^\+?[0-9]{7,15}$/;
+
+function sanitizeSlugInput(raw: string): string {
+  return raw
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-');
+}
+
+function sanitizePhoneInput(raw: string): string {
+  const hasLeadingPlus = raw.trimStart().startsWith('+');
+  const digitsAndSeparators = raw.replace(/[^0-9\s()-]/g, '');
+  return hasLeadingPlus ? `+${digitsAndSeparators}` : digitsAndSeparators;
+}
+
+function validateStoreForm(form: StoreForm): StoreFormErrors {
+  const errors: StoreFormErrors = {};
+  if (form.email && !EMAIL_PATTERN.test(form.email)) {
+    errors.email = 'Enter a valid email address';
+  }
+  const phoneDigitsOnly = form.phone.replace(/[\s()-]/g, '');
+  if (form.phone && !PHONE_PATTERN.test(phoneDigitsOnly)) {
+    errors.phone = 'Enter a valid phone number (7-15 digits, optional leading +)';
+  }
+  return errors;
+}
 
 export default function CommerceSettingsPage() {
   const { setBreadcrumbs } = useUIStore();
@@ -67,6 +120,11 @@ export default function CommerceSettingsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingStore, setEditingStore] = useState<CommerceStore | null>(null);
   const [form, setForm] = useState<StoreForm>(defaultForm);
+  const [touched, setTouched] = useState<{ email?: boolean; phone?: boolean }>({});
+  const [slugTouched, setSlugTouched] = useState(false);
+
+  const errors = validateStoreForm(form);
+  const isFormValid = !errors.email && !errors.phone && form.name.trim().length > 0;
 
   const { data, isLoading } = useCommerceStores({ limit: 50 });
   const createStore = useCreateCommerceStore();
@@ -82,6 +140,8 @@ export default function CommerceSettingsPage() {
   const openCreate = () => {
     setEditingStore(null);
     setForm(defaultForm);
+    setTouched({});
+    setSlugTouched(false);
     setDialogOpen(true);
   };
 
@@ -92,14 +152,20 @@ export default function CommerceSettingsPage() {
       slug: s.slug ?? '',
       currencyCode: s.currencyCode,
       countryCode: s.countryCode,
-      timezone: s.timezone ?? 'UTC',
+      timezone: s.timezone ?? defaultTimezoneForCountry(s.countryCode),
       email: s.email ?? '',
       phone: s.phone ?? '',
     });
+    setTouched({});
+    setSlugTouched(true); // existing stores already have a slug; never overwrite it from the name field
     setDialogOpen(true);
   };
 
   const handleSubmit = () => {
+    if (!isFormValid) {
+      setTouched({ email: true, phone: true });
+      return;
+    }
     const payload: CreateStorePayload = {
       name: form.name,
       slug: form.slug || undefined,
@@ -227,7 +293,14 @@ export default function CommerceSettingsPage() {
                 <Label>Store Name *</Label>
                 <Input
                   value={form.name}
-                  onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                  onChange={(e) => {
+                    const name = e.target.value;
+                    setForm((f) => ({
+                      ...f,
+                      name,
+                      slug: slugTouched ? f.slug : sanitizeSlugInput(name),
+                    }));
+                  }}
                   placeholder="Amarise UAE"
                 />
               </div>
@@ -235,10 +308,14 @@ export default function CommerceSettingsPage() {
                 <Label>Slug</Label>
                 <Input
                   value={form.slug}
-                  onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))}
+                  onChange={(e) => {
+                    setSlugTouched(true);
+                    setForm((f) => ({ ...f, slug: sanitizeSlugInput(e.target.value) }));
+                  }}
                   placeholder="amarise-uae"
                   className="font-mono text-xs"
                 />
+                <p className="text-[11px] text-muted-foreground">Auto-filled from the store name — edit if needed.</p>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -253,7 +330,10 @@ export default function CommerceSettingsPage() {
               </div>
               <div className="space-y-1.5">
                 <Label>Country *</Label>
-                <Select value={form.countryCode} onValueChange={(v) => setForm((f) => ({ ...f, countryCode: v }))}>
+                <Select
+                  value={form.countryCode}
+                  onValueChange={(v) => setForm((f) => ({ ...f, countryCode: v, timezone: defaultTimezoneForCountry(v) }))}
+                >
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {COUNTRIES.map((c) => <SelectItem key={c.code} value={c.code}>{c.name} ({c.code})</SelectItem>)}
@@ -263,11 +343,14 @@ export default function CommerceSettingsPage() {
             </div>
             <div className="space-y-1.5">
               <Label>Timezone</Label>
-              <Input
-                value={form.timezone}
-                onChange={(e) => setForm((f) => ({ ...f, timezone: e.target.value }))}
-                placeholder="Asia/Dubai"
-              />
+              <Select value={form.timezone} onValueChange={(v) => setForm((f) => ({ ...f, timezone: v }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {(TIMEZONES_BY_COUNTRY[form.countryCode] ?? [{ value: 'UTC', label: 'UTC' }]).map((tz) => (
+                    <SelectItem key={tz.value} value={tz.value}>{tz.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
@@ -276,16 +359,29 @@ export default function CommerceSettingsPage() {
                   type="email"
                   value={form.email}
                   onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                  onBlur={() => setTouched((t) => ({ ...t, email: true }))}
                   placeholder="store@example.com"
+                  aria-invalid={touched.email && !!errors.email}
+                  className={touched.email && errors.email ? 'border-destructive focus-visible:ring-destructive' : ''}
                 />
+                {touched.email && errors.email && (
+                  <p className="text-xs text-destructive">{errors.email}</p>
+                )}
               </div>
               <div className="space-y-1.5">
                 <Label>Contact Phone</Label>
                 <Input
                   value={form.phone}
-                  onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+                  onChange={(e) => setForm((f) => ({ ...f, phone: sanitizePhoneInput(e.target.value) }))}
+                  onBlur={() => setTouched((t) => ({ ...t, phone: true }))}
                   placeholder="+971 4 000 0000"
+                  maxLength={20}
+                  aria-invalid={touched.phone && !!errors.phone}
+                  className={touched.phone && errors.phone ? 'border-destructive focus-visible:ring-destructive' : ''}
                 />
+                {touched.phone && errors.phone && (
+                  <p className="text-xs text-destructive">{errors.phone}</p>
+                )}
               </div>
             </div>
           </div>
@@ -293,7 +389,7 @@ export default function CommerceSettingsPage() {
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
             <Button
               onClick={handleSubmit}
-              disabled={!form.name || createStore.isPending || updateStore.isPending}
+              disabled={!isFormValid || createStore.isPending || updateStore.isPending}
             >
               {editingStore ? 'Save Changes' : 'Create Store'}
             </Button>
