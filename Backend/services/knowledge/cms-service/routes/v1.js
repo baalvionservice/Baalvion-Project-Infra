@@ -13,6 +13,7 @@ const collectRoutes = require('./collectRoutes');
 const marketDataRoutes = require('./marketDataRoutes');
 const integrationController = require('../controller/integrationController');
 const marketDataController = require('../controller/marketDataController');
+const internalEntityMentionsController = require('../controller/internalEntityMentionsController');
 
 const router = Router();
 
@@ -47,6 +48,13 @@ router.get('/internal/market-data/overview', internalAuth, marketDataController.
 // so the public quote page gets full depth without cms-service being called
 // directly from the frontend (imperialpedia-service stays the single public API).
 router.get('/internal/market-data/quote/:symbol', internalAuth, marketDataController.getQuote);
+
+// INTERNAL — imperialpedia-service's entity-mention detector (see
+// service/entityMentionDetectionService.js there) writes the resolved,
+// already-capped entity-link list for a piece of content here on every
+// publish/unpublish, so the public delivery API can serve it without
+// re-scanning article text on every render.
+router.patch('/internal/content/:websiteSlug/:slug/entity-mentions', internalAuth, internalEntityMentionsController.replaceMentions);
 
 // Org-wide integration summary for the dashboard "Website Connections" widget.
 router.get('/cms/integrations/summary', authMiddleware, integrationController.summary);

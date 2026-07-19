@@ -1,5 +1,6 @@
 import { ArticleStatus } from "@/modules/content-engine/types";
 import { articleArtDataUri } from "@baalvion/illustrations";
+import type { EntityMention } from "@/lib/entityLinkInjector";
 
 export type NewsCategory =
   | "Markets"
@@ -70,6 +71,15 @@ export interface NewsArticle {
    * `/financial-intelligence/` bucket. Undefined when the CMS row has no category.
    */
   categorySlug?: string;
+  /**
+   * Persisted, save-time knowledge-graph entity mentions (companies,
+   * industries, technologies, countries) detected in this article's body —
+   * see src/lib/entityLinkInjector.tsx for how these become real internal
+   * links, and Backend/services/knowledge/imperialpedia-service/service/
+   * entityMentionDetectionService.js for how they're computed. Undefined for
+   * the bundled demo set and anything not sourced from the live CMS.
+   */
+  entityMentions?: EntityMention[];
 }
 
 // ── Body block types ──────────────────────────────────────────────────────────

@@ -19,6 +19,7 @@ import type { NewsArticle, NewsBodyBlock, NewsCategory } from '@/lib/data.news';
 import { articleArtDataUri } from '@baalvion/illustrations';
 import { safeImageUrl } from '@/lib/safe-image';
 import { getAuthorBySlug as getStaticAuthorBySlug } from '@/config/authors';
+import type { EntityMention } from '@/lib/entityLinkInjector';
 
 // In production default to the API gateway's public delivery host (not localhost,
 // and not an empty string that silently forced the built-in fallback). A deploy
@@ -111,6 +112,11 @@ export interface CmsContent {
   updatedAt?: string;
   category?: { id: string; name: string; slug: string } | null;
   customFields?: Record<string, unknown> | null;
+  // Persisted, save-time entity-mention detections — see publicService.js's
+  // `entityMentions` include (cms-service) and
+  // entityMentionDetectionService.js (imperialpedia-service). Absent/empty
+  // means no confidently-resolved mentions, never a fabricated placeholder.
+  entityMentions?: EntityMention[];
 }
 
 interface CmsListEnvelope {
@@ -545,6 +551,7 @@ export function cmsContentToNews(raw: CmsContent): NewsArticle {
     views: typeof raw.viewCount === 'number' ? raw.viewCount : undefined,
     customFields: raw.customFields ?? undefined,
     contentType: raw.contentType,
+    entityMentions: raw.entityMentions?.length ? raw.entityMentions : undefined,
   };
 }
 

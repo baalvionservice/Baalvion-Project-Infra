@@ -13,6 +13,7 @@
 const { initSdk } = require('../platform/sdk');
 const config = require('../config/appConfig');
 const glossarySyncService = require('../service/glossarySyncService');
+const entityMentionDetectionService = require('../service/entityMentionDetectionService');
 
 let _subscription = null;
 
@@ -22,9 +23,11 @@ async function handle(event) {
     switch (eventType) {
         case 'cms.content.published':
             await glossarySyncService.handlePublished(payload);
+            await entityMentionDetectionService.handlePublished(payload);
             break;
         case 'cms.content.unpublished':
             await glossarySyncService.handleUnpublished(payload);
+            await entityMentionDetectionService.handleUnpublished(payload);
             break;
         default:
         // no handler for other event types — ignore

@@ -30,6 +30,7 @@ db.CmsApprovalLog     = require('./cmsApprovalLog')(sequelize, DataTypes);
 db.CmsWebsiteMember   = require('./cmsWebsiteMember')(sequelize, DataTypes);
 db.CmsWebsiteIntegration = require('./cmsWebsiteIntegration')(sequelize, DataTypes);
 db.CmsMediaReference  = require('./cmsMediaReference')(sequelize, DataTypes);
+db.CmsContentEntityMention = require('./cmsContentEntityMention')(sequelize, DataTypes);
 db.CmsSeoRedirect     = require('./cmsSeoRedirect')(sequelize, DataTypes);
 db.CmsAuthor          = require('./cmsAuthor')(sequelize, DataTypes);
 db.MarketAsset        = require('./marketAsset')(sequelize, DataTypes);
@@ -71,6 +72,7 @@ db.CmsContent.belongsTo(db.CmsCategory,       { foreignKey: 'categoryId', as: 'c
 db.CmsContent.hasMany(db.CmsContentRevision,  { foreignKey: 'contentId', as: 'revisions' });
 db.CmsContent.hasOne(db.CmsWorkflow,          { foreignKey: 'contentId', as: 'workflow' });
 db.CmsContent.hasMany(db.CmsMediaReference,   { foreignKey: 'contentId', as: 'mediaRefs' });
+db.CmsContent.hasMany(db.CmsContentEntityMention, { foreignKey: 'contentId', as: 'entityMentions' });
 
 // Workflow → ApprovalLogs
 db.CmsWorkflow.belongsTo(db.CmsContent,   { foreignKey: 'contentId', as: 'content' });

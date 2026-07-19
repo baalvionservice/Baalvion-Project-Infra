@@ -23,6 +23,14 @@ export interface EntityValue {
   industry?: string;
   image?: string;
   tags: string[];
+  /**
+   * Alternate names/spellings/tickers/abbreviations that should resolve to
+   * this entity in article entity-mention detection (e.g. "NVIDIA Corp",
+   * "NVIDIA Corporation", "NVDA" -> the canonical "NVIDIA" entity) — see
+   * Backend/services/knowledge/imperialpedia-service/service/
+   * entityMentionDetectionService.js. Editorial data, never inferred.
+   */
+  aliases?: string[];
   competitors?: string[];
   technologies?: string[];
   /**
@@ -39,7 +47,7 @@ export interface EntityValue {
 
 const EMPTY: EntityValue = {
   type: '', name: '', slug: '', description: '', category: '',
-  country: '', industry: '', image: '', tags: [], competitors: [], technologies: [],
+  country: '', industry: '', image: '', tags: [], aliases: [], competitors: [], technologies: [],
   extraAttributes: {},
 };
 
@@ -50,6 +58,7 @@ export function EntityForm({ initial, isEdit = false }: Props) {
   const queryClient = useQueryClient();
   const [value, setValue] = useState<EntityValue>(initial ?? EMPTY);
   const [tagsText, setTagsText] = useState((initial?.tags ?? []).join(', '));
+  const [aliasesText, setAliasesText] = useState((initial?.aliases ?? []).join(', '));
   const [error, setError] = useState<string | null>(null);
 
   // The API upserts by (type, slug), so those fields define identity and are
@@ -69,6 +78,7 @@ export function EntityForm({ initial, isEdit = false }: Props) {
         industry: value.industry?.trim() || null,
         image: value.image?.trim() || null,
         tags: tagsText.split(',').map((s) => s.trim()).filter(Boolean),
+        aliases: aliasesText.split(',').map((s) => s.trim()).filter(Boolean),
         competitors: value.competitors ?? [],
         technologies: value.technologies ?? [],
         // Carry through everything else the entity already had (founded_year, ticker,
@@ -161,6 +171,12 @@ export function EntityForm({ initial, isEdit = false }: Props) {
           <div className="md:col-span-2 space-y-1.5">
             <Label htmlFor="tags">Tags <span className="text-muted-foreground">(comma-separated)</span></Label>
             <Input id="tags" value={tagsText} onChange={(e) => setTagsText(e.target.value)} placeholder="public, fortune-500" />
+          </div>
+          <div className="md:col-span-2 space-y-1.5">
+            <Label htmlFor="aliases">
+              Aliases <span className="text-muted-foreground">(comma-separated — alternate names/tickers that should link here in articles)</span>
+            </Label>
+            <Input id="aliases" value={aliasesText} onChange={(e) => setAliasesText(e.target.value)} placeholder="NVIDIA Corp, NVIDIA Corporation, NVDA" />
           </div>
         </CardContent>
       </Card>

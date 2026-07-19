@@ -2,11 +2,13 @@ import React from "react";
 import Link from "next/link";
 import companiesData from "@/data/companies/companies.json";
 import { getAssetQuote } from "@/lib/data/loaders";
+import type { EntityMention } from "@/lib/entityLinkInjector";
 
 const CNBC_RED = "#CC0000"; // matches this site's existing news-template accent, not the /markets section's own palette
 const GREEN = "#0a7d3d";
+const MAX_QUOTE_CHIPS = 3;
 
-interface TrackedCompany {
+export interface TrackedCompany {
   name: string;
   slug: string;
   ticker: string | null;
@@ -14,30 +16,26 @@ interface TrackedCompany {
 
 const TRACKED_COMPANIES = (companiesData as TrackedCompany[]).filter((c) => c.ticker);
 
-/** Whole-word, case-insensitive match so e.g. "META" doesn't match inside "metadata". */
-function mentionsCompany(text: string, name: string): boolean {
-  const pattern = new RegExp(`\\b${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i");
-  return pattern.test(text);
+/**
+ * Cross-references the article's already-detected, persisted entity mentions
+ * (see src/lib/entityLinkInjector.tsx) against the tracked-company/ticker
+ * list, so the sidebar quote widget uses the one real detector (imperialpedia-
+ * service's entityMentionDetectionService, full body, aliases-aware) instead
+ * of re-scanning title/tags/excerpt itself — this used to be a second,
+ * divergent detector.
+ */
+function trackedCompaniesFromMentions(mentions: EntityMention[] | undefined, max = MAX_QUOTE_CHIPS): TrackedCompany[] {
+  if (!mentions?.length) return [];
+  const companySlugs = new Set(mentions.filter((m) => m.entityType === "company").map((m) => m.entitySlug));
+  return TRACKED_COMPANIES.filter((c) => companySlugs.has(c.slug)).slice(0, max);
 }
 
-function findMentionedCompanies(searchText: string, max = 3): TrackedCompany[] {
-  const matches: TrackedCompany[] = [];
-  for (const company of TRACKED_COMPANIES) {
-    if (mentionsCompany(searchText, company.name)) {
-      matches.push(company);
-      if (matches.length >= max) break;
-    }
-  }
-  return matches;
-}
-
-/** Server Component — scans the article's own title/tags/excerpt for tracked
- * company names and shows a live quote chip for each match. No new content
- * model needed: this is a text scan against the same companies.json already
- * used by /companies, not a dedicated ticker-tagging field on articles. */
-export async function ArticleMarketWidget({ title, tags, excerpt }: { title: string; tags?: string[]; excerpt?: string }) {
-  const searchText = [title, ...(tags ?? []), excerpt ?? ""].join(" ");
-  const mentioned = findMentionedCompanies(searchText);
+/** Server Component — shows a live quote chip for each tracked company the
+ * article's persisted entity mentions include. No text scan here anymore:
+ * detection already happened once at publish time (see
+ * entityMentionDetectionService.js), this just renders the result. */
+export async function ArticleMarketWidget({ entityMentions }: { entityMentions?: EntityMention[] }) {
+  const mentioned = trackedCompaniesFromMentions(entityMentions);
   if (mentioned.length === 0) return null;
 
   const quotes = await Promise.all(mentioned.map((c) => getAssetQuote(c.ticker!)));
@@ -50,9 +48,9 @@ export async function ArticleMarketWidget({ title, tags, excerpt }: { title: str
 
   return (
     <div>
-      <h3 className="text-xs font-black tracking-widest text-gray-900 uppercase border-b-2 pb-2 mb-4" style={{ borderColor: CNBC_RED }}>
+      <h2 className="text-xs font-black tracking-widest text-gray-900 uppercase border-b-2 pb-2 mb-4" style={{ borderColor: CNBC_RED }}>
         Related Markets
-      </h3>
+      </h2>
       <ul className="space-y-3">
         {rows.map(({ company, quote }) => {
           const price = quote!.current_price!;

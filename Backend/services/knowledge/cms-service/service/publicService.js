@@ -1,7 +1,7 @@
 'use strict';
 const { Op } = require('sequelize');
 const { hmacSign, safeCompare } = require('@baalvion/crypto');
-const { CmsWebsite, CmsContent, CmsCategory, CmsTag, CmsAuthor } = require('../models');
+const { CmsWebsite, CmsContent, CmsCategory, CmsTag, CmsAuthor, CmsContentEntityMention } = require('../models');
 const { AppError } = require('../utils/errors');
 const cache = require('./cacheService');
 const config = require('../config/appConfig');
@@ -27,7 +27,17 @@ async function getPublicContent(websiteSlug, slug) {
     const website = await _resolveWebsite(websiteSlug);
     const content = await CmsContent.findOne({
         where: { websiteId: website.id, slug, status: 'published', visibility: 'public' },
-        include: [{ model: CmsCategory, as: 'category', attributes: ['id', 'name', 'slug'] }],
+        include: [
+            { model: CmsCategory, as: 'category', attributes: ['id', 'name', 'slug'] },
+            // Pre-resolved entity-link data (see contentEntityMentionsService.js) —
+            // rides this same cached fetch rather than a second render-time call.
+            // 'rejected'/'suggested' rows (future editor-review states) stay invisible
+            // to the public API by construction.
+            {
+                model: CmsContentEntityMention, as: 'entityMentions', where: { status: 'accepted' }, required: false,
+                attributes: ['entityType', 'entitySlug', 'entityName', 'entityUrl', 'matchedText'],
+            },
+        ],
     });
     if (!content) throw new AppError('NOT_FOUND', 'Content not found', 404);
 
