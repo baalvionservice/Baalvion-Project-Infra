@@ -17,6 +17,8 @@ import type {
   AppointmentPayload,
   SupportTicket,
   SupportTicketPayload,
+  Inquiry,
+  InquiryPayload,
 } from '@/lib/types/crm.types';
 
 const client = serviceClients.crm;
@@ -47,4 +49,12 @@ export const crmApi = {
   affiliates: crmResource<Affiliate, AffiliatePayload>('affiliates'),
   appointments: crmResource<Appointment, AppointmentPayload>('appointments'),
   supportTickets: crmResource<SupportTicket, SupportTicketPayload>('support-tickets'),
+  inquiries: {
+    ...crmResource<Inquiry, InquiryPayload>('inquiries'),
+    // Dedicated append endpoint (POST /crm/inquiries/:id/messages) — the server appends
+    // and returns the full updated inquiry; there is deliberately no generic "set messages"
+    // path so a stale client array can never clobber someone else's reply.
+    addMessage: (id: string, sender: 'client' | 'curator', text: string) =>
+      client.post<ApiResponse<Inquiry>>(`/crm/inquiries/${id}/messages`, { sender, text }),
+  },
 };

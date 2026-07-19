@@ -225,3 +225,49 @@ export interface SupportTicketPayload {
   lastMessage?: string | null;
   messages?: SupportTicketMessage[];
 }
+
+// ─── Private Sales Inquiries ────────────────────────────────────────────────
+// crm-service's Inquiry entity (see Backend/services/ecosystem/crm-service/models/inquiry.js).
+// Sales-funnel lifecycle, distinct from SupportTicket's support queue. Messages use a
+// dedicated append endpoint (POST /crm/inquiries/:id/messages) rather than the generic
+// PATCH, so the thread is never silently overwritten by a stale client-side array.
+export type InquiryStatus = 'new' | 'contacted' | 'qualifying' | 'presenting' | 'closing' | 'won' | 'lost';
+
+export interface InquiryMessage {
+  id: string;
+  sender: 'client' | 'curator';
+  text: string;
+  timestamp: string;
+}
+
+export interface Inquiry {
+  id: string;
+  customerId?: string | null;
+  customerName: string;
+  email?: string | null;
+  country?: string | null;
+  budgetRange?: string | null;
+  intent?: string | null;
+  contactMethod?: string | null;
+  productId?: string | null;
+  serviceId?: string | null;
+  leadTier?: number;
+  status: InquiryStatus;
+  message?: string | null;
+  messages?: InquiryMessage[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface InquiryPayload {
+  customerName: string;
+  email?: string | null;
+  country?: string | null;
+  budgetRange?: string | null;
+  intent?: string | null;
+  contactMethod?: string | null;
+  productId?: string | null;
+  serviceId?: string | null;
+  status?: InquiryStatus;
+  message?: string | null;
+}

@@ -20,6 +20,8 @@ import type {
   AppointmentPayload,
   SupportTicket,
   SupportTicketPayload,
+  Inquiry,
+  InquiryPayload,
 } from '@/lib/types/crm.types';
 
 // The CRUD surface every CRM resource exposes (see crmApi in lib/api/crm.ts).
@@ -133,3 +135,29 @@ export const useSupportTickets = supportTickets.useList;
 export const useCreateSupportTicket = supportTickets.useCreate;
 export const useUpdateSupportTicket = supportTickets.useUpdate;
 export const useDeleteSupportTicket = supportTickets.useDelete;
+
+// ─── Private Sales Inquiries ────────────────────────────────────────────────
+const inquiries = makeCrmHooks<Inquiry, InquiryPayload>('inquiries', 'Inquiry', crmApi.inquiries);
+export const useInquiries = inquiries.useList;
+export const useUpdateInquiry = inquiries.useUpdate;
+
+export const useInquiry = (id: string) =>
+  useQuery({
+    queryKey: crmKeys.all('inquiries').concat(id),
+    queryFn: () => crmApi.inquiries.get(id).then((r) => r.data.data),
+    enabled: !!id,
+    // The customer's browser polls its own copy of this same row while a dialogue is
+    // active; keep the curator's view reasonably fresh without a websocket.
+    refetchInterval: 15_000,
+  });
+
+export const useAddInquiryMessage = (id: string) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (text: string) => crmApi.inquiries.addMessage(id, 'curator', text),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: crmKeys.all('inquiries') });
+    },
+    onError: (e: { message: string }) => toast.error(e.message),
+  });
+};

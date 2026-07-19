@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { Crown, Layers, Megaphone, Store, Share2, CalendarClock, LifeBuoy, Heart } from 'lucide-react';
+import { Crown, Layers, Megaphone, Store, Share2, CalendarClock, LifeBuoy, MessageCircle, Heart } from 'lucide-react';
 import Link from 'next/link';
 import PageHeader from '@/components/common/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,6 +15,7 @@ import {
   useAffiliates,
   useAppointments,
   useSupportTickets,
+  useInquiries,
 } from '@/lib/queries/crm.queries';
 
 const ENTITIES = [
@@ -25,6 +26,7 @@ const ENTITIES = [
   { key: 'affiliates',   label: 'Affiliates',   href: '/crm/affiliates',   icon: Share2,        desc: 'Referrals & commissions' },
   { key: 'appointments', label: 'Appointments', href: '/crm/appointments', icon: CalendarClock, desc: 'Boutique & concierge bookings' },
   { key: 'support-tickets', label: 'Support Tickets', href: '/crm/support-tickets', icon: LifeBuoy, desc: 'Customer service & resolution' },
+  { key: 'inquiries', label: 'Inquiries', href: '/crm/inquiries', icon: MessageCircle, desc: 'Private sales dialogues & acquisition briefs' },
 ] as const;
 
 export default function CrmOverviewPage() {
@@ -37,6 +39,7 @@ export default function CrmOverviewPage() {
   const affiliates = useAffiliates({ limit: 1 });
   const appointments = useAppointments({ limit: 1 });
   const supportTickets = useSupportTickets({ limit: 1 });
+  const inquiries = useInquiries({ limit: 1 });
 
   useEffect(() => {
     setBreadcrumbs([{ label: 'CRM & Marketing' }]);
@@ -50,6 +53,7 @@ export default function CrmOverviewPage() {
     affiliates: { total: affiliates.data?.total, isLoading: affiliates.isLoading },
     appointments: { total: appointments.data?.total, isLoading: appointments.isLoading },
     'support-tickets': { total: supportTickets.data?.total, isLoading: supportTickets.isLoading },
+    inquiries: { total: inquiries.data?.total, isLoading: inquiries.isLoading },
   };
 
   return (

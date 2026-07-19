@@ -86,6 +86,12 @@ export interface Product {
   seoMetadata: Record<string, unknown>;
   seoTitle?: string;
   seoDescription?: string;
+  // Raw JSONB bag (colors/sizes/isVip/regions/collectorValue/... — see
+  // commerce-service's storefrontSerializer.js for the full set of keys the storefront
+  // reads out of this). The update endpoint REPLACES this column wholesale on PATCH, so
+  // any editor that touches one key MUST spread the existing object first, never send a
+  // partial replacement.
+  customFields?: Record<string, unknown>;
   variants?: ProductVariant[];
   category?: Pick<CommerceCategory, 'id' | 'name' | 'slug'>;
   createdAt: string;
@@ -157,6 +163,7 @@ export interface CreateProductPayload {
   isFeatured?: boolean;
   isDigital?: boolean;
   requiresShipping?: boolean;
+  customFields?: Record<string, unknown>;
 }
 
 export interface CreateDiscountPayload {

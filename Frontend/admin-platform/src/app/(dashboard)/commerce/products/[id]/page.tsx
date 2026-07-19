@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -57,6 +58,15 @@ export default function ProductEditorPage() {
     status: 'draft',
   });
 
+  // Curator/collector-value assessment — real, admin-authored fields (commerce-service
+  // custom_fields, surfaced to the storefront via storefrontSerializer.js). Left blank by
+  // default; nothing is shown to customers until a curator actually sets these.
+  const [collectorValue, setCollectorValue] = useState('');
+  const [marketRange, setMarketRange] = useState('');
+  const [investmentInsight, setInvestmentInsight] = useState('');
+  const [scarcityTag, setScarcityTag] = useState('');
+  const [priceVisible, setPriceVisible] = useState(true);
+
   const [newVariantName, setNewVariantName] = useState('');
 
   useEffect(() => {
@@ -72,6 +82,12 @@ export default function ProductEditorPage() {
         tags: (product.tags ?? []).join(', '),
         status: product.status ?? 'draft',
       });
+      const cf = product.customFields ?? {};
+      setCollectorValue(typeof cf.collectorValue === 'string' ? cf.collectorValue : '');
+      setMarketRange(typeof cf.marketRange === 'string' ? cf.marketRange : '');
+      setInvestmentInsight(typeof cf.investmentInsight === 'string' ? cf.investmentInsight : '');
+      setScarcityTag(typeof cf.scarcityTag === 'string' ? cf.scarcityTag : '');
+      setPriceVisible(cf.priceVisible !== false);
     }
   }, [product]);
 
@@ -84,6 +100,18 @@ export default function ProductEditorPage() {
   }, [setBreadcrumbs, isNew, product?.name]);
 
   const handleSave = () => {
+    // customFields is a single JSONB column — the backend REPLACES it wholesale on PATCH,
+    // so this spreads the product's EXISTING customFields first (colors/sizes/isVip/
+    // regions/... set elsewhere) and only overrides the 5 curator fields below. Sending
+    // just { collectorValue, ... } would silently wipe every other custom field.
+    const customFields = {
+      ...(product?.customFields ?? {}),
+      collectorValue: collectorValue.trim() || undefined,
+      marketRange: marketRange.trim() || undefined,
+      investmentInsight: investmentInsight.trim() || undefined,
+      scarcityTag: scarcityTag.trim() || undefined,
+      priceVisible,
+    };
     const payload = {
       name: form.name,
       description: form.description || undefined,
@@ -93,6 +121,7 @@ export default function ProductEditorPage() {
       categoryId: form.categoryId || undefined,
       brand: form.brand || undefined,
       tags: form.tags ? form.tags.split(',').map((t) => t.trim()).filter(Boolean) : [],
+      customFields,
     };
     updateProduct.mutate(payload, {
       onSuccess: () => {
@@ -288,6 +317,63 @@ export default function ProductEditorPage() {
                       onChange={(e) => setForm((f) => ({ ...f, tags: e.target.value }))}
                       placeholder="luxury, featured, sale (comma separated)"
                     />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm">Collector Value</CardTitle>
+                  <p className="text-xs text-muted-foreground">
+                    Curator assessment shown on the storefront. Leave blank unless a curator
+                    has actually evaluated this piece — nothing here is fabricated by default.
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="collectorValue">Collector Value</Label>
+                    <Input
+                      id="collectorValue"
+                      value={collectorValue}
+                      onChange={(e) => setCollectorValue(e.target.value)}
+                      placeholder="e.g. Exceptional, Museum Grade"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="marketRange">Market Range</Label>
+                    <Input
+                      id="marketRange"
+                      value={marketRange}
+                      onChange={(e) => setMarketRange(e.target.value)}
+                      placeholder="e.g. $12,000 - $15,000"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="scarcityTag">Scarcity Tag</Label>
+                    <Input
+                      id="scarcityTag"
+                      value={scarcityTag}
+                      onChange={(e) => setScarcityTag(e.target.value)}
+                      placeholder="e.g. Only 1 available globally"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="investmentInsight">Investment Insight</Label>
+                    <textarea
+                      id="investmentInsight"
+                      rows={3}
+                      value={investmentInsight}
+                      onChange={(e) => setInvestmentInsight(e.target.value)}
+                      placeholder="A real, verifiable note — never a fabricated statistic."
+                      className="w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between pt-1">
+                    <div>
+                      <Label htmlFor="priceVisible">Price Visible</Label>
+                      <p className="text-xs text-muted-foreground">Off shows "Inquire for Private Quote" instead of the price.</p>
+                    </div>
+                    <Switch id="priceVisible" checked={priceVisible} onCheckedChange={setPriceVisible} />
                   </div>
                 </CardContent>
               </Card>

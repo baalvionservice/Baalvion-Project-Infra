@@ -198,6 +198,7 @@ export const NAVIGATION: NavGroup[] = [
           { title: 'Affiliates',   href: '/crm/affiliates',   iconName: 'Share2'          },
           { title: 'Appointments', href: '/crm/appointments', iconName: 'CalendarClock'   },
           { title: 'Support Tickets', href: '/crm/support-tickets', iconName: 'LifeBuoy'   },
+          { title: 'Inquiries',    href: '/crm/inquiries',    iconName: 'MessageCircle'   },
         ],
       },
     ],
