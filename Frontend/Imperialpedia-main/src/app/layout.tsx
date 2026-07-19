@@ -8,6 +8,7 @@ import RootLayoutClient from "@/components/common/RootLayoutClient";
 import { Analytics } from "@/components/common/Analytics";
 import UnifiedAnalytics from "@/components/common/UnifiedAnalytics";
 import { getSiteAdsenseClient } from "@/services/data/cms-public";
+import { structuredData } from "@/lib/seo/structuredData";
 
 const CMS_SLUG = process.env.NEXT_PUBLIC_CMS_SITE_SLUG || "imperialpedia";
 
@@ -130,21 +131,7 @@ export default async function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'Organization',
-              name: 'Imperialpedia',
-              url: env.siteUrl,
-              logo: `${env.siteUrl}/logo.png`,
-              description:
-                'The definitive financial intelligence platform offering expert analysis, live market data, and AI-driven insights.',
-              contactPoint: {
-                '@type': 'ContactPoint',
-                email: env.supportEmail,
-                contactType: 'customer support',
-              },
-              sameAs: ['https://twitter.com/imperialpedia'],
-            }),
+            __html: JSON.stringify(structuredData.organization()),
           }}
         />
         <a

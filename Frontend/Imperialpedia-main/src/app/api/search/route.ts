@@ -3,8 +3,9 @@ import { searchEntities } from '@/lib/utils/search';
 
 /**
  * Global Search API Route.
- * Orchestrates the discovery of knowledge nodes.
- * Optimized with Cache-Control for repetitive discovery handshakes.
+ * Orchestrates the discovery of knowledge nodes — companies, countries, industries,
+ * technologies, and live market assets, ranked by relevance (see `searchEntities`).
+ * Backs the Ctrl+K command palette (`SearchModal`).
  */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -15,7 +16,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const results = searchEntities(q);
+    const results = await searchEntities(q);
     return NextResponse.json(results, {
       headers: {
         'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300'
