@@ -26,6 +26,7 @@ export interface MarketAssetRow {
   change_pct_24h: number | string | null;
   market_cap: number | string | null;
   volume_24h: number | string | null;
+  ai_summary: string | null;
   sentiment: "bullish" | "bearish" | "neutral";
   last_updated_at: string | null;
 }
@@ -59,7 +60,11 @@ export const MARKET_GROUPS = {
   stocks: ["AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "NVDA", "AMD", "META", "NFLX", "JPM", "BRKB", "INTC", "TSM"],
 } as const;
 
-const ALL_TRACKED_SYMBOLS: string[] = Object.values(MARKET_GROUPS).flat();
+// Exported (not just module-local) so the sitemap generator and
+// `generateStaticParams` on the quote page can submit/pre-render exactly the
+// symbols this site actually supports a quote page for — one source of truth
+// instead of a second hardcoded symbol list that could drift out of sync.
+export const ALL_TRACKED_SYMBOLS: string[] = Object.values(MARKET_GROUPS).flat();
 
 // Reverse of worldFeed.ts's Yahoo→canonical map (canonical→Yahoo), so this
 // file doesn't hand-duplicate ~30 symbol pairs a second time — one source of
@@ -124,6 +129,7 @@ async function fetchYahooAsMarketAssetRow(canonicalSymbol: string): Promise<Mark
       change_pct_24h: changePct,
       market_cap: null,
       volume_24h: q.volume ?? null,
+      ai_summary: null,
       sentiment: change >= 0 ? "bullish" : "bearish",
       last_updated_at: new Date().toISOString(),
     };
