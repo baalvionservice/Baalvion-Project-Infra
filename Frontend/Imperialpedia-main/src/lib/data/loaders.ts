@@ -38,6 +38,7 @@ async function fetchList<T>(type: string, fallback: unknown[]): Promise<T[]> {
   try {
     const res = await fetch(`${IMP_API}/entities?type=${type}&limit=500`, {
       cache: 'no-store',
+      signal: AbortSignal.timeout(6000),
     });
     if (!res.ok) throw new Error(String(res.status));
     const json = await res.json();
@@ -53,6 +54,7 @@ async function fetchOne<T>(type: string, slug: string, fallback: unknown[]): Pro
   try {
     const res = await fetch(`${IMP_API}/entities/${type}/${encodeURIComponent(slug)}`, {
       cache: 'no-store',
+      signal: AbortSignal.timeout(6000),
     });
     if (res.ok) return ((await res.json())?.data ?? undefined) as T | undefined;
     if (res.status !== 404) throw new Error(String(res.status));

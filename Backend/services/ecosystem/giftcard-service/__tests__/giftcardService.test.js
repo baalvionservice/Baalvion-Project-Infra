@@ -23,6 +23,8 @@ jest.mock('../models', () => {
                 if (where.slug === 'amazon-us') return mockBrandRange;
                 return null;
             }),
+            findAll: jest.fn(async () => [mockBrandFixed, mockBrandRange]),
+            count: jest.fn(async () => 2),
         },
         GiftCardOrder: {
             create: jest.fn(async (fields) => {
@@ -31,6 +33,16 @@ jest.mock('../models', () => {
                 return row;
             }),
             findByPk: jest.fn(async (id) => orders.get(id) || null),
+            findAndCountAll: jest.fn(async () => ({
+                count: 1,
+                rows: [{
+                    id: 'order-1', user_id: 'u1', brand: mockBrandFixed, supplier: 'reloadly',
+                    denomination_value: 25, currency_code: 'USD', price_usd_cents: 2500,
+                    status: 'fulfilled', fulfillment_error: null, created_at: new Date(), fulfilled_at: new Date(),
+                }],
+            })),
+            count: jest.fn(async () => 3),
+            sum: jest.fn(async () => 7500),
         },
         GiftCardBillingWebhookEvent: {
             findOrCreate: jest.fn(async ({ where, defaults }) => {
@@ -109,5 +121,28 @@ describe('giftcardService.fulfill — idempotency', () => {
             amountMinor: 2500, currency: 'USD', providerRef: 'crypto_abc',
         });
         expect(second.duplicate).toBe(true);
+    });
+});
+
+describe('giftcardService admin merchant views', () => {
+    test('listOrdersAdmin returns paginated real orders with brand info', async () => {
+        const result = await giftcardService.listOrdersAdmin({ limit: 10, offset: 0 });
+        expect(result.total).toBe(1);
+        expect(result.orders[0]).toMatchObject({ id: 'order-1', userId: 'u1', status: 'fulfilled', supplier: 'reloadly' });
+    });
+
+    test('getMerchantStats aggregates real counts and revenue', async () => {
+        const stats = await giftcardService.getMerchantStats();
+        expect(stats).toEqual({
+            totalOrders: 3, fulfilledOrders: 3, pendingOrders: 3, failedOrders: 3,
+            revenueUsdCents: 7500, totalBrands: 2, activeBrands: 2,
+        });
+    });
+
+    test('listCatalogAdmin includes inactive brands and sync metadata', async () => {
+        const brands = await giftcardService.listCatalogAdmin();
+        expect(brands).toHaveLength(2);
+        expect(brands[0]).toHaveProperty('isActive');
+        expect(brands[0]).toHaveProperty('lastSyncedAt');
     });
 });

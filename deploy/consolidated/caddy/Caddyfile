@@ -106,6 +106,15 @@ api.baalvion.com {
 		reverse_proxy app-community:3064
 	}
 
+	# Market Underworld giftcard-service — same shape as community-service above. Public catalog
+	# reads are unauthenticated by design (giftcard-service's catalogRoutes.js mounts them without
+	# authMiddleware); checkout/orders/admin routes underneath do their own RS256 verification, so
+	# this whole prefix gets one direct carve-out rather than a public/authed split.
+	@giftcard_api path /api/v1/giftcards /api/v1/giftcards/*
+	handle @giftcard_api {
+		reverse_proxy app-giftcard:3065
+	}
+
 	# Public OAuth2/OIDC provider surface (oauth-service, UNAUTHENTICATED by design) -- exposes
 	# the actual authorization-code flow endpoints (/oauth/authorize, /oauth/token, /oauth/userinfo)
 	# for relying parties like the NodeBB community forum (nodebb-plugin-sso-oauth2-multiple).

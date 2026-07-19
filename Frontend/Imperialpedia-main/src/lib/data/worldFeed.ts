@@ -249,6 +249,7 @@ export async function fetchYahooQuote(symbol: string): Promise<Quote> {
   const res = await fetch(url, {
     headers: { "User-Agent": "Mozilla/5.0 (compatible; ImperialpediaBot/1.0)" },
     next: { revalidate: 30 },
+    signal: AbortSignal.timeout(6000),
   });
   if (!res.ok) throw new Error(`yahoo ${res.status} ${symbol}`);
   const json = (await res.json()) as {
@@ -393,6 +394,7 @@ export async function googleNews(query: string, max: number): Promise<RawArticle
   const res = await fetch(url, {
     headers: { "User-Agent": "Mozilla/5.0 (compatible; ImperialpediaBot/1.0)" },
     next: { revalidate: 300 },
+    signal: AbortSignal.timeout(6000),
   });
   if (!res.ok) throw new Error(`googlenews ${res.status}`);
   const xml = await res.text();
@@ -615,6 +617,7 @@ async function buildWireNews(region: RegionId): Promise<NewsBundle | null> {
   const res = await fetch(`${NEWS_SERVICE_URL}/internal/v1/news?${q.toString()}`, {
     headers: { "X-Internal-Key": NEWS_SERVICE_INTERNAL_KEY },
     next: { revalidate: 120 },
+    signal: AbortSignal.timeout(6000),
   });
   if (!res.ok) throw new Error(`news-service ${res.status}`);
   const env = (await res.json()) as { data?: WireArticle[] };
@@ -657,6 +660,7 @@ async function cmsList(params: {
     // Editorial content changes on publish — read it LIVE per-request so the
     // World page reflects the CMS immediately (the page is rendered dynamically).
     cache: "no-store",
+    signal: AbortSignal.timeout(6000),
   });
   if (!res.ok) throw new Error(`cms ${res.status}`);
   const env = (await res.json()) as { data?: CmsContent[] };
