@@ -2,5 +2,9 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "ignoreCommand": "npx turbo-ignore imperialpedia-web",
   "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
-  "buildCommand": "cd ../.. && pnpm exec turbo run build --filter=imperialpedia-web"
+  "buildCommand": "cd ../.. && pnpm exec turbo run build --filter=imperialpedia-web",
+  "env": {
+    "NEXT_PUBLIC_GA_ID": "G-5WVH95P61Z",
+    "NEXT_PUBLIC_GTM_ID": "GTM-MFDQSXT5"
+  }
 }

@@ -1,4 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "ignoreCommand": "npx turbo-ignore law-elite-network-web"
+  "ignoreCommand": "npx turbo-ignore law-elite-network-web",
+  "env": {
+    "NEXT_PUBLIC_GA_ID": "G-YKQ97ZPWWH"
+  }
 }
