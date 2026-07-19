@@ -503,10 +503,31 @@ const REPORT_GLOBAL_ARTIFACT = {
   },
 };
 
+// Market showrooms (slug `market-offices`) — real per-market physical presence, used by
+// Contact/Appointments/LocalBusiness schema/llms.txt. Seeded from the values that were
+// previously hardcoded in src/lib/mock-data.ts COUNTRIES[code].office; admin-editable
+// thereafter without a code change.
+const MARKET_OFFICES = {
+  title: 'Market Showrooms',
+  slug: 'market-offices',
+  contentType: 'page',
+  excerpt: 'Physical showroom address/phone/email per market.',
+  contentBlocks: [para(0, 'The showroom address, phone, email and map link for each of the 5 markets are managed here.')],
+  seoMetadata: { title: 'Showrooms | Amarisé Maison Avenue', description: 'Amarisé Maison Avenue showroom locations.' },
+  customFields: {
+    us: { city: 'New York', address: '730 Fifth Avenue, New York, NY 10019', phone: '+1 (212) 555-0192', email: 'concierge.us@amarise-luxe.com', mapUrl: 'https://maps.google.com/?q=730+Fifth+Avenue+New+York', image: '' },
+    uk: { city: 'London', address: '17-18 Old Bond Street, London W1S 4PT', phone: '+44 20 7555 0192', email: 'concierge.uk@amarise-luxe.com', mapUrl: 'https://maps.google.com/?q=Old+Bond+Street+London', image: '' },
+    ae: { city: 'Dubai', address: 'The Dubai Mall, Fashion Avenue, Downtown Dubai', phone: '+971 4 555 0192', email: 'concierge.ae@amarise-luxe.com', mapUrl: 'https://maps.google.com/?q=Dubai+Mall+Fashion+Avenue', image: '' },
+    in: { city: 'Mumbai', address: 'Jio World Centre, BKC, Mumbai, Maharashtra 400051', phone: '+91 22 5555 0192', email: 'concierge.in@amarise-luxe.com', mapUrl: 'https://maps.google.com/?q=Jio+World+Centre+Mumbai', image: '' },
+    sg: { city: 'Singapore', address: '2 Bayfront Ave, Marina Bay Sands, Singapore 018972', phone: '+65 6555 0192', email: 'concierge.sg@amarise-luxe.com', mapUrl: 'https://maps.google.com/?q=Marina+Bay+Sands+Singapore', image: '' },
+  },
+};
+
 const DOCS = [
   HOMEPAGE, PRESS, MAISON_STORY, CUSTOMER_SERVICE, MEMBERSHIP, FOOTER,
   APPOINTMENTS_PAGE, AUTHENTICITY_PAGE, CONTACT_PAGE, PROVENANCE_SHOWCASE,
   SERVICE_CONCIERGE, SERVICE_ADVISORY, SERVICE_AUTHENTICATION, REPORT_GLOBAL_ARTIFACT,
+  MARKET_OFFICES,
 ];
 
 async function main() {

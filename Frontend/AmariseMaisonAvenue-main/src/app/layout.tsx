@@ -120,6 +120,23 @@ export default async function RootLayout({
               foundingDate: "1924",
               description:
                 "Ultra-luxury maison curating the world's most exquisite treasures in haute couture, high-end watches, and fine jewelry since 1924.",
+              // What the business does and where — the two facts a search/AI engine needs
+              // to correctly place this entity (luxury RESALE, not a first-hand fashion house).
+              knowsAbout: [
+                "Authenticated pre-owned Hermès handbags",
+                "Authenticated pre-owned Chanel handbags",
+                "Fine jewelry",
+                "Luxury watches",
+                "Handbag and jewelry authentication",
+                "Luxury consignment and resale",
+              ],
+              areaServed: [
+                { "@type": "Country", name: "United States" },
+                { "@type": "Country", name: "United Kingdom" },
+                { "@type": "Country", name: "United Arab Emirates" },
+                { "@type": "Country", name: "India" },
+                { "@type": "Country", name: "Singapore" },
+              ],
               sameAs: [
                 "https://www.instagram.com/amarisemaisonavenue",
                 "https://www.facebook.com/amarisemaisonavenue",

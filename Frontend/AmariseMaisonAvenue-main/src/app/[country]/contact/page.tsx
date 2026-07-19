@@ -1,7 +1,7 @@
 import React from 'react';
 import { Metadata } from 'next';
 import { COUNTRIES, CONTACT_PAGE_FALLBACK } from '@/lib/mock-data';
-import { getContactPageContent } from '@/lib/cms';
+import { getContactPageContent, getMarketOffices } from '@/lib/cms';
 import { buildAlternates } from '@/lib/seo';
 import { normalizeCountry } from '@/lib/i18n/countries';
 import { ContactFormClient, GlobalAtelier } from './contact-form-client';
@@ -40,8 +40,15 @@ export async function generateMetadata({ params }: ContactPageProps): Promise<Me
 
 export default async function ContactPage({ params }: ContactPageProps) {
   const countryCode = ((await params).country as string) || 'us';
-  const currentCountry = COUNTRIES[countryCode] || COUNTRIES.us;
-  const content = (await getContactPageContent()) ?? CONTACT_PAGE_FALLBACK;
+  const [contactContent, cmsOffices] = await Promise.all([
+    getContactPageContent(),
+    getMarketOffices(),
+  ]);
+  const content = contactContent ?? CONTACT_PAGE_FALLBACK;
+  const currentCountry = {
+    ...(COUNTRIES[countryCode] || COUNTRIES.us),
+    office: cmsOffices?.[countryCode] ?? (COUNTRIES[countryCode] || COUNTRIES.us).office,
+  };
 
   return (
     <div className="animate-fade-in bg-ivory pb-32">
@@ -82,7 +89,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
           <h3 className="text-[10px] font-bold tracking-[0.4em] uppercase text-plum">Maison Global Network</h3>
           <h2 className="text-5xl font-headline font-bold italic text-gray-900">World-Class Presence</h2>
         </div>
-        <GlobalAtelier countryCode={countryCode} />
+        <GlobalAtelier countryCode={countryCode} cmsOffices={cmsOffices} />
       </section>
     </div>
   );

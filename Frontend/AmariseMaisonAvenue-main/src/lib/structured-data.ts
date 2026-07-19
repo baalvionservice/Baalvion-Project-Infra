@@ -6,7 +6,7 @@
  * Keeps the per-page structured data DRY and consistent with the Organization/WebSite
  * graph emitted by the root layout.
  */
-import type { Product } from "./types";
+import type { Product, Country } from "./types";
 import { SITE_URL } from "./seo";
 
 const ORG_REF = { "@id": `${SITE_URL}/#organization` } as const;
@@ -76,6 +76,66 @@ export function breadcrumbJsonLd(
       position: index + 1,
       name: item.name,
       item: item.url,
+    })),
+  };
+}
+
+// schema.org country name, ISO'ish — deliberately spelled out (matches Country.name
+// values like "USA"/"UK" only loosely; addressCountry wants a real country name/code).
+const ADDRESS_COUNTRY_NAME: Record<string, string> = {
+  us: "United States",
+  uk: "United Kingdom",
+  ae: "United Arab Emirates",
+  in: "India",
+  sg: "Singapore",
+};
+
+/**
+ * Store/LocalBusiness schema for a market's real physical showroom (COUNTRIES[code].office
+ * — no fabricated coordinates or hours, only the address/phone/email already on file).
+ * Tells search + AI engines Amarisé has a genuine local presence in this market, not just
+ * a currency-swapped page.
+ */
+export function localBusinessJsonLd(
+  countryCode: string,
+  country: Country
+): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Store",
+    "@id": `${SITE_URL}/${countryCode}#store`,
+    name: `Amarisé Maison Avenue — ${country.office.city}`,
+    parentOrganization: ORG_REF,
+    image: country.office.image || undefined,
+    telephone: country.office.phone,
+    email: country.office.email,
+    url: `${SITE_URL}/${countryCode}/contact`,
+    priceRange: "$$$$",
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: country.office.address,
+      addressLocality: country.office.city,
+      addressCountry: ADDRESS_COUNTRY_NAME[countryCode] ?? country.name,
+    },
+    currenciesAccepted: country.currency,
+  };
+}
+
+/** FAQPage schema from real CMS-authored Q&A (customer-service/faq content) — nothing
+ * fabricated, only what an admin actually published. */
+export function faqPageJsonLd(
+  faqs: { question: string; answer: string }[]
+): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((f) => ({
+      "@type": "Question",
+      name: f.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: f.answer,
+      },
     })),
   };
 }
