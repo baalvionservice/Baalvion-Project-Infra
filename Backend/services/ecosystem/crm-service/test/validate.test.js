@@ -13,6 +13,8 @@ const assert = require('node:assert/strict');
 const {
     appointmentCreateSchema,
     supportTicketCreateSchema,
+    inquiryCreateSchema,
+    inquiryMessageSchema,
 } = require('../middleware/validate');
 
 test('appointment schema accepts a minimal valid booking (only customerName)', () => {
@@ -96,4 +98,63 @@ test('support ticket schema passes through extra fields (priority, category, mes
     assert.equal(result.data.category, 'Logistics');
     assert.equal(Array.isArray(result.data.messages), true);
     assert.equal(result.data.messages.length, 1);
+});
+
+test('inquiry schema accepts a minimal valid inquiry (only customerName)', () => {
+    const result = inquiryCreateSchema.safeParse({ customerName: 'Alexander Cross' });
+    assert.equal(result.success, true);
+    assert.equal(result.data.customerName, 'Alexander Cross');
+});
+
+test('inquiry schema rejects a missing customerName', () => {
+    const result = inquiryCreateSchema.safeParse({ email: 'a.cross@heritage.com' });
+    assert.equal(result.success, false);
+});
+
+test('inquiry schema rejects an empty/whitespace customerName', () => {
+    const result = inquiryCreateSchema.safeParse({ customerName: '   ' });
+    assert.equal(result.success, false);
+});
+
+test('inquiry schema passes through extra storefront fields untouched', () => {
+    const payload = {
+        customerName: 'Alexander Cross',
+        email: 'a.cross@heritage.com',
+        country: 'United Kingdom',
+        budgetRange: 'Tier 1',
+        intent: 'Collector',
+        message: 'Seeking a 1924 series Birkin in pristine condition.',
+        contactMethod: 'WhatsApp',
+        productId: 'prod-1',
+    };
+    const result = inquiryCreateSchema.safeParse(payload);
+    assert.equal(result.success, true);
+    assert.equal(result.data.budgetRange, 'Tier 1');
+    assert.equal(result.data.intent, 'Collector');
+    assert.equal(result.data.productId, 'prod-1');
+});
+
+test('inquiry message schema accepts a valid client message', () => {
+    const result = inquiryMessageSchema.safeParse({ sender: 'client', text: 'Is this still available?' });
+    assert.equal(result.success, true);
+});
+
+test('inquiry message schema accepts a valid curator message', () => {
+    const result = inquiryMessageSchema.safeParse({ sender: 'curator', text: 'Yes, it is.' });
+    assert.equal(result.success, true);
+});
+
+test('inquiry message schema rejects an unknown sender', () => {
+    const result = inquiryMessageSchema.safeParse({ sender: 'admin', text: 'Hello' });
+    assert.equal(result.success, false);
+});
+
+test('inquiry message schema rejects an empty text', () => {
+    const result = inquiryMessageSchema.safeParse({ sender: 'client', text: '' });
+    assert.equal(result.success, false);
+});
+
+test('inquiry message schema rejects a missing sender', () => {
+    const result = inquiryMessageSchema.safeParse({ text: 'Hello' });
+    assert.equal(result.success, false);
 });

@@ -37,6 +37,14 @@ const start = async () => {
         // alter:false — never auto-mutate the schema at runtime (alter:true can silently DROP/ALTER
         // columns and lose data, with no version tracking or rollback). Schema changes go through
         // explicit migrations. This only creates missing tables on a fresh DB.
+        //
+        // This service has no migration tooling (no migrations/ dir), so a NEW column on an
+        // ALREADY-EXISTING table (unlike a brand-new table) would silently never appear without
+        // this one-line, additive, idempotent guard. Purely additive (IF NOT EXISTS) — never
+        // drops or alters an existing column, so it carries none of alter:true's data-loss risk.
+        await db.sequelize.query(
+            'ALTER TABLE IF EXISTS crm.vip_clients ADD COLUMN IF NOT EXISTS wallet_history JSONB DEFAULT \'[]\''
+        );
         await db.sequelize.sync({ alter: false });
         console.log('[CRM] DB connected and synced');
     } catch (err) { console.error('[CRM] DB error:', err.message); process.exit(1); }

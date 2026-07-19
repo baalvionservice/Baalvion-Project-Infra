@@ -16,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
         subscriptionPlan: { type: DataTypes.STRING },
         status: { type: DataTypes.STRING, defaultValue: 'verified' },
         walletBalance: { type: DataTypes.DECIMAL, defaultValue: 0 },
+        walletHistory: { type: DataTypes.JSONB, defaultValue: [] },
         certificates: { type: DataTypes.JSONB, defaultValue: [] },
     }, {
         schema: 'crm',

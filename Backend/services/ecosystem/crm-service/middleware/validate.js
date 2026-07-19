@@ -35,6 +35,22 @@ const supportTicketCreateSchema = z
     })
     .passthrough();
 
+// POST /crm/inquiries — model requires brandId (server-defaulted) + customerName. Everything
+// else (email, country, budgetRange, intent, contactMethod, productId, serviceId, message) is
+// optional and passed through verbatim.
+const inquiryCreateSchema = z
+    .object({
+        customerName: requiredString,
+    })
+    .passthrough();
+
+// POST /crm/inquiries/:id/messages — appends ONE message to the thread. `sender` is restricted
+// to the two real actors so a client can't forge an arbitrary label; `text` must be non-empty.
+const inquiryMessageSchema = z.object({
+    sender: z.enum(['client', 'curator']),
+    text: requiredString,
+});
+
 /**
  * Express middleware factory: validates req.body against a zod schema, replacing it with the
  * parsed result on success and forwarding a 400 AppError (matching this service's error shape)
@@ -64,4 +80,6 @@ module.exports = {
     validateBody,
     appointmentCreateSchema,
     supportTicketCreateSchema,
+    inquiryCreateSchema,
+    inquiryMessageSchema,
 };

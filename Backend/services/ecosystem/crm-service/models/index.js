@@ -26,6 +26,7 @@ db.Vendor = require('./vendor')(sequelize, Sequelize.DataTypes);
 db.Affiliate = require('./affiliate')(sequelize, Sequelize.DataTypes);
 db.Appointment = require('./appointment')(sequelize, Sequelize.DataTypes);
 db.SupportTicket = require('./supportTicket')(sequelize, Sequelize.DataTypes);
+db.Inquiry = require('./inquiry')(sequelize, Sequelize.DataTypes);
 
 Object.values(db).forEach((model) => {
     if (model.associate) model.associate(db);
