@@ -371,7 +371,7 @@ export default function ProductEditorPage() {
                   <div className="flex items-center justify-between pt-1">
                     <div>
                       <Label htmlFor="priceVisible">Price Visible</Label>
-                      <p className="text-xs text-muted-foreground">Off shows "Inquire for Private Quote" instead of the price.</p>
+                      <p className="text-xs text-muted-foreground">Off shows &quot;Inquire for Private Quote&quot; instead of the price.</p>
                     </div>
                     <Switch id="priceVisible" checked={priceVisible} onCheckedChange={setPriceVisible} />
                   </div>
