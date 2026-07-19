@@ -5,22 +5,25 @@
  */
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { treasuryService } from '@/modules/financials/services/treasury.service';
 import { WalletNode, TreasuryKPI, FinancialLog } from '@/modules/financials/types/financial.types';
+import { LiquiditySwapDialog, ProvisionCapitalDialog } from '@/modules/financials/components/liquidity-swap-dialog';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { 
-  Landmark, 
-  Wallet, 
-  ShieldCheck, 
-  TrendingUp, 
-  Activity, 
-  Zap, 
-  ArrowUpRight, 
-  History, 
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
+import {
+  Landmark,
+  Wallet,
+  ShieldCheck,
+  TrendingUp,
+  Activity,
+  Zap,
+  ArrowUpRight,
+  History,
   Lock,
   Globe,
   Loader2,
@@ -44,22 +47,47 @@ import {
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 
 export default function TreasuryCommandCenter() {
+  const { toast } = useToast();
   const [wallets, setWallets] = useState<WalletNode[]>([]);
   const [kpis, setKpis] = useState<TreasuryKPI[]>([]);
   const [logs, setLogs] = useState<FinancialLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [streamOpen, setStreamOpen] = useState(false);
+  const [selectedWallet, setSelectedWallet] = useState<WalletNode | null>(null);
 
-  useEffect(() => {
-    Promise.all([
+  const loadAll = useCallback(async () => {
+    const [w, k, l] = await Promise.all([
       treasuryService.getCashPosition('COMP-101'),
       treasuryService.getTreasuryKPIs(),
       treasuryService.getLedger('COMP-101')
-    ]).then(([w, k, l]) => {
-      setWallets(w);
-      setKpis(k);
-      setLogs(l);
-    }).finally(() => setLoading(false));
+    ]);
+    setWallets(w);
+    setKpis(k);
+    setLogs(l);
   }, []);
+
+  useEffect(() => {
+    loadAll().finally(() => setLoading(false));
+  }, [loadAll]);
+
+  function exportLedger() {
+    if (logs.length === 0) {
+      toast({ variant: 'destructive', title: 'Nothing to export', description: 'No ledger entries loaded yet.' });
+      return;
+    }
+    const header = 'id,type,amount,currency,referenceId,timestamp\n';
+    const rows = logs.map((l) => [l.id, l.type, l.amount, l.currency, l.referenceId || '', l.timestamp || ''].join(',')).join('\n');
+    const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `treasury-ledger-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    toast({ title: 'Ledger exported', description: `${logs.length} entries downloaded as CSV.` });
+  }
 
   if (loading) {
     return (
@@ -82,12 +110,18 @@ export default function TreasuryCommandCenter() {
           <h2 className="text-4xl font-black tracking-tight uppercase tracking-tighter leading-[0.8]">Treasury <br />Command.</h2>
         </div>
         <div className="flex gap-4">
-          <Button variant="outline" className="h-12 px-6 border-2 font-black uppercase tracking-widest text-xs bg-background shadow-md">
+          <Button variant="outline" onClick={exportLedger} className="h-12 px-6 border-2 font-black uppercase tracking-widest text-xs bg-background shadow-md">
             <Download className="mr-3 h-4 w-4" /> Export Ledger
           </Button>
-          <Button className="h-12 px-6 bg-primary text-white font-black uppercase tracking-widest text-xs shadow-md hover:scale-[1.02] transition-all">
-            <Plus className="mr-3 h-5 w-5 fill-current" /> Provision Capital
-          </Button>
+          <ProvisionCapitalDialog
+             wallets={wallets}
+             onExecuted={loadAll}
+             trigger={
+               <Button className="h-12 px-6 bg-primary text-white font-black uppercase tracking-widest text-xs shadow-md hover:scale-[1.02] transition-all">
+                 <Plus className="mr-3 h-5 w-5 fill-current" /> Provision Capital
+               </Button>
+             }
+          />
         </div>
       </div>
 
@@ -142,7 +176,7 @@ export default function TreasuryCommandCenter() {
            <CardContent className="p-6 flex-1">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                  {wallets.map((wallet) => (
-                    <div key={wallet.id} className="p-8 rounded-2xl border-2 bg-muted/5 space-y-6 group hover:border-primary/20 transition-all cursor-default relative overflow-hidden">
+                    <div key={wallet.id} onClick={() => setSelectedWallet(wallet)} className="p-8 rounded-2xl border-2 bg-muted/5 space-y-6 group hover:border-primary/20 transition-all cursor-pointer relative overflow-hidden">
                        <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity"><Landmark className="h-24 w-24" /></div>
                        <div className="flex items-center justify-between relative z-10">
                           <Badge className="bg-primary text-white text-[10px] font-black uppercase h-6 px-3 border-none shadow-sm">{wallet.currency} Node</Badge>
@@ -157,7 +191,7 @@ export default function TreasuryCommandCenter() {
                              <span className="text-muted-foreground opacity-60">Escrow Locked</span>
                              <span className="text-orange-600">{formatCurrency(wallet.escrowLocked, wallet.currency)}</span>
                           </div>
-                          <Progress value={(wallet.escrowLocked / wallet.balance) * 100} className="h-1.5 bg-muted rounded-full overflow-hidden shadow-inner">
+                          <Progress value={(wallet.escrowLocked / (wallet.balance || 1)) * 100} className="h-1.5 bg-muted rounded-full overflow-hidden shadow-inner">
                              <div className="h-full bg-orange-500 animate-pulse" />
                           </Progress>
                        </div>
@@ -172,7 +206,11 @@ export default function TreasuryCommandCenter() {
                           <p className="text-xs font-black uppercase tracking-wide text-muted-foreground">Federated Sync</p>
                           <p className="text-sm font-medium italic opacity-60 max-w-xs mx-auto">"Provision secondary currency nodes for cross-border rebalancing."</p>
                        </div>
-                       <Button variant="outline" className="rounded-2xl border-2 font-black text-[10px] uppercase h-11 px-8 bg-background">Launch Provisioning Wizard</Button>
+                       <ProvisionCapitalDialog
+                          wallets={wallets}
+                          onExecuted={loadAll}
+                          trigger={<Button variant="outline" className="rounded-2xl border-2 font-black text-[10px] uppercase h-11 px-8 bg-background">Launch Provisioning Wizard</Button>}
+                       />
                     </div>
                  </div>
               </div>
@@ -205,9 +243,15 @@ export default function TreasuryCommandCenter() {
                        <span className="text-lg font-black text-blue-300">99.8%</span>
                     </div>
                  </div>
-                 <Button variant="secondary" className="w-full h-14 font-black uppercase text-[12px] tracking-widest shadow-md bg-white text-primary border-none rounded-xl hover:scale-[1.02] transition-transform">
-                    EXECUTE LIQUIDITY SWAP
-                 </Button>
+                 <LiquiditySwapDialog
+                    wallets={wallets}
+                    onExecuted={loadAll}
+                    trigger={
+                      <Button variant="secondary" className="w-full h-14 font-black uppercase text-[12px] tracking-widest shadow-md bg-white text-primary border-none rounded-xl hover:scale-[1.02] transition-transform">
+                         EXECUTE LIQUIDITY SWAP
+                      </Button>
+                    }
+                 />
               </CardContent>
            </Card>
 
@@ -242,9 +286,13 @@ export default function TreasuryCommandCenter() {
             <CardTitle className="text-sm font-black uppercase tracking-wide">Operational Ledger Stream</CardTitle>
             <CardDescription className="text-xs font-medium">Real-time immutable trace of institutional settlements and capital releases.</CardDescription>
           </div>
-          <div className="flex items-center gap-3 px-6 py-2.5 bg-primary/5 rounded-full border-2 border-primary/10 text-[10px] font-black uppercase tracking-widest text-primary shadow-sm">
+          <button
+             type="button"
+             onClick={() => setStreamOpen(true)}
+             className="flex items-center gap-3 px-6 py-2.5 bg-primary/5 rounded-full border-2 border-primary/10 text-[10px] font-black uppercase tracking-widest text-primary shadow-sm hover:bg-primary/10 transition-colors cursor-pointer"
+          >
              <History className="h-4 w-4" /> Live Execution Stream
-          </div>
+          </button>
         </CardHeader>
         <CardContent className="p-0">
            <div className="overflow-x-auto">
@@ -292,6 +340,36 @@ export default function TreasuryCommandCenter() {
            </div>
         </CardContent>
       </Card>
+
+      <Dialog open={!!selectedWallet} onOpenChange={(o) => !o && setSelectedWallet(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader><DialogTitle>{selectedWallet?.currency} Currency Node</DialogTitle></DialogHeader>
+          {selectedWallet && (
+            <div className="space-y-3 py-2 text-sm">
+              <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase text-[10px]">Available Liquidity</span><span className="font-black">{formatCurrency(selectedWallet.availableLiquidity, selectedWallet.currency)}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase text-[10px]">Escrow Locked</span><span className="font-black text-orange-600">{formatCurrency(selectedWallet.escrowLocked, selectedWallet.currency)}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase text-[10px]">Total Balance</span><span className="font-black">{formatCurrency(selectedWallet.balance, selectedWallet.currency)}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase text-[10px]">Jurisdiction</span><span className="font-bold">{selectedWallet.jurisdiction}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase text-[10px]">Trust Score</span><span className="font-bold">{selectedWallet.trustScore}/100</span></div>
+            </div>
+          )}
+          <DialogFooter><Button variant="outline" onClick={() => setSelectedWallet(null)}>Close</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={streamOpen} onOpenChange={setStreamOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader><DialogTitle>Live Execution Stream Status</DialogTitle></DialogHeader>
+          <div className="space-y-3 py-2 text-sm">
+            <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 px-4 py-2 rounded-xl">
+              <ShieldCheck className="h-4 w-4" /> <span className="font-black uppercase text-xs">Stream Active</span>
+            </div>
+            <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase text-[10px]">Entries in Window</span><span className="font-black">{logs.length}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground font-bold uppercase text-[10px]">Most Recent Entry</span><span className="font-bold">{logs[0] ? new Date(logs[0].timestamp ?? Date.now()).toLocaleString() : '—'}</span></div>
+          </div>
+          <DialogFooter><Button variant="outline" onClick={() => setStreamOpen(false)}>Close</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }

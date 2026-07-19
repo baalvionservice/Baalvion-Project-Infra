@@ -9,17 +9,9 @@
 const config = require('../config/appConfig');
 const db = require('../models');
 const { isGlossaryEligible, cmsBlocksToTermBlocks } = require('../utils/termBlockTransform');
+const { fetchPublicContent } = require('../utils/cmsClient');
 
 const TERM_TYPE = 'term';
-
-async function fetchPublicContent(websiteSlug, slug) {
-    const url = `${config.cms.baseUrl}/public/${encodeURIComponent(websiteSlug)}/content/${encodeURIComponent(slug)}`;
-    const res = await fetch(url);
-    if (res.status === 404) return null;
-    if (!res.ok) throw new Error(`cms-service public content fetch failed: ${res.status}`);
-    const body = await res.json();
-    return body && body.data ? body.data : body;
-}
 
 async function handlePublished(payload = {}) {
     const { websiteSlug, slug } = payload;

@@ -27,4 +27,10 @@ module.exports = {
         allowedWebsiteSlugs: parseList(process.env.GLOSSARY_SYNC_WEBSITE_SLUGS, ['imperialpedia']),
     },
     glossarySync: { maxWords: Number(process.env.GLOSSARY_SYNC_MAX_WORDS || 2) },
+    entityLinking: {
+        // First-occurrence-only / one link per entity is a hard anti-spam rule
+        // (see service/entityMentionDetectionService.js), not a tunable — only
+        // the overall per-article cap is configurable.
+        maxLinksPerArticle: Number(process.env.ENTITY_LINK_MAX_PER_ARTICLE || 15),
+    },
 };

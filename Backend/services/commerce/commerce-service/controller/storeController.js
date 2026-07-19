@@ -22,7 +22,11 @@ const listStores = async (req, res, next) => {
 const getStore = async (req, res, next) => {
     try {
         const store = await storeService.getStore(req.params.storeId);
-        return sendSuccess(req, res, store);
+        // req.storeRole/req.storeLevel are stamped by loadStoreRole (RBAC PEP) ahead of this
+        // controller — surface them so the frontend can conditionally render capability-gated
+        // UI (e.g. "you're a seo_manager: edit SEO fields, not delete the product") without a
+        // second round trip to resolve the caller's own capability.
+        return sendSuccess(req, res, { ...store, callerRole: req.storeRole ?? null, callerLevel: req.storeLevel ?? null });
     } catch (err) { return next(err); }
 };
 

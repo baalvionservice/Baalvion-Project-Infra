@@ -77,7 +77,7 @@ test('upload appends sortOrder, auto-features the first image, falls back to ori
     assert.equal(first.isFeatured, true, 'first image is featured by default');
     assert.equal(second.isFeatured, false, 'second image is not featured');
     assert.equal(first.thumbnailUrl, first.url, 'no thumbnail engine → original reused as thumbnail');
-    assert.ok(first.url.includes(`commerce/products/${PRODUCT}/`), 'object key is product-namespaced');
+    assert.ok(first.storageKey.includes(`commerce/products/${PRODUCT}/`), 'object key is product-namespaced');
 });
 
 test('upload rejects a non-image payload for mediaType=image', async () => {

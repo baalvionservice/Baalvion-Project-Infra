@@ -13,6 +13,10 @@ module.exports = function (sequelize, DataTypes) {
         industry: { type: DataTypes.STRING(150), allowNull: true },
         image: { type: DataTypes.STRING(500), allowNull: true },
         tags: { type: DataTypes.JSONB, defaultValue: [] },
+        // Alternate names/spellings/tickers/abbreviations that should resolve to this
+        // entity in mention detection (e.g. ["NVIDIA Corp", "NVIDIA Corporation", "NVDA"])
+        // — see service/entityMentionDetectionService.js. Editorial data, never inferred.
+        aliases: { type: DataTypes.JSONB, defaultValue: [] },
         attributes: { type: DataTypes.JSONB, defaultValue: {} },
     }, {
         tableName: 'entities',

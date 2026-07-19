@@ -18,9 +18,9 @@ export function EarningsCalendarTable({ articles, ctaHref = "/earnings" }: Props
   if (!articles.length) return null;
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-100">
-      <div className="flex items-center justify-between border-b border-gray-100 bg-gray-50 px-5 py-3">
-        <p className="text-xs font-bold uppercase tracking-widest text-gray-500">Earnings Calendar</p>
+    <div className="overflow-hidden rounded-sm border border-border">
+      <div className="flex items-center justify-between border-b border-border bg-muted px-5 py-3">
+        <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Earnings Calendar</p>
         <Link href={ctaHref} className="text-xs font-semibold text-foreground hover:underline">
           Full earnings coverage &rarr;
         </Link>
@@ -28,14 +28,14 @@ export function EarningsCalendarTable({ articles, ctaHref = "/earnings" }: Props
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-100 text-left text-[11px] uppercase tracking-wide text-gray-400">
+            <tr className="border-b border-border text-left text-[11px] uppercase tracking-wide text-muted-foreground">
               <th className="px-5 py-2 font-semibold">Story</th>
               <th className="px-5 py-2 font-semibold">Reported</th>
             </tr>
           </thead>
           <tbody>
             {articles.map((article) => (
-              <tr key={article.id} className="border-b border-gray-50 last:border-none">
+              <tr key={article.id} className="border-b border-border last:border-none">
                 <td className="max-w-0 px-5 py-3">
                   <Link
                     href={newsArticleHref(article)}
@@ -44,7 +44,7 @@ export function EarningsCalendarTable({ articles, ctaHref = "/earnings" }: Props
                     {article.title}
                   </Link>
                 </td>
-                <td className="whitespace-nowrap px-5 py-3 text-gray-500">
+                <td className="whitespace-nowrap px-5 py-3 text-muted-foreground">
                   {formatDate(article.publishedAt)}
                 </td>
               </tr>

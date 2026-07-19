@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Text } from '@/design-system/typography/text';
@@ -31,10 +29,16 @@ export const RelatedEntities = ({ entities }: RelatedEntitiesProps) => {
   return (
     <Section title="Knowledge Graph Connections" className="animate-in fade-in duration-1000 delay-500">
       <div className="space-y-10">
-        {Object.entries(grouped).map(([type, items]) => (
+        {Object.entries(grouped).map(([type, items]) => {
+          // entityRouteSegment already carries the correct plural for every type this
+          // graph actually contains (companies/industries/technologies/countries) —
+          // naively appending "s" produced broken labels like "Related companys".
+          const segment = entityRouteSegment(type);
+          const pluralLabel = segment.charAt(0).toUpperCase() + segment.slice(1);
+          return (
           <div key={type} className="space-y-4">
             <Text variant="label" className="text-primary font-bold opacity-70 ml-1">
-              Related {type}s
+              Related {pluralLabel}
             </Text>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {items.map((entity) => (
@@ -61,7 +65,8 @@ export const RelatedEntities = ({ entities }: RelatedEntitiesProps) => {
               ))}
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
     </Section>
   );

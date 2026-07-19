@@ -11,30 +11,16 @@
  * with bounded backoff and dead-lettering after the attempt cap. The hourly reconciliation sweep
  * remains the deeper backstop.
  */
-const { sequelize } = require('../models');
 const { createPgOutboxStore, startOutboxRelay, relayOutbox } = require('@baalvion/events');
 const config = require('../config/appConfig');
 const ledgerClient = require('./ledgerClient');
 const { createLedgerPublisher, buildLedgerEvent } = require('./ledgerOutboxPublisher');
+const { makeOutboxRunner } = require('../utils/outboxRunner');
 
 const SCHEMA = config.db.schema; // 'orders'
 const TABLE = 'event_outbox';
 
-/**
- * Adapt a Sequelize connection (or an open transaction) to the @baalvion/events PgQueryRunner
- * shape `{ query(sql, params) => { rows } }`. With no `type`, sequelize.query returns
- * `[rows, meta]`; for SELECT and `UPDATE ... RETURNING` `rows` is the row array, otherwise []/undefined.
- */
-function makeRunner(t) {
-    return {
-        query: async (text, params) => {
-            const [rows] = await sequelize.query(text, { bind: params, ...(t ? { transaction: t } : {}) });
-            return { rows: Array.isArray(rows) ? rows : [] };
-        },
-    };
-}
-
-const store = createPgOutboxStore({ runner: makeRunner(), schema: SCHEMA, table: TABLE });
+const store = createPgOutboxStore({ runner: makeOutboxRunner(), schema: SCHEMA, table: TABLE });
 const publisher = createLedgerPublisher(ledgerClient);
 
 const relayLog = {
@@ -49,12 +35,12 @@ const relayLog = {
  * with the capture; omit `t` for paths that aren't transaction-wrapped (durable + retried either way).
  */
 async function enqueuePaymentCapture(args, t = null) {
-    await store.enqueue(buildLedgerEvent('payment_capture', args), t ? makeRunner(t) : undefined);
+    await store.enqueue(buildLedgerEvent('payment_capture', args), t ? makeOutboxRunner(t) : undefined);
 }
 
 /** Enqueue a refund ledger mirror (see enqueuePaymentCapture for the `t` semantics). */
 async function enqueueRefund(args, t = null) {
-    await store.enqueue(buildLedgerEvent('refund', args), t ? makeRunner(t) : undefined);
+    await store.enqueue(buildLedgerEvent('refund', args), t ? makeOutboxRunner(t) : undefined);
 }
 
 let handle = null;

@@ -55,6 +55,21 @@ function toggle(list: string[] | undefined, key: string): string[] {
   return [...set];
 }
 
+/** Map internal/backend error text to a message safe to show end users. */
+function friendlySearchError(message: string): string {
+  if (/network error/i.test(message)) return message; // already user-facing
+  if (/not authenticated|identity envelope|identity signature/i.test(message)) {
+    return 'Your session has expired. Please sign in again to search the catalogue.';
+  }
+  if (/rate limit/i.test(message)) return 'Too many searches in a short time — please wait a moment and try again.';
+  if (/String must contain at most (\d+) character/i.test(message)) {
+    return 'Your search is too long — please shorten it and try again.';
+  }
+  // Authored Zod schema messages look like "field: message" — safe, already user-appropriate.
+  if (/^\w+: .+ character\(s\)$/.test(message)) return message.split(':').slice(1).join(':').trim();
+  return 'Search is temporarily unavailable. Please try again shortly.';
+}
+
 export function SearchExperience() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -78,7 +93,7 @@ export function SearchExperience() {
       })
       .catch((err: Error) => {
         if (err.name === 'AbortError') return;
-        setError(err.message);
+        setError(friendlySearchError(err.message));
         setLoading(false);
       });
     return () => controller.abort();

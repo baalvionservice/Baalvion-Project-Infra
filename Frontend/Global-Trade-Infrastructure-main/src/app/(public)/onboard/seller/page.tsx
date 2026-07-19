@@ -5,6 +5,10 @@
  * @description Seller KYC onboarding wizard — 6 steps (PDF Module 4).
  * Account+Company -> Documents -> Certification verification -> Factory-photo KYC
  * -> Credit score & tier assignment -> Seller activation.
+ * Submits to the same public onboarding intake every department wizard uses
+ * (`onboardingService.submitApplication` -> auth-service `pending` org). No
+ * client-side access is ever granted — real access comes from a backend
+ * session after governance review.
  */
 
 import { useEffect, useState } from 'react';
@@ -21,8 +25,9 @@ import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Store, Building, FileUp, BadgeCheck, Camera, Award, ArrowRight, ArrowLeft,
-  Loader2, CheckCircle2, FileText, Sparkles, ScanLine,
+  Loader2, CheckCircle2, FileText, Sparkles, ScanLine, AlertTriangle,
 } from 'lucide-react';
+import { onboardingService } from '@/services/onboarding-service';
 
 const STEPS = ['Company', 'Documents', 'Certs', 'Factory', 'Tier', 'Activate'];
 
@@ -49,14 +54,31 @@ const TIERS = [
   { key: 'Platinum', color: 'text-indigo-600', min: 900 },
 ];
 
+const COUNTRIES = ['China', 'India', 'Vietnam', 'Turkey', 'United Arab Emirates', 'Germany', 'Mexico', 'Indonesia'];
+const PRODUCT_CATEGORIES = ['Electronics', 'Industrial & Metals', 'Energy & Solar', 'Textiles & Apparel', 'Agriculture', 'Chemicals', 'Automotive'];
+const VOLUME_BANDS = ['< $1M', '$1M – $10M', '$10M – $50M', '$50M – $250M', '$250M+'];
+
+const REQUIRED_STEP0 = ['email', 'password', 'fullName', 'phone', 'legalName', 'registrationNo', 'country', 'productCategory', 'address', 'annualExportVolume'];
+
+type Values = Record<string, string>;
+
 export default function SellerOnboardingWizard() {
   const router = useRouter();
   const [step, setStep] = useState(0);
-  const [docs, setDocs] = useState<Record<string, string>>({});
+  const [values, setValues] = useState<Values>({});
+  const [docs, setDocs] = useState<Values>({});
   const [certIndex, setCertIndex] = useState(0);
   const [certDone, setCertDone] = useState(false);
   const [factoryRunning, setFactoryRunning] = useState(false);
   const [factoryVerified, setFactoryVerified] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitRef, setSubmitRef] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const setValue = (key: string, val: string) => setValues((v) => ({ ...v, [key]: val }));
+
+  const step0Complete = REQUIRED_STEP0.every((k) => (values[k]?.trim()?.length ?? 0) > 0);
+  const docsComplete = SELLER_DOCS.every((d) => Boolean(docs[d.key]));
 
   // Step 3 (index 2): simulate AI certificate validation.
   useEffect(() => {
@@ -81,11 +103,29 @@ export default function SellerOnboardingWizard() {
     setTimeout(() => { setFactoryRunning(false); setFactoryVerified(true); }, 1800);
   };
 
-  const activate = () => {
-    // No client-side role grant. Verification routes the user to real authentication; access is
-    // granted only by a backend-issued session (httpOnly cookie + access token).
-    router.push('/login');
+  const handleSubmit = async () => {
+    setStep(5);
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      const result = await onboardingService.submitApplication({
+        department: 'seller',
+        organizationName: values.legalName,
+        contactEmail: values.email,
+        contactName: values.fullName,
+        contactPhone: values.phone,
+        jurisdiction: values.country,
+      });
+      setSubmitRef(result.reference);
+      try { sessionStorage.setItem('onboarding_application', JSON.stringify({ reference: result.reference, department: 'seller' })); } catch { /* ignore */ }
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'Submission could not be recorded');
+    } finally {
+      setSubmitting(false);
+    }
   };
+
+  const trackApplication = () => router.push(PATHS.ACCESS_PENDING);
 
   const next = () => setStep((s) => Math.min(s + 1, STEPS.length - 1));
   const back = () => setStep((s) => Math.max(s - 1, 0));
@@ -113,25 +153,30 @@ export default function SellerOnboardingWizard() {
                   <div className="space-y-6">
                     <StepHeader icon={Building} title="Account & company details" sub="Your verified supplier identity." />
                     <div className="grid sm:grid-cols-2 gap-5">
-                      <Field label="Work Email"><Input type="email" placeholder="sales@factory.com" className="h-12 border-2 rounded-xl" /></Field>
-                      <Field label="Password"><Input type="password" placeholder="••••••••••" className="h-12 border-2 rounded-xl" /></Field>
-                      <Field label="Legal Company Name"><Input placeholder="Apex Manufacturing Co." className="h-12 border-2 rounded-xl" /></Field>
-                      <Field label="Registration Number"><Input placeholder="REG-000000" className="h-12 border-2 rounded-xl" /></Field>
+                      <Field label="Work Email"><Input type="email" value={values.email ?? ''} onChange={(e) => setValue('email', e.target.value)} placeholder="sales@factory.com" className="h-12 border-2 rounded-xl" /></Field>
+                      <Field label="Password"><Input type="password" value={values.password ?? ''} onChange={(e) => setValue('password', e.target.value)} placeholder="••••••••••" className="h-12 border-2 rounded-xl" /></Field>
+                      <Field label="Full Name"><Input value={values.fullName ?? ''} onChange={(e) => setValue('fullName', e.target.value)} placeholder="Jane Doe" className="h-12 border-2 rounded-xl" /></Field>
+                      <Field label="Phone"><Input type="tel" value={values.phone ?? ''} onChange={(e) => setValue('phone', e.target.value)} placeholder="+86 21 5555 0104" className="h-12 border-2 rounded-xl" /></Field>
+                      <Field label="Legal Company Name"><Input value={values.legalName ?? ''} onChange={(e) => setValue('legalName', e.target.value)} placeholder="Apex Manufacturing Co." className="h-12 border-2 rounded-xl" /></Field>
+                      <Field label="Registration Number"><Input value={values.registrationNo ?? ''} onChange={(e) => setValue('registrationNo', e.target.value)} placeholder="REG-000000" className="h-12 border-2 rounded-xl" /></Field>
                       <Field label="Country">
-                        <Select><SelectTrigger className="h-12 border-2 rounded-xl"><SelectValue placeholder="Select country" /></SelectTrigger>
-                          <SelectContent>{['China', 'India', 'Vietnam', 'Turkey', 'United Arab Emirates', 'Germany', 'Mexico', 'Indonesia'].map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                        <Select value={values.country ?? ''} onValueChange={(v) => setValue('country', v)}>
+                          <SelectTrigger className="h-12 border-2 rounded-xl"><SelectValue placeholder="Select country" /></SelectTrigger>
+                          <SelectContent>{COUNTRIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                         </Select>
                       </Field>
                       <Field label="Product Category">
-                        <Select><SelectTrigger className="h-12 border-2 rounded-xl"><SelectValue placeholder="Select category" /></SelectTrigger>
-                          <SelectContent>{['Electronics', 'Industrial & Metals', 'Energy & Solar', 'Textiles & Apparel', 'Agriculture', 'Chemicals', 'Automotive'].map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                        <Select value={values.productCategory ?? ''} onValueChange={(v) => setValue('productCategory', v)}>
+                          <SelectTrigger className="h-12 border-2 rounded-xl"><SelectValue placeholder="Select category" /></SelectTrigger>
+                          <SelectContent>{PRODUCT_CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                         </Select>
                       </Field>
-                      <Field label="Registered Address" full><Input placeholder="Street, City, Country" className="h-12 border-2 rounded-xl" /></Field>
-                      <Field label="Website"><Input placeholder="https://factory.com" className="h-12 border-2 rounded-xl" /></Field>
+                      <Field label="Registered Address" full><Input value={values.address ?? ''} onChange={(e) => setValue('address', e.target.value)} placeholder="Street, City, Country" className="h-12 border-2 rounded-xl" /></Field>
+                      <Field label="Website" optional><Input value={values.website ?? ''} onChange={(e) => setValue('website', e.target.value)} placeholder="https://factory.com" className="h-12 border-2 rounded-xl" /></Field>
                       <Field label="Annual Export Volume (USD)">
-                        <Select><SelectTrigger className="h-12 border-2 rounded-xl"><SelectValue placeholder="Select range" /></SelectTrigger>
-                          <SelectContent>{['< $1M', '$1M – $10M', '$10M – $50M', '$50M – $250M', '$250M+'].map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                        <Select value={values.annualExportVolume ?? ''} onValueChange={(v) => setValue('annualExportVolume', v)}>
+                          <SelectTrigger className="h-12 border-2 rounded-xl"><SelectValue placeholder="Select range" /></SelectTrigger>
+                          <SelectContent>{VOLUME_BANDS.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                         </Select>
                       </Field>
                     </div>
@@ -140,7 +185,7 @@ export default function SellerOnboardingWizard() {
 
                 {step === 1 && (
                   <div className="space-y-6">
-                    <StepHeader icon={FileUp} title="Upload verification documents" sub="Including product, factory & export credentials." />
+                    <StepHeader icon={FileUp} title="Upload verification documents" sub="Including product, factory & export credentials — reviewed by our compliance team." />
                     <div className="space-y-3">
                       {SELLER_DOCS.map((doc) => <DocRow key={doc.key} label={doc.label} fileName={docs[doc.key]} onPick={(name) => setDocs((d) => ({ ...d, [doc.key]: name }))} />)}
                     </div>
@@ -205,30 +250,56 @@ export default function SellerOnboardingWizard() {
 
                 {step === 5 && (
                   <div className="text-center space-y-8 py-6">
-                    <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 200 }} className="h-24 w-24 rounded-[32px] bg-indigo-500/10 border-2 border-indigo-500/30 flex items-center justify-center mx-auto">
-                      <Award className="h-12 w-12 text-indigo-600" />
-                    </motion.div>
-                    <div className="space-y-2">
-                      <h2 className="text-3xl font-black uppercase tracking-tighter">Welcome, Verified Seller</h2>
-                      <p className="text-sm text-muted-foreground font-medium">Your storefront is live. Create your first listing to reach global buyers.</p>
-                    </div>
-                    <div className="flex items-center justify-center gap-2 text-indigo-600"><Sparkles className="h-4 w-4" /><span className="text-[10px] font-black uppercase tracking-widest">First 6 months subscription-free</span></div>
+                    {submitting ? (
+                      <div className="flex flex-col items-center gap-4 py-10">
+                        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                        <p className="text-sm font-bold text-muted-foreground">Submitting your application…</p>
+                      </div>
+                    ) : submitRef ? (
+                      <>
+                        <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 200 }} className="h-24 w-24 rounded-[32px] bg-indigo-500/10 border-2 border-indigo-500/30 flex items-center justify-center mx-auto">
+                          <Award className="h-12 w-12 text-indigo-600" />
+                        </motion.div>
+                        <div className="space-y-2">
+                          <h2 className="text-3xl font-black uppercase tracking-tighter">Application Submitted</h2>
+                          <p className="text-sm text-muted-foreground font-medium">Your storefront application is queued for governance review.</p>
+                        </div>
+                        <div className="p-4 rounded-2xl border-2 border-primary/20 bg-primary/5 max-w-lg mx-auto">
+                          <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Your application reference</p>
+                          <p className="text-lg font-black tracking-tight text-primary tabular-nums">{submitRef}</p>
+                        </div>
+                        <div className="flex items-center justify-center gap-2 text-indigo-600"><Sparkles className="h-4 w-4" /><span className="text-[10px] font-black uppercase tracking-widest">First 6 months subscription-free once activated</span></div>
+                      </>
+                    ) : (
+                      <div className="p-4 rounded-2xl border-2 border-destructive/30 bg-destructive/5 max-w-lg mx-auto text-left space-y-3">
+                        <div className="flex items-center gap-2 text-destructive">
+                          <AlertTriangle className="h-4 w-4 shrink-0" />
+                          <p className="text-xs font-bold">Your application could not be submitted{submitError ? `: ${submitError}` : ''}.</p>
+                        </div>
+                        <Button size="sm" variant="outline" onClick={() => void handleSubmit()} className="font-black uppercase text-[10px] tracking-widest">Retry Submission</Button>
+                      </div>
+                    )}
                   </div>
                 )}
               </motion.div>
             </AnimatePresence>
 
             <div className="flex items-center justify-between pt-2 border-t">
-              {step > 0 && step !== 2 ? (
+              {step > 0 && step !== 2 && step !== 5 ? (
                 <Button variant="ghost" onClick={back} className="font-black uppercase text-[11px] tracking-widest h-12"><ArrowLeft className="mr-2 h-4 w-4" /> Back</Button>
               ) : <span />}
 
-              {step < 1 && <Button onClick={next} className="h-12 px-10 font-black uppercase text-[11px] tracking-widest rounded-2xl">Continue <ArrowRight className="ml-2 h-4 w-4" /></Button>}
-              {step === 1 && <Button onClick={next} className="h-12 px-10 font-black uppercase text-[11px] tracking-widest rounded-2xl bg-primary">Verify Certifications <BadgeCheck className="ml-2 h-4 w-4" /></Button>}
+              {step === 0 && <Button onClick={next} disabled={!step0Complete} className="h-12 px-10 font-black uppercase text-[11px] tracking-widest rounded-2xl">Continue <ArrowRight className="ml-2 h-4 w-4" /></Button>}
+              {step === 1 && <Button onClick={next} disabled={!docsComplete} className="h-12 px-10 font-black uppercase text-[11px] tracking-widest rounded-2xl bg-primary">Verify Certifications <BadgeCheck className="ml-2 h-4 w-4" /></Button>}
               {step === 2 && <Button onClick={next} disabled={!certDone} className="ml-auto h-12 px-10 font-black uppercase text-[11px] tracking-widest rounded-2xl">Continue <ArrowRight className="ml-2 h-4 w-4" /></Button>}
               {step === 3 && <Button onClick={next} disabled={!factoryVerified} className="h-12 px-10 font-black uppercase text-[11px] tracking-widest rounded-2xl">Continue <ArrowRight className="ml-2 h-4 w-4" /></Button>}
-              {step === 4 && <Button onClick={next} className="h-12 px-10 font-black uppercase text-[11px] tracking-widest rounded-2xl bg-primary">Activate Storefront <Award className="ml-2 h-4 w-4" /></Button>}
-              {step === 5 && <Button onClick={activate} className="ml-auto h-14 px-12 font-black uppercase text-[12px] tracking-widest rounded-2xl bg-indigo-600 hover:bg-indigo-700 shadow-xl">Enter Seller Console <ArrowRight className="ml-2 h-5 w-5" /></Button>}
+              {step === 4 && <Button onClick={() => void handleSubmit()} className="h-12 px-10 font-black uppercase text-[11px] tracking-widest rounded-2xl bg-primary">Activate Storefront <Award className="ml-2 h-4 w-4" /></Button>}
+              {step === 5 && submitRef && !submitting && (
+                <div className="ml-auto flex gap-3">
+                  <Button variant="outline" onClick={() => router.push(PATHS.LOGIN)} className="h-12 px-6 font-black uppercase text-[11px] tracking-widest rounded-2xl">Sign In</Button>
+                  <Button onClick={trackApplication} className="h-14 px-12 font-black uppercase text-[12px] tracking-widest rounded-2xl bg-indigo-600 hover:bg-indigo-700 shadow-xl">Track Application <ArrowRight className="ml-2 h-5 w-5" /></Button>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -249,10 +320,12 @@ function StepHeader({ icon: Icon, title, sub }: { icon: React.ElementType; title
   );
 }
 
-function Field({ label, children, full }: { label: string; children: React.ReactNode; full?: boolean }) {
+function Field({ label, children, full, optional }: { label: string; children: React.ReactNode; full?: boolean; optional?: boolean }) {
   return (
     <div className={cn('space-y-2', full && 'sm:col-span-2')}>
-      <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{label}</Label>
+      <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+        {label}{!optional && <span className="text-primary ml-1">*</span>}
+      </Label>
       {children}
     </div>
   );

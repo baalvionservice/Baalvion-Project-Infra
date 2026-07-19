@@ -74,13 +74,13 @@ export default function SupplyChainControlTower() {
       // Real corridor utilization: in-flight shipments / total fleet.
       const inFlight = shipments.filter((s) => !['delivered', 'cancelled'].includes(String(s.status || '').toLowerCase())).length;
       const density = shipments.length ? Math.round((inFlight / shipments.length) * 100) : 0;
-      const pulse = pulseRes?.data ?? pulseRes ?? null;
-      const ready = readyRes?.data ?? readyRes ?? null;
+      const pulse = pulseRes?.success ? pulseRes.data : null;
+      const ready = readyRes?.success ? readyRes.data : null;
       setTelemetry({
         density,
-        latency: pulse ? Number(pulse.finalityDelay) : null,
-        finality: pulse ? Number(pulse.stabilityScore) : null,
-        readiness: ready ? Number(ready.score) : null,
+        latency: pulse?.finalityDelay != null && !Number.isNaN(Number(pulse.finalityDelay)) ? Number(pulse.finalityDelay) : null,
+        finality: pulse?.stabilityScore != null && !Number.isNaN(Number(pulse.stabilityScore)) ? Number(pulse.stabilityScore) : null,
+        readiness: ready?.score != null && !Number.isNaN(Number(ready.score)) ? Number(ready.score) : null,
         nodeStatus: ready ? String(ready.status || '—') : '—',
       });
     } catch {

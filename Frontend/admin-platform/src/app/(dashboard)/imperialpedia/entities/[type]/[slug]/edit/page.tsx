@@ -9,17 +9,22 @@ import { useUIStore } from '@/lib/store/uiStore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EntityForm, type EntityValue } from '@/components/imperialpedia/EntityForm';
 
-interface EntityDetail {
+// Loose shape: the API flattens the entity's type-specific `attributes` JSONB back to
+// top-level (see entitiesController.js `serialize()`), so a real entity can carry many
+// more fields than the ones this admin form has dedicated controls for (founded_year,
+// employees, website, ticker, founders, logo, executives, products, faq, ...). Typing
+// this as `Record<string, unknown>` rather than a fixed interface is what lets the edit
+// page preserve those fields into `extraAttributes` instead of silently discarding them.
+type EntityDetail = Record<string, unknown> & {
   type: string;
   name: string;
   slug: string;
-  description?: string | null;
-  category?: string | null;
-  country?: string | null;
-  industry?: string | null;
-  image?: string | null;
-  tags?: string[];
-}
+};
+
+const KNOWN_FIELDS = new Set([
+  'type', 'name', 'slug', 'description', 'category', 'country', 'industry',
+  'image', 'tags', 'aliases', 'competitors', 'technologies', 'id', 'created_at', 'updated_at',
+]);
 
 export default function EditEntityPage() {
   const params = useParams();
@@ -59,16 +64,24 @@ export default function EditEntityPage() {
     return <p className="py-16 text-center text-sm text-muted-foreground">Entity not found.</p>;
   }
 
+  const extraAttributes = Object.fromEntries(
+    Object.entries(entity).filter(([key, val]) => !KNOWN_FIELDS.has(key) && val !== undefined),
+  );
+
   const initial: EntityValue = {
     type: entity.type,
     name: entity.name,
     slug: entity.slug,
-    description: entity.description ?? '',
-    category: entity.category ?? '',
-    country: entity.country ?? '',
-    industry: entity.industry ?? '',
-    image: entity.image ?? '',
-    tags: entity.tags ?? [],
+    description: (entity.description as string | null | undefined) ?? '',
+    category: (entity.category as string | null | undefined) ?? '',
+    country: (entity.country as string | null | undefined) ?? '',
+    industry: (entity.industry as string | null | undefined) ?? '',
+    image: (entity.image as string | null | undefined) ?? '',
+    tags: (entity.tags as string[] | undefined) ?? [],
+    aliases: (entity.aliases as string[] | undefined) ?? [],
+    competitors: (entity.competitors as string[] | undefined) ?? [],
+    technologies: (entity.technologies as string[] | undefined) ?? [],
+    extraAttributes,
   };
 
   return (

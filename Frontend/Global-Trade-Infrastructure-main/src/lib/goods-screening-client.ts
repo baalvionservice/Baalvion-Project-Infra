@@ -5,9 +5,11 @@
  * `compliance.restricted-goods` set (global baseline merged with the caller's tenant override)
  * and returns the decision plus any required licenses/certificates.
  *
- * Identity + tenant are injected server-side by the auth-gateway (same model as the sanctions
- * client); the browser only sends the goods description.
+ * Identity + tenant come from a signed envelope minted for the browser's own session via
+ * `fetchLocalApi` (see `lib/local-api-client.ts`) — the browser only supplies the goods
+ * description, never any actor/org claim.
  */
+import { fetchLocalApi } from './local-api-client';
 
 export type GoodsDecision = 'ALLOW' | 'DENY' | 'REVIEW';
 
@@ -58,9 +60,8 @@ export async function screenGoods(input: GoodsScreeningInput): Promise<GoodsScre
 
   let res: Response;
   try {
-    res = await fetch('/api/compliance/goods-screening', {
+    res = await fetchLocalApi('/api/compliance/goods-screening', {
       method: 'POST',
-      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });

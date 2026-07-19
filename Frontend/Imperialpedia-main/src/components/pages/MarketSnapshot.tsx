@@ -34,23 +34,23 @@ export function MarketSnapshot({ indicators }: Props) {
   });
 
   return (
-    <section className="rounded-2xl border border-gray-100 bg-gray-50 px-4 py-6 sm:px-6">
+    <section className="rounded-sm border border-border bg-muted px-4 py-6 sm:px-6">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-          <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400">
+          <span className="h-1.5 w-1.5 rounded-full bg-positive" />
+          <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
             Today&apos;s Markets
           </h2>
         </div>
-        <span className="text-[11px] font-semibold text-gray-400">Intraday &middot; as of {asOf}</span>
+        <span className="text-[11px] font-semibold text-muted-foreground">Intraday &middot; as of {asOf}</span>
       </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
         {items.map((item) => (
           <div
             key={item.name}
-            className="min-w-0 rounded-xl border border-gray-100 bg-white px-3 py-3"
+            className="min-w-0 rounded-sm border border-border bg-card px-3 py-3"
           >
-            <p className="truncate text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+            <p className="truncate text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
               {item.name}
             </p>
             <p className="truncate font-mono text-base font-bold text-foreground">
@@ -58,7 +58,7 @@ export function MarketSnapshot({ indicators }: Props) {
             </p>
             <p
               className={`font-mono text-xs font-bold ${
-                item.positive ? "text-emerald-600" : "text-red-600"
+                item.positive ? "text-positive" : "text-negative"
               }`}
             >
               {item.positive ? "▲" : "▼"} {item.percent}
@@ -72,13 +72,13 @@ export function MarketSnapshot({ indicators }: Props) {
               <polyline
                 points={sparklinePoints(item.name, item.positive)}
                 fill="none"
-                stroke={item.positive ? "#059669" : "#dc2626"}
+                stroke={item.positive ? "hsl(var(--positive))" : "hsl(var(--negative))"}
                 strokeWidth="1.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
             </svg>
-            <p className="mt-1 truncate text-[10px] font-medium text-gray-400">Updated {asOf}</p>
+            <p className="mt-1 truncate text-[10px] font-medium text-muted-foreground">Updated {asOf}</p>
           </div>
         ))}
       </div>

@@ -28,6 +28,8 @@ import { cn, formatCurrency } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { PATHS } from '@/lib/paths';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { format } from 'date-fns';
 
 const STAGES: { id: RFQStatus; label: string; color: string }[] = [
   { id: 'INTERNAL_REVIEW', label: 'Requirement Definition', color: 'bg-blue-500' },
@@ -39,6 +41,7 @@ const STAGES: { id: RFQStatus; label: string; color: string }[] = [
 export default function SourcingPipelinePage() {
   const [rfqs, setRfqs] = useState<RFQ[]>([]);
   const [loading, setLoading] = useState(true);
+  const [auditOpen, setAuditOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -65,14 +68,35 @@ export default function SourcingPipelinePage() {
            <h2 className="text-4xl font-black tracking-tight uppercase tracking-tighter leading-[0.8]">Sourcing <br />Pipeline.</h2>
         </div>
         <div className="flex gap-4">
-           <Button variant="outline" className="h-12 px-6 border-2 font-black uppercase tracking-widest text-xs bg-background shadow-md">
+           <Button variant="outline" className="h-12 px-6 border-2 font-black uppercase tracking-widest text-xs bg-background shadow-md" onClick={() => setAuditOpen(true)}>
               <History className="mr-3 h-4 w-4" /> Pipeline Audit
            </Button>
-           <Button className="h-12 px-6 bg-primary text-white font-black uppercase tracking-widest text-xs shadow-md hover:scale-[1.02] transition-all">
+           <Button className="h-12 px-6 bg-primary text-white font-black uppercase tracking-widest text-xs shadow-md hover:scale-[1.02] transition-all" onClick={() => router.push('/buyer/rfqs/new')}>
               <Plus className="mr-3 h-4 w-4" /> Initiate Sourcing
            </Button>
         </div>
       </div>
+
+      <Dialog open={auditOpen} onOpenChange={setAuditOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader><DialogTitle>Pipeline Audit</DialogTitle></DialogHeader>
+          <div className="max-h-[60vh] overflow-y-auto divide-y">
+            {[...rfqs].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()).map((rfq) => (
+              <div key={rfq.id} className="py-3 flex items-center justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="text-sm font-black truncate">{rfq.title}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Ref {rfq.id} • {STAGES.find((s) => s.id === rfq.status)?.label ?? rfq.status}</p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-[10px] font-bold text-muted-foreground">{format(new Date(rfq.updatedAt), 'PP p')}</p>
+                  <p className="text-[9px] text-muted-foreground opacity-60">Created {format(new Date(rfq.createdAt), 'PP')}</p>
+                </div>
+              </div>
+            ))}
+            {rfqs.length === 0 && <p className="py-8 text-center text-sm text-muted-foreground">No sourcing mandates yet.</p>}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* KANBAN PIPELINE */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">

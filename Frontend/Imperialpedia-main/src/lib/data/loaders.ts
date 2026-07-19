@@ -92,6 +92,19 @@ export async function getCompanyBySlug(slug: string): Promise<CompanyEntity | un
   return fetchOne<CompanyEntity>('company', slug, STATIC.company);
 }
 
+/**
+ * Reverse lookup for the market quote pages (`/markets/quote/[symbol]`): finds the rich
+ * knowledge-graph `CompanyEntity` behind a ticker so quote pages can surface real
+ * description/leadership/headquarters/sameAs data instead of only the bare price feed.
+ * Reuses `loadCompanies()`'s existing cache — no dedicated backend lookup needed since the
+ * company roster is small (tens, not thousands) and already fully loaded for `/companies`.
+ */
+export async function getCompanyByTicker(ticker: string): Promise<CompanyEntity | undefined> {
+  const companies = await loadCompanies();
+  const needle = ticker.toUpperCase();
+  return companies.find((c) => c.ticker?.toUpperCase() === needle);
+}
+
 export async function getIndustryBySlug(slug: string): Promise<IndustryEntity | undefined> {
   return fetchOne<IndustryEntity>('industry', slug, STATIC.industry);
 }

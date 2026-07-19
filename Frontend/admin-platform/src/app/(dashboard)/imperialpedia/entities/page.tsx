@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { serviceClients, normalizeError } from '@/lib/api/client';
 import type { AxiosError } from 'axios';
@@ -28,8 +29,11 @@ interface EntityRow {
 export default function EntitiesListPage() {
   const { setBreadcrumbs } = useUIStore();
   const queryClient = useQueryClient();
+  const searchParams = useSearchParams();
   const [search, setSearch] = useState('');
-  const [type, setType] = useState('');
+  // Seeds from ?type= so the health dashboard's per-type entity counts link
+  // straight into a pre-filtered list instead of dropping the filter on navigation.
+  const [type, setType] = useState(searchParams.get('type') ?? '');
   const [actionError, setActionError] = useState<string | null>(null);
 
   useEffect(() => {

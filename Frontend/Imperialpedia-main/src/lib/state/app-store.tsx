@@ -22,38 +22,20 @@ interface AppContextType extends AppState {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-// Initialize with a mock admin for CMS prototyping
-const DEFAULT_MOCK_USER: User = {
-  id: 'u-1',
-  name: 'Eleanor Vance',
-  email: 'eleanor@imperialpedia.com',
-  role: 'admin'
-};
-
 export function AppProvider({ children }: { children: ReactNode }) {
+  // `currentUser` here is UI-scratch state only — the real authenticated identity
+  // lives in `@/providers/AuthProvider` (useAuth), backed by the RS256 session.
+  // This used to default to a fabricated "Eleanor Vance / admin" persona that
+  // Sidebar.tsx rendered as if it were the real signed-in user; components needing
+  // identity must use useAuth() instead. Notifications start empty (no more
+  // fabricated "Welcome" / "Platform Tip" seed content) until a real notifications
+  // backend exists.
   const [state, setState] = useState<AppState>({
     appLoading: false,
-    currentUser: DEFAULT_MOCK_USER,
+    currentUser: null,
     platformReady: true,
     environment: process.env.NODE_ENV || 'development',
-    notifications: [
-      {
-        id: 'n-1',
-        userId: 'u-1',
-        message: 'Welcome to the Imperialpedia Creator Studio.',
-        type: 'info',
-        createdAt: new Date().toISOString(),
-        read: false,
-      },
-      {
-        id: 'n-2',
-        userId: 'u-1',
-        message: 'Platform Tip: Complete your Expertise Matrix to increase your visibility in the Leaderboard.',
-        type: 'info',
-        createdAt: new Date(Date.now() - 3600000).toISOString(),
-        read: false,
-      }
-    ],
+    notifications: [],
   });
 
   const setAppLoading = (appLoading: boolean) => setState(prev => ({ ...prev, appLoading }));

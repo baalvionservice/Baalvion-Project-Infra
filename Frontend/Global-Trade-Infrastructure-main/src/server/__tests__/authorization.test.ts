@@ -12,6 +12,7 @@ import { signIdentity } from '../http/identity';
 import { POST as decideFinancing } from '@/app/api/finance/[requestId]/decision/route';
 import { POST as screenSanctions } from '@/app/api/sanctions/screen/route';
 import { GET as proxyEntity } from '@/app/api/[entity]/route';
+import { POST as createTradeRoute } from '@/app/api/trades/route';
 import { USER_ROLES, UserRole } from '@/core/roles';
 import { TradeTerms } from '@/orchestration/ports';
 
@@ -101,5 +102,44 @@ describe('authorization — finance decisions & secured endpoints', () => {
   it('rejects anonymous backend proxy access (401)', async () => {
     const res = await proxyEntity(new Request('http://localhost/api/orders'), { params: Promise.resolve({ entity: 'orders' }) });
     expect(res.status).toBe(401);
+  });
+
+  describe('trade creation authorization', () => {
+    const createUrl = 'http://localhost/api/trades';
+
+    it('rejects trade creation from an oversight-only role (regulator) — 403, not 500', async () => {
+      const res = await createTradeRoute(
+        signed(orgA, USER_ROLES.NATIONAL_REGULATOR as UserRole, createUrl, { terms: TERMS }),
+      );
+      expect(res.status).toBe(403);
+    });
+
+    it('rejects trade creation from an external-authority role (bank admin)', async () => {
+      const res = await createTradeRoute(
+        signed(orgA, USER_ROLES.BANK_ADMIN as UserRole, createUrl, { terms: TERMS }),
+      );
+      expect(res.status).toBe(403);
+    });
+
+    it('rejects trade creation from the least-privilege baseline role', async () => {
+      const res = await createTradeRoute(
+        signed(orgA, USER_ROLES.MEMBER as UserRole, createUrl, { terms: TERMS }),
+      );
+      expect(res.status).toBe(403);
+    });
+
+    it('allows trade creation from an actual trade participant role (buyer)', async () => {
+      const res = await createTradeRoute(
+        signed(orgA, USER_ROLES.BUYER as UserRole, createUrl, { terms: TERMS }),
+      );
+      expect(res.status).toBe(201);
+    });
+
+    it('allows trade creation from org leadership (org owner)', async () => {
+      const res = await createTradeRoute(
+        signed(orgA, USER_ROLES.ORG_OWNER as UserRole, createUrl, { terms: TERMS }),
+      );
+      expect(res.status).toBe(201);
+    });
   });
 });

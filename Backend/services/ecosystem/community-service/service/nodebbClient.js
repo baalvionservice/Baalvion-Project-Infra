@@ -96,6 +96,25 @@ async function createReply(tid, uid, content) {
     return nbFetch(`/api/v1/topics/${encodeURIComponent(tid)}`, { method: 'POST', body: JSON.stringify({ uid, content }) });
 }
 
+// Reported-content review (nodebb-plugin-write-api's flags sub-resource). NodeBB dedupes
+// flags per (type, target) internally, so this surfaces one row per reported post/topic with
+// its own reporter history rather than one row per report.
+// ⚠ VERIFY AT EXECUTION TIME: same caveat as every other endpoint in this file — confirm
+// /api/v1/flags' exact shape (in particular whether the installed version nests the flagged
+// post's category cid at flag.target.category.cid or elsewhere) against the live instance.
+async function getFlags() {
+    const body = await nbFetch('/api/v1/flags', { method: 'GET' });
+    return body?.response?.flags || body?.flags || [];
+}
+
+async function updateFlagState(flagId, state) {
+    return nbFetch(`/api/v1/flags/${encodeURIComponent(flagId)}`, { method: 'PUT', body: JSON.stringify({ state }) });
+}
+
+async function deletePost(pid) {
+    return nbFetch(`/api/v1/posts/${encodeURIComponent(pid)}`, { method: 'DELETE' });
+}
+
 module.exports = {
     addUserToGroup,
     removeUserFromGroup,
@@ -105,5 +124,8 @@ module.exports = {
     resolveUidByEmail,
     createTopic,
     createReply,
+    getFlags,
+    updateFlagState,
+    deletePost,
     NodeBBError,
 };

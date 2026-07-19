@@ -15,6 +15,7 @@ import { Loader2, ChevronRight, ChevronLeft, CheckCircle2, Box, DollarSign, Truc
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+import { SUPPORTED_CURRENCIES } from "@/core/currencies";
 
 const steps = [
   { id: 1, title: 'Product Info', icon: Box },
@@ -241,9 +242,9 @@ export function RFQForm() {
                                </SelectTrigger>
                              </FormControl>
                              <SelectContent>
-                               <SelectItem value="USD">USD</SelectItem>
-                               <SelectItem value="EUR">EUR</SelectItem>
-                               <SelectItem value="SGD">SGD</SelectItem>
+                               {SUPPORTED_CURRENCIES.map((c) => (
+                                 <SelectItem key={c} value={c}>{c}</SelectItem>
+                               ))}
                              </SelectContent>
                            </Select>
                            <FormMessage />

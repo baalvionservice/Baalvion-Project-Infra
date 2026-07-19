@@ -1,101 +1,143 @@
 /**
  * @file seller/rfqs/page.tsx
- * @description Global Demand Signal Discovery node. 
- * High-authority marketplace for sellers to absorb institutional trade signals.
+ * @description Global Demand Signal Discovery node — real, backend-driven RFQ
+ * marketplace for sellers (see `getMarketplaceRfqs`/`submitQuote`/`submitQuotesBatch`
+ * in `rfq-service.ts`, all calling real trade-service endpoints).
  */
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { ShieldCheck } from 'lucide-react';
 import { rfqService, RFQ } from '@/services/rfq-service';
-import { MarketplaceTable } from './_components/marketplace-table';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { 
-  Search, 
-  Filter, 
-  TrendingUp, 
-  Zap, 
-  Globe, 
-  Loader2, 
-  ArrowRight,
-  Target,
-  Activity,
-  Boxes,
-  Compass,
-  Radio,
-  SlidersHorizontal,
-  ChevronDown
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
+import {
+  Search, Filter, TrendingUp, Zap, Globe, Loader2, ArrowRight, Target,
+  Activity, Boxes, Compass, Radio, SlidersHorizontal, ChevronDown, AlertTriangle,
 } from 'lucide-react';
-import { cn, formatCurrency, getFlag } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuLabel, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
+  DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
 export default function SellerMarketplaceDiscovery() {
   const [rfqs, setRfqs] = useState<RFQ[]>([]);
   const [loading, setLoading] = useState(true);
+  const [rescanning, setRescanning] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [category, setCategory] = useState<string | null>(null);
+  const [sellerName, setSellerName] = useState('');
+  const [bidTarget, setBidTarget] = useState<RFQ | null>(null);
+  const [bidForm, setBidForm] = useState({ price: '', deliveryTime: '', message: '' });
+  const [submittingBid, setSubmittingBid] = useState(false);
+  const [batchOpen, setBatchOpen] = useState(false);
+  const [batchSelection, setBatchSelection] = useState<Set<string>>(new Set());
+  const [batchForm, setBatchForm] = useState({ price: '', deliveryTime: '', message: '' });
+  const [submittingBatch, setSubmittingBatch] = useState(false);
+  const [topologyOpen, setTopologyOpen] = useState(false);
+  const { toast } = useToast();
 
-  useEffect(() => {
-    // In production, this targets the high-scale discovery ledger
-    setTimeout(() => {
-      setRfqs([
-        {
-          id: 'RFQ-8812',
-          rfq_id: 'RFQ-8812',
-          title: 'Solar PV Modules (550W) for Utility Scale Project',
-          productName: 'Solar PV Modules',
-          category: 'Energy',
-          quantity: { value: 2000, unit: 'Units' },
-          buyer: { country: 'United States', buyer_id: 'COMP-101', type: 'Institution', region: 'North America' },
-          pricing: { target_price: 175, currency: 'USD', pricing_model: 'FOB' },
-          logistics: { destination_port: 'Port of Long Beach', shipment_terms: 'Ocean' },
-          compliance: { certifications: ['ISO 9001', 'CE', 'ESG-V'] },
-          timeline: { deadline: new Date(Date.now() + 172800000).toISOString(), urgency: 'HIGH' },
-          flags: { quality_score: 94 },
-          engagement: { views: 124, quotes_received: 2 },
-          status: 'OPEN',
-          createdAt: new Date(Date.now() - 86400000).toISOString(),
-          updatedAt: new Date().toISOString(),
-          orgId: 'COMP-101'
-        },
-        {
-          id: 'RFQ-8813',
-          rfq_id: 'RFQ-8813',
-          title: 'Lithium Iron Phosphate (LFP) Battery Batch',
-          productName: 'LFP Batteries',
-          category: 'Energy Storage',
-          quantity: { value: 500, unit: 'Sets' },
-          buyer: { country: 'Germany', buyer_id: 'COMP-202', type: 'Sovereign', region: 'Europe' },
-          pricing: { target_price: 2400, currency: 'EUR', pricing_model: 'DDP' },
-          logistics: { destination_port: 'Rotterdam Terminal', shipment_terms: 'Land' },
-          compliance: { certifications: ['IEC 62133', 'UN38.3'] },
-          timeline: { deadline: new Date(Date.now() + 345600000).toISOString(), urgency: 'NORMAL' },
-          flags: { quality_score: 88 },
-          engagement: { views: 42, quotes_received: 0 },
-          status: 'OPEN',
-          createdAt: new Date(Date.now() - 172800000).toISOString(),
-          updatedAt: new Date().toISOString(),
-          orgId: 'COMP-202'
-        }
-      ]);
-      setLoading(false);
-    }, 800);
+  const load = useCallback((cat?: string | null) => {
+    setLoading(true);
+    setError(null);
+    rfqService
+      .getMarketplaceRfqs({ category: cat ?? undefined })
+      .then(setRfqs)
+      .catch((err: Error) => setError(err.message))
+      .finally(() => setLoading(false));
   }, []);
 
-  const filtered = rfqs.filter(r => 
-    r.title.toLowerCase().includes(search.toLowerCase()) || 
-    r.category.toLowerCase().includes(search.toLowerCase())
+  useEffect(() => { load(category); }, [load, category]);
+
+  const rescan = async () => {
+    setRescanning(true);
+    try {
+      await rfqService.getMarketplaceRfqs({ category: category ?? undefined }).then(setRfqs);
+      toast({ title: 'Network re-scanned', description: `${rfqs.length} open demand signals.` });
+    } catch (err) {
+      toast({ variant: 'destructive', title: 'Re-scan failed', description: err instanceof Error ? err.message : 'Unknown error' });
+    } finally {
+      setRescanning(false);
+    }
+  };
+
+  const filtered = rfqs.filter((r) =>
+    r.title.toLowerCase().includes(search.toLowerCase()) ||
+    r.category.toLowerCase().includes(search.toLowerCase()),
   );
+
+  const categories = useMemo(() => [...new Set(rfqs.map((r) => r.category).filter(Boolean))].sort(), [rfqs]);
+
+  const submitBid = async () => {
+    if (!bidTarget || !sellerName.trim() || !bidForm.price) return;
+    setSubmittingBid(true);
+    try {
+      await rfqService.submitQuote({
+        rfqId: bidTarget.id,
+        sellerName: sellerName.trim(),
+        price: Number(bidForm.price),
+        deliveryTime: bidForm.deliveryTime,
+        message: bidForm.message,
+      });
+      toast({ title: 'Bid submitted', description: `Your proposal for "${bidTarget.title}" was sent.` });
+      setBidTarget(null);
+      setBidForm({ price: '', deliveryTime: '', message: '' });
+    } catch (err) {
+      toast({ variant: 'destructive', title: 'Bid failed', description: err instanceof Error ? err.message : 'Unknown error' });
+    } finally {
+      setSubmittingBid(false);
+    }
+  };
+
+  const toggleBatchSelection = (id: string) => {
+    setBatchSelection((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const submitBatch = async () => {
+    if (!sellerName.trim() || !batchForm.price || batchSelection.size === 0) return;
+    setSubmittingBatch(true);
+    try {
+      const result = await rfqService.submitQuotesBatch(
+        [...batchSelection].map((rfqId) => ({
+          rfqId,
+          sellerName: sellerName.trim(),
+          price: Number(batchForm.price),
+          deliveryTime: batchForm.deliveryTime,
+          message: batchForm.message,
+        })),
+      );
+      toast({ title: 'Batch response executed', description: `${result.succeeded} submitted, ${result.failed} failed.` });
+      setBatchOpen(false);
+      setBatchSelection(new Set());
+      setBatchForm({ price: '', deliveryTime: '', message: '' });
+    } catch (err) {
+      toast({ variant: 'destructive', title: 'Batch response failed', description: err instanceof Error ? err.message : 'Unknown error' });
+    } finally {
+      setSubmittingBatch(false);
+    }
+  };
+
+  const countryBreakdown = Object.entries(
+    rfqs.reduce<Record<string, number>>((acc, r) => {
+      const key = r.deliveryCountry || r.buyer.country || 'Unspecified';
+      acc[key] = (acc[key] ?? 0) + 1;
+      return acc;
+    }, {}),
+  ).sort((a, b) => b[1] - a[1]);
 
   if (loading) {
     return (
@@ -125,11 +167,17 @@ export default function SellerMarketplaceDiscovery() {
               <Radio className="h-4 w-4 text-emerald-600 animate-ping" />
               Real-time Pulse Active
            </div>
-           <Button variant="outline" className="h-12 px-6 border-2 font-black uppercase tracking-widest text-xs bg-background shadow-md group">
-              <Compass className="mr-3 h-4 w-4 group-hover:rotate-45 transition-transform" /> Re-Scan Network
+           <Button variant="outline" className="h-12 px-6 border-2 font-black uppercase tracking-widest text-xs bg-background shadow-md group" onClick={() => void rescan()} disabled={rescanning}>
+              {rescanning ? <Loader2 className="mr-3 h-4 w-4 animate-spin" /> : <Compass className="mr-3 h-4 w-4 group-hover:rotate-45 transition-transform" />} Re-Scan Network
            </Button>
         </div>
       </div>
+
+      {error && (
+        <div className="flex items-center gap-2 p-4 rounded-xl border border-destructive/30 bg-destructive/5 text-destructive text-sm">
+          <AlertTriangle className="h-4 w-4 shrink-0" /> {error}
+        </div>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-12">
         {/* DISCOVERY GRID */}
@@ -138,35 +186,63 @@ export default function SellerMarketplaceDiscovery() {
            <div className="flex flex-col lg:flex-row gap-4">
               <div className="relative flex-1">
                  <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-6 w-6 text-muted-foreground opacity-30" />
-                 <input 
-                   placeholder="Resolve institutional demand, commodity signatures, or node IDs..." 
+                 <input
+                   placeholder="Resolve institutional demand, commodity signatures, or node IDs..."
                    className="w-full h-12 pl-14 pr-6 bg-background border-2 rounded-2xl text-lg font-black tracking-tight shadow-inner focus:outline-none focus:border-primary/20 transition-all"
                    value={search}
                    onChange={(e) => setSearch(e.target.value)}
                  />
               </div>
               <div className="flex gap-3">
-                 <Button variant="outline" className="h-12 border-2 px-8 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-md bg-background">
-                    <Filter className="mr-2 h-4 w-4" /> All Sectors
-                    <ChevronDown className="ml-2 h-3 w-3 opacity-40" />
-                 </Button>
-                 <Button variant="outline" className="h-12 w-16 border-2 rounded-2xl shadow-md bg-background">
-                    <SlidersHorizontal className="h-6 w-6" />
+                 <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                       <Button variant="outline" className="h-12 border-2 px-8 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-md bg-background">
+                          <Filter className="mr-2 h-4 w-4" /> {category ?? 'All Sectors'}
+                          <ChevronDown className="ml-2 h-3 w-3 opacity-40" />
+                       </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                       <DropdownMenuLabel>Filter by Sector</DropdownMenuLabel>
+                       <DropdownMenuSeparator />
+                       <DropdownMenuItem onClick={() => setCategory(null)}>All Sectors</DropdownMenuItem>
+                       {categories.map((c) => (
+                          <DropdownMenuItem key={c} onClick={() => setCategory(c)}>{c}</DropdownMenuItem>
+                       ))}
+                    </DropdownMenuContent>
+                 </DropdownMenu>
+                 <Button
+                    variant="outline"
+                    className="h-12 border-2 px-6 rounded-2xl shadow-md bg-background font-black text-[10px] uppercase tracking-widest"
+                    disabled={batchSelection.size === 0}
+                    onClick={() => setBatchOpen(true)}
+                 >
+                    <SlidersHorizontal className="mr-2 h-4 w-4" /> Batch ({batchSelection.size})
                  </Button>
               </div>
            </div>
 
+           {filtered.length === 0 && (
+              <Card className="border-2 border-dashed rounded-2xl">
+                 <CardContent className="p-12 text-center text-muted-foreground font-medium">
+                    {search || category ? 'No open demand signals match your filters.' : 'No open demand signals right now.'}
+                 </CardContent>
+              </Card>
+           )}
+
            <div className="grid gap-8">
               <AnimatePresence>
                  {filtered.map((rfq, i) => (
-                    <motion.div 
+                    <motion.div
                       key={rfq.id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.05 }}
                     >
-                       <Card className="shadow-2xl border-2 hover:border-primary/40 transition-all group overflow-hidden bg-background rounded-2xl">
+                       <Card className={cn('shadow-2xl border-2 hover:border-primary/40 transition-all group overflow-hidden bg-background rounded-2xl', batchSelection.has(rfq.id) && 'border-primary')}>
                           <CardContent className="p-0 flex flex-col md:flex-row">
+                             <div className="flex items-center justify-center px-4 border-r-2 border-muted/30">
+                                <Checkbox checked={batchSelection.has(rfq.id)} onCheckedChange={() => toggleBatchSelection(rfq.id)} />
+                             </div>
                              <div className="md:w-3 bg-primary shrink-0 transition-all duration-700 group-hover:bg-indigo-600" />
                              <div className="flex-1 p-6 flex flex-col md:flex-row items-center justify-between gap-6">
                                 <div className="space-y-6 flex-1 min-w-0">
@@ -181,22 +257,16 @@ export default function SellerMarketplaceDiscovery() {
                                       <p className="text-base text-muted-foreground font-medium italic leading-relaxed max-w-xl">"Requirement for {rfq.category} tier artifacts. Target finality: {rfq.quantity.value} {rfq.quantity.unit}."</p>
                                    </div>
                                 </div>
-                                
+
                                 <div className="flex flex-col items-end shrink-0 border-l-2 pl-12 border-muted/50 space-y-6">
                                    <div className="text-right space-y-1">
                                       <p className="text-[9px] font-black text-muted-foreground uppercase opacity-40 leading-none">Target Unit Price</p>
                                       <p className="text-4xl font-black text-primary tabular-nums tracking-tighter">{formatCurrency(rfq.pricing.target_price)}</p>
-                                      <p className="text-[8px] font-bold text-muted-foreground uppercase mt-1">USD PER UNIT (FOB)</p>
+                                      <p className="text-[8px] font-bold text-muted-foreground uppercase mt-1">{rfq.pricing.currency} PER UNIT ({rfq.pricing.pricing_model})</p>
                                    </div>
-                                   <div className="flex items-center gap-6">
-                                      <div className="flex flex-col items-end">
-                                         <p className="text-[9px] font-black text-muted-foreground uppercase opacity-40 mb-1">Time Finality</p>
-                                         <span className="text-sm font-black text-foreground">48h Left</span>
-                                      </div>
-                                      <Button className="h-14 px-8 font-black uppercase text-[10px] tracking-widest shadow-2xl rounded-2xl bg-primary">
-                                         INITIATE BID
-                                      </Button>
-                                   </div>
+                                   <Button className="h-14 px-8 font-black uppercase text-[10px] tracking-widest shadow-2xl rounded-2xl bg-primary" onClick={() => setBidTarget(rfq)}>
+                                      INITIATE BID
+                                   </Button>
                                 </div>
                              </div>
                           </CardContent>
@@ -209,57 +279,33 @@ export default function SellerMarketplaceDiscovery() {
 
         {/* SIDEBAR: MARKET INTELLIGENCE */}
         <div className="lg:col-span-4 space-y-8">
-           <Card className="shadow-lg border-none bg-primary text-primary-foreground relative overflow-hidden group rounded-2xl">
-              <div className="absolute top-0 right-0 p-6 opacity-10 rotate-12 scale-125 group-hover:scale-150 transition-transform duration-1000">
-                 <Zap className="h-80 w-80 brightness-0 invert" />
-              </div>
-              <CardHeader className="pb-6 border-b border-white/10 p-6 relative">
-                 <CardTitle className="text-[10px] font-black uppercase tracking-widest opacity-80 flex items-center gap-4 text-white">
-                    <Activity className="h-5 w-5 text-yellow-400 animate-pulse" />
-                    Market Oracle
-                 </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6 relative space-y-8">
-                 <p className="text-3xl font-bold italic leading-tight opacity-95 tracking-tighter">
-                    "AI Analysis: Systemic demand for utility-scale energy artifacts in the North America corridor is trending +24% YoY. Bids within 5% of target price have achieved 92% finality in recent cycles."
-                 </p>
-                 <div className="grid grid-cols-2 gap-8">
-                    <div className="p-8 rounded-2xl bg-white/10 border border-white/10 shadow-inner backdrop-blur-md">
-                       <span className="text-[10px] font-black uppercase tracking-widest opacity-60 text-white">Opportunity Depth</span>
-                       <span className="text-4xl font-black text-emerald-300 tracking-tighter block mt-2">HIGH</span>
-                    </div>
-                    <div className="p-8 rounded-2xl bg-white/10 border border-white/10 shadow-inner backdrop-blur-md">
-                       <span className="text-[10px] font-black uppercase tracking-widest opacity-60 text-white">Trust Margin</span>
-                       <span className="text-4xl font-black text-blue-300 tracking-tighter block mt-2">942</span>
-                    </div>
-                 </div>
-                 <Button variant="secondary" className="w-full h-14 font-black uppercase text-[12px] tracking-widest shadow-md bg-white text-primary border-none rounded-xl hover:scale-[1.02] transition-transform">
-                    EXECUTE BATCH RESPONSE
-                 </Button>
-              </CardContent>
-           </Card>
-
            <Card className="shadow-none border-2 bg-background p-6 space-y-8 rounded-2xl">
               <div className="flex items-center justify-between">
                  <h4 className="text-[11px] font-black uppercase tracking-widest text-muted-foreground ml-1">Ecosystem Pulse</h4>
                  <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
               </div>
               <div className="space-y-6">
-                 {[
-                   { label: 'Demand Velocity', val: '+18.4%', icon: TrendingUp, color: 'text-emerald-500' },
-                   { label: 'Carrier Density', val: '92.4%', icon: ShipIcon, color: 'text-blue-500' },
-                   { label: 'Regulatory Variance', val: 'Minimal', icon: ShieldCheck, color: 'text-indigo-500' }
-                 ].map(stat => (
-                   <div key={stat.label} className="flex items-center justify-between group cursor-default">
-                      <div className="flex items-center gap-6">
-                         <div className="p-4 rounded-3xl bg-muted border-2 shadow-inner group-hover:bg-primary/5 transition-colors">
-                            <stat.icon className={cn("h-6 w-6", stat.color)} />
-                         </div>
-                         <span className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">{stat.label}</span>
-                      </div>
-                      <span className="text-2xl font-black tracking-tighter text-foreground">{stat.val}</span>
-                   </div>
-                 ))}
+                 <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-6">
+                       <div className="p-4 rounded-3xl bg-muted border-2 shadow-inner"><Boxes className="h-6 w-6 text-blue-500" /></div>
+                       <span className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">Open Signals</span>
+                    </div>
+                    <span className="text-2xl font-black tracking-tighter text-foreground">{rfqs.length}</span>
+                 </div>
+                 <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-6">
+                       <div className="p-4 rounded-3xl bg-muted border-2 shadow-inner"><TrendingUp className="h-6 w-6 text-emerald-500" /></div>
+                       <span className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">Sectors Active</span>
+                    </div>
+                    <span className="text-2xl font-black tracking-tighter text-foreground">{categories.length}</span>
+                 </div>
+                 <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-6">
+                       <div className="p-4 rounded-3xl bg-muted border-2 shadow-inner"><ShieldCheck className="h-6 w-6 text-indigo-500" /></div>
+                       <span className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">Selected for Batch</span>
+                    </div>
+                    <span className="text-2xl font-black tracking-tighter text-foreground">{batchSelection.size}</span>
+                 </div>
               </div>
            </Card>
 
@@ -268,17 +314,106 @@ export default function SellerMarketplaceDiscovery() {
               <div className="space-y-3">
                  <p className="text-sm font-black uppercase tracking-wide text-muted-foreground">Ecosystem Finality</p>
                  <p className="text-xs font-medium italic leading-relaxed px-4 opacity-60">
-                    "Baalvion intelligence is currently mapping 14,240 cross-jurisdictional nodes. Zero systemic failure patterns detected in the current cycle."
+                    Real-time breakdown of open demand across jurisdictions and sectors currently visible to your organization.
                  </p>
               </div>
-              <Button variant="outline" className="w-full h-12 border-2 font-black uppercase text-[9px] tracking-wide bg-background">AUDIT NETWORK TOPOLOGY</Button>
+              <Button variant="outline" className="w-full h-12 border-2 font-black uppercase text-[9px] tracking-wide bg-background" onClick={() => setTopologyOpen(true)}>AUDIT NETWORK TOPOLOGY</Button>
            </Card>
         </div>
       </div>
+
+      {/* BID DIALOG */}
+      <Dialog open={!!bidTarget} onOpenChange={(open) => !open && setBidTarget(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Bid: {bidTarget?.title}</DialogTitle></DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label>Your Company Name</Label>
+              <Input value={sellerName} onChange={(e) => setSellerName(e.target.value)} placeholder="Apex Manufacturing Co." />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Price ({bidTarget?.pricing.currency ?? 'USD'})</Label>
+                <Input type="number" min="0" value={bidForm.price} onChange={(e) => setBidForm((f) => ({ ...f, price: e.target.value }))} />
+              </div>
+              <div className="space-y-2">
+                <Label>Delivery Time</Label>
+                <Input value={bidForm.deliveryTime} onChange={(e) => setBidForm((f) => ({ ...f, deliveryTime: e.target.value }))} placeholder="14 days" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Message</Label>
+              <Textarea value={bidForm.message} onChange={(e) => setBidForm((f) => ({ ...f, message: e.target.value }))} placeholder="Terms, certifications, or notes for the buyer." />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => void submitBid()} disabled={submittingBid || !sellerName.trim() || !bidForm.price}>
+              {submittingBid ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Submitting…</> : 'Submit Bid'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* BATCH RESPONSE DIALOG */}
+      <Dialog open={batchOpen} onOpenChange={setBatchOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Execute Batch Response ({batchSelection.size} RFQs)</DialogTitle></DialogHeader>
+          <div className="space-y-4 py-2">
+            <p className="text-xs text-muted-foreground">The same price, delivery time, and message will be submitted to every selected RFQ.</p>
+            <div className="space-y-2">
+              <Label>Your Company Name</Label>
+              <Input value={sellerName} onChange={(e) => setSellerName(e.target.value)} placeholder="Apex Manufacturing Co." />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Price (per unit)</Label>
+                <Input type="number" min="0" value={batchForm.price} onChange={(e) => setBatchForm((f) => ({ ...f, price: e.target.value }))} />
+              </div>
+              <div className="space-y-2">
+                <Label>Delivery Time</Label>
+                <Input value={batchForm.deliveryTime} onChange={(e) => setBatchForm((f) => ({ ...f, deliveryTime: e.target.value }))} placeholder="14 days" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Message</Label>
+              <Textarea value={batchForm.message} onChange={(e) => setBatchForm((f) => ({ ...f, message: e.target.value }))} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => void submitBatch()} disabled={submittingBatch || !sellerName.trim() || !batchForm.price}>
+              {submittingBatch ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Executing…</> : `Submit to ${batchSelection.size} RFQs`}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* NETWORK TOPOLOGY DIALOG */}
+      <Dialog open={topologyOpen} onOpenChange={setTopologyOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle>Network Topology Audit</DialogTitle></DialogHeader>
+          <div className="space-y-6 py-2">
+            <div className="grid grid-cols-2 gap-4 text-center">
+              <div className="p-4 rounded-xl bg-muted/40">
+                <p className="text-2xl font-black">{rfqs.length}</p>
+                <p className="text-[9px] font-black uppercase text-muted-foreground">Open Signals</p>
+              </div>
+              <div className="p-4 rounded-xl bg-muted/40">
+                <p className="text-2xl font-black">{countryBreakdown.length}</p>
+                <p className="text-[9px] font-black uppercase text-muted-foreground">Jurisdictions</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">By Jurisdiction</p>
+              {countryBreakdown.slice(0, 8).map(([c, count]) => (
+                <div key={c} className="flex items-center justify-between text-sm py-1.5 border-b last:border-0">
+                  <span className="font-medium">{c}</span>
+                  <span className="font-black tabular-nums">{count}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </main>
   );
-}
-
-function ShipIcon(props: any) {
-  return <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 21c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1s1.2 1 2.5 1c2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M19.38 20A11.6 11.6 0 0 0 21 14l-9-4-9 4c0 2.26 1.05 4.48 2.62 6"/><path d="M19 13V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v6"/></svg>
 }

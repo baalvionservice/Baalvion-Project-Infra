@@ -39,8 +39,9 @@ interface PremiumClientProps {
 
 /**
  * Interactive Premium Subscription Hub.
- * Features tier comparison, monthly/yearly toggles, and a mock Stripe checkout flow.
- * Refined for Prompt 40.
+ * Features tier comparison, monthly/yearly toggles, and a real server-authoritative
+ * Razorpay checkout (see `@/lib/payments/checkout`) — activation is confirmed via
+ * webhook, not client state.
  */
 export function PremiumClient({ data }: PremiumClientProps) {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');

@@ -1,3 +1,6 @@
+'use client';
+
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
@@ -5,8 +8,21 @@ import { CheckCircle, ShieldCheck, Mail, UserCheck } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { PATHS } from "@/lib/paths";
 
+interface StoredApplication {
+  reference: string;
+  department: string;
+}
 
 export default function AccessPendingPage() {
+    const [application, setApplication] = useState<StoredApplication | null>(null);
+
+    useEffect(() => {
+        try {
+            const raw = sessionStorage.getItem('onboarding_application');
+            if (raw) setApplication(JSON.parse(raw) as StoredApplication);
+        } catch { /* ignore — falls back to generic copy */ }
+    }, []);
+
     const nextSteps: { title: string; description: string; icon: LucideIcon }[] = [
         {
             title: "Institutional Verification",
@@ -42,6 +58,14 @@ export default function AccessPendingPage() {
             <p className="text-muted-foreground">
               Our institutional review team is validating your request. This process ensures platform integrity, regulatory alignment, and secure participation for all stakeholders.
             </p>
+
+            {application && (
+              <div className="p-4 rounded-lg border-2 border-primary/20 bg-primary/5 text-left">
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Application Reference</p>
+                <p className="text-lg font-black tracking-tight text-primary tabular-nums">{application.reference}</p>
+                <p className="text-xs text-muted-foreground mt-1 capitalize">{application.department} onboarding — under review</p>
+              </div>
+            )}
 
             <div className="text-left bg-muted/80 p-6 rounded-lg border">
                <h4 className="font-medium mb-4 text-foreground flex items-center gap-2"><ShieldCheck className="w-5 h-5 text-primary"/> What Happens Next:</h4>

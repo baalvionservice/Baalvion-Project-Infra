@@ -108,6 +108,27 @@ class TreasuryService {
     eventBus.publish('TREASURY_OPTIMIZATION_EXECUTED' as any, { sourceNodeId, targetNodeId, amount });
   }
 
+  /**
+   * Provisions fresh capital into a currency node by posting a DEPOSIT journal entry
+   * to the ledger system of record.
+   */
+  async provisionCapital(targetNodeId: string, amount: number, currency: string, note?: string) {
+    logger.warn('Treasury_Command', `PROVISIONING_CAPITAL: ${amount} ${currency} into ${targetNodeId}`);
+
+    const creditAccountId = String(targetNodeId).split(':')[0];
+    await financeClient.post('/ledger/entries', {
+      transactionRef: `PROV-${Date.now()}`,
+      creditAccountId,
+      amount,
+      currency,
+      entryType: 'DEPOSIT',
+      description: note || 'Institutional Capital Provisioning',
+    });
+
+    metricsService.recordMetric('treasury_capital_provisioned_total', 1);
+    eventBus.publish('TREASURY_CAPITAL_PROVISIONED' as any, { targetNodeId, amount, currency });
+  }
+
   async getLedger(_companyId?: string, limit = 20): Promise<FinancialLog[]> {
     const res = await financeClient.get<Page<JavaEntry>>('/ledger/entries', { size: limit });
     return pageContent<JavaEntry>(res.data).map((l) => ({

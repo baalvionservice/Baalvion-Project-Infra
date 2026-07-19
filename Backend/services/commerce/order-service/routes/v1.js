@@ -7,6 +7,7 @@ const cartRoutes = require('./cartRoutes');
 const returnRoutes = require('./returnRoutes');
 const analyticsRoutes = require('./analyticsRoutes');
 const platformAnalyticsRoutes = require('./platformAnalyticsRoutes');
+const adminCartRoutes = require('./adminCartRoutes');
 const paymentWebhookRoutes = require('./paymentWebhookRoutes');
 const razorpayWebhookRoutes = require('./razorpayWebhookRoutes');
 const payuReturnRoutes = require('./payuReturnRoutes');
@@ -21,6 +22,10 @@ const router = Router();
 // the literal '/orders/analytics' segment is matched before ':storeId' could swallow 'analytics'.
 // Auth (authMiddleware + requirePlatformAdmin) is applied INSIDE the router, per-route.
 router.use('/orders/analytics', platformAnalyticsRoutes);
+
+// Platform-scoped (cross-store) cart visibility. authMiddleware runs here at the mount (so
+// req.auth exists); requirePlatformAdmin is applied per-route inside adminCartRoutes.js.
+router.use('/orders/admin/carts', authMiddleware, adminCartRoutes);
 
 // Provider payment webhooks (signature-authenticated, not user-auth). Mounted OUTSIDE the store tree
 // (the webhook resolves the store from the order). Also precedes /orders/stores/:storeId.

@@ -2,6 +2,7 @@ import * as mockApi from '@/services/mock-api/search';
 import { ApiResponse, SearchResult, SearchSuggestion, AdvancedSearchFilters, TopicRecommendation } from '@/types';
 import type { SearchResultType } from '@/types/search';
 import { errorHandler } from '@/lib/errors/error-handler';
+import { sortByRelevance } from '@/lib/utils/search';
 
 /**
  * @fileOverview Global Search — LIVE across imperialpedia-service (entities/creators/assets)
@@ -19,7 +20,7 @@ const SITE = process.env.NEXT_PUBLIC_CMS_SITE_SLUG || 'imperialpedia';
 
 const TYPE_MAP: Record<string, SearchResultType> = {
   company: 'company', country: 'country', industry: 'industry', technology: 'technology',
-  article: 'article', author: 'author', term: 'glossary', review: 'article', asset: 'topic',
+  article: 'article', author: 'author', term: 'glossary', review: 'article', asset: 'market',
   news: 'article', page: 'article',
 };
 
@@ -34,9 +35,10 @@ const routeFor = (type: string, slug: string, name: string): string => {
       return `/terms/${/^[0-9]/.test(c) ? 'num' : c}/${slug}`;
     }
     case 'review': return `/${slug}`;
-    // No per-asset detail route exists yet — point at the real markets overview
-    // page instead of the dead `/market` (no such route in src/app).
-    case 'asset': return `/market-news`;
+    // imperialpedia-service's /search returns assets keyed by ticker symbol as
+    // their slug (same convention as getAssetQuote(symbol)/getAllMarketAssets),
+    // so this resolves straight to the real per-asset quote page.
+    case 'asset': return `/markets/quote/${slug}`;
     case 'author': return `/creators`;
     case 'article': return `/financial-intelligence/${slug}`;
     default: return `/${slug}`;
@@ -96,10 +98,13 @@ export const searchService = {
       if (news.status === 'fulfilled') pushContent(news.value, 'news');
 
       if (out.length > 0) {
-        // de-dupe by id, keep order
+        // de-dupe by id, then rank by relevance — previously the merge order was
+        // whatever the upstream sources happened to return (imperialpedia-service
+        // results always first, then articles, then news), not actual match quality.
         const seen = new Set<string>();
         const deduped = out.filter((r) => (seen.has(r.id) ? false : (seen.add(r.id), true)));
-        return { data: deduped, status: 200 };
+        const ranked = sortByRelevance(deduped, q);
+        return { data: ranked, status: 200 };
       }
       return await mockApi.globalSearch(q, filters);
     } catch (error) {

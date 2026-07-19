@@ -43,4 +43,19 @@ const scope = createScopeResolver({
 });
 const pep = createPep({ scope, resolveStoreScope: (storeId) => loadStoreScope(storeId), config: { failMode: config.rbac.failMode }, AppError, audit });
 
-module.exports = { rbacClient, scope, pep, audit, loadStoreScope };
+// Platform-level role gate for CROSS-STORE endpoints (e.g. an all-stores category or product
+// listing). The store-scoped PEP (loadStoreRole/requireStoreRole) is the wrong authority for an
+// all-stores query — it 403s without a per-store role. Mirrors order-service's
+// middleware/rbacPep.js requirePlatformAdmin exactly: admits only platform-tier roles from the
+// JWT roles[]/role claim. A store_viewer-only or guest token is rejected 403/401.
+const PLATFORM_ADMIN_ROLES = new Set(['super_admin', 'country_admin']);
+const requirePlatformAdmin = (req, res, next) => {
+    if (!req.auth) return next(new AppError('UNAUTHORIZED', 'Authentication required', 401));
+    const roles = [req.auth.role, ...(Array.isArray(req.auth.roles) ? req.auth.roles : [])].filter(Boolean);
+    if (!roles.some((r) => PLATFORM_ADMIN_ROLES.has(r))) {
+        return next(new AppError('FORBIDDEN', 'Platform admin role required (super_admin or country_admin)', 403));
+    }
+    return next();
+};
+
+module.exports = { rbacClient, scope, pep, audit, loadStoreScope, requirePlatformAdmin };

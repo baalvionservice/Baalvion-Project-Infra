@@ -3,11 +3,12 @@
 // by every commerce service). RBAC remains the single source of truth. Route files keep importing
 // { loadStoreRole, loadAccessScope, requireStoreRole, STORE_ROLE_LEVEL } from here unchanged.
 const { STORE_ROLE_LEVEL } = require('@baalvion/commerce-rbac');
-const { pep } = require('../service/rbac');
+const { pep, requirePlatformAdmin } = require('../service/rbac');
 
 module.exports = {
     loadStoreRole: pep.loadStoreRole,
     loadAccessScope: pep.loadAccessScope,
     requireStoreRole: pep.requireStoreRole,
+    requirePlatformAdmin,
     STORE_ROLE_LEVEL,
 };

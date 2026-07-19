@@ -249,6 +249,7 @@ export async function getMarketplaceRfqs(params: RFQDiscoveryParams): Promise<RF
   const res = await apiClient.get<any>('/rfqs', {
     status: 'open',
     commodity: params.search,
+    category: params.category,
   });
   const items = res.data?.items ?? [];
   return items.map(mapRfqFromApi);
@@ -281,6 +282,39 @@ export async function submitQuote(data: any): Promise<RFQResponse> {
   return res.data;
 }
 
+export interface BatchQuoteInput {
+  rfqId: string;
+  sellerName: string;
+  price: number;
+  deliveryTime: string;
+  message: string;
+}
+
+export interface BatchQuoteResultItem {
+  index: number;
+  success: boolean;
+  quotation?: RFQResponse;
+  error?: string;
+}
+
+/** Submit responses to multiple RFQs in one call. Partial failure is reported per-item. */
+export async function submitQuotesBatch(items: BatchQuoteInput[]): Promise<{ succeeded: number; failed: number; results: BatchQuoteResultItem[] }> {
+  const res = await apiClient.post<any>('/quotations/batch', {
+    items: items.map((item) => ({
+      rfqId: item.rfqId,
+      sellerName: item.sellerName,
+      price: Number(item.price) || 0,
+      deliveryTime: item.deliveryTime,
+      message: item.message,
+      status: 'pending',
+    })),
+  });
+  if (!res.success || !res.data) {
+    throw new Error(res.error?.message || 'Failed to submit batch responses.');
+  }
+  return res.data;
+}
+
 export async function getMyResponses(): Promise<RFQResponse[]> {
   // "My" responses are the quotes submitted by the authenticated seller org. Resolve the
   // real org id from the session; if anonymous, return nothing rather than another tenant's quotes.
@@ -299,5 +333,6 @@ export const rfqService = {
   closeRfq,
   getMarketplaceRfqs,
   submitQuote,
+  submitQuotesBatch,
   getMyResponses,
 };

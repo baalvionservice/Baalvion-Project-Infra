@@ -8,6 +8,9 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
+    "migrate": "sequelize-cli db:migrate",
+    "migrate:undo": "sequelize-cli db:migrate:undo",
+    "migrate:undo:all": "sequelize-cli db:migrate:undo:all",
     "test": "node --test"
   },
   "dependencies": {
@@ -31,6 +34,7 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "sequelize-cli": "^6.6.2"
   }
 }

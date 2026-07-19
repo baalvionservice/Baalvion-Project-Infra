@@ -16,7 +16,6 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ArrowLeft, Loader2, Ban, CheckCircle2, Landmark, FilePlus2 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
-import { useAppState } from '@/app/(dashboard)/_components/app-state';
 import { useToast } from '@/hooks/use-toast';
 import {
   tradeCommandService,
@@ -41,7 +40,6 @@ export default function TradeDetailPage() {
   const params = useParams<{ id: string }>();
   const id = params.id;
   const router = useRouter();
-  const { userId, role, tenantId } = useAppState();
   const { toast } = useToast();
 
   const [graph, setGraph] = useState<TradeGraph | null>(null);
@@ -52,8 +50,6 @@ export default function TradeDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-
-  const auth = { userId, role, orgId: tenantId };
 
   const loadAll = useCallback(async () => {
     setLoading(true);
@@ -134,21 +130,21 @@ export default function TradeDetailPage() {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" disabled={busy} onClick={() => void runAction('Request LC', () =>
-            tradeCommandService.requestFinance(id, { type: 'LETTER_OF_CREDIT', amount: orderValue, currency: graph.terms.currency }, auth))}>
+            tradeCommandService.requestFinance(id, { type: 'LETTER_OF_CREDIT', amount: orderValue, currency: graph.terms.currency }))}>
             <Landmark className="mr-2 h-4 w-4" /> Request LC
           </Button>
           <Button variant="outline" disabled={busy} onClick={() => void runAction('Attach Invoice', () =>
-            tradeCommandService.addDocument(id, { kind: 'INVOICE', url: `https://docs.baalvion.local/${graph.reference}/invoice.pdf` }, auth))}>
+            tradeCommandService.addDocument(id, { kind: 'INVOICE', url: `https://docs.baalvion.local/${graph.reference}/invoice.pdf` }))}>
             <FilePlus2 className="mr-2 h-4 w-4" /> Attach Invoice
           </Button>
           {graph.currentState === 'SETTLEMENT_PENDING' && (
-            <Button disabled={busy} onClick={() => void runAction('Complete Trade', () => tradeCommandService.complete(id, auth))}>
+            <Button disabled={busy} onClick={() => void runAction('Complete Trade', () => tradeCommandService.complete(id))}>
               <CheckCircle2 className="mr-2 h-4 w-4" /> Release Settlement
             </Button>
           )}
           {!isTerminal && (
             <Button variant="destructive" disabled={busy} onClick={() => void runAction('Cancel Trade', () =>
-              tradeCommandService.cancel(id, 'cancelled_from_command_center', auth))}>
+              tradeCommandService.cancel(id, 'cancelled_from_command_center'))}>
               <Ban className="mr-2 h-4 w-4" /> Cancel
             </Button>
           )}

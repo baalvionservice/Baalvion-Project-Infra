@@ -12,6 +12,7 @@ const requestContext = require('./middleware/requestContext');
 const createIpRateLimit = require('./middleware/rateLimit');
 const { startReconciliationWorker } = require('./queues/reconciliationQueue');
 const { startLedgerOutboxRelay, stopLedgerOutboxRelay } = require('./service/ledgerOutbox');
+const { startCartEventsOutboxRelay, stopCartEventsOutboxRelay } = require('./service/cartEventsOutbox');
 const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-shutdown');
 
 const app = express();
@@ -57,10 +58,14 @@ async function start() {
         // Transactional-outbox relay: durably delivers captured-payment / refund ledger mirrors to
         // ledger-service with retry + dead-letter (replaces the old fire-and-forget safeLedger path).
         startLedgerOutboxRelay();
+        // Same outbox mechanism, draining cart-activity events into orders.cart_events for admin
+        // live/abandoned-cart visibility (see service/cartEventsOutbox.js).
+        startCartEventsOutboxRelay();
         const server = app.listen(config.port, () => {
             console.log(`[Order Service] Running on port ${config.port} (${config.env})`);
         });
         registerShutdown('ledger-outbox-relay', async () => { await stopLedgerOutboxRelay(); });
+        registerShutdown('cart-events-outbox-relay', async () => { await stopCartEventsOutboxRelay(); });
         registerShutdown('db', async () => { if (sequelize && sequelize.close) await sequelize.close(); });
         initGracefulShutdown(server);
     } catch (err) {

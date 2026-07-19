@@ -21,10 +21,15 @@ const adminSetMemberSchema = z.object({
     status: z.enum(['invited', 'requested', 'approved', 'paid', 'rejected', 'banned', 'cancelled', 'expired']).optional(),
 }).refine((d) => d.role || d.status, { message: 'role or status is required' });
 
+const resolveFlagSchema = z.object({
+    action: z.enum(['dismiss', 'remove']),
+});
+
 module.exports = {
     joinCommunitySchema,
     createInviteSchema,
     redeemInviteSchema,
     decideJoinRequestSchema,
     adminSetMemberSchema,
+    resolveFlagSchema,
 };

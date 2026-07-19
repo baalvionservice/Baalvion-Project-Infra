@@ -1,4 +1,5 @@
-import { newsArticles, NewsBodyBlock, NewsArticle } from "@/lib/data.news";
+import { cache, Suspense } from "react";
+import { newsArticles, NewsBodyBlock, NewsArticle, NewsCategory } from "@/lib/data.news";
 import { getPublishedNewsBySlug } from "@/services/data/cms-public";
 import { buildMetadata } from "@/lib/seo";
 import { formatDate } from "@/services/format-date";
@@ -18,6 +19,10 @@ import { articleUrl } from "@/lib/data/article-url";
 import { ShareBar } from "@/components/article/ShareBar";
 import { articlesService } from "@/services/data";
 import { ArticleMarketWidget } from "@/components/markets/ArticleMarketWidget";
+import { getAllAuthors } from "@/config/authors";
+import { isAllowedImageHost } from "@/lib/safe-image";
+import { structuredData } from "@/lib/seo/structured-data";
+import { createEntityLinker, linkEntitiesInText, EntityLinkerState } from "@/lib/entityLinkInjector";
 import {
   resolveArticleForDetail,
   buildArticleDetailMetadata,
@@ -48,14 +53,18 @@ function isDatedSegments(segments: string[]): segments is [string, string, strin
   );
 }
 
-async function findNewsArticle(slug: string): Promise<NewsArticle | null> {
+// Wrapped in React's cache() so generateMetadata and the page component — which
+// both resolve the same slug on every request — share one lookup (and one
+// live cms-service round-trip) instead of two, per Next's documented pattern
+// for sharing data between generateMetadata and the page it describes.
+const findNewsArticle = cache(async (slug: string): Promise<NewsArticle | null> => {
   return (
     newsArticles.find((a) => a.slug === slug) ??
     (await getPublishedNewsBySlug(slug)) ??
     staticNewsBySlug(slug) ??
     null
   );
-}
+});
 
 function canonicalSegments(dateISO: string): { year: string; month: string; day: string } {
   const d = new Date(dateISO);
@@ -79,6 +88,78 @@ function formatDateTime(iso: string): string {
   });
 }
 
+// Google typically truncates meta descriptions past ~155-160 chars — clip at a
+// word boundary instead of letting an arbitrary CMS excerpt run long and get
+// cut mid-word in the SERP snippet.
+function truncateForMeta(text: string, maxLength = 160): string {
+  if (text.length <= maxLength) return text;
+  const clipped = text.slice(0, maxLength - 1);
+  const lastSpace = clipped.lastIndexOf(" ");
+  return `${clipped.slice(0, lastSpace > 0 ? lastSpace : maxLength - 1)}…`;
+}
+
+// Only categories with a real browse destination under /latest get a linked
+// breadcrumb/category crumb — keeps BreadcrumbList schema honest (no crumb
+// pointing nowhere) instead of linking every category and 404ing on the rest.
+const CATEGORY_HREF: Partial<Record<NewsCategory, string>> = {
+  Markets: "/latest/markets",
+  Stocks: "/latest/stocks",
+  Crypto: "/latest/crypto",
+  Economy: "/latest/economy",
+  PersonalFinance: "/latest/personalfinance",
+  RealEstate: "/latest/realestate",
+};
+
+// The CMS doesn't attribute articles to an author record (see config/authors.ts),
+// so only link the byline when the article's author name matches a known,
+// published author profile — never guess a slug and risk a wrong attribution.
+function findAuthorProfile(name: string) {
+  const normalized = name.trim();
+  return getAllAuthors().find((a) => a.name.trim() === normalized);
+}
+
+function isValidIsoDate(value: string | undefined | null): value is string {
+  return !!value && !Number.isNaN(Date.parse(value));
+}
+
+/**
+ * Mirrors the heuristic in lib/seo/faq-extractor.ts (used by the content-engine
+ * guide pipeline) but operates on the structured NewsBodyBlock[] this template
+ * already has, instead of re-parsing HTML: a heading/subheading ending in "?"
+ * is a question, the paragraph text immediately after it is the answer. Only
+ * returns pairs when the article's own body is already shaped like FAQ content
+ * — nothing here is generated or rewritten, just described to search engines.
+ * Requires 2+ pairs (FAQPage schema needs real Q&A, not one stray question).
+ */
+function extractFaqFromBlocks(body: NewsBodyBlock[]): { question: string; answer: string }[] {
+  const pairs: { question: string; answer: string }[] = [];
+  let pendingQuestion: string | null = null;
+  let pendingAnswer: string[] = [];
+
+  const flush = () => {
+    if (pendingQuestion && pendingAnswer.length) {
+      const answer = pendingAnswer.join(" ").trim();
+      if (answer.length >= 20) pairs.push({ question: pendingQuestion, answer });
+    }
+    pendingQuestion = null;
+    pendingAnswer = [];
+  };
+
+  for (const block of body) {
+    if (block.type === "heading" || block.type === "subheading") {
+      flush();
+      if (block.text.trim().endsWith("?")) pendingQuestion = block.text.trim();
+      continue;
+    }
+    if (block.type === "paragraph" && pendingQuestion) {
+      pendingAnswer.push(block.text);
+    }
+  }
+  flush();
+
+  return pairs.length >= 2 ? pairs.slice(0, 12) : [];
+}
+
 // ─── Metadata ────────────────────────────────────────────────────────────────
 
 export async function generateMetadata({ params }: { params: Promise<SlugParams> }) {
@@ -88,13 +169,41 @@ export async function generateMetadata({ params }: { params: Promise<SlugParams>
     const [, , , articleSlug] = segments;
     const article = await findNewsArticle(articleSlug);
     if (!article) return {};
-    return buildMetadata({
+
+    const baseUrl = (env.siteUrl || "https://imperialpedia.com").replace(/\/$/, "");
+    const authorProfile = findAuthorProfile(article.author.name);
+    const base = buildMetadata({
       title: article.title,
-      description: article.excerpt,
+      description: truncateForMeta(article.excerpt),
+      keywords: article.tags && article.tags.length > 0 ? article.tags : undefined,
       canonical: articleUrl(article.publishedAt, articleSlug),
-      ogImage: article.imageUrl,
+      // Some articles fall back to an inline `data:image/svg+xml,...` illustration
+      // (see @baalvion/illustrations) when no hosted artwork exists yet — that's fine
+      // for the on-page <Image>, but social unfurlers and crawlers fetch og:image as
+      // an HTTP(S) URL and can't resolve a data URI, so it must never reach this tag.
+      // buildMetadata falls back to the sitewide default OG image when this is undefined.
+      ogImage: isAllowedImageHost(article.imageUrl) ? article.imageUrl : undefined,
       ogType: "article",
     });
+
+    return {
+      ...base,
+      authors: [
+        {
+          name: article.author.name,
+          url: authorProfile ? `${baseUrl}/authors/${authorProfile.slug}` : undefined,
+        },
+      ],
+      openGraph: {
+        ...base.openGraph,
+        type: "article",
+        publishedTime: article.publishedAt,
+        modifiedTime: article.updatedAt || article.publishedAt,
+        authors: [article.author.name],
+        section: article.category,
+        tags: article.tags,
+      },
+    };
   }
 
   // Content-engine guides canonically live at /<categorySlug>/<slug> — a
@@ -153,12 +262,19 @@ export async function generateMetadata({ params }: { params: Promise<SlugParams>
 
 // ─── Body block renderer (shared by both the bare-slug and dated routes) ─────
 
-function BodyBlock({ block }: { block: NewsBodyBlock }) {
+// `linker` is optional: headings/subheadings/lists/images are never scanned
+// for entity mentions (see entityMentionText.js's block-type allowlist on the
+// detection side — this mirrors that at render time), and static-only
+// callers (BareSlugPage's broker guides) that have no entityMentions at all
+// simply omit it, rendering plain text exactly as before.
+function BodyBlock({ block, linker }: { block: NewsBodyBlock; linker?: EntityLinkerState }) {
+  const withLinks = (text: string) => (linker ? linkEntitiesInText(text, linker) : text);
+
   switch (block.type) {
     case "paragraph":
       return (
         <p className="text-foreground text-[1.0625rem] leading-[1.85] mb-5">
-          {block.text}
+          {withLinks(block.text)}
         </p>
       );
 
@@ -180,7 +296,7 @@ function BodyBlock({ block }: { block: NewsBodyBlock }) {
       return (
         <blockquote className="my-8 pl-6 border-l-4 border-foreground">
           <p className="text-foreground text-xl font-medium leading-relaxed italic mb-2">
-            &ldquo;{block.text}&rdquo;
+            &ldquo;{withLinks(block.text)}&rdquo;
           </p>
           {block.attribution && (
             <footer className="text-sm text-muted-foreground not-italic font-medium">
@@ -194,7 +310,7 @@ function BodyBlock({ block }: { block: NewsBodyBlock }) {
       return (
         <div className="my-7 rounded-xl bg-muted border border-border px-6 py-5">
           <p className="text-foreground text-[0.9375rem] leading-relaxed font-medium">
-            {block.text}
+            {withLinks(block.text)}
           </p>
         </div>
       );
@@ -220,7 +336,7 @@ function BodyBlock({ block }: { block: NewsBodyBlock }) {
           <div className="relative w-full aspect-[16/9] overflow-hidden rounded-xl">
             <Image
               src={block.url}
-              alt={block.caption ?? ""}
+              alt={block.caption ?? "Article illustration"}
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 720px"
@@ -269,30 +385,118 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
   const relatedArticles = newsArticles
     .filter((a) => a.category === article.category && a.slug !== slug)
     .slice(0, 6);
+  const readMoreLinks = (article.related ?? []).filter((r) => r.href && r.href !== "#");
 
   const baseUrl = (env.siteUrl || "https://imperialpedia.com").replace(/\/$/, "");
   const canonicalPath = articleUrl(article.publishedAt, slug);
   const canonicalUrl = `${baseUrl}${canonicalPath}`;
 
+  const authorProfile = findAuthorProfile(article.author.name);
+  const categoryPath = CATEGORY_HREF[article.category];
+
+  // Persisted, save-time entity-mention detection (full body, all 4 entity
+  // types, aliases-aware) — see entityMentionDetectionService.js. One real
+  // detector feeds both the sidebar quote widget and the internal links
+  // rendered below, and the `mentions` JSON-LD entities here.
+  const entityMentions = article.entityMentions ?? [];
+  const linker = createEntityLinker(entityMentions);
+  const SCHEMA_TYPE_BY_ENTITY_TYPE: Record<string, string> = {
+    company: "Corporation",
+    country: "Country",
+    industry: "Thing",
+    technology: "Thing",
+  };
+  const faqPairs = extractFaqFromBlocks(article.body);
+
   const articleSchema = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
     headline: article.title,
-    description: article.excerpt || "",
-    image: article.imageUrl ? [article.imageUrl] : [],
-    author: { "@type": "Person", name: article.author?.name || "Imperialpedia" },
-    publisher: { "@type": "Organization", name: "Imperialpedia", url: baseUrl },
-    datePublished: article.publishedAt || "",
-    dateModified: article.updatedAt || article.publishedAt || "",
+    // Optional fields are only included when there's a real, valid value —
+    // an empty string or [] in JSON-LD is worse than omitting the key, since
+    // some validators/consumers treat a present-but-empty field as a filled one.
+    ...(article.excerpt ? { description: article.excerpt } : {}),
+    ...(isAllowedImageHost(article.imageUrl) ? { image: [article.imageUrl] } : {}),
+    author: {
+      "@type": "Person",
+      name: article.author?.name || "Imperialpedia",
+      ...(authorProfile ? { url: `${baseUrl}/authors/${authorProfile.slug}` } : {}),
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Imperialpedia",
+      url: baseUrl,
+      logo: { "@type": "ImageObject", url: `${baseUrl}/logo.png`, width: 512, height: 512 },
+    },
+    ...(isValidIsoDate(article.publishedAt) ? { datePublished: article.publishedAt } : {}),
+    ...(isValidIsoDate(article.updatedAt) || isValidIsoDate(article.publishedAt)
+      ? { dateModified: isValidIsoDate(article.updatedAt) ? article.updatedAt : article.publishedAt }
+      : {}),
     url: canonicalUrl,
+    mainEntityOfPage: { "@type": "WebPage", "@id": canonicalUrl },
+    articleSection: article.category,
+    inLanguage: "en-US",
+    ...(article.tags && article.tags.length > 0 ? { keywords: article.tags.join(", ") } : {}),
+    ...(article.readTimeMinutes ? { timeRequired: `PT${article.readTimeMinutes}M` } : {}),
+    // "about" = the topics this article covers (editorial tags, already curated —
+    // not inferred/fabricated); "mentions" = the real, tracked entities named in
+    // it. Both feed Google's Knowledge Graph / entity understanding and give AI
+    // answer engines (ChatGPT Search, Perplexity, AI Overviews) a structured
+    // handle on what the article is actually about, beyond the prose itself.
+    ...(article.tags && article.tags.length > 0
+      ? { about: article.tags.map((tag) => ({ "@type": "Thing", name: tag })) }
+      : {}),
+    ...(entityMentions.length > 0
+      ? {
+          mentions: entityMentions.map((m) => ({
+            "@type": SCHEMA_TYPE_BY_ENTITY_TYPE[m.entityType] || "Thing",
+            name: m.entityName,
+            url: `${baseUrl}${m.entityUrl}`,
+          })),
+        }
+      : {}),
+    // Wire-style articles that credit a source get that source described as a
+    // real citation, not just a plain-text "Source:" link in the body.
+    ...(article.externalSourceUrl
+      ? {
+          citation: {
+            "@type": "CreativeWork",
+            name: article.externalSourceName || article.externalSourceUrl,
+            url: article.externalSourceUrl,
+          },
+        }
+      : {}),
+    // Lets voice assistants and AI answer engines read back a concise summary
+    // instead of the full body — points at the real H1 + excerpt DOM nodes below.
+    // ".key-points" is only added when that section actually renders (see JSX).
+    speakable: {
+      "@type": "SpeakableSpecification",
+      cssSelector:
+        article.keyTakeaways && article.keyTakeaways.length > 0
+          ? ["h1", ".article-excerpt", ".key-points"]
+          : ["h1", ".article-excerpt"],
+    },
   };
+
+  // Only emitted when the article's own body already contains question-headed
+  // sections with real answers underneath — see extractFaqFromBlocks. Never
+  // fabricates questions; this is the same visible body content, described.
+  const faqSchema = faqPairs.length > 0 ? structuredData.faq(faqPairs) : null;
+
+  // Breadcrumb schema must mirror what's actually rendered in the <nav> below —
+  // a mismatch between visible breadcrumbs and BreadcrumbList schema risks a
+  // manual action for misleading structured data, so the category crumb is only
+  // added here (and only links) when CATEGORY_HREF has a real destination for it.
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: baseUrl },
       { "@type": "ListItem", position: 2, name: "World", item: `${baseUrl}/world` },
-      { "@type": "ListItem", position: 3, name: article.title, item: canonicalUrl },
+      ...(categoryPath
+        ? [{ "@type": "ListItem", position: 3, name: article.category, item: `${baseUrl}${categoryPath}` }]
+        : []),
+      { "@type": "ListItem", position: categoryPath ? 4 : 3, name: article.title, item: canonicalUrl },
     ],
   };
 
@@ -300,12 +504,21 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
     <div className="bg-white min-h-screen">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      {faqSchema && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      )}
 
       <div className="max-w-screen-xl mx-auto px-4 py-8 sm:py-10">
-        <nav className="text-xs text-gray-500 mb-4 flex items-center gap-1.5">
+        <nav aria-label="Breadcrumb" className="text-xs text-gray-500 mb-4 flex items-center gap-1.5">
           <Link href="/world" className="hover:text-[#CC0000]">World</Link>
           <span>/</span>
-          <span className="text-gray-400">{article.category}</span>
+          {categoryPath ? (
+            <Link href={categoryPath} className="text-gray-500 hover:text-[#CC0000]">
+              {article.category}
+            </Link>
+          ) : (
+            <span className="text-gray-400">{article.category}</span>
+          )}
         </nav>
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-10 xl:gap-14">
@@ -327,13 +540,15 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
               {article.title}
             </h1>
 
-            <p className="text-lg text-gray-600 leading-relaxed mt-4 max-w-2xl">{article.excerpt}</p>
+            <p className="article-excerpt text-lg text-gray-600 leading-relaxed mt-4 max-w-2xl">
+              {article.excerpt}
+            </p>
 
             {article.keyTakeaways && article.keyTakeaways.length > 0 && (
-              <div className="mt-6 border border-gray-200 bg-gray-50 rounded-sm p-5">
-                <h3 className="text-xs font-black tracking-widest text-gray-900 uppercase mb-3">
+              <div className="key-points mt-6 border border-gray-200 bg-gray-50 rounded-sm p-5">
+                <h2 className="text-xs font-black tracking-widest text-gray-900 uppercase mb-3">
                   Key Points
-                </h3>
+                </h2>
                 <ul className="space-y-2">
                   {article.keyTakeaways.map((point, i) => (
                     <li key={i} className="flex gap-2.5 text-sm text-gray-700 leading-relaxed">
@@ -348,7 +563,17 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
             <div className="flex flex-wrap items-center justify-between gap-4 py-5 mt-5 border-y border-gray-200">
               <div className="flex flex-col gap-1 text-sm">
                 <span>
-                  By <span className="font-semibold text-gray-900">{article.author.name}</span>
+                  By{" "}
+                  {authorProfile ? (
+                    <Link
+                      href={`/authors/${authorProfile.slug}`}
+                      className="font-semibold text-gray-900 hover:text-[#CC0000]"
+                    >
+                      {article.author.name}
+                    </Link>
+                  ) : (
+                    <span className="font-semibold text-gray-900">{article.author.name}</span>
+                  )}
                   {article.author.title && (
                     <span className="text-gray-500"> · {article.author.title}</span>
                   )}
@@ -356,6 +581,7 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
                 <span className="text-gray-500 text-xs">
                   Published {formatDateTime(article.publishedAt)}
                   {article.updatedAt && <> · Updated {formatDateTime(article.updatedAt)}</>}
+                  {article.readTimeMinutes && <> · {article.readTimeMinutes} min read</>}
                 </span>
               </div>
               <ShareBar url={canonicalUrl} title={article.title} />
@@ -381,15 +607,21 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
 
             <div className="prose-none">
               {demoteExtraHeadings(article.body).map((block, i) => (
-                <BodyBlock key={i} block={block} />
+                <BodyBlock key={i} block={block} linker={linker} />
               ))}
             </div>
 
             {article.galleryImages && article.galleryImages.length > 0 && (
               <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {article.galleryImages.map((src) => (
+                {article.galleryImages.map((src, i) => (
                   <div key={src} className="relative aspect-square overflow-hidden rounded-sm">
-                    <Image src={src} alt={article.title} fill className="object-cover" sizes="(max-width: 768px) 50vw, 240px" />
+                    <Image
+                      src={src}
+                      alt={`${article.title} — photo ${i + 1}`}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 50vw, 240px"
+                    />
                   </div>
                 ))}
               </div>
@@ -425,13 +657,19 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
 
           {/* ══ RIGHT: Sidebar ═══════════════════════════════════════════ */}
           <aside className="lg:sticky lg:top-24 lg:self-start space-y-8">
-            <ArticleMarketWidget title={article.title} tags={article.tags} excerpt={article.excerpt} />
+            {/* getAssetQuote (inside this widget) is a live, no-store fetch with up to
+                a 6s timeout — Suspense keeps a slow/degraded quote API from blocking
+                the primary article content (title, byline, hero image) from streaming,
+                which would otherwise directly threaten LCP/TTFB. */}
+            <Suspense fallback={null}>
+              <ArticleMarketWidget entityMentions={entityMentions} />
+            </Suspense>
 
             {relatedArticles.length > 0 && (
               <div>
-                <h3 className="text-xs font-black tracking-widest text-gray-900 uppercase border-b-2 border-[#CC0000] pb-2 mb-4">
+                <h2 className="text-xs font-black tracking-widest text-gray-900 uppercase border-b-2 border-[#CC0000] pb-2 mb-4">
                   Related News
-                </h3>
+                </h2>
                 <ul className="space-y-4">
                   {relatedArticles.map((a) => (
                     <li key={a.id}>
@@ -449,13 +687,15 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
               </div>
             )}
 
-            {article.related && article.related.length > 0 && (
+            {/* Demo/placeholder related links carry href="#" — filtered out so the
+                sidebar never renders an internal link that goes nowhere. */}
+            {readMoreLinks.length > 0 && (
               <div>
-                <h3 className="text-xs font-black tracking-widest text-gray-900 uppercase border-b-2 border-gray-200 pb-2 mb-4">
+                <h2 className="text-xs font-black tracking-widest text-gray-900 uppercase border-b-2 border-gray-200 pb-2 mb-4">
                   Read More
-                </h3>
+                </h2>
                 <ul className="space-y-3">
-                  {article.related.map((r) => (
+                  {readMoreLinks.map((r) => (
                     <li key={r.label}>
                       <Link href={r.href} className="text-sm font-semibold text-gray-800 hover:text-[#CC0000] transition-colors leading-snug">
                         {r.label}
@@ -650,9 +890,15 @@ async function BareSlugPage({ slug }: { slug: string }) {
 
             {article.galleryImages && article.galleryImages.length > 0 && (
               <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {article.galleryImages.map((src) => (
+                {article.galleryImages.map((src, i) => (
                   <div key={src} className="relative aspect-square overflow-hidden rounded-sm">
-                    <Image src={src} alt={article.title} fill className="object-cover" sizes="(max-width: 768px) 50vw, 240px" />
+                    <Image
+                      src={src}
+                      alt={`${article.title} — photo ${i + 1}`}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 50vw, 240px"
+                    />
                   </div>
                 ))}
               </div>

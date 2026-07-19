@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Inter, Barlow_Condensed, Lato } from "next/font/google";
-import TopNav from "@/components/world/TopNav";
-import Footer from "@/components/world/Footer";
+import TopNav from "@/components/cnbc/TopNav";
+import Footer from "@/components/cnbc/Footer";
 
 // Free equivalents for the World vertical's CNBC-style type system:
 // Proxima Nova/Averta (headlines, UI) -> Inter, FoundersGroteskCond
@@ -26,7 +26,7 @@ const worldBody = Lato({ subsets: ["latin"], weight: ["400", "700"], variable: "
 export default function WorldLayout({ children }: { children: ReactNode }) {
   return (
     <div
-      className={`world-shell flex min-h-screen flex-col bg-gray-100 ${worldSans.variable} ${worldCondensed.variable} ${worldBody.variable}`}
+      className={`world-shell cnbc-shell flex min-h-screen flex-col bg-black ${worldSans.variable} ${worldCondensed.variable} ${worldBody.variable}`}
     >
       <TopNav />
       <div className="flex-1">{children}</div>

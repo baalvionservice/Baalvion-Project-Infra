@@ -11,6 +11,11 @@
  *   • ADMIN_PREFIXES         — governance / sovereign-command surfaces. The edge still only checks
  *                              that a session exists; the SPECIFIC authority is enforced by the
  *                              RouteGuard (persona allowlist) + the API (authoritative).
+ *
+ * `PUBLIC_EXACT` below is NOT currently consumed by `middleware.ts` — the edge gate is default-allow
+ * (anything not matched by `isAdminPath`/`needsAuth` is already public). It's kept as accurate,
+ * forward-looking documentation of the intended public surface for a future default-deny migration;
+ * don't assume it's an active allowlist today.
  */
 
 export const AUTH_REQUIRED_PREFIXES: readonly string[] = [
@@ -89,6 +94,11 @@ export const PUBLIC_EXACT: ReadonlySet<string> = new Set([
   '/onboard',
   '/onboard/buyer',
   '/onboard/seller',
+  '/onboard/banking',
+  '/onboard/customs',
+  '/onboard/logistics',
+  '/onboard/enterprise',
+  '/onboard/government',
   '/accept-invite',
   '/forgot-password',
   '/reset-password',

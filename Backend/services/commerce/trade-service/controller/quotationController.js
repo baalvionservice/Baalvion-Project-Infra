@@ -175,7 +175,51 @@ const counterQuotation = async (req, res, next) => {
     }
 };
 
+// Submit responses to multiple RFQs in one call — same seller-stamping and
+// buyer-notification logic as createQuotation, applied per item. Partial
+// failure is reported per-index rather than aborting the whole batch, since
+// a batch of otherwise-independent bids shouldn't all fail for one bad RFQ id.
+const createQuotationsBatch = async (req, res, next) => {
+    try {
+        const items = Array.isArray(req.body?.items) ? req.body.items : [];
+        if (items.length === 0) return next(new AppError('VALIDATION_ERROR', 'items must be a non-empty array', 400));
+        if (items.length > 50) return next(new AppError('VALIDATION_ERROR', 'A batch may contain at most 50 items', 400));
+
+        const sellerId = req.auth?.orgCode ? String(req.auth.orgCode) : req.auth?.orgId ? String(req.auth.orgId) : undefined;
+
+        const results = await Promise.all(items.map(async (item, index) => {
+            try {
+                const payload = { ...item };
+                if (sellerId) payload.sellerId = sellerId;
+                const quotation = await db.Quotation.create(payload);
+                if (quotation.rfqId) {
+                    const rfq = await db.Rfq.findByPk(quotation.rfqId);
+                    if (rfq && rfq.tenant_id) {
+                        await db.Notification.create({
+                            tenant_id: rfq.tenant_id,
+                            recipient_org_id: String(rfq.buyer_org_id ?? rfq.tenant_id),
+                            type: 'quotation_received',
+                            title: 'New quotation received',
+                            message: `${quotation.sellerName || quotation.sellerId} responded to your RFQ`,
+                            entity_type: 'quotation',
+                            entity_id: quotation.id,
+                        });
+                    }
+                }
+                return { index, success: true, quotation };
+            } catch (err) {
+                return { index, success: false, error: err.message || 'Failed to create quotation' };
+            }
+        }));
+
+        const succeeded = results.filter((r) => r.success).length;
+        return sendSuccess(req, res, { results, succeeded, failed: results.length - succeeded }, 201);
+    } catch (err) {
+        return next(err);
+    }
+};
+
 module.exports = {
-    listQuotations, getQuotation, createQuotation, updateQuotation,
+    listQuotations, getQuotation, createQuotation, createQuotationsBatch, updateQuotation,
     acceptQuotation, rejectQuotation, counterQuotation,
 };

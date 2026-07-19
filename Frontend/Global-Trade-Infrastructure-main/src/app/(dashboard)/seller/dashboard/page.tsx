@@ -43,16 +43,34 @@ import {
 } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { InsightsPanel } from '../../_components/insights-panel';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
+import { treasurySyncService } from '@/services/treasury-sync-service';
 
 export default function SellerCommandObservatory() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
+  const router = useRouter();
+  const { toast } = useToast();
 
   useEffect(() => {
     sellerService.getDashboardData()
       .then(setData)
       .finally(() => setLoading(false));
   }, []);
+
+  const resyncTreasury = async () => {
+    setSyncing(true);
+    try {
+      const result = await treasurySyncService.resync();
+      toast({ title: 'Treasury re-synced', description: `${result.walletCount} wallet(s) up to date.` });
+    } catch (err) {
+      toast({ variant: 'destructive', title: 'Treasury sync failed', description: err instanceof Error ? err.message : 'Unknown error' });
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   if (loading || !data) {
     return (
@@ -75,10 +93,10 @@ export default function SellerCommandObservatory() {
           <h2 className="text-4xl font-black tracking-tight uppercase tracking-tighter leading-[0.8]">Seller <br />Observatory.</h2>
         </div>
         <div className="flex gap-4">
-          <Button variant="outline" className="h-12 px-6 border-2 font-black uppercase tracking-widest text-xs bg-background shadow-md">
-            <Landmark className="mr-3 h-4 w-4" /> Treasury Re-Sync
+          <Button variant="outline" className="h-12 px-6 border-2 font-black uppercase tracking-widest text-xs bg-background shadow-md" onClick={() => void resyncTreasury()} disabled={syncing}>
+            {syncing ? <Loader2 className="mr-3 h-4 w-4 animate-spin" /> : <Landmark className="mr-3 h-4 w-4" />} Treasury Re-Sync
           </Button>
-          <Button className="h-12 px-6 bg-primary text-white font-black uppercase tracking-widest text-xs shadow-md hover:scale-[1.02] transition-all">
+          <Button className="h-12 px-6 bg-primary text-white font-black uppercase tracking-widest text-xs shadow-md hover:scale-[1.02] transition-all" onClick={() => router.push('/seller/rfqs')}>
             <Plus className="mr-3 h-5 w-5 fill-current" /> Create Proposal
           </Button>
         </div>
@@ -153,7 +171,7 @@ export default function SellerCommandObservatory() {
                                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">Buyer: {rfq.buyerName} • Target Value: {formatCurrency(rfq.targetValue)}</p>
                              </div>
                           </div>
-                          <Button variant="ghost" className="font-black text-[10px] uppercase tracking-widest text-primary border-2 border-transparent group-hover:border-primary/20 h-12 px-6 rounded-2xl transition-all">
+                          <Button variant="ghost" className="font-black text-[10px] uppercase tracking-widest text-primary border-2 border-transparent group-hover:border-primary/20 h-12 px-6 rounded-2xl transition-all" onClick={() => router.push('/seller/rfqs')}>
                              PREPARE BID <ArrowRight className="ml-2 h-3 w-3" />
                           </Button>
                        </div>
@@ -191,7 +209,7 @@ export default function SellerCommandObservatory() {
                        <span className="text-4xl font-black text-blue-300 tracking-tighter block mt-2">{data.stats.corridors}</span>
                     </div>
                  </div>
-                 <Button variant="secondary" className="w-full h-14 font-black uppercase text-[12px] tracking-widest shadow-md bg-white text-primary border-none rounded-xl hover:scale-[1.02] transition-transform">
+                 <Button variant="secondary" className="w-full h-14 font-black uppercase text-[12px] tracking-widest shadow-md bg-white text-primary border-none rounded-xl hover:scale-[1.02] transition-transform" onClick={() => router.push('/seller/rfqs')}>
                     LAUNCH PROPOSAL BUILDER
                  </Button>
               </CardContent>

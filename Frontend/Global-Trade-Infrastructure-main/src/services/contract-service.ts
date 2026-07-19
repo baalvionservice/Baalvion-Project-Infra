@@ -46,6 +46,14 @@ export const contractService = {
   },
 
   /**
+   * Resolves a single contract for the vault detail view.
+   */
+  async getById(contractId: string): Promise<Contract | null> {
+    const res = await apiClient.getDoc<Contract>('contracts', contractId);
+    return res.success && res.data ? res.data : null;
+  },
+
+  /**
    * Archives a new signed commercial mandate in the vault.
    */
   async archiveMandate(data: Partial<Contract>): Promise<Contract> {

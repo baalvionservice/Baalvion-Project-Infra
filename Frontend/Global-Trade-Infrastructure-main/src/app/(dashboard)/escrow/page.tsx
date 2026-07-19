@@ -1,28 +1,39 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getEscrows, Escrow } from '@/services/escrow-service';
+import { getEscrows, Escrow, EscrowStatus } from '@/services/escrow-service';
 import { EscrowTable } from './_components/escrow-table';
 import { EscrowKpiCards } from './_components/escrow-kpi-cards';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Search, Filter, Loader2, ShieldCheck } from 'lucide-react';
+
+const STATUS_OPTIONS: Array<EscrowStatus | 'all'> = ['all', 'created', 'funded', 'in_transit', 'delivered', 'released', 'refunded', 'disputed'];
 
 export default function EscrowDashboardPage() {
   const [escrows, setEscrows] = useState<Escrow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<EscrowStatus | 'all'>('all');
 
   useEffect(() => {
     getEscrows()
       .then(setEscrows)
+      .catch(() => setEscrows([]))
       .finally(() => setLoading(false));
   }, []);
 
-  const filtered = escrows.filter(e => 
-    e.id.toLowerCase().includes(search.toLowerCase()) ||
+  const filtered = escrows.filter(e =>
+    (statusFilter === 'all' || e.status === statusFilter) &&
+    (e.id.toLowerCase().includes(search.toLowerCase()) ||
     e.orderId.toLowerCase().includes(search.toLowerCase()) ||
-    e.sellerName.toLowerCase().includes(search.toLowerCase())
+    e.sellerName.toLowerCase().includes(search.toLowerCase()))
   );
 
   return (
@@ -59,9 +70,20 @@ export default function EscrowDashboardPage() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <Button variant="outline" className="shrink-0">
-          <Filter className="mr-2 h-4 w-4" /> Filter by Status
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="shrink-0">
+              <Filter className="mr-2 h-4 w-4" /> {statusFilter === 'all' ? 'Filter by Status' : statusFilter.replace(/_/g, ' ')}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {STATUS_OPTIONS.map((s) => (
+              <DropdownMenuItem key={s} onClick={() => setStatusFilter(s)} className="capitalize">
+                {s === 'all' ? 'All Statuses' : s.replace(/_/g, ' ')}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {loading ? (

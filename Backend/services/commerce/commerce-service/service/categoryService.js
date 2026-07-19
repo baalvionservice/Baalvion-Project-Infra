@@ -1,9 +1,10 @@
 'use strict';
-const { CommerceCategory } = require('../models');
+const { CommerceCategory, CommerceStore, Op } = require('../models');
 const { AppError } = require('../utils/errors');
 const cache = require('./cacheService');
 const config = require('../config/appConfig');
 const { slugify } = require('../utils/slugify');
+const { parsePagination, buildPaginated } = require('../utils/pagination');
 
 function buildTree(flat) {
     const map = new Map();
@@ -21,6 +22,25 @@ async function listCategories(storeId) {
     const tree = buildTree(cats);
     await cache.set(cache.keys.categoryTree(storeId), tree, config.cache.categoryTtl);
     return tree;
+}
+
+// Cross-store view for platform admins: unlike listCategories(storeId) (a per-store tree, used by
+// sellers managing their own store), this is a flat, paginated, filterable list spanning every
+// store — the read side of "admin can see/manage every category on the platform". Callers needing
+// tree structure for one store still use listCategories(storeId); this is for the admin index.
+async function listCategoriesAcrossStores({ storeId, search, page: pageIn, limit: limitIn } = {}) {
+    const { page, limit, offset } = parsePagination({ page: pageIn, limit: limitIn });
+    const where = {};
+    if (storeId) where.storeId = storeId;
+    if (search) where.name = { [Op.iLike]: `%${search}%` };
+    const { rows, count } = await CommerceCategory.findAndCountAll({
+        where,
+        include: [{ model: CommerceStore, as: 'store', attributes: ['id', 'name', 'countryCode'] }],
+        order: [['storeId', 'ASC'], ['sortOrder', 'ASC']],
+        limit,
+        offset,
+    });
+    return buildPaginated(rows.map((r) => r.toJSON()), count, { page, limit });
 }
 
 async function createCategory(storeId, body) {
@@ -61,4 +81,4 @@ async function reorderCategories(storeId, order) {
     await cache.del(cache.keys.categoryTree(storeId));
 }
 
-module.exports = { listCategories, createCategory, updateCategory, deleteCategory, reorderCategories };
+module.exports = { listCategories, listCategoriesAcrossStores, createCategory, updateCategory, deleteCategory, reorderCategories };

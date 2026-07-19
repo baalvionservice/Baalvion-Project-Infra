@@ -197,9 +197,14 @@ export function DepartmentWizard({ department }: { department: string }) {
                       </div>
                     )}
                     {submitError && (
-                      <div className="flex items-center gap-2 p-4 rounded-2xl border-2 border-amber-500/30 bg-amber-500/5 max-w-lg mx-auto text-amber-700 dark:text-amber-400">
-                        <AlertTriangle className="h-4 w-4 shrink-0" />
-                        <p className="text-xs font-bold text-left">We recorded your details for review, but could not confirm a reference. Our team will still follow up.</p>
+                      <div className="p-4 rounded-2xl border-2 border-destructive/30 bg-destructive/5 max-w-lg mx-auto text-left space-y-3">
+                        <div className="flex items-center gap-2 text-destructive">
+                          <AlertTriangle className="h-4 w-4 shrink-0" />
+                          <p className="text-xs font-bold">Your application could not be submitted: {submitError}</p>
+                        </div>
+                        <Button size="sm" variant="outline" onClick={() => void handleSubmit()} className="font-black uppercase text-[10px] tracking-widest">
+                          Retry Submission
+                        </Button>
                       </div>
                     )}
                     <div className="p-5 rounded-3xl border-2 bg-muted/20 max-w-lg mx-auto">

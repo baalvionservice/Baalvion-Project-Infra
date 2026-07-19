@@ -10,8 +10,8 @@ export default function FeaturedAnalysis({ sections }: { sections: WorldData["se
   if (items.length === 0) return null;
 
   return (
-    <div className="border-b border-gray-200 px-2 sm:px-4 py-5">
-      <h2 className="world-kicker text-xl font-black tracking-widest text-gray-900 uppercase border-b-4 border-[#fcb700] inline-block pb-1 mb-4">
+    <div className="border-b border-border px-2 sm:px-4 py-5">
+      <h2 className="world-kicker text-xl font-black tracking-widest text-foreground uppercase border-b-4 border-[hsl(var(--cnbc-gold))] inline-block pb-1 mb-4">
         Analysis
       </h2>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-5">
@@ -27,13 +27,13 @@ export default function FeaturedAnalysis({ sections }: { sections: WorldData["se
               />
             </div>
             <div className="min-w-0">
-              <span className="world-kicker inline-block bg-[#002f6c] text-white text-[8px] font-black px-1.5 py-0.5 mb-1 tracking-wide">
+              <span className="world-kicker inline-block bg-[hsl(var(--cnbc-surface))] text-white text-[8px] font-black px-1.5 py-0.5 mb-1 tracking-wide">
                 ANALYSIS
               </span>
-              <p className="text-xs font-semibold leading-snug text-[#005594] hover:text-[#ce2b2b] hover:underline cursor-pointer line-clamp-3">
+              <p className="text-xs font-semibold leading-snug text-foreground hover:text-[hsl(var(--cnbc-red))] hover:underline cursor-pointer line-clamp-3">
                 {item.headline}
               </p>
-              <span className="text-[10px] text-gray-400 mt-1 block">{item.time}</span>
+              <span className="text-[10px] text-muted-foreground mt-1 block">{item.time}</span>
             </div>
           </div>
         ))}

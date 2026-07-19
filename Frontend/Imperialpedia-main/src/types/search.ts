@@ -11,6 +11,7 @@ export type SearchResultType =
   | "company"
   | "industry"
   | "technology"
+  | "market"
   | "article"
   | "author"
   | "calculator"

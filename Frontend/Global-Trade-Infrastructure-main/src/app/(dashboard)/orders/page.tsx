@@ -11,38 +11,60 @@ import { TradeOrder } from '@/types/institutional';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
-  Package, 
-  Activity, 
-  ShieldCheck, 
-  Zap, 
-  ArrowRight, 
-  History, 
-  Search, 
-  Filter, 
-  Loader2, 
+import {
+  Package,
+  Activity,
+  ShieldCheck,
+  Zap,
+  ArrowRight,
+  History,
+  Search,
+  Filter,
+  Loader2,
   Boxes,
   Truck,
   CheckCircle2,
   Clock,
-  Landmark,
-  Plus
+  Landmark
 } from 'lucide-react';
 import { cn, formatCurrency } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import { PATHS } from '@/lib/paths';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Checkbox } from '@/components/ui/checkbox';
+import { InitiateProductionDialog } from './_components/initiate-production-dialog';
+
+const ALL_STATUSES = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'] as const;
 
 export default function OrderExecutionPipeline() {
   const [orders, setOrders] = useState<TradeOrder[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const router = useRouter();
 
-  useEffect(() => {
+  const loadOrders = () => {
+    setLoading(true);
     orderService.getOrders()
       .then(setOrders)
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadOrders();
   }, []);
+
+  const visibleOrders = orders.filter((order) => {
+    const q = search.trim().toLowerCase();
+    const matchesSearch = !q || order.id.toLowerCase().includes(q) || order.product.toLowerCase().includes(q);
+    const matchesStatus = statusFilter.length === 0 || statusFilter.includes(order.status);
+    return matchesSearch && matchesStatus;
+  });
+
+  const toggleStatus = (status: string) => {
+    setStatusFilter((prev) => (prev.includes(status) ? prev.filter((s) => s !== status) : [...prev, status]));
+  };
 
   if (loading) {
     return (
@@ -68,12 +90,14 @@ export default function OrderExecutionPipeline() {
           <p className="text-muted-foreground font-medium italic">High-authority management of trade mandates, fulfillment nodes, and multi-party finality.</p>
         </div>
         <div className="flex gap-4">
-           <Button variant="outline" className="font-black border-2 bg-background h-14 px-8 text-[10px] uppercase tracking-widest shadow-md">
+           <Button
+             variant="outline"
+             className="font-black border-2 bg-background h-14 px-8 text-[10px] uppercase tracking-widest shadow-md"
+             onClick={() => router.push(PATHS.GOVERNANCE_AUDIT)}
+           >
               <History className="mr-2 h-4 w-4" /> Audit Ledger
            </Button>
-           <Button className="font-black shadow-2xl h-14 px-6 text-[10px] uppercase tracking-widest bg-primary">
-              <Plus className="mr-2 h-4 w-4" /> Initiate Production
-           </Button>
+           <InitiateProductionDialog onCreated={loadOrders} />
         </div>
       </div>
 
@@ -102,11 +126,39 @@ export default function OrderExecutionPipeline() {
             <div className="flex gap-4">
                <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground opacity-40" />
-                  <input placeholder="Resolve Order ID..." className="h-10 w-64 bg-background border-2 rounded-xl pl-9 pr-4 text-[10px] font-bold uppercase focus:outline-none focus:border-primary/40 transition-all shadow-sm" />
+                  <input
+                    placeholder="Resolve Order ID..."
+                    className="h-10 w-64 bg-background border-2 rounded-xl pl-9 pr-4 text-[10px] font-bold uppercase focus:outline-none focus:border-primary/40 transition-all shadow-sm"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
                </div>
-               <Button variant="outline" size="sm" className="h-10 rounded-xl border-2 font-black uppercase text-[9px]">
-                  <Filter className="mr-2 h-3.5 w-3.5" /> Filter Pipeline
-               </Button>
+               <Popover>
+                  <PopoverTrigger asChild>
+                     <Button variant="outline" size="sm" className={cn(
+                       "h-10 rounded-xl border-2 font-black uppercase text-[9px]",
+                       statusFilter.length > 0 && "border-primary/50 text-primary",
+                     )}>
+                        <Filter className="mr-2 h-3.5 w-3.5" /> Filter Pipeline{statusFilter.length > 0 ? ` (${statusFilter.length})` : ''}
+                     </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="w-56">
+                     <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-3">Execution State</p>
+                     <div className="space-y-2.5">
+                        {ALL_STATUSES.map((status) => (
+                           <label key={status} className="flex items-center gap-2.5 cursor-pointer">
+                              <Checkbox checked={statusFilter.includes(status)} onCheckedChange={() => toggleStatus(status)} />
+                              <span className="text-xs font-bold capitalize">{status}</span>
+                           </label>
+                        ))}
+                     </div>
+                     {statusFilter.length > 0 && (
+                        <Button variant="ghost" size="sm" className="mt-3 h-8 w-full text-[10px] font-black uppercase" onClick={() => setStatusFilter([])}>
+                           Clear Filters
+                        </Button>
+                     )}
+                  </PopoverContent>
+               </Popover>
             </div>
          </CardHeader>
          <CardContent className="p-0">
@@ -122,7 +174,14 @@ export default function OrderExecutionPipeline() {
                      </tr>
                   </thead>
                   <tbody className="divide-y-2">
-                     {orders.map((order) => (
+                     {visibleOrders.length === 0 && (
+                        <tr>
+                           <td colSpan={5} className="p-16 text-center text-sm font-bold text-muted-foreground uppercase tracking-wide">
+                              No orders match your search or filters.
+                           </td>
+                        </tr>
+                     )}
+                     {visibleOrders.map((order) => (
                         <tr key={order.id} className="group hover:bg-primary/[0.01] transition-colors border-b last:border-0 cursor-pointer" onClick={() => router.push(`${PATHS.ORDERS}/${order.id}`)}>
                            <td className="p-6">
                               <div className="flex items-center gap-6">

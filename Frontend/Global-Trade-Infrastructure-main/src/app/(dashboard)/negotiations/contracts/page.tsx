@@ -12,21 +12,19 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { 
-  FileSignature, 
-  Search, 
-  Filter, 
-  Plus, 
-  Loader2, 
-  ShieldCheck, 
-  History, 
+import {
+  FileSignature,
+  Search,
+  Filter,
+  Loader2,
+  ShieldCheck,
+  History,
   ArrowRight,
   ChevronLeft,
   Zap,
   Lock,
   Download,
   Eye,
-  FileStack,
   Landmark,
   Scale
 } from 'lucide-react';
@@ -35,6 +33,8 @@ import { format } from 'date-fns';
 import { useRouter } from 'next/navigation';
 import { PATHS } from '@/lib/paths';
 import { motion, AnimatePresence } from 'framer-motion';
+import { NewMsaNodeDialog } from './_components/new-msa-node-dialog';
+import { ManageClausesSheet } from './_components/manage-clauses-sheet';
 
 export default function ContractVaultPage() {
   const [loading, setLoading] = useState(true);
@@ -82,10 +82,16 @@ export default function ContractVaultPage() {
     fetchData();
   }, []);
 
-  const filtered = contracts.filter(c => 
-    c.title.toLowerCase().includes(search.toLowerCase()) ||
-    c.id.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = contracts.filter(c => {
+    const q = search.toLowerCase();
+    return (
+      c.title.toLowerCase().includes(q) ||
+      c.id.toLowerCase().includes(q) ||
+      c.parties.toLowerCase().includes(q) ||
+      c.buyerId.toLowerCase().includes(q) ||
+      c.sellerId.toLowerCase().includes(q)
+    );
+  });
 
   if (loading) {
     return (
@@ -105,12 +111,8 @@ export default function ContractVaultPage() {
           <p className="text-muted-foreground font-medium italic">Immutable registry of commercial mandates, syndicated agreements, and sovereign legal artifacts.</p>
         </div>
         <div className="flex gap-4">
-           <Button variant="outline" className="font-black border-2 bg-background h-14 px-8 text-[10px] uppercase tracking-widest shadow-md">
-              <FileStack className="mr-2 h-4 w-4" /> MANAGE CLAUSES
-           </Button>
-           <Button className="font-black shadow-2xl h-14 px-6 text-[10px] uppercase tracking-widest bg-primary">
-              <Plus className="mr-2 h-4 w-4" /> NEW MSA Node
-           </Button>
+           <ManageClausesSheet />
+           <NewMsaNodeDialog onCreated={fetchData} />
         </div>
       </div>
 
@@ -134,7 +136,10 @@ export default function ContractVaultPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
                 >
-                  <Card className="shadow-lg border-2 hover:border-primary/50 transition-all group overflow-hidden bg-background rounded-2xl">
+                  <Card
+                    className="shadow-lg border-2 hover:border-primary/50 transition-all group overflow-hidden bg-background rounded-2xl cursor-pointer"
+                    onClick={() => router.push(`${PATHS.CONTRACT_WORKSPACE}/${ctr.id}`)}
+                  >
                      <CardContent className="p-0 flex">
                         <div className={cn(
                           "w-2 shrink-0 transition-all duration-500",
@@ -163,13 +168,23 @@ export default function ContractVaultPage() {
                                  <p className="text-2xl font-black text-primary tracking-tighter tabular-nums">{formatCurrency(ctr.value, ctr.currency)}</p>
                               </div>
                               <div className="flex gap-3">
-                                 <Button variant="ghost" size="icon" className="h-12 w-12 rounded-2xl border-2 opacity-40 group-hover:opacity-100 transition-opacity">
+                                 <Button
+                                   variant="ghost"
+                                   size="icon"
+                                   className="h-12 w-12 rounded-2xl border-2 opacity-40 group-hover:opacity-100 transition-opacity"
+                                   onClick={(e) => { e.stopPropagation(); router.push(`${PATHS.CONTRACT_WORKSPACE}/${ctr.id}`); }}
+                                 >
                                     <Eye className="h-5 w-5" />
                                  </Button>
-                                 <Button variant="ghost" size="icon" className="h-12 w-12 rounded-2xl border-2 opacity-40 group-hover:opacity-100 transition-opacity">
+                                 <Button variant="ghost" size="icon" className="h-12 w-12 rounded-2xl border-2 opacity-40 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
                                     <Download className="h-5 w-5" />
                                  </Button>
-                                 <Button variant="ghost" size="icon" className="h-12 w-12 rounded-2xl border-2 opacity-40 group-hover:opacity-100 transition-opacity">
+                                 <Button
+                                   variant="ghost"
+                                   size="icon"
+                                   className="h-12 w-12 rounded-2xl border-2 opacity-40 group-hover:opacity-100 transition-opacity"
+                                   onClick={(e) => { e.stopPropagation(); router.push(`${PATHS.CONTRACT_WORKSPACE}/${ctr.id}`); }}
+                                 >
                                     <History className="h-5 w-5" />
                                  </Button>
                               </div>

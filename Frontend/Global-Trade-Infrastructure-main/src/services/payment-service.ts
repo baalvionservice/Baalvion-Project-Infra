@@ -5,11 +5,12 @@
  * Coordinates multi-currency settlements, wallet management, and FX locks.
  */
 import { financeClient, pageContent, type Page } from '@/lib/finance-client';
+import { wallet as walletSdk } from '@/services/finance';
 import { recordTransaction } from './ledger-service';
 import { markEscrowAsFunded } from './escrow-service';
 export { markEscrowAsFunded } from './escrow-service';
 import { getFXRate } from './fx-service';
-import { logger } from './observability-service';
+import { logger, metricsService } from './observability-service';
 import { resolveSessionOrgId } from './session-org';
 
 /**
@@ -172,6 +173,37 @@ export async function getWallet(): Promise<Wallet | undefined> {
 
 export async function getWallets(): Promise<Wallet[]> {
   return walletsToUi(await fetchWalletsWithBalances());
+}
+
+/**
+ * Deposits external capital into the caller's wallet, crediting an existing currency
+ * balance or opening a fresh wallet (first deposit for a new organization) as needed.
+ * Uses wallet-service's single-sided credit — the correct primitive for external funds
+ * entering the ledger, unlike the double-entry `postLedgerEntry` which requires both a
+ * debit and credit account and therefore cannot represent money with no internal source.
+ */
+export async function depositFunds(currency: string, amount: number, reference?: string): Promise<Wallet> {
+  const orgId = await resolveSessionOrgId();
+  if (!orgId) {
+    throw new Error('Cannot deposit funds: no authenticated organization in session.');
+  }
+  logger.info('PaymentService', `DEPOSIT_FUNDS: ${amount} ${currency} for org ${orgId}`);
+
+  const rows = await fetchWalletsWithBalances();
+  const targetId = rows[0]
+    ? rows[0].id
+    : (await walletSdk.open({ holderId: orgId, holderType: 'company', defaultCurrency: currency })).id;
+
+  await walletSdk.credit(targetId, {
+    currency,
+    amount,
+    reference: reference || `Deposit ${new Date().toISOString()}`,
+    idempotencyKey: `dep-${targetId}-${currency}-${Date.now()}`,
+  });
+
+  metricsService.recordMetric('wallet_deposits_total', amount);
+  const wallets = await getWallets();
+  return wallets.find((w) => w.currency?.toUpperCase() === currency.toUpperCase()) || wallets[0];
 }
 
 export async function getTransactions(): Promise<Transaction[]> {

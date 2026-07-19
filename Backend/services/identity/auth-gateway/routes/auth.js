@@ -238,6 +238,13 @@ router.post('/onboarding-application', async (req, res) => {
   return res.status(status || 502).json(json ?? { error: { code: 'ONBOARDING_SERVICE_ERROR', message: 'Onboarding service unavailable' } });
 });
 
+// Contact-form intake — public (no session). Forwards to auth-service, which
+// emails the inquiry to the relevant department inbox. No org/session created.
+router.post('/contact-inquiry', async (req, res) => {
+  const { status, json } = await authService('/contact-inquiry', req.body || {}, req);
+  return res.status(status || 502).json(json ?? { error: { code: 'CONTACT_SERVICE_ERROR', message: 'Contact service unavailable' } });
+});
+
 // Forgot / reset password — public, silent passthrough (no session).
 router.post('/forgot-password', async (req, res) => {
   const { status, json } = await authService('/forgot-password', req.body || {}, req);

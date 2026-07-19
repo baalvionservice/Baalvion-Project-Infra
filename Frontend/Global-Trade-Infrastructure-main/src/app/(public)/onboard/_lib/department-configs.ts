@@ -11,6 +11,7 @@ import {
   Landmark, ShieldCheck, FileUp, Building2, ScanFace, Banknote, Globe, Truck,
   Route, Boxes, ScrollText, UserCircle, Scale, ArrowDownUp, type LucideIcon,
 } from 'lucide-react';
+import { SUPPORTED_CURRENCIES } from '@/core/currencies';
 
 export type WizardFieldType = 'text' | 'email' | 'password' | 'tel' | 'url' | 'select' | 'textarea';
 
@@ -58,6 +59,7 @@ const ACCOUNT_STEP = (placeholder: string): WizardStep => ({
     { key: 'email', label: 'Work Email', type: 'email', placeholder },
     { key: 'password', label: 'Password', type: 'password', placeholder: '••••••••••' },
     { key: 'fullName', label: 'Full Name', type: 'text', placeholder: 'Jane Doe' },
+    { key: 'phone', label: 'Phone', type: 'tel', placeholder: '+1 202 555 0104' },
     { key: 'role', label: 'Role / Title', type: 'text', placeholder: 'Head of Trade Finance' },
   ],
 });
@@ -87,7 +89,7 @@ export const DEPARTMENT_CONFIGS: Record<string, DepartmentConfig> = {
         title: 'Settlement authority', sub: 'How money will settle through your institution on Baalvion.',
         fields: [
           { key: 'settlementAccount', label: 'Settlement Account / IBAN', type: 'text', placeholder: 'IBAN or account reference' },
-          { key: 'settlementCurrency', label: 'Primary Settlement Currency', type: 'select', options: ['USD', 'EUR', 'GBP', 'AED', 'INR', 'SGD', 'CNY'] },
+          { key: 'settlementCurrency', label: 'Primary Settlement Currency', type: 'select', options: [...SUPPORTED_CURRENCIES] },
           { key: 'escrowAuthority', label: 'Authorized to Hold Client Escrow Funds?', type: 'select', options: ['Yes — licensed to hold client funds', 'No — settlement only'] },
           { key: 'monthlyVolume', label: 'Expected Monthly Settlement Volume', type: 'select', options: VOLUME_BANDS },
         ],
@@ -215,6 +217,55 @@ export const DEPARTMENT_CONFIGS: Record<string, DepartmentConfig> = {
     },
   },
 
+  government: {
+    slug: 'government',
+    eyebrow: 'Government & Regulator Verification',
+    title: 'Become a Verified Oversight Authority',
+    icon: Scale,
+    steps: [
+      ACCOUNT_STEP('trade.desk@ministry.gov'),
+      {
+        kind: 'form', nav: 'Authority', icon: Landmark,
+        title: 'Authority details', sub: 'The government body or regulator that will hold oversight access.',
+        fields: [
+          { key: 'legalName', label: 'Agency / Authority Name', type: 'text', placeholder: 'Ministry of Trade' },
+          { key: 'entityType', label: 'Entity Type', type: 'select', options: ['National Customs Authority', 'Central Bank', 'Trade Ministry', 'Financial Regulator', 'Multilateral / Treaty Organization'] },
+          { key: 'jurisdiction', label: 'Primary Jurisdiction', type: 'select', options: COUNTRIES },
+          { key: 'mandate', label: 'Statutory Mandate / Enabling Act', type: 'text', placeholder: 'e.g. Customs Act 1962, Trade Regulation Order' },
+        ],
+      },
+      {
+        kind: 'form', nav: 'Oversight', icon: Route,
+        title: 'Oversight scope', sub: 'What you need visibility or authority over, so we scope your access.',
+        fields: [
+          { key: 'oversightFunction', label: 'Primary Oversight Function', type: 'select', options: ['Customs & Border Control', 'Financial Regulation & AML', 'Sanctions & Export Control', 'Trade Statistics & Policy', 'Multilateral Treaty Compliance'] },
+          { key: 'dataSharing', label: 'Data-Sharing Basis', type: 'select', options: ['Bilateral MOU', 'Multilateral Treaty', 'Domestic Statutory Authority', 'Pending Agreement'] },
+          { key: 'corridors', label: 'Monitored Trade Corridors', type: 'textarea', placeholder: 'e.g. All imports via INNSA; UAE ↔ India trade lane', full: true, optional: true },
+        ],
+      },
+      {
+        kind: 'docs', nav: 'Documents', icon: FileUp,
+        title: 'Upload authorization documents', sub: 'Encrypted at rest. Used only for authority verification.',
+        docs: [
+          { key: 'mandateLetter', label: 'Mandate Letter / Enabling Legislation' },
+          { key: 'authLetter', label: 'Authority Authorization Letter' },
+          { key: 'officerId', label: 'Authorized Officer Government ID' },
+          { key: 'mouReference', label: 'MOU / Treaty Reference (if applicable)' },
+        ],
+      },
+    ],
+    screening: {
+      title: 'Authority verification',
+      sub: 'We confirm your statutory mandate and data-sharing basis before provisioning oversight access.',
+      checks: ['Validating statutory mandate', 'Confirming data-sharing agreement', ...SCREENING_BASE, 'Provisioning oversight sandbox'],
+    },
+    success: {
+      title: 'Oversight Authority Application Submitted',
+      blurb: 'Your agency is queued for mandate verification by our governance team.',
+      reviewNote: 'Oversight and reporting access are activated only after manual approval and a data-sharing agreement is confirmed.',
+    },
+  },
+
   enterprise: {
     slug: 'enterprise',
     eyebrow: 'Enterprise Verification',
@@ -285,4 +336,5 @@ export const DEPARTMENT_CARDS: DepartmentCard[] = [
   { slug: 'banking', title: 'Bank / Financier', desc: 'Hold escrow, post the ledger, and settle trade flows.', icon: Landmark },
   { slug: 'customs', title: 'Customs Authority', desc: 'File declarations through ICEGATE, ACE, CDS, or Mirsal.', icon: Globe },
   { slug: 'logistics', title: 'Logistics / Carrier', desc: 'Move freight and plug into the route + tracking network.', icon: Truck },
+  { slug: 'government', title: 'Government / Regulator', desc: 'Oversight, customs, and financial regulators with statutory access needs.', icon: Scale },
 ];

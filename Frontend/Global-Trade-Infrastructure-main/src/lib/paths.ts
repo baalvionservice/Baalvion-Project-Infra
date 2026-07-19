@@ -126,7 +126,7 @@ export const PATHS = {
   DOCUMENTS: '/documents',
   MESSAGES: '/messages',
   HS_CODES: '/compliance/hs-codes',
-  REVERSE_AUCTIONS: '/marketplace/reverse-auctions',
+  AUCTIONS: '/sourcing/auctions',
   SECURITY_COMMAND: '/governance/security',
 
   // 10. PROTECTION

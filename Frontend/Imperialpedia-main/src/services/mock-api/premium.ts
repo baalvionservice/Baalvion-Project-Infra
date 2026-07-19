@@ -61,7 +61,12 @@ export const getPremiumState = async (): Promise<ApiResponse<PremiumState>> => {
     data: {
       tiers: mockTiers,
       subscription_plans: mockSubscriptionPlans,
-      activeTier: 'tier-pro', 
+      // No billing/entitlement backend exists yet — this used to hardcode
+      // 'tier-pro' so every visitor to /premium/subscribe was told they already
+      // had an active Pro subscription. Report no active tier rather than
+      // fabricate one; PremiumClient renders every tier as subscribable when
+      // activeTier is null.
+      activeTier: null,
       trialInfo: {
         available: true,
         durationDays: 14

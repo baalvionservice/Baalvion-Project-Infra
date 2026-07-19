@@ -180,4 +180,16 @@ export class Money {
   toString(): string {
     return `${this.toDecimalString()} ${this.currency}`;
   }
+
+  /**
+   * `JSON.stringify` cannot serialize the internal `bigint` and has no visibility
+   * into private state anyway — without this, any API response embedding a raw
+   * `Money` (e.g. bid outcomes returned straight from the pure engine, not yet
+   * round-tripped through Prisma's Decimal columns) throws "Do not know how to
+   * serialize a BigInt". Matches the plain decimal-string shape Decimal(20,4)
+   * columns already serialize as elsewhere in these API responses.
+   */
+  toJSON(): string {
+    return this.toDecimalString();
+  }
 }

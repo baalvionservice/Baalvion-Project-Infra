@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-17T15:52:06.193Z",
+  "generatedAt": "2026-07-18T22:48:25.420Z",
   "services": [
     "about-service",
     "account-service",
@@ -26,6 +26,7 @@
     "fulfillment-service",
     "fx-service",
     "gateway",
+    "giftcard-service",
     "imperialpedia-service",
     "insiders-service",
     "inventory-service",
@@ -132,6 +133,9 @@
       "ledger-service"
     ],
     "gateway": [],
+    "giftcard-service": [
+      "auth-service"
+    ],
     "imperialpedia-service": [
       "auth-service"
     ],

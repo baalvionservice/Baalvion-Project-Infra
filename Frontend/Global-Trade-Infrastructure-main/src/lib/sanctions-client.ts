@@ -10,7 +10,11 @@
  *
  * `sourceConfidence` (per match) and `sourcesChecked` (jurisdictions screened: OFAC/EU/UN) are additive
  * multi-jurisdiction fields — older callers that ignore them keep working unchanged.
+ *
+ * Identity + tenant come from a signed envelope minted for the browser's own session via
+ * `fetchLocalApi` (see `lib/local-api-client.ts`).
  */
+import { fetchLocalApi } from './local-api-client';
 
 export type SanctionsStatus = 'CLEAR' | 'POTENTIAL_MATCH' | 'CONFIRMED_MATCH';
 
@@ -47,9 +51,8 @@ export async function screenSanctions(input: SanctionsScreenInput): Promise<Sanc
 
   let res: Response;
   try {
-    res = await fetch('/api/sanctions/screen', {
+    res = await fetchLocalApi('/api/sanctions/screen', {
       method: 'POST',
-      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, country: input.country?.trim() || undefined }),
     });

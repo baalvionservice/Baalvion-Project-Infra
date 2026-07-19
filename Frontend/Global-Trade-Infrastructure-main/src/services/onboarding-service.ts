@@ -70,7 +70,7 @@ class OnboardingEngine {
     });
 
     const status = res.data!;
-    await eventBus.publish('IDENTITY_VERIFICATION_UPGRADED' as any, { orgId: companyId, targetLevel: 1 });
+    await eventBus.publish('IDENTITY_VERIFICATION_UPGRADED', { orgId: companyId, targetLevel: 1 });
 
     return status;
   }
@@ -96,7 +96,7 @@ class OnboardingEngine {
   /** Approves a pending application — activates the organization. */
   async approve(companyId: string): Promise<void> {
     await apiClient.post(`/auth/svc/platform/organizations/${companyId}/status`, { status: 'active' });
-    await eventBus.publish('IDENTITY_VERIFICATION_UPGRADED' as any, { orgId: companyId, targetLevel: 1 });
+    await eventBus.publish('IDENTITY_VERIFICATION_UPGRADED', { orgId: companyId, targetLevel: 1 });
   }
 
   /** Rejects a pending application. Access is never granted. */

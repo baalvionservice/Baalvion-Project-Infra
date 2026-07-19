@@ -15,6 +15,7 @@ router.use('/entities', require('./entitiesRoutes'));
 router.use('/public/entities', require('./entitiesRoutes'));
 router.use('/search', require('./searchRoutes'));
 router.use('/assets', require('./assetsRoutes'));
+router.use('/market-data', require('./marketSyncRoutes'));
 router.use('/community', require('./communityRoutes'));
 router.use('/creators', require('./creatorsRoutes'));
 router.use('/leaderboard', require('./leaderboardRoutes'));

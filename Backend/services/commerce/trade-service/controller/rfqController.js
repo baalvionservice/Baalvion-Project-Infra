@@ -29,11 +29,12 @@ async function fetchRfqOwned(id, req, next) {
 // list/get are intentionally public (cross-tenant marketplace discovery — see models/index.js TENANT_EXCLUDED comment).
 const listRfqs = async (req, res, next) => {
     try {
-        const { status, buyer_org_id, commodity, page = 1, limit = 20 } = req.query;
+        const { status, buyer_org_id, commodity, category, page = 1, limit = 20 } = req.query;
         const where = {};
         if (status) where.status = status;
         if (buyer_org_id) where.buyer_org_id = buyer_org_id;
         if (commodity) where.commodity = { [Op.iLike]: `%${commodity}%` };
+        if (category) where.category = category;
         const offset = (Number(page) - 1) * Number(limit);
         const { count, rows } = await db.Rfq.findAndCountAll({
             where, limit: Number(limit), offset, order: [['created_at', 'DESC']],

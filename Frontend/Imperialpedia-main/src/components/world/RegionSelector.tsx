@@ -18,10 +18,10 @@ export default function RegionSelector({
     ? REGIONS.filter((r) => enabled.includes(r.id) || r.id === current)
     : REGIONS;
   return (
-    <div className="bg-white border-b border-gray-200">
+    <div className="bg-card border-b border-border">
       <div className="max-w-screen-xl mx-auto px-2 sm:px-4">
         <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide">
-          <span className="world-kicker hidden sm:flex items-center text-[10px] font-black tracking-widest text-gray-400 uppercase pr-3 shrink-0">
+          <span className="world-kicker hidden sm:flex items-center text-[10px] font-black tracking-widest text-muted-foreground uppercase pr-3 shrink-0">
             Region
           </span>
           {regions.map((r) => {
@@ -33,8 +33,8 @@ export default function RegionSelector({
                 aria-current={active ? "page" : undefined}
                 className={`world-kicker whitespace-nowrap text-[11px] sm:text-xs font-bold tracking-wide uppercase px-3 py-3 border-b-[3px] transition-all ${
                   active
-                    ? "border-[#ce2b2b] text-[#ce2b2b]"
-                    : "border-transparent text-gray-600 hover:text-[#ce2b2b] hover:border-gray-300"
+                    ? "border-[hsl(var(--cnbc-red))] text-[hsl(var(--cnbc-red))]"
+                    : "border-transparent text-muted-foreground hover:text-[hsl(var(--cnbc-red))] hover:border-border"
                 }`}
               >
                 <span className="sm:hidden">{r.short}</span>

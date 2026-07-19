@@ -220,6 +220,7 @@ router.use('/shipment_routes',      require('./shipmentRouteRoutes'));
 router.use('/tracking_search',      require('./trackingSearchRoutes'));
 router.use('/tracking_dashboard',   require('./logisticsTrackingDashboardRoutes'));
 router.use('/tracking_reports',     require('./trackingReportRoutes'));
+router.use('/intelligence',         require('./intelligenceRoutes'));
 
 // Generic persistence store — MUST be last so it only catches collections that
 // have no bespoke typed route above (alerts, risk_signals, contracts, ...).

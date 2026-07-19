@@ -34,21 +34,55 @@ import { useRouter } from 'next/navigation';
 import { PATHS } from '@/lib/paths';
 import { cn, formatCurrency } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
+  DropdownMenuSeparator, DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { useToast } from '@/hooks/use-toast';
 
 export default function SupplierRegistryPage() {
   const [suppliers, setSuppliers] = useState<SupplierProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [industryFilter, setIndustryFilter] = useState<string | null>(null);
+  const [inviteTarget, setInviteTarget] = useState<SupplierProfile | null>(null);
+  const [inviteMessage, setInviteMessage] = useState('');
+  const [inviting, setInviting] = useState(false);
   const router = useRouter();
+  const { toast } = useToast();
 
   useEffect(() => {
-    supplierService.getSuppliers().then(setSuppliers).finally(() => setLoading(false));
-  }, []);
+    setLoading(true);
+    supplierService
+      .getSuppliers(industryFilter ? { industry: industryFilter } : {})
+      .then(setSuppliers)
+      .finally(() => setLoading(false));
+  }, [industryFilter]);
 
-  const filtered = suppliers.filter(s => 
-    s.name.toLowerCase().includes(search.toLowerCase()) || 
-    (s as any).category?.toLowerCase().includes(search.toLowerCase())
+  const filtered = suppliers.filter((s) =>
+    [s.name, s.industry, s.jurisdiction].filter(Boolean).some((f) => f!.toLowerCase().includes(search.toLowerCase())),
   );
+
+  const industries = [...new Set(suppliers.map((s) => s.industry).filter(Boolean))].sort();
+
+  const sendInvite = async () => {
+    if (!inviteTarget) return;
+    setInviting(true);
+    try {
+      await supplierService.inviteToTender(inviteTarget.id, inviteMessage.trim() || undefined);
+      toast({ title: 'Invitation sent', description: `${inviteTarget.name} has been invited to tender.` });
+      setInviteTarget(null);
+      setInviteMessage('');
+    } catch (err) {
+      toast({ variant: 'destructive', title: 'Invitation failed', description: err instanceof Error ? err.message : 'Unknown error' });
+    } finally {
+      setInviting(false);
+    }
+  };
 
   const columns = [
     { 
@@ -106,13 +140,28 @@ export default function SupplierRegistryPage() {
         </div>
       )
     },
-    { 
-      header: 'Volume Finality', 
-      accessorKey: 'totalTradeVolume', 
+    {
+      header: 'Volume Finality',
+      accessorKey: 'totalTradeVolume',
       cell: (row: SupplierProfile) => (
         <span className="font-black text-sm tabular-nums text-primary">{formatCurrency(row.totalTradeVolume)}</span>
       ),
       className: 'text-right pr-10'
+    },
+    {
+      header: '',
+      accessorKey: 'id',
+      cell: (row: SupplierProfile) => (
+        <Button
+          size="sm"
+          variant="outline"
+          className="font-black uppercase text-[9px] tracking-widest"
+          onClick={(e) => { e.stopPropagation(); setInviteTarget(row); }}
+        >
+          Invite
+        </Button>
+      ),
+      className: 'text-right pr-6',
     },
   ];
 
@@ -177,10 +226,26 @@ export default function SupplierRegistryPage() {
             />
           </div>
           <div className="flex gap-4">
-             <Button variant="outline" className="h-14 border-2 px-8 font-black uppercase text-[10px] tracking-widest bg-background shadow-md">
-                <Filter className="mr-2 h-4 w-4" /> ADVANCED FILTERS
-             </Button>
-             <Button className="h-14 px-8 font-black uppercase text-[10px] tracking-widest shadow-2xl rounded-2xl">
+             <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                   <Button variant="outline" className="h-14 border-2 px-8 font-black uppercase text-[10px] tracking-widest bg-background shadow-md">
+                      <Filter className="mr-2 h-4 w-4" /> {industryFilter ?? 'ADVANCED FILTERS'}
+                   </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                   <DropdownMenuLabel>Filter by Sector</DropdownMenuLabel>
+                   <DropdownMenuSeparator />
+                   <DropdownMenuItem onClick={() => setIndustryFilter(null)}>All Sectors</DropdownMenuItem>
+                   {industries.map((ind) => (
+                      <DropdownMenuItem key={ind} onClick={() => setIndustryFilter(ind)}>{ind}</DropdownMenuItem>
+                   ))}
+                </DropdownMenuContent>
+             </DropdownMenu>
+             <Button
+                className="h-14 px-8 font-black uppercase text-[10px] tracking-widest shadow-2xl rounded-2xl"
+                disabled={filtered.length === 0}
+                onClick={() => setInviteTarget(filtered[0])}
+             >
                 INVITE TO TENDER
              </Button>
           </div>
@@ -255,6 +320,32 @@ export default function SupplierRegistryPage() {
             </div>
          </div>
       </div>
+
+      <Dialog open={!!inviteTarget} onOpenChange={(open) => !open && setInviteTarget(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Invite to Tender</DialogTitle></DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label>Supplier</Label>
+              <Select value={inviteTarget?.id} onValueChange={(id) => setInviteTarget(filtered.find((s) => s.id === id) ?? null)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {filtered.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Message (optional)</Label>
+              <Textarea value={inviteMessage} onChange={(e) => setInviteMessage(e.target.value)} placeholder="Details about the tender, deadline, or requirements." />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => void sendInvite()} disabled={inviting || !inviteTarget}>
+              {inviting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending…</> : 'Send Invitation'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }

@@ -19,26 +19,26 @@ export default function MostActive({ watchlist }: { watchlist: WorldData["watchl
 
   return (
     <div>
-      <span className="world-kicker text-[10px] font-black tracking-widest text-gray-900 uppercase border-b-2 border-gray-200 pb-2 block mb-2">
+      <span className="world-kicker text-[10px] font-black tracking-widest text-foreground uppercase border-b-2 border-border pb-2 block mb-2">
         Most Active
       </span>
-      <div className="grid grid-cols-4 world-kicker text-[9px] font-bold text-gray-400 uppercase pb-1.5 border-b border-gray-100">
+      <div className="grid grid-cols-4 world-kicker text-[9px] font-bold text-muted-foreground uppercase pb-1.5 border-b border-border">
         <span>Name</span>
         <span className="text-right">Price</span>
         <span className="text-right">%Chg</span>
         <span className="text-right">Vol</span>
       </div>
-      <div className="divide-y divide-gray-50">
+      <div className="divide-y divide-border">
         {rows.map((r) => (
           <div key={r.ticker} className="grid grid-cols-4 items-center py-2 text-xs">
-            <span className="font-bold text-gray-800">{r.ticker}</span>
-            <span className="text-right font-mono text-gray-800">{r.price}</span>
+            <span className="font-bold text-foreground">{r.ticker}</span>
+            <span className="text-right font-mono text-foreground">{r.price}</span>
             <span
-              className={`text-right font-mono font-bold ${r.positive ? "text-[#00a857]" : "text-[#ce2b2b]"}`}
+              className={`text-right font-mono font-bold ${r.positive ? "text-[hsl(var(--cnbc-green))]" : "text-[hsl(var(--cnbc-red))]"}`}
             >
               {r.change}
             </span>
-            <span className="text-right font-mono text-gray-600">{formatVolume(r.volume as number)}</span>
+            <span className="text-right font-mono text-muted-foreground">{formatVolume(r.volume as number)}</span>
           </div>
         ))}
       </div>

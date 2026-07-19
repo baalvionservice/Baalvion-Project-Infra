@@ -32,16 +32,48 @@ import {
 } from 'lucide-react';
 import { cn, formatCurrency } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
 
 export default function OpportunityRadarPage() {
   const [loading, setLoading] = useState(true);
   const [opportunities, setOpportunities] = useState<CorridorOpportunity[]>([]);
+  const [calibrating, setCalibrating] = useState(false);
+  const [optimizing, setOptimizing] = useState(false);
+  const router = useRouter();
+  const { toast } = useToast();
 
   useEffect(() => {
     commerceIntelligenceService.getCorridorOpportunities()
       .then(setOpportunities)
       .finally(() => setLoading(false));
   }, []);
+
+  const calibrateForecast = async () => {
+    setCalibrating(true);
+    try {
+      const result = await commerceIntelligenceService.calibrateForecast();
+      setOpportunities(result);
+      toast({ title: 'Forecast calibrated', description: `${result.length} corridor${result.length === 1 ? '' : 's'} scored from live RFQ history.` });
+    } catch (err) {
+      toast({ variant: 'destructive', title: 'Calibration failed', description: err instanceof Error ? err.message : 'Unknown error' });
+    } finally {
+      setCalibrating(false);
+    }
+  };
+
+  const executeOptimization = async () => {
+    setOptimizing(true);
+    try {
+      const result = await commerceIntelligenceService.executeStrategicOptimization('balanced');
+      setOpportunities(result);
+      toast({ title: 'Strategic optimization complete', description: `Corridors re-ranked by balanced cost/speed priority.` });
+    } catch (err) {
+      toast({ variant: 'destructive', title: 'Optimization failed', description: err instanceof Error ? err.message : 'Unknown error' });
+    } finally {
+      setOptimizing(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -67,8 +99,8 @@ export default function OpportunityRadarPage() {
               <Radio className="h-4 w-4 text-emerald-600 animate-ping" />
               Real-time Pulse Active
            </div>
-           <Button className="h-12 px-6 bg-primary text-white font-black uppercase tracking-widest text-xs shadow-md hover:scale-[1.02] transition-all">
-              <Compass className="mr-3 h-4 w-4" /> Calibrate Forecast
+           <Button className="h-12 px-6 bg-primary text-white font-black uppercase tracking-widest text-xs shadow-md hover:scale-[1.02] transition-all" onClick={() => void calibrateForecast()} disabled={calibrating}>
+              {calibrating ? <Loader2 className="mr-3 h-4 w-4 animate-spin" /> : <Compass className="mr-3 h-4 w-4" />} Calibrate Forecast
            </Button>
         </div>
       </div>
@@ -76,6 +108,13 @@ export default function OpportunityRadarPage() {
       <div className="grid gap-6 lg:grid-cols-12">
         {/* RADAR SWEEP VIEW */}
         <div className="lg:col-span-8 space-y-6">
+           {opportunities.length === 0 && (
+              <Card className="border-2 border-dashed rounded-2xl">
+                 <CardContent className="p-12 text-center text-muted-foreground font-medium">
+                    No corridor opportunities yet — scores are computed from your organization's RFQ history over the last 90 days. Publish an RFQ to see the radar populate.
+                 </CardContent>
+              </Card>
+           )}
            <div className="grid gap-8">
               {opportunities.map((opp, i) => (
                 <motion.div 
@@ -107,31 +146,32 @@ export default function OpportunityRadarPage() {
                           <div className="flex justify-between items-start">
                              <div className="space-y-3">
                                 <div className="flex items-center gap-4">
-                                   <Badge className="bg-emerald-600 text-white text-[9px] font-black h-6 px-3 border-none shadow-sm uppercase tracking-widest">HIGH AFFINITY</Badge>
-                                   <span className="text-[10px] text-muted-foreground font-black uppercase tracking-widest opacity-40">Discovery ID: {opp.id}</span>
+                                   <Badge className="bg-emerald-600 text-white text-[9px] font-black h-6 px-3 border-none shadow-sm uppercase tracking-widest">{opp.opportunityScore >= 70 ? 'HIGH AFFINITY' : opp.opportunityScore >= 40 ? 'MODERATE' : 'EMERGING'}</Badge>
+                                   <span className="text-[10px] text-muted-foreground font-black uppercase tracking-widest opacity-40">{opp.rfqCount ?? 0} RFQ{(opp.rfqCount ?? 0) === 1 ? '' : 's'} in last 90d</span>
                                 </div>
                                 <h3 className="text-4xl font-black uppercase tracking-tighter text-foreground leading-[0.8] group-hover:text-primary transition-colors">
                                    {opp.originNode} <br /><span className="text-muted-foreground opacity-30">TO</span> {opp.destinationNode}
                                 </h3>
                              </div>
                           </div>
-                          
+
                           <p className="text-lg font-medium leading-relaxed italic opacity-80 border-l-4 border-primary/20 pl-8">
-                             "Projected growth of {opp.growthForecast} in high-purity silicon batching. Current node density suggests a 14.2% margin arbitrage compared to existing routes."
+                             {opp.commodities?.length ? `Demand in ${opp.commodities.join(', ')}. ` : ''}
+                             Growth trend {opp.growthForecast} over the trailing 30 days, with a {opp.winRatePercent ?? 0}% quotation win rate on this corridor.
                           </p>
-                          
+
                           <div className="flex items-center justify-between pt-6 border-t border-muted/50">
                              <div className="flex items-center gap-6">
                                 <div className="space-y-1">
-                                   <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Estimated Value</p>
-                                   <p className="text-2xl font-black text-primary tracking-tighter">$12.4M</p>
+                                   <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Avg Target Price</p>
+                                   <p className="text-2xl font-black text-primary tracking-tighter">{opp.avgTargetPrice ? formatCurrency(opp.avgTargetPrice) : '—'}</p>
                                 </div>
                                 <div className="space-y-1 border-l pl-8 border-muted">
                                    <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Growth Delta</p>
                                    <p className="text-2xl font-black text-emerald-600 tracking-tighter">{opp.growthForecast}</p>
                                 </div>
                              </div>
-                             <Button className="h-14 px-6 font-black uppercase text-[10px] tracking-widest shadow-2xl rounded-2xl bg-primary">
+                             <Button className="h-14 px-6 font-black uppercase text-[10px] tracking-widest shadow-2xl rounded-2xl bg-primary" onClick={() => router.push('/buyer/rfqs/new')}>
                                 INITIATE SOURCING
                              </Button>
                           </div>
@@ -169,8 +209,8 @@ export default function OpportunityRadarPage() {
                        <span className="text-4xl font-black text-blue-300 tracking-tighter block mt-2">A++</span>
                     </div>
                  </div>
-                 <Button variant="secondary" className="w-full h-14 font-black uppercase text-[12px] tracking-widest shadow-md bg-white text-primary border-none rounded-xl hover:scale-[1.02] transition-transform">
-                    EXECUTE STRATEGIC OPTIMIZATION
+                 <Button variant="secondary" className="w-full h-14 font-black uppercase text-[12px] tracking-widest shadow-md bg-white text-primary border-none rounded-xl hover:scale-[1.02] transition-transform" onClick={() => void executeOptimization()} disabled={optimizing}>
+                    {optimizing ? <Loader2 className="mr-2 h-4 w-4 animate-spin inline" /> : null} EXECUTE STRATEGIC OPTIMIZATION
                  </Button>
               </CardContent>
            </Card>

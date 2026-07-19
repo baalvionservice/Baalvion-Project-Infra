@@ -60,12 +60,12 @@ const upsertEntity = async (req, res, next) => {
     try {
         if (!isAdmin(req)) return next(new AppError('FORBIDDEN', 'Admin access required', 403));
 
-        const { type, name, slug, description, category, country, industry, image, tags, ...rest } = req.body;
+        const { type, name, slug, description, category, country, industry, image, tags, aliases, ...rest } = req.body;
         if (!type || !name || !slug) return next(new AppError('VALIDATION_ERROR', 'type, name and slug are required', 400));
 
         // Anything that isn't a base column is type-specific → attributes.
         const attributes = rest.attributes && typeof rest.attributes === 'object' ? rest.attributes : rest;
-        const base = { type, name, slug, description, category, country, industry, image, tags: tags || [], attributes };
+        const base = { type, name, slug, description, category, country, industry, image, tags: tags || [], aliases: aliases || [], attributes };
 
         const existing = await db.Entity.findOne({ where: { type, slug } });
         if (existing) {

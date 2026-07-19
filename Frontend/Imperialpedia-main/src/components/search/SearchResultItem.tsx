@@ -14,6 +14,7 @@ import {
   Calculator,
   BookOpen,
   Tag,
+  LineChart,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -22,11 +23,12 @@ interface SearchResultItemProps extends SearchResult {
   className?: string;
 }
 
-const typeConfig = {
+const typeConfig: Record<SearchResult["type"], { icon: typeof Globe; color: string }> = {
   country: { icon: Globe, color: "text-primary bg-primary/10" },
   company: { icon: Building, color: "text-secondary bg-secondary/10" },
   industry: { icon: Factory, color: "text-emerald-500 bg-emerald-500/10" },
   technology: { icon: Cpu, color: "text-amber-500 bg-amber-500/10" },
+  market: { icon: LineChart, color: "text-rose-500 bg-rose-500/10" },
   article: { icon: FileText, color: "text-blue-500 bg-blue-500/10" },
   author: { icon: User, color: "text-purple-500 bg-purple-500/10" },
   calculator: { icon: Calculator, color: "text-orange-500 bg-orange-500/10" },

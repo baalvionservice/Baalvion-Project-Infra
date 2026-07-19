@@ -28,6 +28,7 @@
     /* Semantic finance colors */
     --positive: 145 63% 35%;
     --negative: 4 74% 49%;
+    --breaking: 0 72% 51%; /* BreakingTicker's current red-600 look, unscoped default */
   }
 
   .dark {
@@ -132,6 +133,74 @@
   }
   .world-shell .world-kicker {
     font-family: var(--font-world-condensed), "Barlow Condensed", sans-serif;
+  }
+
+  /* ── CNBC design tokens — scoped to .cnbc-shell, applied on /world, /news, ──
+     /market-news only (see RootLayoutClient.tsx + each route's layout.tsx).
+     Canonical values lifted from the existing literal-CNBC reference page,
+     src/app/markets/quote/[symbol]/page.tsx (CNBC_RED #E31937, GREEN #00A651,
+     bg-black/bg-[#111], border-white/15|/10, rounded-sm, Arial/Helvetica) —
+     reused here rather than re-invented, and reconciled against 3+ previously
+     inconsistent reds (#E31937, #ce2b2b, red-600) and 4 off-palette dark
+     accents (#002f6c, #071d39, #0a0e14) already scattered across /world's
+     components (fixed at the component level during the Phase 5 re-theme).
+
+     Remapping the existing shadcn semantic tokens (--background/--card/
+     --border/--muted/--muted-foreground/--positive/--negative) inside this
+     scope is the key mechanism: every shared component already built on
+     bg-card/border-border/text-muted-foreground/text-positive/text-negative
+     (FeaturedArticleCard, ArticleCard, NewsletterForm, FAQItem, most of
+     /news's components) re-skins automatically with ZERO per-component
+     edits and zero effect on the other ~8 topic hubs still in the light
+     Investopedia theme, since .cnbc-shell only applies on these 3 routes. */
+  .cnbc-shell {
+    --cnbc-bg: 0 0% 0%; /* #000000 */
+    --cnbc-surface: 0 0% 6.7%; /* #111111 */
+    --cnbc-red: 350 79% 49%; /* #E31937 */
+    --cnbc-green: 149 100% 33%; /* #00A651 */
+    --cnbc-gold: 42 100% 49%; /* secondary/featured-badge accent, distinct from red/green */
+
+    --background: var(--cnbc-bg);
+    --foreground: 0 0% 100%;
+    --card: var(--cnbc-surface);
+    --card-foreground: 0 0% 100%;
+    --popover: var(--cnbc-surface);
+    --popover-foreground: 0 0% 100%;
+    --muted: var(--cnbc-surface);
+    --muted-foreground: 0 0% 65%; /* ~white/65% against black */
+    --border: 0 0% 18%; /* solid-gray approximation of white/15 over black, see note below */
+    --input: 0 0% 18%;
+    --destructive: var(--cnbc-red);
+    --positive: var(--cnbc-green);
+    --negative: var(--cnbc-red);
+    --breaking: var(--cnbc-red);
+    /* --primary/--accent (sitewide royal blue / gold) intentionally left
+       unremapped here — decided per-component during Phase 5 rather than
+       blanket-overridden, since not every link/CTA inside these routes
+       should necessarily read as CNBC red. */
+  }
+  /* tailwind.config.ts's border/input tokens are plain "hsl(var(--x))" with
+     no alpha-channel wiring (confirmed: no "hsl(var(--x) / <alpha-value>)"
+     pattern exists anywhere in this codebase yet) — so --border above is a
+     solid dark gray approximating the quote page's literal white/15 over
+     black, rather than true alpha. Lower blast radius than retrofitting
+     alpha support sitewide; components wanting the exact quote-page hairline
+     can still use literal `border-white/15`/`border-white/10` directly. */
+
+  /* Literal-CNBC typography: bare Arial/Helvetica, not the softer Inter-based
+     .world-shell type system above. Placed AFTER .world-shell's block so
+     that on /world (which carries both classes) this wins on selectors of
+     equal specificity — source order is the tiebreaker within one @layer. */
+  .cnbc-shell,
+  .cnbc-shell h1,
+  .cnbc-shell h2,
+  .cnbc-shell h3,
+  .cnbc-shell h4,
+  .cnbc-shell h5,
+  .cnbc-shell h6,
+  .cnbc-shell p {
+    font-family: Arial, Helvetica, sans-serif !important;
+    color: hsl(var(--foreground));
   }
 
   :focus-visible {

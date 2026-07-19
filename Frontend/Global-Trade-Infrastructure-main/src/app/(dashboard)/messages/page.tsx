@@ -33,18 +33,26 @@ import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion, AnimatePresence } from 'framer-motion';
+import { NewThreadDialog } from './_components/new-thread-dialog';
+import { EncryptionInfoDialog } from './_components/encryption-info-dialog';
 
 export default function InboxPage() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'all' | 'warroom' | 'contextual'>('all');
+  const [encryptionInfoOpen, setEncryptionInfoOpen] = useState(false);
   const router = useRouter();
 
-  useEffect(() => {
+  const loadInbox = () => {
+    setLoading(true);
     communicationService.getInbox('COMP-101')
       .then(setConversations)
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadInbox();
   }, []);
 
   const filtered = conversations.filter(c => {
@@ -78,13 +86,15 @@ export default function InboxPage() {
               <p className="text-muted-foreground font-medium italic">Authoritative dialogue nodes for multi-party trade synchronization and systemic escalations.</p>
            </div>
            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 px-5 py-2.5 rounded-full border-2 shadow-sm bg-background text-indigo-700 border-indigo-200 font-black text-[10px] uppercase tracking-widest">
+              <button
+                type="button"
+                onClick={() => setEncryptionInfoOpen(true)}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-full border-2 shadow-sm bg-background text-indigo-700 border-indigo-200 font-black text-[10px] uppercase tracking-widest hover:bg-indigo-50 transition-colors"
+              >
                  <ShieldCheck className="h-4 w-4" />
                  E2E Encryption: AUTH_V4
-              </div>
-              <Button className="font-black shadow-2xl h-11 px-6 text-[10px] uppercase tracking-widest bg-primary">
-                NEW THREAD
-              </Button>
+              </button>
+              <NewThreadDialog onCreated={loadInbox} />
            </div>
         </div>
 
@@ -262,6 +272,7 @@ export default function InboxPage() {
            </div>
         </div>
       </div>
+      <EncryptionInfoDialog open={encryptionInfoOpen} onOpenChange={setEncryptionInfoOpen} />
     </main>
   );
 }

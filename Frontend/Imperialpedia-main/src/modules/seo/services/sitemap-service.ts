@@ -6,6 +6,7 @@ import { loadCompanies, loadCountries, loadIndustries, loadTechnologies } from "
 import { fetchAllTerms } from "@/lib/data/term-live";
 import { reviewSlugs } from "@/lib/data/review-live";
 import { getPublishedNews } from "@/services/data/cms-public";
+import { ALL_TRACKED_SYMBOLS } from "@/lib/data/marketsLoader";
 import { env } from "@/config/env";
 import { logger } from "@/lib/errors/logger";
 
@@ -178,6 +179,14 @@ export const sitemapService = {
     pushEntities(countries, "/countries");
     pushEntities(industries, "/industries");
     pushEntities(technologies, "/technologies");
+
+    // Market quote pages — every symbol this site actually renders a
+    // `/markets/quote/[symbol]` page for (same tracked list the markets
+    // breakdown panels and quote page itself use), so these financial entity
+    // pages are discoverable rather than relying on internal links alone.
+    ALL_TRACKED_SYMBOLS.forEach((symbol) => {
+      entries.push({ loc: `${base}/markets/quote/${symbol}`, changefreq: "hourly", priority: 0.7 });
+    });
     (reviewSlugs || []).forEach((slug) =>
       entries.push({ loc: `${base}/${slug}`, changefreq: "weekly", priority: 0.8 }),
     );

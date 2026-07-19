@@ -39,7 +39,6 @@ import {
 import { format } from "date-fns";
 import Link from "next/link";
 import { getCreatorContent } from "@/services/data/creators-service";
-import { getContributorTrustData } from "@/services/mock-api/creators";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -56,8 +55,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { TrustVerificationPanel } from "@/modules/creators/components/TrustVerificationPanel";
-import { ContributorTrustData } from "@/types/trust";
 
 interface CreatorProfileClientProps {
   creator: CreatorProfile;
@@ -72,19 +69,14 @@ export function CreatorProfileClient({ creator }: CreatorProfileClientProps) {
   const [notifsActive, setNotifsActive] = useState(true);
   const [followers, setFollowers] = useState(creator.stats.followersCount);
   const [content, setContent] = useState<CreatorContentItem[]>([]);
-  const [trustData, setTrustData] = useState<ContributorTrustData | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
     async function loadExtraData() {
       try {
-        const [contentRes, trustRes] = await Promise.all([
-          getCreatorContent(creator.id),
-          getContributorTrustData(creator.id),
-        ]);
+        const contentRes = await getCreatorContent(creator.id);
         setContent(contentRes.data);
-        if (trustRes.data) setTrustData(trustRes.data);
       } catch (e) {
         console.error(e);
       } finally {
@@ -321,15 +313,9 @@ export function CreatorProfileClient({ creator }: CreatorProfileClientProps) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
         {/* Main Intelligence Column */}
         <div className="lg:col-span-8 space-y-12">
-          <Tabs defaultValue="trust" className="w-full space-y-10">
+          <Tabs defaultValue="performance" className="w-full space-y-10">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 border-b border-white/5 pb-4">
               <TabsList className="bg-card/30 border border-white/5 p-1 h-12 rounded-2xl">
-                <TabsTrigger
-                  value="trust"
-                  className="px-8 h-10 gap-2 rounded-xl font-bold text-xs data-[state=active]:bg-primary"
-                >
-                  <ShieldCheck className="h-4 w-4" /> Trust Node
-                </TabsTrigger>
                 <TabsTrigger
                   value="performance"
                   className="px-8 h-10 gap-2 rounded-xl font-bold text-xs data-[state=active]:bg-primary"
@@ -354,20 +340,6 @@ export function CreatorProfileClient({ creator }: CreatorProfileClientProps) {
                 />
               </div>
             </div>
-
-            {/* TRUST TAB */}
-            <TabsContent value="trust" className="mt-0">
-              {trustData ? (
-                <TrustVerificationPanel
-                  trustData={trustData}
-                  displayName={creator.displayName}
-                />
-              ) : (
-                <div className="py-20 flex justify-center">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                </div>
-              )}
-            </TabsContent>
 
             {/* PERFORMANCE TAB */}
             <TabsContent value="performance" className="mt-0">
@@ -478,42 +450,48 @@ export function CreatorProfileClient({ creator }: CreatorProfileClientProps) {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-8 space-y-8">
-              <div className="space-y-6">
-                <div className="flex items-start gap-4">
-                  <div className="p-2.5 rounded-xl bg-secondary/10 text-secondary shrink-0">
-                    <Briefcase className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <Text
-                      variant="label"
-                      className="text-[9px] opacity-50 font-bold uppercase tracking-widest block mb-1"
-                    >
-                      Tenure
-                    </Text>
-                    <Text variant="bodySmall" weight="bold">
-                      {creator.yearsExperience || 10}+ Years Institutional
-                      Experience
-                    </Text>
-                  </div>
-                </div>
+              {(creator.yearsExperience || creator.education) && (
+                <div className="space-y-6">
+                  {creator.yearsExperience && (
+                    <div className="flex items-start gap-4">
+                      <div className="p-2.5 rounded-xl bg-secondary/10 text-secondary shrink-0">
+                        <Briefcase className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <Text
+                          variant="label"
+                          className="text-[9px] opacity-50 font-bold uppercase tracking-widest block mb-1"
+                        >
+                          Tenure
+                        </Text>
+                        <Text variant="bodySmall" weight="bold">
+                          {creator.yearsExperience}+ Years Institutional
+                          Experience
+                        </Text>
+                      </div>
+                    </div>
+                  )}
 
-                <div className="flex items-start gap-4">
-                  <div className="p-2.5 rounded-xl bg-primary/10 text-primary shrink-0">
-                    <GraduationCap className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <Text
-                      variant="label"
-                      className="text-[9px] opacity-50 font-bold uppercase tracking-widest block mb-1"
-                    >
-                      Academy
-                    </Text>
-                    <Text variant="bodySmall" weight="bold">
-                      {creator.education || "Institutional Researcher"}
-                    </Text>
-                  </div>
+                  {creator.education && (
+                    <div className="flex items-start gap-4">
+                      <div className="p-2.5 rounded-xl bg-primary/10 text-primary shrink-0">
+                        <GraduationCap className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <Text
+                          variant="label"
+                          className="text-[9px] opacity-50 font-bold uppercase tracking-widest block mb-1"
+                        >
+                          Academy
+                        </Text>
+                        <Text variant="bodySmall" weight="bold">
+                          {creator.education}
+                        </Text>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
+              )}
 
               <div className="space-y-4 pt-6 border-t border-white/5">
                 <Text

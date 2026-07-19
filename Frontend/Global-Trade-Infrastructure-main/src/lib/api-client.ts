@@ -19,6 +19,10 @@ import { ApiResponse } from '@/types/api';
 const BASE_URL = '/trade-bff';
 
 const MAX_RETRIES = 3;
+// A stalled connection with no response otherwise hangs the calling page's loading state
+// forever (e.g. an infinite "Authenticating..." spinner). Bound every request so it always
+// settles into a real error the UI can render instead of spinning indefinitely.
+const REQUEST_TIMEOUT_MS = 15_000;
 const UNSAFE = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
 // ── Legacy bearer-token shims ────────────────────────────────────────────────
@@ -82,10 +86,13 @@ function refreshTokens(): Promise<boolean> {
 export const apiClient = {
   async request<T>(path: string, options: RequestInit, retries = 0, didRefresh = false): Promise<ApiResponse<T>> {
     const method = (options.method || 'GET').toString();
+    const timeoutController = new AbortController();
+    const timeoutId = setTimeout(() => timeoutController.abort(), REQUEST_TIMEOUT_MS);
     try {
       const response = await fetch(`${BASE_URL}${path}`, {
         ...options,
         credentials: 'include', // same-origin proxy → send the httpOnly session cookies
+        signal: options.signal ?? timeoutController.signal,
         headers: {
           ...buildHeaders(method),
           ...(options.headers as Record<string, string> || {}),
@@ -120,6 +127,16 @@ export const apiClient = {
 
       return response.json();
     } catch (e: unknown) {
+      // A timeout we triggered ourselves — the request never got a chance to fail fast, so
+      // retrying would just stack another full REQUEST_TIMEOUT_MS wait on top. Surface it once.
+      if (e instanceof DOMException && e.name === 'AbortError' && !options.signal) {
+        return {
+          success: false,
+          data: null,
+          error: { code: 'TIMEOUT', message: 'Backend request timed out. Please try again.' },
+          timestamp: new Date().toISOString(),
+        };
+      }
       if (retries < MAX_RETRIES) {
         const backoff = Math.pow(2, retries) * 1000;
         await new Promise((r) => setTimeout(r, backoff));
@@ -131,6 +148,8 @@ export const apiClient = {
         error: { code: 'NETWORK_FAILURE', message: 'Backend connection timeout.' },
         timestamp: new Date().toISOString(),
       };
+    } finally {
+      clearTimeout(timeoutId);
     }
   },
 

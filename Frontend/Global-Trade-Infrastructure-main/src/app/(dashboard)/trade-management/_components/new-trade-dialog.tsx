@@ -13,7 +13,7 @@ import { tradeCommandService } from '@/services/trade-command-service';
 type Props = { onCreated: (id: string) => void };
 
 export function NewTradeDialog({ onCreated }: Props) {
-  const { userId, role, tenantId } = useAppState();
+  const { tenantId } = useAppState();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -34,25 +34,22 @@ export function NewTradeDialog({ onCreated }: Props) {
   async function handleSubmit() {
     setSubmitting(true);
     try {
-      const trade = await tradeCommandService.create(
-        {
-          organizationName: `Tenant ${tenantId}`,
-          organizationSlug: `tenant-${tenantId}`,
-          terms: {
-            buyerId: form.buyerName,
-            sellerId: form.supplierName,
-            commodity: form.commodity,
-            quantity: Number(form.quantity),
-            unitPrice: Number(form.unitPrice),
-            currency: form.currency.toUpperCase(),
-            originCountry: form.originCountry.toUpperCase(),
-            destinationCountry: form.destinationCountry.toUpperCase(),
-          },
-          buyer: { name: form.buyerName },
-          supplier: { name: form.supplierName },
+      const trade = await tradeCommandService.create({
+        organizationName: `Tenant ${tenantId}`,
+        organizationSlug: `tenant-${tenantId}`,
+        terms: {
+          buyerId: form.buyerName,
+          sellerId: form.supplierName,
+          commodity: form.commodity,
+          quantity: Number(form.quantity),
+          unitPrice: Number(form.unitPrice),
+          currency: form.currency.toUpperCase(),
+          originCountry: form.originCountry.toUpperCase(),
+          destinationCountry: form.destinationCountry.toUpperCase(),
         },
-        { userId, role, orgId: tenantId },
-      );
+        buyer: { name: form.buyerName },
+        supplier: { name: form.supplierName },
+      });
       toast({ title: 'Trade created', description: `${trade.reference} is now at ${trade.currentState.replace(/_/g, ' ')}.` });
       setOpen(false);
       onCreated(trade.id);
