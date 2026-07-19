@@ -5,6 +5,7 @@ import { Toaster } from '@/components/ui/toaster';
 import './globals.css';
 import { SubmissionsProvider } from '@/contexts/submissions-context';
 import { getSiteUrl } from '@/lib/site-url';
+import { GoogleAnalytics } from '@/components/GoogleAnalytics';
 
 const siteUrl = getSiteUrl();
 
@@ -105,6 +106,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning className={`${inter.variable} ${spaceGrotesk.variable}`}>
+      <head>
+        <GoogleAnalytics />
+      </head>
       <body>
         <script
           type="application/ld+json"

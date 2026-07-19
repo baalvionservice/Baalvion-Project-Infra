@@ -28,6 +28,7 @@ RUN pnpm install --no-frozen-lockfile
 ARG NEXT_PUBLIC_CTM_API_URL
 ARG NEXT_PUBLIC_APP_URL
 ARG NEXT_PUBLIC_USE_MOCK=false
+ARG NEXT_PUBLIC_GA_ID
 ENV NEXT_TELEMETRY_DISABLED=1 NODE_ENV=production
 COPY --from=pruner /app/out/full/ ./
 RUN pnpm turbo run build --filter=controlthemarket-web
