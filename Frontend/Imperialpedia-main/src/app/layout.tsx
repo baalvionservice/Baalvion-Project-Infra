@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import RootLayoutClient from "@/components/common/RootLayoutClient";
 import { Analytics } from "@/components/common/Analytics";
 import UnifiedAnalytics from "@/components/common/UnifiedAnalytics";
+import { GoogleTagManagerScript, GoogleTagManagerNoScript } from "@/components/common/GoogleTagManager";
 import { getSiteAdsenseClient } from "@/services/data/cms-public";
 import { structuredData } from "@/lib/seo/structuredData";
 
@@ -117,6 +118,7 @@ export default async function RootLayout({
       className={cn(sourceSerif.variable)}
     >
       <head>
+        <GoogleTagManagerScript />
         <meta
           name="viewport"
           content="width=device-width, initial-scale=1, viewport-fit=cover"
@@ -128,6 +130,7 @@ export default async function RootLayout({
       </head>
 
       <body className="font-ui bg-background text-foreground antialiased min-h-screen flex flex-col">
+        <GoogleTagManagerNoScript />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
