@@ -163,7 +163,7 @@ export default function LiveAteliersPage() {
                     </TableRow>
                  </TableHeader>
                  <TableBody>
-                    {activeVip.liveRequests.map((req) => (
+                    {(activeVip.liveRequests || []).map((req) => (
                       <TableRow key={req.id} className="hover:bg-ivory/30 transition-colors">
                          <TableCell className="pl-8">
                             <div className="flex flex-col">
@@ -200,7 +200,7 @@ export default function LiveAteliersPage() {
                          </TableCell>
                       </TableRow>
                     ))}
-                    {activeVip.liveRequests.length === 0 && (
+                    {(activeVip.liveRequests || []).length === 0 && (
                       <TableRow>
                          <TableCell colSpan={5} className="py-40 text-center opacity-30">
                             <Video className="w-12 h-12 mx-auto mb-4" />

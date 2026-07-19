@@ -40,6 +40,7 @@ import { apiOrchestrator } from "@/lib/api/orchestrator";
 import { handleNotImplementedError } from "@/lib/feature-policy";
 import { onMissingCheckoutDependency, revalidateCartStock } from "@/lib/checkout-policy";
 import { getProductById } from "@/lib/catalog";
+import { getMembershipPlans } from "@/lib/cms";
 import { PaymentGateway, CountryCode } from "@/lib/types";
 import { formatAmount, normalizeCountry } from "@/lib/i18n/countries";
 import { RiskEngine } from "@/lib/fraud/risk-engine";
@@ -247,10 +248,34 @@ export default function CheckoutPage() {
     applyAddressToForm(addr);
   };
 
+  // CMS-managed membership plans (admin.baalvion.com → Amarisé → membership-plans) take
+  // precedence over the store's static plan list — this route previously read ONLY the
+  // store/mock plans and never queried the CMS at all.
+  const [cmsPlans, setCmsPlans] = useState<typeof paymentPlans | null>(null);
+  useEffect(() => {
+    let active = true;
+    getMembershipPlans().then((plans) => {
+      if (!active || !plans.length) return;
+      const validTiers = ["Silver", "Gold", "Diamond"] as const;
+      setCmsPlans(
+        plans.map((p) => ({
+          ...p,
+          interval: p.interval === "monthly" ? "monthly" : "yearly",
+          tier: (validTiers as readonly string[]).includes(p.tier)
+            ? (p.tier as (typeof validTiers)[number])
+            : "Silver",
+        }))
+      );
+    }).catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const planId = searchParams.get("planId");
   const selectedPlan = useMemo(
-    () => paymentPlans.find((p) => p.id === planId),
-    [planId, paymentPlans]
+    () => (cmsPlans ?? paymentPlans).find((p) => p.id === planId),
+    [planId, cmsPlans, paymentPlans]
   );
   const currentCountryConfig = useMemo(
     () => countryConfigs.find((c) => c.code === countryCode),

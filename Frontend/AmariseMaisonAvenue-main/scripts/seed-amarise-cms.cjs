@@ -10,9 +10,18 @@
  *   - `maison-story`             → /about heritage narrative
  *   - `customer-service`         → /customer-service (per-country shipping/returns/FAQ)
  *   - `membership-plans`         → /membership/plans tiers
+ *   - `footer-config`            → site-wide footer nav/social/legal (all pages)
+ *   - `appointments-page`        → /appointments hero/quote/benefits/experience types
+ *   - `authenticity-page`        → /authenticity hero/steps/CTA
+ *   - `contact-page`             → /contact form copy + inquiry types
+ *   - `provenance-showcase`      → shared /private-order + /special-archive narrative
+ *   - `concierge`/`advisory`/`authentication` (kind: service) → /services/[id]
+ *   - `global-artifact-report` (kind: report)                → /reports/[id]
  *
  * Mirrors the typed readers in src/lib/cms.ts (getHomepage / getPressItems /
- * getMaisonStory / getCustomerService / getMembershipPlans). Every image URL is left
+ * getMaisonStory / getCustomerService / getMembershipPlans / getFooterConfig /
+ * getAppointmentsPageContent / getAuthenticityContent / getContactPageContent /
+ * getProvenanceShowcase / getServices / getReports). Every image URL is left
  * empty on purpose — the owner uploads real photography from the admin Media library
  * and pastes the URL; until then <BrandImage> renders an elegant branded panel.
  *
@@ -263,7 +272,242 @@ const MEMBERSHIP = {
   },
 };
 
-const DOCS = [HOMEPAGE, PRESS, MAISON_STORY, CUSTOMER_SERVICE, MEMBERSHIP];
+const FOOTER = {
+  title: 'Footer Configuration',
+  slug: 'footer-config',
+  contentType: 'page',
+  excerpt: 'Site-wide footer navigation, contact/social links, trust badge and legal copy.',
+  contentBlocks: [para(0, 'Every footer column, contact/social link and legal link is managed here.')],
+  seoMetadata: { title: 'Footer | Amarisé Maison Avenue', description: 'Footer configuration.' },
+  customFields: {
+    columns: [
+      {
+        title: 'Customer Care',
+        links: [
+          { label: 'Contact Us', href: '/contact' },
+          { label: 'FAQ', href: '/faq' },
+          { label: 'My Account', href: '/account' },
+          { label: 'Track Order', href: '/track-order' },
+          { label: 'Shipping & Returns', href: '/customer-service' },
+          { label: 'Authenticity Guarantee', href: '/customer-service' },
+          { label: 'Sell To Us', href: '/how-to-sell' },
+          { label: 'Showrooms', href: '/appointments' },
+        ],
+      },
+      {
+        title: 'About',
+        links: [
+          { label: 'About Us', href: '/about' },
+          { label: 'Visit Us', href: '/contact' },
+          { label: 'Message From Our Founder', href: '/about' },
+          { label: 'Affiliates', href: '/journal' },
+          { label: 'Blog', href: '/journal' },
+          { label: 'Press', href: '/press' },
+        ],
+      },
+      {
+        title: 'Shop',
+        links: [
+          { label: 'Archive Registry', href: '/category/hermes' },
+          { label: 'New Arrivals', href: '/category/new-arrivals' },
+          { label: 'Hermès', href: '/category/hermes' },
+          { label: 'Chanel', href: '/category/chanel' },
+        ],
+      },
+      {
+        title: 'Sell With Us',
+        links: [
+          { label: 'How to Consign', href: '/how-to-sell' },
+          { label: 'Partner Portal', href: '/sell' },
+        ],
+      },
+    ],
+    socialLinks: [
+      { name: 'Phone', href: 'tel:+1234567890', icon: 'phone' },
+      { name: 'Email', href: 'mailto:info@amarisemaisonavenue.com', icon: 'email' },
+      { name: 'Whatsapp', href: 'https://wa.me/1234567890', icon: 'whatsapp' },
+    ],
+    trustBadge: {
+      eyebrow: '100% Authentic',
+      title: 'Guaranteed',
+      description: 'The #1 Trusted Seller of New & Pre-Owned Hermès Bags',
+    },
+    brandName: 'AMARISÉ',
+    brandSuffix: 'MAISON AVENUE',
+    copyrightText:
+      '© 2026 Amarisé Maison Avenue. All Rights Reserved. Amarisé Maison Avenue is a registered Trademark of Amarisé Maison Avenue Inc.',
+    legalLinks: [
+      { label: 'Our Privacy Policy', href: '/privacy-policy' },
+      { label: 'Terms of Service', href: '/terms-of-service' },
+    ],
+  },
+};
+
+const APPOINTMENTS_PAGE = {
+  title: 'Appointments Page',
+  slug: 'appointments-page',
+  contentType: 'page',
+  excerpt: 'Private salon booking page hero + benefits + experience types.',
+  contentBlocks: [para(0, 'Every hero line, benefit and experience-type option on /appointments is managed here.')],
+  seoMetadata: { title: 'Book an Appointment | Amarisé Maison Avenue', description: 'Book a private viewing, virtual try-on, or consultation.' },
+  customFields: {
+    eyebrow: 'Private Salon Experience',
+    title: 'Book Your Visit',
+    quoteTitle: 'The Atelier Protocol',
+    quote: 'An intimate exploration of the Maison’s archive, guided by our senior curators in a private environment.',
+    benefits: [
+      { icon: 'ShieldCheck', label: 'Complimentary Viewing', description: 'No acquisition obligation.' },
+      { icon: 'Globe', label: 'Global Concierge', description: 'Available in all 5 international hubs.' },
+      { icon: 'Sparkles', label: 'Bespoke Presentation', description: 'Curated selection based on your taste.' },
+    ],
+    appointmentTypes: [
+      { value: 'showroom', label: 'Private Showroom Viewing' },
+      { value: 'virtual', label: 'Virtual Try-on' },
+      { value: 'in_home', label: 'In-Home Presentation' },
+      { value: 'phone', label: 'Telephone Consultation' },
+    ],
+  },
+};
+
+const AUTHENTICITY_PAGE = {
+  title: 'Authenticity Page',
+  slug: 'authenticity-page',
+  contentType: 'page',
+  excerpt: 'The authenticity guarantee explainer shown on /authenticity.',
+  contentBlocks: [para(0, 'The 4-step authentication explainer and closing CTA on /authenticity are managed here.')],
+  seoMetadata: { title: 'Authenticity Guarantee | Amarisé Maison Avenue', description: 'Every acquisition is authenticated and certified.' },
+  customFields: {
+    eyebrow: 'The AMARISÉ Standard',
+    title: 'Authenticity, Guaranteed.',
+    subtitle: 'Provenance is the soul of an artifact. Every piece in our registry is authenticated by experts and certified — so your acquisition is beyond question.',
+    steps: [
+      { icon: 'Microscope', title: 'Expert Examination', body: 'In-house gemologists and master authenticators inspect hardware, stitching, materials, date codes and provenance against verified references.' },
+      { icon: 'Fingerprint', title: 'Provenance Verification', body: 'Ownership history and documentation are validated. Pieces without a verifiable chain of provenance never enter the registry.' },
+      { icon: 'FileText', title: 'Certificate of Authenticity', body: 'Each acquisition is issued a uniquely numbered certificate that accompanies the piece and is recorded in your account.' },
+      { icon: 'ShieldCheck', title: 'Lifetime Guarantee', body: 'Our Authenticity Guarantee stands for the life of the piece. A verified inauthenticity claim is met with a full refund and complimentary return.' },
+    ],
+    ctaTitle: 'A question of provenance?',
+    ctaSubtitle: 'Our specialists are available for a private dialogue.',
+    ctaLabel: 'Contact a Specialist',
+  },
+};
+
+const CONTACT_PAGE = {
+  title: 'Contact Page',
+  slug: 'contact-page',
+  contentType: 'page',
+  excerpt: 'Contact form copy and inquiry types shown on /contact.',
+  contentBlocks: [para(0, 'The contact form headline, subtitle and inquiry-type options are managed here.')],
+  seoMetadata: { title: 'Contact | Amarisé Maison Avenue', description: 'Reach the Maison concierge team.' },
+  customFields: {
+    title: 'Speak with the Maison',
+    subtitle: 'Our concierge team is at your disposal for bespoke requests, private appointments, and heritage inquiries.',
+    inquiryTypes: [
+      { value: 'bespoke', label: 'Bespoke Commission' },
+      { value: 'salon', label: 'Private Salon Appointment' },
+      { value: 'order', label: 'Order Support' },
+      { value: 'press', label: 'Press & Media' },
+    ],
+  },
+};
+
+const PROVENANCE_SHOWCASE = {
+  title: 'Provenance Showcase',
+  slug: 'provenance-showcase',
+  contentType: 'page',
+  excerpt: 'Shared provenance/narrative copy used on /private-order/[id] and /special-archive/[id].',
+  contentBlocks: [para(0, 'The generic Maison provenance narrative shown alongside real per-product data.')],
+  seoMetadata: { title: 'Provenance | Amarisé Maison Avenue', description: 'Maison provenance and security standard.' },
+  customFields: {
+    narrative: 'This artifact represents the absolute pinnacle of the Maison’s craftsmanship. Hand-finished in our central atelier, it serves as a testament to human brilliance and the pursuit of the absolute standard. Every stitch and material selection has been audited for heritage compliance, ensuring its position as a primary pillar of any elite collection.',
+    originLabel: 'Maison Central Ateliers, Heritage Series v1.2. Audited provenance records included.',
+    authenticityLabel: 'NFC Certification Included',
+    securityMatrixTitle: 'Security Matrix',
+    securityMatrixBody: 'NFC Authenticity Certification and Secure Digital Ledger Tracking.',
+  },
+};
+
+// Maison services (kind: 'service') — /services/[id]
+const SERVICE_CONCIERGE = {
+  title: 'Maison Concierge',
+  slug: 'concierge',
+  contentType: 'page',
+  excerpt: 'A private concierge service dedicated to sourcing rare artifacts globally.',
+  contentBlocks: [para(0, 'Maison Concierge service detail page content.')],
+  seoMetadata: { title: 'Maison Concierge | Amarisé Maison Avenue', description: 'Private concierge acquisition service.' },
+  customFields: {
+    kind: 'service',
+    name: 'Maison Concierge',
+    tagline: 'The Ultimate Acquisition Partner',
+    description: 'A private concierge service dedicated to sourcing rare artifacts globally, managing international logistics, and providing white-glove delivery.',
+    priceRange: 'On Commission',
+    features: ['Global Sourcing Network', 'Tax & Duty Optimization', 'Private Viewings', 'Bespoke Logistics'],
+    imageUrl: '',
+  },
+};
+const SERVICE_ADVISORY = {
+  title: 'Investment Advisory',
+  slug: 'advisory',
+  contentType: 'page',
+  excerpt: 'Bespoke advisory for collectors seeking to build high-value artisanal portfolios.',
+  contentBlocks: [para(0, 'Investment Advisory service detail page content.')],
+  seoMetadata: { title: 'Investment Advisory | Amarisé Maison Avenue', description: 'Bespoke portfolio advisory service.' },
+  customFields: {
+    kind: 'service',
+    name: 'Investment Advisory',
+    tagline: 'Strategic Portfolio Curation',
+    description: 'Bespoke advisory for collectors seeking to build high-value artisanal portfolios with long-term capital appreciation.',
+    priceRange: 'Annual Retainer',
+    features: ['Market Performance Reports', 'Private Auction Access', 'Provenance Verification', 'Exit Strategy Planning'],
+    imageUrl: '',
+  },
+};
+const SERVICE_AUTHENTICATION = {
+  title: 'Heritage Registry',
+  slug: 'authentication',
+  contentType: 'page',
+  excerpt: 'Official Maison authentication service for high-value artifacts.',
+  contentBlocks: [para(0, 'Heritage Registry (authentication) service detail page content.')],
+  seoMetadata: { title: 'Heritage Registry | Amarisé Maison Avenue', description: 'Official authentication service.' },
+  customFields: {
+    kind: 'service',
+    name: 'Heritage Registry',
+    tagline: 'Absolute Provenance Verification',
+    description: 'Official Maison authentication service for high-value artifacts, including digital NFC certification and archival documentation.',
+    priceRange: '$1,500 per Artifact',
+    features: ['Atelier Inspection', 'Digital Heritage Seal', 'Blockchain Tracking', 'Official Appraisal'],
+    imageUrl: '',
+  },
+};
+
+// Maison intelligence reports (kind: 'report') — /reports/[id]. `body` (contentBlocks
+// paragraphs) is left for a real curator to author — no fabricated market claim is seeded.
+const REPORT_GLOBAL_ARTIFACT = {
+  title: 'The Global Artifact Appreciation Study',
+  slug: 'global-artifact-report',
+  contentType: 'page',
+  excerpt: 'A deep dive into the performance of heritage luxury goods in the current economic climate.',
+  contentBlocks: [
+    para(0, 'This report body is intentionally left for a Maison curator to author with real, verifiable findings — no placeholder market claim is seeded here.'),
+  ],
+  seoMetadata: { title: 'Maison Intelligence | Amarisé Maison Avenue', description: 'Curatorial market intelligence report.' },
+  customFields: {
+    kind: 'report',
+    title: 'The Global Artifact Appreciation Study',
+    summary: 'A deep dive into the performance of heritage luxury goods in the current economic climate.',
+    author: 'Maison Amarisé Curatorial Desk',
+    date: '',
+    isPremium: true,
+    priceLabel: '',
+    previewImage: '',
+  },
+};
+
+const DOCS = [
+  HOMEPAGE, PRESS, MAISON_STORY, CUSTOMER_SERVICE, MEMBERSHIP, FOOTER,
+  APPOINTMENTS_PAGE, AUTHENTICITY_PAGE, CONTACT_PAGE, PROVENANCE_SHOWCASE,
+  SERVICE_CONCIERGE, SERVICE_ADVISORY, SERVICE_AUTHENTICATION, REPORT_GLOBAL_ARTIFACT,
+];
 
 async function main() {
   if (!PW) throw new Error('SUPERADMIN_PASSWORD is required');

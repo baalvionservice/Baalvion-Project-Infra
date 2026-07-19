@@ -42,10 +42,13 @@ export function InquiryModal({ isOpen, onClose, product, service }: InquiryModal
     contactMethod: 'WhatsApp'
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const inquiryId = createInitialInquiry({
+    setSubmitting(true);
+
+    const inquiryId = await createInitialInquiry({
       productId: product?.id,
       serviceId: service?.id,
       customerName: formData.name,
@@ -58,16 +61,24 @@ export function InquiryModal({ isOpen, onClose, product, service }: InquiryModal
       brandId: 'amarise-luxe'
     });
 
+    setSubmitting(false);
+
+    if (!inquiryId) {
+      toast({
+        title: "Unable to submit brief",
+        description: "Please try again in a moment.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     toast({
       title: "Acquisition Intent Received",
-      description: "A specialist curator has been assigned. Redirecting to secure dialogue...",
+      description: "A specialist curator will review your brief shortly.",
     });
 
-    // Close and redirect to chat
-    setTimeout(() => {
-      onClose();
-      router.push(`/${country || 'us'}/inquiry/${inquiryId}`);
-    }, 1500);
+    onClose();
+    router.push(`/${country || 'us'}/inquiry/${inquiryId}`);
   };
 
   return (
@@ -168,8 +179,8 @@ export function InquiryModal({ isOpen, onClose, product, service }: InquiryModal
             </div>
 
             <div className="pt-6">
-              <Button type="submit" className="w-full h-20 bg-plum text-white hover:bg-black rounded-none text-[11px] font-bold tracking-[0.5em] uppercase transition-all shadow-2xl shadow-plum/20">
-                <Lock className="w-4 h-4 mr-4" /> TRANSMIT ACQUISITION BRIEF <ArrowRight className="ml-4 w-4 h-4" />
+              <Button type="submit" disabled={submitting} className="w-full h-20 bg-plum text-white hover:bg-black rounded-none text-[11px] font-bold tracking-[0.5em] uppercase transition-all shadow-2xl shadow-plum/20 disabled:opacity-50">
+                <Lock className="w-4 h-4 mr-4" /> {submitting ? 'TRANSMITTING…' : 'TRANSMIT ACQUISITION BRIEF'} <ArrowRight className="ml-4 w-4 h-4" />
               </Button>
             </div>
           </form>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { Heart, ArrowRight, ShieldCheck } from 'lucide-react';
@@ -11,7 +11,6 @@ import {
   normalizeCountry,
 } from '@/lib/i18n/countries';
 
-import { PRODUCTS_EXTENDED } from '@/lib/mock-monetization';
 import { useAppStore } from '@/lib/store';
 
 import { Button } from '@/components/ui/button';
@@ -40,13 +39,9 @@ export const ProductCard = memo(({ product }: ProductCardProps) => {
     (i) => i.id === product.id
   );
 
-  const monetization = useMemo(
-    () =>
-      PRODUCTS_EXTENDED[product.id] || {
-        priceVisible: true,
-      },
-    [product.id]
-  );
+  // Real, admin-authored field (commerce-service custom_fields.priceVisible via the storefront
+  // serializer) — defaults to true (was a fabricated per-product mock lookup table before).
+  const priceVisible = product.priceVisible !== false;
 
   const badge = getProductBadge(product);
 
@@ -141,7 +136,7 @@ export const ProductCard = memo(({ product }: ProductCardProps) => {
 
         <div className="flex flex-col items-center space-y-3">
           <span className="text-sm lg:text-lg font-bold tracking-tighter text-gray-900 tabular uppercase">
-            {monetization.priceVisible
+            {priceVisible
               ? formatProductPrice(
                   product,
                   normalizeCountry(countryCode)

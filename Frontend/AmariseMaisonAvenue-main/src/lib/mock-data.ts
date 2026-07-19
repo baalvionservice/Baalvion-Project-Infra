@@ -31,7 +31,15 @@ import {
   TaxRule,
   Subscription,
 } from "./types";
-import type { HomepageContent, PressContent } from "./cms";
+import type {
+  HomepageContent,
+  PressContent,
+  FooterConfig,
+  AppointmentsPageContent,
+  AuthenticityPageContent,
+  ContactPageContent,
+  ProvenanceShowcaseContent,
+} from "./cms";
 
 export const COUNTRIES: Record<string, Country> = {
   us: {
@@ -462,82 +470,6 @@ export const CUSTOMER_SERVICE: Record<string, CustomerServiceInfo> = {
     ],
   },
 };
-
-export const VIP_CLIENTS: VipClient[] = [
-  {
-    id: "u-client-1",
-    name: "Julian Vandervilt",
-    email: "julian@vandervilt.com",
-    tier: "Diamond",
-    loyaltyPoints: 12500,
-    totalSpend: 250000,
-    lastPurchase: "2024-03-10",
-    isSubscriber: true,
-    subscriptionPlan: "Maison Gold",
-    brandId: "amarise-luxe",
-    status: "verified",
-    walletBalance: 12500.5,
-    walletHistory: [
-      {
-        id: "w-1",
-        type: "Deposit",
-        amount: 5000,
-        description: "Treasury Funding",
-        timestamp: "2024-03-01T10:00:00Z",
-      },
-      {
-        id: "w-2",
-        type: "Service Fee",
-        amount: -250,
-        description: "Live Curatorial Session",
-        timestamp: "2024-03-10T14:30:00Z",
-      },
-    ],
-    liveRequests: [],
-    certificates: [
-      {
-        id: "cert-11",
-        artifactName: "Hermès Birkin 25 Gold",
-        provenanceScore: 100,
-        status: "Verified",
-        imageUrl: "https://picsum.photos/seed/hermes-birkin-cert/1000/1200",
-      },
-    ],
-  },
-  {
-    id: "vip-2",
-    name: "Sophia Chen",
-    email: "sophia@lux.net",
-    tier: "Gold",
-    loyaltyPoints: 4200,
-    totalSpend: 85000,
-    lastPurchase: "2024-02-28",
-    isSubscriber: false,
-    brandId: "amarise-luxe",
-    status: "verified",
-    walletBalance: 500,
-    walletHistory: [],
-    liveRequests: [],
-    certificates: [],
-  },
-  {
-    id: "vip-3",
-    name: "Alexander Cross",
-    email: "a.cross@heritage.com",
-    tier: "Diamond",
-    loyaltyPoints: 18000,
-    totalSpend: 420000,
-    lastPurchase: "2024-03-14",
-    isSubscriber: true,
-    subscriptionPlan: "Atelier Reserve",
-    brandId: "amarise-luxe",
-    status: "verified",
-    walletBalance: 42000,
-    walletHistory: [],
-    liveRequests: [],
-    certificates: [],
-  },
-];
 
 export const PAYMENT_PLANS: PaymentPlan[] = [
   {
@@ -1254,4 +1186,123 @@ export const PRESS_FALLBACK: PressContent = {
       href: "#",
     },
   ],
+};
+
+export const FOOTER_FALLBACK: FooterConfig = {
+  columns: [
+    {
+      title: "Customer Care",
+      links: [
+        { label: "Contact Us", href: "/contact" },
+        { label: "FAQ", href: "/faq" },
+        { label: "My Account", href: "/account" },
+        { label: "Track Order", href: "/track-order" },
+        { label: "Shipping & Returns", href: "/customer-service" },
+        { label: "Authenticity Guarantee", href: "/customer-service" },
+        { label: "Sell To Us", href: "/how-to-sell" },
+        { label: "Showrooms", href: "/appointments" },
+      ],
+    },
+    {
+      title: "About",
+      links: [
+        { label: "About Us", href: "/about" },
+        { label: "Visit Us", href: "/contact" },
+        { label: "Message From Our Founder", href: "/about" },
+        { label: "Affiliates", href: "/journal" },
+        { label: "Blog", href: "/journal" },
+        { label: "Press", href: "/press" },
+      ],
+    },
+    {
+      title: "Shop",
+      links: [
+        { label: "Archive Registry", href: "/category/hermes" },
+        { label: "New Arrivals", href: "/category/new-arrivals" },
+        { label: "Hermès", href: "/category/hermes" },
+        { label: "Chanel", href: "/category/chanel" },
+      ],
+    },
+    {
+      title: "Sell With Us",
+      links: [
+        { label: "How to Consign", href: "/how-to-sell" },
+        { label: "Partner Portal", href: "/sell" },
+      ],
+    },
+  ],
+  socialLinks: [
+    { name: "Phone", href: "tel:+1234567890", icon: "phone" },
+    { name: "Email", href: "mailto:info@amarisemaisonavenue.com", icon: "email" },
+    { name: "Whatsapp", href: "https://wa.me/1234567890", icon: "whatsapp" },
+  ],
+  trustBadge: {
+    eyebrow: "100% Authentic",
+    title: "Guaranteed",
+    description: "The #1 Trusted Seller of New & Pre-Owned Hermès Bags",
+  },
+  brandName: "AMARISÉ",
+  brandSuffix: "MAISON AVENUE",
+  copyrightText:
+    "© 2026 Amarisé Maison Avenue. All Rights Reserved. Amarisé Maison Avenue is a registered Trademark of Amarisé Maison Avenue Inc.",
+  legalLinks: [
+    { label: "Our Privacy Policy", href: "/privacy-policy" },
+    { label: "Terms of Service", href: "/terms-of-service" },
+  ],
+};
+
+export const APPOINTMENTS_PAGE_FALLBACK: AppointmentsPageContent = {
+  eyebrow: "Private Salon Experience",
+  title: "Book Your Visit",
+  quoteTitle: "The Atelier Protocol",
+  quote:
+    "An intimate exploration of the Maison's archive, guided by our senior curators in a private environment.",
+  benefits: [
+    { icon: "ShieldCheck", label: "Complimentary Viewing", description: "No acquisition obligation." },
+    { icon: "Globe", label: "Global Concierge", description: "Available in all 5 international hubs." },
+    { icon: "Sparkles", label: "Bespoke Presentation", description: "Curated selection based on your taste." },
+  ],
+  appointmentTypes: [
+    { value: "showroom", label: "Private Showroom Viewing" },
+    { value: "virtual", label: "Virtual Try-on" },
+    { value: "in_home", label: "In-Home Presentation" },
+    { value: "phone", label: "Telephone Consultation" },
+  ],
+};
+
+export const AUTHENTICITY_FALLBACK: AuthenticityPageContent = {
+  eyebrow: "The AMARISÉ Standard",
+  title: "Authenticity, Guaranteed.",
+  subtitle:
+    "Provenance is the soul of an artifact. Every piece in our registry is authenticated by experts and certified — so your acquisition is beyond question.",
+  steps: [
+    { icon: "Microscope", title: "Expert Examination", body: "In-house gemologists and master authenticators inspect hardware, stitching, materials, date codes and provenance against verified references." },
+    { icon: "Fingerprint", title: "Provenance Verification", body: "Ownership history and documentation are validated. Pieces without a verifiable chain of provenance never enter the registry." },
+    { icon: "FileText", title: "Certificate of Authenticity", body: "Each acquisition is issued a uniquely numbered certificate that accompanies the piece and is recorded in your account." },
+    { icon: "ShieldCheck", title: "Lifetime Guarantee", body: "Our Authenticity Guarantee stands for the life of the piece. A verified inauthenticity claim is met with a full refund and complimentary return." },
+  ],
+  ctaTitle: "A question of provenance?",
+  ctaSubtitle: "Our specialists are available for a private dialogue.",
+  ctaLabel: "Contact a Specialist",
+};
+
+export const CONTACT_PAGE_FALLBACK: ContactPageContent = {
+  title: "Speak with the Maison",
+  subtitle:
+    "Our concierge team is at your disposal for bespoke requests, private appointments, and heritage inquiries.",
+  inquiryTypes: [
+    { value: "bespoke", label: "Bespoke Commission" },
+    { value: "salon", label: "Private Salon Appointment" },
+    { value: "order", label: "Order Support" },
+    { value: "press", label: "Press & Media" },
+  ],
+};
+
+export const PROVENANCE_SHOWCASE_FALLBACK: ProvenanceShowcaseContent = {
+  narrative:
+    "This artifact represents the absolute pinnacle of the Maison's craftsmanship. Hand-finished in our central atelier, it serves as a testament to human brilliance and the pursuit of the absolute standard. Every stitch and material selection has been audited for heritage compliance, ensuring its position as a primary pillar of any elite collection.",
+  originLabel: "Maison Central Ateliers, Heritage Series v1.2. Audited provenance records included.",
+  authenticityLabel: "NFC Certification Included",
+  securityMatrixTitle: "Security Matrix",
+  securityMatrixBody: "NFC Authenticity Certification and Secure Digital Ledger Tracking.",
 };

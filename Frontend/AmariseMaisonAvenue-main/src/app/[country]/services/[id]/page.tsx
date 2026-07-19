@@ -1,19 +1,37 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { BrandImage } from '@/components/ui/BrandImage';
 import { MAISON_SERVICES } from '@/lib/mock-monetization';
+import { getService } from '@/lib/cms';
 import { Button } from '@/components/ui/button';
 import { InquiryModal } from '@/components/product/InquiryModal';
 import { ShieldCheck, ArrowRight, Star, Globe, Clock, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { MaisonService } from '@/lib/types';
 
 export default function ServicePage() {
   const { id, country } = useParams();
-  const service = MAISON_SERVICES.find(s => s.id === id);
+  const serviceId = id as string;
+  const [service, setService] = useState<MaisonService | null | undefined>(undefined);
   const [isInquiryOpen, setIsInquiryOpen] = useState(false);
 
+  useEffect(() => {
+    let cancelled = false;
+    setService(undefined);
+    getService(serviceId).then((cmsService) => {
+      if (cancelled) return;
+      setService(cmsService ?? MAISON_SERVICES.find((s) => s.id === serviceId) ?? null);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [serviceId]);
+
+  if (service === undefined) {
+    return <div className="py-40 text-center text-[12px] uppercase tracking-[0.3em] text-gray-400">Loading&hellip;</div>;
+  }
   if (!service) return <div className="py-40 text-center font-headline text-3xl">Service not found.</div>;
 
   return (

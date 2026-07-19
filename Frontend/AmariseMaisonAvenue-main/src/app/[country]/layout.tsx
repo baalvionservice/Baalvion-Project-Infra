@@ -3,7 +3,6 @@
 import React, { useEffect } from "react";
 import { Header } from "@/components/layout/Header";
 import { useParams, usePathname } from "next/navigation";
-import { ShowcaseControls } from "@/components/demo/ShowcaseControls";
 import { MaisonPopup } from "@/components/layout/MaisonPopup";
 import { MadAveLiveWidget } from "@/components/layout/MadAveLiveWidget";
 import { CartSheet } from "@/components/layout/CartSheet";
@@ -26,8 +25,6 @@ export default function CountryLayout({
   children: React.ReactNode;
 }) {
 
-  const [isMobile, setIsMobile] = React.useState<boolean>(true);
-
   const { setLanguage } = useAppStore();
   const params = useParams();
   const country = normalizeCountry(params?.country);
@@ -35,16 +32,6 @@ export default function CountryLayout({
 
   const isCollectionPage = pathname?.includes("/category/") || pathname?.includes("/account/live");
   const isProductPage = pathname?.includes("/product/");
-
-  function checkMobile() {
-    if (typeof window !== "undefined") {
-      setIsMobile(window.innerWidth < 768);
-    }
-  }
-
-  useEffect(() => {
-    checkMobile();
-  }, []);
 
   // Lead each market in its default language (AE → Arabic/RTL), while honouring
   // a manual language switch made within the same country.
@@ -90,7 +77,6 @@ export default function CountryLayout({
 
 
       <Footer />
-      {!isMobile && <ShowcaseControls />}
     </div>
   );
 }

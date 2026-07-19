@@ -34,7 +34,14 @@ export function useProducts(query: ProductQuery = {}) {
     return () => { active = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
-  return { products: page.items, total: page.total, loading };
+  return {
+    products: page.items,
+    total: page.total,
+    totalPages: page.totalPages,
+    page: page.page,
+    facets: page.facets,
+    loading,
+  };
 }
 
 export function useProduct(idOrSlug?: string, country?: CountryCode) {

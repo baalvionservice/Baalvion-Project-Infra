@@ -13,7 +13,9 @@ import {
     Mail,
     Clock,
     Sparkles,
-    Globe
+    Globe,
+    AlertCircle,
+    CheckCircle2,
 } from 'lucide-react';
 import {
     Select,
@@ -22,8 +24,9 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { useToast } from '@/hooks/use-toast';
 import { COUNTRIES } from '@/lib/mock-data';
+import { createSupportTicket } from '@/lib/crm-client';
+import type { ContactPageContent } from '@/lib/cms';
 import Link from 'next/link';
 
 type Country = {
@@ -41,24 +44,40 @@ type Country = {
 interface ContactFormClientProps {
     countryCode: string;
     currentCountry: Country;
+    content: ContactPageContent;
 }
 
-export function ContactFormClient({ countryCode, currentCountry }: ContactFormClientProps) {
+export function ContactFormClient({ countryCode, currentCountry, content }: ContactFormClientProps) {
     const router = useRouter();
-    const { toast } = useToast();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitted, setSubmitted] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [inquiryType, setInquiryType] = useState(content.inquiryTypes[0]?.value ?? 'bespoke');
+    const [message, setMessage] = useState('');
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError(null);
         setIsSubmitting(true);
 
-        setTimeout(() => {
-            setIsSubmitting(false);
-            toast({
-                title: "Request Sent",
-                description: "A Maison Concierge will contact you within 24 business hours.",
-            });
-        }, 1500);
+        const typeLabel = content.inquiryTypes.find((t) => t.value === inquiryType)?.label ?? inquiryType;
+        const ticket = await createSupportTicket({
+            customerName: name.trim(),
+            customerEmail: email.trim(),
+            subject: `Contact form: ${typeLabel}`,
+            category: inquiryType,
+            message: message.trim(),
+        });
+
+        setIsSubmitting(false);
+        if (ticket) {
+            setSubmitted(true);
+        } else {
+            setError('We could not send your message. Please try again in a moment.');
+        }
     };
 
     const handleCountrySwitch = (code: string) => {
@@ -70,21 +89,32 @@ export function ContactFormClient({ countryCode, currentCountry }: ContactFormCl
             {/* Contact Form Section */}
             <div className="flex-1 space-y-12">
                 <div className="space-y-4">
-                    <h2 className="text-4xl font-headline font-bold italic">Speak with the Maison</h2>
+                    <h2 className="text-4xl font-headline font-bold italic">{content.title}</h2>
                     <p className="text-lg text-muted-foreground font-light leading-relaxed italic max-w-xl">
-                        "Our concierge team is at your disposal for bespoke requests, private appointments, and heritage inquiries."
+                        "{content.subtitle}"
                     </p>
                 </div>
 
+                {submitted ? (
+                    <div className="bg-white p-10 shadow-luxury border border-border flex items-start gap-4">
+                        <CheckCircle2 className="w-6 h-6 text-emerald-600 shrink-0 mt-1" />
+                        <div className="space-y-2">
+                            <h3 className="text-xl font-headline font-bold italic">Request Sent</h3>
+                            <p className="text-sm text-muted-foreground font-light">
+                                A Maison Concierge will contact you within 24 business hours.
+                            </p>
+                        </div>
+                    </div>
+                ) : (
                 <form onSubmit={handleSubmit} className="space-y-8 bg-white p-10 shadow-luxury border border-border">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-2">
                             <Label className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Your Name</Label>
-                            <Input required className="rounded-none bg-ivory/50 border-border focus:ring-gold" placeholder="Julian Vandervilt" />
+                            <Input required value={name} onChange={(e) => setName(e.target.value)} className="rounded-none bg-ivory/50 border-border focus:ring-gold" placeholder="Julian Vandervilt" />
                         </div>
                         <div className="space-y-2">
                             <Label className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Email Address</Label>
-                            <Input required type="email" className="rounded-none bg-ivory/50 border-border focus:ring-gold" placeholder="j.vandervilt@lux.net" />
+                            <Input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="rounded-none bg-ivory/50 border-border focus:ring-gold" placeholder="j.vandervilt@lux.net" />
                         </div>
                     </div>
 
@@ -106,23 +136,31 @@ export function ContactFormClient({ countryCode, currentCountry }: ContactFormCl
 
                     <div className="space-y-2">
                         <Label className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Inquiry Type</Label>
-                        <Select defaultValue="bespoke">
+                        <Select value={inquiryType} onValueChange={setInquiryType}>
                             <SelectTrigger className="rounded-none bg-ivory/50 border-border h-12">
                                 <SelectValue placeholder="Reason for Contact" />
                             </SelectTrigger>
                             <SelectContent className="bg-white border-border shadow-luxury">
-                                <SelectItem value="bespoke" className="text-[10px] font-bold uppercase tracking-widest">Bespoke Commission</SelectItem>
-                                <SelectItem value="salon" className="text-[10px] font-bold uppercase tracking-widest">Private Salon Appointment</SelectItem>
-                                <SelectItem value="order" className="text-[10px] font-bold uppercase tracking-widest">Order Support</SelectItem>
-                                <SelectItem value="press" className="text-[10px] font-bold uppercase tracking-widest">Press & Media</SelectItem>
+                                {content.inquiryTypes.map((t) => (
+                                    <SelectItem key={t.value} value={t.value} className="text-[10px] font-bold uppercase tracking-widest">
+                                        {t.label}
+                                    </SelectItem>
+                                ))}
                             </SelectContent>
                         </Select>
                     </div>
 
                     <div className="space-y-2">
                         <Label className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Your Message</Label>
-                        <Textarea required className="rounded-none bg-ivory/50 border-border min-h-[150px] focus:ring-gold" placeholder="How may the Maison assist you?" />
+                        <Textarea required value={message} onChange={(e) => setMessage(e.target.value)} className="rounded-none bg-ivory/50 border-border min-h-[150px] focus:ring-gold" placeholder="How may the Maison assist you?" />
                     </div>
+
+                    {error && (
+                        <div role="alert" className="flex items-start gap-3 border border-red-200 bg-red-50 px-4 py-3 text-[12px] text-red-600">
+                            <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+                            <span>{error}</span>
+                        </div>
+                    )}
 
                     <Button
                         type="submit"
@@ -132,6 +170,7 @@ export function ContactFormClient({ countryCode, currentCountry }: ContactFormCl
                         {isSubmitting ? "TRANSMITTING..." : "SEND MESSAGE"} <Send className="w-4 h-4 ml-3" />
                     </Button>
                 </form>
+                )}
             </div>
 
             {/* Sidebar with HQ Info */}

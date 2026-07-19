@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { BrandImage } from "@/components/ui/BrandImage";
-import { COUNTRIES } from "@/lib/mock-data";
+import { COUNTRIES, APPOINTMENTS_PAGE_FALLBACK } from "@/lib/mock-data";
+import { getAppointmentsPageContent, type AppointmentsPageContent } from "@/lib/cms";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +17,7 @@ import {
   Loader2,
   CheckCircle2,
   AlertCircle,
+  type LucideIcon,
 } from "lucide-react";
 import {
   Select,
@@ -31,17 +33,31 @@ import {
 } from "@/lib/api-client";
 import type { StoreAppointment, StoreAppointmentType } from "@/lib/types";
 
-const APPOINTMENT_TYPES: { value: StoreAppointmentType; label: string }[] = [
-  { value: "showroom", label: "Private Showroom Viewing" },
-  { value: "virtual", label: "Virtual Try-on" },
-  { value: "in_home", label: "In-Home Presentation" },
-  { value: "phone", label: "Telephone Consultation" },
-];
+const BENEFIT_ICON_MAP: Record<string, LucideIcon> = {
+  ShieldCheck,
+  Globe,
+  Sparkles,
+};
 
 export default function AppointmentBookingPage() {
   const { country } = useParams();
   const countryCode = (country as string) || "us";
   const currentCountry = COUNTRIES[countryCode] || COUNTRIES.us;
+
+  const [content, setContent] = useState<AppointmentsPageContent>(APPOINTMENTS_PAGE_FALLBACK);
+  useEffect(() => {
+    let cancelled = false;
+    getAppointmentsPageContent().then((c) => {
+      if (!cancelled && c) setContent(c);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  const APPOINTMENT_TYPES: { value: StoreAppointmentType; label: string }[] =
+    content.appointmentTypes.length
+      ? (content.appointmentTypes as { value: StoreAppointmentType; label: string }[])
+      : APPOINTMENTS_PAGE_FALLBACK.appointmentTypes as { value: StoreAppointmentType; label: string }[];
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -104,10 +120,10 @@ export default function AppointmentBookingPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-ivory/20 to-ivory" />
         <div className="relative z-10 text-center space-y-4 px-6">
           <span className="text-primary text-[10px] font-bold tracking-[0.5em] uppercase">
-            Private Salon Experience
+            {content.eyebrow}
           </span>
           <h1 className="text-6xl md:text-7xl font-headline font-bold italic text-gray-900 leading-tight">
-            Book Your Visit
+            {content.title}
           </h1>
         </div>
       </section>
@@ -117,6 +133,7 @@ export default function AppointmentBookingPage() {
           <AppointmentSuccess
             appointment={booked}
             countryCode={countryCode}
+            appointmentTypes={APPOINTMENT_TYPES}
             onBookAnother={() => {
               setBooked(null);
               setDate("");
@@ -129,29 +146,24 @@ export default function AppointmentBookingPage() {
             <div className="space-y-8">
               <div className="space-y-4">
                 <h2 className="text-3xl font-headline font-bold italic">
-                  The Atelier Protocol
+                  {content.quoteTitle}
                 </h2>
                 <p className="text-sm text-muted-foreground font-light leading-relaxed italic">
-                  &ldquo;An intimate exploration of the Maison&rsquo;s archive, guided by our
-                  senior curators in a private environment.&rdquo;
+                  &ldquo;{content.quote}&rdquo;
                 </p>
               </div>
               <div className="space-y-6">
-                <BenefitItem
-                  icon={<ShieldCheck className="w-4 h-4 text-gold" />}
-                  label="Complimentary Viewing"
-                  desc="No acquisition obligation."
-                />
-                <BenefitItem
-                  icon={<Globe className="w-4 h-4 text-gold" />}
-                  label="Global Concierge"
-                  desc="Available in all 5 international hubs."
-                />
-                <BenefitItem
-                  icon={<Sparkles className="w-4 h-4 text-gold" />}
-                  label="Bespoke Presentation"
-                  desc="Curated selection based on your taste."
-                />
+                {content.benefits.map((b) => {
+                  const Icon = BENEFIT_ICON_MAP[b.icon] || ShieldCheck;
+                  return (
+                    <BenefitItem
+                      key={b.label}
+                      icon={<Icon className="w-4 h-4 text-gold" />}
+                      label={b.label}
+                      desc={b.description}
+                    />
+                  );
+                })}
               </div>
             </div>
 
@@ -308,14 +320,16 @@ export default function AppointmentBookingPage() {
 function AppointmentSuccess({
   appointment,
   countryCode,
+  appointmentTypes,
   onBookAnother,
 }: {
   appointment: StoreAppointment;
   countryCode: string;
+  appointmentTypes: { value: StoreAppointmentType; label: string }[];
   onBookAnother: () => void;
 }) {
   const typeLabel =
-    APPOINTMENT_TYPES.find((t) => t.value === appointment.type)?.label ||
+    appointmentTypes.find((t) => t.value === appointment.type)?.label ||
     String(appointment.type).replace(/_/g, " ");
   const when = appointment.preferredAt
     ? new Date(appointment.preferredAt).toLocaleString()

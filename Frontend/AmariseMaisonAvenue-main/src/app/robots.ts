@@ -33,6 +33,9 @@ export default function robots(): MetadataRoute.Robots {
         disallow: privatePaths,
       },
     ],
-    sitemap: "https://www.amarisemaisonavenue.com/sitemap.xml",
+    sitemap: [
+      "https://www.amarisemaisonavenue.com/sitemap.xml",
+      "https://www.amarisemaisonavenue.com/news-sitemap.xml",
+    ],
   };
 }

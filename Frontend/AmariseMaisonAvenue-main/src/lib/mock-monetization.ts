@@ -1,34 +1,13 @@
 
-import { ProductExtended, MaisonService, MaisonReport, PrivateInquiry } from './types';
+import { MaisonService, MaisonReport } from './types';
 
 /**
- * HIGH-TICKET MONETIZATION MOCK DATA
- * Assigning Elite status to selected artifacts for ₹10L+ trust simulation.
+ * Maison service/report catalog copy. Note: per-product collector-value/investment-insight
+ * claims (formerly a fabricated PRODUCTS_EXTENDED lookup table here) are now real,
+ * admin-authored fields on the product itself (commerce-service custom_fields, surfaced via
+ * storefrontSerializer.js) — see Product.collectorValue/marketRange/investmentInsight/
+ * scarcityTag/priceVisible in lib/types.ts. Nothing here fabricates a per-artifact claim.
  */
-
-export const PRODUCTS_EXTENDED: Record<string, Partial<ProductExtended>> = {
-  'prod-1': {
-    collectorValue: 'Exceptional',
-    marketRange: '$12,000 - $15,000',
-    investmentInsight: 'Artifacts from the 1924 founding series show a consistent 12% annual appreciation in the secondary market.',
-    scarcityTag: 'Final Archive Piece',
-    priceVisible: false
-  },
-  'prod-10': {
-    collectorValue: 'Museum Grade',
-    marketRange: '$45,000 - $55,000',
-    investmentInsight: 'This piece represents a one-of-a-kind collaboration between our Parisian atelier and the 1924 archives.',
-    scarcityTag: 'Privately Sourced',
-    priceVisible: false
-  },
-  'prod-50': {
-    collectorValue: 'Strategic',
-    marketRange: '$8,000 - $10,000',
-    investmentInsight: 'Exotic series within the Heritage line maintain higher resale liquidity than seasonal counterparts.',
-    scarcityTag: 'Only 1 available globally',
-    priceVisible: true
-  }
-};
 
 export const MAISON_SERVICES: MaisonService[] = [
   {
@@ -79,16 +58,3 @@ export const MAISON_REPORTS: MaisonReport[] = [
   }
 ];
 
-export const MOCK_REVENUE_METRICS = {
-  totalAcquisitionValue: 12450000,
-  highIntentLeads: 142,
-  servicePullThrough: 28,
-  conversionRate: 4.2,
-  topRegions: [
-    { name: 'USA', value: 4500000 },
-    { name: 'UAE', value: 3800000 },
-    { name: 'UK', value: 2100000 },
-    { name: 'Singapore', value: 1200000 },
-    { name: 'India', value: 850000 }
-  ]
-};

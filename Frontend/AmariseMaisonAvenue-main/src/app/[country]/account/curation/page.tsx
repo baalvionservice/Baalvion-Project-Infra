@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import { useAppStore } from '@/lib/store';
-import { 
+import { useMyInquiries } from '@/hooks/use-sales-system';
+import {
   MessageSquare, 
   ChevronRight, 
   Sparkles, 
@@ -22,7 +22,7 @@ import { cn } from '@/lib/utils';
 export default function CurationInquiriesPage() {
   const { country } = useParams();
   const countryCode = (country as string) || 'us';
-  const { privateInquiries } = useAppStore();
+  const { inquiries: privateInquiries, loading } = useMyInquiries();
 
   return (
     <div className="space-y-12">
@@ -62,7 +62,7 @@ export default function CurationInquiriesPage() {
                     </h3>
                     <div className="flex items-center space-x-3">
                        <Clock className="w-3 h-3 text-gray-300" />
-                       <span className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Updated {new Date(inquiry.timestamp).toLocaleDateString()}</span>
+                       <span className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Updated {new Date(inquiry.timestamp ?? inquiry.createdAt ?? Date.now()).toLocaleDateString()}</span>
                     </div>
                   </div>
                   <Crown className={cn("w-5 h-5", inquiry.leadTier === 1 ? "text-gold fill-gold" : "text-gray-100")} />
@@ -94,7 +94,13 @@ export default function CurationInquiriesPage() {
           </Card>
         ))}
 
-        {privateInquiries.length === 0 && (
+        {loading && (
+          <p className="py-24 text-center text-[11px] font-bold uppercase tracking-[0.3em] text-gray-400">
+            Loading&hellip;
+          </p>
+        )}
+
+        {!loading && privateInquiries.length === 0 && (
           <div className="py-40 text-center border-2 border-dashed border-border flex flex-col items-center space-y-6 opacity-30">
              <div className="p-8 bg-ivory border border-border rounded-full">
                 <Sparkles className="w-12 h-12 text-gold/30" />

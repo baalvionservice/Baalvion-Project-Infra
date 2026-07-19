@@ -25,8 +25,6 @@ import {
   CartItem,
   VipClient,
   SupportTicket,
-  PrivateInquiry,
-  LeadConversation,
   MaisonMetric,
   MaisonAlert,
   SystemHealthScore,
@@ -36,7 +34,6 @@ import {
   Collection,
   Editorial,
   SEOMetadata,
-  SalesScript,
   Appointment,
   Invoice,
   Affiliate,
@@ -62,29 +59,19 @@ import {
 } from "./types";
 import {
   COUNTRIES as INITIAL_COUNTRIES,
-  VIP_CLIENTS as INITIAL_VIP_CLIENTS,
   SUPPORT_TICKETS as INITIAL_TICKETS,
-  ADMIN_ACCOUNTS,
-  CAMPAIGNS,
   INVOICES as INITIAL_INVOICES,
-  AFFILIATES,
-  RETURNS as INITIAL_RETURNS,
   EDITOR_INITIAL,
   BUYING_GUIDES,
-  INDEXING_STATUS as INITIAL_INDEXING,
-  SUPPORT_STATS as INITIAL_SUPPORT_STATS,
-  VENDORS,
   PAYMENT_PLANS,
   SUBSCRIPTIONS,
   FX_RATES,
-  TAX_RULES,
 } from "./mock-data";
-import { MOCK_SESSION_USER, MaisonUser } from "./permissions/mock-users";
+import type { MaisonUser } from "./permissions/mock-users";
 import { wishlistApi } from "./api-client";
 import { getAccessToken } from "./auth";
 import { COUNTRIES_CONFIG, BRANDS_CONFIG } from "./mock-global-config";
-import { MOCK_INQUIRIES, MOCK_CONVERSATIONS } from "./mock-sales";
-import { ACQUISITION_SCRIPTS } from "./mock-sales-system";
+import { getMyVipClient, adjustMyWallet, createAppointment } from "./crm-client";
 import { SupportedLanguage } from "./i18n/config";
 import { eventBus } from "./events/bus";
 import { initializeGlobalHandlers } from "./events/handlers";
@@ -108,36 +95,28 @@ interface AppContextType {
   isCartOpen: boolean;
   activeVip: VipClient | null;
   supportTickets: SupportTicket[];
-  privateInquiries: PrivateInquiry[];
-  leadConversations: LeadConversation[];
   activeHub: CountryCode | "global";
   currentLanguage: SupportedLanguage;
   paymentPlans: PaymentPlan[];
   subscriptions: Subscription[];
   fxRates: FXRate[];
-  taxRules: TaxRule[];
 
   // Scoped Data
   scopedProducts: Product[];
   scopedTransactions: Transaction[];
   scopedNotifications: MaisonNotification[];
-  scopedInquiries: PrivateInquiry[];
   scopedErrors: MaisonError[];
   scopedAlerts: MaisonAlert[];
   scopedMetrics: MaisonMetric[];
   scopedCertificates: any[];
   scopedBrandIntegrity: BrandIntegrityIssue[];
   scopedWorkflows: WorkflowTask[];
-  scopedReturns: ReturnRequest[];
   scopedShipments: Shipment[];
   scopedAuditLogs: AuditLogEntry[];
   scopedFraudLogs: FraudLog[];
   scopedPricingOptimizations: DynamicPrice[];
   scopedEvents: any[];
   scopedJobs: BackgroundJob[];
-
-  // Support
-  supportStats: any;
 
   // AI
   aiModules: AIModuleStatus[];
@@ -147,7 +126,6 @@ interface AppContextType {
   // Settings
   integrations: any[];
   apiLogs: any[];
-  indexingStatus: any;
   systemHealth: SystemHealthScore;
 
   // Actions
@@ -169,13 +147,6 @@ interface AppContextType {
   toggleWishlist: (p: Product) => void;
   topUpWallet: (amount: number) => void;
   requestLiveSession: (productId: string, productName: string) => boolean;
-  addLeadMessage: (
-    inquiryId: string,
-    text: string,
-    sender: "client" | "curator"
-  ) => void;
-  updateInquiryStatus: (id: string, status: any) => void;
-  upsertPrivateInquiry: (i: PrivateInquiry) => void;
   createInvoice: (inv: Invoice) => void;
   createTransaction: (tx: Transaction) => void;
   deleteProduct: (id: string) => void;
@@ -187,7 +158,6 @@ interface AppContextType {
     quantity: number,
     reason: string
   ) => void;
-  processReturn: (id: string, status: any) => void;
   recordMetric: (m: Omit<MaisonMetric, "id" | "timestamp">) => void;
   recordFraudLog: (l: Omit<FraudLog, "id">) => void;
   updateAIModule: (id: string, enabled: boolean, level: any) => void;
@@ -205,7 +175,6 @@ interface AppContextType {
     country: CountryCode
   ) => void;
   upsertAppointment: (apt: Appointment) => void;
-  upsertTemplate: (t: SalesScript) => void;
   upsertSEOMetadata: (meta: SEOMetadata) => void;
   toggleProductVipStatus: (id: string) => void;
   lockProductForEditing: (id: string) => boolean;
@@ -229,14 +198,9 @@ interface AppContextType {
     code: CountryCode,
     config: Partial<CountryConfig>
   ) => void;
-  verifyClient: (id: string) => void;
   addTicketMessage: (id: string, text: string, sender: string) => void;
   updateTicketStatus: (id: string, status: any) => void;
   getLocalizedPrice: (price: number) => string;
-  activeVendor: any | null;
-  setActiveVendor: (v: any | null) => void;
-  vendors: any[];
-  messagingTemplates: SalesScript[];
   collections: Collection[];
   editorials: Editorial[];
   buyingGuides: BuyingGuide[];
@@ -267,17 +231,15 @@ interface AppContextType {
   runStressTest: (id: string) => void;
   scopedStressTests: any[];
   scopedLiveRequests: any[];
-  activeCampaigns: Campaign[];
-  affiliates: Affiliate[];
-  vipClients: VipClient[];
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [currentUser, setCurrentUser] = useState<MaisonUser | null>(
-    MOCK_SESSION_USER
-  );
+  // Fail-closed: an anonymous visitor is nobody's staff persona, never a default
+  // super_admin. Real customer identity comes from useAuth(); this only carries
+  // an internal staff/VIP persona when something explicitly sets one.
+  const [currentUser, setCurrentUser] = useState<MaisonUser | null>(null);
   const [adminJurisdiction, setAdminJurisdiction] = useState<
     CountryCode | "global"
   >("global");
@@ -328,13 +290,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [wishlist, setWishlist] = useState<Product[]>([]);
   const [isCartOpen, setCartOpen] = useState(false);
-  const [vips, setVips] = useState<VipClient[]>(INITIAL_VIP_CLIENTS);
+  // Real crm-service VIP record for the logged-in customer only (was a shared global mock
+  // array where EVERY visitor saw the same first entry's wallet/certificates). null when
+  // the customer isn't logged in or has no VIP record — never another customer's data.
+  const [myVipClient, setMyVipClient] = useState<VipClient | null>(null);
+  useEffect(() => {
+    if (!getAccessToken()) return;
+    getMyVipClient().then((v) => {
+      if (v) setMyVipClient(v);
+    });
+  }, []);
   const [supportTickets, setSupportTickets] =
     useState<SupportTicket[]>(INITIAL_TICKETS);
-  const [privateInquiries, setPrivateInquiries] =
-    useState<PrivateInquiry[]>(MOCK_INQUIRIES);
-  const [leadConversations, setLeadConversations] =
-    useState<LeadConversation[]>(MOCK_CONVERSATIONS);
   const [globalSyncHistory, setGlobalSyncHistory] = useState<
     GlobalSyncSession[]
   >([]);
@@ -349,7 +316,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     BrandIntegrityIssue[]
   >([]);
   const [shipments, setShipments] = useState<Shipment[]>([]);
-  const [returns, setReturns] = useState<ReturnRequest[]>(INITIAL_RETURNS);
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
   const [aiModules, setAiModules] = useState<AIModuleStatus[]>([
     {
@@ -387,7 +353,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [aiSuggestions, setAiSuggestions] = useState<AISuggestion[]>([]);
   const [seoRegistry, setSeoRegistry] = useState<SEOMetadata[]>([]);
   const [socialMetrics, setSocialMetrics] = useState<Record<string, any>>({});
-  const [activeVendor, setActiveVendor] = useState<any | null>(VENDORS[0]);
   const [automationRules, setAutomationRules] = useState<AutomationRule[]>([]);
   const [cmsSections, setCmsSections] = useState<CMSSection[]>([]);
 
@@ -600,10 +565,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return currentUser.country as CountryCode;
   }, [currentUser, adminJurisdiction]);
 
-  const activeVip = useMemo(
-    () => vips.find((v) => v.id === currentUser?.id) || vips[0],
-    [vips, currentUser]
-  );
+  // The logged-in customer's OWN VIP record, or null. Never falls back to "the first VIP in
+  // some list" — that was the bug (every visitor saw one shared customer's private wallet/
+  // certificates regardless of who they were).
+  const activeVip = myVipClient;
 
   const scopedProducts = useMemo(
     () =>
@@ -629,17 +594,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             (n) => n.country === activeHub || n.country === "global"
           ),
     [notifications, activeHub]
-  );
-
-  const scopedInquiries = useMemo(
-    () =>
-      activeHub === "global"
-        ? privateInquiries
-        : privateInquiries.filter(
-            (i) =>
-              i.country.toLowerCase() === activeHub || i.country === "global"
-          ),
-    [privateInquiries, activeHub]
   );
 
   const scopedErrors = useMemo(
@@ -736,44 +690,34 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     isCartOpen,
     activeVip,
     supportTickets,
-    privateInquiries,
-    leadConversations,
     activeHub,
     currentLanguage,
     paymentPlans: PAYMENT_PLANS,
     subscriptions: SUBSCRIPTIONS,
     fxRates,
-    taxRules: TAX_RULES,
     scopedProducts,
     scopedTransactions,
     scopedNotifications,
-    scopedInquiries,
     scopedErrors,
     scopedAlerts,
     scopedMetrics: metrics,
     scopedCertificates: activeVip?.certificates || [],
     scopedBrandIntegrity: brandIntegrityIssues,
     scopedWorkflows: [],
-    scopedReturns: returns,
     scopedShipments: shipments,
     scopedAuditLogs,
     scopedFraudLogs,
     scopedPricingOptimizations,
     scopedEvents,
     scopedJobs,
-    supportStats: INITIAL_SUPPORT_STATS,
     aiModules,
     aiLogs,
     aiSuggestions,
     integrations: [],
     apiLogs: [],
-    indexingStatus: INITIAL_INDEXING,
     systemHealth: obsEngine.calculateHealth(
       activeHub === "global" ? "global" : activeHub
     ),
-    activeVendor,
-    vendors: VENDORS,
-    messagingTemplates: ACQUISITION_SCRIPTS,
     collections,
     editorials: EDITOR_INITIAL,
     buyingGuides: BUYING_GUIDES,
@@ -794,9 +738,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     runStressTest: (id) => {},
     scopedStressTests: [],
     scopedLiveRequests: activeVip?.liveRequests || [],
-    activeCampaigns: CAMPAIGNS,
-    affiliates: AFFILIATES,
-    vipClients: vips,
 
     setCurrentUser,
     setAdminJurisdiction,
@@ -866,64 +807,49 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
         return isRemoving ? prev.filter((i) => i.id !== p.id) : [...prev, p];
       }),
-    topUpWallet: (amt) =>
-      setVips((prev) =>
-        prev.map((v) =>
-          v.id === activeVip?.id
-            ? { ...v, walletBalance: v.walletBalance + amt }
-            : v
-        )
-      ),
+    // Optimistic local update (immediate UI feedback) + real crm-service persistence in the
+    // background (same fire-and-forget pattern as toggleWishlist above) — reconciles with the
+    // server's authoritative row when it responds, so a failed write self-corrects on next load.
+    topUpWallet: (amt) => {
+      if (!activeVip) return;
+      setMyVipClient((v) => (v ? { ...v, walletBalance: v.walletBalance + amt } : v));
+      void adjustMyWallet(amt, 'Wallet top-up').then((updated) => {
+        if (updated) setMyVipClient(updated);
+      });
+    },
     requestLiveSession: (pid, name) => {
       if (activeVip && activeVip.walletBalance >= 250) {
-        setVips((prev) =>
-          prev.map((v) =>
-            v.id === activeVip.id
-              ? {
-                  ...v,
-                  walletBalance: v.walletBalance - 250,
-                  liveRequests: [
-                    {
-                      id: `req-${Date.now()}`,
-                      productId: pid,
-                      productName: name,
-                      status: "scheduled",
-                      requestedAt: new Date().toISOString(),
-                    },
-                    ...v.liveRequests,
-                  ],
-                }
-              : v
-          )
+        setMyVipClient((v) =>
+          v
+            ? {
+                ...v,
+                walletBalance: v.walletBalance - 250,
+                liveRequests: [
+                  {
+                    id: `req-${Date.now()}`,
+                    productId: pid,
+                    productName: name,
+                    status: "scheduled",
+                    requestedAt: new Date().toISOString(),
+                  },
+                  ...(v.liveRequests || []),
+                ],
+              }
+            : v
         );
+        void adjustMyWallet(-250, `Live shopping session — ${name}`).then((updated) => {
+          if (updated) setMyVipClient((v) => (v ? { ...v, ...updated, liveRequests: v.liveRequests } : updated));
+        });
+        void createAppointment({
+          customerName: activeVip.name,
+          customerEmail: activeVip.email,
+          type: 'Live Shopping Session',
+          notes: `Product: ${name} (${pid})`,
+        });
         return true;
       }
       return false;
     },
-    addLeadMessage: (id, text, sender) =>
-      setLeadConversations((prev) =>
-        prev.map((c) =>
-          c.inquiryId === id
-            ? {
-                ...c,
-                messages: [
-                  ...c.messages,
-                  {
-                    id: `m-${Date.now()}`,
-                    sender,
-                    text,
-                    timestamp: new Date().toISOString(),
-                  },
-                ],
-              }
-            : c
-        )
-      ),
-    updateInquiryStatus: (id, status) =>
-      setPrivateInquiries((prev) =>
-        prev.map((i) => (i.id === id ? { ...i, status } : i))
-      ),
-    upsertPrivateInquiry: (i) => setPrivateInquiries((prev) => [i, ...prev]),
     createInvoice: (inv) => {},
     createTransaction: (tx) => setTransactions((prev) => [tx, ...prev]),
     deleteProduct: (id) =>
@@ -943,10 +869,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     performWarehouseIntake: (pid, qty, reason) =>
       setProducts((prev) =>
         prev.map((p) => (p.id === pid ? { ...p, stock: p.stock + qty } : p))
-      ),
-    processReturn: (id, status) =>
-      setReturns((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, status } : r))
       ),
     recordMetric: (m) =>
       setMetrics((prev) =>
@@ -974,9 +896,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // i18n.setLanguage(l); // TODO: Implement i18n when available
     },
     optimizeRegistryPricing: (hub) => {
+      // NOTE: inquiries are no longer a global in-memory list (see useMyInquiries) — this
+      // admin-only pricing audit has no live caller today; pass [] rather than fabricate data.
       const suggestions = DynamicPricingEngine.auditRegistryPricing(
         products,
-        privateInquiries,
+        [],
         hub
       );
       setPricingOptimizations((prev) => [...suggestions, ...prev]);
@@ -1002,7 +926,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         ...prev,
       ]),
     upsertAppointment: (a) => {},
-    upsertTemplate: (t) => {},
     upsertSEOMetadata: (m) =>
       setSeoRegistry((prev) =>
         prev.find((i) => i.path === m.path)
@@ -1059,10 +982,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setCountryConfigs((prev) =>
         prev.map((c) => (c.code === code ? { ...c, ...config } : c))
       ),
-    verifyClient: (id) =>
-      setVips((prev) =>
-        prev.map((v) => (v.id === id ? { ...v, status: "verified" } : v))
-      ),
     addTicketMessage: (id, t, s) =>
       setSupportTickets((prev) =>
         prev.map((tk) =>
@@ -1098,7 +1017,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       };
       setGlobalSyncHistory((prev) => [session, ...prev]);
     },
-    setActiveVendor,
     setActiveBrand: setActiveBrandId,
     publishEvent: (type, source, payload) => {
       eventBus.publish({

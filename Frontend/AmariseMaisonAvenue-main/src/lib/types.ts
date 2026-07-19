@@ -170,6 +170,14 @@ export interface Product {
   targetKeyword?: string;
   seoTitle?: string;
   seoDescription?: string;
+  // Curator-authored collector/investment notes (commerce-service custom_fields, admin-settable
+  // per product). Undefined when the admin hasn't assessed this artifact — never a fabricated
+  // default, so consumers must only render the badge/copy when the field is actually present.
+  collectorValue?: string;
+  marketRange?: string;
+  investmentInsight?: string;
+  scarcityTag?: string;
+  priceVisible?: boolean;
 }
 
 export interface CartItem extends Product {
@@ -247,8 +255,11 @@ export interface VipClient {
   brandId: string;
   status: "pending" | "verified" | "rejected";
   walletBalance: number;
-  walletHistory: any[];
-  liveRequests: any[];
+  walletHistory?: any[];
+  // Live-shopping session requests are real crm-service Appointments (type: "Live Shopping
+  // Session"), not a field on the VIP record itself — kept optional here for legacy display
+  // code; a dedicated fetch (list-my-appointments) is the real source, not this field.
+  liveRequests?: any[];
   certificates: any[];
 }
 
@@ -279,10 +290,14 @@ export interface PrivateInquiry {
   contactMethod: "WhatsApp" | "Email";
   status: "new" | "contacted" | "qualifying" | "presenting" | "closing" | "won";
   leadTier: number;
-  timestamp: string;
+  // Real backend rows carry Sequelize's createdAt/updatedAt; `timestamp` is kept for legacy
+  // display code that hasn't been migrated to those field names yet.
+  timestamp?: string;
+  createdAt?: string;
   productId?: string;
   serviceId?: string;
   brandId?: string;
+  messages?: { id: string; sender: "client" | "curator"; text: string; timestamp: string }[];
 }
 
 export interface LeadConversation {
@@ -406,14 +421,16 @@ export interface SalesScript {
 
 export interface Appointment {
   id: string;
-  customerId: string;
+  customerId?: string;
   customerName: string;
-  type: "Private Viewing" | "Virtual Try-on" | "Atelier Tour";
-  date: string;
-  time: string;
-  city: string;
-  status: "pending" | "confirmed" | "canceled";
-  brandId: string;
+  customerEmail?: string;
+  type: "Private Viewing" | "Virtual Try-on" | "Atelier Tour" | "Live Shopping Session";
+  date?: string;
+  time?: string;
+  city?: string;
+  notes?: string;
+  status: "pending" | "confirmed" | "canceled" | "scheduled";
+  brandId?: string;
 }
 
 // ─── Resale / Consignment (order-service, store-scoped) ──────────────────────
@@ -900,14 +917,6 @@ export interface AuditLogEntry {
   afterState?: any;
   reason?: string;
   timestamp: string;
-}
-
-export interface ProductExtended {
-  collectorValue: string;
-  marketRange: string;
-  investmentInsight: string;
-  scarcityTag: string;
-  priceVisible: boolean;
 }
 
 export interface MaisonService {

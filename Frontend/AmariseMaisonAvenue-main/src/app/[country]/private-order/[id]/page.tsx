@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { BrandImage } from '@/components/ui/BrandImage';
-import { COUNTRIES } from '@/lib/mock-data';
+import { COUNTRIES, PROVENANCE_SHOWCASE_FALLBACK } from '@/lib/mock-data';
+import { getProvenanceShowcase, type ProvenanceShowcaseContent } from '@/lib/cms';
 import { formatProductPrice, normalizeCountry } from '@/lib/i18n/countries';
 import { useProduct } from '@/lib/useCatalog';
 import { Button } from '@/components/ui/button';
@@ -44,13 +45,28 @@ export default function PrivateOrderPage() {
     message: ''
   });
 
+  const [provenance, setProvenance] = useState<ProvenanceShowcaseContent>(PROVENANCE_SHOWCASE_FALLBACK);
+  useEffect(() => {
+    let cancelled = false;
+    getProvenanceShowcase().then((p) => {
+      if (!cancelled && p) setProvenance(p);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   if (!product) {
     return <div className="py-40 text-center font-headline text-3xl text-gray-900">Artifact not found in registry.</div>;
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const inquiryId = createInitialInquiry({
+    setSubmitting(true);
+
+    const inquiryId = await createInitialInquiry({
       productId: product.id,
       customerName: formData.name,
       email: formData.email,
@@ -62,14 +78,23 @@ export default function PrivateOrderPage() {
       brandId: 'amarise-luxe'
     });
 
+    setSubmitting(false);
+
+    if (!inquiryId) {
+      toast({
+        title: "Unable to submit brief",
+        description: "Please try again in a moment.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     toast({
       title: "Acquisition Protocol Initialized",
       description: "A specialist curator is reviewing your brief.",
     });
 
-    setTimeout(() => {
-      router.push(`/${countryCode}/inquiry/${inquiryId}`);
-    }, 1500);
+    router.push(`/${countryCode}/inquiry/${inquiryId}`);
   };
 
   return (
@@ -147,18 +172,18 @@ export default function PrivateOrderPage() {
               </TabsList>
               <TabsContent value="narrative" className="pt-12">
                 <p className="text-gray-600 font-light leading-[1.8] text-2xl italic first-letter:text-9xl first-letter:font-headline first-letter:text-gray-900 first-letter:float-left first-letter:mr-6 first-letter:mt-4">
-                  {product.specialNotes || "This artifact represents the absolute pinnacle of the Maison's craftsmanship. Hand-finished in our central atelier, it serves as a testament to human brilliance and the pursuit of the absolute standard. Every stitch and material selection has been audited for heritage compliance, ensuring its position as a primary pillar of any elite collection."}
+                  {product.specialNotes || provenance.narrative}
                 </p>
               </TabsContent>
               <TabsContent value="provenance" className="pt-12">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                    <div className="space-y-6">
                       <h4 className="text-[10px] font-bold uppercase tracking-widest text-plum">Origin Archive</h4>
-                      <p className="text-lg font-light italic text-gray-500 leading-relaxed">Maison Central Ateliers, Heritage Series v1.2. Audited provenance records included.</p>
+                      <p className="text-lg font-light italic text-gray-500 leading-relaxed">{provenance.originLabel}</p>
                    </div>
                    <div className="space-y-6">
-                      <h4 className="text-[10px] font-bold uppercase tracking-widest text-plum">Security Matrix</h4>
-                      <p className="text-lg font-light italic text-gray-500 leading-relaxed">NFC Authenticity Certification and Secure Digital Ledger Tracking.</p>
+                      <h4 className="text-[10px] font-bold uppercase tracking-widest text-plum">{provenance.securityMatrixTitle}</h4>
+                      <p className="text-lg font-light italic text-gray-500 leading-relaxed">{provenance.securityMatrixBody}</p>
                    </div>
                 </div>
               </TabsContent>
@@ -199,8 +224,8 @@ export default function PrivateOrderPage() {
                   <Textarea className="rounded-none border-border bg-ivory/30 min-h-[120px] text-sm italic py-4 focus:border-plum" placeholder="Detail your collection intent or specific provenance requirements..." value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})} />
                 </div>
                 
-                <Button type="submit" className="w-full h-20 bg-plum text-white hover:bg-gold hover:text-gray-900 rounded-none text-[10px] font-bold tracking-[0.4em] uppercase shadow-2xl transition-all">
-                  TRANSMIT PRIVATE BRIEF <ArrowRight className="ml-3 w-4 h-4" />
+                <Button type="submit" disabled={submitting} className="w-full h-20 bg-plum text-white hover:bg-gold hover:text-gray-900 rounded-none text-[10px] font-bold tracking-[0.4em] uppercase shadow-2xl transition-all disabled:opacity-50">
+                  {submitting ? 'TRANSMITTING…' : 'TRANSMIT PRIVATE BRIEF'} <ArrowRight className="ml-3 w-4 h-4" />
                 </Button>
               </form>
 

@@ -11,6 +11,7 @@
  * other jurisdictions never surfaces in the wrong market.
  */
 import type { Product, Department, Category, Collection, CountryCode } from './types';
+import type { SidebarSection } from './mock-category-data';
 import { isSupportedCountry } from './i18n/countries';
 import { resolveConfiguredStoreId } from './store-id';
 
@@ -35,6 +36,7 @@ export interface ProductsPage {
   page: number;
   pageSize: number;
   totalPages: number;
+  facets?: ProductFacets;
 }
 
 const EMPTY_PAGE: ProductsPage = { items: [], total: 0, page: 1, pageSize: 20, totalPages: 1 };
@@ -81,6 +83,26 @@ export interface ProductQuery {
   page?: number;
   limit?: number;
   country?: CountryCode;
+  // Real server-side faceted search (commerce-service storefrontFilters.js). Comma-joined
+  // string of values per facet (OR within a facet); condition is a fixed enum.
+  brand?: string;
+  color?: string;
+  size?: string;
+  condition?: string;
+  minPrice?: number;
+  maxPrice?: number;
+}
+
+export interface ProductFacetBucket {
+  value: string;
+  count: number;
+}
+export interface ProductFacets {
+  brand: ProductFacetBucket[];
+  color: ProductFacetBucket[];
+  size: ProductFacetBucket[];
+  condition: ProductFacetBucket[];
+  price: { min: number | null; max: number | null };
 }
 
 export async function getProducts(query: ProductQuery = {}): Promise<ProductsPage> {
@@ -176,4 +198,47 @@ export async function getRelatedProducts(
   if (!Array.isArray(items)) return [];
   if (!isSupportedCountry(country)) return items;
   return items.filter((p) => isAvailableInCountry(p, country));
+}
+
+/**
+ * Build the category filter sidebar from REAL, admin-managed taxonomy (commerce-service
+ * departments/categories) instead of the hardcoded Hermès/Chanel/Goyard/Jewelry sidebar map
+ * in mock-category-data.ts. One department = one section; its child categories become the
+ * section's items; each category's own `subcategories` (real seo_metadata field, editable
+ * from admin.baalvion.com → Commerce → Categories) become that item's sub-items.
+ *
+ * Returns null when the given category id isn't found under any department yet (e.g. a
+ * legacy/virtual slug like "new-arrivals-handbags" that predates real taxonomy) — callers
+ * should fall back to the static mock sidebar in that case, never render an empty aside.
+ */
+export function buildLiveCategorySidebar(
+  categoryId: string,
+  categories: Category[],
+  departments: Department[]
+): SidebarSection[] | null {
+  const department = departments.find((d) => d.categories.includes(categoryId));
+  if (!department) return null;
+
+  const categoryById = new Map(categories.map((c) => [c.id, c]));
+  const siblings = department.categories
+    .map((id) => categoryById.get(id))
+    .filter((c): c is Category => Boolean(c));
+  if (siblings.length === 0) return null;
+
+  return [
+    {
+      id: department.id,
+      label: department.name,
+      items: siblings.map((c) => ({
+        id: c.id,
+        label: c.name,
+        subItems: c.subcategories?.length
+          ? c.subcategories.map((subId) => ({
+              id: subId,
+              label: categoryById.get(subId)?.name ?? subId,
+            }))
+          : undefined,
+      })),
+    },
+  ];
 }

@@ -1,68 +1,40 @@
 'use client';
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useFilter } from "@/hooks/useFilter";
 import { FilterSheet } from "@/components/category/FilterSheet";
 import { CategorySidebar } from "@/components/category/CatergorySidebar";
 import { CollectionToolbar } from "@/components/category/CollectionToolbar";
-import { useProducts, useCategories } from "@/lib/useCatalog";
+import { useProducts, useCategories, useDepartments } from "@/lib/useCatalog";
 import { ProductGrid } from "@/components/category/ProductGrid";
 import { ShopByCategory } from "@/components/category/ShopByCategory";
 import { getCategorySidebar } from "@/lib/mock-category-data";
+import { buildLiveCategorySidebar } from "@/lib/catalog";
 import type { Product } from "@/lib/types";
 import type { FilterState } from "@/lib/mock-category-data";
 
 /**
- * Apply the active sidebar/price filters to a list of products.
+ * Apply the "hardware"/"style" sidebar filters to a list of products.
  *
- * - Price: keep products whose USD `basePrice` is within [priceMin, priceMax].
- * - Color / Size: case-insensitive intersection against the product's own arrays.
- * - Hardware / Style: best-effort substring match against the product `name`
- *   (no dedicated field exists for these dimensions).
+ * Color, size and price are now enforced server-side (commerce-service real faceted
+ * search — see storefrontFilters.js), so pagination totals stay correct. Hardware/style
+ * have no dedicated backend column, so they stay a best-effort client-side substring
+ * match against the product name, applied on top of the already-server-filtered page.
  *
  * A dimension with nothing selected never excludes a product.
  */
 function applyFilters(products: Product[], state: FilterState): Product[] {
   const lower = (arr: string[]) => arr.map((v) => v.toLowerCase());
-
-  const selectedColors = lower(state.color);
-  const selectedSizes = lower(state.size);
   const nameTerms = lower([...state.hardware, ...state.style]);
+  if (nameTerms.length === 0) return products;
 
   return products.filter((p) => {
-    // Price (USD base)
-    if (p.basePrice < state.priceMin || p.basePrice > state.priceMax) {
-      return false;
-    }
-
-    // Color — intersect product colors (case-insensitive)
-    if (selectedColors.length > 0) {
-      const productColors = lower(p.colors ?? []);
-      const hit = productColors.some((c) =>
-        selectedColors.some((sel) => c === sel || c.includes(sel) || sel.includes(c))
-      );
-      if (!hit) return false;
-    }
-
-    // Size — intersect product sizes (case-insensitive)
-    if (selectedSizes.length > 0) {
-      const productSizes = lower(p.sizes ?? []);
-      const hit = productSizes.some((s) =>
-        selectedSizes.some((sel) => s === sel || s.includes(sel) || sel.includes(s))
-      );
-      if (!hit) return false;
-    }
-
-    // Hardware + Style — best-effort match against the product name
-    if (nameTerms.length > 0) {
-      const name = p.name.toLowerCase();
-      const hit = nameTerms.some((term) => name.includes(term));
-      if (!hit) return false;
-    }
-
-    return true;
+    const name = p.name.toLowerCase();
+    return nameTerms.some((term) => name.includes(term));
   });
 }
+
+const PAGE_SIZE = 24;
 
 interface CategoryPageClientProps {
     id: string;
@@ -80,13 +52,32 @@ export default function CategoryPageClient({
     sidebarSections
 }: CategoryPageClientProps) {
     const [filterOpen, setFilterOpen] = useState(false);
+    const [page, setPage] = useState(1);
     const filter = useFilter();
-    const { products } = useProducts({ categoryId: id, limit: 50 });
+
+    // Real server-side facets (color/size/price — see storefrontFilters.js) + real
+    // pagination, so results beyond the first page are actually reachable and the
+    // "N results" / page count reflect the full filtered catalog, not just one batch.
+    const filterKey = JSON.stringify([filter.state.color, filter.state.size, filter.state.priceMin, filter.state.priceMax]);
+    useEffect(() => {
+        setPage(1);
+    }, [id, filterKey]);
+
+    const { products, total, totalPages } = useProducts({
+        categoryId: id,
+        limit: PAGE_SIZE,
+        page,
+        color: filter.state.color.length ? filter.state.color.join(",") : undefined,
+        size: filter.state.size.length ? filter.state.size.join(",") : undefined,
+        minPrice: filter.state.priceMin,
+        maxPrice: filter.state.priceMax,
+    });
 
     // Prefer the LIVE backend category name (matched by id or slug) so the heading reflects the
     // real taxonomy and there's no hardcoded slug→label drift; fall back to the static label prop
     // for categories that have no backend record yet.
     const { categories } = useCategories();
+    const { departments } = useDepartments();
     const liveCategoryName = useMemo(() => {
         const match = categories.find(
             (c) => c.id === id || (c as { slug?: string }).slug === id
@@ -94,6 +85,15 @@ export default function CategoryPageClient({
         return match?.name;
     }, [categories, id]);
     const resolvedTitle = liveCategoryName ?? pageTitle;
+
+    // Prefer a sidebar built from real, admin-managed taxonomy (Commerce → Departments/
+    // Categories) over the hardcoded Hermès/Chanel/Goyard/Jewelry sidebar map — falls back to
+    // the static mock only for legacy/virtual slugs not yet represented as real categories.
+    const liveSidebarSections = useMemo(
+        () => buildLiveCategorySidebar(id, categories, departments),
+        [id, categories, departments]
+    );
+    const resolvedSidebarSections = liveSidebarSections ?? sidebarSections;
 
     // Apply the active filters to the products before rendering the grid.
     const filteredProducts = useMemo(
@@ -116,8 +116,8 @@ export default function CategoryPageClient({
 
     // Find if the current ID matches a section/item/subItem in the resolved sidebar
     const findMatchingData = () => {
-        if (!sidebarSections) return null;
-        for (const section of sidebarSections) {
+        if (!resolvedSidebarSections) return null;
+        for (const section of resolvedSidebarSections) {
             if (section.id === id) {
                 return { type: "section" as const, data: section };
             }
@@ -148,7 +148,7 @@ export default function CategoryPageClient({
                 filter={filter}
                 availableColors={availableColors}
                 availableSizes={availableSizes}
-                resultCount={filteredProducts.length}
+                resultCount={total}
             />
 
             {/* ── Page body ── */}
@@ -159,10 +159,10 @@ export default function CategoryPageClient({
                     </h1>
 
                     {/* ── Left: Sidebar navigation ── */}
-                    {sidebarSections && (
+                    {resolvedSidebarSections && (
                         <CategorySidebar
                             categoryName={brandName}
-                            sections={sidebarSections}
+                            sections={resolvedSidebarSections}
                             countryCode={country}
                         />
                     )}
@@ -196,7 +196,7 @@ export default function CategoryPageClient({
 
                             {/* Toolbar: product count + filter + sort + chips */}
                             <CollectionToolbar
-                                totalProducts={filteredProducts.length}
+                                totalProducts={total}
                                 filter={filter}
                                 onFilterOpen={() => setFilterOpen(true)}
                             />
@@ -208,6 +208,35 @@ export default function CategoryPageClient({
                             products={filteredProducts}
                             countryCode={country}
                         />
+
+                        {/* Pagination — real, server-backed (was capped at a single
+                            50-item batch with no way to reach anything beyond it). */}
+                        {totalPages > 1 && (
+                            <nav
+                                aria-label="Category pagination"
+                                className="flex items-center justify-center gap-6 pt-6"
+                            >
+                                <button
+                                    type="button"
+                                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                                    disabled={page <= 1}
+                                    className="text-[11px] font-bold uppercase tracking-widest text-gray-700 disabled:text-gray-300 disabled:cursor-not-allowed transition-colors hover:text-black"
+                                >
+                                    Previous
+                                </button>
+                                <span className="text-[11px] uppercase tracking-widest text-gray-400">
+                                    Page {page} of {totalPages}
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                                    disabled={page >= totalPages}
+                                    className="text-[11px] font-bold uppercase tracking-widest text-gray-700 disabled:text-gray-300 disabled:cursor-not-allowed transition-colors hover:text-black"
+                                >
+                                    Next
+                                </button>
+                            </nav>
+                        )}
                     </main>
                 </div>
             </div>

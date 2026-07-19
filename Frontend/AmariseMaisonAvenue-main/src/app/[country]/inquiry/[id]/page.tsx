@@ -1,20 +1,37 @@
 'use client';
 
-import React from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import { CuratorChat } from '@/components/sales/CuratorChat';
-import { useSalesSystem } from '@/hooks/use-sales-system';
+import { useInquiryThread, recallInquiryEmail } from '@/hooks/use-sales-system';
 import { ChevronLeft, Crown, ShieldCheck, Globe } from 'lucide-react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
 
 export default function InquiryConversationPage() {
   const { id, country } = useParams();
-  const { getInquiry } = useSalesSystem();
-  const router = useRouter();
-  
-  const inquiry = getInquiry(id as string);
+  const inquiryId = id as string;
   const countryCode = (country as string) || 'us';
+
+  // The email that proves ownership of this inquiry — remembered locally at creation time
+  // (see use-sales-system.ts), same trust model as the guest cart session.
+  const [email, setEmail] = useState<string | null>(null);
+  useEffect(() => {
+    setEmail(recallInquiryEmail(inquiryId));
+  }, [inquiryId]);
+
+  const { inquiry, loading } = useInquiryThread(inquiryId, email);
+
+  if (email === null && !loading) {
+    return (
+      <div className="py-40 text-center font-headline text-3xl">
+        This dialogue can only be reopened from the device/browser it was started on.
+      </div>
+    );
+  }
+
+  if (loading) {
+    return <div className="py-40 text-center text-[12px] uppercase tracking-[0.3em] text-gray-400">Loading&hellip;</div>;
+  }
 
   if (!inquiry) {
     return <div className="py-40 text-center font-headline text-3xl">Acquisition Record Not Found</div>;
@@ -66,7 +83,7 @@ export default function InquiryConversationPage() {
 
           {/* Main Chat Interface */}
           <main className="flex-1 w-full">
-            <CuratorChat inquiryId={id as string} />
+            <CuratorChat inquiryId={inquiryId} email={email} />
           </main>
 
         </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useProducts } from '@/lib/useCatalog';
@@ -9,8 +9,8 @@ import { normalizeCountry } from '@/lib/i18n/countries';
 
 /** Where "explore New Arrivals" sends shoppers when a query returns nothing. */
 const NEW_ARRIVALS_CATEGORY = 'hermes-birkin-handbags';
-/** Cap on how many results we render for a single query. */
-const SEARCH_LIMIT = 50;
+/** Results per page (real server-side pagination — was a hard 50-result cap with no way to reach anything beyond it). */
+const SEARCH_PAGE_SIZE = 24;
 
 function SearchResults() {
   const params = useParams();
@@ -18,8 +18,17 @@ function SearchResults() {
 
   const searchParams = useSearchParams();
   const query = (searchParams.get('q') ?? '').trim();
+  const [page, setPage] = useState(1);
 
-  const { products, total, loading } = useProducts({ search: query, limit: SEARCH_LIMIT });
+  useEffect(() => {
+    setPage(1);
+  }, [query]);
+
+  const { products, total, totalPages, loading } = useProducts({
+    search: query,
+    limit: SEARCH_PAGE_SIZE,
+    page,
+  });
 
   // No query yet — invite the shopper to search.
   if (!query) {
@@ -73,11 +82,39 @@ function SearchResults() {
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 lg:gap-x-8 gap-y-12 lg:gap-y-16">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} countryCode={countryCode} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 lg:gap-x-8 gap-y-12 lg:gap-y-16">
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} countryCode={countryCode} />
+            ))}
+          </div>
+          {totalPages > 1 && (
+            <nav
+              aria-label="Search results pagination"
+              className="flex items-center justify-center gap-6 pt-12"
+            >
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page <= 1}
+                className="text-[11px] font-bold uppercase tracking-widest text-gray-700 disabled:text-gray-300 disabled:cursor-not-allowed transition-colors hover:text-black"
+              >
+                Previous
+              </button>
+              <span className="text-[11px] uppercase tracking-widest text-gray-400">
+                Page {page} of {totalPages}
+              </span>
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page >= totalPages}
+                className="text-[11px] font-bold uppercase tracking-widest text-gray-700 disabled:text-gray-300 disabled:cursor-not-allowed transition-colors hover:text-black"
+              >
+                Next
+              </button>
+            </nav>
+          )}
+        </>
       )}
     </div>
   );

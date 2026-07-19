@@ -1,6 +1,7 @@
 import React from 'react';
 import { Metadata } from 'next';
-import { COUNTRIES } from '@/lib/mock-data';
+import { COUNTRIES, CONTACT_PAGE_FALLBACK } from '@/lib/mock-data';
+import { getContactPageContent } from '@/lib/cms';
 import { buildAlternates } from '@/lib/seo';
 import { normalizeCountry } from '@/lib/i18n/countries';
 import { ContactFormClient, GlobalAtelier } from './contact-form-client';
@@ -40,6 +41,7 @@ export async function generateMetadata({ params }: ContactPageProps): Promise<Me
 export default async function ContactPage({ params }: ContactPageProps) {
   const countryCode = ((await params).country as string) || 'us';
   const currentCountry = COUNTRIES[countryCode] || COUNTRIES.us;
+  const content = (await getContactPageContent()) ?? CONTACT_PAGE_FALLBACK;
 
   return (
     <div className="animate-fade-in bg-ivory pb-32">
@@ -67,7 +69,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
         <div className="flex flex-col lg:flex-row gap-24 items-start">
 
           {/* Contact Form Section */}
-          <ContactFormClient countryCode={countryCode} currentCountry={currentCountry} />
+          <ContactFormClient countryCode={countryCode} currentCountry={currentCountry} content={content} />
 
 
         </div>

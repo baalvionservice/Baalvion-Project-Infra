@@ -5,10 +5,13 @@ import CategoryPageClient from "@/components/category/CategoryPageClient";
 import { getCategorySidebar } from "@/lib/mock-category-data";
 import { buildAlternates, SITE_URL } from "@/lib/seo";
 import { normalizeCountry, getCountryConfig } from "@/lib/i18n/countries";
-import { getProducts } from "@/lib/catalog";
+import { getProducts, getCategories, getDepartments } from "@/lib/catalog";
 import { breadcrumbJsonLd, itemListJsonLd } from "@/lib/structured-data";
 
 // ── Category label map ────────────────────────────────────────────────────────
+// Legacy/curated fallback for virtual grouping slugs (e.g. "new-arrivals-handbags")
+// that don't correspond to a real commerce-service category row. Real, admin-created
+// categories are resolved FIRST from live data below — this map is only a safety net.
 
 const CATEGORY_LABELS: Record<string, string> = {
   // New Arrivals
@@ -157,8 +160,10 @@ interface CategoryPageProps {
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
   const { id, country } = await params;
   const cc = normalizeCountry(country);
-  const pageTitle = getCategoryLabel(id);
-  const brandName = getCategoryBrandName(id);
+  const [categories, departments] = await Promise.all([getCategories(cc), getDepartments(cc)]);
+  const pageTitle = categories.find((c) => c.id === id)?.name ?? getCategoryLabel(id);
+  const brandName =
+    departments.find((d) => d.categories.includes(id))?.name ?? getCategoryBrandName(id);
   const countryData = getCountryConfig(cc);
 
   return {
@@ -171,17 +176,20 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { id, country } = await params;
   const cc = normalizeCountry(country);
-  const pageTitle = getCategoryLabel(id);
-  const brandName = getCategoryBrandName(id);
-  const sidebarSections = getCategorySidebar(id);
 
-  // Server-fetch the listing so the ItemList structured data reflects real products.
-  // Fails soft to an empty page (no schema emitted) so the listing never breaks the render.
-  const { items: products } = await getProducts({
-    categoryId: id,
-    country: cc,
-    limit: 48,
-  });
+  // Server-fetch the listing + live taxonomy so the ItemList structured data reflects
+  // real products and titles reflect real, admin-managed categories/departments.
+  // Fails soft to an empty page / the legacy label map (no schema emitted / heuristic title)
+  // so the listing never breaks the render.
+  const [{ items: products }, categories, departments] = await Promise.all([
+    getProducts({ categoryId: id, country: cc, limit: 48 }),
+    getCategories(cc),
+    getDepartments(cc),
+  ]);
+  const pageTitle = categories.find((c) => c.id === id)?.name ?? getCategoryLabel(id);
+  const brandName =
+    departments.find((d) => d.categories.includes(id))?.name ?? getCategoryBrandName(id);
+  const sidebarSections = getCategorySidebar(id);
 
   const categoryUrl = `${SITE_URL}/${cc}/category/${id}`;
   const breadcrumbSchema = breadcrumbJsonLd([

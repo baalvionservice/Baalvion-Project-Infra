@@ -1,10 +1,11 @@
 
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { BrandImage } from '@/components/ui/BrandImage';
-import { COUNTRIES } from '@/lib/mock-data';
+import { COUNTRIES, PROVENANCE_SHOWCASE_FALLBACK } from '@/lib/mock-data';
+import { getProvenanceShowcase, type ProvenanceShowcaseContent } from '@/lib/cms';
 import { formatProductPrice, normalizeCountry } from '@/lib/i18n/countries';
 import { useProduct } from '@/lib/useCatalog';
 import { Button } from '@/components/ui/button';
@@ -28,6 +29,17 @@ export default function SpecialArchivePage() {
   const { product, loading } = useProduct(id as string);
   const currentCountry = COUNTRIES[countryCode] || COUNTRIES.us;
   const isWishlisted = wishlist.some(i => i.id === product?.id);
+
+  const [provenance, setProvenance] = useState<ProvenanceShowcaseContent>(PROVENANCE_SHOWCASE_FALLBACK);
+  useEffect(() => {
+    let cancelled = false;
+    getProvenanceShowcase().then((p) => {
+      if (!cancelled && p) setProvenance(p);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   if (loading) {
     return <div className="py-40 text-center font-headline text-3xl">Loading…</div>;
@@ -103,13 +115,13 @@ export default function SpecialArchivePage() {
               </TabsList>
               <TabsContent value="narrative" className="pt-10">
                 <p className="text-gray-600 font-light leading-relaxed italic first-letter:text-6xl first-letter:float-left first-letter:mr-3 text-lg">
-                  This artifact represents the pinnacle of the Maison's craftsmanship. Hand-finished in our central atelier, it serves as a testament to human brilliance and the pursuit of excellence that has defined our heritage since 1924.
+                  {product.specialNotes || provenance.narrative}
                 </p>
               </TabsContent>
               <TabsContent value="provenance" className="pt-10">
                 <ul className="space-y-4 text-sm font-light">
                   <li className="flex justify-between border-b pb-2"><span>Origin</span><span>Maison Ateliers, {currentCountry.office?.city}</span></li>
-                  <li className="flex justify-between border-b pb-2"><span>Authenticity</span><span>NFC Certification Included</span></li>
+                  <li className="flex justify-between border-b pb-2"><span>Authenticity</span><span>{provenance.authenticityLabel}</span></li>
                 </ul>
               </TabsContent>
             </Tabs>

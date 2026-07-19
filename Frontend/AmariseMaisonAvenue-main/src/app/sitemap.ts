@@ -1,12 +1,14 @@
 import { MetadataRoute } from "next";
-import {
-  CITIES,
-  BUYING_GUIDES,
-  EDITOR_INITIAL,
-  COUNTRIES,
-} from "@/lib/mock-data";
+import { CITIES, COUNTRIES } from "@/lib/mock-data";
 import { getProducts, getCategories } from "@/lib/catalog";
+import { getBuyingGuides, getEditorials } from "@/lib/cms";
 import { sitemapAlternates } from "@/lib/seo";
+
+function toDate(value: string | undefined): Date {
+  if (!value) return new Date();
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? new Date() : parsed;
+}
 
 /**
  * Institutional Sitemap Generator
@@ -17,10 +19,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://www.amarisemaisonavenue.com";
   const countryCodes = Object.keys(COUNTRIES);
 
-  // Live catalog from commerce-service (was mock PRODUCTS/CATEGORIES).
-  const [{ items: products }, categories] = await Promise.all([
+  // Live catalog from commerce-service + live editorial content from the central CMS
+  // (was mock PRODUCTS/CATEGORIES/BUYING_GUIDES/EDITOR_INITIAL — sitemap now matches
+  // what the journal/buying-guide pages actually render).
+  const [{ items: products }, categories, buyingGuides, editorials] = await Promise.all([
     getProducts({ limit: 200 }),
     getCategories(),
+    getBuyingGuides(),
+    getEditorials(),
   ]);
 
   const routes: MetadataRoute.Sitemap = [];
@@ -76,21 +82,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       });
     });
 
-    // 4. Curatorial Intelligence (Guides)
-    BUYING_GUIDES.filter((g) => g.country === code).forEach((guide) => {
+    // 4. Curatorial Intelligence (Guides) — live from CMS
+    buyingGuides.forEach((guide) => {
       routes.push({
         url: `${baseUrl}/${code}/buying-guide/${guide.id}`,
-        lastModified: new Date(),
+        lastModified: toDate(guide.date),
         changeFrequency: "monthly",
         priority: 0.7,
       });
     });
 
-    // 5. Editorial Archives (The Journal)
-    EDITOR_INITIAL.filter((ed) => ed.country === code).forEach((ed) => {
+    // 5. Editorial Archives (The Journal) — live from CMS
+    editorials.forEach((ed) => {
       routes.push({
         url: `${baseUrl}/${code}/journal/${ed.id}`,
-        lastModified: new Date(),
+        lastModified: toDate(ed.date),
         changeFrequency: "monthly",
         priority: 0.6,
       });

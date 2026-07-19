@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { BrandImage } from '@/components/ui/BrandImage';
 import { useAppStore } from '@/lib/store';
+import { getBuyingGuides, type BuyingGuideContent } from '@/lib/cms';
 import {
   ChevronRight,
   ArrowRight,
@@ -18,14 +19,35 @@ type BuyingGuideListingProps = {
 };
 
 /**
- * BuyingGuideListing: client-side curated directory of Maison intelligence.
- * Reads guides + live social metrics from the app store. Rendered by the
- * server page so route-level generateMetadata is preserved.
+ * BuyingGuideListing: curated directory of Maison intelligence.
+ * CMS-managed guides are global (no per-country scoping) and preferred when present;
+ * otherwise falls back to the bundled per-country guide set from the store — this route
+ * previously read ONLY the store/mock set and never queried the CMS at all.
  */
 export default function BuyingGuideListing({ countryCode }: BuyingGuideListingProps) {
   const { buyingGuides, socialMetrics } = useAppStore();
+  const [cmsGuides, setCmsGuides] = React.useState<BuyingGuideContent[] | null>(null);
 
-  const filteredGuides = buyingGuides.filter(g => g.country === countryCode || g.country === 'us');
+  React.useEffect(() => {
+    let active = true;
+    getBuyingGuides().then((guides) => {
+      if (active && guides.length) setCmsGuides(guides);
+    }).catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const filteredGuides = cmsGuides
+    ? cmsGuides.map((g) => ({
+        id: g.id,
+        title: g.title,
+        excerpt: g.excerpt,
+        category: g.category,
+        author: g.author,
+        imageUrl: g.imageUrl,
+      }))
+    : buyingGuides.filter(g => g.country === countryCode || g.country === 'us');
 
   return (
     <div className="animate-fade-in bg-ivory pb-40">

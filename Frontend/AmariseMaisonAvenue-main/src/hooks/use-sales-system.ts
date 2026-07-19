@@ -1,93 +1,156 @@
-
 'use client';
 
-import { useCallback, useEffect } from 'react';
-import { useAppStore } from '@/lib/store';
-import { PrivateInquiry, LeadConversation, SalesScript } from '@/lib/types';
-import { ACQUISITION_SCRIPTS } from '@/lib/mock-sales-system';
+import { useCallback, useEffect, useState } from 'react';
+import { PrivateInquiry, LeadConversation } from '@/lib/types';
+import {
+  createInquiry as apiCreateInquiry,
+  getMyInquiry,
+  addInquiryMessage,
+  toConversation,
+} from '@/lib/crm-client';
 
+// Guest inquiries have no login session, so ownership is proven the same way the guest cart
+// is (see api-client.ts's `amarise.cartSession`): the email used to raise the inquiry is
+// remembered locally, keyed by inquiry id, and sent back on every read/write. This is what
+// lets the customer reopen /inquiry/[id] after the initial redirect without an account.
+const STORAGE_KEY = 'amarise.myInquiries';
+
+function rememberInquiryEmail(id: string, email: string) {
+  if (typeof window === 'undefined') return;
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const map = raw ? JSON.parse(raw) : {};
+    map[id] = email;
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
+  } catch {
+    /* ignore */
+  }
+}
+
+export function recallInquiryEmail(id: string): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const map = JSON.parse(raw);
+    return typeof map[id] === 'string' ? map[id] : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Every {id, email} pair this browser has raised an inquiry under (most recent first). */
+function listRememberedInquiries(): { id: string; email: string }[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const map = JSON.parse(raw) as Record<string, string>;
+    return Object.entries(map)
+      .reverse()
+      .map(([id, email]) => ({ id, email }));
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Real, backend-persisted private sales inquiries (crm-service `Inquiry` entity) — replaces
+ * the previous purely client-side mock simulation (shared global array + a fake instant
+ * "curator" auto-reply). There is no auto-reply anymore: a new inquiry sits in `new` status
+ * until an actual person responds via crm-service; this hook only ever reflects real state.
+ */
 export function useSalesSystem() {
-  const { 
-    privateInquiries, 
-    leadConversations, 
-    addLeadMessage, 
-    updateInquiryStatus,
-    upsertPrivateInquiry 
-  } = useAppStore();
+  const createInitialInquiry = useCallback(
+    async (
+      data: Omit<PrivateInquiry, 'id' | 'status' | 'leadTier' | 'timestamp' | 'messages'>
+    ): Promise<string | null> => {
+      const created = await apiCreateInquiry(data);
+      if (!created) return null;
+      if (data.email) rememberInquiryEmail(created.id, data.email);
+      return created.id;
+    },
+    []
+  );
 
-  const getInquiry = useCallback((id: string) => {
-    return privateInquiries.find(i => i.id === id);
-  }, [privateInquiries]);
+  const sendMessage = useCallback(
+    async (inquiryId: string, text: string): Promise<PrivateInquiry | null> => {
+      return addInquiryMessage(inquiryId, 'client', text);
+    },
+    []
+  );
 
-  const getConversation = useCallback((inquiryId: string) => {
-    return leadConversations.find(c => c.inquiryId === inquiryId);
-  }, [leadConversations]);
+  return { createInitialInquiry, sendMessage, recallInquiryEmail };
+}
 
-  const triggerAutoReply = useCallback((inquiryId: string, userMessage: string) => {
-    const inquiry = privateInquiries.find(i => i.id === inquiryId);
-    if (!inquiry) return;
+/**
+ * Loads (and polls) a single inquiry + its conversation thread by id, scoped to the email it
+ * was raised under. Used by CuratorChat / the inquiry detail page — replaces the old
+ * synchronous store lookup with a real, ownership-checked fetch.
+ */
+export function useInquiryThread(inquiryId: string, email: string | null) {
+  const [inquiry, setInquiry] = useState<PrivateInquiry | null>(null);
+  const [conversation, setConversation] = useState<LeadConversation | null>(null);
+  const [loading, setLoading] = useState(true);
 
-    // Simulate curator thinking time
-    setTimeout(() => {
-      let script: SalesScript | undefined;
-      const lowerMsg = userMessage.toLowerCase();
+  const refresh = useCallback(async () => {
+    if (!inquiryId || !email) {
+      setLoading(false);
+      return;
+    }
+    const row = await getMyInquiry(inquiryId, email);
+    setInquiry(row);
+    setConversation(row ? toConversation(row) : null);
+    setLoading(false);
+  }, [inquiryId, email]);
 
-      // Simple keyword matching for "Mock AI"
-      if (inquiry.status === 'new') {
-        script = ACQUISITION_SCRIPTS.find(s => s.stage === 'new');
-        updateInquiryStatus(inquiryId, 'contacted');
-      } else if (lowerMsg.includes('investment') || lowerMsg.includes('market')) {
-        script = ACQUISITION_SCRIPTS.find(s => s.id === 'script-investor');
-        updateInquiryStatus(inquiryId, 'qualifying');
-      } else if (lowerMsg.includes('personal') || lowerMsg.includes('gift')) {
-        script = ACQUISITION_SCRIPTS.find(s => s.id === 'script-personal');
-        updateInquiryStatus(inquiryId, 'qualifying');
-      } else if (lowerMsg.includes('price') || lowerMsg.includes('cost')) {
-        script = ACQUISITION_SCRIPTS.find(s => s.id === 'script-price');
-        updateInquiryStatus(inquiryId, 'presenting');
-      } else if (lowerMsg.includes('wait') || lowerMsg.includes('available')) {
-        script = ACQUISITION_SCRIPTS.find(s => s.id === 'script-scarcity');
-        updateInquiryStatus(inquiryId, 'closing');
+  useEffect(() => {
+    setLoading(true);
+    refresh();
+  }, [refresh]);
+
+  const sendClientMessage = useCallback(
+    async (text: string) => {
+      const updated = await addInquiryMessage(inquiryId, 'client', text);
+      if (updated) {
+        setInquiry(updated);
+        setConversation(toConversation(updated));
       }
+    },
+    [inquiryId]
+  );
 
-      if (script) {
-        addLeadMessage(inquiryId, script.template, 'curator');
-      }
-    }, 1500);
-  }, [privateInquiries, addLeadMessage, updateInquiryStatus]);
+  return { inquiry, conversation, loading, sendClientMessage, refresh };
+}
 
-  const sendClientMessage = useCallback((inquiryId: string, text: string) => {
-    addLeadMessage(inquiryId, text, 'client');
-    triggerAutoReply(inquiryId, text);
-  }, [addLeadMessage, triggerAutoReply]);
+/**
+ * Every inquiry THIS BROWSER has raised (via the remembered id/email pairs), fetched in
+ * parallel and ownership-checked exactly like useInquiryThread. Replaces the old global
+ * `privateInquiries` store array, which showed every visitor the same shared seed data
+ * regardless of who they were.
+ */
+export function useMyInquiries() {
+  const [inquiries, setInquiries] = useState<PrivateInquiry[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const createInitialInquiry = useCallback((data: Omit<PrivateInquiry, 'id' | 'status' | 'leadTier' | 'timestamp'>) => {
-    const id = `inq-${Date.now()}`;
-    const inquiry: PrivateInquiry = {
-      ...data,
-      id,
-      status: 'new',
-      leadTier: 3, // Logic handled in store
-      timestamp: new Date().toISOString()
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    const remembered = listRememberedInquiries();
+    if (remembered.length === 0) {
+      setInquiries([]);
+      setLoading(false);
+      return;
+    }
+    Promise.all(remembered.map(({ id, email }) => getMyInquiry(id, email))).then((rows) => {
+      if (!active) return;
+      setInquiries(rows.filter((r): r is PrivateInquiry => r !== null));
+      setLoading(false);
+    });
+    return () => {
+      active = false;
     };
-    upsertPrivateInquiry(inquiry);
-    
-    // Immediate first reply logic
-    setTimeout(() => {
-      const script = ACQUISITION_SCRIPTS.find(s => s.stage === 'new');
-      if (script) {
-        addLeadMessage(id, script.template, 'curator');
-        updateInquiryStatus(id, 'contacted');
-      }
-    }, 1000);
+  }, []);
 
-    return id;
-  }, [upsertPrivateInquiry, addLeadMessage, updateInquiryStatus]);
-
-  return {
-    getInquiry,
-    getConversation,
-    sendClientMessage,
-    createInitialInquiry
-  };
+  return { inquiries, loading };
 }

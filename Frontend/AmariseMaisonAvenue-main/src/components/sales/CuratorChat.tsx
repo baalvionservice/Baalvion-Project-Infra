@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useSalesSystem } from '@/hooks/use-sales-system';
+import { useInquiryThread } from '@/hooks/use-sales-system';
 import { Send, Lock, ShieldCheck, Sparkles, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -10,15 +10,14 @@ import { cn } from '@/lib/utils';
 
 interface CuratorChatProps {
   inquiryId: string;
+  /** The email the inquiry was raised under — proves ownership for the PII-safe lookup. */
+  email: string | null;
 }
 
-export function CuratorChat({ inquiryId }: CuratorChatProps) {
-  const { getInquiry, getConversation, sendClientMessage } = useSalesSystem();
+export function CuratorChat({ inquiryId, email }: CuratorChatProps) {
+  const { inquiry, conversation, loading, sendClientMessage } = useInquiryThread(inquiryId, email);
   const [message, setMessage] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  const inquiry = getInquiry(inquiryId);
-  const conversation = getConversation(inquiryId);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -26,11 +25,19 @@ export function CuratorChat({ inquiryId }: CuratorChatProps) {
     }
   }, [conversation?.messages]);
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-[700px] bg-white border border-border">
+        <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gray-400">Loading dialogue&hellip;</p>
+      </div>
+    );
+  }
+
   if (!inquiry || !conversation) return null;
 
   const handleSend = () => {
     if (!message.trim()) return;
-    sendClientMessage(inquiryId, message);
+    sendClientMessage(message);
     setMessage('');
   };
 

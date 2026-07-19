@@ -14,7 +14,7 @@
  * degrades to `null`/`[]` on any failure so a CMS outage never breaks a page render —
  * callers supply their own last-resort fallback copy where appropriate.
  */
-import type { CountryCode } from './types';
+import type { CountryCode, MaisonService, MaisonReport } from './types';
 
 // Central CMS public delivery base, ending at `/api/v1`. The website is addressed by slug.
 const CMS_URL = process.env.NEXT_PUBLIC_CMS_URL || 'http://localhost:3011/api/v1';
@@ -471,5 +471,286 @@ export async function getPressItems(): Promise<PressContent | null> {
       href: String(a.href ?? '#'),
       image: a.image ? String(a.image) : undefined,
     })),
+  };
+}
+
+// ── Footer (slug `footer-config`) — admin-editable nav columns, contact/social
+// links, trust badge and legal copy. `href` values are country-LESS; the Footer
+// component prepends the active market the same way homepage links do.
+export interface FooterLink {
+  label: string;
+  href: string;
+}
+export interface FooterColumn {
+  title: string;
+  links: FooterLink[];
+}
+export type FooterSocialIcon =
+  | 'phone'
+  | 'email'
+  | 'whatsapp'
+  | 'facebook'
+  | 'twitter'
+  | 'instagram'
+  | 'youtube'
+  | 'tiktok';
+export interface FooterSocialLink {
+  name: string;
+  href: string;
+  icon: FooterSocialIcon;
+}
+export interface FooterTrustBadge {
+  eyebrow: string;
+  title: string;
+  description: string;
+}
+export interface FooterConfig {
+  columns: FooterColumn[];
+  socialLinks: FooterSocialLink[];
+  trustBadge: FooterTrustBadge;
+  brandName: string;
+  brandSuffix: string;
+  copyrightText: string;
+  legalLinks: FooterLink[];
+}
+
+const VALID_SOCIAL_ICONS: readonly FooterSocialIcon[] = [
+  'phone',
+  'email',
+  'whatsapp',
+  'facebook',
+  'twitter',
+  'instagram',
+  'youtube',
+  'tiktok',
+];
+
+function toSocialIcon(value: unknown): FooterSocialIcon {
+  return (VALID_SOCIAL_ICONS as readonly string[]).includes(String(value))
+    ? (value as FooterSocialIcon)
+    : 'email';
+}
+
+/** Global site footer (slug `footer-config`, structured customFields). */
+export async function getFooterConfig(): Promise<FooterConfig | null> {
+  const c = await getContent('footer-config');
+  const cf = c?.customFields;
+  if (!cf) return null;
+  const trust = cf.trustBadge ?? {};
+  return {
+    columns: asArray<Record<string, unknown>>(cf.columns).map((col) => ({
+      title: String(col.title ?? ''),
+      links: asArray<Record<string, unknown>>(col.links).map((l) => ({
+        label: String(l.label ?? ''),
+        href: String(l.href ?? '#'),
+      })),
+    })),
+    socialLinks: asArray<Record<string, unknown>>(cf.socialLinks).map((s) => ({
+      name: String(s.name ?? ''),
+      href: String(s.href ?? '#'),
+      icon: toSocialIcon(s.icon),
+    })),
+    trustBadge: {
+      eyebrow: trust.eyebrow ?? '100% Authentic',
+      title: trust.title ?? 'Guaranteed',
+      description: trust.description ?? '',
+    },
+    brandName: cf.brandName ?? 'AMARISÉ',
+    brandSuffix: cf.brandSuffix ?? 'MAISON AVENUE',
+    copyrightText: cf.copyrightText ?? '',
+    legalLinks: asArray<Record<string, unknown>>(cf.legalLinks).map((l) => ({
+      label: String(l.label ?? ''),
+      href: String(l.href ?? '#'),
+    })),
+  };
+}
+
+// ── Appointments page (slug `appointments-page`) — hero copy, quote, benefit list, and the
+// experience-type options offered in the booking form. Icons are string keys (matches the
+// FooterSocialIcon pattern) resolved to a Lucide component by the page itself.
+export interface AppointmentBenefit {
+  icon: string;
+  label: string;
+  description: string;
+}
+export interface AppointmentTypeOption {
+  value: string;
+  label: string;
+}
+export interface AppointmentsPageContent {
+  eyebrow: string;
+  title: string;
+  quoteTitle: string;
+  quote: string;
+  benefits: AppointmentBenefit[];
+  appointmentTypes: AppointmentTypeOption[];
+}
+
+export async function getAppointmentsPageContent(): Promise<AppointmentsPageContent | null> {
+  const c = await getContent('appointments-page');
+  const cf = c?.customFields;
+  if (!cf) return null;
+  return {
+    eyebrow: cf.eyebrow ?? 'Private Salon Experience',
+    title: cf.title ?? 'Book Your Visit',
+    quoteTitle: cf.quoteTitle ?? 'The Atelier Protocol',
+    quote: cf.quote ?? '',
+    benefits: asArray<Record<string, unknown>>(cf.benefits).map((b) => ({
+      icon: String(b.icon ?? 'ShieldCheck'),
+      label: String(b.label ?? ''),
+      description: String(b.description ?? ''),
+    })),
+    appointmentTypes: asArray<Record<string, unknown>>(cf.appointmentTypes).map((t) => ({
+      value: String(t.value ?? ''),
+      label: String(t.label ?? ''),
+    })),
+  };
+}
+
+// ── Authenticity page (slug `authenticity-page`) — hero copy, the 4-step explainer, and the
+// closing CTA. Icons are string keys resolved client-side (Microscope/Fingerprint/FileText/
+// ShieldCheck by default).
+export interface AuthenticityStep {
+  icon: string;
+  title: string;
+  body: string;
+}
+export interface AuthenticityPageContent {
+  eyebrow: string;
+  title: string;
+  subtitle: string;
+  steps: AuthenticityStep[];
+  ctaTitle: string;
+  ctaSubtitle: string;
+  ctaLabel: string;
+}
+
+export async function getAuthenticityContent(): Promise<AuthenticityPageContent | null> {
+  const c = await getContent('authenticity-page');
+  const cf = c?.customFields;
+  if (!cf) return null;
+  return {
+    eyebrow: cf.eyebrow ?? 'The AMARISÉ Standard',
+    title: cf.title ?? 'Authenticity, Guaranteed.',
+    subtitle: cf.subtitle ?? c!.excerpt ?? '',
+    steps: asArray<Record<string, unknown>>(cf.steps).map((s) => ({
+      icon: String(s.icon ?? 'ShieldCheck'),
+      title: String(s.title ?? ''),
+      body: String(s.body ?? ''),
+    })),
+    ctaTitle: cf.ctaTitle ?? 'A question of provenance?',
+    ctaSubtitle: cf.ctaSubtitle ?? '',
+    ctaLabel: cf.ctaLabel ?? 'Contact a Specialist',
+  };
+}
+
+// ── Contact page (slug `contact-page`) — the copy around the form; per-country office
+// details still come from the market config (COUNTRIES), not the CMS.
+export interface ContactPageContent {
+  title: string;
+  subtitle: string;
+  inquiryTypes: { value: string; label: string }[];
+}
+
+export async function getContactPageContent(): Promise<ContactPageContent | null> {
+  const c = await getContent('contact-page');
+  const cf = c?.customFields;
+  if (!cf) return null;
+  return {
+    title: cf.title ?? 'Speak with the Maison',
+    subtitle: cf.subtitle ?? c!.excerpt ?? '',
+    inquiryTypes: asArray<Record<string, unknown>>(cf.inquiryTypes).map((t) => ({
+      value: String(t.value ?? ''),
+      label: String(t.label ?? ''),
+    })),
+  };
+}
+
+// ── Maison services (contentType `page`, kind `service`) — the concierge/advisory/
+// authentication service catalog shown on /services/[id].
+function mapMaisonService(c: CmsContent): MaisonService {
+  const cf = c.customFields ?? {};
+  return {
+    id: c.slug,
+    name: cf.name ?? c.title,
+    tagline: cf.tagline ?? '',
+    description: cf.description ?? c.excerpt ?? '',
+    priceRange: cf.priceRange ?? '',
+    features: asArray<unknown>(cf.features).map(String),
+    imageUrl: cf.imageUrl ?? c.featuredImage ?? '',
+    brandId: cf.brandId ?? 'amarise-luxe',
+    isGlobal: cf.isGlobal != null ? !!cf.isGlobal : true,
+  };
+}
+
+export async function getServices(): Promise<MaisonService[]> {
+  const items = await listContent({ contentType: 'page', kind: 'service', limit: 50 });
+  return items.map(mapMaisonService);
+}
+
+export async function getService(id: string): Promise<MaisonService | null> {
+  const c = await getContent(id);
+  if (!c || c.customFields?.kind !== 'service') return null;
+  return mapMaisonService(c);
+}
+
+// ── Maison intelligence reports (contentType `page`, kind `report`) — the curatorial market
+// reports shown on /reports/[id]. `body` carries the real analysis prose; the page renders it
+// once the report is unlocked. No specific numeric claim here is fabricated by this reader —
+// it only surfaces what an admin actually writes.
+export interface MaisonReportBody extends MaisonReport {
+  body: string;
+  priceLabel: string;
+}
+
+function mapMaisonReport(c: CmsContent): MaisonReportBody {
+  const cf = c.customFields ?? {};
+  const prose = toProse(c).filter((p) => p.type === 'paragraph').map((p) => p.text);
+  return {
+    id: c.slug,
+    title: cf.title ?? c.title,
+    summary: cf.summary ?? c.excerpt ?? '',
+    body: prose.join('\n\n'),
+    date: cf.date ?? c.publishedAt ?? '',
+    author: cf.author ?? 'Maison Amarisé',
+    isPremium: cf.isPremium != null ? !!cf.isPremium : true,
+    priceLabel: cf.priceLabel ?? '',
+    previewImage: cf.previewImage ?? c.featuredImage ?? '',
+    brandId: cf.brandId ?? 'amarise-luxe',
+  };
+}
+
+export async function getReports(): Promise<MaisonReportBody[]> {
+  const items = await listContent({ contentType: 'page', kind: 'report', limit: 50 });
+  return items.map(mapMaisonReport);
+}
+
+export async function getReport(id: string): Promise<MaisonReportBody | null> {
+  const c = await getContent(id);
+  if (!c || c.customFields?.kind !== 'report') return null;
+  return mapMaisonReport(c);
+}
+
+// ── Shared provenance/narrative showcase copy (slug `provenance-showcase`) — used by both
+// /private-order/[id] and /special-archive/[id], which show the same generic Maison
+// provenance marketing copy alongside the (real, per-product) catalog data.
+export interface ProvenanceShowcaseContent {
+  narrative: string;
+  originLabel: string;
+  authenticityLabel: string;
+  securityMatrixTitle: string;
+  securityMatrixBody: string;
+}
+
+export async function getProvenanceShowcase(): Promise<ProvenanceShowcaseContent | null> {
+  const c = await getContent('provenance-showcase');
+  const cf = c?.customFields;
+  if (!cf) return null;
+  return {
+    narrative: cf.narrative ?? c!.excerpt ?? '',
+    originLabel: cf.originLabel ?? '',
+    authenticityLabel: cf.authenticityLabel ?? 'NFC Certification Included',
+    securityMatrixTitle: cf.securityMatrixTitle ?? 'Security Matrix',
+    securityMatrixBody: cf.securityMatrixBody ?? '',
   };
 }
