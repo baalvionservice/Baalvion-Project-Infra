@@ -9,6 +9,7 @@ import { NotificationProvider } from "@/context/notification-context";
 import { LanguageProvider } from "@/context/language-context";
 import { ToastContainer } from "@/components/notifications/toast-container";
 import { GlobalSearch } from "@/components/layout/global-search";
+import { GoogleAnalytics } from "@/components/layout/google-analytics";
 import { cn } from "@/lib/utils";
 
 const isDev = process.env.NODE_ENV === 'development';
@@ -65,7 +66,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body 
+      <head>
+        <GoogleAnalytics />
+      </head>
+      <body
         className={cn(
           !isDev ? `${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable}` : "font-sans",
           "bg-[#0B0C0F] text-white antialiased min-h-screen flex flex-col"
