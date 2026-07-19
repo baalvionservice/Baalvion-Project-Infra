@@ -20,6 +20,7 @@ db.CommunityInvite = require('./community_invite')(sequelize);
 db.CommunityJoinRequest = require('./community_join_request')(sequelize);
 db.CommunityModerationLog = require('./community_moderation_log')(sequelize);
 db.CommunityBillingWebhookEvent = require('./community_billing_webhook_event')(sequelize);
+db.CommunityChatMessage = require('./community_chat_message')(sequelize);
 
 // Associations
 db.Community.hasMany(db.CommunityMembership, { foreignKey: 'community_id', as: 'memberships' });
@@ -33,5 +34,8 @@ db.CommunityJoinRequest.belongsTo(db.Community, { foreignKey: 'community_id', as
 
 db.Community.hasMany(db.CommunityModerationLog, { foreignKey: 'community_id', as: 'moderationLogs' });
 db.CommunityModerationLog.belongsTo(db.Community, { foreignKey: 'community_id', as: 'community' });
+
+db.Community.hasMany(db.CommunityChatMessage, { foreignKey: 'community_id', as: 'chatMessages' });
+db.CommunityChatMessage.belongsTo(db.Community, { foreignKey: 'community_id', as: 'community' });
 
 module.exports = db;

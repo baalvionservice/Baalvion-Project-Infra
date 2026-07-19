@@ -54,7 +54,10 @@ module.exports = {
     maxPerSecond: Number(process.env.WS_RATE_LIMIT_PER_SECOND || 30),
   },
 
-  // Namespace-to-required-role mapping
+  // Namespace-to-required-role mapping. '/community' is intentionally absent — access is
+  // gated per-room by actual community membership (checked against community-service at
+  // join:room time), not by a platform-wide role, since ordinary marketplace members won't
+  // hold any of the roles used above.
   namespaceRoles: {
     '/dashboard': ['member', 'admin', 'super_admin', 'org_admin'],
     '/ir':        ['member', 'admin', 'super_admin', 'org_admin', 'investor'],
@@ -62,6 +65,11 @@ module.exports = {
     '/admin':     ['admin', 'super_admin'],
     '/ctm':       ['member', 'admin', 'super_admin', 'org_admin', 'trader'],
   },
+
+  // Internal call target for verifying community-chat room membership (join:room on
+  // /community). Same service the frontend's community-proxy talks to, just addressed
+  // directly rather than through the public gateway.
+  communityServiceUrl: process.env.COMMUNITY_SERVICE_URL || 'http://localhost:3064',
 
   // Reconnect replay buffer
   replay: {

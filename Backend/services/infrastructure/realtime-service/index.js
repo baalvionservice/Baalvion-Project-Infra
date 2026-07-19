@@ -57,6 +57,7 @@ const NS_IR        = io.of('/ir');
 const NS_JOBS      = io.of('/jobs');
 const NS_ADMIN     = io.of('/admin');
 const NS_CTM       = io.of('/ctm');
+const NS_COMMUNITY = io.of('/community');
 
 // ── Presence tracking ─────────────────────────────────────────────────────────
 // orgId -> Set<userId>
@@ -247,6 +248,9 @@ function createAuthMiddleware(namespacePath) {
       socket.data.permissions = Array.isArray(payload.permissions) ? payload.permissions : [];
       socket.data.sessionId   = payload.sid ?? null;
       socket.data.jti         = payload.jti ?? null;
+      // Kept only to re-present as Bearer when checking community membership server-side
+      // (join:room on /community) — never forwarded anywhere else, never logged.
+      socket.data.token       = token;
 
       // Namespace role check (roles[]-aware — any held role in the namespace allow-list)
       if (allowedRoles.length && !socket.data.roles.some((r) => allowedRoles.includes(r))) {
@@ -280,9 +284,42 @@ async function joinAuthorizedRooms(socket) {
   }
 }
 
-// Prevent room-hopping: only allow joining rooms that belong to the user's org
-function guardRoomJoin(socket, room) {
-  const { userId, orgId, roles } = socket.data;
+// ── Community membership check (for /community room joins) ───────────────────────
+// Reuses community-service's own GET /communities/:slug (same endpoint the frontend's
+// Access page already calls) rather than adding a bespoke internal endpoint — it already
+// returns membership.status for whichever user the Bearer token belongs to.
+const MEMBERSHIP_CACHE_TTL_MS = 30_000;
+const membershipCache = new Map(); // `${userId}:${slug}` -> { allowed, expiresAt }
+const ACTIVE_MEMBERSHIP_STATUSES = new Set(['approved', 'paid']);
+
+async function hasCommunityMembership(token, userId, slug) {
+  const cacheKey = `${userId}:${slug}`;
+  const cached = membershipCache.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now()) return cached.allowed;
+
+  let allowed = false;
+  try {
+    const res = await fetch(`${config.communityServiceUrl}/v1/community/communities/${encodeURIComponent(slug)}`, {
+      headers: { authorization: `Bearer ${token}` },
+    });
+    if (res.ok) {
+      const body = await res.json();
+      const status = body?.data?.membership?.status;
+      allowed = ACTIVE_MEMBERSHIP_STATUSES.has(status);
+    }
+  } catch (err) {
+    console.warn(`[WS] Membership check failed for user=${userId} slug=${slug}:`, err.message);
+  }
+
+  membershipCache.set(cacheKey, { allowed, expiresAt: Date.now() + MEMBERSHIP_CACHE_TTL_MS });
+  return allowed;
+}
+
+// Prevent room-hopping: only allow joining rooms the user is actually authorized for.
+// Async because /community rooms require a live membership check against community-service
+// (membership can change independently of the socket's JWT lifetime).
+async function guardRoomJoin(socket, room) {
+  const { userId, orgId, roles, token } = socket.data;
 
   // Always allow personal room
   if (room === `user:${userId}`) return true;
@@ -296,6 +333,13 @@ function guardRoomJoin(socket, room) {
   // Admin global — admins only
   if (room === 'admin:global') {
     return roles.includes('admin') || roles.includes('super_admin');
+  }
+
+  // Community chat rooms — only current, active (approved/paid) members
+  if (room.startsWith('community:')) {
+    const slug = room.slice('community:'.length);
+    if (!slug) return false;
+    return hasCommunityMembership(token, userId, slug);
   }
 
   // Deny unknown patterns
@@ -351,12 +395,20 @@ function attachConnectionHandler(namespace, namespacePath) {
         socket.disconnect(true);
         return;
       }
-      if (typeof room !== 'string' || !guardRoomJoin(socket, room)) {
+      if (typeof room !== 'string' || !(await guardRoomJoin(socket, room))) {
         socket.emit('error', { code: 'ROOM_FORBIDDEN', room, ts: Date.now() });
         return;
       }
       await socket.join(room);
       socket.emit('room:joined', { room, ts: Date.now() });
+    });
+
+    // ── Explicit room leave requests ───────────────────────────────────────────
+    // No re-authorization needed to leave — a socket may always drop a room it's in.
+    socket.on('leave:room', async (room) => {
+      if (typeof room !== 'string') return;
+      await socket.leave(room);
+      socket.emit('room:left', { room, ts: Date.now() });
     });
 
     // ── Pong handler (client responds to server heartbeat pings) ─────────────
@@ -383,6 +435,7 @@ attachConnectionHandler(NS_IR,        '/ir');
 attachConnectionHandler(NS_JOBS,      '/jobs');
 attachConnectionHandler(NS_ADMIN,     '/admin');
 attachConnectionHandler(NS_CTM,       '/ctm');
+attachConnectionHandler(NS_COMMUNITY, '/community');
 
 // ── Heartbeat pump (server -> all clients every 30s) ─────────────────────────
 setInterval(() => {
@@ -455,7 +508,7 @@ app.get('/metrics', (req, res) => {
   }
 
   const namespaceCounts = {};
-  ['/dashboard', '/ir', '/jobs', '/admin', '/ctm'].forEach((ns) => {
+  ['/dashboard', '/ir', '/jobs', '/admin', '/ctm', '/community'].forEach((ns) => {
     namespaceCounts[ns] = io.of(ns).sockets.size;
   });
 
@@ -505,7 +558,7 @@ if (!config.jwt.bypassAuth) {
 
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`[realtime-service] HTTP + WebSocket server listening on http://0.0.0.0:${PORT}`);
-  console.log(`[realtime-service] Namespaces: /dashboard /ir /jobs /admin /ctm`);
+  console.log(`[realtime-service] Namespaces: /dashboard /ir /jobs /admin /ctm /community`);
   if (config.jwt.bypassAuth) {
     console.warn('[realtime-service] WARNING: JWT_BYPASS_AUTH=true — all connections accepted without verification');
   }
