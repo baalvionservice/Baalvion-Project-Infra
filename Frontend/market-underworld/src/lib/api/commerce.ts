@@ -28,6 +28,25 @@ export interface StorefrontProduct {
   status: string;
 }
 
+// Detail-only fields serializeProductDetail() adds on top of the list-item shape (see
+// commerce-service/utils/storefrontSerializer.js) — seoTitle/seoDescription are sourced from
+// seoMetadata.title/seoMetadata.description (the key names the seller listing-edit form writes;
+// NOT metaTitle/metaDescription, despite that being the more obvious guess).
+export interface StorefrontProductDetail extends StorefrontProduct {
+  description: string;
+  condition?: string;
+  conditionGrade?: string;
+  conditionDetails?: string;
+  authenticityStatus?: string;
+  authenticityCertificateCode?: string;
+  isOneOfAKind: boolean;
+  serialNumber?: string;
+  targetKeyword?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  pricing: unknown[];
+}
+
 interface StorefrontListResponse {
   success: boolean;
   data: {
@@ -66,9 +85,58 @@ export async function getStorefrontProducts(
   }
 }
 
-export async function getStorefrontProduct(idOrSlug: string, country = 'us') {
-  return commerceFetch<{ success: boolean; data: StorefrontProduct & { pricing: unknown[] } }>(
+export async function getStorefrontProduct(idOrSlug: string, country = 'us'): Promise<StorefrontProductDetail> {
+  return commerceFetch<{ success: boolean; data: StorefrontProductDetail }>(
     `/storefront/${MARKET_UNDERWORLD_STORE_ID}/products/${idOrSlug}`,
     { country }
   ).then((r) => r.data);
+}
+
+export async function getRelatedProducts(idOrSlug: string, country = 'us'): Promise<StorefrontProduct[]> {
+  try {
+    const res = await commerceFetch<{ success: boolean; data: StorefrontProduct[] }>(
+      `/storefront/${MARKET_UNDERWORLD_STORE_ID}/products/${idOrSlug}/related`,
+      { country }
+    );
+    return res.data;
+  } catch {
+    return [];
+  }
+}
+
+export interface StorefrontCategory {
+  id: string;
+  departmentId: string;
+  name: string;
+  subcategories: string[];
+}
+
+export interface StorefrontDepartment {
+  id: string;
+  name: string;
+  description: string;
+  imageUrl: string;
+  categories: string[];
+}
+
+export async function getStorefrontCategories(): Promise<StorefrontCategory[]> {
+  try {
+    const res = await commerceFetch<{ success: boolean; data: StorefrontCategory[] }>(
+      `/storefront/${MARKET_UNDERWORLD_STORE_ID}/categories`
+    );
+    return res.data;
+  } catch {
+    return [];
+  }
+}
+
+export async function getStorefrontDepartments(): Promise<StorefrontDepartment[]> {
+  try {
+    const res = await commerceFetch<{ success: boolean; data: StorefrontDepartment[] }>(
+      `/storefront/${MARKET_UNDERWORLD_STORE_ID}/departments`
+    );
+    return res.data;
+  } catch {
+    return [];
+  }
 }

@@ -5,11 +5,16 @@ import { AdminSidebar } from '@/components/admin/admin-sidebar';
 import { AdminNavbar } from '@/components/admin/admin-navbar';
 import { Menu, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { RoleGuard } from '@/components/auth/RoleGuard';
+
+// Matches commerce-service/order-service's requirePlatformAdmin: super_admin | country_admin.
+const ADMIN_ROLES = ['super_admin', 'country_admin'];
 
 export default function AdminDashboardLayout({ children }: { children: React.ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
+    <RoleGuard allow={ADMIN_ROLES}>
     <div className="min-h-screen bg-[#050508] flex overflow-x-hidden">
       {/* Sidebar - Desktop (Static) */}
       <aside className="hidden lg:block w-72 shrink-0">
@@ -63,5 +68,6 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
         </main>
       </div>
     </div>
+    </RoleGuard>
   );
 }

@@ -128,7 +128,7 @@ backups/
 .aider*
 
 # Reports
-Reports/
+/Reports/
 build-report.txt
 lint-report.txt
 
