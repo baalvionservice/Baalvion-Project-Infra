@@ -731,6 +731,34 @@ export async function getReport(id: string): Promise<MaisonReportBody | null> {
   return mapMaisonReport(c);
 }
 
+// ── Welcome-offer popup (slug `welcome-offer`) — the $ off email-capture gateway shown
+// to first-time visitors. `image` is a URL pasted from the admin Media library; when
+// absent the popup falls back to the branded monogram panel via <BrandImage>.
+export interface WelcomeOfferContent {
+  image: string;
+  archiveLabel: string;
+  headline: string;
+  subtext: string;
+  ctaLabel: string;
+  disclaimer: string;
+}
+
+export async function getWelcomeOfferContent(): Promise<WelcomeOfferContent | null> {
+  const c = await getContent('welcome-offer');
+  const cf = c?.customFields;
+  if (!cf && !c?.featuredImage) return null;
+  return {
+    image: cf?.image ?? c?.featuredImage ?? '',
+    archiveLabel: cf?.archiveLabel ?? 'Archive No. 1924',
+    headline: cf?.headline ?? '$100 Off, On Us?',
+    subtext:
+      cf?.subtext ??
+      'Join our collector network for first access to the 1924 heritage series and bespoke curatorial guidance.',
+    ctaLabel: cf?.ctaLabel ?? 'Collect Your Offer',
+    disclaimer: cf?.disclaimer ?? '*Offer valid on all orders $2,500+.',
+  };
+}
+
 // ── Shared provenance/narrative showcase copy (slug `provenance-showcase`) — used by both
 // /private-order/[id] and /special-archive/[id], which show the same generic Maison
 // provenance marketing copy alongside the (real, per-product) catalog data.

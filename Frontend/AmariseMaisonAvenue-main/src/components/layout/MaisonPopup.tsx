@@ -4,34 +4,37 @@ import React, { useState, useEffect } from 'react';
 import { X, Sparkles, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { PlaceholderImage } from '@/components/ui/PlaceholderImage';
+import { BrandImage } from '@/components/ui/BrandImage';
+import { getWelcomeOfferContent, type WelcomeOfferContent } from '@/lib/cms';
 import { cn } from '@/lib/utils';
 
 /**
- * MaisonPopup: Restored High-Fidelity Invitation Gateway.
- * Optimized for mobile viewport stability while maintaining expensive aesthetic.
+ * MaisonPopup: $100 welcome-offer gateway, shown once per visitor.
+ * Once dismissed (X) or submitted, it is flagged as seen permanently — it will not
+ * reappear on refresh, revisit, or later navigation for that browser.
  */
-const POPUP_INTERVAL = 2 * 60 * 1000; // 2 minutes
-const POPUP_KEY = 'maison_popup_last_shown';
+const POPUP_SEEN_KEY = 'amarise_offer_seen';
+const POPUP_SHOW_DELAY = 3000;
 
 export function MaisonPopup() {
   const [isOpen, setIsOpen] = useState(false);
+  const [offer, setOffer] = useState<WelcomeOfferContent | null>(null);
 
   useEffect(() => {
-    const lastShown = localStorage.getItem(POPUP_KEY);
-    const now = Date.now();
+    const hasSeenOffer = localStorage.getItem(POPUP_SEEN_KEY) === 'true';
+    if (hasSeenOffer) return;
 
-    if (!lastShown || now - parseInt(lastShown) > POPUP_INTERVAL) {
-      const timer = setTimeout(() => {
-        setIsOpen(true);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
+    getWelcomeOfferContent().then(setOffer);
+
+    const timer = setTimeout(() => {
+      setIsOpen(true);
+    }, POPUP_SHOW_DELAY);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleClose = () => {
     setIsOpen(false);
-    localStorage.setItem(POPUP_KEY, Date.now().toString());
+    localStorage.setItem(POPUP_SEEN_KEY, 'true');
   };
 
   const handleCollect = (e: React.FormEvent) => {
@@ -53,12 +56,18 @@ export function MaisonPopup() {
           <X className="w-6 h-6 stroke-[1.5px]" />
         </button>
 
-        {/* Visual Panel */}
+        {/* Visual Panel — sourced from the CMS welcome-offer image; falls back to the
+            branded monogram panel until an admin uploads a real photo. */}
         <div className="relative w-full md:w-[52%] h-[220px] md:h-auto bg-[#f8f8f8] shrink-0 overflow-hidden">
-          <PlaceholderImage className="absolute inset-0 w-full h-full border-none transition-transform duration-[10s] hover:scale-110" />
+          <BrandImage
+            src={offer?.image}
+            alt="Amarisé Maison Avenue welcome offer"
+            className="absolute inset-0 w-full h-full border-none transition-transform duration-[10s] hover:scale-110"
+            priority
+          />
           <div className="absolute inset-0 bg-black/5" />
           <div className="absolute top-6 left-6 luxury-blur bg-white/10 border border-white/20 px-4 py-1.5 hidden md:block">
-             <span className="text-[8px] font-bold tracking-[0.5em] text-white uppercase">Archive No. 1924</span>
+             <span className="text-[8px] font-bold tracking-[0.5em] text-white uppercase">{offer?.archiveLabel ?? 'Archive No. 1924'}</span>
           </div>
         </div>
 
@@ -75,36 +84,42 @@ export function MaisonPopup() {
 
           <div className="space-y-4 md:space-y-6">
             <h2 id="popup-title" className="text-2xl md:text-[42px] font-headline font-medium text-gray-900 leading-[1.1] tracking-tighter italic">
-              A Private Invitation <br /> to the Archive
+              {offer?.headline ?? '$100 Off, On Us?'}
             </h2>
             <p className="text-xs md:text-sm text-gray-500 font-light italic leading-relaxed max-w-[280px] mx-auto">
-              Join our collector network for first access to the 1924 heritage series and bespoke curatorial guidance.
+              {offer?.subtext ??
+                'Join our collector network for first access to the 1924 heritage series and bespoke curatorial guidance.'}
             </p>
           </div>
 
           <form onSubmit={handleCollect} className="space-y-4 max-w-[340px] mx-auto w-full pt-2">
             <div className="space-y-3">
-              <Input 
-                type="email" 
-                placeholder="EMAIL ADDRESS" 
+              <Input
+                type="email"
+                placeholder="EMAIL ADDRESS"
                 className="h-12 md:h-16 rounded-none border-gray-100 bg-[#fcfcfc] text-center text-[10px] md:text-xs font-bold tracking-[0.3em] placeholder:text-gray-300 focus:ring-0 focus:border-black transition-all"
                 required
                 aria-label="Collector Email Address"
               />
             </div>
-            
-            <Button 
+
+            <Button
               type="submit"
               className="w-full h-12 md:h-16 bg-black text-white hover:bg-plum rounded-none text-[10px] md:text-[11px] font-bold tracking-[0.4em] uppercase transition-all shadow-2xl"
             >
-              REQUEST ACCESS <ArrowRight className="ml-3 w-4 h-4" />
+              {offer?.ctaLabel ?? 'Collect Your Offer'} <ArrowRight className="ml-3 w-4 h-4" />
             </Button>
           </form>
 
-          <div className="pt-4 flex items-center justify-center space-x-3 text-gray-400">
-            <Sparkles className="w-4 h-4 text-gold animate-pulse" />
-            <p className="text-[9px] md:text-[10px] font-bold tracking-[0.4em] uppercase">
-              Exclusivity Guaranteed
+          <div className="pt-4 flex flex-col items-center justify-center space-y-3 text-gray-400">
+            <div className="flex items-center justify-center space-x-3">
+              <Sparkles className="w-4 h-4 text-gold animate-pulse" />
+              <p className="text-[9px] md:text-[10px] font-bold tracking-[0.4em] uppercase">
+                Exclusivity Guaranteed
+              </p>
+            </div>
+            <p className="text-[10px] text-gray-400 font-light italic">
+              {offer?.disclaimer ?? '*Offer valid on all orders $2,500+.'}
             </p>
           </div>
         </div>

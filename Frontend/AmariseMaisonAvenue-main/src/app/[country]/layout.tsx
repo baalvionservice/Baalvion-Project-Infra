@@ -55,7 +55,7 @@ export default function CountryLayout({
     <div dir={i18n.getDirection()}>
       {/* Invisible: announces this storefront tab as a live visitor (admin sees the count). */}
       <PresenceBeacon />
-      {/* <MaisonPopup /> */}
+      <MaisonPopup />
       {/* <MadAveLiveWidget /> */}
 
       {/*......... We will enable it when we integrate backend for AI Chat .........*/}

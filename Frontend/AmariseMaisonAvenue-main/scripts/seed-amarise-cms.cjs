@@ -503,10 +503,28 @@ const REPORT_GLOBAL_ARTIFACT = {
   },
 };
 
+const WELCOME_OFFER = {
+  title: 'Welcome Offer Popup',
+  slug: 'welcome-offer',
+  contentType: 'page',
+  excerpt: 'First-visit email-capture popup shown once per browser.',
+  contentBlocks: [para(0, 'The $ off welcome-offer popup shown to first-time visitors is managed here.')],
+  seoMetadata: { title: 'Welcome Offer | Amarisé Maison Avenue', description: 'First-visit welcome offer.' },
+  customFields: {
+    image: '',
+    archiveLabel: 'Archive No. 1924',
+    headline: '$100 Off, On Us?',
+    subtext: 'Join our collector network for first access to the 1924 heritage series and bespoke curatorial guidance.',
+    ctaLabel: 'Collect Your Offer',
+    disclaimer: '*Offer valid on all orders $2,500+.',
+  },
+};
+
 const DOCS = [
   HOMEPAGE, PRESS, MAISON_STORY, CUSTOMER_SERVICE, MEMBERSHIP, FOOTER,
   APPOINTMENTS_PAGE, AUTHENTICITY_PAGE, CONTACT_PAGE, PROVENANCE_SHOWCASE,
   SERVICE_CONCIERGE, SERVICE_ADVISORY, SERVICE_AUTHENTICATION, REPORT_GLOBAL_ARTIFACT,
+  WELCOME_OFFER,
 ];
 
 async function main() {
