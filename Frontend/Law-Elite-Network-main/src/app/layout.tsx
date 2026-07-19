@@ -13,6 +13,7 @@ import { AIChatAssistantWrapper } from '@/components/ai/AIChatAssistantWrapper';
 import ImpersonationBanner from '@/components/admin/ImpersonationBanner';
 import { cmsGetAdsenseClient } from '@/lib/cms';
 import UnifiedAnalytics from '@/components/UnifiedAnalytics';
+import { GoogleAnalytics } from '@/components/GoogleAnalytics';
 import { cn } from '@/lib/utils';
 import './globals.css';
 
@@ -157,6 +158,7 @@ export default async function RootLayout({
       className={cn(inter.variable, libreFranklin.variable, sourceSerif.variable)}
     >
       <head>
+        <GoogleAnalytics />
         <meta name="theme-color" content="#1e3a5f" />
         {ADSENSE_CLIENT && (
           <meta name="google-adsense-account" content={ADSENSE_CLIENT} />
