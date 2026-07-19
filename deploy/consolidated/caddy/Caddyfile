@@ -92,6 +92,32 @@ api.baalvion.com {
 		reverse_proxy app-commerce:3012
 	}
 
+	# order-service (cart/checkout/payment/returns/appointments/wishlists/consignments — Amarisé
+	# and any other storefront's buy-side) — same container as commerce-service, DIFFERENT port
+	# (app-commerce:3013, not 3012). Guest checkout uses X-Cart-Session (no bearer token) and
+	# logged-in customers use their own JWT, so like community-service above this does its own
+	# optionalAuth/authMiddleware verification per-route (routes/v1.js) rather than needing the
+	# session-gated BFF to translate anything. Without this carve-out NOTHING under /orders,
+	# /wishlists, /consignments or /appointments is reachable from the public internet at all —
+	# checkout, cart, and payment-gateway webhooks (Razorpay/PayU call back into
+	# /api/v1/orders/webhooks/*) all 404/401 through the BFF today.
+	@order_service path /api/v1/orders /api/v1/orders/* /api/v1/wishlists/* /api/v1/consignments/* /api/v1/appointments/*
+	handle @order_service {
+		reverse_proxy app-commerce:3013
+	}
+
+	# crm-service PUBLIC storefront surface (private sales inquiries, VIP wallet/membership,
+	# the general contact-form support tickets) — Amarisé's concierge flow. Same per-route
+	# optionalAuth/authMiddleware pattern as order-service above (crm-service verifies every
+	# request itself; nothing here trusts the edge). The staff/admin-console view of this same
+	# service already exists at admin.baalvion.com/api-bff/ecosystem/crm/* — this is the
+	# SEPARATE public entry point real customers' browsers actually call. Without this,
+	# createInquiry/getMyVipClient/createSupportTicket etc. all fail from the live storefront.
+	@crm_service path /api/v1/crm /api/v1/crm/*
+	handle @crm_service {
+		reverse_proxy app-ecosystem:3063
+	}
+
 	# Market Underworld community-service (UNAUTHENTICATED read) -- the real multi-community
 	# forum on community.marketunderworld.com/forum fetches its public community list here.
 	# community-service does its own RS256 verification on every other /api/v1/community/*
@@ -239,6 +265,12 @@ admin.baalvion.com {
 	}
 	handle_path /api-bff/commerce/commerce/* {
 		reverse_proxy app-commerce:3012
+	}
+	# order-service admin surface (order/cart/return/appointment oversight — authMiddleware-gated
+	# internally). Same app-commerce container, port 3013 not 3012 — see the public order-service
+	# carve-out above for why these are different ports on one container.
+	handle_path /api-bff/commerce/orders/* {
+		reverse_proxy app-commerce:3013
 	}
 	handle_path /api-bff/commerce/market/* {
 		reverse_proxy app-commerce:3007
