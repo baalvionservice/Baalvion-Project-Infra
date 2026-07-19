@@ -98,3 +98,74 @@ export async function getMyOrder(orderId: string): Promise<GiftCardOrder | null>
     const orders = await getMyOrders();
     return orders.find((o) => o.id === orderId) ?? null;
 }
+
+// Admin / merchant views — platform-admin only, enforced server-side by giftcard-service's
+// requirePlatformAdmin (a non-admin caller gets a real 403 from the proxy, not a client gate).
+
+export interface AdminGiftCardOrder {
+    id: string;
+    userId: string;
+    brandName: string | null;
+    brandLogoUrl: string | null;
+    supplier: string;
+    denominationValue: number;
+    currencyCode: string;
+    priceUsdCents: number;
+    status: OrderStatus;
+    fulfillmentError?: string;
+    createdAt: string;
+    fulfilledAt: string | null;
+}
+
+export interface AdminOrdersPage {
+    total: number;
+    orders: AdminGiftCardOrder[];
+}
+
+export interface MerchantStats {
+    totalOrders: number;
+    fulfilledOrders: number;
+    pendingOrders: number;
+    failedOrders: number;
+    revenueUsdCents: number;
+    totalBrands: number;
+    activeBrands: number;
+}
+
+export interface AdminGiftCardBrand extends GiftCardBrand {
+    supplier: string;
+    isActive: boolean;
+    lastSyncedAt: string | null;
+}
+
+export async function getMerchantStats(): Promise<MerchantStats | null> {
+    try {
+        return await giftcardFetch<MerchantStats>('/admin/stats');
+    } catch {
+        return null;
+    }
+}
+
+export async function getAdminOrders(status?: OrderStatus): Promise<AdminOrdersPage> {
+    try {
+        const qs = status ? `?status=${encodeURIComponent(status)}` : '';
+        return await giftcardFetch<AdminOrdersPage>(`/admin/orders${qs}`);
+    } catch {
+        return { total: 0, orders: [] };
+    }
+}
+
+export async function getAdminCatalog(): Promise<AdminGiftCardBrand[]> {
+    try {
+        return await giftcardFetch<AdminGiftCardBrand[]>('/admin/catalog');
+    } catch {
+        return [];
+    }
+}
+
+export async function syncCatalog(supplier = 'reloadly'): Promise<{ synced: unknown }> {
+    return giftcardFetch<{ synced: unknown }>('/admin/catalog/sync', {
+        method: 'POST',
+        body: JSON.stringify({ supplier }),
+    });
+}

@@ -60,6 +60,7 @@ export async function getSiteAdsenseClient(): Promise<string | null> {
     const res = await fetch(`${CMS_PUBLIC_URL}/${SITE_SLUG}`, {
       headers: { Accept: 'application/json' },
       next: { revalidate: 3600 },
+      signal: AbortSignal.timeout(6000),
     });
     if (res.ok) {
       const json = (await res.json()) as { data?: { config?: { ads?: { adsensePublisherId?: string } } } };
@@ -182,6 +183,11 @@ async function cmsFetchOnce<T>(path: string): Promise<T> {
     headers: { Accept: 'application/json' },
     // Content is editorial and changes on publish — keep it fresh, not statically frozen.
     cache: 'no-store',
+    // Without a bound, a hung cms-service connection hangs every page that
+    // renders through this shared fetcher (news, categories, the article
+    // catch-all) for the full request lifetime instead of failing over to
+    // the caller's fallback.
+    signal: AbortSignal.timeout(6000),
   });
   if (!res.ok) {
     // 404 (e.g. unknown slug) is an expected "not found", not a transport failure.

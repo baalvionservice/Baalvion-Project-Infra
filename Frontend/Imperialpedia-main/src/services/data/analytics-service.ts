@@ -355,7 +355,7 @@ export const analyticsService = {
   async getAssetSummaries(): Promise<ApiResponse<AssetSummary[]>> {
     try {
       const IMP_API = process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3004/api/v1');
-      const res = await fetch(`${IMP_API}/assets?limit=50`, { cache: 'no-store' });
+      const res = await fetch(`${IMP_API}/assets?limit=50`, { cache: 'no-store', signal: AbortSignal.timeout(6000) });
       if (res.ok) {
         const json = await res.json();
         const items = json?.data?.items ?? [];
