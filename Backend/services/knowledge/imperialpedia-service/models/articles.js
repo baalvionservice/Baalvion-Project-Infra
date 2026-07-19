@@ -19,6 +19,7 @@ module.exports = function (sequelize, DataTypes) {
         likes_count: { type: DataTypes.INTEGER, defaultValue: 0 },
         cover_image: { type: DataTypes.STRING(500), allowNull: true },
         reading_time_min: { type: DataTypes.INTEGER, defaultValue: 0 },
+        is_premium: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
     }, {
         tableName: 'articles',
         schema: 'imperialpedia',
@@ -29,6 +30,7 @@ module.exports = function (sequelize, DataTypes) {
             { fields: ['status'] },
             { fields: ['author_id'] },
             { fields: ['category'] },
+            { fields: ['is_premium'] },
         ],
     });
 };

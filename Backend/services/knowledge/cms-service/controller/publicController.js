@@ -11,14 +11,16 @@ const getWebsiteInfo = async (req, res, next) => {
 
 const listContent = async (req, res, next) => {
     try {
-        const result = await publicService.listPublicContent(req.params.websiteSlug, req.query);
+        const callerId = req.auth && req.auth.userId;
+        const result = await publicService.listPublicContent(req.params.websiteSlug, req.query, { callerId });
         return sendPaginated(req, res, result);
     } catch (err) { return next(err); }
 };
 
 const getContent = async (req, res, next) => {
     try {
-        const content = await publicService.getPublicContent(req.params.websiteSlug, req.params.slug);
+        const callerId = req.auth && req.auth.userId;
+        const content = await publicService.getPublicContent(req.params.websiteSlug, req.params.slug, { callerId });
         return sendSuccess(req, res, content);
     } catch (err) { return next(err); }
 };

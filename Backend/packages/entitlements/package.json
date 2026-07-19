@@ -1,0 +1,13 @@
+{
+  "name": "@baalvion/entitlements",
+  "version": "1.0.0",
+  "description": "Shared premium-content entitlement decision logic (decideAccess) — the single source of truth for 'does this user have paid access', consumed by every service that gates content behind a subscription (imperialpedia-service, cms-service).",
+  "private": true,
+  "main": "index.js",
+  "files": [
+    "index.js"
+  ],
+  "scripts": {
+    "test": "node --test"
+  }
+}

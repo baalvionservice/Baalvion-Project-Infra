@@ -1,12 +1,14 @@
 'use strict';
 const { Op } = require('sequelize');
 const { hmacSign, safeCompare } = require('@baalvion/crypto');
+const { decideAccess } = require('@baalvion/entitlements');
 const { CmsWebsite, CmsContent, CmsCategory, CmsTag, CmsAuthor, CmsContentEntityMention } = require('../models');
 const { AppError } = require('../utils/errors');
 const cache = require('./cacheService');
 const config = require('../config/appConfig');
 const contentService = require('./contentService');
 const contentEvents = require('./analytics/contentEvents');
+const entitlementClient = require('./entitlementClient');
 const { parsePagination, buildPaginated } = require('../utils/pagination');
 
 async function _resolveWebsite(websiteSlug) {
@@ -15,37 +17,48 @@ async function _resolveWebsite(websiteSlug) {
     return website;
 }
 
-async function getPublicContent(websiteSlug, slug) {
+async function getPublicContent(websiteSlug, slug, { callerId } = {}) {
     const cacheKey = cache.keys.publicContent(websiteSlug, slug);
     const cached = await cache.get(cacheKey);
+
+    let data;
     if (cached) {
         await contentService.incrementViewCount(cached.id);
         void contentEvents.recordContentView(websiteSlug, cached); // fire-and-forget, fail-open
-        return cached;
+        data = cached;
+    } else {
+        const website = await _resolveWebsite(websiteSlug);
+        const content = await CmsContent.findOne({
+            where: { websiteId: website.id, slug, status: 'published', visibility: 'public' },
+            include: [
+                { model: CmsCategory, as: 'category', attributes: ['id', 'name', 'slug'] },
+                // Pre-resolved entity-link data (see contentEntityMentionsService.js) —
+                // rides this same cached fetch rather than a second render-time call.
+                // 'rejected'/'suggested' rows (future editor-review states) stay invisible
+                // to the public API by construction.
+                {
+                    model: CmsContentEntityMention, as: 'entityMentions', where: { status: 'accepted' }, required: false,
+                    attributes: ['entityType', 'entitySlug', 'entityName', 'entityUrl', 'matchedText'],
+                },
+            ],
+        });
+        if (!content) throw new AppError('NOT_FOUND', 'Content not found', 404);
+
+        data = content.toJSON();
+        await cache.set(cacheKey, data, config.cache.publicTtl);
+        await contentService.incrementViewCount(content.id);
+        void contentEvents.recordContentView(websiteSlug, data); // fire-and-forget, fail-open
     }
 
-    const website = await _resolveWebsite(websiteSlug);
-    const content = await CmsContent.findOne({
-        where: { websiteId: website.id, slug, status: 'published', visibility: 'public' },
-        include: [
-            { model: CmsCategory, as: 'category', attributes: ['id', 'name', 'slug'] },
-            // Pre-resolved entity-link data (see contentEntityMentionsService.js) —
-            // rides this same cached fetch rather than a second render-time call.
-            // 'rejected'/'suggested' rows (future editor-review states) stay invisible
-            // to the public API by construction.
-            {
-                model: CmsContentEntityMention, as: 'entityMentions', where: { status: 'accepted' }, required: false,
-                attributes: ['entityType', 'entitySlug', 'entityName', 'entityUrl', 'matchedText'],
-            },
-        ],
-    });
-    if (!content) throw new AppError('NOT_FOUND', 'Content not found', 404);
-
-    const data = content.toJSON();
-    await cache.set(cacheKey, data, config.cache.publicTtl);
-    await contentService.incrementViewCount(content.id);
-    void contentEvents.recordContentView(websiteSlug, data); // fire-and-forget, fail-open
-    return data;
+    // Premium gate — resolved AFTER the cache read/write, every request, for every caller.
+    // The cached row always holds the FULL content; redaction is a per-request overlay on top,
+    // never baked into the cache itself (baking it in would leak paid content to whichever
+    // caller happens to populate the cache first, or wrongly redact it for a payer).
+    const access = await entitlementClient.resolveAccess({ userId: callerId, isPremiumContent: Boolean(data.isPremium) });
+    if (access.isPremium && !access.hasAccess) {
+        return { ...data, contentBlocks: null, access };
+    }
+    return { ...data, access };
 }
 
 /**
@@ -79,7 +92,7 @@ function _isTruthyParam(v) {
     return v === 'true' || v === '1' || v === true;
 }
 
-async function listPublicContent(websiteSlug, query = {}) {
+async function listPublicContent(websiteSlug, query = {}, { callerId } = {}) {
     const { page, limit, offset } = parsePagination(query);
     const {
         categorySlug, tag, search, contentType, authorSlug,
@@ -147,7 +160,20 @@ async function listPublicContent(websiteSlug, query = {}) {
         limit, offset,
     });
 
-    return buildPaginated(rows, count, { page, limit });
+    // contentBlocks is already excluded above, so there's no body to leak here — this is only
+    // resolving `access` metadata for card-level paywall badges/CTAs. One subscription lookup
+    // for the whole page (not per row) to avoid an N+1 call to imperialpedia-service; if that
+    // lookup fails, `subscription` stays null, which decideAccess treats as free-tier (fails
+    // closed to "no access" for premium items, same direction as the single-item gate — just
+    // lower stakes here since no content body is at risk either way).
+    const subscription = await entitlementClient.getSubscription(callerId).catch(() => null);
+    const items = rows.map((row) => {
+        const item = row.toJSON();
+        const access = decideAccess({ isPremiumContent: Boolean(item.isPremium), subscription });
+        return { ...item, access };
+    });
+
+    return buildPaginated(items, count, { page, limit });
 }
 
 async function getPublicCategory(websiteSlug, categorySlug) {

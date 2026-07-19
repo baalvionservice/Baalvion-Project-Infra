@@ -26,8 +26,30 @@ const authMiddleware = (req, res, next) => _canonical(req, res, (err) => {
     req.user = { id: req.auth.userId, orgId: req.auth.orgId, roles: req.auth.roles };
     return next();
 });
+
+// Optional auth for public-read routes: if a valid Bearer is present, populate req.auth/req.user
+// (so the premium-content gate in service/publicService.js knows who's asking); if absent or
+// invalid, continue anonymously. Mirrors imperialpedia-service's middleware/authMiddleware.js
+// exactly — this export didn't exist here before (public routes had zero auth middleware),
+// which is a prerequisite for entitlement resolution to work on cms-service's delivery API.
+const optionalAuth = (req, res, next) => {
+    const header = req.headers.authorization || '';
+    if (!header.startsWith('Bearer ')) return next();
+    return _canonical(req, res, (err) => {
+        if (err) {
+            // Bad/expired token on a public route → treat as anonymous. Null out any partially
+            // populated auth state so a rejected token can never leak roles/entitlement downstream.
+            req.auth = undefined;
+            req.user = undefined;
+            return next();
+        }
+        req.user = { id: req.auth.userId, orgId: req.auth.orgId, roles: req.auth.roles };
+        return next();
+    });
+};
+
 // Hierarchical RBAC (canonical roles[]); super_admin satisfies any check.
 const requireRole = (...roles) => wrap(rbacRequireRole(...roles));
 const requirePermission = (...perms) => wrap(rbacRequirePermission(...perms));
 
-module.exports = { authMiddleware, requireRole, requirePermission };
+module.exports = { authMiddleware, optionalAuth, requireRole, requirePermission };

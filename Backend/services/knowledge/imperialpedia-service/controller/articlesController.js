@@ -3,6 +3,13 @@ const { Op } = require('sequelize');
 const db = require('../models');
 const { sendSuccess, sendPaginated, sendError } = require('../utils/response');
 const { AppError } = require('../utils/errors');
+const { decideAccess, loadSubscriptionForUser, resolveArticleAccess } = require('../service/entitlementService');
+
+const PRIVILEGED_ROLES = ['admin', 'owner', 'super_admin'];
+const isPrivilegedCaller = (req) => ((req.auth && req.auth.roles) || []).some((r) => PRIVILEGED_ROLES.includes(r));
+// Access an author/admin always has, independent of any subscription — used to bypass the
+// paywall for the article's own author and for editorial review.
+const fullAccess = (article) => ({ isPremium: Boolean(article.is_premium), hasAccess: true, requiredTier: null, currentTier: null });
 
 const buildSlug = (title) => {
     return title
@@ -36,10 +43,13 @@ const listArticles = async (req, res, next) => {
 
         if (req.query.status) {
             const requestedStatus = String(req.query.status);
-            if (PRIVILEGED_STATUSES.has(requestedStatus)) {
+            const isPrivileged = isPrivilegedCaller(req);
+            if (requestedStatus === 'all') {
+                // Admin moderation view — every status, no where.status filter at all.
+                // Falls back to published-only for non-privileged callers (same as omitting status).
+                if (!isPrivileged) where.status = 'published';
+            } else if (PRIVILEGED_STATUSES.has(requestedStatus)) {
                 // Only allow authenticated admins/owners to filter by non-public statuses.
-                const roles = (req.auth && req.auth.roles) || [];
-                const isPrivileged = roles.some((r) => ['admin', 'owner', 'super_admin'].includes(r));
                 if (!isPrivileged) {
                     // Silently fall back to published — do not 403 (backward-compatible).
                     where.status = 'published';
@@ -68,8 +78,24 @@ const listArticles = async (req, res, next) => {
             order: [['created_at', 'DESC']],
         });
 
+        // Resolve the caller's subscription once for the whole page (not per row) to avoid an
+        // N+1 query, then apply the same free-vs-premium decision per article.
+        const isPrivileged = isPrivilegedCaller(req);
+        const callerId = req.auth && req.auth.userId;
+        const subscription = isPrivileged ? null : await loadSubscriptionForUser(callerId);
+
+        const items = rows.map((row) => {
+            const article = row.toJSON();
+            const isAuthor = Boolean(callerId) && article.author_id === callerId;
+            const access = isPrivileged || isAuthor
+                ? fullAccess(article)
+                : decideAccess({ isPremiumContent: Boolean(article.is_premium), subscription });
+            if (access.isPremium && !access.hasAccess) article.content = null;
+            return { ...article, access };
+        });
+
         return sendPaginated(req, res, {
-            items: rows,
+            items,
             pagination: buildPagination(count, page, limit),
         });
     } catch (err) { return next(err); }
@@ -78,7 +104,7 @@ const listArticles = async (req, res, next) => {
 // POST /articles — auth required
 const createArticle = async (req, res, next) => {
     try {
-        const { title, content, summary, category, tags, cover_image, reading_time_min, org_id } = req.body;
+        const { title, content, summary, category, tags, cover_image, reading_time_min, org_id, is_premium } = req.body;
         if (!title) return next(new AppError('VALIDATION_ERROR', 'Title is required', 400));
 
         const slug = buildSlug(title);
@@ -96,6 +122,7 @@ const createArticle = async (req, res, next) => {
             author_name: req.body.author_name || null,
             org_id: org_id || req.user.orgId || null,
             status: 'draft',
+            is_premium: Boolean(is_premium),
         });
 
         return sendSuccess(req, res, article, 201);
@@ -124,15 +151,14 @@ const getArticle = async (req, res, next) => {
 
         if (!article) return next(new AppError('NOT_FOUND', 'Article not found', 404));
 
+        const isPrivileged = isPrivilegedCaller(req);
+        const callerId = req.auth && req.auth.userId;
+        const isAuthor = Boolean(callerId) && article.author_id === callerId;
+
         // Gate non-published articles: only the author or an admin may see them.
-        if (article.status !== 'published') {
-            const roles = (req.auth && req.auth.roles) || [];
-            const isPrivileged = roles.some((r) => ['admin', 'owner', 'super_admin'].includes(r));
-            const isAuthor = req.auth && req.auth.userId && article.author_id === req.auth.userId;
-            if (!isPrivileged && !isAuthor) {
-                // Surface as 404 so callers cannot enumerate non-public articles.
-                return next(new AppError('NOT_FOUND', 'Article not found', 404));
-            }
+        if (article.status !== 'published' && !isPrivileged && !isAuthor) {
+            // Surface as 404 so callers cannot enumerate non-public articles.
+            return next(new AppError('NOT_FOUND', 'Article not found', 404));
         }
 
         // Increment views only for published articles.
@@ -140,7 +166,16 @@ const getArticle = async (req, res, next) => {
             await article.increment('views_count');
         }
 
-        return sendSuccess(req, res, article);
+        // Premium gate: the author and privileged staff always see the full body (editorial
+        // review / ownership); everyone else needs an active paid subscription.
+        const access = isPrivileged || isAuthor
+            ? fullAccess(article)
+            : await resolveArticleAccess({ article, userId: callerId });
+
+        const payload = article.toJSON();
+        if (access.isPremium && !access.hasAccess) payload.content = null;
+
+        return sendSuccess(req, res, { ...payload, access });
     } catch (err) { return next(err); }
 };
 
@@ -154,7 +189,7 @@ const updateArticle = async (req, res, next) => {
             return next(new AppError('FORBIDDEN', 'Not authorized to update this article', 403));
         }
 
-        const allowed = ['title', 'content', 'summary', 'category', 'tags', 'cover_image', 'reading_time_min', 'author_name'];
+        const allowed = ['title', 'content', 'summary', 'category', 'tags', 'cover_image', 'reading_time_min', 'author_name', 'is_premium'];
         const updates = {};
         for (const key of allowed) {
             if (req.body[key] !== undefined) updates[key] = req.body[key];

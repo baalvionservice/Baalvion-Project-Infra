@@ -19,6 +19,7 @@
     "@baalvion/telemetry": "workspace:*",
     "@baalvion/graceful-shutdown": "workspace:*",
     "@baalvion/crypto": "workspace:*",
+    "@baalvion/entitlements": "workspace:*",
     "express-rate-limit": "^7.5.0",
     "@baalvion/auth-node": "workspace:*",
     "@baalvion/sdk": "workspace:*",

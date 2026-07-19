@@ -84,9 +84,14 @@ export default function ImperialpediaAdminPage() {
     queryKey: ['imperialpedia', 'glossary', 'health'],
     queryFn: () => serviceClients.imperialpedia.get('/glossary', { params: { limit: 500 } }).then((r) => r.data),
   });
+  const { data: articlesData, isLoading: articlesLoading } = useQuery({
+    queryKey: ['imperialpedia', 'articles', 'health'],
+    queryFn: () => serviceClients.imperialpedia.get('/articles', { params: { status: 'all', limit: 500 } }).then((r) => r.data),
+  });
 
   const entities = extractRows<EntityRow>(entitiesData);
   const glossaryTerms = extractRows<GlossaryRow>(glossaryData);
+  const articles = extractRows<{ id: number; status: string; is_premium: boolean }>(articlesData);
 
   const health = useMemo(() => {
     const knownSlugs = new Set(entities.map((e) => `${e.type}:${e.slug}`));
@@ -125,8 +130,9 @@ export default function ImperialpediaAdminPage() {
     return { countByType, missingDescription, missingImage, missingCategory, brokenRelationships, score };
   }, [entities]);
 
-  const isLoading = entitiesLoading || glossaryLoading;
+  const isLoading = entitiesLoading || glossaryLoading || articlesLoading;
   const glossaryPublished = glossaryTerms.filter((t) => t.status === 'published').length;
+  const articlesPremium = articles.filter((a) => a.is_premium).length;
 
   return (
     <div className="space-y-6">
@@ -217,6 +223,16 @@ export default function ImperialpediaAdminPage() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Link
+          href="/imperialpedia/articles"
+          className="rounded-lg border bg-card p-4 transition-colors hover:border-primary/50 hover:bg-accent"
+        >
+          <div className="font-semibold">Articles →</div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {isLoading ? 'Community-authored articles — status, moderation, premium/paywall flag.' :
+              `${articles.length} articles, ${articlesPremium} premium.`}
+          </p>
+        </Link>
+        <Link
           href="/imperialpedia/glossary"
           className="rounded-lg border bg-card p-4 transition-colors hover:border-primary/50 hover:bg-accent"
         >
@@ -253,6 +269,15 @@ export default function ImperialpediaAdminPage() {
           <p className="mt-1 text-sm text-muted-foreground">
             Sync health for the live asset_summaries pipeline powering /market-news, /world and
             /markets/quote/* — last success/error, row counts, manual resync.
+          </p>
+        </Link>
+        <Link
+          href="/imperialpedia/affiliate"
+          className="rounded-lg border bg-card p-4 transition-colors hover:border-primary/50 hover:bg-accent"
+        >
+          <div className="font-semibold">Affiliate Products →</div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            CTA links with click tracking + a revenue-estimate report by merchant, category, or content type.
           </p>
         </Link>
       </div>

@@ -14,6 +14,7 @@ const marketDataRoutes = require('./marketDataRoutes');
 const integrationController = require('../controller/integrationController');
 const marketDataController = require('../controller/marketDataController');
 const internalEntityMentionsController = require('../controller/internalEntityMentionsController');
+const internalContentFeedController = require('../controller/internalContentFeedController');
 
 const router = Router();
 
@@ -55,6 +56,12 @@ router.get('/internal/market-data/quote/:symbol', internalAuth, marketDataContro
 // publish/unpublish, so the public delivery API can serve it without
 // re-scanning article text on every render.
 router.patch('/internal/content/:websiteSlug/:slug/entity-mentions', internalAuth, internalEntityMentionsController.replaceMentions);
+
+// INTERNAL — imperialpedia-service's knowledge-feed aggregator (the "Global Data Package" bulk
+// API prototype) pulls the full, unredacted cms_contents stream for one website here. Deliberate
+// mirror of the market-data internal resolvers above: imperialpedia-service stays the single
+// public API for this, cms-service is never called directly by an external bulk-API consumer.
+router.get('/internal/content-feed/:websiteSlug', internalAuth, internalContentFeedController.getContentFeed);
 
 // Org-wide integration summary for the dashboard "Website Connections" widget.
 router.get('/cms/integrations/summary', authMiddleware, integrationController.summary);

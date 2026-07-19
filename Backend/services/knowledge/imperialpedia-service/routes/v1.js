@@ -1,5 +1,21 @@
 'use strict';
 const router = require('express').Router();
+const internalAuth = require('../middleware/internalAuth');
+const entitlementInternalController = require('../controller/entitlementInternalController');
+const knowledgeFeedController = require('../controller/knowledgeFeedController');
+const { optionalAuth } = require('../middleware/authMiddleware');
+
+// INTERNAL — other services (cms-service's premium-content gate) resolve a caller's
+// subscription here. Gated by the shared internal secret, mirrors cms-service's own
+// /internal/* resolvers (see routes/v1.js there — integrations, market-data, entity-mentions).
+router.get('/internal/entitlements/:userId', internalAuth, entitlementInternalController.getUserEntitlement);
+
+// "Global Data Package" bulk API prototype — merges this service's articles with cms-service's
+// content stream. optionalAuth so the controller can tell an anonymous caller apart from a
+// logged-in one without a subscription (both get the same 403, but with req.auth populated when
+// present the license check can actually run instead of always short-circuiting to "no license").
+router.get('/knowledge-feed', optionalAuth, knowledgeFeedController.getKnowledgeFeed);
+
 router.use('/articles', require('./articlesRoutes'));
 router.use('/entities', require('./entitiesRoutes'));
 // Duplicate mount of the same (already-public-read) entities router under
@@ -26,4 +42,5 @@ router.use('/portfolio', require('./portfolioRoutes'));
 router.use('/glossary', require('./glossaryRoutes'));
 router.use('/world-config', require('./worldConfigRoutes'));
 router.use('/payments', require('./paymentRoutes'));
+router.use('/affiliate-products', require('./affiliateRoutes'));
 module.exports = router;

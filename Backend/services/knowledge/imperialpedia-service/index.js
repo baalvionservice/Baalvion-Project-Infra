@@ -8,6 +8,8 @@ const config = require('./config/appConfig');
 const requestContext = require('./middleware/requestContext');
 const rateLimit = require('./middleware/rateLimit');
 const v1Routes = require('./routes/v1');
+const { redirectAffiliateClick } = require('./controller/redirectController');
+const { optionalAuth } = require('./middleware/authMiddleware');
 const { errorHandler, notFoundHandler } = require('./middleware/errorMiddleware');
 const db = require('./models');
 const { metricsMiddleware, metricsHandler } = require('./middleware/metrics');
@@ -30,6 +32,9 @@ app.use(rateLimit());
 app.get('/', (req, res) => res.json({ service: 'Baalvion Imperialpedia Service', version: config.apiVersion }));
 app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 app.get('/metrics', metricsHandler);
+// Short outbound affiliate redirect — deliberately at the app root (not /api/v1/affiliate-products)
+// so the public-facing link stays short. See controller/redirectController.js.
+app.get('/r/:trackingCode', optionalAuth, redirectAffiliateClick);
 app.use('/v1', v1Routes);
 app.use('/api/v1', v1Routes);
 app.use(notFoundHandler);

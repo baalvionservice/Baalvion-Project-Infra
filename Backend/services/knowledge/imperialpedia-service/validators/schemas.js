@@ -95,6 +95,23 @@ const loanSchema = z.object({
     tenure_months: z.number().int().positive(),
 });
 
+const createAffiliateProductSchema = z.object({
+    slug: z.string().min(1).max(200).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens'),
+    product_name: z.string().min(1).max(255),
+    merchant_name: z.string().min(1).max(255),
+    category: z.string().max(100).optional(),
+    // Only http/https — reject javascript:/data: and other schemes (stored XSS / open-redirect
+    // via an outbound CTA link), same rule as glossarySchemas.js's reference URLs.
+    cta_url: z.string().url().refine((u) => /^https?:\/\//i.test(u), 'Only http/https URLs are allowed'),
+    disclosure_text: z.string().max(2000).optional(),
+    commission_rate: z.number().min(0).max(100).optional(),
+    avg_order_value: z.number().min(0).optional(),
+    article_id: z.coerce.number().int().positive().optional(),
+    status: z.enum(['active', 'paused', 'archived']).default('active'),
+});
+
+const updateAffiliateProductSchema = createAffiliateProductSchema.partial();
+
 module.exports = {
     paginationSchema,
     createArticleSchema,
@@ -110,4 +127,6 @@ module.exports = {
     compoundInterestSchema,
     retirementSchema,
     loanSchema,
+    createAffiliateProductSchema,
+    updateAffiliateProductSchema,
 };

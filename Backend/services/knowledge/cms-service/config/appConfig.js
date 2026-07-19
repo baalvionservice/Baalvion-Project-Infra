@@ -65,6 +65,12 @@ module.exports = {
     media: {
         serviceUrl: process.env.MEDIA_SERVICE_URL || 'http://localhost:3012',
     },
+    // imperialpedia-service owns the subscriptions/plans tables — the premium-content gate in
+    // service/entitlementClient.js resolves a caller's subscription through its internal
+    // resolver rather than this service ever touching that schema directly.
+    imperialpedia: {
+        baseUrl: process.env.IMPERIALPEDIA_BASE_URL || 'http://localhost:3004/api/v1',
+    },
     // On-publish revalidation: when content is published / unpublished / edited
     // live, cms-service calls the affected website's frontend revalidate webhook so
     // build-cached (ISR) pages refresh immediately instead of waiting out their TTL.

@@ -35,6 +35,8 @@ db.WorldConfig = require('./world_config')(sequelize, DataTypes);
 db.Plan = require('./plans')(sequelize, DataTypes);
 db.Subscription = require('./subscriptions')(sequelize, DataTypes);
 db.Payment = require('./payments')(sequelize, DataTypes);
+db.AffiliateProduct = require('./affiliate_products')(sequelize, DataTypes);
+db.AffiliateClick = require('./affiliate_clicks')(sequelize, DataTypes);
 
 // Associations
 // Plan -> Subscriptions / Payments -> Subscription (billing)
@@ -45,6 +47,12 @@ db.Payment.belongsTo(db.Subscription, { foreignKey: 'subscription_id', as: 'subs
 // Article -> CreatorProfile (author)
 db.Article.belongsTo(db.CreatorProfile, { foreignKey: 'author_id', targetKey: 'user_id', as: 'creatorProfile', constraints: false });
 db.CreatorProfile.hasMany(db.Article, { foreignKey: 'author_id', sourceKey: 'user_id', as: 'articles', constraints: false });
+
+// AffiliateProduct -> Article (loose, optional — see models/affiliate_products.js)
+db.AffiliateProduct.belongsTo(db.Article, { foreignKey: 'article_id', as: 'article', constraints: false });
+// AffiliateProduct -> AffiliateClick (real FK — click log is owned by this service, unlike Article)
+db.AffiliateProduct.hasMany(db.AffiliateClick, { foreignKey: 'product_id', as: 'clicks', onDelete: 'CASCADE' });
+db.AffiliateClick.belongsTo(db.AffiliateProduct, { foreignKey: 'product_id', as: 'product' });
 
 // CommunityPost -> Comments
 db.CommunityPost.hasMany(db.Comment, { foreignKey: 'post_id', as: 'comments' });
