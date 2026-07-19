@@ -9,14 +9,16 @@ import {
   Globe, 
   ShoppingBag, 
   CreditCard, 
-  ShieldCheck, 
-  Settings, 
-  Activity, 
+  ShieldCheck,
+  Settings,
+  Activity,
   Database,
   Lock,
   ChevronRight,
   LogOut,
-  Youtube
+  Youtube,
+  FolderTree,
+  ShoppingCart
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -35,6 +37,8 @@ const ADMIN_NAV = [
       { name: "Teacher Network", path: "/admin/teachers", icon: GraduationCap },
       { name: "Seller Marketplace", path: "/admin/sellers", icon: ShieldCheck },
       { name: "Listing Oversight", path: "/admin/marketplace", icon: ShoppingBag },
+      { name: "Categories", path: "/admin/categories", icon: FolderTree },
+      { name: "Live Carts", path: "/admin/carts", icon: ShoppingCart },
     ]
   },
   {

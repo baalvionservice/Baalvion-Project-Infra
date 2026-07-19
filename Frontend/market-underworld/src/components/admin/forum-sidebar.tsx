@@ -2,16 +2,17 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, ShieldAlert, Database, Users, ChevronRight } from "lucide-react"
+import { LayoutDashboard, ShieldAlert, Database, Users, Flag, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-// Trimmed to real, working sections only. The rest of the original mock nav (Reports Queue,
-// Flagged Content, Thread Manager, Announcements, VIP Sections, Community Health,
-// Forum Settings) linked to pages that never existed — removed rather than shipped as dead
-// links, per the "no mock in production" directive. Add them back once each has a real
-// backend behind it.
+// Trimmed to real, working sections only. Reports Queue now has a real backend (NodeBB flags
+// via community-service's /admin/flags — see adminController.listFlags) and was added back.
+// The rest of the original mock nav (Thread Manager, Announcements, VIP Sections, Community
+// Health, Forum Settings) still linked to pages with no backend — left out per the "no mock
+// in production" directive until each has one.
 const FORUM_NAV = [
   { name: "Join Requests", path: "/admin/forum", icon: LayoutDashboard },
+  { name: "Reports Queue", path: "/admin/forum/reports", icon: Flag },
   { name: "Members", path: "/admin/forum/members", icon: Users },
   { name: "Moderation Logs", path: "/admin/forum/logs", icon: Database },
 ];

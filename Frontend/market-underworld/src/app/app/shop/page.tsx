@@ -7,16 +7,25 @@ import { NexusButton } from '@/components/ui/nexus-button'
 import { Search, ShoppingCart, Zap, Heart, Plus, ChevronRight } from 'lucide-react'
 import { MARKETPLACE_PRODUCTS } from '@/data/mockData'
 import { useToast } from '@/hooks/use-toast'
+import { useCart } from '@/context/cart-context'
 import Link from 'next/link'
 
 export default function ShopTab() {
   const { toast } = useToast();
+  const { addItem, itemCount } = useCart();
 
-  const handleAddToCart = (name: string) => {
-    toast({
-      title: "Added to Cart",
-      description: `${name} has been added to your local node cart.`
-    });
+  const handleAddToCart = async (product: { id: string; title: string; price: number }) => {
+    try {
+      // Mock catalog ids aren't real commerce-service product UUIDs — sku/name/price is enough
+      // for the cart to track the item; productId stays null rather than sending a bad "UUID".
+      await addItem({ sku: String(product.id), name: product.title, price: Number(product.price) || 0 });
+      toast({
+        title: "Added to Cart",
+        description: `${product.title} has been added to your local node cart.`
+      });
+    } catch (err) {
+      toast({ variant: "destructive", title: "Couldn't add to cart", description: err instanceof Error ? err.message : "Please try again." });
+    }
   };
 
   return (
@@ -28,7 +37,9 @@ export default function ShopTab() {
             <button className="p-3 bg-white/5 rounded-2xl border border-white/10"><Search className="w-5 h-5 text-gray-400" /></button>
             <Link href="/app/cart" className="relative p-3 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 text-emerald-400">
               <ShoppingCart className="w-5 h-5" />
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-white text-black text-[8px] font-bold flex items-center justify-center rounded-full">3</span>
+              {itemCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-white text-black text-[8px] font-bold flex items-center justify-center rounded-full">{itemCount}</span>
+              )}
             </Link>
           </div>
         </div>
@@ -95,8 +106,8 @@ export default function ShopTab() {
                     </div>
                     <div className="flex items-center justify-between pt-2 border-t border-white/5">
                       <div className="text-sm font-bold text-white">{p.price} <span className="text-[8px] opacity-40">USDT</span></div>
-                      <button 
-                        onClick={() => handleAddToCart(p.title)}
+                      <button
+                        onClick={() => handleAddToCart(p)}
                         className="w-8 h-8 rounded-xl bg-emerald-500 text-black flex items-center justify-center shadow-lg shadow-emerald-500/20 active:scale-95 transition-transform"
                       >
                         <Plus className="w-4 h-4" />

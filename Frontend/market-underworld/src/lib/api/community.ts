@@ -137,6 +137,33 @@ export async function createReply(slug: string, tid: string, content: string) {
     });
 }
 
+// Live chat — join-gated (member-or-higher, same as forum posting), backed by
+// community-service's own table + realtime-service fan-out (see
+// src/lib/realtime/community-chat-client.ts for the live-receive side).
+export interface ChatMessage {
+    id: string;
+    userId: string;
+    username: string | null;
+    content: string;
+    createdAt: string;
+}
+
+export async function getChatMessages(slug: string, before?: string): Promise<ChatMessage[]> {
+    try {
+        const query = before ? `?before=${encodeURIComponent(before)}` : '';
+        return await communityFetch<ChatMessage[]>(`/communities/${slug}/chat/messages${query}`);
+    } catch {
+        return [];
+    }
+}
+
+export async function postChatMessage(slug: string, content: string): Promise<ChatMessage> {
+    return communityFetch<ChatMessage>(`/communities/${slug}/chat/messages`, {
+        method: 'POST',
+        body: JSON.stringify({ content }),
+    });
+}
+
 // Paid-tier checkout — crypto (USDT-TRC20, ETH-BEP20, or BTC) only, no other payment method
 // exists for community/access-tier memberships. See community-service's service/billingService.js
 // + payment-service's CryptoGateway for the full non-custodial flow (merchant's own wallet, no
@@ -240,4 +267,36 @@ export async function setMemberStatus(slug: string, userId: string, status: 'app
 
 export async function revokeMember(slug: string, userId: string) {
     return communityFetch(`/admin/communities/${slug}/members/${userId}`, { method: 'DELETE' });
+}
+
+// Reported content queue — flags live in NodeBB itself, community-service just relays +
+// enriches them with the owning community (see adminController.listFlags).
+export interface FlaggedContent {
+    flagId: string;
+    type: string;
+    state: string;
+    reasons: string[];
+    reporter: { username?: string; uid?: string | number } | null;
+    target: { id: string; content: string | null; title: string | null; author: string | null };
+    community: { slug: string; name: string } | null;
+    createdAt: string | null;
+}
+
+export async function getFlags(): Promise<FlaggedContent[]> {
+    try {
+        return await communityFetch<FlaggedContent[]>('/admin/flags');
+    } catch {
+        return [];
+    }
+}
+
+export async function resolveFlag(
+    flagId: string,
+    action: 'dismiss' | 'remove',
+    opts: { pid?: string; communitySlug?: string | null } = {},
+) {
+    return communityFetch(`/admin/flags/${flagId}/resolve`, {
+        method: 'POST',
+        body: JSON.stringify({ action, pid: opts.pid, communitySlug: opts.communitySlug }),
+    });
 }

@@ -19,10 +19,19 @@ Each namespace is JWT-gated and role-restricted (see `config/appConfig.js`
 | `/jobs`      | member, admin, super_admin, org_admin, recruiter      |
 | `/admin`     | admin, super_admin                                    |
 | `/ctm`       | member, admin, super_admin, org_admin, trader         |
+| `/community` | any authenticated user — gated per-room instead (see below) |
 
 Connections join `user:<id>`, `org:<orgId>`, and (for admins) `admin:global`
 rooms. Explicit `join:room` requests are guarded so a socket can only join rooms
 that belong to its own org.
+
+`/community` is the exception: it has no namespace-level role requirement, since
+ordinary marketplace/forum members don't hold any of the roles above. Instead,
+`join:room` on a `community:<slug>` room calls community-service's own
+`GET /communities/:slug` (with the socket's own Bearer token) and only allows the
+join if `membership.status` is `approved` or `paid` — i.e. join-request-gated chat,
+mirroring how forum access already works. Results are cached in-memory for 30s per
+user+slug to avoid hammering community-service on reconnect storms.
 
 The token is read from `handshake.auth.token`, the `auth`/`token` query params,
 or the `Authorization: Bearer` header.

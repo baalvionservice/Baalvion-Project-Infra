@@ -15,6 +15,7 @@ import {
   LogOut
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { RoleGuard } from '@/components/auth/RoleGuard';
 
 const SIDEBAR_ITEMS = [
   { group: 'OVERVIEW', items: [
@@ -36,6 +37,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
   const pathname = usePathname();
 
   return (
+    <RoleGuard allow={['super_admin']}>
     <div className="min-h-screen bg-[#0B0C0F] flex">
       {/* Sidebar */}
       <aside className="w-72 border-r border-[#252A33] fixed h-full bg-[#0B0C0F] z-50">
@@ -95,5 +97,6 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
         {children}
       </main>
     </div>
+    </RoleGuard>
   );
 }
