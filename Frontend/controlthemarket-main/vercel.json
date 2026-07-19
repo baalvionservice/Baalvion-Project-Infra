@@ -2,5 +2,8 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "ignoreCommand": "npx turbo-ignore controlthemarket-web",
   "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
-  "buildCommand": "cd ../.. && pnpm exec turbo run build --filter=controlthemarket-web"
+  "buildCommand": "cd ../.. && pnpm exec turbo run build --filter=controlthemarket-web",
+  "env": {
+    "NEXT_PUBLIC_GA_ID": "G-M8JK8PKJ3C"
+  }
 }
