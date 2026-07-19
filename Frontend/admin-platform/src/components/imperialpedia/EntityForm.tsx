@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Loader2 } from 'lucide-react';
+import { EntityPicker } from './EntityPicker';
 
 export interface EntityValue {
   type: string;
@@ -22,11 +23,24 @@ export interface EntityValue {
   industry?: string;
   image?: string;
   tags: string[];
+  competitors?: string[];
+  technologies?: string[];
+  /**
+   * Every other field the entity API returned that this form has no dedicated control
+   * for (founded_year, employees, website, ticker, founders, logo, executives, products,
+   * faq, etc. — see CompanyEntity in the public site's src/types/entity.ts). The backend
+   * (`upsertEntity`) replaces the entire `attributes` JSONB column with whatever extra
+   * top-level fields are in the request body on every save — so a form that only ever
+   * sent its own known fields was silently deleting all of these on every edit. Carrying
+   * them through unmodified is what makes editing safe.
+   */
+  extraAttributes?: Record<string, unknown>;
 }
 
 const EMPTY: EntityValue = {
   type: '', name: '', slug: '', description: '', category: '',
-  country: '', industry: '', image: '', tags: [],
+  country: '', industry: '', image: '', tags: [], competitors: [], technologies: [],
+  extraAttributes: {},
 };
 
 interface Props { initial?: EntityValue; isEdit?: boolean }
@@ -55,6 +69,11 @@ export function EntityForm({ initial, isEdit = false }: Props) {
         industry: value.industry?.trim() || null,
         image: value.image?.trim() || null,
         tags: tagsText.split(',').map((s) => s.trim()).filter(Boolean),
+        competitors: value.competitors ?? [],
+        technologies: value.technologies ?? [],
+        // Carry through everything else the entity already had (founded_year, ticker,
+        // website, founders, ...) so this save round-trips instead of truncating it.
+        ...(value.extraAttributes ?? {}),
       };
       const res = await serviceClients.imperialpedia.post('/entities', payload);
       return res.data;
@@ -116,20 +135,60 @@ export function EntityForm({ initial, isEdit = false }: Props) {
             <Input id="category" value={value.category ?? ''} onChange={(e) => set('category', e.target.value)} placeholder="Manufacturing" />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="country">Country</Label>
-            <Input id="country" value={value.country ?? ''} onChange={(e) => set('country', e.target.value)} placeholder="US" />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="industry">Industry</Label>
-            <Input id="industry" value={value.industry ?? ''} onChange={(e) => set('industry', e.target.value)} placeholder="Industrials" />
-          </div>
-          <div className="space-y-1.5">
             <Label htmlFor="image">Image URL</Label>
             <Input id="image" value={value.image ?? ''} onChange={(e) => set('image', e.target.value)} placeholder="https://…/logo.png" />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Country</Label>
+            <EntityPicker
+              entityType="country"
+              multiple={false}
+              value={value.country ? [value.country] : []}
+              onChange={(slugs) => set('country', slugs[0] ?? '')}
+              placeholder="Search countries…"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Industry</Label>
+            <EntityPicker
+              entityType="industry"
+              multiple={false}
+              value={value.industry ? [value.industry] : []}
+              onChange={(slugs) => set('industry', slugs[0] ?? '')}
+              placeholder="Search industries…"
+            />
           </div>
           <div className="md:col-span-2 space-y-1.5">
             <Label htmlFor="tags">Tags <span className="text-muted-foreground">(comma-separated)</span></Label>
             <Input id="tags" value={tagsText} onChange={(e) => setTagsText(e.target.value)} placeholder="public, fortune-500" />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Relationships</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label>Competitors</Label>
+            <EntityPicker
+              entityType="company"
+              value={value.competitors ?? []}
+              onChange={(slugs) => set('competitors', slugs)}
+              excludeSlug={value.type === 'company' ? value.slug : undefined}
+              placeholder="Search companies…"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Technologies</Label>
+            <EntityPicker
+              entityType="technology"
+              value={value.technologies ?? []}
+              onChange={(slugs) => set('technologies', slugs)}
+              excludeSlug={value.type === 'technology' ? value.slug : undefined}
+              placeholder="Search technologies…"
+            />
           </div>
         </CardContent>
       </Card>
