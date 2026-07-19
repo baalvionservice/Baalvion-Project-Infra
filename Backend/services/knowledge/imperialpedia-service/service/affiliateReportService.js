@@ -17,12 +17,13 @@ const buildReport = async ({ groupBy = 'merchant', from, to }) => {
         throw new AppError('VALIDATION_ERROR', `groupBy must be one of: ${Object.keys(GROUP_EXPRESSIONS).join(', ')}`, 400);
     }
 
-    const db = require('../models');
     const fromDate = from ? new Date(from) : new Date(0);
     const toDate = to ? new Date(to) : new Date();
     if (Number.isNaN(fromDate.getTime()) || Number.isNaN(toDate.getTime())) {
         throw new AppError('VALIDATION_ERROR', 'from/to must be valid dates', 400);
     }
+
+    const db = require('../models');
 
     // estimated_revenue: see migrations/20260005 — SUM over every click row of that click's
     // product's (avg_order_value * commission_rate%). This is a projection assuming every click

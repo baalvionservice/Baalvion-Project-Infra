@@ -1,5 +1,4 @@
 'use strict';
-const config = require('../config/appConfig');
 
 const CMS_WEBSITE_SLUG = process.env.CMS_KNOWLEDGE_WEBSITE_SLUG || 'imperialpedia';
 
@@ -57,6 +56,7 @@ async function fetchArticlesPage({ limit, offset }) {
 }
 
 async function fetchCmsContentPage({ limit, offset }) {
+    const config = require('../config/appConfig');
     const url = `${config.cms.baseUrl}/internal/content-feed/${encodeURIComponent(CMS_WEBSITE_SLUG)}?limit=${limit}&offset=${offset}`;
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 5000);
