@@ -105,3 +105,16 @@ jobs:
   # law-service is now built + pushed to Amazon ECR (repo law-service) by the single
   # canonical pipeline: .github/workflows/deploy.yml. This workflow is now test-only
   # (backend unit tests + migrations, and the Law-Elite frontend production build).
+
+  notify-ci-failure:
+    name: Notify Slack (CI failure)
+    needs: [backend, frontend]
+    if: always() && (needs.backend.result == 'failure' || needs.frontend.result == 'failure')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/slack-notify
+        with:
+          webhook-url: ${{ secrets.SLACK_CI_WEBHOOK }}
+          status: failure
+          title: 'Law Elite CI/CD'

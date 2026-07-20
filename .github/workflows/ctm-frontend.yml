@@ -93,3 +93,18 @@ jobs:
           name: ctm-build
           path: Frontend/controlthemarket-main/.next
           retention-days: 7
+
+  notify-ci-failure:
+    name: Notify Slack (CI failure)
+    needs: [lint-typecheck, build]
+    # build only runs on main (if: github.ref == 'refs/heads/main'), so it can be
+    # legitimately 'skipped' on a PR run — only 'failure' should page.
+    if: always() && (needs.lint-typecheck.result == 'failure' || needs.build.result == 'failure')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/slack-notify
+        with:
+          webhook-url: ${{ secrets.SLACK_CI_WEBHOOK }}
+          status: failure
+          title: 'CTM Frontend CI/CD'

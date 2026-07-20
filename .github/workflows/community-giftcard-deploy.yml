@@ -276,3 +276,30 @@ jobs:
             code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 "$url" || echo "000")
             echo "  $url → $code (expect 200)"
           done
+
+  # ════════════════════════════ 4) notify #baalvion-ci ════════════════════════════
+  notify-deploy:
+    name: Notify Slack (deployment)
+    needs: [build-push-community, build-push-giftcard, deploy]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Determine deployment status
+        id: status
+        run: |
+          if [ "${{ needs.build-push-community.result }}" = "failure" ] || \
+             [ "${{ needs.build-push-giftcard.result }}" = "failure" ] || \
+             [ "${{ needs.deploy.result }}" = "failure" ]; then
+            echo "status=failure" >> "$GITHUB_OUTPUT"
+          else
+            echo "status=success" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: ./.github/actions/slack-notify
+        with:
+          webhook-url: ${{ secrets.SLACK_CI_WEBHOOK }}
+          status: ${{ steps.status.outputs.status }}
+          title: 'Deploy — community + giftcard services (ECR → EC2)'
+          details: 'community=`${{ needs.build-push-community.result }}`, giftcard=`${{ needs.build-push-giftcard.result }}`, roll=`${{ needs.deploy.result }}`'

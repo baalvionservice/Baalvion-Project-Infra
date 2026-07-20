@@ -369,3 +369,32 @@ jobs:
             code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 "$url" || echo "000")
             echo "  $url → $code (expect admin / → 200 or 3xx login redirect)"
           done
+
+  # ════════════════════════════ 3) notify #baalvion-ci ════════════════════════════
+  # build-push-admin-web is intentionally continue-on-error (best-effort — see its
+  # job comment), so its `result` is masked to "success" even if the admin-web image
+  # failed to build. Deployment status is judged on build-push + deploy only, which
+  # mirrors what actually blocks the backend roll.
+  notify-deploy:
+    name: Notify Slack (deployment)
+    needs: [build-push, build-push-admin-web, deploy]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Determine deployment status
+        id: status
+        run: |
+          if [ "${{ needs.build-push.result }}" = "failure" ] || [ "${{ needs.deploy.result }}" = "failure" ]; then
+            echo "status=failure" >> "$GITHUB_OUTPUT"
+          else
+            echo "status=success" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: ./.github/actions/slack-notify
+        with:
+          webhook-url: ${{ secrets.SLACK_CI_WEBHOOK }}
+          status: ${{ steps.status.outputs.status }}
+          title: 'Deploy — consolidated backend (ECR → EC2)'
+          details: 'build-push=`${{ needs.build-push.result }}`, admin-web=`${{ needs.build-push-admin-web.result }}` (best-effort), roll=`${{ needs.deploy.result }}`'
