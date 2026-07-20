@@ -9,7 +9,7 @@
 // Provider assignment is split to stay inside each free tier's daily request budget
 // while refreshing as close to "live" as that budget allows:
 //   Finnhub       — indices/stocks quotes (60 req/min free tier)          → 60s cache
-//   CoinGecko     — crypto, keyless, one batched call for all coins       → 60s cache
+//   Binance       — crypto, keyless, one batched call for all coins       → 60s cache
 //   Twelve Data   — forex + gold (800 req/day, 8 req/min free tier)       → 30min cache
 //   Alpha Vantage — oil/gas/copper (25 req/DAY free tier — very tight)    → 6h cache
 //   FRED          — treasury bond yields (generous free tier, EOD data)  → 1h cache
@@ -132,7 +132,7 @@ const health = {
     twelveData: { status: isConfigured(TWELVE_DATA_KEY) ? 'unknown' : 'unconfigured', message: null, checkedAt: null },
     alphaVantage: { status: isConfigured(ALPHA_VANTAGE_KEY) ? 'unknown' : 'unconfigured', message: null, checkedAt: null },
     fred: { status: isConfigured(FRED_KEY) ? 'unknown' : 'unconfigured', message: null, checkedAt: null },
-    coinGecko: { status: 'unknown', message: null, checkedAt: null }, // keyless — never "unconfigured"
+    binance: { status: 'unknown', message: null, checkedAt: null }, // keyless — never "unconfigured"
 };
 
 function setHealth(provider, status, message = null) {
@@ -239,22 +239,23 @@ async function fetchFredSeries(seriesId) {
     return { value, change, asOf: latest.date };
 }
 
-async function fetchCoinGeckoPrices() {
-    const ids = CRYPTO.map((c) => c.id).join(',');
-    const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`);
-    if (res.status === 429) { setHealth('coinGecko', 'rate_limited', 'HTTP 429'); throw new Error('coingecko 429'); }
-    if (!res.ok) { setHealth('coinGecko', 'error', `HTTP ${res.status}`); throw new Error(`coingecko ${res.status}`); }
-    const j = await res.json();
-    setHealth('coinGecko', 'ok');
+async function fetchBinancePrices() {
+    const symbols = CRYPTO.map((c) => `${c.symbol}USDT`);
+    const res = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbols=${encodeURIComponent(JSON.stringify(symbols))}`);
+    // 418 = Binance's own "IP banned for repeated 429s" code, on top of the standard 429.
+    if (res.status === 429 || res.status === 418) { setHealth('binance', 'rate_limited', `HTTP ${res.status}`); throw new Error(`binance ${res.status}`); }
+    if (!res.ok) { setHealth('binance', 'error', `HTTP ${res.status}`); throw new Error(`binance ${res.status}`); }
+    const arr = await res.json();
+    setHealth('binance', 'ok');
+    const bySymbol = new Map(arr.map((t) => [t.symbol, t]));
     const now = new Date().toISOString();
     const out = {};
     for (const c of CRYPTO) {
-        const entry = j[c.id];
-        if (!entry) { out[c.id] = null; continue; }
-        const price = entry.usd;
-        const changePercent = entry.usd_24h_change ?? null;
-        const prevClose = changePercent != null ? price / (1 + changePercent / 100) : null;
-        const change = prevClose != null ? price - prevClose : null;
+        const t = bySymbol.get(`${c.symbol}USDT`);
+        if (!t) { out[c.id] = null; continue; }
+        const price = Number(t.lastPrice);
+        const changePercent = Number(t.priceChangePercent);
+        const change = Number(t.priceChange);
         out[c.id] = { price, change, changePercent, asOf: now };
     }
     return out;
@@ -314,12 +315,12 @@ async function getCommodities() {
 }
 
 async function getCrypto() {
-    if (!isConfigured(FINNHUB_KEY) && typeof fetch !== 'function') return CRYPTO.map((c) => ({ ...c, source: 'CoinGecko', quote: null }));
-    const batch = await cachedWithMeta('cms:market-data:crypto:batch', TTL.crypto, () => safeFetch('coingecko', fetchCoinGeckoPrices));
-    if (!batch) return CRYPTO.map((c) => ({ ...c, source: 'CoinGecko', quote: null }));
+    if (!isConfigured(FINNHUB_KEY) && typeof fetch !== 'function') return CRYPTO.map((c) => ({ ...c, source: 'Binance', quote: null }));
+    const batch = await cachedWithMeta('cms:market-data:crypto:batch', TTL.crypto, () => safeFetch('binance', fetchBinancePrices));
+    if (!batch) return CRYPTO.map((c) => ({ ...c, source: 'Binance', quote: null }));
     return CRYPTO.map((c) => ({
         ...c,
-        source: 'CoinGecko',
+        source: 'Binance',
         quote: batch[c.id] ? { ...batch[c.id], fetchedAt: batch.fetchedAt, nextRefreshAt: batch.nextRefreshAt } : null,
     }));
 }
@@ -402,7 +403,7 @@ async function attachRelatedNews(stocks, websiteId) {
 
 // ── Step 5 (this round): quote page template — DB-driven via market_assets ─────
 const PROVIDER_LABEL = {
-    finnhub: 'Finnhub', twelvedata: 'Twelve Data', alphavantage: 'Alpha Vantage', fred: 'FRED', coingecko: 'CoinGecko',
+    finnhub: 'Finnhub', twelvedata: 'Twelve Data', alphavantage: 'Alpha Vantage', fred: 'FRED', binance: 'Binance',
 };
 
 const RANGE_CONFIG = {
@@ -580,8 +581,8 @@ async function getQuoteForAsset(asset) {
             return cachedWithMeta(`cms:market-data:quote-page:${asset.providerSymbol}`, TTL.commodity, () => safeFetch(asset.providerSymbol, () => fetchAlphaVantageCommodity(asset.providerSymbol)));
         case 'fred':
             return cachedWithMeta(`cms:market-data:quote-page:${asset.providerSymbol}`, TTL.bond, () => safeFetch(asset.providerSymbol, () => fetchFredSeries(asset.providerSymbol)));
-        case 'coingecko': {
-            const batch = await cachedWithMeta('cms:market-data:crypto:batch', TTL.crypto, () => safeFetch('coingecko', fetchCoinGeckoPrices));
+        case 'binance': {
+            const batch = await cachedWithMeta('cms:market-data:crypto:batch', TTL.crypto, () => safeFetch('binance', fetchBinancePrices));
             const entry = batch && batch[asset.providerSymbol];
             return entry ? { ...entry, fetchedAt: batch.fetchedAt, nextRefreshAt: batch.nextRefreshAt } : null;
         }
@@ -658,7 +659,7 @@ async function getOverview(websiteId) {
             twelveData: isConfigured(TWELVE_DATA_KEY),
             alphaVantage: isConfigured(ALPHA_VANTAGE_KEY),
             fred: isConfigured(FRED_KEY),
-            coinGecko: true,
+            binance: true,
         },
         health,
         generatedAt: new Date().toISOString(),
