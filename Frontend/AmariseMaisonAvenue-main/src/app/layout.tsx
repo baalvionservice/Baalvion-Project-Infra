@@ -1,4 +1,3 @@
-import "@/lib/env";
 import type { Metadata, Viewport } from "next";
 import { Inter, Cormorant_Garamond } from "next/font/google";
 import { headers } from "next/headers";

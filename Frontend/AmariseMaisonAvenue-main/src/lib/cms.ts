@@ -15,7 +15,6 @@
  * callers supply their own last-resort fallback copy where appropriate.
  */
 import type { CountryCode, MaisonService, MaisonReport } from './types';
-import { logger } from './logger';
 
 // Central CMS public delivery base, ending at `/api/v1`. The website is addressed by slug.
 const CMS_URL = process.env.NEXT_PUBLIC_CMS_URL || 'http://localhost:3011/api/v1';
@@ -53,7 +52,8 @@ async function getJson<T>(path: string, fallback: T): Promise<T> {
     const json = await res.json();
     return (json && json.data !== undefined ? json.data : fallback) as T;
   } catch (err) {
-    logger.error('cms', 'CMS fetch failed, using fallback', err, { path });
+    // eslint-disable-next-line no-console -- deliberate operator diagnostic: CMS fetch failed, using fallback
+    console.error('[cms] fetch failed', path, err);
     return fallback;
   }
 }
