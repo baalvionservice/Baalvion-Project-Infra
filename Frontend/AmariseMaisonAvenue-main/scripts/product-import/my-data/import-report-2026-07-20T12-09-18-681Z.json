@@ -1,0 +1,63 @@
+{
+  "createdAt": "2026-07-20T12:09:16.295Z",
+  "csvPath": "my-data/hermes-birkin.csv",
+  "created": [
+    {
+      "lineNumber": 2,
+      "label": "Hermès Birkin 25cm",
+      "productId": "0e41b326-6659-446c-af06-f5ad4d936e25",
+      "slug": "hermes-birkin-25cm"
+    },
+    {
+      "lineNumber": 3,
+      "label": "Hermès Birkin 30cm",
+      "productId": "db10116b-ddd5-43be-a454-2462a71c7b85",
+      "slug": "hermes-birkin-30cm"
+    },
+    {
+      "lineNumber": 4,
+      "label": "Hermès Birkin 35cm",
+      "productId": "d54ba7f4-6251-4249-a0b2-171673aa91ed",
+      "slug": "hermes-birkin-35cm"
+    },
+    {
+      "lineNumber": 5,
+      "label": "Hermès Birkin 40cm",
+      "productId": "1e561dd0-8953-4db5-a083-6c83a2ca9ea1",
+      "slug": "hermes-birkin-40cm"
+    },
+    {
+      "lineNumber": 6,
+      "label": "Hermès Shoulder Birkin",
+      "productId": "aa133065-38dd-4ce1-bfeb-116832e20405",
+      "slug": "hermes-shoulder-birkin"
+    }
+  ],
+  "skipped": [],
+  "failed": [],
+  "warnings": [
+    {
+      "lineNumber": 6,
+      "label": "Hermès Shoulder Birkin",
+      "warnings": [
+        "no Images provided — product will show the placeholder monogram until photos are added"
+      ]
+    }
+  ],
+  "summary": {
+    "ok": true,
+    "rows": {
+      "total": 5,
+      "created": 5,
+      "skipped": 0,
+      "failed": 0
+    },
+    "images": {
+      "uploaded": 0,
+      "failed": 4
+    },
+    "collectionsAttached": 0,
+    "published": 0,
+    "warningRows": 1
+  }
+}
