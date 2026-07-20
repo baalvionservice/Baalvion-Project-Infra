@@ -63,7 +63,7 @@ export interface MarketDataProviders {
   twelveData: boolean;
   alphaVantage: boolean;
   fred: boolean;
-  coinGecko: boolean;
+  binance: boolean;
 }
 
 export interface MarketDataOverview {
