@@ -104,3 +104,21 @@ jobs:
       # payment-service is built + pushed to Amazon ECR (repo baalvion/payment-service,
       # build-arg SERVICE=payment-service) by the canonical pipeline
       # .github/workflows/deploy.yml. This job now builds + Trivy-scans only.
+
+  # build-test / trivy-fs / images are NOT continue-on-error here (unlike ci.yml's
+  # report-only docker-build-scan), so a Trivy finding fails the job directly and is
+  # already a real workflow failure — one notification covers both "tests broke" and
+  # "a fixable HIGH/CRITICAL CVE was introduced" without paging #devops-alerts twice.
+  notify-ci-failure:
+    name: Notify Slack (CI failure)
+    needs: [build-test, trivy-fs, images]
+    if: always() && contains(needs.*.result, 'failure')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/slack-notify
+        with:
+          webhook-url: ${{ secrets.SLACK_CI_WEBHOOK }}
+          status: failure
+          title: 'Financial Services CI/CD'
+          details: 'Build/test, Trivy filesystem scan, or a per-service image Trivy scan failed — check the job log for which.'
