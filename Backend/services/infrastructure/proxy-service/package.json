@@ -30,7 +30,7 @@
     "@baalvion/auth-node": "workspace:*",
     "@baalvion/graceful-shutdown": "workspace:*",
     "@node-saml/node-saml": "^5.0.0",
-    "axios": "1.16.0",
+    "axios": "1.18.0",
     "bcrypt": "^6.0.0",
     "bullmq": "^5.56.1",
     "cookie-parser": "^1.4.7",
