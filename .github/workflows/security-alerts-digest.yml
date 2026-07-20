@@ -1,0 +1,150 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Daily digest of OPEN security findings to Slack #devops-alerts.
+#
+# Dependabot alerts, secret-scanning alerts, and code-scanning (CodeQL/Trivy SARIF)
+# alerts are native GitHub features, not GitHub Actions workflows — there is no
+# push-triggered event to hook a notification step into when a new one appears.
+# This workflow polls the three alert APIs on a schedule instead and posts a
+# severity-bucketed summary, so open findings surface even between scans.
+#
+# GITHUB_TOKEN read access to the Dependabot alerts endpoint is inconsistent across
+# GitHub plans/rollouts. The Dependabot step degrades gracefully (posts "unavailable
+# via GITHUB_TOKEN — check the Security tab" instead of a false zero) if the call is
+# rejected. To get real counts, add a fine-grained PAT with "Dependabot alerts: read"
+# as repo secret GH_SECURITY_PAT — the step prefers it automatically when present.
+# ─────────────────────────────────────────────────────────────────────────────
+name: Security Alerts Digest
+
+on:
+  schedule:
+    # Daily 08:30 UTC — offset from CodeQL (07:00 Mon) and Scorecard (08:00 Mon)
+    # so this always reports on their latest results rather than racing them.
+    - cron: "30 8 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  security-events: read
+
+concurrency:
+  group: security-alerts-digest
+  cancel-in-progress: true
+
+jobs:
+  digest:
+    name: Summarize open security alerts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Count open Dependabot alerts by severity
+        id: dependabot
+        env:
+          GH_TOKEN: ${{ secrets.GH_SECURITY_PAT || secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set +e
+          RAW=$(gh api "repos/${REPO}/dependabot/alerts?state=open&per_page=100" --paginate 2>/tmp/dependabot.err)
+          STATUS=$?
+          set -e
+          if [ $STATUS -ne 0 ]; then
+            echo "::warning::Could not read Dependabot alerts via GITHUB_TOKEN (add GH_SECURITY_PAT for real counts): $(cat /tmp/dependabot.err)"
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "available=true" >> "$GITHUB_OUTPUT"
+          echo "critical=$(echo "$RAW" | jq -s '[.[][] | select(.security_advisory.severity=="critical")] | length')" >> "$GITHUB_OUTPUT"
+          echo "high=$(echo "$RAW" | jq -s '[.[][] | select(.security_advisory.severity=="high")] | length')" >> "$GITHUB_OUTPUT"
+          echo "total=$(echo "$RAW" | jq -s '[.[][]] | length')" >> "$GITHUB_OUTPUT"
+
+      - name: Count open secret-scanning alerts
+        id: secretscan
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set +e
+          RAW=$(gh api "repos/${REPO}/secret-scanning/alerts?state=open&per_page=100" --paginate 2>/tmp/secretscan.err)
+          STATUS=$?
+          set -e
+          if [ $STATUS -ne 0 ]; then
+            echo "::warning::Could not read secret-scanning alerts: $(cat /tmp/secretscan.err)"
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "available=true" >> "$GITHUB_OUTPUT"
+          echo "total=$(echo "$RAW" | jq -s '[.[][]] | length')" >> "$GITHUB_OUTPUT"
+
+      - name: Count open code-scanning alerts by severity
+        id: codescan
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set +e
+          RAW=$(gh api "repos/${REPO}/code-scanning/alerts?state=open&per_page=100" --paginate 2>/tmp/codescan.err)
+          STATUS=$?
+          set -e
+          if [ $STATUS -ne 0 ]; then
+            echo "::warning::Could not read code-scanning alerts: $(cat /tmp/codescan.err)"
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "available=true" >> "$GITHUB_OUTPUT"
+          echo "critical=$(echo "$RAW" | jq -s '[.[][] | select(.rule.security_severity_level=="critical")] | length')" >> "$GITHUB_OUTPUT"
+          echo "high=$(echo "$RAW" | jq -s '[.[][] | select(.rule.security_severity_level=="high")] | length')" >> "$GITHUB_OUTPUT"
+          echo "total=$(echo "$RAW" | jq -s '[.[][]] | length')" >> "$GITHUB_OUTPUT"
+
+      - name: Post digest to Slack
+        env:
+          WEBHOOK_URL: ${{ secrets.SLACK_SECURITY_WEBHOOK }}
+          REPO: ${{ github.repository }}
+          SECURITY_TAB_URL: ${{ github.server_url }}/${{ github.repository }}/security
+          DEP_AVAILABLE: ${{ steps.dependabot.outputs.available }}
+          DEP_CRITICAL: ${{ steps.dependabot.outputs.critical }}
+          DEP_HIGH: ${{ steps.dependabot.outputs.high }}
+          DEP_TOTAL: ${{ steps.dependabot.outputs.total }}
+          SECRET_AVAILABLE: ${{ steps.secretscan.outputs.available }}
+          SECRET_TOTAL: ${{ steps.secretscan.outputs.total }}
+          CODE_AVAILABLE: ${{ steps.codescan.outputs.available }}
+          CODE_CRITICAL: ${{ steps.codescan.outputs.critical }}
+          CODE_HIGH: ${{ steps.codescan.outputs.high }}
+          CODE_TOTAL: ${{ steps.codescan.outputs.total }}
+        run: |
+          set -euo pipefail
+          if [ -z "${WEBHOOK_URL:-}" ]; then
+            echo "::warning::SLACK_SECURITY_WEBHOOK is empty — skipping digest."
+            exit 0
+          fi
+
+          dep_line="Dependabot: unavailable via GITHUB_TOKEN — check the Security tab (add GH_SECURITY_PAT for live counts)"
+          if [ "$DEP_AVAILABLE" = "true" ]; then
+            dep_line="Dependabot: *${DEP_TOTAL}* open (${DEP_CRITICAL} critical, ${DEP_HIGH} high)"
+          fi
+
+          secret_line="Secret scanning: unavailable — check the Security tab"
+          if [ "$SECRET_AVAILABLE" = "true" ]; then
+            secret_line="Secret scanning: *${SECRET_TOTAL}* open"
+          fi
+
+          code_line="Code scanning (CodeQL/Trivy): unavailable — check the Security tab"
+          if [ "$CODE_AVAILABLE" = "true" ]; then
+            code_line="Code scanning (CodeQL/Trivy): *${CODE_TOTAL}* open (${CODE_CRITICAL} critical, ${CODE_HIGH} high)"
+          fi
+
+          PAYLOAD=$(jq -n \
+            --arg repo "$REPO" \
+            --arg url "$SECURITY_TAB_URL" \
+            --arg dep "$dep_line" \
+            --arg secret "$secret_line" \
+            --arg code "$code_line" \
+            '{
+              attachments: [{
+                color: "#e8912d",
+                blocks: [
+                  { type: "section", text: { type: "mrkdwn", text: (":shield: *Daily security digest* — " + $repo) } },
+                  { type: "section", text: { type: "mrkdwn", text: ("• " + $dep + "\n• " + $secret + "\n• " + $code) } },
+                  { type: "actions", elements: [{ type: "button", text: { type: "plain_text", text: "Open Security tab" }, url: $url }] }
+                ]
+              }]
+            }')
+
+          curl -sS -X POST -H 'Content-Type: application/json' --data "$PAYLOAD" "$WEBHOOK_URL" >/dev/null
