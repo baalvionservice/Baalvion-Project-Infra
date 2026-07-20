@@ -44,3 +44,55 @@ jobs:
         uses: github/codeql-action/analyze@v4
         with:
           category: "/language:${{ matrix.language }}"
+
+  # Separate job (not a step in `analyze`) so a matrix failure in ONE language
+  # still lets this run via needs + if: always(), and so the open-alert count
+  # reflects the full, merged set of alerts across both languages rather than
+  # a single matrix leg's partial view.
+  notify-slack:
+    name: Notify Slack (CodeQL)
+    needs: analyze
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: read
+    steps:
+      - name: Count open CodeQL alerts (HIGH/CRITICAL)
+        id: alerts
+        if: needs.analyze.result != 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set +e
+          RAW=$(gh api "repos/${REPO}/code-scanning/alerts?state=open&per_page=100" --paginate 2>/tmp/codescan.err)
+          STATUS=$?
+          set -e
+          if [ $STATUS -ne 0 ]; then
+            echo "::warning::Could not read code-scanning alerts: $(cat /tmp/codescan.err)"
+            echo "count=0" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          COUNT=$(echo "$RAW" | jq -s '[.[][] | select(.rule.security_severity_level=="critical" or .rule.security_severity_level=="high")] | length')
+          echo "count=$COUNT" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v7
+        if: needs.analyze.result == 'failure' || steps.alerts.outputs.count > 0
+
+      - name: Notify — analysis failed
+        if: needs.analyze.result == 'failure'
+        uses: ./.github/actions/slack-notify
+        with:
+          webhook-url: ${{ secrets.SLACK_SECURITY_WEBHOOK }}
+          status: failure
+          title: 'CodeQL'
+          details: 'The CodeQL analysis job itself failed (tooling/config issue) — this is separate from finding actual vulnerabilities. Check the run log.'
+
+      - name: Notify — open HIGH/CRITICAL alerts
+        if: needs.analyze.result != 'failure' && steps.alerts.outputs.count > 0
+        uses: ./.github/actions/slack-notify
+        with:
+          webhook-url: ${{ secrets.SLACK_SECURITY_WEBHOOK }}
+          status: failure
+          title: 'CodeQL'
+          details: '*${{ steps.alerts.outputs.count }}* open HIGH/CRITICAL code-scanning alert(s). See the Security tab for detail.'
