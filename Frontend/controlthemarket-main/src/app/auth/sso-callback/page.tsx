@@ -2,6 +2,13 @@
 
 import { useEffect } from 'react';
 
+// Never statically prerender: this page's only job is to read the one-time token out of the
+// URL hash/query on each real visit and redirect — there is no meaningful static HTML to cache,
+// and attempting static generation here trips a Next.js App Router bug where a page.tsx whose
+// own default export is a Client Component fails to resolve its layout's client boundary
+// (AuthProvider) in the React Client Manifest during prerendering.
+export const dynamic = 'force-dynamic';
+
 /**
  * Shared-auth SSO landing for ControlTheMarket. The user verified on auth.baalvion.com,
  * which redirects back here as `/auth/sso-callback?next=<path>#token=<accessToken>`.
