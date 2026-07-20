@@ -15,6 +15,7 @@
  * callers supply their own last-resort fallback copy where appropriate.
  */
 import type { CountryCode, MaisonService, MaisonReport } from './types';
+import { logger } from './logger';
 
 // Central CMS public delivery base, ending at `/api/v1`. The website is addressed by slug.
 const CMS_URL = process.env.NEXT_PUBLIC_CMS_URL || 'http://localhost:3011/api/v1';
@@ -52,8 +53,7 @@ async function getJson<T>(path: string, fallback: T): Promise<T> {
     const json = await res.json();
     return (json && json.data !== undefined ? json.data : fallback) as T;
   } catch (err) {
-    // eslint-disable-next-line no-console -- deliberate operator diagnostic: CMS fetch failed, using fallback
-    console.error('[cms] fetch failed', path, err);
+    logger.error('cms', 'CMS fetch failed, using fallback', err, { path });
     return fallback;
   }
 }
@@ -729,6 +729,34 @@ export async function getReport(id: string): Promise<MaisonReportBody | null> {
   const c = await getContent(id);
   if (!c || c.customFields?.kind !== 'report') return null;
   return mapMaisonReport(c);
+}
+
+// ── Welcome-offer popup (slug `welcome-offer`) — the $ off email-capture gateway shown
+// to first-time visitors. `image` is a URL pasted from the admin Media library; when
+// absent the popup falls back to the branded monogram panel via <BrandImage>.
+export interface WelcomeOfferContent {
+  image: string;
+  archiveLabel: string;
+  headline: string;
+  subtext: string;
+  ctaLabel: string;
+  disclaimer: string;
+}
+
+export async function getWelcomeOfferContent(): Promise<WelcomeOfferContent | null> {
+  const c = await getContent('welcome-offer');
+  const cf = c?.customFields;
+  if (!cf && !c?.featuredImage) return null;
+  return {
+    image: cf?.image ?? c?.featuredImage ?? '',
+    archiveLabel: cf?.archiveLabel ?? 'Archive No. 1924',
+    headline: cf?.headline ?? '$100 Off, On Us?',
+    subtext:
+      cf?.subtext ??
+      'Join our collector network for first access to the 1924 heritage series and bespoke curatorial guidance.',
+    ctaLabel: cf?.ctaLabel ?? 'Collect Your Offer',
+    disclaimer: cf?.disclaimer ?? '*Offer valid on all orders $2,500+.',
+  };
 }
 
 // ── Shared provenance/narrative showcase copy (slug `provenance-showcase`) — used by both
