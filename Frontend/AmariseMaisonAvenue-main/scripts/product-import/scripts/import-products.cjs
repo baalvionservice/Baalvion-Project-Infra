@@ -34,7 +34,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { readCsvFile, splitList, truthy, slugify } = require('./_csv-utils.cjs');
-const { validateRow, createContext } = require('./_validate.cjs');
+const { validateRow, createContext, VALID_CONDITIONS } = require('./_validate.cjs');
 const {
   login,
   requireStoreId,
@@ -69,6 +69,16 @@ function buildProductBody(row, categoryId) {
   if (row.SKU) body.sku = row.SKU;
   if (row.Description) body.description = row.Description;
   if (row.Inventory) body.stockQuantity = parseInt(row.Inventory, 10);
+
+  // Resale-specific fields (real schema fields — see resaleFields in
+  // Backend/services/commerce/commerce-service/validators/productSchemas.js).
+  // All optional: a listing with none of these is still a valid draft product.
+  if (row.Condition && VALID_CONDITIONS.has(row.Condition.trim())) body.condition = row.Condition.trim();
+  if (row['Condition Notes']) body.conditionNotes = row['Condition Notes'];
+  if (row['Authenticity Status']) body.authenticityStatus = row['Authenticity Status'];
+  if (row['Authenticity Certificate Code']) body.authenticityCertificateCode = row['Authenticity Certificate Code'];
+  if (row['Serial Number']) body.serialNumber = row['Serial Number'];
+  if (row['One Of A Kind']) body.isOneOfAKind = truthy(row['One Of A Kind']);
 
   const materials = splitList(row.Materials);
   if (materials.length) body.materials = materials;

@@ -31,6 +31,12 @@ field" column. Nothing here is a fabricated or aspirational API.
 | `Status` | no | text | `customFields.listingStatus` | **Informational/merchandising text only** (e.g. "New", "Featured", "Active") — does *not* control whether the product is live. See `Publish` for that. |
 | `Tags` | no | semicolon-list | `tags` | e.g. `birkin;exotic;rare`. |
 | `Materials` | no | semicolon-list | `materials` | e.g. `Togo Leather;Gold Hardware`. |
+| `Condition` | no | enum | `condition` | One of `pristine \| excellent \| very_good \| good \| fair \| vintage`. Anything else is silently omitted (warned, not an error). |
+| `Condition Notes` | no | text | `conditionNotes` | Free text, e.g. "light corner wear, no odor." |
+| `Authenticity Status` | no | text | `authenticityStatus` | e.g. "verified", "pending". Set this deliberately — never leave a placeholder here on anything you actually publish. |
+| `Authenticity Certificate Code` | no | text | `authenticityCertificateCode` | Your internal certificate reference, if you issue one. |
+| `Serial Number` | no | text | `serialNumber` | The item's real serial/blind-stamp/date-code, if you record one. **Never fabricate this column** — an incorrect authenticity identifier on a real luxury listing is a genuine liability, not just a data-quality issue. Leave it blank (or an obvious placeholder like `TBD-...`) until you have the real value, and keep the row `Publish=false` until you do. |
+| `One Of A Kind` | no | `true`/`false` | `isOneOfAKind` | Whether this is a single unique item vs. a restockable listing. |
 | `Color` | no | semicolon-list | `customFields.colors` | Single value or list, e.g. `Rouge H` or `Black;Beige`. |
 | `Size` | no | semicolon-list | `customFields.sizes` | e.g. `30cm` or `EU 38`. |
 | `Images` | no (warns if empty) | semicolon-list | product media (uploaded) | Local file paths (resolved relative to the CSV's own directory) **or** `http(s)://` URLs. **The first image in the list becomes the featured/cover photo.** Products with no images fall back to the storefront's `BrandImage` monogram placeholder — that's a normal, supported state, not an error. |
