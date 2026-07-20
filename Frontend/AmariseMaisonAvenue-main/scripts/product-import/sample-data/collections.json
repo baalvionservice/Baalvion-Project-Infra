@@ -1,0 +1,98 @@
+[
+  {
+    "name": "New Arrivals",
+    "slug": "new-arrivals",
+    "description": "The latest acquisitions to enter the Maison, ready to ship.",
+    "productSlugs": [
+      "hermes-birkin-25-etoupe-clemence-palladium-hardware",
+      "goyard-saigon-structured-tote-grey",
+      "chanel-mini-rectangular-flap-black-lambskin",
+      "bulgari-serpenti-viper-bracelet-18k-rose-gold",
+      "hermes-picotin-lock-18-rose-sakura-swift-leather"
+    ]
+  },
+  {
+    "name": "Best Sellers",
+    "slug": "best-sellers",
+    "description": "The pieces our clients return for, season after season.",
+    "productSlugs": [
+      "hermes-birkin-30-rouge-h-togo-leather",
+      "chanel-classic-medium-double-flap-black-caviar-gold-hardware",
+      "christian-dior-lady-dior-medium-black-cannage-lambskin",
+      "cartier-love-necklace-18k-yellow-gold"
+    ]
+  },
+  {
+    "name": "Limited Edition",
+    "slug": "limited-edition",
+    "description": "Rare and one-of-a-kind pieces, unlikely to be sourced again.",
+    "productSlugs": [
+      "hermes-kelly-cut-biscuit-chevre-silver-hardware",
+      "hermes-constance-24-blue-nuit-box-calf-gold-hardware",
+      "tiffany-co-solitaire-diamond-ring-platinum-1-2ct"
+    ]
+  },
+  {
+    "name": "Classic Collection",
+    "slug": "classic-collection",
+    "description": "Timeless archive silhouettes that never fall out of favor.",
+    "productSlugs": [
+      "hermes-kelly-28-sellier-noir-epsom-gold-hardware",
+      "chanel-classic-jumbo-flap-beige-lambskin-gold-hardware",
+      "hermes-bolide-27-vert-fonce-togo-leather",
+      "goyard-artois-pm-black-canvas",
+      "louis-vuitton-neverfull-mm-monogram-canvas",
+      "fendi-baguette-medium-ff-jacquard",
+      "chanel-cap-toe-ballet-flats-black-beige"
+    ]
+  },
+  {
+    "name": "Summer Edit",
+    "slug": "summer-edit",
+    "description": "Lighter leathers and brighter colorways for the warmer months.",
+    "productSlugs": [
+      "hermes-evelyne-iii-33-gold-clemence-leather",
+      "hermes-picotin-lock-18-rose-sakura-swift-leather",
+      "chanel-deauville-tote-navy-canvas",
+      "goyard-anjou-mini-reversible-tote-black"
+    ]
+  },
+  {
+    "name": "Winter Edit",
+    "slug": "winter-edit",
+    "description": "Richer tones and statement pieces for the colder months.",
+    "productSlugs": [
+      "vintage-chanel-cc-logo-brooch-gold-tone",
+      "bulgari-serpenti-viper-bracelet-18k-rose-gold"
+    ]
+  },
+  {
+    "name": "Gift Guide",
+    "slug": "gift-guide",
+    "description": "Considered gifts across every budget, from scarves to fine jewelry.",
+    "productSlugs": [
+      "hermes-bearn-wallet-ebene-epsom-leather",
+      "hermes-cavalcadour-silk-twill-scarf-90cm",
+      "chanel-woc-caviar-black-gold-hardware",
+      "chanel-classic-zip-around-wallet-beige-caviar",
+      "van-cleef-arpels-alhambra-stud-earrings-mother-of-pearl-18k-gold",
+      "tiffany-co-solitaire-diamond-ring-platinum-1-2ct"
+    ]
+  },
+  {
+    "name": "Luxury Essentials",
+    "slug": "luxury-essentials",
+    "description": "Foundational pieces every considered wardrobe should have.",
+    "productSlugs": [
+      "hermes-kelly-cut-biscuit-chevre-silver-hardware",
+      "hermes-lindy-26-craie-clemence-leather",
+      "hermes-cavalcadour-silk-twill-scarf-90cm",
+      "chanel-22-bag-small-black-calfskin-silver-hardware",
+      "goyard-st-louis-pm-black-tote",
+      "the-row-margaux-15-bag-black-leather",
+      "chanel-woc-caviar-black-gold-hardware",
+      "van-cleef-arpels-alhambra-stud-earrings-mother-of-pearl-18k-gold",
+      "cartier-love-necklace-18k-yellow-gold"
+    ]
+  }
+]

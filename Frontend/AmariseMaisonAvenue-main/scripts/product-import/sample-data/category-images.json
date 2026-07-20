@@ -1,0 +1,17 @@
+{
+  "_comment": "SAMPLE DATA — every imageUrl below is a non-functional https://example.com placeholder (example.com is IANA-reserved for documentation and never resolves to real content). Replace each with a real, hosted photo URL (uploaded via the admin media library or your CDN) before running update-category-images.cjs. This _comment key itself is ignored by the script — it only reads real category-slug keys. Slugs shown are the actual department/category slugs already live in the Amarisé store; add more entries for any other category you have a photo for.",
+
+  "dept-new-arrivals": { "imageUrl": "https://example.com/sample-images/categories/new-arrivals-hero.jpg" },
+  "dept-hermes": { "imageUrl": "https://example.com/sample-images/categories/hermes-hero.jpg" },
+  "dept-chanel": { "imageUrl": "https://example.com/sample-images/categories/chanel-hero.jpg" },
+  "dept-goyard": { "imageUrl": "https://example.com/sample-images/categories/goyard-hero.jpg" },
+  "dept-other-brands": { "imageUrl": "https://example.com/sample-images/categories/other-brands-hero.jpg" },
+  "dept-jewelry": { "imageUrl": "https://example.com/sample-images/categories/jewelry-hero.jpg" },
+
+  "hermes-birkin-handbags": { "imageUrl": "https://example.com/sample-images/categories/hermes-birkin.jpg" },
+  "hermes-kelly-handbags": { "imageUrl": "https://example.com/sample-images/categories/hermes-kelly.jpg" },
+  "chanel-flap-bags": { "imageUrl": "https://example.com/sample-images/categories/chanel-flap.jpg" },
+  "goyard-st-louis-bags": { "imageUrl": "https://example.com/sample-images/categories/goyard-st-louis.jpg" },
+  "fine-jewelry-rings": { "imageUrl": "https://example.com/sample-images/categories/fine-jewelry-rings.jpg" },
+  "louis-vuitton-bags": { "imageUrl": "https://example.com/sample-images/categories/louis-vuitton.jpg" }
+}
