@@ -41,7 +41,7 @@ jobs:
         uses: pnpm/action-setup@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
@@ -81,7 +81,7 @@ jobs:
       - uses: actions/checkout@v7
       
       - name: Setup Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v7
         with:
           # Track the module's declared toolchain (go 1.25.0) so coverage
           # instrumentation (`covdata`) matches; a 1.22 pin broke `go test`.
@@ -170,7 +170,7 @@ jobs:
         uses: pnpm/action-setup@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
@@ -233,7 +233,7 @@ jobs:
       - uses: actions/checkout@v7
       # trade-service is a regular folder in this repo (vendored from its former
       # submodule), so the normal checkout already includes it.
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Install psql client
@@ -278,7 +278,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
       # trade-service is a regular folder in this repo (vendored from its former
@@ -308,7 +308,7 @@ jobs:
           --health-timeout 5s --health-retries 12
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Install psql client
@@ -357,7 +357,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
@@ -484,7 +484,15 @@ jobs:
       # CRITICAL OS/library CVE. `ignore-unfixed: true` keeps the gate actionable — it
       # does not block on CVEs that currently have no upstream fix. Pull the vuln DB
       # from the ECR mirror to avoid GHCR anonymous rate limits in CI.
+      #
+      # id added so the Slack notify step below can read the pre-continue-on-error
+      # outcome (steps.trivy-scan.outcome) — the job itself has continue-on-error:
+      # true (report-only gate, see the job comment above), which masks the job-level
+      # `needs.docker-build-scan.result` back to "success" even when this step finds
+      # HIGH/CRITICAL CVEs. Without the step-level id, a downstream job could never
+      # tell the two cases apart.
       - name: Trivy image scan (fail on HIGH/CRITICAL)
+        id: trivy-scan
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         env:
           TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
@@ -496,6 +504,15 @@ jobs:
           vuln-type: os,library
           ignore-unfixed: true
           exit-code: '1'
+
+      - name: Notify Slack security channel (image has fixable HIGH/CRITICAL CVEs)
+        if: steps.trivy-scan.outcome == 'failure'
+        uses: ./.github/actions/slack-notify
+        with:
+          webhook-url: ${{ secrets.SLACK_SECURITY_WEBHOOK }}
+          status: failure
+          title: 'Trivy — baalvion/${{ matrix.name }} image scan'
+          details: 'Fixable HIGH/CRITICAL OS or library CVEs found in `baalvion/${{ matrix.name }}:ci`. See the job log for the full Trivy table.'
 
   # Aggregate gate required by branch protection on `main`.
   # A single stable context that turns red if ANY required job failed or was
@@ -526,3 +543,20 @@ jobs:
             exit 1
           fi
           echo "All required CI jobs passed."
+
+  # Failure-only notification to #baalvion-ci. Success is intentionally silent —
+  # a push/PR firing CI is the common case, so paging on every green run would
+  # just be noise; the required ci-success check on the PR/commit already covers
+  # the "did it pass" signal for anyone watching there.
+  notify-ci-failure:
+    name: Notify Slack (CI failure)
+    needs: ci-success
+    if: always() && needs.ci-success.result == 'failure'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/slack-notify
+        with:
+          webhook-url: ${{ secrets.SLACK_CI_WEBHOOK }}
+          status: failure
+          title: 'CI Pipeline'
