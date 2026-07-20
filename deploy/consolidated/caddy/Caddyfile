@@ -92,6 +92,16 @@ api.baalvion.com {
 		reverse_proxy app-commerce:3012
 	}
 
+	# Authed commerce admin surface (store + department/category CRUD — routes/storeRoutes.js,
+	# routes/categoryRoutes.js). Bearer-token gated by commerce-service's own authMiddleware +
+	# RBAC (loadStoreRole/loadAccessScope), same as storefront/markets above needed no session —
+	# without this carve-out these paths fall through to the session-gated BFF below, which has
+	# no route for them and returns a bare 404 regardless of a valid bearer token.
+	@commerce_admin path /api/v1/commerce/stores /api/v1/commerce/stores/*
+	handle @commerce_admin {
+		reverse_proxy app-commerce:3012
+	}
+
 	# order-service (cart/checkout/payment/returns/appointments/wishlists/consignments — Amarisé
 	# and any other storefront's buy-side) — same container as commerce-service, DIFFERENT port
 	# (app-commerce:3013, not 3012). Guest checkout uses X-Cart-Session (no bearer token) and
