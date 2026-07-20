@@ -3,7 +3,6 @@
 import React, { useEffect } from "react";
 import { Header } from "@/components/layout/Header";
 import { useParams, usePathname } from "next/navigation";
-import { MaisonPopup } from "@/components/layout/MaisonPopup";
 import { MadAveLiveWidget } from "@/components/layout/MadAveLiveWidget";
 import { CartSheet } from "@/components/layout/CartSheet";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -55,7 +54,8 @@ export default function CountryLayout({
     <div dir={i18n.getDirection()}>
       {/* Invisible: announces this storefront tab as a live visitor (admin sees the count). */}
       <PresenceBeacon />
-      {/* <MaisonPopup /> */}
+      {/* MaisonPopup now renders from the root layout (src/app/layout.tsx) — it needs
+          server-side CMS access, which this client layout can't provide. */}
       {/* <MadAveLiveWidget /> */}
 
       {/*......... We will enable it when we integrate backend for AI Chat .........*/}

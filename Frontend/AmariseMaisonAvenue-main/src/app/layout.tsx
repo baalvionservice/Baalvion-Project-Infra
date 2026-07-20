@@ -1,3 +1,4 @@
+import "@/lib/env";
 import type { Metadata, Viewport } from "next";
 import { Inter, Cormorant_Garamond } from "next/font/google";
 import { headers } from "next/headers";
@@ -6,6 +7,8 @@ import { Toaster } from "@/components/ui/toaster";
 import UnifiedAnalytics from "@/components/UnifiedAnalytics";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { AppProvider } from "@/lib/store";
+import { MaisonPopup } from "@/components/layout/MaisonPopup";
+import { getWelcomeOfferContent } from "@/lib/cms";
 import {
   normalizeCountry,
   countryToLocale,
@@ -93,6 +96,8 @@ export default async function RootLayout({
   const country = normalizeCountry((await headers()).get("x-amarise-country"));
   const htmlLang = countryToLocale(country);
   const htmlDir = directionForCountry(country);
+  // Fetched server-side: cms-service has no CORS headers, so this must not run client-side.
+  const welcomeOffer = await getWelcomeOfferContent();
 
   return (
     <html
@@ -172,6 +177,7 @@ export default async function RootLayout({
       </head>
       <body className="font-body antialiased bg-background text-foreground overflow-x-hidden selection:bg-gold selection:text-white">
         <AppProvider>{children}</AppProvider>
+        <MaisonPopup initialOffer={welcomeOffer} />
         <Toaster />
         <UnifiedAnalytics slug={process.env.NEXT_PUBLIC_CMS_WEBSITE_SLUG || "amarise-maison-avenue"} />
       </body>
