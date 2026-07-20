@@ -68,7 +68,7 @@ jobs:
         uses: pnpm/action-setup@v6
 
       - name: Set up Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: '20'
           cache: 'pnpm'
@@ -88,3 +88,16 @@ jobs:
   # jobs-service is not part of the single-host production stack; image builds for the
   # production fleet are owned by the canonical pipeline (.github/workflows/deploy.yml,
   # which pushes only to Amazon ECR). This workflow is now test-only.
+
+  notify-ci-failure:
+    name: Notify Slack (CI failure)
+    needs: lint-and-test
+    if: always() && needs.lint-and-test.result == 'failure'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/slack-notify
+        with:
+          webhook-url: ${{ secrets.SLACK_CI_WEBHOOK }}
+          status: failure
+          title: 'Jobs Service CI/CD'
