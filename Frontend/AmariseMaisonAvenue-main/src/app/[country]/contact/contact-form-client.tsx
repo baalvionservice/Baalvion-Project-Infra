@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/select";
 import { COUNTRIES } from '@/lib/mock-data';
 import { createSupportTicket } from '@/lib/crm-client';
-import type { ContactPageContent } from '@/lib/cms';
+import type { ContactPageContent, MarketOffice } from '@/lib/cms';
 import Link from 'next/link';
 
 type Country = {
@@ -226,7 +226,13 @@ export function ContactFormClient({ countryCode, currentCountry, content }: Cont
     );
 }
 
-export function GlobalAtelier({ countryCode }: { countryCode: string }) {
+export function GlobalAtelier({
+    countryCode,
+    cmsOffices,
+}: {
+    countryCode: string;
+    cmsOffices?: Record<string, MarketOffice> | null;
+}) {
     const router = useRouter();
 
     const handleCountrySwitch = (code: string) => {
@@ -235,19 +241,22 @@ export function GlobalAtelier({ countryCode }: { countryCode: string }) {
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
-            {Object.values(COUNTRIES).map((c) => (
-                <button
-                    key={c.code}
-                    onClick={() => handleCountrySwitch(c.code)}
-                    className={`p-8 border transition-all text-center space-y-4 hover:border-gold hover:shadow-luxury ${countryCode === c.code ? 'border-gold bg-white' : 'border-border bg-white/50'}`}
-                >
-                    <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-plum">{c.code}</span>
-                    <h4 className="text-xl font-headline font-bold text-gray-900 uppercase">{c.office?.city}</h4>
-                    <p className="text-[9px] text-muted-foreground uppercase tracking-widest leading-relaxed">
-                        {c.office?.address.split(',')[0]}
-                    </p>
-                </button>
-            ))}
+            {Object.values(COUNTRIES).map((c) => {
+                const office = cmsOffices?.[c.code] ?? c.office;
+                return (
+                    <button
+                        key={c.code}
+                        onClick={() => handleCountrySwitch(c.code)}
+                        className={`p-8 border transition-all text-center space-y-4 hover:border-gold hover:shadow-luxury ${countryCode === c.code ? 'border-gold bg-white' : 'border-border bg-white/50'}`}
+                    >
+                        <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-plum">{c.code}</span>
+                        <h4 className="text-xl font-headline font-bold text-gray-900 uppercase">{office?.city}</h4>
+                        <p className="text-[9px] text-muted-foreground uppercase tracking-widest leading-relaxed">
+                            {office?.address.split(',')[0]}
+                        </p>
+                    </button>
+                );
+            })}
         </div>
     );
 }

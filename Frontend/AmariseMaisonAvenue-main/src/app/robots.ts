@@ -20,6 +20,28 @@ export default function robots(): MetadataRoute.Robots {
     "/inquiry/",
     "/private-order/",
   ];
+  // Explicit, deliberate allow for AI crawlers/answer engines (they'd fall under the
+  // wildcard "*" rule anyway, but this documents the policy instead of leaving it
+  // implicit — we WANT AI search/answer engines to index and cite the catalog, same
+  // private-path exclusions as everyone else). See also /llms.txt for the AI-agent
+  // summary of what this business sells and where it operates.
+  const aiCrawlers = [
+    "GPTBot",           // OpenAI (ChatGPT browsing/training)
+    "OAI-SearchBot",     // OpenAI (ChatGPT search)
+    "ChatGPT-User",
+    "ClaudeBot",         // Anthropic
+    "Claude-Web",
+    "anthropic-ai",
+    "PerplexityBot",     // Perplexity
+    "Google-Extended",   // Google (Gemini/AI Overviews training+grounding)
+    "Bingbot",
+    "Applebot",
+    "Applebot-Extended",
+    "CCBot",             // Common Crawl (feeds many LLM training sets)
+    "Bytespider",        // ByteDance
+    "Amazonbot",
+  ];
+
   return {
     rules: [
       {
@@ -32,6 +54,11 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
         disallow: privatePaths,
       },
+      ...aiCrawlers.map((userAgent) => ({
+        userAgent,
+        allow: "/",
+        disallow: privatePaths,
+      })),
     ],
     sitemap: [
       "https://www.amarisemaisonavenue.com/sitemap.xml",

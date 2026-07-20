@@ -213,7 +213,7 @@ export default function CustomFieldsPanel({ value, onChange }: Props) {
       <div>
         <Label className="text-sm font-medium">Custom fields</Label>
         <p className="mt-0.5 text-xs text-muted-foreground">
-          Extra structured data. Lists (like a set of benefits or steps) get an "Add item"
+          Extra structured data. Lists (like a set of benefits or steps) get an &quot;Add item&quot;
           row editor; nested groups get their own field list — nothing needs hand-typed JSON.
         </p>
       </div>

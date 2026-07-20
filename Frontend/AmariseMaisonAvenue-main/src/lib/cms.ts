@@ -754,3 +754,45 @@ export async function getProvenanceShowcase(): Promise<ProvenanceShowcaseContent
     securityMatrixBody: cf.securityMatrixBody ?? '',
   };
 }
+
+// ── Market showrooms (slug `market-offices`, customFields keyed by country code) — the
+// physical-presence data (city/address/phone/email/map link) shown on Contact,
+// Appointments, LocalBusiness schema and llms.txt. Real per-market values seeded from
+// the existing COUNTRIES config; admin-editable thereafter without a code change.
+export interface MarketOffice {
+  city: string;
+  address: string;
+  phone: string;
+  email: string;
+  mapUrl: string;
+  image: string;
+}
+
+export async function getMarketOffices(): Promise<Record<string, MarketOffice> | null> {
+  const c = await getContent('market-offices');
+  const cf = c?.customFields;
+  if (!cf) return null;
+  const result: Record<string, MarketOffice> = {};
+  for (const [code, raw] of Object.entries(cf)) {
+    if (!raw || typeof raw !== 'object') continue;
+    const o = raw as Record<string, unknown>;
+    result[code] = {
+      city: String(o.city ?? ''),
+      address: String(o.address ?? ''),
+      phone: String(o.phone ?? ''),
+      email: String(o.email ?? ''),
+      mapUrl: String(o.mapUrl ?? '#'),
+      image: String(o.image ?? ''),
+    };
+  }
+  return Object.keys(result).length ? result : null;
+}
+
+/** One market's office, CMS-first, falling back to the given default (COUNTRIES[code].office). */
+export async function getMarketOffice(
+  countryCode: string,
+  fallback: MarketOffice
+): Promise<MarketOffice> {
+  const all = await getMarketOffices();
+  return all?.[countryCode] ?? fallback;
+}

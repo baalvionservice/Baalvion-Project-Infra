@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { ChevronRight, HelpCircle } from 'lucide-react';
 import { COUNTRIES } from '@/lib/mock-data';
 import { getCustomerService } from '@/lib/cms';
+import { faqPageJsonLd } from '@/lib/structured-data';
 import type { CountryCode } from '@/lib/types';
 
 // Fetch CMS content live per request (works on Vercel against the public CMS).
@@ -15,7 +16,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const country = COUNTRIES[(await params).country] || COUNTRIES.us;
   return {
     title: `Frequently Asked Questions | AMARISÉ MAISON ${country.name}`,
-    description: `Answers on authentication, sourcing, dispatch, returns, payment and private client services for AMARISÉ MAISON in ${country.name}.`,
+    description: `Authentication, shipping to ${country.name}, returns, ${country.currency} payment methods and private client services — answered by the Amarisé Maison Avenue concierge team.`,
   };
 }
 
@@ -61,9 +62,14 @@ export default async function FaqPage({ params }: PageProps) {
     cmsFaqs.length > 0
       ? [{ heading: 'Client Services', items: cmsFaqs.map((f) => ({ q: f.question, a: f.answer })) }]
       : SECTIONS;
+  const allFaqs = sections.flatMap((s) => s.items.map((i) => ({ question: i.q, answer: i.a })));
 
   return (
     <div className="animate-fade-in bg-gradient-to-br from-ivory via-white to-ivory min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqPageJsonLd(allFaqs)) }}
+      />
       <div className="container mx-auto px-6 py-24 max-w-4xl">
         <div className="flex items-center space-x-2 text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-10">
           <Link href={`/${countryCode}`} className="hover:text-plum transition-colors">Maison</Link>

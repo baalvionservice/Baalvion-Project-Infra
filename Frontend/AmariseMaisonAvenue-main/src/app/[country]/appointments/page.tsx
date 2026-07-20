@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { BrandImage } from "@/components/ui/BrandImage";
 import { COUNTRIES, APPOINTMENTS_PAGE_FALLBACK } from "@/lib/mock-data";
-import { getAppointmentsPageContent, type AppointmentsPageContent } from "@/lib/cms";
+import { getAppointmentsPageContent, getMarketOffice, type AppointmentsPageContent, type MarketOffice } from "@/lib/cms";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -43,6 +43,18 @@ export default function AppointmentBookingPage() {
   const { country } = useParams();
   const countryCode = (country as string) || "us";
   const currentCountry = COUNTRIES[countryCode] || COUNTRIES.us;
+
+  const [office, setOffice] = useState<MarketOffice>(currentCountry.office);
+  useEffect(() => {
+    let cancelled = false;
+    getMarketOffice(countryCode, currentCountry.office).then((o) => {
+      if (!cancelled) setOffice(o);
+    });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [countryCode]);
 
   const [content, setContent] = useState<AppointmentsPageContent>(APPOINTMENTS_PAGE_FALLBACK);
   useEffect(() => {
@@ -281,7 +293,7 @@ export default function AppointmentBookingPage() {
                 <div className="p-4 bg-ivory/50 border border-border flex items-center space-x-3">
                   <MapPin className="w-4 h-4 text-gold" />
                   <span className="text-xs font-bold uppercase">
-                    {currentCountry.office?.city} Flagship
+                    {office.city} Flagship
                   </span>
                 </div>
               </div>

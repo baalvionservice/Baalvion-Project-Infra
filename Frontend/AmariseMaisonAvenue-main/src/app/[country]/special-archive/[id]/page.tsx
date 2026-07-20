@@ -5,7 +5,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { BrandImage } from '@/components/ui/BrandImage';
 import { COUNTRIES, PROVENANCE_SHOWCASE_FALLBACK } from '@/lib/mock-data';
-import { getProvenanceShowcase, type ProvenanceShowcaseContent } from '@/lib/cms';
+import { getProvenanceShowcase, getMarketOffice, type ProvenanceShowcaseContent, type MarketOffice } from '@/lib/cms';
 import { formatProductPrice, normalizeCountry } from '@/lib/i18n/countries';
 import { useProduct } from '@/lib/useCatalog';
 import { Button } from '@/components/ui/button';
@@ -31,15 +31,20 @@ export default function SpecialArchivePage() {
   const isWishlisted = wishlist.some(i => i.id === product?.id);
 
   const [provenance, setProvenance] = useState<ProvenanceShowcaseContent>(PROVENANCE_SHOWCASE_FALLBACK);
+  const [office, setOffice] = useState<MarketOffice>(currentCountry.office);
   useEffect(() => {
     let cancelled = false;
     getProvenanceShowcase().then((p) => {
       if (!cancelled && p) setProvenance(p);
     });
+    getMarketOffice(countryCode, currentCountry.office).then((o) => {
+      if (!cancelled) setOffice(o);
+    });
     return () => {
       cancelled = true;
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [countryCode]);
 
   if (loading) {
     return <div className="py-40 text-center font-headline text-3xl">Loading…</div>;
@@ -73,7 +78,7 @@ export default function SpecialArchivePage() {
           <div className="w-full lg:w-2/5 space-y-12">
             <div className="space-y-6">
               <span className="text-primary text-[10px] font-bold tracking-[0.5em] uppercase border-b border-gold/40 pb-1">
-                Atelier {currentCountry.office?.city}
+                Atelier {office.city}
               </span>
               <h1 className="text-5xl font-headline font-bold leading-tight text-gray-900 italic">{product.name}</h1>
               <div className="flex items-center space-x-6">
@@ -120,7 +125,7 @@ export default function SpecialArchivePage() {
               </TabsContent>
               <TabsContent value="provenance" className="pt-10">
                 <ul className="space-y-4 text-sm font-light">
-                  <li className="flex justify-between border-b pb-2"><span>Origin</span><span>Maison Ateliers, {currentCountry.office?.city}</span></li>
+                  <li className="flex justify-between border-b pb-2"><span>Origin</span><span>Maison Ateliers, {office.city}</span></li>
                   <li className="flex justify-between border-b pb-2"><span>Authenticity</span><span>{provenance.authenticityLabel}</span></li>
                 </ul>
               </TabsContent>
