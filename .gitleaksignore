@@ -66,3 +66,7 @@ e8e42392968e972b2c71267baeadbedfb3564bdc:Frontend/market-underworld/src/data/moc
 # Re-pinned after a branch rebase changed this commit's SHA (af050a25 -> the
 # SHA below); the historical commit content is identical.
 ff84c90c5d1d992d42a242cbe557b11efc9de3f5:.gitleaksignore:generic-api-key:51
+
+# Same curl-auth-header false positive as the help-baalvion API docs above,
+# now on the new Reports API doc page (`Bearer YOUR_API_KEY` placeholder).
+ec98fe7f78b057a9a6e8d548416ada7a3715e2a2:Frontend/help-baalvion/src/app/(docs)/api/reports/page.tsx:curl-auth-header:50
