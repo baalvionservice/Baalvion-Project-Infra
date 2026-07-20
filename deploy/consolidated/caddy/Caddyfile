@@ -92,6 +92,17 @@ api.baalvion.com {
 		reverse_proxy app-commerce:3012
 	}
 
+	# Public product media delivery (UNAUTHENTICATED, read-only) — routes/v1.js mounts
+	# GET /commerce/media/:mediaId/raw with no authMiddleware by design (browsers load
+	# product photos via plain <img> tags, no bearer token). Product media URLs are built
+	# from COMMERCE_PUBLIC_URL (must be this same public host) + this path — without this
+	# carve-out every product photo 404s on the live storefront regardless of the upload
+	# having succeeded.
+	@commerce_media path /api/v1/commerce/media/*
+	handle @commerce_media {
+		reverse_proxy app-commerce:3012
+	}
+
 	# Authed commerce admin surface (store + department/category CRUD — routes/storeRoutes.js,
 	# routes/categoryRoutes.js). Bearer-token gated by commerce-service's own authMiddleware +
 	# RBAC (loadStoreRole/loadAccessScope), same as storefront/markets above needed no session —
