@@ -11,9 +11,19 @@ const contentEvents = require('./analytics/contentEvents');
 const entitlementClient = require('./entitlementClient');
 const { parsePagination, buildPaginated } = require('../utils/pagination');
 
+// In-process cache, mirrors entitlementClient.js's _subscriptionCache — a site's config
+// changes rarely, so every public read (content, category, authors, listings) paying for
+// a DB round trip just to re-resolve the same website row was pure latency under load,
+// stacking with the content query itself on every cache-miss request.
+const WEBSITE_CACHE_TTL_MS = 60_000;
+const _websiteCache = new Map(); // slug -> { at, website }
+
 async function _resolveWebsite(websiteSlug) {
+    const cached = _websiteCache.get(websiteSlug);
+    if (cached && Date.now() - cached.at < WEBSITE_CACHE_TTL_MS) return cached.website;
     const website = await CmsWebsite.findOne({ where: { slug: websiteSlug, status: 'active' } });
     if (!website) throw new AppError('NOT_FOUND', 'Website not found', 404);
+    _websiteCache.set(websiteSlug, { at: Date.now(), website });
     return website;
 }
 
@@ -23,7 +33,12 @@ async function getPublicContent(websiteSlug, slug, { callerId } = {}) {
 
     let data;
     if (cached) {
-        await contentService.incrementViewCount(cached.id);
+        // Fire-and-forget (matches recordContentView + the redirect hit-count below) — a
+        // view-count write has no bearing on what this request returns, so it must never
+        // sit in front of the response. Previously awaited here, which meant every single
+        // request — cache hit or not — paid for a DB write's full round trip before the
+        // page could render.
+        void contentService.incrementViewCount(cached.id).catch(() => {}); // best-effort counter, never surfaced
         void contentEvents.recordContentView(websiteSlug, cached); // fire-and-forget, fail-open
         data = cached;
     } else {
@@ -59,7 +74,7 @@ async function getPublicContent(websiteSlug, slug, { callerId } = {}) {
 
         data = content.toJSON();
         await cache.set(cacheKey, data, config.cache.publicTtl);
-        await contentService.incrementViewCount(content.id);
+        void contentService.incrementViewCount(content.id).catch(() => {}); // best-effort counter, see cache-hit branch above
         void contentEvents.recordContentView(websiteSlug, data); // fire-and-forget, fail-open
     }
 

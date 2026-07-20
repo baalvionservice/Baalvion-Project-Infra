@@ -15,6 +15,14 @@ const sequelize = new Sequelize(
         dialectOptions: { ssl: buildPgSsl() },
         logging: config.env === 'development' ? (sql) => logger('sql').debug({ sql }, 'query') : false,
         define: { underscored: true, timestamps: true },
+        // Every other service in this codebase sets this explicitly (see e.g.
+        // order-service, oauth-service, session-service models/index.js) — cms-service
+        // was the one place still silently running on Sequelize's bare default (max: 5),
+        // despite handling public content delivery for every website plus market-data
+        // sync, analytics ingestion, and admin CMS traffic on the same pool. A pool of 5
+        // meant any burst past 5 concurrent requests (a crawler, a busy moment) queued
+        // for a free connection instead of running.
+        pool: { max: 10, min: 2, acquire: 30000, idle: 10000 },
     }
 );
 
