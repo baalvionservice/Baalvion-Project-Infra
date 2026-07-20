@@ -22,6 +22,17 @@ const nextConfig: NextConfig = {
     'express',
   ],
   reactStrictMode: true,
+  // Pages with async `generateMetadata` (CMS-backed pages under `dynamic = 'force-dynamic'`)
+  // stream <title>/<meta> tags into the body and rely on React 19 hoisting them into <head>
+  // client-side. Crawlers that only parse the raw HTML response (Screaming Frog, and any bot
+  // not in Next's default `HTML_LIMITED_BOT_UA_RE` list) see those tags sitting in <body> and
+  // flag "meta description outside head". `htmlLimitedBots` forces those bots to receive the
+  // old blocking (non-streamed) render instead. This *replaces* Next's default bot list rather
+  // than extending it, so the default set (Googlebot's non-JS crawlers, Bingbot, etc. — see
+  // node_modules/next/dist/shared/lib/router/utils/html-bots.js) is reproduced here verbatim
+  // with Screaming Frog appended.
+  htmlLimitedBots:
+    /[\w-]+-Google|Google-[\w-]+|Chrome-Lighthouse|Slurp|DuckDuckBot|baiduspider|yandex|sogou|bitlybot|tumblr|vkShare|quora link preview|redditbot|ia_archiver|Bingbot|BingPreview|applebot|facebookexternalhit|facebookcatalog|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp|SkypeUriPreview|Yeti|googleweblight|Screaming Frog/i,
   // Self-contained server bundle so the Dockerfile's `.next/standalone` + server.js exist.
   // Gated off on win32 (Next standalone symlink emission is unreliable on Windows dev boxes);
   // Docker/CI builds run on Linux where standalone is emitted correctly.

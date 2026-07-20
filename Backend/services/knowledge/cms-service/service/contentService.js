@@ -3,7 +3,7 @@ const path = require('path');
 const { Op } = require('sequelize');
 const { hmacSign } = require('@baalvion/crypto');
 const { writeArticleArtFile } = require('@baalvion/illustrations');
-const { CmsContent, CmsCategory, CmsTag, CmsWorkflow, CmsContentRevision, CmsWebsite, sequelize } = require('../models');
+const { CmsContent, CmsCategory, CmsTag, CmsWorkflow, CmsContentRevision, CmsSeoRedirect, CmsWebsite, sequelize } = require('../models');
 const { AppError } = require('../utils/errors');
 const cache = require('./cacheService');
 const revalidateService = require('./revalidateService');
@@ -11,6 +11,7 @@ const config = require('../config/appConfig');
 const { slugify } = require('../utils/slugify');
 const { parsePagination, buildPaginated } = require('../utils/pagination');
 const { UPLOAD_DIR, PUBLIC_BASE } = require('./mediaService');
+const { logger } = require('../platform/logger');
 
 // URL prefix used for auto-generated article artwork — also doubles as the marker
 // that lets updateContent() tell "we generated this" apart from an editor's own
@@ -136,6 +137,34 @@ async function _uniqueSlug(websiteId, base, excludeId = null) {
     return `${clean}-${Date.now()}`;
 }
 
+// Renaming a published slug breaks every existing internal link, external
+// backlink, and search-engine index entry pointing at the old URL unless
+// something remembers where it moved. `cms_seo_redirects` exists for exactly
+// this (see models/cmsSeoRedirect.js) but nothing ever wrote to it — this is
+// that missing write side. The public delivery layer (publicService) reads it
+// back on a 404 lookup miss.
+//
+// Also collapses redirect chains: if this slug was itself the target of an
+// earlier redirect (A renamed to B, now B renames to C), that older row is
+// repointed straight at the new slug so a visitor following the original link
+// never hops through two redirects.
+async function _recordSlugRedirect(websiteId, oldSlug, newSlug) {
+    if (!oldSlug || !newSlug || oldSlug === newSlug) return;
+
+    const [redirect] = await CmsSeoRedirect.findOrCreate({
+        where: { websiteId, sourceUrl: oldSlug },
+        defaults: { targetUrl: newSlug, redirectType: '301', isActive: true },
+    });
+    if (redirect.targetUrl !== newSlug || !redirect.isActive) {
+        await redirect.update({ targetUrl: newSlug, isActive: true });
+    }
+
+    await CmsSeoRedirect.update(
+        { targetUrl: newSlug },
+        { where: { websiteId, targetUrl: oldSlug } },
+    );
+}
+
 async function createContent(websiteId, userId, body) {
     const {
         title, slug: rawSlug, categoryId, categoryIds, contentType, contentBlocks, tagIds, seoMetadata,
@@ -198,7 +227,10 @@ async function updateContent(websiteId, contentId, userId, body) {
         throw new AppError('FORBIDDEN', 'This content is archived. Restore it to a draft before editing.', 403);
     }
 
-    if (body.slug && body.slug !== content.slug) {
+    const slugChanged = Boolean(body.slug && body.slug !== content.slug);
+    const oldSlug = content.slug;
+
+    if (slugChanged) {
         const existing = await CmsContent.findOne({ where: { websiteId, slug: body.slug, id: { [Op.ne]: contentId } } });
         if (existing) throw new AppError('CONFLICT', 'Content with this slug already exists', 409);
     }
@@ -244,6 +276,15 @@ async function updateContent(websiteId, contentId, userId, body) {
     }
 
     await content.update({ ...body, lastEditedBy: userId });
+
+    if (slugChanged) {
+        // Bookkeeping only — a failure here must never fail the rename itself.
+        try {
+            await _recordSlugRedirect(websiteId, oldSlug, content.slug);
+        } catch (err) {
+            try { logger('content').warn({ err, contentId, oldSlug, newSlug: content.slug }, 'failed to record slug redirect'); } catch { /* logging must never throw */ }
+        }
+    }
 
     if (body.tagIds) {
         const removed = oldTagIds.filter((id) => !body.tagIds.includes(id));
