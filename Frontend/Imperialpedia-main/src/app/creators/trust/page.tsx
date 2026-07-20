@@ -1,5 +1,6 @@
 import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
+import { Container } from '@/design-system/layout/container';
 import { FeatureUnavailable } from '@/components/system/FeatureUnavailable';
 
 // Previous metadata advertised "real-time trust scores" — the page was entirely
@@ -18,6 +19,11 @@ export const metadata: Metadata = buildMetadata({
 export default function TrustedContributorsPage() {
   return (
     <main className="min-h-screen bg-background pt-12">
+      <Container className="text-center pt-8 pb-0">
+        <h1 className="text-2xl sm:text-3xl font-black leading-tight text-foreground">
+          Trusted Contributors Directory
+        </h1>
+      </Container>
       <FeatureUnavailable
         title="Trusted Contributors Directory"
         reason="Contributor trust scoring isn't connected to a live verification backend yet."

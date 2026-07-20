@@ -48,47 +48,54 @@ export function TransparencyClient() {
     loadData();
   }, []);
 
+  const header = (
+    <header className="max-w-3xl space-y-4 px-2">
+      <div className="flex items-center gap-2 text-primary">
+        <ShieldCheck className="h-5 w-5" />
+        <Text
+          variant="label"
+          className="text-xs font-bold tracking-widest uppercase"
+        >
+          Platform Transparency
+        </Text>
+      </div>
+      <Text
+        variant="h1" as="h1"
+        className="text-4xl lg:text-6xl font-bold tracking-tight"
+      >
+        Transparency Hub
+      </Text>
+      <Text
+        variant="body"
+        className="text-muted-foreground text-lg leading-relaxed"
+      >
+        Open governance for the global intelligence community. Below are the figures
+        we can back with real data, plus the editorial and moderation policies that
+        govern how Imperialpedia is run.
+      </Text>
+    </header>
+  );
+
   if (loading || !data) {
     return (
-      <div className="py-40 flex flex-col items-center justify-center space-y-4">
-        <Loader2 className="h-12 w-12 text-primary animate-spin" />
-        <Text
-          variant="bodySmall"
-          className="animate-pulse font-bold tracking-widest uppercase text-muted-foreground"
-        >
-          Loading Transparency Data...
-        </Text>
+      <div className="space-y-16 pb-32">
+        {header}
+        <div className="py-40 flex flex-col items-center justify-center space-y-4">
+          <Loader2 className="h-12 w-12 text-primary animate-spin" />
+          <Text
+            variant="bodySmall"
+            className="animate-pulse font-bold tracking-widest uppercase text-muted-foreground"
+          >
+            Loading Transparency Data...
+          </Text>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-16 pb-32 animate-in fade-in duration-700">
-      <header className="max-w-3xl space-y-4 px-2">
-        <div className="flex items-center gap-2 text-primary">
-          <ShieldCheck className="h-5 w-5" />
-          <Text
-            variant="label"
-            className="text-xs font-bold tracking-widest uppercase"
-          >
-            Platform Transparency
-          </Text>
-        </div>
-        <Text
-          variant="h1" as="h1"
-          className="text-4xl lg:text-6xl font-bold tracking-tight"
-        >
-          Transparency Hub
-        </Text>
-        <Text
-          variant="body"
-          className="text-muted-foreground text-lg leading-relaxed"
-        >
-          Open governance for the global intelligence community. Below are the figures
-          we can back with real data, plus the editorial and moderation policies that
-          govern how Imperialpedia is run.
-        </Text>
-      </header>
+      {header}
 
       {/* REAL METRICS — only figures with an actual data source behind them */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl">
