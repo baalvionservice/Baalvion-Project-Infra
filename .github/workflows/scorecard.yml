@@ -41,3 +41,17 @@ jobs:
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: results.sarif
+
+  notify-slack-security:
+    name: Notify Slack (Scorecard run failed)
+    needs: analysis
+    if: always() && needs.analysis.result == 'failure'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/slack-notify
+        with:
+          webhook-url: ${{ secrets.SLACK_SECURITY_WEBHOOK }}
+          status: failure
+          title: 'OSSF Scorecard'
+          details: 'The supply-chain analysis run itself failed to complete — this does not necessarily mean the score dropped. Check the run log.'
