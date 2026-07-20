@@ -107,7 +107,6 @@ const CATEGORY_HREF: Partial<Record<NewsCategory, string>> = {
   Crypto: "/latest/crypto",
   Economy: "/latest/economy",
   PersonalFinance: "/latest/personalfinance",
-  RealEstate: "/latest/realestate",
 };
 
 // The CMS doesn't attribute articles to an author record (see config/authors.ts),
