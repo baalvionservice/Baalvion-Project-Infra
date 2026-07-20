@@ -45,6 +45,18 @@ const start = async () => {
         await db.sequelize.query(
             'ALTER TABLE IF EXISTS crm.vip_clients ADD COLUMN IF NOT EXISTS wallet_history JSONB DEFAULT \'[]\''
         );
+        // Salesperson assignment + follow-up reminders on inquiries (sales pipeline). Same
+        // purely-additive guard as above — assigned_to is the staff userId, assigned_to_name is a
+        // denormalized display copy (avoids a cross-service join back to identity for every list render).
+        await db.sequelize.query(
+            'ALTER TABLE IF EXISTS crm.inquiries ADD COLUMN IF NOT EXISTS assigned_to BIGINT'
+        );
+        await db.sequelize.query(
+            'ALTER TABLE IF EXISTS crm.inquiries ADD COLUMN IF NOT EXISTS assigned_to_name VARCHAR(255)'
+        );
+        await db.sequelize.query(
+            'ALTER TABLE IF EXISTS crm.inquiries ADD COLUMN IF NOT EXISTS follow_up_at TIMESTAMPTZ'
+        );
         await db.sequelize.sync({ alter: false });
         console.log('[CRM] DB connected and synced');
     } catch (err) { console.error('[CRM] DB error:', err.message); process.exit(1); }

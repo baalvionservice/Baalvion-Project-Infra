@@ -1,27 +1,29 @@
 'use client';
 
-import React from 'react';
-import { useAppStore } from '@/lib/store';
-import { 
-  ShieldCheck, 
-  ChevronRight, 
-  Download, 
-  Award, 
-  Search, 
-  Eye,
+import React, { useEffect, useState } from 'react';
+import { consignmentApi } from '@/lib/api-client';
+import type { MyCertificate } from '@/lib/types';
+import {
+  ShieldCheck,
+  ChevronRight,
+  Download,
+  Award,
+  Search,
   Lock,
-  History,
-  Info,
-  CheckCircle2,
   FileText
 } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { cn } from '@/lib/utils';
 import { BrandImage } from '@/components/ui/BrandImage';
+
+const CONFIDENCE_LABEL: Record<string, string> = {
+  high: 'High Confidence',
+  medium: 'Medium Confidence',
+  low: 'Low Confidence',
+};
 
 /**
  * Heritage Archive: Digital Certificate Registry.
@@ -30,9 +32,31 @@ import { BrandImage } from '@/components/ui/BrandImage';
 export default function HeritageArchivePage() {
   const { country } = useParams();
   const countryCode = (country as string) || 'us';
-  const { activeVip } = useAppStore();
+  const [certificates, setCertificates] = useState<MyCertificate[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
-  const certificates = activeVip?.certificates || [];
+  useEffect(() => {
+    let active = true;
+    consignmentApi.listMyCertificates().then((result) => {
+      if (!active) return;
+      if (result.ok) setCertificates(result.data);
+      setIsLoading(false);
+    });
+    return () => { active = false; };
+  }, []);
+
+  const handleDownload = async (certId: string) => {
+    setDownloadingId(certId);
+    try {
+      const result = await consignmentApi.downloadCertificate(certId);
+      if (result.ok) {
+        window.open(result.data.downloadUrl, '_blank', 'noopener,noreferrer');
+      }
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   return (
     <div className="space-y-12 animate-fade-in">
@@ -55,46 +79,55 @@ export default function HeritageArchivePage() {
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-        {certificates.map((cert) => (
-          <Card key={cert.id} className="bg-white border-border shadow-luxury group hover:border-plum transition-all overflow-hidden flex flex-col">
-            <div className="aspect-[4/5] relative bg-muted overflow-hidden">
-               <BrandImage src={cert.imageUrl} alt={cert.artifactName} className="absolute inset-0" imgClassName="object-contain p-8 group-hover:scale-105 transition-transform duration-[2s]" label={cert.artifactName} />
-               <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors" />
-               <div className="absolute top-6 right-6">
-                  <div className="bg-white/90 backdrop-blur-md p-3 border border-gray-100 shadow-xl rounded-full">
-                     <ShieldCheck className="w-5 h-5 text-secondary" />
-                  </div>
-               </div>
-            </div>
-            
-            <div className="p-8 space-y-6 flex-1 flex flex-col">
-               <div className="space-y-2 flex-1">
-                  <div className="flex justify-between items-start">
-                     <Badge variant="outline" className="text-[8px] uppercase tracking-widest border-plum/20 text-plum px-3 py-1">
-                        {cert.status}
-                     </Badge>
-                     <span className="text-[8px] text-gray-400 font-mono uppercase">ID: {cert.id}</span>
-                  </div>
-                  <h3 className="text-xl font-headline font-bold italic text-gray-900">{cert.artifactName}</h3>
-                  <div className="flex items-center space-x-2 text-[9px] font-bold uppercase tracking-widest text-gray-400">
-                     <Award className="w-3 h-3 text-gold" />
-                     <span>Provenance Score: {cert.provenanceScore}%</span>
-                  </div>
-               </div>
+        {certificates.map((cert) => {
+          const artifactName = [cert.brand, cert.model].filter(Boolean).join(' ') || cert.brand;
+          const imageUrl = cert.item?.photoUrls?.[0];
+          const confidence = cert.authentication?.confidence;
+          return (
+            <Card key={cert.id} className="bg-white border-border shadow-luxury group hover:border-plum transition-all overflow-hidden flex flex-col">
+              <div className="aspect-[4/5] relative bg-muted overflow-hidden">
+                 <BrandImage src={imageUrl} alt={artifactName} className="absolute inset-0" imgClassName="object-contain p-8 group-hover:scale-105 transition-transform duration-[2s]" label={artifactName} />
+                 <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors" />
+                 <div className="absolute top-6 right-6">
+                    <div className="bg-white/90 backdrop-blur-md p-3 border border-gray-100 shadow-xl rounded-full">
+                       <ShieldCheck className="w-5 h-5 text-secondary" />
+                    </div>
+                 </div>
+              </div>
 
-               <div className="pt-6 border-t border-border grid grid-cols-2 gap-4">
-                  <Button variant="outline" className="h-10 border-border text-[9px] font-bold uppercase tracking-widest hover:bg-ivory">
-                     <Eye className="w-3.5 h-3.5 mr-2" /> VIEW DOCS
-                  </Button>
-                  <Button className="h-10 bg-black text-white hover:bg-plum text-[9px] font-bold uppercase tracking-widest">
-                     <Download className="w-3.5 h-3.5 mr-2" /> PDF EXPORT
-                  </Button>
-               </div>
-            </div>
-          </Card>
-        ))}
+              <div className="p-8 space-y-6 flex-1 flex flex-col">
+                 <div className="space-y-2 flex-1">
+                    <div className="flex justify-between items-start">
+                       <Badge variant="outline" className="text-[8px] uppercase tracking-widest border-plum/20 text-plum px-3 py-1">
+                          {cert.status}
+                       </Badge>
+                       <span className="text-[8px] text-gray-400 font-mono uppercase">{cert.code}</span>
+                    </div>
+                    <h3 className="text-xl font-headline font-bold italic text-gray-900">{artifactName}</h3>
+                    {confidence && (
+                      <div className="flex items-center space-x-2 text-[9px] font-bold uppercase tracking-widest text-gray-400">
+                         <Award className="w-3 h-3 text-gold" />
+                         <span>{CONFIDENCE_LABEL[confidence] || confidence}</span>
+                      </div>
+                    )}
+                 </div>
 
-        {certificates.length === 0 && (
+                 <div className="pt-6 border-t border-border">
+                    <Button
+                       className="h-10 w-full bg-black text-white hover:bg-plum text-[9px] font-bold uppercase tracking-widest disabled:opacity-30 disabled:pointer-events-none"
+                       disabled={downloadingId === cert.id}
+                       onClick={() => handleDownload(cert.id)}
+                    >
+                       <Download className="w-3.5 h-3.5 mr-2" />
+                       {downloadingId === cert.id ? 'PREPARING…' : 'PDF EXPORT'}
+                    </Button>
+                 </div>
+              </div>
+            </Card>
+          );
+        })}
+
+        {!isLoading && certificates.length === 0 && (
           <div className="col-span-full py-40 text-center border-2 border-dashed border-border flex flex-col items-center space-y-6 opacity-30 rounded-sm">
              <div className="p-8 bg-ivory border border-border rounded-full">
                 <FileText className="w-12 h-12 text-gray-200" />

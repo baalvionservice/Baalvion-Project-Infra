@@ -16,6 +16,7 @@ const markets = require('../config/markets');
 const pricing = require('./pricing');
 const fxRateProvider = require('./fxRateProvider');
 const { sendOrderEmail } = require('./orderNotifications');
+const invoiceService = require('./invoiceService');
 const inventoryClient = require('./inventoryClient');
 const alerts = require('./alerts');
 
@@ -687,9 +688,13 @@ async function recordPayment(storeId, orderId, body) {
         // Commit the cross-service inventory holds (reserved → deducted) on this manual capture.
         // Idempotent + fail-open (an inventory hiccup never re-fails an already-recorded payment).
         await confirmLocks(storeId, locksFromOrder(order), orderId);
-        // Payment-received email (post-commit, fire-and-forget, fail-open; de-duped by idempotencyKey).
+        // Payment-received email + invoice generation (post-commit, fire-and-forget, fail-open;
+        // email de-duped by idempotencyKey, invoice de-duped by unique orderId).
         OrdersOrderItem.findAll({ where: { orderId } })
-            .then((items) => sendOrderEmail('orderPaid', order.toJSON(), items))
+            .then((items) => {
+                sendOrderEmail('orderPaid', order.toJSON(), items);
+                invoiceService.generateInvoiceForOrder(storeId, order.toJSON(), items);
+            })
             .catch(() => {});
     }
     return payment.toJSON();
@@ -881,9 +886,13 @@ async function confirmPayment(storeId, orderId, intentId, actor, verification, s
         // Commit the cross-service inventory holds (reserved → deducted) now that payment captured.
         // Post-commit + idempotent + fail-open (never re-fail a captured order on an inventory hiccup).
         await confirmLocks(storeId, locksFromOrder(order0), orderId);
-        // Payment-received email (post-commit, fire-and-forget, fail-open; de-duped by idempotencyKey).
+        // Payment-received email + invoice generation (post-commit, fire-and-forget, fail-open;
+        // email de-duped by idempotencyKey, invoice de-duped by unique orderId).
         OrdersOrderItem.findAll({ where: { orderId } })
-            .then((items) => sendOrderEmail('orderPaid', fresh.toJSON(), items))
+            .then((items) => {
+                sendOrderEmail('orderPaid', fresh.toJSON(), items);
+                invoiceService.generateInvoiceForOrder(storeId, fresh.toJSON(), items);
+            })
             .catch(() => {});
     }
     return fresh.toJSON();
@@ -903,6 +912,12 @@ async function failPayment(storeId, orderId, intentId, reason) {
     await releaseLocks(storeId, locks, orderId);
     await cache.del(cache.keys.order(orderId));
     console.warn(JSON.stringify({ evt: 'payment.failed', storeId, orderId, intentId, reason }));
+    // Payment-failed email (post-commit, fire-and-forget, fail-open; de-duped by idempotencyKey).
+    // Only this async/webhook-driven path notifies by email — confirmPayment's inline decline
+    // surfaces synchronously to the checkout caller, so the shopper already sees it in the UI.
+    OrdersOrderItem.findAll({ where: { orderId } })
+        .then((items) => sendOrderEmail('paymentFailed', order.toJSON(), items))
+        .catch(() => {});
     // PCL shadow (Phase 1): mirror the failure. Keyed by orderId, so a "failed" arriving AFTER a
     // shadowed webhook capture for the same order surfaces a PCL CONFLICT (state stays CAPTURED) —
     // never wiping a real payment. Fire-and-forget, post-commit, never throws.
@@ -1038,7 +1053,10 @@ async function capturePaymentFromWebhook({ providerOrderId, providerPaymentId, a
         securityAudit.payment('captured', 'allow', { storeId, resource: { type: 'order', id: orderId }, metadata: { via: 'webhook', providerPaymentId } });
         const fresh = await OrdersOrder.findOne({ where: { id: orderId, storeId } });
         OrdersOrderItem.findAll({ where: { orderId } })
-            .then((items) => sendOrderEmail('orderPaid', fresh.toJSON(), items))
+            .then((items) => {
+                sendOrderEmail('orderPaid', fresh.toJSON(), items);
+                invoiceService.generateInvoiceForOrder(storeId, fresh.toJSON(), items);
+            })
             .catch(() => {});
         // PCL shadow (Phase 1): mirror this capture into pcl.payment_state alongside the legacy
         // write. Fire-and-forget, post-commit, never throws — cannot affect this captured order.

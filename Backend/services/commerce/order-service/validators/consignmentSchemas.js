@@ -6,6 +6,7 @@ const PAYOUT_TYPES = ['consignment', 'buyout'];
 const REQUEST_STATUSES = ['submitted', 'quoted', 'accepted', 'rejected', 'received', 'authenticating', 'authenticated', 'listed', 'sold', 'withdrawn'];
 const AUTH_STATUSES = ['pending', 'in_review', 'authenticated', 'rejected'];
 const CONFIDENCE = ['high', 'medium', 'low'];
+const MANUAL_OWNERSHIP_EVENT_TYPES = ['prior_ownership', 'sold', 'returned'];
 
 // One item the seller wishes to consign. askingPrice is the seller's WISH only — never an
 // authoritative sale price (the platform quotes/lists separately). photoUrls/accessories are bounded
@@ -63,6 +64,16 @@ exports.issueCertificateSchema = z.object({
     issuerName: z.string().max(200).optional().nullable(),
     serialNumber: z.string().max(120).optional().nullable(),
     productId: z.string().uuid().optional().nullable(),
+});
+
+// Ops-only manual chain-of-custody entry. Auto-generated event types (consignor_submission,
+// platform_custody) are intentionally NOT in the accepted enum — the service rejects them too.
+exports.addOwnershipRecordSchema = z.object({
+    eventType: z.enum(MANUAL_OWNERSHIP_EVENT_TYPES),
+    ownerLabel: z.string().max(200).optional().nullable(),
+    eventDate: z.string().datetime().optional().nullable(),
+    location: z.string().max(200).optional().nullable(),
+    notes: z.string().max(2000).optional().nullable(),
 });
 
 // Self-service seller profile upsert (authenticated). Money totals (totalPaidOut/totalConsignments)

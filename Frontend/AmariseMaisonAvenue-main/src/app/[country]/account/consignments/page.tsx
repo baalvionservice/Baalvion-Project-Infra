@@ -123,7 +123,11 @@ export default function MyConsignmentsPage() {
             </TableHeader>
             <TableBody>
               {consignments.map((c) => (
-                <TableRow key={c.id} className="hover:bg-ivory/30 transition-colors group">
+                <TableRow
+                  key={c.id}
+                  className="hover:bg-ivory/30 transition-colors group cursor-pointer"
+                  onClick={() => window.location.assign(`/${countryCode}/account/consignments/${c.id}`)}
+                >
                   <TableCell className="pl-8 py-6">
                     <div className="flex items-center space-x-4">
                       <div className="w-10 h-12 bg-muted rounded-sm flex items-center justify-center text-gray-400 border border-border">

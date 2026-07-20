@@ -3,6 +3,7 @@ const { Router } = require('express');
 const rateLimit = require('express-rate-limit');
 const ctrl = require('../controller/orderController');
 const shipmentCtrl = require('../controller/shipmentController');
+const invoiceCtrl = require('../controller/invoiceController');
 const { validate } = require('../middleware/validate');
 const { authMiddleware } = require('../middleware/authMiddleware');
 const { loadStoreRole, requireStoreRole } = require('../middleware/rbacPep');
@@ -55,6 +56,9 @@ router.get('/:orderId', ctrl.getOrder);
 // Customer-readable shipment tracking for an order. No store-role gate (inherits optionalAuth);
 // ownership (owner OR guest-session OR staff) is enforced in shipmentService.listOrderShipments.
 router.get('/:orderId/shipments', shipmentCtrl.listShipments);
+// Customer-readable invoice for an order. No store-role gate (inherits optionalAuth); ownership
+// (owner OR guest-session OR staff) is enforced in invoiceService.getOrderInvoice.
+router.get('/:orderId/invoice', invoiceCtrl.getOrderInvoice);
 router.post('/:orderId/payments/intent', checkoutLimit, validate(createPaymentIntentSchema), ctrl.createPaymentIntent);
 router.post('/:orderId/payments/confirm', checkoutLimit, validate(confirmPaymentSchema), ctrl.confirmPayment);
 

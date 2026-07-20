@@ -11,6 +11,9 @@ const cache = require('../service/cacheService');
 cache.get = async () => null; cache.set = async () => {}; cache.del = async () => {}; cache.delPattern = async () => {};
 
 const models = require('../models');
+if (models.sequelize) models.sequelize.transaction = async (fn) => fn({});
+const cartEventsOutbox = require('../service/cartEventsOutbox');
+cartEventsOutbox.enqueueCartEvent = async () => {};
 const rbacPep = require('../middleware/rbacPep');
 const captured = [];
 rbacPep.audit.emit = (e) => captured.push(e);

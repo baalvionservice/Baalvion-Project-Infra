@@ -4,19 +4,20 @@
 export {
   generateSignedUploadUrl,
   generateSignedDownloadUrl,
+  putObject,
   deleteObject,
   copyObject,
   getObjectMetadata,
-} from './storage';
-export type { ObjectMetadata, SignedUrlOptions } from './storage';
+} from './storage.ts';
+export type { ObjectMetadata, SignedUrlOptions } from './storage.ts';
 
 // Image processing utilities
 export {
   processImage,
   generateThumbnail,
   extractMetadata,
-} from './image';
-export type { ProcessImageOptions, ImageMetadata, ImageFormat } from './image';
+} from './image.ts';
+export type { ProcessImageOptions, ImageMetadata, ImageFormat } from './image.ts';
 
 // Access control, key building, and validation
 export {
@@ -26,7 +27,7 @@ export {
   ALLOWED_IMAGE_TYPES,
   ALLOWED_DOC_TYPES,
   ALLOWED_VIDEO_TYPES,
-} from './acl';
+} from './acl.ts';
 export type {
   UploadOwner,
   UploadPath,
@@ -34,7 +35,7 @@ export type {
   AllowedDocType,
   AllowedVideoType,
   AllowedMimeType,
-} from './acl';
+} from './acl.ts';
 
 // Magic-byte content validation, malware-scan hooks, and production fail-fast guards
 export {
@@ -43,10 +44,10 @@ export {
   scanContent,
   assertS3ConfiguredForProduction,
   requireScannerInProduction,
-} from './validate';
+} from './validate.ts';
 export type {
   DetectedType,
   ContentValidationResult,
   ScanResult,
   FileScanner,
-} from './validate';
+} from './validate.ts';

@@ -30,6 +30,7 @@ const ConsignmentRequest         = require('./consignmentRequest')(sequelize, Da
 const ConsignmentItem            = require('./consignmentItem')(sequelize, DataTypes);
 const ItemAuthentication         = require('./itemAuthentication')(sequelize, DataTypes);
 const CertificateOfAuthenticity  = require('./certificateOfAuthenticity')(sequelize, DataTypes);
+const ItemOwnershipRecord        = require('./itemOwnershipRecord')(sequelize, DataTypes);
 // Wishlist + appointments persistence.
 const Wishlist           = require('./wishlist')(sequelize, DataTypes);
 const WishlistItem       = require('./wishlistItem')(sequelize, DataTypes);
@@ -78,6 +79,9 @@ CertificateOfAuthenticity.belongsTo(ConsignmentItem, { foreignKey: 'consignmentI
 ItemAuthentication.hasOne(CertificateOfAuthenticity, { foreignKey: 'itemAuthenticationId', as: 'certificate' });
 CertificateOfAuthenticity.belongsTo(ItemAuthentication, { foreignKey: 'itemAuthenticationId', as: 'authentication' });
 
+ConsignmentItem.hasMany(ItemOwnershipRecord, { foreignKey: 'consignmentItemId', as: 'ownershipRecords' });
+ItemOwnershipRecord.belongsTo(ConsignmentItem, { foreignKey: 'consignmentItemId', as: 'item' });
+
 // Wishlist associations.
 Wishlist.hasMany(WishlistItem, { foreignKey: 'wishlistId', as: 'items' });
 WishlistItem.belongsTo(Wishlist, { foreignKey: 'wishlistId', as: 'wishlist' });
@@ -101,6 +105,7 @@ const db = {
     ConsignmentItem,
     ItemAuthentication,
     CertificateOfAuthenticity,
+    ItemOwnershipRecord,
     Wishlist,
     WishlistItem,
     Appointment,

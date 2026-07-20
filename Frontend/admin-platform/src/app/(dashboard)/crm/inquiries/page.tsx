@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { MessageCircle, Search, Crown } from 'lucide-react';
+import { MessageCircle, Search, Crown, Kanban } from 'lucide-react';
 import Link from 'next/link';
 import PageHeader from '@/components/common/PageHeader';
 import StatusBadge from '@/components/common/StatusBadge';
@@ -54,6 +54,11 @@ export default function InquiriesPage() {
       <PageHeader
         title="Inquiries"
         description={`${total} private sales inquiries — the Amarisé concierge dialogue queue`}
+        actions={
+          <Link href="/crm/inquiries/pipeline">
+            <Button variant="outline" size="sm"><Kanban className="mr-1.5 h-3.5 w-3.5" /> Pipeline view</Button>
+          </Link>
+        }
       />
 
       <div className="flex flex-wrap gap-3">

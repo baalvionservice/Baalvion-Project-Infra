@@ -255,6 +255,9 @@ export interface Inquiry {
   status: InquiryStatus;
   message?: string | null;
   messages?: InquiryMessage[];
+  assignedTo?: string | null;
+  assignedToName?: string | null;
+  followUpAt?: string | null;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -270,4 +273,7 @@ export interface InquiryPayload {
   serviceId?: string | null;
   status?: InquiryStatus;
   message?: string | null;
+  assignedTo?: string | null;
+  assignedToName?: string | null;
+  followUpAt?: string | null;
 }

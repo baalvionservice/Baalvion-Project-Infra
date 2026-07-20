@@ -489,6 +489,23 @@ export interface Consignment {
   updatedAt?: string;
 }
 
+/** One event in an item's authenticity timeline (GET /requests/:id/items/:itemId/timeline). */
+export interface TimelineEvent {
+  type: string;
+  date?: string | null;
+  label?: string | null;
+  location?: string | null;
+  notes?: string | null;
+  confidence?: "high" | "medium" | "low" | null;
+  code?: string;
+  certificateId?: string;
+}
+
+export interface ItemTimeline {
+  itemId: string;
+  events: TimelineEvent[];
+}
+
 /** The authenticated seller's profile (GET/PUT /sellers/me). */
 export interface SellerProfile {
   id?: string;
@@ -553,6 +570,31 @@ export interface CertificateVerification {
     issuedAt?: string;
     status?: string;
   };
+}
+
+/** Signed download link for a certificate's PDF (GET /certificates/:id/download, auth required). */
+export interface CertificateDownload {
+  downloadUrl: string;
+}
+
+/** A certificate the signed-in seller was issued (GET /certificates/mine, auth required). */
+export interface MyCertificate {
+  id: string;
+  code: string;
+  brand: string;
+  model?: string | null;
+  conditionGrade?: string | null;
+  serialNumber?: string | null;
+  issuerName?: string | null;
+  issuedAt?: string | null;
+  status: "valid" | "revoked";
+  pdfUrl?: string | null;
+  item?: {
+    photoUrls?: string[];
+  } | null;
+  authentication?: {
+    confidence?: "high" | "medium" | "low" | null;
+  } | null;
 }
 
 export interface Invoice {

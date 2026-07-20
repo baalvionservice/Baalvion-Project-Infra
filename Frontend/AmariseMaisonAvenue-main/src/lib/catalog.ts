@@ -14,6 +14,7 @@ import type { Product, Department, Category, Collection, CountryCode } from './t
 import type { SidebarSection } from './mock-category-data';
 import { isSupportedCountry } from './i18n/countries';
 import { resolveConfiguredStoreId } from './store-id';
+import { logger } from './logger';
 
 // NEXT_PUBLIC_COMMERCE_URL is the PUBLIC storefront base (no auth), ending at `/api/v1`.
 // This module appends `/commerce/storefront/:storeId/...`. The AUTHED/admin commerce base
@@ -44,8 +45,7 @@ const EMPTY_PAGE: ProductsPage = { items: [], total: 0, page: 1, pageSize: 20, t
 async function getJson<T>(path: string, fallback: T): Promise<T> {
   const storeId = resolveStoreId();
   if (!storeId) {
-    // eslint-disable-next-line no-console -- deliberate startup diagnostic: misconfigured storefront (no store id)
-    console.warn('[catalog] NEXT_PUBLIC_STORE_ID is not set — cannot resolve storefront');
+    logger.warn('catalog', 'NEXT_PUBLIC_STORE_ID is not set — cannot resolve storefront');
     return fallback;
   }
   try {
@@ -54,8 +54,7 @@ async function getJson<T>(path: string, fallback: T): Promise<T> {
     const json = await res.json();
     return (json && json.data !== undefined ? json.data : fallback) as T;
   } catch (err) {
-    // eslint-disable-next-line no-console -- deliberate operator diagnostic: storefront fetch failed, falling back
-    console.error('[catalog] fetch failed', path, err);
+    logger.error('catalog', 'Storefront fetch failed, falling back', err, { path });
     return fallback;
   }
 }

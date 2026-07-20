@@ -49,6 +49,7 @@ export default function JournalArticlePage() {
     getEditorial(id as string)
       .then((ed) => { if (active) { setCmsArticle(ed); setCmsResolved(true); } })
       .catch(() => { if (active) setCmsResolved(true); });
+    return () => { active = false; };
   }, [id]);
 
   const article = cmsArticle

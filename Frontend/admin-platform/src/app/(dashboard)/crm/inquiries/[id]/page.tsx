@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { ChevronLeft, Send, Crown, Globe, Mail, Package } from 'lucide-react';
+import { ChevronLeft, Send, Crown, Globe, Mail, Package, UserCircle, CalendarClock, X } from 'lucide-react';
 import Link from 'next/link';
 import PageHeader from '@/components/common/PageHeader';
 import StatusBadge from '@/components/common/StatusBadge';
@@ -11,11 +11,14 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import UserPicker from '@/components/rbac/UserPicker';
 import { cn } from '@/lib/utils/cn';
 import { formatDate } from '@/lib/utils/format';
 import { useInquiry, useAddInquiryMessage, useUpdateInquiry } from '@/lib/queries/crm.queries';
 import { useUIStore } from '@/lib/store/uiStore';
 import type { InquiryStatus } from '@/lib/types/crm.types';
+import type { AdminUser } from '@/lib/types/user.types';
 
 const STATUS_OPTIONS: InquiryStatus[] = ['new', 'contacted', 'qualifying', 'presenting', 'closing', 'won', 'lost'];
 
@@ -98,6 +101,59 @@ export default function InquiryDetailPage() {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs text-muted-foreground">Assigned to</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className="w-full justify-start h-9 font-normal">
+                    <UserCircle className="mr-2 h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                    <span className="truncate">{inquiry.assignedToName || 'Unassigned'}</span>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-72 p-2" align="start">
+                  <UserPicker
+                    selected={inquiry.assignedTo ? ({ id: Number(inquiry.assignedTo), fullName: inquiry.assignedToName } as AdminUser) : null}
+                    onSelect={(user) =>
+                      updateInquiry.mutate({
+                        id: inquiry.id,
+                        payload: user
+                          ? { assignedTo: String(user.id), assignedToName: user.fullName || user.email }
+                          : { assignedTo: null, assignedToName: null },
+                      })
+                    }
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs text-muted-foreground">Follow up</label>
+              <div className="flex items-center gap-2">
+                <div className="relative flex-1">
+                  <CalendarClock className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+                  <input
+                    type="date"
+                    className="w-full h-9 rounded-md border border-input bg-transparent pl-9 pr-2 text-sm"
+                    value={inquiry.followUpAt ? inquiry.followUpAt.slice(0, 10) : ''}
+                    onChange={(e) =>
+                      updateInquiry.mutate({
+                        id: inquiry.id,
+                        payload: { followUpAt: e.target.value ? new Date(e.target.value).toISOString() : null },
+                      })
+                    }
+                  />
+                </div>
+                {inquiry.followUpAt && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-9 w-9 p-0"
+                    onClick={() => updateInquiry.mutate({ id: inquiry.id, payload: { followUpAt: null } })}
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </Button>
+                )}
+              </div>
             </div>
             <InfoRow icon={<Crown className="h-3.5 w-3.5" />} label="Lead Tier" value={inquiry.leadTier ? `Tier ${inquiry.leadTier}` : '—'} />
             <InfoRow icon={<Globe className="h-3.5 w-3.5" />} label="Market" value={inquiry.country ?? '—'} />

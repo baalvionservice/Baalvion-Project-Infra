@@ -90,7 +90,16 @@ export interface LoginResponse {
 
 export interface MfaVerifyPayload {
   code: string;
-  tempToken: string;
+  // Only set for the login-time challenge flow (POST /mfa/verify keyed by a pre-auth tempToken).
+  // Omitted for the authenticated self-service setup-confirmation flow (Settings > Security),
+  // where the bearer token already identifies the user.
+  tempToken?: string;
+}
+
+export interface MfaEnableResponse {
+  qrCodeUrl: string;
+  secret: string;
+  recoveryCodes: string[];
 }
 
 export interface RefreshResponse {

@@ -107,6 +107,24 @@ mountEntity('/crm/inquiries', inquiries, {
     createValidator: validateBody(inquiryCreateSchema),
 });
 
+// Staff follow-up queue: inquiries whose follow-up date has arrived (or passed) and aren't
+// already closed out. This IS the "reminder" — a live, always-current queue rather than a
+// separate scheduled-notification system, so there's nothing to go stale or fail to fire.
+router.get('/crm/inquiries/due-for-follow-up', authMiddleware, async (req, res) => {
+    const { Op } = require('sequelize');
+    const brandId = req.query.brandId || DEFAULT_BRAND;
+    const rows = await db.Inquiry.findAll({
+        where: {
+            brandId,
+            followUpAt: { [Op.lte]: new Date() },
+            status: { [Op.notIn]: ['won', 'lost'] },
+        },
+        order: [['followUpAt', 'ASC']],
+        limit: 200,
+    });
+    return sendSuccess(req, res, rows);
+});
+
 // PII-safe guest lookup (mirrors order-service's guest order-lookup pattern): a customer who
 // isn't staff-authenticated can still check the status/thread of THEIR OWN inquiry by proving
 // they know the id AND the email it was raised under — never by id alone. Uniform 404 on any

@@ -9,6 +9,7 @@ const {
     updateConsignmentStatusSchema,
     recordAuthenticationSchema,
     issueCertificateSchema,
+    addOwnershipRecordSchema,
     upsertSellerProfileSchema,
 } = require('../validators/consignmentSchemas');
 
@@ -18,6 +19,12 @@ const router = Router({ mergeParams: true });
 
 // ── PUBLIC certificate verification. No auth — MUST precede any '/:id' so 'certificates' is literal.
 router.get('/certificates/:code/verify', ctrl.verifyCertificate);
+// ── Owner(consignor)/guest/staff: download a certificate's PDF (ownership enforced in-service).
+// Auth required (no guest-session certificate access today — issuance is always admin/ops-driven,
+// and the consigning owner is expected to be signed in to view their account).
+router.get('/certificates/:id/download', authMiddleware, ctrl.downloadCertificate);
+// ── Customer-facing "my certificates". Auth required (no guest variant — see service comment).
+router.get('/certificates/mine', authMiddleware, ctrl.listMyCertificates);
 
 // ── Authenticated seller self-service profile. Literal '/sellers' precedes '/requests/:id'.
 router.get('/sellers/me', authMiddleware, ctrl.getSellerProfile);
@@ -31,9 +38,12 @@ router.get('/requests/mine', authMiddleware, ctrl.listMyConsignments);
 router.post('/requests', validate(submitConsignmentSchema), ctrl.submitConsignment);
 // ── Owner/guest/staff: read a single request (ownership enforced in-service).
 router.get('/requests/:id', ctrl.getConsignment);
-// ── Admin/ops: transition + authentication + certificate issuance.
+// ── Owner/guest/staff: an item's full authenticity timeline (ownership enforced in-service).
+router.get('/requests/:id/items/:itemId/timeline', ctrl.getItemTimeline);
+// ── Admin/ops: transition + authentication + certificate issuance + manual custody entries.
 router.patch('/requests/:id/status', authMiddleware, loadStoreRole, requireStoreRole('ops_manager'), validate(updateConsignmentStatusSchema), ctrl.updateConsignmentStatus);
 router.post('/requests/:id/items/:itemId/authentication', authMiddleware, loadStoreRole, requireStoreRole('ops_manager'), validate(recordAuthenticationSchema), ctrl.recordAuthentication);
 router.post('/requests/:id/items/:itemId/certificate', authMiddleware, loadStoreRole, requireStoreRole('ops_manager'), validate(issueCertificateSchema), ctrl.issueCertificate);
+router.post('/requests/:id/items/:itemId/ownership', authMiddleware, loadStoreRole, requireStoreRole('ops_manager'), validate(addOwnershipRecordSchema), ctrl.addOwnershipRecord);
 
 module.exports = router;

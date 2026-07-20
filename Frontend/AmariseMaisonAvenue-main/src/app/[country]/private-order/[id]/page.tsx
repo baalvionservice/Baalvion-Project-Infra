@@ -56,11 +56,11 @@ export default function PrivateOrderPage() {
     };
   }, []);
 
+  const [submitting, setSubmitting] = useState(false);
+
   if (!product) {
     return <div className="py-40 text-center font-headline text-3xl text-gray-900">Artifact not found in registry.</div>;
   }
-
-  const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

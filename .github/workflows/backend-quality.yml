@@ -68,15 +68,18 @@ jobs:
         run: pnpm exec turbo run type-check --filter="./Backend/services/*/*" --continue
 
       # ── Gate 3: backend node:test suites (blocking) ───────────────────────────
-      # Run only services whose test script is `node --test` (pure, no DB/network);
-      # this deliberately excludes jest/vitest services until their runners are wired.
+      # Run every service whose test script STARTS WITH `node --test` (pure, no DB/network) —
+      # this deliberately excludes jest/vitest services until their runners are wired. Matches
+      # as a prefix (not an exact string) because several real suites pass extra flags/globs
+      # (e.g. order-service's `node --test --test-force-exit tests/*.test.js`) — the previous
+      # exact-match pattern silently excluded those services from this gate entirely.
       - name: Backend Tests (node:test)
         run: |
           set -e
           failed=0
           for pj in Backend/services/*/*/package.json; do
             d=$(dirname "$pj")
-            if grep -Eq '"test"[[:space:]]*:[[:space:]]*"node --test"' "$pj"; then
+            if grep -Eq '"test"[[:space:]]*:[[:space:]]*"node --test' "$pj"; then
               echo "::group::node --test $d"
               if (cd "$d" && node --test); then
                 echo "ok: $d"

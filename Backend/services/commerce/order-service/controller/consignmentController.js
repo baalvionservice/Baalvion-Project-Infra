@@ -2,6 +2,7 @@
 const { sendSuccess, sendPaginated } = require('../utils/response');
 const consignmentService = require('../service/consignmentService');
 const { actorOf } = require('../utils/actor');
+const { generateSignedDownloadUrl } = require('@baalvion/upload');
 
 // Shopper/guest: submit a consignment request (+items). Ownership bound in-service (userId or
 // signed guest session).
@@ -28,6 +29,18 @@ const getConsignment = async (req, res, next) => {
     catch (err) { return next(err); }
 };
 
+// Owner/guest/staff: the full authenticity timeline for one item (ownership enforced in-service).
+const getItemTimeline = async (req, res, next) => {
+    try { return sendSuccess(req, res, await consignmentService.getItemTimeline(req.params.storeId, req.params.id, req.params.itemId, actorOf(req))); }
+    catch (err) { return next(err); }
+};
+
+// Admin/ops: record a manual chain-of-custody event (prior owner, sold, returned).
+const addOwnershipRecord = async (req, res, next) => {
+    try { return sendSuccess(req, res, await consignmentService.addOwnershipRecord(req.params.storeId, req.params.id, req.params.itemId, req.validated, req.auth.userId), 201); }
+    catch (err) { return next(err); }
+};
+
 // Admin/ops: advance a consignment along the forward-only status machine.
 const updateConsignmentStatus = async (req, res, next) => {
     try { return sendSuccess(req, res, await consignmentService.updateConsignmentStatus(req.params.storeId, req.params.id, req.validated, req.auth.userId)); }
@@ -46,10 +59,26 @@ const issueCertificate = async (req, res, next) => {
     catch (err) { return next(err); }
 };
 
+// Customer-facing: the authenticated seller's own issued certificates.
+const listMyCertificates = async (req, res, next) => {
+    try { return sendSuccess(req, res, await consignmentService.listMyCertificates(req.params.storeId, req.auth && req.auth.userId)); }
+    catch (err) { return next(err); }
+};
+
 // PUBLIC: verify a certificate by its code. Returns only safe display fields.
 const verifyCertificate = async (req, res, next) => {
     try { return sendSuccess(req, res, await consignmentService.verifyCertificate(req.params.storeId, req.params.code)); }
     catch (err) { return next(err); }
+};
+
+// Owner(consignor)/guest/staff: download a certificate's PDF (ownership enforced in-service). The
+// stored pdfUrl is an S3 object key, not a public URL — mint a short-lived signed download link.
+const downloadCertificate = async (req, res, next) => {
+    try {
+        const cert = await consignmentService.getCertificateForDownload(req.params.storeId, req.params.id, actorOf(req));
+        const downloadUrl = await generateSignedDownloadUrl(cert.pdfUrl);
+        return sendSuccess(req, res, { ...cert, downloadUrl });
+    } catch (err) { return next(err); }
 };
 
 // Authenticated seller: read own profile.
@@ -69,10 +98,14 @@ module.exports = {
     listMyConsignments,
     listConsignments,
     getConsignment,
+    getItemTimeline,
+    addOwnershipRecord,
     updateConsignmentStatus,
     recordAuthentication,
     issueCertificate,
     verifyCertificate,
+    listMyCertificates,
+    downloadCertificate,
     getSellerProfile,
     upsertSellerProfile,
 };

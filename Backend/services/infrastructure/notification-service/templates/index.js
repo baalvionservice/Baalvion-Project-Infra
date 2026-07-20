@@ -191,6 +191,45 @@ const TEMPLATES = {
 `, 'Your payment for {{orderNumber}} was successful'),
     },
 
+    // Payment declined/failed (sent when a gateway/webhook-driven payment fails asynchronously —
+    // NOT sent on a synchronous checkout-time decline, since the shopper already sees that in the UI)
+    paymentFailed: {
+        subject: 'Payment failed for {{orderNumber}}',
+        preview: 'We were unable to process your payment for {{orderNumber}}',
+        body: baseLayout(`
+<h1 class="h1">Payment unsuccessful{{#if name}}, {{name}}{{/if}}</h1>
+<div class="alert-box">
+  <p style="margin:0;font-size:14px;color:#7f1d1d"><strong>We were unable to process your payment</strong> for order <strong>{{orderNumber}}</strong>. No charge has been made.</p>
+</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0;border-collapse:collapse">
+  <thead>
+    <tr>
+      <th align="left"  style="padding:8px 0;font-size:12px;color:#a1a1aa;border-bottom:1px solid #e4e4e7;text-transform:uppercase;letter-spacing:0.5px">Item</th>
+      <th align="center" style="padding:8px 0;font-size:12px;color:#a1a1aa;border-bottom:1px solid #e4e4e7;text-transform:uppercase;letter-spacing:0.5px">Qty</th>
+      <th align="right" style="padding:8px 0;font-size:12px;color:#a1a1aa;border-bottom:1px solid #e4e4e7;text-transform:uppercase;letter-spacing:0.5px">Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each items}}
+    <tr>
+      <td align="left"  style="padding:10px 0;font-size:14px;color:#09090b;border-bottom:1px solid #f4f4f5">{{this.name}}</td>
+      <td align="center" style="padding:10px 0;font-size:14px;color:#52525b;border-bottom:1px solid #f4f4f5">{{this.quantity}}</td>
+      <td align="right" style="padding:10px 0;font-size:14px;color:#09090b;border-bottom:1px solid #f4f4f5">{{this.total}} {{../currency}}</td>
+    </tr>
+    {{/each}}
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2" align="right" style="padding:14px 0 0;font-size:15px;font-weight:700;color:#09090b">Amount due</td>
+      <td align="right" style="padding:14px 0 0;font-size:15px;font-weight:700;color:#09090b">{{total}} {{currency}}</td>
+    </tr>
+  </tfoot>
+</table>
+<a href="{{orderUrl}}" class="btn">Retry Payment</a>
+<p class="text" style="font-size:13px;color:#a1a1aa">Your order is being held, but will be released if payment isn't completed soon. Contact support if you believe this is an error.</p>
+`, 'We were unable to process your payment for {{orderNumber}}'),
+    },
+
     // Impersonation notification (sent to admin + target)
     impersonationAlert: {
         subject: '[Admin] Impersonation session started',

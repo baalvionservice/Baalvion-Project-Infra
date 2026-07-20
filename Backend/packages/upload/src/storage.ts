@@ -72,6 +72,27 @@ export async function generateSignedDownloadUrl(
 // ─── Object Operations ────────────────────────────────────────────────────────
 
 /**
+ * Upload bytes generated server-side (e.g. a rendered PDF) directly to S3.
+ * Returns the object key on success — callers persist this as the canonical
+ * reference (a signed download URL can be minted later via generateSignedDownloadUrl).
+ */
+export async function putObject(
+  key: string,
+  body: Buffer,
+  contentType: string,
+): Promise<string> {
+  await s3.send(
+    new PutObjectCommand({
+      Bucket: BUCKET,
+      Key: key,
+      Body: body,
+      ContentType: contentType,
+    }),
+  );
+  return key;
+}
+
+/**
  * Delete an object from S3 by key.
  */
 export async function deleteObject(key: string): Promise<void> {

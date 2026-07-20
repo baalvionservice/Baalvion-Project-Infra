@@ -52,7 +52,7 @@ function buildData(order, items, recipient) {
 
 /**
  * Send a transactional order email. Never throws.
- * @param {'orderConfirmation'|'orderPaid'} templateName
+ * @param {'orderConfirmation'|'orderPaid'|'paymentFailed'} templateName
  * @param {object} order  the committed order (toJSON() shape or model instance)
  * @param {Array}  items  the order's line items
  */

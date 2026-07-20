@@ -22,6 +22,10 @@ module.exports = (sequelize, DataTypes) => {
         status: { type: DataTypes.STRING, defaultValue: 'new' },
         message: { type: DataTypes.TEXT },
         messages: { type: DataTypes.JSONB, defaultValue: [] },
+        // Sales pipeline: which staff member owns this lead, and when they should next follow up.
+        assignedTo: { type: DataTypes.BIGINT, allowNull: true },
+        assignedToName: { type: DataTypes.STRING, allowNull: true },
+        followUpAt: { type: DataTypes.DATE, allowNull: true },
     }, {
         schema: 'crm',
         tableName: 'inquiries',

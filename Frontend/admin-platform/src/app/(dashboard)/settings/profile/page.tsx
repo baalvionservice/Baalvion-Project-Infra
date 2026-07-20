@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/lib/store/authStore';
 import { authApi } from '@/lib/api/auth';
+import MfaSetup from '@/components/settings/MfaSetup';
 import { toast } from 'sonner';
 
 const initials = (name: string) =>
@@ -122,9 +123,12 @@ export default function ProfilePage() {
           <CardTitle className="text-base">Security</CardTitle>
           <CardDescription>Manage credentials and platform settings</CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-wrap gap-3">
-          <Button asChild variant="outline"><Link href="/settings">Platform settings</Link></Button>
-          <Button asChild variant="outline"><Link href="/sessions">Active sessions</Link></Button>
+        <CardContent className="space-y-4">
+          <MfaSetup />
+          <div className="flex flex-wrap gap-3">
+            <Button asChild variant="outline"><Link href="/settings">Platform settings</Link></Button>
+            <Button asChild variant="outline"><Link href="/sessions">Active sessions</Link></Button>
+          </div>
         </CardContent>
       </Card>
     </div>

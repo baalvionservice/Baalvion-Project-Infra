@@ -25,6 +25,9 @@ import type {
   StoreAppointment,
   StoreAppointmentType,
   CertificateVerification,
+  CertificateDownload,
+  MyCertificate,
+  ItemTimeline,
 } from './types';
 
 // ── Base URLs (each service mounts its routes under /api/v1) ─────────────────
@@ -1158,6 +1161,31 @@ export const consignmentApi = {
     if (!storeId) return missingStore<CertificateVerification>();
     return apiFetch<CertificateVerification>(
       `${CONSIGNMENT_BASE}/${storeId}/certificates/${encodeURIComponent(code)}/verify`,
+    );
+  },
+
+  // An item's full authenticity timeline (ownership enforced server-side).
+  getItemTimeline(requestId: string, itemId: string): Promise<ApiResult<ItemTimeline>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<ItemTimeline>();
+    return apiFetch<ItemTimeline>(`${CONSIGNMENT_BASE}/${storeId}/requests/${requestId}/items/${itemId}/timeline`);
+  },
+
+  // The authenticated seller's own issued certificates (their submission history).
+  listMyCertificates(): Promise<ApiResult<MyCertificate[]>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<MyCertificate[]>();
+    return apiFetch<MyCertificate[]>(`${CONSIGNMENT_BASE}/${storeId}/certificates/mine`);
+  },
+
+  // Owner(consignor)/staff: mint a short-lived signed download link for a certificate's PDF.
+  // Requires auth. Ownership (the consignor who submitted the item, or store staff) is enforced
+  // server-side.
+  downloadCertificate(id: string): Promise<ApiResult<CertificateDownload>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<CertificateDownload>();
+    return apiFetch<CertificateDownload>(
+      `${CONSIGNMENT_BASE}/${storeId}/certificates/${encodeURIComponent(id)}/download`,
     );
   },
 

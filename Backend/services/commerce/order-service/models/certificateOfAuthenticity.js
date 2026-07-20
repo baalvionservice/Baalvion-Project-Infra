@@ -19,5 +19,7 @@ module.exports = function(sequelize, DataTypes) {
         revokedReason: { type: DataTypes.STRING(500), allowNull: true },
         // sha256 of the canonical certificate fields — tamper/integrity check on public verify.
         verificationHash: { type: DataTypes.STRING(64), allowNull: true },
+        // S3 object key of the rendered certificate PDF, set once issuance generates it.
+        pdfUrl: { type: DataTypes.STRING(500), allowNull: true },
     }, { schema: 'orders', underscored: true, timestamps: true, tableName: 'consignment_certificates' });
 };

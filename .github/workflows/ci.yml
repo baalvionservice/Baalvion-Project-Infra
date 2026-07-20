@@ -58,11 +58,19 @@ jobs:
       # script only where it exists, with the package's own eslint + config).
       # A root `pnpm exec eslint` cannot work: the root has no eslint, and the
       # target packages use incompatible config styles.
-      # Blocking: the app-level lint debt for the two scoped apps has been
-      # burned down (proxy-baalvionstack-web + baalvion-admin-platform are
-      # clean — zero errors). Expand the --filter list as more apps are cleaned.
+      # Blocking: the app-level lint debt for the three scoped apps has been
+      # burned down (proxy-baalvionstack-web + baalvion-admin-platform +
+      # amarise-maison-avenue-web are clean — zero errors). Expand the
+      # --filter list as more apps are cleaned.
       - name: Run ESLint
-        run: pnpm exec turbo run lint --filter=proxy-baalvionstack-web --filter=baalvion-admin-platform
+        run: pnpm exec turbo run lint --filter=proxy-baalvionstack-web --filter=baalvion-admin-platform --filter=amarise-maison-avenue-web
+
+      # Vitest unit/component suites for the two apps that have them wired up
+      # (amarise-maison-avenue-web: checkout policy + UI components; baalvion-admin-platform:
+      # RBAC permission logic). Expand the --filter list as more apps get real test suites —
+      # do not add an app here until its suite is genuinely green (mirrors the ESLint gate above).
+      - name: Run Frontend Unit Tests
+        run: pnpm exec turbo run test --filter=amarise-maison-avenue-web --filter=baalvion-admin-platform
 
       - name: TypeScript Typecheck
         run: |

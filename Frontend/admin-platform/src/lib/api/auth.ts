@@ -7,6 +7,7 @@ import type {
   LoginResponse,
   AuthUser,
   MfaVerifyPayload,
+  MfaEnableResponse,
   RefreshResponse,
   ForgotPasswordPayload,
   ResetPasswordPayload,
@@ -135,7 +136,7 @@ export const authApi = {
   mfaVerify: (payload: MfaVerifyPayload) =>
     authClient.post<ApiResponse<LoginResponse>>('/mfa/verify', payload),
 
-  mfaEnable: () => authClient.post<ApiResponse<{ qrCode: string; secret: string }>>('/mfa/enable'),
+  mfaEnable: () => authClient.post<ApiResponse<MfaEnableResponse>>('/mfa/enable'),
 
   mfaDisable: (code: string) =>
     authClient.delete<ApiResponse<void>>('/mfa/disable', { data: { code } }),
