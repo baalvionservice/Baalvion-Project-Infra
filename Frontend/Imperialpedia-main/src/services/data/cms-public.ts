@@ -192,13 +192,37 @@ async function cmsFetchOnce<T>(path: string): Promise<T> {
   if (!res.ok) {
     // 404 (e.g. unknown slug) is an expected "not found", not a transport failure.
     if (res.status === 404) {
-      const err = new Error('CMS_NOT_FOUND') as Error & { status?: number };
+      // A renamed slug's old URL comes back as a 404 whose body carries where the
+      // content moved to (see publicService.js's CONTENT_MOVED branch) instead of
+      // a bare "not found" — surface it so callers can redirect instead of losing
+      // the link entirely.
+      const body = await res.json().catch(() => null) as
+        | { error?: { details?: { redirectTo?: string } } }
+        | null;
+      const err = new Error('CMS_NOT_FOUND') as Error & { status?: number; redirectTo?: string };
       err.status = 404;
+      err.redirectTo = body?.error?.details?.redirectTo;
       throw err;
     }
     throw new Error(`cms-service ${res.status} for ${path}`);
   }
   return res.json() as Promise<T>;
+}
+
+/**
+ * Looks up whether `slug` was renamed since it was last linked — cms-service
+ * records a `cms_seo_redirects` row on every content rename (see
+ * contentService.updateContent) and surfaces the current slug via this 404's
+ * error details. Never throws: a lookup failure here must fall through to the
+ * caller's normal "not found" handling, not break the page.
+ */
+export async function getContentRedirectSlug(slug: string): Promise<string | null> {
+  try {
+    await cmsFetchOnce<CmsItemEnvelope>(`/content/${encodeURIComponent(slug)}`);
+    return null; // content exists at this slug — nothing to redirect
+  } catch (error) {
+    return (error as { redirectTo?: string } | null)?.redirectTo ?? null;
+  }
 }
 
 async function cmsFetch<T>(path: string): Promise<T> {

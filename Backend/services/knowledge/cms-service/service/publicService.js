@@ -2,7 +2,7 @@
 const { Op } = require('sequelize');
 const { hmacSign, safeCompare } = require('@baalvion/crypto');
 const { decideAccess } = require('@baalvion/entitlements');
-const { CmsWebsite, CmsContent, CmsCategory, CmsTag, CmsAuthor, CmsContentEntityMention } = require('../models');
+const { CmsWebsite, CmsContent, CmsCategory, CmsTag, CmsAuthor, CmsContentEntityMention, CmsSeoRedirect } = require('../models');
 const { AppError } = require('../utils/errors');
 const cache = require('./cacheService');
 const config = require('../config/appConfig');
@@ -42,7 +42,20 @@ async function getPublicContent(websiteSlug, slug, { callerId } = {}) {
                 },
             ],
         });
-        if (!content) throw new AppError('NOT_FOUND', 'Content not found', 404);
+        if (!content) {
+            // The slug may have been renamed (contentService.updateContent records a
+            // redirect on every rename) — surface where it moved instead of a bare
+            // 404, so callers can send the visitor/crawler on rather than losing them.
+            const redirect = await CmsSeoRedirect.findOne({
+                where: { websiteId: website.id, sourceUrl: slug, isActive: true },
+                attributes: ['id', 'targetUrl'],
+            });
+            if (redirect) {
+                void redirect.increment('hitCount'); // fire-and-forget, fail-open
+                throw new AppError('CONTENT_MOVED', 'Content moved to a new URL', 404, { redirectTo: redirect.targetUrl });
+            }
+            throw new AppError('NOT_FOUND', 'Content not found', 404);
+        }
 
         data = content.toJSON();
         await cache.set(cacheKey, data, config.cache.publicTtl);
