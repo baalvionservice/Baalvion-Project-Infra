@@ -122,7 +122,7 @@
       "file-type@21": "21.3.2",
       "@modelcontextprotocol/sdk": "1.26.0",
       "ip-address": "10.1.1",
-      "uuid@11": "11.1.1",
+      "uuid": "11.1.1",
       "esbuild": "0.28.1"
     }
   }
