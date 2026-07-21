@@ -172,7 +172,7 @@ export function EntityForm({ initial, isEdit = false }: Props) {
         <CardContent>
           <div className="space-y-1.5">
             <Label htmlFor="editorialOverview">
-              Long-form profile <span className="text-muted-foreground">(several paragraphs — rendered as its own "About" section, separate from the short Description above)</span>
+              Long-form profile <span className="text-muted-foreground">(several paragraphs — rendered as its own &quot;About&quot; section, separate from the short Description above)</span>
             </Label>
             <Textarea
               id="editorialOverview"
