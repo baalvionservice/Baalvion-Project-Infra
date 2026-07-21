@@ -46,7 +46,7 @@ jobs:
         uses: pnpm/action-setup@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
@@ -70,7 +70,29 @@ jobs:
       # ── Gate 3: backend node:test suites (blocking) ───────────────────────────
       # Run only services whose test script is `node --test` (pure, no DB/network);
       # this deliberately excludes jest/vitest services until their runners are wired.
+      #
+      # --test-concurrency=1 serializes test *files* within a service: bare `node
+      # --test` otherwise schedules every discovered file onto its own worker
+      # thread, and a handful of "pure" test files transitively load modules that
+      # call requireEnv() (see Backend/packages/auth-node/requireEnv.js) at
+      # module-require time — e.g. models/index.js -> config/appConfig.js. None of
+      # these are reachable from the actual test assertions (they're always behind
+      # a lazily-required call), but the mere act of another file in the same
+      # worker pool pulling that chain in concurrently was enough to produce
+      # nondeterministic cross-file TAP failures. The env vars below are
+      # throwaway CI-only placeholders (never used to reach real DB/JWT
+      # verification in these pure suites) that satisfy requireEnv()'s
+      # "must be set" boot check so that accidental transitive loads no longer
+      # crash the whole file.
       - name: Backend Tests (node:test)
+        env:
+          JWT_PUBLIC_KEY: 'ci-placeholder-not-a-real-key'
+          JWT_ACCESS_SECRET: 'ci-placeholder-not-a-real-secret'
+          JWT_REFRESH_SECRET: 'ci-placeholder-not-a-real-secret'
+          INTERNAL_SERVICE_SECRET: 'ci-placeholder-not-a-real-secret'
+          GATEWAY_SIGNING_SECRET: 'ci-placeholder-not-a-real-secret'
+          BILLING_SIGNING_SECRET: 'ci-placeholder-not-a-real-secret'
+          DB_PASSWORD: 'ci-placeholder-not-a-real-password'
         run: |
           set -e
           failed=0
@@ -78,7 +100,7 @@ jobs:
             d=$(dirname "$pj")
             if grep -Eq '"test"[[:space:]]*:[[:space:]]*"node --test"' "$pj"; then
               echo "::group::node --test $d"
-              if (cd "$d" && node --test); then
+              if (cd "$d" && node --test --test-concurrency=1); then
                 echo "ok: $d"
               else
                 echo "::error::tests failed in $d"

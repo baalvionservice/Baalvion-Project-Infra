@@ -7,6 +7,12 @@ import { useEffect, useState } from "react";
 import type { Invoice } from "@/lib/types";
 import { Loader2 } from "lucide-react";
 
+// Never statically prerender: this is a per-user authenticated billing dashboard, not shareable
+// static HTML. Static generation here also trips a Next.js App Router bug where a page.tsx whose
+// own default export is a Client Component fails to resolve its layout's client boundary
+// (AuthProvider) in the React Client Manifest during prerendering.
+export const dynamic = 'force-dynamic';
+
 
 export default function BillingPage() {
   const { user } = useAuth();
