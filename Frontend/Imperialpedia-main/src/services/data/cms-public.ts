@@ -326,6 +326,9 @@ export interface ResolvedAuthor {
   avatarUrl?: string;
   videoUrl?: string;
   social: { twitter?: string; linkedin?: string; website?: string };
+  /** Usual editorial role (writer/reviewer/fact-checker) — from the static roster
+   *  (config/authors.ts) only; the CMS-managed record has no equivalent field. */
+  role?: 'writer' | 'reviewer' | 'fact-checker';
 }
 
 /**
@@ -356,7 +359,9 @@ export async function resolveAuthor(slug: string): Promise<ResolvedAuthor | null
       name: fallback.name,
       title: fallback.title,
       bio: fallback.bio,
+      credentials: fallback.credentials,
       avatarUrl: fallback.avatarUrl,
+      role: fallback.role,
       social: {
         twitter: fallback.social?.twitter,
         linkedin: fallback.social?.linkedin,
@@ -491,6 +496,8 @@ export function cmsContentToArticle(raw: CmsContent): Article {
   const authorSlug = typeof cf.authorSlug === 'string' ? cf.authorSlug : undefined;
   const reviewerSlug = typeof cf.reviewerSlug === 'string' ? cf.reviewerSlug : undefined;
   const reviewedAt = typeof cf.reviewedAt === 'string' ? cf.reviewedAt : undefined;
+  const factCheckerSlug = typeof cf.factCheckerSlug === 'string' ? cf.factCheckerSlug : undefined;
+  const factCheckedAt = typeof cf.factCheckedAt === 'string' ? cf.factCheckedAt : undefined;
   const rawCitations = Array.isArray(cf.citations) ? (cf.citations as unknown[]) : [];
   const citations = rawCitations
     .map((c) => c as { title?: unknown; url?: unknown })
@@ -507,6 +514,8 @@ export function cmsContentToArticle(raw: CmsContent): Article {
     authorSlug,
     reviewerSlug,
     reviewedAt,
+    factCheckerSlug,
+    factCheckedAt,
     citations: citations.length ? citations : undefined,
     publishedAt: raw.publishedAt ?? undefined,
     updatedAt: raw.updatedAt ?? raw.publishedAt ?? new Date().toISOString(),

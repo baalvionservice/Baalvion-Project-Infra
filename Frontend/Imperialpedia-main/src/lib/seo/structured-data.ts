@@ -25,6 +25,7 @@ export const structuredData = {
     datePublished: string;
     dateModified?: string;
     reviewedBy?: { name: string; url?: string };
+    factCheckedBy?: { name: string; url?: string };
   }): StructuredData => ({
     '@context': 'https://schema.org',
     '@type': 'Article',
@@ -41,6 +42,16 @@ export const structuredData = {
     dateModified: data.dateModified || data.datePublished,
     ...(data.reviewedBy && {
       reviewedBy: { '@type': 'Person', name: data.reviewedBy.name, url: data.reviewedBy.url },
+    }),
+    // No dedicated schema.org "fact-checker" property exists yet — `contributor`
+    // is the closest standard fit for a named editorial role beyond author/reviewer.
+    ...(data.factCheckedBy && {
+      contributor: {
+        '@type': 'Person',
+        name: data.factCheckedBy.name,
+        url: data.factCheckedBy.url,
+        description: 'Fact-checked this article',
+      },
     }),
   }),
 
@@ -63,6 +74,7 @@ export const structuredData = {
     datePublished: string;
     dateModified?: string;
     reviewedBy?: { name: string; url?: string };
+    factCheckedBy?: { name: string; url?: string };
   }): StructuredData => ({
     '@context': 'https://schema.org',
     '@type': 'NewsArticle',
@@ -84,6 +96,14 @@ export const structuredData = {
     dateModified: data.dateModified || data.datePublished,
     ...(data.reviewedBy && {
       reviewedBy: { '@type': 'Person', name: data.reviewedBy.name, url: data.reviewedBy.url },
+    }),
+    ...(data.factCheckedBy && {
+      contributor: {
+        '@type': 'Person',
+        name: data.factCheckedBy.name,
+        url: data.factCheckedBy.url,
+        description: 'Fact-checked this article',
+      },
     }),
   }),
 

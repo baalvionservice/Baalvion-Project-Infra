@@ -4,13 +4,15 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Text } from '@/design-system/typography/text';
-import { ShieldCheck } from 'lucide-react';
+import { ShieldCheck, BadgeCheck } from 'lucide-react';
 import type { ResolvedAuthor } from '@/services/data/cms-public';
 
 interface AuthorCredibilityCardProps {
   author: ResolvedAuthor;
   reviewer?: ResolvedAuthor | null;
   reviewedAt?: string;
+  factChecker?: ResolvedAuthor | null;
+  factCheckedAt?: string;
 }
 
 // Pinned to UTC — see ArticleHeader.tsx for why (SSR/hydration date-mismatch avoidance).
@@ -32,10 +34,18 @@ const initials = (name: string) =>
 /**
  * Author bio/credentials/experience block rendered directly on the article — the E-E-A-T
  * trust signals Google expects for YMYL finance content, surfaced here rather than only on
- * the standalone /authors/[slug] page. When the article names an editorial reviewer, a
- * distinct "Reviewed by" strip is shown alongside the byline author.
+ * the standalone /authors/[slug] page. Three distinct editorial roles can appear: the
+ * byline author ("Written by"), an editorial reviewer ("Reviewed for accuracy"), and a
+ * fact-checker ("Fact-checked by") — each optional and shown only when the article names
+ * that role via CMS customFields (authorSlug / reviewerSlug / factCheckerSlug).
  */
-export const AuthorCredibilityCard = ({ author, reviewer, reviewedAt }: AuthorCredibilityCardProps) => {
+export const AuthorCredibilityCard = ({
+  author,
+  reviewer,
+  reviewedAt,
+  factChecker,
+  factCheckedAt,
+}: AuthorCredibilityCardProps) => {
   const credentialsLine = [author.title, author.credentials].filter(Boolean).join(' · ');
 
   return (
@@ -95,6 +105,24 @@ export const AuthorCredibilityCard = ({ author, reviewer, reviewedAt }: AuthorCr
               )}
               {reviewedAt && (
                 <> — last reviewed {reviewedDateFormatter.format(new Date(reviewedAt))}</>
+              )}
+            </Text>
+          </div>
+        )}
+
+        {factChecker && (
+          <div className={`pt-5 flex items-start gap-3 ${reviewer ? 'mt-4' : 'mt-6 pt-5 border-t'}`}>
+            <BadgeCheck className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+            <Text variant="bodySmall" className="text-muted-foreground leading-relaxed">
+              <span className="font-semibold text-foreground">Fact-checked by</span>{' '}
+              <Link href={`/authors/${factChecker.slug}`} className="font-semibold text-foreground hover:text-primary transition-colors">
+                {factChecker.name}
+              </Link>
+              {[factChecker.title, factChecker.credentials].filter(Boolean).length > 0 && (
+                <>, {[factChecker.title, factChecker.credentials].filter(Boolean).join(' · ')}</>
+              )}
+              {factCheckedAt && (
+                <> — last checked {reviewedDateFormatter.format(new Date(factCheckedAt))}</>
               )}
             </Text>
           </div>

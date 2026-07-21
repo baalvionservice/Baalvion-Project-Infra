@@ -102,6 +102,12 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
     sameAs: sameAs.length ? sameAs : undefined,
   });
   const breadcrumb = breadcrumbService.generateBreadcrumbForAuthor(author.name, author.slug);
+  const roleBadge =
+    author.role === 'reviewer'
+      ? 'Editorial Reviewer'
+      : author.role === 'fact-checker'
+        ? 'Fact-Checking Editor'
+        : 'Staff Writer';
 
   return (
     <main className="min-h-screen bg-background pt-16">
@@ -127,7 +133,7 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
                     <div className="flex flex-wrap items-center gap-3 mb-2">
                       <Text variant="h1" as="h1" className="tracking-tight">{author.name}</Text>
                       <Badge className="bg-primary/10 text-primary border-primary/20 gap-1.5 font-bold uppercase text-[10px] tracking-widest h-6 px-2.5">
-                        <BadgeCheck className="h-3.5 w-3.5" /> Staff Writer
+                        <BadgeCheck className="h-3.5 w-3.5" /> {roleBadge}
                       </Badge>
                     </div>
                     <Text variant="h4" className="text-primary font-bold uppercase tracking-widest text-sm">

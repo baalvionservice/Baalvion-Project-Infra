@@ -7,6 +7,7 @@ import { Menu, X, Search, ChevronDown } from "lucide-react";
 import { ImperialpediaMark } from "@/components/icons/ImperialpediaMark";
 import { SearchModal } from "@/components/search/SearchModal";
 import { cn } from "@/lib/utils";
+import { useShortcutHint, shortcutLabel } from "@/hooks/use-shortcut-hint";
 
 type NavLink = { label: string; href: string };
 type NavCategory = {
@@ -126,6 +127,7 @@ export const Navbar = () => {
   const [openMobileSection, setOpenMobileSection] = useState<string | null>(null);
   const pathname = usePathname();
   const router = useRouter();
+  const shortcutHint = shortcutLabel(useShortcutHint());
 
   useEffect(() => {
     setIsMobileOpen(false);
@@ -141,7 +143,9 @@ export const Navbar = () => {
     cat.links.forEach((l) => router.prefetch(l.href));
   };
 
-  // Keyboard shortcut: ⌘K / Ctrl+K opens search
+  // Global search shortcut — e.metaKey covers ⌘K on macOS/iOS, e.ctrlKey covers
+  // Ctrl+K on Windows/Linux; touch devices have no physical shortcut, so they
+  // rely entirely on the tap-to-open search trigger below.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
@@ -190,9 +194,11 @@ export const Navbar = () => {
               >
                 <Search className="h-4 w-4" />
                 <span>Search</span>
-                <kbd className="ml-auto hidden lg:inline text-[10px] font-semibold text-muted-foreground border border-border rounded px-1">
-                  ⌘K
-                </kbd>
+                {shortcutHint && (
+                  <kbd className="ml-auto hidden lg:inline text-[10px] font-semibold text-muted-foreground border border-border rounded px-1">
+                    {shortcutHint}
+                  </kbd>
+                )}
               </button>
               <button
                 type="button"

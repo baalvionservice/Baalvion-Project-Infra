@@ -12,7 +12,7 @@ export const LEAD_STORY: Article = {
   category: "Markets",
   dek: "Investors are recalibrating rate-cut expectations after the latest CPI print. Here's what the data means for stocks, bonds, and your portfolio.",
   imageSeed: "fed-markets",
-  author: "Imperialpedia Editorial",
+  author: "Allen Krewzz",
 };
 
 export const TOP_STORIES: Article[] = [

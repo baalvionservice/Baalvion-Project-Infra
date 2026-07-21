@@ -27,20 +27,23 @@ export const metadata: Metadata = {
     template: '%s | Imperialpedia',
   },
   description:
-    'Imperialpedia is the definitive financial intelligence platform. Expert analysis, live market data, AI-driven insights, and a global community of investors and analysts.',
+    'Imperialpedia is the definitive financial intelligence platform. Expert analysis, live market data, and a global community of investors and analysts.',
   keywords: [
     'financial intelligence',
     'market analysis',
     'investment research',
     'stock market',
-    'AI analyst',
     'economic indicators',
     'financial glossary',
     'investing',
     'personal finance',
     'Imperialpedia',
   ],
-  authors: [{ name: 'Imperialpedia Editorial Team', url: env.siteUrl }],
+  authors: [
+    { name: 'Allen Krewzz', url: `${env.siteUrl}/authors/allen-krewzz` },
+    { name: 'Tamanna Shaikh', url: `${env.siteUrl}/authors/tamanna-shaikh` },
+    { name: 'Deepak Kuldeep', url: `${env.siteUrl}/authors/deepak-kuldeep` },
+  ],
   creator: 'Imperialpedia',
   publisher: 'Baalvion',
   openGraph: {
@@ -50,7 +53,7 @@ export const metadata: Metadata = {
     siteName: 'Imperialpedia',
     title: 'Imperialpedia — The Financial Intelligence Network',
     description:
-      'Expert financial analysis, live market data, AI-driven insights, and a global investor community.',
+      'Expert financial analysis, live market data, and a global investor community.',
     images: [
       {
         url: `${env.siteUrl}/og-image.png`,
@@ -66,7 +69,7 @@ export const metadata: Metadata = {
     creator: '@imperialpedia',
     title: 'Imperialpedia — The Financial Intelligence Network',
     description:
-      'Expert financial analysis, live market data, AI-driven insights, and a global investor community.',
+      'Expert financial analysis, live market data, and a global investor community.',
     images: [`${env.siteUrl}/og-image.png`],
   },
   robots: {

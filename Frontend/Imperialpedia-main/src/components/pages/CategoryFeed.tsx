@@ -1,10 +1,11 @@
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles } from "@/services/data/cms-public";
 import { staticCategoryNews } from "@/services/data/static-content";
-import { topicCopy, staticCategoryFor, parentFor } from "@/lib/topic-config";
+import { topicCopy, staticCategoryFor, parentFor, siblingsFor } from "@/lib/topic-config";
 import { ExploreNewsSection } from "@/app/news/ExploreNewsSection";
 import { FeaturedArticleCard } from "@/components/pages/FeaturedArticleCard";
 import { HorizontalArticleCard } from "@/components/pages/HorizontalArticleCard";
+import { SubtopicTabs } from "@/components/pages/SubtopicTabs";
 import HeadingSection from "@/components/layout/HeadingSection";
 import { env } from "@/config/env";
 import { newsArticleHref } from "@/lib/data/article-url";
@@ -22,6 +23,7 @@ type Props = {
  */
 export async function CategoryFeed({ slug }: Props) {
   const copy = topicCopy(slug);
+  const siblings = siblingsFor(slug);
 
   // 1) Live CMS content for this category.
   let articles: NewsArticle[] = await getCategoryArticles(slug, 30);
@@ -90,6 +92,12 @@ export async function CategoryFeed({ slug }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       <HeadingSection tag={copy.tag} eyebrow={parentFor(slug)} title={copy.title} description={copy.description} />
+
+      {siblings && (
+        <div className="max-w-7xl mx-auto px-4">
+          <SubtopicTabs current={slug} siblings={siblings} />
+        </div>
+      )}
 
       <div className="max-w-7xl mx-auto px-4 py-4 space-y-12">
         {featured && (

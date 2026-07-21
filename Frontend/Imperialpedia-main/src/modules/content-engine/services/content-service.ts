@@ -22,6 +22,8 @@ function mapToArticleModel(raw: any): Article {
     authorSlug: raw.authorSlug,
     reviewerSlug: raw.reviewerSlug,
     reviewedAt: raw.reviewedAt,
+    factCheckerSlug: raw.factCheckerSlug,
+    factCheckedAt: raw.factCheckedAt,
     citations: raw.citations,
     publishedAt: raw.publishedAt,
     updatedAt: raw.updatedAt || raw.publishedAt || new Date().toISOString(),

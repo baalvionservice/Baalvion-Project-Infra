@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { ImperialpediaMark } from '@/components/icons/ImperialpediaMark';
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
 
 // ─── Remove stubs and restore your real imports in production ─────────────────
 //   import { Container } from '@/design-system/layout/container';
@@ -67,91 +68,55 @@ const SOCIAL_LINKS = [
   },
 ];
 
-const NAV_COLUMNS = [
-  {
-    label: 'Explore',
-    links: [
-      { label: 'News', href: '/news' },
-      { label: 'Investing', href: '/investing' },
-      { label: 'Banking', href: '/banking' },
-      { label: 'Personal Finance', href: '/personal-finance' },
-      { label: 'Economy', href: '/economy' },
-      { label: 'Reviews', href: '/reviews' },
-      { label: 'Dictionary', href: '/terms' },
-    ],
-  },
+// Core site navigation — kept separate from the Company/Editorial/Legal
+// columns below, which are policy & about-the-company links, not site nav.
+const EXPLORE_COLUMN = {
+  label: 'Explore',
+  links: [
+    { label: 'News', href: '/news' },
+    { label: 'Investing', href: '/investing' },
+    { label: 'Banking', href: '/banking' },
+    { label: 'Personal Finance', href: '/personal-finance' },
+    { label: 'Economy', href: '/economy' },
+    { label: 'Reviews', href: '/reviews' },
+    { label: 'Dictionary', href: '/terms' },
+  ],
+};
+
+// Essential company/editorial/legal links only — pruned from a much longer list
+// of policy and disclosure pages (advertising policy, ownership disclosure,
+// ethics policy, diversity policy, source-attribution policy, DMCA, etc.) that
+// added clutter without helping a reader. Those pages still exist for anyone
+// who links to them directly; they're just no longer part of the footer's
+// primary navigation.
+const FOOTER_COLUMNS = [
+  EXPLORE_COLUMN,
   {
     label: 'Company',
     links: [
       { label: 'About Us', href: '/about' },
-      { label: 'Our Authors', href: '/authors' },
-      { label: 'Privacy Policy', href: '/privacy-policy' },
-    ],
-  },
-  {
-    label: 'Resources',
-    links: [
       { label: 'Contact Us', href: '/contact' },
-      { label: 'Terms of Service', href: '/terms-of-service' },
-      { label: 'Transparency Hub', href: '/transparency' },
-    ],
-  },
-];
-
-const LEGAL_TRUST_COLUMNS = [
-  {
-    label: 'Editorial Integrity',
-    links: [
-      { label: 'Editorial Policy', href: '/editorial-policy' },
-      { label: 'Corrections Policy', href: '/corrections' },
-      { label: 'Fact-Checking Policy', href: '/fact-checking' },
-      { label: 'Review Policy', href: '/review-policy' },
-      { label: 'Ethics Policy', href: '/ethics-policy' },
-      { label: 'Conflict of Interest Policy', href: '/conflict-of-interest-policy' },
-      { label: 'Diversity Policy', href: '/diversity-policy' },
-    ],
-  },
-  {
-    label: 'Content & AI',
-    links: [
-      { label: 'AI Usage Policy', href: '/ai-usage-policy' },
-      { label: 'Comment & Community Policy', href: '/comment-policy' },
-      { label: 'Source Attribution Policy', href: '/source-attribution-policy' },
-    ],
-  },
-  {
-    label: 'Ads & Disclosures',
-    links: [
-      { label: 'Advertise', href: '/advertise' },
-      { label: 'Advertising Policy', href: '/advertising-policy' },
-      { label: 'Sponsored Content Policy', href: '/sponsored-content-policy' },
-      { label: 'Affiliate Disclosure', href: '/affiliate-disclosure' },
-      { label: 'Ownership Disclosure', href: '/ownership-disclosure' },
-    ],
-  },
-  {
-    label: 'Legal & Access',
-    links: [
-      { label: 'Disclaimer', href: '/disclaimer' },
-      { label: 'Cookie Policy', href: '/cookie-policy' },
-      { label: 'DMCA Policy', href: '/dmca-policy' },
-      { label: 'Copyright Policy', href: '/copyright-policy' },
-      { label: 'Accessibility Statement', href: '/accessibility' },
+      { label: 'Our Authors', href: '/authors' },
       { label: 'Careers', href: '/careers' },
     ],
   },
-];
-
-const ALPHABET = ['#', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')];
-
-// A handful of the most-searched-for legal links repeated at the very bottom,
-// tiny and pipe-separated — the rest already live in the Legal & Access
-// column above; this is a quick-access row, not a duplicate of that nav.
-const BOTTOM_LEGAL_LINKS = [
-  { label: 'Privacy Policy', href: '/privacy-policy' },
-  { label: 'Terms of Service', href: '/terms-of-service' },
-  { label: 'Cookie Policy', href: '/cookie-policy' },
-  { label: 'Accessibility', href: '/accessibility' },
+  {
+    label: 'Editorial',
+    links: [
+      { label: 'Editorial Policy', href: '/editorial-policy' },
+      { label: 'Fact-Checking Policy', href: '/fact-checking' },
+      { label: 'Corrections Policy', href: '/corrections' },
+    ],
+  },
+  {
+    label: 'Legal & Privacy',
+    links: [
+      { label: 'Terms of Service', href: '/terms-of-service' },
+      { label: 'Privacy Policy', href: '/privacy-policy' },
+      { label: 'Disclaimer', href: '/disclaimer' },
+      { label: 'Cookie Policy', href: '/cookie-policy' },
+    ],
+  },
 ];
 
 // Shared outlined-pill CTA button — bold, small, uppercase, tracked-out, matching
@@ -250,7 +215,7 @@ export default function Footer() {
         {/* ── Top Grid ─────────────────────────────────────────────── */}
         <div className="
           grid gap-10
-          grid-cols-1 sm:grid-cols-2 lg:grid-cols-[220px_1fr_1fr_1fr]
+          grid-cols-1 sm:grid-cols-2 lg:grid-cols-[220px_1fr_1fr_1fr_1fr]
           pb-12 border-b border-white/[0.08]
         ">
 
@@ -291,31 +256,60 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Nav columns */}
-          {NAV_COLUMNS.map((col) => (
-            <nav key={col.label} aria-label={`${col.label} links`}>
-              <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-slate-100/60 mb-3.5 font-sans">
-                {col.label}
-              </p>
-              <ul className="grid grid-cols-2 md:flex md:flex-col gap-3.5 list-none p-0 m-0">
-                {col.links.map((link) => (
-                  <li key={link.label}>
-                    <Link
-                      href={link.href}
-                      className="
-                        text-slate-300 hover:text-white
-                        text-[13px] font-medium
-                        font-sans transition-colors duration-150
-                        no-underline
-                      "
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          ))}
+          {/* Nav columns — grid layout on tablet/desktop; a compact accordion
+              takes over below md so four full columns don't stack into one
+              long scroll on a phone. */}
+          <div className="hidden md:contents">
+            {FOOTER_COLUMNS.map((col) => (
+              <nav key={col.label} aria-label={`${col.label} links`}>
+                <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-slate-100/60 mb-3.5 font-sans">
+                  {col.label}
+                </p>
+                <ul className="flex flex-col gap-3.5 list-none p-0 m-0">
+                  {col.links.map((link) => (
+                    <li key={link.label}>
+                      <Link
+                        href={link.href}
+                        className="
+                          text-slate-300 hover:text-white
+                          text-[13px] font-medium
+                          font-sans transition-colors duration-150
+                          no-underline
+                        "
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            ))}
+          </div>
+
+          {/* Mobile accordion — same four columns, collapsed by default. */}
+          <Accordion type="single" collapsible className="md:hidden sm:col-span-2 -mb-2">
+            {FOOTER_COLUMNS.map((col) => (
+              <AccordionItem key={col.label} value={col.label} className="border-white/[0.08]">
+                <AccordionTrigger className="text-[11px] font-bold tracking-[0.18em] uppercase text-slate-100/60 font-sans hover:no-underline py-3.5 [&>svg]:text-slate-400">
+                  {col.label}
+                </AccordionTrigger>
+                <AccordionContent>
+                  <ul className="flex flex-col gap-3 list-none p-0 m-0">
+                    {col.links.map((link) => (
+                      <li key={link.label}>
+                        <Link
+                          href={link.href}
+                          className="text-slate-300 hover:text-white text-[13px] font-medium font-sans transition-colors duration-150 no-underline"
+                        >
+                          {link.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </div>
 
         {/* ── Promo Row ────────────────────────────────────────────── */}
@@ -337,81 +331,10 @@ export default function Footer() {
           </PromoBox>
         </div>
 
-        {/* ── Legal, Trust & Editorial Standards ───────────────────── */}
-        <div className="grid gap-8 grid-cols-2 lg:grid-cols-4 py-10 border-b border-white/[0.08]">
-          {LEGAL_TRUST_COLUMNS.map((col) => (
-            <nav key={col.label} aria-label={`${col.label} links`}>
-              <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-slate-100/60 mb-3.5 font-sans">
-                {col.label}
-              </p>
-              <ul className="flex flex-col gap-2.5 list-none p-0 m-0">
-                {col.links.map((link) => (
-                  <li key={link.label}>
-                    <Link
-                      href={link.href}
-                      className="text-slate-300 hover:text-white text-[13px] font-medium font-sans transition-colors duration-150 no-underline"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          ))}
-        </div>
-
-        {/* ── Alphabet Row ─────────────────────────────────────────── */}
-        <div
-          className="
-            hidden sm:flex flex-wrap justify-start items-center gap-1
-            py-8 border-b border-white/[0.08]
-          "
-          aria-label="Browse dictionary by letter"
-        >
-          {ALPHABET.map((letter) => (
-            <Link
-              key={letter}
-              href={`/terms-beginning-with-${letter === '#' ? 'num' : letter.toLowerCase()}`}
-              aria-label={
-                letter === '#'
-                  ? 'Terms beginning with number'
-                  : `Terms beginning with ${letter}`
-              }
-              className="
-                text-slate-300 hover:text-white hover:bg-blue-500/15
-                text-base sm:text-lg font-medium font-sans
-                px-1.5 sm:px-2 py-1.5
-                min-w-[26px] sm:min-w-[32px]
-                text-center rounded
-                transition-colors duration-150
-                no-underline
-              "
-            >
-              {letter}
-            </Link>
-          ))}
-        </div>
-
         {/* ── Bottom Bar ───────────────────────────────────────────── */}
-        <div className="pt-7 space-y-3">
-          <nav
-            className="flex flex-wrap justify-center sm:justify-start items-center gap-x-3 gap-y-1.5"
-            aria-label="Legal quick links"
-          >
-            {BOTTOM_LEGAL_LINKS.map((link, i) => (
-              <React.Fragment key={link.href}>
-                {i > 0 && <span className="text-slate-600 text-[11px]" aria-hidden>|</span>}
-                <Link
-                  href={link.href}
-                  className="text-slate-400 hover:text-white text-[11px] font-sans transition-colors duration-150 no-underline"
-                >
-                  {link.label}
-                </Link>
-              </React.Fragment>
-            ))}
-          </nav>
+        <div className="pt-7">
           <p className="text-slate-500 text-center sm:text-left text-xs font-sans">
-            &copy; {new Date().getFullYear()} Imperialpedia. AI Knowledge Infrastructure.
+            &copy; {new Date().getFullYear()} Imperialpedia. All rights reserved.
           </p>
         </div>
 

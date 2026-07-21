@@ -819,3 +819,23 @@ const PARENT_BY_SLUG: Record<string, { label: string; href: string }> = (() => {
 export function parentFor(slug: string): { label: string; href: string } | undefined {
   return PARENT_BY_SLUG[slug];
 }
+
+export interface SiblingTopic {
+  slug: string;
+  label: string;
+}
+
+/**
+ * Sibling sub-topics within the same nav group as `slug` (including `slug` itself),
+ * e.g. on /bonds this returns Stocks, Bonds, ETFs, Mutual Funds, Options, Commodities,
+ * Cryptocurrency, Real Estate, Retirement, Portfolio, Brokers. Powers a tab strip so a
+ * reader who lands on one sub-topic page can jump directly to a related one instead of
+ * dead-ending on a single-topic silo — without collapsing these into fewer routes (each
+ * keeps its own indexable URL). Returns undefined for a page with no group (e.g. a
+ * top-level parent hub like /investing, which already has its own topic browser).
+ */
+export function siblingsFor(slug: string): SiblingTopic[] | undefined {
+  const group = CATEGORY_GROUPS.find((g) => g.children.includes(slug));
+  if (!group || group.children.length < 2) return undefined;
+  return group.children.map((child) => ({ slug: child, label: topicCopy(child).title }));
+}

@@ -8,7 +8,7 @@ import { Metadata } from 'next';
 export const metadata: Metadata = buildMetadata({
   canonical: '/premium/subscribe',
   title: 'Upgrade Your Intelligence | Premium Access',
-  description: 'Select a premium tier to unlock advanced AI analyst tools, institutional-grade calculators, and real-time market oversight.',
+  description: 'Select a premium tier to unlock advanced analyst tools, institutional-grade calculators, and real-time market oversight.',
 });
 
 /**

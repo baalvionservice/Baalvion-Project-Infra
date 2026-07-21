@@ -19,11 +19,13 @@ import type { ResolvedAuthor } from "@/services/data/cms-public";
 interface ArticlePageProps {
   slug: string;
   article?: Article | null;
-  /** Full author/reviewer profiles, server-resolved by the route (bio, credentials,
-   *  expertise) — powers the AuthorCredibilityCard. Undefined when rendered client-side
-   *  without an initial article (loading fallback path never has these). */
+  /** Full author/reviewer/fact-checker profiles, server-resolved by the route (bio,
+   *  credentials, expertise) — powers the AuthorCredibilityCard. Undefined when
+   *  rendered client-side without an initial article (loading fallback path never
+   *  has these). */
   author?: ResolvedAuthor | null;
   reviewer?: ResolvedAuthor | null;
+  factChecker?: ResolvedAuthor | null;
 }
 
 /**
@@ -35,6 +37,7 @@ export const ArticlePage = ({
   article: initialArticle,
   author,
   reviewer,
+  factChecker,
 }: ArticlePageProps) => {
   const [article, setArticle] = useState<Article | null>(
     initialArticle || null
@@ -112,7 +115,15 @@ export const ArticlePage = ({
         <div className="max-w-3xl mx-auto">
           <ArticleHeader article={article} />
 
-          {author && <AuthorCredibilityCard author={author} reviewer={reviewer} reviewedAt={article.reviewedAt} />}
+          {author && (
+            <AuthorCredibilityCard
+              author={author}
+              reviewer={reviewer}
+              reviewedAt={article.reviewedAt}
+              factChecker={factChecker}
+              factCheckedAt={article.factCheckedAt}
+            />
+          )}
 
           {article.body ? (
             <div

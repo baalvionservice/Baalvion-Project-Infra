@@ -17,21 +17,29 @@ export const schemaService = {
   
   /**
    * Generates Article schema for content engine articles. Pass the resolved reviewer
-   * profile (from cms-public.resolveAuthor(article.reviewerSlug)) to emit `reviewedBy` —
-   * the E-E-A-T editorial-review signal for YMYL finance content.
+   * profile (from cms-public.resolveAuthor(article.reviewerSlug)) to emit `reviewedBy`,
+   * and the resolved fact-checker (article.factCheckerSlug) to emit a `contributor`
+   * entry — together the three E-E-A-T editorial-review signals for YMYL finance content.
    */
-  generateArticleSchema: (article: Article, reviewer?: ResolvedAuthor | null) => {
+  generateArticleSchema: (
+    article: Article,
+    reviewer?: ResolvedAuthor | null,
+    factChecker?: ResolvedAuthor | null,
+  ) => {
     const base = {
       title: article.title,
       description: article.description,
       image: article.featuredImage || '',
-      authorName:
-        article.authorName ||
-        (article.authorId === 'creator-1' ? 'The Market Maven' : 'Imperialpedia Expert'),
+      // Every published article is written by a named roster author (config/authors.ts) —
+      // this only covers content authored before authorSlug/authorName was populated.
+      authorName: article.authorName || 'Imperialpedia Staff',
       datePublished: article.publishedAt || new Date().toISOString(),
       dateModified: article.updatedAt,
       reviewedBy: reviewer
         ? { name: reviewer.name, url: `${env.siteUrl}/authors/${reviewer.slug}` }
+        : undefined,
+      factCheckedBy: factChecker
+        ? { name: factChecker.name, url: `${env.siteUrl}/authors/${factChecker.slug}` }
         : undefined,
     };
     const schema =

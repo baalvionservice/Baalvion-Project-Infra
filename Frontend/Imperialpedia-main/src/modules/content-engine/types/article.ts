@@ -17,6 +17,8 @@ export interface Article {
   authorSlug?: string; // Links the byline to /authors/[slug] (CMS customFields.authorSlug)
   reviewerSlug?: string; // Editorial reviewer — CMS customFields.reviewerSlug, links to /authors/[slug]
   reviewedAt?: Timestamp; // CMS customFields.reviewedAt — when the reviewer signed off
+  factCheckerSlug?: string; // Fact-checker — CMS customFields.factCheckerSlug, links to /authors/[slug]
+  factCheckedAt?: Timestamp; // CMS customFields.factCheckedAt — when the fact-check pass completed
   citations?: { title: string; url: string }[]; // Sources cited — CMS customFields.citations
   publishedAt?: Timestamp;
   updatedAt: Timestamp;

@@ -52,30 +52,40 @@ export const SearchModal = ({ open, onOpenChange }: { open: boolean; onOpenChang
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl p-0 overflow-hidden bg-card border-white/10 shadow-3xl">
+      <DialogContent
+        // Anchored near the top instead of the default vertical-center: centering
+        // breaks on mobile once the on-screen keyboard shrinks the visual viewport
+        // (the dialog's `top: 50%` is computed against the layout viewport, so it
+        // ends up partially hidden behind the keyboard). Top-anchoring, like most
+        // command palettes, sits clear of the keyboard by construction and never
+        // needs to reposition itself when the keyboard opens.
+        className="max-w-2xl p-0 overflow-hidden bg-card border-white/10 shadow-3xl top-[6vh] sm:top-[10vh] translate-y-0 max-h-[88vh] flex flex-col"
+      >
         <DialogHeader className="sr-only">
           <DialogTitle>Global Search Matrix</DialogTitle>
           <DialogDescription>
             Search across millions of institutional knowledge nodes.
           </DialogDescription>
         </DialogHeader>
-        <div className="p-4 border-b border-white/5">
-          <SearchBar 
-            value={query} 
-            onChange={setQuery} 
-            autoFocus 
+        <div className="p-4 border-b border-white/5 shrink-0">
+          <SearchBar
+            value={query}
+            onChange={setQuery}
+            autoFocus
             placeholder="Type to search our millions of nodes..."
           />
         </div>
-        <div className="max-h-[60vh] overflow-y-auto no-scrollbar">
-          <SearchResults 
+        <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar">
+          <SearchResults
             results={results} 
             loading={loading} 
             query={query} 
             onItemClick={() => onOpenChange(false)} 
           />
         </div>
-        <div className="p-4 bg-muted/20 border-t border-white/5 flex items-center justify-between">
+        {/* Keyboard hints only make sense on a device with a physical keyboard —
+            hidden on touch/small screens instead of showing dead ESC/↵ affordances. */}
+        <div className="hidden sm:flex p-4 bg-muted/20 border-t border-white/5 items-center justify-between">
           <div className="flex gap-4">
             <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase">
               <span className="p-1 rounded bg-background border border-white/10">ESC</span> Close

@@ -21,7 +21,7 @@ export const structuredData = {
     url: siteUrl(),
     logo: absoluteUrl('/logo.png'),
     description:
-      'The definitive financial intelligence platform offering expert analysis, live market data, and AI-driven insights.',
+      'The definitive financial intelligence platform offering expert analysis and live market data.',
     contactPoint: {
       '@type': 'ContactPoint',
       email: env.supportEmail,
