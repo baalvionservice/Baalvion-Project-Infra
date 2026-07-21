@@ -125,6 +125,9 @@
       "uuid": "11.1.1",
       "esbuild": "0.28.1",
       "@opentelemetry/core": "2.9.0",
+      "@opentelemetry/resources": "2.9.0",
+      "@opentelemetry/sdk-trace-base": "2.9.0",
+      "@opentelemetry/sdk-metrics": "2.9.0",
       "@opentelemetry/sdk-node": "0.217.0",
       "@opentelemetry/auto-instrumentations-node": "0.75.0"
     }
