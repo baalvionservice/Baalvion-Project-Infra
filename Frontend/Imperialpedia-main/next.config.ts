@@ -246,37 +246,32 @@ const nextConfig: NextConfig = {
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
-  // Performance optimizations
+  // Performance optimizations — makes Next rewrite barrel imports (`import { X } from
+  // "pkg"`) into direct per-module imports, so a route that uses one icon or one chart
+  // type doesn't pull the whole package's module graph into its chunk.
   experimental: {
-    optimizePackageImports: ["@/components", "@/lib"],
+    optimizePackageImports: [
+      "@/components",
+      "@/lib",
+      "lucide-react",
+      "recharts",
+      "date-fns",
+      "@tanstack/react-query",
+    ],
   },
   // Compression
   compress: true,
   // PWA-like optimizations
   poweredByHeader: false,
-  // Bundle analyzer for optimization
-  webpack: (config, { dev, isServer }) => {
-    // Mobile performance optimizations
-    if (!dev && !isServer) {
-      config.optimization.splitChunks = {
-        chunks: "all",
-        cacheGroups: {
-          default: {
-            minChunks: 2,
-            priority: -20,
-            reuseExistingChunk: true,
-          },
-          vendor: {
-            test: /[\\/]node_modules[\\/]/,
-            name: "vendors",
-            priority: -10,
-            chunks: "all",
-          },
-        },
-      };
-    }
-    return config;
-  },
+  // NOTE: previously this config force-merged every node_modules package into a single
+  // "vendors" cache group with `chunks: "all"` (custom webpack() override, removed here).
+  // That put route-specific heavy deps (recharts, framer-motion, @tiptap/*,
+  // embla-carousel-react — each only used on a handful of routes) into one bundle shipped
+  // on literally every page, measured directly at a 605 kB shared "vendors" chunk across
+  // all 373 routes. Next.js's own built-in webpack config already does more granular,
+  // usage-aware chunk splitting (framework chunk, size-based lib chunks, and real
+  // per-route async chunks for code-split/dynamic imports) — removing the override lets
+  // that do its job instead of forcing everything into one eager bundle.
 };
 
 export default nextConfig;

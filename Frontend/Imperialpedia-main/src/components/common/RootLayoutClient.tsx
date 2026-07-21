@@ -9,7 +9,6 @@ import { GlobalStoreProvider } from "@/lib/state";
 import { ThemeProvider } from "@/design-system/themes/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { trackPageView } from "@/lib/utils/analytics";
-import { I18nProvider } from "@/components/i18n/I18nProvider";
 import { cn } from "@/lib/utils";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/services/query-client";
@@ -40,7 +39,6 @@ export default function RootLayoutClient({ children }: RootLayoutClientProps) {
         <>
             <QueryClientProvider client={queryClient}>
                 <AuthProvider>
-                <I18nProvider>
                     <GlobalStoreProvider>
                         <ThemeProvider>
                             <ToastProvider>
@@ -60,7 +58,6 @@ export default function RootLayoutClient({ children }: RootLayoutClientProps) {
                             </ToastProvider>
                         </ThemeProvider>
                     </GlobalStoreProvider>
-                </I18nProvider>
                 </AuthProvider>
             </QueryClientProvider>
         </>

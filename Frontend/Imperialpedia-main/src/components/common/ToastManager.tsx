@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { Toast } from './Toast';
-import { AnimatePresence } from 'framer-motion';
 
 interface ToastOptions {
   message: string;
@@ -29,13 +28,20 @@ export const useToast = () => {
 
 interface ToastItem extends ToastOptions {
   id: string;
+  exiting?: boolean;
 }
+
+// Must match Toast.tsx's exit-transition duration (`duration-200`) so an item is
+// only dropped from state once its fade/zoom-out animation has actually finished.
+const EXIT_ANIMATION_MS = 200;
 
 /**
  * Global provider for managing the lifecycle of platform-wide alerts.
- * 
- * // TODO: AI-driven predictive notification scheduling 
- * // TODO: Dynamic dashboard for admin notification insights
+ * Always mounted (see RootLayoutClient), so it deliberately has no dependency
+ * beyond React + CSS — removal is a two-phase state update (mark "exiting" so
+ * Toast.tsx can play its CSS exit transition, then actually drop it) instead of
+ * framer-motion's AnimatePresence, which previously pulled that animation
+ * library into every single page's bundle just for this always-on provider.
  */
 export default function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
@@ -46,20 +52,21 @@ export default function ToastProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const removeToast = useCallback((id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
+    setToasts((prev) => prev.map((t) => (t.id === id ? { ...t, exiting: true } : t)));
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, EXIT_ANIMATION_MS);
   }, []);
 
   return (
     <ToastContext.Provider value={{ addToast }}>
       {children}
       <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 items-end pointer-events-none">
-        <AnimatePresence mode="popLayout">
-          {toasts.map((t) => (
-            <div key={t.id} className="pointer-events-auto">
-              <Toast {...t} onClose={removeToast} />
-            </div>
-          ))}
-        </AnimatePresence>
+        {toasts.map((t) => (
+          <div key={t.id} className="pointer-events-auto">
+            <Toast {...t} isExiting={t.exiting} onClose={removeToast} />
+          </div>
+        ))}
       </div>
     </ToastContext.Provider>
   );
