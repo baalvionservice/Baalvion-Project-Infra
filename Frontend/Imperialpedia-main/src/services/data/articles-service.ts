@@ -83,6 +83,17 @@ export const articlesService = {
   async getArticleBySlug(slug: string): Promise<ApiResponse<Article | null>> {
     try {
       const raw = await getCmsContentBySlug(slug);
+      // getCmsContentBySlug fetches by slug alone with no contentType filter, so a CMS
+      // `page` document (About, Privacy, formerly AI Usage Policy, etc.) at this slug
+      // would otherwise get blindly converted into a fake "article" and rendered here —
+      // e.g. deleting a static page route like /ai-usage-policy would just resurface its
+      // still-published CMS page content through this catch-all instead of 404ing.
+      // Treat it as not-found so the normal 404 fallback chain below takes over.
+      if (raw.contentType === 'page') {
+        const err = new Error('CMS_NOT_FOUND') as Error & { status?: number };
+        err.status = 404;
+        throw err;
+      }
       return {
         data: cmsContentToArticle(raw),
         success: true,
