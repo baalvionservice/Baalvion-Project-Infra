@@ -95,6 +95,38 @@ const nextConfig: NextConfig = {
       // now live at the top level.
       { source: '/financial-tools/portfolio', destination: '/portfolio', permanent: true },
       { source: '/financial-tools/retirement', destination: '/retirement', permanent: true },
+      // The old /glossary section (letter index + term-detail pages) was
+      // removed in favour of /terms/[letter]/[slug] — still indexed and
+      // linked externally. /glossary/letter/k → /terms/k covers the old
+      // index route; /glossary/:slug → /terms/:slug covers both old bare
+      // letter pages (/glossary/l) and old term-slug pages, and falls
+      // through to the /terms/[letter] page's own bare-slug-to-term
+      // redirect for the latter.
+      { source: '/glossary/letter/:letter', destination: '/terms/:letter', permanent: true },
+      { source: '/glossary/:slug', destination: '/terms/:slug', permanent: true },
+      // Search Console flagged these as 404s with no matching href, redirect, or
+      // sitemap entry anywhere in the codebase — most likely a hub-page slug run
+      // together with an adjacent term/entity name when the report was copied.
+      // Defensive redirects in case the concatenated form is genuinely being
+      // requested from somewhere outside this repo (old sitemap, third-party link).
+      { source: '/etfsETF', destination: '/etfs', permanent: true },
+      { source: '/inflationInflation', destination: '/inflation', permanent: true },
+      { source: '/cryptocurrencyBitcoin', destination: '/cryptocurrency', permanent: true },
+      // /markets/quote/<symbol> genuinely 404s for these 5 — no data source exists
+      // for them anywhere (not imperialpedia-service, not the Yahoo fallback map in
+      // worldFeed.ts) and building one is not worth the ongoing API/compute cost for
+      // symbols this obscure. CHINA/EM were never individual assets to begin with —
+      // they're the regional composite placeholders in MARKET_GROUPS — so they route
+      // to the matching /world region page instead. DGS2/DGS30/DGS3MO are Treasury
+      // yield curve points with no per-symbol page of their own; /bonds is the closest
+      // real destination. A redirect is also strictly cheaper than a 404: no render,
+      // no external API call, no compute — versus the 30s-revalidate quote page's
+      // renders it would otherwise trigger on every crawl/backlink hit.
+      { source: '/markets/quote/CHINA', destination: '/world/china', permanent: true },
+      { source: '/markets/quote/EM', destination: '/world/emerging', permanent: true },
+      { source: '/markets/quote/DGS2', destination: '/bonds', permanent: true },
+      { source: '/markets/quote/DGS30', destination: '/bonds', permanent: true },
+      { source: '/markets/quote/DGS3MO', destination: '/bonds', permanent: true },
       // These /categories/<slug> archives 404 because no article's category
       // taxonomy string slugifies to an exact match — but each has a real,
       // populated top-level hub page. Send crawlers/visitors there instead.

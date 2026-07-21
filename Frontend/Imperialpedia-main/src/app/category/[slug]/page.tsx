@@ -25,7 +25,7 @@ export function generateStaticParams() {
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
-  const category = categoryMap[(await params).slug];
+  const category = categoryMap[(await params).slug.toLowerCase()];
 
   if (!category) {
     notFound();
@@ -35,7 +35,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 }
 
 export async function generateMetadata({ params }: CategoryPageProps) {
-  const category = categoryMap[(await params).slug];
+  const category = categoryMap[(await params).slug.toLowerCase()];
 
   if (!category) {
     return {

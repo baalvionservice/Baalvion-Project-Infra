@@ -22,7 +22,7 @@ type EntityDetail = Record<string, unknown> & {
 };
 
 const KNOWN_FIELDS = new Set([
-  'type', 'name', 'slug', 'description', 'category', 'country', 'industry',
+  'type', 'name', 'slug', 'description', 'editorialOverview', 'category', 'country', 'industry',
   'image', 'tags', 'aliases', 'competitors', 'technologies', 'id', 'created_at', 'updated_at',
 ]);
 
@@ -73,6 +73,7 @@ export default function EditEntityPage() {
     name: entity.name,
     slug: entity.slug,
     description: (entity.description as string | null | undefined) ?? '',
+    editorialOverview: (entity.editorialOverview as string | null | undefined) ?? '',
     category: (entity.category as string | null | undefined) ?? '',
     country: (entity.country as string | null | undefined) ?? '',
     industry: (entity.industry as string | null | undefined) ?? '',

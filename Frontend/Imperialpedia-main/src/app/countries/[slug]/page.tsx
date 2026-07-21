@@ -4,6 +4,7 @@ import { Metadata } from "next";
 import { Container } from "@/design-system/layout/container";
 import { EntityHeader } from "@/components/knowledge/EntityHeader";
 import { EntityOverview } from "@/components/knowledge/EntityOverview";
+import { EntityEditorialOverview } from "@/components/knowledge/EntityEditorialOverview";
 import { DataTable } from "@/components/knowledge/DataTable";
 import { RelatedEntities } from "@/components/knowledge/RelatedEntities";
 import { getCountryBySlug } from "@/lib/data/loaders";
@@ -76,6 +77,8 @@ export default async function Page({ params }: PageProps) {
               headers={["Matrix Node", "Value"]}
               rows={technicalData}
             />
+
+            <EntityEditorialOverview entityName={country.name} overview={country.editorialOverview} />
 
             <EntityAnalytics type="country" slug={country.slug} />
 

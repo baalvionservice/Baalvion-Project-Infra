@@ -40,6 +40,14 @@ import FAQItem from "@/components/faq/FAQItem";
 import { env } from "@/config/env";
 
 const SLUG = "market-news";
+// The CMS's actual category slug is "markets" — "market-news" is only this
+// route's own path (/markets was retired and 301s to /market-news, see
+// next.config.ts), never a real cms-service category. Querying live content
+// with SLUG instead of this found 0 matches for every "Markets"-categorized
+// article, silently falling through to the static/demo fallback and leaving
+// every real published Markets news item unlinked from its own hub (verified
+// live: 7 published articles, zero incoming links from anywhere on the site).
+const CMS_CATEGORY_SLUG = "markets";
 
 /** Real, nav-matching market topics (see the "Markets" mega-menu in Navbar.tsx),
  * in wire-service order — replaces the generic All/Market/Company/Crypto/PF filter. */
@@ -162,7 +170,7 @@ export async function MarketNewsHub() {
   const movers = computeMovers(assetGroups.stocks);
 
   // 1) Main feed — same CMS-first fallback chain as every other topic page.
-  let articles: NewsArticle[] = await getCategoryArticles(SLUG, 40);
+  let articles: NewsArticle[] = await getCategoryArticles(CMS_CATEGORY_SLUG, 40);
   let isLive = articles.length > 0;
   if (!isLive) {
     const baked = staticCategoryNews(SLUG);

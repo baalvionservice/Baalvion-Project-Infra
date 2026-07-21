@@ -7,14 +7,34 @@
     "category": "Software",
     "description": "Artificial intelligence systems capable of generating new content and solving complex problems.",
     "industry": "software",
-    "applications": ["content-creation", "coding", "scientific-research"],
-    "use_cases": ["Automation", "Personalization", "Research"],
+    "applications": [
+      "content-creation",
+      "coding",
+      "scientific-research"
+    ],
+    "use_cases": [
+      "Automation",
+      "Personalization",
+      "Research"
+    ],
     "invented_year": 2014,
-    "key_companies": ["nvidia", "openai", "google"],
-    "related_technologies": ["large-language-models", "machine-learning"],
-    "tags": ["AI", "innovation", "LLM"],
+    "key_companies": [
+      "nvidia",
+      "openai",
+      "google"
+    ],
+    "related_technologies": [
+      "large-language-models",
+      "machine-learning"
+    ],
+    "tags": [
+      "AI",
+      "innovation",
+      "LLM"
+    ],
     "created_at": "2024-01-01T00:00:00Z",
-    "updated_at": "2024-01-01T00:00:00Z"
+    "updated_at": "2024-01-01T00:00:00Z",
+    "editorialOverview": "Generative AI refers to artificial intelligence systems that create new content — text, images, audio, video, or code — rather than simply analyzing or classifying existing data, the way earlier generations of machine learning primarily did. The category exploded into mainstream awareness with the release of ChatGPT in late 2022 and has since become one of the fastest-adopted technology categories in business history, moving from novelty to genuine enterprise infrastructure in under four years.\n\nMarket size estimates for generative AI vary considerably depending on methodology and what's counted as \"generative AI\" revenue specifically (the underlying models, the applications built on them, or both), with credible 2026 estimates ranging from roughly $90 billion to $160 billion depending on scope, and virtually every forecaster agreeing the category is growing at a compound annual rate well above 25%. What's more consistently measured, and arguably more meaningful, is adoption: an estimated 65% of organizations now use generative AI in at least one business function, roughly double the rate of just ten months earlier, and more than 80% of enterprises are expected to have deployed generative-AI-enabled applications by the end of 2026. Enterprise spending specifically on generative AI reached an estimated $37 billion in 2025, more than tripling the roughly $11.5 billion spent in 2024.\n\nThe technology's practical business applications have broadened considerably beyond the chatbot format that first made it famous. AI-powered copilots and virtual assistants embedded directly into existing software (Microsoft 365 Copilot, Google's Gemini in Workspace, and similar tools from countless other software vendors) now automate substantial portions of routine knowledge work — drafting documents, summarizing meetings, writing and reviewing code, and increasingly taking multi-step actions across software systems with only limited human oversight, a category increasingly described as \"agentic AI.\" That shift — from generative AI as a content-creation tool to generative AI as an increasingly autonomous digital worker — is arguably the more consequential development of 2026 relative to raw model capability improvements, since it changes not just what tasks AI can do but how directly it can act on a business's behalf.\n\nThe competitive and cost dynamics of generative AI remain in genuine flux. Training and running the largest, most capable models requires enormous, continuously growing capital investment — a major driver of the hundreds of billions of dollars in AI infrastructure spending from Microsoft, Google, Amazon, and Meta — while a parallel trend toward smaller, more efficient models has made \"good enough\" generative AI capability available at a fraction of frontier-model cost, widening who can practically build AI-powered products rather than narrowing the field to only the best-funded companies. For businesses evaluating generative AI, the core practical question has shifted from \"should we adopt this\" — largely settled, given adoption rates already above 80% among larger enterprises — to which specific workflows benefit most from automation, how to manage the real risks (factual errors, data privacy, and overreliance on outputs that aren't being adequately checked), and how to measure return on what has become, for many companies, one of their largest new technology budget lines."
   },
   {
     "id": "tech-2",
@@ -24,14 +44,33 @@
     "category": "Hardware",
     "description": "Computing systems that use quantum-mechanical phenomena to perform certain calculations far beyond the reach of classical computers.",
     "industry": "semiconductors",
-    "applications": ["cryptography", "drug-discovery", "materials-science"],
-    "use_cases": ["Optimization", "Simulation", "Cryptography"],
+    "applications": [
+      "cryptography",
+      "drug-discovery",
+      "materials-science"
+    ],
+    "use_cases": [
+      "Optimization",
+      "Simulation",
+      "Cryptography"
+    ],
     "invented_year": 1980,
-    "key_companies": ["nvidia", "intel", "tsmc"],
-    "related_technologies": ["generative-ai"],
-    "tags": ["quantum", "computing", "emerging-tech"],
+    "key_companies": [
+      "nvidia",
+      "intel",
+      "tsmc"
+    ],
+    "related_technologies": [
+      "generative-ai"
+    ],
+    "tags": [
+      "quantum",
+      "computing",
+      "emerging-tech"
+    ],
     "created_at": "2024-01-01T00:00:00Z",
-    "updated_at": "2024-01-01T00:00:00Z"
+    "updated_at": "2024-01-01T00:00:00Z",
+    "editorialOverview": "Quantum computing is a fundamentally different approach to computation that uses the properties of quantum mechanics — superposition and entanglement — to process certain types of problems in ways that classical computers, no matter how powerful, cannot efficiently replicate. Where a classical computer's basic unit of information (a bit) is always either a 0 or a 1, a quantum bit (\"qubit\") can exist in a combination of both states simultaneously, and multiple qubits can become \"entangled\" so that their states are linked in ways with no classical analog — properties that, for the right class of problems, allow quantum computers to explore a vastly larger solution space than classical machines can.\n\nFor most of its history, quantum computing has been defined more by its promise than by practical results, held back by the extreme fragility of qubits: they lose their quantum properties (\"decohere\") from even tiny amounts of environmental noise, producing high error rates that limited quantum computers to research demonstrations rather than useful, reliable computation. 2026 has marked a genuine inflection point on that specific problem. Several companies have now demonstrated working \"logical qubits\" — arrangements of multiple physical qubits combined with error-correction code to behave as a single, much more reliable qubit — at meaningful scale: QuEra Computing, working with Harvard, demonstrated 96 logical qubits built from 448 physical qubits using an advanced error-correction code, while other firms have shown logical qubits actually outperforming raw physical qubits on real computational tasks for the first time, a milestone the field has worked toward for years.\n\nHardware progress has come from multiple, genuinely different physical approaches competing in parallel — a sign the field hasn't yet converged on one clearly superior technology. Microsoft reported a major materials-science advance in its topological qubit approach, improving the stability of its quantum states roughly a thousand-fold. Rigetti's superconducting-qubit systems cut error rates roughly in half within a single year. Quantinuum's trapped-ion approach continues to deliver higher gate fidelities than superconducting rivals achieve at comparable qubit counts, while IBM has laid out a public roadmap toward systems combining multiple processing modules to scale toward thousands of gates per circuit over the next several years. That diversity of competing hardware approaches — superconducting circuits, trapped ions, neutral atoms, and topological qubits among them — means it remains genuinely unclear which underlying technology will ultimately scale most successfully to commercially useful quantum computers.\n\nCommercially, the industry crossed a symbolically important threshold in 2025 when IonQ became the first pure-play quantum computing company to exceed $100 million in annual GAAP revenue, and further signs of maturation followed in 2026 with additional quantum companies reaching public markets. Real, near-term commercial applications remain concentrated in a fairly narrow set of domains where quantum computers' specific mathematical advantages actually apply — materials science simulation, certain optimization problems, and some cryptographic applications — rather than the general-purpose computing quantum computers are sometimes popularly imagined to eventually replace. For most businesses, quantum computing in 2026 remains a research-and-development bet on a technology with a genuinely uncertain but potentially transformative timeline, rather than a technology ready for broad commercial deployment today."
   },
   {
     "id": "tech-3",
@@ -41,14 +80,34 @@
     "category": "Software",
     "description": "Deep learning models trained on massive text datasets to understand and generate human language, powering chatbots, coding assistants, and content-generation tools.",
     "industry": "software",
-    "applications": ["chatbots", "content-generation", "coding-assistants"],
-    "use_cases": ["Automation", "Customer Support", "Research"],
+    "applications": [
+      "chatbots",
+      "content-generation",
+      "coding-assistants"
+    ],
+    "use_cases": [
+      "Automation",
+      "Customer Support",
+      "Research"
+    ],
     "invented_year": 2017,
-    "key_companies": ["openai", "microsoft", "alphabet"],
-    "related_technologies": ["generative-ai", "machine-learning"],
-    "tags": ["AI", "LLM", "NLP"],
+    "key_companies": [
+      "openai",
+      "microsoft",
+      "alphabet"
+    ],
+    "related_technologies": [
+      "generative-ai",
+      "machine-learning"
+    ],
+    "tags": [
+      "AI",
+      "LLM",
+      "NLP"
+    ],
     "created_at": "2024-01-01T00:00:00Z",
-    "updated_at": "2024-01-01T00:00:00Z"
+    "updated_at": "2024-01-01T00:00:00Z",
+    "editorialOverview": "Large language models (LLMs) are the specific type of AI model — trained on enormous quantities of text using a neural network architecture called the \"transformer\" — that underpins most of today's generative AI products, including ChatGPT, Google's Gemini, and Anthropic's Claude. An LLM works by learning statistical patterns in language at a scale large enough that it can generate coherent, contextually appropriate text, answer questions, write code, and increasingly reason through multi-step problems, even though the underlying mechanism is fundamentally a very sophisticated form of pattern prediction rather than understanding in the human sense.\n\nThe competitive landscape among frontier LLMs has continued to shift rapidly through 2026, with no single company holding a stable, durable lead — a pattern that has held since the category's earliest days. OpenAI's GPT-5 model family, released through 2025 and into 2026, brought configurable reasoning effort (letting users trade speed for more careful, deliberate output on harder problems), native multimodal input across text, image, and other formats, and context windows — the amount of text a model can consider at once — now exceeding one million tokens. Google's Gemini line has pushed hard on tool use, letting models directly invoke external functions, search the web, and execute code without extensive prompt engineering, alongside its own steadily expanding context windows and strong benchmark performance on complex reasoning tasks. Anthropic's Claude models have emphasized reliability and reduced hallucination rates as a specific differentiator, alongside strong performance on coding and extended reasoning tasks. Meanwhile, cost-efficient open-source and Chinese models, notably DeepSeek's releases, have repeatedly demonstrated that near-frontier capability doesn't necessarily require frontier-level spending, adding real pricing pressure across the industry.\n\nSeveral genuine technical trends define where LLMs stand in 2026, beyond the usual headline benchmark comparisons. \"Reasoning models\" — designed to work through problems step by step rather than produce an instant answer, trading speed for accuracy on harder tasks — have moved from a specialized niche to a mainstream product tier across nearly every major provider. Multimodality (processing and generating not just text but images, audio, and video within the same model) has become table stakes for any credible frontier model rather than a differentiating feature. And a parallel efficiency trend has meant that capability once available only from the most expensive frontier models can now often be had from smaller, cheaper models within a year or two of the frontier's initial release — a pattern that has repeatedly compressed the commercial advantage of being first to a given capability level.\n\nFor businesses and investors, the practical implication of this fast-moving, multi-vendor landscape is that LLM choice increasingly resembles choosing a cloud infrastructure provider more than picking a single permanent technology bet: most serious enterprise AI deployments now build in a degree of model flexibility, testing and sometimes mixing multiple providers' models for different tasks rather than committing exclusively to one, given how quickly relative rankings between providers have continued to shift. The underlying capability curve — larger context windows, better reasoning, and falling cost per unit of capability — shows no clear sign of flattening, which is precisely why the competitive order among LLM providers has remained so unsettled: today's performance leader has, so far, rarely held that position for more than a few months at a time."
   },
   {
     "id": "tech-4",
@@ -58,14 +117,34 @@
     "category": "Software",
     "description": "A branch of artificial intelligence in which systems learn patterns from data to make predictions or decisions without being explicitly programmed for each task.",
     "industry": "software",
-    "applications": ["fraud-detection", "recommendation-systems", "forecasting"],
-    "use_cases": ["Prediction", "Classification", "Automation"],
+    "applications": [
+      "fraud-detection",
+      "recommendation-systems",
+      "forecasting"
+    ],
+    "use_cases": [
+      "Prediction",
+      "Classification",
+      "Automation"
+    ],
     "invented_year": 1959,
-    "key_companies": ["nvidia", "microsoft", "alphabet"],
-    "related_technologies": ["generative-ai", "large-language-models"],
-    "tags": ["AI", "data-science", "automation"],
+    "key_companies": [
+      "nvidia",
+      "microsoft",
+      "alphabet"
+    ],
+    "related_technologies": [
+      "generative-ai",
+      "large-language-models"
+    ],
+    "tags": [
+      "AI",
+      "data-science",
+      "automation"
+    ],
     "created_at": "2024-01-01T00:00:00Z",
-    "updated_at": "2024-01-01T00:00:00Z"
+    "updated_at": "2024-01-01T00:00:00Z",
+    "editorialOverview": "Machine learning is the broader field of computer science from which today's generative AI and large language models emerged — the general discipline of building systems that improve their performance on a task by learning patterns from data, rather than following explicitly programmed rules for every possible situation. Where a traditional program follows a fixed set of instructions written by a human, a machine learning model is trained: shown large amounts of example data, and adjusted (through statistical optimization) until it can make accurate predictions or decisions on new data it hasn't seen before.\n\nThe field spans a wide range of techniques well beyond the large language models that have dominated recent public attention. \"Supervised learning\" — training a model on labeled examples, such as photos tagged with what they contain — powers everything from fraud-detection systems at banks to medical-image analysis. \"Unsupervised learning\" finds patterns and groupings in unlabeled data, useful for tasks like customer segmentation or anomaly detection. \"Reinforcement learning\" — where a model learns through trial and error, receiving rewards or penalties for its actions — has been central to breakthroughs in game-playing AI and increasingly to fine-tuning the large language models behind today's chatbots, including the technique (reinforcement learning from human feedback) that helped make models like ChatGPT follow instructions and converse naturally rather than simply predict the statistically likely next word.\n\nMachine learning's business applications, unlike generative AI's more recent and highly visible boom, have been quietly embedded in everyday commercial infrastructure for well over a decade: the recommendation systems behind streaming services and e-commerce product suggestions, credit-scoring and fraud-detection models at banks and payment processors, demand forecasting and supply-chain optimization in retail and manufacturing, and predictive-maintenance systems that flag industrial equipment likely to fail before it does. These applications generally predate the current generative AI wave by years and remain, in aggregate, a larger and more mature source of measurable business value than most generative AI deployments today, even though they attract far less public attention than chatbots and image generators.\n\nThe relationship between machine learning and the AI infrastructure boom described elsewhere on this site runs in both directions: the same specialized chips (Nvidia's GPUs, custom AI accelerators from Google, Amazon, and Microsoft) built to train large language models also accelerate more traditional machine learning workloads, and advances in one area — larger models, better training techniques, more efficient hardware — tend to lift capability across the whole field rather than staying confined to a single application. For a business evaluating where to apply machine learning, the practical starting point usually isn't \"how do we use generative AI\" but the more fundamental question the field has always asked: what decisions or predictions in this business would benefit from being learned from historical data, and is there enough reliable data available to train a model that actually improves on the current approach — a question generative AI has made more visible and urgent across nearly every industry, but one that predates it by decades and doesn't always require an LLM to answer."
   },
   {
     "id": "tech-5",
@@ -75,13 +154,26 @@
     "category": "Software",
     "description": "A distributed, cryptographically-secured ledger technology that underpins cryptocurrencies and is also used for supply chain tracking, digital identity, and smart contracts.",
     "industry": "software",
-    "applications": ["cryptocurrency", "supply-chain", "smart-contracts"],
-    "use_cases": ["Decentralization", "Transparency", "Security"],
+    "applications": [
+      "cryptocurrency",
+      "supply-chain",
+      "smart-contracts"
+    ],
+    "use_cases": [
+      "Decentralization",
+      "Transparency",
+      "Security"
+    ],
     "invented_year": 2008,
     "key_companies": [],
     "related_technologies": [],
-    "tags": ["blockchain", "crypto", "distributed-ledger"],
+    "tags": [
+      "blockchain",
+      "crypto",
+      "distributed-ledger"
+    ],
     "created_at": "2024-01-01T00:00:00Z",
-    "updated_at": "2024-01-01T00:00:00Z"
+    "updated_at": "2024-01-01T00:00:00Z",
+    "editorialOverview": "Blockchain is a method of recording data across a distributed network of computers in a way that makes the resulting record extremely difficult to alter after the fact, without relying on any single central authority to vouch for its accuracy. Each new batch of transactions (\"block\") is cryptographically linked to the one before it, forming a chain that every participant in the network holds a copy of — which is what gives blockchain its core property: no single party can quietly rewrite history, because doing so would require simultaneously altering the copies held by a majority of the network.\n\nBlockchain's best-known application remains cryptocurrency — Bitcoin, the original blockchain-based digital currency, and the thousands of other tokens and coins that followed — but the underlying technology has found genuine, if more modest, use well beyond speculative digital assets. Financial institutions have used blockchain-based systems (or \"distributed ledger technology,\" the more institutional term) for cross-border payments settlement, and the technology underpins the broader crypto ecosystem including stablecoins (crypto tokens pegged to a fiat currency like the dollar) that have increasingly been used as a genuine payments rail, particularly in markets with less reliable local banking infrastructure. Smart contracts — self-executing code that runs on a blockchain and automatically enforces the terms of an agreement without a court or intermediary needed to interpret them — extended blockchain's use case from simply recording transactions to actually automating conditional financial and legal agreements, a capability platforms like Ethereum built their entire value proposition around.\n\nThe technology's tradeoffs are well understood at this point after more than a decade of real-world deployment. Decentralization and tamper-resistance come at a real cost: most blockchains are slower and more computationally expensive than a centralized database doing the equivalent job, which is why blockchain has succeeded specifically in use cases where trustlessness (not needing to trust any single party) is worth more than raw speed or efficiency, and struggled to displace conventional databases in applications where a trusted central party already exists and works fine. Energy consumption was historically a major criticism, particularly for Bitcoin's original \"proof of work\" validation method, though many newer blockchains use far less energy-intensive alternatives such as \"proof of stake.\"\n\nRegulatory treatment of blockchain-based assets remains genuinely unsettled in much of the world, with different jurisdictions taking meaningfully different approaches to whether and how cryptocurrencies should be classified, taxed, and regulated — a persistent source of both opportunity (regulatory arbitrage, first-mover advantage in friendlier jurisdictions) and risk (sudden policy shifts that can upend business models built around a specific regulatory assumption) for companies operating in the space. As institutional and even sovereign adoption of blockchain-based assets has grown — most visibly through the approval and rapid growth of Bitcoin exchange-traded funds and a broader wave of corporate treasury allocations to crypto assets — the technology has moved further from its cypherpunk, anti-establishment origins toward a more mainstream, if still volatile and periodically controversial, place in the broader financial system."
   }
 ]

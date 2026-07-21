@@ -5,7 +5,7 @@ import { Text } from '@/design-system/typography/text';
 import { Section } from '@/design-system/layout/section';
 import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
-import { Eye } from 'lucide-react';
+import { Handshake } from 'lucide-react';
 import { env } from '@/config/env';
 import { CmsPage } from '@/components/pages/CmsPage';
 import { getCmsPage } from '@/services/data/cms-public';
@@ -19,48 +19,42 @@ import { getCmsPage } from '@/services/data/cms-public';
 export const revalidate = 3600;
 
 export async function generateMetadata(): Promise<Metadata> {
-  const page = await getCmsPage('sponsored-content-policy');
+  const page = await getCmsPage('advertise');
   if (page) {
     return buildMetadata({
       title: page.seoTitle,
       description: page.seoDescription,
       keywords: page.seoKeywords,
-      canonical: '/sponsored-content-policy',
+      canonical: '/advertise',
     });
   }
   return buildMetadata({
-    title: 'Sponsored Content Policy',
+    title: 'Advertise With Us',
     description:
-      'How Imperialpedia labels sponsored and partner content, why it still meets the same fact-checking bar as editorial articles, and who approves it.',
-    canonical: '/sponsored-content-policy',
+      'Reach an engaged personal-finance and markets audience on Imperialpedia. Learn about available ad formats and how to get in touch about a placement.',
+    canonical: '/advertise',
   });
 }
 
-const LAST_UPDATED = 'July 5, 2026';
+const LAST_UPDATED = 'July 21, 2026';
 
-export default async function SponsoredContentPolicyPage() {
-  return (
-    <CmsPage
-      slug="sponsored-content-policy"
-      eyebrow="Sponsored Content"
-      fallback={<SponsoredContentPolicyFallback />}
-    />
-  );
+export default async function AdvertisePage() {
+  return <CmsPage slug="advertise" eyebrow="Partner With Us" fallback={<AdvertiseFallback />} />;
 }
 
-function SponsoredContentPolicyFallback() {
+function AdvertiseFallback() {
   return (
     <main className="min-h-screen bg-background pt-24 pb-32">
       <Container isNarrow>
         <header className="mb-14 space-y-4">
           <div className="flex items-center gap-2 text-primary">
-            <Eye className="h-5 w-5" aria-hidden />
+            <Handshake className="h-5 w-5" aria-hidden />
             <Text variant="label" className="text-xs font-bold tracking-widest uppercase">
-              Sponsored Content
+              Partner With Us
             </Text>
           </div>
           <Text variant="h1" as="h1" className="text-4xl lg:text-5xl font-bold tracking-tight">
-            Sponsored Content Policy
+            Advertise With {env.appName}
           </Text>
           <Text variant="bodySmall" className="text-muted-foreground">
             Last updated: {LAST_UPDATED}
@@ -70,48 +64,41 @@ function SponsoredContentPolicyFallback() {
         <Section spacing="sm" className="prose prose-invert max-w-none space-y-12">
           <div className="space-y-4">
             <Text variant="h3" className="text-xl font-bold">
-              1. Clear labeling
+              1. Who reads {env.appName}
             </Text>
             <Text variant="body" className="text-muted-foreground leading-relaxed">
-              Any piece on {env.appName} that a company or partner has paid to have published is
-              clearly labeled as such — for example &ldquo;Sponsored&rdquo; or &ldquo;Partner
-              Content&rdquo; — both in any listing that links to it and at the top of the piece
-              itself. We do not present paid content as if it were independent editorial coverage.
+              {env.appName} covers markets, investing, banking, and personal finance for readers
+              actively researching financial decisions — from choosing a brokerage or savings
+              account to understanding a market move. Advertising here reaches that intent-driven
+              audience alongside our editorial coverage.
             </Text>
           </div>
 
           <div className="space-y-4">
             <Text variant="h3" className="text-xl font-bold">
-              2. Same fact-checking bar as editorial content
+              2. Available placements
             </Text>
             <Text variant="body" className="text-muted-foreground leading-relaxed">
-              Labeling a piece as sponsored does not lower the standard it is held to. Sponsored
-              content still passes through the same{' '}
-              <Link href="/fact-checking" className="text-primary hover:underline">
-                Fact-Checking Policy
+              We offer standard programmatic display placements through our ad network partners,
+              as well as sponsored content clearly labeled per our{' '}
+              <Link href="/sponsored-content-policy" className="text-primary hover:underline">
+                Sponsored Content Policy
+              </Link>
+              . Every paid placement is visually distinguished from editorial content, and buying
+              advertising never grants influence over coverage, rankings, or reviews — see our{' '}
+              <Link href="/advertising-policy" className="text-primary hover:underline">
+                Advertising Policy
               </Link>{' '}
-              applied to editorial articles: claims must be sourced, figures must be accurate, and
-              nothing misleading about a product's risks or performance is permitted.
+              for the full standards.
             </Text>
           </div>
 
           <div className="space-y-4">
             <Text variant="h3" className="text-xl font-bold">
-              3. Editorial retains final approval
+              3. Get in touch
             </Text>
             <Text variant="body" className="text-muted-foreground leading-relaxed">
-              A sponsor can propose a topic and provide input on a draft, but the editorial team
-              retains final approval over what is published, including the right to decline or
-              request changes to a piece that does not meet our standards.
-            </Text>
-          </div>
-
-          <div className="space-y-4">
-            <Text variant="h3" className="text-xl font-bold">
-              4. Questions about this policy
-            </Text>
-            <Text variant="body" className="text-muted-foreground leading-relaxed">
-              Reach us at{' '}
+              To discuss a placement, reach out at{' '}
               <a href={`mailto:${env.contactEmail}`} className="text-primary hover:underline">
                 {env.contactEmail}
               </a>{' '}
@@ -119,7 +106,7 @@ function SponsoredContentPolicyFallback() {
               <Link href="/contact" className="text-primary hover:underline">
                 our contact page
               </Link>
-              .
+              , with a short note about your business and the kind of placement you have in mind.
             </Text>
           </div>
         </Section>

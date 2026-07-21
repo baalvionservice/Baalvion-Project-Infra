@@ -40,6 +40,12 @@ export interface BaseEntity {
   slug: Slug;
   type: EntityType;
   description: string;
+  // Long-form editorial profile (several paragraphs) rendered as its own "About"
+  // section — distinct from `description`, which is a single short overview
+  // rendered as one pull-quote-style paragraph (see EntityOverview.tsx) and was
+  // never meant to hold real article-length depth. Optional: absent entities
+  // simply don't render the section rather than showing an empty block.
+  editorialOverview?: string;
   category: string;
   tags: string[];
   created_at: Timestamp;
