@@ -170,24 +170,41 @@ export interface CmsAuthor {
 }
 
 // ── low-level fetchers (throw on transport/5xx so callers can fall back) ─────
-// A brief backend blip (deploy rollover, DB reconnect, one dropped connection)
-// otherwise turns straight into a hard 404 on the very next line — callers only
+// A brief backend blip (deploy rollover, DB reconnect, one dropped connection,
+// or cms-service simply being slower than 6s under a crawl burst — measured
+// directly: a 10-concurrent-request crawl of the sitemap produced dozens of
+// transient failures that a single 300ms retry did not absorb, while every
+// one of those URLs resolved fine on a plain sequential re-check) otherwise
+// turns straight into a hard 404 on the very next line — callers only
 // distinguish "not found" from "unreachable" by HTTP status, and a network
-// error or 5xx looks identical to "give up" unless retried first. One retry
-// after a short delay absorbs that class of transient failure without masking
-// a real 404 (which short-circuits below, before the retry loop).
-const TRANSIENT_RETRY_DELAY_MS = 300;
+// error or 5xx looks identical to "give up" unless retried first. Two retries
+// with backoff absorb that class of transient failure without masking a real
+// 404 (which short-circuits below, before the retry loop).
+const TRANSIENT_RETRY_DELAYS_MS = [400, 1200];
+
+// `cache: 'no-store'` (the previous setting) forces full dynamic rendering on
+// EVERY route that calls through this fetcher — silently overriding that
+// route's own `export const revalidate`, with no build warning once the route
+// also sets `revalidate` (Next only errors for routes with no cache config at
+// all). Confirmed directly in a production build: pages that had just been
+// switched off force-dynamic to `revalidate = 3600` still built as fully
+// dynamic (ƒ, no cache window) because of this. /api/revalidate already
+// calls revalidatePath() on every CMS publish/update/delete — which only has
+// something to invalidate if the underlying fetch is cacheable in the first
+// place. 300s is a safety-net ceiling, not the real freshness mechanism: the
+// webhook still makes edits appear instantly in the normal case.
+const CMS_FETCH_REVALIDATE_SECONDS = 300;
 
 async function cmsFetchOnce<T>(path: string): Promise<T> {
   const res = await fetch(`${CMS_PUBLIC_URL}/${SITE_SLUG}${path}`, {
     headers: { Accept: 'application/json' },
-    // Content is editorial and changes on publish — keep it fresh, not statically frozen.
-    cache: 'no-store',
+    next: { revalidate: CMS_FETCH_REVALIDATE_SECONDS },
     // Without a bound, a hung cms-service connection hangs every page that
     // renders through this shared fetcher (news, categories, the article
     // catch-all) for the full request lifetime instead of failing over to
-    // the caller's fallback.
-    signal: AbortSignal.timeout(6000),
+    // the caller's fallback. 9s (was 6s) — measured cms-service response
+    // times climb past 6s under a crawl burst well before actually failing.
+    signal: AbortSignal.timeout(9000),
   });
   if (!res.ok) {
     // 404 (e.g. unknown slug) is an expected "not found", not a transport failure.
@@ -226,13 +243,16 @@ export async function getContentRedirectSlug(slug: string): Promise<string | nul
 }
 
 async function cmsFetch<T>(path: string): Promise<T> {
-  try {
-    return await cmsFetchOnce<T>(path);
-  } catch (error) {
-    if ((error as { status?: number })?.status === 404) throw error;
-    await new Promise((resolve) => setTimeout(resolve, TRANSIENT_RETRY_DELAY_MS));
-    return cmsFetchOnce<T>(path);
+  for (const delayMs of TRANSIENT_RETRY_DELAYS_MS) {
+    try {
+      return await cmsFetchOnce<T>(path);
+    } catch (error) {
+      if ((error as { status?: number })?.status === 404) throw error;
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
   }
+  // Final attempt — let a real error (transient or not) propagate to the caller.
+  return cmsFetchOnce<T>(path);
 }
 
 export async function listCmsContent(
@@ -357,6 +377,27 @@ const esc = (s: unknown): string =>
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 
+// The content pipeline writes cross-article references as markdown-style
+// `[anchor text](target-slug)` inline in prose (matches the same {slug, anchor}
+// pairs it separately records in customFields.internalLinks) — but nothing
+// ever converted that into a real `<a>`, so every one of these rendered as
+// literal visible bracket-and-parenthesis text on the live site (verified
+// directly on /broker-reviews/order-execution-quality-explained: 5 internal
+// references, all inert plain text). `/financial-intelligence/<slug>` is a
+// safe universal target for ANY article slug regardless of its real category
+// — the catch-all resolves the article by slug alone and 301s to its actual
+// canonical `/<categorySlug>/<slug>` if this guess doesn't match, so no
+// per-link category lookup is needed at render time.
+// Deliberately narrow to a bare kebab-case slug in the parens (no `://`, no
+// leading `/`) so a real external markdown-style link (if one ever appears)
+// is left untouched rather than mis-targeted at /financial-intelligence.
+function linkifyInternalRefs(html: string): string {
+  return html.replace(
+    /\[([^\]\n]+)\]\(([a-z0-9]+(?:-[a-z0-9]+)*)\)/g,
+    (_match, label: string, slug: string) => `<a href="/financial-intelligence/${slug}">${label}</a>`,
+  );
+}
+
 function blockToHtml(b: CmsBlock, headingState: { seenH2: boolean }): string {
   const c = b.content || {};
   switch (b.type) {
@@ -364,7 +405,7 @@ function blockToHtml(b: CmsBlock, headingState: { seenH2: boolean }): string {
     // editor (bold/links/lists), same trust level as the raw `html` block below — must not
     // be escaped or that formatting renders as literal text on the live site.
     case 'paragraph':
-      return `<p>${(c.text as string) || ''}</p>`;
+      return `<p>${linkifyInternalRefs((c.text as string) || '')}</p>`;
     case 'heading': {
       let level = Math.min(Math.max(Number(c.level) || 2, 1), 6);
       // At most one <h2> per article (SEO: single-H2 hierarchy) — the page's own H1
@@ -377,11 +418,11 @@ function blockToHtml(b: CmsBlock, headingState: { seenH2: boolean }): string {
       return `<h${level}>${(c.text as string) || ''}</h${level}>`;
     }
     case 'quote':
-      return `<blockquote><p>${(c.text as string) || ''}</p>${c.cite ? `<cite>${esc(c.cite)}</cite>` : ''}</blockquote>`;
+      return `<blockquote><p>${linkifyInternalRefs((c.text as string) || '')}</p>${c.cite ? `<cite>${esc(c.cite)}</cite>` : ''}</blockquote>`;
     case 'code':
       return `<pre><code>${esc(c.code)}</code></pre>`;
     case 'callout':
-      return `<div class="callout callout-${esc(c.variant) || 'info'}">${(c.text as string) || ''}</div>`;
+      return `<div class="callout callout-${esc(c.variant) || 'info'}">${linkifyInternalRefs((c.text as string) || '')}</div>`;
     case 'divider':
       return '<hr />';
     case 'image':
@@ -389,8 +430,8 @@ function blockToHtml(b: CmsBlock, headingState: { seenH2: boolean }): string {
         ? `<figure><img src="${esc(c.src)}" alt="${esc(c.alt)}" />${c.caption ? `<figcaption>${esc(c.caption)}</figcaption>` : ''}</figure>`
         : '';
     case 'html':
-      // Author-supplied raw HTML, passed through as-is by design.
-      return typeof c.html === 'string' ? c.html : '';
+      // Author-supplied raw HTML, passed through as-is by design (see linkifyInternalRefs above).
+      return typeof c.html === 'string' ? linkifyInternalRefs(c.html) : '';
     case 'button':
       return c.href ? `<a class="btn" href="${esc(c.href)}">${esc(c.text) || 'Open'}</a>` : '';
     case 'embed':

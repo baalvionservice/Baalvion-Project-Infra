@@ -105,6 +105,7 @@ const LEGAL_TRUST_COLUMNS = [
       { label: 'Editorial Policy', href: '/editorial-policy' },
       { label: 'Corrections Policy', href: '/corrections' },
       { label: 'Fact-Checking Policy', href: '/fact-checking' },
+      { label: 'Review Policy', href: '/review-policy' },
       { label: 'Ethics Policy', href: '/ethics-policy' },
       { label: 'Conflict of Interest Policy', href: '/conflict-of-interest-policy' },
       { label: 'Diversity Policy', href: '/diversity-policy' },
@@ -121,6 +122,7 @@ const LEGAL_TRUST_COLUMNS = [
   {
     label: 'Ads & Disclosures',
     links: [
+      { label: 'Advertise', href: '/advertise' },
       { label: 'Advertising Policy', href: '/advertising-policy' },
       { label: 'Sponsored Content Policy', href: '/sponsored-content-policy' },
       { label: 'Affiliate Disclosure', href: '/affiliate-disclosure' },
@@ -142,6 +144,23 @@ const LEGAL_TRUST_COLUMNS = [
 
 const ALPHABET = ['#', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')];
 
+// A handful of the most-searched-for legal links repeated at the very bottom,
+// tiny and pipe-separated — the rest already live in the Legal & Access
+// column above; this is a quick-access row, not a duplicate of that nav.
+const BOTTOM_LEGAL_LINKS = [
+  { label: 'Privacy Policy', href: '/privacy-policy' },
+  { label: 'Terms of Service', href: '/terms-of-service' },
+  { label: 'Cookie Policy', href: '/cookie-policy' },
+  { label: 'Accessibility', href: '/accessibility' },
+];
+
+// Shared outlined-pill CTA button — bold, small, uppercase, tracked-out, matching
+// the promo-box treatment below (deliberately louder than the calm nav links).
+const PILL_BUTTON_CLASS =
+  'inline-flex items-center justify-center rounded-full border border-white/25 ' +
+  'px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest text-white ' +
+  'hover:bg-white/10 hover:border-white/40 transition-colors duration-150 no-underline';
+
 // ─── Inline Newsletter ────────────────────────────────────────────────────────
 // Replace <InlineNewsletter /> with your real <Newsletter /> component
 function InlineNewsletter() {
@@ -156,7 +175,7 @@ function InlineNewsletter() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3 w-full">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3 w-full max-w-sm">
       <input
         type="email"
         placeholder="Enter your email address"
@@ -170,16 +189,8 @@ function InlineNewsletter() {
           transition-colors duration-150
         "
       />
-      <button
-        type="submit"
-        className="
-          w-full rounded py-2.5 cursor-pointer
-          bg-blue-500 hover:bg-blue-600 active:bg-blue-700
-          text-white text-[11px] font-bold tracking-widest uppercase
-          transition-colors duration-150
-        "
-      >
-        Newsletter Sign Up
+      <button type="submit" className={`${PILL_BUTTON_CLASS} w-full bg-blue-500 border-blue-500 hover:bg-blue-600 hover:border-blue-600`}>
+        Sign Up Now
       </button>
       {status === 'success' && (
         <p className="text-green-400 text-xs">✓ You&apos;re subscribed!</p>
@@ -188,6 +199,42 @@ function InlineNewsletter() {
         <p className="text-red-400 text-xs">Please enter a valid email.</p>
       )}
     </form>
+  );
+}
+
+// ─── Promo Row (News Tips / Advertise / Newsletter) ────────────────────────────
+// Deliberately the loudest thing in the footer — bold ~20px headers over a
+// short blurb and an outlined pill CTA, so the footer reads with real
+// hierarchy (promo > nav column labels > nav links > legend) instead of
+// every block being the same small muted-uppercase treatment.
+function PromoBox({
+  title,
+  blurb,
+  cta,
+  href,
+  children,
+}: {
+  title: string;
+  blurb: string;
+  cta?: string;
+  href?: string;
+  children?: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-3">
+      <h2 className="text-lg sm:text-xl font-bold text-white font-headline tracking-tight">
+        {title}
+      </h2>
+      <p className="text-[13px] text-slate-400 leading-relaxed max-w-xs">
+        {blurb}
+      </p>
+      {children}
+      {cta && href && (
+        <Link href={href} className={PILL_BUTTON_CLASS}>
+          {cta}
+        </Link>
+      )}
+    </div>
   );
 }
 
@@ -217,16 +264,13 @@ export default function Footer() {
               aria-label="Imperialpedia Home"
             >
               <ImperialpediaMark className="w-7 h-7 flex-shrink-0 text-white" />
-              <span className="text-xl text-center font-bold tracking-tight text-white font-serif">
+              <span className="text-xl text-center font-bold tracking-tight text-white font-headline">
                 Imperial<span className="text-blue-400">pedia</span>
               </span>
             </Link>
 
-            {/* Newsletter */}
-            <InlineNewsletter />
-
             {/* Social icons */}
-            <div className='w-xl mx-auto md:w-full'>
+            <div className="w-full">
               <p className="text-[10px] font-bold text-center md:text-start tracking-[0.18em] uppercase text-slate-100/60 mb-3 font-sans">
                 Follow Us
               </p>
@@ -249,20 +293,18 @@ export default function Footer() {
 
           {/* Nav columns */}
           {NAV_COLUMNS.map((col) => (
-            <nav
-              key={col.label}
-              className=""
-              aria-label={`${col.label} links`}
-            >
-
-              <ul className="grid md:flex md:flex-col grid-cols-2 md:w-xl gap-3.5 list-none p-0 m-0">
+            <nav key={col.label} aria-label={`${col.label} links`}>
+              <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-slate-100/60 mb-3.5 font-sans">
+                {col.label}
+              </p>
+              <ul className="grid grid-cols-2 md:flex md:flex-col gap-3.5 list-none p-0 m-0">
                 {col.links.map((link) => (
                   <li key={link.label}>
                     <Link
                       href={link.href}
                       className="
-                        text-slate-100 hover:text-white
-                        text-[13px] font-semibold tracking-wide uppercase
+                        text-slate-300 hover:text-white
+                        text-[13px] font-medium
                         font-sans transition-colors duration-150
                         no-underline
                       "
@@ -274,6 +316,25 @@ export default function Footer() {
               </ul>
             </nav>
           ))}
+        </div>
+
+        {/* ── Promo Row ────────────────────────────────────────────── */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 py-12 border-b border-white/[0.08]">
+          <PromoBox
+            title="Have a Tip?"
+            blurb="Spotted an error, or have a story we should be covering? We want to hear from you."
+            cta="Get in Touch"
+            href="/contact"
+          />
+          <PromoBox
+            title="Advertise With Us"
+            blurb="Reach an engaged personal-finance and markets audience alongside our editorial coverage."
+            cta="Learn More"
+            href="/advertise"
+          />
+          <PromoBox title="Get Our Newsletter" blurb="Free weekly insights on markets, investing, and personal finance, delivered to your inbox.">
+            <InlineNewsletter />
+          </PromoBox>
         </div>
 
         {/* ── Legal, Trust & Editorial Standards ───────────────────── */}
@@ -301,8 +362,8 @@ export default function Footer() {
 
         {/* ── Alphabet Row ─────────────────────────────────────────── */}
         <div
-          className=" hidden 
-            sm:flex flex-wrap justify-between items-center gap-1
+          className="
+            hidden sm:flex flex-wrap justify-start items-center gap-1
             py-8 border-b border-white/[0.08]
           "
           aria-label="Browse dictionary by letter"
@@ -332,14 +393,26 @@ export default function Footer() {
         </div>
 
         {/* ── Bottom Bar ───────────────────────────────────────────── */}
-        <div className="
-          flex flex-col sm:flex-row justify-between items-center
-          gap-4 pt-7 flex-wrap
-        ">
-          <p className="text-slate-500 text-center text-xs font-sans">
+        <div className="pt-7 space-y-3">
+          <nav
+            className="flex flex-wrap justify-center sm:justify-start items-center gap-x-3 gap-y-1.5"
+            aria-label="Legal quick links"
+          >
+            {BOTTOM_LEGAL_LINKS.map((link, i) => (
+              <React.Fragment key={link.href}>
+                {i > 0 && <span className="text-slate-600 text-[11px]" aria-hidden>|</span>}
+                <Link
+                  href={link.href}
+                  className="text-slate-400 hover:text-white text-[11px] font-sans transition-colors duration-150 no-underline"
+                >
+                  {link.label}
+                </Link>
+              </React.Fragment>
+            ))}
+          </nav>
+          <p className="text-slate-500 text-center sm:text-left text-xs font-sans">
             &copy; {new Date().getFullYear()} Imperialpedia. AI Knowledge Infrastructure.
           </p>
-
         </div>
 
       </Container>

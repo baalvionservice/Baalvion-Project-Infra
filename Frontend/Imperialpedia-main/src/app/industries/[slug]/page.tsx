@@ -4,6 +4,7 @@ import { Metadata } from "next";
 import { Container } from "@/design-system/layout/container";
 import { EntityHeader } from "@/components/knowledge/EntityHeader";
 import { EntityOverview } from "@/components/knowledge/EntityOverview";
+import { EntityEditorialOverview } from "@/components/knowledge/EntityEditorialOverview";
 import { DataTable } from "@/components/knowledge/DataTable";
 import { RelatedEntities } from "@/components/knowledge/RelatedEntities";
 import { getIndustryBySlug } from "@/lib/data/loaders";
@@ -79,6 +80,8 @@ export default async function Page({ params }: PageProps) {
               headers={["Strategic Node", "Value"]}
               rows={technicalData}
             />
+
+            <EntityEditorialOverview entityName={industry.name} overview={industry.editorialOverview} />
 
             <EntityAnalytics type="industry" slug={industry.slug} />
 

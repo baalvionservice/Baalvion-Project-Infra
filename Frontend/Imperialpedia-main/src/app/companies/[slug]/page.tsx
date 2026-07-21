@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Container } from '@/design-system/layout/container';
 import { EntityHeader } from '@/components/knowledge/EntityHeader';
 import { EntityOverview } from '@/components/knowledge/EntityOverview';
+import { EntityEditorialOverview } from '@/components/knowledge/EntityEditorialOverview';
 import { DataTable } from '@/components/knowledge/DataTable';
 import { getCompanyBySlug, getIndustryBySlug } from '@/lib/data/loaders';
 import { generateEntityMetadata, humanizeSlug, isPublicCompany, safeHostname } from '@/lib/utils/seo';
@@ -140,6 +141,8 @@ export default async function Page({ params }: PageProps) {
             </p>
 
             <DataTable title="Key Facts" headers={['Attribute', 'Value']} rows={keyFacts} />
+
+            <EntityEditorialOverview entityName={company.name} overview={company.editorialOverview} />
 
             <CompanyLeadership company={company} />
 

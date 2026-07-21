@@ -33,11 +33,21 @@ const STATIC: Record<string, unknown[]> = {
   technology: technologiesData as unknown[],
 };
 
+// `cache: 'no-store'` (the previous setting) forces full dynamic rendering on
+// every route that calls these — confirmed directly in a production build
+// (/companies/[slug] etc. still rendered as ƒ/dynamic despite the page's own
+// `revalidate = 300` export). admin-platform's entity editor has no
+// on-save revalidation call (unlike CMS content, which cms-service pings
+// via /api/revalidate on publish), so a short window here — not the long one
+// used for webhook-backed CMS content — is the ceiling on how stale an edit
+// can appear: 60s, not indefinitely no-store, but still bounded and fast.
+const ENTITY_REVALIDATE_SECONDS = 60;
+
 // List a type from the service; fall back to bundled static data on empty/error.
 async function fetchList<T>(type: string, fallback: unknown[]): Promise<T[]> {
   try {
     const res = await fetch(`${IMP_API}/entities?type=${type}&limit=500`, {
-      cache: 'no-store',
+      next: { revalidate: ENTITY_REVALIDATE_SECONDS },
       signal: AbortSignal.timeout(6000),
     });
     if (!res.ok) throw new Error(String(res.status));
@@ -53,7 +63,7 @@ async function fetchList<T>(type: string, fallback: unknown[]): Promise<T[]> {
 async function fetchOne<T>(type: string, slug: string, fallback: unknown[]): Promise<T | undefined> {
   try {
     const res = await fetch(`${IMP_API}/entities/${type}/${encodeURIComponent(slug)}`, {
-      cache: 'no-store',
+      next: { revalidate: ENTITY_REVALIDATE_SECONDS },
       signal: AbortSignal.timeout(6000),
     });
     if (res.ok) return ((await res.json())?.data ?? undefined) as T | undefined;
@@ -209,8 +219,14 @@ export interface AssetQuote {
 
 export async function getAssetQuote(symbol: string): Promise<AssetQuote | undefined> {
   try {
+    // Rendered inside LiveQuoteCard on every ticketed company's /companies/[slug]
+    // sidebar — no-store here forced the ENTIRE page dynamic (Key Facts,
+    // Editorial Overview, everything), not just this one widget: a no-store
+    // fetch anywhere in the render tree marks the whole route dynamic even
+    // inside a Suspense boundary, without Partial Prerendering enabled. 30s
+    // matches the same window marketsLoader.ts already uses for asset data.
     const res = await fetch(`${IMP_API}/assets/${encodeURIComponent(symbol)}`, {
-      cache: 'no-store',
+      next: { revalidate: 30 },
       signal: AbortSignal.timeout(6000),
     });
     if (!res.ok) return undefined;

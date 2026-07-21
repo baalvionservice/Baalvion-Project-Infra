@@ -34,8 +34,12 @@ export const reviewSlugs = Object.keys(REGISTRY);
 
 export async function fetchReviewBySlug(slug: string): Promise<ReviewArticle | undefined> {
   try {
+    // Same entities table/no on-save-webhook situation as loaders.ts's
+    // ENTITY_REVALIDATE_SECONDS — no-store here forced full dynamic rendering
+    // on every review page for zero real freshness benefit (the 9 known
+    // reviews change on the order of weeks, not requests).
     const res = await fetch(`${IMP_API}/entities/review/${encodeURIComponent(slug)}`, {
-      cache: 'no-store',
+      next: { revalidate: 60 },
       signal: AbortSignal.timeout(6000),
     });
     if (res.ok) {

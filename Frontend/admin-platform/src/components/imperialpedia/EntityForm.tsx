@@ -10,14 +10,32 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
 import { EntityPicker } from './EntityPicker';
+
+// Must match EntityType in the public site's src/types/entity.ts exactly (singular,
+// lowercase) — the four page templates (/companies, /countries, /industries,
+// /technologies) each only look up entities under one of these literal strings.
+// A free-text Type field let a typo ("Company", "companies") create a real row
+// that then never appeared anywhere, with no error to explain why.
+const ENTITY_TYPES = ['company', 'country', 'industry', 'technology'] as const;
 
 export interface EntityValue {
   type: string;
   name: string;
   slug: string;
   description?: string;
+  /**
+   * Long-form editorial profile (several paragraphs) — distinct from `description`,
+   * which is a single short overview rendered as one pull-quote-style paragraph on
+   * the public entity page (see Imperialpedia-main's EntityOverview.tsx) and was
+   * never meant to hold real article-length depth. Rendered as its own "About"
+   * section on the public page. Stored in `attributes.editorialOverview` (not a
+   * base entities column) via the same passthrough every other type-specific
+   * field uses.
+   */
+  editorialOverview?: string;
   category?: string;
   country?: string;
   industry?: string;
@@ -46,7 +64,7 @@ export interface EntityValue {
 }
 
 const EMPTY: EntityValue = {
-  type: '', name: '', slug: '', description: '', category: '',
+  type: '', name: '', slug: '', description: '', editorialOverview: '', category: '',
   country: '', industry: '', image: '', tags: [], aliases: [], competitors: [], technologies: [],
   extraAttributes: {},
 };
@@ -73,6 +91,7 @@ export function EntityForm({ initial, isEdit = false }: Props) {
         name: value.name.trim(),
         slug: value.slug.trim() || undefined,
         description: value.description?.trim() || null,
+        editorialOverview: value.editorialOverview?.trim() || null,
         category: value.category?.trim() || null,
         country: value.country?.trim() || null,
         industry: value.industry?.trim() || null,
@@ -120,7 +139,16 @@ export function EntityForm({ initial, isEdit = false }: Props) {
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div className="space-y-1.5">
             <Label htmlFor="type">Type</Label>
-            <Input id="type" value={value.type} onChange={(e) => set('type', e.target.value)} disabled={isEdit} placeholder="company" />
+            <Select value={value.type || undefined} onValueChange={(v) => set('type', v)} disabled={isEdit}>
+              <SelectTrigger id="type">
+                <SelectValue placeholder="Select a type…" />
+              </SelectTrigger>
+              <SelectContent>
+                {ENTITY_TYPES.map((t) => (
+                  <SelectItem key={t} value={t}>{t}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="slug">Slug {isEdit ? '' : <span className="text-muted-foreground">(identity, with type)</span>}</Label>
@@ -131,8 +159,48 @@ export function EntityForm({ initial, isEdit = false }: Props) {
             <Input id="name" value={value.name} onChange={(e) => set('name', e.target.value)} placeholder="Acme Corporation" />
           </div>
           <div className="md:col-span-2 space-y-1.5">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">Description <span className="text-muted-foreground">(short — rendered as a single pull-quote-style overview)</span></Label>
             <Textarea id="description" value={value.description ?? ''} onChange={(e) => set('description', e.target.value)} rows={5} placeholder="Overview of this entity…" />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Editorial Overview</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-1.5">
+            <Label htmlFor="editorialOverview">
+              Long-form profile <span className="text-muted-foreground">(several paragraphs — rendered as its own "About" section, separate from the short Description above)</span>
+            </Label>
+            <Textarea
+              id="editorialOverview"
+              value={value.editorialOverview ?? ''}
+              onChange={(e) => set('editorialOverview', e.target.value)}
+              rows={16}
+              placeholder="A full editorial profile: history, business model, market position, recent developments…"
+            />
+            {(() => {
+              const words = (value.editorialOverview ?? '').trim().split(/\s+/).filter(Boolean).length;
+              // Soft nudge only — never blocks saving. Thin entity pages (under ~100
+              // words) were the actual root cause of a prior SEO audit finding these
+              // pages read as low-value; this keeps that from silently recurring as
+              // more entities get added over time.
+              const tone = words === 0
+                ? 'text-muted-foreground'
+                : words < 400
+                  ? 'text-amber-600 dark:text-amber-500'
+                  : 'text-emerald-600 dark:text-emerald-500';
+              const hint = words === 0
+                ? 'Empty — the page will show no "About" section at all until this is filled in.'
+                : words < 400
+                  ? 'Thin — aim for 600+ words of real, specific content (history, business model, recent developments) to avoid a low-value page.'
+                  : 'Good length.';
+              return (
+                <p className={`text-xs ${tone}`}>{words} words — {hint}</p>
+              );
+            })()}
           </div>
         </CardContent>
       </Card>

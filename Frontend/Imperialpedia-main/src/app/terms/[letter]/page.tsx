@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { Container } from "@/design-system/layout/container";
 import { buildMetadata } from "@/lib/seo";
-import { fetchTermsByLetter } from "@/lib/data/term-live";
+import { fetchTermBySlug, fetchTermsByLetter } from "@/lib/data/term-live";
 import type { Term } from "@/lib/data/terms";
 
 // Refresh published listings periodically without freezing them at build time.
@@ -59,8 +59,14 @@ export default async function TermsByLetterPage({
   const { letter: raw } = await params;
   const letter = raw.toLowerCase();
 
-  // Unknown letters are a genuine 404 — never a runtime error.
-  if (!isValidLetter(letter)) notFound();
+  if (!isValidLetter(letter)) {
+    // Pre-dictionary-restructure links (e.g. /terms/interest-rate) put the
+    // term slug directly under /terms — still indexed and linked externally.
+    // Redirect to the canonical /terms/<letter>/<slug> URL instead of 404ing.
+    const term = await fetchTermBySlug(letter);
+    if (term) permanentRedirect(termHref(term));
+    notFound();
+  }
 
   const terms = (await fetchTermsByLetter(letter))
     .filter((t) => t?.title && t?.slug)

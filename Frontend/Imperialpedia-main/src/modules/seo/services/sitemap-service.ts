@@ -6,6 +6,7 @@ import { loadCompanies, loadCountries, loadIndustries, loadTechnologies } from "
 import { fetchAllTerms } from "@/lib/data/term-live";
 import { reviewSlugs } from "@/lib/data/review-live";
 import { getPublishedNews } from "@/services/data/cms-public";
+import { articleUrl } from "@/lib/data/article-url";
 import { ALL_TRACKED_SYMBOLS } from "@/lib/data/marketsLoader";
 import { env } from "@/config/env";
 import { logger } from "@/lib/errors/logger";
@@ -68,7 +69,7 @@ export const sitemapService = {
     const entries: SitemapEntry[] = [];
 
     // 1. Static public pages (every indexable, crawlable route).
-    const corePages = ["", "/about","/advisor-reviews","/app-reviews","/financial-intelligence","/auto-loans","/bank-reviews","/banking","/banking-reviews","/bonds","/broker-reviews","/brokers","/budgeting","/budgeting-apps","/calendar","/cd-rates","/checking","/commodities","/companies","/company-news","/contact","/countries","/creators","/creators/leaderboards","/creators/profile","/creators/trust","/credit","/credit-card-reviews","/credit-cards","/crypto","/cryptocurrency","/datasets","/debt","/earnings","/economy","/emergency-fund","/estate-planning","/etfs","/explore","/fed","/financial-calculators","/financial-tools","/financial-tools/compound-interest","/financial-tools/inflation","/financial-tools/investment","/financial-tools/loan","/fiscal-policy","/gdp","/global","/government","/income","/indicators","/industries","/inflation","/insurance","/insurance-reviews","/interest-rates","/investing","/knowledge-map","/latest","/learning-paths","/live-market-news","/loan-reviews","/loans","/market-news","/monetary-policy","/money-market","/mortgages","/mutual-funds","/news","/options","/personal-finance","/planning","/politics","/pricing","/privacy-policy","/real-estate","/retirement","/reviews","/robo-advisors","/savings","/stocks","/student-loans","/tax-software","/taxes","/technologies","/terms","/terms-of-service","/topics","/transparency","/unemployment","/world","/world/us","/world/europe","/world/asia","/world/china","/world/emerging"];
+    const corePages = ["", "/about","/advisor-reviews","/app-reviews","/financial-intelligence","/auto-loans","/bank-reviews","/banking","/banking-reviews","/bonds","/broker-reviews","/brokers","/budgeting","/budgeting-apps","/calendar","/cd-rates","/checking","/commodities","/companies","/company-news","/contact","/countries","/creators","/creators/leaderboards","/creators/trust","/credit","/credit-card-reviews","/credit-cards","/crypto","/cryptocurrency","/datasets","/debt","/earnings","/economy","/emergency-fund","/estate-planning","/etfs","/explore","/fed","/financial-calculators","/financial-tools","/financial-tools/compound-interest","/financial-tools/inflation","/financial-tools/investment","/financial-tools/loan","/fiscal-policy","/gdp","/global","/government","/income","/indicators","/industries","/inflation","/insurance","/insurance-reviews","/interest-rates","/investing","/knowledge-map","/latest","/learning-paths","/live-market-news","/loan-reviews","/loans","/market-news","/monetary-policy","/money-market","/mortgages","/mutual-funds","/news","/options","/personal-finance","/planning","/politics","/pricing","/privacy-policy","/real-estate","/retirement","/reviews","/robo-advisors","/savings","/stocks","/student-loans","/tax-software","/taxes","/technologies","/terms","/terms-of-service","/topics","/transparency","/unemployment","/world","/world/us","/world/europe","/world/asia","/world/china","/world/emerging"];
     corePages.forEach((path) => {
       entries.push({
         loc: `${base}${path}`,
@@ -184,14 +185,26 @@ export const sitemapService = {
     // `/markets/quote/[symbol]` page for (same tracked list the markets
     // breakdown panels and quote page itself use), so these financial entity
     // pages are discoverable rather than relying on internal links alone.
-    ALL_TRACKED_SYMBOLS.forEach((symbol) => {
+    // Excluded: regional composite placeholders (CHINA, EM) and Treasury
+    // yield series with no individual quote source (only DGS10 has a Yahoo
+    // fallback via ^TNX in worldFeed.ts's CANONICAL_SYMBOL_MAP — DGS2/DGS30/
+    // DGS3MO have neither an imperialpedia-service row nor a Yahoo mapping)
+    // — verified live as the only 6 real, reproducible 404s in a 386-URL
+    // sitemap crawl. They stay in MARKET_GROUPS/ALL_TRACKED_SYMBOLS for the
+    // breakdown-panel and pre-render use cases; only sitemap submission
+    // (i.e., what Google is told to index) excludes them.
+    const QUOTE_PAGE_UNSUPPORTED = new Set(["CHINA", "EM", "DGS2", "DGS30", "DGS3MO"]);
+    ALL_TRACKED_SYMBOLS.filter((symbol) => !QUOTE_PAGE_UNSUPPORTED.has(symbol)).forEach((symbol) => {
       entries.push({ loc: `${base}/markets/quote/${symbol}`, changefreq: "hourly", priority: 0.7 });
     });
     (reviewSlugs || []).forEach((slug) =>
       entries.push({ loc: `${base}/${slug}`, changefreq: "weekly", priority: 0.8 }),
     );
     (news || []).forEach((n) => {
-      if (n?.slug) entries.push({ loc: `${base}/${n.slug}`, lastmod: n.publishedAt?.split("T")[0], changefreq: "daily", priority: 0.8 });
+      // Canonical is the dated /YYYY/MM/DD/slug path (see article-url.ts) — the
+      // bare-slug path used here previously just 301s there, so Google was being
+      // pointed at a URL that immediately redirects instead of the real one.
+      if (n?.slug) entries.push({ loc: `${base}${articleUrl(n.publishedAt, n.slug)}`, lastmod: n.publishedAt?.split("T")[0], changefreq: "daily", priority: 0.8 });
     });
 
     // Dedupe by URL.

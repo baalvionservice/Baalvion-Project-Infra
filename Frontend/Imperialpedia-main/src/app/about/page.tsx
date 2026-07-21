@@ -10,9 +10,13 @@ import { Target, BookOpen, Sparkles } from 'lucide-react';
 import { CmsPage } from '@/components/pages/CmsPage';
 import { getCmsPage } from '@/services/data/cms-public';
 
-// Content is managed in the CMS (admin-platform) — read live per request so
-// edits publish instantly; falls back to the static copy below when offline.
-export const dynamic = 'force-dynamic';
+// Managed in the CMS (admin-platform). ISR instead of force-dynamic: content here
+// changes on the order of months, not requests, and the on-publish webhook
+// (/api/revalidate, called by cms-service after publish/update/delete) already
+// revalidates this route instantly — force-dynamic was paying for a fresh CMS
+// fetch + full re-render on every single request, including every bot/crawler
+// hit, for a page that's correct 99.9% of the time without one.
+export const revalidate = 3600;
 
 export async function generateMetadata(): Promise<Metadata> {
   const page = await getCmsPage('about');

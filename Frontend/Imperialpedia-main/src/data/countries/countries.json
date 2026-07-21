@@ -12,11 +12,23 @@
     "gdp": "$25T",
     "currency": "USD",
     "official_language": "English",
-    "industries": ["semiconductors", "software", "finance"],
-    "technologies": ["generative-ai", "blockchain"],
-    "tags": ["economy", "global", "reserve-currency"],
+    "industries": [
+      "semiconductors",
+      "software",
+      "finance"
+    ],
+    "technologies": [
+      "generative-ai",
+      "blockchain"
+    ],
+    "tags": [
+      "economy",
+      "global",
+      "reserve-currency"
+    ],
     "created_at": "2024-01-01T00:00:00Z",
-    "updated_at": "2024-01-01T00:00:00Z"
+    "updated_at": "2024-01-01T00:00:00Z",
+    "editorialOverview": "The United States remains the world's largest economy by nominal GDP and the center of gravity for global financial markets, and its 2026 economic story is defined by a familiar but increasingly delicate balancing act: a Federal Reserve fighting inflation that has proven stickier than hoped, even as the labor market shows clear signs of cooling. Real GDP growth is projected around 2.0-2.1% for 2026 — solid but unremarkable by historical standards — while the unemployment rate is projected to rise to roughly 4.6% over the year, evidence of a job market that has softened meaningfully from its post-pandemic tightness.\n\nInflation is the more complicated part of the picture. Having eased from its post-pandemic peak, inflation reaccelerated through the first half of 2026, reaching 4.2% year over year in May, up sharply from 2.4% in February — a jump the Federal Reserve has attributed partly to rising oil prices and a resurgence in cost pressures well above its 2% long-run target. That reacceleration put the Fed in an unusually difficult position: with inflation moving the wrong way at the same time the labor market was weakening, the traditional playbook (cut rates to support jobs, raise them to fight inflation) offered no clean answer, and the Fed held its policy rate in a 3.5%-3.75% range through the middle of the year even as some officials debated whether a further hike might be needed given the inflation trend, while others favored eventual cuts to support a softening job market — with the Fed's own projections pointing toward rate reductions later in 2026 as the more likely path if labor conditions continue to deteriorate.\n\nMuch of the economy's 2026 investment story runs through artificial intelligence. Enormous capital expenditure commitments from Microsoft, Alphabet, Meta, and Amazon — collectively hundreds of billions of dollars annually — on AI data centers and chips have become a meaningful driver of U.S. business investment and, by extension, headline GDP growth, while simultaneously raising a genuine debate among economists about whether current valuations of AI-exposed companies and the broader stock market reflect sustainable earnings growth or a concentration risk reminiscent of past technology bubbles. Oil prices and their effect on both inflation and consumer spending are a second major swing factor for the year's outlook, alongside more structural, slower-moving concerns: elevated healthcare and electricity costs weighing on household affordability, and limited fiscal space given the federal government's high existing debt levels constraining how much room policymakers have to respond to any future downturn with additional spending.\n\nFor anyone tracking U.S. markets and the broader economy through 2026, the throughline is a set of forces pulling in different directions at the same time — a resilient-but-slowing labor market, inflation that refuses to fully cooperate, a Federal Reserve trying to balance both mandates simultaneously, and a historic wave of AI-driven capital spending that is propping up growth even as questions mount about how quickly that spending will actually pay for itself. How those tensions resolve over the back half of 2026 will shape not just U.S. markets but, given the dollar's and U.S. Treasury market's central role in the global financial system, much of the rest of the world's financial conditions too."
   },
   {
     "id": "country-2",
@@ -31,11 +43,20 @@
     "gdp": "$790B",
     "currency": "New Taiwan Dollar (TWD)",
     "official_language": "Mandarin Chinese",
-    "industries": ["semiconductors"],
-    "technologies": ["quantum-computing"],
-    "tags": ["asia", "semiconductors", "manufacturing"],
+    "industries": [
+      "semiconductors"
+    ],
+    "technologies": [
+      "quantum-computing"
+    ],
+    "tags": [
+      "asia",
+      "semiconductors",
+      "manufacturing"
+    ],
     "created_at": "2024-01-01T00:00:00Z",
-    "updated_at": "2024-01-01T00:00:00Z"
+    "updated_at": "2024-01-01T00:00:00Z",
+    "editorialOverview": "Taiwan occupies an outsized position in the global economy relative to its size: a self-governing island of roughly 23 million people that produces over 60% of the world's semiconductors and more than 90% of the most advanced ones, making it arguably the single most strategically important economy in the world for the technology industry. Its capital is Taipei, and its modern prosperity is inseparable from one company in particular — TSMC — though a dense ecosystem of chip designers, equipment makers, and materials suppliers has grown up around it over four decades.\n\nTaiwan's 2026 economic performance has been extraordinary, almost entirely on the back of the AI-driven chip boom. GDP grew 13.69% year over year in the quarter ending March 2026, one of the fastest growth rates the country has posted in decades, and full-year 2026 GDP growth forecasts were revised sharply upward to 7.71%, a 4.17 percentage point jump from earlier projections. Semiconductors alone account for roughly a fifth of Taiwan's total economy and close to 60% of its GDP growth — a concentration that is both the source of Taiwan's current boom and its most obvious long-term vulnerability, since the chip industry is famously cyclical and a slowdown in global AI or electronics demand would hit Taiwan's economy far harder than a more diversified economy of comparable size.\n\nThat concentration is deliberate policy as much as historical accident. Taiwan's government has spent decades cultivating semiconductor manufacturing as a strategic national asset — sometimes described as a \"silicon shield,\" the idea that the world's dependence on Taiwanese chip manufacturing gives other nations, particularly the United States, a strong incentive to help defend Taiwan's autonomy from mainland China, which considers Taiwan part of its territory. That geopolitical backdrop is inseparable from any serious discussion of Taiwan's economy: virtually every major forecast of global chip supply, AI infrastructure buildout, or technology company earnings carries an implicit assumption that Taiwan's political status quo holds, and any disruption to that status quo would ripple through global markets far beyond Taiwan's own borders.\n\nBeyond semiconductors, Taiwan maintains a broader advanced manufacturing and electronics export base, along with a well-developed financial sector and a highly educated workforce that continues to feed its chip industry's talent needs. The government has also worked to encourage manufacturers to diversify production geographically — including TSMC's own expansions into the U.S. and Japan — both to satisfy customer demand for supply-chain resilience and, implicitly, to hedge some of the concentration risk that comes with having the world's most critical manufacturing capacity sited in a single, geopolitically contested location. For investors and companies with exposure to the semiconductor supply chain, Taiwan's economic trajectory is less a standalone story than the physical foundation underneath nearly every major AI and technology forecast being made anywhere else in the world."
   },
   {
     "id": "country-3",
@@ -50,10 +71,18 @@
     "gdp": "$1.7T",
     "currency": "South Korean Won (KRW)",
     "official_language": "Korean",
-    "industries": ["semiconductors"],
+    "industries": [
+      "semiconductors"
+    ],
     "technologies": [],
-    "tags": ["asia", "semiconductors", "manufacturing", "technology"],
+    "tags": [
+      "asia",
+      "semiconductors",
+      "manufacturing",
+      "technology"
+    ],
     "created_at": "2024-01-01T00:00:00Z",
-    "updated_at": "2024-01-01T00:00:00Z"
+    "updated_at": "2024-01-01T00:00:00Z",
+    "editorialOverview": "South Korea is a major East Asian economy whose fortunes in 2026 have become almost as tightly bound to the global semiconductor cycle as Taiwan's, driven by its two memory-chip giants, Samsung and SK Hynix, riding an unprecedented AI-driven memory boom. With Seoul as its capital and a population of roughly 52 million, South Korea combines this chip-manufacturing strength with established leadership in shipbuilding, automobiles (Hyundai, Kia), consumer electronics, and a globally influential cultural-export industry.\n\nThe 2026 numbers reflect a genuine boom concentrated heavily in semiconductors. First-quarter GDP grew 3.6% year over year, the fastest pace since late 2021, prompting the government to raise its full-year 2026 growth forecast to 3% from an earlier 2% estimate — which would mark South Korea's fastest annual expansion in five years if it holds. The driver is unmistakable: semiconductor exports rose roughly 150-200% year over year through the first half of 2026, hitting a record $44.82 billion in a single month and pushing first-half total exports up 48.4% to $496.7 billion, with June exports crossing $100 billion for the first time in the country's history. Samsung's semiconductor division alone posted an estimated $36 billion in operating profit over the period, with SK Hynix similarly benefiting from surging memory-chip demand tied to AI data center buildouts worldwide.\n\nThat boom is specifically a memory-chip story — South Korea's particular niche within the broader semiconductor industry, distinct from Taiwan's dominance in advanced logic and foundry manufacturing. As AI training and inference workloads have driven demand for high-bandwidth memory (HBM) and other advanced memory products used in AI accelerators, Samsung and SK Hynix have found themselves as indispensable a link in the global AI supply chain as TSMC, just for a different category of chip. South Korea's current account surplus was projected to reach a record $290 billion for the year, and per-capita gross national income was forecast to approach $40,000, both figures substantially lifted by the export boom.\n\nThe less encouraging side of the picture is a genuinely uneven recovery: domestic consumption grew just 0.6% in the first quarter, construction activity contracted, and the services sector remained largely flat even as exports surged — meaning the headline growth numbers mask a economy where the benefits of the chip boom have not yet broadly reached households and smaller domestic-facing businesses. That pattern is a familiar one for export-dependent economies riding a commodity or technology supercycle: extraordinary top-line growth concentrated in a narrow set of large exporters, with a more muted effect on everyday domestic economic activity. For South Korea, the durability of its current boom — and whether its gains eventually broaden into the wider economy — will likely depend on how long the current AI-driven memory chip supercycle runs before either fresh capacity or a shift in AI hardware demand cools it off."
   }
 ]
