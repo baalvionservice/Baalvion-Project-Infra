@@ -21,6 +21,12 @@ module.exports = {
         dialect: 'postgres',
         schema: 'commerce',
         logging: false,
+        dialectOptions: {
+            ssl: process.env.DB_SSL === 'false' ? false : {
+                require: true,
+                rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false',
+            },
+        },
         define: { underscored: true, timestamps: true },
     },
 };
