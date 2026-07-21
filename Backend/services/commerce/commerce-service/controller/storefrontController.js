@@ -14,6 +14,11 @@ const getProduct = async (req, res, next) => {
     catch (err) { return next(err); }
 };
 
+const getPaymentSettings = async (req, res, next) => {
+    try { return sendSuccess(req, res, await storefront.getPaymentSettings(req.params.storeId)); }
+    catch (err) { return next(err); }
+};
+
 const listDepartments = async (req, res, next) => {
     try { return sendSuccess(req, res, await storefront.listDepartments(req.params.storeId)); }
     catch (err) { return next(err); }
@@ -58,4 +63,4 @@ const presenceCount = async (req, res, next) => {
     catch (err) { return next(err); }
 };
 
-module.exports = { listProducts, getProduct, listDepartments, listCategories, listCollections, listReviews, listRelated, previewDiscount, presenceHeartbeat, presenceCount };
+module.exports = { listProducts, getProduct, listDepartments, listCategories, listCollections, listReviews, listRelated, previewDiscount, presenceHeartbeat, presenceCount, getPaymentSettings };

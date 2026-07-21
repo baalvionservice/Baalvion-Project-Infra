@@ -85,6 +85,22 @@ export async function getStorefrontProducts(
   }
 }
 
+export interface StorePaymentSettings {
+  paymentMode: 'standard' | 'crypto_only';
+  cryptoWallets: Record<string, string>;
+}
+
+export async function getStorePaymentSettings(): Promise<StorePaymentSettings> {
+  try {
+    const res = await commerceFetch<{ success: boolean; data: StorePaymentSettings }>(
+      `/storefront/${MARKET_UNDERWORLD_STORE_ID}/payment-settings`
+    );
+    return res.data;
+  } catch {
+    return { paymentMode: 'standard', cryptoWallets: {} };
+  }
+}
+
 export async function getStorefrontProduct(idOrSlug: string, country = 'us'): Promise<StorefrontProductDetail> {
   return commerceFetch<{ success: boolean; data: StorefrontProductDetail }>(
     `/storefront/${MARKET_UNDERWORLD_STORE_ID}/products/${idOrSlug}`,
@@ -102,6 +118,65 @@ export async function getRelatedProducts(idOrSlug: string, country = 'us'): Prom
   } catch {
     return [];
   }
+}
+
+export interface ProductReview {
+  id: string;
+  rating: number;
+  title: string | null;
+  body: string | null;
+  author: string;
+  isVerifiedPurchase: boolean;
+  createdAt: string;
+  reply: string | null;
+  replyAt: string | null;
+}
+
+export interface ProductReviewsResult {
+  items: ProductReview[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  ratingAverage: number;
+  ratingCount: number;
+}
+
+export async function getProductReviews(idOrSlug: string, opts: { page?: number; limit?: number } = {}): Promise<ProductReviewsResult> {
+  const params: Record<string, string> = {};
+  if (opts.page) params.page = String(opts.page);
+  if (opts.limit) params.limit = String(opts.limit);
+  try {
+    const res = await commerceFetch<{ success: boolean; data: ProductReviewsResult }>(
+      `/storefront/${MARKET_UNDERWORLD_STORE_ID}/products/${idOrSlug}/reviews`,
+      params
+    );
+    return res.data;
+  } catch {
+    return { items: [], total: 0, page: 1, pageSize: 20, totalPages: 0, ratingAverage: 0, ratingCount: 0 };
+  }
+}
+
+export interface DiscountPreview {
+  valid: boolean;
+  code: string;
+  type: 'percentage' | 'fixed_amount' | 'free_shipping' | 'buy_x_get_y';
+  amount: number;
+  eligibility: { minPurchaseAmount: number | null; appliesTo: string };
+}
+
+export async function previewDiscount(code: string, orderAmount: number): Promise<DiscountPreview> {
+  const url = new URL(`${COMMERCE_API_BASE}/storefront/${MARKET_UNDERWORLD_STORE_ID}/discounts/validate`);
+  const res = await fetch(url.toString(), {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ code, orderAmount }),
+  });
+  const body = (await res.json().catch(() => ({}))) as { success: boolean; data?: DiscountPreview; error?: { message: string } };
+  if (!res.ok || body.success === false) {
+    throw new Error(body.error?.message || 'That discount code is not valid.');
+  }
+  return body.data as DiscountPreview;
 }
 
 export interface StorefrontCategory {

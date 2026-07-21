@@ -1,41 +1,70 @@
 "use client"
 
-import React, { useState, useEffect } from 'react';
-import { MARKETPLACE_PRODUCTS } from '@/data/mockData';
+import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { ListingCard, Badge } from '@/components/ui/ListingCard';
 import { AppButton } from '@/components/ui/AppButton';
-import { Search, ShoppingBag, ShieldCheck, MoreVertical, Ban, Globe, DollarSign } from 'lucide-react';
+import { Search, ShieldCheck, Globe, ClipboardCheck, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { listAdminStores, listSellerApplications, type CommerceStoreAdmin } from '@/lib/api/commerce-admin';
+
+const STATUS_VARIANT: Record<CommerceStoreAdmin['status'], 'success' | 'warning' | 'default'> = {
+  active: 'success',
+  maintenance: 'warning',
+  inactive: 'default',
+};
 
 export default function SellerMarketplacePage() {
-  const [mounted, setMounted] = useState(false);
+  const [stores, setStores] = useState<CommerceStoreAdmin[]>([]);
+  const [total, setTotal] = useState(0);
+  const [countries, setCountries] = useState(0);
+  const [pendingApplications, setPendingApplications] = useState(0);
+  const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = (opts: { search?: string } = {}) => {
+    setLoading(true);
+    setError(null);
+    listAdminStores({ limit: 100, search: opts.search })
+      .then((res) => {
+        setStores(res.items);
+        setTotal(res.pagination.total);
+        setCountries(new Set(res.items.map((s) => s.countryCode)).size);
+      })
+      .catch((err) => setError(err instanceof Error ? err.message : 'Failed to load stores'))
+      .finally(() => setLoading(false));
+  };
 
   useEffect(() => {
-    setMounted(true);
+    load();
+    listSellerApplications({ status: 'pending', limit: 1 }).then((res) => setPendingApplications(res.pagination.total)).catch(() => {});
   }, []);
 
-  if (!mounted) return null;
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    load({ search });
+  };
 
   return (
     <div className="p-10 space-y-10">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-8">
         <div>
           <h1 className="text-4xl font-bold tracking-tight mb-2">Seller Marketplace</h1>
-          <p className="text-text-muted font-medium">Global merchant registry and inventory oversight.</p>
+          <p className="text-text-muted font-medium">Global merchant registry — real stores from commerce-service.</p>
         </div>
-        <div className="flex gap-4">
-          <AppButton className="bg-brand-green text-black px-8 h-12 font-bold uppercase text-[11px] tracking-widest">
-            New Registrations (42)
+        <Link href="/admin/seller-applications">
+          <AppButton className="bg-brand-green text-black px-8 h-12 font-bold uppercase text-[11px] tracking-widest gap-2">
+            <ClipboardCheck className="w-4 h-4" /> Pending Applications ({pendingApplications})
           </AppButton>
-        </div>
+        </Link>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[
-          { label: 'Total Sellers', val: '5,000', icon: ShieldCheck, color: 'text-brand-green' },
-          { label: 'Active Catalogs', val: '10,000+', icon: ShoppingBag, color: 'text-semantic-info' },
-          { label: 'Global Nodes', val: '7', icon: Globe, color: 'text-semantic-warning' },
-          { label: 'Market Revenue', val: '847.32 ETH', icon: DollarSign, color: 'text-white' },
+          { label: 'Total Stores', val: total.toLocaleString(), icon: ShieldCheck, color: 'text-brand-green' },
+          { label: 'Countries Represented', val: countries.toLocaleString(), icon: Globe, color: 'text-semantic-info' },
+          { label: 'Pending Applications', val: pendingApplications.toLocaleString(), icon: ClipboardCheck, color: 'text-semantic-warning' },
         ].map((stat, i) => (
           <ListingCard key={i} variant="stats">
             <div className="flex items-center justify-between mb-4">
@@ -48,70 +77,56 @@ export default function SellerMarketplacePage() {
       </div>
 
       <ListingCard className="p-0 overflow-hidden border-brand-border bg-brand-surface">
-        <div className="p-6 border-b border-brand-border bg-brand-void/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="relative flex-1 max-w-md">
+        <div className="p-6 border-b border-brand-border bg-brand-void/50">
+          <form onSubmit={handleSearchSubmit} className="relative flex-1 max-w-md">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-ghost" />
-            <input 
-              placeholder="Search merchants, categories, nodes..." 
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search store name..."
               className="w-full bg-brand-void border border-brand-border h-11 rounded-lg pl-11 pr-4 text-sm font-mono text-white outline-none focus:border-brand-green transition-all"
             />
-          </div>
-          <div className="flex gap-2">
-            {['All Merchants', 'Verified', 'Pending', 'Suspended'].map(tab => (
-              <button key={tab} className="px-4 py-2 rounded-lg bg-white/5 border border-white/5 text-[10px] font-bold uppercase tracking-widest text-text-muted hover:text-white hover:bg-white/10 transition-all">
-                {tab}
-              </button>
-            ))}
-          </div>
+          </form>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left font-mono">
-            <thead className="bg-brand-void/80 text-[10px] text-text-muted uppercase tracking-widest">
-              <tr>
-                <th className="p-6">Merchant Identity</th>
-                <th className="p-6">Primary Segment</th>
-                <th className="p-6">Inventory Volume</th>
-                <th className="p-6">Trade Rating</th>
-                <th className="p-6">Node Status</th>
-                <th className="p-6 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="text-sm divide-y divide-brand-border/50">
-              {MARKETPLACE_PRODUCTS.map((product) => (
-                <tr key={product.id} className="hover:bg-brand-void/30 transition-colors group">
-                  <td className="p-6">
-                    <div>
-                      <div className="font-bold text-white group-hover:text-brand-green transition-colors">{product.seller}</div>
-                      <div className="text-[10px] text-text-muted">Merchant ID: #{product.id.slice(-4).toUpperCase()}</div>
-                    </div>
-                  </td>
-                  <td className="p-6">
-                    <div className="text-white">{product.category}</div>
-                    <div className="text-[10px] text-text-ghost">{product.region}</div>
-                  </td>
-                  <td className="p-6 text-white font-bold">{product.stock} Units</td>
-                  <td className="p-6">
-                    <div className="flex items-center gap-1 text-semantic-warning">
-                      <span className="font-bold">{product.rating}</span>
-                      <span className="text-[10px] text-text-ghost">({product.purchases})</span>
-                    </div>
-                  </td>
-                  <td className="p-6">
-                    <Badge variant="success">VERIFIED</Badge>
-                  </td>
-                  <td className="p-6 text-right">
-                    <div className="flex justify-end gap-2">
-                      <button className="p-2 text-text-ghost hover:text-white transition-colors" title="Audit Listings"><ShoppingBag className="w-4 h-4" /></button>
-                      <button className="p-2 text-text-ghost hover:text-semantic-error transition-colors" title="Revoke Permissions"><Ban className="w-4 h-4" /></button>
-                      <button className="p-2 text-text-ghost hover:text-white transition-colors"><MoreVertical className="w-4 h-4" /></button>
-                    </div>
-                  </td>
+        {error ? (
+          <div className="p-16 text-center text-semantic-error font-medium">{error}</div>
+        ) : loading ? (
+          <div className="p-16 flex items-center justify-center gap-3 text-text-muted">
+            <Loader2 className="w-5 h-5 animate-spin" /> Loading stores…
+          </div>
+        ) : stores.length === 0 ? (
+          <div className="p-16 text-center text-text-muted font-medium">No stores match this search.</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left font-mono">
+              <thead className="bg-brand-void/80 text-[10px] text-text-muted uppercase tracking-widest">
+                <tr>
+                  <th className="p-6">Store</th>
+                  <th className="p-6">Code</th>
+                  <th className="p-6">Country</th>
+                  <th className="p-6">Currency</th>
+                  <th className="p-6">Status</th>
+                  <th className="p-6">Created</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="text-sm divide-y divide-brand-border/50">
+                {stores.map((store) => (
+                  <tr key={store.id} className="hover:bg-brand-void/30 transition-colors group">
+                    <td className="p-6">
+                      <div className="font-bold text-white group-hover:text-brand-green transition-colors">{store.name}</div>
+                    </td>
+                    <td className="p-6 text-text-muted">{store.code}</td>
+                    <td className="p-6 text-white">{store.countryCode}</td>
+                    <td className="p-6 text-text-muted">{store.currencyCode}</td>
+                    <td className="p-6"><Badge variant={STATUS_VARIANT[store.status]}>{store.status}</Badge></td>
+                    <td className="p-6 text-text-muted">{new Date(store.createdAt).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </ListingCard>
     </div>
   );

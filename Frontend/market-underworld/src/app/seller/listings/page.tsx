@@ -6,7 +6,7 @@ import { Package, Plus, Pencil } from "lucide-react"
 import { NexusCard, NexusBadge } from "@/components/ui/nexus-card"
 import { NexusButton } from "@/components/ui/nexus-button"
 import { useToast } from "@/hooks/use-toast"
-import { listMyStores, listStoreProducts, createStoreProduct, type CommerceStoreSummary, type CommerceProduct } from "@/lib/api/commerce-admin"
+import { listMyStores, listStoreProducts, createStoreProduct, listMySellerApplications, type CommerceStoreSummary, type CommerceProduct, type SellerApplication } from "@/lib/api/commerce-admin"
 import { useRouter } from "next/navigation"
 
 const STATUS_BADGE: Record<CommerceProduct["status"], "default" | "success" | "warning" | "info"> = {
@@ -15,6 +15,7 @@ const STATUS_BADGE: Record<CommerceProduct["status"], "default" | "success" | "w
   approved: "info",
   published: "success",
   archived: "default",
+  rejected: "warning",
 };
 
 export default function SellerListingsPage() {
@@ -25,9 +26,15 @@ export default function SellerListingsPage() {
   const [products, setProducts] = useState<CommerceProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [pendingApplication, setPendingApplication] = useState<SellerApplication | null>(null);
 
   useEffect(() => {
-    listMyStores().then((s) => { setStores(s); if (s.length > 0) setStoreId(s[0].id); else setLoading(false); });
+    listMyStores().then((s) => {
+      setStores(s);
+      if (s.length > 0) { setStoreId(s[0].id); return; }
+      setLoading(false);
+      listMySellerApplications().then((apps) => setPendingApplication(apps.find((a) => a.status === "pending") ?? null)).catch(() => {});
+    });
   }, []);
 
   useEffect(() => {
@@ -76,6 +83,25 @@ export default function SellerListingsPage() {
 
       {loading ? (
         <div className="text-gray-500 font-medium">Loading…</div>
+      ) : stores.length === 0 ? (
+        <NexusCard className="p-16 text-center border-white/5 bg-white/[0.01] space-y-4">
+          {pendingApplication ? (
+            <>
+              <p className="text-white font-bold text-lg">Application pending review</p>
+              <p className="text-gray-500 font-medium">
+                Your application for <span className="text-white">{pendingApplication.storeName}</span> is awaiting admin approval before you can list products.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-white font-bold text-lg">You don't have a store yet</p>
+              <p className="text-gray-500 font-medium mb-2">Apply to become a seller to start listing products.</p>
+              <Link href="/seller/onboarding">
+                <NexusButton className="gap-2">Become a Seller</NexusButton>
+              </Link>
+            </>
+          )}
+        </NexusCard>
       ) : products.length === 0 ? (
         <NexusCard className="p-16 text-center border-white/5 bg-white/[0.01]">
           <Package className="w-10 h-10 text-gray-700 mx-auto mb-4" />

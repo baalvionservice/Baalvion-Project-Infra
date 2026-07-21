@@ -219,19 +219,30 @@ async function stripeFetch(path, { method = 'GET', form } = {}) {
 }
 
 // Where Stripe sends the shopper back after the hosted page. The success URL echoes the session id
-// so the storefront can call confirm; {CHECKOUT_SESSION_ID} is substituted by Stripe.
-function stripeReturnBase() {
-  return (process.env.STOREFRONT_URL || process.env.APP_URL || 'http://localhost:3033').replace(/\/+$/, '');
+// so the storefront can call confirm; {CHECKOUT_SESSION_ID} is substituted by Stripe. `returnUrl`
+// (the calling order's metadata.returnUrl, set by the storefront at checkout — see
+// orderService.createPaymentIntent) is the CORRECT per-tenant base; STOREFRONT_URL/APP_URL is a
+// single global fallback for the one caller that doesn't send it.
+function stripeReturnBase(returnUrl, country) {
+  if (returnUrl) {
+    try {
+      const u = new URL(returnUrl);
+      if (u.protocol === 'http:' || u.protocol === 'https:') return u.origin + u.pathname.replace(/\/+$/, '');
+    } catch { /* fall through to the global default below */ }
+  }
+  // No per-order returnUrl (older/other callers) — preserve the original single-tenant behavior
+  // exactly: global STOREFRONT_URL/APP_URL + the country-prefixed checkout path.
+  const cc = (country || 'us').toLowerCase();
+  return `${(process.env.STOREFRONT_URL || process.env.APP_URL || 'http://localhost:3033').replace(/\/+$/, '')}/${cc}/checkout`;
 }
 
 const stripeProvider = {
   name: 'stripe',
   PRODUCTION: true,
-  async createPaymentIntent({ orderId, amount, currencyCode, country }) {
+  async createPaymentIntent({ orderId, amount, currencyCode, country, returnUrl }) {
     const minor = Math.round(Number(amount) * 100); // Stripe amount = smallest currency unit
     if (!Number.isFinite(minor) || minor < 1) throw new Error('stripe: invalid order amount');
-    const base = stripeReturnBase();
-    const cc = (country || 'us').toLowerCase();
+    const base = stripeReturnBase(returnUrl, country);
     const form = toForm({
       mode: 'payment',
       client_reference_id: String(orderId),
@@ -240,13 +251,13 @@ const stripeProvider = {
         price_data: {
           currency: (currencyCode || 'USD').toLowerCase(),
           unit_amount: minor,
-          product_data: { name: `Amarisé Maison Avenue — Order ${String(orderId).slice(0, 8)}` },
+          product_data: { name: `Order ${String(orderId).slice(0, 8)}` },
         },
       },
       metadata: { orderId: String(orderId) },
       payment_intent_data: { metadata: { orderId: String(orderId) } },
-      success_url: `${base}/${cc}/checkout?stripe_session={CHECKOUT_SESSION_ID}&order=${orderId}`,
-      cancel_url: `${base}/${cc}/checkout?stripe_cancelled=1&order=${orderId}`,
+      success_url: `${base}?stripe_session={CHECKOUT_SESSION_ID}&order=${orderId}`,
+      cancel_url: `${base}?stripe_cancelled=1&order=${orderId}`,
     });
     const session = await stripeFetch('/checkout/sessions', { method: 'POST', form });
     const { publishableKey } = await stripeCreds();
@@ -330,6 +341,51 @@ const bankTransferProvider = {
   async refundPayment({ amount, reason }) {
     // Real refunds are issued out-of-band by finance; record the intent for reconciliation.
     return { status: 'refunded', provider: 'bank_transfer', refundId: `rf_bt_${crypto.randomUUID()}`, amount, reason: reason || 'refund' };
+  },
+};
+
+// ── Crypto (REAL, manual wallet transfer + admin confirmation) ───────────────────────────────
+// No custodial/automated crypto processor is integrated (that would need a real account + API
+// keys with a provider like Coinbase Commerce/BitPay — none configured). This is the same
+// pattern as bankTransferProvider above: the shopper is shown a wallet address + exact amount,
+// the order is placed and RESERVED, and it stays PENDING until an admin verifies the on-chain
+// transaction and calls the existing POST /:orderId/payments (recordPayment) to settle it.
+// NEVER auto-captures — confirmPayment always returns 'pending'.
+const CRYPTO_WALLETS = {
+  BTC: process.env.CRYPTO_WALLET_BTC || '',
+  ETH: process.env.CRYPTO_WALLET_ETH || '',
+  USDT: process.env.CRYPTO_WALLET_USDT || '',
+};
+
+function cryptoInstructions({ amount, currencyCode, orderId }) {
+  const tmpl = process.env.CRYPTO_PAYMENT_INSTRUCTIONS;
+  const ref = String(orderId);
+  const amt = `${currencyCode} ${Number(amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+  if (tmpl) return tmpl.replace(/\{amount\}/g, amt).replace(/\{reference\}/g, ref).replace(/\{currency\}/g, currencyCode);
+  return [
+    `Send the equivalent of ${amt} in crypto to one of the wallet addresses below.`,
+    `Include order reference ${ref} in your transaction memo if your wallet supports it.`,
+    `Your order is reserved; it ships once we've verified the transaction on-chain (this is a manual step, typically within a few hours).`,
+  ].join(' ');
+}
+
+const cryptoManualProvider = {
+  name: 'crypto',
+  PRODUCTION: true,
+  async createPaymentIntent({ orderId, amount, currencyCode }) {
+    return {
+      intentId: `crypto_${crypto.randomUUID()}`,
+      status: 'awaiting_transfer',
+      wallets: CRYPTO_WALLETS,
+      instructions: cryptoInstructions({ amount, currencyCode, orderId }),
+    };
+  },
+  // Manual settlement only — never client-capturable. 'pending' keeps the order awaiting funds.
+  async confirmPayment() { return { status: 'pending', transactionId: null, reason: 'awaiting_crypto_transfer' }; },
+  async failPayment() { return { status: 'failed' }; },
+  async cancelPayment() { return { status: 'voided' }; },
+  async refundPayment({ amount, reason }) {
+    return { status: 'refunded', provider: 'crypto', refundId: `rf_crypto_${crypto.randomUUID()}`, amount, reason: reason || 'refund' };
   },
 };
 
@@ -443,6 +499,7 @@ function getProvider(selectedGateway = null) {
     case 'stripe':                  return stripeProvider;
     case 'razorpay':                return razorpayProvider;
     case 'bank': case 'bank_transfer': return bankTransferProvider;
+    case 'crypto': case 'crypto_manual': return cryptoManualProvider;
     case 'payu':                    return payuProvider;
     case 'paypal':                  return unconfigured('paypal');
     case 'mock':

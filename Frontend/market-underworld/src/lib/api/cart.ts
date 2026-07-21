@@ -39,7 +39,9 @@ interface ApiEnvelope<T> {
   error?: { code: string; message: string };
 }
 
-function getSessionToken(): string | null {
+// Exported so orders.ts (same guest-checkout identity) can send the identical X-Cart-Session
+// header when placing an order — a guest order is bound to the same signed cart session.
+export function getSessionToken(): string | null {
   if (typeof window === 'undefined') return null;
   return window.localStorage.getItem(SESSION_TOKEN_KEY);
 }

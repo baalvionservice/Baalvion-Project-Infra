@@ -120,7 +120,10 @@ export default function SignIn() {
           </div>
 
           <div className="space-y-1.5">
-            <label htmlFor="password" className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">Password</label>
+            <div className="flex items-center justify-between ml-1">
+              <label htmlFor="password" className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Password</label>
+              <Link href="/auth/forgot-password" className="text-[10px] font-bold text-brand-green hover:underline underline-offset-4">Forgot?</Link>
+            </div>
             <div className="relative">
               <input
                 id="password"

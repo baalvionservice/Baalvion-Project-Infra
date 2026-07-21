@@ -137,11 +137,11 @@ export default function EditListingPage() {
     try {
       await handleSave();
       const res = await fetch(`/api/commerce-proxy/stores/${storeId}/products/${productId}/publish`, { method: "POST", credentials: "include" });
-      if (!res.ok) throw new Error(`Publish failed: ${res.status}`);
-      toast({ title: "Listing published" });
+      if (!res.ok) throw new Error(`Submission failed: ${res.status}`);
+      toast({ title: "Submitted for review", description: "An admin will review this listing before it goes live." });
       load();
     } catch (err) {
-      toast({ variant: "destructive", title: "Couldn't publish listing", description: err instanceof Error ? err.message : "Please try again." });
+      toast({ variant: "destructive", title: "Couldn't submit listing", description: err instanceof Error ? err.message : "Please try again." });
     } finally {
       setPublishing(false);
     }
@@ -156,15 +156,23 @@ export default function EditListingPage() {
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <h1 className="text-4xl font-bold tracking-tight mb-2">Edit Listing</h1>
-          <p className="text-gray-500 font-medium text-lg">{product.status === "published" ? "Live on the storefront." : `Status: ${product.status}`}</p>
+          <p className="text-gray-500 font-medium text-lg">
+            {product.status === "published" && "Live on the storefront."}
+            {product.status === "pending_review" && "Submitted — awaiting admin review."}
+            {product.status === "rejected" && "Rejected by an admin — edit and resubmit."}
+            {(product.status === "draft" || product.status === "approved" || product.status === "archived") && `Status: ${product.status}`}
+          </p>
+          {product.status === "rejected" && typeof product.customFields?.moderationRejectionReason === "string" && (
+            <p className="text-sm text-red-400 mt-2 max-w-xl">Reason: {product.customFields.moderationRejectionReason}</p>
+          )}
         </div>
         <div className="flex gap-3">
           <NexusButton variant="outline" onClick={handleSave} isLoading={saving} className="gap-2">
             <Save className="w-4 h-4" /> Save
           </NexusButton>
-          {product.status !== "published" && (
+          {(product.status === "draft" || product.status === "rejected") && (
             <NexusButton onClick={handlePublish} isLoading={publishing} className="gap-2">
-              <Rocket className="w-4 h-4" /> Publish
+              <Rocket className="w-4 h-4" /> Submit for Review
             </NexusButton>
           )}
         </div>

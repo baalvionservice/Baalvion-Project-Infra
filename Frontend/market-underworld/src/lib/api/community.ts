@@ -92,10 +92,14 @@ export interface ForumThread {
     postcount: number;
     viewcount: number;
     user?: { username?: string; picture?: string | null };
+    threadType?: 'discussion' | 'question';
+    isAnswered?: boolean;
+    acceptedPid?: string | null;
 }
 
 export interface ForumPost {
     pid: string;
+    uid?: string;
     content: string;
     timestamp: number;
     user?: { username?: string; picture?: string | null };
@@ -123,10 +127,10 @@ export async function getThread(slug: string, tid: string): Promise<{ thread: Fo
     }
 }
 
-export async function createThread(slug: string, title: string, content: string) {
+export async function createThread(slug: string, title: string, content: string, type?: 'discussion' | 'question') {
     return communityFetch<{ tid: string }>(`/communities/${slug}/threads`, {
         method: 'POST',
-        body: JSON.stringify({ title, content }),
+        body: JSON.stringify({ title, content, ...(type ? { type } : {}) }),
     });
 }
 
@@ -134,6 +138,31 @@ export async function createReply(slug: string, tid: string, content: string) {
     return communityFetch<{ pid: string }>(`/communities/${slug}/threads/${tid}/posts`, {
         method: 'POST',
         body: JSON.stringify({ content }),
+    });
+}
+
+// Author-only (or moderator) — backend independently verifies ownership before editing, see
+// community-service/controller/contentController.js:editPost.
+export async function editPost(slug: string, tid: string, pid: string, content: string) {
+    return communityFetch<unknown>(`/communities/${slug}/threads/${tid}/posts/${pid}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ content }),
+    });
+}
+
+// Feeds the same NodeBB flags queue the admin moderation console already reviews.
+export async function reportPost(slug: string, tid: string, pid: string, reason: string) {
+    return communityFetch<unknown>(`/communities/${slug}/threads/${tid}/posts/${pid}/flag`, {
+        method: 'POST',
+        body: JSON.stringify({ reason }),
+    });
+}
+
+// Thread author or moderator marks a reply as the accepted answer (question-type threads only).
+export async function acceptAnswer(slug: string, tid: string, pid: string) {
+    return communityFetch<unknown>(`/communities/${slug}/threads/${tid}/accept-answer`, {
+        method: 'POST',
+        body: JSON.stringify({ pid }),
     });
 }
 

@@ -115,6 +115,23 @@ async function deletePost(pid) {
     return nbFetch(`/api/v1/posts/${encodeURIComponent(pid)}`, { method: 'DELETE' });
 }
 
+// Edit an existing post's content. Same privileged-caller shape as createReply — community-service
+// resolves + verifies the acting uid actually owns pid BEFORE calling this (see
+// contentController.editPost); NodeBB's write-api token is admin-level and will not reject an
+// ownership mismatch on its own, so that check must happen on our side.
+// ⚠ VERIFY AT EXECUTION TIME: same caveat as every other endpoint in this file.
+function editPost(pid, uid, content) {
+    return nbFetch(`/api/v1/posts/${encodeURIComponent(pid)}`, { method: 'PUT', body: JSON.stringify({ uid, content }) });
+}
+
+// Report a post for moderator review — feeds the SAME /api/v1/flags queue
+// adminController.js's getFlags/resolveFlag already reads (previously nothing ever wrote to it).
+// ⚠ VERIFY AT EXECUTION TIME: nodebb-plugin-write-api documents this as POST /api/v1/posts/:pid/flag
+// with a `reason` field; confirm against the installed plugin version before relying on it.
+function createFlag(pid, uid, reason) {
+    return nbFetch(`/api/v1/posts/${encodeURIComponent(pid)}/flag`, { method: 'POST', body: JSON.stringify({ uid, reason }) });
+}
+
 module.exports = {
     addUserToGroup,
     removeUserFromGroup,
@@ -127,5 +144,7 @@ module.exports = {
     getFlags,
     updateFlagState,
     deletePost,
+    editPost,
+    createFlag,
     NodeBBError,
 };

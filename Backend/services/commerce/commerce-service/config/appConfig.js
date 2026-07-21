@@ -53,6 +53,14 @@ module.exports = {
     media: {
         encryptionKey: process.env.MEDIA_ENCRYPTION_KEY || null,
     },
+    // Market Underworld is a single shared-catalog marketplace: every approved seller is granted
+    // a team role on this ONE store rather than getting their own (the public storefront/cart/
+    // checkout are all hardcoded to this store id — see market-underworld's src/lib/api/commerce.ts
+    // MARKET_UNDERWORLD_STORE_ID). Override via env for a different deployment; the default matches
+    // that frontend constant exactly.
+    marketplace: {
+        defaultStoreId: process.env.MARKETPLACE_STORE_ID || '84d4dedc-be2e-43d7-adf3-82d54e7bdb2c',
+    },
     // RBAC service is the SINGLE SOURCE OF TRUTH for admin hierarchy + store-team roles.
     // Commerce is a Policy Enforcement Point: it forwards the caller's bearer token to
     // resolve their effective grants, and owns the country→store scope-chain resolution

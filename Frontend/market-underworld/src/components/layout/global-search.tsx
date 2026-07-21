@@ -3,11 +3,24 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { Search, X, Command, GraduationCap, ShoppingBag, MessageSquare, ArrowRight } from "lucide-react"
+import { Search, GraduationCap, ShoppingBag, MessageSquare, ArrowRight, Loader2 } from "lucide-react"
+import { getStorefrontProducts } from "@/lib/api/commerce"
+
+const slugifyCategory = (name: string) => name.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "general";
+
+interface SearchResult {
+  type: string;
+  name: string;
+  sub: string;
+  icon: typeof ShoppingBag;
+  href: string;
+}
 
 export const GlobalSearch = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [searching, setSearching] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -28,15 +41,28 @@ export const GlobalSearch = () => {
     };
   }, []);
 
-  const results = query ? [
-    { type: 'Teacher', name: 'Priya Sharma', sub: 'Chemistry', icon: GraduationCap, href: '/education/teacher/priya-sharma' },
-    { type: 'Teacher', name: 'Yuki Tanaka', sub: 'Calculus', icon: GraduationCap, href: '/education/teacher/yuki-tanaka' },
-    { type: 'Marketplace', name: 'iPhone 16 Pro', sub: 'Electronics', icon: ShoppingBag, href: '/marketplace/uae/electronics/p1' },
-    { type: 'Forum', name: 'Crypto Wallets 2026', sub: 'Intelligence', icon: MessageSquare, href: '/forum/thread/thread-2' },
-  ].filter(r => 
-    r.name.toLowerCase().includes(query.toLowerCase()) || 
-    r.sub.toLowerCase().includes(query.toLowerCase())
-  ) : [];
+  // Real product search (commerce-service's storefront search param) — debounced. Teacher/forum
+  // results are intentionally not included: there's no teacher domain and no cross-community
+  // forum search endpoint in the backend (see backlog notes) — showing fake entries for those
+  // would be exactly the kind of mock UI this pass is removing.
+  useEffect(() => {
+    if (!query.trim()) { setResults([]); return; }
+    setSearching(true);
+    const handle = setTimeout(() => {
+      getStorefrontProducts(undefined, { search: query, limit: 8 })
+        .then((products) => {
+          setResults(products.map((p) => ({
+            type: 'Product',
+            name: p.name,
+            sub: `${p.price} ${p.currencyCode}`,
+            icon: ShoppingBag,
+            href: `/shop/${slugifyCategory(p.categoryName || 'general')}/${p.slug}`,
+          })));
+        })
+        .finally(() => setSearching(false));
+    }, 300);
+    return () => clearTimeout(handle);
+  }, [query]);
 
   const handleResultClick = (href: string) => {
     router.push(href);
@@ -84,7 +110,10 @@ export const GlobalSearch = () => {
                   exit={{ opacity: 0, y: -10 }}
                   className="mt-4 p-4 bg-[#111318] border border-white/10 rounded-[2rem] shadow-3xl overflow-hidden"
                 >
-                  <div className="text-[10px] font-bold text-[#5A5A7A] uppercase tracking-widest px-4 mb-4">Intelligence Records ({results.length})</div>
+                  <div className="text-[10px] font-bold text-[#5A5A7A] uppercase tracking-widest px-4 mb-4 flex items-center gap-2">
+                    Product Results ({results.length})
+                    {searching && <Loader2 className="w-3 h-3 animate-spin" />}
+                  </div>
                   <div className="space-y-1">
                     {results.length > 0 ? results.map((res, i) => (
                       <button 

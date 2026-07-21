@@ -3,22 +3,23 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { 
-  LayoutDashboard, 
-  Users, 
-  GraduationCap, 
-  Globe, 
+  LayoutDashboard,
+  Users,
+  Globe,
   ShoppingBag, 
   CreditCard, 
   ShieldCheck,
-  Settings,
-  Activity,
   Database,
   Lock,
   ChevronRight,
   LogOut,
-  Youtube,
   FolderTree,
-  ShoppingCart
+  ShoppingCart,
+  ClipboardCheck,
+  ClipboardList,
+  FileCheck,
+  RotateCcw,
+  Tag
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -34,24 +35,23 @@ const ADMIN_NAV = [
     group: "MANAGEMENT",
     items: [
       { name: "User Registry", path: "/admin/users", icon: Users },
-      { name: "Teacher Network", path: "/admin/teachers", icon: GraduationCap },
       { name: "Seller Marketplace", path: "/admin/sellers", icon: ShieldCheck },
+      { name: "Seller Applications", path: "/admin/seller-applications", icon: ClipboardCheck },
+      { name: "Listing Moderation", path: "/admin/moderation", icon: FileCheck },
       { name: "Listing Oversight", path: "/admin/marketplace", icon: ShoppingBag },
       { name: "Categories", path: "/admin/categories", icon: FolderTree },
       { name: "Live Carts", path: "/admin/carts", icon: ShoppingCart },
-    ]
-  },
-  {
-    group: "SPECIAL SECTORS",
-    items: [
-      { name: "YouTube Intelligence", path: "/admin/youtube-marketplace", icon: Youtube },
+      { name: "Order Management", path: "/admin/orders", icon: ClipboardList },
+      { name: "Returns", path: "/admin/returns", icon: RotateCcw },
+      { name: "Discount Codes", path: "/admin/discounts", icon: Tag },
+      { name: "Payment Settings", path: "/admin/payment-settings", icon: CreditCard },
     ]
   },
   {
     group: "MONITORING",
     items: [
       { name: "Security Node", path: "/admin/security", icon: Lock },
-      { name: "System Logs", path: "/admin/logs", icon: Database },
+      { name: "System Logs", path: "/admin/forum/logs", icon: Database },
     ]
   }
 ];

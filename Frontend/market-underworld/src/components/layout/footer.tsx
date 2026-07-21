@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ShieldAlert, Globe, Terminal } from 'lucide-react';
+import { Terminal } from 'lucide-react';
 import { getStorefrontCategories, type StorefrontCategory } from '@/lib/api/commerce';
 
 // Client component, not async server component: Footer is imported directly into many "use
@@ -57,12 +57,7 @@ export const Footer = () => {
             <ul className="space-y-4 text-xs font-bold text-[#6B7280] uppercase tracking-widest">
               <li><Link href="/access" className="hover:text-[#39FF14]">Get Access</Link></li>
               <li><Link href="/auth/signin" className="hover:text-white">Operator Sign In</Link></li>
-              <li>
-                <Link href="/demo-access" className="flex items-center gap-2 text-semantic-warning hover:text-white transition-colors">
-                  <ShieldAlert className="w-3.5 h-3.5" />
-                  Demo Panel Access
-                </Link>
-              </li>
+              <li><Link href="/seller/onboarding" className="hover:text-white">Become a Seller</Link></li>
             </ul>
           </div>
         </div>
