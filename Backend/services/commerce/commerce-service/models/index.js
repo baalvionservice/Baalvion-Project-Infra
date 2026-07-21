@@ -27,6 +27,7 @@ db.CommerceCollection     = require('./commerceCollection')(sequelize, DataTypes
 db.CommerceCollectionProduct = require('./commerceCollectionProduct')(sequelize, DataTypes);
 db.CommerceDiscount       = require('./commerceDiscount')(sequelize, DataTypes);
 db.CommerceReview         = require('./commerceReview')(sequelize, DataTypes);
+db.CommerceSellerApplication = require('./commerceSellerApplication')(sequelize, DataTypes);
 
 // Associations
 db.CommerceStore.hasMany(db.CommerceCategory,     { foreignKey: 'storeId', as: 'categories' });

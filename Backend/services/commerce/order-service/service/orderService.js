@@ -18,6 +18,7 @@ const fxRateProvider = require('./fxRateProvider');
 const { sendOrderEmail } = require('./orderNotifications');
 const inventoryClient = require('./inventoryClient');
 const alerts = require('./alerts');
+const shippingService = require('./shippingService');
 
 // ── Cross-service inventory reservation (the AUTHORITATIVE oversell guard) ──────────────────────
 // inventory-service owns warehouse-scoped stock and an atomic, row-locked reserve→confirm→release
@@ -409,7 +410,9 @@ async function reserveInventory(t, storeId, items) {
 }
 
 async function createOrder(storeId, body, actor) {
-    const { customerId, shippingAmount = 0, discountCode, notes, billingAddress, shippingAddress, metadata = {}, idempotencyKey } = body;
+    const { customerId, discountCode, notes, billingAddress, shippingAddress, metadata = {}, idempotencyKey } = body;
+    // shippingAmount is NEVER taken from the client — same trust boundary as price/tax below
+    // (a client could otherwise checkout with $0 shipping by simply omitting/zeroing the field).
 
     // 5-market commerce context (us/uk/ae/in/sg). The market is the SERVER-AUTHORITATIVE source
     // of currency + tax rule — a client cannot claim market='in' but currencyCode='USD'. `market`
@@ -476,10 +479,8 @@ async function createOrder(storeId, body, actor) {
     await fxRateProvider.primeFromCache().catch(() => {});
     const items = await resolveAuthoritativeItems(storeId, body.items, market);
 
-    const shipping = Number(shippingAmount);
-    if (!Number.isFinite(shipping) || shipping < 0) {
-        throw new AppError('VALIDATION_ERROR', 'shippingAmount must be a non-negative number', 400);
-    }
+    // Server-computed, not client-supplied — see shippingService.js header.
+    const shipping = shippingService.computeShipping(items);
 
     // Pre-discount totals (market currency). grossSubtotal is what the customer sees and is the
     // base the discount + minimum-purchase rules apply against.
@@ -779,7 +780,14 @@ async function createPaymentIntent(storeId, orderId, actor, selectedGateway = nu
     // error, not a server fault — map it to 402 and never leak the provider's raw message.
     let intent;
     try {
-        intent = await provider.createPaymentIntent({ orderId, amount: Number(order.totalAmount), currencyCode: order.currencyCode, country: order.market || order.country });
+        intent = await provider.createPaymentIntent({
+            orderId, amount: Number(order.totalAmount), currencyCode: order.currencyCode, country: order.market || order.country,
+            // The storefront that placed this order — lets a REDIRECT-based gateway (Stripe/PayU)
+            // bounce the shopper back to the CORRECT tenant's checkout instead of the single global
+            // STOREFRONT_URL/APP_URL default, which only ever pointed at one hardcoded site. Optional:
+            // absent for older orders / callers that don't send it, so behavior is unchanged for them.
+            returnUrl: (order.metadata && order.metadata.returnUrl) || null,
+        });
     } catch (e) {
         securityAudit.payment('intent_failed', 'deny', { userId: actor && actor.userId, storeId, resource: { type: 'order', id: orderId }, reason: 'provider_error', requestId: actor && actor.requestId, metadata: { provider: provider.name, providerStatus: e && e.providerStatus } });
         throw new AppError('PAYMENT_ERROR', 'Could not initialise payment with the provider', 402);
@@ -949,19 +957,20 @@ async function settlePayuReturn(body) {
     if (!parsed.txnid) return { ok: false, reason: 'missing_txnid' };
     const payment = await OrdersOrderPayment.findOne({ where: { transactionId: parsed.txnid }, attributes: ['orderId'] });
     if (!payment) return { ok: false, reason: 'unknown_order' };
-    const order = await OrdersOrder.findOne({ where: { id: payment.orderId }, attributes: ['id', 'storeId', 'market', 'totalAmount'] });
+    const order = await OrdersOrder.findOne({ where: { id: payment.orderId }, attributes: ['id', 'storeId', 'market', 'totalAmount', 'metadata'] });
     if (!order) return { ok: false, reason: 'order_not_found' };
+    const returnUrl = (order.metadata && order.metadata.returnUrl) || null;
     // Defence-in-depth (beyond the reverse-hash): the settled amount MUST match the order total, so a
     // leaked salt alone can't capture a tampered/short amount. PayU echoes the amount we submitted.
     if (Math.abs(parseFloat(parsed.amount) - Number(order.totalAmount)) > 0.01) {
-        return { ok: true, orderId: order.id, market: order.market, settled: 'failed' };
+        return { ok: true, orderId: order.id, market: order.market, returnUrl, settled: 'failed' };
     }
     if (parsed.status === 'captured') {
         await capturePaymentFromWebhook({ providerOrderId: parsed.txnid, providerPaymentId: parsed.mihpayid });
-        return { ok: true, orderId: order.id, market: order.market, settled: 'paid' };
+        return { ok: true, orderId: order.id, market: order.market, returnUrl, settled: 'paid' };
     }
     await failPayment(order.storeId, order.id, parsed.txnid, `payu_${String((body && body.status) || 'failed')}`).catch(() => {});
-    return { ok: true, orderId: order.id, market: order.market, settled: 'failed' };
+    return { ok: true, orderId: order.id, market: order.market, returnUrl, settled: 'failed' };
 }
 
 async function handlePaymentWebhook({ event, orderId, intentId, reason }) {

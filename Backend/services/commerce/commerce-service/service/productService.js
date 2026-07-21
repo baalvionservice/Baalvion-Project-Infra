@@ -1,6 +1,6 @@
 'use strict';
 const { Op } = require('sequelize');
-const { CommerceProduct, CommerceProductVariant, CommerceProductPricing, CommerceProductMedia, CommerceCategory, sequelize } = require('../models');
+const { CommerceProduct, CommerceProductVariant, CommerceProductPricing, CommerceProductMedia, CommerceCategory, CommerceStore, sequelize } = require('../models');
 const { AppError } = require('../utils/errors');
 const { demoteFromMock } = require('../utils/mockFlag');
 const cache = require('./cacheService');
@@ -87,13 +87,53 @@ async function deleteProduct(storeId, productId) {
     await cache.del(cache.keys.product(productId));
 }
 
+// Seller-facing "Publish" now SUBMITS the listing for admin moderation rather than making it
+// public directly — Market Underworld now shares one catalog across many independent, mutually-
+// untrusting sellers (see sellerApplicationService.js), so a seller self-publishing straight to
+// the live storefront with zero review is no longer acceptable. Actual public visibility is
+// granted only by moderateProduct() below. 'rejected' listings resubmit through this same path.
 async function publishProduct(storeId, productId, userId) {
     const product = await CommerceProduct.findOne({ where: { id: productId, storeId } });
     if (!product) throw new AppError('NOT_FOUND', 'Product not found', 404);
-    if (!['approved', 'draft'].includes(product.status)) throw new AppError('CONFLICT', 'Product must be approved or draft to publish', 409);
-    await product.update({ status: 'published', publishedAt: new Date(), lastEditedBy: userId });
+    if (!['draft', 'rejected'].includes(product.status)) throw new AppError('CONFLICT', 'Product must be a draft (or rejected listing) to submit for review', 409);
+    await product.update({ status: 'pending_review', lastEditedBy: userId });
     await cache.del(cache.keys.product(productId));
     return product.toJSON();
+}
+
+// Admin moderation decision on a pending_review listing. Approve makes it live (published,
+// visible on the public storefront per storefrontService's PUBLIC_WHERE filter); reject sends it
+// back to the seller as 'rejected' (editable + resubmittable) with a reason recorded so they know
+// what to fix — never silently deleted.
+async function moderateProduct(storeId, productId, adminUserId, { action, reason }) {
+    const product = await CommerceProduct.findOne({ where: { id: productId, storeId } });
+    if (!product) throw new AppError('NOT_FOUND', 'Product not found', 404);
+    if (product.status !== 'pending_review') throw new AppError('CONFLICT', 'Product is not awaiting review', 409);
+    if (action === 'approve') {
+        await product.update({ status: 'published', publishedAt: new Date(), lastEditedBy: adminUserId });
+    } else {
+        await product.update({
+            status: 'rejected',
+            lastEditedBy: adminUserId,
+            customFields: { ...(product.customFields || {}), moderationRejectionReason: reason || null, moderationRejectedAt: new Date().toISOString() },
+        });
+    }
+    await cache.del(cache.keys.product(productId));
+    return product.toJSON();
+}
+
+// Cross-store queue for the admin moderation console — mirrors listProductsAcrossStores exactly,
+// filtered to pending_review only.
+async function listPendingModeration({ page: pageIn, limit: limitIn } = {}) {
+    const { page, limit, offset } = parsePagination({ page: pageIn, limit: limitIn });
+    const { rows, count } = await CommerceProduct.findAndCountAll({
+        where: { status: 'pending_review' },
+        include: [{ model: CommerceStore, as: 'store', attributes: ['id', 'name', 'countryCode'] }],
+        order: [['updatedAt', 'ASC']], // oldest submission first — first in, first reviewed
+        attributes: { exclude: ['description'] },
+        limit, offset,
+    });
+    return buildPaginated(rows.map((r) => r.toJSON()), count, { page, limit });
 }
 
 async function duplicateProduct(storeId, productId, userId) {
@@ -137,4 +177,22 @@ async function bulkUpdate(storeId, userId, { ids, action, categoryId }) {
     return { updated: products.length };
 }
 
-module.exports = { listProducts, getProduct, createProduct, updateProduct, deleteProduct, publishProduct, duplicateProduct, bulkUpdate };
+// Cross-store admin view — mirrors categoryService.listCategoriesAcrossStores exactly (same
+// admin-list convention, same CommerceStore include for the store name/country column).
+async function listProductsAcrossStores({ storeId, search, status, page: pageIn, limit: limitIn } = {}) {
+    const { page, limit, offset } = parsePagination({ page: pageIn, limit: limitIn });
+    const where = {};
+    if (storeId) where.storeId = storeId;
+    if (status) where.status = Array.isArray(status) ? { [Op.in]: status } : status;
+    if (search) where[Op.or] = [{ name: { [Op.iLike]: `%${search}%` } }, { sku: { [Op.iLike]: `%${search}%` } }];
+    const { rows, count } = await CommerceProduct.findAndCountAll({
+        where,
+        include: [{ model: CommerceStore, as: 'store', attributes: ['id', 'name', 'countryCode'] }],
+        order: [['updatedAt', 'DESC']],
+        attributes: { exclude: ['description'] },
+        limit, offset,
+    });
+    return buildPaginated(rows.map((r) => r.toJSON()), count, { page, limit });
+}
+
+module.exports = { listProducts, getProduct, createProduct, updateProduct, deleteProduct, publishProduct, duplicateProduct, bulkUpdate, listProductsAcrossStores, moderateProduct, listPendingModeration };

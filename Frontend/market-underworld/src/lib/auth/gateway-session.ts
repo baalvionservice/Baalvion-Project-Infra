@@ -41,6 +41,21 @@ async function register(email: string, password: string, fullName?: string): Pro
   return toIdentity(await session.getSession(true));
 }
 
+// Unauthenticated (skipAuth-equivalent) gateway calls — mirrors register()'s bare-fetch pattern
+// exactly, since these run before a session cookie exists (or, for verifyEmail, without one).
+async function gatewayPost(path: string, body: unknown): Promise<{ message: string }> {
+  const base = GATEWAY_URL.replace(/\/$/, '');
+  const r = await fetch(`${base}${path}`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const json: any = await r.json().catch(() => ({}));
+  if (!r.ok) throw new ApiError(json?.error?.code ?? 'REQUEST_FAILED', json?.error?.message ?? 'Request failed', r.status);
+  return json?.data ?? json;
+}
+
 export const gatewayAuth = {
   async login(email: string, password: string): Promise<GatewayIdentity | null> {
     await session.login(email, password);
@@ -50,6 +65,15 @@ export const gatewayAuth = {
   logout: () => session.logout(),
   getCurrentUser: async () => toIdentity(await session.getSession()),
   isAuthenticated: async () => (await session.getSession()).authenticated,
+  forgotPassword: (email: string) => gatewayPost('/auth/forgot-password', { email }),
+  resetPassword: (token: string, newPassword: string) => gatewayPost('/auth/reset-password', { token, newPassword }),
+  verifyEmail: async (token: string): Promise<{ message: string }> => {
+    const base = GATEWAY_URL.replace(/\/$/, '');
+    const r = await fetch(`${base}/auth/verify-email?token=${encodeURIComponent(token)}`, { credentials: 'include' });
+    const json: any = await r.json().catch(() => ({}));
+    if (!r.ok) throw new ApiError(json?.error?.code ?? 'VERIFY_FAILED', json?.error?.message ?? 'Verification failed', r.status);
+    return json?.data ?? json;
+  },
   /** Data client — cookie + CSRF + single-flight 401→refresh→retry. No Bearer, no localStorage. */
   api: session.authFetch,
 };

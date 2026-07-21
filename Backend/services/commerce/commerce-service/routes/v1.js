@@ -2,8 +2,10 @@
 const { Router } = require('express');
 const { authMiddleware } = require('../middleware/authMiddleware');
 const storeRoutes = require('./storeRoutes');
+const sellerApplicationRoutes = require('./sellerApplicationRoutes');
 const categoryRoutes = require('./categoryRoutes');
 const adminCategoryRoutes = require('./adminCategoryRoutes');
+const adminProductRoutes = require('./adminProductRoutes');
 const productRoutes = require('./productRoutes');
 const collectionRoutes = require('./collectionRoutes');
 const discountRoutes = require('./discountRoutes');
@@ -29,8 +31,10 @@ router.get('/commerce/markets', marketController.list);
 // the router, per-route (see adminCategoryRoutes.js), same convention as
 // order-service/routes/platformAnalyticsRoutes.js.
 router.use('/commerce/admin/categories', authMiddleware, adminCategoryRoutes);
+router.use('/commerce/admin/products', authMiddleware, adminProductRoutes);
 
 router.use('/commerce/stores', authMiddleware, storeRoutes);
+router.use('/commerce/seller-applications', authMiddleware, sellerApplicationRoutes);
 router.use('/commerce/stores/:storeId/categories', authMiddleware, categoryRoutes);
 router.use('/commerce/stores/:storeId/products/:productId/reviews', authMiddleware, reviewRoutes);
 router.use('/commerce/stores/:storeId/products', authMiddleware, productRoutes);

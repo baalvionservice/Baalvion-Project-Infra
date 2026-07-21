@@ -15,6 +15,7 @@ export default function Registration() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [agreedToTerms, setAgreedToTerms] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
   const { register } = useAuth()
@@ -103,9 +104,22 @@ export default function Registration() {
             </div>
           </div>
 
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              required
+              checked={agreedToTerms}
+              onChange={(e) => setAgreedToTerms(e.target.checked)}
+              className="mt-0.5 accent-[#39FF14] w-4 h-4"
+            />
+            <span className="text-xs text-gray-500 font-medium leading-relaxed">
+              I agree to the Terms of Service and Privacy Policy.
+            </span>
+          </label>
+
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !agreedToTerms}
             className="w-full h-12 bg-[#39FF14] text-black font-bold uppercase tracking-widest rounded-xl hover:bg-[#2BE010] transition-all text-xs flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}

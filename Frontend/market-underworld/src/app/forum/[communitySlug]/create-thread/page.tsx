@@ -15,14 +15,15 @@ export default function CreateThreadPage({ params }: { params: Promise<{ communi
   const { toast } = useToast();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [type, setType] = useState<"discussion" | "question">("discussion");
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async () => {
     if (!title.trim() || !content.trim()) return;
     setSubmitting(true);
     try {
-      const result = await createThread(communitySlug, title.trim(), content.trim());
-      toast({ title: "Discussion started" });
+      const result = await createThread(communitySlug, title.trim(), content.trim(), type);
+      toast({ title: type === "question" ? "Question posted" : "Discussion started" });
       router.push(`/forum/thread/${result.tid}?c=${communitySlug}`);
     } catch (err) {
       toast({ variant: "destructive", title: "Couldn't start discussion", description: err instanceof Error ? err.message : "Please try again." });
@@ -36,8 +37,19 @@ export default function CreateThreadPage({ params }: { params: Promise<{ communi
       <Link href={`/forum/${communitySlug}`} className="inline-flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-cyan-400 transition-colors mb-12">
         <ArrowLeft className="w-4 h-4" /> Back
       </Link>
-      <h1 className="text-4xl font-bold mb-10">Start a Discussion</h1>
+      <h1 className="text-4xl font-bold mb-10">{type === "question" ? "Ask a Question" : "Start a Discussion"}</h1>
       <NexusCard className="p-10 border-white/5 bg-white/[0.02] space-y-6">
+        <div className="flex gap-2">
+          {(["discussion", "question"] as const).map((t) => (
+            <button
+              key={t}
+              onClick={() => setType(t)}
+              className={`px-5 h-9 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors ${type === t ? "bg-cyan-500 text-black" : "bg-white/5 border border-white/10 text-gray-500 hover:text-white"}`}
+            >
+              {t === "question" ? "Question" : "Discussion"}
+            </button>
+          ))}
+        </div>
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}

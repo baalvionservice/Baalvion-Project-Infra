@@ -1,11 +1,15 @@
 "use client"
 
 import Link from "next/link"
-import { Star, ShoppingCart } from "lucide-react"
+import { useEffect, useState } from "react"
+import { Star, ShoppingCart, Heart } from "lucide-react"
 import { NexusButton } from "@/components/ui/nexus-button"
 import { useCart } from "@/context/cart-context"
 import { useToast } from "@/hooks/use-toast"
-import type { StorefrontProduct, StorefrontProductDetail } from "@/lib/api/commerce"
+import { useAuth } from "@/context/auth-context"
+import { ProductReviews } from "@/components/shop/ProductReviews"
+import { MARKET_UNDERWORLD_STORE_ID, type StorefrontProduct, type StorefrontProductDetail } from "@/lib/api/commerce"
+import { getMyWishlist, addToWishlist, removeFromWishlist } from "@/lib/api/orders"
 
 interface ProductDetailClientProps {
   product: StorefrontProductDetail;
@@ -16,6 +20,16 @@ interface ProductDetailClientProps {
 export function ProductDetailClient({ product, related, categorySlug }: ProductDetailClientProps) {
   const { addItem } = useCart();
   const { toast } = useToast();
+  const { isAuthenticated } = useAuth();
+  const [wishlisted, setWishlisted] = useState(false);
+  const [wishlistBusy, setWishlistBusy] = useState(false);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    getMyWishlist(MARKET_UNDERWORLD_STORE_ID)
+      .then((w) => setWishlisted(w.items.some((i) => i.productId === product.id)))
+      .catch(() => {});
+  }, [isAuthenticated, product.id]);
 
   const handleAddToCart = async () => {
     try {
@@ -23,6 +37,27 @@ export function ProductDetailClient({ product, related, categorySlug }: ProductD
       toast({ title: "Added to cart", description: `${product.name} is in your cart.` });
     } catch (err) {
       toast({ variant: "destructive", title: "Couldn't add to cart", description: err instanceof Error ? err.message : "Please try again." });
+    }
+  };
+
+  const handleToggleWishlist = async () => {
+    if (!isAuthenticated) {
+      toast({ variant: "destructive", title: "Sign in to save items" });
+      return;
+    }
+    setWishlistBusy(true);
+    try {
+      if (wishlisted) {
+        await removeFromWishlist(MARKET_UNDERWORLD_STORE_ID, product.id);
+        setWishlisted(false);
+      } else {
+        await addToWishlist(MARKET_UNDERWORLD_STORE_ID, product.id);
+        setWishlisted(true);
+      }
+    } catch (err) {
+      toast({ variant: "destructive", title: "Couldn't update wishlist", description: err instanceof Error ? err.message : "Please try again." });
+    } finally {
+      setWishlistBusy(false);
     }
   };
 
@@ -48,9 +83,19 @@ export function ProductDetailClient({ product, related, categorySlug }: ProductD
           <p className="text-2xl font-bold text-white">{product.price} <span className="text-sm opacity-50">{product.currencyCode}</span></p>
           <p className="text-sm text-gray-400 leading-relaxed">{product.description}</p>
           <p className="text-xs text-gray-500">{product.inStock ? `${product.stock} in stock` : "Out of stock"}</p>
-          <NexusButton onClick={handleAddToCart} disabled={!product.inStock} className="gap-2 h-12 px-8">
-            <ShoppingCart className="w-4 h-4" /> Add to Cart
-          </NexusButton>
+          <div className="flex gap-3">
+            <NexusButton onClick={handleAddToCart} disabled={!product.inStock} className="gap-2 h-12 px-8">
+              <ShoppingCart className="w-4 h-4" /> Add to Cart
+            </NexusButton>
+            <button
+              onClick={handleToggleWishlist}
+              disabled={wishlistBusy}
+              className={`w-12 h-12 rounded-xl border flex items-center justify-center transition-colors disabled:opacity-50 ${wishlisted ? "border-pink-500/40 bg-pink-500/10 text-pink-400" : "border-white/10 text-gray-500 hover:text-white"}`}
+              title={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
+            >
+              <Heart className={`w-5 h-5 ${wishlisted ? "fill-pink-400" : ""}`} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -73,6 +118,8 @@ export function ProductDetailClient({ product, related, categorySlug }: ProductD
           </div>
         </section>
       )}
+
+      <ProductReviews productId={product.id} />
     </div>
   );
 }

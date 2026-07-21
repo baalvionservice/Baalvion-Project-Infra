@@ -3,17 +3,31 @@
 import React, { useState, useEffect } from 'react';
 import { ListingCard, Badge } from '@/components/ui/ListingCard';
 import { GlobalRegionIntelligence } from '@/components/admin/GlobalRegionIntelligence';
-import { Globe, TrendingUp, Activity, Database, BarChart3 } from 'lucide-react';
+import { TrendingUp, TrendingDown, Activity, Database } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getPlatformStats, type PlatformStats } from '@/lib/api/admin-users';
+
+function loginGrowthPercent(trend: PlatformStats['loginTrend']): number | null {
+  if (!trend || trend.length < 14) return null;
+  const sorted = [...trend].sort((a, b) => a.date.localeCompare(b.date));
+  const last7 = sorted.slice(-7).reduce((sum, d) => sum + Number(d.success), 0);
+  const prev7 = sorted.slice(-14, -7).reduce((sum, d) => sum + Number(d.success), 0);
+  if (prev7 === 0) return null;
+  return ((last7 - prev7) / prev7) * 100;
+}
 
 export default function AnalyticsIntelligencePage() {
   const [mounted, setMounted] = useState(false);
+  const [stats, setStats] = useState<PlatformStats | null>(null);
 
   useEffect(() => {
     setMounted(true);
+    getPlatformStats().then(setStats).catch(() => setStats(null));
   }, []);
 
   if (!mounted) return null;
+
+  const growth = stats ? loginGrowthPercent(stats.loginTrend) : null;
 
   return (
     <div className="p-10 space-y-12">
@@ -29,9 +43,14 @@ export default function AnalyticsIntelligencePage() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[
-          { label: 'Growth Vector', val: '+42.8%', icon: TrendingUp, color: 'text-brand-green' },
-          { label: 'Data Throughput', val: '1.2 PB/s', icon: Activity, color: 'text-semantic-info' },
-          { label: 'Active Segments', val: '1,247', icon: Database, color: 'text-white' },
+          {
+            label: 'Login Growth (7d vs prior 7d)',
+            val: growth === null ? '—' : `${growth >= 0 ? '+' : ''}${growth.toFixed(1)}%`,
+            icon: growth !== null && growth < 0 ? TrendingDown : TrendingUp,
+            color: growth !== null && growth < 0 ? 'text-semantic-error' : 'text-brand-green',
+          },
+          { label: 'Active Sessions', val: stats ? Number(stats.sessionCount.count).toLocaleString() : '—', icon: Activity, color: 'text-semantic-info' },
+          { label: 'Organizations', val: stats ? Number(stats.orgCount.count).toLocaleString() : '—', icon: Database, color: 'text-white' },
         ].map((stat, i) => (
           <ListingCard key={i} variant="stats">
             <div className="flex items-center justify-between mb-4">

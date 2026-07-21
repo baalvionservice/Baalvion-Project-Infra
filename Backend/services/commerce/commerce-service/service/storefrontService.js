@@ -102,6 +102,19 @@ async function ensureStore(storeId) {
     return store;
 }
 
+// Public, narrow projection of store.meta — the only store-config surface a guest checkout is
+// allowed to read (never the full store record, which is staff-gated behind loadStoreRole).
+// Admin sets these two keys via the existing PATCH /stores/:storeId (updateStoreSchema already
+// allows an arbitrary `meta` object) — no new write endpoint needed.
+async function getPaymentSettings(storeId) {
+    const store = await ensureStore(storeId);
+    const meta = store.meta || {};
+    return {
+        paymentMode: meta.paymentMode === 'crypto_only' ? 'crypto_only' : 'standard',
+        cryptoWallets: (meta.cryptoWallets && typeof meta.cryptoWallets === 'object') ? meta.cryptoWallets : {},
+    };
+}
+
 async function listProducts(storeId, query = {}) {
     await ensureStore(storeId);
     const country = resolveCountry(query);
@@ -331,4 +344,4 @@ async function previewDiscount(storeId, { code, orderAmount = 0 }) {
     };
 }
 
-module.exports = { listProducts, getProduct, listDepartments, listCategories, listCollections, listRelated, previewDiscount };
+module.exports = { listProducts, getProduct, listDepartments, listCategories, listCollections, listRelated, previewDiscount, getPaymentSettings };

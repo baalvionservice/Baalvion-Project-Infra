@@ -2,47 +2,71 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  Store, 
-  Package, 
-  ShieldCheck, 
-  Wallet, 
-  FileText, 
-  Rocket, 
-  Check, 
-  ArrowRight, 
+import {
+  ShieldCheck,
+  Wallet,
+  Rocket,
+  Check,
+  ArrowRight,
   ArrowLeft,
   Camera,
   Plus,
-  X,
   Sparkles,
   Info,
   Clock,
-  Shield
 } from 'lucide-react'
 import { NexusButton } from '@/components/ui/nexus-button'
 import { NexusCard, NexusBadge } from '@/components/ui/nexus-card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { submitSellerApplication, listMySellerApplications, type SellerApplication } from '@/lib/api/commerce-admin'
 
 const STEPS = [
   "Welcome", "Store", "Appearance", "Product", "Identity", "Crypto", "Policies", "Launch"
 ]
 
+// countryCode/currencyCode must be real ISO codes — commerce-service's createStoreSchema
+// rejects anything else (see Backend/.../validators/storeSchemas.js).
+const COUNTRY_OPTIONS = [
+  { label: 'India', countryCode: 'IN', currencyCode: 'INR' },
+  { label: 'United States', countryCode: 'US', currencyCode: 'USD' },
+  { label: 'United Kingdom', countryCode: 'GB', currencyCode: 'GBP' },
+  { label: 'United Arab Emirates', countryCode: 'AE', currencyCode: 'AED' },
+  { label: 'Singapore', countryCode: 'SG', currencyCode: 'SGD' },
+  { label: 'Germany', countryCode: 'DE', currencyCode: 'EUR' },
+]
+
+function slugifyStoreCode(name: string): string {
+  const base = name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+  const suffix = Math.random().toString(36).slice(2, 6);
+  return `${base || 'store'}_${suffix}`.slice(0, 20);
+}
+
 export default function SellerOnboarding() {
   const [step, setStep] = useState(0)
   const [isLaunched, setIsLaunched] = useState(false)
+  const [launching, setLaunching] = useState(false)
+  const [launchError, setLaunchError] = useState<string | null>(null)
+  const [checkingExisting, setCheckingExisting] = useState(true)
+  const [existingApplication, setExistingApplication] = useState<SellerApplication | null>(null)
   const { toast } = useToast()
   const router = useRouter()
+
+  useEffect(() => {
+    listMySellerApplications()
+      .then((apps) => setExistingApplication(apps.find((a) => a.status === 'pending') ?? null))
+      .catch(() => setExistingApplication(null))
+      .finally(() => setCheckingExisting(false))
+  }, [])
 
   const [formData, setAnswers] = useState({
     storeName: '',
     storeTagline: '',
     category: [] as string[],
-    region: 'South Asia',
+    countryCode: 'IN',
+    currencyCode: 'INR',
     logo: null,
     banner: null,
     color: '#00E676',
@@ -50,12 +74,73 @@ export default function SellerOnboarding() {
     productName: '',
     price: '',
     stock: '',
+    legalFullName: '',
+    dateOfBirth: '',
+    phoneNumber: '',
     payoutCoin: 'ETH',
+    payoutWalletAddress: '',
     payoutSchedule: 'Weekly'
   })
 
   const nextStep = () => setStep(s => Math.min(s + 1, 7))
   const prevStep = () => setStep(s => Math.max(s - 1, 0))
+
+  const handleLaunch = async () => {
+    setLaunching(true)
+    setLaunchError(null)
+    try {
+      const application = await submitSellerApplication({
+        storeName: formData.storeName,
+        storeCode: slugifyStoreCode(formData.storeName),
+        countryCode: formData.countryCode,
+        currencyCode: formData.currencyCode,
+        description: formData.description || undefined,
+        legalFullName: formData.legalFullName || undefined,
+        dateOfBirth: formData.dateOfBirth || undefined,
+        phoneNumber: formData.phoneNumber || undefined,
+        payoutCurrency: formData.payoutCoin || undefined,
+        payoutWalletAddress: formData.payoutWalletAddress || undefined,
+      })
+      setExistingApplication(application)
+      setIsLaunched(true)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Please try again.'
+      setLaunchError(message)
+      toast({ variant: 'destructive', title: "Couldn't submit your application", description: message })
+    } finally {
+      setLaunching(false)
+    }
+  }
+
+  if (checkingExisting) {
+    return (
+      <div className="min-h-screen bg-[#050508] text-white flex items-center justify-center">
+        <div className="text-gray-500 font-medium">Loading…</div>
+      </div>
+    )
+  }
+
+  if (existingApplication && !isLaunched) {
+    return (
+      <div className="min-h-screen bg-[#050508] text-white flex items-center justify-center p-6">
+        <div className="max-w-lg w-full text-center space-y-10">
+          <div className="w-24 h-24 bg-amber-500/10 rounded-[2rem] flex items-center justify-center text-amber-400 mx-auto border border-amber-500/20">
+            <Clock className="w-12 h-12" />
+          </div>
+          <div className="space-y-4">
+            <h2 className="text-4xl font-bold">Application Pending Review</h2>
+            <p className="text-gray-400 text-lg">
+              Your application for <span className="text-white font-bold">{existingApplication.storeName}</span> is awaiting admin approval.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 gap-4">
+            <NexusButton className="bg-[#00E676] text-black h-14 text-lg font-bold" onClick={() => router.push('/seller/listings')}>Check Status</NexusButton>
+            <NexusButton variant="outline" className="h-14 font-bold border-white/10" onClick={() => router.push('/')}>Return to Homepage</NexusButton>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-[#050508] text-white selection:bg-[#00E676]/20">
@@ -96,7 +181,7 @@ export default function SellerOnboarding() {
           {step === 4 && <IdentityVerification key="s4" data={formData} setAnswers={setAnswers} onNext={nextStep} onPrev={prevStep} />}
           {step === 5 && <CryptoSetup key="s5" data={formData} setAnswers={setAnswers} onNext={nextStep} onPrev={prevStep} />}
           {step === 6 && <StorePolicies key="s6" data={formData} setAnswers={setAnswers} onNext={nextStep} onPrev={prevStep} />}
-          {step === 7 && <LaunchReview key="s7" data={formData} onLaunch={() => setIsLaunched(true)} onPrev={prevStep} />}
+          {step === 7 && <LaunchReview key="s7" data={formData} onLaunch={handleLaunch} launching={launching} launchError={launchError} onPrev={prevStep} />}
         </AnimatePresence>
       </main>
 
@@ -123,11 +208,11 @@ export default function SellerOnboarding() {
                 <h2 className="text-4xl font-bold">Store Submitted! 🚀</h2>
                 <p className="text-gray-400 text-lg">{formData.storeName || 'Your store'} is now under review by our team.</p>
                 <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl text-emerald-400 font-medium text-sm">
-                  Estimated live time: ~2 hours
+                  A platform admin will review and approve your application shortly.
                 </div>
               </div>
               <div className="grid grid-cols-1 gap-4">
-                <NexusButton className="bg-[#00E676] text-black h-14 text-lg font-bold" onClick={() => router.push('/admin/seller')}>Go to Seller Dashboard</NexusButton>
+                <NexusButton className="bg-[#00E676] text-black h-14 text-lg font-bold" onClick={() => router.push('/seller/listings')}>Check Application Status</NexusButton>
                 <NexusButton variant="outline" className="h-14 font-bold border-white/10" onClick={() => router.push('/')}>Return to Homepage</NexusButton>
               </div>
             </motion.div>
@@ -266,6 +351,22 @@ function StoreBasics({ data, setAnswers, onNext, onPrev }: any) {
             ))}
           </div>
         </div>
+
+        <div className="space-y-4">
+          <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Store Country</label>
+          <select
+            value={data.countryCode}
+            onChange={(e) => {
+              const opt = COUNTRY_OPTIONS.find((c) => c.countryCode === e.target.value)
+              if (opt) setAnswers({ ...data, countryCode: opt.countryCode, currencyCode: opt.currencyCode })
+            }}
+            className="w-full h-14 bg-black/40 border border-white/10 rounded-xl px-4 text-sm font-bold text-white outline-none focus:border-[#00E676]/50"
+          >
+            {COUNTRY_OPTIONS.map((opt) => (
+              <option key={opt.countryCode} value={opt.countryCode}>{opt.label} ({opt.currencyCode})</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div className="pt-8 flex gap-4">
@@ -356,7 +457,7 @@ function StoreAppearance({ data, setAnswers, onNext, onPrev }: any) {
               </div>
               <div className="flex justify-center gap-2 pt-2">
                 <NexusBadge variant="success" className="bg-emerald-500/10 text-emerald-400 border-none">NEW SELLER</NexusBadge>
-                <NexusBadge variant="info" className="bg-blue-500/10 text-blue-400 border-none">{data.region}</NexusBadge>
+                <NexusBadge variant="info" className="bg-blue-500/10 text-blue-400 border-none">{data.countryCode}</NexusBadge>
               </div>
             </div>
           </NexusCard>
@@ -436,11 +537,10 @@ function FirstProduct({ data, setAnswers, onNext, onPrev }: any) {
 }
 
 function IdentityVerification({ data, setAnswers, onNext, onPrev }: any) {
-  const [otpSent, setOtpSent] = useState(false)
-  const [verified, setVerified] = useState(false)
+  const canContinue = data.legalFullName.trim() && data.dateOfBirth.trim() && data.phoneNumber.trim()
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       className="max-w-2xl mx-auto space-y-12"
@@ -449,14 +549,14 @@ function IdentityVerification({ data, setAnswers, onNext, onPrev }: any) {
         <div className="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 mx-auto mb-6">
           <ShieldCheck className="w-10 h-10" />
         </div>
-        <h2 className="text-4xl font-bold">🪪 Verify Your Identity</h2>
-        <p className="text-gray-500">Required for crypto payouts and store validation</p>
+        <h2 className="text-4xl font-bold">🪪 Identity Information</h2>
+        <p className="text-gray-500">Reviewed manually by an admin before your store is approved</p>
       </div>
 
       <div className="p-6 bg-blue-500/5 border border-blue-500/10 rounded-[2rem] flex items-start gap-4">
         <Info className="w-5 h-5 text-blue-400 shrink-0 mt-1" />
         <div className="text-sm text-gray-400 leading-relaxed">
-          NEXUS uses enterprise-grade encryption to protect your data. Identity verification helps prevent fraud and ensures secure crypto settlements.
+          This information is reviewed by a platform admin as part of your application — there&apos;s no automated document scan, so nothing to upload here. Give your real legal name and details; a mismatch will just slow down your review.
         </div>
       </div>
 
@@ -464,43 +564,38 @@ function IdentityVerification({ data, setAnswers, onNext, onPrev }: any) {
         <div className="grid grid-cols-2 gap-6">
           <div className="space-y-2">
             <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Legal Full Name</label>
-            <Input className="bg-black/40 border-white/10 h-12" placeholder="As per ID" />
+            <Input
+              value={data.legalFullName}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAnswers({ ...data, legalFullName: e.target.value })}
+              className="bg-black/40 border-white/10 h-12"
+              placeholder="As per ID"
+            />
           </div>
           <div className="space-y-2">
             <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Date of Birth</label>
-            <Input className="bg-black/40 border-white/10 h-12" placeholder="DD/MM/YYYY" />
+            <Input
+              type="date"
+              value={data.dateOfBirth}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAnswers({ ...data, dateOfBirth: e.target.value })}
+              className="bg-black/40 border-white/10 h-12"
+            />
           </div>
         </div>
 
         <div className="space-y-2">
           <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Phone Number</label>
-          <div className="flex gap-3">
-            <Input className="bg-black/40 border-white/10 h-12 flex-[3]" placeholder="+91 98765 43210" />
-            <NexusButton 
-              variant={otpSent ? "secondary" : "primary"} 
-              className="flex-1 h-12 text-[10px] bg-white/5 border-white/10 text-white" 
-              onClick={() => { setOtpSent(true); setTimeout(() => setVerified(true), 3000) }}
-            >
-              {otpSent ? (verified ? 'VERIFIED ✓' : 'SENDING...') : 'SEND OTP'}
-            </NexusButton>
-          </div>
+          <Input
+            value={data.phoneNumber}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAnswers({ ...data, phoneNumber: e.target.value })}
+            className="bg-black/40 border-white/10 h-12"
+            placeholder="+91 98765 43210"
+          />
         </div>
-
-        {otpSent && !verified && (
-          <div className="space-y-4">
-            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest text-center block">Enter 6-digit code</label>
-            <div className="flex justify-center gap-2">
-              {[1, 2, 3, 4, 5, 6].map(i => (
-                <input key={i} className="w-12 h-14 bg-white/5 border border-white/10 rounded-xl text-center font-bold text-lg focus:border-[#00E676] outline-none" maxLength={1} />
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
       <div className="pt-8 flex gap-4">
         <NexusButton variant="outline" className="flex-1 h-14 border-white/10" onClick={onPrev}>Back</NexusButton>
-        <NexusButton className="flex-[2] h-14 bg-[#00E676] text-black font-bold" onClick={onNext} disabled={!verified}>Continue</NexusButton>
+        <NexusButton className="flex-[2] h-14 bg-[#00E676] text-black font-bold" onClick={onNext} disabled={!canContinue}>Continue</NexusButton>
       </div>
     </motion.div>
   )
@@ -537,9 +632,17 @@ function CryptoSetup({ data, setAnswers, onNext, onPrev }: any) {
       <div className="space-y-4">
         <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Your {data.payoutCoin} Wallet Address</label>
         <div className="relative">
-          <Input className="h-14 bg-black/40 border-white/10 pl-12 font-mono text-sm" placeholder="0x..." />
+          <Input
+            value={data.payoutWalletAddress}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAnswers({ ...data, payoutWalletAddress: e.target.value })}
+            className="h-14 bg-black/40 border-white/10 pl-12 font-mono text-sm"
+            placeholder="0x..."
+          />
           <Wallet className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600" />
         </div>
+        <p className="text-[10px] text-gray-600">
+          Stored with your application for admin-processed manual payouts — there&apos;s no automated crypto payout provider integrated yet, so payouts are sent and marked complete by an admin.
+        </p>
       </div>
 
       <div className="space-y-4">
@@ -613,7 +716,7 @@ function StorePolicies({ data, setAnswers, onNext, onPrev }: any) {
   )
 }
 
-function LaunchReview({ data, onLaunch, onPrev }: any) {
+function LaunchReview({ data, onLaunch, launching, launchError, onPrev }: any) {
   return (
     <motion.div 
       initial={{ opacity: 0, scale: 0.95 }}
@@ -671,13 +774,19 @@ function LaunchReview({ data, onLaunch, onPrev }: any) {
       </div>
 
       <div className="pt-12 text-center space-y-8">
-        <NexusButton 
-          className="w-full max-w-xl h-20 text-2xl bg-[#00E676] text-black font-bold shadow-3xl shadow-[#00E676]/30 pulse-glow"
+        {launchError && (
+          <div className="max-w-xl mx-auto p-4 bg-red-500/5 border border-red-500/20 rounded-2xl text-red-400 text-sm font-medium">
+            {launchError}
+          </div>
+        )}
+        <NexusButton
+          className="w-full max-w-xl h-20 text-2xl bg-[#00E676] text-black font-bold shadow-3xl shadow-[#00E676]/30 pulse-glow disabled:opacity-60"
           onClick={onLaunch}
+          disabled={launching}
         >
-          🚀 Launch My Store!
+          {launching ? 'Submitting…' : '🚀 Submit Application'}
         </NexusButton>
-        <button onClick={onPrev} className="block mx-auto text-sm font-bold text-gray-500 hover:text-white transition-colors">Wait, I need to edit something</button>
+        <button onClick={onPrev} disabled={launching} className="block mx-auto text-sm font-bold text-gray-500 hover:text-white transition-colors disabled:opacity-40">Wait, I need to edit something</button>
       </div>
 
       <style jsx global>{`

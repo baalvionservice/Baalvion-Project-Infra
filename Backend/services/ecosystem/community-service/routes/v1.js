@@ -6,6 +6,7 @@ const adminRoutes = require('./adminRoutes');
 const contentRoutes = require('./contentRoutes');
 const billingRoutes = require('./billingRoutes');
 const chatRoutes = require('./chatRoutes');
+const directMessageRoutes = require('./directMessageRoutes');
 
 const router = Router();
 
@@ -16,5 +17,6 @@ router.use('/community', adminRoutes);
 router.use('/community', contentRoutes);
 router.use('/community', billingRoutes);
 router.use('/community', chatRoutes);
+router.use('/community', directMessageRoutes);
 
 module.exports = router;

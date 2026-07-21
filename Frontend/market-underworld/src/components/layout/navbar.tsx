@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Menu, X, ShieldCheck, MapPin, Bell, Globe, ArrowRight } from 'lucide-react';
+import { Search, Menu, X, MapPin, Bell, Globe, ArrowRight, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIdentity } from '@/context/identity-context';
 import { useAuth } from '@/context/auth-context';
@@ -20,7 +20,7 @@ const NAV_ITEMS = [
   { name: 'About', path: '/about' },
 ];
 
-export const Navbar = (_props: { isMarketplace?: boolean } = {}) => {
+export const Navbar = ({ isMarketplace: _isMarketplace }: { isMarketplace?: boolean } = {}) => {
   const pathname = usePathname();
   const { identity, isLoading } = useIdentity();
   const { user, isAuthenticated, logout } = useAuth();
@@ -73,9 +73,17 @@ export const Navbar = (_props: { isMarketplace?: boolean } = {}) => {
               {item.name}
             </Link>
           ))}
-          <Link href="/demo-access" className="px-4 py-2 text-[12px] font-bold uppercase tracking-widest text-semantic-warning hover:text-white min-h-[44px] flex items-center">
-            Demo
-          </Link>
+          {isAuthenticated && (
+            <Link
+              href="/invoices"
+              className={cn(
+                "relative px-4 py-2 text-[12px] font-bold uppercase tracking-widest transition-colors min-h-[44px] flex items-center rounded-md hover:bg-white/5",
+                pathname === '/invoices' ? "text-brand-green bg-brand-green/5" : "text-text-muted hover:text-white"
+              )}
+            >
+              My Orders
+            </Link>
+          )}
         </div>
 
         <div className="flex items-center gap-2 sm:gap-4">
@@ -87,7 +95,17 @@ export const Navbar = (_props: { isMarketplace?: boolean } = {}) => {
             >
               <Search className="w-5 h-5" />
             </button>
-            
+
+            {isAuthenticated && (
+              <Link
+                href="/wishlist"
+                className="p-2.5 text-gray-400 hover:text-white transition-colors hover:bg-white/5 rounded-xl border border-white/5"
+                aria-label="Wishlist"
+              >
+                <Heart className="w-5 h-5" />
+              </Link>
+            )}
+
             <div className="relative" ref={notifRef}>
               <button 
                 onClick={() => setIsNotifOpen(!isNotifOpen)}
@@ -192,13 +210,19 @@ export const Navbar = (_props: { isMarketplace?: boolean } = {}) => {
                     <ArrowRight className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </Link>
                 ))}
-                <Link 
-                  href="/demo-access" 
-                  onClick={() => setIsMobileOpen(false)}
-                  className="text-2xl font-bold uppercase italic py-4 text-semantic-warning border-b border-white/5"
-                >
-                  Demo Access
-                </Link>
+                {isAuthenticated && (
+                  <Link
+                    href="/invoices"
+                    onClick={() => setIsMobileOpen(false)}
+                    className={cn(
+                      "text-2xl font-bold uppercase italic py-4 border-b border-white/5 flex items-center justify-between group",
+                      pathname === '/invoices' ? "text-brand-green" : "text-white"
+                    )}
+                  >
+                    My Orders
+                    <ArrowRight className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </Link>
+                )}
               </div>
 
               <div className="mt-auto space-y-6">

@@ -38,6 +38,7 @@ const presenceLimit = rateLimit({
     message: { success: false, error: { code: 'RATE_LIMITED', message: 'Too many presence pings' } },
 });
 
+router.get('/payment-settings', ctrl.getPaymentSettings);
 router.get('/products', ctrl.listProducts);
 router.get('/products/:idOrSlug/reviews', ctrl.listReviews);
 router.get('/products/:idOrSlug/related', ctrl.listRelated);

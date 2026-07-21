@@ -2,11 +2,12 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Package, FolderTree } from "lucide-react"
+import { Package, FolderTree, ClipboardList } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const NAV = [
   { name: "Listings", path: "/seller/listings", icon: Package },
+  { name: "Orders", path: "/seller/orders", icon: ClipboardList },
   { name: "Categories", path: "/seller/categories", icon: FolderTree },
 ];
 

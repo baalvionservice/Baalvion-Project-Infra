@@ -2,14 +2,12 @@
 "use client"
 
 import React, { useState, useEffect } from 'react';
-import { ListingCard, Badge } from '@/components/ui/ListingCard';
-import { AppButton } from '@/components/ui/AppButton';
+import { ListingCard } from '@/components/ui/ListingCard';
 import { GlobalActivityIntelligence } from '@/components/admin/GlobalActivityIntelligence';
 import { GlobalRegionIntelligence } from '@/components/admin/GlobalRegionIntelligence';
-import { Activity, Globe, Database, LayoutDashboard, Terminal, ShieldCheck, Zap } from 'lucide-react';
+import { Activity, Globe, Database, Terminal, ShieldCheck, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { getSimulatedStats } from '@/lib/simulation-engine';
-import { REGIONS } from '@/data/mockData';
+import { getPlatformStats, getAuditLogs, type PlatformStats, type AuditLogEntry } from '@/lib/api/admin-users';
 
 const TABS = [
   { id: 'intelligence', label: 'Global Intel', icon: Activity },
@@ -19,13 +17,22 @@ const TABS = [
 
 export default function SuperAdminDashboard() {
   const [activeTab, setActiveTab] = useState('intelligence');
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<PlatformStats | null>(null);
+  const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
+  const [auditLoading, setAuditLoading] = useState(false);
 
   useEffect(() => {
-    setStats(getSimulatedStats());
-    const timer = setInterval(() => setStats(getSimulatedStats()), 5000);
-    return () => clearInterval(timer);
+    getPlatformStats().then(setStats).catch(() => setStats(null));
   }, []);
+
+  useEffect(() => {
+    if (activeTab !== 'audit') return;
+    setAuditLoading(true);
+    getAuditLogs({ limit: 25 })
+      .then((res) => setAuditLogs(res.items))
+      .catch(() => setAuditLogs([]))
+      .finally(() => setAuditLoading(false));
+  }, [activeTab]);
 
   return (
     <div className="p-10 pb-32 max-w-[1600px] mx-auto space-y-12">
@@ -38,7 +45,7 @@ export default function SuperAdminDashboard() {
             Command <span className="text-brand-green">Terminal.</span>
           </h1>
           <p className="text-text-muted font-mono text-xs uppercase tracking-widest">
-            Global Node Administration • 50,000 Agents • Level 5 Clearance
+            Global Node Administration • {stats ? `${Number(stats.userCount.count).toLocaleString()} Agents` : '…'} • Level 5 Clearance
           </p>
         </div>
         
@@ -64,24 +71,24 @@ export default function SuperAdminDashboard() {
       {activeTab === 'intelligence' && stats && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <ListingCard className="p-10 border-brand-green/20 bg-brand-green/5 space-y-6">
-            <div className="text-[10px] font-bold text-brand-green uppercase tracking-[0.3em]">Protocol Volume</div>
-            <div className="text-5xl font-bold text-white font-mono leading-none">{stats.totalVolumeEth} <span className="text-lg opacity-40">ETH</span></div>
+            <div className="text-[10px] font-bold text-brand-green uppercase tracking-[0.3em]">Total Users</div>
+            <div className="text-5xl font-bold text-white font-mono leading-none">{Number(stats.userCount.count).toLocaleString()}</div>
             <div className="flex items-center gap-2 text-xs font-bold text-brand-green">
-              <Zap className="w-4 h-4" /> LIVE SETTLEMENTS
+              <Activity className="w-4 h-4" /> ACROSS {Number(stats.orgCount.count).toLocaleString()} ORGS
             </div>
           </ListingCard>
           <ListingCard className="p-10 border-white/5 bg-white/[0.02] space-y-6">
-            <div className="text-[10px] font-bold text-text-muted uppercase tracking-[0.3em]">Network Population</div>
-            <div className="text-5xl font-bold text-white font-mono leading-none">{stats.totalUsers.toLocaleString()}</div>
+            <div className="text-[10px] font-bold text-text-muted uppercase tracking-[0.3em]">Active Sessions</div>
+            <div className="text-5xl font-bold text-white font-mono leading-none">{Number(stats.sessionCount.count).toLocaleString()}</div>
             <div className="flex items-center gap-2 text-xs font-bold text-text-muted">
-              <Activity className="w-4 h-4" /> 2,430 NODES ACTIVE
+              <Activity className="w-4 h-4" /> LIVE RIGHT NOW
             </div>
           </ListingCard>
           <ListingCard className="p-10 border-white/5 bg-white/[0.02] space-y-6">
-            <div className="text-[10px] font-bold text-text-muted uppercase tracking-[0.3em]">Escrow Efficiency</div>
-            <div className="text-5xl font-bold text-white font-mono leading-none">99.9%</div>
+            <div className="text-[10px] font-bold text-text-muted uppercase tracking-[0.3em]">Logins (24h)</div>
+            <div className="text-5xl font-bold text-white font-mono leading-none">{Number(stats.recentLogins.count).toLocaleString()}</div>
             <div className="flex items-center gap-2 text-xs font-bold text-emerald-500">
-              <ShieldCheck className="w-4 h-4" /> SECURE TUNNELS
+              <ShieldCheck className="w-4 h-4" /> {Number(stats.failedLogins.count).toLocaleString()} FAILED
             </div>
           </ListingCard>
         </div>
@@ -97,29 +104,37 @@ export default function SuperAdminDashboard() {
               <div className="flex items-center justify-between mb-12">
                 <div className="space-y-1">
                   <h3 className="text-sm font-bold uppercase tracking-widest text-white flex items-center gap-2">
-                    <Terminal className="w-4 h-4 text-brand-green" /> Global Protocol Audit Log
+                    <Terminal className="w-4 h-4 text-brand-green" /> Global Platform Audit Log
                   </h3>
-                  <p className="text-[9px] text-text-muted font-mono uppercase">Full transaction transparency node</p>
+                  <p className="text-[9px] text-text-muted font-mono uppercase">Real activity from auth.audit_logs</p>
                 </div>
-                <AppButton variant="secondary" size="sm" className="font-mono text-[9px] uppercase tracking-widest border-brand-border">Export Hash Log</AppButton>
               </div>
-              <div className="space-y-4">
-                {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                  <div key={i} className="p-5 bg-brand-void rounded border border-brand-border flex justify-between items-center group hover:border-brand-green transition-all">
-                    <div className="flex items-center gap-6">
-                      <div className="w-2 h-2 rounded-full bg-brand-green animate-pulse shadow-[0_0_10px_rgba(57,255,20,0.5)]" />
-                      <div>
-                        <div className="text-xs font-bold text-white uppercase font-mono tracking-tight">PROTOCOL_AUDIT_LOG_0{i}_HEX_8472</div>
-                        <div className="text-[9px] text-text-muted uppercase font-mono mt-1">Origin: {REGIONS[i % REGIONS.length].name} Node • Hash: 0x{Math.random().toString(16).slice(2, 10).toUpperCase()}</div>
+              {auditLoading ? (
+                <div className="flex items-center justify-center gap-3 text-text-muted py-16">
+                  <Loader2 className="w-5 h-5 animate-spin" /> Loading…
+                </div>
+              ) : auditLogs.length === 0 ? (
+                <p className="text-text-muted text-sm py-16 text-center">No audit activity yet.</p>
+              ) : (
+                <div className="space-y-4">
+                  {auditLogs.map((log) => (
+                    <div key={log.id} className="p-5 bg-brand-void rounded border border-brand-border flex justify-between items-center group hover:border-brand-green transition-all">
+                      <div className="flex items-center gap-6">
+                        <div className="w-2 h-2 rounded-full bg-brand-green" />
+                        <div>
+                          <div className="text-xs font-bold text-white uppercase font-mono tracking-tight">{log.action}</div>
+                          <div className="text-[9px] text-text-muted uppercase font-mono mt-1">
+                            {log.user_email || log.user_id || 'system'} {log.ip_address ? `• IP: ${log.ip_address}` : ''}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-6">
+                        <span className="text-[10px] font-mono text-text-ghost">{new Date(log.created_at).toLocaleString()}</span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-6">
-                      <span className="text-[10px] font-mono text-text-ghost">14:32:10 UTC</span>
-                      <Badge variant="info" className="text-[8px] font-mono px-2">VERIFIED</Badge>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </ListingCard>
           </div>
         )}

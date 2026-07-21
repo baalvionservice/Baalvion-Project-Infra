@@ -114,7 +114,7 @@ exports.refundPaymentSchema = z.object({
 // order/payment metadata so reporting + the success screen reflect the shopper's selection; the
 // actual provider that captures money is still resolved server-side by PAYMENT_PROVIDER (the mock in
 // non-production). A client can therefore label intent intent without overriding capture authority.
-const GATEWAYS = ['stripe', 'razorpay', 'payu', 'bank'];
+const GATEWAYS = ['stripe', 'razorpay', 'payu', 'bank', 'crypto'];
 
 // Create a payment intent. `gateway` is the shopper's selected storefront gateway (recorded only).
 exports.createPaymentIntentSchema = z.object({
