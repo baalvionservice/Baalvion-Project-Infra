@@ -3,7 +3,7 @@ description: 'Posts a formatted CI/security/deploy status message to a Slack Inc
 
 inputs:
   webhook-url:
-    description: 'Slack Incoming Webhook URL — always pass via ${{ secrets.* }}, never a literal URL.'
+    description: 'Slack Incoming Webhook URL — always pass via the caller workflow''s secrets context (e.g. secrets.SLACK_CI_WEBHOOK), never a literal URL.'
     required: true
   status:
     description: 'success | failure'
