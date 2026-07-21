@@ -24,7 +24,7 @@ const PROVIDER_LABEL: Record<string, string> = {
   twelveData: 'Twelve Data',
   alphaVantage: 'Alpha Vantage',
   fred: 'FRED',
-  coinGecko: 'CoinGecko',
+  binance: 'Binance',
 };
 
 // "Hidden" per spec — collapsed by default, only an editor who clicks the toggle sees it.

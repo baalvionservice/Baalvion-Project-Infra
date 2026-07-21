@@ -65,7 +65,6 @@ function drainOnce(opts = {}) {
 module.exports = {
     store,
     publisher,
-    makeRunner,
     enqueuePaymentCapture,
     enqueueRefund,
     startLedgerOutboxRelay,

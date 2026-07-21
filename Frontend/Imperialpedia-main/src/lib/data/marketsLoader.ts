@@ -192,18 +192,44 @@ export interface AssetDetail extends MarketAssetRow {
   relatedArticles: { id: number; title: string; slug: string; published_at: string | null }[];
 }
 
+// Bare-bones AssetDetail built from the same Yahoo fallback row getAllMarketAssets()
+// already uses — no chart/indicators/fundamentals (Yahoo's meta payload doesn't carry
+// those), but enough (name/price/change) to render a real page instead of a 404.
+function toFallbackDetail(row: MarketAssetRow): AssetDetail {
+  return {
+    ...row,
+    marketStatus: null,
+    volume: row.volume_24h != null ? { volume: Number(row.volume_24h), averageVolume: null } : null,
+    chart: [],
+    historical: [],
+    performance: null,
+    indicators: null,
+    fundamentals: null,
+    relatedCompanies: [],
+    relatedArticles: [],
+  };
+}
+
 export async function getAssetDetail(symbol: string, range: string): Promise<AssetDetail | null> {
   try {
     const res = await fetch(`${IMP_API}/assets/${encodeURIComponent(symbol)}/detail?range=${encodeURIComponent(range)}`, {
       next: { revalidate: 30 },
       signal: AbortSignal.timeout(8000),
     });
-    if (!res.ok) return null;
-    const json = await res.json();
-    return (json?.data ?? null) as AssetDetail | null;
+    if (res.ok) {
+      const json = await res.json();
+      const detail = (json?.data ?? null) as AssetDetail | null;
+      if (detail) return detail;
+    }
   } catch {
-    return null;
+    // fall through to Yahoo below
   }
+  // imperialpedia-service unreachable, or the symbol hasn't synced into
+  // asset_summaries yet — same failure mode getAllMarketAssets() already
+  // guards against (see file header). Without this, any hiccup in that one
+  // upstream call 404s the entire quote page instead of degrading gracefully.
+  const fallback = await fetchYahooAsMarketAssetRow(symbol);
+  return fallback ? toFallbackDetail(fallback) : null;
 }
 
 export function computeMovers(stocks: MarketAssetRow[]) {
