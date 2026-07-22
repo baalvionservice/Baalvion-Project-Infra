@@ -104,11 +104,11 @@ export async function CategoryFeed({ slug }: Props) {
           <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <aside className="flex flex-col">
               {sidebarArticles.map((article) => (
-                <HorizontalArticleCard key={article.id} article={article} />
+                <HorizontalArticleCard key={article.id} article={article} categoryLabel={copy.title} />
               ))}
             </aside>
             <div className="lg:col-span-2">
-              <FeaturedArticleCard article={featured} />
+              <FeaturedArticleCard article={featured} categoryLabel={copy.title} />
             </div>
           </section>
         )}
@@ -118,7 +118,7 @@ export async function CategoryFeed({ slug }: Props) {
             <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
               Explore {isLive ? copy.title : "News"}
             </h2>
-            <ExploreNewsSection articles={gridArticles} />
+            <ExploreNewsSection articles={gridArticles} categoryLabel={copy.title} />
           </section>
         )}
 

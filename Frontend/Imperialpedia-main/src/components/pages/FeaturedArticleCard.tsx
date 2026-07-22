@@ -6,7 +6,14 @@ import { formatDate } from "@/services/format-date";
 import { newsArticleHref } from "@/lib/data/article-url";
 
 /** Large hero card — the featured article */
-export function FeaturedArticleCard({ article }: { article: NewsArticle }) {
+export function FeaturedArticleCard({
+  article,
+  categoryLabel,
+}: {
+  article: NewsArticle;
+  /** Overrides the badge text (e.g. the current topic page's title) without changing article.category. */
+  categoryLabel?: string;
+}) {
     return (
       <Link href={newsArticleHref(article)} className="group block">
         <div className="relative w-full md:mt-6 overflow-hidden aspect-[16/9] lg:aspect-[21/9]">
@@ -23,7 +30,7 @@ export function FeaturedArticleCard({ article }: { article: NewsArticle }) {
         </div>
         {/* text */}
         <div className="py-5 space-y-3">
-          <CategoryBadge category={article.category} />
+          <CategoryBadge category={article.category} label={categoryLabel} />
           <h3 className="text-foreground text-2xl md:text-3xl font-bold leading-snug max-w-2xl group-hover:underline underline-offset-4">
             {article.title}
           </h3>

@@ -48,8 +48,11 @@ function filterByCategory(articles: NewsArticle[], category: NewsCategory | "All
 
 export function ExploreNewsSection({
   articles,
+  categoryLabel,
 }: {
   articles: NewsArticle[];
+  /** Overrides each card's badge text (e.g. the current topic page's title) without changing article.category. */
+  categoryLabel?: string;
 }) {
   const [tab, setTab] = React.useState<ExploreValue>("all");
   const [selectedCategory, setSelectedCategory] = React.useState<NewsCategory | "All">("All");
@@ -128,7 +131,7 @@ export function ExploreNewsSection({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {filtered.map((article) => (
-          <ArticleCard key={article.id} article={article} />
+          <ArticleCard key={article.id} article={article} categoryLabel={categoryLabel} />
         ))}
       </div>
     </div>

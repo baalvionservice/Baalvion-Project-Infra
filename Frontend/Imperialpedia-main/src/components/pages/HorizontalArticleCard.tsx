@@ -5,7 +5,14 @@ import { NewsArticle } from "@/lib/data.news";
 import { newsArticleHref } from "@/lib/data/article-url";
 
 /** Horizontal card (image left, text right) — for the sidebar list */
-export function HorizontalArticleCard({ article }: { article: NewsArticle }) {
+export function HorizontalArticleCard({
+  article,
+  categoryLabel,
+}: {
+  article: NewsArticle;
+  /** Overrides the badge text (e.g. the current topic page's title) without changing article.category. */
+  categoryLabel?: string;
+}) {
   return (
     <Link
       href={newsArticleHref(article)}
@@ -21,7 +28,7 @@ export function HorizontalArticleCard({ article }: { article: NewsArticle }) {
         />
       </div>
       <div className="flex-1 min-w-0 space-y-1">
-        <CategoryBadge category={article.category} />
+        <CategoryBadge category={article.category} label={categoryLabel} />
         <h3 className="text-sm font-semibold text-foreground leading-snug group-hover:underline line-clamp-2">
           {article.title}
         </h3>

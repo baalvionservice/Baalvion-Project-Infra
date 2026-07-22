@@ -8,17 +8,24 @@ import { formatDate } from "@/services/format-date";
 import { CATEGORY_COLORS } from "@/lib/utils/categories-colors";
 import { newsArticleHref } from "@/lib/data/article-url";
 
-export function CategoryBadge({ category }: { category: NewsCategory }) {
+export function CategoryBadge({ category, label }: { category: NewsCategory; label?: string }) {
   return (
     <span
       className={`inline-block w-fit text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded ${CATEGORY_COLORS[category]}`}
     >
-      {category}
+      {label ?? category}
     </span>
   );
 }
 
-export function ArticleCard({ article }: { article: NewsArticle }) {
+export function ArticleCard({
+  article,
+  categoryLabel,
+}: {
+  article: NewsArticle;
+  /** Overrides the badge text (e.g. the current topic page's title) without changing article.category. */
+  categoryLabel?: string;
+}) {
   return (
     <Link href={newsArticleHref(article)} className="group flex flex-col">
       <div className="relative w-full aspect-[16/9] overflow-hidden rounded-xl mb-3">
@@ -31,7 +38,7 @@ export function ArticleCard({ article }: { article: NewsArticle }) {
         />
       </div>
       <div className="flex flex-col flex-1 space-y-2">
-        <CategoryBadge category={article.category} />
+        <CategoryBadge category={article.category} label={categoryLabel} />
         <h3 className="text-base font-bold text-foreground leading-snug group-hover:text-blue-600 transition-colors line-clamp-3">
           {article.title}
         </h3>
