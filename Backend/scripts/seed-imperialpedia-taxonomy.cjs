@@ -17,7 +17,7 @@
  */
 
 const CMS_URL = process.env.CMS_URL || 'http://127.0.0.1:3011/api/v1';
-const WEBSITE_ID = process.env.WEBSITE_ID || 'f963f97f-e03f-4383-bac3-d8849e9a7c71';
+const WEBSITE_ID = process.env.WEBSITE_ID || 'e9b3a833-8074-44e9-8451-34949214e4be';
 const TOKEN = process.env.CMS_TOKEN;
 
 if (!TOKEN) {

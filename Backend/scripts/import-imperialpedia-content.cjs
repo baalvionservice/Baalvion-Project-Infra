@@ -23,14 +23,20 @@
  *     "body": "Plain text.\n\nSecond paragraph.",      // OR provide contentBlocks
  *     "contentBlocks": [{ "type": "paragraph", "content": { "text": "..." } }],
  *     "seoMetadata": { "title": "...", "description": "...", "keywords": ["..."] },
- *     "tagIds": [], "publish": true, "scheduledAt": "2026-07-01T09:00:00Z"
+ *     "tagIds": [], "publish": true, "scheduledAt": "2026-07-01T09:00:00Z",
+ *     // World News (contentType "news"): tag both to get the nested
+ *     // /world/<region>/<country>/YYYY/MM/DD/<slug> permalink instead of the
+ *     // flat dated URL — region must match an id in worldRegions.ts
+ *     // (e.g. "asia"), country is any slug (e.g. "india"), no registry needed.
+ *     "contentType": "news", "worldRegion": "asia", "worldCountry": "india",
+ *     "customFields": { "author": { "name": "..." } }
  *   }
  */
 
 const fs = require('fs');
 
 const CMS_URL = process.env.CMS_URL || 'http://127.0.0.1:3011/api/v1';
-const WEBSITE_ID = process.env.WEBSITE_ID || 'f963f97f-e03f-4383-bac3-d8849e9a7c71';
+const WEBSITE_ID = process.env.WEBSITE_ID || 'e9b3a833-8074-44e9-8451-34949214e4be';
 const TOKEN = process.env.CMS_TOKEN;
 const CONCURRENCY = Number(process.env.CONCURRENCY || 5);
 
@@ -85,6 +91,10 @@ async function run() {
 
   async function importOne(item) {
     const slug = item.slug ? slugify(item.slug) : slugify(item.title);
+    const customFields = { ...(item.customFields || {}) };
+    if (item.worldRegion) customFields.worldRegion = item.worldRegion;
+    if (item.worldCountry) customFields.worldCountry = item.worldCountry;
+
     const payload = {
       title: item.title,
       slug,
@@ -95,6 +105,7 @@ async function run() {
       contentBlocks: toBlocks(item),
       seoMetadata: item.seoMetadata || { title: item.title, description: item.excerpt || '' },
       tagIds: item.tagIds || [],
+      customFields,
       visibility: 'public',
     };
     try {

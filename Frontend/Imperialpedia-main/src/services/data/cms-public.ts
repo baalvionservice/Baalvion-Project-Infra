@@ -20,6 +20,7 @@ import { articleArtDataUri } from '@baalvion/illustrations';
 import { safeImageUrl } from '@/lib/safe-image';
 import { getAuthorBySlug as getStaticAuthorBySlug } from '@/config/authors';
 import type { EntityMention } from '@/lib/entityLinkInjector';
+import { REGIONS } from '@/lib/data/worldRegions';
 
 // In production default to the API gateway's public delivery host (not localhost,
 // and not an empty string that silently forced the built-in fallback). A deploy
@@ -112,6 +113,11 @@ export interface CmsContent {
   createdAt?: string;
   updatedAt?: string;
   category?: { id: string; name: string; slug: string } | null;
+  // Every category the editor checked (not just the primary) — see
+  // publicService.js's _resolveCategoryList. parentId lets callers walk the
+  // World > Region > Country shape (used below to derive worldRegion/worldCountry)
+  // without a second request.
+  categories?: { id: string; name: string; slug: string; parentId: string | null }[] | null;
   customFields?: Record<string, unknown> | null;
   // Persisted, save-time entity-mention detections — see publicService.js's
   // `entityMentions` include (cms-service) and
@@ -543,11 +549,16 @@ export function cmsContentToArticle(raw: CmsContent): Article {
 const NEWS_CATEGORIES: NewsCategory[] = [
   'Markets', 'Economy', 'Stocks', 'Crypto', 'PersonalFinance',
   'RealEstate', 'ETFs', 'Editorial', 'Guides', 'Bonds',
+  'Business', 'Investing', 'Tech', 'Politics', 'World', 'Finance',
+  'HealthScience', 'Media', 'Energy', 'Climate',
 ];
 
+// CMS category names are free text ("Health & Science", "Real Estate") — strip
+// everything but letters before comparing so admin-panel spelling/punctuation
+// doesn't fall through to the Editorial catch-all.
 function toNewsCategory(name?: string | null): NewsCategory {
   if (!name) return 'Editorial';
-  const norm = name.replace(/\s+/g, '').toLowerCase();
+  const norm = name.replace(/[^a-z]/gi, '').toLowerCase();
   return NEWS_CATEGORIES.find((c) => c.toLowerCase() === norm) ?? 'Editorial';
 }
 
@@ -591,11 +602,31 @@ function blocksToNewsBody(blocks?: CmsBlock[]): NewsBodyBlock[] {
   return out;
 }
 
+// Region categories are identified by slug, not a dedicated "isRegion" flag —
+// any checked category whose slug matches a known world-page region id
+// (see worldRegions.ts) is the region; whichever OTHER checked category has
+// that region as its parent is the country. Requires no fixed country list:
+// editors add a new country by creating one category node under the region,
+// no code change needed. "world" itself is excluded since it's the top of
+// the tree, not a region.
+const WORLD_REGION_IDS = new Set<string>(REGIONS.map((r) => r.id).filter((id) => id !== 'world'));
+
+function deriveWorldGeo(categories: CmsContent['categories']): { region?: string; country?: string } {
+  const list = categories ?? [];
+  const regionCat = list.find((c) => WORLD_REGION_IDS.has(c.slug));
+  if (!regionCat) return {};
+  const countryCat = list.find((c) => c.parentId === regionCat.id);
+  return { region: regionCat.slug, country: countryCat?.slug };
+}
+
 export function cmsContentToNews(raw: CmsContent): NewsArticle {
   const words = plainTextLength(raw.contentBlocks, raw.excerpt);
   const cf = (raw.customFields ?? {}) as Record<string, unknown>;
   const author = cf.author as { name?: unknown } | undefined;
   const authorName = author && typeof author.name === 'string' ? author.name : undefined;
+  const derivedGeo = deriveWorldGeo(raw.categories);
+  const worldRegion = (typeof cf.worldRegion === 'string' ? cf.worldRegion : undefined) ?? derivedGeo.region;
+  const worldCountry = (typeof cf.worldCountry === 'string' ? cf.worldCountry : undefined) ?? derivedGeo.country;
   return {
     id: raw.id,
     title: raw.title,
@@ -632,6 +663,8 @@ export function cmsContentToNews(raw: CmsContent): NewsArticle {
     customFields: raw.customFields ?? undefined,
     contentType: raw.contentType,
     entityMentions: raw.entityMentions?.length ? raw.entityMentions : undefined,
+    worldRegion,
+    worldCountry,
   };
 }
 

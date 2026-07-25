@@ -27,6 +27,23 @@ async function _resolveWebsite(websiteSlug) {
     return website;
 }
 
+// `category` (the belongsTo association above) only ever resolves the single
+// primary categoryId — an editor who checks several categories in the admin
+// panel (e.g. a topic like "Politics" plus a World > Region > Country branch
+// like "India") has that fuller picture stored in `categoryIds`, but it was
+// never surfaced to readers. Frontends that need to tell "this is filed under
+// Politics" apart from "this is filed under India" (see Imperialpedia's
+// world/[region]/[country] route) need every checked category, with parentId
+// so the tree shape (World > Asia-Pacific > India) can be walked client-side.
+async function _resolveCategoryList(websiteId, categoryIds) {
+    if (!Array.isArray(categoryIds) || !categoryIds.length) return [];
+    const rows = await CmsCategory.findAll({
+        where: { id: { [Op.in]: categoryIds }, websiteId },
+        attributes: ['id', 'name', 'slug', 'parentId'],
+    });
+    return rows.map((r) => r.toJSON());
+}
+
 async function getPublicContent(websiteSlug, slug, { callerId } = {}) {
     const cacheKey = cache.keys.publicContent(websiteSlug, slug);
     const cached = await cache.get(cacheKey);
@@ -73,6 +90,7 @@ async function getPublicContent(websiteSlug, slug, { callerId } = {}) {
         }
 
         data = content.toJSON();
+        data.categories = await _resolveCategoryList(website.id, data.categoryIds);
         await cache.set(cacheKey, data, config.cache.publicTtl);
         void contentService.incrementViewCount(content.id).catch(() => {}); // best-effort counter, see cache-hit branch above
         void contentEvents.recordContentView(websiteSlug, data); // fire-and-forget, fail-open
@@ -111,7 +129,9 @@ async function getPreviewContent(websiteSlug, slug, exp, token) {
         include: [{ model: CmsCategory, as: 'category', attributes: ['id', 'name', 'slug'] }],
     });
     if (!content) throw new AppError('NOT_FOUND', 'Content not found', 404);
-    return content.toJSON();
+    const data = content.toJSON();
+    data.categories = await _resolveCategoryList(website.id, data.categoryIds);
+    return data;
 }
 
 // Query-string booleans arrive as strings ("true"/"1") — only an explicit truthy

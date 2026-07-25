@@ -22,6 +22,16 @@ const CATEGORY_LABEL: Record<NewsCategory, string> = {
   Bonds: "Bonds & Fixed Income",
   Guides: "Guides",
   Editorial: "Editorial",
+  Business: "Business",
+  Investing: "Investing",
+  Tech: "Technology",
+  Politics: "Politics",
+  World: "World",
+  Finance: "Finance",
+  HealthScience: "Health & Science",
+  Media: "Media",
+  Energy: "Energy",
+  Climate: "Climate",
 };
 
 /** One finance-niche category rail: a large feature plus 4-6 smaller stories. */
@@ -29,17 +39,20 @@ export function CategorySection({ category, articles }: Props) {
   if (!articles.length) return null;
   const [feature, ...rest] = articles;
   const small = rest.slice(0, 6);
+  const topicSlug = CATEGORY_TOPIC_SLUG[category];
 
   return (
     <section className="space-y-6">
       <div className="flex items-center justify-between border-b-2 border-red-600 pb-2">
         <h2 className="text-lg font-bold text-foreground">{CATEGORY_LABEL[category]}</h2>
-        <Link
-          href={`/${CATEGORY_TOPIC_SLUG[category]}`}
-          className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-red-600 hover:underline dark:text-red-400"
-        >
-          View all <ArrowRight className="h-3 w-3" />
-        </Link>
+        {topicSlug && (
+          <Link
+            href={`/${topicSlug}`}
+            className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-red-600 hover:underline dark:text-red-400"
+          >
+            View all <ArrowRight className="h-3 w-3" />
+          </Link>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

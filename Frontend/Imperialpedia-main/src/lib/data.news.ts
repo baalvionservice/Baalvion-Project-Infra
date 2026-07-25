@@ -12,7 +12,17 @@ export type NewsCategory =
   | "ETFs"
   | "Editorial"
   | "Guides"
-  | "Bonds";
+  | "Bonds"
+  | "Business"
+  | "Investing"
+  | "Tech"
+  | "Politics"
+  | "World"
+  | "Finance"
+  | "HealthScience"
+  | "Media"
+  | "Energy"
+  | "Climate";
 
 export interface NewsAuthor {
   name: string;
@@ -80,6 +90,14 @@ export interface NewsArticle {
    * the bundled demo set and anything not sourced from the live CMS.
    */
   entityMentions?: EntityMention[];
+  /**
+   * World-news geographic tagging (from CMS `customFields.worldRegion` /
+   * `customFields.worldCountry`) — when both are set on a `contentType: "news"`
+   * row, drives the nested `/world/<region>/<country>/YYYY/MM/DD/<slug>`
+   * permalink instead of the flat dated URL. See `newsArticleHref`.
+   */
+  worldRegion?: string;
+  worldCountry?: string;
 }
 
 // ── Body block types ──────────────────────────────────────────────────────────

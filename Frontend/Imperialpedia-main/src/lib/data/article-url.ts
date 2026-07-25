@@ -7,13 +7,18 @@
  * bare path and it 404s once the article is no longer reachable via the
  * legacy bare-slug redirect chain.
  */
-export function newsArticleHref(article: { slug: string; publishedAt: string; contentType?: string; categorySlug?: string }): string {
+export function newsArticleHref(article: { slug: string; publishedAt: string; contentType?: string; categorySlug?: string; worldRegion?: string; worldCountry?: string }): string {
   if (article.contentType === 'article') {
     // A guide's permalink lives under its real CMS category (e.g. /bonds/<slug>)
     // so browsing from /bonds and opening an article stays under /bonds, not a
     // flat /financial-intelligence/ bucket disconnected from the topic hub.
     // Falls back to the legacy bucket only for rows with no category assigned.
     return article.categorySlug ? `/${article.categorySlug}/${article.slug}` : `/financial-intelligence/${article.slug}`;
+  }
+  // Country-level world news (both region + country tagged) gets the nested
+  // permalink; everything else keeps the flat dated URL.
+  if (article.worldRegion && article.worldCountry) {
+    return worldArticleUrl(article.worldRegion, article.worldCountry, article.publishedAt, article.slug);
   }
   return articleUrl(article.publishedAt, article.slug);
 }
@@ -29,6 +34,24 @@ export function articleUrl(dateISO: string | null | undefined, slug: string): st
   const mm = String(safe.getUTCMonth() + 1).padStart(2, "0");
   const dd = String(safe.getUTCDate()).padStart(2, "0");
   return `/${yyyy}/${mm}/${dd}/${slug}`;
+}
+
+/**
+ * Canonical permalink for country-level World News:
+ * `/world/<region>/<country>/YYYY/MM/DD/<slug>`, e.g.
+ * `/world/asia/india/2026/07/22/anger-on-the-streets-...`. `region` matches
+ * the existing `RegionId` used by the `/world/<region>` market pages
+ * (see worldRegions.ts) so a country's news and its region's market page
+ * share one identifier; `country` is an open slug, not a fixed list — new
+ * countries need no code change, only a published article tagged with them.
+ */
+export function worldArticleUrl(region: string, country: string, dateISO: string | null | undefined, slug: string): string {
+  const parsed = dateISO ? new Date(dateISO) : new Date();
+  const safe = Number.isNaN(parsed.getTime()) ? new Date() : parsed;
+  const yyyy = safe.getUTCFullYear();
+  const mm = String(safe.getUTCMonth() + 1).padStart(2, "0");
+  const dd = String(safe.getUTCDate()).padStart(2, "0");
+  return `/world/${region}/${country}/${yyyy}/${mm}/${dd}/${slug}`;
 }
 
 export interface LinkableStory {

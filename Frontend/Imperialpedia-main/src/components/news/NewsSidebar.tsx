@@ -55,15 +55,17 @@ export function NewsSidebar({ articles }: Props) {
             Trending Topics
           </h3>
           <div className="flex flex-wrap gap-2">
-            {categories.map((cat) => (
-              <Link
-                key={cat}
-                href={`/${CATEGORY_TOPIC_SLUG[cat]}`}
-                className="rounded-full border border-border px-3 py-1 text-xs font-medium text-foreground hover:bg-muted"
-              >
-                {cat}
-              </Link>
-            ))}
+            {categories
+              .filter((cat) => CATEGORY_TOPIC_SLUG[cat])
+              .map((cat) => (
+                <Link
+                  key={cat}
+                  href={`/${CATEGORY_TOPIC_SLUG[cat]}`}
+                  className="rounded-full border border-border px-3 py-1 text-xs font-medium text-foreground hover:bg-muted"
+                >
+                  {cat}
+                </Link>
+              ))}
           </div>
         </div>
       )}
