@@ -25,8 +25,6 @@ export function FeaturedArticleCard({
             sizes="(max-width: 768px) 100vw, 75vw"
             priority
           />
-          {/* gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
         </div>
         {/* text */}
         <div className="py-5 space-y-3">
@@ -35,11 +33,11 @@ export function FeaturedArticleCard({
             {article.title}
           </h3>
           {article.excerpt && (
-            <p className="max-w-2xl text-sm text-gray-600 leading-relaxed line-clamp-2">
+            <p className="max-w-2xl text-sm text-muted-foreground leading-relaxed line-clamp-2">
               {article.excerpt}
             </p>
           )}
-          <p className="text-gray-500 text-xs">
+          <p className="text-muted-foreground text-xs">
             By {article.author.name} · {formatDate(article.publishedAt)} · {article.readTimeMinutes} min read
           </p>
         </div>
