@@ -125,6 +125,13 @@ export default function ContentClassificationPanel({
           Pick one or more. The <span className="font-medium">primary</span> drives the article&apos;s
           URL section; it also appears on every chosen topic page.
         </p>
+        <p className="text-[11px] text-muted-foreground">
+          For World News tied to a specific country, also check{' '}
+          <span className="font-medium">World</span>, the region (e.g. Asia-Pacific), and the
+          country (e.g. India) — that combination gives the article its own
+          <code className="mx-1 rounded bg-muted px-1 py-0.5 text-[10px]">/world/&lt;region&gt;/&lt;country&gt;/...</code>
+          page automatically.
+        </p>
         <div className="max-h-56 space-y-0.5 overflow-y-auto rounded-md border p-1">
           {groups.length === 0 && (
             <p className="px-2 py-3 text-[11px] text-muted-foreground">No categories yet.</p>
