@@ -16,7 +16,7 @@ export function HorizontalArticleCard({
   return (
     <Link
       href={newsArticleHref(article)}
-      className="group flex gap-3 items-center py-4 border-b border-gray-100 last:border-none"
+      className="group flex gap-3 items-center py-4 border-b border-border last:border-none"
     >
       <div className="relative flex-shrink-0 w-32 h-full overflow-hidden">
         <Image
