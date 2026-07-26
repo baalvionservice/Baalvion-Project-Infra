@@ -62,6 +62,13 @@ export interface CreateTagPayload {
   slug: string;
 }
 
+export function flattenCategoryTree(tree: CategoryTree[]): CategoryTree[] {
+  const out: CategoryTree[] = [];
+  const walk = (nodes: CategoryTree[]) => nodes.forEach((n) => { out.push(n); if (n.children?.length) walk(n.children); });
+  walk(tree);
+  return out;
+}
+
 export function buildCategoryTree(flat: WebsiteCategory[]): CategoryTree[] {
   const map = new Map<string, CategoryTree>();
   flat.forEach((c) => map.set(c.id, { ...c, children: [] }));

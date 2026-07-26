@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Save, Search, Clock, History, Settings2, Tag as TagIcon, Eye, Pencil, Send, Globe, Radio } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,8 +21,11 @@ import CustomFieldsPanel from './CustomFieldsPanel';
 import ReviewerPanel from './ReviewerPanel';
 import CitationsPanel from './CitationsPanel';
 import ContentWorkflowBadge from './ContentWorkflowBadge';
+import RelatedContentSuggestions from './newsroom/RelatedContentSuggestions';
 import { useUpdateContent, useAutosave } from '@/lib/queries/cms-content.queries';
 import { useWorkflowTransition } from '@/lib/queries/cms-workflow.queries';
+import { useWebsiteCategoryTree } from '@/lib/queries/cms-taxonomy.queries';
+import { flattenCategoryTree } from '@/lib/types/cms-taxonomy.types';
 import { useCmsStore } from '@/lib/store/cmsStore';
 import type { ContentItem, ContentBlock } from '@/lib/types/cms-content.types';
 import type { SeoMeta } from '@/lib/types/cms.types';
@@ -37,9 +40,10 @@ interface Props {
   canPublish?: boolean;
   websiteTitleSuffix?: string;
   websiteDomain?: string | null;
+  websiteSlug?: string;
 }
 
-export default function ContentEditor({ content, userRole, canPublish, websiteTitleSuffix, websiteDomain }: Props) {
+export default function ContentEditor({ content, userRole, canPublish, websiteTitleSuffix, websiteDomain, websiteSlug }: Props) {
   const { mutate: save, isPending: isSaving } = useUpdateContent(content.id);
   const { mutate: runTransition, isPending: isTransitioning } = useWorkflowTransition();
   const autosave = useAutosave(content.id);
@@ -74,6 +78,9 @@ export default function ContentEditor({ content, userRole, canPublish, websiteTi
     externalSourceUrl: content.externalSourceUrl,
   });
   const [mode, setMode] = useState<'edit' | 'preview' | 'live'>('edit');
+
+  const { data: categoryTree } = useWebsiteCategoryTree(content.websiteId);
+  const flatCategories = useMemo(() => flattenCategoryTree(categoryTree ?? []), [categoryTree]);
 
   // Client-side estimate shown as a placeholder in the panel — the server recomputes
   // the authoritative value from contentBlocks on save when the field is left blank.
@@ -336,6 +343,18 @@ export default function ContentEditor({ content, userRole, canPublish, websiteTi
                   onCategoriesChange={(ids) => { setCategoryIds(ids); markUnsaved(); }}
                   onTagsChange={(ids) => { setTagIds(ids); markUnsaved(); }}
                 />
+                <div className="space-y-1.5 p-4">
+                  <Label className="text-xs">Related Content</Label>
+                  <p className="text-[11px] text-muted-foreground">Other published content sharing this item&apos;s primary category — link to it from the body.</p>
+                  <RelatedContentSuggestions
+                    websiteId={content.websiteId}
+                    websiteSlug={websiteSlug}
+                    websiteDomain={websiteDomain}
+                    categoryId={categoryIds[0]}
+                    excludeContentId={content.id}
+                    categories={flatCategories}
+                  />
+                </div>
                 <NewsMetaPanel
                   value={newsMeta}
                   onChange={(v) => { setNewsMeta(v); markUnsaved(); }}

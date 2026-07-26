@@ -8,7 +8,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import ContentEditor from '@/components/cms/ContentEditor';
 import { useContentItem } from '@/lib/queries/cms-content.queries';
 import { useWebsite } from '@/lib/queries/cms-websites.queries';
+import { useWebsiteCategoryTree } from '@/lib/queries/cms-taxonomy.queries';
 import { useCmsPermissions } from '@/lib/queries/cms-permissions.queries';
+import { buildImperialpediaPath } from '@/lib/newsroom/public-url';
+import { flattenCategoryTree } from '@/lib/types/cms-taxonomy.types';
 import { useUIStore } from '@/lib/store/uiStore';
 import { useCmsStore } from '@/lib/store/cmsStore';
 
@@ -39,6 +42,7 @@ export default function ContentEditorPage({
 
   const { data: website } = useWebsite(websiteId);
   const { data: content, isLoading } = useContentItem(contentId);
+  const { data: categoryTree } = useWebsiteCategoryTree(websiteId);
   const permissions = useCmsPermissions(websiteId);
 
   useEffect(() => {
@@ -82,12 +86,23 @@ export default function ContentEditorPage({
     );
   }
 
-  // Canonical public URL for this item, e.g. https://imperialpedia.com/<slug>.
-  // `domain` is stored bare (no scheme); normalize and strip any trailing slash.
+  // Canonical public URL for this item. `domain` is stored bare (no scheme);
+  // normalize and strip any trailing slash. Imperialpedia news uses dated
+  // (and, for world/country-tagged stories, nested) permalinks — not a bare
+  // `/<slug>` — so the "View live" link must resolve the real scheme or it
+  // 404s even when the article is actually live at a different URL.
   const liveBase = website?.domain
     ? `https://${website.domain.replace(/^https?:\/\//, '').replace(/\/+$/, '')}`
     : null;
-  const liveUrl = liveBase ? `${liveBase}/${content.slug}` : null;
+  const publicPath = website?.slug === 'imperialpedia' && content.type === 'news'
+    ? buildImperialpediaPath({
+        slug: content.slug,
+        dateSource: content.publishedAt,
+        categoryIds: content.categoryIds,
+        categories: flattenCategoryTree(categoryTree ?? []),
+      })
+    : `/${content.slug}`;
+  const liveUrl = liveBase ? `${liveBase}${publicPath}` : null;
   const isPublished = content.status === 'published';
 
   return (
@@ -148,6 +163,7 @@ export default function ContentEditorPage({
           canPublish={permissions.canPublish}
           websiteTitleSuffix={website?.config?.seoDefaults?.titleSuffix}
           websiteDomain={website?.domain}
+          websiteSlug={website?.slug}
         />
       </div>
     </div>

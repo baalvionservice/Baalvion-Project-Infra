@@ -13,7 +13,7 @@ interface Props {
   websiteDomain?: string | null;
 }
 
-const STATUS_COLOR: Partial<Record<ContentWorkflowStatus, string>> = {
+export const STATUS_COLOR: Partial<Record<ContentWorkflowStatus, string>> = {
   published: '#16C784',
   draft: '#F59E0B',
   pending_review: '#2D7FF9',

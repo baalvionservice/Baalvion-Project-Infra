@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useEffect, useMemo, useState } from 'react';
+import { use, useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -21,6 +21,7 @@ import KpiCard from '@/components/cms/newsroom/KpiCard';
 import LiveFeed from '@/components/cms/newsroom/LiveFeed';
 import UploadsTable from '@/components/cms/newsroom/UploadsTable';
 import MarketDataPanel from '@/components/cms/newsroom/MarketDataPanel';
+import SearchJumpDropdown from '@/components/cms/newsroom/SearchJumpDropdown';
 import { cn } from '@/lib/utils/cn';
 import { useUIStore } from '@/lib/store/uiStore';
 import { useCmsStore } from '@/lib/store/cmsStore';
@@ -92,6 +93,10 @@ export default function NewsroomDashboardPage({ params }: { params: Promise<{ we
   const [regionFilter, setRegionFilter] = useState('');
   const [activity, setActivity] = useState<'hour' | 'day' | 'week'>('day');
   const [secondsAgo, setSecondsAgo] = useState(0);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [activeSearchIndex, setActiveSearchIndex] = useState(0);
+  const searchWrapRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const { data, isLoading, isError, refetch, dataUpdatedAt } = useContentList(
     { websiteId, page: 1, limit: 100, type: 'news' },
@@ -106,6 +111,63 @@ export default function NewsroomDashboardPage({ params }: { params: Promise<{ we
   }, [dataUpdatedAt]);
 
   const allItems = useMemo(() => data?.data ?? [], [data]);
+
+  // Jump-to-article search — deliberately searches ALL items regardless of the
+  // selected date range/status/topic filters below, since those exist for the
+  // analytics widgets, not for "find this one article to edit."
+  const searchMatches = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return [];
+    return allItems
+      .filter((i) => i.title.toLowerCase().includes(q))
+      .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt));
+  }, [allItems, search]);
+  const searchResults = searchMatches.slice(0, 8);
+
+  useEffect(() => { setActiveSearchIndex(0); }, [search]);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchWrapRef.current && !searchWrapRef.current.contains(e.target as Node)) setIsSearchOpen(false);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // "/" jumps focus to search from anywhere on the page, unless already typing in a field.
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const isTyping = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
+      if (e.key === '/' && !isTyping) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    document.addEventListener('keydown', handleGlobalKeyDown);
+    return () => document.removeEventListener('keydown', handleGlobalKeyDown);
+  }, []);
+
+  const goToArticleEditor = (item: ContentItem) => {
+    setIsSearchOpen(false);
+    router.push(`/cms/websites/${websiteId}/content/${item.id}`);
+  };
+
+  const handleSearchKeyDown = (e: ReactKeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActiveSearchIndex((i) => Math.min(i + 1, searchResults.length - 1));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActiveSearchIndex((i) => Math.max(i - 1, 0));
+    } else if (e.key === 'Enter') {
+      const target = searchResults[activeSearchIndex];
+      if (target) { e.preventDefault(); goToArticleEditor(target); }
+    } else if (e.key === 'Escape') {
+      setIsSearchOpen(false);
+      searchInputRef.current?.blur();
+    }
+  };
 
   const topicLabelById = useMemo(() => {
     const m = new Map<string, string>();
@@ -197,15 +259,29 @@ export default function NewsroomDashboardPage({ params }: { params: Promise<{ we
           </span>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <div className="relative">
+          <div ref={searchWrapRef} className="relative">
             <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2" style={{ color: MUTED }} />
             <input
+              ref={searchInputRef}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search headlines…"
-              className="h-8 w-48 rounded-md border pl-8 pr-2 text-xs outline-none"
+              onFocus={() => setIsSearchOpen(true)}
+              onKeyDown={handleSearchKeyDown}
+              placeholder="Jump to an article to edit… (press / )"
+              className="h-8 w-72 rounded-md border pl-8 pr-2 text-xs outline-none focus:ring-1"
               style={{ background: BG, borderColor: BORDER, color: TEXT }}
             />
+            {isSearchOpen && search.trim() && (
+              <SearchJumpDropdown
+                query={search.trim()}
+                results={searchResults}
+                totalMatches={searchMatches.length}
+                topicLabelById={topicLabelById}
+                regionLabelById={regionLabelById}
+                activeIndex={activeSearchIndex}
+                onSelect={goToArticleEditor}
+              />
+            )}
           </div>
           <div className="flex rounded-md border p-0.5" style={{ borderColor: BORDER }}>
             {RANGES.map((r) => (

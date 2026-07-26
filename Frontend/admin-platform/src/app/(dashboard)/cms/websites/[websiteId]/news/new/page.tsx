@@ -3,7 +3,7 @@
 import { use, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Upload, Loader2, Radio, TrendingUp, Star } from 'lucide-react';
+import { ArrowLeft, Upload, Loader2, Radio, TrendingUp, Star, Plus, X, Link2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -22,6 +22,9 @@ import { NEWS_TOPICS, NEWS_REGIONS, type NewsTopic } from '@/lib/constants/news-
 import { NEWS_LABELS, type ContentBlock, type CreateContentPayload, type NewsLabel } from '@/lib/types/cms-content.types';
 import { useUIStore } from '@/lib/store/uiStore';
 import { useCmsStore } from '@/lib/store/cmsStore';
+import RelatedContentSuggestions from '@/components/cms/newsroom/RelatedContentSuggestions';
+
+const pad2 = (n: number) => String(n).padStart(2, '0');
 
 /**
  * The WordPress-style "Add New Post" screen for daily news uploading — one big
@@ -46,17 +49,23 @@ export default function NewNewsPage({ params }: { params: Promise<{ websiteId: s
     ]);
   }, [website, setBreadcrumbs, websiteId]);
 
-  const { resolveTopic, resolveRegion } = useNewsTaxonomy(websiteId);
+  const { resolveTopic, resolveRegion, resolveCountry, getCountriesForRegion, topicIdByName, regionIdBySlug, categories } = useNewsTaxonomy(websiteId);
   const { mutateAsync: create, isPending: isCreating } = useCreateContent();
   const { mutateAsync: transition, isPending: isPublishing } = useWorkflowTransition();
   const busy = isCreating || isPublishing;
 
   const [title, setTitle] = useState('');
+  const [slug, setSlug] = useState('');
+  const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false);
   const [excerpt, setExcerpt] = useState('');
   const [blocks, setBlocks] = useState<ContentBlock[]>([]);
   const [featuredImage, setFeaturedImage] = useState('');
   const [topics, setTopics] = useState<NewsTopic[]>([]);
   const [region, setRegion] = useState<string>('');
+  const [countryName, setCountryName] = useState('');
+  const [isAddingCountry, setIsAddingCountry] = useState(false);
+  const [newCountryInput, setNewCountryInput] = useState('');
+  const [isCreatingCountry, setIsCreatingCountry] = useState(false);
   const [isBreaking, setIsBreaking] = useState(false);
   const [isTrending, setIsTrending] = useState(false);
   const [isFeatured, setIsFeatured] = useState(false);
@@ -68,6 +77,50 @@ export default function NewNewsPage({ params }: { params: Promise<{ websiteId: s
     setTopics((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]));
   const toggleLabel = (l: NewsLabel) =>
     setLabels((prev) => (prev.includes(l) ? prev.filter((x) => x !== l) : [...prev, l]));
+
+  const handleTitleChange = (val: string) => {
+    setTitle(val);
+    if (!isSlugManuallyEdited) setSlug(slugify(val));
+  };
+
+  const handleRegionChange = (next: string) => {
+    setRegion(next);
+    setCountryName('');
+    setIsAddingCountry(false);
+    setNewCountryInput('');
+  };
+
+  const handleAddCountry = async () => {
+    const name = newCountryInput.trim();
+    if (!name || !region) return;
+    setIsCreatingCountry(true);
+    try {
+      await resolveCountry(region, name);
+      setCountryName(name);
+      setIsAddingCountry(false);
+      setNewCountryInput('');
+    } finally {
+      setIsCreatingCountry(false);
+    }
+  };
+
+  // Preview only — mirrors lib/newsroom/public-url.ts's scheme without needing
+  // real category IDs yet (region/country categories may not exist until submit).
+  // "Publish Now" sets publishedAt to this same moment, so "today" is accurate;
+  // "Save Draft" shows the date it WOULD get if published right now.
+  const previewPath = (() => {
+    const now = new Date();
+    const datePath = `${now.getUTCFullYear()}/${pad2(now.getUTCMonth() + 1)}/${pad2(now.getUTCDate())}`;
+    const finalSlug = slug || slugify(title) || 'untitled-headline';
+    if (region && region !== 'world' && countryName) {
+      return `/world/${region}/${slugify(countryName)}/${datePath}/${finalSlug}`;
+    }
+    return `/${datePath}/${finalSlug}`;
+  })();
+
+  const relatedCategoryId = topics.length
+    ? topicIdByName.get(topics[0].toLowerCase())
+    : (region ? regionIdBySlug.get(region) : undefined);
 
   const handleImagePick = async (file: File | undefined) => {
     if (!file) return;
@@ -88,13 +141,14 @@ export default function NewNewsPage({ params }: { params: Promise<{ websiteId: s
     if (!title.trim()) return;
     const topicIds = await Promise.all(topics.map(resolveTopic));
     const regionId = region ? await resolveRegion(region) : null;
-    const categoryIds = [...topicIds, ...(regionId ? [regionId] : [])];
+    const countryId = region && countryName ? (await resolveCountry(region, countryName)).id : null;
+    const categoryIds = [...topicIds, ...(regionId ? [regionId] : []), ...(countryId ? [countryId] : [])];
 
     const payload: CreateContentPayload = {
       websiteId,
       type: 'news',
       title,
-      slug: slugify(title),
+      slug: slug || slugify(title),
       excerpt: excerpt || undefined,
       featuredImage: featuredImage || undefined,
       blocks,
@@ -127,9 +181,22 @@ export default function NewNewsPage({ params }: { params: Promise<{ websiteId: s
             className="h-auto border-0 border-b rounded-none px-0 text-3xl font-bold shadow-none focus-visible:ring-0"
             placeholder="Add headline"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => handleTitleChange(e.target.value)}
             autoFocus
           />
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Link2 className="h-3.5 w-3.5 shrink-0" />
+            <span className="shrink-0">{website?.domain ?? 'imperialpedia.com'}{previewPath}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs text-muted-foreground">Slug:</span>
+            <Input
+              className="h-7 max-w-sm text-xs font-mono"
+              value={slug}
+              placeholder={slugify(title) || 'auto-generated-from-headline'}
+              onChange={(e) => { setIsSlugManuallyEdited(true); setSlug(slugify(e.target.value)); }}
+            />
+          </div>
           <div className="rounded-md border px-4 py-3 min-h-[400px]">
             <DocumentEditor blocks={blocks} onChange={setBlocks} />
           </div>
@@ -204,9 +271,9 @@ export default function NewNewsPage({ params }: { params: Promise<{ websiteId: s
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Region</CardTitle>
+              <CardTitle className="text-sm">Region &amp; Country</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-3">
               <div className="flex flex-wrap gap-1.5">
                 {NEWS_REGIONS.map((r) => {
                   const active = region === r.slug;
@@ -214,7 +281,7 @@ export default function NewNewsPage({ params }: { params: Promise<{ websiteId: s
                     <button
                       key={r.slug}
                       type="button"
-                      onClick={() => setRegion(active ? '' : r.slug)}
+                      onClick={() => handleRegionChange(active ? '' : r.slug)}
                       className={cn(
                         'rounded-full border px-2.5 py-1 text-xs transition-colors',
                         active ? 'border-primary/40 bg-primary/10 text-primary' : 'border-border text-muted-foreground hover:bg-muted/60',
@@ -225,6 +292,74 @@ export default function NewNewsPage({ params }: { params: Promise<{ websiteId: s
                   );
                 })}
               </div>
+
+              {region && region !== 'world' && (
+                <div className="space-y-1.5 border-t pt-3">
+                  <p className="text-xs text-muted-foreground">
+                    Country <span className="italic">(gives the article its own /world/{region}/&lt;country&gt;/... page)</span>
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {getCountriesForRegion(region).map((c) => {
+                      const active = countryName === c.name;
+                      return (
+                        <button
+                          key={c.id}
+                          type="button"
+                          onClick={() => setCountryName(active ? '' : c.name)}
+                          className={cn(
+                            'rounded-full border px-2.5 py-1 text-xs transition-colors',
+                            active ? 'border-primary/40 bg-primary/10 text-primary' : 'border-border text-muted-foreground hover:bg-muted/60',
+                          )}
+                        >
+                          {c.name}
+                        </button>
+                      );
+                    })}
+                    {!isAddingCountry && (
+                      <button
+                        type="button"
+                        onClick={() => setIsAddingCountry(true)}
+                        className="flex items-center gap-1 rounded-full border border-dashed px-2.5 py-1 text-xs text-muted-foreground hover:bg-muted/60"
+                      >
+                        <Plus className="h-3 w-3" /> New country
+                      </button>
+                    )}
+                  </div>
+                  {isAddingCountry && (
+                    <div className="flex gap-1.5">
+                      <Input
+                        className="h-7 text-xs"
+                        placeholder="e.g. India"
+                        value={newCountryInput}
+                        onChange={(e) => setNewCountryInput(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); void handleAddCountry(); } }}
+                        autoFocus
+                      />
+                      <Button type="button" size="sm" className="h-7 text-xs" disabled={!newCountryInput.trim() || isCreatingCountry} onClick={() => void handleAddCountry()}>
+                        {isCreatingCountry ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Add'}
+                      </Button>
+                      <Button type="button" variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={() => { setIsAddingCountry(false); setNewCountryInput(''); }}>
+                        <X className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">Related Content</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <RelatedContentSuggestions
+                websiteId={websiteId}
+                websiteSlug={website?.slug}
+                websiteDomain={website?.domain}
+                categoryId={relatedCategoryId}
+                categories={categories}
+              />
             </CardContent>
           </Card>
 
