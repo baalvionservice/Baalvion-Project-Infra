@@ -156,6 +156,20 @@ const nextConfig: NextConfig = {
       // backlinks, search-engine cache) 301s to its new home so nothing 404s
       // and link equity carries over.
       { source: '/articles/:slug*', destination: '/financial-intelligence/:slug*', permanent: true },
+      // These 3 guide/topic slugs no longer resolve to any live CMS article (Search
+      // Console still has them indexed as duplicate/canonicalized from before the
+      // content was retired) — redirect to the closest live hub instead of leaving
+      // a hard 404 for the residual crawl traffic and any external backlinks.
+      { source: '/financial-intelligence/high-risk-vs-low-risk-stocks', destination: '/stocks', permanent: true },
+      { source: '/stocks/high-risk-vs-low-risk-stocks', destination: '/stocks', permanent: true },
+      { source: '/financial-intelligence/diversification', destination: '/financial-intelligence', permanent: true },
+      // These 3 industry slugs were removed from the industries dataset (only
+      // finance/semiconductors/software remain) but Search Console still has them
+      // indexed from before — send crawlers/visitors to the live hub instead of a
+      // hard 404.
+      { source: '/industries/automotive', destination: '/industries', permanent: true },
+      { source: '/industries/e-commerce', destination: '/industries', permanent: true },
+      { source: '/industries/internet-services', destination: '/industries', permanent: true },
       // Back-compat: the old query-param World URLs now live at clean paths.
       // /world?region=us → /world/us, /world?region=world → /world.
       {

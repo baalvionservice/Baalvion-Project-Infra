@@ -135,7 +135,7 @@ export async function InvestingHub() {
   let faqSource: { faq?: { question: string; answer: string }[] }[] = [];
   try {
     const { items } = await listCmsContent({ categorySlug: SLUG, contentType: "article", limit: 12 });
-    faqSource = items.map(cmsContentToArticle);
+    faqSource = items.map((raw) => cmsContentToArticle(raw));
   } catch {
     faqSource = [];
   }

@@ -176,7 +176,7 @@ export async function StocksHub() {
   let faqSource: { faq?: { question: string; answer: string }[] }[] = [];
   try {
     const { items } = await listCmsContent({ categorySlug: SLUG, contentType: "article", limit: 100 });
-    faqSource = items.map(cmsContentToArticle);
+    faqSource = items.map((raw) => cmsContentToArticle(raw));
   } catch {
     faqSource = [];
   }

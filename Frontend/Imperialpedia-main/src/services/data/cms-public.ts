@@ -17,7 +17,7 @@
 import { Article, ArticleStatus } from '@/modules/content-engine/types/article';
 import type { NewsArticle, NewsBodyBlock, NewsCategory } from '@/lib/data.news';
 import { articleArtDataUri } from '@baalvion/illustrations';
-import { safeImageUrl } from '@/lib/safe-image';
+import { isAllowedImageHost, safeImageUrl } from '@/lib/safe-image';
 import { getAuthorBySlug as getStaticAuthorBySlug } from '@/config/authors';
 import type { EntityMention } from '@/lib/entityLinkInjector';
 import { REGIONS } from '@/lib/data/worldRegions';
@@ -394,29 +394,75 @@ const esc = (s: unknown): string =>
 // ever converted that into a real `<a>`, so every one of these rendered as
 // literal visible bracket-and-parenthesis text on the live site (verified
 // directly on /broker-reviews/order-execution-quality-explained: 5 internal
-// references, all inert plain text). `/financial-intelligence/<slug>` is a
-// safe universal target for ANY article slug regardless of its real category
-// — the catch-all resolves the article by slug alone and 301s to its actual
-// canonical `/<categorySlug>/<slug>` if this guess doesn't match, so no
-// per-link category lookup is needed at render time.
+// references, all inert plain text).
+// `categoryMap` (slug → categorySlug, built by getArticleCategoryMap below)
+// lets this point straight at the real canonical `/<categorySlug>/<slug>`
+// instead of routing every hit through `/financial-intelligence/<slug>`,
+// which only 301s there via the catch-all's categorySlug-mismatch redirect —
+// a real hop on every single cross-reference link across every article body,
+// flagged in a site crawl as internal-redirect bloat. Falls back to the old
+// `/financial-intelligence/<slug>` guess (still safe, still resolves via the
+// same 301) when the map has no entry — an uncategorized article, or a
+// reference to a slug that isn't in the article set at all.
 // Deliberately narrow to a bare kebab-case slug in the parens (no `://`, no
 // leading `/`) so a real external markdown-style link (if one ever appears)
 // is left untouched rather than mis-targeted at /financial-intelligence.
-function linkifyInternalRefs(html: string): string {
+function linkifyInternalRefs(html: string, categoryMap?: ReadonlyMap<string, string | undefined>): string {
   return html.replace(
     /\[([^\]\n]+)\]\(([a-z0-9]+(?:-[a-z0-9]+)*)\)/g,
-    (_match, label: string, slug: string) => `<a href="/financial-intelligence/${slug}">${label}</a>`,
+    (_match, label: string, slug: string) => {
+      const categorySlug = categoryMap?.get(slug);
+      const href = categorySlug ? `/${categorySlug}/${slug}` : `/financial-intelligence/${slug}`;
+      return `<a href="${href}">${label}</a>`;
+    },
   );
 }
 
-function blockToHtml(b: CmsBlock, headingState: { seenH2: boolean }): string {
+// Cached (slug → categorySlug) lookup for every published article, used to
+// resolve linkifyInternalRefs above to a direct canonical href. Walks
+// pagination the same way sitemap-service.ts does (cms-service caps page
+// size at 100 server-side regardless of the requested limit). Cached
+// in-memory for CATEGORY_MAP_TTL_MS so every article render in a burst of
+// requests doesn't each re-walk the full article list.
+const CATEGORY_MAP_TTL_MS = 10 * 60 * 1000;
+let categoryMapCache: { at: number; map: Map<string, string | undefined> } | null = null;
+
+export async function getArticleCategoryMap(): Promise<Map<string, string | undefined>> {
+  const now = Date.now();
+  if (categoryMapCache && now - categoryMapCache.at < CATEGORY_MAP_TTL_MS) return categoryMapCache.map;
+  const map = new Map<string, string | undefined>();
+  try {
+    const first = await listCmsContent({ contentType: 'article', page: 1, limit: 1000 });
+    const items = [...first.items];
+    const totalPages = Math.max(1, Math.ceil(first.total / Math.max(items.length, 1)));
+    for (let page = 2; page <= totalPages; page++) {
+      try {
+        items.push(...(await listCmsContent({ contentType: 'article', page, limit: 1000 })).items);
+      } catch {
+        break;
+      }
+    }
+    items.forEach((item) => map.set(item.slug, item.category?.slug));
+  } catch {
+    // CMS unreachable — return whatever (possibly empty) map we built; callers
+    // fall back to the safe /financial-intelligence/<slug> guess per-slug.
+  }
+  categoryMapCache = { at: now, map };
+  return map;
+}
+
+function blockToHtml(
+  b: CmsBlock,
+  headingState: { seenH2: boolean },
+  categoryMap?: ReadonlyMap<string, string | undefined>,
+): string {
   const c = b.content || {};
   switch (b.type) {
     // paragraph/heading/quote/callout text is authored as trusted HTML by the CMS rich-text
     // editor (bold/links/lists), same trust level as the raw `html` block below — must not
     // be escaped or that formatting renders as literal text on the live site.
     case 'paragraph':
-      return `<p>${linkifyInternalRefs((c.text as string) || '')}</p>`;
+      return `<p>${linkifyInternalRefs((c.text as string) || '', categoryMap)}</p>`;
     case 'heading': {
       let level = Math.min(Math.max(Number(c.level) || 2, 1), 6);
       // At most one <h2> per article (SEO: single-H2 hierarchy) — the page's own H1
@@ -429,11 +475,11 @@ function blockToHtml(b: CmsBlock, headingState: { seenH2: boolean }): string {
       return `<h${level}>${(c.text as string) || ''}</h${level}>`;
     }
     case 'quote':
-      return `<blockquote><p>${linkifyInternalRefs((c.text as string) || '')}</p>${c.cite ? `<cite>${esc(c.cite)}</cite>` : ''}</blockquote>`;
+      return `<blockquote><p>${linkifyInternalRefs((c.text as string) || '', categoryMap)}</p>${c.cite ? `<cite>${esc(c.cite)}</cite>` : ''}</blockquote>`;
     case 'code':
       return `<pre><code>${esc(c.code)}</code></pre>`;
     case 'callout':
-      return `<div class="callout callout-${esc(c.variant) || 'info'}">${linkifyInternalRefs((c.text as string) || '')}</div>`;
+      return `<div class="callout callout-${esc(c.variant) || 'info'}">${linkifyInternalRefs((c.text as string) || '', categoryMap)}</div>`;
     case 'divider':
       return '<hr />';
     case 'image':
@@ -442,7 +488,7 @@ function blockToHtml(b: CmsBlock, headingState: { seenH2: boolean }): string {
         : '';
     case 'html':
       // Author-supplied raw HTML, passed through as-is by design (see linkifyInternalRefs above).
-      return typeof c.html === 'string' ? linkifyInternalRefs(c.html) : '';
+      return typeof c.html === 'string' ? linkifyInternalRefs(c.html, categoryMap) : '';
     case 'button':
       return c.href ? `<a class="btn" href="${esc(c.href)}">${esc(c.text) || 'Open'}</a>` : '';
     case 'embed':
@@ -463,12 +509,12 @@ function blockToHtml(b: CmsBlock, headingState: { seenH2: boolean }): string {
   }
 }
 
-export function blocksToHtml(blocks?: CmsBlock[]): string {
+export function blocksToHtml(blocks?: CmsBlock[], categoryMap?: ReadonlyMap<string, string | undefined>): string {
   if (!blocks || !blocks.length) return '';
   const headingState = { seenH2: false };
   return [...blocks]
     .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-    .map((b) => blockToHtml(b, headingState))
+    .map((b) => blockToHtml(b, headingState, categoryMap))
     .filter(Boolean)
     .join('\n');
 }
@@ -489,7 +535,7 @@ function plainTextLength(blocks?: CmsBlock[], excerpt?: string | null): number {
 }
 
 // ── CMS content → Imperialpedia Article ─────────────────────────────────────
-export function cmsContentToArticle(raw: CmsContent): Article {
+export function cmsContentToArticle(raw: CmsContent, categoryMap?: ReadonlyMap<string, string | undefined>): Article {
   const words = plainTextLength(raw.contentBlocks, raw.excerpt);
   const cf = (raw.customFields ?? {}) as Record<string, unknown>;
   const rawFaq = Array.isArray(cf.faq) ? (cf.faq as unknown[]) : [];
@@ -514,7 +560,7 @@ export function cmsContentToArticle(raw: CmsContent): Article {
     slug: raw.slug,
     title: raw.title,
     description: raw.excerpt ?? '',
-    body: blocksToHtml(raw.contentBlocks) || undefined,
+    body: blocksToHtml(raw.contentBlocks, categoryMap) || undefined,
     authorId: String(raw.authorId ?? 'imperialpedia'),
     authorName,
     authorSlug,
@@ -653,7 +699,11 @@ export function cmsContentToNews(raw: CmsContent): NewsArticle {
     isEditorsPick: raw.isEditorsPick === true,
     isPremium: raw.isPremium === true,
     newsLabels: raw.newsLabels ?? undefined,
-    galleryImages: raw.galleryImages ?? undefined,
+    // Unlike featuredImage/imageUrl above, a gallery has no single fallback slot to
+    // substitute — an item on a non-allowlisted host (e.g. a wire-service CNN/Getty
+    // URL) would otherwise reach next/image directly and make /_next/image 400 for
+    // every crawler and visitor hitting that article. Drop those items instead.
+    galleryImages: raw.galleryImages?.filter((url) => isAllowedImageHost(url)) || undefined,
     videoUrl: raw.videoUrl ?? undefined,
     externalSourceName: raw.externalSourceName ?? undefined,
     externalSourceUrl: raw.externalSourceUrl ?? undefined,
@@ -724,7 +774,7 @@ export async function getCmsPage(slug: string): Promise<CmsPage | null> {
   try {
     const raw = await getCmsContentBySlug(slug);
     if (raw.contentType && raw.contentType !== 'page') return null;
-    const bodyHtml = blocksToHtml(raw.contentBlocks);
+    const bodyHtml = blocksToHtml(raw.contentBlocks, await getArticleCategoryMap());
     if (!bodyHtml) return null;
     return {
       title: raw.title,

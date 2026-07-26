@@ -183,7 +183,7 @@ export async function BudgetingHub() {
     const results = await Promise.all(
       BUDGETING_TOPICS.map((t) => listCmsContent({ categorySlug: t.slug, contentType: "article", limit: 12 }))
     );
-    faqSource = results.flatMap((r) => r.items.map(cmsContentToArticle));
+    faqSource = results.flatMap((r) => r.items.map((raw) => cmsContentToArticle(raw)));
   } catch {
     faqSource = [];
   }

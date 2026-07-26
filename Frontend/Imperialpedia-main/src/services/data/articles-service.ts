@@ -3,6 +3,7 @@ import {
   listCmsContent,
   getCmsContentBySlug,
   cmsContentToArticle,
+  getArticleCategoryMap,
 } from "@/services/data/cms-public";
 import { ApiResponse, PaginatedResponse } from "@/types";
 import { Article } from "@/modules/content-engine/types/article";
@@ -35,7 +36,8 @@ export const articlesService = {
       });
 
       if (items.length > 0) {
-        const data = items.map(cmsContentToArticle);
+        const categoryMap = await getArticleCategoryMap();
+        const data = items.map((raw) => cmsContentToArticle(raw, categoryMap));
         return {
           data,
           success: true,
@@ -95,7 +97,7 @@ export const articlesService = {
         throw err;
       }
       return {
-        data: cmsContentToArticle(raw),
+        data: cmsContentToArticle(raw, await getArticleCategoryMap()),
         success: true,
         statusCode: 200,
         message: "Article retrieved successfully",
@@ -143,8 +145,9 @@ export const articlesService = {
         page,
         limit,
       });
+      const categoryMap = await getArticleCategoryMap();
       return {
-        data: items.map(cmsContentToArticle),
+        data: items.map((raw) => cmsContentToArticle(raw, categoryMap)),
         success: true,
         message: "Articles retrieved successfully",
         statusCode: 200,
@@ -183,8 +186,9 @@ export const articlesService = {
     try {
       const { items } = await listCmsContent({ contentType: "article", limit: 6 });
       if (items.length > 0) {
+        const categoryMap = await getArticleCategoryMap();
         return {
-          data: items.slice(0, 3).map(cmsContentToArticle),
+          data: items.slice(0, 3).map((raw) => cmsContentToArticle(raw, categoryMap)),
           success: true,
           statusCode: 200,
           message: "Featured articles retrieved successfully",
