@@ -68,6 +68,7 @@ import {
   useRemoveWebsiteMember,
 } from '@/lib/queries/cms-websites.queries';
 import InviteUserDialog from './InviteUserDialog';
+import PendingInvitations from './PendingInvitations';
 import UserRoleBadge from './UserRoleBadge';
 import type { CmsRole } from '@/lib/types/cms-website.types';
 
@@ -312,6 +313,8 @@ export default function UsersManager({ websiteId, canonicalId }: Props) {
           You have read-only access. Only website admins can invite or manage users.
         </p>
       )}
+
+      <PendingInvitations websiteId={websiteId} canManage={canManage} />
 
       <InviteUserDialog
         open={inviteOpen}

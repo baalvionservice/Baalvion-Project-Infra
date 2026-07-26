@@ -99,7 +99,8 @@ export default function InviteUserDialog({ open, onOpenChange, websiteId, canoni
             Invite a user
           </DialogTitle>
           <DialogDescription className="text-xs">
-            Search an existing teammate or invite by email, then choose what they can do.
+            Search an existing teammate to grant access immediately, or enter an email that
+            doesn&apos;t have an account yet — we&apos;ll send them an invite link to sign up.
           </DialogDescription>
         </DialogHeader>
 

@@ -15,6 +15,7 @@ export const websiteKeys = {
   detail: (id: string) => [...websiteKeys.all, 'detail', id] as const,
   stats: (id: string) => [...websiteKeys.all, 'stats', id] as const,
   members: (id: string) => [...websiteKeys.all, 'members', id] as const,
+  invitations: (id: string) => [...websiteKeys.all, 'invitations', id] as const,
 };
 
 export const useWebsites = (params?: { page?: number; limit?: number; status?: string; search?: string }) =>
@@ -43,6 +44,13 @@ export const useWebsiteMembers = (websiteId: string) =>
   useQuery({
     queryKey: websiteKeys.members(websiteId),
     queryFn: () => websitesApi.members.list(websiteId).then((r) => r.data.data),
+    enabled: !!websiteId,
+  });
+
+export const useWebsiteInvitations = (websiteId: string) =>
+  useQuery({
+    queryKey: websiteKeys.invitations(websiteId),
+    queryFn: () => websitesApi.invitations.list(websiteId).then((r) => r.data.data),
     enabled: !!websiteId,
   });
 
@@ -107,9 +115,48 @@ export const useAddWebsiteMember = (websiteId: string) => {
   return useMutation({
     mutationFn: (payload: AddWebsiteMemberPayload) =>
       websitesApi.members.add(websiteId, payload),
-    onSuccess: () => {
+    onSuccess: (res) => {
       qc.invalidateQueries({ queryKey: websiteKeys.members(websiteId) });
-      toast.success('Member added');
+      qc.invalidateQueries({ queryKey: websiteKeys.invitations(websiteId) });
+      const result = res.data.data;
+      if (result.kind === 'member') {
+        toast.success('Member added');
+      } else if (result.emailSent) {
+        toast.success(`Invitation emailed to ${result.email}`);
+      } else {
+        toast.warning(
+          `Invitation created for ${result.email}, but the email could not be sent. Check email delivery, then resend.`,
+        );
+      }
+    },
+    onError: (e: { message: string }) => toast.error(e.message),
+  });
+};
+
+export const useResendWebsiteInvitation = (websiteId: string) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (invitationId: string) => websitesApi.invitations.resend(websiteId, invitationId),
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: websiteKeys.invitations(websiteId) });
+      const result = res.data.data;
+      if (result.emailSent) {
+        toast.success(`Invitation re-sent to ${result.email}`);
+      } else {
+        toast.warning(`Could not send the invitation email to ${result.email}. Check email delivery.`);
+      }
+    },
+    onError: (e: { message: string }) => toast.error(e.message),
+  });
+};
+
+export const useRevokeWebsiteInvitation = (websiteId: string) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (invitationId: string) => websitesApi.invitations.revoke(websiteId, invitationId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: websiteKeys.invitations(websiteId) });
+      toast.success('Invitation revoked');
     },
     onError: (e: { message: string }) => toast.error(e.message),
   });

@@ -1,5 +1,6 @@
 'use strict';
 const websiteService = require('../service/websiteService');
+const invitationService = require('../service/invitationService');
 const { sendSuccess, sendPaginated } = require('../utils/response');
 // Shared scope helper — platform principals (super_admin/owner/admin) operate across
 // ALL orgs, everyone else is org-scoped. Single source of truth in cmsAccess so the
@@ -83,4 +84,33 @@ const removeMember = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
-module.exports = { list, create, getStats, getOne, update, remove, listMembers, addMember, updateMemberRole, removeMember, searchUsers };
+// Admin-facing pending-invitation management — surfaces status (sent/not sent/expired)
+// so a mail delivery failure is visible on the Members page instead of only a one-time
+// toast at creation time.
+const listInvitations = async (req, res, next) => {
+    try {
+        const invitations = await invitationService.listInvitations(req.params.websiteId);
+        return sendSuccess(req, res, invitations);
+    } catch (err) { return next(err); }
+};
+
+const resendInvitation = async (req, res, next) => {
+    try {
+        const website = await websiteService.getWebsite(req.params.websiteId, callerScope(req));
+        const result = await invitationService.resendInvitation(website, req.params.invitationId, req.user.id);
+        return sendSuccess(req, res, result);
+    } catch (err) { return next(err); }
+};
+
+const revokeInvitation = async (req, res, next) => {
+    try {
+        await invitationService.revokeInvitation(req.params.websiteId, req.params.invitationId);
+        return sendSuccess(req, res, null);
+    } catch (err) { return next(err); }
+};
+
+module.exports = {
+    list, create, getStats, getOne, update, remove,
+    listMembers, addMember, updateMemberRole, removeMember, searchUsers,
+    listInvitations, resendInvitation, revokeInvitation,
+};
