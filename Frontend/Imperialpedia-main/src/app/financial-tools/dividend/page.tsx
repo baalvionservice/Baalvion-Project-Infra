@@ -1,5 +1,7 @@
 import { buildMetadata } from '@/lib/seo';
 import DividendClient from './DividendClient';
+import { ToolExplainer, resolveToolExplainerContent } from '@/components/financial-tools/ToolExplainer';
+import { dividendExplainer } from '@/components/financial-tools/tool-explainer-content';
 
 export const metadata = buildMetadata({
   canonical: '/financial-tools/dividend',
@@ -8,6 +10,12 @@ export const metadata = buildMetadata({
   keywords: ['Dividend Calculator', 'Dividend Yield', 'Passive Income', 'Dividend Stocks'],
 });
 
-export default function DividendPage() {
-  return <DividendClient />;
+export default async function DividendPage() {
+  const content = await resolveToolExplainerContent('dividend', dividendExplainer);
+  return (
+    <>
+      <DividendClient />
+      <ToolExplainer content={content} />
+    </>
+  );
 }

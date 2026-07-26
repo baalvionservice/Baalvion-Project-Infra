@@ -1,5 +1,7 @@
 import { buildMetadata } from '@/lib/seo';
 import CagrClient from './CagrClient';
+import { ToolExplainer, resolveToolExplainerContent } from '@/components/financial-tools/ToolExplainer';
+import { cagrExplainer } from '@/components/financial-tools/tool-explainer-content';
 
 export const metadata = buildMetadata({
   canonical: '/financial-tools/cagr',
@@ -8,6 +10,12 @@ export const metadata = buildMetadata({
   keywords: ['CAGR Calculator', 'Compound Annual Growth Rate', 'Stock Returns', 'Investment Growth'],
 });
 
-export default function CagrPage() {
-  return <CagrClient />;
+export default async function CagrPage() {
+  const content = await resolveToolExplainerContent('cagr', cagrExplainer);
+  return (
+    <>
+      <CagrClient />
+      <ToolExplainer content={content} />
+    </>
+  );
 }

@@ -17,6 +17,12 @@ export interface TopicCopy {
   title: string;
   /** Hero description sentence. */
   description: string;
+  /**
+   * Longer educational primer paragraph (~100-150 words), rendered below the
+   * article feed on <CategoryFeed> so the page has substantive, unique prose
+   * independent of how many articles are currently published in the category.
+   */
+  intro?: string;
   /** SEO <title> — defaults to `${title} — News & Analysis`. */
   metaTitle?: string;
   /** SEO meta description — defaults to `description`. */
@@ -225,6 +231,8 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'Economic Indicators',
     description:
       'CPI, PPI, retail sales, consumer confidence, PMI, and the data investors watch to read the health of the economy.',
+    intro:
+      "Economic indicators are the data releases investors and policymakers use to gauge the direction of the economy, generally grouped into leading indicators (which tend to change before the economy does, like building permits or consumer confidence), lagging indicators (which confirm a trend already underway, like the unemployment rate), and coincident indicators (which move alongside the economy in real time, like industrial production). CPI and PPI measure price changes at the consumer and producer level respectively; PMI surveys gauge whether manufacturing and services activity is expanding or contracting. No single indicator tells the whole story, which is why economists and markets typically weigh several together rather than reacting to any one release in isolation.",
     metaTitle: 'Economic Indicators Explained',
     metaDescription:
       'Learn how CPI, PPI, retail sales, consumer confidence, and other leading and lagging indicators reveal the direction of the economy.',
@@ -234,6 +242,8 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'Fiscal Policy',
     description:
       'Government spending, taxation, budget deficits, and the national debt — and how fiscal decisions ripple through the economy.',
+    intro:
+      "Fiscal policy refers to government decisions about spending and taxation, distinct from the monetary policy set by central banks. Expansionary fiscal policy — higher spending or lower taxes — aims to stimulate a weak economy but can widen budget deficits and add to the national debt if not offset elsewhere; contractionary fiscal policy does the reverse to cool an overheating economy or rein in deficits. Because fiscal and monetary policy can work in tandem or in opposite directions — for example, government stimulus spending while a central bank simultaneously raises rates to fight inflation — understanding both together gives a fuller picture of the forces shaping growth and prices.",
     metaTitle: 'Fiscal Policy Explained',
     metaDescription:
       'Understand government spending, taxation, budget deficits, and national debt, and how fiscal policy decisions affect growth and inflation.',
@@ -243,6 +253,8 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'Monetary Policy',
     description:
       'How central banks manage the money supply — interest rates, quantitative easing, and inflation targeting explained.',
+    intro:
+      "Monetary policy is how a central bank — the Federal Reserve in the U.S. — manages the money supply and credit conditions to pursue its mandates of stable prices and maximum employment. The primary tool is the federal funds rate, but central banks also use quantitative easing (large-scale asset purchases to inject liquidity) and quantitative tightening (letting those assets run off) to influence longer-term borrowing costs. Because monetary policy works with a lag — rate changes take months to fully show up in economic data — central banks act on forecasts and incoming data rather than waiting for problems to fully materialize, which is why FOMC statements are scrutinized as closely as the rate decisions themselves.",
     metaTitle: 'Monetary Policy Explained',
     metaDescription:
       'Learn how central banks use interest rates, quantitative easing, and inflation targeting to manage the money supply and the broader economy.',
@@ -268,6 +280,8 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'Cryptocurrency',
     description:
       'The latest on digital assets, blockchain protocols, tokens, and the markets that trade them.',
+    intro:
+      "Cryptocurrency refers to digital assets secured by blockchain technology — a distributed, cryptographically verified ledger that records ownership and transactions without relying on a central bank or clearinghouse. Bitcoin, the first and largest cryptocurrency, was designed primarily as a store of value and medium of exchange; Ethereum and other smart-contract platforms extended the technology to support decentralized applications, lending protocols, and tokenized assets. The asset class remains considerably more volatile than traditional equities or bonds, trades continuously across a fragmented set of exchanges, and its regulatory treatment still varies significantly by country — all factors worth understanding before treating price moves in isolation.",
     metaTitle: 'Cryptocurrency News & Analysis',
   },
   portfolio: {
@@ -316,6 +330,8 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'ETFs',
     description:
       'Exchange-traded funds explained — strategies, flows, costs, and how to use them in a portfolio.',
+    intro:
+      "An exchange-traded fund (ETF) is a basket of securities — stocks, bonds, commodities, or a mix — that trades on an exchange throughout the day like an individual stock, combining the diversification of a mutual fund with intraday liquidity. Most ETFs are passively managed, tracking an index like the S&P 500 at a low annual expense ratio, though actively managed and leveraged or inverse ETFs also exist with different risk profiles and costs. Because ETF shares are created and redeemed by authorized participants rather than the fund buying and selling securities directly for each investor, they're also generally more tax-efficient than traditional mutual funds in a taxable account.",
     metaTitle: 'ETF News & Fund Analysis',
   },
   'real-estate': {
@@ -323,7 +339,20 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'Real Estate',
     description:
       'Housing, mortgages, REITs, and property investing — the trends shaping the market.',
+    intro:
+      "Real estate coverage spans residential and commercial property markets, the mortgage financing that supports them, and real estate investment trusts (REITs) that let investors gain property exposure without directly owning buildings. Housing activity is unusually sensitive to interest rates, since most home purchases are financed — a rise in mortgage rates directly raises monthly payments and can cool both home prices and transaction volume even without any change in the underlying value of the properties themselves. REITs, by contrast, trade like stocks and are valued partly on property fundamentals and partly on the same interest-rate sensitivity that affects dividend-paying equities generally.",
     metaTitle: 'Real Estate News & Property Investing',
+  },
+  commodities: {
+    tag: 'COMMODITIES',
+    title: 'Commodities',
+    description:
+      'Oil, gold, natural gas, and the raw-material markets that move with global supply, demand, and the dollar.',
+    intro:
+      "Commodities are raw or primary economic goods — energy products like crude oil and natural gas, metals like gold and copper, and agricultural products — that trade in standardized units on global exchanges, largely interchangeable regardless of producer. Commodity prices are driven primarily by global supply and demand balances, geopolitical events affecting production regions, and currency moves, since most commodities are priced in U.S. dollars, so a weaker dollar tends to support commodity prices and vice versa. Because commodity price swings often show up in headline inflation data before they filter through to other parts of the economy, commodities coverage is closely tied to the broader inflation and monetary-policy conversation.",
+    metaTitle: 'Commodities News & Analysis',
+    metaDescription:
+      'Track oil, gold, natural gas, and other commodity prices, and understand what drives supply, demand, and the raw-material markets.',
   },
   retirement: {
     tag: 'RETIREMENT',
@@ -353,6 +382,8 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'Budgeting Basics',
     description:
       'What a budget actually is, why it matters, and how to build your very first spending plan without feeling overwhelmed.',
+    intro:
+      "A budget is simply a plan for how income will be spent, saved, and allocated over a given period — its purpose is to make spending intentional rather than reactive. Building a first budget generally starts with tracking actual income and expenses for a month to see where money currently goes, then setting category limits based on priorities rather than guesses. The most common reason budgets fail isn't the framework chosen but unrealistic category limits set without real spending data behind them, which is why tracking before restricting tends to produce a budget people can actually sustain.",
     metaTitle: 'Budgeting Basics — A Beginner’s Guide',
     metaDescription:
       'Learn what a budget is, why budgeting matters, and how to start budgeting for the first time with simple, practical steps.',
@@ -362,6 +393,8 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'Monthly Budget',
     description:
       'Checklists, calendars, and review habits for building a monthly budget that keeps working month after month, even when income is irregular.',
+    intro:
+      "A monthly budget only stays useful if it's reviewed and adjusted on a regular cadence — most budgets that fail do so not from a bad initial plan but from never being revisited as actual spending diverges from it. A recurring monthly review (comparing planned versus actual spending by category, then adjusting the next month's limits) turns a static plan into a system that improves over time. For irregular income, basing the budget on a conservative baseline month rather than an average smooths out the risk of overcommitting spending in a leaner month.",
     metaTitle: 'Monthly Budget Guides, Checklists & Calendars',
     metaDescription:
       'Build and maintain a monthly budget with practical checklists, a budgeting calendar, and a repeatable monthly review process.',
@@ -371,6 +404,8 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'Saving Money',
     description:
       'Practical, everyday ways to cut expenses and save more — from groceries and utilities to transportation and frugal living habits.',
+    intro:
+      "Cutting expenses meaningfully usually comes from a handful of larger, recurring line items — housing, transportation, and food — rather than eliminating many small purchases, since a single large fixed cost typically outweighs dozens of small discretionary ones. Practical approaches include auditing recurring subscriptions, comparison-shopping for insurance and utilities on a regular schedule (rates change even when you don't switch providers), and separating genuine needs from wants before cutting. Frugal habits compound over time the same way investment returns do — an expense trimmed permanently saves money every month going forward, not just once.",
     metaTitle: 'How to Save Money — Practical Tips & Strategies',
     metaDescription:
       'Save more every month with practical tips for cutting expenses on groceries, utilities, and transportation, plus frugal living strategies that stick.',
@@ -380,6 +415,8 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'Family Budget',
     description:
       'Budgeting for households, kids, single parents, and couples — practical frameworks for managing money as a family.',
+    intro:
+      "Budgeting as a household introduces coordination that a single-person budget doesn't require — merging or tracking separate incomes, agreeing on shared versus individual spending categories, and planning around child-related costs that shift substantially by age, from childcare in early years to activities and food later on. Couples commonly use one of a few structures: fully joint finances, fully separate with agreed shared-expense splits, or a hybrid with joint accounts for shared costs and individual accounts for discretionary spending. Single parents managing a household budget alone face the same categories with less income-splitting flexibility, which often makes an emergency fund and childcare cost planning even higher priorities.",
     metaTitle: 'Family Budgeting Guides — Kids, Couples & Single Parents',
     metaDescription:
       'Learn how to build a family budget, manage money with kids, budget as a single parent, and coordinate finances as a couple.',
@@ -389,6 +426,8 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'Student Budget',
     description:
       'Budgeting for college, part-time income, and the everyday expenses that come with student life.',
+    intro:
+      "Budgeting during college typically means managing irregular, part-time, or seasonal income against costs that don't stay constant either — tuition and housing usually due in lump sums, while food and personal expenses are ongoing. Building a student budget generally starts by separating fixed costs already covered by financial aid, family contributions, or scholarships from costs the student is personally responsible for month to month, then setting spending limits against actual part-time or work-study income rather than projected totals. Student discounts, campus meal plans, and used or rented textbooks are common, practical levers for reducing costs during this specific life stage.",
     metaTitle: 'Student Budgeting Guides — College & Part-Time Income',
     metaDescription:
       'Practical budgeting guidance for college students, including part-time income budgets and managing everyday student expenses.',
@@ -398,6 +437,8 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'Budgeting Apps',
     description:
       'Comparisons of budgeting apps, spreadsheets, and manual tracking methods to help you find the system you’ll actually stick with.',
+    intro:
+      "Budgeting apps generally fall into a few categories: automatic account-aggregation tools that pull in transactions and categorize spending with minimal manual entry, zero-based budgeting apps that require actively assigning every dollar a job, and simple expense trackers that log spending without enforcing a plan. Spreadsheets and manual tracking remain viable alternatives for people who want full control over categories and formulas without a subscription cost, though they require more discipline to keep updated. The most effective tool is rarely the one with the most features — it's the one whose friction level matches how much manual effort someone will realistically keep up with.",
     metaTitle: 'Best Budgeting Apps & Tracking Methods Compared',
     metaDescription:
       'Compare the best budgeting apps, spreadsheet templates, and manual tracking methods to find the budgeting system that fits how you actually manage money.',
@@ -407,6 +448,8 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'Advanced Budgeting',
     description:
       'Budgeting strategies for freelancers, small business owners, and navigating inflation, recessions, and annual financial planning.',
+    intro:
+      "Budgeting gets more complex once income is variable rather than a fixed salary — a common reality for freelancers and small business owners, who need to budget around irregular cash flow, separate business and personal expenses, and set aside for quarterly estimated taxes that a salaried budget doesn't require. Advanced budgeting also covers adapting a plan to changing conditions: building in a buffer for inflation eating into a fixed budget over time, adjusting spending during a recession or income disruption, and running an annual review to reset categories as income, goals, or life circumstances change rather than letting a static budget go stale.",
     metaTitle: 'Advanced Budgeting Strategies',
     metaDescription:
       'Advanced budgeting guidance for freelancers and small business owners, plus how to budget through inflation, recessions, and annual planning.',
@@ -416,6 +459,8 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'The Federal Reserve',
     description:
       "Fed policy decisions, interest-rate moves, and what the FOMC's actions mean for borrowing costs, savings yields, and the broader economy.",
+    intro:
+      "The Federal Reserve is the central bank of the United States, tasked by Congress with a dual mandate: stable prices and maximum sustainable employment. Its main policy tool, the federal funds rate, is set by the Federal Open Market Committee (FOMC) at regularly scheduled meetings throughout the year, with decisions accompanied by a statement and, at alternating meetings, updated economic projections and a press conference from the Fed Chair. Markets parse Fed communications closely — not just the rate decision itself but the tone of the statement and any forward guidance — because expectations about future rate moves are often already priced into markets well before the Fed actually acts.",
     metaTitle: 'Federal Reserve News & Interest Rate Policy',
     metaDescription:
       'Track Federal Reserve interest-rate decisions, FOMC statements, and analysis of how monetary policy affects loans, savings, and markets.',
@@ -452,6 +497,8 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'Economic Calendar',
     description:
       'Key economic releases and how to read them — FOMC meetings, the jobs report, CPI, and earnings season.',
+    intro:
+      "An economic calendar tracks the scheduled release dates for the data points that most often move markets — the monthly jobs report, CPI and PCE inflation readings, FOMC rate decisions, GDP estimates, and corporate earnings during reporting season. Because these releases are scheduled well in advance, markets often price in expectations ahead of time, which means the reaction on release day is frequently driven more by how the actual number compares to consensus forecasts than by the number itself in isolation. Traders and long-term investors use an economic calendar differently — for short-term positioning around expected volatility, or simply to understand why markets moved sharply on a given day.",
     metaTitle: 'Economic Calendar — Key Release Dates Explained',
     metaDescription:
       'A guide to the economic calendar — FOMC meeting dates, the jobs report, CPI releases, and earnings season, and why each moves markets.',
@@ -470,6 +517,8 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'Interest Rates',
     description:
       'How benchmark rates move, why they change, and what higher or lower rates mean for loans, savings, and investments.',
+    intro:
+      "Interest rates represent the cost of borrowing money or the return earned on savings, and in the U.S. they're anchored by the federal funds rate — the rate the Federal Reserve sets for banks lending to each other overnight. Changes to that benchmark ripple outward to mortgage rates, credit card APRs, auto loans, savings account yields, and bond prices, though not always by the same amount or on the same timeline. The Fed raises rates to cool inflation by making borrowing more expensive and saving more attractive, and cuts rates to stimulate growth when the economy is slowing — a balancing act reflected in every FOMC meeting.",
     metaTitle: 'Interest Rate News & Analysis',
     metaDescription:
       'Understand how interest rate changes affect mortgages, credit cards, savings yields, and investment returns.',
@@ -488,6 +537,8 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'Emergency Fund',
     description:
       'How much to save, where to keep it, and how to work a fully-funded emergency fund into your monthly budget.',
+    intro:
+      "An emergency fund is cash set aside specifically for unplanned expenses — job loss, medical bills, urgent repairs — kept separate from everyday spending and investment accounts so it's available without having to sell investments at a bad time. Common guidance suggests three to six months of essential expenses, though the right target varies with job stability, whether a household has one income or two, and existing insurance coverage. Because the fund's job is availability rather than growth, it's typically held in a high-yield savings account or similar low-risk, liquid vehicle rather than invested in the market, where a downturn could coincide with exactly the moment the money is needed.",
     metaTitle: 'Emergency Fund Guides — How Much to Save & Where',
     metaDescription:
       'Learn how much to keep in an emergency fund, how to build one into your budget, and when it makes sense to use it.',
@@ -506,6 +557,8 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'GDP & Economic Growth',
     description:
       "What gross domestic product measures, how it's calculated, and what quarterly GDP data reveals about the health of the economy.",
+    intro:
+      "Gross Domestic Product (GDP) measures the total monetary value of all finished goods and services produced within a country over a specific period, and is the single most-watched gauge of economic size and growth. In the U.S., the Bureau of Economic Analysis reports GDP quarterly, first as an advance estimate that gets revised twice as more complete data arrives. Economists commonly define a recession as two consecutive quarters of negative GDP growth, though the official U.S. determination, made by the National Bureau of Economic Research, considers a broader set of indicators. Markets react most to whether GDP growth is accelerating, decelerating, or reversing relative to expectations, not just its absolute level.",
     metaTitle: 'GDP News & Economic Growth Analysis',
     metaDescription:
       'Track GDP growth data and understand what quarterly economic output figures mean for jobs, inflation, and markets.',
@@ -515,6 +568,8 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'Unemployment & Jobs',
     description:
       'Labor market data, unemployment claims, and what hiring trends signal about the direction of the economy.',
+    intro:
+      "The unemployment rate measures the share of the labor force that is jobless and actively seeking work, and is one of the Federal Reserve's two statutory mandates alongside price stability. In the U.S., the headline rate comes from the Bureau of Labor Statistics' monthly jobs report, alongside nonfarm payrolls (net jobs added or lost) and wage growth — together these three figures are among the most market-moving economic releases each month. A rising unemployment rate can signal a cooling economy and often precedes interest-rate cuts, while a very low rate can fuel wage-driven inflation pressure, which is why labor-market data is read alongside inflation figures rather than in isolation.",
     metaTitle: 'Unemployment & Jobs Market News',
     metaDescription:
       'Labor market coverage including unemployment claims, payroll data, and what hiring trends mean for the broader economy.',
@@ -551,6 +606,8 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'Inflation',
     description:
       "What's driving prices higher or lower, how inflation is measured, and what it means for your budget and investments.",
+    intro:
+      "Inflation is the rate at which prices for goods and services rise over time, eroding the purchasing power of each dollar. In the United States, the two most closely watched gauges are the Consumer Price Index (CPI), which tracks a fixed basket of goods and services bought by urban consumers, and the Personal Consumption Expenditures (PCE) index, the Federal Reserve's preferred measure because it adjusts more quickly as spending habits shift. Moderate, stable inflation is considered normal in a growing economy; the concern is when it runs persistently above a central bank's target, prompting interest-rate responses that ripple through mortgages, savings yields, and stock valuations.",
     metaTitle: 'Inflation News & Analysis',
     metaDescription:
       'Understand what drives inflation, how CPI and PCE are measured, and what rising or falling prices mean for your money.',
@@ -569,6 +626,8 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'Wealth Building',
     description:
       'Long-term strategies for growing net worth — saving rate, investing discipline, income growth, and the habits that compound over decades.',
+    intro:
+      "Long-term wealth accumulation is driven by three interacting levers: how much of income gets saved and invested (savings rate), the rate of return earned on that money, and time — the longest-held dollars benefit the most from compounding. Of the three, savings rate is usually the one within the most direct personal control, especially earlier in a career when investment balances are still small and additional contributions matter more than market returns on existing capital. Income growth compounds the effect further, since a rising income that maintains rather than expands lifestyle spending directly increases the amount available to save and invest each year.",
     metaTitle: 'Wealth Building Strategies & Guides',
     metaDescription:
       'Practical wealth-building strategies covering saving rate, investing discipline, income growth, and the habits that compound over a lifetime.',
@@ -578,6 +637,8 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'Budget Rules',
     description:
       'Proven budgeting frameworks — from the 50/30/20 rule to zero-based budgeting — for allocating income with a clear system.',
+    intro:
+      "Budgeting frameworks give structure to how income gets allocated, replacing guesswork with a repeatable system. The 50/30/20 rule splits after-tax income into needs, wants, and savings or debt repayment; zero-based budgeting assigns every dollar a job so income minus allocations equals zero; envelope budgeting allocates cash, physical or digital, to specific spending categories to enforce limits. No single framework is objectively best — the right one depends on how variable your income is, how many financial goals you're balancing at once, and simply which system you'll actually maintain consistently, since a budget only works if it's followed.",
     metaTitle: 'Budget Rules & Frameworks Explained',
     metaDescription:
       'Compare proven budget rules and frameworks, including the 50/30/20 rule and zero-based budgeting, to find the system that fits your income.',
@@ -587,9 +648,22 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'Debt Repayment Strategies',
     description:
       'Side-by-side comparisons of debt payoff methods — snowball, avalanche, and consolidation — to help you pick the fastest path out of debt.',
+    intro:
+      "The two most commonly compared debt payoff methods are the snowball method, paying off the smallest balance first for quick psychological wins and then rolling that payment into the next-smallest debt, and the avalanche method, paying off the highest-interest debt first, which minimizes total interest paid over time. Mathematically, avalanche saves more money; behaviorally, snowball's early wins help some people stay motivated through a long payoff process — the better method is often whichever one an individual will actually stick with. Debt consolidation, which combines multiple debts into a single loan or balance-transfer offer, can also lower the effective interest rate, but works best when the underlying spending patterns that created the debt have also been addressed.",
     metaTitle: 'Debt Repayment Strategies Compared',
     metaDescription:
       'Compare debt repayment strategies including the snowball method, avalanche method, and consolidation to find the fastest path out of debt.',
+  },
+  'estate-planning': {
+    tag: 'ESTATE PLANNING',
+    title: 'Estate Planning',
+    description:
+      'Wills, trusts, powers of attorney, and beneficiary designations — the essentials of planning how your assets are managed and passed on.',
+    intro:
+      "Estate planning is the process of arranging how assets will be managed during incapacity and distributed after death. A will directs asset distribution and names guardians for minor children, while a living trust can let assets bypass the probate court process entirely — generally faster and more private than a will alone. A complete plan typically also includes powers of attorney, both financial and healthcare, authorizing someone to act on your behalf if you become unable to, and a healthcare directive specifying your medical care wishes. Beneficiary designations on retirement accounts and life insurance policies pass outside a will entirely, which is why keeping those designations current is one of the most commonly overlooked parts of estate planning.",
+    metaTitle: 'Estate Planning Guides — Wills, Trusts & Beneficiaries',
+    metaDescription:
+      'Learn how wills, trusts, powers of attorney, and beneficiary designations work together in an estate plan, and what often gets overlooked.',
   },
   planning: {
     tag: 'FINANCIAL PLANNING',
@@ -786,7 +860,7 @@ const CATEGORY_GROUPS: CategoryGroup[] = [
   {
     label: 'PERSONAL FINANCE',
     href: '/personal-finance',
-    children: ['budgeting', 'debt', 'credit', 'planning', 'financial-independence', 'money-management', 'financial-calculators'],
+    children: ['budgeting', 'debt', 'credit', 'planning', 'financial-independence', 'money-management', 'financial-calculators', 'estate-planning'],
   },
   {
     label: 'ECONOMY',
@@ -801,7 +875,7 @@ const CATEGORY_GROUPS: CategoryGroup[] = [
   {
     label: 'BUDGETING',
     href: '/budgeting',
-    children: ['budgeting-basics', 'monthly-budget', 'saving-money', 'family-budget', 'student-budget', 'budgeting-apps', 'advanced-budgeting', 'budget-rules'],
+    children: ['budgeting-basics', 'monthly-budget', 'saving-money', 'family-budget', 'student-budget', 'budgeting-apps', 'advanced-budgeting', 'budget-rules', 'emergency-fund', 'wealth-building', 'debt-repayment-strategies'],
   },
 ];
 

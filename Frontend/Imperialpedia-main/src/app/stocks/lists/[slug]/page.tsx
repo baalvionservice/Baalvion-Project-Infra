@@ -9,6 +9,7 @@ import { ArrowLeft, ListChecks } from 'lucide-react';
 import { buildMetadata } from '@/lib/seo';
 import { loadCompanies } from '@/lib/data/loaders';
 import { EntityList } from '@/components/lists/EntityList';
+import { getSiteContent } from '@/lib/data/site-content';
 import stockLists from '@/data/stock-lists/stock-lists.json';
 
 interface PageProps {
@@ -42,6 +43,11 @@ export default async function StockListDetailPage({ params }: PageProps) {
   const companies = await loadCompanies();
   const matched = companies.filter((c) => c.tags.some((t) => list.matchTags.includes(t)));
 
+  // Admin-managed override (Imperialpedia > Site Content, type "stock-list")
+  // takes precedence over the bundled default in stock-lists.json.
+  const live = await getSiteContent<{ longDescription?: string }>('stock-list', slug);
+  const longDescription = live?.longDescription ?? list.longDescription;
+
   return (
     <main className="min-h-screen bg-background pt-16 pb-32">
       <Section spacing="md">
@@ -64,6 +70,11 @@ export default async function StockListDetailPage({ params }: PageProps) {
               {list.description} This is an educational grouping, not a recommendation to buy or sell any
               security.
             </Text>
+            {longDescription && (
+              <Text variant="body" className="text-muted-foreground leading-relaxed mt-4">
+                {longDescription}
+              </Text>
+            )}
           </header>
 
           <EntityList entities={matched} type="company" totalCount={matched.length} />

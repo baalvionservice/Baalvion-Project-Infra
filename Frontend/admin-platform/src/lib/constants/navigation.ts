@@ -278,6 +278,7 @@ export const NAVIGATION: NavGroup[] = [
           { title: 'Overview',  href: '/imperialpedia',          iconName: 'LayoutDashboard' },
           { title: 'Glossary',  href: '/imperialpedia/glossary', iconName: 'FileText'        },
           { title: 'Entities',  href: '/imperialpedia/entities', iconName: 'Building2'        },
+          { title: 'Site Content', href: '/imperialpedia/site-content', iconName: 'FileEdit'  },
           { title: 'Analytics', href: '/cms/websites/imperialpedia/analytics', iconName: 'BarChart3' },
         ],
       },

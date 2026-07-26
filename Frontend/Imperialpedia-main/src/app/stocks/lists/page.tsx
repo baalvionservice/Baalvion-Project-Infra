@@ -33,6 +33,16 @@ export default function StockListsIndexPage() {
               Curated groupings of companies by theme and sector — a starting point for research, not a
               recommendation to buy any specific stock.
             </Text>
+            <Text variant="body" className="text-muted-foreground leading-relaxed mt-4">
+              Each list below groups companies that share a common theme, sector, or investment
+              characteristic — dividend payers, large-cap blue chips, semiconductor makers, and similar
+              groupings that investors commonly use as a research starting point rather than a ranked or
+              model portfolio. Membership in a list is based on the underlying business and financial
+              characteristics that define the theme (for example, a sustained dividend history for the
+              dividend-stocks list, or chip design and manufacturing for the semiconductor list), not
+              short-term price performance. Open any list to see its full methodology and the companies
+              currently included.
+            </Text>
           </header>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -1,5 +1,7 @@
 import { buildMetadata } from '@/lib/seo';
 import ProfitLossClient from './ProfitLossClient';
+import { ToolExplainer, resolveToolExplainerContent } from '@/components/financial-tools/ToolExplainer';
+import { profitLossExplainer } from '@/components/financial-tools/tool-explainer-content';
 
 export const metadata = buildMetadata({
   canonical: '/financial-tools/profit-loss',
@@ -8,6 +10,12 @@ export const metadata = buildMetadata({
   keywords: ['Profit Loss Calculator', 'Stock Trade Calculator', 'Realized Gains'],
 });
 
-export default function ProfitLossPage() {
-  return <ProfitLossClient />;
+export default async function ProfitLossPage() {
+  const content = await resolveToolExplainerContent('profit-loss', profitLossExplainer);
+  return (
+    <>
+      <ProfitLossClient />
+      <ToolExplainer content={content} />
+    </>
+  );
 }

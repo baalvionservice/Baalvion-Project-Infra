@@ -76,6 +76,30 @@ export function extractFaqFromBlocks(body: NewsBodyBlock[]): { question: string;
   return pairs.length >= 2 ? pairs.slice(0, 12) : [];
 }
 
+// Flattens an article body into plain readable text for the "Listen" (TTS)
+// player — headings/paragraphs/quotes/callouts/list items in order; images
+// and dividers contribute nothing since there's nothing to read aloud.
+export function plainTextFromBody(body: NewsBodyBlock[]): string {
+  return body
+    .map((block) => {
+      switch (block.type) {
+        case "paragraph":
+        case "heading":
+        case "subheading":
+        case "callout":
+          return block.text;
+        case "quote":
+          return block.attribution ? `${block.text} — ${block.attribution}` : block.text;
+        case "list":
+          return block.items.join(". ");
+        default:
+          return "";
+      }
+    })
+    .filter(Boolean)
+    .join(". ");
+}
+
 // At most one <h2> per article (SEO: single-H2 hierarchy) — the page's own H1 is
 // the title, so the first "heading" block stays H2 and every later one demotes to
 // "subheading" (renders H3) rather than repeating H2 for each major section.
