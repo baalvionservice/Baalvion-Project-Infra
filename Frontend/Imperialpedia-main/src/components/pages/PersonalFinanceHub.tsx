@@ -192,11 +192,16 @@ export async function PersonalFinanceHub() {
 
   // 3) "Start Here" — a beginner overview pick plus the lead guide from the
   //    three most-visited topics, all real, all deduped against everything else.
+  //    Each pick keeps its own topic label — the article's raw CMS category
+  //    falls back to "Editorial" for names outside the site-wide NewsCategory
+  //    enum (see toNewsCategory in cms-public.ts), so the badge must be
+  //    overridden per-topic instead of trusting article.category.
+  const topicLabel = (slug: string) => TOPICS.find((t) => t.slug === slug)?.label ?? copy.title;
   const startHere = [
-    ...claim(rest, 1),
-    ...claim(byTopic.budgeting ?? [], 1),
-    ...claim(byTopic.savings ?? [], 1),
-    ...claim(byTopic.debt ?? [], 1),
+    ...claim(rest, 1).map((article) => ({ article, label: copy.title })),
+    ...claim(byTopic.budgeting ?? [], 1).map((article) => ({ article, label: topicLabel("budgeting") })),
+    ...claim(byTopic.savings ?? [], 1).map((article) => ({ article, label: topicLabel("savings") })),
+    ...claim(byTopic.debt ?? [], 1).map((article) => ({ article, label: topicLabel("debt") })),
   ];
 
   // 4) Topic sections — pillar + supporting grid per topic.
@@ -332,11 +337,11 @@ export async function PersonalFinanceHub() {
           <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <aside className="flex flex-col">
               {sidebarArticles.map((article) => (
-                <HorizontalArticleCard key={article.id} article={article} />
+                <HorizontalArticleCard key={article.id} article={article} categoryLabel={copy.title} />
               ))}
             </aside>
             <div className="lg:col-span-2">
-              <FeaturedArticleCard article={featured} />
+              <FeaturedArticleCard article={featured} categoryLabel={copy.title} />
             </div>
           </section>
         )}
@@ -347,8 +352,8 @@ export async function PersonalFinanceHub() {
               Start Here
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              {startHere.map((article) => (
-                <ArticleCard key={article.id} article={article} />
+              {startHere.map(({ article, label }) => (
+                <ArticleCard key={article.id} article={article} categoryLabel={label} />
               ))}
             </div>
           </section>
@@ -425,7 +430,7 @@ export async function PersonalFinanceHub() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {latestNews.map((article) => (
                 <Link key={article.id} href={newsArticleHref(article)} className="group block">
-                  <p className="text-xs font-semibold text-primary mb-1">{article.category}</p>
+                  <p className="text-xs font-semibold text-primary mb-1">{copy.title}</p>
                   <h3 className="text-sm font-bold text-foreground leading-snug group-hover:underline line-clamp-3">
                     {article.title}
                   </h3>

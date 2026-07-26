@@ -63,7 +63,7 @@ export function ProductSection({ slug, label, icon: Icon, articles }: Props) {
         {supporting.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 lg:col-span-2">
             {supporting.slice(0, 4).map((article) => (
-              <ArticleCard key={article.id} article={article} />
+              <ArticleCard key={article.id} article={article} categoryLabel={label} />
             ))}
           </div>
         )}
