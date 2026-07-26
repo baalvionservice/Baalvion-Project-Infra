@@ -82,7 +82,7 @@ export default function NewsroomDashboardPage({ params }: { params: Promise<{ we
     ]);
   }, [website, setBreadcrumbs, websiteId]);
 
-  const { topicIdByName, regionIdBySlug } = useNewsTaxonomy(websiteId);
+  const { topicIdByName, regionIdBySlug, categories } = useNewsTaxonomy(websiteId);
   const { data: members } = useWebsiteMembers(website?.id ?? '');
   const { data: siteStats } = useWebsiteStats(website?.id ?? '');
 
@@ -514,6 +514,7 @@ export default function NewsroomDashboardPage({ params }: { params: Promise<{ we
           topicLabelById={topicLabelById}
           regionLabelById={regionLabelById}
           authorNameById={authorNameById}
+          categories={categories}
           websiteId={websiteId}
           websiteDomain={website?.domain}
         />

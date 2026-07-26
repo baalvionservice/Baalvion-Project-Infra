@@ -52,6 +52,9 @@ export default function SearchJumpDropdown({
                     <span className="rounded px-1 py-px font-semibold uppercase tracking-wide" style={{ color, background: `${color}1A` }}>
                       {item.status.replace(/_/g, ' ')}
                     </span>
+                    <span style={{ color: item.readingTimeMinutes ? MUTED : '#EF4444' }}>
+                      {item.readingTimeMinutes ? `${item.readingTimeMinutes} min read` : 'No content yet'}
+                    </span>
                     {[topic, region].filter(Boolean).join(' • ')}
                     {' · '}Updated {formatDate(item.updatedAt, 'MMM d, HH:mm')}
                   </p>

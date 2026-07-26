@@ -23,6 +23,7 @@ import { NEWS_LABELS, type ContentBlock, type CreateContentPayload, type NewsLab
 import { useUIStore } from '@/lib/store/uiStore';
 import { useCmsStore } from '@/lib/store/cmsStore';
 import RelatedContentSuggestions from '@/components/cms/newsroom/RelatedContentSuggestions';
+import AuthorPanel from '@/components/cms/AuthorPanel';
 
 const pad2 = (n: number) => String(n).padStart(2, '0');
 
@@ -77,6 +78,7 @@ export default function NewNewsPage({ params }: { params: Promise<{ websiteId: s
   const [isTrending, setIsTrending] = useState(false);
   const [isFeatured, setIsFeatured] = useState(false);
   const [labels, setLabels] = useState<NewsLabel[]>([]);
+  const [customFields, setCustomFields] = useState<Record<string, unknown>>({});
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -192,6 +194,7 @@ export default function NewNewsPage({ params }: { params: Promise<{ websiteId: s
       isTrending,
       isFeatured,
       newsLabels: labels,
+      customFields: Object.keys(customFields).length ? customFields : undefined,
     };
     const res = await create(payload);
     if (publish) {
@@ -288,6 +291,15 @@ export default function NewNewsPage({ params }: { params: Promise<{ websiteId: s
                 onChange={(e) => { void handleImagePick(e.target.files?.[0]); e.target.value = ''; }}
               />
             </CardContent>
+          </Card>
+
+          <Card>
+            <AuthorPanel
+              websiteId={websiteId}
+              value={customFields}
+              onChange={setCustomFields}
+              bordered={false}
+            />
           </Card>
 
           <Card>

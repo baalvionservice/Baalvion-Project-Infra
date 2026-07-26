@@ -1,8 +1,15 @@
 'use client';
 
-import { ExternalLink, Pencil } from 'lucide-react';
+import { ExternalLink, Pencil, FileText } from 'lucide-react';
 import { formatDate } from '@/lib/utils/format';
+import { buildImperialpediaPath } from '@/lib/newsroom/public-url';
 import type { ContentItem, ContentWorkflowStatus } from '@/lib/types/cms-content.types';
+
+interface CategoryRef {
+  id: string;
+  slug: string;
+  parentId: string | null;
+}
 
 interface Props {
   items: ContentItem[];
@@ -11,6 +18,7 @@ interface Props {
   authorNameById: Map<number, string>;
   websiteId: string;
   websiteDomain?: string | null;
+  categories: CategoryRef[];
 }
 
 export const STATUS_COLOR: Partial<Record<ContentWorkflowStatus, string>> = {
@@ -22,7 +30,16 @@ export const STATUS_COLOR: Partial<Record<ContentWorkflowStatus, string>> = {
   changes_requested: '#EF4444',
 };
 
-export default function UploadsTable({ items, topicLabelById, regionLabelById, authorNameById, websiteId, websiteDomain }: Props) {
+// A quick "how far along is this" signal for the list view — editors couldn't
+// tell a near-empty draft from a finished one without opening it. Word count
+// isn't in the list payload, but readingTimeMinutes (server-computed from the
+// body) already is, so it doubles as a length proxy at zero extra cost.
+function lengthLabel(item: ContentItem): string {
+  if (!item.readingTimeMinutes) return 'No content yet';
+  return `${item.readingTimeMinutes} min read`;
+}
+
+export default function UploadsTable({ items, topicLabelById, regionLabelById, authorNameById, websiteId, websiteDomain, categories }: Props) {
   if (!items.length) {
     return <p className="py-8 text-center text-xs" style={{ color: '#9CA3AF' }}>Nothing in this range.</p>;
   }
@@ -34,6 +51,7 @@ export default function UploadsTable({ items, topicLabelById, regionLabelById, a
           <tr className="text-left text-[11px] uppercase tracking-wide" style={{ color: '#9CA3AF' }}>
             <th className="px-3 py-2 font-medium">Headline</th>
             <th className="px-3 py-2 font-medium">Status</th>
+            <th className="px-3 py-2 font-medium">Length</th>
             <th className="px-3 py-2 font-medium">Topics</th>
             <th className="px-3 py-2 font-medium">Region</th>
             <th className="px-3 py-2 font-medium">Source</th>
@@ -49,6 +67,13 @@ export default function UploadsTable({ items, topicLabelById, regionLabelById, a
             const region = item.categoryIds.map((id) => regionLabelById.get(id)).find(Boolean);
             const author = item.author.fullName || authorNameById.get(item.author.id) || '—';
             const color = STATUS_COLOR[item.status] ?? '#9CA3AF';
+            const isEmpty = !item.readingTimeMinutes;
+            const publicPath = buildImperialpediaPath({
+              slug: item.slug,
+              dateSource: item.publishedAt,
+              categoryIds: item.categoryIds,
+              categories,
+            });
             return (
               <tr key={item.id} className="border-t" style={{ borderColor: '#242A33' }}>
                 <td className="max-w-xs truncate px-3 py-2.5" style={{ color: '#F5F7FA' }}>{item.title}</td>
@@ -58,6 +83,12 @@ export default function UploadsTable({ items, topicLabelById, regionLabelById, a
                     style={{ color, background: `${color}1A` }}
                   >
                     {item.status.replace(/_/g, ' ')}
+                  </span>
+                </td>
+                <td className="px-3 py-2.5">
+                  <span className="flex items-center gap-1 whitespace-nowrap text-xs" style={{ color: isEmpty ? '#EF4444' : '#9CA3AF' }}>
+                    <FileText className="h-3 w-3 shrink-0" />
+                    {lengthLabel(item)}
                   </span>
                 </td>
                 <td className="px-3 py-2.5">
@@ -85,7 +116,7 @@ export default function UploadsTable({ items, topicLabelById, regionLabelById, a
                     </a>
                     {item.status === 'published' && websiteDomain && (
                       <a
-                        href={`https://${websiteDomain}/${item.slug}`}
+                        href={`https://${websiteDomain}${publicPath}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="rounded p-1 transition-colors hover:bg-white/10"

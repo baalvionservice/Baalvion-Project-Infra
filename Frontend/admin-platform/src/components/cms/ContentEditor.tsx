@@ -16,6 +16,8 @@ import SeoPanel from './SeoPanel';
 import RevisionHistory from './RevisionHistory';
 import WorkflowPanel from './WorkflowPanel';
 import ContentClassificationPanel from './ContentClassificationPanel';
+import AuthorPanel from './AuthorPanel';
+import FeaturedImagePanel from './FeaturedImagePanel';
 import NewsMetaPanel, { type NewsMeta } from './NewsMetaPanel';
 import CustomFieldsPanel from './CustomFieldsPanel';
 import ReviewerPanel from './ReviewerPanel';
@@ -57,6 +59,7 @@ export default function ContentEditor({ content, userRole, canPublish, websiteTi
   const [title, setTitle] = useState(content.title);
   const [slug, setSlug] = useState(content.slug);
   const [excerpt, setExcerpt] = useState(content.excerpt ?? '');
+  const [featuredImage, setFeaturedImage] = useState(content.featuredImage ?? '');
   const [blocks, setBlocks] = useState<ContentBlock[]>(content.blocks);
   const [seo, setSeo] = useState<SeoMeta>(content.seo ?? {});
   // Classification — one or more categories (first = primary) plus any number of tags.
@@ -119,6 +122,7 @@ export default function ContentEditor({ content, userRole, canPublish, websiteTi
       title,
       slug,
       excerpt,
+      featuredImage,
       blocks,
       seo,
       categoryIds,
@@ -132,7 +136,7 @@ export default function ContentEditor({ content, userRole, canPublish, websiteTi
   // the workflow transition so what goes live is exactly what's on screen.
   const handlePublish = () => {
     save(
-      { title, slug, excerpt, blocks, seo, categoryIds, tagIds, customFields, ...newsMeta },
+      { title, slug, excerpt, featuredImage, blocks, seo, categoryIds, tagIds, customFields, ...newsMeta },
       {
         onSuccess: () =>
           runTransition({ contentId: content.id, action: isPublished ? 'unpublish' : 'publish' }),
@@ -142,7 +146,7 @@ export default function ContentEditor({ content, userRole, canPublish, websiteTi
 
   const handleSubmitForReview = () => {
     save(
-      { title, slug, excerpt, blocks, seo, categoryIds, tagIds, customFields, ...newsMeta },
+      { title, slug, excerpt, featuredImage, blocks, seo, categoryIds, tagIds, customFields, ...newsMeta },
       {
         onSuccess: () => runTransition({ contentId: content.id, action: 'submit_for_review' }),
       },
@@ -355,6 +359,15 @@ export default function ContentEditor({ content, userRole, canPublish, websiteTi
                     categories={flatCategories}
                   />
                 </div>
+                <AuthorPanel
+                  websiteId={content.websiteId}
+                  value={customFields}
+                  onChange={(v) => { setCustomFields(v); markUnsaved(); }}
+                />
+                <FeaturedImagePanel
+                  value={featuredImage}
+                  onChange={(url) => { setFeaturedImage(url); markUnsaved(); }}
+                />
                 <NewsMetaPanel
                   value={newsMeta}
                   onChange={(v) => { setNewsMeta(v); markUnsaved(); }}

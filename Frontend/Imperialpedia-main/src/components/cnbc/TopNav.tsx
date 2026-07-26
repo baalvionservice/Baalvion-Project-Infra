@@ -1,8 +1,35 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ImperialpediaMark } from "@/components/icons/ImperialpediaMark";
 import { navCategories } from "@/lib/data/worldData";
+
+// "Wed, Apr 8, 2026" was hardcoded here — never wired to an actual clock, so it
+// just froze at whatever date someone typed in and never matched "today."
+// Starts empty and fills in only after mount (never during SSR) — the browser's
+// timezone almost never matches the server's, so computing `new Date()` during
+// SSR would render one string, then immediately mismatch on hydration once the
+// client recomputes it in its own timezone. 60s refresh is plenty for a
+// date+time masthead; no need for per-second re-renders.
+function useLiveMastheadClock(): string {
+  const [now, setNow] = useState("");
+  useEffect(() => {
+    const format = () =>
+      new Date().toLocaleString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        timeZoneName: "short",
+      });
+    setNow(format());
+    const id = setInterval(() => setNow(format()), 60_000);
+    return () => clearInterval(id);
+  }, []);
+  return now;
+}
 
 /**
  * Shared dark CNBC-style masthead for /world, /news, /market-news — promoted
@@ -15,6 +42,7 @@ import { navCategories } from "@/lib/data/worldData";
  */
 export default function TopNav() {
   const [activeCategory, setActiveCategory] = useState("World");
+  const liveClock = useLiveMastheadClock();
 
   return (
     <header className="bg-black border-b border-white/15 sticky top-0 z-50">
@@ -38,7 +66,7 @@ export default function TopNav() {
           </nav>
         </div>
         <div className="flex items-center gap-3 text-xs text-white/50">
-          <span className="hidden sm:block">Wed, Apr 8, 2026</span>
+          <span className="hidden sm:block" suppressHydrationWarning>{liveClock}</span>
           <button className="world-kicker bg-[hsl(var(--cnbc-red))] text-white text-xs font-bold px-3 py-1.5 rounded-sm hover:opacity-90 transition-opacity">
             SUBSCRIBE
           </button>
