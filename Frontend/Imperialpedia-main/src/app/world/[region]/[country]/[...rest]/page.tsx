@@ -7,7 +7,7 @@ import { notFound, permanentRedirect } from "next/navigation";
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getPublishedNewsBySlug, findAuthorProfileByName } from "@/services/data/cms-public";
 import { staticNewsBySlug } from "@/services/data/static-content";
-import { newsArticleHref } from "@/lib/data/article-url";
+import { newsArticleHref, labelFromSlug } from "@/lib/data/article-url";
 import { REGIONS, type RegionConfig } from "@/lib/data/worldRegions";
 import { buildMetadata } from "@/lib/seo";
 import { env } from "@/config/env";
@@ -30,21 +30,32 @@ import {
   truncateForMeta,
 } from "@/lib/article/render-helpers";
 
-type Params = Promise<{
-  region: string;
-  country: string;
-  year: string;
-  month: string;
-  day: string;
-  slug: string;
-}>;
+type Params = Promise<{ region: string; country: string; rest: string[] }>;
 
 const REGION_BY_ID = new Map<string, RegionConfig>(REGIONS.map((r) => [r.id, r]));
 
-// Every dated-news lookup checks the static demo set → live CMS → committed
-// snapshot, same fallback chain the flat /YYYY/MM/DD/<slug> route uses, so a
-// world/country article resolves the same way regardless of which URL shape
-// links to it.
+/**
+ * A single catch-all handles both permalink depths under /world/<region>/<country>/:
+ *   - 4 segments: [YYYY, MM, DD, slug]          → country-level article
+ *   - 5 segments: [state, YYYY, MM, DD, slug]   → state-level article
+ * A regular `[year]` folder and a `[state]` folder can't be siblings (Next.js
+ * requires every dynamic segment at the same position to share one name), so
+ * catch-all + manual length parsing is the way to support both depths.
+ */
+function parseRest(rest: string[]): { state?: string; year: string; month: string; day: string; slug: string } | null {
+  if (rest.length === 4) {
+    const [year, month, day, slug] = rest;
+    return { year, month, day, slug };
+  }
+  if (rest.length === 5) {
+    const [state, year, month, day, slug] = rest;
+    return { state, year, month, day, slug };
+  }
+  return null;
+}
+
+// Same fallback chain as the flat /YYYY/MM/DD/<slug> route, so an article
+// resolves the same way regardless of which URL shape links to it.
 async function findNewsArticle(slug: string): Promise<NewsArticle | null> {
   return (
     newsArticles.find((a) => a.slug === slug) ??
@@ -54,20 +65,11 @@ async function findNewsArticle(slug: string): Promise<NewsArticle | null> {
   );
 }
 
-// "south-korea" → "South Korea" — countries have no fixed registry (any slug
-// works, no code change needed to add one), so the display label is derived
-// from the slug rather than looked up.
-function countryLabel(slug: string): string {
-  return slug
-    .split("-")
-    .filter(Boolean)
-    .map((word) => word[0].toUpperCase() + word.slice(1))
-    .join(" ");
-}
-
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
-  const { region, country, slug } = await params;
-  const article = await findNewsArticle(slug);
+  const { region, country, rest } = await params;
+  const parsed = parseRest(rest);
+  if (!parsed) return {};
+  const article = await findNewsArticle(parsed.slug);
   if (!article) return {};
 
   const canonical = newsArticleHref(article);
@@ -82,6 +84,12 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   });
 
   const baseUrl = (env.siteUrl || "https://imperialpedia.com").replace(/\/$/, "");
+  const sectionParts = [
+    "World",
+    REGION_BY_ID.get(region)?.label ?? region,
+    labelFromSlug(country),
+    ...(parsed.state ? [labelFromSlug(parsed.state)] : []),
+  ];
   return {
     ...base,
     authors: [
@@ -96,34 +104,43 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
       publishedTime: article.publishedAt,
       modifiedTime: article.updatedAt || article.publishedAt,
       authors: [article.author.name],
-      section: `World / ${REGION_BY_ID.get(region)?.label ?? region} / ${countryLabel(country)}`,
+      section: sectionParts.join(" / "),
       tags: article.tags,
     },
   };
 }
 
 export default async function WorldCountryArticlePage({ params }: { params: Params }) {
-  const { region, country, slug } = await params;
+  const { region, country, rest } = await params;
 
   if (!REGION_BY_ID.has(region) || region === "world") notFound();
+
+  const parsed = parseRest(rest);
+  if (!parsed) notFound();
+  const { state, slug } = parsed;
 
   const article = await findNewsArticle(slug);
   if (!article) notFound();
 
   // Single source of truth for where this article actually belongs (flat
-  // dated URL, category guide, or this nested world/country shape) — if the
+  // dated URL, category guide, country-level, or state-level) — if the
   // requested path isn't the article's real canonical, redirect instead of
-  // serving (or indexing) a second copy under the wrong region/country/date.
+  // serving (or indexing) a second copy under the wrong region/country/state/date.
   const canonicalPath = newsArticleHref(article);
-  const requestedPath = `/world/${region}/${country}/${new Date(article.publishedAt).getUTCFullYear()}` +
+  const datePrefix = `${new Date(article.publishedAt).getUTCFullYear()}` +
     `/${String(new Date(article.publishedAt).getUTCMonth() + 1).padStart(2, "0")}` +
-    `/${String(new Date(article.publishedAt).getUTCDate()).padStart(2, "0")}/${slug}`;
+    `/${String(new Date(article.publishedAt).getUTCDate()).padStart(2, "0")}`;
+  const requestedPath = state
+    ? `/world/${region}/${country}/${state}/${datePrefix}/${slug}`
+    : `/world/${region}/${country}/${datePrefix}/${slug}`;
   if (canonicalPath !== requestedPath) {
     permanentRedirect(canonicalPath);
   }
 
   const regionConfig = REGION_BY_ID.get(region)!;
-  const countryName = countryLabel(country);
+  const countryName = labelFromSlug(country);
+  const stateName = state ? labelFromSlug(state) : null;
+  const leafName = stateName ?? countryName;
 
   const baseUrl = (env.siteUrl || "https://imperialpedia.com").replace(/\/$/, "");
   const canonicalUrl = `${baseUrl}${canonicalPath}`;
@@ -163,7 +180,7 @@ export default async function WorldCountryArticlePage({ params }: { params: Para
       : {}),
     url: canonicalUrl,
     mainEntityOfPage: { "@type": "WebPage", "@id": canonicalUrl },
-    articleSection: countryName,
+    articleSection: leafName,
     inLanguage: "en-US",
     ...(article.tags && article.tags.length > 0 ? { keywords: article.tags.join(", ") } : {}),
     ...(article.readTimeMinutes ? { timeRequired: `PT${article.readTimeMinutes}M` } : {}),
@@ -197,16 +214,23 @@ export default async function WorldCountryArticlePage({ params }: { params: Para
     },
   };
 
+  const breadcrumbItems = [
+    { "@type": "ListItem", position: 1, name: "Home", item: baseUrl },
+    { "@type": "ListItem", position: 2, name: "World", item: `${baseUrl}/world` },
+    { "@type": "ListItem", position: 3, name: regionConfig.label, item: `${baseUrl}/world/${region}` },
+    {
+      "@type": "ListItem",
+      position: 4,
+      name: countryName,
+      item: stateName ? `${baseUrl}/world/${region}/${country}` : canonicalUrl,
+    },
+    ...(stateName ? [{ "@type": "ListItem" as const, position: 5, name: stateName, item: canonicalUrl }] : []),
+    { "@type": "ListItem", position: stateName ? 6 : 5, name: article.title, item: canonicalUrl },
+  ];
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: baseUrl },
-      { "@type": "ListItem", position: 2, name: "World", item: `${baseUrl}/world` },
-      { "@type": "ListItem", position: 3, name: regionConfig.label, item: `${baseUrl}/world/${region}` },
-      { "@type": "ListItem", position: 4, name: countryName, item: canonicalUrl },
-      { "@type": "ListItem", position: 5, name: article.title, item: canonicalUrl },
-    ],
+    itemListElement: breadcrumbItems,
   };
 
   return (
@@ -223,13 +247,21 @@ export default async function WorldCountryArticlePage({ params }: { params: Para
           <span>/</span>
           <Link href={`/world/${region}`} className="hover:text-[#CC0000]">{regionConfig.label}</Link>
           <span>/</span>
-          <span className="text-muted-foreground/70">{countryName}</span>
+          {stateName ? (
+            <>
+              <Link href={`/world/${region}/${country}`} className="hover:text-[#CC0000]">{countryName}</Link>
+              <span>/</span>
+              <span className="text-muted-foreground/70">{stateName}</span>
+            </>
+          ) : (
+            <span className="text-muted-foreground/70">{countryName}</span>
+          )}
         </nav>
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-10 xl:gap-14">
           <article className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <CategoryBadge category={article.category} label={countryName} />
+              <CategoryBadge category={article.category} label={leafName} />
               {article.newsLabels?.map((label) => (
                 <span
                   key={label}
@@ -358,6 +390,12 @@ export default async function WorldCountryArticlePage({ params }: { params: Para
             <Suspense fallback={null}>
               <TrendingNowModule />
             </Suspense>
+
+            {stateName && (
+              <Suspense fallback={null}>
+                <MoreInCategoryModule categorySlug={state} categoryLabel={stateName} excludeSlug={slug} />
+              </Suspense>
+            )}
 
             <Suspense fallback={null}>
               <MoreInCategoryModule categorySlug={country} categoryLabel={countryName} excludeSlug={slug} />

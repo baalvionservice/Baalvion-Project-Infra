@@ -49,7 +49,10 @@ export default function NewNewsPage({ params }: { params: Promise<{ websiteId: s
     ]);
   }, [website, setBreadcrumbs, websiteId]);
 
-  const { resolveTopic, resolveRegion, resolveCountry, getCountriesForRegion, topicIdByName, regionIdBySlug, categories } = useNewsTaxonomy(websiteId);
+  const {
+    resolveTopic, resolveRegion, resolveCountry, getCountriesForRegion,
+    resolveState, getStatesForCountry, topicIdByName, regionIdBySlug, categories,
+  } = useNewsTaxonomy(websiteId);
   const { mutateAsync: create, isPending: isCreating } = useCreateContent();
   const { mutateAsync: transition, isPending: isPublishing } = useWorkflowTransition();
   const busy = isCreating || isPublishing;
@@ -66,6 +69,10 @@ export default function NewNewsPage({ params }: { params: Promise<{ websiteId: s
   const [isAddingCountry, setIsAddingCountry] = useState(false);
   const [newCountryInput, setNewCountryInput] = useState('');
   const [isCreatingCountry, setIsCreatingCountry] = useState(false);
+  const [stateName, setStateName] = useState('');
+  const [isAddingState, setIsAddingState] = useState(false);
+  const [newStateInput, setNewStateInput] = useState('');
+  const [isCreatingState, setIsCreatingState] = useState(false);
   const [isBreaking, setIsBreaking] = useState(false);
   const [isTrending, setIsTrending] = useState(false);
   const [isFeatured, setIsFeatured] = useState(false);
@@ -88,6 +95,16 @@ export default function NewNewsPage({ params }: { params: Promise<{ websiteId: s
     setCountryName('');
     setIsAddingCountry(false);
     setNewCountryInput('');
+    setStateName('');
+    setIsAddingState(false);
+    setNewStateInput('');
+  };
+
+  const handleCountryChange = (next: string) => {
+    setCountryName(next);
+    setStateName('');
+    setIsAddingState(false);
+    setNewStateInput('');
   };
 
   const handleAddCountry = async () => {
@@ -96,7 +113,7 @@ export default function NewNewsPage({ params }: { params: Promise<{ websiteId: s
     setIsCreatingCountry(true);
     try {
       await resolveCountry(region, name);
-      setCountryName(name);
+      handleCountryChange(name);
       setIsAddingCountry(false);
       setNewCountryInput('');
     } finally {
@@ -104,14 +121,31 @@ export default function NewNewsPage({ params }: { params: Promise<{ websiteId: s
     }
   };
 
+  const handleAddState = async () => {
+    const name = newStateInput.trim();
+    if (!name || !region || !countryName) return;
+    setIsCreatingState(true);
+    try {
+      await resolveState(region, countryName, name);
+      setStateName(name);
+      setIsAddingState(false);
+      setNewStateInput('');
+    } finally {
+      setIsCreatingState(false);
+    }
+  };
+
   // Preview only — mirrors lib/newsroom/public-url.ts's scheme without needing
-  // real category IDs yet (region/country categories may not exist until submit).
+  // real category IDs yet (region/country/state categories may not exist until submit).
   // "Publish Now" sets publishedAt to this same moment, so "today" is accurate;
   // "Save Draft" shows the date it WOULD get if published right now.
   const previewPath = (() => {
     const now = new Date();
     const datePath = `${now.getUTCFullYear()}/${pad2(now.getUTCMonth() + 1)}/${pad2(now.getUTCDate())}`;
     const finalSlug = slug || slugify(title) || 'untitled-headline';
+    if (region && region !== 'world' && countryName && stateName) {
+      return `/world/${region}/${slugify(countryName)}/${slugify(stateName)}/${datePath}/${finalSlug}`;
+    }
     if (region && region !== 'world' && countryName) {
       return `/world/${region}/${slugify(countryName)}/${datePath}/${finalSlug}`;
     }
@@ -142,7 +176,8 @@ export default function NewNewsPage({ params }: { params: Promise<{ websiteId: s
     const topicIds = await Promise.all(topics.map(resolveTopic));
     const regionId = region ? await resolveRegion(region) : null;
     const countryId = region && countryName ? (await resolveCountry(region, countryName)).id : null;
-    const categoryIds = [...topicIds, ...(regionId ? [regionId] : []), ...(countryId ? [countryId] : [])];
+    const stateId = region && countryName && stateName ? (await resolveState(region, countryName, stateName)).id : null;
+    const categoryIds = [...topicIds, ...(regionId ? [regionId] : []), ...(countryId ? [countryId] : []), ...(stateId ? [stateId] : [])];
 
     const payload: CreateContentPayload = {
       websiteId,
@@ -271,7 +306,7 @@ export default function NewNewsPage({ params }: { params: Promise<{ websiteId: s
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Region &amp; Country</CardTitle>
+              <CardTitle className="text-sm">Region, Country &amp; State</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex flex-wrap gap-1.5">
@@ -305,7 +340,7 @@ export default function NewNewsPage({ params }: { params: Promise<{ websiteId: s
                         <button
                           key={c.id}
                           type="button"
-                          onClick={() => setCountryName(active ? '' : c.name)}
+                          onClick={() => handleCountryChange(active ? '' : c.name)}
                           className={cn(
                             'rounded-full border px-2.5 py-1 text-xs transition-colors',
                             active ? 'border-primary/40 bg-primary/10 text-primary' : 'border-border text-muted-foreground hover:bg-muted/60',
@@ -339,6 +374,59 @@ export default function NewNewsPage({ params }: { params: Promise<{ websiteId: s
                         {isCreatingCountry ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Add'}
                       </Button>
                       <Button type="button" variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={() => { setIsAddingCountry(false); setNewCountryInput(''); }}>
+                        <X className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {region && region !== 'world' && countryName && (
+                <div className="space-y-1.5 border-t pt-3">
+                  <p className="text-xs text-muted-foreground">
+                    State / Province <span className="italic">(optional — nests one level deeper: /world/{region}/{slugify(countryName)}/&lt;state&gt;/...)</span>
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {getStatesForCountry(region, countryName).map((s) => {
+                      const active = stateName === s.name;
+                      return (
+                        <button
+                          key={s.id}
+                          type="button"
+                          onClick={() => setStateName(active ? '' : s.name)}
+                          className={cn(
+                            'rounded-full border px-2.5 py-1 text-xs transition-colors',
+                            active ? 'border-primary/40 bg-primary/10 text-primary' : 'border-border text-muted-foreground hover:bg-muted/60',
+                          )}
+                        >
+                          {s.name}
+                        </button>
+                      );
+                    })}
+                    {!isAddingState && (
+                      <button
+                        type="button"
+                        onClick={() => setIsAddingState(true)}
+                        className="flex items-center gap-1 rounded-full border border-dashed px-2.5 py-1 text-xs text-muted-foreground hover:bg-muted/60"
+                      >
+                        <Plus className="h-3 w-3" /> New state
+                      </button>
+                    )}
+                  </div>
+                  {isAddingState && (
+                    <div className="flex gap-1.5">
+                      <Input
+                        className="h-7 text-xs"
+                        placeholder="e.g. California"
+                        value={newStateInput}
+                        onChange={(e) => setNewStateInput(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); void handleAddState(); } }}
+                        autoFocus
+                      />
+                      <Button type="button" size="sm" className="h-7 text-xs" disabled={!newStateInput.trim() || isCreatingState} onClick={() => void handleAddState()}>
+                        {isCreatingState ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Add'}
+                      </Button>
+                      <Button type="button" variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={() => { setIsAddingState(false); setNewStateInput(''); }}>
                         <X className="h-3.5 w-3.5" />
                       </Button>
                     </div>

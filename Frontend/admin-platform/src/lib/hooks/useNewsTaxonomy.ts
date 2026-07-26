@@ -75,6 +75,31 @@ export function useNewsTaxonomy(websiteId: string) {
     return { id: res.data.data.id, slug: countrySlug };
   };
 
+  /** States/provinces one level below a country (parentId = country's category id) —
+   *  same nesting pattern regions/countries use, one level deeper. Reading this
+   *  needs the country's id, not just its name, so callers pass the region slug
+   *  + country name and this looks the id up from the already-loaded tree. */
+  const getStatesForCountry = (regionSlug: string, countryName: string) => {
+    const regionId = regionIdBySlug.get(regionSlug);
+    if (!regionId) return [];
+    const countrySlug = slugify(countryName);
+    const countryCat = flat.find((c) => c.parentId === regionId && c.slug === countrySlug);
+    if (!countryCat) return [];
+    return flat
+      .filter((c) => c.parentId === countryCat.id)
+      .map((c) => ({ id: c.id, name: c.name, slug: c.slug }));
+  };
+
+  /** Creates (or reuses) a state category nested under the given country, resolving/creating the country first. */
+  const resolveState = async (regionSlug: string, countryName: string, stateName: string): Promise<{ id: string; slug: string }> => {
+    const country = await resolveCountry(regionSlug, countryName);
+    const stateSlug = slugify(stateName);
+    const existing = flat.find((c) => c.parentId === country.id && c.slug === stateSlug);
+    if (existing) return { id: existing.id, slug: existing.slug };
+    const res = await createCategory({ websiteId, name: stateName, slug: stateSlug, parentId: country.id });
+    return { id: res.data.data.id, slug: stateSlug };
+  };
+
   // Simplified flat shape (id/slug/parentId/name) for URL-preview building —
   // callers that need to resolve region+country from a set of categoryIds
   // (see lib/newsroom/public-url.ts) don't need the full CategoryTree.
@@ -92,5 +117,7 @@ export function useNewsTaxonomy(websiteId: string) {
     resolveRegion,
     getCountriesForRegion,
     resolveCountry,
+    getStatesForCountry,
+    resolveState,
   };
 }

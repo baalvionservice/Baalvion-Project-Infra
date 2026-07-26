@@ -92,12 +92,15 @@ export interface NewsArticle {
   entityMentions?: EntityMention[];
   /**
    * World-news geographic tagging (from CMS `customFields.worldRegion` /
-   * `customFields.worldCountry`) — when both are set on a `contentType: "news"`
-   * row, drives the nested `/world/<region>/<country>/YYYY/MM/DD/<slug>`
-   * permalink instead of the flat dated URL. See `newsArticleHref`.
+   * `customFields.worldCountry` / `customFields.worldState`) — when region
+   * and country are set on a `contentType: "news"` row, drives the nested
+   * `/world/<region>/<country>/YYYY/MM/DD/<slug>` permalink instead of the
+   * flat dated URL; adding `worldState` nests one level deeper into
+   * `/world/<region>/<country>/<state>/YYYY/MM/DD/<slug>`. See `newsArticleHref`.
    */
   worldRegion?: string;
   worldCountry?: string;
+  worldState?: string;
 }
 
 // ── Body block types ──────────────────────────────────────────────────────────

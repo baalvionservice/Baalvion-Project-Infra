@@ -16,6 +16,16 @@ import {
 import { slugify } from '@/lib/utils/format';
 import type { CategoryTree } from '@/lib/types/cms-taxonomy.types';
 
+// A minimal recursive shape (rather than reusing `CategoryTree` directly) —
+// intersecting `CategoryTree` with itself through recursive props confuses
+// TS's inference on `node.children` inside a self-referential component prop.
+// Any `CategoryTree` structurally satisfies this, so no cast is needed.
+interface CategoryTreeNode {
+  id: string;
+  name: string;
+  children: CategoryTreeNode[];
+}
+
 interface Props {
   websiteId: string;
   categoryIds: string[];
@@ -91,15 +101,13 @@ export default function ContentClassificationPanel({
     setNewChildName('');
   };
 
-  const CategoryRow = ({ id, name, indent, onAddChild }: { id: string; name: string; indent?: boolean; onAddChild?: () => void }) => {
+  const CategoryRow = ({ id, name, depth, onAddChild }: { id: string; name: string; depth: number; onAddChild: () => void }) => {
     const checked = categoryIds.includes(id);
     const isPrimary = categoryIds[0] === id;
     return (
       <div
-        className={cn(
-          'flex items-center gap-2 rounded px-1.5 py-1 hover:bg-muted/50',
-          indent && 'pl-6',
-        )}
+        className="flex items-center gap-2 rounded px-1.5 py-1 hover:bg-muted/50"
+        style={{ paddingLeft: `${0.375 + depth * 1.25}rem` }}
       >
         <Checkbox checked={checked} onCheckedChange={() => toggleCategory(id)} className="h-3.5 w-3.5" />
         <button
@@ -109,16 +117,14 @@ export default function ContentClassificationPanel({
         >
           {name}
         </button>
-        {onAddChild && (
-          <button
-            type="button"
-            onClick={onAddChild}
-            className="text-muted-foreground hover:text-foreground"
-            title={`Add a sub-category under ${name} (e.g. a country under a region)`}
-          >
-            <Plus className="h-3 w-3" />
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={onAddChild}
+          className="text-muted-foreground hover:text-foreground"
+          title={`Add a sub-category under ${name} (e.g. a country under a region, or a state under a country)`}
+        >
+          <Plus className="h-3 w-3" />
+        </button>
         {checked &&
           (isPrimary ? (
             <span className="flex items-center gap-0.5 text-[9px] font-semibold uppercase text-amber-500">
@@ -139,6 +145,36 @@ export default function ContentClassificationPanel({
     );
   };
 
+  // Recursive so any level (region -> country -> state -> ...) can both be
+  // checked and have a child added under it — geo-tagging isn't capped at
+  // 2 levels the way a hardcoded root+children render would be.
+  const CategoryNode = ({ node, depth }: { node: CategoryTreeNode; depth: number }) => (
+    <div>
+      <CategoryRow id={node.id} name={node.name} depth={depth} onAddChild={() => { setAddingChildUnder(node.id); setNewChildName(''); }} />
+      {addingChildUnder === node.id && (
+        <div className="flex gap-1.5 py-1" style={{ paddingLeft: `${0.375 + (depth + 1) * 1.25}rem` }}>
+          <Input
+            className="h-7 text-xs"
+            placeholder={`New sub-category under ${node.name}…`}
+            value={newChildName}
+            onChange={(e) => setNewChildName(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); void addChildCategory(node.id); } }}
+            autoFocus
+          />
+          <Button size="icon" variant="outline" className="h-7 w-7 shrink-0" disabled={!newChildName.trim() || createCategory.isPending} onClick={() => void addChildCategory(node.id)}>
+            {createCategory.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+          </Button>
+          <Button size="icon" variant="ghost" className="h-7 w-7 shrink-0" onClick={() => setAddingChildUnder(null)}>
+            <X className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      )}
+      {node.children.map((child) => (
+        <CategoryNode key={child.id} node={child} depth={depth + 1} />
+      ))}
+    </div>
+  );
+
   return (
     <div className="space-y-5 p-4">
       {/* Categories — multi-select with a primary */}
@@ -152,41 +188,20 @@ export default function ContentClassificationPanel({
           URL section; it also appears on every chosen topic page.
         </p>
         <p className="text-[11px] text-muted-foreground">
-          For World News tied to a specific country, also check{' '}
-          <span className="font-medium">World</span>, the region (e.g. Asia-Pacific), and the
-          country (e.g. India) — that combination gives the article its own
-          <code className="mx-1 rounded bg-muted px-1 py-0.5 text-[10px]">/world/&lt;region&gt;/&lt;country&gt;/...</code>
-          page automatically.
+          For World News tied to a specific country (or state), also check{' '}
+          <span className="font-medium">World</span>, the region (e.g. Asia-Pacific), the
+          country (e.g. India), and optionally a state/province nested under the country —
+          that combination gives the article its own
+          <code className="mx-1 rounded bg-muted px-1 py-0.5 text-[10px]">/world/&lt;region&gt;/&lt;country&gt;/[state]/...</code>
+          page automatically. Use the <Plus className="inline h-3 w-3 align-text-bottom" /> next to any
+          category to add a new one nested under it.
         </p>
         <div className="max-h-56 space-y-0.5 overflow-y-auto rounded-md border p-1">
           {groups.length === 0 && (
             <p className="px-2 py-3 text-[11px] text-muted-foreground">No categories yet.</p>
           )}
           {groups.map((root) => (
-            <div key={root.id}>
-              <CategoryRow id={root.id} name={root.name} onAddChild={() => { setAddingChildUnder(root.id); setNewChildName(''); }} />
-              {root.children.map((child) => (
-                <CategoryRow key={child.id} id={child.id} name={child.name} indent />
-              ))}
-              {addingChildUnder === root.id && (
-                <div className="flex gap-1.5 py-1 pl-6">
-                  <Input
-                    className="h-7 text-xs"
-                    placeholder={`New sub-category under ${root.name}…`}
-                    value={newChildName}
-                    onChange={(e) => setNewChildName(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); void addChildCategory(root.id); } }}
-                    autoFocus
-                  />
-                  <Button size="icon" variant="outline" className="h-7 w-7 shrink-0" disabled={!newChildName.trim() || createCategory.isPending} onClick={() => void addChildCategory(root.id)}>
-                    {createCategory.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
-                  </Button>
-                  <Button size="icon" variant="ghost" className="h-7 w-7 shrink-0" onClick={() => setAddingChildUnder(null)}>
-                    <X className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-              )}
-            </div>
+            <CategoryNode key={root.id} node={root} depth={0} />
           ))}
         </div>
         {categoryIds.length > 0 && (

@@ -697,18 +697,21 @@ function blocksToNewsBody(blocks?: CmsBlock[]): NewsBodyBlock[] {
 // Region categories are identified by slug, not a dedicated "isRegion" flag —
 // any checked category whose slug matches a known world-page region id
 // (see worldRegions.ts) is the region; whichever OTHER checked category has
-// that region as its parent is the country. Requires no fixed country list:
-// editors add a new country by creating one category node under the region,
-// no code change needed. "world" itself is excluded since it's the top of
-// the tree, not a region.
+// that region as its parent is the country; and (one level deeper) whichever
+// checked category has THAT country as its parent is the state/province.
+// Requires no fixed country or state list: editors add either by creating a
+// category node under the right parent, no code change needed. "world"
+// itself is excluded since it's the top of the tree, not a region.
 const WORLD_REGION_IDS = new Set<string>(REGIONS.map((r) => r.id).filter((id) => id !== 'world'));
 
-function deriveWorldGeo(categories: CmsContent['categories']): { region?: string; country?: string } {
+function deriveWorldGeo(categories: CmsContent['categories']): { region?: string; country?: string; state?: string } {
   const list = categories ?? [];
   const regionCat = list.find((c) => WORLD_REGION_IDS.has(c.slug));
   if (!regionCat) return {};
   const countryCat = list.find((c) => c.parentId === regionCat.id);
-  return { region: regionCat.slug, country: countryCat?.slug };
+  if (!countryCat) return { region: regionCat.slug };
+  const stateCat = list.find((c) => c.parentId === countryCat.id);
+  return { region: regionCat.slug, country: countryCat.slug, state: stateCat?.slug };
 }
 
 export function cmsContentToNews(raw: CmsContent): NewsArticle {
@@ -719,6 +722,7 @@ export function cmsContentToNews(raw: CmsContent): NewsArticle {
   const derivedGeo = deriveWorldGeo(raw.categories);
   const worldRegion = (typeof cf.worldRegion === 'string' ? cf.worldRegion : undefined) ?? derivedGeo.region;
   const worldCountry = (typeof cf.worldCountry === 'string' ? cf.worldCountry : undefined) ?? derivedGeo.country;
+  const worldState = (typeof cf.worldState === 'string' ? cf.worldState : undefined) ?? derivedGeo.state;
   return {
     id: raw.id,
     title: raw.title,
@@ -761,6 +765,7 @@ export function cmsContentToNews(raw: CmsContent): NewsArticle {
     entityMentions: raw.entityMentions?.length ? raw.entityMentions : undefined,
     worldRegion,
     worldCountry,
+    worldState,
   };
 }
 
