@@ -9,6 +9,8 @@ import { getPublishedNewsBySlug, findAuthorProfileByName } from "@/services/data
 import { staticNewsBySlug } from "@/services/data/static-content";
 import { newsArticleHref, labelFromSlug } from "@/lib/data/article-url";
 import { REGIONS, type RegionConfig } from "@/lib/data/worldRegions";
+import { getCountryTimezone } from "@/lib/data/countryTimezones";
+import { CountryLocalClock } from "@/components/world/CountryLocalClock";
 import { buildMetadata } from "@/lib/seo";
 import { env } from "@/config/env";
 import { isAllowedImageHost } from "@/lib/safe-image";
@@ -140,6 +142,7 @@ export default async function WorldCountryArticlePage({ params }: { params: Para
   const regionConfig = REGION_BY_ID.get(region)!;
   const countryName = labelFromSlug(country);
   const stateName = state ? labelFromSlug(state) : null;
+  const countryTimeZone = getCountryTimezone(country);
   const leafName = stateName ?? countryName;
 
   const baseUrl = (env.siteUrl || "https://imperialpedia.com").replace(/\/$/, "");
@@ -242,21 +245,24 @@ export default async function WorldCountryArticlePage({ params }: { params: Para
       )}
 
       <div className="max-w-screen-xl mx-auto px-4 py-8 sm:py-10">
-        <nav aria-label="Breadcrumb" className="text-xs text-muted-foreground mb-4 flex items-center gap-1.5">
-          <Link href="/world" className="hover:text-[#CC0000]">World</Link>
-          <span>/</span>
-          <Link href={`/world/${region}`} className="hover:text-[#CC0000]">{regionConfig.label}</Link>
-          <span>/</span>
-          {stateName ? (
-            <>
-              <Link href={`/world/${region}/${country}`} className="hover:text-[#CC0000]">{countryName}</Link>
-              <span>/</span>
-              <span className="text-muted-foreground/70">{stateName}</span>
-            </>
-          ) : (
-            <span className="text-muted-foreground/70">{countryName}</span>
-          )}
-        </nav>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Link href="/world" className="hover:text-[#CC0000]">World</Link>
+            <span>/</span>
+            <Link href={`/world/${region}`} className="hover:text-[#CC0000]">{regionConfig.label}</Link>
+            <span>/</span>
+            {stateName ? (
+              <>
+                <Link href={`/world/${region}/${country}`} className="hover:text-[#CC0000]">{countryName}</Link>
+                <span>/</span>
+                <span className="text-muted-foreground/70">{stateName}</span>
+              </>
+            ) : (
+              <span className="text-muted-foreground/70">{countryName}</span>
+            )}
+          </nav>
+          {countryTimeZone && <CountryLocalClock country={countryName} timeZone={countryTimeZone} />}
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-10 xl:gap-14">
           <article className="min-w-0">
