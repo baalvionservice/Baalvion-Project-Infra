@@ -7,6 +7,7 @@
     "launched_year": 1957,
     "description": "Tracks roughly 500 of the largest publicly traded U.S. companies, weighted by market capitalization. Widely used as the primary benchmark for the overall U.S. stock market.",
     "methodology": "Market-capitalization weighted; constituents are selected by a committee based on size, liquidity, and profitability criteria rather than a fixed mechanical rule.",
+    "investorNote": "The S&P 500 is the most commonly cited yardstick for U.S. equity performance — when a fund manager talks about 'beating the market,' this index is usually the benchmark being measured against. Because it's weighted by market capitalization, its largest constituents (the handful of companies with the biggest market values) have an outsized effect on its daily moves, so the index can rise even when most of its 500 members are flat or falling, as long as a few mega-caps are climbing. It also underlies some of the largest and most heavily traded index funds and ETFs in the world.",
     "major_sectors": ["Technology", "Healthcare", "Financials", "Consumer Discretionary", "Industrials"]
   },
   {
@@ -17,6 +18,7 @@
     "launched_year": 1971,
     "description": "Includes essentially every stock listed on the Nasdaq exchange, with a heavy tilt toward technology and growth companies.",
     "methodology": "Market-capitalization weighted across all Nasdaq-listed common stocks, ADRs, and similar securities.",
+    "investorNote": "The Nasdaq Composite is often confused with the narrower Nasdaq-100, which tracks only the exchange's 100 largest non-financial companies — the Composite instead includes essentially every Nasdaq-listed common stock, from mega-cap technology names down to small, thinly traded companies. Its heavy technology and growth-company weighting means it has historically shown larger swings than broader benchmarks like the S&P 500 during both rallies and downturns, since it's more sensitive to shifts in growth-stock sentiment and interest-rate expectations.",
     "major_sectors": ["Technology", "Consumer Discretionary", "Healthcare", "Telecommunications"]
   },
   {
@@ -27,6 +29,7 @@
     "launched_year": 1896,
     "description": "One of the oldest U.S. stock market indexes, tracking 30 large, well-established companies chosen to represent the broader economy.",
     "methodology": "Price-weighted rather than market-cap weighted — higher-priced stocks move the index more than lower-priced ones, a quirk unique among major benchmarks.",
+    "investorNote": "Despite being the most frequently quoted index in daily news coverage, the Dow's price-weighting method means a $500 stock moves the index more than a $50 stock regardless of which company is actually larger by market value — a structural quirk most other major indexes avoid by weighting on market capitalization instead. Tracking only 30 companies also makes it a narrower gauge of the U.S. economy than the S&P 500's roughly 500 constituents, which is why professional investors more often reference the S&P 500 as the primary benchmark even though the Dow remains the most publicly recognized.",
     "major_sectors": ["Industrials", "Technology", "Financials", "Healthcare", "Consumer Staples"]
   },
   {
@@ -37,6 +40,7 @@
     "launched_year": 1984,
     "description": "Tracks approximately 2,000 small-cap U.S. companies, making it the most widely followed benchmark for smaller, domestically focused businesses.",
     "methodology": "Market-capitalization weighted, reconstituted annually to capture the smallest 2,000 companies within the broader Russell 3000 universe.",
+    "investorNote": "Small-cap companies in the Russell 2000 generally derive a larger share of their revenue from the domestic U.S. economy than the multinational giants that dominate the S&P 500, which makes this index a commonly used gauge of the health of the broader U.S. economy rather than just its largest exporters. Investors also watch the Russell 2000 relative to large-cap benchmarks to judge whether a market rally is broad-based — with smaller companies participating — or narrowly concentrated in a handful of mega-cap names.",
     "major_sectors": ["Financials", "Healthcare", "Industrials", "Technology"]
   },
   {
@@ -47,6 +51,7 @@
     "launched_year": 1984,
     "description": "Tracks the 100 largest companies listed on the London Stock Exchange by market capitalization.",
     "methodology": "Market-capitalization weighted, reviewed quarterly.",
+    "investorNote": "Because a large share of FTSE 100 constituents earn most of their revenue outside the United Kingdom, the index often behaves more like a proxy for global growth and commodity prices than a pure read on the UK's domestic economy — it's not unusual for the index to rise even during periods of sluggish UK growth, or for a weaker British pound to lift the index by boosting the reported value of overseas earnings. This distinguishes it from more domestically weighted UK benchmarks like the FTSE 250.",
     "major_sectors": ["Financials", "Energy", "Consumer Staples", "Materials", "Healthcare"]
   },
   {
@@ -57,6 +62,7 @@
     "launched_year": 1950,
     "description": "Japan's most widely cited stock index, tracking 225 large, established companies listed on the Tokyo Stock Exchange.",
     "methodology": "Price-weighted, similar in spirit to the Dow Jones Industrial Average.",
+    "investorNote": "Like the Dow Jones Industrial Average, the Nikkei 225 is price-weighted rather than weighted by market capitalization, so higher-priced shares influence the index more than the size of the underlying company would suggest. The index is also a widely cited case study in market history: after peaking during Japan's asset-price bubble in 1989, it took decades for the Nikkei to reclaim that earlier high, a reminder that even a major developed-market index can take a generation to fully recover from an extreme valuation peak.",
     "major_sectors": ["Industrials", "Technology", "Consumer Discretionary", "Financials"]
   },
   {
@@ -67,6 +73,7 @@
     "launched_year": 1986,
     "description": "Tracks 30 large, financially sound companies listed on the Bombay Stock Exchange, serving as India's oldest broad market benchmark.",
     "methodology": "Free-float market-capitalization weighted.",
+    "investorNote": "As India's oldest stock index, the Sensex is frequently used in domestic and international media as shorthand for the health of the Indian equity market as a whole, even though it tracks only 30 companies. Its free-float weighting counts only shares actually available for public trading — excluding promoter and government holdings not in circulation — which is meant to better reflect the shares investors can realistically buy and sell rather than a company's full market value.",
     "major_sectors": ["Financials", "Technology", "Energy", "Consumer Staples"]
   },
   {
@@ -77,6 +84,7 @@
     "launched_year": 1996,
     "description": "Tracks 50 large-cap companies listed on the National Stock Exchange of India, and alongside the Sensex is one of India's two primary equity benchmarks.",
     "methodology": "Free-float market-capitalization weighted.",
+    "investorNote": "The Nifty 50 and the Sensex are frequently quoted together as companion benchmarks for the Indian equity market — tracking 50 versus 30 companies respectively, on different exchanges (NSE and BSE) — and tend to move in close alignment since both are dominated by many of the same large-cap Indian companies. Because the Nifty 50 covers more constituents across a broader set of sectors than the Sensex, some investors treat it as the slightly more representative of the two gauges of overall market direction.",
     "major_sectors": ["Financials", "Technology", "Energy", "Consumer Discretionary"]
   }
 ]

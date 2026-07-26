@@ -6,6 +6,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getAssetDetail, ALL_TRACKED_SYMBOLS } from "@/lib/data/marketsLoader";
 import { getCompanyByTicker, getRelatedEntities } from "@/lib/data/loaders";
+import { buildOverviewParagraph } from "@/lib/data/asset-overview-text";
 import { buildMetadata } from "@/lib/seo";
 import { structuredData } from "@/lib/seo/structured-data";
 import { JsonLd } from "@/modules/seo-engine/components/JsonLd";
@@ -75,6 +76,10 @@ function resolveRange(range: string | undefined): (typeof RANGES)[number] {
 // runs once per request, not twice (React's documented cache() pattern).
 const getDetailCached = cache(async (symbol: string, range: string) => getAssetDetail(symbol, range));
 
+// Same rationale as getDetailCached: generateMetadata and the page component
+// both look up the same symbol's company record.
+const getCompanyCached = cache(async (symbol: string) => getCompanyByTicker(symbol));
+
 function truncate(text: string, max = 157): string {
   return text.length > max ? `${text.slice(0, max).trimEnd()}...` : text;
 }
@@ -89,20 +94,16 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
     return buildMetadata({ title: "Quote Not Found", noIndex: true });
   }
 
-  const typeLabel = ASSET_TYPE_LABELS[detail.asset_type] ?? "Market";
+  const typeLabel = ASSET_TYPE_LABELS[detail.asset_type] ?? "Market Instrument";
   const title =
     detail.asset_type === "stock"
       ? `${detail.name} (${detail.symbol}) Stock Price, Quote & Chart`
       : `${detail.name} (${detail.symbol}) Price, Quote & Chart`;
 
-  const fallbackDescription = [
-    `${detail.name} (${detail.symbol})`,
-    detail.exchange ? `on ${detail.exchange}` : null,
-    "— live price, historical chart, and key statistics.",
-  ].filter(Boolean).join(" ");
-  const description = truncate(detail.ai_summary || fallbackDescription);
-
-  const company = await getCompanyByTicker(detail.symbol);
+  const company = await getCompanyCached(detail.symbol);
+  const description = truncate(
+    company?.description || detail.ai_summary || buildOverviewParagraph(detail, typeLabel),
+  );
   const ogImage = company?.logo && isAllowedImageHost(company.logo) ? company.logo : undefined;
 
   return buildMetadata({
@@ -155,7 +156,7 @@ export default async function QuotePage({ params, searchParams }: PageProps) {
 
   if (!detail) notFound();
 
-  const company = await getCompanyByTicker(detail.symbol);
+  const company = await getCompanyCached(detail.symbol);
   const relatedEntities = company
     ? await getRelatedEntities(company as unknown as Parameters<typeof getRelatedEntities>[0])
     : [];
@@ -169,8 +170,21 @@ export default async function QuotePage({ params, searchParams }: PageProps) {
   const entityId = `${canonicalUrl}#entity`;
   const typeLabel = ASSET_TYPE_LABELS[detail.asset_type] ?? "Market Instrument";
   const hub = ASSET_TYPE_HUB[detail.asset_type];
-  const description = company?.description || detail.ai_summary || null;
+  const description = company?.description || detail.ai_summary || buildOverviewParagraph(detail, typeLabel);
   const logoOk = !!company?.logo && isAllowedImageHost(company.logo);
+
+  // "About" excerpt — only ever the company's real editorial profile, never
+  // generated. Deliberately capped at the opening paragraph rather than the
+  // full multi-paragraph text: that full profile already lives, verbatim, at
+  // /companies/[slug] (via EntityEditorialOverview), and reproducing all of it
+  // here would put identical long-form prose on two separately canonicalized
+  // URLs. The quote page links to the full profile instead of duplicating it.
+  const editorialParagraphs = (company?.editorialOverview ?? "")
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+  const editorialExcerpt = editorialParagraphs[0];
+  const hasMoreEditorial = editorialParagraphs.length > 1;
 
   // Same array powers the visible <nav> below and the BreadcrumbList JSON-LD —
   // kept as one source so they can never drift out of sync (see
@@ -462,6 +476,24 @@ export default async function QuotePage({ params, searchParams }: PageProps) {
             )}
           </div>
         </div>
+
+        {company && editorialExcerpt && (
+          <div className="bg-[#111] border border-white/15 rounded-sm p-4">
+            <h2 className="text-[11px] font-black uppercase tracking-widest text-white/70 mb-2">
+              About {company.name}
+            </h2>
+            <div className="space-y-3">
+              <p className="text-[13px] text-white/70 leading-relaxed">{editorialExcerpt}</p>
+              {hasMoreEditorial && (
+                <p className="text-[10px] text-white/30">
+                  <Link href={`/companies/${company.slug}`} className="hover:underline">
+                    Read the full {company.name} profile &rarr;
+                  </Link>
+                </p>
+              )}
+            </div>
+          </div>
+        )}
 
         {company && Boolean(company.founders?.length || company.ceo || company.executives?.length || company.headquarters || company.website || company.products?.length) && (
           <div className="bg-[#111] border border-white/15 rounded-sm p-4">

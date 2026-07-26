@@ -2,6 +2,7 @@ import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles } from "@/services/data/cms-public";
 import { staticCategoryNews } from "@/services/data/static-content";
 import { topicCopy, staticCategoryFor, parentFor, siblingsFor } from "@/lib/topic-config";
+import { getSiteContent } from "@/lib/data/site-content";
 import { ExploreNewsSection } from "@/app/news/ExploreNewsSection";
 import { FeaturedArticleCard } from "@/components/pages/FeaturedArticleCard";
 import { HorizontalArticleCard } from "@/components/pages/HorizontalArticleCard";
@@ -24,6 +25,11 @@ type Props = {
 export async function CategoryFeed({ slug }: Props) {
   const copy = topicCopy(slug);
   const siblings = siblingsFor(slug);
+
+  // Admin-managed override (Imperialpedia > Site Content, type "topic-hub")
+  // takes precedence over the bundled default in topic-config.ts.
+  const liveTopic = await getSiteContent<{ intro?: string }>("topic-hub", slug);
+  const intro = liveTopic?.intro ?? copy.intro;
 
   // 1) Live CMS content for this category.
   let articles: NewsArticle[] = await getCategoryArticles(slug, 30);
@@ -92,6 +98,12 @@ export async function CategoryFeed({ slug }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       <HeadingSection tag={copy.tag} eyebrow={parentFor(slug)} title={copy.title} description={copy.description} />
+
+      {intro && (
+        <div className="max-w-7xl mx-auto px-4">
+          <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground pb-6">{intro}</p>
+        </div>
+      )}
 
       {siblings && (
         <div className="max-w-7xl mx-auto px-4">

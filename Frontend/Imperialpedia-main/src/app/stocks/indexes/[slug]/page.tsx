@@ -7,6 +7,7 @@ import { Text } from '@/design-system/typography/text';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, BarChart3 } from 'lucide-react';
 import { buildMetadata } from '@/lib/seo';
+import { getSiteContent } from '@/lib/data/site-content';
 import indexes from '@/data/indexes/indexes.json';
 
 interface PageProps {
@@ -36,6 +37,11 @@ export default async function IndexDetailPage({ params }: PageProps) {
   const { slug } = await params;
   const idx = findIndex(slug);
   if (!idx) notFound();
+
+  // Admin-managed override (Imperialpedia > Site Content, type "market-index")
+  // takes precedence over the bundled default in indexes.json.
+  const live = await getSiteContent<{ investorNote?: string }>('market-index', slug);
+  const investorNote = live?.investorNote ?? idx.investorNote;
 
   return (
     <main className="min-h-screen bg-background pt-16 pb-32">
@@ -75,11 +81,17 @@ export default async function IndexDetailPage({ params }: PageProps) {
 
           <div className="space-y-8">
             <div>
-              <Text variant="h3" className="mb-2">Methodology</Text>
+              <Text variant="h3" as="h3" className="mb-2">Methodology</Text>
               <Text variant="body" className="text-muted-foreground leading-relaxed">{idx.methodology}</Text>
             </div>
+            {investorNote && (
+              <div>
+                <Text variant="h3" as="h3" className="mb-2">How Investors Use This Index</Text>
+                <Text variant="body" className="text-muted-foreground leading-relaxed">{investorNote}</Text>
+              </div>
+            )}
             <div>
-              <Text variant="h3" className="mb-3">Major Sectors</Text>
+              <Text variant="h3" as="h3" className="mb-3">Major Sectors</Text>
               <div className="flex flex-wrap gap-2">
                 {idx.major_sectors.map((sector) => (
                   <Badge key={sector} variant="outline">{sector}</Badge>
@@ -89,7 +101,7 @@ export default async function IndexDetailPage({ params }: PageProps) {
           </div>
 
           <div className="mt-12 pt-8 border-t border-border">
-            <Text variant="h3" className="mb-4">Related Reading</Text>
+            <Text variant="h3" as="h3" className="mb-4">Related Reading</Text>
             <div className="flex flex-wrap gap-x-6 gap-y-2">
               <Link href="/financial-intelligence/what-is-the-stock-market" className="text-sm font-semibold text-primary hover:underline">
                 What Is the Stock Market?

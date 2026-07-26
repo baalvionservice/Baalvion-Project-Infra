@@ -80,9 +80,18 @@ export default async function TermsByLetterPage({
     <div className="min-h-screen bg-background">
       <Container className="py-10 lg:py-14">
         {/* Heading — bold neutral sans, Investopedia dictionary style */}
-        <h1 className="!font-ui mb-8 text-4xl font-extrabold tracking-tight text-foreground lg:text-[2.75rem]">
+        <h1 className="!font-ui mb-3 text-4xl font-extrabold tracking-tight text-foreground lg:text-[2.75rem]">
           Terms Beginning With &apos;{label}&apos;
         </h1>
+
+        {terms.length > 0 && (
+          <p className="mb-8 max-w-2xl text-[15px] leading-relaxed text-muted-foreground">
+            Browse {terms.length} expert-vetted definition{terms.length === 1 ? "" : "s"} beginning
+            with &apos;{label}&apos; in Imperialpedia&apos;s financial dictionary — from core
+            concepts to specialized terminology. Select any term below for the full explanation,
+            worked examples, and related concepts.
+          </p>
+        )}
 
         {/* Compact A–Z selector */}
         <nav
@@ -119,14 +128,21 @@ export default async function TermsByLetterPage({
             .
           </p>
         ) : (
-          <div className="gap-x-10 sm:columns-2 lg:columns-4">
+          <div className="grid gap-x-10 gap-y-6 sm:grid-cols-2">
             {terms.map((term) => (
               <Link
                 key={term.slug}
                 href={termHref(term)}
-                className="mb-3 block break-inside-avoid text-[15px] leading-snug text-foreground transition-colors visited:text-primary hover:text-primary hover:underline"
+                className="group block border-b border-border/60 pb-4 last:border-none"
               >
-                {shortLabel(term.title)}
+                <span className="block text-[15px] font-semibold leading-snug text-foreground transition-colors group-hover:text-primary group-hover:underline">
+                  {shortLabel(term.title)}
+                </span>
+                {term.seoDescription && (
+                  <span className="mt-1 block text-sm leading-relaxed text-muted-foreground">
+                    {term.seoDescription}
+                  </span>
+                )}
               </Link>
             ))}
           </div>

@@ -1,5 +1,7 @@
 import { buildMetadata } from '@/lib/seo';
 import CompoundInterestClient from './CompoundInterestClient';
+import { ToolExplainer, resolveToolExplainerContent } from '@/components/financial-tools/ToolExplainer';
+import { compoundInterestExplainer } from '@/components/financial-tools/tool-explainer-content';
 
 /**
  * SEO-optimized route for the Compound Interest Calculator.
@@ -11,6 +13,12 @@ export const metadata = buildMetadata({
   keywords: ['Compound Interest', 'Wealth Building', 'Exponential Growth', 'Savings Calculator', 'Future Value'],
 });
 
-export default function CompoundInterestPage() {
-  return <CompoundInterestClient />;
+export default async function CompoundInterestPage() {
+  const content = await resolveToolExplainerContent('compound-interest', compoundInterestExplainer);
+  return (
+    <>
+      <CompoundInterestClient />
+      <ToolExplainer content={content} />
+    </>
+  );
 }

@@ -1,5 +1,7 @@
 import { buildMetadata } from '@/lib/seo';
 import InflationClient from './InflationClient';
+import { ToolExplainer, resolveToolExplainerContent } from '@/components/financial-tools/ToolExplainer';
+import { inflationExplainer } from '@/components/financial-tools/tool-explainer-content';
 
 /**
  * SEO-optimized route for the Inflation Impact Calculator.
@@ -11,6 +13,12 @@ export const metadata = buildMetadata({
   keywords: ['Inflation Calculator', 'Purchasing Power', 'Economic Analysis', 'Currency Erosion', 'Future Value'],
 });
 
-export default function InflationCalculatorPage() {
-  return <InflationClient />;
+export default async function InflationCalculatorPage() {
+  const content = await resolveToolExplainerContent('inflation', inflationExplainer);
+  return (
+    <>
+      <InflationClient />
+      <ToolExplainer content={content} />
+    </>
+  );
 }
