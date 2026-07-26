@@ -63,11 +63,11 @@ export function ListenBar({ text, estimatedMinutes }: { text: string; estimatedM
   };
 
   return (
-    <div className="flex items-center gap-3 rounded-lg border border-gray-200 px-4 py-3 my-6">
-      <Headphones className="h-4 w-4 text-gray-500 flex-shrink-0" />
-      <span className="text-sm font-semibold text-gray-900">Listen</span>
+    <div className="flex items-center gap-3 rounded-lg border border-border px-4 py-3 my-6">
+      <Headphones className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+      <span className="text-sm font-semibold text-foreground">Listen</span>
       {estimatedMinutes && (
-        <span className="text-xs font-semibold text-gray-500 bg-gray-100 rounded-full px-2 py-0.5">
+        <span className="text-xs font-semibold text-muted-foreground bg-muted rounded-full px-2 py-0.5">
           {estimatedMinutes} min
         </span>
       )}
@@ -76,7 +76,7 @@ export function ListenBar({ text, estimatedMinutes }: { text: string; estimatedM
         type="button"
         onClick={handlePlayPause}
         aria-label={playing && !paused ? "Pause" : "Play"}
-        className="flex items-center justify-center h-8 w-8 rounded-full bg-gray-900 text-white hover:bg-[#CC0000] transition-colors"
+        className="flex items-center justify-center h-8 w-8 rounded-full bg-foreground text-background hover:bg-[#CC0000] hover:text-white transition-colors"
       >
         {playing && !paused ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5 ml-0.5" />}
       </button>
@@ -85,7 +85,7 @@ export function ListenBar({ text, estimatedMinutes }: { text: string; estimatedM
           type="button"
           onClick={handleStop}
           aria-label="Stop"
-          className="flex items-center justify-center h-8 w-8 rounded-full border border-gray-300 text-gray-600 hover:border-gray-900 hover:text-gray-900 transition-colors"
+          className="flex items-center justify-center h-8 w-8 rounded-full border border-border text-muted-foreground hover:border-[#CC0000] hover:text-[#CC0000] transition-colors"
         >
           <Square className="h-3 w-3" />
         </button>

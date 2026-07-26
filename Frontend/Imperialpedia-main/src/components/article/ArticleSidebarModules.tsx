@@ -33,7 +33,7 @@ export async function MoreInCategoryModule({
 
   return (
     <div>
-      <h2 className="text-xs font-black tracking-widest text-gray-900 uppercase border-b-2 border-gray-200 pb-2 mb-4">
+      <h2 className="text-xs font-black tracking-widest text-foreground uppercase border-b-2 border-border pb-2 mb-4">
         More in {categoryLabel}
       </h2>
       <ul className="space-y-4">
@@ -43,7 +43,7 @@ export async function MoreInCategoryModule({
               <div className="relative w-16 h-16 flex-shrink-0 overflow-hidden rounded-sm">
                 <Image src={a.imageUrl} alt={a.title} fill className="object-cover" sizes="64px" />
               </div>
-              <span className="text-sm font-semibold text-gray-800 leading-snug group-hover:text-[#CC0000] transition-colors line-clamp-3">
+              <span className="text-sm font-semibold text-foreground leading-snug group-hover:text-[#CC0000] transition-colors line-clamp-3">
                 {a.title}
               </span>
             </Link>
