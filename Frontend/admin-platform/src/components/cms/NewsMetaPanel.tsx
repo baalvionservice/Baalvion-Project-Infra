@@ -1,12 +1,15 @@
 'use client';
 
-import { useState } from 'react';
-import { Newspaper, Radio, TrendingUp, Star, Lock, Plus, X, Image as ImageIcon, Video, Link2 } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { toast } from 'sonner';
+import { Newspaper, Radio, TrendingUp, Star, Lock, Plus, X, Image as ImageIcon, Video, Link2, Upload, Loader2 } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils/cn';
+import { mediaApi } from '@/lib/api/media';
+import type { NormalizedError } from '@/lib/api/client';
 import { NEWS_LABELS, type NewsLabel } from '@/lib/types/cms-content.types';
 
 export interface NewsMeta {
@@ -39,6 +42,8 @@ const FLAGS: { key: keyof NewsMeta; label: string; icon: typeof Star }[] = [
 
 export default function NewsMetaPanel({ value, onChange, autoReadingTime }: Props) {
   const [newImage, setNewImage] = useState('');
+  const [isUploadingGalleryImage, setIsUploadingGalleryImage] = useState(false);
+  const galleryFileInputRef = useRef<HTMLInputElement>(null);
 
   const set = <K extends keyof NewsMeta>(key: K, v: NewsMeta[K]) => onChange({ ...value, [key]: v });
 
@@ -53,6 +58,27 @@ export default function NewsMetaPanel({ value, onChange, autoReadingTime }: Prop
     if (!url) return;
     set('galleryImages', [...value.galleryImages, url]);
     setNewImage('');
+  };
+
+  // The only way to add a gallery image used to be pasting an already-hosted
+  // URL — most editors don't have one and would paste a local file path or
+  // give up, so the "image" silently never resolves anywhere public. This
+  // mirrors FeaturedImagePanel's actual upload flow.
+  const uploadGalleryImage = async (file: File | undefined) => {
+    if (!file) return;
+    setIsUploadingGalleryImage(true);
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      const res = await mediaApi.files.upload(form);
+      set('galleryImages', [...value.galleryImages, res.data.data.url]);
+      toast.success('Image uploaded');
+    } catch (err) {
+      const message = (err as Partial<NormalizedError>)?.message || 'Image upload failed';
+      toast.error(message);
+    } finally {
+      setIsUploadingGalleryImage(false);
+    }
   };
 
   const removeImage = (url: string) => set('galleryImages', value.galleryImages.filter((i) => i !== url));
@@ -142,12 +168,35 @@ export default function NewsMetaPanel({ value, onChange, autoReadingTime }: Prop
         <div className="space-y-1">
           {value.galleryImages.map((url) => (
             <div key={url} className="flex items-center gap-1.5 rounded border px-2 py-1">
+              {/* eslint-disable-next-line @next/next/no-img-element -- arbitrary uploaded/pasted URL */}
+              <img src={url} alt="" className="h-8 w-8 shrink-0 rounded object-cover" />
               <span className="flex-1 truncate text-[11px]">{url}</span>
               <button type="button" onClick={() => removeImage(url)} className="text-muted-foreground hover:text-destructive">
                 <X className="h-3 w-3" />
               </button>
             </div>
           ))}
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="w-full"
+          disabled={isUploadingGalleryImage}
+          onClick={() => galleryFileInputRef.current?.click()}
+        >
+          {isUploadingGalleryImage ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Upload className="mr-2 h-3.5 w-3.5" />}
+          Upload image
+        </Button>
+        <input
+          ref={galleryFileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => { void uploadGalleryImage(e.target.files?.[0]); e.target.value = ''; }}
+        />
+        <div className="flex items-center gap-1.5">
+          <span className="text-[11px] text-muted-foreground">or paste a URL:</span>
         </div>
         <div className="flex gap-1.5">
           <Input
