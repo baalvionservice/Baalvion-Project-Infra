@@ -18,7 +18,7 @@ import { Article, ArticleStatus } from '@/modules/content-engine/types/article';
 import type { NewsArticle, NewsBodyBlock, NewsCategory } from '@/lib/data.news';
 import { articleArtDataUri } from '@baalvion/illustrations';
 import { isAllowedImageHost, safeImageUrl } from '@/lib/safe-image';
-import { getAuthorBySlug as getStaticAuthorBySlug } from '@/config/authors';
+import { getAuthorBySlug as getStaticAuthorBySlug, getAllAuthors as getStaticAuthors } from '@/config/authors';
 import type { EntityMention } from '@/lib/entityLinkInjector';
 import { REGIONS } from '@/lib/data/worldRegions';
 
@@ -377,6 +377,52 @@ export async function resolveAuthor(slug: string): Promise<ResolvedAuthor | null
   }
 
   return null;
+}
+
+/**
+ * Resolves an author profile by display name (articles carry a plain
+ * `author.name` string, not a slug) — checks the live, admin-managed CMS
+ * roster first (so an avatar uploaded via CMS → Websites → Authors shows up
+ * on the byline), falling back to the static roster in config/authors.ts.
+ * Name match is case/whitespace-insensitive; returns null rather than
+ * guessing when no profile matches, so the byline just renders as plain text.
+ */
+export async function findAuthorProfileByName(name: string): Promise<ResolvedAuthor | null> {
+  const normalized = name.trim().toLowerCase();
+  if (!normalized) return null;
+
+  const live = await getPublicAuthors();
+  const liveMatch = live.find((a) => a.name.trim().toLowerCase() === normalized);
+  if (liveMatch) {
+    return {
+      slug: liveMatch.slug,
+      name: liveMatch.name,
+      title: liveMatch.title || 'Contributor',
+      bio: liveMatch.bio || '',
+      credentials: liveMatch.credentials || undefined,
+      expertise: liveMatch.expertise?.length ? liveMatch.expertise : undefined,
+      avatarUrl: liveMatch.avatarUrl || undefined,
+      videoUrl: liveMatch.videoUrl || undefined,
+      social: { twitter: liveMatch.social?.x || undefined, linkedin: liveMatch.social?.linkedin || undefined },
+    };
+  }
+
+  const staticMatch = getStaticAuthors().find((a) => a.name.trim().toLowerCase() === normalized);
+  if (!staticMatch) return null;
+  return {
+    slug: staticMatch.slug,
+    name: staticMatch.name,
+    title: staticMatch.title,
+    bio: staticMatch.bio,
+    credentials: staticMatch.credentials,
+    avatarUrl: staticMatch.avatarUrl,
+    role: staticMatch.role,
+    social: {
+      twitter: staticMatch.social?.twitter,
+      linkedin: staticMatch.social?.linkedin,
+      website: staticMatch.social?.website,
+    },
+  };
 }
 
 // ── block → HTML (trusted, internally-authored content) ─────────────────────

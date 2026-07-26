@@ -1,6 +1,6 @@
 import { cache, Suspense } from "react";
 import { newsArticles, NewsArticle, NewsCategory } from "@/lib/data.news";
-import { getPublishedNewsBySlug } from "@/services/data/cms-public";
+import { getPublishedNewsBySlug, findAuthorProfileByName } from "@/services/data/cms-public";
 import { buildMetadata } from "@/lib/seo";
 import { formatDate } from "@/services/format-date";
 import Image from "next/image";
@@ -19,7 +19,6 @@ import { articleUrl } from "@/lib/data/article-url";
 import { ShareBar } from "@/components/article/ShareBar";
 import { articlesService } from "@/services/data";
 import { ArticleMarketWidget } from "@/components/markets/ArticleMarketWidget";
-import { getAllAuthors } from "@/config/authors";
 import { isAllowedImageHost } from "@/lib/safe-image";
 import { structuredData } from "@/lib/seo/structured-data";
 import { createEntityLinker } from "@/lib/entityLinkInjector";
@@ -35,9 +34,12 @@ import {
   extractFaqFromBlocks,
   formatDateTime,
   isValidIsoDate,
+  plainTextFromBody,
   truncateForMeta,
 } from "@/lib/article/render-helpers";
 import { TrendingNowModule, MoreInCategoryModule } from "@/components/article/ArticleSidebarModules";
+import { ArticleByline } from "@/components/article/ArticleByline";
+import { ListenBar } from "@/components/article/ListenBar";
 
 type ArticleType = NewsArticle;
 
@@ -87,14 +89,6 @@ const CATEGORY_HREF: Partial<Record<NewsCategory, string>> = {
   PersonalFinance: "/latest/personalfinance",
 };
 
-// The CMS doesn't attribute articles to an author record (see config/authors.ts),
-// so only link the byline when the article's author name matches a known,
-// published author profile — never guess a slug and risk a wrong attribution.
-function findAuthorProfile(name: string) {
-  const normalized = name.trim();
-  return getAllAuthors().find((a) => a.name.trim() === normalized);
-}
-
 // ─── Metadata ────────────────────────────────────────────────────────────────
 
 export async function generateMetadata({ params }: { params: Promise<SlugParams> }) {
@@ -106,7 +100,7 @@ export async function generateMetadata({ params }: { params: Promise<SlugParams>
     if (!article) return {};
 
     const baseUrl = (env.siteUrl || "https://imperialpedia.com").replace(/\/$/, "");
-    const authorProfile = findAuthorProfile(article.author.name);
+    const authorProfile = await findAuthorProfileByName(article.author.name);
     const base = buildMetadata({
       title: article.title,
       description: truncateForMeta(article.excerpt),
@@ -213,7 +207,7 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
   const canonicalPath = articleUrl(article.publishedAt, slug);
   const canonicalUrl = `${baseUrl}${canonicalPath}`;
 
-  const authorProfile = findAuthorProfile(article.author.name);
+  const authorProfile = await findAuthorProfileByName(article.author.name);
   const categoryPath = CATEGORY_HREF[article.category];
 
   // Persisted, save-time entity-mention detection (full body, all 4 entity
@@ -383,31 +377,22 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
             )}
 
             <div className="flex flex-wrap items-center justify-between gap-4 py-5 mt-5 border-y border-gray-200">
-              <div className="flex flex-col gap-1 text-sm">
-                <span>
-                  By{" "}
-                  {authorProfile ? (
-                    <Link
-                      href={`/authors/${authorProfile.slug}`}
-                      className="font-semibold text-gray-900 hover:text-[#CC0000]"
-                    >
-                      {article.author.name}
-                    </Link>
-                  ) : (
-                    <span className="font-semibold text-gray-900">{article.author.name}</span>
-                  )}
-                  {article.author.title && (
-                    <span className="text-gray-500"> · {article.author.title}</span>
-                  )}
-                </span>
-                <span className="text-gray-500 text-xs">
-                  Published {formatDateTime(article.publishedAt)}
-                  {article.updatedAt && <> · Updated {formatDateTime(article.updatedAt)}</>}
-                  {article.readTimeMinutes && <> · {article.readTimeMinutes} min read</>}
-                </span>
-              </div>
+              <ArticleByline
+                authorName={article.author.name}
+                authorTitle={article.author.title}
+                authorProfile={authorProfile}
+                publishedLine={
+                  <>
+                    Published {formatDateTime(article.publishedAt)}
+                    {article.updatedAt && <> · Updated {formatDateTime(article.updatedAt)}</>}
+                    {article.readTimeMinutes && <> · {article.readTimeMinutes} min read</>}
+                  </>
+                }
+              />
               <ShareBar url={canonicalUrl} title={article.title} />
             </div>
+
+            <ListenBar text={plainTextFromBody(article.body)} estimatedMinutes={article.readTimeMinutes} />
 
             <figure className="mt-6 mb-8">
               <div className="relative w-full aspect-[16/9] overflow-hidden rounded-sm shadow-sm">
