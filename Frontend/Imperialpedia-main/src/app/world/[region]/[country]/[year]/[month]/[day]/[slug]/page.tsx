@@ -210,7 +210,7 @@ export default async function WorldCountryArticlePage({ params }: { params: Para
   };
 
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-background min-h-screen">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       {faqSchema && (
@@ -218,12 +218,12 @@ export default async function WorldCountryArticlePage({ params }: { params: Para
       )}
 
       <div className="max-w-screen-xl mx-auto px-4 py-8 sm:py-10">
-        <nav aria-label="Breadcrumb" className="text-xs text-gray-500 mb-4 flex items-center gap-1.5">
+        <nav aria-label="Breadcrumb" className="text-xs text-muted-foreground mb-4 flex items-center gap-1.5">
           <Link href="/world" className="hover:text-[#CC0000]">World</Link>
           <span>/</span>
           <Link href={`/world/${region}`} className="hover:text-[#CC0000]">{regionConfig.label}</Link>
           <span>/</span>
-          <span className="text-gray-400">{countryName}</span>
+          <span className="text-muted-foreground/70">{countryName}</span>
         </nav>
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-10 xl:gap-14">
@@ -233,7 +233,7 @@ export default async function WorldCountryArticlePage({ params }: { params: Para
               {article.newsLabels?.map((label) => (
                 <span
                   key={label}
-                  className="inline-block w-fit text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded bg-gray-900 text-white"
+                  className="inline-block w-fit text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded bg-foreground text-background"
                 >
                   {label}
                 </span>
@@ -244,18 +244,18 @@ export default async function WorldCountryArticlePage({ params }: { params: Para
               {article.title}
             </h1>
 
-            <p className="article-excerpt text-lg text-gray-600 leading-relaxed mt-4 max-w-2xl">
+            <p className="article-excerpt text-lg text-muted-foreground leading-relaxed mt-4 max-w-2xl">
               {article.excerpt}
             </p>
 
             {article.keyTakeaways && article.keyTakeaways.length > 0 && (
-              <div className="key-points mt-6 border border-gray-200 bg-gray-50 rounded-sm p-5">
-                <h2 className="text-xs font-black tracking-widest text-gray-900 uppercase mb-3">
+              <div className="key-points mt-6 border border-border bg-muted rounded-sm p-5">
+                <h2 className="text-xs font-black tracking-widest text-foreground uppercase mb-3">
                   Key Points
                 </h2>
                 <ul className="space-y-2">
                   {article.keyTakeaways.map((point, i) => (
-                    <li key={i} className="flex gap-2.5 text-sm text-gray-700 leading-relaxed">
+                    <li key={i} className="flex gap-2.5 text-sm text-muted-foreground leading-relaxed">
                       <span className="mt-1.5 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-[#CC0000]" />
                       {point}
                     </li>
@@ -264,7 +264,7 @@ export default async function WorldCountryArticlePage({ params }: { params: Para
               </div>
             )}
 
-            <div className="flex flex-wrap items-center justify-between gap-4 py-5 mt-5 border-y border-gray-200">
+            <div className="flex flex-wrap items-center justify-between gap-4 py-5 mt-5 border-y border-border">
               <ArticleByline
                 authorName={article.author.name}
                 authorTitle={article.author.title}
@@ -294,7 +294,7 @@ export default async function WorldCountryArticlePage({ params }: { params: Para
                 />
               </div>
               {article.imageCaption && (
-                <figcaption className="mt-2 text-xs text-gray-500 text-center">
+                <figcaption className="mt-2 text-xs text-muted-foreground text-center">
                   {article.imageCaption}
                 </figcaption>
               )}
@@ -323,13 +323,13 @@ export default async function WorldCountryArticlePage({ params }: { params: Para
             )}
 
             {article.externalSourceUrl && (
-              <p className="mt-6 text-xs text-gray-500">
+              <p className="mt-6 text-xs text-muted-foreground">
                 Source:{" "}
                 <a
                   href={article.externalSourceUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-semibold text-gray-700 hover:text-[#CC0000] underline underline-offset-2"
+                  className="font-semibold text-foreground hover:text-[#CC0000] underline underline-offset-2"
                 >
                   {article.externalSourceName || article.externalSourceUrl}
                 </a>
@@ -337,11 +337,11 @@ export default async function WorldCountryArticlePage({ params }: { params: Para
             )}
 
             {article.tags && article.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-8 pt-6 border-t border-gray-200">
+              <div className="flex flex-wrap gap-2 mt-8 pt-6 border-t border-border">
                 {article.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="text-xs font-semibold text-gray-600 bg-gray-100 rounded-full px-3 py-1"
+                    className="text-xs font-semibold text-muted-foreground bg-muted rounded-full px-3 py-1"
                   >
                     {tag}
                   </span>

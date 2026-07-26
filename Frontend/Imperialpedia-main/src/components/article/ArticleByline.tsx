@@ -38,16 +38,16 @@ export function ArticleByline({
           {authorProfile ? (
             <Link
               href={`/authors/${authorProfile.slug}`}
-              className="font-semibold text-gray-900 hover:text-[#CC0000]"
+              className="font-semibold text-foreground hover:text-[#CC0000]"
             >
               {authorName}
             </Link>
           ) : (
-            <span className="font-semibold text-gray-900">{authorName}</span>
+            <span className="font-semibold text-foreground">{authorName}</span>
           )}
-          {authorTitle && <span className="text-gray-500"> · {authorTitle}</span>}
+          {authorTitle && <span className="text-muted-foreground"> · {authorTitle}</span>}
         </span>
-        <span className="text-gray-500 text-xs">{publishedLine}</span>
+        <span className="text-muted-foreground text-xs">{publishedLine}</span>
       </div>
     </div>
   );

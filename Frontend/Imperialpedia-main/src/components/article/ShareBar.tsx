@@ -45,7 +45,7 @@ export function ShareBar({ url, title }: ShareBarProps) {
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Share on X"
-        className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 text-gray-500 hover:border-[#CC0000] hover:text-[#CC0000] transition-colors"
+        className="w-8 h-8 flex items-center justify-center rounded-full border border-border text-muted-foreground hover:border-[#CC0000] hover:text-[#CC0000] transition-colors"
       >
         {icon(ICONS.x)}
       </a>
@@ -54,7 +54,7 @@ export function ShareBar({ url, title }: ShareBarProps) {
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Share on Facebook"
-        className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 text-gray-500 hover:border-[#CC0000] hover:text-[#CC0000] transition-colors"
+        className="w-8 h-8 flex items-center justify-center rounded-full border border-border text-muted-foreground hover:border-[#CC0000] hover:text-[#CC0000] transition-colors"
       >
         {icon(ICONS.facebook)}
       </a>
@@ -63,21 +63,21 @@ export function ShareBar({ url, title }: ShareBarProps) {
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Share on LinkedIn"
-        className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 text-gray-500 hover:border-[#CC0000] hover:text-[#CC0000] transition-colors"
+        className="w-8 h-8 flex items-center justify-center rounded-full border border-border text-muted-foreground hover:border-[#CC0000] hover:text-[#CC0000] transition-colors"
       >
         {icon(ICONS.linkedin)}
       </a>
       <a
         href={`mailto:?subject=${encodedTitle}&body=${encodedUrl}`}
         aria-label="Share by email"
-        className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 text-gray-500 hover:border-[#CC0000] hover:text-[#CC0000] transition-colors"
+        className="w-8 h-8 flex items-center justify-center rounded-full border border-border text-muted-foreground hover:border-[#CC0000] hover:text-[#CC0000] transition-colors"
       >
         {icon(ICONS.mail)}
       </a>
       <button
         type="button"
         onClick={handleCopy}
-        className="text-xs font-bold text-gray-500 border border-gray-300 rounded-full px-3 h-8 hover:border-[#CC0000] hover:text-[#CC0000] transition-colors"
+        className="text-xs font-bold text-muted-foreground border border-border rounded-full px-3 h-8 hover:border-[#CC0000] hover:text-[#CC0000] transition-colors"
       >
         {copied ? "Copied!" : "Copy link"}
       </button>
