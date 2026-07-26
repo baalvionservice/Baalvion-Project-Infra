@@ -3,6 +3,7 @@
 import { use, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { toast } from 'sonner';
 import { ArrowLeft, Upload, Loader2, Radio, TrendingUp, Star, Plus, X, Link2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,6 +15,7 @@ import DocumentEditor from '@/components/cms/document-editor/DocumentEditor';
 import { cn } from '@/lib/utils/cn';
 import { slugify } from '@/lib/utils/format';
 import { mediaApi } from '@/lib/api/media';
+import type { NormalizedError } from '@/lib/api/client';
 import { useCreateContent } from '@/lib/queries/cms-content.queries';
 import { useWorkflowTransition } from '@/lib/queries/cms-workflow.queries';
 import { useWebsite } from '@/lib/queries/cms-websites.queries';
@@ -166,8 +168,13 @@ export default function NewNewsPage({ params }: { params: Promise<{ websiteId: s
       form.append('file', file);
       const res = await mediaApi.files.upload(form);
       setFeaturedImage(res.data.data.url);
-    } catch {
-      /* surfaced by the global toast layer */
+      toast.success('Image uploaded');
+    } catch (err) {
+      // No global toast-on-error interceptor exists for cmsApiClient — without this,
+      // a failed upload (e.g. production's malware-scanner guard rejecting because
+      // no scanner is wired) silently does nothing, which is exactly what was reported.
+      const message = (err as Partial<NormalizedError>)?.message || 'Image upload failed';
+      toast.error(message);
     } finally {
       setIsUploadingImage(false);
     }

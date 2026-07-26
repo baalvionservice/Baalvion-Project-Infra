@@ -316,7 +316,7 @@ export default function ContentEditor({ content, userRole, canPublish, websiteTi
 
       {/* Side panel */}
       {activeSidePanel && (
-        <div className="w-72 shrink-0 border-l flex flex-col overflow-hidden">
+        <div className="w-80 shrink-0 border-l flex flex-col overflow-hidden">
           <div className="flex items-center justify-between border-b px-4 py-2.5">
             <span className="text-sm font-medium capitalize">{activeSidePanel}</span>
             <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => toggleSidePanel(activeSidePanel)}>
@@ -339,62 +339,86 @@ export default function ContentEditor({ content, userRole, canPublish, websiteTi
               />
             )}
             {activeSidePanel === 'settings' && (
-              <div className="divide-y">
-                <ContentClassificationPanel
-                  websiteId={content.websiteId}
-                  categoryIds={categoryIds}
-                  tagIds={tagIds}
-                  onCategoriesChange={(ids) => { setCategoryIds(ids); markUnsaved(); }}
-                  onTagsChange={(ids) => { setTagIds(ids); markUnsaved(); }}
-                />
-                <div className="space-y-1.5 p-4">
-                  <Label className="text-xs">Related Content</Label>
-                  <p className="text-[11px] text-muted-foreground">Other published content sharing this item&apos;s primary category — link to it from the body.</p>
-                  <RelatedContentSuggestions
+              // Grouped into tabs instead of one long stacked scroll — with Author,
+              // Featured Image, and Related Content added on top of the original
+              // Classification/News/Custom-fields/Reviewer/Citations/Workflow panels,
+              // a single flat column felt "congested" (direct user feedback) and made
+              // it hard to find any one thing without a lot of scrolling.
+              <Tabs defaultValue="content" className="w-full">
+                <TabsList className="grid w-full grid-cols-4 rounded-none border-b bg-transparent p-0 h-auto">
+                  <TabsTrigger value="content" className="rounded-none py-2 text-xs data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary">Content</TabsTrigger>
+                  <TabsTrigger value="media" className="rounded-none py-2 text-xs data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary">Media</TabsTrigger>
+                  <TabsTrigger value="people" className="rounded-none py-2 text-xs data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary">People</TabsTrigger>
+                  <TabsTrigger value="advanced" className="rounded-none py-2 text-xs data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary">Advanced</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="content" className="mt-0 divide-y">
+                  <ContentClassificationPanel
                     websiteId={content.websiteId}
-                    websiteSlug={websiteSlug}
-                    websiteDomain={websiteDomain}
-                    categoryId={categoryIds[0]}
-                    excludeContentId={content.id}
-                    categories={flatCategories}
+                    categoryIds={categoryIds}
+                    tagIds={tagIds}
+                    onCategoriesChange={(ids) => { setCategoryIds(ids); markUnsaved(); }}
+                    onTagsChange={(ids) => { setTagIds(ids); markUnsaved(); }}
                   />
-                </div>
-                <AuthorPanel
-                  websiteId={content.websiteId}
-                  value={customFields}
-                  onChange={(v) => { setCustomFields(v); markUnsaved(); }}
-                />
-                <FeaturedImagePanel
-                  value={featuredImage}
-                  onChange={(url) => { setFeaturedImage(url); markUnsaved(); }}
-                />
-                <NewsMetaPanel
-                  value={newsMeta}
-                  onChange={(v) => { setNewsMeta(v); markUnsaved(); }}
-                  autoReadingTime={autoReadingTime}
-                />
-                <CustomFieldsPanel
-                  value={customFields}
-                  onChange={(v) => { setCustomFields(v); markUnsaved(); }}
-                />
-                <ReviewerPanel
-                  websiteId={content.websiteId}
-                  value={customFields}
-                  onChange={(v) => { setCustomFields(v); markUnsaved(); }}
-                />
-                <CitationsPanel
-                  value={customFields}
-                  onChange={(v) => { setCustomFields(v); markUnsaved(); }}
-                />
-                <div className="p-4 space-y-4">
-                  <WorkflowPanel
-                    contentId={content.id}
-                    currentStatus={content.status}
-                    userRole={userRole}
-                    scheduledAt={content.scheduledAt}
+                  <div className="space-y-1.5 p-4">
+                    <Label className="text-xs">Related Content</Label>
+                    <p className="text-[11px] text-muted-foreground">Other published content sharing this item&apos;s primary category — link to it from the body.</p>
+                    <RelatedContentSuggestions
+                      websiteId={content.websiteId}
+                      websiteSlug={websiteSlug}
+                      websiteDomain={websiteDomain}
+                      categoryId={categoryIds[0]}
+                      excludeContentId={content.id}
+                      categories={flatCategories}
+                    />
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="media" className="mt-0 divide-y">
+                  <FeaturedImagePanel
+                    value={featuredImage}
+                    onChange={(url) => { setFeaturedImage(url); markUnsaved(); }}
                   />
-                </div>
-              </div>
+                  <NewsMetaPanel
+                    value={newsMeta}
+                    onChange={(v) => { setNewsMeta(v); markUnsaved(); }}
+                    autoReadingTime={autoReadingTime}
+                  />
+                </TabsContent>
+
+                <TabsContent value="people" className="mt-0 divide-y">
+                  <AuthorPanel
+                    websiteId={content.websiteId}
+                    value={customFields}
+                    onChange={(v) => { setCustomFields(v); markUnsaved(); }}
+                    bordered={false}
+                  />
+                  <ReviewerPanel
+                    websiteId={content.websiteId}
+                    value={customFields}
+                    onChange={(v) => { setCustomFields(v); markUnsaved(); }}
+                  />
+                  <CitationsPanel
+                    value={customFields}
+                    onChange={(v) => { setCustomFields(v); markUnsaved(); }}
+                  />
+                </TabsContent>
+
+                <TabsContent value="advanced" className="mt-0 divide-y">
+                  <div className="p-4 space-y-4">
+                    <WorkflowPanel
+                      contentId={content.id}
+                      currentStatus={content.status}
+                      userRole={userRole}
+                      scheduledAt={content.scheduledAt}
+                    />
+                  </div>
+                  <CustomFieldsPanel
+                    value={customFields}
+                    onChange={(v) => { setCustomFields(v); markUnsaved(); }}
+                  />
+                </TabsContent>
+              </Tabs>
             )}
           </ScrollArea>
         </div>

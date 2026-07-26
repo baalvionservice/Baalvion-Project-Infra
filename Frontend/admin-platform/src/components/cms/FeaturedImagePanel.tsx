@@ -1,10 +1,12 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import { toast } from 'sonner';
 import { Upload, Loader2, ImageIcon, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { mediaApi } from '@/lib/api/media';
+import type { NormalizedError } from '@/lib/api/client';
 
 interface Props {
   value: string;
@@ -29,8 +31,14 @@ export default function FeaturedImagePanel({ value, onChange }: Props) {
       form.append('file', file);
       const res = await mediaApi.files.upload(form);
       onChange(res.data.data.url);
-    } catch {
-      /* surfaced by the global toast layer */
+      toast.success('Image uploaded');
+    } catch (err) {
+      // cmsApiClient's response interceptor already normalizes axios errors to
+      // { code, message, status } — there is no global toast-on-error layer, so
+      // without this the upload just silently does nothing on failure (the bug
+      // reported: "I am unable to upload images... not able to do it").
+      const message = (err as Partial<NormalizedError>)?.message || 'Image upload failed';
+      toast.error(message);
     } finally {
       setIsUploading(false);
     }
