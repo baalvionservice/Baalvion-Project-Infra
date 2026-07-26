@@ -18,6 +18,7 @@ import { createEntityLinker } from "@/lib/entityLinkInjector";
 import { CategoryBadge } from "@/app/news/NewsArticleCard";
 import { ShareBar } from "@/components/article/ShareBar";
 import { ArticleMarketWidget } from "@/components/markets/ArticleMarketWidget";
+import { TrendingNowModule, MoreInCategoryModule } from "@/components/article/ArticleSidebarModules";
 import {
   BodyBlock,
   demoteExtraHeadings,
@@ -126,10 +127,6 @@ export default async function WorldCountryArticlePage({ params }: { params: Para
 
   const regionConfig = REGION_BY_ID.get(region)!;
   const countryName = countryLabel(country);
-
-  const relatedArticles = newsArticles
-    .filter((a) => a.worldRegion === region && a.worldCountry === country && a.slug !== slug)
-    .slice(0, 6);
 
   const baseUrl = (env.siteUrl || "https://imperialpedia.com").replace(/\/$/, "");
   const canonicalUrl = `${baseUrl}${canonicalPath}`;
@@ -370,27 +367,17 @@ export default async function WorldCountryArticlePage({ params }: { params: Para
               <ArticleMarketWidget entityMentions={entityMentions} />
             </Suspense>
 
-            {relatedArticles.length > 0 && (
-              <div>
-                <h2 className="text-xs font-black tracking-widest text-gray-900 uppercase border-b-2 border-[#CC0000] pb-2 mb-4">
-                  More from {countryName}
-                </h2>
-                <ul className="space-y-4">
-                  {relatedArticles.map((a) => (
-                    <li key={a.id}>
-                      <Link href={newsArticleHref(a)} className="group flex gap-3">
-                        <div className="relative w-16 h-16 flex-shrink-0 overflow-hidden rounded-sm">
-                          <Image src={a.imageUrl} alt={a.title} fill className="object-cover" sizes="64px" />
-                        </div>
-                        <span className="text-sm font-semibold text-gray-800 leading-snug group-hover:text-[#CC0000] transition-colors line-clamp-3">
-                          {a.title}
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            <Suspense fallback={null}>
+              <TrendingNowModule />
+            </Suspense>
+
+            <Suspense fallback={null}>
+              <MoreInCategoryModule categorySlug={country} categoryLabel={countryName} excludeSlug={slug} />
+            </Suspense>
+
+            <Suspense fallback={null}>
+              <MoreInCategoryModule categorySlug={article.categorySlug} categoryLabel={article.category} excludeSlug={slug} />
+            </Suspense>
           </aside>
         </div>
       </div>

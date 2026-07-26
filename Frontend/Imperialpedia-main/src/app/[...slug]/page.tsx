@@ -37,6 +37,7 @@ import {
   isValidIsoDate,
   truncateForMeta,
 } from "@/lib/article/render-helpers";
+import { TrendingNowModule, MoreInCategoryModule } from "@/components/article/ArticleSidebarModules";
 
 type ArticleType = NewsArticle;
 
@@ -206,9 +207,6 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
     permanentRedirect(articleUrl(article.publishedAt, slug));
   }
 
-  const relatedArticles = newsArticles
-    .filter((a) => a.category === article.category && a.slug !== slug)
-    .slice(0, 6);
   const readMoreLinks = (article.related ?? []).filter((r) => r.href && r.href !== "#");
 
   const baseUrl = (env.siteUrl || "https://imperialpedia.com").replace(/\/$/, "");
@@ -489,27 +487,13 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
               <ArticleMarketWidget entityMentions={entityMentions} />
             </Suspense>
 
-            {relatedArticles.length > 0 && (
-              <div>
-                <h2 className="text-xs font-black tracking-widest text-gray-900 uppercase border-b-2 border-[#CC0000] pb-2 mb-4">
-                  Related News
-                </h2>
-                <ul className="space-y-4">
-                  {relatedArticles.map((a) => (
-                    <li key={a.id}>
-                      <Link href={articleUrl(a.publishedAt, a.slug)} className="group flex gap-3">
-                        <div className="relative w-16 h-16 flex-shrink-0 overflow-hidden rounded-sm">
-                          <Image src={a.imageUrl} alt={a.title} fill className="object-cover" sizes="64px" />
-                        </div>
-                        <span className="text-sm font-semibold text-gray-800 leading-snug group-hover:text-[#CC0000] transition-colors line-clamp-3">
-                          {a.title}
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            <Suspense fallback={null}>
+              <TrendingNowModule />
+            </Suspense>
+
+            <Suspense fallback={null}>
+              <MoreInCategoryModule categorySlug={article.categorySlug} categoryLabel={article.category} excludeSlug={slug} />
+            </Suspense>
 
             {/* Demo/placeholder related links carry href="#" — filtered out so the
                 sidebar never renders an internal link that goes nowhere. */}
