@@ -118,35 +118,36 @@ api.baalvion.com {
 		reverse_proxy app-ecosystem:3063
 	}
 
-	# Market Underworld community-service (UNAUTHENTICATED read + self-authenticating routes).
-	# CORRECTED (was /api/v1/community/*, which matches NOTHING community-service actually
-	# mounts): the real routes, verified against routes/*.js, are /public/communities and
-	# /communities/* (join/chat/etc — each does its own authMiddleware/requireCommunityRole
-	# check internally). /admin/* and /billing/* are deliberately NOT exposed here — both
-	# community-service and giftcard-service mount those same relative paths, so a wildcard
-	# carve-out would collide between the two services, and billing/fulfill is
-	# requireInternalSecret (server-to-server only, same reasoning as the payment
-	# refund/capture deny-list above — never meant to be publicly routable).
-	@community_public path /api/v1/public/communities
-	handle @community_public {
-		reverse_proxy app-community:3064
+	# Market Underworld community-service. VERIFIED against routes/v1.js: every one of its
+	# sub-routers (communitiesRoutes, adminRoutes, billingRoutes, chatRoutes, etc.) mounts
+	# under router.use('/community', ...) — so the real prefix IS /api/v1/community/*, exactly
+	# what this carve-out already had. (An earlier pass here mistakenly "fixed" this to
+	# /api/v1/public/communities after grepping only the leaf route files and missing that
+	# extra /community nesting level — reverted.) admin/* and billing/* live under this SAME
+	# /community prefix (e.g. /api/v1/community/admin/flags), so they must be denied BEFORE
+	# the general carve-out below (first matching handle wins) — billing/fulfill is
+	# requireInternalSecret (server-to-server only), and admin/* needs a real session, same
+	# reasoning as the payment refund/capture deny-list above.
+	@community_locked path /api/v1/community/admin/* /api/v1/community/billing/*
+	handle @community_locked {
+		respond "Forbidden" 403
 	}
-	@community_scoped path /api/v1/communities /api/v1/communities/*
-	handle @community_scoped {
+	@community_api path /api/v1/community/* /api/v1/community
+	handle @community_api {
 		reverse_proxy app-community:3064
 	}
 
-	# Market Underworld giftcard-service. CORRECTED (was /api/v1/giftcards/*, which matches
-	# nothing — giftcard-service has no route under that prefix at all): the real routes,
-	# verified against routes/*.js, are /catalog + /suppliers (public reads, catalogRoutes.js
-	# mounts them without authMiddleware), /brands/*/checkout and /my-orders (self-authenticating).
-	# /admin/* and /billing/* deliberately excluded — see community-service note above.
-	@giftcard_public path /api/v1/catalog /api/v1/suppliers
-	handle @giftcard_public {
-		reverse_proxy app-giftcard:3065
+	# Market Underworld giftcard-service. VERIFIED against routes/v1.js: every sub-router
+	# (catalogRoutes, ordersRoutes, billingRoutes, adminRoutes) mounts under
+	# router.use('/giftcards', ...) — so /api/v1/giftcards/* was already correct (same
+	# earlier-mistake-then-revert as community-service above). admin/* and billing/* denied
+	# first, same reasoning.
+	@giftcard_locked path /api/v1/giftcards/admin/* /api/v1/giftcards/billing/*
+	handle @giftcard_locked {
+		respond "Forbidden" 403
 	}
-	@giftcard_scoped path /api/v1/brands/* /api/v1/my-orders
-	handle @giftcard_scoped {
+	@giftcard_api path /api/v1/giftcards/* /api/v1/giftcards
+	handle @giftcard_api {
 		reverse_proxy app-giftcard:3065
 	}
 
