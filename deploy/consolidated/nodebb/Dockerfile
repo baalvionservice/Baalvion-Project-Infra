@@ -12,7 +12,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends git ca-certific
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /usr/src/app
+# NodeBB's repo .gitignores /package.json (only the install/package.json TEMPLATE is
+# tracked) — a plain `git clone` alone leaves no manifest for npm to install against.
+# Confirmed against the actual v3.9.1 tag tree (GitHub API + a real clone): root
+# package.json is absent at every checked tag; install/package.json is the real one.
 RUN git clone --depth 1 --branch ${NODEBB_VERSION} https://github.com/NodeBB/NodeBB.git . \
+    && cp install/package.json package.json \
     && npm install --omit=dev --no-audit --no-fund
 
 # Plugins this deployment depends on:
