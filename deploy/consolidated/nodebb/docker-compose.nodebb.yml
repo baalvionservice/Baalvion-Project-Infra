@@ -60,11 +60,13 @@ services:
     environment:
       <<: *nodebb-db
       # NodeBB's real config precedence is config.json < environment (double-underscore
-      # nests, e.g. postgres__host) — ⚠ VERIFY AT EXECUTION TIME against the pinned
-      # NODEBB_VERSION's actual config docs before relying on these key names in prod.
+      # nests, e.g. postgres__host). VERIFIED against src/database/postgres.js at v3.9.1:
+      # the field is `postgres:username`, NOT `postgres:user` — the latter silently maps
+      # to a key NodeBB never reads, so the pool connects with no username at all
+      # ("no PostgreSQL user name specified in startup packet").
       postgres__host: nodebb-postgres
       postgres__port: "5432"
-      postgres__user: ${NODEBB_DB_USER:-nodebb}
+      postgres__username: ${NODEBB_DB_USER:-nodebb}
       postgres__password: ${NODEBB_DB_PASSWORD}
       postgres__database: ${NODEBB_DB_NAME:-nodebb}
       url: ${NODEBB_URL:-https://forum.marketunderworld.com}
