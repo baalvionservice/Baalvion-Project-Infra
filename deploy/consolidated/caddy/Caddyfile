@@ -118,26 +118,35 @@ api.baalvion.com {
 		reverse_proxy app-ecosystem:3063
 	}
 
-	# Market Underworld community-service (UNAUTHENTICATED read) -- the real multi-community
-	# forum on community.marketunderworld.com/forum fetches its public community list here.
-	# community-service does its own RS256 verification on every other /api/v1/community/*
-	# route below it does not need BFF session-translation, so it gets a direct carve-out
-	# rather than falling through to the session-gated proxy-service BFF.
-	@community_public path /api/v1/community/public /api/v1/community/public/*
+	# Market Underworld community-service (UNAUTHENTICATED read + self-authenticating routes).
+	# CORRECTED (was /api/v1/community/*, which matches NOTHING community-service actually
+	# mounts): the real routes, verified against routes/*.js, are /public/communities and
+	# /communities/* (join/chat/etc — each does its own authMiddleware/requireCommunityRole
+	# check internally). /admin/* and /billing/* are deliberately NOT exposed here — both
+	# community-service and giftcard-service mount those same relative paths, so a wildcard
+	# carve-out would collide between the two services, and billing/fulfill is
+	# requireInternalSecret (server-to-server only, same reasoning as the payment
+	# refund/capture deny-list above — never meant to be publicly routable).
+	@community_public path /api/v1/public/communities
 	handle @community_public {
 		reverse_proxy app-community:3064
 	}
-	@community_authed path /api/v1/community/*
-	handle @community_authed {
+	@community_scoped path /api/v1/communities /api/v1/communities/*
+	handle @community_scoped {
 		reverse_proxy app-community:3064
 	}
 
-	# Market Underworld giftcard-service — same shape as community-service above. Public catalog
-	# reads are unauthenticated by design (giftcard-service's catalogRoutes.js mounts them without
-	# authMiddleware); checkout/orders/admin routes underneath do their own RS256 verification, so
-	# this whole prefix gets one direct carve-out rather than a public/authed split.
-	@giftcard_api path /api/v1/giftcards /api/v1/giftcards/*
-	handle @giftcard_api {
+	# Market Underworld giftcard-service. CORRECTED (was /api/v1/giftcards/*, which matches
+	# nothing — giftcard-service has no route under that prefix at all): the real routes,
+	# verified against routes/*.js, are /catalog + /suppliers (public reads, catalogRoutes.js
+	# mounts them without authMiddleware), /brands/*/checkout and /my-orders (self-authenticating).
+	# /admin/* and /billing/* deliberately excluded — see community-service note above.
+	@giftcard_public path /api/v1/catalog /api/v1/suppliers
+	handle @giftcard_public {
+		reverse_proxy app-giftcard:3065
+	}
+	@giftcard_scoped path /api/v1/brands/* /api/v1/my-orders
+	handle @giftcard_scoped {
 		reverse_proxy app-giftcard:3065
 	}
 
