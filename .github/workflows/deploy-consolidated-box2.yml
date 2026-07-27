@@ -1,0 +1,296 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Deploy — consolidated backend, SECOND environment (ECR → EC2)
+#
+#   Second, independent target for deploy/consolidated: its OWN AWS account
+#   (575062583642), OWN ECR repos, OWN EC2 host (13.207.108.167). Does not touch
+#   baalvion-prod-01 or its secrets (AWS_DEPLOY_ROLE_ARN / CORE_EC2_*) — this
+#   workflow uses the CORE2_* secrets instead so the two pipelines can never
+#   collide or double-roll off the same trigger.
+#
+#   Manual trigger only (workflow_dispatch) while this environment is still
+#   being validated — no push-triggered auto-deploy until it's proven stable.
+#
+#   git push main -> nothing happens here automatically.
+#   Actions tab -> "Run workflow" -> build all 3 images -> push to this
+#   account's ECR -> SSH-roll 13.207.108.167 (default + payments profile).
+#
+# HARD INVARIANTS (same as deploy-consolidated.yml):
+#   • The EC2 box NEVER builds. All builds happen here in CI.
+#   • OIDC only — no static AWS keys.
+#   • The roll is gated behind the `production` environment + CORE2_EC2_* secrets;
+#     a partial/unconfigured target SKIPS (stays green) rather than failing.
+# ─────────────────────────────────────────────────────────────────────────────
+name: Deploy — consolidated backend, box2 (ECR → EC2)
+
+on:
+  workflow_dispatch:
+    inputs:
+      roll:
+        description: "Also roll the EC2 stack after pushing images (true/false)"
+        required: false
+        default: "true"
+      profiles:
+        description: "Compose profiles to bring up on the roll (space-separated, e.g. 'payments')"
+        required: false
+        default: "payments"
+
+concurrency:
+  group: deploy-consolidated-box2
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  id-token: write   # OIDC role assumption
+
+env:
+  AWS_REGION: ${{ vars.CORE2_AWS_REGION || 'ap-south-1' }}
+  RELEASE_TAG: ${{ vars.CORE2_RELEASE_TAG || 'v1.0.0-box2' }}
+
+jobs:
+  # ════════════════════════════ 1) build + push baalvion-backend ════════════════════════════
+  build-push-backend:
+    name: build baalvion/backend
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.tag.outputs.image_tag }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.CORE2_AWS_DEPLOY_ROLE_ARN }}
+          role-session-name: gha-box2-backend-${{ github.run_id }}
+
+      - name: Log in to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Ensure ECR repository exists
+        run: |
+          aws ecr describe-repositories --repository-names "baalvion/backend" --region "$AWS_REGION" >/dev/null 2>&1 \
+            || aws ecr create-repository --repository-name "baalvion/backend" \
+                 --image-tag-mutability MUTABLE --image-scanning-configuration scanOnPush=true --region "$AWS_REGION"
+
+      - name: Compute image tag (prod-<short-sha>)
+        id: tag
+        run: echo "image_tag=prod-$(echo "${{ github.sha }}" | cut -c1-8)" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve image tags
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ steps.ecr.outputs.registry }}/baalvion/backend
+          tags: |
+            type=raw,value=prod-latest
+            type=raw,value=${{ env.RELEASE_TAG }}
+            type=raw,value=${{ steps.tag.outputs.image_tag }}
+
+      - name: Build and push to ECR
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: deploy/consolidated/Dockerfile.node
+          push: true
+          provenance: false
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=box2-backend
+          cache-to: type=gha,mode=max,scope=box2-backend
+
+  # ════════════════════════════ 2) build + push admin-web ════════════════════════════
+  build-push-admin-web:
+    name: build baalvion/admin-web
+    runs-on: ubuntu-latest
+    continue-on-error: true   # non-fatal: admin console is a nice-to-have, never blocks the backend roll
+    outputs:
+      image_tag: ${{ steps.tag.outputs.image_tag }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.CORE2_AWS_DEPLOY_ROLE_ARN }}
+          role-session-name: gha-box2-adminweb-${{ github.run_id }}
+
+      - name: Log in to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Ensure ECR repository exists
+        run: |
+          aws ecr describe-repositories --repository-names "baalvion/admin-web" --region "$AWS_REGION" >/dev/null 2>&1 \
+            || aws ecr create-repository --repository-name "baalvion/admin-web" \
+                 --image-tag-mutability MUTABLE --image-scanning-configuration scanOnPush=true --region "$AWS_REGION"
+
+      - name: Compute image tag (prod-<short-sha>)
+        id: tag
+        run: echo "image_tag=prod-$(echo "${{ github.sha }}" | cut -c1-8)" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve image tags
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ steps.ecr.outputs.registry }}/baalvion/admin-web
+          tags: |
+            type=raw,value=prod-latest
+            type=raw,value=${{ env.RELEASE_TAG }}
+            type=raw,value=${{ steps.tag.outputs.image_tag }}
+
+      - name: Build and push admin-web to ECR
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: Frontend/admin-platform/Dockerfile.deploy
+          push: true
+          provenance: false
+          build-args: |
+            NEXT_PUBLIC_APP_URL=${{ vars.CORE2_ADMIN_URL || 'https://admin-box2.baalvion.com' }}
+            NEXT_PUBLIC_GATEWAY_URL=/auth-bff
+            NEXT_PUBLIC_CMS_API_URL=${{ vars.CORE2_ADMIN_URL || 'https://admin-box2.baalvion.com' }}/api-bff/knowledge/cms/api/v1
+            NEXT_PUBLIC_AUTH_URL=${{ vars.CORE2_ADMIN_URL || 'https://admin-box2.baalvion.com' }}/auth-bff
+            NEXT_PUBLIC_APP_ENV=production
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=box2-admin-web
+          cache-to: type=gha,mode=max,scope=box2-admin-web
+
+  # ════════════════════════════ 3) build + push payment-service (Java) ════════════════════════════
+  # NOTE: nothing else in the repo currently builds+pushes baalvion/payment-service — the
+  # comment in financial-services.yml pointing at deploy.yml is stale (deploy.yml was deleted
+  # 2026-07-02). This is the one live pipeline that produces this image.
+  build-push-payment:
+    name: build baalvion/payment-service
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.tag.outputs.image_tag }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.CORE2_AWS_DEPLOY_ROLE_ARN }}
+          role-session-name: gha-box2-payment-${{ github.run_id }}
+
+      - name: Log in to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Ensure ECR repository exists
+        run: |
+          aws ecr describe-repositories --repository-names "baalvion/payment-service" --region "$AWS_REGION" >/dev/null 2>&1 \
+            || aws ecr create-repository --repository-name "baalvion/payment-service" \
+                 --image-tag-mutability MUTABLE --image-scanning-configuration scanOnPush=true --region "$AWS_REGION"
+
+      - name: Compute image tag (prod-<short-sha>)
+        id: tag
+        run: echo "image_tag=prod-$(echo "${{ github.sha }}" | cut -c1-8)" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve image tags
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ steps.ecr.outputs.registry }}/baalvion/payment-service
+          tags: |
+            type=raw,value=latest
+            type=raw,value=${{ env.RELEASE_TAG }}
+            type=raw,value=${{ steps.tag.outputs.image_tag }}
+
+      - name: Build and push payment-service to ECR
+        uses: docker/build-push-action@v7
+        with:
+          context: Backend/services/commerce/financial-services-java
+          file: Backend/services/commerce/financial-services-java/Dockerfile
+          build-args: SERVICE=payment-service
+          push: true
+          provenance: false
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=box2-payjava
+          cache-to: type=gha,mode=max,scope=box2-payjava
+
+  # ════════════════════════════ 4) roll the stack on box2 ════════════════════════════
+  deploy:
+    name: Roll box2 stack
+    needs: [build-push-backend, build-push-admin-web, build-push-payment]
+    if: ${{ github.event.inputs.roll != 'false' }}
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      EC2_HOST: ${{ secrets.CORE2_EC2_HOST }}
+      EC2_USER: ${{ secrets.CORE2_EC2_USER }}
+      EC2_SSH_KEY: ${{ secrets.CORE2_EC2_SSH_KEY }}
+      IMAGE_TAG: ${{ needs.build-push-backend.outputs.image_tag }}
+      PAYMENTS_IMAGE_TAG: ${{ needs.build-push-payment.outputs.image_tag }}
+      PROFILES: ${{ github.event.inputs.profiles || 'payments' }}
+    steps:
+      - name: Check EC2 target is configured
+        id: gate
+        run: |
+          if [ -z "${EC2_HOST}" ] || [ -z "${EC2_USER}" ] || [ -z "${EC2_SSH_KEY}" ]; then
+            echo "::notice title=Roll skipped::CORE2_EC2_* not fully configured. Images are in ECR (tag ${IMAGE_TAG}); roll skipped."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Pull + roll on box2
+        if: steps.gate.outputs.ready == 'true'
+        uses: appleboy/ssh-action@v1
+        env:
+          IMAGE_TAG: ${{ needs.build-push-backend.outputs.image_tag }}
+          PAYMENTS_IMAGE_TAG: ${{ needs.build-push-payment.outputs.image_tag }}
+          PROFILES: ${{ github.event.inputs.profiles || 'payments' }}
+        with:
+          host: ${{ secrets.CORE2_EC2_HOST }}
+          username: ${{ secrets.CORE2_EC2_USER }}
+          key: ${{ secrets.CORE2_EC2_SSH_KEY }}
+          envs: IMAGE_TAG,PAYMENTS_IMAGE_TAG,PROFILES
+          script: |
+            set -euo pipefail
+            cd /opt/baalvion-box2
+            git fetch --all --prune
+            git checkout main
+            git pull --ff-only
+
+            ENV=deploy/consolidated/.env
+            if grep -q '^IMAGE_TAG=' "$ENV"; then sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=${IMAGE_TAG}|" "$ENV"; else echo "IMAGE_TAG=${IMAGE_TAG}" >> "$ENV"; fi
+            if grep -q '^PAYMENTS_IMAGE_TAG=' "$ENV"; then sed -i "s|^PAYMENTS_IMAGE_TAG=.*|PAYMENTS_IMAGE_TAG=${PAYMENTS_IMAGE_TAG}|" "$ENV"; else echo "PAYMENTS_IMAGE_TAG=${PAYMENTS_IMAGE_TAG}" >> "$ENV"; fi
+
+            REGION="$(grep -E '^AWS_REGION=' "$ENV" | head -1 | cut -d= -f2)"
+            REGISTRY="$(grep -E '^ECR_REGISTRY=' "$ENV" | head -1 | cut -d= -f2)"
+            aws ecr get-login-password --region "${REGION:-ap-south-1}" | docker login --username AWS --password-stdin "${REGISTRY}"
+
+            PROFILE_FLAGS=""
+            for p in $PROFILES; do PROFILE_FLAGS="$PROFILE_FLAGS --profile $p"; done
+
+            COMPOSE="docker compose --env-file $ENV -f deploy/consolidated/docker-compose.prod.yml"
+            $COMPOSE $PROFILE_FLAGS pull
+            $COMPOSE $PROFILE_FLAGS up -d --no-build --remove-orphans
+            docker image prune -f
+
+      - name: Smoke test public ingress
+        if: steps.gate.outputs.ready == 'true'
+        continue-on-error: true
+        run: |
+          sleep 25
+          for url in \
+            "http://${{ secrets.CORE2_EC2_HOST }}/health" \
+            "http://${{ secrets.CORE2_EC2_HOST }}:3001/health" ; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 "$url" || echo "000")
+            echo "  $url -> $code"
+          done
