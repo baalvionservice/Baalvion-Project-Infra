@@ -223,10 +223,125 @@ jobs:
           cache-from: type=gha,scope=box2-payjava
           cache-to: type=gha,mode=max,scope=box2-payjava
 
-  # ════════════════════════════ 4) roll the stack on box2 ════════════════════════════
+  # ════════════════════════════ 4) build + push community-service ════════════════════════════
+  # NOTE: no CI pipeline previously built this image (deploy/consolidated/docker-compose.prod.yml's
+  # app-community comment: "no CI workflow currently builds+pushes these images to their own ECR
+  # repos — that pipeline still needs to be created"). This is that pipeline.
+  build-push-community:
+    name: build baalvion/community-service
+    runs-on: ubuntu-latest
+    continue-on-error: true   # first-time build for this image; never block the core roll
+    outputs:
+      image_tag: ${{ steps.tag.outputs.image_tag }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.CORE2_AWS_DEPLOY_ROLE_ARN }}
+          role-session-name: gha-box2-community-${{ github.run_id }}
+
+      - name: Log in to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Ensure ECR repository exists
+        run: |
+          aws ecr describe-repositories --repository-names "baalvion/community-service" --region "$AWS_REGION" >/dev/null 2>&1 \
+            || aws ecr create-repository --repository-name "baalvion/community-service" \
+                 --image-tag-mutability MUTABLE --image-scanning-configuration scanOnPush=true --region "$AWS_REGION"
+
+      - name: Compute image tag (prod-<short-sha>)
+        id: tag
+        run: echo "image_tag=prod-$(echo "${{ github.sha }}" | cut -c1-8)" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve image tags
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ steps.ecr.outputs.registry }}/baalvion/community-service
+          tags: |
+            type=raw,value=latest
+            type=raw,value=${{ env.RELEASE_TAG }}
+            type=raw,value=${{ steps.tag.outputs.image_tag }}
+
+      - name: Build and push community-service to ECR
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: Backend/services/ecosystem/community-service/Dockerfile
+          push: true
+          provenance: false
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=box2-community
+          cache-to: type=gha,mode=max,scope=box2-community
+
+  # ════════════════════════════ 5) build + push giftcard-service ════════════════════════════
+  build-push-giftcard:
+    name: build baalvion/giftcard-service
+    runs-on: ubuntu-latest
+    continue-on-error: true   # first-time build for this image; never block the core roll
+    outputs:
+      image_tag: ${{ steps.tag.outputs.image_tag }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.CORE2_AWS_DEPLOY_ROLE_ARN }}
+          role-session-name: gha-box2-giftcard-${{ github.run_id }}
+
+      - name: Log in to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Ensure ECR repository exists
+        run: |
+          aws ecr describe-repositories --repository-names "baalvion/giftcard-service" --region "$AWS_REGION" >/dev/null 2>&1 \
+            || aws ecr create-repository --repository-name "baalvion/giftcard-service" \
+                 --image-tag-mutability MUTABLE --image-scanning-configuration scanOnPush=true --region "$AWS_REGION"
+
+      - name: Compute image tag (prod-<short-sha>)
+        id: tag
+        run: echo "image_tag=prod-$(echo "${{ github.sha }}" | cut -c1-8)" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve image tags
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ steps.ecr.outputs.registry }}/baalvion/giftcard-service
+          tags: |
+            type=raw,value=latest
+            type=raw,value=${{ env.RELEASE_TAG }}
+            type=raw,value=${{ steps.tag.outputs.image_tag }}
+
+      - name: Build and push giftcard-service to ECR
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: Backend/services/ecosystem/giftcard-service/Dockerfile
+          push: true
+          provenance: false
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=box2-giftcard
+          cache-to: type=gha,mode=max,scope=box2-giftcard
+
+  # ════════════════════════════ 6) roll the stack on box2 ════════════════════════════
   deploy:
     name: Roll box2 stack
-    needs: [build-push-backend, build-push-admin-web, build-push-payment]
+    needs: [build-push-backend, build-push-admin-web, build-push-payment, build-push-community, build-push-giftcard]
     if: ${{ github.event.inputs.roll != 'false' }}
     runs-on: ubuntu-latest
     environment: production
@@ -236,6 +351,8 @@ jobs:
       EC2_SSH_KEY: ${{ secrets.CORE2_EC2_SSH_KEY }}
       IMAGE_TAG: ${{ needs.build-push-backend.outputs.image_tag }}
       PAYMENTS_IMAGE_TAG: ${{ needs.build-push-payment.outputs.image_tag }}
+      COMMUNITY_IMAGE_TAG: ${{ needs.build-push-community.outputs.image_tag }}
+      GIFTCARD_IMAGE_TAG: ${{ needs.build-push-giftcard.outputs.image_tag }}
       # NOTE: no `|| 'payments'` fallback here — the workflow_dispatch input above already
       # has its own YAML-level default ("payments") applied when the input is omitted. An
       # `||` on top of that treats an explicitly-passed empty string as falsy and silently
@@ -258,12 +375,14 @@ jobs:
         env:
           IMAGE_TAG: ${{ needs.build-push-backend.outputs.image_tag }}
           PAYMENTS_IMAGE_TAG: ${{ needs.build-push-payment.outputs.image_tag }}
+          COMMUNITY_IMAGE_TAG: ${{ needs.build-push-community.outputs.image_tag }}
+          GIFTCARD_IMAGE_TAG: ${{ needs.build-push-giftcard.outputs.image_tag }}
           PROFILES: ${{ github.event.inputs.profiles }}
         with:
           host: ${{ secrets.CORE2_EC2_HOST }}
           username: ${{ secrets.CORE2_EC2_USER }}
           key: ${{ secrets.CORE2_EC2_SSH_KEY }}
-          envs: IMAGE_TAG,PAYMENTS_IMAGE_TAG,PROFILES
+          envs: IMAGE_TAG,PAYMENTS_IMAGE_TAG,COMMUNITY_IMAGE_TAG,GIFTCARD_IMAGE_TAG,PROFILES
           script: |
             set -euo pipefail
             cd /opt/baalvion-box2
@@ -274,6 +393,12 @@ jobs:
             ENV=deploy/consolidated/.env
             if grep -q '^IMAGE_TAG=' "$ENV"; then sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=${IMAGE_TAG}|" "$ENV"; else echo "IMAGE_TAG=${IMAGE_TAG}" >> "$ENV"; fi
             if grep -q '^PAYMENTS_IMAGE_TAG=' "$ENV"; then sed -i "s|^PAYMENTS_IMAGE_TAG=.*|PAYMENTS_IMAGE_TAG=${PAYMENTS_IMAGE_TAG}|" "$ENV"; else echo "PAYMENTS_IMAGE_TAG=${PAYMENTS_IMAGE_TAG}" >> "$ENV"; fi
+            if [ -n "${COMMUNITY_IMAGE_TAG:-}" ]; then
+              if grep -q '^COMMUNITY_IMAGE_TAG=' "$ENV"; then sed -i "s|^COMMUNITY_IMAGE_TAG=.*|COMMUNITY_IMAGE_TAG=${COMMUNITY_IMAGE_TAG}|" "$ENV"; else echo "COMMUNITY_IMAGE_TAG=${COMMUNITY_IMAGE_TAG}" >> "$ENV"; fi
+            fi
+            if [ -n "${GIFTCARD_IMAGE_TAG:-}" ]; then
+              if grep -q '^GIFTCARD_IMAGE_TAG=' "$ENV"; then sed -i "s|^GIFTCARD_IMAGE_TAG=.*|GIFTCARD_IMAGE_TAG=${GIFTCARD_IMAGE_TAG}|" "$ENV"; else echo "GIFTCARD_IMAGE_TAG=${GIFTCARD_IMAGE_TAG}" >> "$ENV"; fi
+            fi
 
             REGION="$(grep -E '^AWS_REGION=' "$ENV" | head -1 | cut -d= -f2)"
             REGISTRY="$(grep -E '^ECR_REGISTRY=' "$ENV" | head -1 | cut -d= -f2)"
