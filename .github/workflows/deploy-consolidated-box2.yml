@@ -412,6 +412,40 @@ jobs:
             $COMPOSE $PROFILE_FLAGS up -d --no-build --remove-orphans
             docker image prune -f
 
+      - name: Bootstrap / repair platform super-admin (idempotent)
+        if: steps.gate.outputs.ready == 'true'
+        continue-on-error: true   # never block the backend roll on the admin seed
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.CORE2_EC2_HOST }}
+          username: ${{ secrets.CORE2_EC2_USER }}
+          key: ${{ secrets.CORE2_EC2_SSH_KEY }}
+          # bootstrapSuperAdmin.js upserts on unique email (ON CONFLICT), so this is safe to
+          # run every deploy. box2's RDS cert isn't in a trusted CA chain from Node's default
+          # trust store (same reason DB_SSL_REJECT_UNAUTHORIZED=false is set for the main app
+          # containers) -- but this script uses its own raw pg.Client with no ssl config at
+          # all, so PGSSLMODE alone doesn't disable verification here the way it does for
+          # libpq; NODE_TLS_REJECT_UNAUTHORIZED=0 is the actual thing that gets it past
+          # "self-signed certificate in certificate chain", scoped to just this one-off exec.
+          script: |
+            set -euo pipefail
+            cd /opt/baalvion-box2
+            ENV=deploy/consolidated/.env
+            SA_EMAIL="$(grep -E '^SUPERADMIN_EMAIL=' "$ENV" | head -1 | cut -d= -f2- | tr -d '\r' || true)"
+            SA_PASS="$(grep -E '^SUPERADMIN_PASSWORD=' "$ENV" | head -1 | cut -d= -f2- | tr -d '\r' || true)"
+            if [ -z "$SA_EMAIL" ] || [ -z "$SA_PASS" ]; then
+              echo "::notice title=Superadmin seed skipped::SUPERADMIN_EMAIL/PASSWORD not set in $ENV."
+              exit 0
+            fi
+            docker exec \
+              -e SUPERADMIN_EMAIL="$SA_EMAIL" \
+              -e SUPERADMIN_PASSWORD="$SA_PASS" \
+              -e PGSSLMODE=require \
+              -e NODE_TLS_REJECT_UNAUTHORIZED=0 \
+              consolidated-app-identity-1 \
+              node /app/Backend/services/identity/auth-service/scripts/bootstrapSuperAdmin.js
+            echo "::notice title=Superadmin seeded::${SA_EMAIL} asserted in app-identity (role=super_admin)."
+
       - name: Smoke test public ingress
         if: steps.gate.outputs.ready == 'true'
         continue-on-error: true
