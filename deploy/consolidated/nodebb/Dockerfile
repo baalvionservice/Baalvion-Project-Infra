@@ -34,4 +34,10 @@ COPY config.json /usr/src/app/config.json
 EXPOSE 4567
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=5 \
     CMD node -e "require('http').get('http://127.0.0.1:4567/api/config',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"
-CMD ["./nodebb", "start"]
+# `./nodebb start` daemonizes (forks + detaches) — the container's PID 1 exits immediately
+# after forking, so Docker sees the process end and restarts the container in a loop. NodeBB's
+# own official entrypoint (install/docker/entrypoint.sh) runs `npm start -- ... --no-daemon`
+# for exactly this reason. config.json is baked into the image (COPY above), so this boots
+# straight to the web server — first admin setup happens via the web install wizard on first
+# visit, matching the original operator-supervised, not-silently-automated intent.
+CMD ["npm", "start", "--", "--config=/usr/src/app/config.json", "--no-silent", "--no-daemon"]
