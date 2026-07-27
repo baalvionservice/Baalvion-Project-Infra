@@ -236,7 +236,11 @@ jobs:
       EC2_SSH_KEY: ${{ secrets.CORE2_EC2_SSH_KEY }}
       IMAGE_TAG: ${{ needs.build-push-backend.outputs.image_tag }}
       PAYMENTS_IMAGE_TAG: ${{ needs.build-push-payment.outputs.image_tag }}
-      PROFILES: ${{ github.event.inputs.profiles || 'payments' }}
+      # NOTE: no `|| 'payments'` fallback here — the workflow_dispatch input above already
+      # has its own YAML-level default ("payments") applied when the input is omitted. An
+      # `||` on top of that treats an explicitly-passed empty string as falsy and silently
+      # overrides it back to 'payments', making it impossible to actually request no profiles.
+      PROFILES: ${{ github.event.inputs.profiles }}
     steps:
       - name: Check EC2 target is configured
         id: gate
@@ -254,7 +258,7 @@ jobs:
         env:
           IMAGE_TAG: ${{ needs.build-push-backend.outputs.image_tag }}
           PAYMENTS_IMAGE_TAG: ${{ needs.build-push-payment.outputs.image_tag }}
-          PROFILES: ${{ github.event.inputs.profiles || 'payments' }}
+          PROFILES: ${{ github.event.inputs.profiles }}
         with:
           host: ${{ secrets.CORE2_EC2_HOST }}
           username: ${{ secrets.CORE2_EC2_USER }}
