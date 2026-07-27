@@ -59,11 +59,14 @@ async function ensureGroup(name) {
 }
 
 async function ensureCategory(community) {
+    // VERIFIED at execution time (2026-07-27, nodebb-plugin-write-api@5.8.20): the response
+    // envelope is {code, payload}, not {response} or a top-level cid — the two shapes this
+    // used to check for never matched, silently logging cid=undefined every run.
     const created = await nb('/api/v1/categories', {
         method: 'POST',
         body: JSON.stringify({ name: community.name, description: community.description }),
     });
-    return created?.response?.cid || created?.cid;
+    return created?.payload?.cid;
 }
 
 async function main() {
