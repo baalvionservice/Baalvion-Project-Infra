@@ -18,6 +18,7 @@ const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-s
 
 const app = express();
 
+app.set('trust proxy', 1);
 app.use(helmet());
 // Global IP rate limiter (express-rate-limit, CodeQL-recognized) — generous DoS ceiling.
 app.use(rateLimit({ windowMs: 60_000, max: Number(process.env.IP_RATE_LIMIT_MAX) || 1000, standardHeaders: true, legacyHeaders: false, message: { success: false, error: { code: 'RATE_LIMITED', message: 'Too many requests' } } }));

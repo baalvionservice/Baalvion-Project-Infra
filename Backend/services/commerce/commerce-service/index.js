@@ -18,6 +18,7 @@ const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-s
 
 const app = express();
 
+app.set('trust proxy', 1);
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 
 // Locally-stored product media (MEDIA_DRIVER=local). Served publicly with permissive CORS so

@@ -22,6 +22,7 @@ const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-s
 
 const app = express();
 
+app.set('trust proxy', 1);
 app.use(helmet());
 app.use(cors({ origin: config.corsOrigins, credentials: true }));
 

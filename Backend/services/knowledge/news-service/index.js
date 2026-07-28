@@ -39,6 +39,11 @@ const start = async () => {
     try {
         await db.sequelize.authenticate();
         await db.sequelize.query('CREATE SCHEMA IF NOT EXISTS news_intelligence');
+        // Schema creation alone doesn't create tables -- this was missing entirely, so every
+        // model-backed route 500'd with "relation news_intelligence.articles does not exist".
+        // Matches the established pattern documented in deploy/consolidated's own workflow:
+        // "CREATE SCHEMA IF NOT EXISTS <domain> + sequelize.sync({alter:false})".
+        await db.sequelize.sync({ alter: false });
         console.log('[news-service] DB connected');
     } catch (err) {
         console.error('[news-service] DB error:', err.message);
