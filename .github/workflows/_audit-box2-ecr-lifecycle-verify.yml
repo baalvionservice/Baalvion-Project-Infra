@@ -1,0 +1,27 @@
+name: (temp) Verify ECR lifecycle policies were applied
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-region: ${{ vars.CORE2_AWS_REGION || 'ap-south-1' }}
+          role-to-assume: ${{ secrets.CORE2_AWS_DEPLOY_ROLE_ARN }}
+
+      - name: Check lifecycle policy on each repo
+        run: |
+          set -uo pipefail
+          for repo in baalvion/backend baalvion/admin-web baalvion/payment-service baalvion/community-service baalvion/giftcard-service; do
+            echo "===== $repo ====="
+            aws ecr get-lifecycle-policy --repository-name "$repo" --output json 2>&1 || echo "no policy found / cannot read"
+          done
