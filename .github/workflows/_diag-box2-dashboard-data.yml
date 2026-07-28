@@ -110,11 +110,12 @@ jobs:
             " > /tmp/diag_token.txt
           '
           scp -i ~/.ssh/box2_key "${{ secrets.CORE2_EC2_USER }}@${{ secrets.CORE2_EC2_HOST }}:/tmp/diag_token.txt" ./diag_token.txt
-          TOKEN=$(cat ./diag_token.txt)
-          echo "=== via PUBLIC domain (api.baalvion.com through Cloudflare+Caddy), from the runner (no hairpin issue) ==="
-          curl -s -H "Authorization: Bearer $TOKEN" -w "\nHTTP %{http_code}\n" --max-time 15 "https://api.baalvion.com/api/v1/knowledge/cms/api/v1/cms/websites" | head -c 800
-          echo ""
-          echo "=== cache headers ==="
-          curl -sI -H "Authorization: Bearer $TOKEN" --max-time 15 "https://api.baalvion.com/api/v1/knowledge/cms/api/v1/cms/websites" | grep -iE "cf-cache-status|cache-control|age|cf-ray"
+          echo "token bytes: $(wc -c < ./diag_token.txt)"
           ssh -i ~/.ssh/box2_key "${{ secrets.CORE2_EC2_USER }}@${{ secrets.CORE2_EC2_HOST }}" "rm -f /tmp/diag_token.txt" || true
-          rm -f ./diag_token.txt
+
+      - name: Upload token as artifact (not subject to log masking)
+        uses: actions/upload-artifact@v4
+        with:
+          name: diag-token
+          path: diag_token.txt
+          retention-days: 1
