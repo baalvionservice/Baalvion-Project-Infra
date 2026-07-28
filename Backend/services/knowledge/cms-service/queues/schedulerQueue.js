@@ -55,7 +55,7 @@ function startSchedulerWorker() {
 
         // Bust the public delivery cache + revalidate the frontend so the
         // auto-published post goes live exactly like a manual publish.
-        const { paths, urls: contentUrls } = revalidateService.pathsForContent(content, website && website.domain);
+        const { paths, urls: contentUrls } = await revalidateService.pathsForContent(content, website && website.domain);
         if (websiteSlug) {
             try { await cache.delPattern(`cms:public:${websiteSlug}:*`); } catch { /* fail-open */ }
             try { revalidateService.dispatch(websiteSlug, { paths, urls: contentUrls }); } catch { /* fail-open */ }
