@@ -408,7 +408,6 @@ jobs:
             for p in $PROFILES; do PROFILE_FLAGS="$PROFILE_FLAGS --profile $p"; done
 
             COMPOSE="docker compose --env-file $ENV -f deploy/consolidated/docker-compose.prod.yml"
-            $COMPOSE $PROFILE_FLAGS pull
             # NOTE: deliberately no --remove-orphans. NodeBB (deploy/consolidated/nodebb/
             # docker-compose.nodebb.yml) is a separate compose file not referenced here --
             # merging it in to avoid the orphan warning is worse (verified live: it corrupts
@@ -416,7 +415,27 @@ jobs:
             # nodebb file's own duplicate app-community definition wins the merge). A
             # --remove-orphans roll on this file alone previously deleted a fully-configured,
             # already-live NodeBB outright. The orphan warning is cosmetic noise; leave it.
-            $COMPOSE $PROFILE_FLAGS up -d --no-build
+            #
+            # admin-web pulled/started SEPARATELY, best-effort. Verified live: a blanket
+            # `pull` with no service args fails HARD (aborts every image, not just the broken
+            # one) the moment any single tag is missing from ECR -- including from a purely
+            # transient CI blip unrelated to any real bug (hit this exact case: a Docker Hub
+            # connect-timeout in the admin-web build job left its tag never pushed, which then
+            # blocked redis/neo4j/caddy/everything from pulling too). Core services are always
+            # required and pulled explicitly by name; admin-web can't take them down with it.
+            $COMPOSE pull app-identity app-commerce app-trade app-ecosystem app-platform app-edge-realtime redis neo4j caddy
+            $COMPOSE up -d --no-build app-identity app-commerce app-trade app-ecosystem app-platform app-edge-realtime redis neo4j
+
+            # Profile-gated services (payments/community/giftcard) — separate call so a
+            # failure here can't touch the core services pulled/started above.
+            if [ -n "$PROFILE_FLAGS" ]; then
+              $COMPOSE $PROFILE_FLAGS pull || echo "::notice::one or more profile-gated images unavailable this run -- skipped"
+              $COMPOSE $PROFILE_FLAGS up -d --no-build || echo "::notice::one or more profile-gated services failed to start this run"
+            fi
+
+            $COMPOSE pull admin-web && $COMPOSE up -d --no-build --no-deps admin-web \
+              || echo "::notice::admin-web image unavailable this run (build/pull failed) -- skipped, previous version keeps running"
+            $COMPOSE up -d --no-build --no-deps caddy
             docker image prune -f
 
       - name: Bootstrap / repair platform super-admin (idempotent)
