@@ -20,7 +20,7 @@ export default function WebsitesPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
 
-  const { data, isLoading } = useWebsites({
+  const { data, isLoading, isError, error, refetch } = useWebsites({
     search: search || undefined,
     status: statusFilter || undefined,
   });
@@ -76,6 +76,15 @@ export default function WebsitesPage() {
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-52" />
           ))}
+        </div>
+      ) : isError ? (
+        <div className="rounded-lg border-2 border-dashed border-red-500/40 py-20 text-center">
+          <p className="text-sm text-red-500 mb-3">
+            Failed to load websites: {(error as { message?: string })?.message ?? 'Unknown error'}
+          </p>
+          <Button size="sm" variant="outline" onClick={() => refetch()}>
+            Retry
+          </Button>
         </div>
       ) : websites.length === 0 ? (
         <div className="rounded-lg border-2 border-dashed border-border py-20 text-center">

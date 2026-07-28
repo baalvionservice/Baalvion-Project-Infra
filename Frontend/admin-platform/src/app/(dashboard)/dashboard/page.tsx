@@ -156,7 +156,7 @@ export default function DashboardPage() {
   const infra     = useRealtimeStore((s) => s.infra);
   const queues    = useRealtimeStore((s) => s.queues);
 
-  const { data: integrationSummary } = useIntegrationsSummary();
+  const { data: integrationSummary, isError: integrationSummaryError } = useIntegrationsSummary();
   const connected = (integrationSummary ?? []).filter((w) => w.configured > 0);
 
   const [refetchKey, setRefetchKey] = useState(0);
@@ -451,7 +451,13 @@ export default function DashboardPage() {
                 </span>
               </Link>
             ))}
-            {!integrationSummary?.length && (
+            {integrationSummaryError && (
+              <p className="col-span-full py-4 text-center text-xs text-red-500">
+                Failed to load website connections. The API request errored — check the network
+                tab or try refreshing.
+              </p>
+            )}
+            {!integrationSummaryError && !integrationSummary?.length && (
               <p className="col-span-full py-4 text-center text-xs text-muted-foreground">
                 Loading website connections…
               </p>
