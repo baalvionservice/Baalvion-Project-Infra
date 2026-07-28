@@ -85,7 +85,7 @@ jobs:
                 console.log('cms/integrations/summary ->', JSON.stringify(await call('app-platform', 3018, '/api/v1/cms/integrations/summary')));
               })().catch(e=>{console.log('SCRIPT ERROR:', e.message); process.exit(1);});
             "
-      - name: Mint fresh token and hit the PUBLIC domain (through Cloudflare/Caddy)
+      - name: Print a short-lived diagnostic token (for external cache test only)
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.CORE2_EC2_HOST }}
@@ -95,7 +95,7 @@ jobs:
           command_timeout: 5m
           script: |
             set -uo pipefail
-            TOKEN=$(docker exec -w /app/Backend/services/identity/auth-service consolidated-app-identity-1 node -e "
+            docker exec -w /app/Backend/services/identity/auth-service consolidated-app-identity-1 node -e "
               const db = require('./models');
               const { signAccessToken } = require('./utils/jwtRsa');
               (async () => {
@@ -107,12 +107,9 @@ jobs:
                   \"select id from auth.sessions where user_id = \" + user.id + \" order by created_at desc limit 1\",
                   { type: db.sequelize.QueryTypes.SELECT }
                 );
-                process.stdout.write(signAccessToken({ sub: user.id, email: user.email, orgId: user.org_id, role: 'super_admin', permissions: [], sid: session.id }));
-                process.exit(0);
+                const t = signAccessToken({ sub: user.id, email: user.email, orgId: user.org_id, role: 'super_admin', permissions: [], sid: session.id });
+                console.log('DIAG_TOKEN_START');
+                console.log(t);
+                console.log('DIAG_TOKEN_END');
               })();
-            ")
-            echo "=== via PUBLIC domain (api.baalvion.com through Cloudflare+Caddy) ==="
-            curl -s -H "Authorization: Bearer $TOKEN" -w "\nHTTP %{http_code}\n" --max-time 15 "https://api.baalvion.com/api/v1/knowledge/cms/api/v1/cms/websites" | head -c 800
-            echo ""
-            echo "=== cache headers ==="
-            curl -sI -H "Authorization: Bearer $TOKEN" --max-time 15 "https://api.baalvion.com/api/v1/knowledge/cms/api/v1/cms/websites" | grep -iE "cf-cache-status|cache-control|age|cf-ray"
+            "
