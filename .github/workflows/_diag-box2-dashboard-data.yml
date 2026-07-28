@@ -119,3 +119,21 @@ jobs:
           name: diag-token
           path: diag_token.txt
           retention-days: 1
+
+  caddy-check:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check box2 Caddyfile routing for the cms/knowledge path
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.CORE2_EC2_HOST }}
+          username: ${{ secrets.CORE2_EC2_USER }}
+          key: ${{ secrets.CORE2_EC2_SSH_KEY }}
+          timeout: 30s
+          command_timeout: 3m
+          script: |
+            set -uo pipefail
+            cd /opt/baalvion-box2
+            echo "===== grep for cms / knowledge routes in Caddyfile ====="
+            grep -n -B2 -A6 "knowledge\|cms-service\|/cms" deploy/consolidated/caddy/Caddyfile
