@@ -48,11 +48,21 @@ jobs:
             DB_USER=$(grep -E "^DB_USER=" "$ENV" | cut -d= -f2- | tr -d "\r")
             DB_PASSWORD=$(grep -E "^DB_PASSWORD=" "$ENV" | cut -d= -f2- | tr -d "\r")
             echo "restoring into box2 DB_NAME=$DB_NAME as DB_USER=$DB_USER"
-            zcat /tmp/box1_full_dump.sql.gz | PGSSLMODE=require PGPASSWORD="$DB_PASSWORD" psql \
-              -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -v ON_ERROR_STOP=0 2>&1 | tail -100
+            # box2 bare host has no native psql -- run it via a throwaway postgres:16-alpine
+            # container instead, same trick already used for box2s migrations this session.
+            gunzip -c /tmp/box1_full_dump.sql.gz > /tmp/box1_full_dump.sql
+            docker run --rm -i \
+              -e PGSSLMODE=require -e PGPASSWORD="$DB_PASSWORD" \
+              -v /tmp/box1_full_dump.sql:/tmp/dump.sql:ro \
+              postgres:16-alpine \
+              psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -v ON_ERROR_STOP=0 -f /tmp/dump.sql 2>&1 | tail -150
             echo "=== post-restore sanity check ==="
-            PGSSLMODE=require PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" \
+            docker run --rm \
+              -e PGSSLMODE=require -e PGPASSWORD="$DB_PASSWORD" \
+              postgres:16-alpine \
+              psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" \
               -c "select count(*) as cms_websites from cms.cms_websites;"
+            rm -f /tmp/box1_full_dump.sql
           '
 
       - name: Cleanup dump files (always runs)
