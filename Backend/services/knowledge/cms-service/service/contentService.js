@@ -71,11 +71,23 @@ async function listContent(websiteId, query = {}) {
         ];
     }
     if (authorId) where.authorId = authorId;
+    // Match each word independently (title OR excerpt, any order) rather than the whole
+    // query as one contiguous substring — a title like "Dollar-Cost Averaging Explained"
+    // would never match a phrase search for "what is dollar cost averaging" otherwise,
+    // since punctuation, word order, and filler words rarely line up exactly.
     if (search) {
-        where[Op.or] = [
-            { title: { [Op.iLike]: `%${search}%` } },
-            { excerpt: { [Op.iLike]: `%${search}%` } },
-        ];
+        const terms = search.trim().split(/\s+/).filter(Boolean);
+        if (terms.length) {
+            where[Op.and] = [
+                ...(where[Op.and] || []),
+                ...terms.map((term) => ({
+                    [Op.or]: [
+                        { title: { [Op.iLike]: `%${term}%` } },
+                        { excerpt: { [Op.iLike]: `%${term}%` } },
+                    ],
+                })),
+            ];
+        }
     }
 
     const { rows, count } = await CmsContent.findAndCountAll({
