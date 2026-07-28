@@ -1,0 +1,40 @@
+name: (temp) Diagnose box1 reachability + CMS data
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Read-only status + CMS data check over SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.CORE_EC2_HOST }}
+          username: ${{ secrets.CORE_EC2_USER }}
+          key: ${{ secrets.CORE_EC2_SSH_KEY }}
+          timeout: 30s
+          command_timeout: 5m
+          script: |
+            set -uo pipefail
+            echo "===== uptime / hostname ====="
+            hostname
+            uptime
+            echo "===== docker compose ps ====="
+            cd /opt/baalvion-core
+            COMPOSE="docker compose --env-file deploy/consolidated/.env \
+              -f deploy/consolidated/docker-compose.prod.yml \
+              -f deploy/consolidated/docker-compose.ssl-override.yml"
+            $COMPOSE ps
+            echo "===== RDS: cms_websites count + list (read-only) ====="
+            ENV=deploy/consolidated/.env
+            DB_HOST="$(grep -E '^DB_HOST=' "$ENV" | head -1 | cut -d= -f2- | tr -d '\r')"
+            DB_PORT="$(grep -E '^DB_PORT=' "$ENV" | head -1 | cut -d= -f2- | tr -d '\r')"
+            DB_NAME="$(grep -E '^DB_NAME=' "$ENV" | head -1 | cut -d= -f2- | tr -d '\r')"
+            DB_USER="$(grep -E '^DB_USER=' "$ENV" | head -1 | cut -d= -f2- | tr -d '\r')"
+            DB_PASSWORD="$(grep -E '^DB_PASSWORD=' "$ENV" | head -1 | cut -d= -f2- | tr -d '\r')"
+            PGSSLMODE=require PGPASSWORD="$DB_PASSWORD" psql \
+              "postgresql://${DB_USER}@${DB_HOST}:${DB_PORT}/${DB_NAME}" \
+              -c "select count(*) as cms_websites from cms.cms_websites;" \
+              -c "select id, name, slug from cms.cms_websites limit 25;" 2>&1 || true
