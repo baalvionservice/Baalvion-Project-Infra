@@ -1,0 +1,76 @@
+name: (temp) Full local backup of box2 (db + media + nodebb)
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Set up SSH key for box2
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.CORE2_EC2_SSH_KEY }}" > ~/.ssh/box2_key
+          chmod 600 ~/.ssh/box2_key
+          ssh-keyscan -H "${{ secrets.CORE2_EC2_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Dump main database on box2
+        run: |
+          ssh -i ~/.ssh/box2_key "${{ secrets.CORE2_EC2_USER }}@${{ secrets.CORE2_EC2_HOST }}" '
+            set -euo pipefail
+            ENV=/opt/baalvion-box2/deploy/consolidated/.env
+            DB_HOST=$(grep -E "^DB_HOST=" "$ENV" | cut -d= -f2- | tr -d "\r")
+            DB_PORT=$(grep -E "^DB_PORT=" "$ENV" | cut -d= -f2- | tr -d "\r")
+            DB_NAME=$(grep -E "^DB_NAME=" "$ENV" | cut -d= -f2- | tr -d "\r")
+            DB_USER=$(grep -E "^DB_USER=" "$ENV" | cut -d= -f2- | tr -d "\r")
+            DB_PASSWORD=$(grep -E "^DB_PASSWORD=" "$ENV" | cut -d= -f2- | tr -d "\r")
+            docker run --rm \
+              -e PGSSLMODE=require -e PGPASSWORD="$DB_PASSWORD" \
+              postgres:16-alpine \
+              pg_dump -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" --no-owner --no-privileges \
+              > /tmp/backup_main_db.sql
+            gzip -f /tmp/backup_main_db.sql
+            echo "main db dump size: $(du -h /tmp/backup_main_db.sql.gz | cut -f1)"
+          '
+          scp -i ~/.ssh/box2_key "${{ secrets.CORE2_EC2_USER }}@${{ secrets.CORE2_EC2_HOST }}:/tmp/backup_main_db.sql.gz" ./backup_main_db.sql.gz
+
+      - name: Dump nodebb database on box2
+        run: |
+          ssh -i ~/.ssh/box2_key "${{ secrets.CORE2_EC2_USER }}@${{ secrets.CORE2_EC2_HOST }}" '
+            set -euo pipefail
+            CONTAINER=$(docker ps --format "{{.Names}}" | grep -E "nodebb-postgres" | head -1)
+            PGUSER=$(docker exec "$CONTAINER" printenv POSTGRES_USER)
+            PGDB=$(docker exec "$CONTAINER" printenv POSTGRES_DB)
+            docker exec "$CONTAINER" pg_dump -U "$PGUSER" -d "$PGDB" --no-owner --no-privileges > /tmp/backup_nodebb.sql
+            gzip -f /tmp/backup_nodebb.sql
+            echo "nodebb dump size: $(du -h /tmp/backup_nodebb.sql.gz | cut -f1)"
+          '
+          scp -i ~/.ssh/box2_key "${{ secrets.CORE2_EC2_USER }}@${{ secrets.CORE2_EC2_HOST }}:/tmp/backup_nodebb.sql.gz" ./backup_nodebb.sql.gz
+
+      - name: Tar media/uploads on box2
+        run: |
+          ssh -i ~/.ssh/box2_key "${{ secrets.CORE2_EC2_USER }}@${{ secrets.CORE2_EC2_HOST }}" '
+            set -euo pipefail
+            docker exec consolidated-app-platform-1 tar -czf /tmp/backup_media.tar.gz -C /app/Backend/services/knowledge/cms-service/uploads .
+            docker cp consolidated-app-platform-1:/tmp/backup_media.tar.gz /tmp/backup_media.tar.gz
+            docker exec consolidated-app-platform-1 rm -f /tmp/backup_media.tar.gz
+            echo "media tarball size: $(du -h /tmp/backup_media.tar.gz | cut -f1)"
+          '
+          scp -i ~/.ssh/box2_key "${{ secrets.CORE2_EC2_USER }}@${{ secrets.CORE2_EC2_HOST }}:/tmp/backup_media.tar.gz" ./backup_media.tar.gz
+
+      - name: Clean up remote temp files
+        if: always()
+        run: |
+          ssh -i ~/.ssh/box2_key "${{ secrets.CORE2_EC2_USER }}@${{ secrets.CORE2_EC2_HOST }}" \
+            "rm -f /tmp/backup_main_db.sql.gz /tmp/backup_nodebb.sql.gz /tmp/backup_media.tar.gz" || true
+
+      - name: Upload all three as one artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: box2-full-backup
+          path: |
+            backup_main_db.sql.gz
+            backup_nodebb.sql.gz
+            backup_media.tar.gz
+          retention-days: 3
