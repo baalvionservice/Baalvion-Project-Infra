@@ -1,0 +1,45 @@
+name: (temp) Unblock CMS upload (set UPLOAD_SCAN_REQUIRED=false, recreate app-platform)
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  fix-upload-scan:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Set UPLOAD_SCAN_REQUIRED=false and recreate app-platform
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.CORE2_EC2_HOST }}
+          username: ${{ secrets.CORE2_EC2_USER }}
+          key: ${{ secrets.CORE2_EC2_SSH_KEY }}
+          timeout: 30s
+          command_timeout: 3m
+          script: |
+            set -euo pipefail
+            cd /opt/baalvion-box2/deploy/consolidated
+
+            ENV=.env
+            if grep -q '^UPLOAD_SCAN_REQUIRED=' "$ENV"; then
+              sed -i 's|^UPLOAD_SCAN_REQUIRED=.*|UPLOAD_SCAN_REQUIRED=false|' "$ENV"
+            else
+              echo 'UPLOAD_SCAN_REQUIRED=false' >> "$ENV"
+            fi
+            echo "===== current setting ====="
+            grep '^UPLOAD_SCAN' "$ENV" || echo "(no UPLOAD_SCAN_URL set — expected, scanning stays opt-out)"
+
+            echo
+            echo "===== recreating app-platform (cms-service lives here) so the new env is picked up ====="
+            docker compose --env-file "$ENV" -f docker-compose.prod.yml up -d --no-build --no-deps app-platform
+
+            echo
+            echo "===== waiting for health ====="
+            for i in $(seq 1 10); do
+              if docker compose --env-file "$ENV" -f docker-compose.prod.yml ps app-platform | grep -q '(healthy)'; then
+                echo "app-platform healthy"
+                break
+              fi
+              sleep 5
+            done
+            docker compose --env-file "$ENV" -f docker-compose.prod.yml ps app-platform
