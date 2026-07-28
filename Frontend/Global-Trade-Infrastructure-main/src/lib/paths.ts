@@ -7,6 +7,7 @@ export const PATHS = {
   // --- PUBLIC INSTITUTIONAL GATEWAY ---
   HOME: '/',
   PLATFORM: '/platform',
+  PLATFORM_MAP: '/platform/map',
   SOLUTIONS_BANKS: '/banks',
   SOLUTIONS_GOV: '/governments',
   SOLUTIONS_ENTERPRISES: '/enterprises',
