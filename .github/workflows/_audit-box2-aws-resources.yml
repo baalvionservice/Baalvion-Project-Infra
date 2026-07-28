@@ -3,6 +3,10 @@ name: (temp) Audit box2 AWS resource sizing (EC2/EBS/RDS)
 on:
   workflow_dispatch: {}
 
+permissions:
+  contents: read
+  id-token: write   # OIDC role assumption
+
 jobs:
   audit:
     runs-on: ubuntu-latest
