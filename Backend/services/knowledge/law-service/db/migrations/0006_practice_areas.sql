@@ -7,12 +7,19 @@
 
 CREATE TABLE IF NOT EXISTS legal.practice_areas (
     id         SERIAL PRIMARY KEY,
-    name       VARCHAR(120) NOT NULL UNIQUE,
-    slug       VARCHAR(120) NOT NULL UNIQUE,
+    name       VARCHAR(120) NOT NULL,
+    slug       VARCHAR(120) NOT NULL,
     is_active  BOOLEAN NOT NULL DEFAULT true,
     "order"    INTEGER NOT NULL DEFAULT 0,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    created_at TIMESTAMPTZ NOT NULL
 );
+
+-- Same root cause/fix as 0005_geo_taxonomy.sql: legal.practice_areas can already exist
+-- (Sequelize model sync, pre-this-migration) without these inline constraints/defaults,
+-- and CREATE TABLE IF NOT EXISTS silently skips them in that case.
+ALTER TABLE legal.practice_areas ALTER COLUMN created_at SET DEFAULT now();
+CREATE UNIQUE INDEX IF NOT EXISTS uq_practice_areas_name ON legal.practice_areas (name);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_practice_areas_slug ON legal.practice_areas (slug);
 
 INSERT INTO legal.practice_areas (name, slug, "order") VALUES
     ('Criminal', 'criminal', 1),
@@ -35,8 +42,9 @@ CREATE TABLE IF NOT EXISTS legal.lawyer_practice_areas (
     id               SERIAL PRIMARY KEY,
     lawyer_id        INTEGER NOT NULL REFERENCES legal.lawyers(id) ON DELETE CASCADE,
     practice_area_id INTEGER NOT NULL REFERENCES legal.practice_areas(id) ON DELETE CASCADE,
-    created_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
-    UNIQUE (lawyer_id, practice_area_id)
+    created_at       TIMESTAMPTZ NOT NULL
 );
+ALTER TABLE legal.lawyer_practice_areas ALTER COLUMN created_at SET DEFAULT now();
+CREATE UNIQUE INDEX IF NOT EXISTS uq_lawyer_practice_areas ON legal.lawyer_practice_areas (lawyer_id, practice_area_id);
 CREATE INDEX IF NOT EXISTS idx_lawyer_practice_areas_lawyer ON legal.lawyer_practice_areas (lawyer_id);
 CREATE INDEX IF NOT EXISTS idx_lawyer_practice_areas_practice ON legal.lawyer_practice_areas (practice_area_id);
