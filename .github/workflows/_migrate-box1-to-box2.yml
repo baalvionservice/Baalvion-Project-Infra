@@ -139,18 +139,20 @@ jobs:
           scp -i ~/.ssh/box2_key ./nodebb_dump.sql.gz "${{ secrets.CORE2_EC2_USER }}@${{ secrets.CORE2_EC2_HOST }}:/tmp/nodebb_dump.sql.gz"
           ssh -i ~/.ssh/box2_key "${{ secrets.CORE2_EC2_USER }}@${{ secrets.CORE2_EC2_HOST }}" '
             set -euo pipefail
-            if ! docker ps --format "{{.Names}}" | grep -qx nodebb-postgres; then
-              echo "BOX2 HAS NO nodebb-postgres CONTAINER -- skipping restore, needs investigation"
+            CONTAINER=$(docker ps --format "{{.Names}}" | grep -E "nodebb-postgres" | head -1)
+            if [ -z "$CONTAINER" ]; then
+              echo "BOX2 HAS NO nodebb-postgres-like CONTAINER -- skipping restore, needs investigation"
               exit 1
             fi
-            PGUSER=$(docker exec nodebb-postgres printenv POSTGRES_USER)
-            PGDB=$(docker exec nodebb-postgres printenv POSTGRES_DB)
+            echo "using container: $CONTAINER"
+            PGUSER=$(docker exec "$CONTAINER" printenv POSTGRES_USER)
+            PGDB=$(docker exec "$CONTAINER" printenv POSTGRES_DB)
             gunzip -c /tmp/nodebb_dump.sql.gz > /tmp/nodebb_dump.sql
-            docker cp /tmp/nodebb_dump.sql nodebb-postgres:/tmp/nodebb_dump.sql
-            docker exec nodebb-postgres psql -U "$PGUSER" -d "$PGDB" -v ON_ERROR_STOP=0 -f /tmp/nodebb_dump.sql 2>&1 | tail -100
+            docker cp /tmp/nodebb_dump.sql "$CONTAINER":/tmp/nodebb_dump.sql
+            docker exec "$CONTAINER" psql -U "$PGUSER" -d "$PGDB" -v ON_ERROR_STOP=0 -f /tmp/nodebb_dump.sql 2>&1 | tail -100
             echo "=== post-restore sanity check ==="
-            docker exec nodebb-postgres psql -U "$PGUSER" -d "$PGDB" -c "select count(*) from legacy_object;"
-            docker exec nodebb-postgres rm -f /tmp/nodebb_dump.sql
+            docker exec "$CONTAINER" psql -U "$PGUSER" -d "$PGDB" -c "select count(*) from legacy_object;"
+            docker exec "$CONTAINER" rm -f /tmp/nodebb_dump.sql
             rm -f /tmp/nodebb_dump.sql
           '
           rm -f nodebb_dump.sql.gz
