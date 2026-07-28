@@ -1,0 +1,44 @@
+name: (temp) Audit box2 AWS resource sizing (EC2/EBS/RDS)
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-region: ${{ vars.CORE2_AWS_REGION || 'ap-south-1' }}
+          role-to-assume: ${{ secrets.CORE2_AWS_DEPLOY_ROLE_ARN }}
+
+      - name: EC2 instance sizing
+        run: |
+          set -uo pipefail
+          echo "===== EC2 instance matching box2's host IP ====="
+          aws ec2 describe-instances \
+            --filters "Name=ip-address,Values=${{ secrets.CORE2_EC2_HOST }}" \
+            --query 'Reservations[].Instances[].{Id:InstanceId,Type:InstanceType,State:State.Name,AZ:Placement.AvailabilityZone,Launch:LaunchTime}' \
+            --output table
+
+          INSTANCE_ID=$(aws ec2 describe-instances \
+            --filters "Name=ip-address,Values=${{ secrets.CORE2_EC2_HOST }}" \
+            --query 'Reservations[0].Instances[0].InstanceId' --output text)
+          echo "resolved instance id: $INSTANCE_ID"
+
+          echo
+          echo "===== attached EBS volumes ====="
+          aws ec2 describe-volumes \
+            --filters "Name=attachment.instance-id,Values=$INSTANCE_ID" \
+            --query 'Volumes[].{Id:VolumeId,SizeGiB:Size,Type:VolumeType,Iops:Iops}' \
+            --output table
+
+      - name: RDS instance sizing
+        run: |
+          set -uo pipefail
+          echo "===== all RDS instances in this account/region ====="
+          aws rds describe-db-instances \
+            --query 'DBInstances[].{Id:DBInstanceIdentifier,Class:DBInstanceClass,Engine:Engine,MultiAZ:MultiAZ,StorageGiB:AllocatedStorage,StorageType:StorageType,Status:DBInstanceStatus}' \
+            --output table
