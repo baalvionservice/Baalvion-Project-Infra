@@ -20,7 +20,9 @@ export const metadata: Metadata = pageMetadata({
   keywords: ['country trade policy', 'import export rules', 'customs tariffs', 'trade agreements', 'HS codes', 'country knowledge base'],
 });
 
-export const revalidate = 300;
+// Reads the GCKB database directly — forced dynamic so build doesn't require a
+// reachable DB at build time. See authorities/page.tsx for the full rationale.
+export const dynamic = 'force-dynamic';
 
 export default async function CountriesPage() {
   const countries = await listCountries();
@@ -44,7 +46,7 @@ export default async function CountriesPage() {
           {countries.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-white/10 bg-slate-950/40 py-24 text-center">
               <p className="text-sm font-bold text-slate-300">The knowledge base has no published countries yet.</p>
-              <p className="mt-1 text-xs text-slate-500">Reference data is loaded through the import API or the seed tooling.</p>
+              <p className="mt-1 text-xs text-slate-500">Our institutional data team is expanding this directory. Check back soon or contact us for details on a specific country.</p>
             </div>
           ) : (
             <CountryExplorer countries={countries} />

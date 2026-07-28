@@ -11,7 +11,9 @@ import { getAgreementDetail } from '@/server/gckb/public-read';
  * and every published preferential tariff line granted under the agreement.
  */
 
-export const revalidate = 300;
+// Reads the GCKB database directly — forced dynamic so build doesn't require a
+// reachable DB at build time. See authorities/page.tsx for the full rationale.
+export const dynamic = 'force-dynamic';
 
 type Params = { params: Promise<{ code: string }> };
 

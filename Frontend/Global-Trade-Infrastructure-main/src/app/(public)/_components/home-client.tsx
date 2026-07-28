@@ -199,6 +199,9 @@ export function HomeClient() {
             <Button variant="outline" className="h-14 px-10 border-white/10 text-white font-black uppercase tracking-widest text-xs rounded-2xl hover:bg-white/5" asChild>
               <Link href={PATHS.ACCESS_REQUEST}>Request Institutional Access</Link>
             </Button>
+            <Button variant="outline" className="h-14 px-10 border-white/10 text-white font-black uppercase tracking-widest text-xs rounded-2xl hover:bg-white/5" asChild>
+              <Link href={PATHS.CONTACT}>Book A Consultation</Link>
+            </Button>
           </div>
         </div>
       </section>

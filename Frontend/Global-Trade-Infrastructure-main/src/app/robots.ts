@@ -25,6 +25,12 @@ export default function robots(): MetadataRoute.Robots {
           '/onboard',
           '/privacy',
           '/terms',
+          '/countries',
+          '/ports',
+          '/tariffs',
+          '/fta',
+          '/authorities',
+          '/compare',
         ],
         disallow: [
           '/dashboard',

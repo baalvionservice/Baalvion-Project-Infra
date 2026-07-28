@@ -17,6 +17,7 @@ const pricingTiers = [
     description: "Ideal for growing exporters and importers requiring verified trade execution.",
     features: ["Up to 10 active RFQs", "Integrated Escrow (Standard)", "Basic Logistics Tracking", "KYC/KYB Verification"],
     cta: "Start Scaling",
+    href: PATHS.ONBOARD,
     highlight: false,
     icon: Zap
   },
@@ -27,6 +28,7 @@ const pricingTiers = [
     description: "Advanced capabilities for high-volume traders and mid-market enterprises.",
     features: ["Unlimited RFQs & Orders", "Multi-Currency Finance Cloud", "Advanced IoT Telemetry", "Priority Customs Clearance", "AI Intelligence Insights"],
     cta: "Go Institutional",
+    href: PATHS.ONBOARD,
     highlight: true,
     icon: Globe
   },
@@ -37,6 +39,7 @@ const pricingTiers = [
     description: "Mission-critical infrastructure for multinational corporations and banks.",
     features: ["Private Cloud Option", "SWIFT / ERP Native Connectors", "Sovereign Data Residency", "Dedicated TAM Support", "Full Forensic Audit Access"],
     cta: "Contact Enterprise Sales",
+    href: PATHS.CONTACT,
     highlight: false,
     icon: Landmark
   },
@@ -47,6 +50,7 @@ const pricingTiers = [
     description: "The digital trade backbone for national governments and regulators.",
     features: ["Jurisdictional Control Node", "Regulatory Oversight Portal", "HS Code Policy Management", "National Trade Heatmaps", "Crisis Response Command"],
     cta: "Inquire Governance Access",
+    href: PATHS.ACCESS_REQUEST,
     highlight: false,
     icon: ShieldCheck
   }
@@ -58,7 +62,7 @@ export default function PricingPage() {
       <section className="py-24 text-center">
         <div className="container px-4">
           <Badge variant="outline" className="mb-6 px-4 py-1.5 uppercase font-black tracking-widest border-primary/20 text-primary bg-primary/5">
-             Commercialization v4.2
+             Institutional Pricing
           </Badge>
           <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter mb-6">
             Institutional <br />Pricing Matrix
@@ -104,8 +108,10 @@ export default function PricingPage() {
                   </ul>
                 </CardContent>
                 <CardFooter className="p-8 border-t bg-muted/20">
-                  <Button className="w-full h-12 font-black uppercase tracking-widest text-[10px]" variant={tier.highlight ? "default" : "outline"}>
-                    {tier.cta} <ArrowRight className="ml-2 h-3 w-3" />
+                  <Button className="w-full h-12 font-black uppercase tracking-widest text-[10px]" variant={tier.highlight ? "default" : "outline"} asChild>
+                    <Link href={tier.href}>
+                      {tier.cta} <ArrowRight className="ml-2 h-3 w-3" />
+                    </Link>
                   </Button>
                 </CardFooter>
               </Card>
