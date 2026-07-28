@@ -310,7 +310,7 @@ async function updateContent(websiteId, contentId, userId, body) {
                 await cache.delPattern(`cms:public:${website.slug}:*`);
                 // Revalidate the website's build-cached (ISR) pages so the live edit
                 // appears immediately. Fire-and-forget; never blocks the response.
-                const { paths, urls } = revalidateService.pathsForContent(content, website.domain);
+                const { paths, urls } = await revalidateService.pathsForContent(content, website.domain);
                 revalidateService.dispatch(website.slug, { paths, urls });
             }
         } catch { /* fail-open */ }
@@ -421,7 +421,7 @@ async function bulkUpdate(websiteId, userId, { ids, action, categoryId }) {
             if (website?.slug) {
                 await cache.delPattern(`cms:public:${website.slug}:*`);
                 for (const content of wasPublished) {
-                    const { paths, urls } = revalidateService.pathsForContent(content, website.domain);
+                    const { paths, urls } = await revalidateService.pathsForContent(content, website.domain);
                     revalidateService.dispatch(website.slug, { paths, urls });
                 }
             }
