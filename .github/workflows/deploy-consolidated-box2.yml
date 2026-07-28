@@ -510,6 +510,34 @@ jobs:
               || echo "::notice::marketplace-service migration step failed this run -- check logs"
             echo "::notice title=Migrations applied::commerce/inventory/fulfillment/marketplace schemas current on app-commerce."
 
+      - name: Apply cms-service + news-service migrations (idempotent)
+        if: steps.gate.outputs.ready == 'true'
+        continue-on-error: true   # never block the backend roll on a migration hiccup
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.CORE2_EC2_HOST }}
+          username: ${{ secrets.CORE2_EC2_USER }}
+          key: ${{ secrets.CORE2_EC2_SSH_KEY }}
+          # Same missing-migration-step bug as app-commerce, confirmed live: GET .../cms/websites
+          # 500s with 'relation "cms.cms_websites" does not exist'. deploy-consolidated.yml (the
+          # original prod-01 workflow) has always run these two via `npm run migrate` post-roll --
+          # this box2 workflow simply never had the equivalent step. news-service also gained a
+          # sync({alter:false}) call in its own boot code earlier this session (a different,
+          # already-live fix for the same underlying gap), so this is redundant-but-harmless
+          # belt-and-suspenders for news-service specifically; it's the real fix for cms-service.
+          script: |
+            set -euo pipefail
+            cd /opt/baalvion-box2
+            ENV=deploy/consolidated/.env
+            COMPOSE="docker compose --env-file $ENV -f deploy/consolidated/docker-compose.prod.yml"
+            $COMPOSE exec -T -e PGSSLMODE=require app-platform \
+              sh -lc "cd /app/Backend/services/knowledge/cms-service && npm run migrate" \
+              || echo "::notice::cms-service migration step failed this run -- check logs"
+            $COMPOSE exec -T -e PGSSLMODE=require app-platform \
+              sh -lc "cd /app/Backend/services/knowledge/news-service && npm run migrate" \
+              || echo "::notice::news-service migration step failed this run -- check logs"
+            echo "::notice title=Migrations applied::cms-service + news-service schemas current on app-platform."
+
       - name: Bootstrap / repair platform super-admin (idempotent)
         if: steps.gate.outputs.ready == 'true'
         continue-on-error: true   # never block the backend roll on the admin seed
