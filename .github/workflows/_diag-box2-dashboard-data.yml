@@ -49,3 +49,39 @@ jobs:
                 console.log('cms/integrations/summary (app-platform:3018) ->', JSON.stringify(await call('app-platform', 3018, '/api/v1/cms/integrations/summary')));
               })().catch(e=>{console.log('SCRIPT ERROR:', e.message); process.exit(1);});
             "
+      - name: Retry with a real, existing session id
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.CORE2_EC2_HOST }}
+          username: ${{ secrets.CORE2_EC2_USER }}
+          key: ${{ secrets.CORE2_EC2_SSH_KEY }}
+          timeout: 30s
+          command_timeout: 5m
+          script: |
+            set -uo pipefail
+            docker exec -w /app/Backend/services/identity/auth-service consolidated-app-identity-1 node -e "
+              const db = require('./models');
+              const { signAccessToken } = require('./utils/jwtRsa');
+              const http = require('http');
+              (async () => {
+                const [user] = await db.sequelize.query(
+                  \"select u.id, u.email, tm.org_id from auth.users u join auth.team_members tm on tm.user_id = u.id where tm.role = 'super_admin' limit 1\",
+                  { type: db.sequelize.QueryTypes.SELECT }
+                );
+                const [session] = await db.sequelize.query(
+                  \"select id from auth.sessions where user_id = \" + user.id + \" order by created_at desc limit 1\",
+                  { type: db.sequelize.QueryTypes.SELECT }
+                );
+                console.log('user:', user.email, user.id, 'session:', session ? session.id : 'NONE FOUND');
+                if (!session) { console.log('NO SESSION ROW EXISTS FOR THIS USER'); process.exit(1); }
+                const token = signAccessToken({ sub: user.id, email: user.email, orgId: user.org_id, role: 'super_admin', permissions: [], sid: session.id });
+                const call = (host, port, path) => new Promise((resolve) => {
+                  http.get({ host, port, path, headers: { Authorization: 'Bearer ' + token } }, (r) => {
+                    let d=''; r.on('data', c=>d+=c); r.on('end', ()=>resolve({status:r.statusCode, body:d.slice(0,800)}));
+                  }).on('error', e=>resolve({status:'ERR', body:e.message}));
+                });
+                console.log('admin/stats ->', JSON.stringify(await call('app-platform', 3021, '/v1/admin/stats')));
+                console.log('cms/websites ->', JSON.stringify(await call('app-platform', 3018, '/api/v1/cms/websites')));
+                console.log('cms/integrations/summary ->', JSON.stringify(await call('app-platform', 3018, '/api/v1/cms/integrations/summary')));
+              })().catch(e=>{console.log('SCRIPT ERROR:', e.message); process.exit(1);});
+            "
