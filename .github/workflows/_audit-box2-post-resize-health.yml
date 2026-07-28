@@ -1,0 +1,31 @@
+name: (temp) Verify box2 container health after t3.large resize
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Container status + health endpoints
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.CORE2_EC2_HOST }}
+          username: ${{ secrets.CORE2_EC2_USER }}
+          key: ${{ secrets.CORE2_EC2_SSH_KEY }}
+          timeout: 30s
+          command_timeout: 2m
+          script: |
+            set -uo pipefail
+            echo "===== all containers ====="
+            docker ps -a --format '{{.Names}}\t{{.Status}}'
+            echo
+            echo "===== caddy -> app health checks ====="
+            docker exec consolidated-caddy-1 sh -c "wget -qO- http://app-identity:3001/health || echo FAILED" 2>&1; echo
+            docker exec consolidated-caddy-1 sh -c "wget -qO- http://app-platform:3021/health || echo FAILED" 2>&1; echo
+            docker exec consolidated-caddy-1 sh -c "wget -qO- http://app-commerce:3012/health || echo FAILED" 2>&1; echo
+            docker exec consolidated-caddy-1 sh -c "wget -qO- http://app-edge-realtime:4000/health || echo FAILED" 2>&1; echo
+            echo
+            echo "===== public HTTPS sanity ====="
+            curl -sk -o /dev/null -w "admin.baalvion.com -> %{http_code}\n" https://admin.baalvion.com/
