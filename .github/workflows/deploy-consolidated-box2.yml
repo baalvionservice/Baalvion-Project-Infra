@@ -477,6 +477,39 @@ jobs:
             $COMPOSE up -d --no-build --no-deps caddy
             docker image prune -f
 
+      - name: Apply app-commerce service migrations (idempotent)
+        if: steps.gate.outputs.ready == 'true'
+        continue-on-error: true   # never block the backend roll on a migration hiccup
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.CORE2_EC2_HOST }}
+          username: ${{ secrets.CORE2_EC2_USER }}
+          key: ${{ secrets.CORE2_EC2_SSH_KEY }}
+          # commerce-service, inventory-service, fulfillment-service, and marketplace-service
+          # all ship real sequelize-cli/custom migration files but none of them are ever
+          # invoked anywhere in this pipeline (only market-service self-migrates via
+          # sync({alter:false})) -- same class of bug as the auth-service oauth-tables fix
+          # above. Confirmed live: fulfillment-service 500s with 'relation
+          # "fulfillment.fulfillment_shipments" does not exist' on every shipments call.
+          # All four migration chains here are verified idempotent (sequelize-cli tracks
+          # SequelizeMeta; marketplace-service's custom migrate.js has no tracking table but
+          # every statement in its 4 files is additive/IF-NOT-EXISTS or DROP-POLICY-then-
+          # CREATE, so re-running the whole chain every deploy is safe).
+          script: |
+            set -euo pipefail
+            cd /opt/baalvion-box2
+            ENV=deploy/consolidated/.env
+            COMPOSE="docker compose --env-file $ENV -f deploy/consolidated/docker-compose.prod.yml"
+            for svc in commerce-service inventory-service fulfillment-service; do
+              $COMPOSE exec -T -e PGSSLMODE=require app-commerce \
+                sh -lc "cd /app/Backend/services/commerce/${svc} && npm run migrate" \
+                || echo "::notice::${svc} migration step failed this run -- check logs"
+            done
+            $COMPOSE exec -T -e PGSSLMODE=require app-commerce \
+              sh -lc "cd /app/Backend/services/marketplace/marketplace-service && npm run migrate" \
+              || echo "::notice::marketplace-service migration step failed this run -- check logs"
+            echo "::notice title=Migrations applied::commerce/inventory/fulfillment/marketplace schemas current on app-commerce."
+
       - name: Bootstrap / repair platform super-admin (idempotent)
         if: steps.gate.outputs.ready == 'true'
         continue-on-error: true   # never block the backend roll on the admin seed
