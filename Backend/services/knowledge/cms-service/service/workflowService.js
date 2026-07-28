@@ -105,7 +105,7 @@ async function transition(websiteId, contentId, userId, userLevel, action, notes
             const websiteSlug = website ? website.slug : null;
             // Shared across the revalidate webhook and the search-engine ping below —
             // both want the same canonical content URL(s).
-            const { paths, urls: contentUrls } = revalidateService.pathsForContent(content, website && website.domain);
+            const { paths, urls: contentUrls } = await revalidateService.pathsForContent(content, website && website.domain);
             // Bust the public delivery cache so published edits appear immediately on the
             // live site instead of waiting out the 10-minute public TTL.
             if (websiteSlug) {

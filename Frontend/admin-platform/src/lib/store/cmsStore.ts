@@ -21,6 +21,11 @@ interface CmsState {
   // Pending approvals count (badge on nav)
   pendingApprovalsCount: number;
 
+  // Last content-list URL visited per website (pathname + query string), so the
+  // editor's "back" link can restore filters/search/page instead of dumping the
+  // user back on the unfiltered list.
+  lastContentListUrl: Record<string, string>;
+
   // Actions
   setActiveWebsite: (website: Website | null) => void;
   setActiveWebsiteId: (id: string | null) => void;
@@ -32,6 +37,7 @@ interface CmsState {
   toggleSidePanel: (panel: 'seo' | 'versions' | 'settings' | 'categories') => void;
   closeSidePanel: () => void;
   setPendingApprovalsCount: (count: number) => void;
+  setLastContentListUrl: (websiteId: string, url: string) => void;
 }
 
 export const useCmsStore = create<CmsState>()(
@@ -46,6 +52,7 @@ export const useCmsStore = create<CmsState>()(
       sidebarPanelOpen: false,
       activeSidePanel: null,
       pendingApprovalsCount: 0,
+      lastContentListUrl: {},
 
       setActiveWebsite: (website) =>
         set({ activeWebsite: website, activeWebsiteId: website?.id ?? null }),
@@ -89,12 +96,16 @@ export const useCmsStore = create<CmsState>()(
       closeSidePanel: () => set({ sidebarPanelOpen: false, activeSidePanel: null }),
 
       setPendingApprovalsCount: (count) => set({ pendingApprovalsCount: count }),
+
+      setLastContentListUrl: (websiteId, url) =>
+        set((s) => ({ lastContentListUrl: { ...s.lastContentListUrl, [websiteId]: url } })),
     }),
     {
       name: 'baalvion-cms',
       partialize: (s) => ({
         activeWebsiteId: s.activeWebsiteId,
         activeWebsite: s.activeWebsite,
+        lastContentListUrl: s.lastContentListUrl,
       }),
     }
   )
