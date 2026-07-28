@@ -137,3 +137,38 @@ jobs:
             cd /opt/baalvion-box2
             echo "===== grep for cms / knowledge routes in Caddyfile ====="
             grep -n -B2 -A6 "knowledge\|cms-service\|/cms" deploy/consolidated/caddy/Caddyfile
+
+  org-membership-check:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: List ALL org memberships for the super_admin user + which org owns the websites
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.CORE2_EC2_HOST }}
+          username: ${{ secrets.CORE2_EC2_USER }}
+          key: ${{ secrets.CORE2_EC2_SSH_KEY }}
+          timeout: 30s
+          command_timeout: 3m
+          script: |
+            set -uo pipefail
+            docker exec -w /app/Backend/services/identity/auth-service consolidated-app-identity-1 node -e "
+              const db = require('./models');
+              (async () => {
+                const memberships = await db.sequelize.query(
+                  \"select tm.org_id, tm.role, o.name from auth.team_members tm left join auth.organizations o on o.id = tm.org_id where tm.user_id = 1\",
+                  { type: db.sequelize.QueryTypes.SELECT }
+                );
+                console.log('ALL memberships for user 1:', JSON.stringify(memberships, null, 2));
+                const websiteOrgs = await db.sequelize.query(
+                  \"select distinct organization_id, count(*) from cms.cms_websites group by organization_id\",
+                  { type: db.sequelize.QueryTypes.SELECT }
+                );
+                console.log('org(s) that own cms_websites rows:', JSON.stringify(websiteOrgs, null, 2));
+                const sessions = await db.sequelize.query(
+                  \"select id, org_id, created_at from auth.sessions where user_id = 1 order by created_at desc limit 5\",
+                  { type: db.sequelize.QueryTypes.SELECT }
+                );
+                console.log('recent real sessions (org_id used at real login):', JSON.stringify(sessions, null, 2));
+              })().catch(e=>{console.log('ERROR:', e.message); process.exit(1);});
+            "
