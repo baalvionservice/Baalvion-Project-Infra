@@ -6,6 +6,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { PATHS } from '@/lib/paths';
 import { documentService, TradeDocument, DocumentType, DocumentClassification } from '@/services/document-service';
 import { apiClient } from '@/lib/api-client';
 import { toList } from '@/lib/api-list';
@@ -189,6 +191,11 @@ export default function InstitutionalVaultPage() {
               <Lock className="h-4 w-4" />
               Encryption: AES-256 Verified
            </button>
+           <Button asChild variant="outline" className="h-12 px-6 border-2 font-black uppercase tracking-widest text-xs">
+              <Link href={PATHS.DOCUMENT_CENTER}>
+                <FileText className="mr-3 h-5 w-5" /> Document Center
+              </Link>
+           </Button>
            <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
              <DialogTrigger asChild>
                 <Button className="h-12 px-6 bg-primary text-white font-black uppercase tracking-widest text-xs shadow-md hover:scale-[1.02] transition-all">

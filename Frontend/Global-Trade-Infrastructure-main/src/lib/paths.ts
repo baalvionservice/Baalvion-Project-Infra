@@ -131,6 +131,7 @@ export const PATHS = {
   MFA_SETUP: '/settings/mfa',
   PROFILE: '/profile',
   DOCUMENTS: '/documents',
+  DOCUMENT_CENTER: '/documents/generate',
   MESSAGES: '/messages',
   HS_CODES: '/compliance/hs-codes',
   AUCTIONS: '/sourcing/auctions',

@@ -1,10 +1,12 @@
 /**
  * @file server/documents/trade-document-templates.ts
  * @description The concrete trade-document templates — Commercial Invoice,
- * Packing List, Bill of Lading, Certificate of Origin and Customs Declaration —
- * expressed as pure {@link DocumentTemplate} configuration (config-over-code).
- * Each is rendered by the universal template engine; adding a document type is a
- * data change here, not a code change in the renderer.
+ * Packing List, Bill of Lading, Certificate of Origin, Customs Declaration,
+ * Insurance Certificate, Purchase Order, Letter of Credit and Inspection
+ * Certificate — expressed as pure {@link DocumentTemplate} configuration
+ * (config-over-code). Each is rendered by the universal template engine;
+ * adding a document type is a data change here, not a code change in the
+ * renderer.
  */
 import { DocumentTemplate, TemplateSection } from './template-types';
 
@@ -262,6 +264,204 @@ const customsDeclaration: DocumentTemplate = {
   qr: { enabled: true, contentTemplate: 'CUS|{{ declarationNumber }}|{{ totalCustomsValue }}|{{ hash }}' },
 };
 
+/** Insurance Certificate (marine/cargo cover). */
+const insuranceCertificate: DocumentTemplate = {
+  documentType: 'INSURANCE_CERTIFICATE',
+  engineVersion: '1',
+  outputFormats: [...COMMON_FORMATS],
+  variables: [
+    { name: 'certificateNumber', type: 'string', required: true },
+    { name: 'issueDate', type: 'date', required: true },
+    { name: 'insurer', type: 'object', required: true },
+    { name: 'insured', type: 'object', required: true },
+    { name: 'policyNumber', type: 'string', required: true },
+    { name: 'conveyance', type: 'string' },
+    { name: 'voyageFrom', type: 'string', required: true },
+    { name: 'voyageTo', type: 'string', required: true },
+    { name: 'goods', type: 'array', required: true },
+    { name: 'insuredValue', type: 'number', required: true },
+    { name: 'currency', type: 'string', required: true },
+    { name: 'coveredRisks', type: 'string' },
+    { name: 'claimsPayableAt', type: 'string' },
+  ],
+  validations: [
+    { field: 'certificateNumber', rule: 'nonEmpty' },
+    { field: 'policyNumber', rule: 'nonEmpty' },
+    { field: 'goods', rule: 'nonEmpty', message: 'at least one insured item is required' },
+    { field: 'insuredValue', rule: 'min', value: 0, message: 'insured value must be non-negative' },
+  ],
+  sections: [
+    { id: 'title', type: 'text', content: 'INSURANCE CERTIFICATE — {{ certificateNumber }} ({{ issueDate }})' },
+    partyFields('insurer', 'Insurer'),
+    partyFields('insured', 'Insured / Beneficiary'),
+    { id: 'voyage', type: 'fields', title: 'Voyage', fields: [
+      { label: 'Policy Number', value: '{{ policyNumber }}' },
+      { label: 'Conveyance', value: '{{ conveyance }}' },
+      { label: 'From', value: '{{ voyageFrom }}' },
+      { label: 'To', value: '{{ voyageTo }}' },
+    ] },
+    { id: 'goods', type: 'table', title: 'Insured Goods', repeatOver: 'goods', columns: [
+      { header: 'Description', value: '{{ row.description }}' },
+      { header: 'Marks', value: '{{ row.marks }}' },
+      { header: 'Qty', value: '{{ row.quantity }}', align: 'right' },
+      { header: 'Value', value: '{{ row.value }}', align: 'right' },
+    ] },
+    { id: 'cover', type: 'fields', title: 'Cover', fields: [
+      { label: 'Insured Value', value: '{{ insuredValue }} {{ currency }}' },
+      { label: 'Covered Risks', value: '{{ coveredRisks }}' },
+      { label: 'Claims Payable At', value: '{{ claimsPayableAt }}' },
+    ] },
+    { id: 'sig', type: 'signature', title: 'Authorised Signature' },
+  ],
+  signature: signature(['insurer']),
+  qr: { enabled: true, contentTemplate: 'INS|{{ certificateNumber }}|{{ insuredValue }}|{{ hash }}' },
+};
+
+/** Purchase Order. */
+const purchaseOrder: DocumentTemplate = {
+  documentType: 'PURCHASE_ORDER',
+  engineVersion: '1',
+  outputFormats: [...COMMON_FORMATS],
+  variables: [
+    { name: 'poNumber', type: 'string', required: true },
+    { name: 'issueDate', type: 'date', required: true },
+    { name: 'buyer', type: 'object', required: true },
+    { name: 'seller', type: 'object', required: true },
+    { name: 'deliveryDate', type: 'date' },
+    { name: 'incoterm', type: 'string' },
+    { name: 'currency', type: 'string', required: true },
+    { name: 'items', type: 'array', required: true },
+    { name: 'subtotal', type: 'number', required: true },
+    { name: 'grandTotal', type: 'number', required: true },
+    { name: 'paymentTerms', type: 'string' },
+    { name: 'specialInstructions', type: 'string' },
+  ],
+  validations: [
+    { field: 'poNumber', rule: 'nonEmpty' },
+    { field: 'items', rule: 'nonEmpty', message: 'at least one line item is required' },
+    { field: 'grandTotal', rule: 'min', value: 0, message: 'grand total must be non-negative' },
+  ],
+  sections: [
+    { id: 'title', type: 'text', content: 'PURCHASE ORDER — {{ poNumber }} ({{ issueDate }})' },
+    partyFields('buyer', 'Buyer'),
+    partyFields('seller', 'Seller'),
+    { id: 'terms', type: 'fields', title: 'Terms', fields: [
+      { label: 'Delivery Date', value: '{{ deliveryDate }}' },
+      { label: 'Incoterm', value: '{{ incoterm }}' },
+      { label: 'Payment Terms', value: '{{ paymentTerms }}' },
+    ] },
+    { id: 'lines', type: 'table', title: 'Line Items', repeatOver: 'items', columns: [
+      { header: 'Description', value: '{{ row.description }}' },
+      { header: 'HS Code', value: '{{ row.hsCode }}' },
+      { header: 'Qty', value: '{{ row.quantity }}', align: 'right' },
+      { header: 'Unit Price', value: '{{ row.unitPrice }}', align: 'right' },
+      { header: 'Line Total', value: '{{ row.lineTotal }}', align: 'right' },
+    ] },
+    { id: 'totals', type: 'fields', title: 'Totals', fields: [
+      { label: 'Subtotal', value: '{{ subtotal }} {{ currency }}' },
+      { label: 'Grand Total', value: '{{ grandTotal }} {{ currency }}' },
+    ] },
+    { id: 'notes', type: 'text', title: 'Special Instructions', content: '{{ specialInstructions }}' },
+    { id: 'sig', type: 'signature', title: 'Authorised Signature' },
+  ],
+  signature: signature(['buyer']),
+  qr: { enabled: true, contentTemplate: 'PO|{{ poNumber }}|{{ grandTotal }}|{{ hash }}' },
+};
+
+/** Letter of Credit. */
+const letterOfCredit: DocumentTemplate = {
+  documentType: 'LETTER_OF_CREDIT',
+  engineVersion: '1',
+  outputFormats: [...COMMON_FORMATS],
+  variables: [
+    { name: 'lcNumber', type: 'string', required: true },
+    { name: 'issueDate', type: 'date', required: true },
+    { name: 'expiryDate', type: 'date', required: true },
+    { name: 'issuingBank', type: 'object', required: true },
+    { name: 'applicant', type: 'object', required: true },
+    { name: 'beneficiary', type: 'object', required: true },
+    { name: 'amount', type: 'number', required: true },
+    { name: 'currency', type: 'string', required: true },
+    { name: 'availableWith', type: 'string' },
+    { name: 'partialShipments', type: 'boolean' },
+    { name: 'transhipment', type: 'boolean' },
+    { name: 'latestShipmentDate', type: 'date' },
+    { name: 'documentsRequired', type: 'array', required: true },
+    { name: 'descriptionOfGoods', type: 'string', required: true },
+  ],
+  validations: [
+    { field: 'lcNumber', rule: 'nonEmpty' },
+    { field: 'amount', rule: 'min', value: 0, message: 'amount must be non-negative' },
+    { field: 'documentsRequired', rule: 'nonEmpty', message: 'at least one required document must be listed' },
+  ],
+  sections: [
+    { id: 'title', type: 'text', content: 'LETTER OF CREDIT — {{ lcNumber }} ({{ issueDate }})' },
+    partyFields('issuingBank', 'Issuing Bank'),
+    partyFields('applicant', 'Applicant'),
+    partyFields('beneficiary', 'Beneficiary'),
+    { id: 'terms', type: 'fields', title: 'Credit Terms', fields: [
+      { label: 'Amount', value: '{{ amount }} {{ currency }}' },
+      { label: 'Expiry Date', value: '{{ expiryDate }}' },
+      { label: 'Available With', value: '{{ availableWith }}' },
+      { label: 'Latest Shipment Date', value: '{{ latestShipmentDate }}' },
+      { label: 'Partial Shipments', value: '{{ partialShipments }}' },
+      { label: 'Transhipment', value: '{{ transhipment }}' },
+    ] },
+    { id: 'goods', type: 'text', title: 'Description of Goods', content: '{{ descriptionOfGoods }}' },
+    { id: 'docs', type: 'table', title: 'Documents Required', repeatOver: 'documentsRequired', columns: [
+      { header: 'Document', value: '{{ row }}' },
+    ] },
+    { id: 'sig', type: 'signature', title: 'Authorised Signature' },
+  ],
+  signature: signature(['issuingBank']),
+  qr: { enabled: true, contentTemplate: 'LC|{{ lcNumber }}|{{ amount }}|{{ hash }}' },
+};
+
+/** Inspection Certificate (pre-shipment / quality inspection). */
+const inspectionCertificate: DocumentTemplate = {
+  documentType: 'INSPECTION_CERTIFICATE',
+  engineVersion: '1',
+  outputFormats: [...COMMON_FORMATS],
+  variables: [
+    { name: 'certificateNumber', type: 'string', required: true },
+    { name: 'inspectionDate', type: 'date', required: true },
+    { name: 'inspectionBody', type: 'object', required: true },
+    { name: 'exporter', type: 'object', required: true },
+    { name: 'consignee', type: 'object', required: true },
+    { name: 'placeOfInspection', type: 'string' },
+    { name: 'items', type: 'array', required: true },
+    { name: 'inspectionStandard', type: 'string' },
+    { name: 'result', type: 'string', required: true }, // PASS | FAIL | CONDITIONAL
+    { name: 'remarks', type: 'string' },
+  ],
+  validations: [
+    { field: 'certificateNumber', rule: 'nonEmpty' },
+    { field: 'items', rule: 'nonEmpty', message: 'at least one inspected item is required' },
+    { field: 'result', rule: 'in', value: ['PASS', 'FAIL', 'CONDITIONAL'], message: 'result must be PASS, FAIL or CONDITIONAL' },
+  ],
+  sections: [
+    { id: 'title', type: 'text', content: 'INSPECTION CERTIFICATE — {{ certificateNumber }} ({{ inspectionDate }})' },
+    partyFields('inspectionBody', 'Inspection Body'),
+    partyFields('exporter', 'Exporter'),
+    partyFields('consignee', 'Consignee'),
+    { id: 'meta', type: 'fields', title: 'Inspection Details', fields: [
+      { label: 'Place of Inspection', value: '{{ placeOfInspection }}' },
+      { label: 'Standard Applied', value: '{{ inspectionStandard }}' },
+      { label: 'Result', value: '{{ result }}' },
+    ] },
+    { id: 'items', type: 'table', title: 'Inspected Items', repeatOver: 'items', columns: [
+      { header: 'Description', value: '{{ row.description }}' },
+      { header: 'HS Code', value: '{{ row.hsCode }}' },
+      { header: 'Qty Inspected', value: '{{ row.quantity }}', align: 'right' },
+      { header: 'Finding', value: '{{ row.finding }}' },
+    ] },
+    { id: 'remarks', type: 'text', title: 'Remarks', content: '{{ remarks }}' },
+    { id: 'sig', type: 'signature', title: 'Inspector Signature' },
+  ],
+  signature: signature(['inspectionBody']),
+  qr: { enabled: true, contentTemplate: 'INSP|{{ certificateNumber }}|{{ result }}|{{ hash }}' },
+};
+
 export interface TradeDocumentDef {
   type: string;
   title: string;
@@ -276,6 +476,10 @@ export const TRADE_DOCUMENT_TEMPLATES: Readonly<Record<string, TradeDocumentDef>
   BILL_OF_LADING: { type: 'BILL_OF_LADING', title: 'Bill of Lading', numberField: 'blNumber', template: billOfLading },
   CERTIFICATE_OF_ORIGIN: { type: 'CERTIFICATE_OF_ORIGIN', title: 'Certificate of Origin', numberField: 'cooNumber', template: certificateOfOrigin },
   CUSTOMS_DECLARATION: { type: 'CUSTOMS_DECLARATION', title: 'Customs Declaration', numberField: 'declarationNumber', template: customsDeclaration },
+  INSURANCE_CERTIFICATE: { type: 'INSURANCE_CERTIFICATE', title: 'Insurance Certificate', numberField: 'certificateNumber', template: insuranceCertificate },
+  PURCHASE_ORDER: { type: 'PURCHASE_ORDER', title: 'Purchase Order', numberField: 'poNumber', template: purchaseOrder },
+  LETTER_OF_CREDIT: { type: 'LETTER_OF_CREDIT', title: 'Letter of Credit', numberField: 'lcNumber', template: letterOfCredit },
+  INSPECTION_CERTIFICATE: { type: 'INSPECTION_CERTIFICATE', title: 'Inspection Certificate', numberField: 'certificateNumber', template: inspectionCertificate },
 };
 
 export function getTradeDocumentDef(type: string): TradeDocumentDef | null {
