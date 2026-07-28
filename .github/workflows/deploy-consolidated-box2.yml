@@ -369,6 +369,41 @@ jobs:
             echo "ready=true" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Apply auth-service OAuth platform tables migration (idempotent)
+        if: steps.gate.outputs.ready == 'true'
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.CORE2_EC2_HOST }}
+          username: ${{ secrets.CORE2_EC2_USER }}
+          key: ${{ secrets.CORE2_EC2_SSH_KEY }}
+          # Root cause: oauth-service's /v1/clients endpoints (clientService.js) have always
+          # queried auth.oauth_clients / oauth_authorization_codes / oauth_refresh_tokens /
+          # auth.api_keys via raw SQL, but nothing ever created those tables -- they only ever
+          # existed in Backend/database/migrations/004_identity_platform_additions.sql, a
+          # centralized migrations directory that isn't wired into this workflow or auth-service's
+          # own boot path. This runs ONLY the new, additive 014_oauth_platform_tables.sql file
+          # (CREATE TABLE/INDEX IF NOT EXISTS only) -- deliberately NOT auth-service's full
+          # `npm run migrate` chain, since 001-013 are already applied here and some of those
+          # files (004_org_type.sql, 005/006/007) use bare ADD CONSTRAINT with no IF NOT EXISTS
+          # guard, so replaying the whole chain a second time would hard-fail on the first one.
+          script: |
+            set -euo pipefail
+            cd /opt/baalvion-box2
+            git fetch --all --prune
+            git checkout main
+            git pull --ff-only
+            ENV=deploy/consolidated/.env
+            DB_HOST="$(grep -E '^DB_HOST=' "$ENV" | head -1 | cut -d= -f2- | tr -d '\r')"
+            DB_PORT="$(grep -E '^DB_PORT=' "$ENV" | head -1 | cut -d= -f2- | tr -d '\r')"
+            DB_NAME="$(grep -E '^DB_NAME=' "$ENV" | head -1 | cut -d= -f2- | tr -d '\r')"
+            DB_USER="$(grep -E '^DB_USER=' "$ENV" | head -1 | cut -d= -f2- | tr -d '\r')"
+            DB_PASSWORD="$(grep -E '^DB_PASSWORD=' "$ENV" | head -1 | cut -d= -f2- | tr -d '\r')"
+            PGSSLMODE=require PGPASSWORD="$DB_PASSWORD" psql \
+              "postgresql://${DB_USER}@${DB_HOST}:${DB_PORT}/${DB_NAME}" \
+              -v ON_ERROR_STOP=1 \
+              -f "Backend/services/identity/auth-service/migrations/014_oauth_platform_tables.sql"
+            echo "::notice title=Migration applied::auth.oauth_clients/oauth_authorization_codes/oauth_refresh_tokens/api_keys are current."
+
       - name: Pull + roll on box2
         if: steps.gate.outputs.ready == 'true'
         uses: appleboy/ssh-action@v1
