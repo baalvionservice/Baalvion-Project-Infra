@@ -25,6 +25,10 @@ export default function ContentEditorPage({
   const setActiveContent = useCmsStore((s) => s.setActiveContent);
   const setActiveWebsiteId = useCmsStore((s) => s.setActiveWebsiteId);
   const clearDraft = useCmsStore((s) => s.clearDraft);
+  // Restores whatever filters/search/page the user had open on the content list
+  // (falls back to the bare list URL if they arrived here directly, e.g. a bookmark).
+  const lastContentListUrl = useCmsStore((s) => s.lastContentListUrl[websiteId]);
+  const backHref = lastContentListUrl ?? `/cms/websites/${websiteId}/content`;
   const [copied, setCopied] = useState(false);
 
   const copyId = async () => {
@@ -80,7 +84,7 @@ export default function ContentEditorPage({
       <div className="p-6 text-center">
         <p className="text-muted-foreground mb-4">Content not found.</p>
         <Button asChild>
-          <Link href={`/cms/websites/${websiteId}/content`}>Back to Content</Link>
+          <Link href={backHref}>Back to Content</Link>
         </Button>
       </div>
     );
@@ -110,7 +114,7 @@ export default function ContentEditorPage({
       {/* Minimal back bar */}
       <div className="flex items-center gap-2 px-4 py-2 border-b shrink-0">
         <Button variant="ghost" size="sm" className="h-7 text-xs" asChild>
-          <Link href={`/cms/websites/${websiteId}/content`}>
+          <Link href={backHref}>
             <ArrowLeft className="mr-1 h-3.5 w-3.5" />
             {website?.name ?? 'Content'}
           </Link>

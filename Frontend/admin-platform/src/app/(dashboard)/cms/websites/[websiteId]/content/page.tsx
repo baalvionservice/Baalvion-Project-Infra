@@ -1,7 +1,7 @@
 'use client';
 
-import { use, useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { use, useState, useEffect, useRef } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import type { ColumnDef } from '@tanstack/react-table';
 import { Plus, MoreHorizontal, Copy, Trash2, ArrowLeft, Upload, Send, Archive, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
@@ -58,15 +58,26 @@ export default function WebsiteContentPage({
 }) {
   const { websiteId } = use(params);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { setBreadcrumbs } = useUIStore();
   const setActiveWebsiteId = useCmsStore((s) => s.setActiveWebsiteId);
+  const setLastContentListUrl = useCmsStore((s) => s.setLastContentListUrl);
   useEffect(() => { setActiveWebsiteId(websiteId); }, [websiteId, setActiveWebsiteId]);
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState('');
+
+  // Filters/pagination are seeded from the URL once on mount so a bookmark, refresh,
+  // or "back" navigation restores the exact list view instead of resetting to defaults.
+  const [page, setPage] = useState(() => Number(searchParams.get('page')) || 1);
+  const [search, setSearch] = useState(() => searchParams.get('search') ?? '');
   const debouncedSearch = useDebounce(search, 400);
-  const [typeFilter, setTypeFilter] = useState<ContentItemType | ''>('');
-  const [statusFilter, setStatusFilter] = useState<ContentWorkflowStatus | ''>('');
-  const [categoryFilter, setCategoryFilter] = useState<string>('');
+  const [typeFilter, setTypeFilter] = useState<ContentItemType | ''>(
+    () => (searchParams.get('type') as ContentItemType | null) ?? ''
+  );
+  const [statusFilter, setStatusFilter] = useState<ContentWorkflowStatus | ''>(
+    () => (searchParams.get('status') as ContentWorkflowStatus | null) ?? ''
+  );
+  const [categoryFilter, setCategoryFilter] = useState<string>(
+    () => searchParams.get('category') ?? ''
+  );
   const [createOpen, setCreateOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [newTitle, setNewTitle] = useState('');
@@ -90,7 +101,30 @@ export default function WebsiteContentPage({
 
   // Reset to page 1 whenever the effective search term changes, otherwise a
   // narrower result set can leave the user stranded on a page past the new total.
-  useEffect(() => { setPage(1); }, [debouncedSearch]);
+  // Skip the very first run — debouncedSearch equals the URL-seeded initial value on
+  // mount, and resetting then would stomp a restored page (e.g. navigating back).
+  const isFirstSearchRun = useRef(true);
+  useEffect(() => {
+    if (isFirstSearchRun.current) { isFirstSearchRun.current = false; return; }
+    setPage(1);
+  }, [debouncedSearch]);
+
+  // Keep the URL (and the "last content list" pointer used by the editor's back
+  // link) in sync with the current filters/page, via replace so this doesn't spam
+  // browser history — only the initial visit gets a real entry.
+  useEffect(() => {
+    const qs = new URLSearchParams();
+    if (page > 1) qs.set('page', String(page));
+    if (debouncedSearch) qs.set('search', debouncedSearch);
+    if (typeFilter) qs.set('type', typeFilter);
+    if (statusFilter) qs.set('status', statusFilter);
+    if (categoryFilter) qs.set('category', categoryFilter);
+    const query = qs.toString();
+    const url = `/cms/websites/${websiteId}/content${query ? `?${query}` : ''}`;
+    router.replace(url, { scroll: false });
+    setLastContentListUrl(websiteId, url);
+  }, [websiteId, page, debouncedSearch, typeFilter, statusFilter, categoryFilter, router, setLastContentListUrl]);
+
   const { mutate: create, isPending: isCreating } = useCreateContent();
   const { mutate: remove } = useDeleteContent();
   const { mutate: duplicate } = useDuplicateContent();
