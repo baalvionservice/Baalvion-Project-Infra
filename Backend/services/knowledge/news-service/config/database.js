@@ -1,5 +1,10 @@
 const dotenv = require('dotenv');
 dotenv.config();
+// Same TLS helper the runtime app uses (buildPgSsl, respects DB_SSL_REJECT_UNAUTHORIZED).
+// This file is sequelize-cli's separate config, which previously hardcoded
+// rejectUnauthorized:true with no escape hatch -- confirmed live: `npm run migrate`
+// failed with "self-signed certificate in certificate chain" against box2's RDS.
+const { buildPgSsl } = require('@baalvion/auth-node');
 
 module.exports = {
     development: {
@@ -22,7 +27,7 @@ module.exports = {
         schema: 'news_intelligence',
         logging: false,
         dialectOptions: {
-            ssl: { rejectUnauthorized: true },
+            ssl: buildPgSsl(),
         },
         define: { underscored: true, timestamps: true },
     },

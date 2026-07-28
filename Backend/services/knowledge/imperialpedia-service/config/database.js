@@ -1,5 +1,9 @@
 const dotenv = require('dotenv');
 dotenv.config();
+// Same TLS helper the runtime app uses (buildPgSsl, respects DB_SSL_REJECT_UNAUTHORIZED) --
+// see cms-service/news-service config/database.js for the confirmed-live failure this
+// hardcoded rejectUnauthorized:true would hit if this migrate script is ever invoked.
+const { buildPgSsl } = require('@baalvion/auth-node');
 
 module.exports = {
     development: {
@@ -22,7 +26,7 @@ module.exports = {
         schema: 'imperialpedia',
         logging: false,
         dialectOptions: {
-            ssl: { rejectUnauthorized: true },
+            ssl: buildPgSsl(),
         },
         define: { underscored: true, timestamps: true },
     },
