@@ -409,7 +409,14 @@ jobs:
 
             COMPOSE="docker compose --env-file $ENV -f deploy/consolidated/docker-compose.prod.yml"
             $COMPOSE $PROFILE_FLAGS pull
-            $COMPOSE $PROFILE_FLAGS up -d --no-build --remove-orphans
+            # NOTE: deliberately no --remove-orphans. NodeBB (deploy/consolidated/nodebb/
+            # docker-compose.nodebb.yml) is a separate compose file not referenced here --
+            # merging it in to avoid the orphan warning is worse (verified live: it corrupts
+            # app-community's image to a local-build reference that doesn't exist, since the
+            # nodebb file's own duplicate app-community definition wins the merge). A
+            # --remove-orphans roll on this file alone previously deleted a fully-configured,
+            # already-live NodeBB outright. The orphan warning is cosmetic noise; leave it.
+            $COMPOSE $PROFILE_FLAGS up -d --no-build
             docker image prune -f
 
       - name: Bootstrap / repair platform super-admin (idempotent)

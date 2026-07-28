@@ -40,6 +40,14 @@ CREATE INDEX IF NOT EXISTS idx_cities_country ON legal.cities (country_code);
 CREATE UNIQUE INDEX IF NOT EXISTS uq_states_country_name ON legal.states (country_code, name);
 CREATE UNIQUE INDEX IF NOT EXISTS uq_cities_state_name ON legal.cities (state_id, name);
 
+-- Same root cause, same fix, for the DEFAULT now() on created_at: the pre-existing table
+-- (created before this migration ever ran, see above) also lacks this default, so the
+-- INSERTs below -- which don't list created_at, relying on the table default -- failed
+-- with "null value in column created_at ... violates not-null constraint" once the unique-
+-- index fix got past the first error. ALTER COLUMN SET DEFAULT is safe to re-run.
+ALTER TABLE legal.states ALTER COLUMN created_at SET DEFAULT now();
+ALTER TABLE legal.cities ALTER COLUMN created_at SET DEFAULT now();
+
 -- ── Starter states ──────────────────────────────────────────────────────────
 INSERT INTO legal.states (country_code, name, code) VALUES
     ('IN','Maharashtra','MH'), ('IN','Delhi','DL'), ('IN','Karnataka','KA'),
