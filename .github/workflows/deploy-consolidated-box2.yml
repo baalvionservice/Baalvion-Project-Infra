@@ -398,10 +398,14 @@ jobs:
             DB_NAME="$(grep -E '^DB_NAME=' "$ENV" | head -1 | cut -d= -f2- | tr -d '\r')"
             DB_USER="$(grep -E '^DB_USER=' "$ENV" | head -1 | cut -d= -f2- | tr -d '\r')"
             DB_PASSWORD="$(grep -E '^DB_PASSWORD=' "$ENV" | head -1 | cut -d= -f2- | tr -d '\r')"
-            PGSSLMODE=require PGPASSWORD="$DB_PASSWORD" psql \
-              "postgresql://${DB_USER}@${DB_HOST}:${DB_PORT}/${DB_NAME}" \
-              -v ON_ERROR_STOP=1 \
-              -f "Backend/services/identity/auth-service/migrations/014_oauth_platform_tables.sql"
+            # box2's bare EC2 host has no psql binary (unlike prod-01/CORE_EC2_HOST) --
+            # run it via a throwaway postgres:16-alpine container instead, same trick
+            # already used once this session to create the baalvion database itself.
+            docker run --rm -i \
+              -e PGSSLMODE=require -e PGPASSWORD="$DB_PASSWORD" \
+              -v "$(pwd)/Backend/services/identity/auth-service/migrations/014_oauth_platform_tables.sql:/tmp/014.sql:ro" \
+              postgres:16-alpine \
+              psql "postgresql://${DB_USER}@${DB_HOST}:${DB_PORT}/${DB_NAME}" -v ON_ERROR_STOP=1 -f /tmp/014.sql
             echo "::notice title=Migration applied::auth.oauth_clients/oauth_authorization_codes/oauth_refresh_tokens/api_keys are current."
 
       - name: Pull + roll on box2
