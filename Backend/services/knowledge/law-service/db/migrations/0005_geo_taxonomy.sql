@@ -12,8 +12,7 @@ CREATE TABLE IF NOT EXISTS legal.states (
     country_code VARCHAR(2) NOT NULL,
     name         VARCHAR(120) NOT NULL,
     code         VARCHAR(10),
-    created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
-    UNIQUE (country_code, name)
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_states_country ON legal.states (country_code);
 
@@ -22,11 +21,24 @@ CREATE TABLE IF NOT EXISTS legal.cities (
     state_id     INTEGER NOT NULL REFERENCES legal.states(id) ON DELETE CASCADE,
     country_code VARCHAR(2) NOT NULL,
     name         VARCHAR(160) NOT NULL,
-    created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
-    UNIQUE (state_id, name)
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_cities_state ON legal.cities (state_id);
 CREATE INDEX IF NOT EXISTS idx_cities_country ON legal.cities (country_code);
+
+-- Unique indexes pulled OUT of the inline column constraints and made their own
+-- IF-NOT-EXISTS statements. Root cause of a real production bug: legal.states/cities
+-- get created by Sequelize model sync on boot (no composite-unique knowledge) BEFORE
+-- this migration ever runs. CREATE TABLE IF NOT EXISTS then silently skips against
+-- the pre-existing table -- the inline UNIQUE never actually gets applied -- and the
+-- INSERT ... ON CONFLICT below fails every time with "no unique or exclusion
+-- constraint matching". Since the whole file runs in one transaction that rolls back
+-- on that failure, the migration is never marked applied and retries on every boot
+-- (observed: 1700+ crash-loop restarts). CREATE UNIQUE INDEX IF NOT EXISTS satisfies
+-- ON CONFLICT's requirement (any matching unique index, not specifically a named
+-- constraint) regardless of who created the table first.
+CREATE UNIQUE INDEX IF NOT EXISTS uq_states_country_name ON legal.states (country_code, name);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_cities_state_name ON legal.cities (state_id, name);
 
 -- ── Starter states ──────────────────────────────────────────────────────────
 INSERT INTO legal.states (country_code, name, code) VALUES
