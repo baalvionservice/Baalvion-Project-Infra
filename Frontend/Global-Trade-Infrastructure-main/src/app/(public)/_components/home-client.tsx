@@ -25,6 +25,8 @@ interface HomeClientProps {
   pulse: PlatformPulse;
   /** Real count of published CUSTOMS-kind authorities across the GCKB. */
   customsAuthorityCount: number;
+  /** Real, cross-service count from trade-service; null if unreachable — omit the tile, don't fabricate. */
+  activeShipmentCount: number | null;
 }
 
 const AUDIENCES = [
@@ -71,12 +73,15 @@ function TradePeek() {
   );
 }
 
-export function HomeClient({ pulse, customsAuthorityCount }: HomeClientProps) {
+export function HomeClient({ pulse, customsAuthorityCount, activeShipmentCount }: HomeClientProps) {
   const ticker = [
     { label: 'Settlement Cycle', val: 'T+1' },
     { label: 'Ledger Integrity', val: pulse.ledgerBalanced ? 'All Books Balanced' : 'Under Review' },
     { label: 'Customs Authorities', val: customsAuthorityCount.toLocaleString() },
     { label: 'Escrows On Platform', val: pulse.escrowCount.toLocaleString() },
+    // Only shown when trade-service actually answered — a failed/timed-out
+    // cross-service call omits the tile rather than showing a stale/fake number.
+    ...(activeShipmentCount != null ? [{ label: 'Active Shipments', val: activeShipmentCount.toLocaleString() }] : []),
     { label: 'Screening', val: 'Fail-Closed' },
   ];
 
