@@ -136,6 +136,51 @@ export interface AddWebsiteMemberPayload {
   /** Or invite by an already-known numeric user id. */
   userId?: number;
   role: CmsRole;
+  /** Optional note included in the invite email when the recipient has no account yet. */
+  personalNote?: string;
+}
+
+/** Result of adding/inviting a member — an existing platform user is granted access
+ *  immediately, an unknown email gets a token-based invite emailed to them instead. */
+export interface AddWebsiteMemberResult {
+  kind: 'member';
+  id: number;
+  websiteId: string;
+  userId: number;
+  cmsRole: CmsRole;
+  user: { id: number; fullName: string; email: string; avatarUrl: string | null };
+  joinedAt: string;
+}
+
+export interface AddWebsiteInvitationResult {
+  kind: 'invitation';
+  id: number;
+  email: string;
+  role: CmsRole;
+  roleLabel: string;
+  status: string;
+  expiresAt: string;
+  /** Whether the invite email actually went out (SES/mailer can silently no-op or fail). */
+  emailSent: boolean;
+}
+
+export type AddWebsiteMemberResponse = AddWebsiteMemberResult | AddWebsiteInvitationResult;
+
+export type InvitationStatus = 'pending' | 'accepted' | 'expired' | 'revoked';
+
+/** A pending/past contributor invite — the admin-facing view for the unknown-email
+ *  path of "Invite a user", so a delivery failure stays visible after creation. */
+export interface WebsiteInvitation {
+  id: string;
+  email: string;
+  role: CmsRole;
+  roleLabel: string;
+  status: InvitationStatus;
+  inviterName?: string;
+  personalNote?: string;
+  expiresAt: string;
+  acceptedAt?: string;
+  createdAt: string;
 }
 
 export interface UserSearchResult {

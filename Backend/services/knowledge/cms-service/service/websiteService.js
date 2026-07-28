@@ -7,6 +7,7 @@ const config = require('../config/appConfig');
 const { slugify } = require('../utils/slugify');
 const { parsePagination, buildPaginated } = require('../utils/pagination');
 const identityService = require('./identityService');
+const invitationService = require('./invitationService');
 const { emitSafe, CmsEvents } = require('../platform/events');
 const db = require('../models');
 
@@ -151,9 +152,16 @@ async function listMembers(websiteId, scope) {
 
 /**
  * Invite a user to a website with a CMS role.
- * Accepts either a resolved userId or an email. When an email is given it is
- * resolved against the platform identity store; an unknown email is a 404 so the
- * console can tell the admin to create the user under Identity → Users first.
+ * Accepts either a resolved userId or an email. When an email resolves to an existing
+ * platform user, they are granted the role immediately (they already have a login, so
+ * there is nothing to email). When the email is unknown, this falls back to the
+ * token-based contributor invite (invitationService) — it emails an accept link the
+ * recipient uses to create their own account, rather than 404ing and telling the admin
+ * to go create the account by hand first.
+ *
+ * Returns a `kind`-tagged result so the caller can tell which path was taken:
+ * `{ kind: 'member', ... }` for an immediate grant, `{ kind: 'invitation', ... }` for
+ * a pending invite (with `emailSent` reflecting whether the mail actually went out).
  */
 async function addMember(websiteId, scope, body, inviterId = null) {
     const website = await CmsWebsite.findOne({ where: { id: websiteId, ...orgFilter(scope) } });
@@ -163,11 +171,11 @@ async function addMember(websiteId, scope, body, inviterId = null) {
     if (userId == null && body.email) {
         const user = await identityService.findByEmail(body.email);
         if (!user) {
-            throw new AppError(
-                'NOT_FOUND',
-                `No platform user found with email "${body.email}". Create the user under Identity → Users first, then invite them.`,
-                404,
-            );
+            const invitation = await invitationService.createInvitation(website, body.email, body.role, {
+                inviterId,
+                personalNote: body.personalNote,
+            });
+            return { kind: 'invitation', ...invitation };
         }
         userId = Number(user.id);
     }
@@ -193,7 +201,7 @@ async function addMember(websiteId, scope, body, inviterId = null) {
         invitedBy: inviterId,
     }, { tenantId: website.slug });
 
-    return enriched;
+    return { kind: 'member', ...enriched };
 }
 
 async function updateMemberRole(websiteId, scope, userId, role) {

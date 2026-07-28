@@ -27,4 +27,11 @@ router.post('/:websiteId/members', loadCmsRole, requireCmsRole('cms_admin'), val
 router.patch('/:websiteId/members/:userId', loadCmsRole, requireCmsRole('cms_admin'), validate(updateMemberRoleSchema), ctrl.updateMemberRole);
 router.delete('/:websiteId/members/:userId', loadCmsRole, requireCmsRole('cms_admin'), ctrl.removeMember);
 
+// /cms/websites/:websiteId/invitations — pending contributor invites (unknown-email
+// path of POST /members). Admin-only: see who hasn't accepted yet, and whether the
+// invite email actually sent, so a mailer failure is visible instead of silent.
+router.get('/:websiteId/invitations', loadCmsRole, requireCmsRole('cms_admin'), ctrl.listInvitations);
+router.post('/:websiteId/invitations/:invitationId/resend', loadCmsRole, requireCmsRole('cms_admin'), ctrl.resendInvitation);
+router.delete('/:websiteId/invitations/:invitationId', loadCmsRole, requireCmsRole('cms_admin'), ctrl.revokeInvitation);
+
 module.exports = router;

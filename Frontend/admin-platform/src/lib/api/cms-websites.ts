@@ -7,6 +7,9 @@ import type {
   CreateWebsitePayload,
   UpdateWebsitePayload,
   AddWebsiteMemberPayload,
+  AddWebsiteMemberResponse,
+  AddWebsiteInvitationResult,
+  WebsiteInvitation,
   UserSearchResult,
 } from '@/lib/types/cms-website.types';
 import type { ApiResponse, PaginatedResponse } from '@/lib/types/common.types';
@@ -30,6 +33,13 @@ const toMember = (m: RawMember): WebsiteMember => ({
   user: m.user,
   joinedAt: m.joinedAt,
 });
+
+// POST /members returns either an immediate grant (existing platform user) or a
+// pending invitation (unknown email — accept link emailed to them), tagged by `kind`.
+type RawAddMemberResponse = ({ kind: 'member' } & RawMember) | AddWebsiteInvitationResult;
+
+const toAddMemberResult = (r: RawAddMemberResponse): AddWebsiteMemberResponse =>
+  r.kind === 'invitation' ? r : { kind: 'member', ...toMember(r) };
 
 // cms-service (:3018 /api/v1) returns camelCase rows. It does not (yet) embed
 // content/member counts or a createdBy user object, so we backfill those to the
@@ -130,8 +140,8 @@ export const websitesApi = {
     },
 
     add: async (websiteId: string, payload: AddWebsiteMemberPayload) => {
-      const res = await cmsApiClient.post<ApiResponse<RawMember>>(`/cms/websites/${websiteId}/members`, payload);
-      return { ...res, data: { ...res.data, data: toMember(res.data.data) } };
+      const res = await cmsApiClient.post<ApiResponse<RawAddMemberResponse>>(`/cms/websites/${websiteId}/members`, payload);
+      return { ...res, data: { ...res.data, data: toAddMemberResult(res.data.data) } };
     },
 
     updateRole: async (websiteId: string, userId: number, cmsRole: CmsRole) => {
@@ -144,5 +154,19 @@ export const websitesApi = {
 
     searchUsers: (websiteId: string, q: string) =>
       cmsApiClient.get<ApiResponse<UserSearchResult[]>>(`/cms/websites/${websiteId}/members/user-search`, { params: { q } }),
+  },
+
+  // Pending contributor invites — the unknown-email path of members.add().
+  invitations: {
+    list: (websiteId: string) =>
+      cmsApiClient.get<ApiResponse<WebsiteInvitation[]>>(`/cms/websites/${websiteId}/invitations`),
+
+    resend: (websiteId: string, invitationId: string) =>
+      cmsApiClient.post<ApiResponse<AddWebsiteInvitationResult>>(
+        `/cms/websites/${websiteId}/invitations/${invitationId}/resend`,
+      ),
+
+    revoke: (websiteId: string, invitationId: string) =>
+      cmsApiClient.delete<ApiResponse<void>>(`/cms/websites/${websiteId}/invitations/${invitationId}`),
   },
 };
