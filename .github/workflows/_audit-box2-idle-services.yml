@@ -1,0 +1,57 @@
+name: (temp) Audit box2 idle-service candidates (trade/neo4j/giftcard/forum)
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Container inventory, real footprint, and external route exposure (read-only)
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.CORE2_EC2_HOST }}
+          username: ${{ secrets.CORE2_EC2_USER }}
+          key: ${{ secrets.CORE2_EC2_SSH_KEY }}
+          timeout: 30s
+          command_timeout: 3m
+          script: |
+            set -uo pipefail
+            cd /opt/baalvion-box2
+
+            echo "===== all containers: name / status / uptime / restarts ====="
+            docker ps -a --format '{{.Names}}\t{{.Status}}\t{{.Image}}'
+
+            echo
+            echo "===== live CPU/mem footprint (single snapshot) ====="
+            docker stats --no-stream --format '{{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}'
+
+            echo
+            echo "===== host disk + memory headroom ====="
+            df -h / 2>&1
+            free -h 2>&1
+
+            echo
+            echo "===== which of the candidate containers actually exist right now ====="
+            for c in consolidated-app-trade-1 consolidated-neo4j-1 consolidated-app-giftcard-1 consolidated-app-community-1 consolidated-nodebb-1 consolidated-nodebb-postgres-1 consolidated-zookeeper-1 consolidated-kafka-1; do
+              if docker inspect "$c" >/dev/null 2>&1; then
+                echo "$c: EXISTS ($(docker inspect -f '{{.State.Status}} started {{.State.StartedAt}} restarts={{.RestartCount}}' "$c"))"
+              else
+                echo "$c: NOT PRESENT"
+              fi
+            done
+
+            echo
+            echo "===== Caddyfile: is anything public-facing routed to trade/giftcard/forum/community? ====="
+            grep -n -B1 -A4 "network-graph\|trade\.\|giftcard\|marketunderworld\|nodebb\|community" deploy/consolidated/caddy/Caddyfile 2>&1
+
+            echo
+            echo "===== active TCP connections into the trade/giftcard/forum ports (if containers are up) ====="
+            for name_port in "consolidated-app-trade-1:3048" "consolidated-app-giftcard-1:3065" "consolidated-app-community-1:3064" "consolidated-nodebb-1:4567"; do
+              cname="${name_port%%:*}"; port="${name_port##*:}"
+              if docker inspect "$cname" >/dev/null 2>&1; then
+                echo "-- $cname (port $port) established connections:"
+                docker exec "$cname" sh -c "cat /proc/net/tcp 2>/dev/null | wc -l" 2>&1 || echo "  (could not exec)"
+              fi
+            done
