@@ -172,3 +172,22 @@ jobs:
                 console.log('recent real sessions (org_id used at real login):', JSON.stringify(sessions, null, 2));
               })().catch(e=>{console.log('ERROR:', e.message); process.exit(1);});
             "
+
+  box2-full-inventory:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: List every container running on box2
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.CORE2_EC2_HOST }}
+          username: ${{ secrets.CORE2_EC2_USER }}
+          key: ${{ secrets.CORE2_EC2_SSH_KEY }}
+          timeout: 30s
+          command_timeout: 2m
+          script: |
+            set -uo pipefail
+            echo "===== all containers on box2 ====="
+            docker ps -a --format '{{.Names}}\t{{.Status}}\t{{.Image}}'
+            echo "===== nodebb/community/tor mentions in box2's compose file ====="
+            grep -n "nodebb\|community\|tor-bridge" /opt/baalvion-box2/deploy/consolidated/docker-compose.prod.yml 2>&1 | head -20
