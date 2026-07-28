@@ -1,0 +1,26 @@
+name: (temp) Check box2 RDS Multi-AZ status and sizing
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-region: ${{ vars.CORE2_AWS_REGION || 'ap-south-1' }}
+          role-to-assume: ${{ secrets.CORE2_AWS_DEPLOY_ROLE_ARN }}
+
+      - name: Describe all RDS instances
+        run: |
+          set -uo pipefail
+          aws rds describe-db-instances \
+            --query 'DBInstances[].{Id:DBInstanceIdentifier,Class:DBInstanceClass,Engine:Engine,MultiAZ:MultiAZ,StorageGiB:AllocatedStorage,StorageType:StorageType,Status:DBInstanceStatus}' \
+            --output table
