@@ -1,0 +1,61 @@
+name: (temp) Add ECR lifecycle policy (keep last 10 images per repo)
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  id-token: write   # OIDC role assumption
+
+jobs:
+  apply-policy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-region: ${{ vars.CORE2_AWS_REGION || 'ap-south-1' }}
+          role-to-assume: ${{ secrets.CORE2_AWS_DEPLOY_ROLE_ARN }}
+
+      - name: Apply "keep last 10 images" lifecycle policy to every box2 ECR repo
+        run: |
+          set -uo pipefail
+          cat > /tmp/lifecycle-policy.json <<'EOF'
+          {
+            "rules": [
+              {
+                "rulePriority": 1,
+                "description": "Keep only the last 10 images, expire the rest",
+                "selection": {
+                  "tagStatus": "any",
+                  "countType": "imageCountMoreThan",
+                  "countNumber": 10
+                },
+                "action": { "type": "expire" }
+              }
+            ]
+          }
+          EOF
+
+          for repo in baalvion/backend baalvion/admin-web baalvion/payment-service baalvion/community-service baalvion/giftcard-service; do
+            echo "===== $repo ====="
+            if aws ecr describe-repositories --repository-names "$repo" >/dev/null 2>&1; then
+              aws ecr put-lifecycle-policy \
+                --repository-name "$repo" \
+                --lifecycle-policy-text file:///tmp/lifecycle-policy.json \
+                && echo "policy applied" \
+                || echo "FAILED to apply policy to $repo"
+            else
+              echo "repo does not exist, skipping"
+            fi
+          done
+
+          echo
+          echo "===== verifying + current image counts ====="
+          for repo in baalvion/backend baalvion/admin-web baalvion/payment-service baalvion/community-service baalvion/giftcard-service; do
+            if aws ecr describe-repositories --repository-names "$repo" >/dev/null 2>&1; then
+              count=$(aws ecr list-images --repository-name "$repo" --query 'length(imageIds)' --output text)
+              echo "$repo: $count images currently"
+            fi
+          done
