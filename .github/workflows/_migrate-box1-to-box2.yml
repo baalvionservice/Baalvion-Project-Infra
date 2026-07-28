@@ -1,0 +1,63 @@
+name: (temp) Migrate box1 database to box2
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Set up SSH keys for both hosts
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.CORE_EC2_SSH_KEY }}" > ~/.ssh/box1_key
+          printf '%s\n' "${{ secrets.CORE2_EC2_SSH_KEY }}" > ~/.ssh/box2_key
+          chmod 600 ~/.ssh/box1_key ~/.ssh/box2_key
+          ssh-keyscan -H "${{ secrets.CORE_EC2_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+          ssh-keyscan -H "${{ secrets.CORE2_EC2_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Dump box1's full database (schema+data, no-owner, self-cleaning restore)
+        run: |
+          ssh -i ~/.ssh/box1_key "${{ secrets.CORE_EC2_USER }}@${{ secrets.CORE_EC2_HOST }}" '
+            set -euo pipefail
+            ENV=/opt/baalvion-core/deploy/consolidated/.env
+            DB_HOST=$(grep -E "^DB_HOST=" "$ENV" | cut -d= -f2- | tr -d "\r")
+            DB_PORT=$(grep -E "^DB_PORT=" "$ENV" | cut -d= -f2- | tr -d "\r")
+            DB_NAME=$(grep -E "^DB_NAME=" "$ENV" | cut -d= -f2- | tr -d "\r")
+            DB_USER=$(grep -E "^DB_USER=" "$ENV" | cut -d= -f2- | tr -d "\r")
+            DB_PASSWORD=$(grep -E "^DB_PASSWORD=" "$ENV" | cut -d= -f2- | tr -d "\r")
+            PGSSLMODE=require PGPASSWORD="$DB_PASSWORD" pg_dump \
+              -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" \
+              --no-owner --no-privileges --no-comments --clean --if-exists \
+              | gzip > /tmp/box1_full_dump.sql.gz
+            echo "dump size: $(du -h /tmp/box1_full_dump.sql.gz | cut -f1)"
+          '
+          scp -i ~/.ssh/box1_key "${{ secrets.CORE_EC2_USER }}@${{ secrets.CORE_EC2_HOST }}:/tmp/box1_full_dump.sql.gz" ./box1_full_dump.sql.gz
+          ls -la box1_full_dump.sql.gz
+
+      - name: Transfer dump to box2 and restore
+        run: |
+          scp -i ~/.ssh/box2_key ./box1_full_dump.sql.gz "${{ secrets.CORE2_EC2_USER }}@${{ secrets.CORE2_EC2_HOST }}:/tmp/box1_full_dump.sql.gz"
+          ssh -i ~/.ssh/box2_key "${{ secrets.CORE2_EC2_USER }}@${{ secrets.CORE2_EC2_HOST }}" '
+            set -euo pipefail
+            ENV=/opt/baalvion-box2/deploy/consolidated/.env
+            DB_HOST=$(grep -E "^DB_HOST=" "$ENV" | cut -d= -f2- | tr -d "\r")
+            DB_PORT=$(grep -E "^DB_PORT=" "$ENV" | cut -d= -f2- | tr -d "\r")
+            DB_NAME=$(grep -E "^DB_NAME=" "$ENV" | cut -d= -f2- | tr -d "\r")
+            DB_USER=$(grep -E "^DB_USER=" "$ENV" | cut -d= -f2- | tr -d "\r")
+            DB_PASSWORD=$(grep -E "^DB_PASSWORD=" "$ENV" | cut -d= -f2- | tr -d "\r")
+            echo "restoring into box2 DB_NAME=$DB_NAME as DB_USER=$DB_USER"
+            zcat /tmp/box1_full_dump.sql.gz | PGSSLMODE=require PGPASSWORD="$DB_PASSWORD" psql \
+              -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -v ON_ERROR_STOP=0 2>&1 | tail -100
+            echo "=== post-restore sanity check ==="
+            PGSSLMODE=require PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" \
+              -c "select count(*) as cms_websites from cms.cms_websites;"
+          '
+
+      - name: Cleanup dump files (always runs)
+        if: always()
+        run: |
+          ssh -i ~/.ssh/box1_key "${{ secrets.CORE_EC2_USER }}@${{ secrets.CORE_EC2_HOST }}" "rm -f /tmp/box1_full_dump.sql.gz" || true
+          ssh -i ~/.ssh/box2_key "${{ secrets.CORE2_EC2_USER }}@${{ secrets.CORE2_EC2_HOST }}" "rm -f /tmp/box1_full_dump.sql.gz" || true
+          rm -f box1_full_dump.sql.gz
