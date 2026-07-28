@@ -71,3 +71,86 @@ jobs:
           ssh -i ~/.ssh/box1_key "${{ secrets.CORE_EC2_USER }}@${{ secrets.CORE_EC2_HOST }}" "rm -f /tmp/box1_full_dump.sql.gz" || true
           ssh -i ~/.ssh/box2_key "${{ secrets.CORE2_EC2_USER }}@${{ secrets.CORE2_EC2_HOST }}" "rm -f /tmp/box1_full_dump.sql.gz" || true
           rm -f box1_full_dump.sql.gz
+
+  migrate-media:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Set up SSH keys
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.CORE_EC2_SSH_KEY }}" > ~/.ssh/box1_key
+          printf '%s\n' "${{ secrets.CORE2_EC2_SSH_KEY }}" > ~/.ssh/box2_key
+          chmod 600 ~/.ssh/box1_key ~/.ssh/box2_key
+          ssh-keyscan -H "${{ secrets.CORE_EC2_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+          ssh-keyscan -H "${{ secrets.CORE2_EC2_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Tar cms_uploads on box1 and pull it down
+        run: |
+          ssh -i ~/.ssh/box1_key "${{ secrets.CORE_EC2_USER }}@${{ secrets.CORE_EC2_HOST }}" '
+            set -euo pipefail
+            docker exec consolidated-app-platform-1 tar -czf /tmp/cms_uploads.tar.gz -C /app/Backend/services/knowledge/cms-service/uploads .
+            docker cp consolidated-app-platform-1:/tmp/cms_uploads.tar.gz /tmp/cms_uploads.tar.gz
+            docker exec consolidated-app-platform-1 rm -f /tmp/cms_uploads.tar.gz
+          '
+          scp -i ~/.ssh/box1_key "${{ secrets.CORE_EC2_USER }}@${{ secrets.CORE_EC2_HOST }}:/tmp/cms_uploads.tar.gz" ./cms_uploads.tar.gz
+          ls -la cms_uploads.tar.gz
+          ssh -i ~/.ssh/box1_key "${{ secrets.CORE_EC2_USER }}@${{ secrets.CORE_EC2_HOST }}" "rm -f /tmp/cms_uploads.tar.gz" || true
+
+      - name: Push tarball to box2 and extract into its cms_uploads volume
+        run: |
+          scp -i ~/.ssh/box2_key ./cms_uploads.tar.gz "${{ secrets.CORE2_EC2_USER }}@${{ secrets.CORE2_EC2_HOST }}:/tmp/cms_uploads.tar.gz"
+          ssh -i ~/.ssh/box2_key "${{ secrets.CORE2_EC2_USER }}@${{ secrets.CORE2_EC2_HOST }}" '
+            set -euo pipefail
+            docker cp /tmp/cms_uploads.tar.gz consolidated-app-platform-1:/tmp/cms_uploads.tar.gz
+            docker exec consolidated-app-platform-1 sh -c "mkdir -p /app/Backend/services/knowledge/cms-service/uploads && tar -xzf /tmp/cms_uploads.tar.gz -C /app/Backend/services/knowledge/cms-service/uploads && rm -f /tmp/cms_uploads.tar.gz"
+            echo "=== post-extract file count on box2 ==="
+            docker exec consolidated-app-platform-1 sh -c "find /app/Backend/services/knowledge/cms-service/uploads -type f | wc -l"
+            rm -f /tmp/cms_uploads.tar.gz
+          '
+          rm -f cms_uploads.tar.gz
+
+  migrate-nodebb:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Set up SSH keys
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.CORE_EC2_SSH_KEY }}" > ~/.ssh/box1_key
+          printf '%s\n' "${{ secrets.CORE2_EC2_SSH_KEY }}" > ~/.ssh/box2_key
+          chmod 600 ~/.ssh/box1_key ~/.ssh/box2_key
+          ssh-keyscan -H "${{ secrets.CORE_EC2_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+          ssh-keyscan -H "${{ secrets.CORE2_EC2_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Dump box1's nodebb-postgres database
+        run: |
+          ssh -i ~/.ssh/box1_key "${{ secrets.CORE_EC2_USER }}@${{ secrets.CORE_EC2_HOST }}" '
+            set -euo pipefail
+            docker exec nodebb-postgres pg_dump -U nodebb -d nodebb --no-owner --no-privileges --clean --if-exists > /tmp/nodebb_dump.sql
+            gzip -f /tmp/nodebb_dump.sql
+            echo "dump size: $(du -h /tmp/nodebb_dump.sql.gz | cut -f1)"
+          '
+          scp -i ~/.ssh/box1_key "${{ secrets.CORE_EC2_USER }}@${{ secrets.CORE_EC2_HOST }}:/tmp/nodebb_dump.sql.gz" ./nodebb_dump.sql.gz
+          ssh -i ~/.ssh/box1_key "${{ secrets.CORE_EC2_USER }}@${{ secrets.CORE_EC2_HOST }}" "rm -f /tmp/nodebb_dump.sql.gz" || true
+
+      - name: Check box2's nodebb-postgres exists + restore
+        run: |
+          scp -i ~/.ssh/box2_key ./nodebb_dump.sql.gz "${{ secrets.CORE2_EC2_USER }}@${{ secrets.CORE2_EC2_HOST }}:/tmp/nodebb_dump.sql.gz"
+          ssh -i ~/.ssh/box2_key "${{ secrets.CORE2_EC2_USER }}@${{ secrets.CORE2_EC2_HOST }}" '
+            set -euo pipefail
+            if ! docker ps --format "{{.Names}}" | grep -qx nodebb-postgres; then
+              echo "BOX2 HAS NO nodebb-postgres CONTAINER -- skipping restore, needs investigation"
+              exit 1
+            fi
+            PGUSER=$(docker exec nodebb-postgres printenv POSTGRES_USER)
+            PGDB=$(docker exec nodebb-postgres printenv POSTGRES_DB)
+            gunzip -c /tmp/nodebb_dump.sql.gz > /tmp/nodebb_dump.sql
+            docker cp /tmp/nodebb_dump.sql nodebb-postgres:/tmp/nodebb_dump.sql
+            docker exec nodebb-postgres psql -U "$PGUSER" -d "$PGDB" -v ON_ERROR_STOP=0 -f /tmp/nodebb_dump.sql 2>&1 | tail -100
+            echo "=== post-restore sanity check ==="
+            docker exec nodebb-postgres psql -U "$PGUSER" -d "$PGDB" -c "select count(*) from legacy_object;"
+            docker exec nodebb-postgres rm -f /tmp/nodebb_dump.sql
+            rm -f /tmp/nodebb_dump.sql
+          '
+          rm -f nodebb_dump.sql.gz
