@@ -1,0 +1,45 @@
+name: (temp) Stop idle app-trade + neo4j on box2
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  stop-and-verify:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Stop app-trade + neo4j (confirmed zero external route), verify rest stays healthy
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.CORE2_EC2_HOST }}
+          username: ${{ secrets.CORE2_EC2_USER }}
+          key: ${{ secrets.CORE2_EC2_SSH_KEY }}
+          timeout: 30s
+          command_timeout: 3m
+          script: |
+            set -uo pipefail
+            cd /opt/baalvion-box2
+
+            echo "===== stopping app-trade + neo4j ====="
+            docker compose --env-file deploy/consolidated/.env \
+              -f deploy/consolidated/docker-compose.prod.yml \
+              stop app-trade neo4j
+
+            echo
+            echo "===== container status after stop ====="
+            docker ps -a --format '{{.Names}}\t{{.Status}}'
+
+            echo
+            echo "===== rest of the stack: healthcheck status ====="
+            for c in consolidated-app-identity-1 consolidated-app-commerce-1 consolidated-app-platform-1 consolidated-app-ecosystem-1 consolidated-app-edge-realtime-1 consolidated-app-payments-1 consolidated-caddy-1 consolidated-redis-1; do
+              echo "$c: $(docker inspect -f '{{.State.Health.Status}}' "$c" 2>/dev/null || docker inspect -f '{{.State.Status}}' "$c")"
+            done
+
+            echo
+            echo "===== new host memory footprint ====="
+            free -h
+
+            echo
+            echo "===== sanity: identity + platform health endpoints still respond ====="
+            docker exec consolidated-caddy-1 sh -c "wget -qO- http://app-identity:3001/health || echo FAILED" 2>&1
+            docker exec consolidated-caddy-1 sh -c "wget -qO- http://app-platform:3021/health || echo FAILED" 2>&1
