@@ -21,6 +21,12 @@ export interface GatewayIdentity {
   orgId: string | null;
 }
 
+// Mirrors commerce-service/order-service's requirePlatformAdmin: super_admin | country_admin.
+export const ADMIN_ROLES = ['super_admin', 'country_admin'];
+
+export const isAdminIdentity = (identity: GatewayIdentity | null): boolean =>
+  !!identity && identity.roles.some((r) => ADMIN_ROLES.includes(r));
+
 const toIdentity = (s: {
   userId: string | null; email?: string | null; roles: string[]; permissions: string[]; orgId: string | null;
 }): GatewayIdentity | null =>

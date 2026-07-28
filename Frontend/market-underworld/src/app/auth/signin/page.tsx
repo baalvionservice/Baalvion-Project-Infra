@@ -8,6 +8,7 @@ import Link from 'next/link'
 import { Eye, EyeOff, ChevronLeft, Lock, Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/context/auth-context'
+import { isAdminIdentity } from '@/lib/auth/gateway-session'
 import { ApiError } from '@baalvion/auth-sdk'
 
 // Allowlist for the post-login OAuth bounce-back. Two legitimate shapes reach here:
@@ -62,7 +63,7 @@ export default function SignIn() {
     e.preventDefault()
     setIsSubmitting(true)
     try {
-      await login(email, password)
+      const identity = await login(email, password)
       toast({ title: "Access Granted", description: "Welcome back to the network." })
 
       // OAuth bounce-back — see the allowlist functions above for the two legitimate shapes.
@@ -76,7 +77,7 @@ export default function SignIn() {
         return
       }
 
-      router.push('/app/home')
+      router.push(isAdminIdentity(identity) ? '/admin' : '/')
     } catch (err) {
       const message = err instanceof ApiError ? err.message : "Invalid credentials. Try again.";
       toast({ variant: 'destructive', title: "Authentication Failed", description: message })

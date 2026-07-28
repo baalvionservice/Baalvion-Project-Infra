@@ -27,7 +27,7 @@ export default function Registration() {
     try {
       await register(email, password, fullName)
       toast({ title: "Access Authorized", description: "Your node is now live." })
-      router.push('/app/home')
+      router.push('/')
     } catch (err) {
       const message = err instanceof ApiError ? err.message : "Could not create your account. Try again.";
       toast({ variant: 'destructive', title: "Registration Failed", description: message })
