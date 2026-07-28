@@ -1,0 +1,33 @@
+name: (temp) Audit box2 host CPU/mem specs via SSH (no AWS API needed)
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: CPU count + memory + AWS instance-metadata (from inside the box, no IAM needed)
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.CORE2_EC2_HOST }}
+          username: ${{ secrets.CORE2_EC2_USER }}
+          key: ${{ secrets.CORE2_EC2_SSH_KEY }}
+          timeout: 30s
+          command_timeout: 2m
+          script: |
+            set -uo pipefail
+            echo "===== vCPU count ====="
+            nproc
+            echo
+            echo "===== memory ====="
+            free -h
+            echo
+            echo "===== EC2 instance-metadata (IMDSv2, local to the box, no IAM policy involved) ====="
+            TOKEN=$(curl -sX PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 60" 2>&1)
+            curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/instance-type 2>&1; echo
+            curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/placement/availability-zone 2>&1; echo
+            echo
+            echo "===== root disk ====="
+            lsblk 2>&1
