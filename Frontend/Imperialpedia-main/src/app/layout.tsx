@@ -1,6 +1,7 @@
 import React from "react";
 import "./globals.css";
 import { Metadata } from "next";
+import Script from "next/script";
 import { env } from "@/config/env";
 import { Source_Serif_4 } from "next/font/google";
 import { cn } from "@/lib/utils";
@@ -128,7 +129,19 @@ export default async function RootLayout({
         />
         <meta name="theme-color" content="#ffffff" />
         {adsenseClient && (
-          <meta name="google-adsense-account" content={adsenseClient} />
+          <>
+            <meta name="google-adsense-account" content={adsenseClient} />
+            {/* AdSense's site-verification check looks for this snippet between
+                <head> and </head> -- it was previously loaded from <body> via
+                Analytics, which works for ad delivery but doesn't match what the
+                verification crawler is documented to check for. */}
+            <Script
+              async
+              src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`}
+              crossOrigin="anonymous"
+              strategy="afterInteractive"
+            />
+          </>
         )}
       </head>
 
@@ -148,7 +161,7 @@ export default async function RootLayout({
         </a>
 
         <RootLayoutClient>{children}</RootLayoutClient>
-        <Analytics adsenseClient={adsenseClient} />
+        <Analytics />
         <UnifiedAnalytics slug={CMS_SLUG} />
       </body>
     </html>

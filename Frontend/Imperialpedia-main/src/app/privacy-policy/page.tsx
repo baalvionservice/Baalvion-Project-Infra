@@ -109,10 +109,20 @@ function PrivacyFallback() {
             <Text variant="body" className="text-muted-foreground leading-relaxed">
               We may use cookies and similar technologies for site functionality, to remember preferences,
               and to measure traffic. We may also use third-party analytics (for example, Google Analytics)
-              and advertising partners (for example, Google AdSense) that set their own cookies and process
-              data according to their policies. Where required, we will request your consent before
-              non-essential cookies are used. You can control cookies through your browser settings and any
-              cookie banner we display.
+              and advertising partners (for example, Google AdSense, which uses Google&apos;s ad-serving
+              technology formerly branded Google DoubleClick, now part of Google Marketing Platform) that
+              set their own third-party cookies and process data according to their policies. Google, as a
+              third-party vendor, uses cookies to serve ads on this site based on a user&apos;s prior visits
+              to this website and other websites. You may opt out of personalized advertising by visiting{" "}
+              <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener noreferrer" className="underline">
+                Google Ads Settings
+              </a>{" "}
+              or{" "}
+              <a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener noreferrer" className="underline">
+                www.aboutads.info
+              </a>
+              . Where required, we will request your consent before non-essential cookies are used. You can
+              control cookies through your browser settings and any cookie banner we display.
             </Text>
           </div>
 
