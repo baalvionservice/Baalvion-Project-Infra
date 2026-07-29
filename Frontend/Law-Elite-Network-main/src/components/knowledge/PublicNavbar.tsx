@@ -245,7 +245,7 @@ export function PublicNavbar() {
                       filteredSubcategories.map((sub) => (
                         <Link
                           key={sub.id}
-                          href={`/law/${activeCategoryData.slug}?sub=${sub.slug}`}
+                          href={`/law/${activeCategoryData.slug}/${sub.slug}`}
                           onClick={() => setActiveCategory(null)}
                           className="group flex items-center justify-between py-2.5 border-b border-slate-50 hover:border-slate-200 transition-colors"
                         >
@@ -322,7 +322,7 @@ export function PublicNavbar() {
                     .map((sub) => (
                       <Link
                         key={sub.id}
-                        href={`/law/${cat.slug}?sub=${sub.slug}`}
+                        href={`/law/${cat.slug}/${sub.slug}`}
                         onClick={() => setIsMobileMenuOpen(false)}
                         className="py-1.5 text-xs font-medium text-slate-500 hover:text-news-600"
                       >
