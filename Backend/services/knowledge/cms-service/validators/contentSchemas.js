@@ -84,8 +84,13 @@ const autosaveContentSchema = z.object({
     seoMetadata: seoMetadataSchema.optional(),
 });
 
+// Raised from 100 -> 1000: bulkUpdate() (contentService.js) applies archive/delete
+// via a single set-based `WHERE id IN (...)` query, not a per-id loop, so a request
+// this size is still one round-trip to the DB. The admin console chunks requests
+// above this size client-side (see content/page.tsx), so 1000 is a per-request cap,
+// not a hard ceiling on how many items one bulk action can cover.
 const bulkUpdateSchema = z.object({
-    ids: z.array(z.string().uuid()).min(1).max(100),
+    ids: z.array(z.string().uuid()).min(1).max(1000),
     action: z.enum(['publish', 'archive', 'delete', 'assign_category']),
     categoryId: z.string().uuid().optional(),
 });
