@@ -61,10 +61,11 @@ jobs:
               -e SA_EMAIL_DIAG="$SA_EMAIL" \
               -e SA_PASS_DIAG="$SA_PASS" \
               -e NODE_TLS_REJECT_UNAUTHORIZED=0 \
+              -w /app/Backend/services/identity/auth-service \
               consolidated-app-identity-1 \
               node -e '
                 const { Client } = require("pg");
-                const password = require("/app/Backend/services/identity/auth-service/utils/password");
+                const password = require("./utils/password");
                 (async () => {
                   const c = new Client({
                     host: process.env.DB_HOST, port: Number(process.env.DB_PORT || 5432),
