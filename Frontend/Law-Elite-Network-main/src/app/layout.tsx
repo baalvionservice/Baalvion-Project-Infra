@@ -123,7 +123,7 @@ const organizationJsonLd = {
     contactType: 'customer support',
     url: `${SITE_URL}/contact-us`,
   },
-  sameAs: ['https://twitter.com/lawelitenetwork'],
+  sameAs: ['https://x.com/lawelitenetwork', 'https://www.linkedin.com/company/law-elite-network'],
 };
 
 const webSiteJsonLd = {
