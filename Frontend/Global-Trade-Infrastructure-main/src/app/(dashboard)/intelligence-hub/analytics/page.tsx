@@ -1,183 +1,239 @@
+'use client';
 /**
  * @file intelligence-hub/analytics/page.tsx
- * @description THE STRATEGIC BI COMMAND OBSERVATORY. 
- * Re-engineered entry point for global institutional analytics and operational cognition.
+ * @description Analytics (Phase 4) — every figure here comes from
+ * GET /api/analytics/overview, which is real Prisma groupBy/count/sum/avg
+ * aggregation scoped to the caller's own organization (analytics-repository.ts
+ * + analytics-service.ts). This REPLACES a previous "Strategic Analytics
+ * Observatory" page whose own service code comment admitted it was fake
+ * ("In production, this triggers a high-scale aggregation query on
+ * ClickHouse/Trino") while hardcoding numbers like a 99.98% compliance pass
+ * rate — exactly the deceptive-UI problem this phase exists to fix. That
+ * service/components (src/modules/analytics/*) are left in place (not
+ * deleted — out of scope to chase down and clean up) but are no longer used
+ * by any page.
+ *
+ * "Revenue", "Shipment performance", "Partner analytics", and "Financial
+ * analytics" as distinct named dashboards from the original request are NOT
+ * separately covered here — Revenue overlaps with Trade Volume/Settlement
+ * below under a different label, and the other three would need either
+ * schema additions (no clean "partner" aggregation surface exists yet) or a
+ * much larger build than this phase's real estate justifies. Flagged as
+ * follow-up scope, not silently dropped.
  */
-'use client';
-
-import { useEffect } from 'react';
-import { analyticsService } from '@/modules/analytics/services/analytics.service';
-import { useAnalyticsStore } from '@/modules/analytics/store/use-analytics-store';
-import { ExecutiveCommandGrid } from '@/modules/analytics/components/executive-command-grid';
-import { DataWarehouseHealth } from '@/modules/analytics/components/data-warehouse-health';
-import { OperationalForecastingPanel } from '@/modules/analytics/components/operational-forecasting-panel';
+import { useEffect, useState } from 'react';
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { ShieldCheck } from 'lucide-react';
-import { 
-  Loader2, 
-  RefreshCw, 
-  Download, 
-  PieChart, 
-  Globe,
-  TrendingUp,
-  Database
-} from 'lucide-react';
-import { cn, formatCurrency } from '@/lib/utils';
-import { motion } from 'framer-motion';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertCircle, BarChart3, ShieldAlert, ShieldCheck, Landmark, Globe2 } from 'lucide-react';
+import { fetchLocalApi } from '@/lib/local-api-client';
+import { cn } from '@/lib/utils';
 
-export default function StrategicAnalyticsObservatory() {
-  const { kpis, setKpis, warehouse, setWarehouse, spend, setSpend, isSyncing, setSyncing } = useAnalyticsStore();
-
-  const fetchData = async () => {
-    setSyncing(true);
-    const [kPulse, wHealth, sDeepDive] = await Promise.all([
-      analyticsService.getExecutivePulse(),
-      analyticsService.getWarehouseHealth(),
-      analyticsService.getSpendDeepDive()
-    ]);
-    setKpis(kPulse);
-    setWarehouse(wHealth);
-    setSpend(sDeepDive);
-    setSyncing(false);
+interface AnalyticsOverview {
+  tradeVolume: { currency: string; totalAmount: string; orderCount: number }[];
+  tradePipeline: { state: string; count: number }[];
+  settlement: { byStatus: { status: string; count: number; totalAmount: string }[]; avgCycleHours: number | null };
+  risk: { byLevel: { level: string; count: number; avgScore: number | null }[]; totalAssessments: number };
+  compliance: {
+    byOutcome: { outcome: string; count: number }[];
+    byType: { type: string; count: number }[];
+    totalChecks: number;
+    passRate: number | null;
   };
+  topCountries: { country: string; count: number; totalAmount: string }[];
+}
+
+function titleCase(s: string): string {
+  return s.toLowerCase().replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+const pipelineConfig = { count: { label: 'Trades', color: 'hsl(var(--primary))' } } satisfies ChartConfig;
+const riskConfig = { count: { label: 'Assessments', color: 'hsl(var(--destructive))' } } satisfies ChartConfig;
+
+function SectionCard({ icon: Icon, title, description, children }: { icon: typeof BarChart3; title: string; description: string; children: React.ReactNode }) {
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center gap-3 space-y-0">
+        <div className="rounded-lg bg-primary/10 p-2">
+          <Icon className="h-4 w-4 text-primary" />
+        </div>
+        <div>
+          <CardTitle className="text-base">{title}</CardTitle>
+          <CardDescription>{description}</CardDescription>
+        </div>
+      </CardHeader>
+      <CardContent>{children}</CardContent>
+    </Card>
+  );
+}
+
+export default function AnalyticsPage() {
+  const [data, setData] = useState<AnalyticsOverview | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchData();
-    const interval = setInterval(fetchData, 15000);
-    return () => clearInterval(interval);
+    let cancelled = false;
+    fetchLocalApi('/api/analytics/overview')
+      .then((res) => res.json())
+      .then((body) => {
+        if (cancelled) return;
+        if (!body.success) throw new Error(body.error ?? 'Failed to load analytics');
+        setData(body.data as AnalyticsOverview);
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) setError(err instanceof Error ? err.message : 'Failed to load analytics');
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  if (kpis.length === 0 || !warehouse) {
+  if (error) {
     return (
-      <div className="flex h-[80vh] flex-col items-center justify-center gap-6 bg-background">
-        <Loader2 className="h-12 w-12 animate-spin text-primary opacity-20" />
-        <p className="text-[11px] font-black uppercase tracking-widest text-muted-foreground animate-pulse">Syncing Strategic Oracle...</p>
+      <div className="p-6">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Couldn&apos;t load analytics</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       </div>
     );
   }
 
+  if (!data) {
+    return (
+      <div className="space-y-6 p-6">
+        <Skeleton className="h-10 w-64" />
+        <div className="grid gap-4 md:grid-cols-2">
+          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-64 rounded-lg" />)}
+        </div>
+      </div>
+    );
+  }
+
+  const pipelineData = data.tradePipeline.map((r) => ({ state: titleCase(r.state), count: r.count }));
+  const riskData = data.risk.byLevel.map((r) => ({ level: titleCase(r.level), count: r.count }));
+
   return (
-    <main className="space-y-8 pb-24">
-      {/* COMMAND HEADER */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b pb-8">
-        <div className="space-y-4">
-          <div className="flex items-center gap-3">
-             <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-             <p className="text-[10px] font-black uppercase tracking-widest text-primary">Authority Node: BI_COMMAND_ALPHA</p>
-          </div>
-          <h2 className="text-4xl font-black tracking-tight uppercase tracking-tighter leading-[0.8]">Strategic <br />Intelligence.</h2>
-          <p className="text-muted-foreground font-medium italic text-lg max-w-2xl">"Authoritative planetary oversight of institutional procurement, cash positioning, and execution finality."</p>
-        </div>
-        <div className="flex gap-4">
-          <Button variant="outline" className="h-12 px-6 border-2 font-black uppercase tracking-widest text-xs bg-background shadow-md group" onClick={fetchData}>
-            <RefreshCw className={cn("mr-3 h-4 w-4 transition-transform duration-700", isSyncing && "animate-spin")} /> Global Re-Sync
-          </Button>
-          <Button className="h-12 px-6 bg-primary text-white font-black uppercase tracking-widest text-xs shadow-md hover:scale-[1.02] transition-all">
-            <Download className="mr-3 h-4 w-4" /> Export Executive Pack
-          </Button>
-        </div>
+    <div className="space-y-6 p-6">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Analytics</h1>
+        <p className="text-sm text-muted-foreground">Real, org-scoped figures — trade pipeline, settlement, risk, and compliance.</p>
       </div>
 
-      <ExecutiveCommandGrid kpis={kpis} />
-
-      <div className="grid gap-6 lg:grid-cols-12">
-        <div className="lg:col-span-8 space-y-6">
-           {/* SPEND VELOCITY MONITOR */}
-           <Card className="shadow-none border-2 bg-background rounded-2xl overflow-hidden flex flex-col h-[500px]">
-              <CardHeader className="bg-muted/10 border-b p-6 flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle className="text-xl font-black uppercase tracking-tighter">Planetary Spend Velocity</CardTitle>
-                  <CardDescription className="text-sm font-medium italic">High-fidelity intensity mapping of global procurement liquidity across jurisdictional nodes.</CardDescription>
+      <div className="grid gap-4 md:grid-cols-2">
+        <SectionCard icon={Landmark} title="Trade Volume" description="Total order value by currency">
+          {data.tradeVolume.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No orders recorded yet.</p>
+          ) : (
+            <div className="space-y-3">
+              {data.tradeVolume.map((v) => (
+                <div key={v.currency} className="flex items-center justify-between border-b py-2 last:border-0">
+                  <span className="text-sm font-medium">{v.currency}</span>
+                  <div className="text-right">
+                    <p className="text-sm font-bold tabular-nums">{Number(v.totalAmount).toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
+                    <p className="text-xs text-muted-foreground">{v.orderCount} orders</p>
+                  </div>
                 </div>
-                <Globe className="h-8 w-8 text-primary opacity-20" />
-              </CardHeader>
-              <CardContent className="p-6 flex-1 grid md:grid-cols-2 gap-6">
-                 <div className="space-y-8">
-                    {spend?.breakdown.map((item) => (
-                       <div key={item.category} className="space-y-3 group cursor-default">
-                          <div className="flex items-center justify-between">
-                             <span className="text-xs font-black uppercase tracking-widest text-foreground/80">{item.category} Node</span>
-                             <div className="text-right">
-                                <span className="text-sm font-black text-primary tabular-nums">{formatCurrency(item.amount)}</span>
-                                <p className={cn("text-[9px] font-bold uppercase tracking-widest", item.trend > 0 ? "text-emerald-600" : "text-red-600")}>
-                                  {item.trend > 0 ? '+' : ''}{item.trend}% growth
-                                </p>
-                             </div>
-                          </div>
-                          <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden shadow-inner relative">
-                             <motion.div 
-                               initial={{ width: 0 }}
-                               animate={{ width: `${item.percentage}%` }}
-                               transition={{ duration: 1.5, ease: "circOut" }}
-                               className="h-full bg-primary"
-                             />
-                          </div>
-                       </div>
-                    ))}
-                 </div>
-                 <div className="bg-muted/30 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center p-6 text-center space-y-6 group">
-                    <PieChart className="h-12 w-16 text-primary opacity-20 group-hover:scale-110 transition-transform duration-700" />
-                    <div className="space-y-1">
-                       <p className="text-xs font-black uppercase tracking-wide text-muted-foreground">Allocation Matrix</p>
-                       <p className="text-sm font-medium italic opacity-60 max-w-xs mx-auto">"Corridor-level liquidity rebalancing is recommended for the APAC-US renewables cluster."</p>
-                    </div>
-                    <Button variant="outline" className="rounded-2xl border-2 font-black text-[10px] uppercase h-11 px-8 bg-background shadow-md">Review Routing Matrix</Button>
-                 </div>
-              </CardContent>
-           </Card>
+              ))}
+            </div>
+          )}
+        </SectionCard>
 
-           <DataWarehouseHealth health={warehouse} />
-        </div>
+        <SectionCard icon={BarChart3} title="Trade Pipeline" description="Trades by current lifecycle state">
+          {pipelineData.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No trades recorded yet.</p>
+          ) : (
+            <ChartContainer config={pipelineConfig} className="h-[220px] w-full">
+              <BarChart data={pipelineData} layout="vertical" margin={{ left: 12 }}>
+                <CartesianGrid horizontal={false} strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis type="number" tickLine={false} axisLine={false} className="text-xs" />
+                <YAxis type="category" dataKey="state" tickLine={false} axisLine={false} width={110} className="text-[10px]" />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Bar dataKey="count" fill="var(--color-count)" radius={4} />
+              </BarChart>
+            </ChartContainer>
+          )}
+        </SectionCard>
 
-        <div className="lg:col-span-4 space-y-6">
-           <OperationalForecastingPanel signals={[
-             {
-               id: 'F1',
-               targetMetric: 'Settlement Finality',
-               horizon: '30d',
-               predictedValue: 420,
-               confidenceScore: 0.98,
-               impactLevel: 'critical',
-               recommendation: 'Treasury Signal: Global FX drift in the USD/INR corridor is trending +14%. Recommend autonomous swap activation.',
-               probabilityDensity: [0.1, 0.2, 0.4, 0.2, 0.1]
-             },
-             {
-               id: 'F2',
-               targetMetric: 'Sourcing Demand',
-               horizon: '90d',
-               predictedValue: 1240,
-               confidenceScore: 0.84,
-               impactLevel: 'medium',
-               recommendation: 'Industrial Foresight: Surge in high-purity silicon demand predicted for Q3. Secure Tier 1 supplier capacity now.',
-               probabilityDensity: [0.1, 0.1, 0.3, 0.4, 0.1]
-             }
-           ]} />
+        <SectionCard icon={Globe2} title="Settlement Performance" description="Instructions by status">
+          {data.settlement.byStatus.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No settlement instructions recorded yet.</p>
+          ) : (
+            <div className="space-y-3">
+              {data.settlement.byStatus.map((s) => (
+                <div key={s.status} className="flex items-center justify-between border-b py-2 last:border-0">
+                  <span className="text-sm font-medium">{titleCase(s.status)}</span>
+                  <div className="text-right">
+                    <p className="text-sm font-bold tabular-nums">{s.count}</p>
+                    <p className="text-xs text-muted-foreground">{Number(s.totalAmount).toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
+                  </div>
+                </div>
+              ))}
+              <p className="pt-2 text-xs text-muted-foreground">
+                Avg settlement cycle:{' '}
+                {data.settlement.avgCycleHours !== null ? `${data.settlement.avgCycleHours.toFixed(1)} hours` : 'not enough settled instructions yet'}
+              </p>
+            </div>
+          )}
+        </SectionCard>
 
-           <Card className="shadow-none border-2 bg-background p-6 space-y-6 rounded-2xl">
-              <div className="flex items-center justify-between">
-                 <h4 className="text-[11px] font-black uppercase tracking-widest text-muted-foreground ml-1">Ecosystem Ratios</h4>
-                 <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+        <SectionCard icon={ShieldAlert} title="Risk Exposure" description="Assessments by level">
+          {riskData.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No risk assessments recorded yet.</p>
+          ) : (
+            <ChartContainer config={riskConfig} className="h-[220px] w-full">
+              <BarChart data={riskData} layout="vertical" margin={{ left: 12 }}>
+                <CartesianGrid horizontal={false} strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis type="number" tickLine={false} axisLine={false} className="text-xs" />
+                <YAxis type="category" dataKey="level" tickLine={false} axisLine={false} width={80} className="text-[10px]" />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Bar dataKey="count" fill="var(--color-count)" radius={4} />
+              </BarChart>
+            </ChartContainer>
+          )}
+        </SectionCard>
+
+        <SectionCard icon={ShieldCheck} title="Compliance" description="Checks by outcome and type">
+          <div className="space-y-4">
+            <div className={cn('rounded-lg border p-3 text-center', data.compliance.passRate !== null && data.compliance.passRate >= 0.9 && 'border-emerald-500/30 bg-emerald-500/5')}>
+              <p className="text-2xl font-black tabular-nums">
+                {data.compliance.passRate !== null ? `${(data.compliance.passRate * 100).toFixed(1)}%` : '—'}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {data.compliance.passRate !== null ? `pass rate across ${data.compliance.totalChecks} checks` : 'no compliance checks recorded yet'}
+              </p>
+            </div>
+            {data.compliance.byType.length > 0 && (
+              <div className="space-y-1.5">
+                {data.compliance.byType.map((t) => (
+                  <div key={t.type} className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">{titleCase(t.type)}</span>
+                    <span className="font-bold tabular-nums">{t.count}</span>
+                  </div>
+                ))}
               </div>
-              <div className="space-y-8">
-                 {[
-                   { label: 'Asset Finality', val: '99.98%', icon: ShieldCheck, color: 'text-emerald-500' },
-                   { label: 'Node Symmetry', val: '100%', icon: Database, color: 'text-blue-500' },
-                   { label: 'Signal Accuracy', val: '98.4%', icon: TrendingUp, color: 'text-indigo-500' }
-                 ].map(stat => (
-                   <div key={stat.label} className="flex items-center justify-between group cursor-default">
-                      <div className="flex items-center gap-4">
-                         <div className="p-3 rounded-2xl bg-muted border-2 shadow-inner group-hover:bg-primary/5 transition-colors"><stat.icon className={cn("h-5 w-5", stat.color)} /></div>
-                         <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{stat.label}</span>
-                      </div>
-                      <span className="text-2xl font-black tracking-tighter tabular-nums">{stat.val}</span>
-                   </div>
-                 ))}
-              </div>
-           </Card>
-        </div>
+            )}
+          </div>
+        </SectionCard>
+
+        <SectionCard icon={Globe2} title="Top Destination Countries" description="By order count — only Order.destinationCountry carries geography today">
+          {data.topCountries.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No orders with a destination country recorded yet.</p>
+          ) : (
+            <div className="space-y-2">
+              {data.topCountries.map((c) => (
+                <div key={c.country} className="flex items-center justify-between border-b py-1.5 last:border-0 text-sm">
+                  <span className="font-medium">{c.country}</span>
+                  <span className="tabular-nums text-muted-foreground">{c.count} orders</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </SectionCard>
       </div>
-    </main>
+    </div>
   );
 }
