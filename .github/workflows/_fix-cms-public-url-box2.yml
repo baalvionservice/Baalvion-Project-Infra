@@ -1,0 +1,134 @@
+name: (temp) Fix cms-service CMS_PUBLIC_URL + backfill localhost image URLs on box2
+
+# Root cause: Backend/services/knowledge/cms-service/service/mediaService.js's
+# PUBLIC_BASE falls back to http://localhost:3011 when CMS_PUBLIC_URL is unset.
+# deploy/consolidated/docker-compose.prod.yml's app-platform service never sets
+# CMS_PUBLIC_URL explicitly, so it silently rides that fallback unless deploy/consolidated/.env
+# on the box happens to define it. Every image uploaded (or auto-generated article
+# artwork, see contentService.js) while that fallback was active got a permanently
+# unreachable http://localhost:3011/uploads/<key> URL baked into
+# cms.cms_media_assets.url / .thumbnail_url and cms.cms_contents.featured_image —
+# resolves fine from whatever machine IS "localhost:3011" (the box itself / an
+# admin tunnelled into it), 404s/connection-refused for every other device
+# (mobile, anyone off that exact host).
+#
+# This workflow: (1) reports current state, (2) sets CMS_PUBLIC_URL in .env and
+# restarts app-platform to pick it up, (3) rewrites the already-broken rows to the
+# real public host, (4) spot-checks one rewritten URL over HTTPS.
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: 1) Report current state (read-only)
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.CORE2_EC2_HOST }}
+          username: ${{ secrets.CORE2_EC2_USER }}
+          key: ${{ secrets.CORE2_EC2_SSH_KEY }}
+          timeout: 30s
+          command_timeout: 3m
+          script: |
+            set -uo pipefail
+            cd /opt/baalvion-box2
+            echo "===== deploy/consolidated/.env: CMS_PUBLIC_URL / MEDIA_DRIVER / S3_PUBLIC_URL ====="
+            grep -E '^(CMS_PUBLIC_URL|MEDIA_DRIVER|S3_PUBLIC_URL)=' deploy/consolidated/.env || echo "(none set in .env -- falls back to code default)"
+            APP_PLATFORM="$(docker ps --filter name=app-platform --format '{{.Names}}' | head -1)"
+            echo "===== app-platform container: $APP_PLATFORM ====="
+            echo "===== live env inside container ====="
+            docker exec "$APP_PLATFORM" env | grep -E '^(CMS_PUBLIC_URL|MEDIA_DRIVER|S3_PUBLIC_URL)=' || echo "(not set -- process is using the http://localhost:3011 code default)"
+            echo "===== broken-row counts in DB (before fix) ====="
+            docker exec -w /app/Backend/services/knowledge/cms-service "$APP_PLATFORM" node -e "
+              const db = require('./models');
+              (async () => {
+                const [assets] = await db.sequelize.query(\"select count(*)::int as n from cms.cms_media_assets where url like 'http://localhost:3011%' or thumbnail_url like 'http://localhost:3011%'\", { type: db.sequelize.QueryTypes.SELECT });
+                const [contents] = await db.sequelize.query(\"select count(*)::int as n from cms.cms_contents where featured_image like 'http://localhost:3011%'\", { type: db.sequelize.QueryTypes.SELECT });
+                console.log('cms_media_assets broken rows:', assets.n);
+                console.log('cms_contents broken featured_image rows:', contents.n);
+              })().catch(e => { console.log('QUERY ERROR:', e.message); process.exit(1); });
+            "
+
+      - name: 2) Set CMS_PUBLIC_URL in .env and restart app-platform
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.CORE2_EC2_HOST }}
+          username: ${{ secrets.CORE2_EC2_USER }}
+          key: ${{ secrets.CORE2_EC2_SSH_KEY }}
+          timeout: 30s
+          command_timeout: 5m
+          script: |
+            set -euo pipefail
+            cd /opt/baalvion-box2
+            ENV=deploy/consolidated/.env
+            if grep -q '^CMS_PUBLIC_URL=' "$ENV"; then
+              sed -i 's|^CMS_PUBLIC_URL=.*|CMS_PUBLIC_URL=https://api.baalvion.com|' "$ENV"
+            else
+              echo 'CMS_PUBLIC_URL=https://api.baalvion.com' >> "$ENV"
+            fi
+            echo "===== confirmed in .env ====="
+            grep -E '^CMS_PUBLIC_URL=' "$ENV"
+            COMPOSE="docker compose --env-file $ENV -f deploy/consolidated/docker-compose.prod.yml"
+            $COMPOSE up -d --no-build --no-deps app-platform
+            echo "===== waiting for app-platform health ====="
+            for i in $(seq 1 20); do
+              STATUS="$(docker inspect --format='{{.State.Health.Status}}' "$(docker ps --filter name=app-platform --format '{{.Names}}' | head -1)" 2>/dev/null || echo starting)"
+              echo "attempt $i: $STATUS"
+              [ "$STATUS" = "healthy" ] && break
+              sleep 5
+            done
+            APP_PLATFORM="$(docker ps --filter name=app-platform --format '{{.Names}}' | head -1)"
+            echo "===== live env after restart ====="
+            docker exec "$APP_PLATFORM" env | grep -E '^CMS_PUBLIC_URL='
+
+      - name: 3) Backfill already-broken rows to the real public host
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.CORE2_EC2_HOST }}
+          username: ${{ secrets.CORE2_EC2_USER }}
+          key: ${{ secrets.CORE2_EC2_SSH_KEY }}
+          timeout: 30s
+          command_timeout: 3m
+          script: |
+            set -uo pipefail
+            APP_PLATFORM="$(docker ps --filter name=app-platform --format '{{.Names}}' | head -1)"
+            docker exec -w /app/Backend/services/knowledge/cms-service "$APP_PLATFORM" node -e "
+              const db = require('./models');
+              (async () => {
+                const [assets] = await db.sequelize.query(\"update cms.cms_media_assets set url = replace(url, 'http://localhost:3011', 'https://api.baalvion.com'), thumbnail_url = replace(thumbnail_url, 'http://localhost:3011', 'https://api.baalvion.com'), updated_at = now() where url like 'http://localhost:3011%' or thumbnail_url like 'http://localhost:3011%' returning id\", { type: db.sequelize.QueryTypes.UPDATE });
+                const [contents] = await db.sequelize.query(\"update cms.cms_contents set featured_image = replace(featured_image, 'http://localhost:3011', 'https://api.baalvion.com'), updated_at = now() where featured_image like 'http://localhost:3011%' returning id\", { type: db.sequelize.QueryTypes.UPDATE });
+                console.log('cms_media_assets rows fixed:', assets.length);
+                console.log('cms_contents rows fixed:', contents.length);
+                const [remaining] = await db.sequelize.query(\"select count(*)::int as n from cms.cms_media_assets where url like 'http://localhost%' or thumbnail_url like 'http://localhost%'\", { type: db.sequelize.QueryTypes.SELECT });
+                console.log('cms_media_assets rows STILL broken (any localhost port):', remaining.n);
+                const sample = await db.sequelize.query(\"select url from cms.cms_media_assets order by updated_at desc limit 3\", { type: db.sequelize.QueryTypes.SELECT });
+                console.log('sample of 3 recently-fixed urls:', JSON.stringify(sample));
+              })().catch(e => { console.log('QUERY ERROR:', e.message); process.exit(1); });
+            "
+
+      - name: 4) Spot-check a rewritten URL over HTTPS
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.CORE2_EC2_HOST }}
+          username: ${{ secrets.CORE2_EC2_USER }}
+          key: ${{ secrets.CORE2_EC2_SSH_KEY }}
+          timeout: 30s
+          command_timeout: 2m
+          script: |
+            set -uo pipefail
+            APP_PLATFORM="$(docker ps --filter name=app-platform --format '{{.Names}}' | head -1)"
+            URL="$(docker exec -w /app/Backend/services/knowledge/cms-service "$APP_PLATFORM" node -e "
+              const db = require('./models');
+              db.sequelize.query(\"select url from cms.cms_media_assets where url like 'https://api.baalvion.com/uploads/%' order by updated_at desc limit 1\", { type: db.sequelize.QueryTypes.SELECT })
+                .then(r => { console.log(r[0] ? r[0].url : ''); process.exit(0); })
+                .catch(() => process.exit(0));
+            " | tail -1)"
+            echo "checking: $URL"
+            if [ -n "$URL" ]; then
+              curl -s -o /dev/null -w 'HTTP %{http_code}\n' "$URL"
+            else
+              echo "no fixed rows to spot-check"
+            fi
