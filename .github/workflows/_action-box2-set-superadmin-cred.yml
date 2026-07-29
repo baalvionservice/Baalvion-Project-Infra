@@ -30,6 +30,8 @@ jobs:
               exit 1
             fi
 
+            echo "diag: SA_PASS length=$(printf '%s' "$SA_PASS" | wc -c) md5=$(printf '%s' "$SA_PASS" | md5sum | cut -d' ' -f1)"
+
             cd /opt/baalvion-box2
             ENV=deploy/consolidated/.env
 
