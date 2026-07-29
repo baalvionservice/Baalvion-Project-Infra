@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { Search, GraduationCap, ShoppingBag, MessageSquare, ArrowRight, Loader2 } from "lucide-react"
+import { Search, ShoppingBag, MessageSquare, ArrowRight, Loader2 } from "lucide-react"
 import { getStorefrontProducts } from "@/lib/api/commerce"
 
 const slugifyCategory = (name: string) => name.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "general";
@@ -143,9 +143,8 @@ export const GlobalSearch = () => {
             </AnimatePresence>
 
             {!query && (
-              <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 px-4">
+              <div className="mt-8 grid grid-cols-3 gap-4 px-4">
                 {[
-                  { label: 'Operators', icon: GraduationCap, href: '/education' },
                   { label: 'Exchange', icon: ShoppingBag, href: '/marketplace' },
                   { label: 'Intelligence', icon: MessageSquare, href: '/forum' },
                   { label: 'Streams', icon: Search, href: '/live-sessions' }
