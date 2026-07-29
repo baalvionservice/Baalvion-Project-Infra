@@ -34,6 +34,10 @@ const DISALLOW = [
   '/writer/',
   '/auth/',
   '/maintenance',
+  // Placeholder/skeleton pages with no real content yet — keep out of crawl
+  // and index until real pricing tiers / dataset listings ship.
+  '/pricing',
+  '/datasets',
 ];
 
 // AI crawlers explicitly allowed (same allow/disallow scope as regular search
