@@ -10,6 +10,7 @@ import { Linkedin, Twitter, BookOpen, Loader2 } from 'lucide-react';
 import { getAuthorBySlug, authorNameToSlug, type LawAuthor } from '@/data/authors';
 import { getAllArticles, type LawArticle } from '@/data/law-content';
 import { resolveArticleImage, resolvePersonImage } from '@/lib/article-art';
+import { articleUrl } from '@/lib/article-url';
 
 export default function AuthorProfilePage() {
   const { slug } = useParams();
@@ -147,7 +148,7 @@ export default function AuthorProfilePage() {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                 {articles.map((art) => (
-                  <Link key={art.id} href={`/article/${art.slug}`} className="group block h-full">
+                  <Link key={art.id} href={articleUrl(art)} className="group block h-full">
                     <div className="bg-white border border-slate-200 overflow-hidden shadow-sm group-hover:shadow-md transition-all duration-300 flex flex-col h-full">
                       <div className="relative aspect-[3/2] overflow-hidden bg-slate-100">
                         <Image

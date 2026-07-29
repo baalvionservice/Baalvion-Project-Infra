@@ -7,6 +7,7 @@ import { ArticleCard } from '@/components/knowledge/ArticleCard';
 import { getArticlesByCategorySlug } from '@/data/law-content';
 import seedData from '../../../../../docs/seed-data.json';
 
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 const titleCase = (s: string) => s.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
 function bundledCategory(slug: string) {
@@ -89,9 +90,30 @@ export default async function SubcategoryPage(
 
   const categoryName = category?.name || titleCase(catSlug);
   const subName = subcategory?.name || titleCase(sub);
+  const url = `${SITE}/law/${catSlug}/${sub}`;
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: `${subName} — ${categoryName} Guides`,
+    description: `Expert ${subName} legal guides within ${categoryName} on Law Elite Network.`,
+    url,
+    isPartOf: { '@type': 'WebSite', name: 'Law Elite Network', url: SITE },
+  };
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE },
+      { '@type': 'ListItem', position: 2, name: categoryName, item: `${SITE}/law/${catSlug}` },
+      { '@type': 'ListItem', position: 3, name: subName, item: url },
+    ],
+  };
 
   return (
     <div className="min-h-screen bg-white pt-[60px] lg:pt-[96px]">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <main className="pb-24">
         {/* Subcategory masthead with breadcrumb */}
         <section className="border-b border-slate-200 bg-slate-50/60">

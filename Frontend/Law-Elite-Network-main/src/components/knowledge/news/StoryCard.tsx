@@ -7,6 +7,7 @@ import { Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { resolveArticleImage } from '@/lib/article-art';
 import { formatArticleDate } from '@/lib/format-date';
+import { articleUrl } from '@/lib/article-url';
 
 type Variant = 'lead' | 'default' | 'horizontal';
 
@@ -47,7 +48,7 @@ function Byline({ article }: { article: any }) {
  */
 export function StoryCard({ article, variant = 'default', priority = false }: StoryCardProps) {
   if (!article) return null;
-  const href = `/article/${article.slug}`;
+  const href = articleUrl(article);
 
   if (variant === 'lead') {
     return (

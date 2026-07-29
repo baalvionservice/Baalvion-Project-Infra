@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import type { CmsArticle } from "@/lib/cms";
+import { articleUrl } from "@/lib/article-url";
 
 type Props = {
   articles: CmsArticle[];
@@ -47,7 +48,7 @@ export function BreakingTicker({ articles }: Props) {
           {[...items, ...items].map((article, i) => (
             <Link
               key={`${article.id}-${i}`}
-              href={`/article/${article.slug}`}
+              href={articleUrl(article)}
               className="mx-6 font-headline text-sm font-semibold hover:underline underline-offset-4"
             >
               {article.title}

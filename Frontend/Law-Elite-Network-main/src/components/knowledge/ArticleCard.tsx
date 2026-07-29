@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { Clock, Eye } from 'lucide-react';
 import { resolveArticleImage } from '@/lib/article-art';
 import { formatArticleDate } from '@/lib/format-date';
+import { articleUrl } from '@/lib/article-url';
 
 interface ArticleCardProps {
   article: any;
@@ -34,7 +35,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
   const categoryName = article?.category?.name || article?.subcategory?.name;
 
   return (
-    <Link href={`/article/${article.slug}`} className="group flex flex-col h-full">
+    <Link href={articleUrl(article)} className="group flex flex-col h-full">
       <div className="relative aspect-[16/10] w-full overflow-hidden rounded-lg bg-slate-100">
         <Image
           src={resolveArticleImage(article)}

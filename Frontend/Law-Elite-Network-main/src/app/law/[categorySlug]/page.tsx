@@ -7,6 +7,8 @@ import { getArticlesByCategorySlug } from '@/data/law-content';
 import seedData from '../../../../docs/seed-data.json';
 import { CategoryContent } from './CategoryContent';
 
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+
 function bundledCategory(slug: string) {
   const cat = (seedData as any).categories?.find((c: any) => c.slug === slug);
   if (cat) return { id: cat.id, name: cat.name, slug: cat.slug, description: cat.description };
@@ -53,8 +55,27 @@ export default async function CategoryPage(
     );
   }
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: `${category.name} Lawyers`,
+    description: category.description || `Verified ${category.name} lawyers and legal resources.`,
+    url: `${SITE}/law/${categorySlug}`,
+    isPartOf: { '@type': 'WebSite', name: 'Law Elite Network', url: SITE },
+  };
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE },
+      { '@type': 'ListItem', position: 2, name: category.name, item: `${SITE}/law/${categorySlug}` },
+    ],
+  };
+
   return (
     <div className="min-h-screen bg-white pt-[60px] lg:pt-[96px]">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <main className="pb-24">
         {/* Category masthead */}
         <section className="border-b border-slate-200 bg-slate-50/60">

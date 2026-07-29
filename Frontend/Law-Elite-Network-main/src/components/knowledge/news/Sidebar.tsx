@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { CmsArticle } from "@/lib/cms";
+import { articleUrl } from "@/lib/article-url";
 
 type Props = {
   articles: CmsArticle[];
@@ -12,7 +13,7 @@ function ArticleLinkList({ items }: { items: CmsArticle[] }) {
         <li key={article.id} className="flex gap-3">
           <span className="text-lg font-bold text-slate-300 dark:text-slate-600 leading-none">{i + 1}</span>
           <Link
-            href={`/article/${article.slug}`}
+            href={articleUrl(article)}
             className="font-headline text-sm font-semibold leading-snug text-slate-900 dark:text-white hover:text-news-600 transition-colors"
           >
             {article.title}

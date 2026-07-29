@@ -10,24 +10,23 @@ const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 const titleCase = (s: string) => s.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
 export async function generateMetadata(
-  { params }: { params: Promise<{ slug: string }> },
+  { params }: { params: Promise<{ categorySlug: string; subSlug: string; articleSlug: string }> },
 ): Promise<Metadata> {
-  const { slug } = await params;
-  const a = await fetchArticleForMetadata(slug);
-  // Points canonical at the nested URL whenever the article has enough taxonomy
-  // to build one -- even though this legacy route redirects there anyway, any
-  // crawler that briefly indexes this URL before following the redirect should
-  // still see the correct canonical.
-  const url = `${SITE}${articleUrl(a ? { ...a, slug } : { slug })}`;
+  const { articleSlug } = await params;
+  const a = await fetchArticleForMetadata(articleSlug);
+  const url = `${SITE}${articleUrl(a ? { ...a, slug: articleSlug } : { slug: articleSlug })}`;
   // No server-side record: humanize the slug so the title is still specific (not bare "Article").
   if (!a) {
-    const humanized = `${titleCase(slug)} | Law Elite Network`;
+    const humanized = `${titleCase(articleSlug)} | Law Elite Network`;
     return { title: humanized, alternates: { canonical: url }, openGraph: { type: 'article', url, title: humanized } };
   }
   const title = a.title;
   const description = String(a.excerpt || a.title).slice(0, 300);
   const authorName = (typeof a.author === 'string' ? a.author : a.author?.name) || a.author_name || undefined;
-  const ogImage = resolveArticleImage({ ...a, title, slug });
+  // Prefers a real, admin-set image, then the pre-generated static PNG for bundled
+  // articles (a real crawlable raster URL — required for og:image/NewsArticle.image),
+  // and only falls back to the inline SVG data URI when neither exists.
+  const ogImage = resolveArticleImage({ ...a, title, slug: articleSlug });
   return {
     title,
     description,
@@ -50,17 +49,20 @@ export async function generateMetadata(
 }
 
 export default async function ArticleLayout(
-  { children, params }: { children: React.ReactNode; params: Promise<{ slug: string }> },
+  { children, params }: {
+    children: React.ReactNode;
+    params: Promise<{ categorySlug: string; subSlug: string; articleSlug: string }>;
+  },
 ) {
-  const { slug } = await params;
-  const a = await fetchArticleForMetadata(slug);
-  const url = `${SITE}${articleUrl(a ? { ...a, slug } : { slug })}`;
+  const { articleSlug } = await params;
+  const a = await fetchArticleForMetadata(articleSlug);
+  const url = `${SITE}${articleUrl(a ? { ...a, slug: articleSlug } : { slug: articleSlug })}`;
   const bylineName = (typeof a?.author === 'string' ? a.author : a?.author?.name) || undefined;
   const matchedAuthor = bylineName ? getAuthorByName(bylineName) : null;
   const authorLd = matchedAuthor
     ? { '@type': 'Person', name: matchedAuthor.name, url: `${SITE}/author/${matchedAuthor.slug}` }
     : { '@type': 'Organization', name: 'Law Elite Network' };
-  const articleImage = a ? resolveArticleImage({ ...a, title: a.title, slug }) : undefined;
+  const articleImage = a ? resolveArticleImage({ ...a, title: a.title, slug: articleSlug }) : undefined;
   const jsonLd = a && {
     '@context': 'https://schema.org',
     '@type': a.contentType === 'news' ? 'NewsArticle' : 'Article',
@@ -72,6 +74,8 @@ export default async function ArticleLayout(
     mainEntityOfPage: url,
     author: authorLd,
     publisher: { '@type': 'Organization', name: 'Law Elite Network', logo: { '@type': 'ImageObject', url: `${SITE}/logo.png` } },
+    // Voice/AI-assistant readability: points speakable extraction at the
+    // headline and excerpt so assistants can read a short summary aloud.
     speakable: {
       '@type': 'SpeakableSpecification',
       cssSelector: ['h1', '[data-article-excerpt]'],
@@ -89,10 +93,13 @@ export default async function ArticleLayout(
         })),
       }
     : null;
+  // Breadcrumb trail: Home → category hub → subcategory hub (when known) → Article.
   const cat = a?.category;
+  const sub = a?.subcategory;
   const crumbs: Array<{ name: string; item: string }> = [{ name: 'Home', item: SITE }];
   if (cat?.name && cat?.slug) crumbs.push({ name: cat.name, item: `${SITE}/law/${cat.slug}` });
-  crumbs.push({ name: a?.title || titleCase(slug), item: url });
+  if (cat?.slug && sub?.name && sub?.slug) crumbs.push({ name: sub.name, item: `${SITE}/law/${cat.slug}/${sub.slug}` });
+  crumbs.push({ name: a?.title || titleCase(articleSlug), item: url });
   const breadcrumbLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',

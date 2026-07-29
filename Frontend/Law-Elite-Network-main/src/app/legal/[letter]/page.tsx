@@ -5,6 +5,7 @@ import { articlesPublicApi } from '@/lib/api/client';
 import { cmsGetArticles } from '@/lib/cms';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { getAllArticles } from '@/data/law-content';
+import { articleUrl } from '@/lib/article-url';
 
 /**
  * Server-side so the A-Z glossary actually has crawlable content. The
@@ -77,7 +78,7 @@ export default async function AlphabeticalListingPage(
                 {articles.map((art: any) => (
                   <Link
                     key={art.id}
-                    href={`/article/${art.slug}`}
+                    href={articleUrl(art)}
                     className="group block transition-all"
                   >
                     <span className="text-[15px] font-medium text-slate-700 group-hover:text-blue-600 group-hover:underline decoration-2 underline-offset-4 transition-all leading-snug block interactive-lift">
