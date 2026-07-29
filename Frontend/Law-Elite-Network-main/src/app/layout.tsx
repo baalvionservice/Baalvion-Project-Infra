@@ -14,6 +14,7 @@ import ImpersonationBanner from '@/components/admin/ImpersonationBanner';
 import { cmsGetAdsenseClient } from '@/lib/cms';
 import UnifiedAnalytics from '@/components/UnifiedAnalytics';
 import { GoogleAnalytics } from '@/components/GoogleAnalytics';
+import { CookieConsentBanner } from '@/components/CookieConsentBanner';
 import { cn } from '@/lib/utils';
 import './globals.css';
 
@@ -158,6 +159,26 @@ export default async function RootLayout({
       className={cn(inter.variable, libreFranklin.variable, sourceSerif.variable)}
     >
       <head>
+        {/* Google Consent Mode v2 -- must be pushed to dataLayer BEFORE gtag('js', ...)
+            and gtag('config', ...) run (in GoogleAnalytics below) and before the AdSense
+            loader in <body>, so no GA/ads cookie is set for a visitor who hasn't chosen
+            yet. CookieConsentBanner updates these to 'granted' on accept; until then
+            every visitor (EEA or not) defaults to denied, satisfying Google's EU User
+            Consent Policy requirement for AdSense/Analytics. */}
+        <Script id="consent-default" strategy="beforeInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            window.gtag = gtag;
+            gtag('consent', 'default', {
+              ad_storage: 'denied',
+              ad_user_data: 'denied',
+              ad_personalization: 'denied',
+              analytics_storage: 'denied',
+              wait_for_update: 500,
+            });
+          `}
+        </Script>
         <GoogleAnalytics />
         <meta name="theme-color" content="#1e3a5f" />
         {ADSENSE_CLIENT && (
@@ -210,6 +231,7 @@ export default async function RootLayout({
           </AuthProvider>
         </ThemeProvider>
         <UnifiedAnalytics slug={CMS_SLUG} />
+        <CookieConsentBanner />
       </body>
     </html>
   );

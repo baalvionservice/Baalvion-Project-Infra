@@ -40,7 +40,7 @@ export default function AlphabeticalListingPage() {
 
   const articles = useMemo(() => {
     if (apiArticles.length > 0) return apiArticles;
-    return (seedData as any).articles?.filter((a: any) => a.alphabet === normalizedLetter) || [];
+    return (seedData as any).articles?.filter((a: any) => a.alphabet === normalizedLetter && a.content) || [];
   }, [apiArticles, normalizedLetter]);
 
   return (

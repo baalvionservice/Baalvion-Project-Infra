@@ -12,10 +12,7 @@ import { InternalLinkingService } from '@/lib/api/services/internal-linking.serv
 import { KeywordMappingRepository } from '@/lib/api/repositories/keyword-mapping.repository';
 import {
   Loader2,
-  ChevronDown,
-  ChevronUp,
   BookOpen,
-  List
 } from 'lucide-react';
 import {
   Popover,
@@ -36,21 +33,6 @@ interface TOCItem {
   level: number;
 }
 
-function generateFallbackContent(title: string): string {
-  return `
-    <h2>What Is ${title}?</h2>
-    <p>This legal domain represents a strategic framework within the global legal network that facilitates the resolution of complex matters through established legal protocols.</p>
-    <div class="key-takeaways">
-      <h4>Key Takeaways</h4>
-      <ul>
-        <li>This is a specialized area of law with unique procedural requirements.</li>
-        <li>Expert legal counsel is highly recommended for navigating this domain.</li>
-        <li>The process is governed by both statutory and common law principles.</li>
-      </ul>
-    </div>
-  `;
-}
-
 export default function ArticleDeepDivePage() {
   const { slug } = useParams();
   const searchParams = useSearchParams();
@@ -61,7 +43,6 @@ export default function ArticleDeepDivePage() {
   const [articleLoading, setArticleLoading] = useState(true);
   const [toc, setToc] = useState<TOCItem[]>([]);
   const [activeId, setActiveId] = useState<string>("");
-  const [isSeriesOpen, setIsSeriesOpen] = useState(false);
   const [processedContent, setProcessedContent] = useState<string>("");
   const [isOptimizing, setIsOptimizing] = useState(true);
   const observer = useRef<IntersectionObserver | null>(null);
@@ -98,10 +79,8 @@ export default function ArticleDeepDivePage() {
       }
     };
     const fromSeed = () => {
-      const seedMatch = (seedData as any).articles?.find((a: any) => a.slug === slug);
-      return seedMatch
-        ? { ...seedMatch, content: seedMatch.content || generateFallbackContent(seedMatch.title), updatedAt: "February 12, 2025" }
-        : null;
+      const seedMatch = (seedData as any).articles?.find((a: any) => a.slug === slug && a.content);
+      return seedMatch ? { ...seedMatch, updatedAt: "February 12, 2025" } : null;
     };
     // Bundled editorial library (full HTML content) is the offline baseline.
     const fromBundled = () => getArticleBySlug(slug as string);
@@ -280,35 +259,6 @@ export default function ArticleDeepDivePage() {
                     </Popover>
                     Updated {article.updatedAt || article.updated_at || 'February 12, 2025'}
                   </div>
-                </div>
-
-                <div className="bg-white border border-slate-200 rounded-lg overflow-hidden mt-8 shadow-sm">
-                  <div
-                    className="p-5 flex items-center justify-between cursor-pointer hover:bg-slate-50 transition-colors"
-                    onClick={() => setIsSeriesOpen(!isSeriesOpen)}
-                  >
-                    <div className="flex flex-col">
-                      <div className="flex items-center gap-2 mb-1">
-                        <List className="w-4 h-4 text-blue-600" />
-                        <span className="text-[12px] font-bold text-slate-500 uppercase tracking-widest">Part of the Series</span>
-                      </div>
-                      <p className="text-xl font-bold text-slate-900">Complete Guide to {category?.name || "Legal Strategy"}</p>
-                    </div>
-                    {isSeriesOpen ? <ChevronUp className="w-6 h-6 text-slate-900" /> : <ChevronDown className="w-6 h-6 text-slate-900" />}
-                  </div>
-
-                  {isSeriesOpen && (
-                    <div className="border-t border-slate-100 animate-in slide-in-from-top-2 duration-300">
-                      <div className="p-5">
-                        <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mb-4">Module Cluster</p>
-                        <div className="space-y-3">
-                          <Link href="#" className="text-sm font-medium text-blue-600 hover:underline block">1. Initialization Protocols</Link>
-                          <Link href="#" className="text-sm font-medium text-slate-700 hover:text-blue-600 block">2. Discovery Infrastructure</Link>
-                          <Link href="#" className="text-sm font-medium text-slate-700 hover:text-blue-600 block">3. Strategic Resolution</Link>
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </div>
 
                 <figure className="pt-6">
