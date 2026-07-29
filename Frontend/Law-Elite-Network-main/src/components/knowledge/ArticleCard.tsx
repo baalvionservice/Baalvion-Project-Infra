@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Clock, Eye } from 'lucide-react';
 import { resolveArticleImage } from '@/lib/article-art';
+import { formatArticleDate } from '@/lib/format-date';
 
 interface ArticleCardProps {
   article: any;
@@ -12,7 +13,7 @@ interface ArticleCardProps {
 
 function Byline({ article }: { article: any }) {
   const author = article?.author;
-  const date = article?.updatedAt || article?.updated_at || article?.publishedAt || article?.published_at;
+  const date = formatArticleDate(article?.updatedAt || article?.updated_at || article?.publishedAt || article?.published_at);
   if (!author && !date) return null;
   return (
     <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-slate-500 font-medium">

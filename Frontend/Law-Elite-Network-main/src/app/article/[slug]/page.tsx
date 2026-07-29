@@ -13,6 +13,7 @@ import { getAuthorByName } from '@/data/authors';
 import { resolveArticleImage } from '@/lib/article-art';
 import { cmsGetArticleBySlug, cmsGetPreviewContent } from '@/lib/cms';
 import { articlesPublicApi } from '@/lib/api/client';
+import { formatArticleDate } from '@/lib/format-date';
 
 interface TOCItem {
   id: string;
@@ -89,7 +90,7 @@ export default async function ArticleDeepDivePage(
   const subcategory = article.subcategory;
   const authorName: string = (typeof article.author === 'string' ? article.author : article.author?.name) || 'Law Elite Editorial';
   const matchedAuthor = getAuthorByName(authorName);
-  const updatedAt = article.updatedAt || article.updated_at || 'February 12, 2025';
+  const updatedAt = formatArticleDate(article.updatedAt || article.updated_at) || 'February 12, 2025';
   const processedContent = injectHeadingIds(article.content || '');
   const toc = extractToc(processedContent);
 
