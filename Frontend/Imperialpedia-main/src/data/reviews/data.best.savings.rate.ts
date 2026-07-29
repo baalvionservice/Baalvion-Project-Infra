@@ -14,10 +14,12 @@ export const bestSavingsRates: ReviewArticle = withReviewArt({
   reviewedBy: {
     name: "Priya Nair",
     title: "Senior Loans Editor",
+    slug: "priya-nair",
   },
   factCheckedBy: {
     name: "Daniel Osei",
     title: "Personal Finance Analyst",
+    slug: "daniel-osei",
   },
   methodologyLink: "#methodology",
   methodology:

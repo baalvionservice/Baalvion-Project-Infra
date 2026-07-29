@@ -14,8 +14,9 @@ export const bestCryptoExchangesReview: ReviewArticle = withReviewArt({
   reviewedBy: {
     name: "Alex Torres",
     title: "Senior Crypto Editor",
+    slug: "alex-torres",
   },
-  factCheckedBy: { name: "Priya Nair", title: "Blockchain Analyst" },
+  factCheckedBy: { name: "Priya Nair", title: "Blockchain Analyst", slug: "priya-nair" },
   methodologyLink: "#methodology",
   methodology:
     "We evaluated 20+ cryptocurrency exchanges across trading fees, available coins, security track record, regulatory compliance, ease of use, staking options, and customer support quality. Each platform was tested with live accounts. Scores weight security (30%), fees (25%), coin selection (20%), UX (15%), and support (10%).",
@@ -51,6 +52,22 @@ export const bestCryptoExchangesReview: ReviewArticle = withReviewArt({
       providerName: "Gemini",
       summaryBlurb: "Clean interface, strong regulation, and easy onboarding.",
       ctaUrl: "https://www.gemini.com",
+      ctaLabel: "Start Trading",
+    },
+    {
+      providerId: "cryptocom",
+      categoryLabel: "Best Mobile App",
+      providerName: "Crypto.com",
+      summaryBlurb: "Polished mobile-first app with a companion Visa card and staking rewards.",
+      ctaUrl: "https://crypto.com",
+      ctaLabel: "Start Trading",
+    },
+    {
+      providerId: "bitstamp",
+      categoryLabel: "Best for Track Record",
+      providerName: "Bitstamp",
+      summaryBlurb: "One of the oldest continuously operating exchanges, in business since 2011.",
+      ctaUrl: "https://www.bitstamp.net",
       ctaLabel: "Start Trading",
     },
   ],
@@ -200,6 +217,70 @@ export const bestCryptoExchangesReview: ReviewArticle = withReviewArt({
       ctaUrl: "https://www.gemini.com",
       ctaLabel: "Start Trading",
     },
+    {
+      id: "cryptocom",
+      name: "Crypto.com",
+      categoryLabels: ["Best Mobile App"],
+      overallScore: 4.5,
+      fastFacts: [
+        { label: "Account Minimum", value: "$0" },
+        { label: "Trading Fee", value: "0.075%–0.4%, lower with CRO staking" },
+        { label: "Coins Available", value: "350+" },
+      ],
+      whyWeChoseIt: [
+        {
+          heading: "Best Mobile App",
+          body: "Crypto.com built its business around a mobile-first experience, and it shows — the app handles trading, staking, and its companion Visa debit card in one polished interface. For anyone who wants to manage crypto primarily from a phone rather than a desktop terminal, it's the strongest option we tested.",
+        },
+      ],
+      pros: [
+        "Widest coin selection among mainstream US-available exchanges at 350+",
+        "Crypto.com Visa Card earns crypto-back rewards on everyday spending",
+        "Competitive fees that drop further when staking the platform's native CRO token",
+        "Strong mobile app design with integrated staking and a built-in DeFi wallet",
+      ],
+      cons: [
+        "Fee discounts require locking up CRO tokens, adding complexity for casual users",
+        "Past aggressive marketing spend has drawn some scrutiny of the platform's overhead",
+        "Customer support response times can lag during high-volume periods",
+      ],
+      overview:
+        "Crypto.com was founded in 2016 and has grown into one of the most widely used consumer crypto platforms globally, reporting tens of millions of users. Beyond the exchange itself, the company operates a Visa card program, a DeFi wallet, and an NFT marketplace, positioning itself as an all-in-one crypto app rather than a pure trading venue.",
+      ctaUrl: "https://crypto.com",
+      ctaLabel: "Start Trading",
+    },
+    {
+      id: "bitstamp",
+      name: "Bitstamp",
+      categoryLabels: ["Best for Track Record"],
+      overallScore: 4.4,
+      fastFacts: [
+        { label: "Account Minimum", value: "$0" },
+        { label: "Trading Fee", value: "0.0%–0.40%, tiered by 30-day volume" },
+        { label: "Coins Available", value: "80+" },
+      ],
+      whyWeChoseIt: [
+        {
+          heading: "Best for Track Record",
+          body: "Founded in 2011, Bitstamp is one of the longest continuously operating cryptocurrency exchanges in the world, having survived multiple market cycles without a major security breach. For investors who weight operational longevity heavily when choosing where to hold assets, that history is hard to match.",
+        },
+      ],
+      pros: [
+        "Operating since 2011 with no major hack in its history",
+        "Licensed and regulated across the EU, UK, and US",
+        "Transparent, volume-tiered fee schedule with no hidden charges",
+        "Strong institutional-grade security practices, including cold storage majority",
+      ],
+      cons: [
+        "Smaller coin selection than Coinbase or Crypto.com",
+        "Interface feels less modern than newer competitors",
+        "Fewer educational resources for first-time crypto buyers",
+      ],
+      overview:
+        "Bitstamp launched in Slovenia in 2011 and is now headquartered in Luxembourg, holding regulatory licenses across multiple jurisdictions including the EU, UK, and several US states. It was the first licensed cryptocurrency exchange in Europe and has built its reputation on regulatory compliance and operational stability rather than rapid feature expansion.",
+      ctaUrl: "https://www.bitstamp.net",
+      ctaLabel: "Start Trading",
+    },
   ],
   comparisonRows: [
     {
@@ -225,6 +306,18 @@ export const bestCryptoExchangesReview: ReviewArticle = withReviewArt({
       specs: { "Trading Fee": "0.2–0.4%", Coins: "70+", "Min. Deposit": "$0", Staking: "Yes", Score: "4.4/5" },
       overallScore: 4.4,
       ctaUrl: "https://www.gemini.com",
+    },
+    {
+      providerName: "Crypto.com",
+      specs: { "Trading Fee": "0.075–0.4%", Coins: "350+", "Min. Deposit": "$0", Staking: "Yes", Score: "4.5/5" },
+      overallScore: 4.5,
+      ctaUrl: "https://crypto.com",
+    },
+    {
+      providerName: "Bitstamp",
+      specs: { "Trading Fee": "0.0–0.40%", Coins: "80+", "Min. Deposit": "$0", Staking: "No", Score: "4.4/5" },
+      overallScore: 4.4,
+      ctaUrl: "https://www.bitstamp.net",
     },
   ],
   faqs: [

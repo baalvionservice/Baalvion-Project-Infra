@@ -14,10 +14,12 @@ export const bestOnlineBrokersReview: ReviewArticle = withReviewArt({
   reviewedBy: {
     name: "Marcus Reid",
     title: "Senior Investing Editor",
+    slug: "marcus-reid",
   },
   factCheckedBy: {
     name: "Linda Zhao",
     title: "CFA Charterholder",
+    slug: "linda-zhao",
   },
   methodologyLink: "#methodology",
   methodology:

@@ -45,12 +45,14 @@ export async function CategoryFeed({ slug }: Props) {
     }
   }
 
-  // 2) Fallback to bundled demo content (category-filtered, then whole set) so the
-  //    page stays populated for topics that have no published content yet.
+  // 2) Fallback to bundled demo content, filtered to this topic's mapped NewsCategory.
+  //    Deliberately does NOT fall back further to the whole demo set — a topic with no
+  //    CMS content, no baked snapshot, and no matching demo category should show the
+  //    "no articles yet" empty state below, not an unrelated grab-bag of demo articles
+  //    (this previously dumped e.g. Crypto/Economy/Stocks articles onto /advisor-reviews).
   if (!isLive) {
     const cat = staticCategoryFor(slug);
-    const filtered = cat ? newsArticles.filter((a) => a.category === cat) : [];
-    articles = filtered.length ? filtered : newsArticles;
+    articles = cat ? newsArticles.filter((a) => a.category === cat) : [];
   }
 
   const featured = articles.find((a) => a.featured) ?? articles[0];

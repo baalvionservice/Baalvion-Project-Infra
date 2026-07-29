@@ -7,6 +7,11 @@ import { CalculatorCard } from '@/modules/calculators/components/CalculatorCard'
 import { PieChart, Calculator as CalcIcon, Sparkles } from 'lucide-react';
 import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
+import {
+  financialToolsHubIntro,
+  financialToolsCategoryBlurbs,
+  financialToolsHubClosing,
+} from '@/components/financial-tools/hub-content';
 
 export const metadata: Metadata = buildMetadata({
   canonical: '/financial-tools',
@@ -42,6 +47,9 @@ export default async function FinancialToolsDashboard() {
             <Text variant="body" className="text-muted-foreground text-xl leading-relaxed max-w-3xl">
               Master your financial future with our suite of precision instruments. From debt management to retirement modeling, our tools provide the clarity you need to navigate complex fiscal decisions.
             </Text>
+            <Text variant="body" className="text-muted-foreground text-base leading-relaxed max-w-3xl mt-6">
+              {financialToolsHubIntro}
+            </Text>
           </header>
 
           <div className="space-y-24">
@@ -58,6 +66,12 @@ export default async function FinancialToolsDashboard() {
                   <div className="flex-grow h-px bg-gradient-to-r from-border to-transparent ml-4" />
                 </div>
 
+                {financialToolsCategoryBlurbs[category] && (
+                  <Text variant="body" className="text-muted-foreground leading-relaxed max-w-3xl -mt-4">
+                    {financialToolsCategoryBlurbs[category]}
+                  </Text>
+                )}
+
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {tools
                     .filter(t => t.category === category)
@@ -69,6 +83,10 @@ export default async function FinancialToolsDashboard() {
               </div>
             ))}
           </div>
+
+          <Text variant="body" className="text-muted-foreground leading-relaxed max-w-3xl mt-24">
+            {financialToolsHubClosing}
+          </Text>
 
           <Section spacing="lg" className="mt-32">
             <div className="p-12 lg:p-20 rounded-[3.5rem] bg-primary/5 border border-primary/20 text-center relative overflow-hidden group">

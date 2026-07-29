@@ -4,6 +4,8 @@ export interface ReviewAuthor {
   name: string;
   title?: string;
   avatarUrl?: string;
+  /** Links the byline to /authors/{slug} when this person has a real author profile. */
+  slug?: string;
 }
 
 export interface ProviderKeySpec {

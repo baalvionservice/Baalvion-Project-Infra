@@ -31,6 +31,16 @@ export function InvestingTopicExplorer({ topics, articlesByTopic, allArticles }:
     [topics, articlesByTopic]
   );
 
+  // ArticleCard falls back to article.category (a coarse NewsCategory bucket) when no
+  // categoryLabel is passed — CMS pillar categories that aren't one of that fixed
+  // enum's values (e.g. every Budgeting pillar) all map to the generic "Editorial"
+  // catch-all, so every card in a hub like this showed the same meaningless badge.
+  // Look the real pillar label up by the article's own categorySlug instead.
+  const labelBySlug = React.useMemo(
+    () => Object.fromEntries(topics.map((t) => [t.slug, t.label])),
+    [topics]
+  );
+
   const articles = active === "all" ? allArticles : articlesByTopic[active] ?? [];
 
   return (
@@ -58,7 +68,11 @@ export function InvestingTopicExplorer({ topics, articlesByTopic, allArticles }:
       {articles.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {articles.map((article) => (
-            <ArticleCard key={article.id} article={article} />
+            <ArticleCard
+              key={article.id}
+              article={article}
+              categoryLabel={(article.categorySlug && labelBySlug[article.categorySlug]) || undefined}
+            />
           ))}
         </div>
       ) : (
