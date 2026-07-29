@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Navbar } from "@/components/common/Navbar";
 import Footer from "@/components/common/Footer";
+import { CookieConsentBanner } from "@/components/common/CookieConsentBanner";
 import ToastProvider from "@/components/common/ToastManager";
 import { Toaster as SonnerToaster } from "sonner";
 import { GlobalStoreProvider } from "@/lib/state";
@@ -52,6 +53,7 @@ export default function RootLayoutClient({ children }: RootLayoutClientProps) {
                                         {children}
                                     </main>
                                     {!suppressGlobalChrome && <Footer />}
+                                    <CookieConsentBanner />
                                     <Toaster />
                                     <SonnerToaster />
                                 </TooltipProvider>

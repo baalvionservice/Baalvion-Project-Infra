@@ -27,6 +27,25 @@ export function Analytics({ adsenseClient }: AnalyticsProps) {
     <>
       {GA_ID ? (
         <>
+          {/* Google Consent Mode v2 -- must be pushed to dataLayer BEFORE gtag('js', ...)
+              and gtag('config', ...) run, so GA/ads never set cookies for a visitor who
+              hasn't accepted. CookieConsentBanner updates these to 'granted' on accept;
+              until then every visitor (EEA or not) defaults to denied, satisfying Google's
+              EU User Consent Policy requirement for AdSense/Analytics. */}
+          <Script id="consent-default" strategy="beforeInteractive">
+            {`
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              window.gtag = gtag;
+              gtag('consent', 'default', {
+                ad_storage: 'denied',
+                ad_user_data: 'denied',
+                ad_personalization: 'denied',
+                analytics_storage: 'denied',
+                wait_for_update: 500,
+              });
+            `}
+          </Script>
           <Script
             src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
             strategy="afterInteractive"
