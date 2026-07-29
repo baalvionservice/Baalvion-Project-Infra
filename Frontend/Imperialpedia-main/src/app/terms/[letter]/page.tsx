@@ -44,10 +44,19 @@ export async function generateMetadata({
   const { letter: raw } = await params;
   const letter = raw.toLowerCase();
   const label = letterLabel(letter);
+  // Some letters (X, Z, Q, ...) currently have zero indexed terms -- the page still
+  // renders a real "no definitions yet" state (not a 404), but it must not be
+  // indexable: an empty, auto-generated-looking listing page is exactly the "thin/
+  // auto-generated content" pattern AdSense review flags. Mirrors the same
+  // noindex-when-empty rule already applied to law-elite-network's A-Z glossary.
+  const hasTerms = isValidLetter(letter)
+    ? (await fetchTermsByLetter(letter)).some((t) => t?.title && t?.slug)
+    : true;
   return buildMetadata({
     title: `Terms Beginning With '${label}'`,
     description: `Browse Imperialpedia's financial dictionary — expert-vetted definitions and concepts beginning with '${label}', indexed A–Z.`,
     canonical: `/terms-beginning-with-${letter}`,
+    noIndex: !hasTerms,
   });
 }
 
