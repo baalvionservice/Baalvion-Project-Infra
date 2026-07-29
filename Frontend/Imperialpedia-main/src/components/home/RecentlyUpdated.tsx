@@ -2,7 +2,7 @@ import React from "react";
 import { loadCountries, loadCompanies, loadIndustries, loadTechnologies } from "@/lib/data/loaders";
 import { EntityListItem } from "@/components/lists/EntityListItem";
 import { HomeSectionHeading } from "./HomeSectionHeading";
-import type { BaseEntity } from "@/types/entity";
+import type { BaseEntity, CompanyEntity } from "@/types/entity";
 
 const RECENT_COUNT = 6;
 
@@ -41,6 +41,7 @@ export async function RecentlyUpdated() {
             category={entity.category}
             description={entity.description}
             slug={entity.slug}
+            logo={entity.type === "company" ? (entity as CompanyEntity).logo : undefined}
           />
         ))}
       </div>

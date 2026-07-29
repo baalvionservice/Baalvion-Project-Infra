@@ -1,7 +1,7 @@
 import Script from "next/script";
 
 /**
- * Analytics & ad scripts, loaded only when their IDs are configured.
+ * Analytics scripts, loaded only when NEXT_PUBLIC_GA_ID is configured.
  *
  * Previously these were hardcoded placeholder IDs (`G-IMP-INDEX-42`,
  * `ca-pub-…`) injected as raw <script> tags inside the App Router <head>.
@@ -9,20 +9,14 @@ import Script from "next/script";
  * and risked head-hydration mismatches. Gating on a real ID means: no ID →
  * nothing renders (clean console); real ID → scripts load via next/script.
  *
- * The AdSense client is resolved server-side from the CMS admin panel
- * (Website → SEO → Monetization, via getSiteAdsenseClient) and passed in as
- * `adsenseClient`; that resolver falls back to NEXT_PUBLIC_ADSENSE_CLIENT.
+ * The AdSense loader script now lives directly in app/layout.tsx's <head> --
+ * see AdsenseScript there -- not here, per Google's site-verification
+ * requirement that the code sit "between the <head> and </head> tags."
  * GA stays on env: NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
  */
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
-interface AnalyticsProps {
-  /** Resolved AdSense publisher ID ("ca-pub-…"), or null/undefined to disable ads. */
-  adsenseClient?: string | null;
-}
-
-export function Analytics({ adsenseClient }: AnalyticsProps) {
-  const ADSENSE_CLIENT = adsenseClient;
+export function Analytics() {
   return (
     <>
       {GA_ID ? (
@@ -59,15 +53,6 @@ export function Analytics({ adsenseClient }: AnalyticsProps) {
             `}
           </Script>
         </>
-      ) : null}
-
-      {ADSENSE_CLIENT ? (
-        <Script
-          async
-          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
-          crossOrigin="anonymous"
-          strategy="afterInteractive"
-        />
       ) : null}
     </>
   );

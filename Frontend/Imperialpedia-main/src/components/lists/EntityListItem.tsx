@@ -1,11 +1,13 @@
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Text } from '@/design-system/typography/text';
 import { ArrowRight, Layers } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { entityRouteSegment } from '@/lib/utils/seo';
+import { isAllowedImageHost } from '@/lib/safe-image';
 
 interface EntityListItemProps {
   name: string;
@@ -13,23 +15,32 @@ interface EntityListItemProps {
   category: string;
   description: string;
   slug: string;
+  /** Verified brand logo (companies only). Falls back to the generic icon when absent or off-allowlist. */
+  logo?: string;
   className?: string;
 }
 
 /**
  * A refined list item component for knowledge entities.
  */
-export const EntityListItem = ({ name, type, category, description, slug, className }: EntityListItemProps) => {
+export const EntityListItem = ({ name, type, category, description, slug, logo, className }: EntityListItemProps) => {
   const route = `/${entityRouteSegment(type)}/${slug}`;
+  const logoOk = isAllowedImageHost(logo);
 
   return (
     <Link href={route} className={cn("group block", className)}>
       <Card className="glass-card h-full transition-all duration-300 hover:translate-y-[-4px] hover:shadow-xl hover:border-primary/40 overflow-hidden">
         <CardContent className="p-6 flex flex-col h-full">
           <div className="flex justify-between items-start mb-4">
-            <div className="p-2.5 rounded-xl bg-primary/10 text-primary border border-primary/20 group-hover:bg-primary group-hover:text-white transition-all">
-              <Layers size={18} />
-            </div>
+            {logoOk ? (
+              <div className="h-10 w-10 rounded-xl border border-primary/20 bg-white overflow-hidden flex items-center justify-center">
+                <Image src={logo!} alt={`${name} logo`} width={40} height={40} className="object-contain" />
+              </div>
+            ) : (
+              <div className="p-2.5 rounded-xl bg-primary/10 text-primary border border-primary/20 group-hover:bg-primary group-hover:text-white transition-all">
+                <Layers size={18} />
+              </div>
+            )}
             <Badge variant="secondary" className="bg-background/50 border-white/10 text-[10px] font-bold uppercase tracking-widest">
               {category}
             </Badge>

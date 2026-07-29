@@ -29,6 +29,7 @@ export async function FeaturedCompanies() {
             category={company.industry}
             description={company.description}
             slug={company.slug}
+            logo={company.logo}
           />
         ))}
       </div>
