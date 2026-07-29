@@ -169,24 +169,42 @@ export function HomeClient({ pulse, customsAuthorityCount, activeShipmentCount }
       {/* END-TO-END TRADE FLOW */}
       <TradeFlowSection />
 
-      {/* LIVE NETWORK MAP CTA */}
+      {/* LIVE NETWORK MAP + TRUST CENTER CTAs */}
       <section className="px-4 md:px-10 py-20">
-        <div className="max-w-7xl mx-auto">
-          <Link href={PATHS.PLATFORM_MAP} className="group block">
-            <div className="rounded-[28px] border border-white/5 bg-slate-900/40 hover:border-primary/40 hover:bg-slate-900/70 transition-all p-10 md:p-14 flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
-              <div className="space-y-3 max-w-xl">
+        <div className="max-w-7xl mx-auto grid gap-6 md:grid-cols-2">
+          <Link href={PATHS.PLATFORM_MAP} className="group block h-full">
+            <div className="h-full rounded-[28px] border border-white/5 bg-slate-900/40 hover:border-primary/40 hover:bg-slate-900/70 transition-all p-10 flex flex-col justify-between gap-8">
+              <div className="space-y-3">
                 <p className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.4em] text-primary">
                   <Globe2 className="h-4 w-4" /> Live Network
                 </p>
-                <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tighter text-white leading-tight">
+                <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter text-white leading-tight">
                   See The Network On A Map.
                 </h2>
-                <p className="text-sm md:text-base text-slate-400 leading-relaxed">
+                <p className="text-sm text-slate-400 leading-relaxed">
                   Every published port and point of entry on Baalvion, plotted live.
                 </p>
               </div>
-              <span className="inline-flex items-center text-xs font-black uppercase tracking-widest text-primary shrink-0">
+              <span className="inline-flex items-center text-xs font-black uppercase tracking-widest text-primary">
                 Open Map <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              </span>
+            </div>
+          </Link>
+          <Link href={PATHS.TRUST_CENTER} className="group block h-full">
+            <div className="h-full rounded-[28px] border border-white/5 bg-slate-900/40 hover:border-primary/40 hover:bg-slate-900/70 transition-all p-10 flex flex-col justify-between gap-8">
+              <div className="space-y-3">
+                <p className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.4em] text-primary">
+                  <ShieldCheck className="h-4 w-4" /> Trust Center
+                </p>
+                <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter text-white leading-tight">
+                  Verify, Don&apos;t Take Our Word For It.
+                </h2>
+                <p className="text-sm text-slate-400 leading-relaxed">
+                  Real, live figures on platform integrity, audit accountability, and security architecture.
+                </p>
+              </div>
+              <span className="inline-flex items-center text-xs font-black uppercase tracking-widest text-primary">
+                Open Trust Center <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </span>
             </div>
           </Link>

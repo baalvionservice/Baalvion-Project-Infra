@@ -8,6 +8,7 @@ export const PATHS = {
   HOME: '/',
   PLATFORM: '/platform',
   PLATFORM_MAP: '/platform/map',
+  TRUST_CENTER: '/trust',
   SOLUTIONS_BANKS: '/banks',
   SOLUTIONS_GOV: '/governments',
   SOLUTIONS_ENTERPRISES: '/enterprises',
