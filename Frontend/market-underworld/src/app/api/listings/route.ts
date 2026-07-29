@@ -1,52 +1,39 @@
 import { NextResponse } from 'next/server';
-import { MARKETPLACE_PRODUCTS } from '@/data/mockData';
+import { getStorefrontProducts } from '@/lib/api/commerce';
+
+// Adapts real commerce-service StorefrontProduct rows to the field names this route's
+// callers (src/app/marketplace/[country]/[category]/page.tsx) render via ListingCard.
+function toListingShape(p: Awaited<ReturnType<typeof getStorefrontProducts>>[number]) {
+  return {
+    id: p.id,
+    title: p.name,
+    seller: p.categoryName,
+    price: p.price,
+    is_live: false,
+    type: 'listing' as const,
+  };
+}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const country = searchParams.get('country');
-  const category = searchParams.get('category');
-  const query = searchParams.get('q');
-  
-  // Simulate network protocol handshake delay
-  await new Promise(resolve => setTimeout(resolve, 400));
+  const country = searchParams.get('country') ?? undefined;
+  const category = searchParams.get('category') ?? undefined;
+  const query = searchParams.get('q') ?? undefined;
 
-  let filtered = [...MARKETPLACE_PRODUCTS];
+  const products = await getStorefrontProducts(
+    category && category !== 'all' ? category : undefined,
+    { country: country && country !== 'all' ? country : undefined, search: query || undefined }
+  );
 
-  if (country && country !== 'all') {
-    filtered = filtered.filter(p => p.country.toLowerCase() === country.toLowerCase());
-  }
-  
-  if (category && category !== 'all') {
-    filtered = filtered.filter(p => p.category.toLowerCase().replace(/ /g, '') === category.toLowerCase());
-  }
-  
-  if (query) {
-    const q = query.toLowerCase();
-    filtered = filtered.filter(p => 
-      p.title.toLowerCase().includes(q) || 
-      p.description.toLowerCase().includes(q) ||
-      p.seller.toLowerCase().includes(q)
-    );
-  }
+  const listings = products.map(toListingShape);
 
   return NextResponse.json({
     success: true,
-    data: filtered,
+    data: listings,
     meta: {
-      total: filtered.length,
+      total: listings.length,
       page: 1,
       limit: 20
     }
-  });
-}
-
-export async function POST(request: Request) {
-  const body = await request.json();
-  
-  // Logic for creating a dynamic listing
-  return NextResponse.json({
-    success: true,
-    listing_id: 'L-' + Math.random().toString(36).substr(2, 9).toUpperCase(),
-    message: "Listing published to dynamic registry. Awaiting node audit."
   });
 }
