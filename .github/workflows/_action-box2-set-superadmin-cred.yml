@@ -88,11 +88,15 @@ jobs:
                 })().catch(e => { console.error("DIAG ERROR:", e.message); process.exit(1); });
               '
 
-            echo "===== diag: container topology + auth routing ====="
-            docker ps --format '{{.Names}}\t{{.Image}}\t{{.Status}}' | grep -i "identity\|auth"
-            echo "--- caddy route for /api/v1/auth ---"
-            grep -rn "auth" deploy/consolidated/Caddyfile* 2>/dev/null | grep -iv "^\s*#" | head -20
-            echo "--- what DB_HOST does app-identity actually see right now? ---"
-            docker exec consolidated-app-identity-1 sh -c 'echo "DB_HOST=$DB_HOST DB_NAME=$DB_NAME DB_PORT=$DB_PORT"'
-            echo "--- redis reachable from app-identity? ---"
-            docker exec consolidated-app-identity-1 sh -c 'echo "REDIS_HOST=$REDIS_HOST"'
+            echo "===== diag: find the real caddyfile + dump api.baalvion.com block ====="
+            find / -iname "Caddyfile*" -not -path "*/node_modules/*" 2>/dev/null
+            for f in $(find / -iname "Caddyfile*" -not -path "*/node_modules/*" 2>/dev/null); do
+              echo "--- $f ---"
+              cat "$f" 2>/dev/null | head -100
+            done
+
+            echo "===== diag: live login attempt + tail app-identity logs ====="
+            curl -s -X POST http://localhost:3001/api/v1/auth/login -H "Content-Type: application/json" \
+              -d "{\"email\":\"${SA_EMAIL}\",\"password\":\"${SA_PASS}\"}"
+            echo
+            docker logs --since 30s consolidated-app-identity-1 2>&1 | tail -40
