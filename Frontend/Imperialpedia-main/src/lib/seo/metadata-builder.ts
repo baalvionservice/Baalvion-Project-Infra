@@ -26,7 +26,23 @@ export function buildMetadata({
   noIndex = false,
 }: MetadataProps = {}): Metadata {
   const siteName = 'Imperialpedia';
-  const finalTitle = title ? `${title} | ${siteName}` : seoConfig.defaultTitle;
+  // The root layout (src/app/layout.tsx) already sets `title.template = '%s | Imperialpedia'`,
+  // which Next.js applies to every string `title` returned by a page/segment below it.
+  // Appending the suffix here too doubles it (triples it when a CMS-stored seoTitle
+  // already has it baked in) -- verified live: every page using buildMetadata() was
+  // shipping "<Title> | Imperialpedia | Imperialpedia" in its actual <title> tag. Strip any
+  // existing trailing suffix defensively (handles both cases) and let the root template
+  // add it back exactly once.
+  const suffixPattern = new RegExp(`\\s*\\|\\s*${siteName}\\s*$`, 'i');
+  let cleanTitle = title?.trim();
+  while (cleanTitle && suffixPattern.test(cleanTitle)) {
+    cleanTitle = cleanTitle.replace(suffixPattern, '').trim();
+  }
+  // `metadata.title` is left un-suffixed so the root template applies it once; OG/Twitter
+  // titles aren't auto-templated by Next, so they need the full "<Title> | Imperialpedia"
+  // form explicitly.
+  const finalTitle = cleanTitle || seoConfig.defaultTitle;
+  const socialTitle = cleanTitle ? `${cleanTitle} | ${siteName}` : seoConfig.defaultTitle;
   const finalDescription = description || seoConfig.defaultDescription;
   const finalKeywords = keywords || seoConfig.defaultKeywords;
   
@@ -44,7 +60,7 @@ export function buildMetadata({
     keywords: finalKeywords,
     metadataBase: new URL(baseUrl),
     openGraph: {
-      title: finalTitle,
+      title: socialTitle,
       description: finalDescription,
       url: absoluteCanonical || baseUrl,
       siteName: siteName,
@@ -53,7 +69,7 @@ export function buildMetadata({
           url: ogImage || `${baseUrl}/og-image.jpg`,
           width: 1200,
           height: 630,
-          alt: finalTitle,
+          alt: socialTitle,
         },
       ],
       locale: 'en_US',
@@ -61,7 +77,7 @@ export function buildMetadata({
     },
     twitter: {
       card: 'summary_large_image',
-      title: finalTitle,
+      title: socialTitle,
       description: finalDescription,
       images: [ogImage || `${baseUrl}/og-image.jpg`],
       creator: '@imperialpedia',
