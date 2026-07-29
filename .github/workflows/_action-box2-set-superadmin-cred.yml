@@ -55,3 +55,34 @@ jobs:
               consolidated-app-identity-1 \
               node /app/Backend/services/identity/auth-service/scripts/bootstrapSuperAdmin.js
             echo "::notice title=Superadmin bootstrapped::asserted in app-identity (role=super_admin)"
+
+            echo "===== diag: verify stored row + hash server-side (bypasses HTTP/login layer entirely) ====="
+            docker exec \
+              -e SA_EMAIL_DIAG="$SA_EMAIL" \
+              -e SA_PASS_DIAG="$SA_PASS" \
+              -e NODE_TLS_REJECT_UNAUTHORIZED=0 \
+              consolidated-app-identity-1 \
+              node -e '
+                const { Client } = require("pg");
+                const password = require("/app/Backend/services/identity/auth-service/utils/password");
+                (async () => {
+                  const c = new Client({
+                    host: process.env.DB_HOST, port: Number(process.env.DB_PORT || 5432),
+                    database: process.env.DB_NAME, user: process.env.DB_USER, password: process.env.DB_PASSWORD,
+                    ssl: { rejectUnauthorized: false },
+                  });
+                  await c.connect();
+                  const email = process.env.SA_EMAIL_DIAG.toLowerCase().trim();
+                  const r = await c.query("SELECT id, email, status, length(email) as elen, password_hash FROM auth.users WHERE email = $1", [email]);
+                  if (r.rows.length === 0) { console.log(JSON.stringify({ found: false, queriedEmail: email })); process.exit(0); }
+                  const row = r.rows[0];
+                  const verifyResult = await password.verify(row.password_hash, process.env.SA_PASS_DIAG);
+                  console.log(JSON.stringify({
+                    found: true, id: row.id, status: row.status,
+                    emailLen: row.elen, emailMatches: row.email === email,
+                    hashPrefix: row.password_hash.slice(0, 10),
+                    verifyResultWithGivenPassword: verifyResult,
+                  }));
+                  await c.end();
+                })().catch(e => { console.error("DIAG ERROR:", e.message); process.exit(1); });
+              '
