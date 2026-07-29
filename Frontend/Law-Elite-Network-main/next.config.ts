@@ -12,6 +12,19 @@ function originOf(url?: string): string {
 
 const apiOrigin = originOf(process.env.NEXT_PUBLIC_API_BASE_URL);
 const gatewayOrigin = originOf(process.env.NEXT_PUBLIC_GATEWAY_URL);
+const siteOrigin = originOf(process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com');
+const siteUrl = (() => {
+  try {
+    return siteOrigin ? new URL(siteOrigin) : null;
+  } catch {
+    return null;
+  }
+})();
+const siteHostname = siteUrl?.hostname || '';
+// next/image remotePatterns requires 'http' | 'https' specifically — derive it from the
+// actual site origin instead of assuming https, so this also matches local dev
+// (NEXT_PUBLIC_APP_URL=http://localhost:...).
+const siteProtocol: 'http' | 'https' = siteUrl?.protocol === 'http:' ? 'http' : 'https';
 
 const wsExplicit = originOf(process.env.NEXT_PUBLIC_WS_URL);
 const wsDerived = apiOrigin ? apiOrigin.replace(/^http/, 'ws') : '';
@@ -146,6 +159,20 @@ const nextConfig: NextConfig = {
     // Only self, the cms-service origin (auto-generated article artwork), and
     // real user/OAuth-avatar hosts — no stock/placeholder image hosts.
     remotePatterns: [
+      // `resolveArticleImage()` (src/lib/article-art.ts) builds an absolute
+      // `${SITE}/article-art/<slug>.png` URL even for our own self-hosted static
+      // assets. next/image treats any absolute URL as "remote" regardless of
+      // origin, so without this pattern every article hero image 400s through
+      // /_next/image (hostname not configured under images in next.config.js).
+      ...(siteHostname
+        ? [
+            {
+              protocol: siteProtocol,
+              hostname: siteHostname,
+              pathname: '/**',
+            },
+          ]
+        : []),
       {
         protocol: 'https',
         hostname: 'api.baalvion.com',

@@ -1,31 +1,19 @@
-
-"use client";
-
-import React, { useEffect, useState, useRef } from 'react';
-import { useParams, useSearchParams } from 'next/navigation';
-import { articlesPublicApi } from '@/lib/api/client';
+import React from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { BookOpen } from 'lucide-react';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { AIAnswersCard } from '@/components/knowledge/AIAnswersCard';
 import { RelatedArticles } from '@/components/knowledge/RelatedArticles';
 import { Breadcrumbs } from '@/components/knowledge/Breadcrumbs';
-import { InternalLinkingService } from '@/lib/api/services/internal-linking.service';
-import { KeywordMappingRepository } from '@/lib/api/repositories/keyword-mapping.repository';
-import {
-  Loader2,
-  BookOpen,
-} from 'lucide-react';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import Link from 'next/link';
-import Image from 'next/image';
-import { cn } from '@/lib/utils';
+import { ArticleTOC } from './ArticleTOC';
+import { ArticleAuthorByline } from './ArticleAuthorByline';
 import seedData from '../../../../docs/seed-data.json';
 import { getArticleBySlug } from '@/data/law-content';
 import { getAuthorByName } from '@/data/authors';
 import { resolveArticleImage } from '@/lib/article-art';
+import { cmsGetArticleBySlug, cmsGetPreviewContent } from '@/lib/cms';
+import { articlesPublicApi } from '@/lib/api/client';
 
 interface TOCItem {
   id: string;
@@ -33,132 +21,78 @@ interface TOCItem {
   level: number;
 }
 
-export default function ArticleDeepDivePage() {
-  const { slug } = useParams();
-  const searchParams = useSearchParams();
-  const previewToken = searchParams.get('previewToken');
-  const previewExp = searchParams.get('previewExp');
+/**
+ * Source-of-truth order for the rendered article, mirroring generateMetadata
+ * in layout.tsx: CMS (preview-aware) -> law-service -> bundled editorial
+ * library -> static seed. Runs server-side so the article body (title, byline,
+ * hero image, full text) is present in the first response instead of only
+ * appearing after a client-side fetch — crawlers and AdSense's content review
+ * previously saw an empty shell here.
+ */
+async function fetchArticle(slug: string, previewToken?: string, previewExp?: string): Promise<any | null> {
+  if (previewToken && previewExp) {
+    const preview = await cmsGetPreviewContent(slug, previewExp, previewToken);
+    if (preview) return preview;
+  }
 
-  const [article, setArticle] = useState<any>(null);
-  const [articleLoading, setArticleLoading] = useState(true);
-  const [toc, setToc] = useState<TOCItem[]>([]);
-  const [activeId, setActiveId] = useState<string>("");
-  const [processedContent, setProcessedContent] = useState<string>("");
-  const [isOptimizing, setIsOptimizing] = useState(true);
-  const observer = useRef<IntersectionObserver | null>(null);
+  const cms = await cmsGetArticleBySlug(slug);
+  if (cms) return cms;
 
-  useEffect(() => {
-    if (!slug) return;
-    setArticleLoading(true);
+  try {
+    const res = await articlesPublicApi.get(slug);
+    if (res.data?.data) return res.data.data;
+  } catch {
+    /* ignore, fall through to bundled/seed */
+  }
 
-    // Source-of-truth order: central CMS (admin.baalvion.com) FIRST, then
-    // law-service, then the bundled editorial library, then the static seed.
-    // The CMS is authoritative so anything published/edited in the admin console
-    // wins over the legacy law-service record.
-    const fromCms = async () => {
-      try {
-        const previewQs = previewToken && previewExp
-          ? `?previewToken=${encodeURIComponent(previewToken)}&previewExp=${encodeURIComponent(previewExp)}`
-          : '';
-        const r = await fetch(`/api/cms/articles/${slug}${previewQs}`);
-        if (r.ok) {
-          const j = await r.json();
-          if (j?.data) return j.data;
-        }
-      } catch {
-        /* ignore */
-      }
-      return null;
-    };
-    const fromLawService = async () => {
-      try {
-        const res = await articlesPublicApi.get(slug as string);
-        return res.data?.data || null;
-      } catch {
-        return null;
-      }
-    };
-    const fromSeed = () => {
-      const seedMatch = (seedData as any).articles?.find((a: any) => a.slug === slug && a.content);
-      return seedMatch ? { ...seedMatch, updatedAt: "February 12, 2025" } : null;
-    };
-    // Bundled editorial library (full HTML content) is the offline baseline.
-    const fromBundled = () => getArticleBySlug(slug as string);
+  const bundled = getArticleBySlug(slug);
+  if (bundled) return bundled;
 
-    (async () => {
-      try {
-        const resolved =
-          (await fromCms()) || (await fromLawService()) || fromBundled() || fromSeed();
-        setArticle(resolved);
-      } finally {
-        setArticleLoading(false);
-      }
-    })();
-  }, [slug, previewToken, previewExp]);
+  const seedMatch = (seedData as any).articles?.find((a: any) => a.slug === slug && a.content);
+  return seedMatch ? { ...seedMatch, updatedAt: 'February 12, 2025' } : null;
+}
 
-  useEffect(() => {
-    const optimizeContent = async () => {
-      if (!article?.content) return;
-      setIsOptimizing(true);
-      const linkingService = new InternalLinkingService(new KeywordMappingRepository());
-      const contentWithLinks = await linkingService.generateInternalLinks(article.content, slug as string);
-      const finalContent = contentWithLinks.replace(/<(h[1-3])>(.*?)<\/h[1-3]>/gi, (_match: string, tag: string, text: string) => {
-        const id = text.toLowerCase().replace(/\W/g, '-');
-        return `<${tag} id="${id}" class="scroll-mt-32">${text}</${tag}>`;
-      });
-      setProcessedContent(finalContent);
-      setIsOptimizing(false);
-    };
-    optimizeContent();
-  }, [article?.content, slug]);
+/** Mirrors the previous client-side heading-id injection so in-page TOC anchors keep working. */
+function injectHeadingIds(html: string): string {
+  return html.replace(/<(h[1-3])>(.*?)<\/h[1-3]>/gi, (_match: string, tag: string, text: string) => {
+    const id = text.toLowerCase().replace(/\W/g, '-');
+    return `<${tag} id="${id}" class="scroll-mt-32">${text}</${tag}>`;
+  });
+}
 
-  useEffect(() => {
-    if (!processedContent) return;
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(processedContent, 'text/html');
-    const headings = Array.from(doc.querySelectorAll('h1, h2, h3'));
-    const tocItems = headings.map((h, i) => ({
-      id: h.id || `heading-${i}`,
-      text: h.textContent || "",
-      level: parseInt(h.tagName.substring(1)),
-    }));
-    setToc(tocItems);
-
-    const handleIntersect = (entries: IntersectionObserverEntry[]) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) setActiveId(entry.target.id);
-      });
-    };
-
-    observer.current = new IntersectionObserver(handleIntersect, {
-      rootMargin: '-100px 0px -70% 0px',
-      threshold: 0,
+function extractToc(html: string): TOCItem[] {
+  const headingRe = /<(h[1-3]) id="([^"]+)"[^>]*>(.*?)<\/h[1-3]>/gi;
+  const items: TOCItem[] = [];
+  let match: RegExpExecArray | null;
+  while ((match = headingRe.exec(html))) {
+    items.push({
+      id: match[2],
+      text: match[3].replace(/<[^>]+>/g, ''),
+      level: Number(match[1].substring(1)),
     });
+  }
+  return items;
+}
 
-    const timer = setTimeout(() => {
-      tocItems.forEach((item) => {
-        const el = document.getElementById(item.id);
-        if (el) observer.current?.observe(el);
-      });
-    }, 500);
-
-    return () => {
-      clearTimeout(timer);
-      observer.current?.disconnect();
-    };
-  }, [processedContent]);
-
-  const category = article?.category;
-  const subcategory = article?.subcategory;
-  const matchedAuthor = article?.author ? getAuthorByName(article.author) : null;
-
-  if (articleLoading && !article) return (
-    <div className="min-h-screen bg-white flex items-center justify-center">
-      <Loader2 className="w-10 h-10 animate-spin text-blue-600 opacity-20" />
-    </div>
-  );
+export default async function ArticleDeepDivePage(
+  { params, searchParams }: {
+    params: Promise<{ slug: string }>;
+    searchParams: Promise<{ previewToken?: string; previewExp?: string }>;
+  },
+) {
+  const { slug } = await params;
+  const { previewToken, previewExp } = await searchParams;
+  const article = await fetchArticle(slug, previewToken, previewExp);
 
   if (!article) return <ArticleNotFound />;
+
+  const category = article.category;
+  const subcategory = article.subcategory;
+  const authorName: string = (typeof article.author === 'string' ? article.author : article.author?.name) || 'Law Elite Editorial';
+  const matchedAuthor = getAuthorByName(authorName);
+  const updatedAt = article.updatedAt || article.updated_at || 'February 12, 2025';
+  const processedContent = injectHeadingIds(article.content || '');
+  const toc = extractToc(processedContent);
 
   return (
     <div className="min-h-screen bg-white selection:bg-blue-100 selection:text-blue-900">
@@ -174,33 +108,7 @@ export default function ArticleDeepDivePage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 xl:gap-20 items-start">
 
             <aside className="hidden lg:block lg:col-span-3 sticky top-32 max-h-[calc(100vh-160px)] pr-8">
-              <div className="space-y-6">
-                <h4 className="text-[18px] font-bold text-slate-900 tracking-tight">Table of Contents</h4>
-                <div className="relative border-l border-slate-100">
-                  <nav className="flex flex-col">
-                    {toc.map((item) => (
-                      <a
-                        key={item.id}
-                        href={`#${item.id}`}
-                        className={cn(
-                          "text-[14px] leading-tight py-2.5 transition-all duration-300 relative pl-6 block",
-                          activeId === item.id
-                            ? "text-blue-600 font-bold"
-                            : "text-slate-500 hover:text-slate-900 font-medium"
-                        )}
-                        style={{ paddingLeft: `${(item.level - 2) * 12 + 24}px` }}
-                      >
-                        {activeId === item.id && (
-                          <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-10">
-                            <div className="w-0 h-0 border-t-[5px] border-t-transparent border-l-[8px] border-l-blue-600 border-b-[5px] border-b-transparent" />
-                          </div>
-                        )}
-                        {item.text}
-                      </a>
-                    ))}
-                  </nav>
-                </div>
-              </div>
+              <ArticleTOC items={toc} />
             </aside>
 
             <article className="lg:col-span-9 space-y-8">
@@ -212,54 +120,7 @@ export default function ArticleDeepDivePage() {
                   {article.title}
                 </h1>
 
-                <div className="space-y-1 text-[14px] text-slate-600">
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    By
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <span className="font-bold text-blue-700 cursor-pointer border-b border-blue-600 hover:text-blue-900 transition-colors leading-none">
-                          {article.author || 'Law Elite Editorial'}
-                        </span>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-[calc(100vw-2rem)] max-w-[400px] p-0 shadow-2xl border-slate-200 rounded-lg bg-white overflow-hidden" align="start" sideOffset={8}>
-                        <div className="p-7 space-y-3">
-                          <p className="font-headline text-lg font-bold text-slate-900">
-                            {article.author || 'Law Elite Editorial'}
-                          </p>
-                          {matchedAuthor ? (
-                            <>
-                              <p className="text-[12px] font-bold uppercase tracking-wide text-blue-700">
-                                {matchedAuthor.title}
-                              </p>
-                              <p className="text-[12px] text-slate-500">{matchedAuthor.credentials}</p>
-                              <p className="text-[14px] leading-relaxed text-slate-600 line-clamp-4">
-                                {matchedAuthor.bio}
-                              </p>
-                              {matchedAuthor.expertise.length > 0 && (
-                                <p className="text-[12px] text-slate-500">
-                                  Focus: {matchedAuthor.expertise.join(', ')}
-                                </p>
-                              )}
-                              <Link
-                                href={`/author/${matchedAuthor.slug}`}
-                                className="inline-block text-[13px] font-bold text-blue-700 hover:text-blue-900 transition-colors"
-                              >
-                                View full profile →
-                              </Link>
-                            </>
-                          ) : (
-                            <p className="text-[14px] leading-relaxed text-slate-600">
-                              Part of the Law Elite Network editorial team. Our guides are
-                              researched and reviewed for accuracy and clarity, then kept current as
-                              laws change. They provide general legal information, not legal advice.
-                            </p>
-                          )}
-                        </div>
-                      </PopoverContent>
-                    </Popover>
-                    Updated {article.updatedAt || article.updated_at || 'February 12, 2025'}
-                  </div>
-                </div>
+                <ArticleAuthorByline authorName={authorName} updatedAt={updatedAt} matchedAuthor={matchedAuthor} />
 
                 <figure className="pt-6">
                   <div className="aspect-[16/9] relative overflow-hidden bg-slate-50 rounded-lg">
@@ -274,23 +135,13 @@ export default function ArticleDeepDivePage() {
                 </figure>
               </header>
 
-              <div className="relative">
-                {isOptimizing && (
-                  <div className="absolute inset-0 bg-white/50 backdrop-blur-sm z-10 flex items-center justify-center">
-                    <div className="flex items-center gap-3 px-6 py-3 rounded-2xl bg-white shadow-xl border border-slate-100">
-                      <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Synchronizing Intelligence...</span>
-                    </div>
-                  </div>
-                )}
-                <div
-                  className="prose-legal max-w-none pt-8"
-                  dangerouslySetInnerHTML={{ __html: processedContent || article.content }}
-                />
-              </div>
+              <div
+                className="prose-legal max-w-none pt-8"
+                dangerouslySetInnerHTML={{ __html: processedContent }}
+              />
 
               <RelatedArticles
-                currentSlug={slug as string}
+                currentSlug={slug}
                 categorySlug={category?.slug}
                 categoryName={category?.name}
               />
