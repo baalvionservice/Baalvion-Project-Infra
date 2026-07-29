@@ -13,6 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
 import { EntityPicker } from './EntityPicker';
+import FeaturedImagePanel from '@/components/cms/FeaturedImagePanel';
 
 // Must match EntityType in the public site's src/types/entity.ts exactly (singular,
 // lowercase) — the four page templates (/companies, /countries, /industries,
@@ -212,9 +213,12 @@ export function EntityForm({ initial, isEdit = false }: Props) {
             <Label htmlFor="category">Category</Label>
             <Input id="category" value={value.category ?? ''} onChange={(e) => set('category', e.target.value)} placeholder="Manufacturing" />
           </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="image">Image URL</Label>
-            <Input id="image" value={value.image ?? ''} onChange={(e) => set('image', e.target.value)} placeholder="https://…/logo.png" />
+          <div className="md:col-span-2 -mx-6 -mt-2">
+            {/* Same upload flow as the CMS content editor's featured image (mediaApi.files.upload)
+                — this used to be a plain "paste a URL" text field with no way to actually upload
+                a file, which is why every entity's image stayed null even after logos were
+                uploaded elsewhere (the CMS media library, which has no link back to entities). */}
+            <FeaturedImagePanel value={value.image ?? ''} onChange={(url) => set('image', url)} />
           </div>
           <div className="space-y-1.5">
             <Label>Country</Label>
