@@ -229,7 +229,7 @@ export function PremiumClient({ data }: PremiumClientProps) {
         </Card>
       </div>
 
-      {/* Mock Stripe Checkout Dialog */}
+      {/* Real Razorpay checkout dialog -- see startPremiumCheckout in @/lib/payments/checkout */}
       <Dialog open={isCheckoutOpen} onOpenChange={setIsCheckoutOpen}>
         <DialogContent className="max-w-lg bg-card border-white/10 p-0 overflow-hidden shadow-2xl">
           {isSuccess ? (

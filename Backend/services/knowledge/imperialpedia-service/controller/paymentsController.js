@@ -102,3 +102,48 @@ exports.providerStatus = async (req, res) => {
     const configured = await pay.isConfigured();
     return res.json({ success: true, data: { providers: configured ? ['razorpay'] : [], preferred: configured ? 'razorpay' : null } });
 };
+
+// Public pricing — the same `plans` rows /checkout charges from, so the price a visitor
+// sees can never drift from what they're actually charged.
+exports.listPlans = async (req, res) => {
+    try {
+        await pay.seedPlans();
+        const plans = await db.Plan.findAll({ where: { is_active: true }, order: [['monthly_price', 'ASC']] });
+        return res.json({
+            success: true,
+            data: plans.map((p) => ({
+                tierKey: p.tier_key,
+                name: p.name,
+                monthlyPrice: Number(p.monthly_price),
+                annualPrice: Number(p.annual_price),
+                currency: p.currency,
+            })),
+        });
+    } catch (err) {
+        return res.status(500).json({ success: false, error: err.message });
+    }
+};
+
+// Anonymous (no Bearer token, via optionalAuth) → activeTier: null. Logged in → the
+// caller's real active subscription, so the UI never has to guess or hardcode a tier.
+exports.myActiveSubscription = async (req, res) => {
+    try {
+        const userId = req.user && req.user.id;
+        if (!userId) return res.json({ success: true, data: { activeTier: null } });
+
+        const subscription = await db.Subscription.findOne({
+            where: { user_id: userId, status: 'active' },
+            include: [{ model: db.Plan, as: 'plan' }],
+            order: [['createdAt', 'DESC']],
+        });
+        return res.json({
+            success: true,
+            data: {
+                activeTier: subscription && subscription.plan ? subscription.plan.tier_key : null,
+                currentPeriodEnd: subscription ? subscription.current_period_end : null,
+            },
+        });
+    } catch (err) {
+        return res.status(500).json({ success: false, error: err.message });
+    }
+};

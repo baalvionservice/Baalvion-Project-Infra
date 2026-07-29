@@ -1,5 +1,6 @@
 import React from 'react';
 import { Container } from '@/design-system/layout/container';
+import { Text } from '@/design-system/typography/text';
 import { premiumService } from '@/services/data/premium-service';
 import { PremiumClient } from './PremiumClient';
 import { buildMetadata } from '@/lib/seo';
@@ -35,5 +36,3 @@ export default async function PremiumSubscriptionPage() {
     </main>
   );
 }
-
-import { Text } from '@/design-system/typography/text';
