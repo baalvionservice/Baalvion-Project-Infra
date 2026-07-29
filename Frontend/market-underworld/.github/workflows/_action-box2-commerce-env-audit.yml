@@ -1,0 +1,58 @@
+name: (temp) Audit + set Market Underworld commerce env vars on box2
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "Actually write STOREFRONT_URL/APP_URL into .env (true/false). false = audit only."
+        required: false
+        default: "false"
+
+jobs:
+  audit-and-set:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Audit existing commerce env vars + optionally set the known-safe ones
+        uses: appleboy/ssh-action@v1
+        env:
+          APPLY: ${{ github.event.inputs.apply }}
+        with:
+          host: ${{ secrets.CORE2_EC2_HOST }}
+          username: ${{ secrets.CORE2_EC2_USER }}
+          key: ${{ secrets.CORE2_EC2_SSH_KEY }}
+          timeout: 30s
+          command_timeout: 2m
+          envs: APPLY
+          script: |
+            set -uo pipefail
+            cd /opt/baalvion-box2
+            ENV=deploy/consolidated/.env
+
+            echo "===== current state of the 5 vars order-service needs ====="
+            for v in STOREFRONT_URL APP_URL SHIPPING_FLAT_RATE CRYPTO_WALLET_BTC CRYPTO_WALLET_ETH CRYPTO_WALLET_USDT; do
+              if grep -q "^${v}=" "$ENV" 2>/dev/null; then
+                echo "$v = SET (value redacted)"
+              else
+                echo "$v = MISSING"
+              fi
+            done
+
+            if [ "$APPLY" = "true" ]; then
+              echo
+              echo "===== writing known-safe values (STOREFRONT_URL/APP_URL only) ====="
+              if grep -q '^STOREFRONT_URL=' "$ENV"; then
+                sed -i 's|^STOREFRONT_URL=.*|STOREFRONT_URL=https://community.marketunderworld.com|' "$ENV"
+              else
+                echo 'STOREFRONT_URL=https://community.marketunderworld.com' >> "$ENV"
+              fi
+              if grep -q '^APP_URL=' "$ENV"; then
+                sed -i 's|^APP_URL=.*|APP_URL=https://community.marketunderworld.com|' "$ENV"
+              else
+                echo 'APP_URL=https://community.marketunderworld.com' >> "$ENV"
+              fi
+              echo "done -- SHIPPING_FLAT_RATE/CRYPTO_WALLET_* NOT touched (need real business values, not invented here)"
+            else
+              echo
+              echo "(audit only -- re-run with apply=true to write STOREFRONT_URL/APP_URL)"
+            fi
