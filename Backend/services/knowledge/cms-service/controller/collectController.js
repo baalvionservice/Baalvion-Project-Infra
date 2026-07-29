@@ -15,6 +15,13 @@ function script(req, res) {
     res.set('Cache-Control', 'public, max-age=3600');
     res.set('X-Tracker-Version', TRACKER_VERSION);
     res.set('Access-Control-Allow-Origin', '*');
+    // Helmet's default Cross-Origin-Resource-Policy: same-origin (set globally in
+    // index.js) silently blocks every consuming frontend from loading this script
+    // cross-origin, despite the ACAO: * above declaring it public -- confirmed live
+    // (net::ERR_BLOCKED_BY_RESPONSE.NotSameOrigin on imperialpedia.com and every
+    // other site embedding this tracker). Same override pattern already used for
+    // /uploads in index.js.
+    res.set('Cross-Origin-Resource-Policy', 'cross-origin');
     return res.send(TRACKER_JS);
 }
 
