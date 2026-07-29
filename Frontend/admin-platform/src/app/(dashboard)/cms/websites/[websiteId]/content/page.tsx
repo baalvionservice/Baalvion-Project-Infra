@@ -3,7 +3,10 @@
 import { use, useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { ColumnDef } from '@tanstack/react-table';
-import { Plus, MoreHorizontal, Copy, Trash2, ArrowLeft, Upload, Send, Archive, AlertTriangle } from 'lucide-react';
+import {
+  Plus, MoreHorizontal, Copy, Trash2, ArrowLeft, Upload, Send, Archive, AlertTriangle,
+  Newspaper, GraduationCap, LayoutGrid, Loader2, Undo2, Sparkles,
+} from 'lucide-react';
 import Link from 'next/link';
 import PageHeader from '@/components/common/PageHeader';
 import DataTable from '@/components/data-table/DataTable';
@@ -31,9 +34,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
 import {
   useContentList,
   useCreateContent,
@@ -42,6 +57,7 @@ import {
   useRequestContentDeletion,
   useDismissDeletionRequest,
 } from '@/lib/queries/cms-content.queries';
+import { useWorkflowTransition } from '@/lib/queries/cms-workflow.queries';
 import { useWebsite } from '@/lib/queries/cms-websites.queries';
 import { useCmsPermissions } from '@/lib/queries/cms-permissions.queries';
 import CategoryFilterCombobox from '@/components/cms/CategoryFilterCombobox';
@@ -86,6 +102,14 @@ export default function WebsiteContentPage({
   const [bulkBusy, setBulkBusy] = useState(false);
   const [deletionRequestFor, setDeletionRequestFor] = useState<ContentItem | null>(null);
   const [deletionNote, setDeletionNote] = useState('');
+  // "Select all N matching results" — the DataTable only ever selects rows on the
+  // current (server-paginated) page, which makes archiving/deleting hundreds of
+  // items require paging through 20 at a time. This flag means "every item matching
+  // the current search/type/status/category filters," resolved to real ids lazily
+  // (resolveTargetIds, below) only when a bulk action actually runs.
+  const [selectAllMatchingMode, setSelectAllMatchingMode] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState<{ done: number; total: number } | null>(null);
+  const [confirmBulkAction, setConfirmBulkAction] = useState<'archive' | 'delete' | null>(null);
 
   const { data: website } = useWebsite(websiteId);
   const permissions = useCmsPermissions(websiteId);
@@ -109,6 +133,13 @@ export default function WebsiteContentPage({
     setPage(1);
   }, [debouncedSearch]);
 
+  // A "select all matching" only means what it says for the filters it was made
+  // under — narrowing/widening the view (or paging) invalidates it, otherwise a
+  // bulk action could silently apply to a completely different set than shown.
+  useEffect(() => {
+    setSelectAllMatchingMode(false);
+  }, [debouncedSearch, typeFilter, statusFilter, categoryFilter, page]);
+
   // Keep the URL (and the "last content list" pointer used by the editor's back
   // link) in sync with the current filters/page, via replace so this doesn't spam
   // browser history — only the initial visit gets a real entry.
@@ -130,6 +161,7 @@ export default function WebsiteContentPage({
   const { mutate: duplicate } = useDuplicateContent();
   const { mutate: requestDeletion, isPending: isRequestingDeletion } = useRequestContentDeletion();
   const { mutate: dismissDeletionRequest } = useDismissDeletionRequest();
+  const { mutate: transitionOne } = useWorkflowTransition();
 
   // Selection is reported from DataTable during render — only update state when the
   // id set actually changes, otherwise we'd trigger an infinite re-render loop.
@@ -140,25 +172,84 @@ export default function WebsiteContentPage({
     );
   };
 
-  const runBulk = async (fn: () => Promise<unknown>) => {
+  const chunk = <T,>(arr: T[], size: number): T[][] => {
+    const out: T[][] = [];
+    for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+    return out;
+  };
+
+  // Resolves the real target ids for a bulk action. Page-level selection is just
+  // `selectedIds`; "select all matching" only fetches the full id list (paging
+  // through the 100-per-request list endpoint) at the moment an action actually
+  // runs, so toggling the banner on/off never fires wasted requests.
+  const resolveTargetIds = async (): Promise<string[]> => {
+    if (!selectAllMatchingMode) return selectedIds;
+    const total = data?.pagination.total ?? 0;
+    if (total === 0) return [];
+    const limit = 100;
+    const pages = Math.ceil(total / limit);
+    const ids: string[] = [];
+    for (let p = 1; p <= pages; p++) {
+      const res = await cmsContentApi.list({
+        websiteId,
+        page: p,
+        limit,
+        search: debouncedSearch || undefined,
+        type: typeFilter || undefined,
+        status: statusFilter || undefined,
+        categoryId: categoryFilter || undefined,
+      });
+      ids.push(...res.data.data.map((item) => item.id));
+    }
+    return ids;
+  };
+
+  const runBulk = async (
+    action: 'publish' | 'archive' | 'delete',
+    apply: (batch: string[]) => Promise<unknown>,
+  ) => {
     setBulkBusy(true);
     try {
-      await fn();
+      const ids = await resolveTargetIds();
+      if (!ids.length) return;
+      setBulkProgress({ done: 0, total: ids.length });
+      // Batches of 500 keep each request comfortably under the backend's per-call
+      // cap (1000) while still turning a 1000-item action into ~2 round trips
+      // instead of one-per-item.
+      for (const batch of chunk(ids, 500)) {
+        await apply(batch);
+        setBulkProgress((prev) => (prev ? { ...prev, done: prev.done + batch.length } : null));
+      }
+      toast.success(
+        `${ids.length} item${ids.length === 1 ? '' : 's'} ${action === 'publish' ? 'published' : action === 'archive' ? 'archived' : 'deleted'}`,
+      );
       await refetch();
       setSelectedIds([]);
+      setSelectAllMatchingMode(false);
+    } catch (e) {
+      // Backend rejects bulk-delete of anything still published ("archive first")
+      // — surfaced verbatim since it tells the editor exactly what to do next.
+      toast.error(e instanceof Error ? e.message : 'Bulk action failed');
     } finally {
       setBulkBusy(false);
+      setBulkProgress(null);
     }
   };
 
+  // No bulk-publish endpoint on the backend (bulkUpdate only implements
+  // archive/delete/assign_category) — this drives the existing per-item workflow
+  // transition, with modest concurrency so a large selection doesn't take one
+  // sequential round-trip per article.
   const bulkPublish = () =>
-    runBulk(async () => {
-      for (const id of selectedIds) {
-        await cmsWorkflowApi.transition({ contentId: id, action: 'publish' }).catch(() => undefined);
+    runBulk('publish', async (batch) => {
+      for (const idGroup of chunk(batch, 10)) {
+        await Promise.all(
+          idGroup.map((id) => cmsWorkflowApi.transition({ contentId: id, action: 'publish' }).catch(() => undefined)),
+        );
       }
     });
-  const bulkArchive = () => runBulk(() => cmsContentApi.bulkUpdateStatus(selectedIds, 'archive'));
-  const bulkDelete = () => runBulk(() => cmsContentApi.bulkDelete(selectedIds));
+  const bulkArchive = () => runBulk('archive', (batch) => cmsContentApi.bulkUpdateStatus(batch, 'archive'));
+  const bulkDelete = () => runBulk('delete', (batch) => cmsContentApi.bulkDelete(batch));
 
   useEffect(() => {
     setBreadcrumbs([
@@ -291,6 +382,22 @@ export default function WebsiteContentPage({
                 <Copy className="mr-2 h-4 w-4" />
                 Duplicate
               </DropdownMenuItem>
+              {/* Archive requires cms_editor (workflowService's TRANSITIONS.archive.requiredLevel
+                  is 80, same as delete) — reuse canDelete, the permission flag that already
+                  matches that exact gate. Restore only needs cms_author (level 40, same as
+                  canEditContent), so it stays available to a wider set of roles. */}
+              {item.status !== 'archived' && permissions.canDelete && (
+                <DropdownMenuItem onClick={() => transitionOne({ contentId: item.id, action: 'archive' })}>
+                  <Archive className="mr-2 h-4 w-4" />
+                  Archive
+                </DropdownMenuItem>
+              )}
+              {item.status === 'archived' && permissions.canEditContent && (
+                <DropdownMenuItem onClick={() => transitionOne({ contentId: item.id, action: 'restore_to_draft' })}>
+                  <Undo2 className="mr-2 h-4 w-4" />
+                  Restore to Draft
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
               {permissions.canDelete ? (
                 <>
@@ -378,6 +485,55 @@ export default function WebsiteContentPage({
         />
       </div>
 
+      {/* Quick jump between the two buckets editors actually search separately —
+          news (dated wire/market articles) vs. the evergreen education guides
+          (content type "article") — instead of hunting through the Type dropdown
+          every time. "All Content" clears the type filter entirely. */}
+      <div className="flex gap-1.5">
+        {(
+          [
+            { key: '', label: 'All Content', icon: LayoutGrid },
+            { key: 'news', label: 'News', icon: Newspaper },
+            { key: 'article', label: 'Education Guides', icon: GraduationCap },
+          ] as const
+        ).map(({ key, label, icon: Icon }) => (
+          <Button
+            key={key || 'all'}
+            size="sm"
+            variant={typeFilter === key ? 'default' : 'outline'}
+            onClick={() => { setTypeFilter(key); setPage(1); }}
+          >
+            <Icon className="mr-1.5 h-3.5 w-3.5" />
+            {label}
+          </Button>
+        ))}
+
+        {/* Roadmapped, not built yet — shown (not hidden) so editors know it's
+            coming rather than wondering why the tool they expect isn't here. */}
+        <div className="ml-1 flex items-center gap-1.5 border-l pl-2.5">
+          {[
+            { label: 'Move to Category' },
+            { label: 'Export CSV' },
+            { label: 'Saved Views' },
+            { label: 'Date Range' },
+          ].map(({ label }) => (
+            <Button
+              key={label}
+              size="sm"
+              variant="ghost"
+              disabled
+              className="cursor-not-allowed text-muted-foreground opacity-60"
+              title={`${label} — coming soon`}
+            >
+              {label}
+              <Badge variant="outline" className="ml-1.5 gap-1 px-1.5 py-0 text-[9px] font-semibold uppercase tracking-wide">
+                <Sparkles className="h-2.5 w-2.5" /> Soon
+              </Badge>
+            </Button>
+          ))}
+        </div>
+      </div>
+
       {isError && (
         <div className="flex items-center justify-between rounded-md border border-destructive/30 bg-destructive/5 px-4 py-2 text-sm text-destructive">
           <span>Couldn&apos;t load content for this website.</span>
@@ -402,24 +558,79 @@ export default function WebsiteContentPage({
         onSelectionChange={handleSelection}
         toolbar={
           selectedIds.length > 0 ? (
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">{selectedIds.length} selected</span>
-              <Button size="sm" variant="outline" disabled={bulkBusy} onClick={bulkPublish}>
-                <Send className="mr-1.5 h-3.5 w-3.5" /> Publish
-              </Button>
-              <Button size="sm" variant="outline" disabled={bulkBusy} onClick={bulkArchive}>
-                <Archive className="mr-1.5 h-3.5 w-3.5" /> Archive
-              </Button>
-              {permissions.canDelete && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="text-destructive"
-                  disabled={bulkBusy}
-                  onClick={bulkDelete}
-                >
-                  <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Delete
-                </Button>
+            <div className="flex flex-col gap-2">
+              {/* Page selection tops out at 20 (the table's page size) — once every
+                  row on the page is checked and more results exist, offer the real
+                  full-set action instead of forcing 50 pages of manual checkbox work. */}
+              {!selectAllMatchingMode &&
+                (data?.pagination.total ?? 0) > selectedIds.length &&
+                selectedIds.length >= (data?.data.length ?? 0) &&
+                (data?.data.length ?? 0) > 0 && (
+                  <button
+                    type="button"
+                    className="text-left text-xs text-primary underline underline-offset-2"
+                    onClick={() => setSelectAllMatchingMode(true)}
+                  >
+                    All {selectedIds.length} on this page selected — select all {data?.pagination.total} matching results instead?
+                  </button>
+                )}
+
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">
+                  {selectAllMatchingMode ? (data?.pagination.total ?? 0) : selectedIds.length} selected
+                  {selectAllMatchingMode && (
+                    <button
+                      type="button"
+                      className="ml-1.5 underline underline-offset-2"
+                      onClick={() => setSelectAllMatchingMode(false)}
+                    >
+                      clear
+                    </button>
+                  )}
+                </span>
+                {/* Backend gates: publish needs cms_publisher (level 70) -> canPublish;
+                    archive needs cms_editor (level 80) -> the same role floor canDelete
+                    already matches. Hiding these for lower roles means the button never
+                    just sits there waiting to 403. */}
+                {permissions.canPublish && (
+                  <Button size="sm" variant="outline" disabled={bulkBusy} onClick={bulkPublish}>
+                    <Send className="mr-1.5 h-3.5 w-3.5" /> Publish
+                  </Button>
+                )}
+                {permissions.canDelete && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={bulkBusy}
+                    onClick={() => (selectAllMatchingMode ? setConfirmBulkAction('archive') : bulkArchive())}
+                  >
+                    <Archive className="mr-1.5 h-3.5 w-3.5" /> Archive
+                  </Button>
+                )}
+                {permissions.canDelete && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-destructive"
+                    disabled={bulkBusy}
+                    onClick={() => setConfirmBulkAction('delete')}
+                  >
+                    <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Delete
+                  </Button>
+                )}
+              </div>
+
+              {bulkProgress && (
+                <div className="flex items-center gap-2">
+                  <Progress
+                    value={(bulkProgress.done / bulkProgress.total) * 100}
+                    className="h-1.5 w-40"
+                  />
+                  <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    {bulkProgress.done}/{bulkProgress.total}
+                  </span>
+                </div>
               )}
             </div>
           ) : undefined
@@ -569,6 +780,39 @@ export default function WebsiteContentPage({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Confirm before a "select all matching" bulk action — this can cover far
+          more than what's visible on screen, so it gets one explicit checkpoint
+          instead of firing straight off the toolbar button. */}
+      <AlertDialog open={!!confirmBulkAction} onOpenChange={(o) => !o && setConfirmBulkAction(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {confirmBulkAction === 'delete' ? 'Delete' : 'Archive'}{' '}
+              {selectAllMatchingMode ? (data?.pagination.total ?? 0) : selectedIds.length} items?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmBulkAction === 'delete'
+                ? 'This permanently removes every matching item. If any of them are still published, the server rejects the whole action — archive them first, then delete.'
+                : 'This takes every matching item off the public site immediately. It stays fully reversible — republish any of them any time.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className={confirmBulkAction === 'delete' ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90' : undefined}
+              onClick={() => {
+                const action = confirmBulkAction;
+                setConfirmBulkAction(null);
+                if (action === 'delete') bulkDelete();
+                else if (action === 'archive') bulkArchive();
+              }}
+            >
+              {confirmBulkAction === 'delete' ? 'Delete' : 'Archive'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
