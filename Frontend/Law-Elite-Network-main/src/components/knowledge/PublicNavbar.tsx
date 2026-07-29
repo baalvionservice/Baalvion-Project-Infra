@@ -21,6 +21,22 @@ import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { sharedSignInUrl } from '@/lib/shared-auth';
 
+// The top nav bar has room for ~11 items (Home/News/World + up to 8 topics) inside
+// a max-w-7xl container. Full category names ("Property & Real Estate", "Employment
+// & Labor") don't fit there even at wide viewports -- the row would need ~1400px of
+// text alone -- so they wrapped to two cramped lines. Short labels here are for this
+// bar ONLY; the mega-menu heading, page H1, and breadcrumbs still use the full name.
+const NAV_SHORT_LABEL: Record<string, string> = {
+  'business-corporate': 'Business',
+  'criminal-law': 'Criminal Law',
+  'family-personal': 'Family',
+  'property-real-estate': 'Real Estate',
+  'tax-finance': 'Tax & Finance',
+  'employment-labor': 'Employment',
+  'technology-ip': 'Tech & IP',
+  'dispute-resolution': 'Disputes',
+};
+
 /**
  * @fileOverview Public masthead — editorial newsroom navigation.
  * Two-tier layout: a white brand/utility row over a navy section bar with a
@@ -154,42 +170,42 @@ export function PublicNavbar() {
 
       {/* ── Tier 2: navy section bar (desktop) ────────────────────── */}
       <nav className="hidden lg:block bg-[#0B1F3A]" aria-label="Topic sections">
-        <div className="container mx-auto px-6 max-w-7xl h-9 flex items-center">
+        <div className="container mx-auto px-6 max-w-7xl h-9 flex items-center overflow-x-auto no-scrollbar">
           <Link
             href="/"
-            className="flex items-center h-full px-3 text-[12px] font-bold uppercase tracking-wider text-white/90 hover:text-white border-b-[3px] border-transparent hover:border-news-600 transition-colors"
+            className="flex items-center h-full px-3 shrink-0 whitespace-nowrap text-[12px] font-bold uppercase tracking-wider text-white/90 hover:text-white border-b-[3px] border-transparent hover:border-news-600 transition-colors"
           >
             Home
           </Link>
           <Link
             href="/news"
-            className="flex items-center h-full px-3 text-[12px] font-bold uppercase tracking-wider text-white/90 hover:text-white border-b-[3px] border-transparent hover:border-news-600 transition-colors"
+            className="flex items-center h-full px-3 shrink-0 whitespace-nowrap text-[12px] font-bold uppercase tracking-wider text-white/90 hover:text-white border-b-[3px] border-transparent hover:border-news-600 transition-colors"
           >
             News
           </Link>
           <Link
             href="/world"
-            className="flex items-center h-full px-3 text-[12px] font-bold uppercase tracking-wider text-white/90 hover:text-white border-b-[3px] border-transparent hover:border-news-600 transition-colors"
+            className="flex items-center h-full px-3 shrink-0 whitespace-nowrap text-[12px] font-bold uppercase tracking-wider text-white/90 hover:text-white border-b-[3px] border-transparent hover:border-news-600 transition-colors"
           >
             World
           </Link>
           {categories.slice(0, 8).map((cat) => (
             <div
               key={cat.id}
-              className="h-full flex items-center"
+              className="h-full flex items-center shrink-0"
               onMouseEnter={() => setActiveCategory(cat.id)}
               onMouseLeave={() => setActiveCategory(null)}
             >
               <Link
                 href={`/law/${cat.slug}`}
                 className={cn(
-                  'flex items-center gap-1 h-full px-3 text-[12px] font-bold uppercase tracking-wider border-b-[3px] transition-colors',
+                  'flex items-center gap-1 h-full px-3 whitespace-nowrap text-[12px] font-bold uppercase tracking-wider border-b-[3px] transition-colors',
                   activeCategory === cat.id
                     ? 'text-white border-news-600'
                     : 'text-white/80 hover:text-white border-transparent hover:border-news-600/60',
                 )}
               >
-                {cat.name}
+                {NAV_SHORT_LABEL[cat.slug] || cat.name}
               </Link>
             </div>
           ))}
