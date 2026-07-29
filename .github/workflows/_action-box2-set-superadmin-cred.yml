@@ -87,3 +87,12 @@ jobs:
                   await c.end();
                 })().catch(e => { console.error("DIAG ERROR:", e.message); process.exit(1); });
               '
+
+            echo "===== diag: container topology + auth routing ====="
+            docker ps --format '{{.Names}}\t{{.Image}}\t{{.Status}}' | grep -i "identity\|auth"
+            echo "--- caddy route for /api/v1/auth ---"
+            grep -rn "auth" deploy/consolidated/Caddyfile* 2>/dev/null | grep -iv "^\s*#" | head -20
+            echo "--- what DB_HOST does app-identity actually see right now? ---"
+            docker exec consolidated-app-identity-1 sh -c 'echo "DB_HOST=$DB_HOST DB_NAME=$DB_NAME DB_PORT=$DB_PORT"'
+            echo "--- redis reachable from app-identity? ---"
+            docker exec consolidated-app-identity-1 sh -c 'echo "REDIS_HOST=$REDIS_HOST"'
