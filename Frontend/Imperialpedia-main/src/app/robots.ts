@@ -38,6 +38,10 @@ const DISALLOW = [
   // and index until real pricing tiers / dataset listings ship.
   '/pricing',
   '/datasets',
+  // Legacy duplicate of /financial-tools/[slug] (the real, working calculators) --
+  // same topics/slugs (compound-interest, loan, investment, ...), backed by mock
+  // data, body is a literal "Coming Soon" placeholder. Was live and indexable.
+  '/calculators/',
 ];
 
 // AI crawlers explicitly allowed (same allow/disallow scope as regular search

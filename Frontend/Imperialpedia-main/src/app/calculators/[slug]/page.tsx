@@ -24,13 +24,19 @@ export async function generateMetadata({ params }: CalculatorPageProps): Promise
     return { title: 'Calculator Not Found' };
   }
 
-  return seoService.generateMetadata({
-    title: `${calculator.name} — Free Financial Tool`,
-    description: calculator.description,
-    slug: calculator.slug,
-    type: 'tool',
-    keywords: [calculator.name, 'Financial Calculator', 'Wealth Management Tool'],
-  }, '/calculators');
+  // This route duplicates /financial-tools/[slug] (the real, working calculator
+  // for the same slug) with a "Coming Soon" placeholder body over mock data --
+  // keep it out of search results. See robots.ts DISALLOW.
+  return {
+    ...seoService.generateMetadata({
+      title: `${calculator.name} — Free Financial Tool`,
+      description: calculator.description,
+      slug: calculator.slug,
+      type: 'tool',
+      keywords: [calculator.name, 'Financial Calculator', 'Wealth Management Tool'],
+    }, '/calculators'),
+    robots: { index: false, follow: false },
+  };
 }
 
 export default async function Page({ params }: CalculatorPageProps) {
