@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       apply:
-        description: "Actually write STOREFRONT_URL/APP_URL into .env (true/false). false = audit only."
+        description: "Actually write STOREFRONT_URL/APP_URL/MEDIA_ENCRYPTION_KEY into .env (true/false). false = audit only."
         required: false
         default: "false"
 
@@ -29,8 +29,8 @@ jobs:
             cd /opt/baalvion-box2
             ENV=deploy/consolidated/.env
 
-            echo "===== current state of the 5 vars order-service needs ====="
-            for v in STOREFRONT_URL APP_URL SHIPPING_FLAT_RATE CRYPTO_WALLET_BTC CRYPTO_WALLET_ETH CRYPTO_WALLET_USDT; do
+            echo "===== current state of the 7 vars order-service/media-encryption need ====="
+            for v in STOREFRONT_URL APP_URL SHIPPING_FLAT_RATE CRYPTO_WALLET_BTC CRYPTO_WALLET_ETH CRYPTO_WALLET_USDT MEDIA_ENCRYPTION_KEY; do
               if grep -q "^${v}=" "$ENV" 2>/dev/null; then
                 echo "$v = SET (value redacted)"
               else
@@ -40,7 +40,7 @@ jobs:
 
             if [ "$APPLY" = "true" ]; then
               echo
-              echo "===== writing known-safe values (STOREFRONT_URL/APP_URL only) ====="
+              echo "===== writing known-safe values (STOREFRONT_URL/APP_URL/MEDIA_ENCRYPTION_KEY) ====="
               if grep -q '^STOREFRONT_URL=' "$ENV"; then
                 sed -i 's|^STOREFRONT_URL=.*|STOREFRONT_URL=https://community.marketunderworld.com|' "$ENV"
               else
@@ -51,8 +51,27 @@ jobs:
               else
                 echo 'APP_URL=https://community.marketunderworld.com' >> "$ENV"
               fi
+
+              # MEDIA_ENCRYPTION_KEY: only generate+write if genuinely absent -- never
+              # overwrite an existing key (that would make every already-encrypted product
+              # photo undecryptable, since the row's stored keyId would no longer match).
+              if grep -q '^MEDIA_ENCRYPTION_KEY=' "$ENV"; then
+                echo "MEDIA_ENCRYPTION_KEY already set -- leaving untouched"
+              else
+                NEWKEY="$(openssl rand -base64 32)"
+                echo "MEDIA_ENCRYPTION_KEY=${NEWKEY}" >> "$ENV"
+                echo "MEDIA_ENCRYPTION_KEY generated and written (product photo at-rest encryption now ON)"
+              fi
+
+              echo
+              echo "===== restarting app-commerce to pick up new env vars ====="
+              COMPOSE="docker compose --env-file $ENV -f deploy/consolidated/docker-compose.prod.yml"
+              $COMPOSE up -d --no-build --no-deps app-commerce
+              sleep 5
+              $COMPOSE ps app-commerce
+
               echo "done -- SHIPPING_FLAT_RATE/CRYPTO_WALLET_* NOT touched (need real business values, not invented here)"
             else
               echo
-              echo "(audit only -- re-run with apply=true to write STOREFRONT_URL/APP_URL)"
+              echo "(audit only -- re-run with apply=true to write STOREFRONT_URL/APP_URL/MEDIA_ENCRYPTION_KEY)"
             fi
