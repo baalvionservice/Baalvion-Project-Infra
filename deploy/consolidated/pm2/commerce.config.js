@@ -1,9 +1,13 @@
 // app-commerce — Commerce + marketplace (bounded context: commerce, marketplace).
 // financial-services-java is NOT here — the JVM ships as the separate app-payments container.
 // SLIMMED for the consolidated box: only the services the central admin console manages run
-// here. order-service is deprecated (its lifecycle moved to the trade domain's
-// order-execution-service) and trade-service has no admin-console panel, so both are omitted
-// to keep the 3.7GB box lean. Re-add them here if a console surface needs them.
+// here, EXCEPT order-service, which is re-added below. The comment this replaced called
+// order-service "deprecated" in favor of the trade domain's order-execution-service, but that's
+// a different bounded context (GTI/trade B2B) with no relationship to order-service's real
+// consumer: Market Underworld's cart/checkout/payments/wishlists/returns/consignments/
+// appointments (Caddyfile's @order_service carve-out has been proxying to app-commerce:3013
+// this whole time regardless). Without it running, the entire buyer purchase flow 502s.
+// trade-service still has no admin-console panel and stays omitted here.
 const ROOT = '/app/Backend/services';
 const svc = (name, dir, port, heapMB = 192, maxMemMB = 320) => ({
   name,
@@ -26,5 +30,6 @@ module.exports = {
     svc('fulfillment-service', 'commerce/fulfillment-service', 3016),
     svc('market-service',      'commerce/market-service',      3007),
     svc('marketplace-service', 'marketplace/marketplace-service', 3060),
+    svc('order-service',       'commerce/order-service',       3013, 192, 320),
   ],
 };
