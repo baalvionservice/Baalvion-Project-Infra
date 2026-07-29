@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import type { ColumnDef } from '@tanstack/react-table';
 import {
   Plus, MoreHorizontal, Copy, Trash2, ArrowLeft, Upload, Send, Archive, AlertTriangle,
-  Newspaper, GraduationCap, LayoutGrid, Loader2,
+  Newspaper, GraduationCap, LayoutGrid, Loader2, Undo2, Sparkles,
 } from 'lucide-react';
 import Link from 'next/link';
 import PageHeader from '@/components/common/PageHeader';
@@ -57,6 +57,7 @@ import {
   useRequestContentDeletion,
   useDismissDeletionRequest,
 } from '@/lib/queries/cms-content.queries';
+import { useWorkflowTransition } from '@/lib/queries/cms-workflow.queries';
 import { useWebsite } from '@/lib/queries/cms-websites.queries';
 import { useCmsPermissions } from '@/lib/queries/cms-permissions.queries';
 import CategoryFilterCombobox from '@/components/cms/CategoryFilterCombobox';
@@ -160,6 +161,7 @@ export default function WebsiteContentPage({
   const { mutate: duplicate } = useDuplicateContent();
   const { mutate: requestDeletion, isPending: isRequestingDeletion } = useRequestContentDeletion();
   const { mutate: dismissDeletionRequest } = useDismissDeletionRequest();
+  const { mutate: transitionOne } = useWorkflowTransition();
 
   // Selection is reported from DataTable during render — only update state when the
   // id set actually changes, otherwise we'd trigger an infinite re-render loop.
@@ -380,6 +382,22 @@ export default function WebsiteContentPage({
                 <Copy className="mr-2 h-4 w-4" />
                 Duplicate
               </DropdownMenuItem>
+              {/* Archive requires cms_editor (workflowService's TRANSITIONS.archive.requiredLevel
+                  is 80, same as delete) — reuse canDelete, the permission flag that already
+                  matches that exact gate. Restore only needs cms_author (level 40, same as
+                  canEditContent), so it stays available to a wider set of roles. */}
+              {item.status !== 'archived' && permissions.canDelete && (
+                <DropdownMenuItem onClick={() => transitionOne({ contentId: item.id, action: 'archive' })}>
+                  <Archive className="mr-2 h-4 w-4" />
+                  Archive
+                </DropdownMenuItem>
+              )}
+              {item.status === 'archived' && permissions.canEditContent && (
+                <DropdownMenuItem onClick={() => transitionOne({ contentId: item.id, action: 'restore_to_draft' })}>
+                  <Undo2 className="mr-2 h-4 w-4" />
+                  Restore to Draft
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
               {permissions.canDelete ? (
                 <>
@@ -489,6 +507,31 @@ export default function WebsiteContentPage({
             {label}
           </Button>
         ))}
+
+        {/* Roadmapped, not built yet — shown (not hidden) so editors know it's
+            coming rather than wondering why the tool they expect isn't here. */}
+        <div className="ml-1 flex items-center gap-1.5 border-l pl-2.5">
+          {[
+            { label: 'Move to Category' },
+            { label: 'Export CSV' },
+            { label: 'Saved Views' },
+            { label: 'Date Range' },
+          ].map(({ label }) => (
+            <Button
+              key={label}
+              size="sm"
+              variant="ghost"
+              disabled
+              className="cursor-not-allowed text-muted-foreground opacity-60"
+              title={`${label} — coming soon`}
+            >
+              {label}
+              <Badge variant="outline" className="ml-1.5 gap-1 px-1.5 py-0 text-[9px] font-semibold uppercase tracking-wide">
+                <Sparkles className="h-2.5 w-2.5" /> Soon
+              </Badge>
+            </Button>
+          ))}
+        </div>
       </div>
 
       {isError && (
@@ -545,17 +588,25 @@ export default function WebsiteContentPage({
                     </button>
                   )}
                 </span>
-                <Button size="sm" variant="outline" disabled={bulkBusy} onClick={bulkPublish}>
-                  <Send className="mr-1.5 h-3.5 w-3.5" /> Publish
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={bulkBusy}
-                  onClick={() => (selectAllMatchingMode ? setConfirmBulkAction('archive') : bulkArchive())}
-                >
-                  <Archive className="mr-1.5 h-3.5 w-3.5" /> Archive
-                </Button>
+                {/* Backend gates: publish needs cms_publisher (level 70) -> canPublish;
+                    archive needs cms_editor (level 80) -> the same role floor canDelete
+                    already matches. Hiding these for lower roles means the button never
+                    just sits there waiting to 403. */}
+                {permissions.canPublish && (
+                  <Button size="sm" variant="outline" disabled={bulkBusy} onClick={bulkPublish}>
+                    <Send className="mr-1.5 h-3.5 w-3.5" /> Publish
+                  </Button>
+                )}
+                {permissions.canDelete && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={bulkBusy}
+                    onClick={() => (selectAllMatchingMode ? setConfirmBulkAction('archive') : bulkArchive())}
+                  >
+                    <Archive className="mr-1.5 h-3.5 w-3.5" /> Archive
+                  </Button>
+                )}
                 {permissions.canDelete && (
                   <Button
                     size="sm"
