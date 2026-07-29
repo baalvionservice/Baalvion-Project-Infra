@@ -222,7 +222,12 @@ const nextConfig: NextConfig = {
               "font-src 'self'",
               // Dev: allow the local imperialpedia-service (:3004) and cms-service (:3018)
               // that client components (Market Movers, community, search) fetch directly.
-              "connect-src 'self' https://api.baalvion.com http://localhost:3004 http://localhost:3018 https://www.google-analytics.com https://*.google-analytics.com https://*.googlesyndication.com",
+              // *.adtrafficquality.google is Google's ad-traffic-quality/fraud check (sodar)
+              // that AdSense pings from the page; *.doubleclick.net/*.google.com are ad-request
+              // + measurement calls. All three were unlisted, so once ads go live they'd fail
+              // silently in the console instead of actually loading — confirmed live via a
+              // console-error sweep (every page blocked the sodar connect-src call).
+              "connect-src 'self' https://api.baalvion.com http://localhost:3004 http://localhost:3018 https://www.google-analytics.com https://*.google-analytics.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com https://*.adtrafficquality.google",
               // www.googletagmanager.com/ns.html is the GTM <noscript> fallback iframe.
               "frame-src https://googleads.g.doubleclick.net https://*.googlesyndication.com https://www.googletagmanager.com",
               "frame-ancestors 'self'",
