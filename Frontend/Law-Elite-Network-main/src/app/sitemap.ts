@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next';
 import { getAllArticles } from '@/data/law-content';
 import { getAllAuthors } from '@/data/authors';
+import { articleUrl } from '@/lib/article-url';
 
 // Render at request time, never at build time. This route fetches from law-service,
 // and a build-time fetch against an unreachable API blocks `next build` (CI timeout).
@@ -96,9 +97,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  const articleRoutes: MetadataRoute.Sitemap = articles.map((a) => ({
-    url: `${BASE_URL}/article/${a.slug}`,
-    lastModified: new Date(a.updated_at || a.updatedAt || Date.now()),
+  // Bundled articles (always present) unioned with live-API results, deduped by
+  // slug -- API wins on lastModified when both exist. Previously this only mapped
+  // `articles` (API-sourced), so whenever the live API was unreachable the 45
+  // bundled guides had zero <url> entries in the sitemap at all, despite being
+  // fully real, indexable content reachable via internal links.
+  const articleEntries = new Map<string, { url: string; lastModified: Date }>();
+  getAllArticles().forEach((a) => {
+    articleEntries.set(a.slug, {
+      url: `${BASE_URL}${articleUrl(a)}`,
+      lastModified: new Date(a.updatedAt || Date.now()),
+    });
+  });
+  articles.forEach((a) => {
+    articleEntries.set(a.slug, {
+      url: `${BASE_URL}${articleUrl(a)}`,
+      lastModified: new Date(a.updated_at || a.updatedAt || Date.now()),
+    });
+  });
+
+  const articleRoutes: MetadataRoute.Sitemap = Array.from(articleEntries.values()).map((entry) => ({
+    url: entry.url,
+    lastModified: entry.lastModified,
     changeFrequency: 'weekly',
     priority: 0.65,
   }));

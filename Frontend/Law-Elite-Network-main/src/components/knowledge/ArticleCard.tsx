@@ -5,6 +5,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Clock, Eye } from 'lucide-react';
 import { resolveArticleImage } from '@/lib/article-art';
+import { formatArticleDate } from '@/lib/format-date';
+import { articleUrl } from '@/lib/article-url';
 
 interface ArticleCardProps {
   article: any;
@@ -12,7 +14,7 @@ interface ArticleCardProps {
 
 function Byline({ article }: { article: any }) {
   const author = article?.author;
-  const date = article?.updatedAt || article?.updated_at || article?.publishedAt || article?.published_at;
+  const date = formatArticleDate(article?.updatedAt || article?.updated_at || article?.publishedAt || article?.published_at);
   if (!author && !date) return null;
   return (
     <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-slate-500 font-medium">
@@ -33,7 +35,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
   const categoryName = article?.category?.name || article?.subcategory?.name;
 
   return (
-    <Link href={`/article/${article.slug}`} className="group flex flex-col h-full">
+    <Link href={articleUrl(article)} className="group flex flex-col h-full">
       <div className="relative aspect-[16/10] w-full overflow-hidden rounded-lg bg-slate-100">
         <Image
           src={resolveArticleImage(article)}

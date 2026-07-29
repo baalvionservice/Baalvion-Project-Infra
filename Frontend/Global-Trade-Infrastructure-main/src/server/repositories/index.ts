@@ -6,6 +6,16 @@
 export * from './types';
 export { BaseRepository } from './base-repository';
 export { OrganizationRepository, organizationRepository } from './organization-repository';
+export { analyticsRepository } from './analytics-repository';
+export type {
+  TradeVolumeByCurrency,
+  TradeStateCount,
+  SettlementStatusSummary,
+  RiskLevelSummary,
+  ComplianceOutcomeCount,
+  ComplianceTypeCount,
+  CountryVolume,
+} from './analytics-repository';
 export { TradeRepository, tradeRepository } from './trade-repository';
 export type { TradeWithGraph } from './trade-repository';
 export {

@@ -26,7 +26,7 @@ import { PATHS } from '@/lib/paths';
  */
 const navLinks = [
   { href: PATHS.PLATFORM, label: 'Platform' },
-  { 
+  {
     label: 'Solutions',
     subLinks: [
       { href: PATHS.SOLUTIONS_BANKS, label: 'For Banks' },
@@ -35,7 +35,18 @@ const navLinks = [
       { href: PATHS.SOLUTIONS_LOGISTICS, label: 'For Logistics' },
     ]
   },
-  { href: PATHS.INTELLIGENCE_HUB, label: 'Intelligence' },
+  {
+    label: 'Trade Data',
+    subLinks: [
+      { href: PATHS.COUNTRIES, label: 'Countries' },
+      { href: PATHS.PORTS, label: 'Ports' },
+      { href: PATHS.TARIFFS, label: 'Tariffs' },
+      { href: PATHS.FTA, label: 'Trade Agreements' },
+      { href: PATHS.AUTHORITIES, label: 'Authorities' },
+      { href: PATHS.COMPARE, label: 'Compare Countries' },
+    ]
+  },
+  { href: PATHS.PRICING, label: 'Pricing' },
   { href: PATHS.ABOUT, label: 'About' },
 ];
 
@@ -50,7 +61,7 @@ export function InstitutionalHeader() {
           <span className="font-black text-2xl uppercase tracking-tighter text-white">Baalvion</span>
         </Link>
         
-        <nav className="hidden md:flex items-center gap-6 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">
+        <nav className="hidden md:flex items-center gap-2 text-xs font-black uppercase tracking-[0.12em] text-slate-400">
           {navLinks.map((link) =>
             link.subLinks ? (
               <DropdownMenu key={link.label}>
@@ -60,14 +71,14 @@ export function InstitutionalHeader() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="rounded-none border-2 border-white/5 bg-slate-900 text-slate-100 shadow-3xl p-2 min-w-[240px]">
                   {link.subLinks.map((subLink) => (
-                    <DropdownMenuItem key={subLink.label} asChild className="rounded-none px-4 py-3 font-bold text-[10px] uppercase tracking-widest focus:bg-primary/20">
+                    <DropdownMenuItem key={subLink.label} asChild className="rounded-none px-4 py-3 font-bold text-xs uppercase tracking-wide focus:bg-primary/20">
                       <Link href={subLink.href || '#'}>{subLink.label}</Link>
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button key={link.label} variant="ghost" asChild className="font-black text-slate-500 hover:text-primary hover:bg-transparent px-4 transition-all">
+              <Button key={link.label} variant="ghost" asChild className="font-black text-slate-400 hover:text-primary hover:bg-transparent px-4 transition-all">
                 <Link href={link.href || '#'}>
                   {link.label}
                 </Link>
@@ -77,8 +88,8 @@ export function InstitutionalHeader() {
         </nav>
 
         <div className="flex items-center gap-6">
-          <button type="button" onClick={() => window.location.assign(sharedSignInUrl())} className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-500 hover:text-primary transition-colors hidden lg:flex items-center gap-2">
-            <Globe className="h-3 w-3" aria-hidden="true" /> Institutional Login
+          <button type="button" onClick={() => window.location.assign(sharedSignInUrl())} className="text-xs font-black uppercase tracking-[0.1em] text-slate-400 hover:text-primary transition-colors hidden lg:flex items-center gap-2">
+            <Globe className="h-3.5 w-3.5" aria-hidden="true" /> Institutional Login
           </button>
           <Button size="lg" className="font-black h-12 px-8 bg-white text-slate-950 rounded-none shadow-2xl hidden sm:flex hover:bg-slate-200" asChild>
             <Link href={PATHS.ACCESS_REQUEST || '#'}>Access Portal</Link>

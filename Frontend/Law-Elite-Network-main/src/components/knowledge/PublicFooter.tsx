@@ -2,14 +2,9 @@
 
 import React from 'react';
 import Link from 'next/link';
-import {
-  Facebook,
-  Instagram,
-  Linkedin,
-  Youtube,
-  ChevronRight
-} from 'lucide-react';
+import { Linkedin } from 'lucide-react';
 import { LawEliteMark } from '@/components/icons/LawEliteMark';
+import { FooterNewsletterForm } from '@/components/knowledge/FooterNewsletterForm';
 
 /**
  * @fileOverview High-Fidelity Editorial Footer
@@ -37,20 +32,15 @@ export function PublicFooter() {
               </Link>
 
               <div className="space-y-6">
-                <button className="bg-[#c2d4ef] hover:bg-white text-[#222b3e] font-bold uppercase text-[11px] tracking-[0.15em] px-10 h-12 rounded shadow-xl transition-all duration-300 w-full max-w-[280px]">
-                  Newsletter Sign Up
-                </button>
+                <FooterNewsletterForm />
 
                 <div className="space-y-4">
                   <p className="text-[10px] font-bold uppercase tracking-widest text-white/50">Follow Us</p>
                   <div className="flex items-center gap-6">
-                    <Link href="#" className="text-white hover:text-blue-400 transition-colors" aria-label="Law Elite Network on Facebook"><Facebook className="w-5 h-5" aria-hidden="true" /></Link>
-                    <Link href="#" className="text-white hover:text-pink-400 transition-colors" aria-label="Law Elite Network on Instagram"><Instagram className="w-5 h-5" aria-hidden="true" /></Link>
-                    <Link href="#" className="text-white hover:text-blue-300 transition-colors" aria-label="Law Elite Network on LinkedIn"><Linkedin className="w-5 h-5" aria-hidden="true" /></Link>
-                    <Link href="#" className="text-white hover:text-white/80 transition-colors font-bold text-lg" aria-label="Law Elite Network on TikTok">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.83 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.04-.1z"/></svg>
+                    <Link href="https://www.linkedin.com/company/law-elite-network" target="_blank" rel="noopener noreferrer" className="text-white hover:text-blue-300 transition-colors" aria-label="Law Elite Network on LinkedIn"><Linkedin className="w-5 h-5" aria-hidden="true" /></Link>
+                    <Link href="https://x.com/lawelitenetwork" target="_blank" rel="noopener noreferrer" className="text-white hover:text-white/80 transition-colors" aria-label="Law Elite Network on X">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                     </Link>
-                    <Link href="#" className="text-white hover:text-red-500 transition-colors" aria-label="Law Elite Network on YouTube"><Youtube className="w-6 h-6" aria-hidden="true" /></Link>
                   </div>
                 </div>
               </div>

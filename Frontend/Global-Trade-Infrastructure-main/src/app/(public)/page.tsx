@@ -7,6 +7,9 @@
 import type { Metadata } from 'next';
 import { HomeClient } from './_components/home-client';
 import { pageMetadata, softwareApplicationJsonLd, jsonLdScriptProps } from '@/lib/seo';
+import { getPlatformPulse } from '@/server/public/platform-pulse';
+import { getActiveShipmentCount } from '@/server/public/tracking-pulse';
+import { listAuthoritiesDirectory } from '@/server/gckb/public-read';
 
 export const metadata: Metadata = pageMetadata({
   title: 'Baalvion — The Global Trade Operating System',
@@ -27,11 +30,30 @@ export const metadata: Metadata = pageMetadata({
   ],
 });
 
-export default function RootHomePage() {
+// Reads the DB directly (platform pulse + GCKB authorities) — forced dynamic so
+// build doesn't require a reachable DB at build time. See authorities/page.tsx
+// for the full rationale.
+export const dynamic = 'force-dynamic';
+
+export default async function RootHomePage() {
+  // getPlatformPulse() never throws (see its own doc comment). listAuthoritiesDirectory()
+  // can throw on a DB outage — the homepage is the site's front door and must stay up
+  // through a transient blip, so this specific count degrades to 0 rather than 500ing
+  // the whole page (unlike /authorities itself, whose entire purpose requires the DB).
+  // getActiveShipmentCount() is a cross-service HTTP call (trade-service) with its
+  // own 3s timeout and never throws — returns null on any failure, in which case
+  // HomeClient omits the tile rather than showing a fabricated/stale number.
+  const [pulse, authorities, activeShipmentCount] = await Promise.all([
+    getPlatformPulse(),
+    listAuthoritiesDirectory().catch(() => []),
+    getActiveShipmentCount(),
+  ]);
+  const customsAuthorityCount = authorities.filter((a) => a.kind === 'CUSTOMS').length;
+
   return (
     <>
       <script {...jsonLdScriptProps(softwareApplicationJsonLd())} />
-      <HomeClient />
+      <HomeClient pulse={pulse} customsAuthorityCount={customsAuthorityCount} activeShipmentCount={activeShipmentCount} />
     </>
   );
 }

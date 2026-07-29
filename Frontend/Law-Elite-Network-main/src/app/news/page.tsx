@@ -10,6 +10,7 @@ import { VideoCarousel } from '@/components/knowledge/news/VideoCarousel';
 import { LatestFeed } from '@/components/knowledge/news/LatestFeed';
 import { Sidebar } from '@/components/knowledge/news/Sidebar';
 import { Newsletter } from '@/components/knowledge/news/Newsletter';
+import { articleUrl } from '@/lib/article-url';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 const FEED_PAGE_SIZE = 12;
@@ -74,7 +75,7 @@ export default async function NewsPage() {
         '@type': 'ListItem',
         position: i + 1,
         name: a.title,
-        url: `${SITE}/article/${a.slug}`,
+        url: `${SITE}${articleUrl(a)}`,
       })),
     },
   };

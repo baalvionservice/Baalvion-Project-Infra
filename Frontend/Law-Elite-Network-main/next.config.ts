@@ -12,6 +12,19 @@ function originOf(url?: string): string {
 
 const apiOrigin = originOf(process.env.NEXT_PUBLIC_API_BASE_URL);
 const gatewayOrigin = originOf(process.env.NEXT_PUBLIC_GATEWAY_URL);
+const siteOrigin = originOf(process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com');
+const siteUrl = (() => {
+  try {
+    return siteOrigin ? new URL(siteOrigin) : null;
+  } catch {
+    return null;
+  }
+})();
+const siteHostname = siteUrl?.hostname || '';
+// next/image remotePatterns requires 'http' | 'https' specifically — derive it from the
+// actual site origin instead of assuming https, so this also matches local dev
+// (NEXT_PUBLIC_APP_URL=http://localhost:...).
+const siteProtocol: 'http' | 'https' = siteUrl?.protocol === 'http:' ? 'http' : 'https';
 
 const wsExplicit = originOf(process.env.NEXT_PUBLIC_WS_URL);
 const wsDerived = apiOrigin ? apiOrigin.replace(/^http/, 'ws') : '';
@@ -61,21 +74,32 @@ const securityHeaders = [
     key: 'Content-Security-Policy',
     value: [
       "default-src 'self'",
-      `script-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://www.googletagmanager.com https://pagead2.googlesyndication.com${
+      // AdSense loads its ad-delivery script from *.googlesyndication.com
+      // (not just pagead2) and *.doubleclick.net/*.googleadservices.com for
+      // remarketing/ad-service tags. api.baalvion.com is the cms-service
+      // analytics collect.js — it was in connect-src/img-src but missing here,
+      // so the site's own tracker was silently CSP-blocked on every page.
+      `script-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://www.googletagmanager.com https://api.baalvion.com https://*.googlesyndication.com https://*.doubleclick.net https://*.googleadservices.com https://*.google.com${
         isDev ? " 'unsafe-eval'" : ''
       }`,
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       // 'self' + data: (inline generated SVG artwork) + api.baalvion.com (cms-service-
       // hosted generated artwork) + firebasestorage/googleusercontent (real user/OAuth
-      // avatars) — no stock/placeholder image hosts.
-      "img-src 'self' data: blob: https://api.baalvion.com https://firebasestorage.googleapis.com https://lh3.googleusercontent.com https://*.razorpay.com",
+      // avatars) + Google ad-creative/pixel hosts — no stock/placeholder image hosts.
+      "img-src 'self' data: blob: https://api.baalvion.com https://firebasestorage.googleapis.com https://lh3.googleusercontent.com https://*.razorpay.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com https://*.gstatic.com",
       "font-src 'self' data: https://fonts.gstatic.com",
-      `connect-src 'self' ${extraConnect} https://api.baalvion.com https://*.razorpay.com https://lumberjack.razorpay.com https://*.googleapis.com https://*.algolianet.com https://*.algolia.net https://www.google-analytics.com https://*.google-analytics.com${
+      // *.adtrafficquality.google is Google's ad-traffic-quality/fraud check (sodar) that
+      // AdSense pings from the page; *.googlesyndication.com/*.doubleclick.net/*.google.com
+      // are ad-request + measurement calls. All three were previously unlisted, so once
+      // ads go live they'd fail silently in the console instead of actually loading.
+      `connect-src 'self' ${extraConnect} https://api.baalvion.com https://*.razorpay.com https://lumberjack.razorpay.com https://*.googleapis.com https://*.algolianet.com https://*.algolia.net https://www.google-analytics.com https://*.google-analytics.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com https://*.adtrafficquality.google${
         isDev
           ? ' ws://localhost:* ws://127.0.0.1:* http://localhost:* http://127.0.0.1:*'
           : ''
       }`,
-      "frame-src 'self' https://*.razorpay.com https://api.razorpay.com",
+      // Ad creatives render in iframes served from googleads.g.doubleclick.net and
+      // tpc.googlesyndication.com — without these, approved ads simply never paint.
+      "frame-src 'self' https://*.razorpay.com https://api.razorpay.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com",
       "frame-ancestors 'none'",
       "form-action 'self'",
       "base-uri 'self'",
@@ -146,6 +170,20 @@ const nextConfig: NextConfig = {
     // Only self, the cms-service origin (auto-generated article artwork), and
     // real user/OAuth-avatar hosts — no stock/placeholder image hosts.
     remotePatterns: [
+      // `resolveArticleImage()` (src/lib/article-art.ts) builds an absolute
+      // `${SITE}/article-art/<slug>.png` URL even for our own self-hosted static
+      // assets. next/image treats any absolute URL as "remote" regardless of
+      // origin, so without this pattern every article hero image 400s through
+      // /_next/image (hostname not configured under images in next.config.js).
+      ...(siteHostname
+        ? [
+            {
+              protocol: siteProtocol,
+              hostname: siteHostname,
+              pathname: '/**',
+            },
+          ]
+        : []),
       {
         protocol: 'https',
         hostname: 'api.baalvion.com',

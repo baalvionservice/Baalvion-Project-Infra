@@ -1,5 +1,5 @@
 
-import React, { Suspense } from "react";
+import React from "react";
 import type { Metadata } from "next";
 import Script from "next/script";
 import { Inter, Libre_Franklin, Source_Serif_4 } from "next/font/google";
@@ -9,11 +9,11 @@ import { I18nProvider } from '@/i18n/I18nProvider';
 import { Toaster } from '@/components/ui/toaster';
 import { Navbar } from '@/components/navbar';
 import NotificationToastListener from '@/components/notifications/NotificationToastListener';
-import { AIChatAssistantWrapper } from '@/components/ai/AIChatAssistantWrapper';
 import ImpersonationBanner from '@/components/admin/ImpersonationBanner';
 import { cmsGetAdsenseClient } from '@/lib/cms';
 import UnifiedAnalytics from '@/components/UnifiedAnalytics';
 import { GoogleAnalytics } from '@/components/GoogleAnalytics';
+import { CookieConsentBanner } from '@/components/CookieConsentBanner';
 import { cn } from '@/lib/utils';
 import './globals.css';
 
@@ -122,7 +122,7 @@ const organizationJsonLd = {
     contactType: 'customer support',
     url: `${SITE_URL}/contact-us`,
   },
-  sameAs: ['https://twitter.com/lawelitenetwork'],
+  sameAs: ['https://x.com/lawelitenetwork', 'https://www.linkedin.com/company/law-elite-network'],
 };
 
 const webSiteJsonLd = {
@@ -158,10 +158,41 @@ export default async function RootLayout({
       className={cn(inter.variable, libreFranklin.variable, sourceSerif.variable)}
     >
       <head>
+        {/* Google Consent Mode v2 -- must be pushed to dataLayer BEFORE gtag('js', ...)
+            and gtag('config', ...) run (in GoogleAnalytics below) and before the AdSense
+            loader below, so no GA/ads cookie is set for a visitor who hasn't chosen yet.
+            CookieConsentBanner updates these to 'granted' on accept; until then every
+            visitor (EEA or not) defaults to denied, satisfying Google's EU User Consent
+            Policy requirement for AdSense/Analytics. */}
+        <Script id="consent-default" strategy="beforeInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            window.gtag = gtag;
+            gtag('consent', 'default', {
+              ad_storage: 'denied',
+              ad_user_data: 'denied',
+              ad_personalization: 'denied',
+              analytics_storage: 'denied',
+              wait_for_update: 500,
+            });
+          `}
+        </Script>
         <GoogleAnalytics />
         <meta name="theme-color" content="#1e3a5f" />
         {ADSENSE_CLIENT && (
-          <meta name="google-adsense-account" content={ADSENSE_CLIENT} />
+          <>
+            <meta name="google-adsense-account" content={ADSENSE_CLIENT} />
+            {/* AdSense's own site-verification check looks for this snippet between
+                <head> and </head> — it was previously declared in <body>, which works
+                for ad delivery but doesn't match what the verification crawler expects. */}
+            <Script
+              async
+              src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
+              crossOrigin="anonymous"
+              strategy="afterInteractive"
+            />
+          </>
         )}
         <script
           type="application/ld+json"
@@ -173,14 +204,6 @@ export default async function RootLayout({
         />
       </head>
       <body className="font-body antialiased selection:bg-blue-100 selection:text-blue-900 bg-background text-foreground overflow-x-hidden">
-        {ADSENSE_CLIENT && (
-          <Script
-            async
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
-            crossOrigin="anonymous"
-            strategy="afterInteractive"
-          />
-        )}
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-6 focus:py-3 focus:bg-blue-700 focus:text-white focus:rounded-xl focus:font-bold focus:shadow-2xl"
@@ -198,10 +221,6 @@ export default async function RootLayout({
                   {children}
                 </main>
 
-                <Suspense fallback={null}>
-                  <AIChatAssistantWrapper />
-                </Suspense>
-
                 <NotificationToastListener />
                 <ImpersonationBanner />
               </div>
@@ -210,6 +229,7 @@ export default async function RootLayout({
           </AuthProvider>
         </ThemeProvider>
         <UnifiedAnalytics slug={CMS_SLUG} />
+        <CookieConsentBanner />
       </body>
     </html>
   );

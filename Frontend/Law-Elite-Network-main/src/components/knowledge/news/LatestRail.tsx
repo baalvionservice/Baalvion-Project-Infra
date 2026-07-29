@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Clock } from 'lucide-react';
+import { articleUrl } from '@/lib/article-url';
 
 interface LatestRailProps {
   articles: any[];
@@ -27,7 +28,7 @@ export function LatestRail({ articles, title = 'Latest Guides' }: LatestRailProp
       <ul className="divide-y divide-slate-100 dark:divide-slate-800 dark:bg-slate-900">
         {articles.map((art) => (
           <li key={art.id || art.slug}>
-            <Link href={`/article/${art.slug}`} className="group block px-4 py-3.5 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+            <Link href={articleUrl(art)} className="group block px-4 py-3.5 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
               {art.category?.name && (
                 <span className="block text-[10px] font-bold uppercase tracking-[0.16em] text-news-600 mb-1">
                   {art.category.name}

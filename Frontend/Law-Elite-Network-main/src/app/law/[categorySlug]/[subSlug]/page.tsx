@@ -1,15 +1,13 @@
-"use client";
-
-import React, { useState, useEffect, useMemo } from 'react';
-import { useParams } from 'next/navigation';
+import React from 'react';
+import Link from 'next/link';
+import { ChevronRight, FileText } from 'lucide-react';
 import { categoriesPublicApi, subcategoriesPublicApi, articlesPublicApi } from '@/lib/api/client';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { ArticleCard } from '@/components/knowledge/ArticleCard';
 import { getArticlesByCategorySlug } from '@/data/law-content';
 import seedData from '../../../../../docs/seed-data.json';
-import { Loader2, ChevronRight, FileText } from 'lucide-react';
-import Link from 'next/link';
 
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 const titleCase = (s: string) => s.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
 function bundledCategory(slug: string) {
@@ -35,76 +33,87 @@ function matchesSubcategory(article: any, subSlug: string, subId: string | null)
   );
 }
 
-export default function SubcategoryPage() {
-  const { categorySlug, subSlug } = useParams();
-  const catSlug = (categorySlug as string) || '';
-  const sub = (subSlug as string) || '';
+/**
+ * Server-side so the masthead H1 and article grid are present in the first
+ * response. There's no client interactivity on this page (no filters, just
+ * links) — the previous client-only version fetched everything in useEffect,
+ * so crawlers only ever saw a loading spinner.
+ */
+async function fetchTaxonomyAndArticles(catSlug: string, sub: string) {
+  const fallbackCat = bundledCategory(catSlug);
+  const fallbackSub = bundledSubcategory(catSlug, sub);
 
-  const [category, setCategory] = useState<any>(null);
-  const [subcategory, setSubcategory] = useState<any>(null);
-  const [apiArticles, setApiArticles] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  let category = fallbackCat;
+  let subcategory = fallbackSub;
+  let apiArticles: any[] = [];
 
-  useEffect(() => {
-    if (!catSlug || !sub) return;
-    setLoading(true);
+  try {
+    const catRes = await categoriesPublicApi.get(catSlug);
+    category = catRes.data?.data || fallbackCat;
+    const catId = category?.id;
 
-    const fallbackCat = bundledCategory(catSlug);
-    const fallbackSub = bundledSubcategory(catSlug, sub);
-    setCategory(fallbackCat);
-    setSubcategory(fallbackSub);
+    const [subsRes, articlesRes] = await Promise.all([
+      subcategoriesPublicApi.list({ categoryId: catId }).catch(() => null),
+      articlesPublicApi
+        .list({ categoryId: catId, sortBy: 'views', order: 'desc', status: 'published' })
+        .catch(() => null),
+    ]);
 
-    categoriesPublicApi
-      .get(catSlug)
-      .then((res) => {
-        const cat = res.data?.data || fallbackCat;
-        setCategory(cat);
-        const catId = cat?.id;
+    const subs = subsRes?.data?.data || [];
+    const matched = subs.find((s: any) => s.slug === sub);
+    if (matched) subcategory = matched;
 
-        subcategoriesPublicApi
-          .list({ categoryId: catId })
-          .then((r) => {
-            const subs = r.data?.data || [];
-            const matched = subs.find((s: any) => s.slug === sub);
-            if (matched) setSubcategory(matched);
-          })
-          .catch(() => {});
+    apiArticles = articlesRes?.data?.data?.items || articlesRes?.data?.data || [];
+  } catch {
+    /* keep bundled fallbacks */
+  }
 
-        articlesPublicApi
-          .list({ categoryId: catId, sortBy: 'views', order: 'desc', status: 'published' })
-          .then((r) => setApiArticles(r.data?.data?.items || r.data?.data || []))
-          .catch(() => {})
-          .finally(() => setLoading(false));
-      })
-      .catch(() => setLoading(false));
-  }, [catSlug, sub]);
+  return { category, subcategory, apiArticles };
+}
+
+export default async function SubcategoryPage(
+  { params }: { params: Promise<{ categorySlug: string; subSlug: string }> },
+) {
+  const { categorySlug: catSlug, subSlug: sub } = await params;
+  const { category, subcategory, apiArticles } = await fetchTaxonomyAndArticles(catSlug, sub);
 
   // Bundled articles are the baseline; API results win (same merge as the category page).
-  const articles = useMemo(() => {
+  const articles = (() => {
     const bundled = getArticlesByCategorySlug(catSlug);
     if (apiArticles.length === 0) return bundled;
     const seen = new Set(apiArticles.map((a) => a.slug));
     return [...apiArticles, ...bundled.filter((a) => !seen.has(a.slug))];
-  }, [apiArticles, catSlug]);
+  })();
 
-  const filteredArticles = useMemo(() => {
-    const subId = subcategory?.id ? String(subcategory.id) : null;
-    return articles.filter((a) => matchesSubcategory(a, sub, subId));
-  }, [articles, sub, subcategory]);
+  const subId = subcategory?.id ? String(subcategory.id) : null;
+  const filteredArticles = articles.filter((a) => matchesSubcategory(a, sub, subId));
 
   const categoryName = category?.name || titleCase(catSlug);
   const subName = subcategory?.name || titleCase(sub);
+  const url = `${SITE}/law/${catSlug}/${sub}`;
 
-  if (loading && !subcategory) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center pt-[96px]">
-        <Loader2 className="w-10 h-10 animate-spin text-blue-600 opacity-30" />
-      </div>
-    );
-  }
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: `${subName} — ${categoryName} Guides`,
+    description: `Expert ${subName} legal guides within ${categoryName} on Law Elite Network.`,
+    url,
+    isPartOf: { '@type': 'WebSite', name: 'Law Elite Network', url: SITE },
+  };
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE },
+      { '@type': 'ListItem', position: 2, name: categoryName, item: `${SITE}/law/${catSlug}` },
+      { '@type': 'ListItem', position: 3, name: subName, item: url },
+    ],
+  };
 
   return (
     <div className="min-h-screen bg-white pt-[60px] lg:pt-[96px]">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <main className="pb-24">
         {/* Subcategory masthead with breadcrumb */}
         <section className="border-b border-slate-200 bg-slate-50/60">
@@ -148,17 +157,7 @@ export default function SubcategoryPage() {
             </span>
           </div>
 
-          {loading && articles.length === 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-7 gap-y-10">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="space-y-3">
-                  <div className="aspect-[16/10] rounded-lg bg-slate-100 animate-pulse" />
-                  <div className="h-4 w-2/3 bg-slate-100 rounded animate-pulse" />
-                  <div className="h-4 w-full bg-slate-50 rounded animate-pulse" />
-                </div>
-              ))}
-            </div>
-          ) : filteredArticles.length > 0 ? (
+          {filteredArticles.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-7 gap-y-10">
               {filteredArticles.map((article) => (
                 <ArticleCard key={article.id || article.slug} article={article} />

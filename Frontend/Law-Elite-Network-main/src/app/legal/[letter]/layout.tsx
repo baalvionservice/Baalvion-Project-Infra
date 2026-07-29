@@ -1,6 +1,12 @@
 import type { Metadata } from 'next';
+import { getAllArticles } from '@/data/law-content';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+
+/** Count bundled articles for this letter — drives the noindex-when-empty rule. */
+function bundledCount(letter: string): number {
+  return getAllArticles().filter((a) => a.alphabet === letter).length;
+}
 
 export async function generateMetadata(
   { params }: { params: Promise<{ letter: string }> },
@@ -11,12 +17,17 @@ export async function generateMetadata(
   const title = `Legal Terms Starting With "${upper}" — Glossary | Law Elite Network`;
   const description = `Browse expert-verified legal terms, definitions, and guides beginning with the letter ${upper} in the Law Elite Network legal glossary — covering business, criminal, family, tax, employment, and property law.`;
 
+  // Thin/empty letters must not be indexed. The bundled baseline mirrors what the
+  // page renders when the API is unreachable, so it is a safe floor for this check
+  // (mirrors the same rule on /law/[categorySlug]/[subSlug]).
+  const hasArticles = bundledCount(upper) > 0;
+
   return {
     title,
     description,
     keywords: [`legal terms ${upper}`, `law glossary ${upper}`, 'legal dictionary', 'legal definitions'],
     alternates: { canonical: url },
-    robots: { index: true, follow: true },
+    robots: hasArticles ? { index: true, follow: true } : { index: false, follow: true },
     openGraph: { type: 'website', url, title, description },
     twitter: { card: 'summary_large_image', title, description },
   };

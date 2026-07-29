@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight, PlayCircle } from "lucide-react";
 import { useCallback } from "react";
 import type { CmsArticle } from "@/lib/cms";
 import { resolveArticleImage } from "@/lib/article-art";
+import { articleUrl } from "@/lib/article-url";
 
 type Props = {
   articles: CmsArticle[];
@@ -56,7 +57,7 @@ export function VideoCarousel({ articles }: Props) {
           <div className="flex gap-6">
             {videos.map((video) => (
               <Link
-                href={`/article/${video.slug}`}
+                href={articleUrl(video)}
                 key={video.id}
                 className="group block shrink-0 basis-2/3 sm:basis-1/2 lg:basis-1/3"
               >

@@ -60,9 +60,9 @@ export default function ContactPage() {
             <div className="grid md:grid-cols-2 gap-16 items-start">
                 <div className="space-y-6">
                     <p className="text-sm font-semibold uppercase tracking-wider text-primary">Contact</p>
-                    <h1 className="text-3xl md:text-4xl font-medium tracking-tight">Institutional Inquiries</h1>
+                    <h1 className="text-3xl md:text-4xl font-medium tracking-tight">Book A Consultation</h1>
                     <p className="text-lg text-muted-foreground">
-                        For institutional inquiries, please use the provided form or contact the relevant department directly. Our team operates on a confidential, institution-to-institution basis.
+                        Submit an inquiry to request a consultation with our institutional team, or contact the relevant department directly. Our team operates on a confidential, institution-to-institution basis and will respond with scheduling options within one business day.
                     </p>
                     <Separator className="my-6"/>
                     <div className="space-y-6 pt-4">
@@ -95,7 +95,7 @@ export default function ContactPage() {
 
                 <Card className="bg-card">
                     <CardHeader>
-                        <CardTitle>Submit an Inquiry</CardTitle>
+                        <CardTitle>Request A Consultation</CardTitle>
                         <CardDescription>All fields are required. We only respond to official institutional email addresses.</CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -104,8 +104,8 @@ export default function ContactPage() {
                             <div className="h-14 w-14 rounded-full bg-emerald-500/10 border-2 border-emerald-500/30 flex items-center justify-center">
                               <CheckCircle2 className="h-7 w-7 text-emerald-600" />
                             </div>
-                            <h3 className="text-lg font-semibold text-foreground">Inquiry sent</h3>
-                            <p className="text-sm text-muted-foreground max-w-xs">We've received your message and will respond via your official email address shortly.</p>
+                            <h3 className="text-lg font-semibold text-foreground">Consultation requested</h3>
+                            <p className="text-sm text-muted-foreground max-w-xs">We've received your request and will follow up with scheduling options via your official email address shortly.</p>
                           </div>
                         ) : (
                           <form className="space-y-6" onSubmit={handleSubmit}>
@@ -145,7 +145,7 @@ export default function ContactPage() {
                                 </div>
                               )}
                               <Button type="submit" className="w-full" disabled={!canSubmit || status === 'submitting'}>
-                                  {status === 'submitting' ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending…</> : <>Submit Inquiry <ArrowRight className="ml-2 w-4 h-4"/></>}
+                                  {status === 'submitting' ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending…</> : <>Request Consultation <ArrowRight className="ml-2 w-4 h-4"/></>}
                               </Button>
                           </form>
                         )}

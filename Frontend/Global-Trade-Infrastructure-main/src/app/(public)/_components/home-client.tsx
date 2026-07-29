@@ -11,19 +11,23 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import {
   ShieldCheck, ArrowRight, Landmark, Boxes, Globe, Truck, FileCheck2, Workflow,
-  Link2, Fingerprint, Code2, ArrowDownUp,
+  Link2, Fingerprint, Code2, ArrowDownUp, Globe2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { PATHS } from '@/lib/paths';
 import { BrowserFrame, PeekRow, PeekBadge } from './solution/solution-page';
+import { TradeFlowSection } from './trade-flow-section';
+import type { PlatformPulse } from '@/server/public/platform-pulse';
 
-const TICKER = [
-  { label: 'Settlement Cycle', val: 'T+1' },
-  { label: 'Ledger Drift', val: '0.00' },
-  { label: 'Customs Gateways', val: '4' },
-  { label: 'Screening', val: 'Fail-Closed' },
-];
+interface HomeClientProps {
+  /** Real, platform-wide aggregate facts — see server/public/platform-pulse.ts. */
+  pulse: PlatformPulse;
+  /** Real count of published CUSTOMS-kind authorities across the GCKB. */
+  customsAuthorityCount: number;
+  /** Real, cross-service count from trade-service; null if unreachable — omit the tile, don't fabricate. */
+  activeShipmentCount: number | null;
+}
 
 const AUDIENCES = [
   { title: 'Banks', desc: 'Escrow, ledger, and net settlement that plug into your core systems.', icon: Landmark, href: PATHS.SOLUTIONS_BANKS },
@@ -43,7 +47,7 @@ const fadeUp = {
 function TradePeek() {
   const active = 3;
   return (
-    <BrowserFrame label="One Trade · End To End">
+    <BrowserFrame label="Illustrative Example · One Trade End To End">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <p className="text-[9px] font-black uppercase tracking-widest text-slate-500">Order #GTI-4471</p>
@@ -69,17 +73,31 @@ function TradePeek() {
   );
 }
 
-export function HomeClient() {
+export function HomeClient({ pulse, customsAuthorityCount, activeShipmentCount }: HomeClientProps) {
+  const ticker = [
+    { label: 'Settlement Cycle', val: 'T+1' },
+    { label: 'Ledger Integrity', val: pulse.ledgerBalanced ? 'All Books Balanced' : 'Under Review' },
+    { label: 'Customs Authorities', val: customsAuthorityCount.toLocaleString() },
+    { label: 'Escrows On Platform', val: pulse.escrowCount.toLocaleString() },
+    // Only shown when trade-service actually answered — a failed/timed-out
+    // cross-service call omits the tile rather than showing a stale/fake number.
+    ...(activeShipmentCount != null ? [{ label: 'Active Shipments', val: activeShipmentCount.toLocaleString() }] : []),
+    { label: 'Screening', val: 'Fail-Closed' },
+  ];
+
   return (
     <div className="flex flex-col bg-slate-950 text-slate-100 selection:bg-primary selection:text-white overflow-hidden">
-      {/* LIVE KERNEL TICKER */}
+      {/* LIVE KERNEL TICKER — every value here is real, sourced server-side from
+          platform-pulse.ts + the GCKB authorities directory. Nothing hardcoded. */}
       <div className="h-12 bg-slate-900/80 backdrop-blur-md border-b border-white/5 flex items-center px-4 md:px-10 justify-between overflow-hidden shrink-0 z-40 sticky top-0">
         <div className="flex items-center gap-8 overflow-x-auto no-scrollbar">
           <div className="flex items-center gap-3">
-            <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-400 whitespace-nowrap">Platform: Operational</span>
+            <div className={`h-2 w-2 rounded-full ${pulse.dbHealthy ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-400 whitespace-nowrap">
+              Platform: {pulse.dbHealthy ? 'Operational' : 'Degraded'}
+            </span>
           </div>
-          {TICKER.map((s) => (
+          {ticker.map((s) => (
             <div key={s.label} className="flex items-center gap-2 whitespace-nowrap border-l border-white/5 pl-8 first:border-0 first:pl-0">
               <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{s.label}:</span>
               <span className="text-[10px] font-black text-slate-200 tabular-nums">{s.val}</span>
@@ -148,11 +166,56 @@ export function HomeClient() {
         </div>
       </section>
 
+      {/* END-TO-END TRADE FLOW */}
+      <TradeFlowSection />
+
+      {/* LIVE NETWORK MAP + TRUST CENTER CTAs */}
+      <section className="px-4 md:px-10 py-20">
+        <div className="max-w-7xl mx-auto grid gap-6 md:grid-cols-2">
+          <Link href={PATHS.PLATFORM_MAP} className="group block h-full">
+            <div className="h-full rounded-[28px] border border-white/5 bg-slate-900/40 hover:border-primary/40 hover:bg-slate-900/70 transition-all p-10 flex flex-col justify-between gap-8">
+              <div className="space-y-3">
+                <p className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.4em] text-primary">
+                  <Globe2 className="h-4 w-4" /> Live Network
+                </p>
+                <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter text-white leading-tight">
+                  See The Network On A Map.
+                </h2>
+                <p className="text-sm text-slate-400 leading-relaxed">
+                  Every published port and point of entry on Baalvion, plotted live.
+                </p>
+              </div>
+              <span className="inline-flex items-center text-xs font-black uppercase tracking-widest text-primary">
+                Open Map <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              </span>
+            </div>
+          </Link>
+          <Link href={PATHS.TRUST_CENTER} className="group block h-full">
+            <div className="h-full rounded-[28px] border border-white/5 bg-slate-900/40 hover:border-primary/40 hover:bg-slate-900/70 transition-all p-10 flex flex-col justify-between gap-8">
+              <div className="space-y-3">
+                <p className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.4em] text-primary">
+                  <ShieldCheck className="h-4 w-4" /> Trust Center
+                </p>
+                <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter text-white leading-tight">
+                  Verify, Don&apos;t Take Our Word For It.
+                </h2>
+                <p className="text-sm text-slate-400 leading-relaxed">
+                  Real, live figures on platform integrity, audit accountability, and security architecture.
+                </p>
+              </div>
+              <span className="inline-flex items-center text-xs font-black uppercase tracking-widest text-primary">
+                Open Trust Center <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              </span>
+            </div>
+          </Link>
+        </div>
+      </section>
+
       {/* INTEROPERABILITY */}
       <section className="px-4 md:px-10 py-28 border-y border-white/5 bg-slate-900/20">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
           <motion.div {...fadeUp} className="space-y-8">
-            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Integrate, Don't Replace</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Integrate, Don&apos;t Replace</p>
             <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter text-white leading-[0.95]">Connects To What You Already Run.</h2>
             <p className="text-lg text-slate-400 leading-relaxed">
               Bind your core banking, ERP, TMS, or customs gateway through signed API adapters. Baalvion orchestrates the trade across them — you keep authoritative control of your own systems.
@@ -198,6 +261,9 @@ export function HomeClient() {
             </Button>
             <Button variant="outline" className="h-14 px-10 border-white/10 text-white font-black uppercase tracking-widest text-xs rounded-2xl hover:bg-white/5" asChild>
               <Link href={PATHS.ACCESS_REQUEST}>Request Institutional Access</Link>
+            </Button>
+            <Button variant="outline" className="h-14 px-10 border-white/10 text-white font-black uppercase tracking-widest text-xs rounded-2xl hover:bg-white/5" asChild>
+              <Link href={PATHS.CONTACT}>Book A Consultation</Link>
             </Button>
           </div>
         </div>

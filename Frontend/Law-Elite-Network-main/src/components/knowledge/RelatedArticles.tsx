@@ -5,11 +5,14 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { getArticlesByCategorySlug } from '@/data/law-content';
 import { resolveArticleImage } from '@/lib/article-art';
+import { articleUrl } from '@/lib/article-url';
 
 interface RelatedArticle {
   id: string;
   title: string;
   category: string;
+  categorySlug?: string;
+  subcategorySlug?: string;
   author: string;
   slug: string;
   featuredImage?: string;
@@ -39,7 +42,15 @@ export function RelatedArticles({ currentSlug, categorySlug, categoryName }: Rel
 
     const bundled: RelatedArticle[] = getArticlesByCategorySlug(categorySlug)
       .filter((a) => a.slug !== currentSlug)
-      .map((a) => ({ id: a.id, title: a.title, category: a.category.name, author: a.author, slug: a.slug }));
+      .map((a) => ({
+        id: a.id,
+        title: a.title,
+        category: a.category.name,
+        categorySlug: a.category.slug,
+        subcategorySlug: a.subcategory?.slug,
+        author: a.author,
+        slug: a.slug,
+      }));
 
     fetch(`/api/cms/articles?category=${encodeURIComponent(categorySlug)}`)
       .then((r) => (r.ok ? r.json() : null))
@@ -52,6 +63,9 @@ export function RelatedArticles({ currentSlug, categorySlug, categoryName }: Rel
                 id: a.id,
                 title: a.title,
                 category: a.category?.name || categoryName || 'Legal Guide',
+                categorySlug: a.category?.slug,
+                // CMS content has no subcategory field (lib/cms.ts toArticle()) --
+                // articleUrl() falls back to the flat /article/{slug} URL for these.
                 author: 'Law Elite Editorial',
                 slug: a.slug,
                 featuredImage: a.featuredImage || undefined,
@@ -79,7 +93,7 @@ export function RelatedArticles({ currentSlug, categorySlug, categoryName }: Rel
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 px-2">
           {related.map((art) => (
-            <Link key={art.id} href={`/article/${art.slug}`} className="group block h-full">
+            <Link key={art.id} href={articleUrl({ slug: art.slug, category: { slug: art.categorySlug }, subcategory: { slug: art.subcategorySlug } })} className="group block h-full">
               <div className="bg-white border border-slate-200 overflow-hidden shadow-sm group-hover:shadow-md transition-all duration-300 flex flex-col h-full">
                 <div className="relative aspect-[3/2] overflow-hidden bg-slate-100">
                   <Image

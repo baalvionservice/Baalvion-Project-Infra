@@ -77,11 +77,75 @@ const customsData = {
   currency: 'USD',
 };
 
+const insuranceData = {
+  certificateNumber: 'INS-1',
+  issueDate: '2026-06-22',
+  insurer: party('Global Marine Insurance', 'GB'),
+  insured: party('Acme Exports', 'US'),
+  policyNumber: 'POL-555',
+  conveyance: 'MV Trade',
+  voyageFrom: 'Shanghai',
+  voyageTo: 'Hamburg',
+  goods: [{ description: 'Steel coils', marks: 'M1', quantity: 10, value: 5000 }],
+  insuredValue: 5500,
+  currency: 'USD',
+  coveredRisks: 'All Risks (Institute Cargo Clauses A)',
+  claimsPayableAt: 'Hamburg',
+};
+
+const purchaseOrderData = {
+  poNumber: 'PO-88',
+  issueDate: '2026-06-22',
+  buyer: party('Globex Imports', 'DE'),
+  seller: party('Acme Exports', 'US'),
+  deliveryDate: '2026-07-01',
+  incoterm: 'FOB',
+  currency: 'USD',
+  items: [{ description: 'Steel coils', hsCode: '7208.10', quantity: 10, unitPrice: 500, lineTotal: 5000 }],
+  subtotal: 5000,
+  grandTotal: 5000,
+  paymentTerms: 'NET 30',
+  specialInstructions: 'Handle with care',
+};
+
+const letterOfCreditData = {
+  lcNumber: 'LC-42',
+  issueDate: '2026-06-22',
+  expiryDate: '2026-09-22',
+  issuingBank: party('First National Bank', 'US'),
+  applicant: party('Globex Imports', 'DE'),
+  beneficiary: party('Acme Exports', 'US'),
+  amount: 5000,
+  currency: 'USD',
+  availableWith: 'Issuing Bank by payment',
+  partialShipments: false,
+  transhipment: false,
+  latestShipmentDate: '2026-08-15',
+  documentsRequired: ['Commercial Invoice', 'Bill of Lading', 'Certificate of Origin'],
+  descriptionOfGoods: 'Steel coils, 10 MT',
+};
+
+const inspectionData = {
+  certificateNumber: 'INSP-5',
+  inspectionDate: '2026-06-22',
+  inspectionBody: party('SGS Testing', 'CH'),
+  exporter: party('Acme Exports', 'US'),
+  consignee: party('Globex Imports', 'DE'),
+  placeOfInspection: 'Shanghai Port',
+  items: [{ description: 'Steel coils', hsCode: '7208.10', quantity: 10, finding: 'Conforms to spec' }],
+  inspectionStandard: 'ISO 17020',
+  result: 'PASS',
+  remarks: 'No defects found',
+};
+
 describe('trade-document template registry', () => {
-  it('exposes all five document types', () => {
+  it('exposes all nine document types', () => {
     const types = listTradeDocumentTypes().map((t) => t.type);
     expect(types).toEqual(
-      expect.arrayContaining(['COMMERCIAL_INVOICE', 'PACKING_LIST', 'BILL_OF_LADING', 'CERTIFICATE_OF_ORIGIN', 'CUSTOMS_DECLARATION']),
+      expect.arrayContaining([
+        'COMMERCIAL_INVOICE', 'PACKING_LIST', 'BILL_OF_LADING', 'CERTIFICATE_OF_ORIGIN', 'CUSTOMS_DECLARATION',
+        'INSURANCE_CERTIFICATE', 'PURCHASE_ORDER', 'LETTER_OF_CREDIT', 'INSPECTION_CERTIFICATE',
+      ]),
     );
   });
 });
@@ -93,6 +157,10 @@ describe('generateDocument — happy path per template', () => {
     ['BILL_OF_LADING', blData, 'BL-7', 'MSCU1234567'],
     ['CERTIFICATE_OF_ORIGIN', cooData, 'COO-3', 'WO'],
     ['CUSTOMS_DECLARATION', customsData, 'CUS-9', 'EXPORT'],
+    ['INSURANCE_CERTIFICATE', insuranceData, 'INS-1', 'Steel coils'],
+    ['PURCHASE_ORDER', purchaseOrderData, 'PO-88', 'Steel coils'],
+    ['LETTER_OF_CREDIT', letterOfCreditData, 'LC-42', 'Commercial Invoice'],
+    ['INSPECTION_CERTIFICATE', inspectionData, 'INSP-5', 'Conforms to spec'],
   ];
 
   for (const [type, data, number, marker] of cases) {
@@ -128,6 +196,18 @@ describe('generateDocument — validation & determinism', () => {
     expect(() => generateDocument({ documentType: 'CUSTOMS_DECLARATION', data: { ...customsData, regime: 'SMUGGLE' } })).toThrow(
       /DOCUMENT_VALIDATION_FAILED/,
     );
+  });
+
+  it('rejects an invalid inspection result via the in-rule', () => {
+    expect(() => generateDocument({ documentType: 'INSPECTION_CERTIFICATE', data: { ...inspectionData, result: 'MAYBE' } })).toThrow(
+      /DOCUMENT_VALIDATION_FAILED/,
+    );
+  });
+
+  it('throws when a letter of credit has no required documents listed', () => {
+    expect(() =>
+      generateDocument({ documentType: 'LETTER_OF_CREDIT', data: { ...letterOfCreditData, documentsRequired: [] } }),
+    ).toThrow(/DOCUMENT_VALIDATION_FAILED/);
   });
 
   it('produces a stable content hash for identical data', () => {

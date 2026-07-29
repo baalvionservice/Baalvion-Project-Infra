@@ -111,15 +111,15 @@ export default function PrivacyPolicyPage() {
             </Block>
 
             <Block id="advertising" title="Advertising & Google AdSense">
-              <p>This website displays advertising served by third-party advertising networks, including <strong>Google AdSense</strong>. These partners help fund our free legal content.</p>
+              <p>This website displays advertising served by third-party advertising networks, including <strong>Google AdSense</strong> (which uses Google&apos;s ad-serving technology, formerly branded <strong>Google DoubleClick</strong>, now part of Google Marketing Platform). These partners help fund our free legal content.</p>
               <ul>
-                <li>Third-party vendors, including Google, use cookies to serve ads based on a user&apos;s prior visits to this website and other websites.</li>
+                <li>Google, as a third-party vendor, uses cookies — including what was formerly known as the DoubleClick cookie — to serve ads on this site based on a user&apos;s prior visits to this website and other websites.</li>
                 <li>Google&apos;s use of advertising cookies enables it and its partners to serve ads to you based on your visit to this site and/or other sites on the Internet.</li>
                 <li>You may opt out of personalized advertising by visiting <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener noreferrer">Google Ads Settings</a>.</li>
                 <li>You can opt out of a third-party vendor&apos;s use of cookies for personalized advertising by visiting <a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener noreferrer">www.aboutads.info</a>.</li>
-                <li>Third-party networks operating on this site may also place and read cookies on your browser or use web beacons to collect information in the course of ads being served. For more information, see <a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener noreferrer">How Google uses information from sites that use its services</a>.</li>
+                <li>Third-party networks operating on this site may also place and read third-party cookies on your browser, or use web beacons, to collect information in the course of ads being served. For more information, see <a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener noreferrer">How Google uses information from sites that use its services</a>.</li>
               </ul>
-              <p>We do not control the cookies used by third-party advertisers and recommend reviewing their respective privacy policies.</p>
+              <p>We do not control the third-party cookies used by these advertisers and recommend reviewing their respective privacy policies.</p>
             </Block>
 
             <Block id="third-party" title="Third-Party Disclosures">

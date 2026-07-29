@@ -1,4 +1,5 @@
 import { cmsGetArticles, cmsGetNews, type CmsArticle } from "@/lib/cms";
+import { articleUrl } from "@/lib/article-url";
 
 export const revalidate = 300;
 
@@ -13,7 +14,7 @@ const esc = (s: string): string =>
     .replace(/'/g, "&apos;");
 
 function itemXml(item: CmsArticle): string {
-  const url = `${SITE}/article/${item.slug}`;
+  const url = `${SITE}${articleUrl(item)}`;
   const pubDate = item.updatedAt ? new Date(item.updatedAt).toUTCString() : new Date().toUTCString();
   return `  <item>
     <title>${esc(item.title)}</title>

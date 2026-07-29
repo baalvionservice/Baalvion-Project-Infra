@@ -40,9 +40,32 @@ import { getPracticeAreas, type PracticeArea } from '@/services/practiceAreas/pr
  */
 export default function LawyerMarketplacePage() {
   return (
-    <Suspense fallback={<MarketplaceSkeleton />}>
-      <LawyerMarketplaceContent />
-    </Suspense>
+    <div className="min-h-screen bg-[#F8FAFC]">
+      <Navbar />
+
+      <main className="container mx-auto px-4 pt-24 pb-12">
+        {/* Static intro — kept outside the Suspense boundary below so the H1 and
+            copy are always part of the first response. LawyerMarketplaceContent
+            calls useSearchParams(), which forces its own Suspense boundary to
+            fall back to MarketplaceSkeleton in the prerendered shell; nesting
+            everything under that boundary (the previous structure) meant
+            crawlers only ever saw the loading skeleton, with no <h1> at all. */}
+        <header className="mb-12 text-center animate-in fade-in slide-in-from-top-4 duration-1000">
+          <div className="flex justify-center mb-4">
+             <span className="px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-[10px] font-bold uppercase tracking-[0.2em] flex items-center gap-2 shadow-lg shadow-blue-500/5">
+               <Award className="w-3.5 h-3.5" />
+               Verified Global Network
+             </span>
+          </div>
+          <h1 className="font-headline text-5xl md:text-6xl mb-4 italic text-slate-900">Discover Elite Counsel</h1>
+          <p className="text-slate-500 max-w-2xl mx-auto italic font-medium">Access a curated network of the world's most distinguished, verified legal practitioners.</p>
+        </header>
+
+        <Suspense fallback={<MarketplaceSkeleton />}>
+          <LawyerMarketplaceContent />
+        </Suspense>
+      </main>
+    </div>
   );
 }
 
@@ -156,28 +179,14 @@ function LawyerMarketplaceContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
-      <Navbar />
-      
-      <main className="container mx-auto px-4 pt-24 pb-12">
-        <header className="mb-12 text-center animate-in fade-in slide-in-from-top-4 duration-1000">
-          <div className="flex justify-center mb-4">
-             <span className="px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-[10px] font-bold uppercase tracking-[0.2em] flex items-center gap-2 shadow-lg shadow-blue-500/5">
-               <Award className="w-3.5 h-3.5" />
-               Verified Global Network
-             </span>
+    <>
+        {activeCase && (
+          <div className="mb-12 -mt-6 inline-flex items-center gap-3 px-4 py-2 rounded-2xl bg-blue-50 border border-blue-100 text-blue-600 animate-in zoom-in duration-500">
+            <Gavel className="w-4 h-4" />
+            <span className="text-xs font-bold uppercase tracking-widest">Optimizing for: {activeCase.title}</span>
+            <Sparkles className="w-3 h-3 animate-pulse" />
           </div>
-          <h1 className="font-headline text-5xl md:text-6xl mb-4 italic text-slate-900">Discover Elite Counsel</h1>
-          <p className="text-slate-500 max-w-2xl mx-auto italic font-medium">Access a curated network of the world's most distinguished, verified legal practitioners.</p>
-          
-          {activeCase && (
-            <div className="mt-6 inline-flex items-center gap-3 px-4 py-2 rounded-2xl bg-blue-50 border border-blue-100 text-blue-600 animate-in zoom-in duration-500">
-              <Gavel className="w-4 h-4" />
-              <span className="text-xs font-bold uppercase tracking-widest">Optimizing for: {activeCase.title}</span>
-              <Sparkles className="w-3 h-3 animate-pulse" />
-            </div>
-          )}
-        </header>
+        )}
 
         {/* Discovery Control Center */}
         <div className="bg-white p-6 rounded-3xl mb-12 space-y-6 border border-slate-200 shadow-xl relative overflow-hidden">
@@ -407,27 +416,24 @@ function LawyerMarketplaceContent() {
             )}
           </div>
         </div>
-      </main>
-    </div>
+    </>
   );
 }
 
 function MarketplaceSkeleton() {
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
-      <Navbar />
-      <main className="container mx-auto px-4 pt-24 pb-12">
-        <div className="max-w-2xl mx-auto text-center mb-12">
-          <Skeleton className="h-4 w-32 mx-auto mb-4" />
-          <Skeleton className="h-12 w-64 mx-auto mb-4" />
-          <Skeleton className="h-4 w-full" />
+    <>
+      <div className="bg-white p-6 rounded-3xl mb-12 space-y-6 border border-slate-200 shadow-xl">
+        <Skeleton className="h-12 w-full" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-11 w-full" />)}
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {[1, 2, 3, 4, 5, 6].map(i => (
-            <Skeleton key={i} className="h-[320px] rounded-3xl" />
-          ))}
-        </div>
-      </main>
-    </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {[1, 2, 3, 4, 5, 6].map(i => (
+          <Skeleton key={i} className="h-[320px] rounded-3xl" />
+        ))}
+      </div>
+    </>
   );
 }

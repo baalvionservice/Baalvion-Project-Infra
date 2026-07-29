@@ -1,68 +1,24 @@
 import type { Metadata } from 'next';
-import { cmsGetArticleBySlug } from '@/lib/cms';
 import { getAuthorByName } from '@/data/authors';
 import { resolveArticleImage } from '@/lib/article-art';
 import { extractFaqFromHtml } from '@/lib/seo/faq-extractor';
+import { fetchArticleForMetadata } from '@/lib/article-metadata-fetch';
+import { articleUrl } from '@/lib/article-url';
 
-const API = process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3015/v1');
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 
 const titleCase = (s: string) => s.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-
-// Hard cap so a slow/hung law-service response falls back to the humanized-slug
-// title instead of blocking metadata generation and the page render.
-const FETCH_TIMEOUT_MS = 4000;
-
-async function fetchFromLawService(slug: string): Promise<any | null> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-  try {
-    // /articles/:slug resolves by slug (the ?slug= list filter is not applied server-side).
-    const r = await fetch(`${API}/articles/${encodeURIComponent(slug)}`, {
-      next: { revalidate: 3600 },
-      signal: controller.signal,
-    });
-    if (!r.ok) return null;
-    const j = await r.json();
-    return j?.data ?? null;
-  } catch {
-    return null;
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
-/**
- * Source-of-truth order for SEO metadata/JSON-LD: central CMS first, then
- * law-service. Mirrors the client page so the indexed title/description/canonical
- * track whatever is authoritative in the admin console.
- */
-async function fetchArticle(slug: string): Promise<any | null> {
-  const cms = await cmsGetArticleBySlug(slug);
-  if (cms) {
-    return {
-      id: cms.id,
-      title: cms.title,
-      excerpt: cms.excerpt,
-      tags: [],
-      category: cms.category,
-      author: cms.author,
-      contentType: cms.contentType,
-      updated_at: cms.updatedAt,
-      published_at: cms.updatedAt,
-      cover_image: cms.featuredImage,
-      body: cms.content,
-    };
-  }
-  return fetchFromLawService(slug);
-}
 
 export async function generateMetadata(
   { params }: { params: Promise<{ slug: string }> },
 ): Promise<Metadata> {
   const { slug } = await params;
-  const a = await fetchArticle(slug);
-  const url = `${SITE}/article/${slug}`;
+  const a = await fetchArticleForMetadata(slug);
+  // Points canonical at the nested URL whenever the article has enough taxonomy
+  // to build one -- even though this legacy route redirects there anyway, any
+  // crawler that briefly indexes this URL before following the redirect should
+  // still see the correct canonical.
+  const url = `${SITE}${articleUrl(a ? { ...a, slug } : { slug })}`;
   // No server-side record: humanize the slug so the title is still specific (not bare "Article").
   if (!a) {
     const humanized = `${titleCase(slug)} | Law Elite Network`;
@@ -71,9 +27,6 @@ export async function generateMetadata(
   const title = a.title;
   const description = String(a.excerpt || a.title).slice(0, 300);
   const authorName = (typeof a.author === 'string' ? a.author : a.author?.name) || a.author_name || undefined;
-  // Prefers a real, admin-set image, then the pre-generated static PNG for bundled
-  // articles (a real crawlable raster URL — required for og:image/NewsArticle.image),
-  // and only falls back to the inline SVG data URI when neither exists.
   const ogImage = resolveArticleImage({ ...a, title, slug });
   return {
     title,
@@ -100,7 +53,8 @@ export default async function ArticleLayout(
   { children, params }: { children: React.ReactNode; params: Promise<{ slug: string }> },
 ) {
   const { slug } = await params;
-  const a = await fetchArticle(slug);
+  const a = await fetchArticleForMetadata(slug);
+  const url = `${SITE}${articleUrl(a ? { ...a, slug } : { slug })}`;
   const bylineName = (typeof a?.author === 'string' ? a.author : a?.author?.name) || undefined;
   const matchedAuthor = bylineName ? getAuthorByName(bylineName) : null;
   const authorLd = matchedAuthor
@@ -115,11 +69,9 @@ export default async function ArticleLayout(
     image: articleImage ? [articleImage] : undefined,
     datePublished: a.published_at || undefined,
     dateModified: a.updated_at || a.published_at || undefined,
-    mainEntityOfPage: `${SITE}/article/${slug}`,
+    mainEntityOfPage: url,
     author: authorLd,
     publisher: { '@type': 'Organization', name: 'Law Elite Network', logo: { '@type': 'ImageObject', url: `${SITE}/logo.png` } },
-    // Voice/AI-assistant readability: points speakable extraction at the
-    // headline and excerpt so assistants can read a short summary aloud.
     speakable: {
       '@type': 'SpeakableSpecification',
       cssSelector: ['h1', '[data-article-excerpt]'],
@@ -137,11 +89,10 @@ export default async function ArticleLayout(
         })),
       }
     : null;
-  // Breadcrumb trail: Home → (category hub, when known) → Article.
   const cat = a?.category;
   const crumbs: Array<{ name: string; item: string }> = [{ name: 'Home', item: SITE }];
   if (cat?.name && cat?.slug) crumbs.push({ name: cat.name, item: `${SITE}/law/${cat.slug}` });
-  crumbs.push({ name: a?.title || titleCase(slug), item: `${SITE}/article/${slug}` });
+  crumbs.push({ name: a?.title || titleCase(slug), item: url });
   const breadcrumbLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',

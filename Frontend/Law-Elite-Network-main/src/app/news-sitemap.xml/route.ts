@@ -8,6 +8,7 @@
 // CMS degrades to an empty (but valid) sitemap instead of hanging this route.
 
 import { cmsGetNews } from '@/lib/cms';
+import { articleUrl } from '@/lib/article-url';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 const PUBLICATION_NAME = 'Law Elite Network';
@@ -36,7 +37,7 @@ export async function GET(): Promise<Response> {
 
   const urls = recent
     .map((a) => {
-      const loc = `${SITE}/article/${a.slug}`;
+      const loc = `${SITE}${articleUrl(a)}`;
       const publicationDate = new Date(a.updatedAt as string).toISOString();
       return `  <url>
     <loc>${escapeXml(loc)}</loc>

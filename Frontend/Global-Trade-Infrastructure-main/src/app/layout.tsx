@@ -7,15 +7,18 @@ import { RouteGuard } from "./(dashboard)/_components/route-guard";
 import { TourOverlay } from '@/components/tour-overlay';
 import { organizationJsonLd, webSiteJsonLd, jsonLdScriptProps } from '@/lib/seo';
 
-// Authenticated, store-driven trade platform: render dynamically rather than
-// statically prerendering at build (client stores are not SSG-safe).
-export const dynamic = 'force-dynamic';
+// NOTE: `force-dynamic` is intentionally NOT set here. The public marketing routes
+// under (public) are designed for static/ISR rendering (see their `revalidate`
+// exports) so they can be cached and crawled fast. Only the authenticated,
+// store-driven surfaces need per-request dynamic rendering — that's opted into
+// locally in (dashboard)/layout.tsx and governance/layout.tsx instead of globally
+// forcing every public page (including this one) to skip caching.
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://trade.baalvion.com';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  icons: { icon: 'data:,' },
+  icons: { icon: '/icon.svg' },
   title: {
     default: 'Baalvion | The Global Trade Operating System',
     template: '%s | Baalvion OS',

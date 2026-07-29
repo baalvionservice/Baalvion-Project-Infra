@@ -19,7 +19,11 @@ export const metadata: Metadata = pageMetadata({
   keywords: ['customs authority', 'trade ministry', 'tax authority', 'government directory', 'regulatory bodies', 'central bank'],
 });
 
-export const revalidate = 300;
+// Queries the GCKB database directly (not via `fetch`), so Next.js has no signal
+// to treat this as dynamic on its own. Force it explicitly: prerendering this at
+// build time would require a reachable DB at build, which isn't guaranteed in
+// every deploy pipeline. (See src/app/layout.tsx for why this isn't set globally.)
+export const dynamic = 'force-dynamic';
 
 export default async function AuthoritiesPage() {
   const authorities = await listAuthoritiesDirectory();
@@ -41,7 +45,7 @@ export default async function AuthoritiesPage() {
           {authorities.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-white/10 bg-slate-950/40 py-24 text-center">
               <p className="text-sm font-bold text-slate-300">No authorities are published yet.</p>
-              <p className="mt-1 text-xs text-slate-500">Reference data is loaded through the import API or the seed tooling.</p>
+              <p className="mt-1 text-xs text-slate-500">Our institutional data team is expanding this directory. Check back soon or contact us for details on a specific jurisdiction.</p>
             </div>
           ) : (
             <AuthorityDirectory authorities={authorities} />

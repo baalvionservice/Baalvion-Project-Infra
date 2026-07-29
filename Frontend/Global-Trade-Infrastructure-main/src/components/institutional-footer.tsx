@@ -20,7 +20,7 @@ export function InstitutionalFooter() {
     return (
         <footer className="bg-muted text-muted-foreground">
             <div className="container mx-auto px-4 md:px-6 py-12">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
                     <div className="lg:col-span-2 mb-8 md:mb-0">
                         <div className="flex items-center gap-2 mb-4">
                             <BaalvionLogo className="h-8 w-8 text-primary" />
@@ -32,9 +32,9 @@ export function InstitutionalFooter() {
                         <h4 className="font-semibold text-foreground mb-4">Platform</h4>
                         <ul className="space-y-2 text-sm">
                             <li><Link href={PATHS.PLATFORM} className="hover:text-foreground">Platform Overview</Link></li>
-                            <li><Link href={PATHS.PLATFORM} className="hover:text-foreground">Capabilities</Link></li>
+                            <li><Link href={PATHS.PRICING} className="hover:text-foreground">Pricing</Link></li>
+                            <li><Link href={PATHS.ONBOARD} className="hover:text-foreground">Onboard Your Institution</Link></li>
                             <li><Link href={PATHS.ABOUT} className="hover:text-foreground">How It Works</Link></li>
-                            <li><Link href={PATHS.INTELLIGENCE_HUB} className="hover:text-foreground">Intelligence & Oversight</Link></li>
                         </ul>
                     </div>
                     <div>
@@ -44,6 +44,17 @@ export function InstitutionalFooter() {
                             <li><Link href={PATHS.SOLUTIONS_GOV} className="hover:text-foreground">For Governments & Regulators</Link></li>
                             <li><Link href={PATHS.SOLUTIONS_ENTERPRISES} className="hover:text-foreground">For Enterprises</Link></li>
                             <li><Link href={PATHS.SOLUTIONS_LOGISTICS} className="hover:text-foreground">For Logistics & Shipping</Link></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 className="font-semibold text-foreground mb-4">Trade Data</h4>
+                        <ul className="space-y-2 text-sm">
+                            <li><Link href={PATHS.COUNTRIES} className="hover:text-foreground">Countries</Link></li>
+                            <li><Link href={PATHS.PORTS} className="hover:text-foreground">Ports</Link></li>
+                            <li><Link href={PATHS.TARIFFS} className="hover:text-foreground">Tariffs</Link></li>
+                            <li><Link href={PATHS.FTA} className="hover:text-foreground">Trade Agreements</Link></li>
+                            <li><Link href={PATHS.AUTHORITIES} className="hover:text-foreground">Authorities</Link></li>
+                            <li><Link href={PATHS.COMPARE} className="hover:text-foreground">Compare Countries</Link></li>
                         </ul>
                     </div>
                      <div>
@@ -56,7 +67,15 @@ export function InstitutionalFooter() {
                         </ul>
                     </div>
                 </div>
-                <div className="mt-12 pt-8 border-t flex flex-col sm:flex-row items-center justify-between text-sm">
+                <div className="mt-12 pt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
+                    <p className="font-semibold text-foreground/80">Part of the Baalvion group</p>
+                    <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+                        <a href="https://baalvion.com" className="hover:text-foreground">Baalvion.com</a>
+                        <a href="https://about.baalvion.com" className="hover:text-foreground">About Baalvion</a>
+                        <a href="https://ir.baalvion.com" className="hover:text-foreground">Investor Relations</a>
+                    </div>
+                </div>
+                <div className="mt-6 pt-6 border-t flex flex-col sm:flex-row items-center justify-between text-sm">
                     <p className='mb-4 sm:mb-0'>&copy; {year ? year : ''} Baalvion Industries Pvt. Ltd.</p>
                     <div className="flex items-center gap-4">
                         <Link href={PATHS.PRIVACY_POLICY} className="hover:text-foreground">Privacy Policy</Link>

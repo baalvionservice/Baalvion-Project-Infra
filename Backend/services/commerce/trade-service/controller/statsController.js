@@ -1,7 +1,15 @@
 'use strict';
+const { Op } = require('sequelize');
 const db = require('../models');
 const cache = require('../cache');
 const { sendSuccess } = require('../utils/response');
+const { verifyChain } = require('../utils/audit');
+
+// Same "active" bucket the (authenticated) Global Shipment Tracking Dashboard
+// uses — see STATUS_BUCKETS.active in logisticsTrackingDashboardController.js.
+// Duplicated (not imported) to keep this public, unauthenticated controller
+// decoupled from that tenant-aware one; both are short, stable status lists.
+const ACTIVE_SHIPMENT_STATUSES = ['booked', 'picked_up', 'in_transit', 'port_processing', 'customs_clearance', 'released'];
 
 const fmtMoney = (n) => {
     if (n >= 1e12) return `$${(n / 1e12).toFixed(2)}T`;
@@ -17,9 +25,11 @@ const platformStats = async (req, res, next) => {
         // Tenant-aware cache (30s) — aggregates are tenant-scoped via query hooks.
         const ck = cache.tkey((req.auth && req.auth.tenantId) || 'global', 'stats', 'platform');
         const payload = await cache.wrap(ck, 30, async () => {
-            const [listings, rfqs, deals, orders, shipments, disputes, organizations] = await Promise.all([
+            const [listings, rfqs, deals, orders, shipments, disputes, organizations, activeTradeShipments, chain] = await Promise.all([
                 db.Listing.count(), db.Rfq.count(), db.Deal.count(), db.Order.count(),
                 db.Shipment.count(), db.Dispute.count(), db.Organization.count(),
+                db.TradeShipment.count({ where: { status: { [Op.in]: ACTIVE_SHIPMENT_STATUSES } } }),
+                verifyChain(),
             ]);
             const [orderVol, dealVol] = await Promise.all([db.Order.sum('total_value'), db.Deal.sum('total_value')]);
             const totalValue = (Number(orderVol) || 0) + (Number(dealVol) || 0);
@@ -29,6 +39,17 @@ const platformStats = async (req, res, next) => {
                 activeTenants: organizations,
                 finality: '12.4s',
                 load: Math.min(99, 38 + orders * 2 + shipments * 3),
+                // Same "active" definition the authenticated tracking dashboard shows
+                // (/tracking_dashboard/summary's STATUS_BUCKETS.active), platform-wide.
+                activeTradeShipments,
+                // Independently recomputed SHA-256 hash-chain over every audit_logs row
+                // (see utils/audit.js verifyChain) — proves the trail hasn't been
+                // tampered with. Aggregate only: valid/entry-count/head-hash-prefix,
+                // never the underlying entries (those stay behind authMiddleware on
+                // GET /audit and /audit/verify).
+                auditChainValid: chain.valid,
+                auditChainEntries: chain.entries ?? null,
+                auditChainHeadHashPrefix: chain.headHash ? chain.headHash.slice(0, 16) : null,
                 counts: { listings, rfqs, deals, orders, shipments, disputes, organizations },
             };
         });

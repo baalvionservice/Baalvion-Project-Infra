@@ -17,7 +17,9 @@ import {
  * Server-rendered (SSR + ISR) with dynamic, per-country SEO metadata.
  */
 
-export const revalidate = 300;
+// Reads the GCKB database directly — forced dynamic so build doesn't require a
+// reachable DB at build time. See authorities/page.tsx for the full rationale.
+export const dynamic = 'force-dynamic';
 
 type Params = { params: Promise<{ code: string }> };
 
@@ -118,7 +120,7 @@ export default async function CountryProfilePage({ params }: Params) {
           {nav.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-white/10 bg-slate-950/40 py-20 text-center">
               <p className="text-sm font-bold text-slate-300">No published trade policy is on file for {country.name} yet.</p>
-              <p className="mt-1 text-xs text-slate-500">Reference data is loaded through the import API or the seed tooling.</p>
+              <p className="mt-1 text-xs text-slate-500">Our institutional data team is expanding this directory. Contact us for details on this jurisdiction.</p>
             </div>
           ) : (
             <>

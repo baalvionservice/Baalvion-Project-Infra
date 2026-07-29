@@ -74,7 +74,13 @@ export function organizationJsonLd() {
     logo: absoluteUrl('/icon.svg'),
     description:
       'Baalvion is the neutral institutional infrastructure layer for global trade — connecting execution, finance, compliance, and logistics in one governed platform.',
-    sameAs: ['https://twitter.com/baalvion', 'https://www.linkedin.com/company/baalvion'],
+    sameAs: [
+      'https://baalvion.com',
+      'https://about.baalvion.com',
+      'https://ir.baalvion.com',
+      'https://twitter.com/baalvion',
+      'https://www.linkedin.com/company/baalvion',
+    ],
     contactPoint: {
       '@type': 'ContactPoint',
       contactType: 'sales',
@@ -100,7 +106,13 @@ export function webSiteJsonLd() {
   };
 }
 
-/** SoftwareApplication / Product schema for the home + platform pages. */
+/**
+ * SoftwareApplication / Product schema for the home + platform pages.
+ * No `aggregateRating` here on purpose — Google's structured-data guidelines
+ * require review counts to reflect real, verifiable reviews; a fabricated
+ * rating risks a manual spam action against the whole rich-result eligibility
+ * for this site, not just this page.
+ */
 export function softwareApplicationJsonLd() {
   return {
     '@context': 'https://schema.org',
@@ -110,7 +122,6 @@ export function softwareApplicationJsonLd() {
     operatingSystem: 'Web',
     url: SITE_URL,
     offers: { '@type': 'Offer', price: '499', priceCurrency: 'USD' },
-    aggregateRating: { '@type': 'AggregateRating', ratingValue: '4.9', ratingCount: '128' },
   };
 }
 

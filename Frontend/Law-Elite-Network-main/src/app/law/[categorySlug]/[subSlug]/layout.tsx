@@ -85,35 +85,10 @@ export async function generateMetadata(
   };
 }
 
-export default async function SubcategoryLayout(
-  { children, params }: { children: React.ReactNode; params: Promise<{ categorySlug: string; subSlug: string }> },
-) {
-  const { categorySlug, subSlug } = await params;
-  const { categoryName, subName } = await resolveTaxonomy(categorySlug, subSlug);
-  const url = `${SITE}/law/${categorySlug}/${subSlug}`;
-
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'CollectionPage',
-    name: `${subName} — ${categoryName} Guides`,
-    description: `Expert ${subName} legal guides within ${categoryName} on Law Elite Network.`,
-    url,
-    isPartOf: { '@type': 'WebSite', name: 'Law Elite Network', url: SITE },
-  };
-  const breadcrumbLd = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE },
-      { '@type': 'ListItem', position: 2, name: categoryName, item: `${SITE}/law/${categorySlug}` },
-      { '@type': 'ListItem', position: 3, name: subName, item: url },
-    ],
-  };
-  return (
-    <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
-      {children}
-    </>
-  );
+// CollectionPage/BreadcrumbList JSON-LD used to live here, but a layout wraps
+// EVERY nested route below it -- including the article route now nested under
+// this subcategory, which has its own (more complete, 4-level) BreadcrumbList.
+// Moved to page.tsx, which only renders for this exact route.
+export default function SubcategoryLayout({ children }: { children: React.ReactNode }) {
+  return children;
 }

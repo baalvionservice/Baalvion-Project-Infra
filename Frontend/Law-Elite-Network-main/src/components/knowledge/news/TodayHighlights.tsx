@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Clock, Eye } from "lucide-react";
 import type { CmsArticle } from "@/lib/cms";
 import { resolveArticleImage } from "@/lib/article-art";
+import { articleUrl } from "@/lib/article-url";
 
 type Props = {
   articles: CmsArticle[];
@@ -21,7 +22,7 @@ export function TodayHighlights({ articles }: Props) {
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {items.map((article) => (
-          <Link key={article.id} href={`/article/${article.slug}`} className="group flex flex-col">
+          <Link key={article.id} href={articleUrl(article)} className="group flex flex-col">
             <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl mb-3 bg-slate-100 dark:bg-slate-800">
               <Image
                 src={resolveArticleImage(article)}

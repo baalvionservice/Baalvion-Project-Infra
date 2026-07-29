@@ -1,375 +1,41 @@
+import { permanentRedirect } from 'next/navigation';
+import { fetchArticleForRender } from '@/lib/article-fetch';
+import { articleUrl } from '@/lib/article-url';
+import { ArticleView, ArticleNotFound } from '@/components/knowledge/ArticleView';
 
-"use client";
-
-import React, { useEffect, useState, useRef } from 'react';
-import { useParams, useSearchParams } from 'next/navigation';
-import { articlesPublicApi } from '@/lib/api/client';
-import { PublicFooter } from '@/components/knowledge/PublicFooter';
-import { AIAnswersCard } from '@/components/knowledge/AIAnswersCard';
-import { RelatedArticles } from '@/components/knowledge/RelatedArticles';
-import { Breadcrumbs } from '@/components/knowledge/Breadcrumbs';
-import { InternalLinkingService } from '@/lib/api/services/internal-linking.service';
-import { KeywordMappingRepository } from '@/lib/api/repositories/keyword-mapping.repository';
-import {
-  Loader2,
-  ChevronDown,
-  ChevronUp,
-  BookOpen,
-  List
-} from 'lucide-react';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import Link from 'next/link';
-import Image from 'next/image';
-import { cn } from '@/lib/utils';
-import seedData from '../../../../docs/seed-data.json';
-import { getArticleBySlug } from '@/data/law-content';
-import { getAuthorByName } from '@/data/authors';
-import { resolveArticleImage } from '@/lib/article-art';
-
-interface TOCItem {
-  id: string;
-  text: string;
-  level: number;
-}
-
-function generateFallbackContent(title: string): string {
-  return `
-    <h2>What Is ${title}?</h2>
-    <p>This legal domain represents a strategic framework within the global legal network that facilitates the resolution of complex matters through established legal protocols.</p>
-    <div class="key-takeaways">
-      <h4>Key Takeaways</h4>
-      <ul>
-        <li>This is a specialized area of law with unique procedural requirements.</li>
-        <li>Expert legal counsel is highly recommended for navigating this domain.</li>
-        <li>The process is governed by both statutory and common law principles.</li>
-      </ul>
-    </div>
-  `;
-}
-
-export default function ArticleDeepDivePage() {
-  const { slug } = useParams();
-  const searchParams = useSearchParams();
-  const previewToken = searchParams.get('previewToken');
-  const previewExp = searchParams.get('previewExp');
-
-  const [article, setArticle] = useState<any>(null);
-  const [articleLoading, setArticleLoading] = useState(true);
-  const [toc, setToc] = useState<TOCItem[]>([]);
-  const [activeId, setActiveId] = useState<string>("");
-  const [isSeriesOpen, setIsSeriesOpen] = useState(false);
-  const [processedContent, setProcessedContent] = useState<string>("");
-  const [isOptimizing, setIsOptimizing] = useState(true);
-  const observer = useRef<IntersectionObserver | null>(null);
-
-  useEffect(() => {
-    if (!slug) return;
-    setArticleLoading(true);
-
-    // Source-of-truth order: central CMS (admin.baalvion.com) FIRST, then
-    // law-service, then the bundled editorial library, then the static seed.
-    // The CMS is authoritative so anything published/edited in the admin console
-    // wins over the legacy law-service record.
-    const fromCms = async () => {
-      try {
-        const previewQs = previewToken && previewExp
-          ? `?previewToken=${encodeURIComponent(previewToken)}&previewExp=${encodeURIComponent(previewExp)}`
-          : '';
-        const r = await fetch(`/api/cms/articles/${slug}${previewQs}`);
-        if (r.ok) {
-          const j = await r.json();
-          if (j?.data) return j.data;
-        }
-      } catch {
-        /* ignore */
-      }
-      return null;
-    };
-    const fromLawService = async () => {
-      try {
-        const res = await articlesPublicApi.get(slug as string);
-        return res.data?.data || null;
-      } catch {
-        return null;
-      }
-    };
-    const fromSeed = () => {
-      const seedMatch = (seedData as any).articles?.find((a: any) => a.slug === slug);
-      return seedMatch
-        ? { ...seedMatch, content: seedMatch.content || generateFallbackContent(seedMatch.title), updatedAt: "February 12, 2025" }
-        : null;
-    };
-    // Bundled editorial library (full HTML content) is the offline baseline.
-    const fromBundled = () => getArticleBySlug(slug as string);
-
-    (async () => {
-      try {
-        const resolved =
-          (await fromCms()) || (await fromLawService()) || fromBundled() || fromSeed();
-        setArticle(resolved);
-      } finally {
-        setArticleLoading(false);
-      }
-    })();
-  }, [slug, previewToken, previewExp]);
-
-  useEffect(() => {
-    const optimizeContent = async () => {
-      if (!article?.content) return;
-      setIsOptimizing(true);
-      const linkingService = new InternalLinkingService(new KeywordMappingRepository());
-      const contentWithLinks = await linkingService.generateInternalLinks(article.content, slug as string);
-      const finalContent = contentWithLinks.replace(/<(h[1-3])>(.*?)<\/h[1-3]>/gi, (_match: string, tag: string, text: string) => {
-        const id = text.toLowerCase().replace(/\W/g, '-');
-        return `<${tag} id="${id}" class="scroll-mt-32">${text}</${tag}>`;
-      });
-      setProcessedContent(finalContent);
-      setIsOptimizing(false);
-    };
-    optimizeContent();
-  }, [article?.content, slug]);
-
-  useEffect(() => {
-    if (!processedContent) return;
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(processedContent, 'text/html');
-    const headings = Array.from(doc.querySelectorAll('h1, h2, h3'));
-    const tocItems = headings.map((h, i) => ({
-      id: h.id || `heading-${i}`,
-      text: h.textContent || "",
-      level: parseInt(h.tagName.substring(1)),
-    }));
-    setToc(tocItems);
-
-    const handleIntersect = (entries: IntersectionObserverEntry[]) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) setActiveId(entry.target.id);
-      });
-    };
-
-    observer.current = new IntersectionObserver(handleIntersect, {
-      rootMargin: '-100px 0px -70% 0px',
-      threshold: 0,
-    });
-
-    const timer = setTimeout(() => {
-      tocItems.forEach((item) => {
-        const el = document.getElementById(item.id);
-        if (el) observer.current?.observe(el);
-      });
-    }, 500);
-
-    return () => {
-      clearTimeout(timer);
-      observer.current?.disconnect();
-    };
-  }, [processedContent]);
-
-  const category = article?.category;
-  const subcategory = article?.subcategory;
-  const matchedAuthor = article?.author ? getAuthorByName(article.author) : null;
-
-  if (articleLoading && !article) return (
-    <div className="min-h-screen bg-white flex items-center justify-center">
-      <Loader2 className="w-10 h-10 animate-spin text-blue-600 opacity-20" />
-    </div>
-  );
+/**
+ * Legacy flat URL. Canonical articles now live at
+ * /law/[categorySlug]/[subSlug]/[articleSlug] for topical-silo SEO. Whenever an
+ * article has enough taxonomy to build that nested URL, permanently (308)
+ * redirect there instead of serving duplicate content at two URLs. CMS
+ * articles have no subcategory field at all (see lib/cms.ts toArticle()), so
+ * for those articleUrl() can't build a nested URL -- this route renders them
+ * directly instead, since it's the only URL they can have.
+ */
+export default async function ArticleDeepDivePage(
+  { params, searchParams }: {
+    params: Promise<{ slug: string }>;
+    searchParams: Promise<{ previewToken?: string; previewExp?: string }>;
+  },
+) {
+  const { slug } = await params;
+  const { previewToken, previewExp } = await searchParams;
+  const isPreview = Boolean(previewToken && previewExp);
+  const article = await fetchArticleForRender(slug, previewToken, previewExp);
 
   if (!article) return <ArticleNotFound />;
 
-  return (
-    <div className="min-h-screen bg-white selection:bg-blue-100 selection:text-blue-900">
-      <main className="pt-32 pb-24">
-        <div className="container mx-auto px-6 max-w-7xl">
+  // Never redirect away from a live-preview request: the CMS admin iframe opens
+  // exactly this URL with previewToken/previewExp, and next.config.ts only grants
+  // the frame-ancestors CSP exception to /article/:slug* -- redirecting would both
+  // drop the preview params (showing the published version instead of the draft)
+  // and break out of the CSP-allowed iframe origin.
+  if (!isPreview) {
+    const canonicalPath = articleUrl(article);
+    if (canonicalPath !== `/article/${slug}`) {
+      permanentRedirect(canonicalPath);
+    }
+  }
 
-          <Breadcrumbs
-            category={category}
-            subcategory={subcategory}
-            articleTitle={article.title}
-          />
-
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 xl:gap-20 items-start">
-
-            <aside className="hidden lg:block lg:col-span-3 sticky top-32 max-h-[calc(100vh-160px)] pr-8">
-              <div className="space-y-6">
-                <h4 className="text-[18px] font-bold text-slate-900 tracking-tight">Table of Contents</h4>
-                <div className="relative border-l border-slate-100">
-                  <nav className="flex flex-col">
-                    {toc.map((item) => (
-                      <a
-                        key={item.id}
-                        href={`#${item.id}`}
-                        className={cn(
-                          "text-[14px] leading-tight py-2.5 transition-all duration-300 relative pl-6 block",
-                          activeId === item.id
-                            ? "text-blue-600 font-bold"
-                            : "text-slate-500 hover:text-slate-900 font-medium"
-                        )}
-                        style={{ paddingLeft: `${(item.level - 2) * 12 + 24}px` }}
-                      >
-                        {activeId === item.id && (
-                          <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-10">
-                            <div className="w-0 h-0 border-t-[5px] border-t-transparent border-l-[8px] border-l-blue-600 border-b-[5px] border-b-transparent" />
-                          </div>
-                        )}
-                        {item.text}
-                      </a>
-                    ))}
-                  </nav>
-                </div>
-              </div>
-            </aside>
-
-            <article className="lg:col-span-9 space-y-8">
-
-              <AIAnswersCard />
-
-              <header className="space-y-6">
-                <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold text-slate-900 tracking-tighter leading-[0.95]">
-                  {article.title}
-                </h1>
-
-                <div className="space-y-1 text-[14px] text-slate-600">
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    By
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <span className="font-bold text-blue-700 cursor-pointer border-b border-blue-600 hover:text-blue-900 transition-colors leading-none">
-                          {article.author || 'Law Elite Editorial'}
-                        </span>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-[400px] p-0 shadow-2xl border-slate-200 rounded-lg bg-white overflow-hidden" align="start" sideOffset={8}>
-                        <div className="p-7 space-y-3">
-                          <p className="font-headline text-lg font-bold text-slate-900">
-                            {article.author || 'Law Elite Editorial'}
-                          </p>
-                          {matchedAuthor ? (
-                            <>
-                              <p className="text-[12px] font-bold uppercase tracking-wide text-blue-700">
-                                {matchedAuthor.title}
-                              </p>
-                              <p className="text-[12px] text-slate-500">{matchedAuthor.credentials}</p>
-                              <p className="text-[14px] leading-relaxed text-slate-600 line-clamp-4">
-                                {matchedAuthor.bio}
-                              </p>
-                              {matchedAuthor.expertise.length > 0 && (
-                                <p className="text-[12px] text-slate-500">
-                                  Focus: {matchedAuthor.expertise.join(', ')}
-                                </p>
-                              )}
-                              <Link
-                                href={`/author/${matchedAuthor.slug}`}
-                                className="inline-block text-[13px] font-bold text-blue-700 hover:text-blue-900 transition-colors"
-                              >
-                                View full profile →
-                              </Link>
-                            </>
-                          ) : (
-                            <p className="text-[14px] leading-relaxed text-slate-600">
-                              Part of the Law Elite Network editorial team. Our guides are
-                              researched and reviewed for accuracy and clarity, then kept current as
-                              laws change. They provide general legal information, not legal advice.
-                            </p>
-                          )}
-                        </div>
-                      </PopoverContent>
-                    </Popover>
-                    Updated {article.updatedAt || article.updated_at || 'February 12, 2025'}
-                  </div>
-                </div>
-
-                <div className="bg-white border border-slate-200 rounded-lg overflow-hidden mt-8 shadow-sm">
-                  <div
-                    className="p-5 flex items-center justify-between cursor-pointer hover:bg-slate-50 transition-colors"
-                    onClick={() => setIsSeriesOpen(!isSeriesOpen)}
-                  >
-                    <div className="flex flex-col">
-                      <div className="flex items-center gap-2 mb-1">
-                        <List className="w-4 h-4 text-blue-600" />
-                        <span className="text-[12px] font-bold text-slate-500 uppercase tracking-widest">Part of the Series</span>
-                      </div>
-                      <p className="text-xl font-bold text-slate-900">Complete Guide to {category?.name || "Legal Strategy"}</p>
-                    </div>
-                    {isSeriesOpen ? <ChevronUp className="w-6 h-6 text-slate-900" /> : <ChevronDown className="w-6 h-6 text-slate-900" />}
-                  </div>
-
-                  {isSeriesOpen && (
-                    <div className="border-t border-slate-100 animate-in slide-in-from-top-2 duration-300">
-                      <div className="p-5">
-                        <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mb-4">Module Cluster</p>
-                        <div className="space-y-3">
-                          <Link href="#" className="text-sm font-medium text-blue-600 hover:underline block">1. Initialization Protocols</Link>
-                          <Link href="#" className="text-sm font-medium text-slate-700 hover:text-blue-600 block">2. Discovery Infrastructure</Link>
-                          <Link href="#" className="text-sm font-medium text-slate-700 hover:text-blue-600 block">3. Strategic Resolution</Link>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <figure className="pt-6">
-                  <div className="aspect-[16/9] relative overflow-hidden bg-slate-50 rounded-lg">
-                    <Image
-                      src={resolveArticleImage(article)}
-                      alt={article.title}
-                      fill
-                      className="object-cover"
-                      priority
-                    />
-                  </div>
-                </figure>
-              </header>
-
-              <div className="relative">
-                {isOptimizing && (
-                  <div className="absolute inset-0 bg-white/50 backdrop-blur-sm z-10 flex items-center justify-center">
-                    <div className="flex items-center gap-3 px-6 py-3 rounded-2xl bg-white shadow-xl border border-slate-100">
-                      <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Synchronizing Intelligence...</span>
-                    </div>
-                  </div>
-                )}
-                <div
-                  className="prose-legal max-w-none pt-8"
-                  dangerouslySetInnerHTML={{ __html: processedContent || article.content }}
-                />
-              </div>
-
-              <RelatedArticles
-                currentSlug={slug as string}
-                categorySlug={category?.slug}
-                categoryName={category?.name}
-              />
-            </article>
-
-          </div>
-        </div>
-      </main>
-
-      <PublicFooter />
-    </div>
-  );
-}
-
-function ArticleNotFound() {
-  return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center">
-      <div className="w-24 h-24 rounded-3xl bg-slate-50 flex items-center justify-center text-slate-200 mb-8 border border-slate-100 shadow-inner">
-        <BookOpen className="w-12 h-12" />
-      </div>
-      <h2 className="text-3xl font-bold text-slate-900 mb-4 italic">Intelligence Record Missing</h2>
-      <p className="text-slate-500 italic mb-10 max-w-sm mx-auto leading-relaxed">
-        The requested strategic dossier could not be synchronized with our global knowledge ledger.
-      </p>
-      <Link href="/">
-        <button className="bg-slate-900 text-white px-10 h-14 rounded-2xl font-bold text-[10px] uppercase tracking-[0.2em] shadow-2xl hover:bg-blue-600 transition-all interactive-lift">
-          Return to Discovery Hub
-        </button>
-      </Link>
-    </div>
-  );
+  return <ArticleView article={article} slug={slug} />;
 }

@@ -97,6 +97,19 @@ export class LedgerAccountRepository extends BaseRepository<LedgerAccount> {
       orderBy: [{ code: 'asc' }],
     });
   }
+
+  /**
+   * All live accounts across every tenant — platform-wide, unscoped. Only ever
+   * used to compute aggregate booleans/counts (e.g. "is every org's book
+   * balanced right now") for the public platform-pulse summary; callers must
+   * never surface individual account rows or per-org balances from this.
+   */
+  listAllUnscoped(currency?: string, tx?: PrismaTransaction): Promise<LedgerAccount[]> {
+    return this.delegate(tx).findMany({
+      where: this.liveWhere(currency ? { currency } : undefined),
+      orderBy: [{ code: 'asc' }],
+    });
+  }
 }
 
 // ── Transactions (immutable; corrected by reversal) ──────────────────────────

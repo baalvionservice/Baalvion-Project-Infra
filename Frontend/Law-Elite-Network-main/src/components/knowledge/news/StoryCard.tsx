@@ -6,6 +6,8 @@ import Image from 'next/image';
 import { Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { resolveArticleImage } from '@/lib/article-art';
+import { formatArticleDate } from '@/lib/format-date';
+import { articleUrl } from '@/lib/article-url';
 
 type Variant = 'lead' | 'default' | 'horizontal';
 
@@ -23,7 +25,7 @@ function Kicker({ article }: { article: any }) {
 
 function Byline({ article }: { article: any }) {
   const author = article?.author;
-  const date = article?.updatedAt || article?.updated_at;
+  const date = formatArticleDate(article?.updatedAt || article?.updated_at);
   const reading = article?.readingTime;
   return (
     <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-slate-500 dark:text-slate-400 font-medium">
@@ -46,7 +48,7 @@ function Byline({ article }: { article: any }) {
  */
 export function StoryCard({ article, variant = 'default', priority = false }: StoryCardProps) {
   if (!article) return null;
-  const href = `/article/${article.slug}`;
+  const href = articleUrl(article);
 
   if (variant === 'lead') {
     return (

@@ -1,47 +1,51 @@
-"use client";
-
-import React, { useEffect, useState, useMemo } from 'react';
-import { useParams } from 'next/navigation';
-import { articlesPublicApi } from '@/lib/api/client';
-import { PublicFooter } from '@/components/knowledge/PublicFooter';
-import { Loader2, ShieldCheck, ArrowLeft, Scale } from 'lucide-react';
+import React from 'react';
 import Link from 'next/link';
-import seedData from '../../../../docs/seed-data.json';
+import { ShieldCheck, ArrowLeft, Scale } from 'lucide-react';
+import { articlesPublicApi } from '@/lib/api/client';
+import { cmsGetArticles } from '@/lib/cms';
+import { PublicFooter } from '@/components/knowledge/PublicFooter';
+import { getAllArticles } from '@/data/law-content';
+import { articleUrl } from '@/lib/article-url';
 
-export default function AlphabeticalListingPage() {
-  const { letter } = useParams();
-  const normalizedLetter = (letter as string).toUpperCase();
+/**
+ * Server-side so the A-Z glossary actually has crawlable content. The
+ * previous client-only version fell back to docs/seed-data.json (2 sample
+ * articles total) instead of the real 45-article bundled library, so 24 of
+ * 26 letters rendered "currently being synchronized" with zero real links --
+ * exactly the "auto-generated pages with little to no original content"
+ * pattern AdSense review flags. Bundled data (via getAllArticles) is now the
+ * baseline, with live law-service/CMS results merged on top when reachable.
+ */
+async function fetchArticlesForLetter(letter: string) {
+  const bundled = getAllArticles().filter((a) => a.alphabet === letter);
 
-  const [apiArticles, setApiArticles] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  let lawArticles: any[] = [];
+  let cmsArticles: any[] = [];
+  try {
+    const res = await articlesPublicApi.list({ alphabet: letter, status: 'published', limit: 200 });
+    lawArticles = res.data?.data?.items || res.data?.data || [];
+  } catch {
+    /* law-service unreachable — bundled data still covers this letter */
+  }
+  try {
+    cmsArticles = await cmsGetArticles(letter);
+  } catch {
+    /* cms unreachable — bundled data still covers this letter */
+  }
 
-  useEffect(() => {
-    setLoading(true);
-    // Merge law-service articles with CMS-managed articles (added in the
-    // admin-platform console) so console publishes appear in the A–Z directly.
-    const law = articlesPublicApi
-      .list({ alphabet: normalizedLetter, status: 'published', limit: 200 })
-      .then((res) => res.data?.data?.items || res.data?.data || [])
-      .catch(() => []);
-    const cms = fetch(`/api/cms/articles?letter=${normalizedLetter}`)
-      .then((r) => (r.ok ? r.json() : null))
-      .then((j) => (Array.isArray(j?.data) ? j.data : []))
-      .catch(() => []);
-    Promise.all([law, cms])
-      .then(([lawArticles, cmsArticles]) => {
-        const bySlug = new Map<string, any>();
-        for (const a of [...lawArticles, ...cmsArticles]) {
-          if (a && a.slug) bySlug.set(a.slug, a);
-        }
-        setApiArticles(Array.from(bySlug.values()));
-      })
-      .finally(() => setLoading(false));
-  }, [normalizedLetter]);
+  const bySlug = new Map<string, any>();
+  for (const a of [...bundled, ...lawArticles, ...cmsArticles]) {
+    if (a?.slug) bySlug.set(a.slug, a);
+  }
+  return Array.from(bySlug.values());
+}
 
-  const articles = useMemo(() => {
-    if (apiArticles.length > 0) return apiArticles;
-    return (seedData as any).articles?.filter((a: any) => a.alphabet === normalizedLetter) || [];
-  }, [apiArticles, normalizedLetter]);
+export default async function AlphabeticalListingPage(
+  { params }: { params: Promise<{ letter: string }> },
+) {
+  const { letter } = await params;
+  const normalizedLetter = letter.toUpperCase();
+  const articles = await fetchArticlesForLetter(normalizedLetter);
 
   return (
     <div className="min-h-screen bg-white">
@@ -68,17 +72,13 @@ export default function AlphabeticalListingPage() {
             </div>
           </header>
 
-          {loading && articles.length === 0 ? (
-            <div className="py-32 flex flex-col items-center justify-center">
-              <Loader2 className="w-10 h-10 animate-spin text-blue-600 opacity-20" />
-            </div>
-          ) : articles.length > 0 ? (
+          {articles.length > 0 ? (
             <div className="space-y-12 animate-in fade-in duration-700">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-12 gap-y-5 px-1">
                 {articles.map((art: any) => (
                   <Link
                     key={art.id}
-                    href={`/article/${art.slug}`}
+                    href={articleUrl(art)}
                     className="group block transition-all"
                   >
                     <span className="text-[15px] font-medium text-slate-700 group-hover:text-blue-600 group-hover:underline decoration-2 underline-offset-4 transition-all leading-snug block interactive-lift">
@@ -100,7 +100,7 @@ export default function AlphabeticalListingPage() {
           ) : (
             <div className="py-32 text-center opacity-40">
               <p className="text-sm italic font-medium text-slate-400 uppercase tracking-widest">
-                Intelligence dossiers for "{normalizedLetter}" are currently being synchronized.
+                No published guides begin with "{normalizedLetter}" yet.
               </p>
             </div>
           )}

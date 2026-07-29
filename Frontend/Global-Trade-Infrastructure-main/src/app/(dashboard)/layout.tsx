@@ -1,52 +1,20 @@
 /**
  * @file layout.tsx
- * @description THE SUPREME DASHBOARD ORCHESTRATOR.
- * Integrates the resizable workspace engine and global navigation.
+ * @description Server shell for the authenticated, store-driven trade dashboard.
+ * Rendered dynamically per-request rather than statically prerendered at build
+ * (client stores are not SSG-safe). Kept as a Server Component solely so this
+ * route segment config can live here instead of forcing the whole app —
+ * including the public marketing pages under (public) — to skip static/ISR
+ * caching. Actual UI lives in `_components/dashboard-shell.tsx`.
  */
-'use client';
+import { DashboardShell } from './_components/dashboard-shell';
 
-import 'leaflet/dist/leaflet.css';
-import { DashboardHeader } from "./_components/header";
-import { DashboardSidebar } from "./_components/sidebar";
-import { WorkspaceShell } from "./_components/workspace-shell";
-import { AiCopilotDrawer } from "./_components/ai-copilot-drawer";
-import { RealtimeProvider } from "./_components/realtime-provider";
-import { useWorkspaceStore } from "@/modules/workspace/store/workspace-store";
-import { TradeQueryProvider } from "@/api/query-provider";
-import { cn } from "@/lib/utils";
+export const dynamic = 'force-dynamic';
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const { sidebarCollapsed } = useWorkspaceStore();
-
-  return (
-    <TradeQueryProvider>
-      <div
-        className={cn(
-          "min-h-screen w-full bg-background grid transition-all duration-500",
-          sidebarCollapsed ? "grid-cols-[80px_1fr]" : "grid-cols-[280px_1fr]"
-        )}
-      >
-        {/* 1. PRIMARY NAVIGATION RAIL */}
-        <DashboardSidebar collapsed={sidebarCollapsed} />
-
-        {/* 2. OPERATIONAL WORKSPACE (COMMAND PLANE) */}
-        <div className="flex flex-col min-w-0 overflow-hidden bg-background relative">
-          <DashboardHeader />
-
-          {/* THE TACTICAL SHELL: Resizable panes & tabs */}
-          <WorkspaceShell>
-             {children}
-          </WorkspaceShell>
-        </div>
-
-        {/* OVERLAYS & COGNITIVE CLUSTERS */}
-        <AiCopilotDrawer />
-        <RealtimeProvider />
-      </div>
-    </TradeQueryProvider>
-  );
+  return <DashboardShell>{children}</DashboardShell>;
 }

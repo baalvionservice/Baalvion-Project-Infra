@@ -46,33 +46,12 @@ export async function generateMetadata(
   };
 }
 
-export default async function CategoryLayout(
-  { children, params }: { children: React.ReactNode; params: Promise<{ categorySlug: string }> },
-) {
-  const { categorySlug } = await params;
-  const cat = await fetchCategory(categorySlug);
-  const name = cat?.name || titleCase(categorySlug);
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'CollectionPage',
-    name: `${name} Lawyers`,
-    description: cat?.description || `Verified ${name} lawyers and legal resources.`,
-    url: `${SITE}/law/${categorySlug}`,
-    isPartOf: { '@type': 'WebSite', name: 'Law Elite Network', url: SITE },
-  };
-  const breadcrumbLd = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE },
-      { '@type': 'ListItem', position: 2, name, item: `${SITE}/law/${categorySlug}` },
-    ],
-  };
-  return (
-    <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
-      {children}
-    </>
-  );
+// CollectionPage/BreadcrumbList JSON-LD used to live here, but a layout wraps
+// EVERY nested route below it -- including /law/[categorySlug]/[subSlug]/[articleSlug],
+// which now has its own (more complete) BreadcrumbList. That meant an article page
+// rendered two conflicting BreadcrumbList blocks: the category's 2-level trail from
+// here, plus the article's real 4-level one. Moved to page.tsx, which only renders
+// for this exact route, not for deeper nested ones.
+export default function CategoryLayout({ children }: { children: React.ReactNode }) {
+  return children;
 }
