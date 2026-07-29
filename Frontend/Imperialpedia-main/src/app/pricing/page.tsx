@@ -1,7 +1,14 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import { Container } from '@/design-system/layout/container';
 import { Text } from '@/design-system/typography/text';
 import { Section } from '@/design-system/layout/section';
+
+// Placeholder page (no real pricing content yet) — keep out of search results
+// until real tiers/prices ship. See also robots.ts DISALLOW.
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default function PricingPage() {
   return (

@@ -1,9 +1,16 @@
 import React from 'react';
-    import { Container } from '@/design-system/layout/container';
-    import { Text } from '@/design-system/typography/text';
-    import { Section } from '@/design-system/layout/section';
+import type { Metadata } from 'next';
+import { Container } from '@/design-system/layout/container';
+import { Text } from '@/design-system/typography/text';
+import { Section } from '@/design-system/layout/section';
 
-    export default function DatasetsPage() {
+// Placeholder page (no real dataset content yet) — keep out of search results
+// until real dataset listings ship. See also robots.ts DISALLOW.
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
+
+export default function DatasetsPage() {
       return (
         <main className="min-h-screen bg-background pt-20">
           <Container>
