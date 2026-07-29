@@ -34,7 +34,7 @@ export function Breadcrumbs({ category, subcategory, articleTitle }: Breadcrumbs
       {subcategory && category && (
         <>
           <ChevronRight className="w-3 h-3 text-slate-200" />
-          <Link href={`/law/${category.slug}?sub=${subcategory.slug}`} className="hover:text-blue-600 transition-colors">
+          <Link href={`/law/${category.slug}/${subcategory.slug}`} className="hover:text-blue-600 transition-colors">
             {subcategory.name}
           </Link>
         </>

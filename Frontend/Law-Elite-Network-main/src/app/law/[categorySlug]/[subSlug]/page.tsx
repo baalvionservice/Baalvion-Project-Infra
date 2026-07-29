@@ -1,10 +1,15 @@
 import React from 'react';
 import Link from 'next/link';
+import { permanentRedirect } from 'next/navigation';
 import { ChevronRight, FileText } from 'lucide-react';
 import { categoriesPublicApi, subcategoriesPublicApi, articlesPublicApi } from '@/lib/api/client';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { ArticleCard } from '@/components/knowledge/ArticleCard';
+import { ArticleView, ArticleNotFound } from '@/components/knowledge/ArticleView';
 import { getArticlesByCategorySlug } from '@/data/law-content';
+import { fetchArticleForRender } from '@/lib/article-fetch';
+import { articleUrl } from '@/lib/article-url';
+import { isKnownSubcategory } from '@/lib/subcategory-or-article';
 import seedData from '../../../../../docs/seed-data.json';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
@@ -72,9 +77,35 @@ async function fetchTaxonomyAndArticles(catSlug: string, sub: string) {
 }
 
 export default async function SubcategoryPage(
-  { params }: { params: Promise<{ categorySlug: string; subSlug: string }> },
+  { params, searchParams }: {
+    params: Promise<{ categorySlug: string; subSlug: string }>;
+    searchParams: Promise<{ previewToken?: string; previewExp?: string }>;
+  },
 ) {
   const { categorySlug: catSlug, subSlug: sub } = await params;
+
+  // This segment is ambiguous: a real subcategory hub, OR a 2-segment CMS
+  // article URL (CMS content has no subcategory -- see article-url.ts /
+  // lib/subcategory-or-article.ts). Try the article path first.
+  if (!(await isKnownSubcategory(catSlug, sub))) {
+    const { previewToken, previewExp } = await searchParams;
+    const isPreview = Boolean(previewToken && previewExp);
+    const article = await fetchArticleForRender(sub, previewToken, previewExp);
+
+    if (article) {
+      if (!isPreview) {
+        const canonicalPath = articleUrl(article);
+        const requestedPath = `/law/${catSlug}/${sub}`;
+        if (canonicalPath !== requestedPath) {
+          permanentRedirect(canonicalPath);
+        }
+      }
+      return <ArticleView article={article} slug={sub} />;
+    }
+
+    return <ArticleNotFound />;
+  }
+
   const { category, subcategory, apiArticles } = await fetchTaxonomyAndArticles(catSlug, sub);
 
   // Bundled articles are the baseline; API results win (same merge as the category page).
