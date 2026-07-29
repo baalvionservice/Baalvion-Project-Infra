@@ -25,6 +25,25 @@ function injectHeadingIds(html: string): string {
   });
 }
 
+/**
+ * A single non-looped `.replace(/<[^>]+>/g, '')` pass can leave a crafted tag
+ * behind (e.g. "<scri" + "<x>" + "pt>" reassembling into "<script>" after one
+ * pass removes only the middle span) -- CodeQL flags this as incomplete
+ * multi-character sanitization. Looping until the string stops changing closes
+ * that gap. TOC labels render via plain JSX text interpolation (never
+ * dangerouslySetInnerHTML), so this was never actually exploitable here, but
+ * the sanitizer should be correct on its own terms rather than relying on that.
+ */
+function stripTags(value: string): string {
+  let previous: string;
+  let current = value;
+  do {
+    previous = current;
+    current = previous.replace(/<[^>]+>/g, '');
+  } while (current !== previous);
+  return current;
+}
+
 function extractToc(html: string): TOCItem[] {
   const headingRe = /<(h[1-3]) id="([^"]+)"[^>]*>(.*?)<\/h[1-3]>/gi;
   const items: TOCItem[] = [];
@@ -32,7 +51,7 @@ function extractToc(html: string): TOCItem[] {
   while ((match = headingRe.exec(html))) {
     items.push({
       id: match[2],
-      text: match[3].replace(/<[^>]+>/g, ''),
+      text: stripTags(match[3]),
       level: Number(match[1].substring(1)),
     });
   }
