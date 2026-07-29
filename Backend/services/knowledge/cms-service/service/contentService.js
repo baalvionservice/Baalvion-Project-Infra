@@ -275,6 +275,10 @@ async function updateContent(websiteId, contentId, userId, body) {
         body.readingTimeMinutes = _estimateReadingTime(body.contentBlocks);
     }
 
+    // Captured before update() mutates the instance in place — needed below to
+    // catch the published→archived transition (see cache-bust comment).
+    const wasPublished = content.status === 'published';
+
     await content.update({ ...body, lastEditedBy: userId });
 
     if (slugChanged) {
@@ -301,9 +305,13 @@ async function updateContent(websiteId, contentId, userId, body) {
     }
 
     await cache.del(cache.keys.content(contentId));
-    // If the edited item is live, bust the public delivery cache so the change appears
-    // on the website immediately instead of waiting out the public TTL.
-    if (content.status === 'published') {
+    // Bust the public delivery cache if the item is live now OR was live before this
+    // edit — the latter catches published→archived (and published→draft), where
+    // `content.status` above already reflects the NEW value post-update, so checking
+    // only that would miss the exact transition that needs to tell readers the page
+    // is gone (an admin must archive published content before deleteContent will
+    // remove it, so this is the only point where that removal becomes visible).
+    if (wasPublished || content.status === 'published') {
         try {
             const website = await CmsWebsite.findByPk(websiteId, { attributes: ['slug', 'domain'] });
             if (website?.slug) {

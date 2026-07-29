@@ -21,6 +21,58 @@ function urlFor(websiteSlug) {
     return (websiteSlug && map[websiteSlug]) || null;
 }
 
+// Same fixed region-id set Imperialpedia's worldRegions.ts uses for its
+// `/world/<region>` market pages ("world" itself excluded — it's the tree root,
+// not a region). A checked category matching one of these ids is the region;
+// whichever OTHER checked category has that region as its parent is the
+// country; one level deeper again is the state/province. Mirrors
+// cms-public.ts's deriveWorldGeo on the frontend exactly, so the path computed
+// here always matches the one Next.js actually renders the article at.
+const WORLD_REGION_IDS = new Set(['us', 'europe', 'asia', 'china', 'emerging']);
+
+function _publishedDateParts(content) {
+    const parsed = content && content.publishedAt ? new Date(content.publishedAt) : new Date();
+    const safe = Number.isNaN(parsed.getTime()) ? new Date() : parsed;
+    return {
+        yyyy: String(safe.getUTCFullYear()),
+        mm: String(safe.getUTCMonth() + 1).padStart(2, '0'),
+        dd: String(safe.getUTCDate()).padStart(2, '0'),
+    };
+}
+
+// The article's own real canonical page — NOT the bare `/<slug>`, which is a
+// different cached route (a redirect stub) for both guides and news. Without
+// this, revalidatePath() only ever busts a page nobody actually lands on, and
+// the real dated/`/world/...`-nested article page stays stale until its own
+// 300s fetch-revalidate safety net happens to expire on someone's next visit.
+function _canonicalContentPath(content, checkedCategories) {
+    const slug = content && content.slug;
+    if (!slug) return null;
+
+    // Content-engine guides live at /<categorySlug>/<slug> (or the legacy
+    // /financial-intelligence/<slug> bucket when uncategorized).
+    if (content.contentType === 'article') {
+        const primary = checkedCategories.find((c) => c.id === content.categoryId);
+        return primary && primary.slug ? `/${primary.slug}/${slug}` : `/financial-intelligence/${slug}`;
+    }
+
+    // News: a World > Region > Country (> State) branch among the CHECKED
+    // categories (editors check both the region and the country, not just the
+    // leaf — see deriveWorldGeo) means the nested /world/... permalink;
+    // otherwise it's the flat dated URL.
+    const regionCat = checkedCategories.find((c) => WORLD_REGION_IDS.has(c.slug));
+    const { yyyy, mm, dd } = _publishedDateParts(content);
+    if (regionCat) {
+        const countryCat = checkedCategories.find((c) => c.parentId === regionCat.id);
+        if (countryCat) {
+            const stateCat = checkedCategories.find((c) => c.parentId === countryCat.id);
+            const statePart = stateCat ? `/${stateCat.slug}` : '';
+            return `/world/${regionCat.slug}/${countryCat.slug}${statePart}/${yyyy}/${mm}/${dd}/${slug}`;
+        }
+    }
+    return `/${yyyy}/${mm}/${dd}/${slug}`;
+}
+
 // Best-effort canonical paths/urls for a single content item. The frontend route
 // unions these with its own default hub paths (home, listing pages, sitemap).
 //
@@ -32,17 +84,17 @@ function urlFor(websiteSlug) {
 async function pathsForContent(content, domain) {
     const slug = content && content.slug;
     const paths = ['/'];
-    if (slug) paths.push(`/${slug}`);
 
     const categoryIds = [
         ...(content && content.categoryId ? [content.categoryId] : []),
         ...(content && Array.isArray(content.categoryIds) ? content.categoryIds : []),
     ];
+    let categories = [];
     if (categoryIds.length) {
         try {
-            const categories = await CmsCategory.findAll({
+            categories = await CmsCategory.findAll({
                 where: { id: [...new Set(categoryIds)] },
-                attributes: ['slug'],
+                attributes: ['id', 'slug', 'parentId'],
             });
             for (const cat of categories) {
                 if (cat.slug) paths.push(`/${cat.slug}`);
@@ -50,10 +102,14 @@ async function pathsForContent(content, domain) {
         } catch { /* fail-open — category lookup must never block revalidation */ }
     }
 
+    const canonicalPath = _canonicalContentPath(content, categories);
+    if (canonicalPath) paths.push(canonicalPath);
+    else if (slug) paths.push(`/${slug}`);
+
     const urls = [];
     if (domain && slug) {
         const host = String(domain).replace(/^https?:\/\//, '').replace(/\/+$/, '');
-        if (host) urls.push(`https://${host}/${slug}`);
+        if (host) urls.push(`https://${host}${canonicalPath || `/${slug}`}`);
     }
     return { paths: [...new Set(paths)], urls };
 }
