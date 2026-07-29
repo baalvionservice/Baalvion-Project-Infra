@@ -160,10 +160,10 @@ export default async function RootLayout({
       <head>
         {/* Google Consent Mode v2 -- must be pushed to dataLayer BEFORE gtag('js', ...)
             and gtag('config', ...) run (in GoogleAnalytics below) and before the AdSense
-            loader in <body>, so no GA/ads cookie is set for a visitor who hasn't chosen
-            yet. CookieConsentBanner updates these to 'granted' on accept; until then
-            every visitor (EEA or not) defaults to denied, satisfying Google's EU User
-            Consent Policy requirement for AdSense/Analytics. */}
+            loader below, so no GA/ads cookie is set for a visitor who hasn't chosen yet.
+            CookieConsentBanner updates these to 'granted' on accept; until then every
+            visitor (EEA or not) defaults to denied, satisfying Google's EU User Consent
+            Policy requirement for AdSense/Analytics. */}
         <Script id="consent-default" strategy="beforeInteractive">
           {`
             window.dataLayer = window.dataLayer || [];
@@ -181,7 +181,18 @@ export default async function RootLayout({
         <GoogleAnalytics />
         <meta name="theme-color" content="#1e3a5f" />
         {ADSENSE_CLIENT && (
-          <meta name="google-adsense-account" content={ADSENSE_CLIENT} />
+          <>
+            <meta name="google-adsense-account" content={ADSENSE_CLIENT} />
+            {/* AdSense's own site-verification check looks for this snippet between
+                <head> and </head> — it was previously declared in <body>, which works
+                for ad delivery but doesn't match what the verification crawler expects. */}
+            <Script
+              async
+              src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
+              crossOrigin="anonymous"
+              strategy="afterInteractive"
+            />
+          </>
         )}
         <script
           type="application/ld+json"
@@ -193,14 +204,6 @@ export default async function RootLayout({
         />
       </head>
       <body className="font-body antialiased selection:bg-blue-100 selection:text-blue-900 bg-background text-foreground overflow-x-hidden">
-        {ADSENSE_CLIENT && (
-          <Script
-            async
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
-            crossOrigin="anonymous"
-            strategy="afterInteractive"
-          />
-        )}
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-6 focus:py-3 focus:bg-blue-700 focus:text-white focus:rounded-xl focus:font-bold focus:shadow-2xl"
