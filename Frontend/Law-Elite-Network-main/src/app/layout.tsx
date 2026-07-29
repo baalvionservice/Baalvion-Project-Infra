@@ -1,5 +1,5 @@
 
-import React, { Suspense } from "react";
+import React from "react";
 import type { Metadata } from "next";
 import Script from "next/script";
 import { Inter, Libre_Franklin, Source_Serif_4 } from "next/font/google";
@@ -9,7 +9,6 @@ import { I18nProvider } from '@/i18n/I18nProvider';
 import { Toaster } from '@/components/ui/toaster';
 import { Navbar } from '@/components/navbar';
 import NotificationToastListener from '@/components/notifications/NotificationToastListener';
-import { AIChatAssistantWrapper } from '@/components/ai/AIChatAssistantWrapper';
 import ImpersonationBanner from '@/components/admin/ImpersonationBanner';
 import { cmsGetAdsenseClient } from '@/lib/cms';
 import UnifiedAnalytics from '@/components/UnifiedAnalytics';
@@ -218,10 +217,6 @@ export default async function RootLayout({
                 <main id="main-content" className="flex-1">
                   {children}
                 </main>
-
-                <Suspense fallback={null}>
-                  <AIChatAssistantWrapper />
-                </Suspense>
 
                 <NotificationToastListener />
                 <ImpersonationBanner />

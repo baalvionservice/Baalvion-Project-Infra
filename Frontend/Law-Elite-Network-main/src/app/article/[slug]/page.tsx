@@ -3,7 +3,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { BookOpen } from 'lucide-react';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
-import { AIAnswersCard } from '@/components/knowledge/AIAnswersCard';
 import { RelatedArticles } from '@/components/knowledge/RelatedArticles';
 import { Breadcrumbs } from '@/components/knowledge/Breadcrumbs';
 import { ArticleTOC } from './ArticleTOC';
@@ -112,8 +111,6 @@ export default async function ArticleDeepDivePage(
             </aside>
 
             <article className="lg:col-span-9 space-y-8">
-
-              <AIAnswersCard />
 
               <header className="space-y-6">
                 <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold text-slate-900 tracking-tighter leading-[0.95]">
