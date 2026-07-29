@@ -118,7 +118,14 @@
 /* Investopedia-Grade Prose Hardening — Franklin display headings, serif body */
 .prose-legal {
   @apply max-w-none text-slate-700;
+  overflow-wrap: break-word;
 }
+/* CMS-authored HTML can contain arbitrary <img>/<table>/long URLs — without
+   these, a fixed-width image or table pastes in wider than a phone viewport
+   and either overflows or gets silently clipped by body's overflow-x-hidden. */
+.prose-legal img { @apply max-w-full h-auto rounded-lg; }
+.prose-legal table { @apply block max-w-full overflow-x-auto; }
+.prose-legal pre { @apply max-w-full overflow-x-auto; }
 .prose-legal h1 { @apply font-headline text-4xl md:text-6xl font-extrabold text-slate-900 mt-16 mb-8 tracking-tight leading-tight; }
 .prose-legal h2 { @apply font-headline text-2xl md:text-[2rem] font-extrabold text-slate-900 mt-16 mb-5 tracking-tight border-b border-slate-200 pb-3 leading-tight; }
 .prose-legal h3 { @apply font-headline text-xl md:text-2xl font-bold text-slate-800 mt-10 mb-4 tracking-tight; }

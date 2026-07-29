@@ -221,7 +221,7 @@ export default function ArticleDeepDivePage() {
                           {article.author || 'Law Elite Editorial'}
                         </span>
                       </PopoverTrigger>
-                      <PopoverContent className="w-[400px] p-0 shadow-2xl border-slate-200 rounded-lg bg-white overflow-hidden" align="start" sideOffset={8}>
+                      <PopoverContent className="w-[calc(100vw-2rem)] max-w-[400px] p-0 shadow-2xl border-slate-200 rounded-lg bg-white overflow-hidden" align="start" sideOffset={8}>
                         <div className="p-7 space-y-3">
                           <p className="font-headline text-lg font-bold text-slate-900">
                             {article.author || 'Law Elite Editorial'}
