@@ -1,0 +1,55 @@
+name: (temp) Set box2 superadmin credential + bootstrap now
+
+# Reads from TEMP_SUPERADMIN_EMAIL/TEMP_SUPERADMIN_PASSWORD repo secrets rather than
+# workflow_dispatch inputs -- dispatch inputs are recorded in the run's plain-text metadata
+# (visible via the Actions UI / API), so they're not an acceptable place for a real password.
+on:
+  workflow_dispatch: {}
+
+jobs:
+  set-and-bootstrap:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Write SUPERADMIN_EMAIL/PASSWORD into box2 .env and bootstrap immediately
+        uses: appleboy/ssh-action@v1
+        env:
+          SA_EMAIL: ${{ secrets.TEMP_SUPERADMIN_EMAIL }}
+          SA_PASS: ${{ secrets.TEMP_SUPERADMIN_PASSWORD }}
+        with:
+          host: ${{ secrets.CORE2_EC2_HOST }}
+          username: ${{ secrets.CORE2_EC2_USER }}
+          key: ${{ secrets.CORE2_EC2_SSH_KEY }}
+          timeout: 30s
+          command_timeout: 1m
+          envs: SA_EMAIL,SA_PASS
+          script: |
+            set -uo pipefail
+            if [ -z "${SA_EMAIL:-}" ] || [ -z "${SA_PASS:-}" ]; then
+              echo "::error::TEMP_SUPERADMIN_EMAIL/TEMP_SUPERADMIN_PASSWORD secrets not set -- aborting"
+              exit 1
+            fi
+
+            cd /opt/baalvion-box2
+            ENV=deploy/consolidated/.env
+
+            if grep -q '^SUPERADMIN_EMAIL=' "$ENV"; then
+              sed -i "s|^SUPERADMIN_EMAIL=.*|SUPERADMIN_EMAIL=${SA_EMAIL}|" "$ENV"
+            else
+              echo "SUPERADMIN_EMAIL=${SA_EMAIL}" >> "$ENV"
+            fi
+            if grep -q '^SUPERADMIN_PASSWORD=' "$ENV"; then
+              sed -i "s|^SUPERADMIN_PASSWORD=.*|SUPERADMIN_PASSWORD=${SA_PASS}|" "$ENV"
+            else
+              echo "SUPERADMIN_PASSWORD=${SA_PASS}" >> "$ENV"
+            fi
+            echo "SUPERADMIN_EMAIL/PASSWORD written to $ENV (values not printed)"
+
+            docker exec \
+              -e SUPERADMIN_EMAIL="$SA_EMAIL" \
+              -e SUPERADMIN_PASSWORD="$SA_PASS" \
+              -e PGSSLMODE=require \
+              -e NODE_TLS_REJECT_UNAUTHORIZED=0 \
+              consolidated-app-identity-1 \
+              node /app/Backend/services/identity/auth-service/scripts/bootstrapSuperAdmin.js
+            echo "::notice title=Superadmin bootstrapped::asserted in app-identity (role=super_admin)"
