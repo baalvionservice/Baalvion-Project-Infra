@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { PATHS } from '@/lib/paths';
 import { useToast } from '@/hooks/use-toast';
+import { fetchLocalApi } from '@/lib/local-api-client';
 
 interface TemplateSummary {
   type: string;
@@ -135,7 +136,7 @@ export default function DocumentCenterPage() {
 
   useEffect(() => {
     let cancelled = false;
-    fetch('/api/documents/templates')
+    fetchLocalApi('/api/documents/templates')
       .then((res) => res.json())
       .then((body) => {
         if (cancelled) return;
@@ -158,7 +159,7 @@ export default function DocumentCenterPage() {
     setFormError(null);
     setResult(null);
     setTemplateLoading(true);
-    fetch(`/api/documents/templates/${type}`)
+    fetchLocalApi(`/api/documents/templates/${type}`)
       .then((res) => res.json())
       .then((body) => {
         if (!body.success) throw new Error(body.error ?? 'Failed to load template');
@@ -201,7 +202,7 @@ export default function DocumentCenterPage() {
 
     setSubmitting(true);
     try {
-      const res = await fetch('/api/documents/generate', {
+      const res = await fetchLocalApi('/api/documents/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ documentType: selectedType, data, format: 'HTML', persist: true }),
