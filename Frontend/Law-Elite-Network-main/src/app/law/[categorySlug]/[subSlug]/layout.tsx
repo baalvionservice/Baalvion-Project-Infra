@@ -1,5 +1,8 @@
 import type { Metadata } from 'next';
 import { getArticlesByCategorySlug } from '@/data/law-content';
+import { fetchArticleForMetadata } from '@/lib/article-metadata-fetch';
+import { buildArticleMetadata, ArticleJsonLd } from '@/lib/seo/article-seo';
+import { isKnownSubcategory } from '@/lib/subcategory-or-article';
 import seedData from '../../../../../docs/seed-data.json';
 
 const API = process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3015/v1');
@@ -63,6 +66,16 @@ export async function generateMetadata(
   { params }: { params: Promise<{ categorySlug: string; subSlug: string }> },
 ): Promise<Metadata> {
   const { categorySlug, subSlug } = await params;
+
+  // /law/[categorySlug]/[subSlug] is ambiguous: a real subcategory hub, OR a
+  // 2-segment CMS article URL (CMS content has no subcategory -- see
+  // lib/subcategory-or-article.ts). Try the article path first since it's the
+  // narrower, more specific match.
+  if (!(await isKnownSubcategory(categorySlug, subSlug))) {
+    const article = await fetchArticleForMetadata(subSlug);
+    if (article) return buildArticleMetadata(article, subSlug, SITE);
+  }
+
   const { categoryName, subName } = await resolveTaxonomy(categorySlug, subSlug);
 
   const title = `${subName} — ${categoryName} Guides | Law Elite Network`;
@@ -85,10 +98,26 @@ export async function generateMetadata(
   };
 }
 
-// CollectionPage/BreadcrumbList JSON-LD used to live here, but a layout wraps
-// EVERY nested route below it -- including the article route now nested under
-// this subcategory, which has its own (more complete, 4-level) BreadcrumbList.
-// Moved to page.tsx, which only renders for this exact route.
-export default function SubcategoryLayout({ children }: { children: React.ReactNode }) {
+// CollectionPage/BreadcrumbList JSON-LD for the subcategory-hub case lives in
+// page.tsx (a layout wraps every nested route below it, including the article
+// route nested under this subcategory, which has its own more complete
+// BreadcrumbList). The article-JSON-LD case (this segment resolving to a CMS
+// article instead of a real subcategory) is rendered here since it applies
+// uniformly regardless of which case page.tsx renders.
+export default async function SubcategoryLayout(
+  { children, params }: { children: React.ReactNode; params: Promise<{ categorySlug: string; subSlug: string }> },
+) {
+  const { categorySlug, subSlug } = await params;
+  if (!(await isKnownSubcategory(categorySlug, subSlug))) {
+    const article = await fetchArticleForMetadata(subSlug);
+    if (article) {
+      return (
+        <>
+          <ArticleJsonLd article={article} slug={subSlug} site={SITE} />
+          {children}
+        </>
+      );
+    }
+  }
   return children;
 }
