@@ -30,3 +30,16 @@ export async function isKnownSubcategory(categorySlug: string, subSlug: string):
     return false;
   }
 }
+
+/**
+ * Whether a subcategory has at least one article, so navigation can hide (and
+ * the page route can 404) subcategories that are real taxonomy but currently
+ * empty -- e.g. 54 of this site's 80 bundled subcategories have zero articles.
+ * CMS-sourced articles never carry a subcategory (see article-url.ts), so
+ * bundled data is the only possible source of a populated subcategory; this can
+ * stay synchronous instead of needing a live API round-trip like
+ * isKnownSubcategory above.
+ */
+export function isSubcategoryPopulated(categorySlug: string, subSlug: string): boolean {
+  return getArticlesByCategorySlug(categorySlug).some((a) => a.subcategory?.slug === subSlug);
+}
