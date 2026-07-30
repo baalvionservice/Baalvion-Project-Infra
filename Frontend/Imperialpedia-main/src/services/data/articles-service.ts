@@ -1,4 +1,3 @@
-import * as mockApi from "@/services/mock-api/articles";
 import {
   listCmsContent,
   getCmsContentBySlug,
@@ -15,10 +14,9 @@ import { errorHandler } from "@/lib/errors/error-handler";
  * LIVE source of truth: content authored in admin-platform and *published* through the
  * Baalvion CMS (cms-service), read via its public delivery API (see `cms-public.ts`).
  *
- * Rollout strategy (incremental): real published CMS articles take precedence. When the
- * CMS has no published articles yet, or cms-service is unreachable, we fall back to the
- * legacy mock set so the page is never empty during cutover. Once editorial content is
- * flowing, the mock fallback simply never triggers.
+ * No mock fallback: if the CMS has no published articles yet, or cms-service is
+ * unreachable, callers get an honest empty/null result rather than legacy mock
+ * articles standing in as if real — including during an outage.
  */
 
 const nowIso = () => new Date().toISOString();
@@ -54,31 +52,40 @@ export const articlesService = {
           },
         };
       }
-      // CMS reachable but no published articles yet → mock keeps the library populated.
-      return await mockApi.getArticles(page, limit);
+      // CMS reachable but genuinely has no published articles yet — honest empty page.
+      return {
+        data: [],
+        success: true,
+        message: "No articles published yet",
+        statusCode: 200,
+        timestamp: nowIso(),
+        pagination: {
+          currentPage: page,
+          totalPages: 0,
+          pageSize: limit,
+          totalItems: 0,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      };
     } catch (error) {
-      // Transport/availability failure → fall back to mock rather than break the page.
       const appError = errorHandler.handleError(error);
-      try {
-        return await mockApi.getArticles(page, limit);
-      } catch {
-        return {
-          data: [],
-          success: false,
-          statusCode: appError.statusCode,
-          message: appError.message,
-          timestamp: nowIso(),
-          path: "/api/articles",
-          pagination: {
-            currentPage: page,
-            totalPages: 0,
-            pageSize: limit,
-            totalItems: 0,
-            hasNextPage: false,
-            hasPreviousPage: false,
-          },
-        };
-      }
+      return {
+        data: [],
+        success: false,
+        statusCode: appError.statusCode,
+        message: appError.message,
+        timestamp: nowIso(),
+        path: "/api/articles",
+        pagination: {
+          currentPage: page,
+          totalPages: 0,
+          pageSize: limit,
+          totalItems: 0,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      };
     }
   },
 
@@ -117,19 +124,15 @@ export const articlesService = {
       // crawlers retry rather than delist.
       if ((error as { status?: number })?.status !== 404) throw error;
 
-      try {
-        return await mockApi.getArticleBySlug(slug);
-      } catch {
-        const appError = errorHandler.handleError(error);
-        return {
-          data: null,
-          success: false,
-          statusCode: appError.statusCode,
-          message: appError.message,
-          timestamp: nowIso(),
-          path: `/api/articles/${slug}`,
-        };
-      }
+      const appError = errorHandler.handleError(error);
+      return {
+        data: null,
+        success: false,
+        statusCode: appError.statusCode,
+        message: appError.message,
+        timestamp: nowIso(),
+        path: `/api/articles/${slug}`,
+      };
     }
   },
 
@@ -195,21 +198,23 @@ export const articlesService = {
           timestamp: nowIso(),
         };
       }
-      return await mockApi.getFeaturedArticles();
+      return {
+        data: [],
+        success: true,
+        statusCode: 200,
+        message: "No articles published yet",
+        timestamp: nowIso(),
+      };
     } catch (error) {
-      try {
-        return await mockApi.getFeaturedArticles();
-      } catch {
-        const appError = errorHandler.handleError(error);
-        return {
-          data: [],
-          success: false,
-          statusCode: appError.statusCode,
-          message: appError.message,
-          timestamp: nowIso(),
-          path: "/api/articles/featured",
-        };
-      }
+      const appError = errorHandler.handleError(error);
+      return {
+        data: [],
+        success: false,
+        statusCode: appError.statusCode,
+        message: appError.message,
+        timestamp: nowIso(),
+        path: "/api/articles/featured",
+      };
     }
   },
 };

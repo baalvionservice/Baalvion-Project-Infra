@@ -1,11 +1,17 @@
-import * as mockApi from '@/services/mock-api/premium';
-import { ApiResponse, SubscriptionTier, PremiumState, PremiumReport, PremiumAnalytics, PremiumDashboardData, PortfolioDeepDiveData, BacktestDashboardData } from '@/types/premium';
+import { ApiResponse, SubscriptionTier, PremiumState } from '@/types/premium';
 import { errorHandler } from '@/lib/errors/error-handler';
 import { apiClient } from '@/services/api-client/client';
 import { TIER_PRESENTATION, DEFAULT_TIER_PRESENTATION } from '@/services/data/premium-plans-presentation';
 
 /**
- * @fileOverview Abstraction layer for subscription, billing, and premium intelligence data.
+ * @fileOverview Abstraction layer for subscription and billing data.
+ *
+ * This file previously carried getReports/getAnalytics/getDashboardData/
+ * getPortfolioDeepDive/getBacktestData — all backed entirely by
+ * `@/services/mock-api/premium` fabricated data, and all confirmed to have zero
+ * real consumers (the /premium/analytics, /premium/reports, /premium/dashboard,
+ * /premium/deep-dive, /premium/backtesting pages already render FeatureUnavailable
+ * unconditionally, per their own doc comments). Removed as unreachable dead code.
  */
 
 interface PlanApiRow {
@@ -81,71 +87,6 @@ export const premiumService = {
         },
         status: 200,
       };
-    } catch (error) {
-      const appError = errorHandler.handleError(error);
-      return {
-        data: null,
-        status: appError.statusCode,
-        error: appError.message,
-      };
-    }
-  },
-
-  async getReports(): Promise<ApiResponse<PremiumReport[]>> {
-    try {
-      return await mockApi.getPremiumReports();
-    } catch (error) {
-      const appError = errorHandler.handleError(error);
-      return {
-        data: [],
-        status: appError.statusCode,
-        error: appError.message,
-      };
-    }
-  },
-
-  async getAnalytics(): Promise<ApiResponse<PremiumAnalytics[]>> {
-    try {
-      return await mockApi.getPremiumAnalytics();
-    } catch (error) {
-      const appError = errorHandler.handleError(error);
-      return {
-        data: [],
-        status: appError.statusCode,
-        error: appError.message,
-      };
-    }
-  },
-
-  async getDashboardData(): Promise<ApiResponse<PremiumDashboardData | null>> {
-    try {
-      return await mockApi.getPremiumDashboardData();
-    } catch (error) {
-      const appError = errorHandler.handleError(error);
-      return {
-        data: null,
-        status: appError.statusCode,
-        error: appError.message,
-      };
-    }
-  },
-
-  async getPortfolioDeepDive(): Promise<ApiResponse<PortfolioDeepDiveData | null>> {
-    try {
-      return await mockApi.getPortfolioDeepDiveData();
-    } catch (error) {
-      const appError = errorHandler.handleError(error);
-      return {
-        data: null,
-        status: appError.statusCode,
-        error: appError.message,
-      };
-    }
-  },
-
-  async getBacktestData(): Promise<ApiResponse<BacktestDashboardData | null>> {
-    try {
-      return await mockApi.getBacktestData();
     } catch (error) {
       const appError = errorHandler.handleError(error);
       return {

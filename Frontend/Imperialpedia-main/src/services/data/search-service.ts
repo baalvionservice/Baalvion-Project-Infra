@@ -1,16 +1,16 @@
-import * as mockApi from '@/services/mock-api/search';
-import { ApiResponse, SearchResult, SearchSuggestion, AdvancedSearchFilters, TopicRecommendation } from '@/types';
+import { ApiResponse, SearchResult, AdvancedSearchFilters } from '@/types';
 import type { SearchResultType } from '@/types/search';
 import { errorHandler } from '@/lib/errors/error-handler';
 import { sortByRelevance } from '@/lib/utils/search';
 
 /**
  * @fileOverview Global Search — LIVE across imperialpedia-service (entities/creators/assets)
- * AND the CMS published content (articles/news). Mock fallback when both are unreachable/empty.
+ * AND the CMS published content (articles/news). No mock fallback: an honest empty
+ * result set when both upstreams are unreachable or have no matches, rather than
+ * fabricated search results.
  */
 
-// Localhost is a dev-only default; production resolves to '' (search falls back to
-// mock when the upstreams are unreachable) so no dev URL ships in the prod bundle.
+// Localhost is a dev-only default; production resolves to ''.
 const IS_PROD = process.env.NODE_ENV === 'production';
 const IMP_API =
   process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL || (IS_PROD ? '' : 'http://localhost:3004/api/v1');
@@ -97,45 +97,13 @@ export const searchService = {
       if (arts.status === 'fulfilled') pushContent(arts.value, 'article');
       if (news.status === 'fulfilled') pushContent(news.value, 'news');
 
-      if (out.length > 0) {
-        // de-dupe by id, then rank by relevance — previously the merge order was
-        // whatever the upstream sources happened to return (imperialpedia-service
-        // results always first, then articles, then news), not actual match quality.
-        const seen = new Set<string>();
-        const deduped = out.filter((r) => (seen.has(r.id) ? false : (seen.add(r.id), true)));
-        const ranked = sortByRelevance(deduped, q);
-        return { data: ranked, status: 200 };
-      }
-      return await mockApi.globalSearch(q, filters);
-    } catch (error) {
-      try { return await mockApi.globalSearch(q, filters); } catch {
-        const appError = errorHandler.handleError(error);
-        return { data: [], status: appError.statusCode, error: appError.message };
-      }
-    }
-  },
-
-  async getSuggestions(query: string): Promise<ApiResponse<SearchSuggestion[]>> {
-    try {
-      return await mockApi.getSearchSuggestions(query);
-    } catch (error) {
-      const appError = errorHandler.handleError(error);
-      return { data: [], status: appError.statusCode, error: appError.message };
-    }
-  },
-
-  async getPopularContent(): Promise<ApiResponse<SearchResult[]>> {
-    try {
-      return await mockApi.getPopularContent();
-    } catch (error) {
-      const appError = errorHandler.handleError(error);
-      return { data: [], status: appError.statusCode, error: appError.message };
-    }
-  },
-
-  async getRecommendedTopics(query?: string): Promise<ApiResponse<TopicRecommendation[]>> {
-    try {
-      return await mockApi.getRecommendedTopics(query);
+      // de-dupe by id, then rank by relevance — previously the merge order was
+      // whatever the upstream sources happened to return (imperialpedia-service
+      // results always first, then articles, then news), not actual match quality.
+      const seen = new Set<string>();
+      const deduped = out.filter((r) => (seen.has(r.id) ? false : (seen.add(r.id), true)));
+      const ranked = sortByRelevance(deduped, q);
+      return { data: ranked, status: 200 };
     } catch (error) {
       const appError = errorHandler.handleError(error);
       return { data: [], status: appError.statusCode, error: appError.message };
