@@ -5,8 +5,8 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Timer, Play, Square, Loader2, Clock, History, IndianRupee } from 'lucide-react';
-import { mockAddTimeLog } from '@/services/cases/case.mock';
+import { Timer, Play, Square, Clock, History, IndianRupee } from 'lucide-react';
+import { addCaseTimeLog } from '@/services/cases/caseService';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
@@ -49,7 +49,7 @@ export default function TimeTracker({ caseId, timeLogs, onUpdate }: TimeTrackerP
     setIsActive(false);
     const mins = Math.max(1, Math.round(seconds / 60));
     try {
-      await mockAddTimeLog(caseId, {
+      await addCaseTimeLog(caseId, {
         durationMinutes: mins,
         isBillable,
         category: 'drafting',

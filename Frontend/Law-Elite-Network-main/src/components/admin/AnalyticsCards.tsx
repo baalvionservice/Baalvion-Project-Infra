@@ -1,55 +1,48 @@
 "use client";
 
 import React from "react";
-import { 
-  Users, 
-  Briefcase, 
-  CalendarCheck, 
-  TrendingUp, 
-  IndianRupee,
+import {
+  Users,
+  Briefcase,
+  CalendarCheck,
+  TrendingUp,
   ShieldCheck
 } from "lucide-react";
-
-interface AnalyticsData {
-  totalUsers: number;
-  totalLawyers: number;
-  totalBookings: number;
-  revenue: number;
-}
+import type { DashboardStats } from "@/lib/api/admin";
 
 /**
  * @fileOverview AnalyticsCards
- * High-fidelity visualization of key platform performance metrics.
+ * Real platform performance metrics, sourced from adminApi.dashboard().
  */
-export default function AnalyticsCards({ data }: { data: AnalyticsData }) {
+export default function AnalyticsCards({ data }: { data: DashboardStats }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      
-      <StatCard 
-        label="Global Network" 
-        value={data.totalUsers} 
+
+      <StatCard
+        label="Global Network"
+        value={data.clients.total + data.lawyers.total}
         sub="Registered Members"
         icon={<Users className="w-5 h-5 text-accent" />}
       />
 
-      <StatCard 
-        label="Verified Counsel" 
-        value={data.totalLawyers} 
-        sub="Active Marketplace"
+      <StatCard
+        label="Verified Counsel"
+        value={data.lawyers.active}
+        sub={`${data.lawyers.pending} Pending Review`}
         icon={<Briefcase className="w-5 h-5 text-accent" />}
       />
 
-      <StatCard 
-        label="Consultations" 
-        value={data.totalBookings} 
-        sub="Executive Agenda"
+      <StatCard
+        label="Consultations"
+        value={data.bookings.total}
+        sub={`${data.bookings.pending} Pending`}
         icon={<CalendarCheck className="w-5 h-5 text-accent" />}
       />
 
-      <StatCard 
-        label="Gross Revenue" 
-        value={`₹${data.revenue.toLocaleString()}`} 
-        sub="Settled Settlements"
+      <StatCard
+        label="Gross Revenue"
+        value={`₹${data.payments.totalRevenue.toLocaleString()}`}
+        sub={`${data.payments.succeeded} Settled Payments`}
         icon={<TrendingUp className="w-5 h-5 text-emerald-400" />}
         isRevenue
       />
@@ -58,15 +51,15 @@ export default function AnalyticsCards({ data }: { data: AnalyticsData }) {
   );
 }
 
-function StatCard({ 
-  label, 
-  value, 
-  sub, 
-  icon, 
-  isRevenue = false 
-}: { 
-  label: string; 
-  value: string | number; 
+function StatCard({
+  label,
+  value,
+  sub,
+  icon,
+  isRevenue = false
+}: {
+  label: string;
+  value: string | number;
   sub: string;
   icon: React.ReactNode;
   isRevenue?: boolean;
@@ -74,7 +67,7 @@ function StatCard({
   return (
     <div className="glass-panel p-6 rounded-2xl border-white/5 executive-card group relative overflow-hidden">
       <div className="absolute top-0 right-0 w-24 h-24 bg-accent/5 rounded-full -mr-12 -mt-12 blur-2xl group-hover:bg-accent/10 transition-colors" />
-      
+
       <div className="flex justify-between items-start mb-4 relative z-10">
         <div>
           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{label}</p>
@@ -91,7 +84,7 @@ function StatCard({
         </h2>
         {isRevenue && <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-tighter">Verified</span>}
       </div>
-      
+
       <div className="mt-4 pt-4 border-t border-white/5 flex items-center gap-2 relative z-10">
         <ShieldCheck className="w-3 h-3 text-accent/40" />
         <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em]">Synchronized Live</span>

@@ -4,7 +4,13 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { DashboardShell } from '@/components/layout/DashboardShell';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
-import { getCaseById, deleteCase } from '@/services/cases/caseService';
+import {
+  getCaseById,
+  deleteCase,
+  getCaseTasks,
+  getCaseNotes,
+  getCaseTimeLogs,
+} from '@/services/cases/caseService';
 import { 
   ShieldCheck, 
   Loader2, 
@@ -42,6 +48,9 @@ export default function CaseDetailPage() {
   const router = useRouter();
   const { user, isLawyer } = useAuth();
   const [legalCase, setLegalCase] = useState<any>(null);
+  const [tasks, setTasks] = useState<any[]>([]);
+  const [notes, setNotes] = useState<any[]>([]);
+  const [timeLogs, setTimeLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
@@ -50,8 +59,16 @@ export default function CaseDetailPage() {
     if (!id) return;
     setLoading(true);
     try {
-      const data = await getCaseById(id as string);
+      const [data, taskList, noteList, timeLogList] = await Promise.all([
+        getCaseById(id as string),
+        getCaseTasks(id as string),
+        getCaseNotes(id as string),
+        getCaseTimeLogs(id as string),
+      ]);
       setLegalCase(data);
+      setTasks(taskList);
+      setNotes(noteList);
+      setTimeLogs(timeLogList);
     } catch (err) {
       // Systemic error handling
     } finally {
@@ -186,7 +203,7 @@ export default function CaseDetailPage() {
                 </TabsContent>
 
                 <TabsContent value="workflow" className="animate-in fade-in duration-500">
-                  <TaskSystem caseId={legalCase.id} tasks={legalCase.tasks || []} onUpdate={loadData} />
+                  <TaskSystem caseId={legalCase.id} tasks={tasks} onUpdate={loadData} />
                 </TabsContent>
 
                 <TabsContent value="vault" className="animate-in fade-in duration-500">
@@ -202,14 +219,14 @@ export default function CaseDetailPage() {
                 </TabsContent>
 
                 <TabsContent value="research" className="animate-in fade-in duration-500">
-                  <PrivateNotes caseId={legalCase.id} notes={legalCase.notes || []} onUpdate={loadData} />
+                  <PrivateNotes caseId={legalCase.id} notes={notes} onUpdate={loadData} />
                 </TabsContent>
               </Tabs>
             </div>
 
             <aside className="lg:col-span-4 space-y-8">
               {isLawyer && (
-                <TimeTracker caseId={legalCase.id} timeLogs={legalCase.timeLogs || []} onUpdate={loadData} />
+                <TimeTracker caseId={legalCase.id} timeLogs={timeLogs} onUpdate={loadData} />
               )}
 
               <Card className="border-slate-200 bg-white shadow-sm overflow-hidden">

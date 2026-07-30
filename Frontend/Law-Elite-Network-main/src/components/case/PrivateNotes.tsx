@@ -2,10 +2,10 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BookOpen, Plus, Save, Loader2, Lock, Tag, Trash2 } from 'lucide-react';
-import { mockAddNote, updateCase } from '@/services/cases/case.mock';
+import { BookOpen, Plus, Save, Lock, Tag, Trash2 } from 'lucide-react';
+import { addCaseNote, deleteCaseNote } from '@/services/cases/caseService';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -27,10 +27,10 @@ export default function PrivateNotes({ caseId, notes, onUpdate }: PrivateNotesPr
   const handleAddNote = async () => {
     if (!noteText.trim()) return;
     try {
-      await mockAddNote(caseId, { 
-        text: noteText, 
+      await addCaseNote(caseId, {
+        text: noteText,
         isPrivate: true,
-        tags: ['Strategy']
+        tags: ['Strategy'],
       });
       setNoteText("");
       setIsAdding(false);
@@ -42,8 +42,7 @@ export default function PrivateNotes({ caseId, notes, onUpdate }: PrivateNotesPr
   };
 
   const handleDelete = async (noteId: string) => {
-    const updated = notes.filter(n => n.id !== noteId);
-    await updateCase(caseId, { notes: updated });
+    await deleteCaseNote(caseId, noteId);
     onUpdate();
   };
 
