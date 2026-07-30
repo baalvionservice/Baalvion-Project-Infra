@@ -15,6 +15,7 @@ import {
 import { LawEliteMark } from '@/components/icons/LawEliteMark';
 import SearchBar from '../search/SearchBar';
 import { cn } from '@/lib/utils';
+import { isSubcategoryPopulated } from '@/lib/subcategory-or-article';
 import seedData from '../../../docs/seed-data.json';
 import { useAuth } from '@/hooks/useAuth';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
@@ -75,17 +76,22 @@ export function PublicNavbar() {
     load();
   }, []);
 
-  const filteredSubcategories = useMemo(() => {
-    if (!activeCategory) return [];
-    return subcategories.filter(
-      (sub) => String(sub.category_id || sub.categoryId) === String(activeCategory),
-    );
-  }, [activeCategory, subcategories]);
-
   const activeCategoryData = useMemo(
     () => categories.find((c) => c.id === activeCategory),
     [activeCategory, categories],
   );
+
+  // Hide subcategories with no articles yet -- otherwise every menu click leads
+  // to a dead end ("No articles yet"); see docs/empty-subcategories.md for the
+  // content backlog these represent.
+  const filteredSubcategories = useMemo(() => {
+    if (!activeCategory || !activeCategoryData) return [];
+    return subcategories.filter(
+      (sub) =>
+        String(sub.category_id || sub.categoryId) === String(activeCategory) &&
+        isSubcategoryPopulated(activeCategoryData.slug, sub.slug),
+    );
+  }, [activeCategory, activeCategoryData, subcategories]);
 
   const dashboardHref =
     role === 'admin' ? '/admin/dashboard' : role === 'lawyer' ? '/lawyer/dashboard' : '/dashboard';
@@ -318,7 +324,11 @@ export function PublicNavbar() {
                     View all guides →
                   </Link>
                   {subcategories
-                    .filter((sub) => String(sub.category_id || sub.categoryId) === String(cat.id))
+                    .filter(
+                      (sub) =>
+                        String(sub.category_id || sub.categoryId) === String(cat.id) &&
+                        isSubcategoryPopulated(cat.slug, sub.slug),
+                    )
                     .map((sub) => (
                       <Link
                         key={sub.id}

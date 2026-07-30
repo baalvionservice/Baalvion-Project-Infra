@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
-import { permanentRedirect } from 'next/navigation';
-import { ChevronRight, FileText } from 'lucide-react';
+import { notFound, permanentRedirect } from 'next/navigation';
+import { ChevronRight } from 'lucide-react';
 import { categoriesPublicApi, subcategoriesPublicApi, articlesPublicApi } from '@/lib/api/client';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { ArticleCard } from '@/components/knowledge/ArticleCard';
@@ -119,6 +119,13 @@ export default async function SubcategoryPage(
   const subId = subcategory?.id ? String(subcategory.id) : null;
   const filteredArticles = articles.filter((a) => matchesSubcategory(a, sub, subId));
 
+  // A real subcategory with zero articles is a dead end, not a page worth serving --
+  // it's already hidden from nav (see docs/empty-subcategories.md) and noindexed
+  // (layout.tsx), so a genuine 404 here matches what both already communicate.
+  if (filteredArticles.length === 0) {
+    notFound();
+  }
+
   const categoryName = category?.name || titleCase(catSlug);
   const subName = subcategory?.name || titleCase(sub);
   const url = `${SITE}/law/${catSlug}/${sub}`;
@@ -188,29 +195,11 @@ export default async function SubcategoryPage(
             </span>
           </div>
 
-          {filteredArticles.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-7 gap-y-10">
-              {filteredArticles.map((article) => (
-                <ArticleCard key={article.id || article.slug} article={article} />
-              ))}
-            </div>
-          ) : (
-            <div className="py-24 text-center space-y-5 border border-dashed border-slate-200 rounded-xl bg-slate-50/40">
-              <FileText className="w-12 h-12 text-slate-300 mx-auto" />
-              <div className="space-y-1.5">
-                <h4 className="font-headline text-xl font-bold text-slate-900">No articles yet</h4>
-                <p className="text-sm text-slate-500 max-w-xs mx-auto leading-relaxed">
-                  We haven&rsquo;t published any {subName.toLowerCase()} guides yet. Explore the rest of{' '}
-                  {categoryName} in the meantime.
-                </p>
-              </div>
-              <Link href={`/law/${catSlug}`}>
-                <button className="px-7 h-11 rounded-md bg-[#0B1F3A] text-white text-sm font-bold hover:bg-blue-800 transition-colors">
-                  Back to {categoryName}
-                </button>
-              </Link>
-            </div>
-          )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-7 gap-y-10">
+            {filteredArticles.map((article) => (
+              <ArticleCard key={article.id || article.slug} article={article} />
+            ))}
+          </div>
         </div>
       </main>
 
