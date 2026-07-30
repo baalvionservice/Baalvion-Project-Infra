@@ -14,13 +14,12 @@ import {
 interface ChartsProps {
   data: {
     name: string;
-    engagements: number;
+    value: number;
   }[];
 }
 
 /**
- * @fileOverview High-Fidelity Network Engagement Chart.
- * Visualizes platform velocity with a premium executive aesthetic.
+ * @fileOverview Revenue-by-month trend chart for the admin insights page.
  */
 export default function Charts({ data }: ChartsProps) {
   return (
@@ -31,31 +30,31 @@ export default function Charts({ data }: ChartsProps) {
           margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
         >
           <defs>
-            <linearGradient id="colorEngagements" x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="hsl(var(--accent))" stopOpacity={0.3} />
               <stop offset="95%" stopColor="hsl(var(--accent))" stopOpacity={0} />
             </linearGradient>
           </defs>
-          <CartesianGrid 
-            strokeDasharray="3 3" 
-            vertical={false} 
-            stroke="rgba(255,255,255,0.05)" 
+          <CartesianGrid
+            strokeDasharray="3 3"
+            vertical={false}
+            stroke="rgba(255,255,255,0.05)"
           />
-          <XAxis 
-            dataKey="name" 
-            axisLine={false} 
-            tickLine={false} 
+          <XAxis
+            dataKey="name"
+            axisLine={false}
+            tickLine={false}
             tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 10, fontWeight: "bold" }}
             dy={10}
           />
-          <YAxis 
-            axisLine={false} 
-            tickLine={false} 
+          <YAxis
+            axisLine={false}
+            tickLine={false}
             tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 10, fontWeight: "bold" }}
           />
-          <Tooltip 
-            contentStyle={{ 
-              backgroundColor: "rgba(24, 27, 46, 0.95)", 
+          <Tooltip
+            contentStyle={{
+              backgroundColor: "rgba(24, 27, 46, 0.95)",
               border: "1px solid rgba(255,255,255,0.1)",
               borderRadius: "12px",
               fontSize: "10px",
@@ -68,11 +67,11 @@ export default function Charts({ data }: ChartsProps) {
           />
           <Area
             type="monotone"
-            dataKey="engagements"
+            dataKey="value"
             stroke="hsl(var(--accent))"
             strokeWidth={3}
             fillOpacity={1}
-            fill="url(#colorEngagements)"
+            fill="url(#colorValue)"
             animationDuration={2000}
           />
         </AreaChart>

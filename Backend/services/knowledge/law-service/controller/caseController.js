@@ -101,13 +101,15 @@ const updateCase = async (req, res, next) => {
             if (!isOwner) return next(new AppError('FORBIDDEN', 'Not authorised to update this case', 403));
         }
         // Mass-assignment guard: only allow safe client-editable fields.
-        const { title, description, category, priority, notes } = req.body;
+        // (Private strategy notes are a separate resource -- see
+        // caseNoteController.js / GET|POST /cases/:id/notes -- the Case model
+        // itself has no notes column.)
+        const { title, description, category, priority } = req.body;
         const patch = {};
         if (title      !== undefined) patch.title       = title;
         if (description !== undefined) patch.description = description;
         if (category   !== undefined) patch.category    = category;
         if (priority   !== undefined) patch.priority    = priority;
-        if (notes      !== undefined) patch.notes       = notes;
         await legalCase.update(patch);
         return sendSuccess(req, res, legalCase);
     } catch (err) { return next(err); }

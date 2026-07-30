@@ -99,3 +99,30 @@ export const adaptProfile = (u: any) => {
     createdAt: u.created_at || u.createdAt,
   };
 };
+
+export const adaptCaseNote = (n: any) => ({
+  id: String(n.id),
+  caseId: n.case_id != null ? String(n.case_id) : undefined,
+  text: n.text,
+  tags: n.tags || [],
+  isPrivate: n.is_private,
+  createdAt: new Date(n.created_at || n.createdAt),
+});
+
+export const adaptCaseTask = (t: any) => ({
+  id: String(t.id),
+  caseId: t.case_id != null ? String(t.case_id) : undefined,
+  title: t.title,
+  status: t.status,
+  createdAt: new Date(t.created_at || t.createdAt),
+});
+
+export const adaptCaseTimeLog = (l: any) => ({
+  id: String(l.id),
+  caseId: l.case_id != null ? String(l.case_id) : undefined,
+  durationMinutes: l.duration_minutes,
+  isBillable: l.is_billable,
+  category: l.category,
+  description: l.description,
+  createdAt: new Date(l.created_at || l.createdAt),
+});

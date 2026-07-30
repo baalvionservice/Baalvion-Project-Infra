@@ -2,11 +2,11 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckSquare, Plus, Clock, Loader2, CheckCircle2, Circle, MoreVertical } from 'lucide-react';
+import { CheckSquare, Plus, CheckCircle2, Circle, MoreVertical } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { mockAddTask, updateCase } from '@/services/cases/case.mock';
+import { addCaseTask, updateCaseTaskStatus } from '@/services/cases/caseService';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -28,7 +28,7 @@ export default function TaskSystem({ caseId, tasks, onUpdate }: TaskSystemProps)
   const handleAddTask = async () => {
     if (!taskTitle.trim()) return;
     try {
-      await mockAddTask(caseId, { title: taskTitle, status: 'pending' });
+      await addCaseTask(caseId, { title: taskTitle });
       setTaskTitle("");
       setIsAdding(false);
       onUpdate();
@@ -40,8 +40,7 @@ export default function TaskSystem({ caseId, tasks, onUpdate }: TaskSystemProps)
 
   const toggleStatus = async (taskId: string, currentStatus: string) => {
     const newStatus = currentStatus === 'completed' ? 'pending' : 'completed';
-    const updatedTasks = tasks.map(t => t.id === taskId ? { ...t, status: newStatus } : t);
-    await updateCase(caseId, { tasks: updatedTasks });
+    await updateCaseTaskStatus(caseId, taskId, newStatus);
     onUpdate();
   };
 

@@ -183,6 +183,21 @@ export const caseApi = {
   update: (id: string, data: unknown) => apiClient.put(`/cases/${id}`, data),
   updateStatus: (id: string, status: string) =>
     apiClient.patch(`/cases/${id}/status`, { status }),
+  notes: {
+    list: (caseId: string) => apiClient.get(`/cases/${caseId}/notes`),
+    create: (caseId: string, data: unknown) => apiClient.post(`/cases/${caseId}/notes`, data),
+    delete: (caseId: string, noteId: string) => apiClient.delete(`/cases/${caseId}/notes/${noteId}`),
+  },
+  tasks: {
+    list: (caseId: string) => apiClient.get(`/cases/${caseId}/tasks`),
+    create: (caseId: string, data: unknown) => apiClient.post(`/cases/${caseId}/tasks`, data),
+    updateStatus: (caseId: string, taskId: string, status: string) =>
+      apiClient.patch(`/cases/${caseId}/tasks/${taskId}`, { status }),
+  },
+  timeLogs: {
+    list: (caseId: string) => apiClient.get(`/cases/${caseId}/timelogs`),
+    create: (caseId: string, data: unknown) => apiClient.post(`/cases/${caseId}/timelogs`, data),
+  },
 };
 
 export const messageApi = {
