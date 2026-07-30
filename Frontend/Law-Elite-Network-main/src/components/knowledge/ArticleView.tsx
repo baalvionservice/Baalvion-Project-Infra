@@ -3,7 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { BookOpen } from 'lucide-react';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
-import { RelatedArticles } from '@/components/knowledge/RelatedArticles';
+import { RelatedArticles, fetchRelatedArticles } from '@/components/knowledge/RelatedArticles';
 import { Breadcrumbs } from '@/components/knowledge/Breadcrumbs';
 import { ArticleTOC } from '@/app/law/[categorySlug]/[subSlug]/[articleSlug]/ArticleTOC';
 import { ArticleAuthorByline } from '@/app/law/[categorySlug]/[subSlug]/[articleSlug]/ArticleAuthorByline';
@@ -65,7 +65,7 @@ function extractToc(html: string): TOCItem[] {
  * have no subcategory, instead of a URL it can't build) so the two never
  * visually drift apart.
  */
-export function ArticleView({ article, slug }: { article: any; slug: string }) {
+export async function ArticleView({ article, slug }: { article: any; slug: string }) {
   const category = article.category;
   const subcategory = article.subcategory;
   const authorName: string = (typeof article.author === 'string' ? article.author : article.author?.name) || 'Law Elite Editorial';
@@ -73,6 +73,7 @@ export function ArticleView({ article, slug }: { article: any; slug: string }) {
   const updatedAt = formatArticleDate(article.updatedAt || article.updated_at) || 'February 12, 2025';
   const processedContent = injectHeadingIds(article.content || '');
   const toc = extractToc(processedContent);
+  const relatedArticles = await fetchRelatedArticles(slug, category?.slug, category?.name);
 
   return (
     <div className="min-h-screen bg-white selection:bg-blue-100 selection:text-blue-900">
@@ -118,11 +119,7 @@ export function ArticleView({ article, slug }: { article: any; slug: string }) {
                 dangerouslySetInnerHTML={{ __html: processedContent }}
               />
 
-              <RelatedArticles
-                currentSlug={slug}
-                categorySlug={category?.slug}
-                categoryName={category?.name}
-              />
+              <RelatedArticles articles={relatedArticles} />
             </article>
 
           </div>

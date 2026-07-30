@@ -1,13 +1,12 @@
-"use client";
-
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getArticlesByCategorySlug } from '@/data/law-content';
+import { cmsGetArticles } from '@/lib/cms';
 import { resolveArticleImage } from '@/lib/article-art';
 import { articleUrl } from '@/lib/article-url';
 
-interface RelatedArticle {
+export interface RelatedArticle {
   id: string;
   title: string;
   category: string;
@@ -18,73 +17,58 @@ interface RelatedArticle {
   featuredImage?: string;
 }
 
-interface RelatedArticlesProps {
-  /** Slug of the article currently being read — excluded from its own related list. */
-  currentSlug: string;
-  categorySlug?: string;
-  categoryName?: string;
-}
-
 /**
  * Same-category interlinking, sourced from the CMS first (real published
  * articles) with the bundled editorial library as an always-present fallback.
- * Never shows placeholder/unrelated content — an empty result renders nothing.
+ * Server-side so these links and the "Related Articles" heading are present in
+ * the first response -- this previously fetched client-side in a useEffect, so
+ * a non-JS-executing crawler saw neither the section nor its internal links on
+ * any article page.
  */
-export function RelatedArticles({ currentSlug, categorySlug, categoryName }: RelatedArticlesProps) {
-  const [related, setRelated] = useState<RelatedArticle[]>([]);
+export async function fetchRelatedArticles(
+  currentSlug: string,
+  categorySlug?: string,
+  categoryName?: string,
+): Promise<RelatedArticle[]> {
+  if (!categorySlug) return [];
 
-  useEffect(() => {
-    if (!categorySlug) {
-      setRelated([]);
-      return;
-    }
-    let cancelled = false;
+  const bundled: RelatedArticle[] = getArticlesByCategorySlug(categorySlug)
+    .filter((a) => a.slug !== currentSlug)
+    .map((a) => ({
+      id: a.id,
+      title: a.title,
+      category: a.category.name,
+      categorySlug: a.category.slug,
+      subcategorySlug: a.subcategory?.slug,
+      author: a.author,
+      slug: a.slug,
+    }));
 
-    const bundled: RelatedArticle[] = getArticlesByCategorySlug(categorySlug)
-      .filter((a) => a.slug !== currentSlug)
+  try {
+    const cms = await cmsGetArticles(undefined, categorySlug);
+    const cmsArticles: RelatedArticle[] = cms
+      .filter((a) => a.slug && a.slug !== currentSlug)
       .map((a) => ({
         id: a.id,
         title: a.title,
-        category: a.category.name,
-        categorySlug: a.category.slug,
-        subcategorySlug: a.subcategory?.slug,
-        author: a.author,
+        category: a.category?.name || categoryName || 'Legal Guide',
+        categorySlug: a.category?.slug,
+        // CMS content has no subcategory field (lib/cms.ts toArticle()) --
+        // articleUrl() falls back to the flat /article/{slug} URL for these.
+        author: 'Law Elite Editorial',
         slug: a.slug,
+        featuredImage: (a as any).featuredImage || undefined,
       }));
+    const bySlug = new Map<string, RelatedArticle>();
+    for (const a of [...cmsArticles, ...bundled]) bySlug.set(a.slug, a);
+    return Array.from(bySlug.values()).slice(0, 4);
+  } catch {
+    return bundled.slice(0, 4);
+  }
+}
 
-    fetch(`/api/cms/articles?category=${encodeURIComponent(categorySlug)}`)
-      .then((r) => (r.ok ? r.json() : null))
-      .then((j) => {
-        if (cancelled) return;
-        const cmsArticles: RelatedArticle[] = Array.isArray(j?.data)
-          ? j.data
-              .filter((a: any) => a.slug && a.slug !== currentSlug)
-              .map((a: any) => ({
-                id: a.id,
-                title: a.title,
-                category: a.category?.name || categoryName || 'Legal Guide',
-                categorySlug: a.category?.slug,
-                // CMS content has no subcategory field (lib/cms.ts toArticle()) --
-                // articleUrl() falls back to the flat /article/{slug} URL for these.
-                author: 'Law Elite Editorial',
-                slug: a.slug,
-                featuredImage: a.featuredImage || undefined,
-              }))
-          : [];
-        const bySlug = new Map<string, RelatedArticle>();
-        for (const a of [...cmsArticles, ...bundled]) bySlug.set(a.slug, a);
-        setRelated(Array.from(bySlug.values()).slice(0, 4));
-      })
-      .catch(() => {
-        if (!cancelled) setRelated(bundled.slice(0, 4));
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [currentSlug, categorySlug, categoryName]);
-
-  if (related.length === 0) return null;
+export function RelatedArticles({ articles }: { articles: RelatedArticle[] }) {
+  if (articles.length === 0) return null;
 
   return (
     <section className="pt-2 border-t-4 border-blue-600 mt-20 mb-24">
@@ -92,7 +76,7 @@ export function RelatedArticles({ currentSlug, categorySlug, categoryName }: Rel
         <h2 className="text-3xl font-bold text-slate-900 mb-10 pt-4 px-2">Related Articles</h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 px-2">
-          {related.map((art) => (
+          {articles.map((art) => (
             <Link key={art.id} href={articleUrl({ slug: art.slug, category: { slug: art.categorySlug }, subcategory: { slug: art.subcategorySlug } })} className="group block h-full">
               <div className="bg-white border border-slate-200 overflow-hidden shadow-sm group-hover:shadow-md transition-all duration-300 flex flex-col h-full">
                 <div className="relative aspect-[3/2] overflow-hidden bg-slate-100">
