@@ -5,18 +5,12 @@ import { buildMetadata } from "@/lib/seo/metadata-builder";
 import { structuredData } from "@/lib/seo/structuredData";
 
 import { TrendingBar } from "@/components/landing/investopedia/TrendingBar";
-import { LeadStory } from "@/components/landing/investopedia/LeadStory";
-import { TopicSection } from "@/components/landing/investopedia/TopicSection";
 import { TermOfDay } from "@/components/landing/investopedia/TermOfDay";
 import { NewsletterBand } from "@/components/landing/investopedia/NewsletterBand";
-import {
-  LEAD_STORY,
-  TOP_STORIES,
-  TOPIC_GROUPS,
-  TERM_OF_DAY,
-} from "@/components/landing/investopedia/content";
+import { TERM_OF_DAY } from "@/components/landing/investopedia/content";
 
 import { HomeIntro, homeFaqItems } from "@/components/home/HomeIntro";
+import { HomeEditorial } from "@/components/home/HomeEditorial";
 import { LatestArticles } from "@/components/home/LatestArticles";
 import { MarketHighlights } from "@/components/home/MarketHighlights";
 import { TrendingTopics } from "@/components/home/TrendingTopics";
@@ -41,10 +35,11 @@ export async function generateMetadata(): Promise<Metadata> {
 
 /**
  * Imperialpedia home — a discovery hub, not just an editorial landing page.
- * Structure: static "what is this" intro (immediate paint) → editorial layer
- * (curated lead story / topic rows, unchanged) → live discovery rails, each
- * in its own Suspense boundary so a slow data source (market feed, CMS,
- * live entity service) never blocks the rest of the page from rendering.
+ * Structure: static "what is this" intro (immediate paint) → CMS-backed
+ * editorial layer (real lead story / topic rows, grouped from whatever
+ * categories are actually published) → live discovery rails, each in its
+ * own Suspense boundary so a slow data source (market feed, CMS, live
+ * entity service) never blocks the rest of the page from rendering.
  */
 export default function Home() {
   return (
@@ -55,19 +50,16 @@ export default function Home() {
       <HomeIntro />
 
       <TrendingBar />
-      <LeadStory lead={LEAD_STORY} secondary={TOP_STORIES} />
 
-      <TopicSection group={TOPIC_GROUPS[0]} />
-      <TopicSection group={TOPIC_GROUPS[1]} />
+      <Suspense fallback={<HomeSectionSkeleton cards={4} />}>
+        <HomeEditorial />
+      </Suspense>
 
       <TermOfDay
         term={TERM_OF_DAY.term}
         definition={TERM_OF_DAY.definition}
         href={TERM_OF_DAY.href}
       />
-
-      <TopicSection group={TOPIC_GROUPS[2]} />
-      <TopicSection group={TOPIC_GROUPS[3]} />
 
       <Suspense fallback={<HomeSectionSkeleton cards={4} />}>
         <LatestArticles />

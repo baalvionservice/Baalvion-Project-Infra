@@ -37,7 +37,7 @@ async function listCategories(websiteId) {
 }
 
 async function createCategory(websiteId, body) {
-    const { parentId, name, slug: rawSlug, description, seoMetadata, sortOrder } = body;
+    const { parentId, name, slug: rawSlug, description, imageUrl, seoMetadata, sortOrder } = body;
     const slug = rawSlug || slugify(name);
 
     const existing = await CmsCategory.findOne({ where: { websiteId, slug } });
@@ -50,7 +50,7 @@ async function createCategory(websiteId, body) {
         depth = parent.depth + 1;
     }
 
-    const category = await CmsCategory.create({ websiteId, parentId: parentId || null, name, slug, description, seoMetadata: seoMetadata || {}, sortOrder: sortOrder || 0, depth, status: 'active', contentCount: 0 });
+    const category = await CmsCategory.create({ websiteId, parentId: parentId || null, name, slug, description, imageUrl: imageUrl || null, seoMetadata: seoMetadata || {}, sortOrder: sortOrder || 0, depth, status: 'active', contentCount: 0 });
     await cache.del(cache.keys.categoryTree(websiteId));
     return category.toJSON();
 }

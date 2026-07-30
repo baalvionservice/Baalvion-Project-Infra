@@ -11,6 +11,8 @@ import type { NormalizedError } from '@/lib/api/client';
 interface Props {
   value: string;
   onChange: (url: string) => void;
+  /** Overrides the panel's label — same upload flow reused for non-article images (e.g. category photos). */
+  label?: string;
 }
 
 /**
@@ -19,7 +21,7 @@ interface Props {
  * there was no way to add or replace a featured image after creation. Same
  * upload flow as Add News (mediaApi.files.upload), just available here too.
  */
-export default function FeaturedImagePanel({ value, onChange }: Props) {
+export default function FeaturedImagePanel({ value, onChange, label = 'Featured Image' }: Props) {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -48,7 +50,7 @@ export default function FeaturedImagePanel({ value, onChange }: Props) {
     <div className="space-y-2 p-4 border-t">
       <Label className="flex items-center gap-1.5 text-sm font-medium">
         <ImageIcon className="h-3.5 w-3.5 text-cyan-500" />
-        Featured Image
+        {label}
       </Label>
       {value ? (
         <div className="relative">
@@ -65,7 +67,7 @@ export default function FeaturedImagePanel({ value, onChange }: Props) {
         </div>
       ) : (
         <div className="flex aspect-video w-full items-center justify-center rounded border border-dashed text-xs text-muted-foreground">
-          No image — one will be auto-generated
+          {label === 'Featured Image' ? 'No image — one will be auto-generated' : 'No image set'}
         </div>
       )}
       <Button

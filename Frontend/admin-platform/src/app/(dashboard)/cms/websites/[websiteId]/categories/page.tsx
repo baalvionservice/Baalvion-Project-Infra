@@ -5,6 +5,7 @@ import { Plus, ArrowLeft, Tag, Search } from 'lucide-react';
 import Link from 'next/link';
 import PageHeader from '@/components/common/PageHeader';
 import CategoryTree from '@/components/cms/CategoryTree';
+import FeaturedImagePanel from '@/components/cms/FeaturedImagePanel';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -46,6 +47,7 @@ interface CategoryForm {
   slug: string;
   description: string;
   parentId: string;
+  imageUrl: string;
   seoTitle: string;
   seoDescription: string;
   keywords: string; // comma-separated in the form
@@ -58,6 +60,7 @@ const DEFAULT_FORM: CategoryForm = {
   slug: '',
   description: '',
   parentId: '',
+  imageUrl: '',
   seoTitle: '',
   seoDescription: '',
   keywords: '',
@@ -112,6 +115,7 @@ export default function WebsiteCategoriesPage({
       slug: node.slug,
       description: node.description ?? '',
       parentId: node.parentId ?? '',
+      imageUrl: node.imageUrl ?? '',
       seoTitle: seo.title ?? '',
       seoDescription: seo.description ?? '',
       keywords: (seo.keywords ?? []).join(', '),
@@ -143,6 +147,7 @@ export default function WebsiteCategoriesPage({
       slug: form.slug,
       description: form.description || undefined,
       parentId: form.parentId || null,
+      imageUrl: form.imageUrl || undefined,
       seoMetadata,
     };
     if (catDialog.editing) {
@@ -330,6 +335,12 @@ export default function WebsiteCategoriesPage({
                 onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
               />
             </div>
+
+            <FeaturedImagePanel
+              label="Category Photo"
+              value={form.imageUrl}
+              onChange={(url) => setForm((f) => ({ ...f, imageUrl: url }))}
+            />
 
             {/* Per-category SEO — drives how this topic page ranks and appears in search */}
             <div className="rounded-md border bg-muted/20 p-2.5 space-y-3">

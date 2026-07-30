@@ -39,7 +39,7 @@ async function _resolveCategoryList(websiteId, categoryIds) {
     if (!Array.isArray(categoryIds) || !categoryIds.length) return [];
     const rows = await CmsCategory.findAll({
         where: { id: { [Op.in]: categoryIds }, websiteId },
-        attributes: ['id', 'name', 'slug', 'parentId'],
+        attributes: ['id', 'name', 'slug', 'parentId', 'imageUrl'],
     });
     return rows.map((r) => r.toJSON());
 }

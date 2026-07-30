@@ -6,6 +6,10 @@ module.exports = function (sequelize, DataTypes) {
         name: { type: DataTypes.STRING(200), allowNull: false },
         slug: { type: DataTypes.STRING(200), allowNull: false },
         description: { type: DataTypes.TEXT, allowNull: true },
+        // Real display photo for the category (distinct from seoMetadata.ogImage,
+        // which is only used for social share cards) — e.g. shown on the category's
+        // own hub page or as a topic-section banner on frontend homepages.
+        imageUrl: { type: DataTypes.TEXT, allowNull: true },
         seoMetadata: { type: DataTypes.JSONB, allowNull: true, defaultValue: {} },
         sortOrder: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
         depth: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },

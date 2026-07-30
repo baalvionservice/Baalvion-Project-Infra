@@ -18,6 +18,7 @@ const createCategorySchema = z.object({
     name: z.string().min(1).max(200),
     slug: z.string().min(1).max(200).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens').optional(),
     description: z.string().max(1000).optional().nullable(),
+    imageUrl: z.string().url().optional().nullable(),
     seoMetadata: categorySeoSchema,
     sortOrder: z.number().int().min(0).default(0),
 });
@@ -27,6 +28,7 @@ const updateCategorySchema = z.object({
     name: z.string().min(1).max(200).optional(),
     slug: z.string().min(1).max(200).regex(/^[a-z0-9-]+$/).optional(),
     description: z.string().max(1000).optional().nullable(),
+    imageUrl: z.string().url().optional().nullable(),
     seoMetadata: categorySeoSchema,
     status: categoryStatusEnum.optional(),
     sortOrder: z.number().int().min(0).optional(),
