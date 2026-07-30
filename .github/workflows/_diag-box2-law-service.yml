@@ -1,0 +1,26 @@
+name: (temp) Diagnose box2 law-service 502
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check app-platform container status + law-service pm2 logs
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.CORE2_EC2_HOST }}
+          username: ${{ secrets.CORE2_EC2_USER }}
+          key: ${{ secrets.CORE2_EC2_SSH_KEY }}
+          timeout: 30s
+          command_timeout: 3m
+          script: |
+            set -uo pipefail
+            echo "===== container status ====="
+            docker ps -a --format '{{.Names}}\t{{.Status}}\t{{.Image}}' | grep -i platform
+            echo "===== pm2 list inside app-platform ====="
+            docker exec consolidated-app-platform-1 pm2 list
+            echo "===== law-service recent logs ====="
+            docker exec consolidated-app-platform-1 pm2 logs law-service --lines 80 --nostream
