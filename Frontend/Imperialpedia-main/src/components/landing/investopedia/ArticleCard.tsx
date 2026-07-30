@@ -1,11 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { articleArtDataUri } from "@baalvion/illustrations";
 import type { Article } from "./types";
-
-const img = (article: Article) =>
-  articleArtDataUri({ title: article.title, category: article.category, seed: article.imageSeed });
 
 type Props = {
   article: Article;
@@ -23,7 +19,7 @@ export function ArticleCard({ article, variant = "card" }: Props) {
       <Link href={article.href} className="group flex gap-3 py-3 border-b border-border last:border-0">
         <div className="relative h-16 w-24 flex-shrink-0 overflow-hidden bg-muted">
           <Image
-            src={img(article)}
+            src={article.image}
             alt=""
             fill
             sizes="96px"
@@ -44,7 +40,7 @@ export function ArticleCard({ article, variant = "card" }: Props) {
     <Link href={article.href} className="group block">
       <div className="relative aspect-[16/9] w-full overflow-hidden bg-muted">
         <Image
-          src={img(article)}
+          src={article.image}
           alt=""
           fill
           sizes="(max-width: 768px) 100vw, 33vw"

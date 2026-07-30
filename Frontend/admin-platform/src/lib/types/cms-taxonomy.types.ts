@@ -12,6 +12,7 @@ export interface WebsiteCategory {
   name: string;
   slug: string;
   description?: string;
+  imageUrl?: string;
   seoMetadata?: CategorySeo;
   parentId: string | null;
   depth: number;
@@ -38,6 +39,7 @@ export interface CreateCategoryPayload {
   name: string;
   slug: string;
   description?: string;
+  imageUrl?: string;
   seoMetadata?: CategorySeo;
   parentId?: string | null;
   order?: number;
@@ -47,6 +49,7 @@ export interface UpdateCategoryPayload {
   name?: string;
   slug?: string;
   description?: string;
+  imageUrl?: string;
   seoMetadata?: CategorySeo;
   parentId?: string | null;
   order?: number;

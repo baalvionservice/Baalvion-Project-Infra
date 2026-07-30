@@ -288,6 +288,26 @@ export async function getCmsContentBySlug(slug: string): Promise<CmsContent> {
   return env.data;
 }
 
+interface CmsCategoryEnvelope {
+  success: boolean;
+  data: { id: string; name: string; slug: string; imageUrl?: string | null };
+}
+
+/**
+ * A category's own record (for its `imageUrl`, e.g. a homepage topic-section
+ * banner) — distinct from the `{id, name, slug}` stub embedded on each
+ * article. Never throws: an unknown/unreachable category just means no
+ * banner image, not a broken page.
+ */
+export async function getPublicCategoryBySlug(slug: string): Promise<{ imageUrl?: string | null } | null> {
+  try {
+    const env = await cmsFetch<CmsCategoryEnvelope>(`/categories/${encodeURIComponent(slug)}`);
+    return env.data;
+  } catch {
+    return null;
+  }
+}
+
 // ── Author/contributor profiles (cms_authors, admin-managed) ────────────────
 interface CmsAuthorListEnvelope {
   success: boolean;
