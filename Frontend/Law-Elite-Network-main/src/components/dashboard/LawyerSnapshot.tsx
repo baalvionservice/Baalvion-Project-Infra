@@ -1,11 +1,17 @@
 "use client";
 
 import React from 'react';
-import { User, Star, Briefcase, MessageSquare, ShieldCheck, ChevronRight } from "lucide-react";
+import { User, Star, MessageSquare, ShieldCheck, ChevronRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from 'next/link';
+
+/** First letter of each of the first two words — real initials, not a placeholder. */
+function initialsFor(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  return parts.slice(0, 2).map((p) => p[0]?.toUpperCase() || '').join('') || '?';
+}
 
 /**
  * @fileOverview LawyerSnapshot
@@ -32,14 +38,16 @@ export default function LawyerSnapshot({ lawyer }: { lawyer?: any }) {
             <div className="relative">
               <Avatar className="h-12 w-12 border-2 border-white shadow-md">
                 <AvatarImage src={lawyer.profileImage} />
-                <AvatarFallback className="bg-[#0B1F3A] text-white text-xs font-bold italic">HS</AvatarFallback>
+                <AvatarFallback className="bg-[#0B1F3A] text-white text-xs font-bold italic">
+                  {initialsFor(lawyer.name || '?')}
+                </AvatarFallback>
               </Avatar>
               <div className="absolute -bottom-1 -right-1 bg-emerald-500 rounded-full p-0.5 border-2 border-white">
                 <ShieldCheck className="w-2.5 h-2.5 text-white" />
               </div>
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-bold text-slate-900 truncate leading-tight">{lawyer.name || 'Harvey Specter'}</p>
+              <p className="text-sm font-bold text-slate-900 truncate leading-tight">{lawyer.name}</p>
               <p className="text-[10px] font-bold text-blue-600 uppercase tracking-tighter">Elite Practitioner</p>
             </div>
           </div>
@@ -47,12 +55,15 @@ export default function LawyerSnapshot({ lawyer }: { lawyer?: any }) {
           <div className="grid grid-cols-2 gap-2">
             <div className="bg-slate-50 p-2 rounded-lg border border-slate-100 text-center">
               <p className="text-[8px] font-bold text-slate-400 uppercase">Expertise</p>
-              <p className="text-[10px] font-bold text-slate-700 truncate">Corporate</p>
+              <p className="text-[10px] font-bold text-slate-700 truncate">
+                {lawyer.specialization?.[0] || 'General Practice'}
+              </p>
             </div>
             <div className="bg-slate-50 p-2 rounded-lg border border-slate-100 text-center">
               <p className="text-[8px] font-bold text-slate-400 uppercase">Rating</p>
               <p className="text-[10px] font-bold text-slate-700 flex items-center justify-center gap-1">
-                <Star className="w-2.5 h-2.5 fill-blue-600 text-blue-600" /> 5.0
+                <Star className="w-2.5 h-2.5 fill-blue-600 text-blue-600" />
+                {lawyer.rating > 0 ? lawyer.rating.toFixed(1) : 'New'}
               </p>
             </div>
           </div>

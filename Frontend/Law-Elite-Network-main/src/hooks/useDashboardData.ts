@@ -8,6 +8,7 @@ import { generateRecommendations } from '@/services/recommendations/recommendati
 import { subscribeToNotifications } from '@/services/notifications/notificationService';
 import { getDocumentsByCase } from '@/services/documents/documentService';
 import { subscribeToMessages } from '@/services/chat/chatService';
+import { getLawyerById } from '@/services/lawyers/lawyerService';
 
 /**
  * @fileOverview useDashboardData Hook
@@ -21,6 +22,7 @@ export function useDashboardData(userId: string | undefined) {
     recommendations: [],
     notifications: [],
     recentDocuments: [],
+    assignedLawyer: null,
     unreadMessagesCount: 0,
     loading: true,
     error: null
@@ -41,12 +43,18 @@ export function useDashboardData(userId: string | undefined) {
       // 2. Aggregate documents from all active cases
       let allDocs: any[] = [];
       const activeCases = cases.filter((c: any) => c.status === 'active' || c.status === 'in_progress');
-      
+
       if (activeCases.length > 0) {
         const docPromises = activeCases.slice(0, 3).map((c: any) => getDocumentsByCase(c.id || c.caseId));
         const docResults = await Promise.all(docPromises);
         allDocs = docResults.flat().sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
       }
+
+      // 3. Real assigned-counsel snapshot for the primary case, if one has a lawyer.
+      const primaryCase = cases.length > 0 ? cases[0] : null;
+      const assignedLawyer = primaryCase?.lawyerId
+        ? await getLawyerById(primaryCase.lawyerId).catch(() => null)
+        : null;
 
       setData((prev: any) => ({
         ...prev,
@@ -55,6 +63,7 @@ export function useDashboardData(userId: string | undefined) {
         appointments,
         recommendations,
         recentDocuments: allDocs.slice(0, 5),
+        assignedLawyer,
         loading: false
       }));
     } catch (err: any) {

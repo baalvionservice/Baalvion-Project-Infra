@@ -60,10 +60,11 @@ function DashboardContent() {
   const { user } = useAuthContext();
   const router = useRouter();
   
-  const { 
-    cases, 
-    appointments, 
+  const {
+    cases,
+    appointments,
     recentDocuments,
+    assignedLawyer,
     loading,
     refresh,
     stats,
@@ -96,7 +97,6 @@ function DashboardContent() {
 
   const hasData = cases.length > 0 || appointments.length > 0;
   const primaryCase = cases.length > 0 ? cases[0] : null;
-  const assignedLawyer = primaryCase?.assignedLawyerId ? { name: 'Harvey Specter', role: 'Counsel' } : null;
 
   return (
     <div className="container mx-auto px-8 pt-8 pb-12 animate-in fade-in duration-700">
