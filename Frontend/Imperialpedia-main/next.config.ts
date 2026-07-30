@@ -264,6 +264,13 @@ const nextConfig: NextConfig = {
     // `contentSecurityPolicy` below still sandboxes the optimized-image response.
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    // Next's default (`attachment`) forces every /_next/image response to send
+    // Content-Disposition: attachment, which Safari/WebKit honors even for plain
+    // <img> requests — the browser treats the load as a download instead of
+    // rendering it, so the homepage lead-story/article-card artwork never appears.
+    // The artwork is trusted and same-origin-sandboxed via the CSP above, so there's
+    // no security reason to force a download; `inline` lets it render normally.
+    contentDispositionType: 'inline',
   },
   // Performance optimizations — makes Next rewrite barrel imports (`import { X } from
   // "pkg"`) into direct per-module imports, so a route that uses one icon or one chart
