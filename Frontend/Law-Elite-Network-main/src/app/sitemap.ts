@@ -90,12 +90,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // A–Z legal glossary letter pages — each now has its own distinct
   // title/description/canonical (see src/app/legal/[letter]/layout.tsx), so
   // they belong in the sitemap as real indexable pages, not just linked from /legal.
-  const legalLetterRoutes: MetadataRoute.Sitemap = 'abcdefghijklmnopqrstuvwxyz'.split('').map((letter) => ({
-    url: `${BASE_URL}/legal/${letter}`,
-    lastModified: new Date(),
-    changeFrequency: 'weekly',
-    priority: 0.4,
-  }));
+  // Letters with zero bundled articles get `noindex` there (same `bundledCount`
+  // check) — a sitemap should only ever list indexable URLs, so those letters
+  // are excluded here rather than submitting noindex'd, empty pages to Google.
+  const allArticles = getAllArticles();
+  const legalLetterRoutes: MetadataRoute.Sitemap = 'abcdefghijklmnopqrstuvwxyz'
+    .split('')
+    .filter((letter) => allArticles.some((a) => a.alphabet === letter.toUpperCase()))
+    .map((letter) => ({
+      url: `${BASE_URL}/legal/${letter}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.4,
+    }));
 
   const lawyerRoutes: MetadataRoute.Sitemap = lawyers.map((l) => ({
     url: `${BASE_URL}/lawyer/${l.id}`,
