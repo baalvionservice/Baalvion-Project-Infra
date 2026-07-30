@@ -18,7 +18,13 @@ function TrustBar({ review }: { review: ReviewArticle }) {
                 <span>
                     By{" "}
                     <span className="font-semibold text-foreground">
-                        {review.reviewedBy.name}
+                        {review.reviewedBy.slug ? (
+                            <Link href={`/authors/${review.reviewedBy.slug}`} className="hover:underline">
+                                {review.reviewedBy.name}
+                            </Link>
+                        ) : (
+                            review.reviewedBy.name
+                        )}
                     </span>
 
                 </span>
@@ -35,7 +41,13 @@ function TrustBar({ review }: { review: ReviewArticle }) {
                     <span>
                         Fact-checked by{" "}
                         <span className="font-semibold text-foreground">
-                            {review.factCheckedBy.name}
+                            {review.factCheckedBy.slug ? (
+                                <Link href={`/authors/${review.factCheckedBy.slug}`} className="hover:underline">
+                                    {review.factCheckedBy.name}
+                                </Link>
+                            ) : (
+                                review.factCheckedBy.name
+                            )}
                         </span>
                     </span>
                 </div>

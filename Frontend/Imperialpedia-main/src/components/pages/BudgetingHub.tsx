@@ -149,6 +149,13 @@ export async function BudgetingHub() {
   const sidebarArticles = rest.slice(0, 3);
   const gridArticles = rest.slice(3);
 
+  // article.category is a coarse NewsCategory bucket that budgeting's pillar categories
+  // don't belong to, so it renders as the generic "Editorial" catch-all — look the real
+  // pillar label up by the article's own categorySlug instead (see also
+  // InvestingTopicExplorer, which needed the same fix for the tab-filtered grid below).
+  const budgetingLabelBySlug = Object.fromEntries(BUDGETING_TOPICS.map((t) => [t.slug, t.label]));
+  const labelFor = (a: NewsArticle) => (a.categorySlug && budgetingLabelBySlug[a.categorySlug]) || undefined;
+
   // 3) "Popular this week" — ranked from the combined feed by tracked view
   //    count, falling back to publish recency. No curated picks.
   const trending = [...articles]
@@ -286,11 +293,11 @@ export async function BudgetingHub() {
           <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <aside className="flex flex-col">
               {sidebarArticles.map((article) => (
-                <HorizontalArticleCard key={article.id} article={article} />
+                <HorizontalArticleCard key={article.id} article={article} categoryLabel={labelFor(article)} />
               ))}
             </aside>
             <div className="lg:col-span-2">
-              <FeaturedArticleCard article={featured} />
+              <FeaturedArticleCard article={featured} categoryLabel={labelFor(featured)} />
             </div>
           </section>
         )}

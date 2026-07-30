@@ -242,7 +242,10 @@ export const positionSizeExplainer: ToolExplainerContent = {
   ],
   howItWorks: [
     "The calculator first converts your risk percentage into a dollar risk budget (Account Size × Risk%), then divides that budget by the per-share loss if the trade goes against you and hits the stop-loss. The result is the largest position size that keeps your dollar loss, if wrong, capped at the budget — regardless of how far the stop is from the entry.",
-    "A tighter stop (closer to entry) allows a larger position for the same dollar risk; a wider stop forces a smaller position. This is why traders with wider stops on volatile assets typically size positions smaller.",
+    "A tighter stop (closer to entry) allows a larger position for the same dollar risk; a wider stop forces a smaller position. This is why traders with wider stops on volatile assets typically size positions smaller — the position size and the stop distance are two sides of the same risk-budget equation, not independent decisions.",
+    "This is fixed-fractional position sizing — risking a constant percentage of the account on every trade — which is the most common approach because it scales automatically as the account grows or shrinks. Some traders instead use fixed-dollar risk (the same dollar amount on every trade regardless of account size), which is simpler but doesn't compound risk down after a losing streak the way fixed-fractional sizing does.",
+    "The stop-loss distance itself is usually set by the trade's own technical structure — below a recent swing low, outside a volatility band like an ATR multiple, or beyond a support level — not chosen to hit a target position size. Sizing the position around the stop, rather than sizing the stop around a position you already want to take, keeps the risk management honest: the stop reflects where the trade thesis is actually invalidated, and the position size is whatever the risk budget allows at that distance.",
+    "Position sizing also interacts with how many trades are open at once. Risking 1% on a single trade is very different from risking 1% each across ten simultaneously open, highly correlated positions — the effective portfolio risk in that case is much closer to the sum of the individual risks than to 1%. This calculator sizes one trade at a time; managing aggregate risk across multiple concurrent positions is a separate, portfolio-level judgment it doesn't make for you.",
   ],
   example: {
     title: "$50,000 account, 1% risk, entry $120, stop $114",
@@ -263,6 +266,21 @@ export const positionSizeExplainer: ToolExplainerContent = {
       question: "What if I don't use a stop-loss?",
       answer:
         "This formula requires a defined exit price to calculate risk per share. Without a stop-loss, there's no way to cap downside on a single position, which is the specific risk this calculation is designed to manage.",
+    },
+    {
+      question: "Should the position size ever be rounded up instead of down?",
+      answer:
+        "Rounding down is the conservative choice — it keeps the actual dollar risk at or slightly below the intended budget. Rounding up would push the realized risk slightly above the target percentage if the stop is hit, which defeats the purpose of setting a fixed risk budget in the first place.",
+    },
+    {
+      question: "Does position size account for trading fees or slippage?",
+      answer:
+        "No — the formula assumes the entry and stop-loss prices are exact fills. In practice, slippage (getting filled at a worse price than intended, especially on fast-moving or thinly traded names) means the real loss if a stop triggers can run slightly higher than the calculated risk amount. Traders in volatile or illiquid instruments often size a bit smaller than the raw formula output to leave a margin for this.",
+    },
+    {
+      question: "How does this differ from just deciding how many shares to buy based on account size alone?",
+      answer:
+        "Sizing by a flat percentage of account value (e.g., \"always put 10% of the account into each trade\") ignores how far away the stop is, so two trades of the same dollar size can carry very different real risk if one has a tight stop and the other a wide one. Risk-based position sizing normalizes for that difference, so every trade risks a comparable amount regardless of how volatile the entry-to-stop distance happens to be.",
     },
   ],
 };

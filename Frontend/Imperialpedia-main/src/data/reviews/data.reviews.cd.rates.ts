@@ -14,8 +14,9 @@ export const bestCdRatesReview: ReviewArticle = withReviewArt({
   reviewedBy: {
     name: "Sarah Mitchell",
     title: "Senior Banking Editor",
+    slug: "sarah-mitchell",
   },
-  factCheckedBy: { name: "James Okafor", title: "Certified Financial Planner" },
+  factCheckedBy: { name: "James Okafor", title: "Certified Financial Planner", slug: "james-okafor" },
   methodologyLink: "#methodology",
   methodology:
     "We evaluated 40+ banks and credit unions, comparing APY rates, minimum deposit requirements, early withdrawal penalties, and FDIC/NCUA insurance coverage. Rates were verified directly from institution websites in April 2026. Our overall scores weight APY (50%), minimum deposit (20%), penalty structure (20%), and brand trust (10%).",
@@ -51,6 +52,22 @@ export const bestCdRatesReview: ReviewArticle = withReviewArt({
       providerName: "Synchrony Bank",
       summaryBlurb: "Bump-rate CD lets you take advantage of rate increases.",
       ctaUrl: "https://www.synchronybank.com",
+      ctaLabel: "Open Account",
+    },
+    {
+      providerId: "capitalone360",
+      categoryLabel: "Best for Branch Access",
+      providerName: "Capital One 360",
+      summaryBlurb: "Competitive online rates backed by a nationwide branch and ATM network.",
+      ctaUrl: "https://www.capitalone.com",
+      ctaLabel: "Open Account",
+    },
+    {
+      providerId: "citbank",
+      categoryLabel: "Best for Long Terms",
+      providerName: "CIT Bank",
+      summaryBlurb: "Strong long-term CD rates with a wide range of term lengths.",
+      ctaUrl: "https://www.cit.com",
       ctaLabel: "Open Account",
     },
   ],
@@ -193,6 +210,70 @@ export const bestCdRatesReview: ReviewArticle = withReviewArt({
       ctaUrl: "https://www.synchronybank.com",
       ctaLabel: "Open Account",
     },
+    {
+      id: "capitalone360",
+      name: "Capital One 360",
+      categoryLabels: ["Best for Branch Access"],
+      overallScore: 4.3,
+      fastFacts: [
+        { label: "Account Minimum", value: "$0" },
+        { label: "APY", value: "4.10% (12-month term)" },
+        { label: "Early Withdrawal Penalty", value: "3 months of interest" },
+      ],
+      whyWeChoseIt: [
+        {
+          heading: "Best for Branch Access",
+          body: "Capital One 360 is the rare high-yield CD provider that also offers a nationwide network of physical branches and Capital One Cafés. For savers who want the convenience of in-person service alongside a competitive online rate, it's the strongest combination on this list.",
+        },
+      ],
+      pros: [
+        "Nationwide branch and ATM network unlike most competitors here",
+        "No minimum deposit required",
+        "No monthly maintenance fees",
+        "FDIC insured up to $250,000",
+      ],
+      cons: [
+        "APY trails top online-only competitors like Marcus",
+        "Early withdrawal penalty applies to all standard CD terms",
+        "Branch locations concentrated in select metro areas",
+      ],
+      overview:
+        "Capital One 360 is the online and retail banking arm of Capital One, one of the largest banks in the United States. Unlike purely digital competitors, it combines competitive online rates with a physical branch network and Capital One Café locations, making it a middle-ground option between online-only banks and traditional branch banking.",
+      ctaUrl: "https://www.capitalone.com",
+      ctaLabel: "Open Account",
+    },
+    {
+      id: "citbank",
+      name: "CIT Bank",
+      categoryLabels: ["Best for Long Terms"],
+      overallScore: 4.5,
+      fastFacts: [
+        { label: "Account Minimum", value: "$1,000" },
+        { label: "APY", value: "4.65% (11-month No-Penalty CD)" },
+        { label: "Early Withdrawal Penalty", value: "Varies by term, none on No-Penalty CD" },
+      ],
+      whyWeChoseIt: [
+        {
+          heading: "Best for Long Terms",
+          body: "CIT Bank offers one of the widest CD term ranges we evaluated, from 6 months out to 5 years, with consistently competitive rates across the curve. Savers who want to ladder CDs across several maturities get more usable term options here than at most competitors.",
+        },
+      ],
+      pros: [
+        "Wide term selection from 6 months to 5 years",
+        "No-Penalty CD option available on the 11-month term",
+        "Competitive APYs across both short and long terms",
+        "FDIC insured up to $250,000",
+      ],
+      cons: [
+        "$1,000 minimum deposit higher than several no-minimum competitors",
+        "No physical branches",
+        "Mobile app has fewer features than larger competitors",
+      ],
+      overview:
+        "CIT Bank is the online banking division of First-Citizens Bank, one of the largest family-controlled banks in the US. CIT has built its reputation around high-yield savings and CD products with a broad range of terms, targeting savers who want to structure a CD ladder without moving money across multiple institutions.",
+      ctaUrl: "https://www.cit.com",
+      ctaLabel: "Open Account",
+    },
   ],
   comparisonRows: [
     {
@@ -218,6 +299,18 @@ export const bestCdRatesReview: ReviewArticle = withReviewArt({
       specs: { APY: "4.85%", Term: "12–60 mo", "Min. Deposit": "$0", "Early Withdrawal": "90–365 days", Score: "4.5/5" },
       overallScore: 4.5,
       ctaUrl: "https://www.synchronybank.com",
+    },
+    {
+      providerName: "Capital One 360",
+      specs: { APY: "4.10%", Term: "6 mo – 5 yr", "Min. Deposit": "$0", "Early Withdrawal": "3 mo interest", Score: "4.3/5" },
+      overallScore: 4.3,
+      ctaUrl: "https://www.capitalone.com",
+    },
+    {
+      providerName: "CIT Bank",
+      specs: { APY: "4.65%", Term: "6 mo – 5 yr", "Min. Deposit": "$1,000", "Early Withdrawal": "Varies", Score: "4.5/5" },
+      overallScore: 4.5,
+      ctaUrl: "https://www.cit.com",
     },
   ],
   faqs: [
