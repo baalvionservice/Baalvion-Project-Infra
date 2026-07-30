@@ -7,6 +7,7 @@ import { ArticleCard } from '@/components/knowledge/ArticleCard';
 import { SubcategoryTabs } from '@/components/knowledge/SubcategoryTabs';
 import { AlphabetFilter } from '@/components/knowledge/AlphabetFilter';
 import { getArticlesByCategorySlug } from '@/data/law-content';
+import { isSubcategoryPopulated } from '@/lib/subcategory-or-article';
 import seedData from '../../../../docs/seed-data.json';
 import { FileText } from 'lucide-react';
 
@@ -60,6 +61,14 @@ export function CategoryContent({ categorySlug, categoryId }: CategoryContentPro
     if (match) setSelectedSubcategoryId(String(match.id));
   }, [searchParams, subcategories]);
 
+  // Only show subcategories with at least one article -- otherwise every
+  // filter chip for an empty topic is a dead end (see
+  // docs/empty-subcategories.md for the content backlog these represent).
+  const populatedSubcategories = useMemo(
+    () => subcategories.filter((s) => isSubcategoryPopulated(categorySlug, s.slug)),
+    [subcategories, categorySlug],
+  );
+
   // Bundled articles for this category are the baseline; API results win.
   const articles = useMemo(() => {
     const bundled = getArticlesByCategorySlug(categorySlug);
@@ -95,7 +104,7 @@ export function CategoryContent({ categorySlug, categoryId }: CategoryContentPro
               Filter by topic
             </span>
             <SubcategoryTabs
-              subcategories={subcategories}
+              subcategories={populatedSubcategories}
               selectedId={selectedSubcategoryId}
               onSelect={setSelectedSubcategoryId}
             />
