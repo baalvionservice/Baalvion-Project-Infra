@@ -72,7 +72,7 @@ export default function SponsoredContentPolicyPage() {
                 editorial or credentialing check, described in our{' '}
                 <Link href="/editorial-standards" className="text-blue-600 hover:underline">Editorial Standards</Link>.
                 A paid or sponsored placement, by contrast, reflects a commercial arrangement disclosed under our{' '}
-                <Link href="/affiliate-disclosure" className="text-blue-600 hover:underline">Affiliate Disclosure</Link>.
+                <Link href="/editorial-disclosure-policy" className="text-blue-600 hover:underline">Editorial, DMCA &amp; Disclosure Policy</Link>.
                 A listing can be both, one, or neither — paying for placement does not itself confer Verified status.
               </p>
             </Block>

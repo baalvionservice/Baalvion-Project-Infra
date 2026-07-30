@@ -142,6 +142,22 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
 
+  // Five policy pages (attribution/ownership/copyright/DMCA/affiliate) were
+  // consolidated into one Editorial, DMCA & Disclosure Policy page; /disclaimer
+  // was dropped as a near-duplicate of the Terms of Service disclaimer section.
+  // Permanent redirects so bookmarks, backlinks, and any already-indexed URLs
+  // don't 404.
+  async redirects() {
+    return [
+      { source: '/source-attribution-policy', destination: '/editorial-disclosure-policy', permanent: true },
+      { source: '/ownership-disclosure', destination: '/editorial-disclosure-policy', permanent: true },
+      { source: '/dmca-policy', destination: '/editorial-disclosure-policy', permanent: true },
+      { source: '/copyright-policy', destination: '/editorial-disclosure-policy', permanent: true },
+      { source: '/affiliate-disclosure', destination: '/editorial-disclosure-policy', permanent: true },
+      { source: '/disclaimer', destination: '/terms-of-service', permanent: true },
+    ];
+  },
+
   async headers() {
     return [
       {

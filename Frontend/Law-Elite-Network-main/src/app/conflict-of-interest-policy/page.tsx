@@ -40,7 +40,7 @@ export default function ConflictOfInterestPolicyPage() {
             <Block icon={<Scale className="w-6 h-6 text-blue-600" />} title="Separating Editorial and Commercial Judgment">
               <p>
                 Referral and matching arrangements with listed lawyers are commercial relationships, disclosed in our{' '}
-                <Link href="/affiliate-disclosure" className="text-blue-600 hover:underline">Affiliate Disclosure</Link>.
+                <Link href="/editorial-disclosure-policy" className="text-blue-600 hover:underline">Editorial, DMCA &amp; Disclosure Policy</Link>.
                 They are kept separate from editorial judgments about legal topics, which are governed by our{' '}
                 <Link href="/editorial-standards" className="text-blue-600 hover:underline">Editorial Standards</Link>.
                 A lawyer&apos;s participation in our referral network does not entitle them to favorable coverage,

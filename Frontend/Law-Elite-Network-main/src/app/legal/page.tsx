@@ -61,7 +61,7 @@ export default function LegalDirectoryPage() {
             <div className="relative z-10 max-w-2xl space-y-6">
               <h3 className="text-3xl font-bold font-serif italic">Unparalleled Discovery Velocity</h3>
               <p className="text-slate-400 text-lg leading-relaxed italic font-medium">
-                Our alphabetical index covers 120+ jurisdictions and 12 major legal domains, ensuring that high-intent intelligence is always within reach for discerning members.
+                Our alphabetical index spans 8 major legal domains, with new terms and guides added as our contributors publish them.
               </p>
               <div className="pt-8 flex items-center gap-3 text-blue-400 font-bold uppercase text-xs tracking-[0.2em]">
                 <ShieldCheck className="w-5 h-5" />

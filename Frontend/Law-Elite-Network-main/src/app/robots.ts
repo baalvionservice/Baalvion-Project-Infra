@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 
-const ALLOW = ['/', '/news', '/search', '/plans', '/about-us', '/contact-us', '/careers', '/advertise', '/editorial-process', '/privacy-policy', '/terms-of-service', '/disclaimer', '/lawyers/', '/article/', '/law/', '/legal/'];
+const ALLOW = ['/', '/news', '/search', '/plans', '/about-us', '/contact-us', '/careers', '/advertise', '/editorial-process', '/privacy-policy', '/terms-of-service', '/editorial-disclosure-policy', '/lawyers/', '/article/', '/law/', '/legal/'];
 
 const DISALLOW = [
   '/dashboard',

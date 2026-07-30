@@ -90,8 +90,7 @@ export default function TermsOfServicePage() {
               <p>
                 By accessing, browsing, or otherwise using the Service in any way, you acknowledge that you have read,
                 understood, and agree to be bound by these Terms and by our{' '}
-                <Link href="/privacy-policy">Privacy Policy</Link>,{' '}
-                <Link href="/disclaimer">Disclaimer</Link>, and{' '}
+                <Link href="/privacy-policy">Privacy Policy</Link> and{' '}
                 <Link href="/editorial-standards">Editorial Standards</Link>, each of which is incorporated into these
                 Terms by reference. These Terms constitute a legally binding agreement between you and Law Elite Network
                 (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;).
@@ -229,8 +228,7 @@ export default function TermsOfServicePage() {
                 of any kind, whether express or implied, including warranties of merchantability, fitness for a
                 particular purpose, accuracy, and non-infringement. We do not warrant that the Service will be
                 uninterrupted, error-free, secure, or that any information on it is current, complete, or accurate. Your
-                use of the Service is at your own risk. This section operates together with our{' '}
-                <Link href="/disclaimer">Disclaimer</Link>.
+                use of the Service is at your own risk.
               </p>
               <p>
                 To the fullest extent permitted by applicable law, Law Elite Network and its owners, officers, editors,
