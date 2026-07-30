@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { Building2, Save, Loader2, Link as LinkIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiClient } from "@/lib/api/client";
@@ -33,7 +34,8 @@ export default function CategoryEditorModal({ category, isOpen, onClose, onSucce
     slug: "",
     description: "",
     icon: "Scale",
-    order: 1
+    order: 1,
+    is_active: true
   });
 
   useEffect(() => {
@@ -43,10 +45,11 @@ export default function CategoryEditorModal({ category, isOpen, onClose, onSucce
         slug: category.slug || "",
         description: category.description || "",
         icon: category.icon || "Scale",
-        order: category.order || 1
+        order: category.order || 1,
+        is_active: category.is_active !== false
       });
     } else {
-      setFormData({ name: "", slug: "", description: "", icon: "Scale", order: 1 });
+      setFormData({ name: "", slug: "", description: "", icon: "Scale", order: 1, is_active: true });
     }
   }, [category, isOpen]);
 
@@ -62,7 +65,7 @@ export default function CategoryEditorModal({ category, isOpen, onClose, onSucce
       if (category?.id) {
         await apiClient.patch(`/categories/${category.id}`, formData);
       } else {
-        await apiClient.post('/categories', { ...formData, is_active: true });
+        await apiClient.post('/categories', formData);
       }
       toast({ title: "Pillar Synchronized", description: "Jurisdictional pillar updated in the global catalog." });
       onSuccess();
@@ -141,6 +144,17 @@ export default function CategoryEditorModal({ category, isOpen, onClose, onSucce
               onChange={e => setFormData({...formData, description: e.target.value})}
               className="min-h-[100px] border-slate-200 italic"
               placeholder="Provide context for this domain cluster..."
+            />
+          </div>
+
+          <div className="flex items-center justify-between rounded-xl border border-slate-200 p-4">
+            <div className="space-y-0.5">
+              <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Visible on Live Site</Label>
+              <p className="text-xs text-slate-400">Off hides this pillar and its specializations from the public site.</p>
+            </div>
+            <Switch
+              checked={formData.is_active}
+              onCheckedChange={checked => setFormData({...formData, is_active: checked})}
             />
           </div>
 

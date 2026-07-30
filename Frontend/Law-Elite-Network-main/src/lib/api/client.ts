@@ -148,7 +148,7 @@ export const articlesPublicApi = {
 };
 
 export const categoriesPublicApi = {
-  list: () => publicClient.get('/categories'),
+  list: (params?: Record<string, unknown>) => publicClient.get('/categories', { params }),
   get: (slugOrId: string) => publicClient.get(`/categories/${slugOrId}`),
 };
 

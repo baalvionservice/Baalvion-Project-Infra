@@ -33,4 +33,22 @@ const createSubcategory = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
-module.exports = { listSubcategories, getSubcategory, createSubcategory };
+const updateSubcategory = async (req, res, next) => {
+    try {
+        const subcategory = await db.Subcategory.findByPk(req.params.id);
+        if (!subcategory) return next(new AppError('NOT_FOUND', 'Subcategory not found', 404));
+        await subcategory.update(req.body);
+        return sendSuccess(req, res, subcategory);
+    } catch (err) { return next(err); }
+};
+
+const deleteSubcategory = async (req, res, next) => {
+    try {
+        const subcategory = await db.Subcategory.findByPk(req.params.id);
+        if (!subcategory) return next(new AppError('NOT_FOUND', 'Subcategory not found', 404));
+        await subcategory.update({ is_active: false });
+        return sendSuccess(req, res, subcategory);
+    } catch (err) { return next(err); }
+};
+
+module.exports = { listSubcategories, getSubcategory, createSubcategory, updateSubcategory, deleteSubcategory };

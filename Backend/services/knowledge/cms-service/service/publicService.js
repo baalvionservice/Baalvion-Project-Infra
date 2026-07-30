@@ -63,7 +63,7 @@ async function getPublicContent(websiteSlug, slug, { callerId } = {}) {
         const content = await CmsContent.findOne({
             where: { websiteId: website.id, slug, status: 'published', visibility: 'public' },
             include: [
-                { model: CmsCategory, as: 'category', attributes: ['id', 'name', 'slug'] },
+                { model: CmsCategory, as: 'category', attributes: ['id', 'name', 'slug'], where: { status: 'active' }, required: false },
                 // Pre-resolved entity-link data (see contentEntityMentionsService.js) —
                 // rides this same cached fetch rather than a second render-time call.
                 // 'rejected'/'suggested' rows (future editor-review states) stay invisible
@@ -174,10 +174,10 @@ async function listPublicContent(websiteSlug, query = {}, { callerId } = {}) {
         ];
     }
 
-    const includes = [{ model: CmsCategory, as: 'category', attributes: ['id', 'name', 'slug'] }];
+    const includes = [{ model: CmsCategory, as: 'category', attributes: ['id', 'name', 'slug'], where: { status: 'active' }, required: false }];
 
     if (categorySlug) {
-        const cat = await CmsCategory.findOne({ where: { websiteId: website.id, slug: categorySlug } });
+        const cat = await CmsCategory.findOne({ where: { websiteId: website.id, slug: categorySlug, status: 'active' } });
         if (cat) {
             // Surface content whose primary OR additional categories include this one,
             // so a multi-category article appears on every relevant topic page.

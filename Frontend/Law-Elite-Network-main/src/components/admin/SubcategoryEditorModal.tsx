@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Tag, Save, Loader2, Link as LinkIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { categoriesPublicApi, apiClient } from "@/lib/api/client";
@@ -38,7 +39,8 @@ export default function SubcategoryEditorModal({ subcategory, isOpen, onClose, o
   const [formData, setFormData] = useState({
     name: "",
     slug: "",
-    categoryId: ""
+    categoryId: "",
+    is_active: true
   });
 
   useEffect(() => {
@@ -53,10 +55,11 @@ export default function SubcategoryEditorModal({ subcategory, isOpen, onClose, o
       setFormData({
         name: subcategory.name || "",
         slug: subcategory.slug || "",
-        categoryId: String(subcategory.category_id || subcategory.categoryId || "")
+        categoryId: String(subcategory.category_id || subcategory.categoryId || ""),
+        is_active: subcategory.is_active !== false
       });
     } else {
-      setFormData({ name: "", slug: "", categoryId: "" });
+      setFormData({ name: "", slug: "", categoryId: "", is_active: true });
     }
   }, [subcategory, isOpen]);
 
@@ -69,7 +72,7 @@ export default function SubcategoryEditorModal({ subcategory, isOpen, onClose, o
     e.preventDefault();
     setIsSaving(true);
     try {
-      const payload = { name: formData.name, slug: formData.slug, category_id: formData.categoryId, is_active: true };
+      const payload = { name: formData.name, slug: formData.slug, category_id: formData.categoryId, is_active: formData.is_active };
       if (subcategory?.id) {
         await apiClient.patch(`/subcategories/${subcategory.id}`, payload);
       } else {
@@ -138,6 +141,17 @@ export default function SubcategoryEditorModal({ subcategory, isOpen, onClose, o
                 required
               />
             </div>
+          </div>
+
+          <div className="flex items-center justify-between rounded-xl border border-slate-200 p-4">
+            <div className="space-y-0.5">
+              <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Visible on Live Site</Label>
+              <p className="text-xs text-slate-400">Off hides this specialization from the public site.</p>
+            </div>
+            <Switch
+              checked={formData.is_active}
+              onCheckedChange={checked => setFormData({...formData, is_active: checked})}
+            />
           </div>
 
           <DialogFooter className="pt-4">

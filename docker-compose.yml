@@ -1024,6 +1024,10 @@ services:
       - DB_NAME=baalvion_db
       - DB_USER=baalvion
       - DB_PASSWORD=baalvion_dev_pass
+      # Local postgres container has no TLS listener — auth-node's buildPgSsl() defaults
+      # to requiring TLS when NODE_ENV=production (see Backend/packages/auth-node/dbSsl.js),
+      # which this service is set to even locally. Real deploy: unset (RDS enforces SSL).
+      - DB_SSL=false
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
