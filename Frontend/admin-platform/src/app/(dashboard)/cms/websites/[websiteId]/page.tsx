@@ -171,6 +171,12 @@ export default function WebsiteDetailPage({
   const { websiteId } = use(params);
   const { setBreadcrumbs } = useUIStore();
   const setActiveWebsite = useCmsStore((s) => s.setActiveWebsite);
+  // Restore the last filters/search/page the user had open on the Content list
+  // instead of always landing on the unfiltered list — otherwise every trip back
+  // through this dashboard (e.g. via the breadcrumb) silently drops the section
+  // the user was working in.
+  const lastContentListUrl = useCmsStore((s) => s.lastContentListUrl[websiteId]);
+  const contentHref = lastContentListUrl ?? `/cms/websites/${websiteId}/content`;
 
   const { data: website, isLoading } = useWebsite(websiteId);
   // Stats/workflow endpoints key off the canonical UUID. :websiteId may now be a
@@ -261,7 +267,7 @@ export default function WebsiteDetailPage({
                 </a>
               </Button>
               <Button size="sm" asChild>
-                <Link href={`/cms/websites/${websiteId}/content`}>
+                <Link href={contentHref}>
                   <FileText className="mr-2 h-4 w-4" />
                   Add / edit content
                 </Link>
@@ -343,7 +349,7 @@ export default function WebsiteDetailPage({
             ))}
           </div>
           <Button size="sm" className="mt-4" asChild>
-            <Link href={`/cms/websites/${websiteId}/content`}>
+            <Link href={contentHref}>
               Start adding content
               <ArrowRight className="ml-1.5 h-4 w-4" />
             </Link>
@@ -372,7 +378,10 @@ export default function WebsiteDetailPage({
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {group.links.map((link) => (
-              <Link key={link.title} href={`/cms/websites/${websiteId}/${link.segment}`}>
+              <Link
+                key={link.title}
+                href={link.segment === 'content' ? contentHref : `/cms/websites/${websiteId}/${link.segment}`}
+              >
                 <Card
                   className={`h-full cursor-pointer transition-shadow hover:shadow-md ${
                     link.highlight ? 'border-primary/40 ring-1 ring-primary/20' : ''
