@@ -200,7 +200,7 @@ export default function EditorialStandardsPage() {
                 No article can account for the specific facts of your situation, your jurisdiction, or how the law would
                 actually be applied to you. We write to inform and orient, never to substitute for advice from a licensed
                 attorney who knows your circumstances. This policy is reflected throughout our content and explained in
-                full in our <Link href="/disclaimer">Disclaimer</Link>.
+                full in our <Link href="/terms-of-service">Terms of Service</Link>.
               </p>
             </Block>
 

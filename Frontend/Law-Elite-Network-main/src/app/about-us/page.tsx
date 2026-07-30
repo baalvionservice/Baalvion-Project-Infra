@@ -165,7 +165,7 @@ export default function AboutUsPage() {
                 not act, or refrain from acting, on the basis of anything you read here without first obtaining advice
                 from a qualified attorney licensed in your jurisdiction. Our commitment to accuracy is matched by our
                 commitment to being honest about these limits — a standard we hold ourselves to in everything we
-                publish. See our <Link href="/disclaimer">Disclaimer</Link> for the full notice.
+                publish. See our <Link href="/terms-of-service">Terms of Service</Link> for the full notice.
               </p>
             </Block>
 

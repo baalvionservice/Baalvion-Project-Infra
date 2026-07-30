@@ -7,11 +7,16 @@ type Stat = { icon: string; label: string; value: string };
 
 const ICON_MAP: Record<string, LucideIcon> = { Globe, Award, ShieldCheck, Zap };
 
+// Real, verifiable figures -- computed from the bundled editorial library
+// (72 published guides, 8 practice areas, 11 named contributors), not
+// aspirational numbers. Previously this fell back to invented figures
+// ("12K+ Verified Dossiers", "50K+ Active Members", "120+ Global
+// Jurisdictions") with no data behind them whenever the CMS had no override.
 const FALLBACK_STATS: Stat[] = [
-  { icon: "Globe", label: "Global Jurisdictions", value: "120+" },
-  { icon: "Award", label: "Expert Topics", value: "500+" },
-  { icon: "ShieldCheck", label: "Verified Dossiers", value: "12K+" },
-  { icon: "Zap", label: "Active Members", value: "50K+" }
+  { icon: "Award", label: "Practice Areas", value: "8" },
+  { icon: "Globe", label: "Legal Guides", value: "72+" },
+  { icon: "ShieldCheck", label: "Expert Contributors", value: "11" },
+  { icon: "Zap", label: "Specializations Covered", value: "26" }
 ];
 
 /**

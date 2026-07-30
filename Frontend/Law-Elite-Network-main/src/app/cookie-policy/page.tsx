@@ -61,7 +61,7 @@ export default function CookiePolicyPage() {
                 Advertising cookies are set by us or by third-party advertising partners to deliver relevant
                 advertising and to measure the performance of that advertising. Some of these cookies may also support
                 sponsored placements described in our{' '}
-                <Link href="/affiliate-disclosure" className="text-blue-600 hover:underline">Affiliate Disclosure</Link>{' '}
+                <Link href="/editorial-disclosure-policy" className="text-blue-600 hover:underline">Editorial, DMCA &amp; Disclosure Policy</Link>{' '}
                 and{' '}
                 <Link href="/sponsored-content-policy" className="text-blue-600 hover:underline">Sponsored Content Policy</Link>.
                 Advertising cookies never affect which legal topics we cover or how we describe them editorially.

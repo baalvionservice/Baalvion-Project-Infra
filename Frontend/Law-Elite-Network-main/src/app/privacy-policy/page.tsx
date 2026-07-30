@@ -182,7 +182,7 @@ export default function PrivacyPolicyPage() {
                 <li>Email: <a href="mailto:legal@lawelitenetwork.com">legal@lawelitenetwork.com</a></li>
                 <li>Mail: Law Elite Network, 12 Executive Tower, BKC, Mumbai, MH 400051, India</li>
               </ul>
-              <p>See also our <Link href="/terms-of-service" className="text-blue-600 hover:underline">Terms of Service</Link> and <Link href="/disclaimer" className="text-blue-600 hover:underline">Disclaimer</Link>.</p>
+              <p>See also our <Link href="/terms-of-service" className="text-blue-600 hover:underline">Terms of Service</Link>.</p>
             </Block>
 
           </section>

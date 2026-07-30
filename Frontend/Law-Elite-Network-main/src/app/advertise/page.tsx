@@ -65,21 +65,25 @@ export default function AdvertisePage() {
 
           <section className="space-y-20">
             <div id="audience" className="space-y-6">
-              <h2 className="text-[32px] font-bold text-slate-900 font-serif leading-tight">Platform Demographics</h2>
+              <h2 className="text-[32px] font-bold text-slate-900 font-serif leading-tight">Platform Overview</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div className="space-y-2">
-                  <p className="text-4xl font-bold text-blue-600 font-serif">50K+</p>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Monthly Active Members</p>
+                  <p className="text-4xl font-bold text-blue-600 font-serif">72+</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Published Legal Guides</p>
                 </div>
                 <div className="space-y-2">
-                  <p className="text-4xl font-bold text-blue-600 font-serif">120+</p>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Global Jurisdictions</p>
+                  <p className="text-4xl font-bold text-blue-600 font-serif">8</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Practice Area Verticals</p>
                 </div>
                 <div className="space-y-2">
-                  <p className="text-4xl font-bold text-blue-600 font-serif">Top 1%</p>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Decision Makers</p>
+                  <p className="text-4xl font-bold text-blue-600 font-serif">11</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Expert Contributors</p>
                 </div>
               </div>
+              <p className="text-sm text-slate-500 max-w-2xl">
+                Every guide is written and reviewed by a named legal contributor across our practice areas, giving
+                advertisers a brand-safe, subject-matter-relevant context rather than generic traffic.
+              </p>
             </div>
 
             <div id="partnerships" className="space-y-8">

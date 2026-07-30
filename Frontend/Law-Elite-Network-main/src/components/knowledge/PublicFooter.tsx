@@ -74,53 +74,32 @@ export function PublicFooter() {
             </div>
 
             <div className="md:col-span-3 space-y-4 text-[11px] font-medium text-white/70">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-white/50">Core Policies</p>
               <ul className="space-y-3">
-                <li><Link href="/corrections" className="hover:text-white transition-colors">Corrections</Link></li>
                 <li><Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
-                <li><Link href="/terms-of-service" className="hover:text-white transition-colors">Terms of Service</Link></li>
-                <li><Link href="/disclaimer" className="hover:text-white transition-colors">Disclaimer</Link></li>
+                <li><Link href="/terms-of-service" className="hover:text-white transition-colors">Terms of Service &amp; Legal Disclaimer</Link></li>
+                <li><Link href="/cookie-policy" className="hover:text-white transition-colors">Cookie Policy</Link></li>
+                <li><Link href="/editorial-disclosure-policy" className="hover:text-white transition-colors">Editorial, DMCA &amp; Disclosure Policy</Link></li>
               </ul>
             </div>
           </div>
 
-          {/* Legal & Compliance: full-width band, kept out of the 12-col grid above
-              since 12 additional links would otherwise force an unbalanced 18-unit row */}
-          <div className="mt-14 pt-10 border-t border-white/10 grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-8">
-            <div className="space-y-4 text-[11px] font-medium text-white/70">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-white/50">Trust &amp; Compliance</p>
-              <ul className="space-y-3">
-                <li><Link href="/cookie-policy" className="hover:text-white transition-colors">Cookie Policy</Link></li>
-                <li><Link href="/ai-usage-policy" className="hover:text-white transition-colors">AI Usage Policy</Link></li>
-                <li><Link href="/dmca-policy" className="hover:text-white transition-colors">DMCA Policy</Link></li>
-                <li><Link href="/copyright-policy" className="hover:text-white transition-colors">Copyright Policy</Link></li>
-              </ul>
-            </div>
-
-            <div className="space-y-4 text-[11px] font-medium text-white/70">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-white/50">Accessibility &amp; Sourcing</p>
-              <ul className="space-y-3">
-                <li><Link href="/accessibility" className="hover:text-white transition-colors">Accessibility Statement</Link></li>
-                <li><Link href="/source-attribution-policy" className="hover:text-white transition-colors">Source Attribution Policy</Link></li>
-                <li><Link href="/diversity-policy" className="hover:text-white transition-colors">Diversity Policy</Link></li>
-              </ul>
-            </div>
-
-            <div className="space-y-4 text-[11px] font-medium text-white/70">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-white/50">Editorial Disclosures</p>
-              <ul className="space-y-3">
-                <li><Link href="/affiliate-disclosure" className="hover:text-white transition-colors">Affiliate Disclosure</Link></li>
-                <li><Link href="/sponsored-content-policy" className="hover:text-white transition-colors">Sponsored Content Policy</Link></li>
-                <li><Link href="/ownership-disclosure" className="hover:text-white transition-colors">Ownership Disclosure</Link></li>
-              </ul>
-            </div>
-
-            <div className="space-y-4 text-[11px] font-medium text-white/70">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-white/50">Community</p>
-              <ul className="space-y-3">
-                <li><Link href="/conflict-of-interest-policy" className="hover:text-white transition-colors">Conflict of Interest Policy</Link></li>
-                <li><Link href="/comment-policy" className="hover:text-white transition-colors">Comment & Review Policy</Link></li>
-              </ul>
-            </div>
+          {/* More policies: kept real and crawlable (see sitemap.ts), just given
+              less visual prominence than the four core policies above -- each of
+              these covers distinct, substantive ground (accessibility commitments,
+              conflict-of-interest handling, comment moderation, etc.), so they're
+              condensed here rather than deleted. */}
+          <div className="mt-14 pt-10 border-t border-white/10">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-4">More Policies</p>
+            <ul className="flex flex-wrap gap-x-8 gap-y-3 text-[11px] font-medium text-white/70">
+              <li><Link href="/ai-usage-policy" className="hover:text-white transition-colors">AI Usage Policy</Link></li>
+              <li><Link href="/diversity-policy" className="hover:text-white transition-colors">Diversity Policy</Link></li>
+              <li><Link href="/accessibility" className="hover:text-white transition-colors">Accessibility Statement</Link></li>
+              <li><Link href="/conflict-of-interest-policy" className="hover:text-white transition-colors">Conflict of Interest Policy</Link></li>
+              <li><Link href="/sponsored-content-policy" className="hover:text-white transition-colors">Sponsored Content Policy</Link></li>
+              <li><Link href="/comment-policy" className="hover:text-white transition-colors">Comment &amp; Review Policy</Link></li>
+              <li><Link href="/corrections" className="hover:text-white transition-colors">Corrections</Link></li>
+            </ul>
           </div>
         </div>
       </div>
