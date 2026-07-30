@@ -98,15 +98,23 @@ const FALLBACK_NAMES: Record<string, string> = {
   XLK: "Technology Sector", XLE: "Energy Sector", XLV: "Health Care Sector", XLF: "Financials Sector", XLY: "Consumer Discretionary Sector",
   AAPL: "Apple", MSFT: "Microsoft", GOOGL: "Alphabet", AMZN: "Amazon", TSLA: "Tesla", NVDA: "Nvidia",
   AMD: "AMD", META: "Meta", NFLX: "Netflix", JPM: "JPMorgan Chase", BRKB: "Berkshire Hathaway", INTC: "Intel", TSM: "Taiwan Semiconductor",
+  DGS10: "10-Year Treasury Yield",
 };
 
 /** Shapes a Yahoo quote into a MarketAssetRow — same price/change math as
  * worldFeed.ts's toIndicator(), so fallback rows read identically to primary
  * ones. Sector/stock tickers pass straight through (bare US ticker == Yahoo
- * symbol); everything else goes through CANONICAL_TO_YAHOO. Symbols with no
- * Yahoo equivalent at all (the 4 FRED bond-yield series) are never attempted. */
+ * symbol); everything else goes through CANONICAL_TO_YAHOO. Of the 4 FRED
+ * bond-yield series, only DGS10 has a real Yahoo equivalent (^TNX, mapped via
+ * worldFeed.ts's CANONICAL_SYMBOL_MAP) — DGS2/DGS30/DGS3MO have neither an
+ * imperialpedia-service row nor a Yahoo mapping and are never attempted.
+ * (This used to block all 4 unconditionally, which silently broke DGS10's
+ * working fallback and made /markets/quote/DGS10 a permanent 404 despite
+ * sitemap-service.ts explicitly keeping it in the sitemap on the assumption
+ * this fallback existed — verified live 2026-07-29.) */
 async function fetchYahooAsMarketAssetRow(canonicalSymbol: string): Promise<MarketAssetRow | null> {
-  if ((MARKET_GROUPS.bonds as readonly string[]).includes(canonicalSymbol)) return null;
+  const UNSUPPORTED_BONDS: readonly string[] = ["DGS2", "DGS30", "DGS3MO"];
+  if (UNSUPPORTED_BONDS.includes(canonicalSymbol)) return null;
   const yahooSymbol = CANONICAL_TO_YAHOO[canonicalSymbol] ?? canonicalSymbol;
   try {
     const q = await fetchYahooQuote(yahooSymbol);
@@ -123,7 +131,9 @@ async function fetchYahooAsMarketAssetRow(canonicalSymbol: string): Promise<Mark
             ? "forex"
             : (MARKET_GROUPS.commodities as readonly string[]).includes(canonicalSymbol)
               ? "commodity"
-              : "index",
+              : (MARKET_GROUPS.bonds as readonly string[]).includes(canonicalSymbol)
+                ? "bond"
+                : "index",
       exchange: null,
       current_price: q.price,
       change_pct_24h: changePct,
