@@ -12,7 +12,6 @@ export const routes = {
     articles: "/financial-intelligence",
     glossary: "/terms",
     calculators: "/financial-tools",
-    creators: "/creators",
     learningPaths: "/learning-paths",
   },
   premium: {

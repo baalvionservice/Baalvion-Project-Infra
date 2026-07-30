@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { TransparencyData } from "@/types/system";
-import { systemService } from "@/services/data/system-service";
 import { Text } from "@/design-system/typography/text";
 import {
   Card,
@@ -12,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import {
   ShieldCheck,
   FileText,
-  Loader2,
   Users,
   Scale,
   ArrowRight,
@@ -29,25 +27,14 @@ import Link from "next/link";
  * fabricated moderation/editorial/quality charts with invented numbers and fake
  * downloadable "audit" PDFs — removed rather than wired to a backend that doesn't
  * exist, per the platform's real-data-first policy.
+ *
+ * Data is fetched server-side by the parent Server Component (page.tsx) and
+ * passed down as a prop — this used to fetch client-side via useEffect, which
+ * meant crawlers (and anyone with JS disabled) only ever saw a "Loading
+ * Transparency Data..." spinner with none of the real content in the raw HTML.
+ * Still a client component for the fade-in animation, but no longer for data.
  */
-export function TransparencyClient() {
-  const [data, setData] = useState<TransparencyData | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const response = await systemService.getTransparencyData();
-        if (response.data) setData(response.data);
-      } catch (e) {
-        console.error("Transparency data fetch failed", e);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadData();
-  }, []);
-
+export function TransparencyClient({ data }: { data: TransparencyData }) {
   const header = (
     <header className="max-w-3xl space-y-4 px-2">
       <div className="flex items-center gap-2 text-primary">
@@ -75,23 +62,6 @@ export function TransparencyClient() {
       </Text>
     </header>
   );
-
-  if (loading || !data) {
-    return (
-      <div className="space-y-16 pb-32">
-        {header}
-        <div className="py-40 flex flex-col items-center justify-center space-y-4">
-          <Loader2 className="h-12 w-12 text-primary animate-spin" />
-          <Text
-            variant="bodySmall"
-            className="animate-pulse font-bold tracking-widest uppercase text-muted-foreground"
-          >
-            Loading Transparency Data...
-          </Text>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-16 pb-32 animate-in fade-in duration-700">

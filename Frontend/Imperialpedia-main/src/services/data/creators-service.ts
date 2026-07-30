@@ -1,4 +1,3 @@
-import * as mockApi from "@/services/mock-api/creators";
 import { CreatorProfile, ApiResponse, CreatorLeaderboard, CreatorVerification, CreatorContentItem, Follower } from "@/types";
 import { TopCreator } from "@/types/analytics";
 import { errorHandler } from "@/lib/errors/error-handler";
@@ -7,8 +6,15 @@ import { personSilhouetteDataUri } from "@baalvion/illustrations";
 
 /**
  * @fileOverview Creator data — LIVE from imperialpedia-service (`/creators`), where each row
- * carries the full public profile in `meta`. Falls back to the mock set when the service has
- * no creators yet or is unreachable.
+ * carries the full public profile in `meta`.
+ *
+ * Deliberately has NO mock-data fallback. This used to fall back to `@/services/mock-api/creators`
+ * (fabricated creators with invented follower/revenue/engagement numbers, e.g. every leaderboard
+ * entry sharing an identical hardcoded $15,400.50 "revenue" figure) whenever the live set was
+ * empty or unreachable — which meant deleting real creator data made the fake data silently
+ * reappear instead of the page going honestly empty. See FeatureUnavailable's doc comment for
+ * the site-wide policy this violated. Every function below now returns real data or an honest
+ * empty/error result — nothing fabricated, ever.
  */
 
 const IMP_API =
@@ -72,16 +78,19 @@ async function fetchCreatorProfiles(): Promise<CreatorProfile[]> {
   return items.map(rowToProfile).filter(Boolean) as CreatorProfile[];
 }
 
+// likes/comments/shares/revenue are 0, not estimated — there is no real engagement
+// or revenue backend for creators yet, and inventing numbers from a view-count
+// multiplier (the previous `views * 0.05` etc.) presents fabricated data as if real.
 const toTopCreator = (p: CreatorProfile): TopCreator => ({
   id: p.id,
   name: p.displayName,
   avatar: p.avatar,
   totalContent: p.stats.articlesCount,
-  likes: Math.floor((p.stats.totalViews || 0) * 0.05),
-  comments: Math.floor((p.stats.totalViews || 0) * 0.02),
-  shares: Math.floor((p.stats.totalViews || 0) * 0.01),
+  likes: 0,
+  comments: 0,
+  shares: 0,
   followers: p.stats.followersCount,
-  engagementRate: p.stats.engagementScore || 5,
+  engagementRate: p.stats.engagementScore || 0,
   revenue: 0,
   verified: p.verified,
   category: p.category,
@@ -90,16 +99,10 @@ const toTopCreator = (p: CreatorProfile): TopCreator => ({
 export const creatorsService = {
   async getCreators(): Promise<ApiResponse<CreatorProfile[]>> {
     try {
-      const live = await fetchCreatorProfiles();
-      if (live.length > 0) return { data: live, status: 200 };
-      return await mockApi.getCreators();
+      return { data: await fetchCreatorProfiles(), status: 200 };
     } catch (error) {
-      try {
-        return await mockApi.getCreators();
-      } catch {
-        const appError = errorHandler.handleError(error);
-        return { data: [], status: appError.statusCode, error: appError.message };
-      }
+      const appError = errorHandler.handleError(error);
+      return { data: [], status: appError.statusCode, error: appError.message };
     }
   },
 
@@ -109,55 +112,37 @@ export const creatorsService = {
     try {
       const live = await fetchCreatorProfiles();
       const found = live.find((c) => c.username === username || c.id === username);
-      if (found) return { data: found, status: 200 };
-      return await mockApi.getCreatorByUsername(username);
+      return { data: found ?? null, status: 200 };
     } catch (error) {
-      try {
-        return await mockApi.getCreatorByUsername(username);
-      } catch {
-        const appError = errorHandler.handleError(error);
-        return { data: null, status: appError.statusCode, error: appError.message };
-      }
+      const appError = errorHandler.handleError(error);
+      return { data: null, status: appError.statusCode, error: appError.message };
     }
   },
 
   async getTopCreators(): Promise<ApiResponse<TopCreator[]>> {
     try {
       const live = await fetchCreatorProfiles();
-      if (live.length > 0) {
-        const data = live
-          .map(toTopCreator)
-          .sort((a, b) => (b.followers || 0) - (a.followers || 0));
-        return { data, status: 200 };
-      }
-      return await mockApi.getTopCreators();
+      const data = live
+        .map(toTopCreator)
+        .sort((a, b) => (b.followers || 0) - (a.followers || 0));
+      return { data, status: 200 };
     } catch (error) {
-      try {
-        return await mockApi.getTopCreators();
-      } catch {
-        const appError = errorHandler.handleError(error);
-        return { data: [], status: appError.statusCode, error: appError.message };
-      }
+      const appError = errorHandler.handleError(error);
+      return { data: [], status: appError.statusCode, error: appError.message };
     }
   },
 
-  // Individual creator profile — LIVE-first via the same `/creators` list the
-  // discovery page and leaderboard already use, so `/creator/[id]` always shows the
-  // exact same record as `/creators`. Falls back to the mock set only when the
-  // service is unreachable or has no matching creator yet.
+  // Individual creator profile — LIVE via the same `/creators` list the discovery
+  // page and leaderboard already use, so `/creator/[id]` always shows the exact
+  // same record as `/creators`.
   async getCreatorById(id: string): Promise<ApiResponse<CreatorProfile | null>> {
     try {
       const live = await fetchCreatorProfiles();
       const found = live.find((c) => c.id === id || c.username === id);
-      if (found) return { data: found, status: 200 };
-      return await mockApi.getCreatorById(id);
+      return { data: found ?? null, status: 200 };
     } catch (error) {
-      try {
-        return await mockApi.getCreatorById(id);
-      } catch {
-        const appError = errorHandler.handleError(error);
-        return { data: null, status: appError.statusCode, error: appError.message };
-      }
+      const appError = errorHandler.handleError(error);
+      return { data: null, status: appError.statusCode, error: appError.message };
     }
   },
 };
@@ -195,9 +180,8 @@ function rowToContentItem(r: ArticleRow): CreatorContentItem {
   };
 }
 
-// Creator's own published articles — LIVE from `/creators/:id/articles`. Falls back
-// to the mock content set (keyed off the mock creator's bundled recentArticles) when
-// the service is unreachable or the creator has no live articles yet.
+// Creator's own published articles — LIVE from `/creators/:id/articles`. No mock
+// fallback: an honest empty list when a creator has no live articles yet.
 export async function getCreatorContent(creatorId: string): Promise<ApiResponse<CreatorContentItem[]>> {
   try {
     const res = await fetch(`${IMP_API}/creators/${encodeURIComponent(creatorId)}/articles?limit=100`, {
@@ -206,21 +190,15 @@ export async function getCreatorContent(creatorId: string): Promise<ApiResponse<
     if (!res.ok) throw new Error(String(res.status));
     const json = await res.json();
     const items: ArticleRow[] = json?.data?.items ?? [];
-    if (items.length > 0) return { data: items.map(rowToContentItem), status: 200 };
-    return await mockApi.getCreatorContent(creatorId);
+    return { data: items.map(rowToContentItem), status: 200 };
   } catch (error) {
-    try {
-      return await mockApi.getCreatorContent(creatorId);
-    } catch {
-      const appError = errorHandler.handleError(error);
-      return { data: [], status: appError.statusCode, error: appError.message };
-    }
+    const appError = errorHandler.handleError(error);
+    return { data: [], status: appError.statusCode, error: appError.message };
   }
 }
 
-// Follower/following graphs — imperialpedia-service has no social-graph endpoint yet,
-// so these attempt the natural REST path first (so they pick up the real data the
-// moment it ships) and fall back to the mock set so the network pages are never empty.
+// Follower/following graphs — imperialpedia-service has no social-graph endpoint yet.
+// No mock fallback: an honest empty list rather than fabricated follower names.
 export async function getFollowers(creatorId: string): Promise<ApiResponse<Follower[]>> {
   try {
     const res = await fetch(`${IMP_API}/creators/${encodeURIComponent(creatorId)}/followers`, {
@@ -229,15 +207,10 @@ export async function getFollowers(creatorId: string): Promise<ApiResponse<Follo
     if (!res.ok) throw new Error(String(res.status));
     const json = await res.json();
     const items: Follower[] = json?.data ?? [];
-    if (items.length > 0) return { data: items, status: 200 };
-    return await mockApi.getFollowers(creatorId);
+    return { data: items, status: 200 };
   } catch (error) {
-    try {
-      return await mockApi.getFollowers(creatorId);
-    } catch {
-      const appError = errorHandler.handleError(error);
-      return { data: [], status: appError.statusCode, error: appError.message };
-    }
+    const appError = errorHandler.handleError(error);
+    return { data: [], status: appError.statusCode, error: appError.message };
   }
 }
 
@@ -249,42 +222,39 @@ export async function getFollowing(creatorId: string): Promise<ApiResponse<Follo
     if (!res.ok) throw new Error(String(res.status));
     const json = await res.json();
     const items: Follower[] = json?.data ?? [];
-    if (items.length > 0) return { data: items, status: 200 };
-    return await mockApi.getFollowing(creatorId);
+    return { data: items, status: 200 };
   } catch (error) {
-    try {
-      return await mockApi.getFollowing(creatorId);
-    } catch {
-      const appError = errorHandler.handleError(error);
-      return { data: [], status: appError.statusCode, error: appError.message };
-    }
+    const appError = errorHandler.handleError(error);
+    return { data: [], status: appError.statusCode, error: appError.message };
   }
 }
 
 // Creator leaderboard (ranked directory) — derived from the live creator profiles so it
-// stays consistent with /creators; mock fallback when the service is empty/unreachable.
+// stays consistent with /creators. No mock fallback: an honest empty list when there
+// are no live creators, rather than fabricated names with an identical invented
+// "revenue" figure (the previous mock set's totalRevenue: 15400.5 on every entry).
+// totalRevenue/totalLikes are real 0, not a views-based estimate — there is no real
+// revenue or likes backend for creators yet.
 export async function getLeaderboardData(): Promise<ApiResponse<CreatorLeaderboard[]>> {
   try {
     const live = await fetchCreatorProfiles();
-    if (live.length > 0) {
-      const data: CreatorLeaderboard[] = live
-        .map((p) => ({
-          creatorId: p.id,
-          name: p.displayName,
-          profileImage: p.avatar,
-          category: p.category,
-          region: p.region,
-          verified: p.verified,
-          totalRevenue: Math.round((p.stats.totalViews || 0) * 0.01),
-          totalViews: p.stats.totalViews || 0,
-          totalLikes: Math.round((p.stats.totalViews || 0) * 0.05),
-        }))
-        .sort((a, b) => b.totalViews - a.totalViews);
-      return { data, status: 200 };
-    }
-    return await mockApi.getLeaderboardData();
-  } catch {
-    return mockApi.getLeaderboardData();
+    const data: CreatorLeaderboard[] = live
+      .map((p) => ({
+        creatorId: p.id,
+        name: p.displayName,
+        profileImage: p.avatar,
+        category: p.category,
+        region: p.region,
+        verified: p.verified,
+        totalRevenue: 0,
+        totalViews: p.stats.totalViews || 0,
+        totalLikes: 0,
+      }))
+      .sort((a, b) => b.totalViews - a.totalViews);
+    return { data, status: 200 };
+  } catch (error) {
+    const appError = errorHandler.handleError(error);
+    return { data: [], status: appError.statusCode, error: appError.message };
   }
 }
 

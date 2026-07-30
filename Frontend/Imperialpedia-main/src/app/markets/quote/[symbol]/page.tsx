@@ -5,6 +5,7 @@ import nextDynamic from "next/dynamic";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getAssetDetail, ALL_TRACKED_SYMBOLS } from "@/lib/data/marketsLoader";
+import { ASSET_EDITORIAL_CONTENT } from "@/lib/data/asset-editorial-content";
 import { getCompanyByTicker, getRelatedEntities } from "@/lib/data/loaders";
 import { buildOverviewParagraph } from "@/lib/data/asset-overview-text";
 import { buildMetadata } from "@/lib/seo";
@@ -102,7 +103,7 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
 
   const company = await getCompanyCached(detail.symbol);
   const description = truncate(
-    company?.description || detail.ai_summary || buildOverviewParagraph(detail, typeLabel),
+    company?.description || detail.ai_summary || ASSET_EDITORIAL_CONTENT[detail.symbol] || buildOverviewParagraph(detail, typeLabel),
   );
   const ogImage = company?.logo && isAllowedImageHost(company.logo) ? company.logo : undefined;
 
@@ -170,6 +171,10 @@ export default async function QuotePage({ params, searchParams }: PageProps) {
   const entityId = `${canonicalUrl}#entity`;
   const typeLabel = ASSET_TYPE_LABELS[detail.asset_type] ?? "Market Instrument";
   const hub = ASSET_TYPE_HUB[detail.asset_type];
+  const editorialBlurb = ASSET_EDITORIAL_CONTENT[detail.symbol];
+  // Overview block stays the live numeric summary (price/change/performance) — its
+  // whole purpose. The editorial blurb (what this instrument actually is, how it's
+  // built, why it's watched) renders separately, below, as its own "About" section.
   const description = company?.description || detail.ai_summary || buildOverviewParagraph(detail, typeLabel);
   const logoOk = !!company?.logo && isAllowedImageHost(company.logo);
 
@@ -476,6 +481,15 @@ export default async function QuotePage({ params, searchParams }: PageProps) {
             )}
           </div>
         </div>
+
+        {!company && editorialBlurb && (
+          <div className="bg-[#111] border border-white/15 rounded-sm p-4">
+            <h2 className="text-[11px] font-black uppercase tracking-widest text-white/70 mb-2">
+              About {detail.name}
+            </h2>
+            <p className="text-[13px] text-white/70 leading-relaxed">{editorialBlurb}</p>
+          </div>
+        )}
 
         {company && editorialExcerpt && (
           <div className="bg-[#111] border border-white/15 rounded-sm p-4">
