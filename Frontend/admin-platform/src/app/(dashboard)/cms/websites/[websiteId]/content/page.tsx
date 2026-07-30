@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useState, useEffect, useRef } from 'react';
+import { use, useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { ColumnDef } from '@tanstack/react-table';
 import {
@@ -60,6 +60,7 @@ import {
 import { useWorkflowTransition } from '@/lib/queries/cms-workflow.queries';
 import { useWebsite } from '@/lib/queries/cms-websites.queries';
 import { useCmsPermissions } from '@/lib/queries/cms-permissions.queries';
+import { useWebsiteCategories } from '@/lib/queries/cms-taxonomy.queries';
 import CategoryFilterCombobox from '@/components/cms/CategoryFilterCombobox';
 import { useUIStore } from '@/lib/store/uiStore';
 import { useCmsStore } from '@/lib/store/cmsStore';
@@ -113,6 +114,13 @@ export default function WebsiteContentPage({
 
   const { data: website } = useWebsite(websiteId);
   const permissions = useCmsPermissions(websiteId);
+  // Flat id → category lookup so results (especially from an unfiltered search across
+  // every section) can show which section each row actually lives in.
+  const { data: categories } = useWebsiteCategories(websiteId);
+  const categoryById = useMemo(
+    () => new Map((categories ?? []).map((c) => [c.id, c])),
+    [categories],
+  );
   const { data, isLoading, isError, refetch } = useContentList({
     websiteId,
     page,
@@ -318,6 +326,38 @@ export default function WebsiteContentPage({
           {row.original.type.replace(/_/g, ' ')}
         </Badge>
       ),
+    },
+    {
+      id: 'category',
+      header: 'Category',
+      cell: ({ row }) => {
+        const ids = row.original.categoryIds;
+        if (!ids.length) {
+          return <span className="text-xs text-muted-foreground">Uncategorized</span>;
+        }
+        return (
+          <div className="flex flex-wrap gap-1">
+            {ids.map((id) => {
+              const category = categoryById.get(id);
+              return (
+                <Badge
+                  key={id}
+                  variant="secondary"
+                  className="cursor-pointer text-xs"
+                  title="Filter the list to this category"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCategoryFilter(id);
+                    setPage(1);
+                  }}
+                >
+                  {category?.name ?? 'Unknown'}
+                </Badge>
+              );
+            })}
+          </div>
+        );
+      },
     },
     {
       accessorKey: 'status',
