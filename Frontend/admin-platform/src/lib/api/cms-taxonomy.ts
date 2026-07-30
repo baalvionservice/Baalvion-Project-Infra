@@ -20,7 +20,7 @@ const wid = (): string => {
 interface RawCategory {
   id: string; websiteId: string; parentId: string | null; name: string; slug: string;
   description?: string | null; seoMetadata?: WebsiteCategory['seoMetadata'] | null;
-  sortOrder?: number; depth?: number; contentCount?: number;
+  sortOrder?: number; depth?: number; contentCount?: number; status?: WebsiteCategory['status'];
   createdAt: string; updatedAt: string;
   children?: RawCategory[];
 }
@@ -29,7 +29,7 @@ const toCategory = (c: RawCategory): WebsiteCategory => ({
   id: c.id, websiteId: c.websiteId, name: c.name, slug: c.slug,
   description: c.description ?? undefined, seoMetadata: c.seoMetadata ?? undefined,
   parentId: c.parentId ?? null,
-  depth: c.depth ?? 0, order: c.sortOrder ?? 0, contentCount: c.contentCount ?? 0,
+  depth: c.depth ?? 0, order: c.sortOrder ?? 0, status: c.status ?? 'active', contentCount: c.contentCount ?? 0,
   createdAt: c.createdAt, updatedAt: c.updatedAt,
 });
 
@@ -74,6 +74,7 @@ export const cmsTaxonomyApi = {
         ...(payload.seoMetadata !== undefined ? { seoMetadata: payload.seoMetadata } : {}),
         ...(payload.parentId !== undefined ? { parentId: payload.parentId } : {}),
         ...(payload.order !== undefined ? { sortOrder: payload.order } : {}),
+        ...(payload.status !== undefined ? { status: payload.status } : {}),
       });
       return { ...res, data: { ...res.data, data: toCategory(res.data.data) } };
     },

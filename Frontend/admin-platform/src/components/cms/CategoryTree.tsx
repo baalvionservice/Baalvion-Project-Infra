@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,16 +28,18 @@ interface TreeNodeProps {
   onEdit: (node: CategoryTreeType) => void;
   onDelete: (id: string) => void;
   onAddChild: (parentId: string) => void;
+  onToggleActive: (id: string, nextActive: boolean) => void;
 }
 
-function TreeNode({ node, depth, onEdit, onDelete, onAddChild }: TreeNodeProps) {
+function TreeNode({ node, depth, onEdit, onDelete, onAddChild, onToggleActive }: TreeNodeProps) {
   const [expanded, setExpanded] = useState(depth < 1);
   const hasChildren = node.children.length > 0;
+  const isActive = node.status !== 'inactive';
 
   return (
     <div>
       <div
-        className="group flex items-center gap-1 rounded-md px-2 py-1.5 hover:bg-muted/50 transition-colors"
+        className={`group flex items-center gap-1 rounded-md px-2 py-1.5 hover:bg-muted/50 transition-colors ${isActive ? '' : 'opacity-50'}`}
         style={{ paddingLeft: `${depth * 16 + 8}px` }}
       >
         <button
@@ -65,6 +68,13 @@ function TreeNode({ node, depth, onEdit, onDelete, onAddChild }: TreeNodeProps) 
         <span className="text-xs text-muted-foreground mr-2">
           {node.contentCount}
         </span>
+
+        <Switch
+          className="mr-1 shrink-0"
+          checked={isActive}
+          onCheckedChange={(checked) => onToggleActive(node.id, checked)}
+          aria-label={isActive ? 'Hide from live site' : 'Show on live site'}
+        />
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -106,6 +116,7 @@ function TreeNode({ node, depth, onEdit, onDelete, onAddChild }: TreeNodeProps) 
               onEdit={onEdit}
               onDelete={onDelete}
               onAddChild={onAddChild}
+              onToggleActive={onToggleActive}
             />
           ))}
         </div>
@@ -119,10 +130,11 @@ interface Props {
   onEdit: (node: CategoryTreeType) => void;
   onDelete: (id: string) => void;
   onAddChild: (parentId: string) => void;
+  onToggleActive: (id: string, nextActive: boolean) => void;
   isLoading?: boolean;
 }
 
-export default function CategoryTree({ tree, onEdit, onDelete, onAddChild, isLoading }: Props) {
+export default function CategoryTree({ tree, onEdit, onDelete, onAddChild, onToggleActive, isLoading }: Props) {
   if (isLoading) {
     return (
       <div className="space-y-1 p-2">
@@ -151,6 +163,7 @@ export default function CategoryTree({ tree, onEdit, onDelete, onAddChild, isLoa
           onEdit={onEdit}
           onDelete={onDelete}
           onAddChild={onAddChild}
+          onToggleActive={onToggleActive}
         />
       ))}
     </div>

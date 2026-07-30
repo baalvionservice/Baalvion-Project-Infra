@@ -26,8 +26,9 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { categoriesPublicApi, subcategoriesPublicApi } from "@/lib/api/client";
+import { categoriesPublicApi, subcategoriesPublicApi, apiClient } from "@/lib/api/client";
 import { useAuthContext } from "@/context/AuthContext";
 import CategoryEditorModal from "./CategoryEditorModal";
 import SubcategoryEditorModal from "./SubcategoryEditorModal";
@@ -53,9 +54,11 @@ export default function CatalogManager() {
   const loadData = async () => {
     setLoading(true);
     try {
+      // isActive=false lifts the "active only" filter so hidden records still
+      // show up here for the admin to review or re-enable.
       const [catRes, subRes] = await Promise.all([
-        categoriesPublicApi.list(),
-        subcategoriesPublicApi.list()
+        categoriesPublicApi.list({ isActive: 'false' }),
+        subcategoriesPublicApi.list({ isActive: 'false' })
       ]);
       setCategories(catRes.data?.data || []);
       setSubcategories(subRes.data?.data || []);
@@ -107,17 +110,24 @@ export default function CatalogManager() {
   };
 
   const handleDelete = async (coll: 'categories' | 'subcategories', id: string) => {
-    if (!adminController) return;
-    if (!confirm("Confirm permanent redaction from hierarchy?")) return;
+    if (!confirm("Hide this record from the live site? It stays in the ledger and can be re-enabled later.")) return;
 
     try {
-      const res = await adminController.deleteCategory({ isAdmin: true, id });
-      if (res.success) {
-        toast({ title: "Record Redacted" });
-        loadData();
-      }
+      await apiClient.delete(`/${coll}/${id}`);
+      toast({ title: "Record Hidden", description: "It no longer appears on the live site." });
+      loadData();
     } catch {
       toast({ variant: "destructive", title: "Redaction Failure" });
+    }
+  };
+
+  const handleToggleActive = async (coll: 'categories' | 'subcategories', id: string, nextActive: boolean) => {
+    try {
+      await apiClient.patch(`/${coll}/${id}`, { is_active: nextActive });
+      toast({ title: nextActive ? "Record Visible" : "Record Hidden" });
+      loadData();
+    } catch {
+      toast({ variant: "destructive", title: "Visibility Update Failed" });
     }
   };
 
@@ -190,12 +200,13 @@ export default function CatalogManager() {
                 <TableHeader className="bg-slate-50">
                   <TableRow>
                     <TableHead className="text-[9px] font-bold uppercase tracking-widest text-slate-500">Domain Pillar</TableHead>
+                    <TableHead className="text-[9px] font-bold uppercase tracking-widest text-slate-500">Visible</TableHead>
                     <TableHead className="text-[9px] font-bold uppercase tracking-widest text-slate-500 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {categories.map(c => (
-                    <TableRow key={c.id} className="hover:bg-slate-50 group">
+                    <TableRow key={c.id} className={`hover:bg-slate-50 group ${c.is_active === false ? 'opacity-50' : ''}`}>
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600">
@@ -206,6 +217,12 @@ export default function CatalogManager() {
                             <code className="text-[9px] text-slate-400 font-mono">/{c.slug}</code>
                           </div>
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        <Switch
+                          checked={c.is_active !== false}
+                          onCheckedChange={(checked) => handleToggleActive('categories', c.id, checked)}
+                        />
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
@@ -244,6 +261,7 @@ export default function CatalogManager() {
                     <TableRow>
                       <TableHead className="text-[9px] font-bold uppercase tracking-widest text-slate-500">Specialization</TableHead>
                       <TableHead className="text-[9px] font-bold uppercase tracking-widest text-slate-500">Pillar</TableHead>
+                      <TableHead className="text-[9px] font-bold uppercase tracking-widest text-slate-500">Visible</TableHead>
                       <TableHead className="text-[9px] font-bold uppercase tracking-widest text-slate-500 text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -251,7 +269,7 @@ export default function CatalogManager() {
                     {subcategories.map(s => {
                       const parent = categories.find(c => String(c.id) === String(s.category_id || s.categoryId));
                       return (
-                        <TableRow key={s.id} className="hover:bg-slate-50 group border-slate-50">
+                        <TableRow key={s.id} className={`hover:bg-slate-50 group border-slate-50 ${s.is_active === false ? 'opacity-50' : ''}`}>
                           <TableCell>
                             <p className="text-sm font-bold text-slate-900">{s.name}</p>
                           </TableCell>
@@ -259,6 +277,12 @@ export default function CatalogManager() {
                             <Badge variant="outline" className="text-[8px] font-bold uppercase text-slate-500 bg-slate-50 border-none px-2 py-0.5">
                               {parent?.name?.split(' & ')[0] || 'Unknown'}
                             </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Switch
+                              checked={s.is_active !== false}
+                              onCheckedChange={(checked) => handleToggleActive('subcategories', s.id, checked)}
+                            />
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-1">

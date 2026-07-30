@@ -1,7 +1,7 @@
 'use strict';
 const { z } = require('zod');
 
-const categoryStatusEnum = z.enum(['active', 'inactive', 'archived']);
+const categoryStatusEnum = z.enum(['active', 'inactive']);
 
 // Per-category SEO. Drives the category/topic landing page's title, meta description,
 // keywords, social image and index directive so every section can rank on its own.

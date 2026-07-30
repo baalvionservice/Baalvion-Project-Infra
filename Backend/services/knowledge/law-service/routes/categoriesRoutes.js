@@ -7,5 +7,6 @@ router.get('/', ctrl.listCategories);
 router.get('/:slugOrId', ctrl.getCategory);
 router.post('/', authMiddleware, ctrl.createCategory);
 router.patch('/:id', authMiddleware, ctrl.updateCategory);
+router.delete('/:id', authMiddleware, ctrl.deleteCategory);
 
 module.exports = router;

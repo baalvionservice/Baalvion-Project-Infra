@@ -20,6 +20,7 @@ const getCategory = async (req, res, next) => {
     try {
         const { slugOrId } = req.params;
         const where = isNaN(slugOrId) ? { slug: slugOrId } : { id: Number(slugOrId) };
+        if (req.query.isActive !== 'false') where.is_active = true;
         const category = await db.Category.findOne({
             where,
             include: [{ model: db.Subcategory, as: 'subcategories', where: { is_active: true }, required: false }],
@@ -47,4 +48,14 @@ const updateCategory = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
-module.exports = { listCategories, getCategory, createCategory, updateCategory };
+const deleteCategory = async (req, res, next) => {
+    try {
+        const category = await db.Category.findByPk(req.params.id);
+        if (!category) return next(new AppError('NOT_FOUND', 'Category not found', 404));
+        await category.update({ is_active: false });
+        await db.Subcategory.update({ is_active: false }, { where: { category_id: category.id } });
+        return sendSuccess(req, res, category);
+    } catch (err) { return next(err); }
+};
+
+module.exports = { listCategories, getCategory, createCategory, updateCategory, deleteCategory };

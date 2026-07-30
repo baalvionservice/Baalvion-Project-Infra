@@ -53,6 +53,7 @@ interface CategoryForm {
   keywords: string; // comma-separated in the form
   ogImage: string;
   noIndex: boolean;
+  isActive: boolean;
 }
 
 const DEFAULT_FORM: CategoryForm = {
@@ -66,6 +67,7 @@ const DEFAULT_FORM: CategoryForm = {
   keywords: '',
   ogImage: '',
   noIndex: false,
+  isActive: true,
 };
 
 export default function WebsiteCategoriesPage({
@@ -121,6 +123,7 @@ export default function WebsiteCategoriesPage({
       keywords: (seo.keywords ?? []).join(', '),
       ogImage: seo.ogImage ?? '',
       noIndex: seo.noIndex ?? false,
+      isActive: node.status !== 'inactive',
     });
     setCatDialog({ open: true, editing: node });
   };
@@ -149,6 +152,7 @@ export default function WebsiteCategoriesPage({
       parentId: form.parentId || null,
       imageUrl: form.imageUrl || undefined,
       seoMetadata,
+      status: (form.isActive ? 'active' : 'inactive') as 'active' | 'inactive',
     };
     if (catDialog.editing) {
       updateCategory(
@@ -161,6 +165,10 @@ export default function WebsiteCategoriesPage({
         { onSuccess: closeDialog }
       );
     }
+  };
+
+  const handleToggleActive = (id: string, nextActive: boolean) => {
+    updateCategory({ id, payload: { status: nextActive ? 'active' : 'inactive' } });
   };
 
   const handleCreateTag = () => {
@@ -216,6 +224,7 @@ export default function WebsiteCategoriesPage({
                 onEdit={openEdit}
                 onDelete={(id) => deleteCategory(id)}
                 onAddChild={(parentId) => openCreate(parentId)}
+                onToggleActive={handleToggleActive}
               />
             </CardContent>
           </Card>
@@ -341,6 +350,17 @@ export default function WebsiteCategoriesPage({
               value={form.imageUrl}
               onChange={(url) => setForm((f) => ({ ...f, imageUrl: url }))}
             />
+
+            <div className="flex items-center justify-between rounded-md border p-2.5">
+              <div>
+                <Label className="text-xs">Visible on website</Label>
+                <p className="text-[10px] text-muted-foreground">Off hides this category and its subcategories from the live site</p>
+              </div>
+              <Switch
+                checked={form.isActive}
+                onCheckedChange={(v) => setForm((f) => ({ ...f, isActive: v }))}
+              />
+            </div>
 
             {/* Per-category SEO — drives how this topic page ranks and appears in search */}
             <div className="rounded-md border bg-muted/20 p-2.5 space-y-3">

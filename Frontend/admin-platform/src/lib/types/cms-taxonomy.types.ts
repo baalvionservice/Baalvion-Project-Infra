@@ -6,6 +6,8 @@ export interface CategorySeo {
   noIndex?: boolean;
 }
 
+export type CategoryStatus = 'active' | 'inactive';
+
 export interface WebsiteCategory {
   id: string;
   websiteId: string;
@@ -17,6 +19,7 @@ export interface WebsiteCategory {
   parentId: string | null;
   depth: number;
   order: number;
+  status: CategoryStatus;
   contentCount: number;
   children?: WebsiteCategory[];
   createdAt: string;
@@ -43,6 +46,7 @@ export interface CreateCategoryPayload {
   seoMetadata?: CategorySeo;
   parentId?: string | null;
   order?: number;
+  status?: CategoryStatus;
 }
 
 export interface UpdateCategoryPayload {
@@ -53,6 +57,7 @@ export interface UpdateCategoryPayload {
   seoMetadata?: CategorySeo;
   parentId?: string | null;
   order?: number;
+  status?: CategoryStatus;
 }
 
 export interface ReorderCategoryPayload {
