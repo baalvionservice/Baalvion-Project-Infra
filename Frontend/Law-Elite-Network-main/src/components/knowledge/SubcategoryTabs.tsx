@@ -31,11 +31,11 @@ export function SubcategoryTabs({ subcategories, selectedId, onSelect }: Subcate
         {subcategories.map((sub) => (
           <button
             key={sub.id}
-            onClick={() => onSelect(sub.id)}
+            onClick={() => onSelect(String(sub.id))}
             className={cn(
               "px-6 h-11 rounded-2xl text-[10px] font-bold uppercase tracking-[0.2em] whitespace-nowrap transition-all duration-500 border interactive-lift",
-              selectedId === sub.id 
-                ? "bg-blue-600 border-blue-600 text-white shadow-xl shadow-blue-200" 
+              selectedId === String(sub.id)
+                ? "bg-blue-600 border-blue-600 text-white shadow-xl shadow-blue-200"
                 : "bg-white border-slate-100 text-slate-400 hover:border-blue-400 hover:text-blue-600"
             )}
           >
@@ -43,8 +43,8 @@ export function SubcategoryTabs({ subcategories, selectedId, onSelect }: Subcate
           </button>
         ))}
       </div>
-      {/* Precision Visual Gradient for horizontal overflow */}
-      <div className="absolute right-0 top-0 bottom-2 w-20 bg-gradient-to-l from-white via-white/80 to-transparent pointer-events-none md:hidden" />
+      {/* Visual hint that the row scrolls horizontally when it overflows — shown at every viewport width, not just mobile. */}
+      <div className="absolute right-0 top-0 bottom-2 w-12 bg-gradient-to-l from-white to-transparent pointer-events-none" />
     </div>
   );
 }
