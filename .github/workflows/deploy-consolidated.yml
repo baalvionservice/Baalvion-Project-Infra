@@ -7,9 +7,11 @@
 #   (deploy/consolidated/Dockerfile.node, repo-root context) — it is NOT one of the
 #   per-service images that deploy.yml builds for the ec2-single-host stack.
 #
-#   git push main (Backend/** or deploy/consolidated/**)  ──▶  build baalvion-backend
-#                                                         ──▶  push to ECR (prod-<sha> + prod-latest)
-#                                                         ──▶  SSH baalvion-prod-01, roll the stack
+# box1 (baalvion-prod-01, AWS account 869657603174) was retired 2026-07-28 —
+# see [[box2-becomes-sole-prod-2026-07-28]]. box2 (deploy-consolidated-box2.yml)
+# is the only real target now. Auto-push-trigger removed (2026-08-01) so this
+# stops failing AccessDenied on every push touching Backend/**; kept as
+# workflow_dispatch only in case box1's role/account is ever revived on purpose.
 #
 # HARD INVARIANTS:
 #   • The EC2 box NEVER builds (only ~566 MB free); all builds happen here in CI.
@@ -20,13 +22,6 @@
 name: Deploy — consolidated backend (ECR → EC2)
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "Backend/**"
-      - "Frontend/admin-platform/**"
-      - "deploy/consolidated/**"
-      - ".github/workflows/deploy-consolidated.yml"
   workflow_dispatch:
     inputs:
       roll:
