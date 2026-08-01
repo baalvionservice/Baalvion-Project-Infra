@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Globe, Building, Factory, Cpu } from 'lucide-react';
+import { Globe, Building, Cpu } from 'lucide-react';
 import { ExploreCard } from './ExploreCard';
 
 /**
@@ -20,12 +20,6 @@ export const ExploreGrid = () => {
       description: 'Audit institutional benchmarks, founding data, and market influence for leading global corporations.',
       href: '/companies',
       icon: Building,
-    },
-    {
-      title: 'Industries',
-      description: 'Explore the global market architecture across manufacturing, finance, healthcare, and energy.',
-      href: '/industries',
-      icon: Factory,
     },
     {
       title: 'Technologies',

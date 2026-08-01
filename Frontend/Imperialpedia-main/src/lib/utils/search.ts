@@ -1,4 +1,4 @@
-import { loadCountries, loadCompanies, loadIndustries, loadTechnologies } from '@/lib/data/loaders';
+import { loadCountries, loadCompanies, loadTechnologies } from '@/lib/data/loaders';
 import { getAllMarketAssets } from '@/lib/data/marketsLoader';
 import { entityRouteSegment } from '@/lib/utils/seo';
 import { SearchResult, SearchResultType } from '@/types/search';
@@ -142,10 +142,9 @@ export async function searchEntities(query: string, limit = 20): Promise<SearchR
   const q = query.toLowerCase().trim();
   if (!q || q.length < 2) return [];
 
-  const [countries, companies, industries, technologies, assets] = await Promise.all([
+  const [countries, companies, technologies, assets] = await Promise.all([
     loadCountries(),
     loadCompanies(),
-    loadIndustries(),
     loadTechnologies(),
     getAllMarketAssets(),
   ]);
@@ -153,7 +152,6 @@ export async function searchEntities(query: string, limit = 20): Promise<SearchR
   const results: SearchResult[] = [];
   pushEntityResults(results, countries, 'country');
   pushEntityResults(results, companies, 'company');
-  pushEntityResults(results, industries, 'industry');
   pushEntityResults(results, technologies, 'technology');
 
   for (const asset of assets) {
