@@ -385,7 +385,6 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
                   <>
                     Published {formatDateTime(article.publishedAt)}
                     {article.updatedAt && <> · Updated {formatDateTime(article.updatedAt)}</>}
-                    {article.readTimeMinutes && <> · {article.readTimeMinutes} min read</>}
                   </>
                 }
               />

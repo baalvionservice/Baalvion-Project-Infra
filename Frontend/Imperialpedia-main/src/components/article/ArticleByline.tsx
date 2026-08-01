@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { AuthorHoverCard } from "./AuthorHoverCard";
 
 // Minimal shape needed to render a byline link + avatar — satisfied by both
 // the static config/authors.ts AuthorProfile and cms-public.ts's ResolvedAuthor
@@ -8,6 +9,9 @@ import Link from "next/link";
 interface BylineAuthor {
   slug: string;
   avatarUrl?: string;
+  title?: string;
+  bio?: string;
+  credentials?: string;
 }
 
 // Shared by every article template — CNBC-style byline: avatar (when the
@@ -36,12 +40,14 @@ export function ArticleByline({
         <span>
           By{" "}
           {authorProfile ? (
-            <Link
-              href={`/authors/${authorProfile.slug}`}
-              className="font-semibold text-foreground hover:text-[#CC0000]"
-            >
-              {authorName}
-            </Link>
+            <AuthorHoverCard author={{ ...authorProfile, name: authorName }}>
+              <Link
+                href={`/authors/${authorProfile.slug}`}
+                className="font-semibold text-foreground hover:text-[#CC0000]"
+              >
+                {authorName}
+              </Link>
+            </AuthorHoverCard>
           ) : (
             <span className="font-semibold text-foreground">{authorName}</span>
           )}

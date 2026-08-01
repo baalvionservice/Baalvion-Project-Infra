@@ -87,3 +87,74 @@ export function buildOverviewParagraph(detail: AssetDetail, typeLabel: string): 
 
   return sentences.join(" ");
 }
+
+/**
+ * Generic, factually-accurate-per-asset-class explainer of how price and
+ * (where applicable) market capitalization work for a given asset type —
+ * `/markets/quote/[symbol]` pages for crypto/commodity/index/forex/bond
+ * symbols have no company record and no performance/fundamentals feed today
+ * (unlike stocks, which get a full company profile), so this is the only
+ * substantive educational content available for them. Deliberately type-level
+ * rather than symbol-level: these mechanics are the same for every symbol of
+ * a given asset type, so nothing here is invented or guessed per-symbol —
+ * only the name/typeLabel are interpolated.
+ */
+export function buildMarketMechanicsParagraph(assetType: string, name: string): string | null {
+  switch (assetType) {
+    case "stock":
+      return (
+        `${name}'s market capitalization is calculated by multiplying its total shares outstanding — the number of ` +
+        `shares the company has actually issued to shareholders, as reported in its financial filings — by the ` +
+        `current share price. It changes constantly as the share price moves, and also shifts whenever the company ` +
+        `issues new shares, buys back existing ones, or splits its stock. Market cap is a market-value measure, not ` +
+        `a statement of the company's assets or revenue: two companies with identical market caps can have very ` +
+        `different underlying financials.`
+      );
+    case "crypto":
+      return (
+        `${name}'s market capitalization is calculated the same way for any cryptocurrency: circulating supply ` +
+        `(the number of coins currently in public circulation, excluding any that are locked, burned, or not yet ` +
+        `issued) multiplied by the current price per coin. Unlike a company's share count, circulating supply isn't ` +
+        `set by a corporate filing — it's determined by the protocol's own issuance schedule and is typically ` +
+        `tracked by data aggregators like CoinMarketCap or CoinGecko. Price itself is set by trading activity across ` +
+        `exchanges: each exchange runs its own order book matching buyers and sellers, and the price quoted here is ` +
+        `an aggregate across major venues rather than a single centralized listing.`
+      );
+    case "commodity":
+      return (
+        `${name} doesn't have a market capitalization in the way a stock or cryptocurrency does — there's no fixed, ` +
+        `countable supply of outstanding units to multiply by price. Instead, its price is set by global supply and ` +
+        `demand in spot and futures markets: producers, industrial buyers, and speculators trade standardized ` +
+        `contracts on commodity exchanges, and the quoted price reflects the most recent trade or settlement price ` +
+        `for the nearest active contract. Prices move on real-world supply shocks (weather, geopolitics, production ` +
+        `changes) and demand shifts (economic growth, industrial usage, currency strength) more than on any single ` +
+        `company's performance.`
+      );
+    case "index":
+      return (
+        `${name} is a market index, not a single tradable security — its value is a weighted average of the prices ` +
+        `of the companies or assets it tracks, recalculated continuously as those underlying prices move. Investors ` +
+        `can't buy the index directly; exposure typically comes through index funds, ETFs, or futures contracts ` +
+        `designed to track it. Because it aggregates many holdings, an index's day-to-day move reflects the combined ` +
+        `performance of its constituents rather than any single company's news.`
+      );
+    case "forex":
+      return (
+        `${name} is a currency pair, and its "price" is an exchange rate — how much of the second currency it takes ` +
+        `to buy one unit of the first. That rate floats based on relative supply and demand for each currency, driven ` +
+        `by factors like interest-rate differentials between the two countries' central banks, trade flows, and ` +
+        `broader risk sentiment. Forex trades continuously across a decentralized global network of banks and ` +
+        `brokers rather than a single exchange, so the quoted price is an aggregate of interbank rates.`
+      );
+    case "bond":
+      return (
+        `${name} tracks a bond yield, which moves inversely to bond price: when investors sell bonds and prices ` +
+        `fall, the yield (the effective annual return a buyer locks in at the new, lower price) rises, and vice ` +
+        `versa. Yields are driven primarily by expectations for the central bank's benchmark interest rate, ` +
+        `inflation expectations, and the perceived credit risk of the issuer — for government bonds, that mostly ` +
+        `means shifting expectations about future rate policy rather than default risk.`
+      );
+    default:
+      return null;
+  }
+}
