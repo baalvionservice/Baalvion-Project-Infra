@@ -48,8 +48,7 @@ export default function CookiePolicyPage() {
             <Block icon={<BarChart3 className="w-6 h-6 text-blue-600" />} title="Analytics Cookies">
               <p>
                 Analytics cookies help us understand which legal topics readers find most useful, how visitors move
-                through our{' '}
-                <Link href="/legal" className="text-blue-600 hover:underline">A-Z legal encyclopedia</Link>, and where
+                through our practice-area guides, and where
                 our content or navigation is falling short. We use this aggregated, statistical information to improve
                 article coverage and site structure — never to identify an individual reader personally. Analytics
                 cookies are optional and can be limited using the controls described below.
