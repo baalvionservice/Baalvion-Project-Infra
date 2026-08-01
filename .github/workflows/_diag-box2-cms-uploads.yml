@@ -1,0 +1,31 @@
+name: (temp) Diagnose box2 CMS upload URLs
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check CMS_PUBLIC_URL env + recent uploaded media URLs
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.CORE2_EC2_HOST }}
+          username: ${{ secrets.CORE2_EC2_USER }}
+          key: ${{ secrets.CORE2_EC2_SSH_KEY }}
+          timeout: 30s
+          command_timeout: 3m
+          script: |
+            set -uo pipefail
+            echo "===== CMS_PUBLIC_URL / MEDIA_PUBLIC_BASE / MEDIA_DRIVER in running container ====="
+            docker exec consolidated-app-platform-1 sh -c 'env | grep -iE "CMS_PUBLIC_URL|MEDIA_PUBLIC_BASE|MEDIA_DRIVER|^PORT="' || echo "(none set)"
+            echo "===== recent cms_media_assets rows ====="
+            docker exec -w /app/Backend/services/knowledge/cms-service consolidated-app-platform-1 node -e "
+              const db = require('./models');
+              (async () => {
+                const [rows] = await db.sequelize.query(\"SELECT id, filename, url, created_at FROM cms.cms_media_assets ORDER BY created_at DESC LIMIT 10\");
+                console.log(JSON.stringify(rows, null, 2));
+                process.exit(0);
+              })().catch(e => { console.log('ERROR:', e.message); process.exit(1); });
+            "
