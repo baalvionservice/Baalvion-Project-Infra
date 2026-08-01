@@ -14,7 +14,6 @@ const FETCH_TIMEOUT_MS = 4000;
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 
-interface LawyerEntry { id: string; updated_at?: string; updatedAt?: string }
 interface TaxonomyRef { slug?: string }
 interface ArticleEntry {
   slug: string;
@@ -54,8 +53,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     process.env.NEXT_PUBLIC_API_BASE_URL?.trim() ||
     (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3015/v1');
 
-  const [lawyers, articles, categories] = await Promise.all([
-    safeFetch<LawyerEntry>(`${apiBase}/lawyers?limit=1000`),
+  const [articles, categories] = await Promise.all([
     safeFetch<ArticleEntry>(`${apiBase}/articles?limit=1000`),
     safeFetch<CategoryEntry>(`${apiBase}/categories`),
   ]);
@@ -65,7 +63,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/news`, lastModified: new Date(), changeFrequency: 'hourly', priority: 0.85 },
     { url: `${BASE_URL}/search`, lastModified: new Date(), changeFrequency: 'hourly', priority: 0.9 },
     { url: `${BASE_URL}/plans`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${BASE_URL}/lawyers`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
     { url: `${BASE_URL}/about-us`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
     { url: `${BASE_URL}/authors`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 },
     { url: `${BASE_URL}/legal`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.55 },
@@ -103,13 +100,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly',
       priority: 0.4,
     }));
-
-  const lawyerRoutes: MetadataRoute.Sitemap = lawyers.map((l) => ({
-    url: `${BASE_URL}/lawyer/${l.id}`,
-    lastModified: new Date(l.updated_at || l.updatedAt || Date.now()),
-    changeFrequency: 'weekly',
-    priority: 0.8,
-  }));
 
   // Bundled articles (always present) unioned with live-API results, deduped by
   // slug -- API wins on lastModified when both exist. Previously this only mapped
@@ -192,7 +182,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     ...staticRoutes,
     ...legalLetterRoutes,
-    ...lawyerRoutes,
     ...articleRoutes,
     ...categoryRoutes,
     ...subcategoryRoutes,

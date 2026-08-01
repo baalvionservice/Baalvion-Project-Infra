@@ -123,14 +123,6 @@ export function PublicNavbar() {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            <Link
-              href="/lawyers"
-              className="hidden lg:inline-flex items-center text-[13px] font-semibold text-slate-700 hover:text-news-600 transition-colors"
-            >
-              Find a Lawyer
-            </Link>
-            <span className="hidden lg:block w-px h-5 bg-slate-200" />
-
             <LanguageSwitcher />
             <ThemeToggle />
 
@@ -284,13 +276,6 @@ export function PublicNavbar() {
               className="block py-3 px-2 text-sm font-bold text-slate-900 border-b border-slate-100"
             >
               Home
-            </Link>
-            <Link
-              href="/lawyers"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="block py-3 px-2 text-sm font-bold text-slate-900 border-b border-slate-100"
-            >
-              Find a Lawyer
             </Link>
             <Link
               href="/news"

@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 
-const ALLOW = ['/', '/news', '/search', '/plans', '/about-us', '/contact-us', '/careers', '/advertise', '/editorial-process', '/privacy-policy', '/terms-of-service', '/editorial-disclosure-policy', '/lawyers/', '/article/', '/law/', '/legal/'];
+const ALLOW = ['/', '/news', '/search', '/plans', '/about-us', '/contact-us', '/careers', '/advertise', '/editorial-process', '/privacy-policy', '/terms-of-service', '/editorial-disclosure-policy', '/article/', '/law/', '/legal/'];
 
 const DISALLOW = [
   '/dashboard',
@@ -26,11 +26,12 @@ const DISALLOW = [
   '/forgot-password',
   '/reset-password',
   '/access-denied',
-  '/lawyer/dashboard',
-  '/lawyer/earnings',
-  '/lawyer/requests',
-  '/lawyer/availability',
-  '/lawyer/profile',
+  // Lawyer directory is empty until real, verified attorney data is loaded —
+  // pulled from nav/sitemap and disallowed here so it isn't crawled or
+  // indexed while it's just an empty results page. Re-enable alongside the
+  // nav links in PublicNavbar/PublicFooter/homepage once populated.
+  '/lawyers',
+  '/lawyer/',
   '/api/',
 ];
 
