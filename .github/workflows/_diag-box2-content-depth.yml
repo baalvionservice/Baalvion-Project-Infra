@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
-      - name: Check CMS-authored article word counts + author table vs bundled baseline
+      - name: Dump raw content_blocks structure for one article
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.CORE2_EC2_HOST }}
@@ -21,38 +21,10 @@ jobs:
             docker exec -w /app/Backend/services/knowledge/cms-service consolidated-app-platform-1 node -e "
               const db = require('./models');
               (async () => {
-                const [website] = await db.sequelize.query(\"SELECT id FROM cms.cms_websites WHERE slug = 'law-elite-network'\");
-                if (!website.length) { console.log('law-elite-network website not found'); process.exit(0); }
-                const wid = website[0].id;
                 const [rows] = await db.sequelize.query(
-                  \"SELECT id, title, slug, status, content_blocks FROM cms.cms_contents WHERE website_id = :wid AND status = 'published' ORDER BY published_at DESC LIMIT 30\",
-                  { replacements: { wid } }
+                  \"SELECT title, content_blocks FROM cms.cms_contents WHERE slug = 'what-is-a-class-action-lawsuit'\"
                 );
-                const stripHtml = (s) => (s || '').replace(/<[^>]+>/g, ' ').replace(/&[a-z]+;/g, ' ');
-                const wordCount = (blocks) => {
-                  if (!blocks) return 0;
-                  let text = '';
-                  try {
-                    const parsed = typeof blocks === 'string' ? JSON.parse(blocks) : blocks;
-                    if (Array.isArray(parsed)) parsed.forEach(b => { text += ' ' + (b.html || b.content || b.text || JSON.stringify(b)); });
-                    else text = JSON.stringify(parsed);
-                  } catch { text = String(blocks); }
-                  return stripHtml(text).trim().split(/\s+/).filter(Boolean).length;
-                };
-                console.log('===== published law-elite-network CMS content word counts =====');
-                console.log('total published found:', rows.length);
-                rows.forEach(r => console.log(wordCount(r.content_blocks), 'words —', r.title, '(' + r.slug + ')'));
-                process.exit(0);
-              })().catch(e => { console.log('ERROR:', e.message); process.exit(1); });
-            "
-            echo "===== cms_authors / contributors table (if present) ====="
-            docker exec -w /app/Backend/services/knowledge/cms-service consolidated-app-platform-1 node -e "
-              const db = require('./models');
-              (async () => {
-                try {
-                  const [rows] = await db.sequelize.query(\"SELECT slug, name FROM cms.cms_authors ORDER BY created_at DESC LIMIT 30\");
-                  console.log(JSON.stringify(rows, null, 2));
-                } catch (e) { console.log('no cms.cms_authors table or query failed:', e.message); }
+                console.log(JSON.stringify(rows[0], null, 2).slice(0, 4000));
                 process.exit(0);
               })().catch(e => { console.log('ERROR:', e.message); process.exit(1); });
             "
