@@ -1,5 +1,5 @@
 import React from "react";
-import { loadCountries, loadCompanies, loadIndustries, loadTechnologies } from "@/lib/data/loaders";
+import { loadCountries, loadCompanies, loadTechnologies } from "@/lib/data/loaders";
 import { EntityListItem } from "@/components/lists/EntityListItem";
 import { HomeSectionHeading } from "./HomeSectionHeading";
 import type { BaseEntity, CompanyEntity } from "@/types/entity";
@@ -14,14 +14,13 @@ const RECENT_COUNT = 6;
  * loaders' 5-minute revalidation window.
  */
 export async function RecentlyUpdated() {
-  const [countries, companies, industries, technologies] = await Promise.all([
+  const [countries, companies, technologies] = await Promise.all([
     loadCountries(),
     loadCompanies(),
-    loadIndustries(),
     loadTechnologies(),
   ]);
 
-  const all: BaseEntity[] = [...countries, ...companies, ...industries, ...technologies];
+  const all: BaseEntity[] = [...countries, ...companies, ...technologies];
   const recent = [...all]
     .filter((e) => e.updated_at)
     .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())

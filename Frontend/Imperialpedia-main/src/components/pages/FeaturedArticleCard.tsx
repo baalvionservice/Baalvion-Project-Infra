@@ -38,7 +38,7 @@ export function FeaturedArticleCard({
             </p>
           )}
           <p className="text-muted-foreground text-xs">
-            By {article.author.name} · {formatDate(article.publishedAt)} · {article.readTimeMinutes} min read
+            By {article.author.name} · {formatDate(article.publishedAt)}
           </p>
         </div>
       </Link>

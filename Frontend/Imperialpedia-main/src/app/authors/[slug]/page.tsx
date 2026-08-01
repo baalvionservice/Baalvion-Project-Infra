@@ -87,8 +87,6 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
     const bDate = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
     return bDate - aDate;
   });
-  const totalReadingMinutes = articles.reduce((sum, a) => sum + (a.readingTime || 0), 0);
-
   const profileUrl = `${env.siteUrl}/authors/${author.slug}`;
   const sameAs = [author.social.twitter, author.social.linkedin, author.social.website].filter(
     (v): v is string => Boolean(v)
@@ -152,12 +150,6 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
                       <span className="text-2xl font-bold tracking-tighter">{articles.length}</span>
                       <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">
                         Articles Published
-                      </span>
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-2xl font-bold tracking-tighter">{totalReadingMinutes.toLocaleString()}m</span>
-                      <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">
-                        Total Read Time
                       </span>
                     </div>
                   </div>

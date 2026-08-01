@@ -7,7 +7,7 @@ import { notFound } from "next/navigation";
 import { getAssetDetail, ALL_TRACKED_SYMBOLS } from "@/lib/data/marketsLoader";
 import { ASSET_EDITORIAL_CONTENT } from "@/lib/data/asset-editorial-content";
 import { getCompanyByTicker, getRelatedEntities } from "@/lib/data/loaders";
-import { buildOverviewParagraph } from "@/lib/data/asset-overview-text";
+import { buildOverviewParagraph, buildMarketMechanicsParagraph } from "@/lib/data/asset-overview-text";
 import { buildMetadata } from "@/lib/seo";
 import { structuredData } from "@/lib/seo/structured-data";
 import { JsonLd } from "@/modules/seo-engine/components/JsonLd";
@@ -103,7 +103,7 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
 
   const company = await getCompanyCached(detail.symbol);
   const description = truncate(
-    company?.description || detail.ai_summary || ASSET_EDITORIAL_CONTENT[detail.symbol] || buildOverviewParagraph(detail, typeLabel),
+    company?.description || detail.ai_summary || ASSET_EDITORIAL_CONTENT[detail.symbol]?.[0] || buildOverviewParagraph(detail, typeLabel),
   );
   const ogImage = company?.logo && isAllowedImageHost(company.logo) ? company.logo : undefined;
 
@@ -172,6 +172,7 @@ export default async function QuotePage({ params, searchParams }: PageProps) {
   const typeLabel = ASSET_TYPE_LABELS[detail.asset_type] ?? "Market Instrument";
   const hub = ASSET_TYPE_HUB[detail.asset_type];
   const editorialBlurb = ASSET_EDITORIAL_CONTENT[detail.symbol];
+  const mechanicsText = buildMarketMechanicsParagraph(detail.asset_type, detail.name);
   // Overview block stays the live numeric summary (price/change/performance) — its
   // whole purpose. The editorial blurb (what this instrument actually is, how it's
   // built, why it's watched) renders separately, below, as its own "About" section.
@@ -394,7 +395,7 @@ export default async function QuotePage({ params, searchParams }: PageProps) {
             {company?.industry && (
               <div>
                 <dt className="text-white/40 uppercase text-[10px]">Industry</dt>
-                <dd><Link href={`/industries/${company.industry}`} className="text-white hover:underline">{humanizeSlug(company.industry)}</Link></dd>
+                <dd className="text-white">{humanizeSlug(company.industry)}</dd>
               </div>
             )}
             {company?.founded_year != null && (
@@ -482,12 +483,27 @@ export default async function QuotePage({ params, searchParams }: PageProps) {
           </div>
         </div>
 
-        {!company && editorialBlurb && (
+        {!company && editorialBlurb && editorialBlurb.length > 0 && (
           <div className="bg-[#111] border border-white/15 rounded-sm p-4">
             <h2 className="text-[11px] font-black uppercase tracking-widest text-white/70 mb-2">
-              About {detail.name}
+              What Is {detail.name}?
             </h2>
-            <p className="text-[13px] text-white/70 leading-relaxed">{editorialBlurb}</p>
+            <div className="space-y-3">
+              {editorialBlurb.map((paragraph, i) => (
+                <p key={i} className="text-[13px] text-white/70 leading-relaxed">{paragraph}</p>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {!company && mechanicsText && (
+          <div className="bg-[#111] border border-white/15 rounded-sm p-4">
+            <h2 className="text-[11px] font-black uppercase tracking-widest text-white/70 mb-2">
+              {detail.asset_type === "crypto"
+                ? `How ${detail.name} Market Cap Is Calculated`
+                : `How ${detail.name} Is Priced`}
+            </h2>
+            <p className="text-[13px] text-white/70 leading-relaxed">{mechanicsText}</p>
           </div>
         )}
 
@@ -506,6 +522,15 @@ export default async function QuotePage({ params, searchParams }: PageProps) {
                 </p>
               )}
             </div>
+          </div>
+        )}
+
+        {company && mechanicsText && (
+          <div className="bg-[#111] border border-white/15 rounded-sm p-4">
+            <h2 className="text-[11px] font-black uppercase tracking-widest text-white/70 mb-2">
+              How {detail.name} Market Cap Is Calculated
+            </h2>
+            <p className="text-[13px] text-white/70 leading-relaxed">{mechanicsText}</p>
           </div>
         )}
 
