@@ -7,7 +7,7 @@ import { RelatedArticles, fetchRelatedArticles } from '@/components/knowledge/Re
 import { Breadcrumbs } from '@/components/knowledge/Breadcrumbs';
 import { ArticleTOC } from '@/app/law/[categorySlug]/[subSlug]/[articleSlug]/ArticleTOC';
 import { ArticleAuthorByline } from '@/app/law/[categorySlug]/[subSlug]/[articleSlug]/ArticleAuthorByline';
-import { getAuthorByName } from '@/data/authors';
+import { getMergedAuthorByName } from '@/lib/authors-server';
 import { resolveArticleImage } from '@/lib/article-art';
 import { formatArticleDate } from '@/lib/format-date';
 
@@ -69,7 +69,7 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
   const category = article.category;
   const subcategory = article.subcategory;
   const authorName: string = (typeof article.author === 'string' ? article.author : article.author?.name) || 'Law Elite Editorial';
-  const matchedAuthor = getAuthorByName(authorName);
+  const matchedAuthor = await getMergedAuthorByName(authorName);
   const updatedAt = formatArticleDate(article.updatedAt || article.updated_at) || 'February 12, 2025';
   const processedContent = injectHeadingIds(article.content || '');
   const toc = extractToc(processedContent);

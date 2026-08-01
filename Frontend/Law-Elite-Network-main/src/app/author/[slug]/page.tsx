@@ -1,75 +1,22 @@
-"use client";
-
-import React, { useEffect, useState } from 'react';
-import { useParams, notFound } from 'next/navigation';
+import React from 'react';
+import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Navbar } from '@/components/navbar';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
-import { Linkedin, Twitter, BookOpen, Loader2 } from 'lucide-react';
-import { getAuthorBySlug, authorNameToSlug, type LawAuthor } from '@/data/authors';
+import { Linkedin, Twitter, BookOpen } from 'lucide-react';
+import { authorNameToSlug } from '@/data/authors';
+import { getMergedAuthorBySlug } from '@/lib/authors-server';
 import { getAllArticles, type LawArticle } from '@/data/law-content';
 import { resolveArticleImage, resolvePersonImage } from '@/lib/article-art';
 import { articleUrl } from '@/lib/article-url';
 
-export default function AuthorProfilePage() {
-  const { slug } = useParams();
-  const bundled = typeof slug === 'string' ? getAuthorBySlug(slug) : null;
-  const [author, setAuthor] = useState<LawAuthor | null>(bundled);
-  const [loading, setLoading] = useState(!bundled);
-  const [missing, setMissing] = useState(false);
-
-  // Source-of-truth order: central CMS first (admin-created contributors), then
-  // the bundled baseline. The bundle covers all current bylines so most renders
-  // are instant; CMS-only authors resolve via the same-origin BFF.
-  useEffect(() => {
-    if (typeof slug !== 'string') return;
-    let cancelled = false;
-    (async () => {
-      try {
-        const r = await fetch(`/api/cms/authors/${slug}`);
-        if (!cancelled && r.ok) {
-          const j = await r.json();
-          if (j?.data) {
-            const d = j.data;
-            setAuthor({
-              slug: d.slug,
-              name: d.name,
-              title: d.title || '',
-              credentials: d.credentials || '',
-              bio: d.bio || '',
-              expertise: Array.isArray(d.expertise) ? d.expertise : [],
-              avatarSeed: d.slug,
-              avatarUrl: d.avatarUrl || undefined,
-              social: d.social || undefined,
-            });
-            setLoading(false);
-            return;
-          }
-        }
-      } catch {
-        /* ignore — fall back to bundled */
-      }
-      if (cancelled) return;
-      if (!bundled) setMissing(true);
-      setLoading(false);
-    })();
-    return () => { cancelled = true; };
-  }, [slug, bundled]);
-
-  if (missing) notFound();
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-white">
-        <Navbar />
-        <div className="flex items-center justify-center pt-48 pb-48">
-          <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
-        </div>
-        <PublicFooter />
-      </div>
-    );
-  }
-  if (!author) return null;
+export default async function AuthorProfilePage(
+  { params }: { params: Promise<{ slug: string }> },
+) {
+  const { slug } = await params;
+  const author = await getMergedAuthorBySlug(slug);
+  if (!author) notFound();
 
   // Match a byline ("Elena Rossi") to this profile by its normalized slug.
   const articles: LawArticle[] = getAllArticles()
