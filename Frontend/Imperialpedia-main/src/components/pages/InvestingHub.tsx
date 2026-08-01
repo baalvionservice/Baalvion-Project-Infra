@@ -244,7 +244,6 @@ export async function InvestingHub() {
                   <h3 className="text-sm font-bold text-foreground leading-snug group-hover:underline line-clamp-3">
                     {article.title}
                   </h3>
-                  <p className="mt-1 text-xs text-gray-400">{article.readTimeMinutes} min read</p>
                 </Link>
               ))}
             </div>

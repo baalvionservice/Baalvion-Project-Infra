@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Clock, Eye } from "lucide-react";
+import { Eye } from "lucide-react";
 import type { NewsArticle } from "@/lib/data.news";
 import { CategoryBadge } from "@/components/pages/CategoriesBadge";
 import { newsArticleHref } from "@/lib/data/article-url";
@@ -38,9 +38,6 @@ export function TodayHighlights({ articles }: Props) {
                 {article.title}
               </h3>
               <div className="mt-auto flex items-center gap-3 text-[11px] text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <Clock className="h-3 w-3" /> {article.readTimeMinutes} min
-                </span>
                 {typeof article.views === "number" && (
                   <span className="flex items-center gap-1">
                     <Eye className="h-3 w-3" /> {article.views.toLocaleString()}

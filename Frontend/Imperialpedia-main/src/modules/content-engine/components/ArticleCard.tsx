@@ -7,7 +7,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Badge } from '@/components/ui/badge';
 import { Text } from '@/design-system/typography/text';
 import { Article } from '../types';
-import { Calendar, Clock, ArrowRight } from 'lucide-react';
+import { Calendar, ArrowRight } from 'lucide-react';
 
 interface ArticleCardProps {
   article: Article;
@@ -69,10 +69,6 @@ export const ArticleCard = ({ article }: ArticleCardProps) => {
               <Text variant="caption">
                 {article.publishedAt ? cardDateFormatter.format(new Date(article.publishedAt)) : 'Recent'}
               </Text>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5" />
-              <Text variant="caption">{article.readingTime}m</Text>
             </div>
           </div>
           <ArrowRight className="w-4 h-4 text-primary opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0" />

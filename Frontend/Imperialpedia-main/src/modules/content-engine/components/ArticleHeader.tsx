@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Text } from '@/design-system/typography/text';
 import { Article } from '../types';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Calendar, User, RefreshCw } from 'lucide-react';
+import { Calendar, User, RefreshCw } from 'lucide-react';
 import { TagList } from './TagList';
 import { authors } from '@/config/authors';
 
@@ -95,12 +95,6 @@ export const ArticleHeader = ({ article }: ArticleHeaderProps) => {
             </div>
           )}
 
-          <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-primary" />
-            <Text variant="bodySmall">
-              {article.readingTime} min read
-            </Text>
-          </div>
         </div>
       </div>
 
