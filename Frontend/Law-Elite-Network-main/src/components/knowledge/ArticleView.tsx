@@ -5,8 +5,8 @@ import { BookOpen } from 'lucide-react';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { RelatedArticles, fetchRelatedArticles } from '@/components/knowledge/RelatedArticles';
 import { Breadcrumbs } from '@/components/knowledge/Breadcrumbs';
-import { ArticleTOC } from '@/app/law/[categorySlug]/[subSlug]/[articleSlug]/ArticleTOC';
-import { ArticleAuthorByline } from '@/app/law/[categorySlug]/[subSlug]/[articleSlug]/ArticleAuthorByline';
+import { ArticleTOC } from '@/app/[categorySlug]/[articleSlug]/ArticleTOC';
+import { ArticleAuthorByline } from '@/app/[categorySlug]/[articleSlug]/ArticleAuthorByline';
 import { getMergedAuthorByName } from '@/lib/authors-server';
 import { resolveArticleImage } from '@/lib/article-art';
 import { formatArticleDate } from '@/lib/format-date';
@@ -60,14 +60,13 @@ function extractToc(html: string): TOCItem[] {
 
 /**
  * Full article render (breadcrumbs, H1, TOC, hero image, body, related
- * articles). Shared by the canonical nested route and the legacy flat-URL
- * route (which falls back to rendering this directly for CMS articles that
- * have no subcategory, instead of a URL it can't build) so the two never
- * visually drift apart.
+ * articles). Shared by the canonical /{categorySlug}/{articleSlug} route and
+ * the legacy flat /article/{slug} route (which falls back to rendering this
+ * directly for articles with no category, instead of a URL it can't build)
+ * so the two never visually drift apart.
  */
 export async function ArticleView({ article, slug }: { article: any; slug: string }) {
   const category = article.category;
-  const subcategory = article.subcategory;
   const authorName: string = (typeof article.author === 'string' ? article.author : article.author?.name) || 'Law Elite Editorial';
   const matchedAuthor = await getMergedAuthorByName(authorName);
   const updatedAt = formatArticleDate(article.updatedAt || article.updated_at) || 'February 12, 2025';
@@ -82,7 +81,6 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
 
           <Breadcrumbs
             category={category}
-            subcategory={subcategory}
             articleTitle={article.title}
           />
 

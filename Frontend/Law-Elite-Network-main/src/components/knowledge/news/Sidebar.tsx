@@ -66,7 +66,7 @@ export function Sidebar({ articles }: Props) {
             {categories.map(([slug, name]) => (
               <Link
                 key={slug}
-                href={`/law/${slug}`}
+                href={`/${slug}`}
                 className="rounded-full border border-slate-200 dark:border-slate-700 px-3 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:border-news-600 hover:text-news-600 transition-colors"
               >
                 {name}

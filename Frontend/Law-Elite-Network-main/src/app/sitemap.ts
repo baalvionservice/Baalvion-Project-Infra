@@ -2,6 +2,7 @@ import { MetadataRoute } from 'next';
 import { getAllArticles } from '@/data/law-content';
 import { getAllAuthors } from '@/data/authors';
 import { articleUrl } from '@/lib/article-url';
+import { toNewCategorySlug } from '@/lib/category-slugs';
 
 // Render at request time, never at build time. This route fetches from law-service,
 // and a build-time fetch against an unreachable API blocks `next build` (CI timeout).
@@ -109,38 +110,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.65,
   }));
 
+  // Subcategories no longer have a dedicated URL -- they're a filter chip on
+  // the category page (?sub=), not a separate indexable page -- so there's no
+  // subcategory-routes block here anymore.
   const categoryRoutes: MetadataRoute.Sitemap = categories.map((c) => ({
-    url: `${BASE_URL}/law/${c.slug}`,
+    url: `${BASE_URL}/${toNewCategorySlug(c.slug)}`,
     lastModified: new Date(c.updated_at || c.updatedAt || Date.now()),
     changeFrequency: 'weekly',
     priority: 0.6,
-  }));
-
-  // Subcategory routes: emit `/law/{categorySlug}/{subSlug}` for every category+subcategory
-  // pair that has at least one article. Derived from the bundled baseline (always present)
-  // unioned with any taxonomy slugs the live API returns — deduped by the composite path.
-  // lastModified tracks the most recently updated article in that pairing (bundled dates are
-  // human strings like "March 12, 2026", which Date.parse handles natively) rather than the
-  // request time, so the signal reflects real content freshness.
-  const taxonomyPairs = new Map<string, { url: string; lastModified: Date }>(); // `${cat}/${sub}` -> entry
-  const addPair = (catSlug?: string, subSlug?: string, updated?: string) => {
-    if (!catSlug || !subSlug) return;
-    const key = `${catSlug}/${subSlug}`;
-    const parsed = updated ? new Date(updated) : null;
-    const candidate = parsed && !Number.isNaN(parsed.getTime()) ? parsed : new Date(0);
-    const existing = taxonomyPairs.get(key);
-    if (!existing || candidate > existing.lastModified) {
-      taxonomyPairs.set(key, { url: `${BASE_URL}/law/${catSlug}/${subSlug}`, lastModified: candidate });
-    }
-  };
-  getAllArticles().forEach((a) => addPair(a.category?.slug, a.subcategory?.slug, a.updatedAt));
-  articles.forEach((a) => addPair(a.category?.slug, a.subcategory?.slug, a.updated_at || a.updatedAt));
-
-  const subcategoryRoutes: MetadataRoute.Sitemap = Array.from(taxonomyPairs.values()).map((entry) => ({
-    url: entry.url,
-    lastModified: entry.lastModified.getTime() > 0 ? entry.lastModified : new Date(),
-    changeFrequency: 'weekly',
-    priority: 0.55,
   }));
 
   // Author profile pages — one per contributor for E-E-A-T discoverability.
@@ -165,7 +142,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...staticRoutes,
     ...articleRoutes,
     ...categoryRoutes,
-    ...subcategoryRoutes,
     ...authorRoutes,
   ];
 }

@@ -3,7 +3,7 @@ import type { LawArticle } from '../law-content';
 const FAMILY_PERSONAL_CATEGORY = {
   id: 'cat_family_personal',
   name: 'Family & Personal',
-  slug: 'family-personal',
+  slug: 'family-law',
 };
 
 export const familyPersonalExtra2Articles: LawArticle[] = [

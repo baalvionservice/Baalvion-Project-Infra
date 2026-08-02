@@ -24,7 +24,7 @@ export function TopicTicker({ categories }: TopicTickerProps) {
           {categories.map((cat) => (
             <Link
               key={cat.id}
-              href={`/law/${cat.slug}`}
+              href={`/${cat.slug}`}
               className="shrink-0 px-3 py-1 text-[13px] font-semibold text-slate-600 dark:text-slate-300 hover:text-news-600 whitespace-nowrap transition-colors"
             >
               {cat.name}

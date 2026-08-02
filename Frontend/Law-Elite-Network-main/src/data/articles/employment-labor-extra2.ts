@@ -3,7 +3,7 @@ import type { LawArticle } from '../law-content';
 const EMPLOYMENT_LABOR_CATEGORY = {
   id: 'cat_employment_labor',
   name: 'Employment & Labor',
-  slug: 'employment-labor',
+  slug: 'employment-law',
 };
 
 export const employmentLaborExtra2Articles: LawArticle[] = [

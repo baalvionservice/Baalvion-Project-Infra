@@ -11,7 +11,7 @@ export const employmentLaborArticles: LawArticle[] = [
     category: {
       id: 'cat_employment_labor',
       name: 'Employment & Labor',
-      slug: 'employment-labor',
+      slug: 'employment-law',
     },
     subcategory: {
       id: 'sub_el_contracts',
@@ -85,7 +85,7 @@ export const employmentLaborArticles: LawArticle[] = [
     category: {
       id: 'cat_employment_labor',
       name: 'Employment & Labor',
-      slug: 'employment-labor',
+      slug: 'employment-law',
     },
     subcategory: {
       id: 'sub_el_termination',

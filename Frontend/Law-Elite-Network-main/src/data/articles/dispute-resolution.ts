@@ -11,7 +11,7 @@ export const disputeResolutionArticles: LawArticle[] = [
     category: {
       id: 'cat_dispute_resolution',
       name: 'Dispute Resolution',
-      slug: 'dispute-resolution',
+      slug: 'disputes',
     },
     subcategory: {
       id: 'sub_dr_arbitration',
@@ -80,7 +80,7 @@ export const disputeResolutionArticles: LawArticle[] = [
     category: {
       id: 'cat_dispute_resolution',
       name: 'Dispute Resolution',
-      slug: 'dispute-resolution',
+      slug: 'disputes',
     },
     subcategory: {
       id: 'sub_dr_mediation',

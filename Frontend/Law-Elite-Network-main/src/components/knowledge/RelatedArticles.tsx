@@ -77,7 +77,7 @@ export function RelatedArticles({ articles }: { articles: RelatedArticle[] }) {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 px-2">
           {articles.map((art) => (
-            <Link key={art.id} href={articleUrl({ slug: art.slug, category: { slug: art.categorySlug }, subcategory: { slug: art.subcategorySlug } })} className="group block h-full">
+            <Link key={art.id} href={articleUrl({ slug: art.slug, category: { slug: art.categorySlug } })} className="group block h-full">
               <div className="bg-white border border-slate-200 overflow-hidden shadow-sm group-hover:shadow-md transition-all duration-300 flex flex-col h-full">
                 <div className="relative aspect-[3/2] overflow-hidden bg-slate-100">
                   <Image

@@ -29,7 +29,7 @@ export function CategorySection({ name, slug, articles }: CategorySectionProps) 
           </h2>
         </div>
         <Link
-          href={`/law/${slug}`}
+          href={`/${slug}`}
           className="inline-flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400 hover:text-news-600 transition-colors"
         >
           View all <ArrowRight className="w-3.5 h-3.5" />

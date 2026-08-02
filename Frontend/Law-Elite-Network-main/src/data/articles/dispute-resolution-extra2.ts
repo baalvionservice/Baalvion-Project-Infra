@@ -3,7 +3,7 @@ import type { LawArticle } from '../law-content';
 const DISPUTE_RESOLUTION_CATEGORY = {
   id: 'cat_dispute_resolution',
   name: 'Dispute Resolution',
-  slug: 'dispute-resolution',
+  slug: 'disputes',
 };
 
 export const disputeResolutionExtra2Articles: LawArticle[] = [
