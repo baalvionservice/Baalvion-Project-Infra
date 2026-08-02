@@ -18,8 +18,7 @@ export async function generateMetadata(
   const description = `Browse expert-verified legal terms, definitions, and guides beginning with the letter ${upper} in the Law Elite Network legal glossary — covering business, criminal, family, tax, employment, and property law.`;
 
   // Thin/empty letters must not be indexed. The bundled baseline mirrors what the
-  // page renders when the API is unreachable, so it is a safe floor for this check
-  // (mirrors the same rule on /law/[categorySlug]/[subSlug]).
+  // page renders when the API is unreachable, so it is a safe floor for this check.
   const hasArticles = bundledCount(upper) > 0;
 
   return {

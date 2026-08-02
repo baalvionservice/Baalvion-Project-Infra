@@ -17,6 +17,12 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: 'draft',
         },
         published_at: { type: DataTypes.DATE, allowNull: true },
+        // Jurisdiction metadata for the /countries section (see db/migrations/0017_article_metadata.sql).
+        country: { type: DataTypes.STRING(120), allowNull: true },
+        state: { type: DataTypes.STRING(120), allowNull: true },
+        city: { type: DataTypes.STRING(120), allowNull: true },
+        court: { type: DataTypes.STRING(255), allowNull: true },
+        language: { type: DataTypes.STRING(20), allowNull: true },
     }, {
         schema: 'legal',
         tableName: 'articles',

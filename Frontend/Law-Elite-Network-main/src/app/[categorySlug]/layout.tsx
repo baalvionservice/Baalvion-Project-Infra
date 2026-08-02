@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { CURRENT_CATEGORY_SLUGS } from '@/lib/category-slugs';
 
 const API = process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3015/v1');
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
@@ -29,12 +30,18 @@ export async function generateMetadata(
   { params }: { params: Promise<{ categorySlug: string }> },
 ): Promise<Metadata> {
   const { categorySlug } = await params;
+  // Unrecognized slug -> page.tsx will notFound(); don't emit an indexable
+  // canonical/title for a category that doesn't exist (this segment is now a
+  // top-level catch-all, not scoped under /law/ anymore).
+  if (!(CURRENT_CATEGORY_SLUGS as readonly string[]).includes(categorySlug)) {
+    return { robots: { index: false, follow: false } };
+  }
   const cat = await fetchCategory(categorySlug);
   const name = cat?.name || titleCase(categorySlug);
   const title = `${name} Attorneys & Legal Services | Law Elite Network`;
   const description = cat?.description
     || `Find verified ${name} lawyers across 188 countries and read expert ${name} guides on Law Elite Network.`;
-  const url = `${SITE}/law/${categorySlug}`;
+  const url = `${SITE}/${categorySlug}`;
   return {
     title,
     description,
@@ -47,11 +54,11 @@ export async function generateMetadata(
 }
 
 // CollectionPage/BreadcrumbList JSON-LD used to live here, but a layout wraps
-// EVERY nested route below it -- including /law/[categorySlug]/[subSlug]/[articleSlug],
-// which now has its own (more complete) BreadcrumbList. That meant an article page
-// rendered two conflicting BreadcrumbList blocks: the category's 2-level trail from
-// here, plus the article's real 4-level one. Moved to page.tsx, which only renders
-// for this exact route, not for deeper nested ones.
+// EVERY nested route below it -- including /[categorySlug]/[articleSlug],
+// which now has its own (more complete) BreadcrumbList. That meant an article
+// page rendered two conflicting BreadcrumbList blocks: the category's 2-level
+// trail from here, plus the article's real one. Moved to page.tsx, which only
+// renders for this exact route, not for deeper nested ones.
 export default function CategoryLayout({ children }: { children: React.ReactNode }) {
   return children;
 }

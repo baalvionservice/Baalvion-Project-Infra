@@ -8,7 +8,7 @@ import { SubcategoryTabs } from '@/components/knowledge/SubcategoryTabs';
 import { AlphabetFilter } from '@/components/knowledge/AlphabetFilter';
 import { getArticlesByCategorySlug } from '@/data/law-content';
 import { isSubcategoryPopulated } from '@/lib/subcategory-or-article';
-import seedData from '../../../../docs/seed-data.json';
+import seedData from '../../../docs/seed-data.json';
 import { FileText } from 'lucide-react';
 
 function bundledSubcategories(categoryId: string) {

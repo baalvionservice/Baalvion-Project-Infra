@@ -39,6 +39,8 @@ export interface LawArticle {
   featured: boolean;
   /** Stable seed for the deterministic editorial image. */
   imageSeed: string;
+  /** Country this guide is jurisdiction-specific to, e.g. "United States". Absent for worldwide-general content. */
+  country?: string;
 }
 
 import { LAW_ARTICLES } from './articles';

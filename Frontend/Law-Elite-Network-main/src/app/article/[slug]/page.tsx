@@ -4,13 +4,11 @@ import { articleUrl } from '@/lib/article-url';
 import { ArticleView, ArticleNotFound } from '@/components/knowledge/ArticleView';
 
 /**
- * Legacy flat URL. Canonical articles now live at
- * /law/[categorySlug]/[subSlug]/[articleSlug] for topical-silo SEO. Whenever an
- * article has enough taxonomy to build that nested URL, permanently (308)
- * redirect there instead of serving duplicate content at two URLs. CMS
- * articles have no subcategory field at all (see lib/cms.ts toArticle()), so
- * for those articleUrl() can't build a nested URL -- this route renders them
- * directly instead, since it's the only URL they can have.
+ * Legacy flat URL. Canonical articles now live at /[categorySlug]/[articleSlug]
+ * for topical-silo SEO. Whenever an article has a category to build that URL,
+ * permanently (308) redirect there instead of serving duplicate content at two
+ * URLs. Only an article with no category at all (rare/orphaned content) has no
+ * other URL to redirect to, so this route renders it directly.
  */
 export default async function ArticleDeepDivePage(
   { params, searchParams }: {

@@ -229,6 +229,8 @@ export interface CmsArticle {
   views?: number;
   /** Raw CMS custom fields (e.g. `breaking`, `videoUrl`) passed through for data-gated UI like the breaking ticker and video carousel. */
   customFields?: Record<string, any>;
+  /** Country this guide is jurisdiction-specific to (customFields.country), e.g. "United States". Absent for worldwide-general content. */
+  country?: string;
 }
 
 function toArticle(c: CmsContent): CmsArticle {
@@ -252,6 +254,7 @@ function toArticle(c: CmsContent): CmsArticle {
     featuredImage: c.featuredImage ?? undefined,
     views: typeof c.viewCount === 'number' ? c.viewCount : undefined,
     customFields: c.customFields ?? undefined,
+    country: typeof cf.country === 'string' ? cf.country : undefined,
   };
 }
 

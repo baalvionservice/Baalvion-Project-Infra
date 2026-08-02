@@ -1,14 +1,14 @@
 
 {
   "categories": [
-    { "id": "cat_business_corporate", "name": "Business & Corporate", "slug": "business-corporate", "description": "Strategic counsel for enterprise governance, mergers, and commerce.", "icon": "Building2", "order": 1, "isActive": true },
+    { "id": "cat_business_corporate", "name": "Business & Corporate", "slug": "business", "description": "Strategic counsel for enterprise governance, mergers, and commerce.", "icon": "Building2", "order": 1, "isActive": true },
     { "id": "cat_criminal_law", "name": "Criminal Law", "slug": "criminal-law", "description": "Expert defense strategies for white-collar crime, bail, and litigation.", "icon": "ShieldAlert", "order": 2, "isActive": true },
-    { "id": "cat_family_personal", "name": "Family & Personal", "slug": "family-personal", "description": "Navigation of domestic relations, custody, and personal statutes.", "icon": "Users", "order": 3, "isActive": true },
-    { "id": "cat_property_real_estate", "name": "Property & Real Estate", "slug": "property-real-estate", "description": "Legal frameworks for property acquisition, leasing, and land statutes.", "icon": "Home", "order": 4, "isActive": true },
+    { "id": "cat_family_personal", "name": "Family & Personal", "slug": "family-law", "description": "Navigation of domestic relations, custody, and personal statutes.", "icon": "Users", "order": 3, "isActive": true },
+    { "id": "cat_property_real_estate", "name": "Property & Real Estate", "slug": "real-estate-law", "description": "Legal frameworks for property acquisition, leasing, and land statutes.", "icon": "Home", "order": 4, "isActive": true },
     { "id": "cat_tax_finance", "name": "Tax & Finance", "slug": "tax-finance", "description": "Regulatory audit of corporate taxation, banking, and capital markets.", "icon": "Banknote", "order": 5, "isActive": true },
-    { "id": "cat_employment_labor", "name": "Employment & Labor", "slug": "employment-labor", "description": "Workplace rights, executive contracts, and labor dispute resolution.", "icon": "Briefcase", "order": 6, "isActive": true },
-    { "id": "cat_technology_ip", "name": "Technology & IP", "slug": "technology-ip", "description": "Protection of creative works, patents, AI ethics, and data privacy.", "icon": "Cpu", "order": 7, "isActive": true },
-    { "id": "cat_dispute_resolution", "name": "Dispute Resolution", "slug": "dispute-resolution", "description": "Strategic arbitration, mediation, and high-stakes litigation protocols.", "icon": "Scale", "order": 8, "isActive": true }
+    { "id": "cat_employment_labor", "name": "Employment & Labor", "slug": "employment-law", "description": "Workplace rights, executive contracts, and labor dispute resolution.", "icon": "Briefcase", "order": 6, "isActive": true },
+    { "id": "cat_technology_ip", "name": "Technology & IP", "slug": "tech-ip", "description": "Protection of creative works, patents, AI ethics, and data privacy.", "icon": "Cpu", "order": 7, "isActive": true },
+    { "id": "cat_dispute_resolution", "name": "Dispute Resolution", "slug": "disputes", "description": "Strategic arbitration, mediation, and high-stakes litigation protocols.", "icon": "Scale", "order": 8, "isActive": true }
   ],
   "subcategories": [
     { "id": "sub_bc_contracts", "categoryId": "cat_business_corporate", "name": "Contracts", "slug": "contracts", "isActive": true },

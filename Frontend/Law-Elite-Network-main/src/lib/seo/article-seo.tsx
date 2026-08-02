@@ -8,10 +8,9 @@ const titleCase = (s: string) => s.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.
 
 /**
  * Shared metadata builder for every route that can render an article page
- * (legacy flat /article/[slug], 2-segment /law/[categorySlug]/[slug], and
- * 3-segment /law/[categorySlug]/[subSlug]/[articleSlug]). Keeps title/canonical/
- * OG/Twitter generation identical across all three so a bug fixed once doesn't
- * regress on the other two.
+ * (legacy flat /article/[slug] and canonical /[categorySlug]/[articleSlug]).
+ * Keeps title/canonical/OG/Twitter generation identical across both so a bug
+ * fixed once doesn't regress on the other.
  */
 export function buildArticleMetadata(article: any | null, slug: string, site: string): Metadata {
   const url = `${site}${articleUrl(article ? { ...article, slug } : { slug })}`;
@@ -48,8 +47,8 @@ export function buildArticleMetadata(article: any | null, slug: string, site: st
 /**
  * Shared Article/NewsArticle + FAQPage + BreadcrumbList JSON-LD, rendered as
  * `<script>` tags. Breadcrumb trail is derived from the article's own
- * category/subcategory (not the requested URL segments), so it's correct
- * even when a route renders an article at a shorter URL than its full taxonomy.
+ * category (not the requested URL segments), so it's correct even when a
+ * route renders an article at a shorter URL than its full taxonomy.
  */
 export function ArticleJsonLd({ article, slug, site }: { article: any | null; slug: string; site: string }) {
   const url = `${site}${articleUrl(article ? { ...article, slug } : { slug })}`;
@@ -88,10 +87,8 @@ export function ArticleJsonLd({ article, slug, site }: { article: any | null; sl
       }
     : null;
   const cat = article?.category;
-  const sub = article?.subcategory;
   const crumbs: Array<{ name: string; item: string }> = [{ name: 'Home', item: site }];
-  if (cat?.name && cat?.slug) crumbs.push({ name: cat.name, item: `${site}/law/${cat.slug}` });
-  if (cat?.slug && sub?.name && sub?.slug) crumbs.push({ name: sub.name, item: `${site}/law/${cat.slug}/${sub.slug}` });
+  if (cat?.name && cat?.slug) crumbs.push({ name: cat.name, item: `${site}/${cat.slug}` });
   crumbs.push({ name: article?.title || titleCase(slug), item: url });
   const breadcrumbLd = {
     '@context': 'https://schema.org',

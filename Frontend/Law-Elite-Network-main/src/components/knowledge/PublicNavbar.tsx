@@ -28,14 +28,14 @@ import { sharedSignInUrl } from '@/lib/shared-auth';
 // text alone -- so they wrapped to two cramped lines. Short labels here are for this
 // bar ONLY; the mega-menu heading, page H1, and breadcrumbs still use the full name.
 const NAV_SHORT_LABEL: Record<string, string> = {
-  'business-corporate': 'Business',
+  business: 'Business',
   'criminal-law': 'Criminal Law',
-  'family-personal': 'Family',
-  'property-real-estate': 'Real Estate',
+  'family-law': 'Family',
+  'real-estate-law': 'Real Estate',
   'tax-finance': 'Tax & Finance',
-  'employment-labor': 'Employment',
-  'technology-ip': 'Tech & IP',
-  'dispute-resolution': 'Disputes',
+  'employment-law': 'Employment',
+  'tech-ip': 'Tech & IP',
+  disputes: 'Disputes',
 };
 
 /**
@@ -203,7 +203,7 @@ export function PublicNavbar() {
               onMouseLeave={() => setActiveCategory(null)}
             >
               <Link
-                href={`/law/${cat.slug}`}
+                href={`/${cat.slug}`}
                 className={cn(
                   'flex items-center gap-1 h-full px-3 whitespace-nowrap text-[12px] font-bold uppercase tracking-wider border-b-[3px] transition-colors',
                   activeCategory === cat.id
@@ -236,7 +236,7 @@ export function PublicNavbar() {
                       'Expert-reviewed guides and explainers across this practice area.'}
                   </p>
                   <Link
-                    href={`/law/${activeCategoryData.slug}`}
+                    href={`/${activeCategoryData.slug}`}
                     onClick={() => setActiveCategory(null)}
                     className="inline-flex items-center gap-1.5 text-[13px] font-bold text-blue-700 hover:text-news-600 transition-colors"
                   >
@@ -251,7 +251,7 @@ export function PublicNavbar() {
                       filteredSubcategories.map((sub) => (
                         <Link
                           key={sub.id}
-                          href={`/law/${activeCategoryData.slug}/${sub.slug}`}
+                          href={`/${activeCategoryData.slug}?sub=${sub.slug}`}
                           onClick={() => setActiveCategory(null)}
                           className="group flex items-center justify-between py-2.5 border-b border-slate-50 hover:border-slate-200 transition-colors"
                         >
@@ -317,7 +317,7 @@ export function PublicNavbar() {
                 </summary>
                 <div className="pb-3 pl-3 grid grid-cols-1 gap-0.5">
                   <Link
-                    href={`/law/${cat.slug}`}
+                    href={`/${cat.slug}`}
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="py-1.5 text-xs font-bold text-blue-700"
                   >
@@ -332,7 +332,7 @@ export function PublicNavbar() {
                     .map((sub) => (
                       <Link
                         key={sub.id}
-                        href={`/law/${cat.slug}/${sub.slug}`}
+                        href={`/${cat.slug}?sub=${sub.slug}`}
                         onClick={() => setIsMobileMenuOpen(false)}
                         className="py-1.5 text-xs font-medium text-slate-500 hover:text-news-600"
                       >

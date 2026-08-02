@@ -3,7 +3,7 @@ import type { LawArticle } from '../law-content';
 const PROPERTY_REAL_ESTATE_CATEGORY = {
   id: 'cat_property_real_estate',
   name: 'Property & Real Estate',
-  slug: 'property-real-estate',
+  slug: 'real-estate-law',
 };
 
 export const propertyRealEstateExtra2Articles: LawArticle[] = [

@@ -3,7 +3,7 @@ import type { LawArticle } from '../law-content';
 const TECHNOLOGY_IP_CATEGORY = {
   id: 'cat_technology_ip',
   name: 'Technology & IP',
-  slug: 'technology-ip',
+  slug: 'tech-ip',
 };
 
 export const technologyIpExtra2Articles: LawArticle[] = [

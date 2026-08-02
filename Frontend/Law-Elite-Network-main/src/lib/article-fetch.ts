@@ -6,8 +6,8 @@ import { articlesPublicApi } from '@/lib/api/client';
 /**
  * Source-of-truth order for the rendered article: CMS (preview-aware) ->
  * law-service -> bundled editorial library -> static seed. Shared by both the
- * canonical nested route (/law/[categorySlug]/[subSlug]/[articleSlug]) and the
- * legacy flat route (/article/[slug]) so the two never drift.
+ * canonical route (/[categorySlug]/[articleSlug]) and the legacy flat route
+ * (/article/[slug]) so the two never drift.
  */
 export async function fetchArticleForRender(
   slug: string,

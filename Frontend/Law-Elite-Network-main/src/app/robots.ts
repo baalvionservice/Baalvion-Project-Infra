@@ -2,7 +2,40 @@ import { MetadataRoute } from 'next';
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 
-const ALLOW = ['/', '/news', '/search', '/plans', '/about-us', '/contact-us', '/careers', '/advertise', '/editorial-process', '/privacy-policy', '/terms-of-service', '/editorial-disclosure-policy', '/lawyers/', '/article/', '/law/', '/legal/'];
+// The 8 practice-area categories are top-level routes (/{slug} + nested
+// /{slug}/{article}) since the URL restructure -- listed explicitly even
+// though '/' already covers them, for parity with the other section prefixes
+// below. /law/ stays allowed forever: those URLs now permanently (308)
+// redirect to their new home, and a redirect source must stay crawlable for
+// Google to keep following and crediting it -- disallowing it would strand
+// the old URLs' accumulated ranking signal instead of transferring it.
+const ALLOW = [
+  '/',
+  '/news',
+  '/search',
+  '/plans',
+  '/about-us',
+  '/contact-us',
+  '/careers',
+  '/advertise',
+  '/editorial-process',
+  '/privacy-policy',
+  '/terms-of-service',
+  '/editorial-disclosure-policy',
+  '/lawyers/',
+  '/article/',
+  '/law/',
+  '/legal/',
+  '/business',
+  '/criminal-law',
+  '/family-law',
+  '/real-estate-law',
+  '/tax-finance',
+  '/employment-law',
+  '/tech-ip',
+  '/disputes',
+  '/countries',
+];
 
 const DISALLOW = [
   '/dashboard',

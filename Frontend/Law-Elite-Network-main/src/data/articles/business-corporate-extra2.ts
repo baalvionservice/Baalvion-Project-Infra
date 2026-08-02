@@ -3,7 +3,7 @@ import type { LawArticle } from '../law-content';
 const BUSINESS_CORPORATE_CATEGORY = {
   id: 'cat_business_corporate',
   name: 'Business & Corporate',
-  slug: 'business-corporate',
+  slug: 'business',
 };
 
 export const businessCorporateExtra2Articles: LawArticle[] = [
