@@ -222,6 +222,13 @@ jobs:
           # server-side check is skipped (same as local dev) — not a build blocker.
           # NEXT_PUBLIC_ALLOWED_RETURN_HOSTS left unset: the baseline in src/lib/brand.ts
           # already covers every current site's apex domain.
+          # AUTH_SERVICE_URL MUST be a build-arg, not a runtime env var: next.config.ts's
+          # rewrites() destination is baked into .next/required-server-files.json at build
+          # time for `output: 'standalone'` (verified live: without this, every /auth-bff/*
+          # request 500'd because the compiled rewrite pointed at the Dockerfile's
+          # http://localhost:3001 fallback instead of app-identity).
+          build-args: |
+            AUTH_SERVICE_URL=http://app-identity:3001
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=box2-auth-web
