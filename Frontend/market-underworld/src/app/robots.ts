@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 
-const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://community.marketunderworld.com';
+// See sitemap.ts for why this is hardcoded rather than read from NEXT_PUBLIC_APP_URL.
+const SITE_URL = 'https://community.marketunderworld.com';
 
 export default function robots(): MetadataRoute.Robots {
   return {

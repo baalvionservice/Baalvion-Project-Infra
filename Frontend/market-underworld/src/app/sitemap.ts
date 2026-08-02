@@ -1,17 +1,23 @@
 import type { MetadataRoute } from 'next';
 import { getStorefrontCategories, getStorefrontProducts } from '@/lib/api/commerce';
 
-// No NEXT_PUBLIC_APP_URL is set for the market-underworld-community Worker (see
-// wrangler.jsonc — only NEXT_PRIVATE_MINIMAL_MODE is defined), so default straight to the
-// real custom domain rather than the localhost fallback community.ts/giftcards.ts use for
-// same-origin proxying. That keeps this file correct in prod with zero extra deploy config.
-const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://community.marketunderworld.com';
+// Deliberately NOT process.env.NEXT_PUBLIC_APP_URL — that var exists purely for internal
+// same-origin SSR fetches (community.ts/giftcards.ts absoluteUrl()) and .env.local pins it to
+// http://localhost:9002 for local dev. Next.js loads .env.local with HIGHER precedence than
+// .env.production even for `next build`, and this Worker has no CI (every deploy is built
+// locally via `pnpm cf:deploy`), so reading that var here baked localhost URLs into the first
+// production deploy of this file. This Worker only ever serves one domain (see
+// wrangler.jsonc's single custom_domain route), so hardcode it instead.
+const SITE_URL = 'https://community.marketunderworld.com';
 
 // community-service's public endpoint, called directly (same target community-proxy's route
 // forwards to) instead of going through /api/community-proxy — that proxy is same-origin by
 // design for cookie translation, which would make this route self-fetch its own Worker.
-const COMMUNITY_API_BASE =
-  process.env.NEXT_PUBLIC_COMMUNITY_API_BASE ?? 'https://api.baalvion.com/api/v1/community';
+// Hardcoded rather than process.env.NEXT_PUBLIC_COMMUNITY_API_BASE for the same reason as
+// SITE_URL above: .env.local points that var at a local-only container (http://localhost:3064)
+// for dev, and this Worker's builds run locally with no CI to strip .env.local out — reading
+// it here silently zeroed out every forum-community sitemap entry on first deploy.
+const COMMUNITY_API_BASE = 'https://api.baalvion.com/api/v1/community';
 
 interface PublicCommunity {
   slug: string;
