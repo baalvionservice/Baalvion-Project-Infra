@@ -19,7 +19,7 @@ const wid = (): string => {
 
 interface RawCategory {
   id: string; websiteId: string; parentId: string | null; name: string; slug: string;
-  description?: string | null; seoMetadata?: WebsiteCategory['seoMetadata'] | null;
+  description?: string | null; imageUrl?: string | null; seoMetadata?: WebsiteCategory['seoMetadata'] | null;
   sortOrder?: number; depth?: number; contentCount?: number; status?: WebsiteCategory['status'];
   createdAt: string; updatedAt: string;
   children?: RawCategory[];
@@ -27,7 +27,7 @@ interface RawCategory {
 
 const toCategory = (c: RawCategory): WebsiteCategory => ({
   id: c.id, websiteId: c.websiteId, name: c.name, slug: c.slug,
-  description: c.description ?? undefined, seoMetadata: c.seoMetadata ?? undefined,
+  description: c.description ?? undefined, imageUrl: c.imageUrl ?? undefined, seoMetadata: c.seoMetadata ?? undefined,
   parentId: c.parentId ?? null,
   depth: c.depth ?? 0, order: c.sortOrder ?? 0, status: c.status ?? 'active', contentCount: c.contentCount ?? 0,
   createdAt: c.createdAt, updatedAt: c.updatedAt,
@@ -60,6 +60,7 @@ export const cmsTaxonomyApi = {
         name: payload.name, slug: payload.slug,
         ...(payload.parentId ? { parentId: payload.parentId } : {}),
         ...(payload.description ? { description: payload.description } : {}),
+        ...(payload.imageUrl ? { imageUrl: payload.imageUrl } : {}),
         ...(payload.seoMetadata ? { seoMetadata: payload.seoMetadata } : {}),
         ...(payload.order !== undefined ? { sortOrder: payload.order } : {}),
       });
@@ -71,6 +72,7 @@ export const cmsTaxonomyApi = {
         ...(payload.name !== undefined ? { name: payload.name } : {}),
         ...(payload.slug !== undefined ? { slug: payload.slug } : {}),
         ...(payload.description !== undefined ? { description: payload.description } : {}),
+        ...(payload.imageUrl !== undefined ? { imageUrl: payload.imageUrl } : {}),
         ...(payload.seoMetadata !== undefined ? { seoMetadata: payload.seoMetadata } : {}),
         ...(payload.parentId !== undefined ? { parentId: payload.parentId } : {}),
         ...(payload.order !== undefined ? { sortOrder: payload.order } : {}),
