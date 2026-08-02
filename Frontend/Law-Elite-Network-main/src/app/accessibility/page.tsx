@@ -37,9 +37,7 @@ export default function AccessibilityPage() {
             <Block icon={<Accessibility className="w-6 h-6 text-blue-600" />} title="Our Standard">
               <p>
                 We aim to meet the Web Content Accessibility Guidelines (WCAG) 2.2 at Level AA across our core
-                pages, including our{' '}
-                <Link href="/legal" className="text-blue-600 hover:underline">legal encyclopedia</Link>, article
-                pages, and{' '}
+                pages, including our article pages and{' '}
                 <Link href="/lawyers" className="text-blue-600 hover:underline">lawyer directory</Link>. This
                 includes attention to color contrast, keyboard navigation, semantic heading structure, descriptive
                 link text, and alternative text for meaningful images.

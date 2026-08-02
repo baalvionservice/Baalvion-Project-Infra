@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
-import { Building2, Globe2, Factory, Cpu, ArrowRight } from "lucide-react";
-import { loadCountries, loadCompanies, loadIndustries, loadTechnologies } from "@/lib/data/loaders";
+import { Building2, Globe2, Cpu, ArrowRight } from "lucide-react";
+import { loadCountries, loadCompanies, loadTechnologies } from "@/lib/data/loaders";
 import { HomeSectionHeading } from "./HomeSectionHeading";
 
 /**
@@ -12,17 +12,15 @@ import { HomeSectionHeading } from "./HomeSectionHeading";
  * so they never drift from what those pages actually list.
  */
 export async function KnowledgeCategories() {
-  const [countries, companies, industries, technologies] = await Promise.all([
+  const [countries, companies, technologies] = await Promise.all([
     loadCountries(),
     loadCompanies(),
-    loadIndustries(),
     loadTechnologies(),
   ]);
 
   const categories = [
     { label: "Companies", href: "/companies", count: companies.length, icon: Building2 },
     { label: "Countries", href: "/countries", count: countries.length, icon: Globe2 },
-    { label: "Industries", href: "/industries", count: industries.length, icon: Factory },
     { label: "Technologies", href: "/technologies", count: technologies.length, icon: Cpu },
   ];
 

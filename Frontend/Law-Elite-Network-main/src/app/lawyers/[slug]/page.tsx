@@ -1,5 +1,6 @@
 import React from 'react';
 import { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import { Navbar } from '@/components/navbar';
 import { getLawyersBySlug } from '@/services/seoService';
 import { generateSEOContent } from '@/lib/seo/seoContent';
@@ -44,6 +45,14 @@ export async function generateMetadata({ params }: SEOPageProps): Promise<Metada
  * Captures high-intent organic traffic for specific cities or categories.
  */
 export default async function SEOLandingPage({ params }: SEOPageProps) {
+  // Gated until the lawyer directory has real, verified data. getLawyersBySlug
+  // never returns null — it falls back to a generic "general" match for ANY
+  // slug, so with 0 lawyers in the DB this was generating a full SEO page
+  // (unique title/description, indexable) for literally any string typed
+  // after /lawyers/, with zero real listings behind it: a textbook
+  // auto-generated doorway page. Remove once populated.
+  notFound();
+
   const { slug } = await params;
   const { type, lawyers, value } = await getLawyersBySlug(slug);
   const seo = generateSEOContent(type, value);

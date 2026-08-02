@@ -311,7 +311,6 @@ export default async function WorldCountryArticlePage({ params }: { params: Para
                   <>
                     Published {formatDateTime(article.publishedAt)}
                     {article.updatedAt && <> · Updated {formatDateTime(article.updatedAt)}</>}
-                    {article.readTimeMinutes && <> · {article.readTimeMinutes} min read</>}
                   </>
                 }
               />

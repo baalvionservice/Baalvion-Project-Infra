@@ -33,7 +33,7 @@ export function HorizontalArticleCard({
           {article.title}
         </h3>
         <div className="text-foreground text-sm">
-          By <span className="">{article.author.name}</span> · {article.readTimeMinutes} min read
+          By <span className="">{article.author.name}</span>
         </div>
       </div>
     </Link>

@@ -56,7 +56,7 @@ export function ProductSection({ slug, label, icon: Icon, articles }: Props) {
             )}
           </div>
           <p className="mt-4 text-xs text-gray-400">
-            {formatDate(pillar.publishedAt)} &middot; {pillar.readTimeMinutes} min read
+            {formatDate(pillar.publishedAt)}
           </p>
         </Link>
 

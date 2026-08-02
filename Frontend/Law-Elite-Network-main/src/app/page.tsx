@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
 import { categoriesPublicApi, articlesPublicApi } from '@/lib/api/client';
 import { mergeArticles } from '@/data/law-content';
 import { TopicTicker } from '@/components/knowledge/news/TopicTicker';
@@ -153,25 +152,6 @@ export default function KnowledgeHomePage() {
           ))}
         </div>
 
-        {/* Browse-all CTA */}
-        <section className="pb-16">
-          <div className="rounded-xl bg-[#0B1F3A] px-6 md:px-10 py-10 md:py-12 flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div>
-              <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-news-600">
-                Need tailored advice?
-              </span>
-              <h3 className="font-headline text-2xl md:text-3xl font-extrabold text-white mt-2">
-                Connect with a verified lawyer in your jurisdiction.
-              </h3>
-            </div>
-            <Link
-              href="/lawyers"
-              className="inline-flex items-center justify-center px-7 h-12 rounded-md bg-white text-[#0B1F3A] font-bold text-sm hover:bg-news-600 hover:text-white transition-colors whitespace-nowrap"
-            >
-              Find a Lawyer
-            </Link>
-          </div>
-        </section>
       </main>
 
       <section className="border-t border-slate-100">

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, notFound } from 'next/navigation';
 import { Navbar } from '@/components/navbar';
 import { Button } from '@/components/ui/button';
 import { 
@@ -39,6 +39,13 @@ import { getPracticeAreas, type PracticeArea } from '@/services/practiceAreas/pr
  * Fixed visibility issues for light-theme Bank-Grade UI.
  */
 export default function LawyerMarketplacePage() {
+  // Gated until the directory has real, verified attorney data — the lawyer
+  // count is 0 across every country right now, so this was just an empty
+  // "0 results" search UI reachable from nav. Pulled from nav/sitemap/robots
+  // too (see PublicNavbar, PublicFooter, homepage, sitemap.ts, robots.ts).
+  // Remove this notFound() + restore those links once populated.
+  notFound();
+
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
       <Navbar />
