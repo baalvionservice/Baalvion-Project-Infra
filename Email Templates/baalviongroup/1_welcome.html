@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>Baalvion Group</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Lora:wght@400;500;600&family=JetBrains+Mono:wght@300;400;500;600&family=Cormorant+Garamond:wght@300;400;500;600&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#f5f5f7;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;color:#1d1d1f;-webkit-font-smoothing:antialiased;}
+.ew{max-width:600px;margin:0 auto;background:#ffffff;border-radius:0;overflow:hidden;border-left:1px solid #e8e8e4;border-right:1px solid #e8e8e4;}
+@media(min-width:660px){.ew{margin:48px auto;border-radius:12px;border:1px solid #e8e8e4;}}
+
+/* HEADER */
+.hdr{padding:32px 56px 28px;border-bottom:1px solid #f0f0f5;background:#111827;}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.logo-mark{width:28px;height:28px;background:rgba(255,255,255,0.12);border-radius:6px;display:flex;align-items:center;justify-content:center;border:0.5px solid rgba(255,255,255,0.2);}
+.logo-mark svg{width:14px;height:14px;}
+.logo-name{font-size:15px;font-weight:500;color:rgba(255,255,255,0.92);letter-spacing:-0.2px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+
+/* HERO */
+.hero{padding:64px 56px 52px;border-bottom:1px solid #f0f0f5;}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:#374151;margin-bottom:18px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+.hero h1{font-size:28px;font-weight:600;color:#1d1d1f;line-height:1.2;letter-spacing:-0.6px;margin-bottom:20px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+.hero p{font-size:15px;color:#6e6e73;line-height:1.75;margin-bottom:14px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+
+/* CTA */
+.cta-sec{padding:44px 56px;border-bottom:1px solid #f0f0f5;}
+.btn{display:inline-block;background:#374151;color:white;font-size:14px;font-weight:500;padding:14px 32px;border-radius:980px;text-decoration:none;letter-spacing:-0.1px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+.sub-cta{font-size:11px;color:#ababab;text-transform:uppercase;letter-spacing:1px;margin-top:22px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+
+/* STEPS */
+.sec{padding:52px 56px;border-bottom:1px solid #f0f0f5;}
+.sec-title{font-size:11px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:#374151;margin-bottom:32px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+.step-list{list-style:none;display:flex;flex-direction:column;gap:28px;}
+.step-item{display:flex;gap:18px;align-items:flex-start;}
+.step-num{width:28px;height:28px;background:#f5f5f7;border-radius:50%;font-size:12px;font-weight:600;color:#6e6e73;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+.step-h{font-size:14px;font-weight:500;color:#1d1d1f;margin-bottom:6px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+.step-p{font-size:13px;color:#6e6e73;line-height:1.65;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+
+/* RESOURCES */
+.res-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.res-card{background:#f5f5f7;border:1px solid #e8e8ed;border-radius:10px;padding:20px 22px;text-decoration:none;}
+.res-icon{font-size:20px;margin-bottom:12px;display:block;}
+.res-h{font-size:13px;font-weight:500;color:#1d1d1f;margin-bottom:4px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+.res-p{font-size:12px;color:#6e6e73;line-height:1.5;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+
+/* HIGHLIGHT BOX */
+.hl-box{background:#111827;border-radius:12px;padding:36px 40px;}
+.hl-box h3{font-size:18px;font-weight:500;color:rgba(255,255,255,0.95);margin-bottom:12px;line-height:1.3;letter-spacing:-0.3px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+.hl-box p{font-size:13px;color:rgba(255,255,255,0.6);line-height:1.7;margin-bottom:22px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+.hl-btn{display:inline-block;background:rgba(255,255,255,0.92);color:#111827;font-size:13px;font-weight:500;padding:12px 26px;border-radius:980px;text-decoration:none;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+
+/* FOOTER */
+.ftr{padding:40px 56px;background:#fafafa;border-top:1px solid #e8e8ed;}
+.ftr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid #e8e8ed;}
+.ftr-logo{font-size:13px;font-weight:500;color:#1d1d1f;letter-spacing:-0.1px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+.ftr-links{display:flex;gap:20px;}
+.ftr-links a{font-size:12px;color:#6e6e73;text-decoration:none;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+.ftr-links a:hover{color:#374151;}
+.ftr-meta{font-size:11px;color:#ababab;line-height:1.8;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+.ftr-meta a{color:#6e6e73;text-decoration:none;border-bottom:1px solid #e8e8ed;}
+
+/* ARTICLE (newsletter) */
+.art{padding:28px 0;border-bottom:1px solid #f0f0f5;text-decoration:none;display:block;}
+.art:last-child{border-bottom:none;padding-bottom:0;}
+.art-tag{font-size:10px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:#374151;margin-bottom:10px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+.art h3{font-size:16px;font-weight:500;color:#1d1d1f;line-height:1.4;margin-bottom:8px;letter-spacing:-0.2px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+.art p{font-size:13px;color:#6e6e73;line-height:1.65;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+.art-read{font-size:12px;color:#374151;margin-top:10px;display:block;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+
+/* REENGAGEMENT */
+.miss-center{text-align:center;padding:64px 56px 52px;border-bottom:1px solid #f0f0f5;}
+.miss-icon{font-size:48px;display:block;margin-bottom:24px;}
+.miss-center h1{font-size:26px;font-weight:500;color:#1d1d1f;margin-bottom:16px;line-height:1.25;letter-spacing:-0.4px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+.miss-center p{font-size:15px;color:#6e6e73;line-height:1.75;max-width:400px;margin:0 auto;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+.stat-row{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid #f0f0f5;}
+.stat-cell{padding:32px 20px;text-align:center;border-right:1px solid #f0f0f5;}
+.stat-cell:last-child{border-right:none;}
+.stat-num{font-size:26px;font-weight:600;color:#374151;display:block;margin-bottom:5px;letter-spacing:-0.5px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+.stat-lbl{font-size:10px;color:#6e6e73;text-transform:uppercase;letter-spacing:1.2px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+.offer-box{background:#f3f4f6;border-radius:10px;padding:28px 32px;border-left:3px solid #374151;border-radius:0 10px 10px 0;}
+.offer-box h3{font-size:16px;font-weight:500;color:#1d1d1f;margin-bottom:8px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+.offer-box p{font-size:13px;color:#6e6e73;line-height:1.65;margin-bottom:22px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+
+/* PROGRESS BAR */
+.prog{display:flex;gap:5px;margin-bottom:28px;}
+.prog-dot{height:3px;flex:1;border-radius:2px;}
+.prog-done{background:#374151;}
+.prog-pend{background:#f0f0f5;opacity:0.5;}
+
+/* TIP BOX */
+.tip-box{background:#f3f4f6;border-left:3px solid #374151;border-radius:0 8px 8px 0;padding:18px 22px;margin-top:28px;}
+.tip-box strong{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#374151;display:block;margin-bottom:6px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+.tip-box p{font-size:13px;color:#6e6e73;line-height:1.6;margin:0;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+
+/* WEEKLY ISSUE BADGE */
+.issue-badge{display:inline-block;background:#f3f4f6;color:#374151;font-size:10px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;padding:6px 14px;border-radius:980px;margin-bottom:24px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+
+@media(max-width:600px){
+  .hdr,.hero,.cta-sec,.sec,.ftr,.miss-center{padding-left:28px;padding-right:28px;}
+  .hero{padding-top:44px;padding-bottom:36px;}
+  .hero h1{font-size:22px;}
+  .res-grid{grid-template-columns:1fr;}
+  .ftr-top{flex-direction:column;align-items:flex-start;gap:14px;}
+  .stat-row{grid-template-columns:1fr;}
+  .stat-cell{border-right:none;border-bottom:1px solid #f0f0f5;}
+}
+</style>
+</head>
+<body>
+<div class="ew">
+<div class="hdr">
+  <a href="https://baalviongroup.com" class="logo">
+    <div class="logo-mark"><svg viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="6" height="6" rx="1" fill="white"/><rect x="9" y="1" width="6" height="6" rx="1" fill="white" opacity="0.7"/><rect x="1" y="9" width="6" height="6" rx="1" fill="white" opacity="0.5"/><rect x="9" y="9" width="6" height="6" rx="1" fill="white" opacity="0.3"/></svg></div>
+    <span class="logo-name">Baalvion Group</span>
+  </a>
+</div>
+<div class="hero">
+  <p class="eyebrow">Welcome</p>
+  <h1>You're now part of Baalvion Group.</h1>
+  <p>Thank you for joining us. You now have access to everything Baalvion Group has to offer — the corporate arm of the Baalvion ecosystem for enterprise partnerships.</p>
+  <p>Your account is active and ready. Here's everything you need to get started.</p>
+</div>
+<div class="cta-sec">
+  <a href="https://baalviongroup.com/portal" class="btn">Get started</a>
+  <p class="sub-cta">or explore everything included below</p>
+</div>
+<div class="sec">
+  <p class="sec-title">What to do next</p>
+  <ul class="step-list"><li class="step-item"><div class="step-num">1</div><div><p class="step-h">Access the enterprise portal</p><p class="step-p">Your dedicated gateway to all group-level services and reporting.</p></div></li>
+<li class="step-item"><div class="step-num">2</div><div><p class="step-h">Schedule your onboarding call</p><p class="step-p">Our enterprise team will walk you through tailored solutions.</p></div></li>
+<li class="step-item"><div class="step-num">3</div><div><p class="step-h">Explore our service portfolio</p><p class="step-p">See every capability the Baalvion Group can deploy for your organisation.</p></div></li>
+</ul>
+</div>
+<div class="sec">
+  <p class="sec-title">Explore</p>
+  <div class="res-grid"><a href="https://baalviongroup.com" class="res-card"><span class="res-icon">🏢</span><p class="res-h">Enterprise Portal</p><p class="res-p">Your dedicated hub</p></a>
+<a href="https://baalviongroup.com" class="res-card"><span class="res-icon">📊</span><p class="res-h">Reports</p><p class="res-p">Group analytics</p></a>
+<a href="https://baalviongroup.com" class="res-card"><span class="res-icon">🤝</span><p class="res-h">Partnerships</p><p class="res-p">Strategic alliances</p></a>
+<a href="https://baalviongroup.com" class="res-card"><span class="res-icon">📞</span><p class="res-h">Account Team</p><p class="res-p">Direct access</p></a>
+</div>
+</div>
+<div class="ftr">
+  <div class="ftr-top">
+    <span class="ftr-logo">Baalvion Group</span>
+    <div class="ftr-links">
+      <a href="https://baalviongroup.com">Website</a>
+      <a href="https://baalviongroup.com/privacy">Privacy</a>
+      <a href="https://baalviongroup.com/unsubscribe">Unsubscribe</a>
+    </div>
+  </div>
+  <p class="ftr-meta">
+    You received this email because you signed up at <a href="https://baalviongroup.com">baalviongroup.com</a>.<br>
+    &copy; Baalvion Group &middot; Pune, Maharashtra, India<br>
+    <a href="https://baalviongroup.com/unsubscribe">Unsubscribe</a> &nbsp;&middot;&nbsp; <a href="https://baalviongroup.com/preferences">Email preferences</a>
+  </p>
+</div>
+</div>
+</body>
+</html>
