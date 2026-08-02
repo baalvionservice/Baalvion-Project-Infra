@@ -15,6 +15,7 @@ const crypto = require('crypto');
 const oauth = require('../service/oauthLogin');
 const config = require('../config/appConfig');
 const logger = require('../utils/logger');
+const { brandFromRequest } = require('../utils/brandFromOrigin');
 
 const APP_URL = String(config.oauth.appUrl || '').replace(/\/$/, '');
 const TX_COOKIE = 'oauth_tx';
@@ -59,8 +60,13 @@ module.exports = {
 
       const nonce = crypto.randomBytes(24).toString('hex');
       const pkce = oauth.createPkce();
+      // brand captured HERE (start), not at callback: the browser's own navigation to /start
+      // reliably carries an Origin/Referer, but the callback is a top-level redirect FROM the
+      // provider (accounts.google.com, etc.) so Origin/Referer there reflects the provider, not
+      // the original site. Round-tripped through the tx cookie, same as returnTo.
+      const brand = brandFromRequest(req);
       // Options inlined (not via a helper) so the httpOnly/secure flags are statically visible.
-      res.cookie(TX_COOKIE, oauth.encodeTx({ nonce, provider, verifier: pkce.verifier, returnTo }), {
+      res.cookie(TX_COOKIE, oauth.encodeTx({ nonce, provider, verifier: pkce.verifier, returnTo, brand }), {
         httpOnly: true,
         secure: config.env === 'production',
         sameSite: 'lax',
@@ -89,7 +95,7 @@ module.exports = {
       if (!req.query.state || req.query.state !== tx.nonce) return fail(res, returnTo, 'state_mismatch');
       if (!req.query.code) return fail(res, returnTo, 'missing_code');
 
-      const ctx = { ipAddress: req.ip, userAgent: req.headers['user-agent'] };
+      const ctx = { ipAddress: req.ip, userAgent: req.headers['user-agent'], brand: tx.brand };
       const profile = await oauth.exchangeAndFetchProfile(provider, { code: req.query.code, codeVerifier: tx.verifier });
       const result = await oauth.loginWithProfile(profile, ctx);
       setRefresh(res, result.refreshToken);

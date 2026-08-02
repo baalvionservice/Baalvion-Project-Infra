@@ -164,6 +164,76 @@ jobs:
           cache-from: type=gha,scope=box2-admin-web
           cache-to: type=gha,mode=max,scope=box2-admin-web
 
+  # ════════════════════════════ 2b) build + push auth-baalvion ════════════════════════════
+  # Shared brand-aware email-OTP sign-in surface (auth.baalvion.com) used by every Baalvion
+  # site's "Sign in" link. Previously never built/deployed — auth.baalvion.com served the bare
+  # auth-gateway API with no UI. See Frontend/auth-baalvion/README.md.
+  build-push-auth-web:
+    name: build baalvion/auth-baalvion
+    runs-on: ubuntu-latest
+    continue-on-error: true   # first-time build for this image; never block the core roll
+    outputs:
+      image_tag: ${{ steps.tag.outputs.image_tag }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.CORE2_AWS_DEPLOY_ROLE_ARN }}
+          role-session-name: gha-box2-authweb-${{ github.run_id }}
+
+      - name: Log in to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Ensure ECR repository exists
+        run: |
+          aws ecr describe-repositories --repository-names "baalvion/auth-baalvion" --region "$AWS_REGION" >/dev/null 2>&1 \
+            || aws ecr create-repository --repository-name "baalvion/auth-baalvion" \
+                 --image-tag-mutability MUTABLE --image-scanning-configuration scanOnPush=true --region "$AWS_REGION"
+
+      - name: Compute image tag (prod-<short-sha>)
+        id: tag
+        run: echo "image_tag=prod-$(echo "${{ github.sha }}" | cut -c1-8)" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve image tags
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ steps.ecr.outputs.registry }}/baalvion/auth-baalvion
+          tags: |
+            type=raw,value=prod-latest
+            type=raw,value=${{ env.RELEASE_TAG }}
+            type=raw,value=${{ steps.tag.outputs.image_tag }}
+
+      - name: Build and push auth-baalvion to ECR
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: Frontend/auth-baalvion/Dockerfile
+          push: true
+          provenance: false
+          # No Turnstile key configured yet: the widget just doesn't render and the
+          # server-side check is skipped (same as local dev) — not a build blocker.
+          # NEXT_PUBLIC_ALLOWED_RETURN_HOSTS left unset: the baseline in src/lib/brand.ts
+          # already covers every current site's apex domain.
+          # AUTH_SERVICE_URL MUST be a build-arg, not a runtime env var: next.config.ts's
+          # rewrites() destination is baked into .next/required-server-files.json at build
+          # time for `output: 'standalone'` (verified live: without this, every /auth-bff/*
+          # request 500'd because the compiled rewrite pointed at the Dockerfile's
+          # http://localhost:3001 fallback instead of app-identity).
+          build-args: |
+            AUTH_SERVICE_URL=http://app-identity:3001
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=box2-auth-web
+          cache-to: type=gha,mode=max,scope=box2-auth-web
+
   # ════════════════════════════ 3) build + push payment-service (Java) ════════════════════════════
   # NOTE: nothing else in the repo currently builds+pushes baalvion/payment-service — the
   # comment in financial-services.yml pointing at deploy.yml is stale (deploy.yml was deleted
@@ -341,7 +411,7 @@ jobs:
   # ════════════════════════════ 6) roll the stack on box2 ════════════════════════════
   deploy:
     name: Roll box2 stack
-    needs: [build-push-backend, build-push-admin-web, build-push-payment, build-push-community, build-push-giftcard]
+    needs: [build-push-backend, build-push-admin-web, build-push-auth-web, build-push-payment, build-push-community, build-push-giftcard]
     if: ${{ github.event.inputs.roll != 'false' }}
     runs-on: ubuntu-latest
     environment: production
@@ -353,6 +423,7 @@ jobs:
       PAYMENTS_IMAGE_TAG: ${{ needs.build-push-payment.outputs.image_tag }}
       COMMUNITY_IMAGE_TAG: ${{ needs.build-push-community.outputs.image_tag }}
       GIFTCARD_IMAGE_TAG: ${{ needs.build-push-giftcard.outputs.image_tag }}
+      AUTH_WEB_IMAGE_TAG: ${{ needs.build-push-auth-web.outputs.image_tag }}
       # NOTE: no `|| 'payments'` fallback here — the workflow_dispatch input above already
       # has its own YAML-level default ("payments") applied when the input is omitted. An
       # `||` on top of that treats an explicitly-passed empty string as falsy and silently
@@ -408,6 +479,36 @@ jobs:
               psql "postgresql://${DB_USER}@${DB_HOST}:${DB_PORT}/${DB_NAME}" -v ON_ERROR_STOP=1 -f /tmp/014.sql
             echo "::notice title=Migration applied::auth.oauth_clients/oauth_authorization_codes/oauth_refresh_tokens/api_keys are current."
 
+      - name: Apply auth-service lifecycle/re-engagement columns migration (idempotent)
+        if: steps.gate.outputs.ready == 'true'
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.CORE2_EC2_HOST }}
+          username: ${{ secrets.CORE2_EC2_USER }}
+          key: ${{ secrets.CORE2_EC2_SSH_KEY }}
+          # 016_lifecycle_reengagement.sql: adds auth.users.signup_brand + reengagement_sent_at
+          # (additive nullable columns + an index) for jobs/reengagementCron.js, which starts
+          # querying these at boot the moment this image rolls -- must land before the roll,
+          # same reasoning/pattern as the 014 migration step above.
+          script: |
+            set -euo pipefail
+            cd /opt/baalvion-box2
+            git fetch --all --prune
+            git checkout main
+            git pull --ff-only
+            ENV=deploy/consolidated/.env
+            DB_HOST="$(grep -E '^DB_HOST=' "$ENV" | head -1 | cut -d= -f2- | tr -d '\r')"
+            DB_PORT="$(grep -E '^DB_PORT=' "$ENV" | head -1 | cut -d= -f2- | tr -d '\r')"
+            DB_NAME="$(grep -E '^DB_NAME=' "$ENV" | head -1 | cut -d= -f2- | tr -d '\r')"
+            DB_USER="$(grep -E '^DB_USER=' "$ENV" | head -1 | cut -d= -f2- | tr -d '\r')"
+            DB_PASSWORD="$(grep -E '^DB_PASSWORD=' "$ENV" | head -1 | cut -d= -f2- | tr -d '\r')"
+            docker run --rm -i \
+              -e PGSSLMODE=require -e PGPASSWORD="$DB_PASSWORD" \
+              -v "$(pwd)/Backend/services/identity/auth-service/migrations/016_lifecycle_reengagement.sql:/tmp/016.sql:ro" \
+              postgres:16-alpine \
+              psql "postgresql://${DB_USER}@${DB_HOST}:${DB_PORT}/${DB_NAME}" -v ON_ERROR_STOP=1 -f /tmp/016.sql
+            echo "::notice title=Migration applied::auth.users.signup_brand/reengagement_sent_at are current."
+
       - name: Pull + roll on box2
         if: steps.gate.outputs.ready == 'true'
         uses: appleboy/ssh-action@v1
@@ -416,12 +517,13 @@ jobs:
           PAYMENTS_IMAGE_TAG: ${{ needs.build-push-payment.outputs.image_tag }}
           COMMUNITY_IMAGE_TAG: ${{ needs.build-push-community.outputs.image_tag }}
           GIFTCARD_IMAGE_TAG: ${{ needs.build-push-giftcard.outputs.image_tag }}
+          AUTH_WEB_IMAGE_TAG: ${{ needs.build-push-auth-web.outputs.image_tag }}
           PROFILES: ${{ github.event.inputs.profiles }}
         with:
           host: ${{ secrets.CORE2_EC2_HOST }}
           username: ${{ secrets.CORE2_EC2_USER }}
           key: ${{ secrets.CORE2_EC2_SSH_KEY }}
-          envs: IMAGE_TAG,PAYMENTS_IMAGE_TAG,COMMUNITY_IMAGE_TAG,GIFTCARD_IMAGE_TAG,PROFILES
+          envs: IMAGE_TAG,PAYMENTS_IMAGE_TAG,COMMUNITY_IMAGE_TAG,GIFTCARD_IMAGE_TAG,AUTH_WEB_IMAGE_TAG,PROFILES
           script: |
             set -euo pipefail
             cd /opt/baalvion-box2
@@ -437,6 +539,9 @@ jobs:
             fi
             if [ -n "${GIFTCARD_IMAGE_TAG:-}" ]; then
               if grep -q '^GIFTCARD_IMAGE_TAG=' "$ENV"; then sed -i "s|^GIFTCARD_IMAGE_TAG=.*|GIFTCARD_IMAGE_TAG=${GIFTCARD_IMAGE_TAG}|" "$ENV"; else echo "GIFTCARD_IMAGE_TAG=${GIFTCARD_IMAGE_TAG}" >> "$ENV"; fi
+            fi
+            if [ -n "${AUTH_WEB_IMAGE_TAG:-}" ]; then
+              if grep -q '^AUTH_WEB_IMAGE_TAG=' "$ENV"; then sed -i "s|^AUTH_WEB_IMAGE_TAG=.*|AUTH_WEB_IMAGE_TAG=${AUTH_WEB_IMAGE_TAG}|" "$ENV"; else echo "AUTH_WEB_IMAGE_TAG=${AUTH_WEB_IMAGE_TAG}" >> "$ENV"; fi
             fi
 
             REGION="$(grep -E '^AWS_REGION=' "$ENV" | head -1 | cut -d= -f2)"
@@ -474,7 +579,13 @@ jobs:
 
             $COMPOSE pull admin-web && $COMPOSE up -d --no-build --no-deps admin-web \
               || echo "::notice::admin-web image unavailable this run (build/pull failed) -- skipped, previous version keeps running"
-            $COMPOSE up -d --no-build --no-deps caddy
+            $COMPOSE pull app-auth-web && $COMPOSE up -d --no-build --no-deps app-auth-web \
+              || echo "::notice::app-auth-web image unavailable this run (build/pull failed) -- skipped, previous version keeps running"
+            # --force-recreate: the Caddyfile is a single-FILE bind mount, so `git pull` replaces
+            # its inode -- a plain `up` with no service-definition changes leaves a running caddy
+            # (which only reads the file at process start) on the STALE inode. Only a recreated
+            # container re-reads the current file. See deploy-consolidated.yml for the same fix.
+            $COMPOSE up -d --no-build --no-deps --force-recreate caddy
             docker image prune -f
 
       - name: Apply app-commerce service migrations (idempotent)

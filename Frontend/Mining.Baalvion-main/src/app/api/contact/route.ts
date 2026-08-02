@@ -11,12 +11,11 @@
 
 import { contactSchema } from "@/lib/validation/forms";
 import { rateLimit } from "@/lib/rate-limit";
-import { sendEmail } from "@/lib/email";
+import { sendLead } from "@/lib/leadNotify";
 import { serverLogger } from "@/lib/server-logger";
 
 export const runtime = "nodejs";
 
-const TRADE_DESK_EMAIL = "trade@baalvion.com";
 const RATE_LIMIT = 5;
 const RATE_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
 const GENERIC_ERROR =
@@ -85,20 +84,16 @@ export async function POST(req: Request): Promise<Response> {
 
     // Notify the trade desk. Email failure must not fail the submission —
     // the lead is still logged and can be followed up manually.
-    const emailResult = await sendEmail({
-      to: TRADE_DESK_EMAIL,
-      replyTo: data.email,
-      subject: `New contact inquiry: ${data.inquiryType}`,
-      text: [
-        `Name: ${data.firstName} ${data.lastName}`,
-        `Email: ${data.email}`,
-        `Inquiry type: ${data.inquiryType}`,
-        `Source: ${data.source ?? "unknown"}`,
-        "",
-        "Message:",
-        data.message,
-      ].join("\n"),
-    });
+    const emailResult = await sendLead(
+      "mining-contact",
+      [
+        { k: "Name", v: `${data.firstName} ${data.lastName}` },
+        { k: "Email", v: data.email },
+        { k: "Inquiry type", v: data.inquiryType },
+        { k: "Source", v: data.source ?? "unknown" },
+      ],
+      data.message
+    );
 
     // Redacted summary only — never log the full message body at info level.
     serverLogger.info("contact.submission_received", {
@@ -107,7 +102,6 @@ export async function POST(req: Request): Promise<Response> {
       messageLength: data.message.length,
       source: data.source ?? "unknown",
       emailDelivered: emailResult.success,
-      emailProvider: emailResult.provider,
     });
 
     return Response.json({

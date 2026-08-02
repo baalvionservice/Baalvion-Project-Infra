@@ -176,7 +176,15 @@ services:
   app-edge-realtime:
     <<: *node-app
     command: ["pm2-runtime","start","/app/pm2/edge-realtime.config.js"]
-    environment: { <<: [*db, *redis] }
+    environment:
+      <<: [*db, *redis]
+      # proxy-service (one of the 4 processes pm2-runtime supervises in this container) uses
+      # this to build its Google/Facebook OAuth redirect target. Pinned here — NOT left to the
+      # shared .env's global APP_URL — because that var is shared across every container in
+      # this stack and belongs to whichever site currently "owns" it (e.g. community.market-
+      # underworld.com); without this override proxy-service silently sends its own users
+      # there instead of back to proxy.baalvionstack.com. See appConfig.js oauth.appUrl.
+      OAUTH_PUBLIC_BASE_URL: https://proxy.baalvionstack.com
     mem_limit: 896m
     mem_reservation: 448m
     healthcheck:
@@ -357,6 +365,42 @@ services:
       start_period: 40s
     depends_on: [ app-identity, app-platform ]
 
+  # ── Shared auth surface (Next.js standalone) → auth.baalvion.com ─────────────
+  # Brand-aware passwordless email-OTP sign-in used by every Baalvion site's "Sign in"
+  # link (proxy.baalvionstack.com, Amarisé, about.baalvion.com, …). Its own /auth-bff/*
+  # rewrite (next.config.ts) proxies straight to auth-service — NOT auth-gateway.
+  # NOTE: that rewrite's destination is baked in at IMAGE BUILD time (see the
+  # build-push-auth-web job's AUTH_SERVICE_URL build-arg in deploy-consolidated-box2.yml,
+  # `output: 'standalone'` snapshots next.config.ts into required-server-files.json) — the
+  # AUTH_SERVICE_URL below does NOT affect that rewrite. It's set anyway as defense-in-depth
+  # for any other server-side code path that reads process.env.AUTH_SERVICE_URL live.
+  app-auth-web:
+    image: ${ECR_REGISTRY}/baalvion/auth-baalvion:${AUTH_WEB_IMAGE_TAG:-prod-latest}
+    pull_policy: always
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      NODE_ENV: production
+      PORT: "3055"
+      HOSTNAME: 0.0.0.0
+      AUTH_SERVICE_URL: http://app-identity:3001
+    mem_limit: 256m
+    mem_reservation: 96m
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: ${AWS_REGION:-ap-south-1}
+        awslogs-group: /baalvion/consolidated
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:3055',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    depends_on: [ app-identity ]
+
   # ── Edge: TLS + host/path routing (only this binds 80/443) ───────────────────
   caddy:
     image: caddy:2-alpine
@@ -368,7 +412,7 @@ services:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
-    depends_on: [ app-identity, app-edge-realtime, app-platform, admin-web ]
+    depends_on: [ app-identity, app-edge-realtime, app-platform, admin-web, app-auth-web ]
 
 volumes:
   redisdata:
