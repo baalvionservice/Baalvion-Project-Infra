@@ -218,7 +218,7 @@ async function requestOtp({ email, firstName, lastName, captchaToken, ipAddress 
  * oauthLogin.loginWithProfile: passwordless account, provisioned buyer org, same login gates. The
  * name (bound to the code at request time) is used to create / backfill the account.
  */
-async function loginForEmail(normEmail, { firstName, lastName, ipAddress, userAgent }) {
+async function loginForEmail(normEmail, { firstName, lastName, ipAddress, userAgent, brand }) {
     let user = await userRepo.findByEmail(normEmail);
     let isNewUser = false;
     let orgId = null;
@@ -233,6 +233,13 @@ async function loginForEmail(normEmail, { firstName, lastName, ipAddress, userAg
         await orgRepo.addMember({ orgId: org.id, userId: user.id, role: 'owner' });
         orgId = org.id;
         isNewUser = true;
+        // Passwordless signups previously got zero welcome/onboarding emails — auth.registered
+        // was only ever published from the password register() path. Fire-and-forget, mirrors
+        // that path exactly.
+        const fullName = [firstName, lastName].filter(Boolean).join(' ') || null;
+        eventBus.publish('auth.registered', {
+            userId: String(user.id), email: user.email, fullName, orgId: org.id, orgName: org.name, ipAddress, brand,
+        }).catch(() => {});
     }
 
     if (user.status && user.status !== 'active') {
@@ -283,7 +290,7 @@ async function loginForEmail(normEmail, { firstName, lastName, ipAddress, userAg
  * code record (bound at request) — verify only carries email + code.
  * @param {{ email: string, code: string, ipAddress?: string, userAgent?: string }} input
  */
-async function verifyOtp({ email, code, ipAddress, userAgent }) {
+async function verifyOtp({ email, code, ipAddress, userAgent, brand }) {
     const normEmail = String(email).toLowerCase().trim();
     const record = await db.EmailOtp.findOne({
         where: { email: normEmail, consumed_at: null },
@@ -313,6 +320,7 @@ async function verifyOtp({ email, code, ipAddress, userAgent }) {
                 lastName:  record.last_name,
                 ipAddress,
                 userAgent,
+                brand,
             });
     }
 }

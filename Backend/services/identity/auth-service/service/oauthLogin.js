@@ -20,6 +20,7 @@ const { userRepo, orgRepo, sessionRepo, auditRepo } = require('../repositories')
 const password = require('../utils/password');
 const { issueTokenPair, presentUser } = require('./authService');
 const { AppError } = require('../utils/errors');
+const eventBus = require('../utils/eventBus');
 
 const VAULT_PROVIDER = { google: 'google-oauth', facebook: 'facebook-oauth', github: 'github-oauth', discord: 'discord-oauth' };
 const envClientFor = (p) =>
@@ -115,7 +116,7 @@ async function exchangeAndFetchProfile(provider, { code, codeVerifier } = {}) {
  * login (status / org-suspension / MFA), and mint an RS256 session.
  * Returns { accessToken, refreshToken, expiresAt, user, isNewUser }.
  */
-async function loginWithProfile(profile, { ipAddress, userAgent } = {}) {
+async function loginWithProfile(profile, { ipAddress, userAgent, brand } = {}) {
   const db = require('../models');
   const normEmail = String(profile.email).toLowerCase().trim();
 
@@ -152,6 +153,12 @@ async function loginWithProfile(profile, { ipAddress, userAgent } = {}) {
     await orgRepo.addMember({ orgId: org.id, userId: user.id, role: 'owner' });
     orgId = org.id;
     isNewUser = true;
+    // OAuth signups previously got zero welcome/onboarding emails — auth.registered was only
+    // ever published from the password register() path. Fire-and-forget, mirrors that path.
+    eventBus.publish('auth.registered', {
+      userId: String(user.id), email: user.email, fullName: profile.fullName || null,
+      orgId: org.id, orgName: org.name, ipAddress, brand,
+    }).catch(() => {});
   }
 
   if (user.status && user.status !== 'active') throw new AppError('ACCOUNT_DISABLED', 'Account is suspended or inactive', 403);

@@ -6,10 +6,14 @@ const { sendSuccess } = require('../utils/response');
 const { AppError } = require('../utils/errors');
 const config = require('../config/appConfig');
 const { issueOnBehalf: issueOnBehalfSvc } = require('../service/issueOnBehalf');
+const { brandFromRequest } = require('../utils/brandFromOrigin');
 
 const parseClientInfo = (req) => ({
     ipAddress: req.ip || req.socket?.remoteAddress,
     userAgent: req.headers['user-agent'],
+    // Which site the request came from — used to theme lifecycle emails (welcome, onboarding)
+    // to match the site the user actually signed up on. See utils/brandFromOrigin.js.
+    brand: brandFromRequest(req),
 });
 
 // Single source of truth for the refresh-token cookie policy. The optional `domain` makes the

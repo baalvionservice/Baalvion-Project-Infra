@@ -1,9 +1,23 @@
 'use strict';
 const Handlebars = require('handlebars');
 const { baseLayout } = require('./base');
+const premium = require('./premium');
 
 // Register helpers
 Handlebars.registerHelper('formatDate', (d) => d ? new Date(d).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) : '');
+
+// Lifecycle emails (welcome, onboarding, re-engagement, lead notifications) render through the
+// premium brand-themed system instead of the generic Handlebars baseLayout — keyed by
+// data.brand (a slug from templates/premium/brands.js, e.g. 'baalvion', 'proxy', 'law';
+// defaults to 'baalvion' when absent/unrecognised). Every other template is unaffected.
+const PREMIUM_RENDERERS = {
+    welcome:            (data) => premium.renderWelcome(data.brand, data),
+    onboardingDay1:     (data) => premium.renderOnboardingDay(data.brand, 1, data),
+    onboardingDay3:     (data) => premium.renderOnboardingDay(data.brand, 3, data),
+    onboardingDay7:     (data) => premium.renderOnboardingDay(data.brand, 7, data),
+    reengagement:       (data) => premium.renderReengagement(data.brand, data),
+    leadNotification:   (data) => premium.renderLeadNotification(data.brand, data),
+};
 
 // ── Template bodies ───────────────────────────────────────────────────────────
 
@@ -223,6 +237,8 @@ for (const [name, tmpl] of Object.entries(TEMPLATES)) {
 }
 
 function render(templateName, data) {
+    if (PREMIUM_RENDERERS[templateName]) return PREMIUM_RENDERERS[templateName](data || {});
+
     const tmpl = compiled[templateName];
     if (!tmpl) throw new Error(`Unknown template: ${templateName}`);
     return {
@@ -231,4 +247,4 @@ function render(templateName, data) {
     };
 }
 
-module.exports = { render, TEMPLATE_NAMES: Object.keys(TEMPLATES) };
+module.exports = { render, TEMPLATE_NAMES: [...Object.keys(TEMPLATES), ...Object.keys(PREMIUM_RENDERERS)] };

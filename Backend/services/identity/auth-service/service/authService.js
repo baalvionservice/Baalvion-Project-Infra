@@ -162,7 +162,7 @@ async function issueTokenPair(user, orgId, sessionId, familyId) {
 
 // ── Auth flows ─────────────────────────────────────────────────────────────────
 
-async function register({ email, password: plainPw, fullName, orgName, accountType, orgType, phone, ipAddress, userAgent }) {
+async function register({ email, password: plainPw, fullName, orgName, accountType, orgType, phone, ipAddress, userAgent, brand }) {
     const existing = await userRepo.findByEmail(email);
     if (existing) throw new AppError('EMAIL_TAKEN', 'Email already registered', 409);
 
@@ -214,6 +214,7 @@ async function register({ email, password: plainPw, fullName, orgName, accountTy
         orgId:     org.id,
         orgName:   org.name,
         ipAddress,
+        brand,
     }).catch(() => {});
 
     eventBus.publish('auth.email_verification_requested', {
