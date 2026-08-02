@@ -44,7 +44,8 @@ export function AlphabetFilter({ selected, onSelect }: AlphabetFilterProps) {
           </button>
         ))}
       </div>
-      <div className="absolute right-0 top-0 bottom-2 w-16 bg-gradient-to-l from-white via-white/80 to-transparent pointer-events-none md:hidden" />
+      {/* Visual hint that the row scrolls horizontally when it overflows — shown at every viewport width, not just mobile. */}
+      <div className="absolute right-0 top-0 bottom-2 w-12 bg-gradient-to-l from-white to-transparent pointer-events-none" />
     </div>
   );
 }

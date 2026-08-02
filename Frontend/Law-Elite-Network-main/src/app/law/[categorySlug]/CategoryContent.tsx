@@ -98,8 +98,8 @@ export function CategoryContent({ categorySlug, categoryId }: CategoryContentPro
     <>
       {/* Filters */}
       <div className="sticky top-[60px] lg:top-[96px] z-30 bg-white/90 backdrop-blur border-b border-slate-200">
-        <div className="container mx-auto px-4 sm:px-6 max-w-7xl py-4 flex flex-col lg:flex-row lg:items-center justify-between gap-5">
-          <div className="flex flex-col gap-2">
+        <div className="container mx-auto px-4 sm:px-6 max-w-7xl py-4 space-y-4">
+          <div className="flex flex-col gap-2 min-w-0">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
               Filter by topic
             </span>
@@ -109,8 +109,8 @@ export function CategoryContent({ categorySlug, categoryId }: CategoryContentPro
               onSelect={setSelectedSubcategoryId}
             />
           </div>
-          <div className="flex flex-col gap-2 lg:items-end">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">A–Z</span>
+          <div className="flex flex-col gap-2 min-w-0 pt-3 border-t border-slate-100">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Browse A–Z</span>
             <AlphabetFilter selected={selectedAlphabet} onSelect={setSelectedAlphabet} />
           </div>
         </div>
