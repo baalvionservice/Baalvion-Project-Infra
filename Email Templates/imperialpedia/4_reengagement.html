@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>Imperialpedia</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#f5f5f7;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;color:#1d1d1f;-webkit-font-smoothing:antialiased;}
+.ew{max-width:600px;margin:0 auto;background:#ffffff;border-radius:0;overflow:hidden;border-left:1px solid #e8e8e4;border-right:1px solid #e8e8e4;}
+@media(min-width:660px){.ew{margin:48px auto;border-radius:12px;border:1px solid #e8e8e4;}}
+
+/* HEADER */
+.hdr{padding:32px 56px 28px;border-bottom:1px solid #f0f0f5;background:#0d1633;}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.logo-mark{width:28px;height:28px;background:rgba(255,255,255,0.12);border-radius:6px;display:flex;align-items:center;justify-content:center;border:0.5px solid rgba(255,255,255,0.2);}
+.logo-mark svg{width:14px;height:14px;}
+.logo-name{font-size:15px;font-weight:500;color:rgba(255,255,255,0.92);letter-spacing:-0.2px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+
+/* HERO */
+.hero{padding:64px 56px 52px;border-bottom:1px solid #f0f0f5;}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:#1d4fc4;margin-bottom:18px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+.hero h1{font-size:28px;font-weight:600;color:#1d1d1f;line-height:1.2;letter-spacing:-0.6px;margin-bottom:20px;font-family:Georgia, 'Times New Roman', serif;}
+.hero p{font-size:15px;color:#6e6e73;line-height:1.75;margin-bottom:14px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+
+/* CTA */
+.cta-sec{padding:44px 56px;border-bottom:1px solid #f0f0f5;}
+.btn{display:inline-block;background:#1d4fc4;color:#ffffff;font-size:14px;font-weight:500;padding:14px 32px;border-radius:980px;text-decoration:none;letter-spacing:-0.1px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+.sub-cta{font-size:11px;color:#ababab;text-transform:uppercase;letter-spacing:1px;margin-top:22px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+
+/* STEPS */
+.sec{padding:52px 56px;border-bottom:1px solid #f0f0f5;}
+.sec-title{font-size:11px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:#1d4fc4;margin-bottom:32px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+.step-list{list-style:none;}
+.step-item{display:flex;gap:18px;align-items:flex-start;margin-bottom:28px;}
+.step-item:last-child{margin-bottom:0;}
+.step-num{width:28px;height:28px;background:#f5f5f7;border-radius:50%;font-size:12px;font-weight:600;color:#6e6e73;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+.step-h{font-size:14px;font-weight:500;color:#1d1d1f;margin-bottom:6px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+.step-p{font-size:13px;color:#6e6e73;line-height:1.65;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+
+/* RESOURCES */
+.res-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.res-card{background:#f5f5f7;border:1px solid #e8e8ed;border-radius:10px;padding:20px 22px;text-decoration:none;}
+.res-icon{font-size:20px;margin-bottom:12px;display:block;}
+.res-h{font-size:13px;font-weight:500;color:#1d1d1f;margin-bottom:4px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+.res-p{font-size:12px;color:#6e6e73;line-height:1.5;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+
+/* HIGHLIGHT BOX */
+.hl-box{background:#0d1633;border-radius:12px;padding:36px 40px;}
+.hl-box h3{font-size:18px;font-weight:500;color:rgba(255,255,255,0.95);margin-bottom:12px;line-height:1.3;letter-spacing:-0.3px;font-family:Georgia, 'Times New Roman', serif;}
+.hl-box p{font-size:13px;color:rgba(255,255,255,0.6);line-height:1.7;margin-bottom:22px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+.hl-btn{display:inline-block;background:rgba(255,255,255,0.92);color:#0d1633;font-size:13px;font-weight:500;padding:12px 26px;border-radius:980px;text-decoration:none;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+
+/* FOOTER */
+.ftr{padding:40px 56px;background:#fafafa;border-top:1px solid #e8e8ed;}
+.ftr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid #e8e8ed;}
+.ftr-logo{font-size:13px;font-weight:500;color:#1d1d1f;letter-spacing:-0.1px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+.ftr-links{display:flex;gap:20px;}
+.ftr-links a{font-size:12px;color:#6e6e73;text-decoration:none;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+.ftr-links a:hover{color:#1d4fc4;}
+.ftr-meta{font-size:11px;color:#ababab;line-height:1.8;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+.ftr-meta a{color:#6e6e73;text-decoration:none;border-bottom:1px solid #e8e8ed;}
+
+/* ARTICLE (newsletter) */
+.art{padding:28px 0;border-bottom:1px solid #f0f0f5;text-decoration:none;display:block;}
+.art:last-child{border-bottom:none;padding-bottom:0;}
+.art-tag{font-size:10px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:#1d4fc4;margin-bottom:10px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+.art h3{font-size:16px;font-weight:500;color:#1d1d1f;line-height:1.4;margin-bottom:8px;letter-spacing:-0.2px;font-family:Georgia, 'Times New Roman', serif;}
+.art p{font-size:13px;color:#6e6e73;line-height:1.65;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+.art-read{font-size:12px;color:#1d4fc4;margin-top:10px;display:block;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+
+/* REENGAGEMENT */
+.miss-center{text-align:center;padding:64px 56px 52px;border-bottom:1px solid #f0f0f5;}
+.miss-icon{font-size:48px;display:block;margin-bottom:24px;}
+.miss-center h1{font-size:26px;font-weight:500;color:#1d1d1f;margin-bottom:16px;line-height:1.25;letter-spacing:-0.4px;font-family:Georgia, 'Times New Roman', serif;}
+.miss-center p{font-size:15px;color:#6e6e73;line-height:1.75;max-width:400px;margin:0 auto;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+.stat-row{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid #f0f0f5;}
+.stat-cell{padding:32px 20px;text-align:center;border-right:1px solid #f0f0f5;}
+.stat-cell:last-child{border-right:none;}
+.stat-num{font-size:26px;font-weight:600;color:#1d4fc4;display:block;margin-bottom:5px;letter-spacing:-0.5px;font-family:Georgia, 'Times New Roman', serif;}
+.stat-lbl{font-size:10px;color:#6e6e73;text-transform:uppercase;letter-spacing:1.2px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+.offer-box{background:#eaf0fd;border-radius:0 10px 10px 0;padding:28px 32px;border-left:3px solid #1d4fc4;}
+.offer-box h3{font-size:16px;font-weight:500;color:#1d1d1f;margin-bottom:8px;font-family:Georgia, 'Times New Roman', serif;}
+.offer-box p{font-size:13px;color:#6e6e73;line-height:1.65;margin-bottom:22px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+
+/* PROGRESS BAR */
+.prog{display:flex;gap:5px;margin-bottom:28px;}
+.prog-dot{height:3px;flex:1;border-radius:2px;}
+.prog-done{background:#1d4fc4;}
+.prog-pend{background:#f0f0f5;opacity:0.5;}
+
+/* TIP BOX */
+.tip-box{background:#eaf0fd;border-left:3px solid #1d4fc4;border-radius:0 8px 8px 0;padding:18px 22px;margin-top:28px;}
+.tip-box strong{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#1d4fc4;display:block;margin-bottom:6px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+.tip-box p{font-size:13px;color:#6e6e73;line-height:1.6;margin:0;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+
+/* WEEKLY ISSUE BADGE */
+.issue-badge{display:inline-block;background:#eaf0fd;color:#1d4fc4;font-size:10px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;padding:6px 14px;border-radius:980px;margin-bottom:24px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+
+/* OTP CODE */
+.otp-wrap{text-align:center;padding:8px 0 20px;}
+.otp-code{display:inline-block;font-family:'SF Mono', 'Courier New', monospace;font-size:40px;font-weight:600;letter-spacing:12px;color:#1d1d1f;background:#f5f5f7;border:1px solid #e8e8ed;border-radius:10px;padding:20px 16px 20px 28px;}
+.otp-expiry{font-size:12px;color:#ababab;text-align:center;margin-top:18px;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;}
+
+/* LEAD NOTIFICATION (internal) */
+.lead-table{width:100%;border-collapse:collapse;}
+.lead-table td{padding:12px 0;border-bottom:1px solid #f0f0f5;font-size:13px;color:#1d1d1f;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;vertical-align:top;}
+.lead-table td.lead-k{color:#6e6e73;width:120px;font-weight:500;}
+.lead-msg{background:#f5f5f7;border-radius:10px;padding:20px 22px;margin-top:20px;font-size:13px;line-height:1.7;color:#1d1d1f;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;white-space:pre-wrap;}
+
+@media(max-width:600px){
+  .hdr,.hero,.cta-sec,.sec,.ftr,.miss-center{padding-left:28px;padding-right:28px;}
+  .hero{padding-top:44px;padding-bottom:36px;}
+  .hero h1{font-size:22px;}
+  .res-grid{grid-template-columns:1fr;}
+  .ftr-top{flex-direction:column;align-items:flex-start;gap:14px;}
+  .stat-row{grid-template-columns:1fr;}
+  .stat-cell{border-right:none;border-bottom:1px solid #f0f0f5;}
+  .otp-code{font-size:30px;letter-spacing:8px;padding:16px 12px 16px 20px;}
+}
+</style>
+</head>
+<body>
+<div class="ew">
+<div class="hdr">
+  <a href="https://imperialpedia.com" class="logo">
+    <div class="logo-mark"><svg viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 1h6v14H7zM3 1h3v2H3zM12 1h3v2h-3zM3 13h3v2H3zM12 13h3v2h-3z" fill="white" opacity="0.9"/></svg></div>
+    <span class="logo-name">Imperialpedia</span>
+  </a>
+</div>
+<div class="miss-center">
+  <span class="miss-icon">👋</span>
+  <h1>We've missed you.</h1>
+  <p>Here's what's new on Imperialpedia since your last visit.</p>
+</div>
+<div class="stat-row">
+  <div class="stat-cell"><span class="stat-num">500+</span><span class="stat-lbl">New articles</span></div>
+  <div class="stat-cell"><span class="stat-num">40</span><span class="stat-lbl">Categories updated</span></div>
+  <div class="stat-cell"><span class="stat-num">1</span><span class="stat-lbl">Reason to return</span></div>
+</div>
+<div class="sec">
+  <p class="sec-title">What changed while you were away</p>
+  <div class="offer-box">
+    <h3>What's new since you last visited</h3>
+    <p>A roundup of new and updated articles worth your time.</p>
+    <a href="https://imperialpedia.com/dashboard" class="btn" style="margin-top:0;">See what's new</a>
+  </div>
+</div>
+<div class="sec">
+  <p class="sec-title">Jump back in</p>
+  <ul class="step-list"><li class="step-item"><div class="step-num">1</div><div><p class="step-h">Browse featured articles</p><p class="step-p">Discover curated content across history, science, culture, and more.</p></div></li>
+<li class="step-item"><div class="step-num">2</div><div><p class="step-h">Create your reading list</p><p class="step-p">Save articles you want to revisit and track your learning journey.</p></div></li>
+<li class="step-item"><div class="step-num">3</div><div><p class="step-h">Contribute knowledge</p><p class="step-p">Edit, improve, or create articles and earn contributor badges.</p></div></li></ul>
+</div>
+<div class="sec" style="border-bottom:none;text-align:center;padding-top:32px;padding-bottom:40px;">
+  <p style="font-size:12px;color:#ababab;margin-bottom:12px;">If you no longer want to hear from us, we understand.</p>
+  <a href="https://imperialpedia.com/unsubscribe" style="font-size:12px;color:#ababab;text-decoration:underline;">Unsubscribe from all emails</a>
+</div>
+<div class="ftr">
+  <div class="ftr-top">
+    <span class="ftr-logo">Imperialpedia</span>
+    <div class="ftr-links">
+      <a href="https://imperialpedia.com">Website</a>
+      <a href="https://imperialpedia.com/privacy">Privacy</a>
+      <a href="https://imperialpedia.com/unsubscribe">Unsubscribe</a>
+    </div>
+  </div>
+  <p class="ftr-meta">
+    You received this email because you signed up at <a href="https://imperialpedia.com">imperialpedia.com</a>.<br>
+    &copy; Imperialpedia &middot; Pune, Maharashtra, India<br>
+    <a href="https://imperialpedia.com/unsubscribe">Unsubscribe</a> &nbsp;&middot;&nbsp; <a href="https://imperialpedia.com/preferences">Email preferences</a>
+  </p>
+</div>
+</div>
+</body>
+</html>

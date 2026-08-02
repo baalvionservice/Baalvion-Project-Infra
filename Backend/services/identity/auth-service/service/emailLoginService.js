@@ -59,20 +59,74 @@ function escapeHtml(s) {
 
 const BRAND = process.env.OTP_EMAIL_BRAND || 'Baalvion';
 const BRAND_ACCENT = process.env.OTP_EMAIL_ACCENT || '#FF9900'; // Baalvion orange
+const BRAND_DOMAIN = process.env.OTP_EMAIL_DOMAIN || 'https://baalvion.com';
+// Dark "ledger" chrome band — matches the flagship baalvion.com brand tokens in
+// Frontend/auth-baalvion/src/lib/themes.ts (same registry that themes the shared login page),
+// so this email, the website, and the login page all read as one product. Same visual system
+// as Email Templates/baalvion/*.html (design reference — not imported directly since that
+// folder isn't part of the deployable backend; kept in sync by hand).
+const HEADER_BG = process.env.OTP_EMAIL_HEADER_BG || '#06080b';
+
+/** Email-safe fallback for a warm display serif (Fraunces isn't reliably rendered by mail clients). */
+const FONT_DISPLAY = "Georgia, 'Times New Roman', serif";
+const FONT_BODY = '-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif';
+const FONT_MONO = "'SF Mono', 'Courier New', monospace";
 
 function buildOtpEmail(code, minutes, firstName) {
     const greeting = firstName ? `Hi ${escapeHtml(firstName)},` : 'Hi,';
     return {
         subject: `${code} is your ${BRAND} verification code`,
-        html: `
-            <div style="font-family:Arial,Helvetica,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#1a1a1a">
-                <h2 style="margin:0 0 16px">Sign in to ${BRAND}</h2>
-                <p style="margin:0 0 8px">${greeting}</p>
-                <p style="margin:0 0 8px">Use this one-time code to finish signing in:</p>
-                <p style="font-size:34px;font-weight:700;letter-spacing:8px;margin:16px 0;color:${BRAND_ACCENT}">${code}</p>
-                <p style="margin:0 0 4px;color:#555">This code expires in ${minutes} minutes.</p>
-                <p style="margin:16px 0 0;color:#888;font-size:13px">If you didn't request this, you can safely ignore this email — no one can sign in without the code.</p>
-            </div>`,
+        html: `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>${code} is your ${BRAND} verification code</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#f5f5f7;font-family:${FONT_BODY};color:#1d1d1f;-webkit-font-smoothing:antialiased;}
+.ew{max-width:600px;margin:0 auto;background:#ffffff;border-left:1px solid #e8e8e4;border-right:1px solid #e8e8e4;}
+@media(min-width:660px){.ew{margin:48px auto;border-radius:12px;border:1px solid #e8e8e4;overflow:hidden;}}
+.hdr{padding:32px 56px 28px;background:${HEADER_BG};}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.logo-mark{width:28px;height:28px;background:rgba(255,255,255,0.12);border-radius:6px;display:flex;align-items:center;justify-content:center;border:0.5px solid rgba(255,255,255,0.2);}
+.logo-name{font-size:15px;font-weight:500;color:rgba(255,255,255,0.92);letter-spacing:-0.2px;}
+.hero{padding:56px 56px 8px;}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:${BRAND_ACCENT};margin-bottom:18px;}
+.hero h1{font-size:26px;font-weight:600;color:#1d1d1f;line-height:1.2;letter-spacing:-0.6px;margin-bottom:16px;font-family:${FONT_DISPLAY};}
+.hero p{font-size:15px;color:#6e6e73;line-height:1.7;}
+.otp-wrap{text-align:center;padding:36px 56px 8px;}
+.otp-code{display:inline-block;font-family:${FONT_MONO};font-size:40px;font-weight:600;letter-spacing:12px;color:#1d1d1f;background:#f5f5f7;border:1px solid #e8e8ed;border-radius:10px;padding:20px 16px 20px 28px;}
+.otp-expiry{font-size:12px;color:#ababab;text-align:center;margin-top:18px;padding:0 56px 44px;}
+.ftr{padding:32px 56px;background:#fafafa;border-top:1px solid #e8e8ed;}
+.ftr-meta{font-size:11px;color:#ababab;line-height:1.8;}
+@media(max-width:600px){.hdr,.hero,.otp-wrap,.ftr{padding-left:28px;padding-right:28px;}.otp-code{font-size:30px;letter-spacing:8px;padding:16px 12px 16px 20px;}}
+</style>
+</head>
+<body>
+<div class="ew">
+<div class="hdr">
+  <a href="${BRAND_DOMAIN}" class="logo">
+    <div class="logo-mark"><svg width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="6" height="6" rx="0.5" fill="white"/><rect x="8" y="1" width="6" height="6" rx="0.5" fill="white" opacity="0.6"/><rect x="1" y="8" width="6" height="6" rx="0.5" fill="white" opacity="0.6"/><rect x="8" y="8" width="6" height="6" rx="0.5" fill="white" opacity="0.3"/></svg></div>
+    <span class="logo-name">${BRAND}</span>
+  </a>
+</div>
+<div class="hero">
+  <p class="eyebrow">Verify it's you</p>
+  <h1>Your sign-in code</h1>
+  <p>${greeting} use this one-time code to finish signing in.</p>
+</div>
+<div class="otp-wrap">
+  <span class="otp-code">${code}</span>
+</div>
+<p class="otp-expiry">This code expires in ${minutes} minutes. If you didn't request this, you can safely ignore this email — no one can sign in without the code.</p>
+<div class="ftr">
+  <p class="ftr-meta">&copy; ${BRAND} &middot; Pune, Maharashtra, India</p>
+</div>
+</div>
+</body>
+</html>`,
     };
 }
 
