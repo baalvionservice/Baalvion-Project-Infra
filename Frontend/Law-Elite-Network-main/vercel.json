@@ -3,5 +3,7 @@
   "ignoreCommand": "npx turbo-ignore law-elite-network-web",
   "env": {
     "NEXT_PUBLIC_GA_ID": "G-YKQ97ZPWWH"
-  }
+  },
+  "buildCommand": "pnpm run build",
+  "outputDirectory": ".next"
 }
