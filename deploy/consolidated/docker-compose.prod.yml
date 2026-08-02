@@ -368,9 +368,12 @@ services:
   # ── Shared auth surface (Next.js standalone) → auth.baalvion.com ─────────────
   # Brand-aware passwordless email-OTP sign-in used by every Baalvion site's "Sign in"
   # link (proxy.baalvionstack.com, Amarisé, about.baalvion.com, …). Its own /auth-bff/*
-  # rewrite (next.config.ts) proxies straight to auth-service — NOT auth-gateway — so
-  # AUTH_SERVICE_URL must point at app-identity:3001 (auth-service's own port inside that
-  # container), matching every other consumer's shared AUTH_SERVICE_URL convention.
+  # rewrite (next.config.ts) proxies straight to auth-service — NOT auth-gateway.
+  # NOTE: that rewrite's destination is baked in at IMAGE BUILD time (see the
+  # build-push-auth-web job's AUTH_SERVICE_URL build-arg in deploy-consolidated-box2.yml,
+  # `output: 'standalone'` snapshots next.config.ts into required-server-files.json) — the
+  # AUTH_SERVICE_URL below does NOT affect that rewrite. It's set anyway as defense-in-depth
+  # for any other server-side code path that reads process.env.AUTH_SERVICE_URL live.
   app-auth-web:
     image: ${ECR_REGISTRY}/baalvion/auth-baalvion:${AUTH_WEB_IMAGE_TAG:-prod-latest}
     pull_policy: always
