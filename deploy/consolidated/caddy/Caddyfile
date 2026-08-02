@@ -13,10 +13,12 @@
 	email ops@baalvion.com
 }
 
-# ── Central auth surface → identity app (auth-gateway) ──
+# ── Central auth surface → shared sign-in frontend (auth-baalvion). Its own
+# /auth-bff/* rewrite proxies to auth-service internally — this domain never talked
+# to the auth-gateway BFF as a UI, that was a stopgap before auth-baalvion existed. ──
 auth.baalvion.com {
 	encode gzip zstd
-	reverse_proxy app-identity:3026
+	reverse_proxy app-auth-web:3055
 }
 
 # ── auth-service direct surface (consumer social login: Google/Facebook/Discord) ──
