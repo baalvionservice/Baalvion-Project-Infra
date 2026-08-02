@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     "Baalvion Intelligence",
   ],
   authors: [{ name: "Baalvion Intelligence" }],
-  metadataBase: new URL("https://signals.baalvion.com"),
+  metadataBase: new URL("https://signal.baalvion.com"),
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -58,7 +58,7 @@ const organizationJsonLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
   name: "Baalvion Intelligence",
-  url: "https://signals.baalvion.com",
+  url: "https://signal.baalvion.com",
   description:
     "Real-time global news intelligence infrastructure — AI summaries, entity extraction, trend detection, and sub-60-second alerts for developers and businesses.",
 };
@@ -67,7 +67,7 @@ const websiteJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
   name: "Baalvion Intelligence",
-  url: "https://signals.baalvion.com",
+  url: "https://signal.baalvion.com",
 };
 
 const softwareApplicationJsonLd = {

@@ -33,6 +33,8 @@ const columns = [
     links: [
       { href: "/legal/privacy", label: "Privacy" },
       { href: "/legal/terms", label: "Terms" },
+      { href: "/legal/refund-policy", label: "Refund & Cancellation" },
+      { href: "/legal/shipping-policy", label: "Shipping & Delivery" },
     ],
   },
 ];
@@ -49,6 +51,9 @@ export function Footer() {
           <p className="mt-4 max-w-xs text-sm text-muted-foreground">
             The real-time intelligence infrastructure for AI and business. Turn global news into
             structured signal.
+          </p>
+          <p className="mt-4 text-xs text-muted-foreground">
+            Available worldwide. Payments in USD via Razorpay, all major cards accepted.
           </p>
         </div>
         {columns.map((col) => (
@@ -67,9 +72,12 @@ export function Footer() {
         ))}
       </div>
       <div className="border-t border-border py-6">
-        <p className="section-container text-xs text-muted-foreground">
-          © {new Date().getFullYear()} Baalvion Intelligence. All rights reserved.
-        </p>
+        <div className="section-container flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+          <p>© {new Date().getFullYear()} Baalvion Intelligence. All rights reserved.</p>
+          <a href="mailto:support@baalvion.com" className="hover:text-foreground">
+            support@baalvion.com
+          </a>
+        </div>
       </div>
     </footer>
   );
