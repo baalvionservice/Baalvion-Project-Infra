@@ -83,10 +83,14 @@ const securityHeaders = [
         isDev ? " 'unsafe-eval'" : ''
       }`,
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      // 'self' + data: (inline generated SVG artwork) + api.baalvion.com (cms-service-
-      // hosted generated artwork) + firebasestorage/googleusercontent (real user/OAuth
-      // avatars) + Google ad-creative/pixel hosts — no stock/placeholder image hosts.
-      "img-src 'self' data: blob: https://api.baalvion.com https://firebasestorage.googleapis.com https://lh3.googleusercontent.com https://*.razorpay.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com https://*.gstatic.com",
+      // 'self' + data:/blob: (inline generated SVG artwork, client-side previews) +
+      // https: (catch-all for content/CMS media and ad-creative images — ad
+      // networks and editorial uploads add new image hosts constantly, and a
+      // fixed per-host allowlist here previously caused the site's OWN
+      // analytics tracker to be silently CSP-blocked; images can't execute
+      // script, so allowing any https host carries no XSS risk, only a
+      // hotlinking one we accept for this public content site).
+      "img-src 'self' data: blob: https:",
       "font-src 'self' data: https://fonts.gstatic.com",
       // *.adtrafficquality.google is Google's ad-traffic-quality/fraud check (sodar) that
       // AdSense pings from the page; *.googlesyndication.com/*.doubleclick.net/*.google.com
@@ -183,8 +187,25 @@ const nextConfig: NextConfig = {
   },
 
   images: {
-    // Only self, the cms-service origin (auto-generated article artwork), and
-    // real user/OAuth-avatar hosts — no stock/placeholder image hosts.
+    // Vercel's /_next/image optimizer is gated behind a paid quota on this
+    // project — every request 402s (X-Vercel-Error: OPTIMIZED_IMAGE_REQUEST_
+    // PAYMENT_REQUIRED) regardless of how remotePatterns is configured, which
+    // silently broke every image on the site. unoptimized:true makes next/image
+    // render the original file directly (still respects remotePatterns for
+    // which hosts are allowed), trading resize/AVIF-WebP conversion for images
+    // that actually render without a Vercel plan/billing change.
+    unoptimized: true,
+    // Self, the cms-service origin, known avatar hosts, PLUS a catch-all for
+    // any other https host. Content authors and ad networks add new image
+    // hosts constantly (new CMS media bucket, a contributor's avatar
+    // provider, a new ad creative CDN) — a fixed allowlist means every new
+    // host 400s through next/image ("hostname not configured") until someone
+    // edits this file and redeploys, which is the same failure class as the
+    // original bug, just moved. Safe to leave wide open here because
+    // unoptimized:true means Next never proxy-fetches these URLs server-side
+    // (no SSRF surface) — the browser fetches them directly, same as a plain
+    // <img src>. The explicit entries below are kept for documentation/intent
+    // even though the wildcard already covers them.
     remotePatterns: [
       // `resolveArticleImage()` (src/lib/article-art.ts) builds an absolute
       // `${SITE}/article-art/<slug>.png` URL even for our own self-hosted static
@@ -215,6 +236,22 @@ const nextConfig: NextConfig = {
         hostname: 'lh3.googleusercontent.com',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: '**',
+        pathname: '/**',
+      },
+      // Dev-only so `next dev` also tolerates http image sources (e.g. a
+      // teammate's local MinIO/S3 emulator) without needing config edits.
+      ...(isDev
+        ? [
+            {
+              protocol: 'http' as const,
+              hostname: '**',
+              pathname: '/**',
+            },
+          ]
+        : []),
     ],
     // Mobile performance optimizations — serve modern formats + right-sized
     // variants instead of one oversized source image to every device.
