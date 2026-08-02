@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { legalEntity } from "@/lib/legal-entity";
 
 export const metadata: Metadata = {
   title: "About",
@@ -48,6 +49,13 @@ export default function AboutPage() {
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      <div className="mx-auto mt-14 max-w-2xl text-center text-sm text-muted-foreground">
+        <p>
+          Baalvion Intelligence is a product of {legalEntity.name}, incorporated in India on{" "}
+          {legalEntity.incorporatedOn} (CIN: {legalEntity.cin}).
+        </p>
       </div>
     </div>
   );
