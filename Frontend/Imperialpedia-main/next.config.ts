@@ -238,6 +238,18 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
+    // Vercel's on-demand Image Optimization API (/_next/image) is metered and
+    // caps out under real traffic — once the quota is hit it returns 402
+    // Payment Required for EVERY image on the site (confirmed live: raw files
+    // at api.baalvion.com/uploads/* return 200, but imperialpedia.com/_next/image
+    // returns 402 OPTIMIZED_IMAGE_REQUEST_PAYMENT_REQUIRED for the same file).
+    // `unoptimized: true` makes next/image render the original src directly —
+    // no resize/reformat pass, no Vercel billing dependency, so images can
+    // never go dark sitewide again regardless of upload volume or traffic.
+    // Uploaded photos are already reasonably sized and generated artwork is
+    // SVG (vector, no benefit from raster resizing), so the loss of on-the-fly
+    // webp/avif conversion here is a non-issue in practice.
+    unoptimized: true,
     // Only self (imperialpedia.com) and the cms-service origin that hosts
     // auto-generated article artwork — no stock/placeholder/third-party hosts.
     remotePatterns: [
