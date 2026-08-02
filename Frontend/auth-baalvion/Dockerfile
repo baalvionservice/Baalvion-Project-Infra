@@ -18,8 +18,15 @@ COPY Frontend/auth-baalvion ./Frontend/auth-baalvion
 # render, and the server-side check is skipped when its secret is unset).
 ARG NEXT_PUBLIC_TURNSTILE_SITE_KEY=""
 ARG NEXT_PUBLIC_ALLOWED_RETURN_HOSTS=""
+# AUTH_SERVICE_URL is server-only (no NEXT_PUBLIC_ prefix) but next.config.ts's rewrites()
+# destination still gets resolved and baked into .next/required-server-files.json at BUILD time
+# for `output: 'standalone'` — the standalone server.js reads that snapshot, it does NOT
+# re-evaluate next.config.ts at runtime. So a docker-compose `environment:` override at container
+# start has NO effect on it; this must be set here, at build time, to the real value.
+ARG AUTH_SERVICE_URL="http://localhost:3001"
 ENV NEXT_PUBLIC_TURNSTILE_SITE_KEY=$NEXT_PUBLIC_TURNSTILE_SITE_KEY
 ENV NEXT_PUBLIC_ALLOWED_RETURN_HOSTS=$NEXT_PUBLIC_ALLOWED_RETURN_HOSTS
+ENV AUTH_SERVICE_URL=$AUTH_SERVICE_URL
 WORKDIR /app/Frontend/auth-baalvion
 RUN pnpm build
 
