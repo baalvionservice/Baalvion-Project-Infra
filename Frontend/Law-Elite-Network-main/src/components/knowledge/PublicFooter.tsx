@@ -80,22 +80,11 @@ export function PublicFooter() {
             </div>
           </div>
 
-          {/* More policies: kept real and crawlable (see sitemap.ts), just given
-              less visual prominence than the four core policies above -- each of
-              these covers distinct, substantive ground (accessibility commitments,
-              conflict-of-interest handling, comment moderation, etc.), so they're
-              condensed here rather than deleted. */}
+          {/* Additional policies consolidated into dedicated page */}
           <div className="mt-14 pt-10 border-t border-white/10">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-4">More Policies</p>
-            <ul className="flex flex-wrap gap-x-8 gap-y-3 text-[11px] font-medium text-white/70">
-              <li><Link href="/ai-usage-policy" className="hover:text-white transition-colors">AI Usage Policy</Link></li>
-              <li><Link href="/diversity-policy" className="hover:text-white transition-colors">Diversity Policy</Link></li>
-              <li><Link href="/accessibility" className="hover:text-white transition-colors">Accessibility Statement</Link></li>
-              <li><Link href="/conflict-of-interest-policy" className="hover:text-white transition-colors">Conflict of Interest Policy</Link></li>
-              <li><Link href="/sponsored-content-policy" className="hover:text-white transition-colors">Sponsored Content Policy</Link></li>
-              <li><Link href="/comment-policy" className="hover:text-white transition-colors">Comment &amp; Review Policy</Link></li>
-              <li><Link href="/corrections" className="hover:text-white transition-colors">Corrections</Link></li>
-            </ul>
+            <Link href="/policies" className="text-[11px] font-medium text-white/70 hover:text-white transition-colors">
+              View all policies and guidelines →
+            </Link>
           </div>
         </div>
       </div>

@@ -14,7 +14,7 @@ interface LatestRailProps {
  * CNBC-style "Latest" column: a tight, text-first stack of recent headlines
  * with category kickers and read-time. Sits beside the lead story.
  */
-export function LatestRail({ articles, title = 'Latest Guides' }: LatestRailProps) {
+export function LatestRail({ articles, title = 'Essential Reads' }: LatestRailProps) {
   if (!articles || articles.length === 0) return null;
 
   return (
