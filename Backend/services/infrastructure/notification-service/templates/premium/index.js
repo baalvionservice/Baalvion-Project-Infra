@@ -30,10 +30,17 @@ function firstNameOf(name) {
   return String(name).trim().split(/\s+/)[0] || null;
 }
 
+// firstName (from account signup) and lead-form fields/message are user-controlled and land
+// straight in this HTML — escape before interpolating, or a submitted "<img src=x onerror=...>"
+// renders live in whoever's inbox opens the email.
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
 function renderWelcome(brandSlug, { fullName } = {}) {
   const { b, c } = resolveBrand(brandSlug);
   const { welcome: w, steps, resources } = c;
-  const first = firstNameOf(fullName);
+  const first = escapeHtml(firstNameOf(fullName));
   const body = `${header(b)}
 <div class="hero">
   <p class="eyebrow">${w.eyebrow}</p>
@@ -120,17 +127,18 @@ ${footer(b)}`;
 
 function renderLeadNotification(brandSlug, { formName = 'Contact form', fields = [], message } = {}) {
   const { b } = resolveBrand(brandSlug);
+  const safeFormName = escapeHtml(formName);
   const body = `${header(b)}
 <div class="hero" style="padding-bottom:24px;">
   <p class="eyebrow">New submission</p>
-  <h1>${formName}</h1>
+  <h1>${safeFormName}</h1>
   <p>A new submission just came in from ${b.domain.replace('https://', '')}.</p>
 </div>
 <div class="sec">
   <table class="lead-table" role="presentation">
-    ${fields.map((f) => `<tr><td class="lead-k">${f.k}</td><td>${f.v}</td></tr>`).join('\n    ')}
+    ${fields.map((f) => `<tr><td class="lead-k">${escapeHtml(f.k)}</td><td>${escapeHtml(f.v)}</td></tr>`).join('\n    ')}
   </table>
-  ${message ? `<div class="lead-msg">${message}</div>` : ''}
+  ${message ? `<div class="lead-msg">${escapeHtml(message)}</div>` : ''}
 </div>
 ${footer(b)}`;
   return { subject: `New ${formName.toLowerCase()} submission`, html: shell(b, `New ${formName.toLowerCase()} submission`, body) };

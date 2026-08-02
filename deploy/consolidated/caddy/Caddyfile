@@ -68,6 +68,16 @@ api.baalvion.com {
 		reverse_proxy app-platform:3018
 	}
 
+	# Public lead-capture (UNAUTHENTICATED) — separately-deployed Vercel frontends (Mining,
+	# about-baalvion, Imperialpedia, …) have no shared secret with the backend network, so their
+	# contact-form API routes call this instead of the internalAuth-gated /v1/notifications/*.
+	# notification-service validates against a hardcoded site->recipient allowlist (never a
+	# caller-supplied address) and rate-limits per IP — see controller/publicController.js.
+	@lead_public path /v1/public/lead
+	handle @lead_public {
+		reverse_proxy app-edge-realtime:3031
+	}
+
 	# Payment public surface (Java PSP gateway, app-payments:3015 — runs under --profile payments):
 	# initiate a charge, read its status, receive provider webhooks (HMAC-verified inside the svc).
 	# Money-OUT (refund/capture) + actuator are denied at the edge (listed first → first match wins).
