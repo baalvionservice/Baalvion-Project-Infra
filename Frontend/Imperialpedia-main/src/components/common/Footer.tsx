@@ -70,6 +70,8 @@ const SOCIAL_LINKS = [
 
 // Core site navigation — kept separate from the Company/Editorial/Legal
 // columns below, which are policy & about-the-company links, not site nav.
+// "Dictionary" (/terms) intentionally omitted — glossary is offline pending
+// AdSense approval, see src/config/glossary.ts.
 const EXPLORE_COLUMN = {
   label: 'Explore',
   links: [
@@ -79,7 +81,6 @@ const EXPLORE_COLUMN = {
     { label: 'Personal Finance', href: '/personal-finance' },
     { label: 'Economy', href: '/economy' },
     { label: 'Reviews', href: '/reviews' },
-    { label: 'Dictionary', href: '/terms' },
   ],
 };
 

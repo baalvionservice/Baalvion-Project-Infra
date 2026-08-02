@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { ArrowRight, BookMarked } from "lucide-react";
 import { Container } from "@/design-system/layout/container";
 import { Section } from "@/design-system/layout/section";
@@ -6,6 +7,7 @@ import { Text } from "@/design-system/typography/text";
 import { buildMetadata } from "@/lib/seo";
 import { fetchAllTerms } from "@/lib/data/term-live";
 import type { Term } from "@/lib/data/terms";
+import { GLOSSARY_LIVE } from "@/config/glossary";
 
 export const revalidate = 300;
 
@@ -28,6 +30,8 @@ function termHref(term: Term): string {
 }
 
 export default async function TermsHubPage() {
+  if (!GLOSSARY_LIVE) notFound();
+
   const all = (await fetchAllTerms()).filter((t) => t?.title && t?.slug);
 
   // Letters that actually have at least one term — used to enable/disable nav tiles.

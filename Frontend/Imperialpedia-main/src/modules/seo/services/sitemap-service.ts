@@ -10,6 +10,7 @@ import { articleUrl } from "@/lib/data/article-url";
 import { ALL_TRACKED_SYMBOLS } from "@/lib/data/marketsLoader";
 import { env } from "@/config/env";
 import { logger } from "@/lib/errors/logger";
+import { GLOSSARY_LIVE } from "@/config/glossary";
 
 /**
  * @fileOverview Scalable XML sitemap system for 10k–1M+ URLs.
@@ -71,7 +72,9 @@ export const sitemapService = {
     // 1. Static public pages (every indexable, crawlable route).
     // "/creators", "/creators/leaderboards", "/creators/trust" removed entirely
     // (routes deleted) — the Creators feature was pulled from the site.
-    const corePages = ["", "/about","/advisor-reviews","/app-reviews","/financial-intelligence","/auto-loans","/bank-reviews","/banking","/banking-reviews","/bonds","/broker-reviews","/brokers","/budgeting","/budgeting-apps","/calendar","/cd-rates","/checking","/commodities","/companies","/company-news","/contact","/countries","/credit","/credit-card-reviews","/credit-cards","/crypto","/cryptocurrency","/debt","/earnings","/economy","/emergency-fund","/estate-planning","/etfs","/explore","/fed","/financial-calculators","/financial-tools","/financial-tools/compound-interest","/financial-tools/inflation","/financial-tools/investment","/financial-tools/loan","/fiscal-policy","/gdp","/global","/government","/income","/indicators","/inflation","/insurance","/insurance-reviews","/interest-rates","/investing","/knowledge-map","/latest","/learning-paths","/live-market-news","/loan-reviews","/loans","/market-news","/monetary-policy","/money-market","/mortgages","/mutual-funds","/news","/options","/personal-finance","/planning","/politics","/privacy-policy","/real-estate","/retirement","/reviews","/robo-advisors","/savings","/stocks","/student-loans","/tax-software","/taxes","/technologies","/terms","/terms-of-service","/topics","/transparency","/unemployment","/world","/world/us","/world/europe","/world/asia","/world/china","/world/emerging"];
+    // "/terms", "/topics", "/learning-paths" removed — glossary/topic-discovery
+    // surface is offline pending AdSense approval, see src/config/glossary.ts.
+    const corePages = ["", "/about","/advisor-reviews","/app-reviews","/financial-intelligence","/auto-loans","/bank-reviews","/banking","/banking-reviews","/bonds","/broker-reviews","/brokers","/budgeting","/budgeting-apps","/calendar","/cd-rates","/checking","/commodities","/companies","/company-news","/contact","/countries","/credit","/credit-card-reviews","/credit-cards","/crypto","/cryptocurrency","/debt","/earnings","/economy","/emergency-fund","/estate-planning","/etfs","/explore","/fed","/financial-calculators","/financial-tools","/financial-tools/compound-interest","/financial-tools/inflation","/financial-tools/investment","/financial-tools/loan","/fiscal-policy","/gdp","/global","/government","/income","/indicators","/inflation","/insurance","/insurance-reviews","/interest-rates","/investing","/knowledge-map","/latest","/live-market-news","/loan-reviews","/loans","/market-news","/monetary-policy","/money-market","/mortgages","/mutual-funds","/news","/options","/personal-finance","/planning","/politics","/privacy-policy","/real-estate","/retirement","/reviews","/robo-advisors","/savings","/stocks","/student-loans","/tax-software","/taxes","/technologies","/terms-of-service","/transparency","/unemployment","/world","/world/us","/world/europe","/world/asia","/world/china","/world/emerging"];
     corePages.forEach((path) => {
       entries.push({
         loc: `${base}${path}`,
@@ -85,13 +88,15 @@ export const sitemapService = {
     // `/terms/[letter]/[slug]` pages) drive both the A–Z hub inclusion below and the
     // individual term entries further down, so the sitemap never submits a hub or a
     // term URL that doesn't actually resolve.
-    const glossaryTerms = await (async () => {
-      try {
-        return await fetchAllTerms();
-      } catch {
-        return [];
-      }
-    })();
+    const glossaryTerms = GLOSSARY_LIVE
+      ? await (async () => {
+          try {
+            return await fetchAllTerms();
+          } catch {
+            return [];
+          }
+        })()
+      : [];
     const letterOf = (title: string) => {
       const first = title.charAt(0).toLowerCase();
       return /^[0-9]/.test(first) ? "num" : first;
@@ -100,6 +105,7 @@ export const sitemapService = {
 
     // A–Z dictionary hubs (Investopedia-style listing pages). Only letters with at
     // least one real glossary entry are submitted so empty hubs aren't indexed.
+    // Skipped entirely while the glossary is offline (see GLOSSARY_LIVE above).
     ["num", ..."abcdefghijklmnopqrstuvwxyz".split("")].forEach((l) => {
       if (!lettersWithTerms.has(l)) return;
       entries.push({ loc: `${base}/terms-beginning-with-${l}`, changefreq: "weekly", priority: 0.5 });

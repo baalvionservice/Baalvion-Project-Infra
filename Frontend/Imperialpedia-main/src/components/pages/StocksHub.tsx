@@ -438,22 +438,8 @@ export async function StocksHub() {
           </div>
         </section>
 
-        {/* Key Terms / Glossary */}
-        <section>
-          <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
-            Key Terms
-          </h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            Look up bull markets, dividends, IPOs, order types, and hundreds of other investing terms in
-            the Imperialpedia glossary.
-          </p>
-          <Link
-            href="/terms"
-            className="inline-flex items-center gap-2 rounded-full border border-gray-200 px-4 py-2 text-xs font-semibold text-foreground transition-colors hover:border-gray-900"
-          >
-            Browse the Glossary <ArrowRight className="h-3 w-3" />
-          </Link>
-        </section>
+        {/* Key Terms / Glossary section omitted — /terms is offline pending
+            AdSense approval, see src/config/glossary.ts. */}
 
         {/* Related tools */}
         <section>

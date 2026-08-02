@@ -20,6 +20,8 @@ import { getTermUrl } from '@/lib/data/utils';
 import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import { GLOSSARY_LIVE } from '@/config/glossary';
 
 export const metadata: Metadata = buildMetadata({
   canonical: '/learning-paths',
@@ -33,6 +35,8 @@ export const metadata: Metadata = buildMetadata({
  * topic listed links to a real, resolvable `/terms/{letter}/{slug}` page.
  */
 export default async function LearningPathsPage() {
+  if (!GLOSSARY_LIVE) notFound();
+
   const { learning_paths: paths } = await getGlobalTopicIndexData();
 
   return (

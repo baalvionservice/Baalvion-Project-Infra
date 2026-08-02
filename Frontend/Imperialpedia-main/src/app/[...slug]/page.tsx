@@ -15,6 +15,7 @@ import { Term } from "@/lib/data/terms";
 import { staticArticleBySlug, staticNewsBySlug } from "@/services/data/static-content";
 import Link from "next/link";
 import { env } from "@/config/env";
+import { GLOSSARY_LIVE } from "@/config/glossary";
 import { articleUrl } from "@/lib/data/article-url";
 import { ShareBar } from "@/components/article/ShareBar";
 import { articlesService } from "@/services/data";
@@ -147,7 +148,7 @@ export async function generateMetadata({ params }: { params: Promise<SlugParams>
   const slug = segments[0];
 
   // Check if this is a terms-beginning-with pattern
-  if (slug.startsWith("terms-beginning-with-")) {
+  if (GLOSSARY_LIVE && slug.startsWith("terms-beginning-with-")) {
     const letter = slug.replace("terms-beginning-with-", "");
     const terms: Term[] = await fetchTermsByLetter(letter);
     if (terms && terms.length > 0) {
@@ -509,6 +510,8 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
 async function BareSlugPage({ slug }: { slug: string }) {
   // ── 1. Check if this is a terms-beginning-with pattern ──────────────────
   if (slug.startsWith("terms-beginning-with-")) {
+    if (!GLOSSARY_LIVE) notFound();
+
     const letter = slug.replace("terms-beginning-with-", "");
     const terms = await fetchTermsByLetter(letter);
 
