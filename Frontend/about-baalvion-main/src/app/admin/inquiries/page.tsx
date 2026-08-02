@@ -15,13 +15,6 @@ export default function AdminInquiries() {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetch('/api/inquiry').then(res => res.json()).then(data => {
-      setInquiries(data);
-      setLoading(false);
-    });
-  }, []);
-
   const getAdminHeaders = () => {
     const token = localStorage.getItem('admin_token');
     return {
@@ -29,6 +22,13 @@ export default function AdminInquiries() {
       'x-admin-key': token || ''
     };
   };
+
+  useEffect(() => {
+    fetch('/api/inquiry', { headers: getAdminHeaders() }).then(res => res.json()).then(data => {
+      setInquiries(data);
+      setLoading(false);
+    });
+  }, []);
 
   const updateStatus = async (id: string, status: Inquiry['status']) => {
     try {
