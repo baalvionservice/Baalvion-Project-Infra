@@ -167,7 +167,7 @@ async function register({ email, password: plainPw, fullName, orgName, accountTy
     if (existing) throw new AppError('EMAIL_TAKEN', 'Email already registered', 409);
 
     const passwordHash = await password.hash(plainPw);
-    const user = await userRepo.create({ email, passwordHash, fullName });
+    const user = await userRepo.create({ email, passwordHash, fullName, brand });
 
     // Optional phone captured at signup is stored UNVERIFIED — it only becomes verified after the
     // phone OTP flow (POST /phone/otp/request → /phone/otp/verify). Kept in-memory for presentUser.
