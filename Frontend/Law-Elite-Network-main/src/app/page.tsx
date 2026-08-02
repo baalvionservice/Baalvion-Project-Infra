@@ -52,21 +52,21 @@ export default function KnowledgeHomePage() {
       .catch(() => {});
   }, []);
 
-  // Bundled content is the trustworthy baseline; live API results take precedence.
   const pool = useMemo(() => mergeArticles(apiArticles), [apiArticles]);
 
   const trending = useMemo(() => [...pool].sort((a, b) => (b.views || 0) - (a.views || 0)), [pool]);
 
   const lead = trending[0];
   const heroSecondary = trending.slice(1, 3);
-  const latest = trending.slice(3, 9);
+  const latest = trending.slice(3, 7);
 
-  const editorsPicks = useMemo(() => {
-    const featured = pool.filter((a) => a.featured);
-    const base = featured.length >= 4 ? featured : [...featured, ...trending];
+  const usedSlugs = useMemo(() => {
     const seen = new Set<string>();
-    return base.filter((a) => (seen.has(a.slug) ? false : (seen.add(a.slug), true))).slice(0, 4);
-  }, [pool, trending]);
+    if (lead) seen.add(lead.slug);
+    heroSecondary.forEach((a) => seen.add(a.slug));
+    latest.forEach((a) => seen.add(a.slug));
+    return seen;
+  }, [lead, heroSecondary, latest]);
 
   const categories = useMemo(() => {
     if (apiCategories.length > 0) {
@@ -78,11 +78,14 @@ export default function KnowledgeHomePage() {
   const articlesByCategory = useMemo(() => {
     return categories.map((cat) => ({
       ...cat,
-      articles: pool.filter(
-        (a) => categoryIdOf(a) === String(cat.id) || categorySlugOf(a) === cat.slug,
-      ),
+      articles: pool
+        .filter((a) => !usedSlugs.has(a.slug))
+        .filter(
+          (a) => categoryIdOf(a) === String(cat.id) || categorySlugOf(a) === cat.slug,
+        )
+        .slice(0, 3),
     }));
-  }, [categories, pool]);
+  }, [categories, pool, usedSlugs]);
 
   return (
     <div className="min-h-screen bg-white pt-[60px] lg:pt-[96px]">
@@ -125,25 +128,6 @@ export default function KnowledgeHomePage() {
             </div>
           </div>
         </section>
-
-        {/* Editor's picks */}
-        {editorsPicks.length > 0 && (
-          <section className="py-8 border-t border-slate-200">
-            <div className="flex items-end justify-between border-b-2 border-slate-900 pb-2 mb-6">
-              <div className="flex items-center gap-3">
-                <span className="w-1.5 h-6 bg-news-600 rounded-sm" />
-                <h2 className="font-headline text-xl md:text-2xl font-extrabold tracking-tight text-slate-900 m-0">
-                  Editor&rsquo;s Picks
-                </h2>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-7 gap-y-9">
-              {editorsPicks.map((a) => (
-                <StoryCard key={a.id || a.slug} article={a} variant="default" />
-              ))}
-            </div>
-          </section>
-        )}
 
         {/* Category sections */}
         <div className="py-8 border-t border-slate-200">

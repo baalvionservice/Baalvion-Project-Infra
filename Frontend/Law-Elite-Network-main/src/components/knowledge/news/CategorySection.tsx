@@ -17,7 +17,7 @@ interface CategorySectionProps {
  */
 export function CategorySection({ name, slug, articles }: CategorySectionProps) {
   if (!articles || articles.length === 0) return null;
-  const cards = articles.slice(0, 4);
+  const cards = articles.slice(0, 3);
 
   return (
     <section className="mb-14">
@@ -36,7 +36,7 @@ export function CategorySection({ name, slug, articles }: CategorySectionProps) 
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-7 gap-y-9">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-7 gap-y-9">
         {cards.map((article) => (
           <StoryCard key={article.id || article.slug} article={article} variant="default" />
         ))}
