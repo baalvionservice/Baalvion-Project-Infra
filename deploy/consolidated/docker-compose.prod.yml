@@ -176,7 +176,15 @@ services:
   app-edge-realtime:
     <<: *node-app
     command: ["pm2-runtime","start","/app/pm2/edge-realtime.config.js"]
-    environment: { <<: [*db, *redis] }
+    environment:
+      <<: [*db, *redis]
+      # proxy-service (one of the 4 processes pm2-runtime supervises in this container) uses
+      # this to build its Google/Facebook OAuth redirect target. Pinned here — NOT left to the
+      # shared .env's global APP_URL — because that var is shared across every container in
+      # this stack and belongs to whichever site currently "owns" it (e.g. community.market-
+      # underworld.com); without this override proxy-service silently sends its own users
+      # there instead of back to proxy.baalvionstack.com. See appConfig.js oauth.appUrl.
+      OAUTH_PUBLIC_BASE_URL: https://proxy.baalvionstack.com
     mem_limit: 896m
     mem_reservation: 448m
     healthcheck:
