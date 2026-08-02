@@ -122,13 +122,8 @@ function SearchContent() {
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
-                  <Link href="/legal">
-                    <button className="bg-slate-900 text-white px-8 h-12 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl shadow-slate-200">
-                      Browse A–Z Index
-                    </button>
-                  </Link>
                   <Link href="/">
-                    <button className="bg-white border border-slate-200 text-slate-600 px-8 h-12 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-slate-50 transition-all">
+                    <button className="bg-slate-900 text-white px-8 h-12 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl shadow-slate-200">
                       Return to Discovery
                     </button>
                   </Link>

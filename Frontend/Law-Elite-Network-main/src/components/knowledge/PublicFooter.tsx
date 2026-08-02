@@ -11,8 +11,6 @@ import { FooterNewsletterForm } from '@/components/knowledge/FooterNewsletterFor
  * Matches the Investopedia-style layout with dark navy aesthetics and A-Z strip.
  */
 export function PublicFooter() {
-  const letters = "#ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-
   return (
     <footer className="w-full flex flex-col">
       {/* Main Footer Section */}
@@ -56,7 +54,6 @@ export function PublicFooter() {
                 <li><Link href="/law/employment-labor" className="hover:text-blue-300 transition-colors">Employment & Labor</Link></li>
                 <li><Link href="/law/technology-ip" className="hover:text-blue-300 transition-colors">Technology & IP</Link></li>
                 <li><Link href="/lawyers" className="hover:text-blue-300 transition-colors">Counsel Registry</Link></li>
-                <li><Link href="/legal" className="hover:text-blue-300 transition-colors">Encyclopedia</Link></li>
               </ul>
             </div>
 
@@ -100,23 +97,6 @@ export function PublicFooter() {
               <li><Link href="/comment-policy" className="hover:text-white transition-colors">Comment &amp; Review Policy</Link></li>
               <li><Link href="/corrections" className="hover:text-white transition-colors">Corrections</Link></li>
             </ul>
-          </div>
-        </div>
-      </div>
-
-      {/* A-Z Index Strip */}
-      <div className="bg-[#1a2333] py-8 border-t border-white/5">
-        <div className="container mx-auto px-6 max-w-7xl">
-          <div className="flex flex-wrap items-center justify-center gap-x-4 md:gap-x-6 gap-y-3">
-            {letters.map((letter) => (
-              <Link 
-                key={letter} 
-                href={letter === '#' ? '/legal' : `/legal/${letter.toLowerCase()}`}
-                className="text-[13px] font-bold text-white/80 hover:text-white transition-all transform hover:scale-110"
-              >
-                {letter}
-              </Link>
-            ))}
           </div>
         </div>
       </div>
