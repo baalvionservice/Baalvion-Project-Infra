@@ -72,6 +72,10 @@ const MARKET_GUIDES = [
   { href: "/earnings", label: "How Earnings Affect Stocks" },
 ];
 
+/** Max FAQs shown — keeps the section a curated, scannable set instead of
+ * however many happen to flatMap out of the source articles. */
+const FAQ_LIMIT = 10;
+
 const EXPLORE_MORE = [
   { href: "/investing", label: "Investing" },
   { href: "/economy", label: "Economy" },
@@ -284,6 +288,15 @@ export async function MarketNewsHub() {
       faqs.push(f);
     }
   }
+  // Cap the total shown — flatMapping every article's FAQ array with no limit
+  // let the count balloon unpredictably (12 source articles x however many
+  // FAQs each happened to carry), producing one overwhelming, hard-to-scan
+  // list instead of a curated set.
+  const visibleFaqs = faqs.slice(0, FAQ_LIMIT);
+  const faqColumns = [
+    visibleFaqs.filter((_, i) => i % 2 === 0),
+    visibleFaqs.filter((_, i) => i % 2 === 1),
+  ];
 
   // ── SEO: CollectionPage + ItemList + Breadcrumb structured data ──
   const base = (env.siteUrl || "https://imperialpedia.com").replace(/\/$/, "");
@@ -530,15 +543,20 @@ export async function MarketNewsHub() {
           </p>
         )}
 
-        {/* FAQ */}
-        {faqs.length > 0 && (
+        {/* FAQ — split into two balanced columns so a long list stays scannable
+            instead of one continuous scroll. */}
+        {visibleFaqs.length > 0 && (
           <section>
             <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-6 pb-2">
               Frequently Asked Questions
             </h3>
-            <div className="rounded-2xl border border-border px-4">
-              {faqs.map((f) => (
-                <FAQItem key={f.question} question={f.question} answer={f.answer} />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {faqColumns.map((column, i) => (
+                <div key={i} className="rounded-2xl border border-border px-4">
+                  {column.map((f) => (
+                    <FAQItem key={f.question} question={f.question} answer={f.answer} />
+                  ))}
+                </div>
               ))}
             </div>
           </section>

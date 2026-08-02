@@ -48,7 +48,7 @@ export async function MarketHighlights() {
 
   return (
     <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 border-t border-border">
-      <HomeSectionHeading title="Market Highlights" href="/markets" />
+      <HomeSectionHeading title="Market Highlights" href="/market-news" />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-6">
         <div>
           <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground pb-2 mb-1 border-b-2 border-foreground">
