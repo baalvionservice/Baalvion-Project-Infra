@@ -36,17 +36,36 @@ async function dispatch(eventType, payload, meta = {}) {
 
     switch (eventType) {
         // Auth events → emails
-        case 'auth.registered':
+        case 'auth.registered': {
+            // brand comes from the signup site (see auth-service's resolveBrand()); falls back
+            // to the flagship 'baalvion' theme when the signup path can't determine one (e.g.
+            // OAuth callbacks, which don't carry an Origin header). Email verification is a
+            // SEPARATE event/template (auth.email_verification_requested below) — the welcome
+            // email itself doesn't need a verify link.
+            const lifecycleData = { fullName: payload.fullName || null, brand: payload.brand || 'baalvion' };
             await emailQueue.add('welcome', {
                 to:            payload.email,
                 templateName:  'welcome',
                 idempotencyKey: `welcome:${payload.userId}`,
-                data: {
-                    name:      payload.fullName || 'there',
-                    verifyUrl: `${config.appUrl}/verify-email?token=${payload.verifyToken}`,
-                },
+                data: lifecycleData,
             });
+            // Onboarding sequence — delayed sends off the SAME signup event, deduped by
+            // idempotencyKey exactly like the immediate welcome send (BullMQ jobId dedup).
+            const DAY_MS = 24 * 60 * 60 * 1000;
+            await emailQueue.add('onboarding-day1', {
+                to: payload.email, templateName: 'onboardingDay1',
+                idempotencyKey: `onboarding-day1:${payload.userId}`, data: lifecycleData,
+            }, { delay: 1 * DAY_MS });
+            await emailQueue.add('onboarding-day3', {
+                to: payload.email, templateName: 'onboardingDay3',
+                idempotencyKey: `onboarding-day3:${payload.userId}`, data: lifecycleData,
+            }, { delay: 3 * DAY_MS });
+            await emailQueue.add('onboarding-day7', {
+                to: payload.email, templateName: 'onboardingDay7',
+                idempotencyKey: `onboarding-day7:${payload.userId}`, data: lifecycleData,
+            }, { delay: 7 * DAY_MS });
             break;
+        }
 
         case 'auth.email_verification_requested':
             await emailQueue.add('email-verify', {
