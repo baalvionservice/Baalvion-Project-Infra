@@ -389,8 +389,25 @@ async function deleteContent(websiteId, contentId) {
     if (content.tagIds?.length) await _incrementTagUsage(websiteId, content.tagIds, -1);
     if (content.categoryIds?.length) await _incrementCategoryCount(websiteId, content.categoryIds, -1);
 
+    const plainContent = content.toJSON();
     await content.destroy();
     await cache.del(cache.keys.content(contentId));
+
+    // A hard delete removes the page just as permanently as an archive does, but
+    // previously skipped the public-cache-bust + ISR-revalidate step archive/publish/
+    // unpublish get (see workflowService.transition) — so a deleted (already-archived)
+    // item kept serving its stale public-cache/build-cached page indefinitely. Mirrors
+    // that same fire-and-forget, fail-open pattern.
+    void (async () => {
+        try {
+            const website = await CmsWebsite.findByPk(websiteId, { attributes: ['slug', 'domain'] });
+            const websiteSlug = website ? website.slug : null;
+            if (!websiteSlug) return;
+            await cache.delPattern(`cms:public:${websiteSlug}:*`);
+            const { paths, urls } = await revalidateService.pathsForContent(plainContent, website.domain);
+            revalidateService.dispatch(websiteSlug, { paths, urls });
+        } catch { /* fail-open — never affects the committed delete */ }
+    })();
 }
 
 async function bulkUpdate(websiteId, userId, { ids, action, categoryId }) {

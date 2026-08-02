@@ -106,6 +106,17 @@ async function pathsForContent(content, domain) {
     if (canonicalPath) paths.push(canonicalPath);
     else if (slug) paths.push(`/${slug}`);
 
+    // Belt-and-suspenders: some 'article'-type content (e.g. the pillar/cluster
+    // seed scripts) is actually served at the dated `/YYYY/MM/DD/<slug>` URL
+    // rather than `_canonicalContentPath`'s `/<categorySlug>/<slug>` guess, so
+    // that guess alone can leave the page a visitor actually lands on never
+    // revalidated. revalidatePath() on a path with no matching route is a
+    // harmless no-op, so always busting the dated variant too costs nothing.
+    if (slug) {
+        const { yyyy, mm, dd } = _publishedDateParts(content);
+        paths.push(`/${yyyy}/${mm}/${dd}/${slug}`);
+    }
+
     const urls = [];
     if (domain && slug) {
         const host = String(domain).replace(/^https?:\/\//, '').replace(/\/+$/, '');
