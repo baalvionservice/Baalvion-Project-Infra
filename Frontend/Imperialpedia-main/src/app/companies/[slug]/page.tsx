@@ -1,13 +1,12 @@
 import React, { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
-import Link from 'next/link';
 import { Container } from '@/design-system/layout/container';
 import { EntityHeader } from '@/components/knowledge/EntityHeader';
 import { EntityOverview } from '@/components/knowledge/EntityOverview';
 import { EntityEditorialOverview } from '@/components/knowledge/EntityEditorialOverview';
 import { DataTable } from '@/components/knowledge/DataTable';
-import { getCompanyBySlug, getIndustryBySlug } from '@/lib/data/loaders';
+import { getCompanyBySlug } from '@/lib/data/loaders';
 import { generateEntityMetadata, humanizeSlug, isPublicCompany, safeHostname } from '@/lib/utils/seo';
 import { structuredData } from '@/lib/seo/structuredData';
 import { JsonLd } from '@/modules/seo-engine/components/JsonLd';
@@ -43,12 +42,6 @@ export default async function Page({ params }: PageProps) {
     notFound();
   }
 
-  // Only link the Industry fact to its entity page when that entity is confirmed to
-  // exist — several company records reference industry slugs that don't have a
-  // dedicated /industries/[slug] page yet, and a Key Facts table is exactly the kind
-  // of high-trust block where a dead link is most damaging.
-  const industryEntity = await getIndustryBySlug(company.industry);
-
   // Key Facts — every row is a verified field straight off the entity; nothing here is
   // inferred or templated filler. Rows are only added when the underlying value exists.
   const keyFacts: [string, React.ReactNode][] = [];
@@ -57,16 +50,7 @@ export default async function Page({ params }: PageProps) {
   }
   keyFacts.push(['Founded', company.founded_year]);
   keyFacts.push(['Headquarters', company.headquarters]);
-  keyFacts.push([
-    'Industry',
-    industryEntity ? (
-      <Link href={`/industries/${industryEntity.slug}`} className="text-primary hover:underline">
-        {humanizeSlug(company.industry)}
-      </Link>
-    ) : (
-      humanizeSlug(company.industry)
-    ),
-  ]);
+  keyFacts.push(['Industry', humanizeSlug(company.industry)]);
   keyFacts.push(['Employees', company.employees.toLocaleString()]);
   const isPublic = isPublicCompany(company);
   if (company.ticker) {

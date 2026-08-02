@@ -37,9 +37,7 @@ export default function DiversityPolicyPage() {
 
             <Block icon={<Globe2 className="w-6 h-6 text-blue-600" />} title="Breadth of Practice Areas and Jurisdictions">
               <p>
-                Our{' '}
-                <Link href="/legal" className="text-blue-600 hover:underline">A-Z legal encyclopedia</Link> spans
-                practice areas from business and corporate law to criminal law, family law, tax, employment, and
+                Our practice-area guides span business and corporate law to criminal law, family law, tax, employment, and
                 technology, reflecting the reality that readers arrive with very different legal needs. Where law
                 varies meaningfully by jurisdiction, we aim to note that variation rather than present a single
                 jurisdiction&apos;s rule as universal.

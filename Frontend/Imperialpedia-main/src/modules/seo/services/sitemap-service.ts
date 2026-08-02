@@ -2,7 +2,7 @@ import {
   articlesService,
   calculatorsService,
 } from "@/services/data";
-import { loadCompanies, loadCountries, loadIndustries, loadTechnologies } from "@/lib/data/loaders";
+import { loadCompanies, loadCountries, loadTechnologies } from "@/lib/data/loaders";
 import { fetchAllTerms } from "@/lib/data/term-live";
 import { reviewSlugs } from "@/lib/data/review-live";
 import { getPublishedNews } from "@/services/data/cms-public";
@@ -71,7 +71,7 @@ export const sitemapService = {
     // 1. Static public pages (every indexable, crawlable route).
     // "/creators", "/creators/leaderboards", "/creators/trust" removed entirely
     // (routes deleted) — the Creators feature was pulled from the site.
-    const corePages = ["", "/about","/advisor-reviews","/app-reviews","/financial-intelligence","/auto-loans","/bank-reviews","/banking","/banking-reviews","/bonds","/broker-reviews","/brokers","/budgeting","/budgeting-apps","/calendar","/cd-rates","/checking","/commodities","/companies","/company-news","/contact","/countries","/credit","/credit-card-reviews","/credit-cards","/crypto","/cryptocurrency","/debt","/earnings","/economy","/emergency-fund","/estate-planning","/etfs","/explore","/fed","/financial-calculators","/financial-tools","/financial-tools/compound-interest","/financial-tools/inflation","/financial-tools/investment","/financial-tools/loan","/fiscal-policy","/gdp","/global","/government","/income","/indicators","/industries","/inflation","/insurance","/insurance-reviews","/interest-rates","/investing","/knowledge-map","/latest","/learning-paths","/live-market-news","/loan-reviews","/loans","/market-news","/monetary-policy","/money-market","/mortgages","/mutual-funds","/news","/options","/personal-finance","/planning","/politics","/privacy-policy","/real-estate","/retirement","/reviews","/robo-advisors","/savings","/stocks","/student-loans","/tax-software","/taxes","/technologies","/terms","/terms-of-service","/topics","/transparency","/unemployment","/world","/world/us","/world/europe","/world/asia","/world/china","/world/emerging"];
+    const corePages = ["", "/about","/advisor-reviews","/app-reviews","/financial-intelligence","/auto-loans","/bank-reviews","/banking","/banking-reviews","/bonds","/broker-reviews","/brokers","/budgeting","/budgeting-apps","/calendar","/cd-rates","/checking","/commodities","/companies","/company-news","/contact","/countries","/credit","/credit-card-reviews","/credit-cards","/crypto","/cryptocurrency","/debt","/earnings","/economy","/emergency-fund","/estate-planning","/etfs","/explore","/fed","/financial-calculators","/financial-tools","/financial-tools/compound-interest","/financial-tools/inflation","/financial-tools/investment","/financial-tools/loan","/fiscal-policy","/gdp","/global","/government","/income","/indicators","/inflation","/insurance","/insurance-reviews","/interest-rates","/investing","/knowledge-map","/latest","/learning-paths","/live-market-news","/loan-reviews","/loans","/market-news","/monetary-policy","/money-market","/mortgages","/mutual-funds","/news","/options","/personal-finance","/planning","/politics","/privacy-policy","/real-estate","/retirement","/reviews","/robo-advisors","/savings","/stocks","/student-loans","/tax-software","/taxes","/technologies","/terms","/terms-of-service","/topics","/transparency","/unemployment","/world","/world/us","/world/europe","/world/asia","/world/china","/world/emerging"];
     corePages.forEach((path) => {
       entries.push({
         loc: `${base}${path}`,
@@ -167,10 +167,9 @@ export const sitemapService = {
     });
 
     // 3. Structured entities + review guides + published news.
-    const [companies, countries, industries, technologies, news] = await Promise.all([
+    const [companies, countries, technologies, news] = await Promise.all([
       safe(loadCompanies(), []),
       safe(loadCountries(), []),
-      safe(loadIndustries(), []),
       safe(loadTechnologies(), []),
       safe(getPublishedNews(1000), []),
     ]);
@@ -180,7 +179,6 @@ export const sitemapService = {
       });
     pushEntities(companies, "/companies", 0.8);
     pushEntities(countries, "/countries");
-    pushEntities(industries, "/industries");
     pushEntities(technologies, "/technologies");
 
     // Market quote pages — every symbol this site actually renders a

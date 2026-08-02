@@ -187,9 +187,9 @@ function PromoBox({
 }) {
   return (
     <div className="space-y-3">
-      <h2 className="text-lg sm:text-xl font-bold text-white font-headline tracking-tight">
+      <h3 className="text-lg sm:text-xl font-bold text-white font-headline tracking-tight">
         {title}
-      </h2>
+      </h3>
       <p className="text-[13px] text-slate-400 leading-relaxed max-w-xs">
         {blurb}
       </p>

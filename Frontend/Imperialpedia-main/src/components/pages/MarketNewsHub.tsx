@@ -394,7 +394,6 @@ export async function MarketNewsHub() {
                           <h3 className="text-sm font-bold text-foreground leading-snug group-hover:underline line-clamp-2">
                             {article.title}
                           </h3>
-                          <p className="mt-1 text-xs text-muted-foreground">{article.readTimeMinutes} min read</p>
                         </div>
                       </Link>
                     </li>
@@ -484,7 +483,6 @@ export async function MarketNewsHub() {
                     <h3 className="text-sm font-bold text-foreground leading-snug group-hover:underline line-clamp-2">
                       {article.title}
                     </h3>
-                    <p className="mt-1 text-xs text-muted-foreground">{article.readTimeMinutes} min read</p>
                   </div>
                 </Link>
               ))}

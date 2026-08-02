@@ -66,8 +66,8 @@ export default function ExplorePage() {
                 label: "Artificial Intelligence",
                 href: "/technologies/generative-ai",
               },
-              { label: "Semiconductors", href: "/industries/semiconductors" },
-              { label: "Global Finance", href: "/industries/finance" },
+              { label: "Semiconductors", href: "/companies/nvidia" },
+              { label: "Global Finance", href: "/companies/berkshire-hathaway" },
               {
                 label: "Economic Benchmarks",
                 href: "/countries/united-states",

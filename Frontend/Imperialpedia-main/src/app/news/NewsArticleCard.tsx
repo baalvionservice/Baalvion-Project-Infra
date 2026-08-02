@@ -46,7 +46,7 @@ export function ArticleCard({
           {article.excerpt}
         </p>
         <p className="text-xs text-gray-400">
-          By {article.author.name} · {formatDate(article.publishedAt)} · {article.readTimeMinutes} min read
+          By {article.author.name} · {formatDate(article.publishedAt)}
         </p>
       </div>
     </Link>

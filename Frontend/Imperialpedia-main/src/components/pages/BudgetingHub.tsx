@@ -147,7 +147,6 @@ export async function BudgetingHub() {
   const featured = articles.find((a) => a.featured) ?? articles[0];
   const rest = articles.filter((a) => a !== featured);
   const sidebarArticles = rest.slice(0, 3);
-  const gridArticles = rest.slice(3);
 
   // article.category is a coarse NewsCategory bucket that budgeting's pillar categories
   // don't belong to, so it renders as the generic "Editorial" catch-all — look the real
@@ -182,6 +181,24 @@ export async function BudgetingHub() {
     const topic = BUDGETING_TOPICS.find((t) => t.slug === slug)!;
     return { topic, article: articlesByTopic[slug]?.[0] };
   }).filter((s): s is { topic: (typeof BUDGETING_TOPICS)[number]; article: NewsArticle } => !!s.article);
+
+  // Every article already surfaced above (featured, sidebar, trending, Start
+  // Budgeting) is excluded from the "Explore Budgeting" grid/tabs below — the
+  // same article was previously appearing twice on the page (once in a rail,
+  // again in the topic explorer), which read as duplicated content.
+  const shownSlugs = new Set<string>([
+    ...(featured ? [featured.slug] : []),
+    ...sidebarArticles.map((a) => a.slug),
+    ...trending.map((a) => a.slug),
+    ...startBudgetingSteps.map((s) => s.article.slug),
+  ]);
+  const gridArticles = rest.filter((a) => !shownSlugs.has(a.slug));
+  const explorerArticlesByTopic = Object.fromEntries(
+    Object.entries(articlesByTopic).map(([slug, items]) => [
+      slug,
+      items.filter((a) => !shownSlugs.has(a.slug)),
+    ])
+  );
 
   // 5) FAQ — aggregated from the CMS's own per-article FAQ data
   //    (customFields.faq), not a hardcoded question list.
@@ -316,7 +333,6 @@ export async function BudgetingHub() {
                   <h3 className="text-sm font-bold text-foreground leading-snug group-hover:underline line-clamp-3">
                     {article.title}
                   </h3>
-                  <p className="mt-1 text-xs text-gray-400">{article.readTimeMinutes} min read</p>
                 </Link>
               ))}
             </div>
@@ -356,7 +372,7 @@ export async function BudgetingHub() {
           </h3>
           <InvestingTopicExplorer
             topics={BUDGETING_TOPICS.map(({ slug, label }) => ({ slug, label }))}
-            articlesByTopic={articlesByTopic}
+            articlesByTopic={explorerArticlesByTopic}
             allArticles={gridArticles}
           />
         </section>

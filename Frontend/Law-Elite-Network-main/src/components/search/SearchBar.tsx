@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, X } from 'lucide-react';
-import { articlesPublicApi } from '@/lib/api/client';
 import SearchSuggestions from './SearchSuggestions';
 
 interface SearchBarProps {
@@ -27,9 +26,10 @@ export default function SearchBar({ initialValue = "", variant = 'hero' }: Searc
     }
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
-      articlesPublicApi.list({ search: queryText, limit: 6, status: 'published' })
-        .then(res => {
-          const items = res.data?.data?.items || res.data?.data || [];
+      fetch(`/api/search?q=${encodeURIComponent(queryText)}&limit=6`)
+        .then(res => res.json())
+        .then(json => {
+          const items = json?.data?.items || [];
           setSuggestions(items);
           setShowSuggestions(items.length > 0);
         })

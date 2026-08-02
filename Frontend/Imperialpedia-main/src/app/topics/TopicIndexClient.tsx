@@ -24,7 +24,6 @@ import {
   Globe,
   Tag as TagIcon,
   SortAsc,
-  Clock,
   GraduationCap,
   TrendingUp,
   ArrowUpRight,
@@ -202,10 +201,6 @@ export function TopicIndexClient({ initialData }: TopicIndexClientProps) {
 
                             <div className="pt-4 border-t border-white/5 flex items-center justify-between">
                               <div className="flex items-center gap-4 text-[9px] text-muted-foreground font-bold uppercase tracking-tighter">
-                                <span className="flex items-center gap-1">
-                                  <Clock className="h-3 w-3" />{" "}
-                                  {topic.reading_time}
-                                </span>
                                 <span className="flex items-center gap-1">
                                   <Activity className="h-3 w-3" />{" "}
                                   {topic.difficulty}

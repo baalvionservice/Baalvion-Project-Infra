@@ -1,50 +1,16 @@
-"use client";
-
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Navbar } from '@/components/navbar';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
-import { getAllAuthors, authorNameToSlug, type LawAuthor } from '@/data/authors';
+import { authorNameToSlug } from '@/data/authors';
+import { getMergedAuthors } from '@/lib/authors-server';
 import { getAllArticles } from '@/data/law-content';
 import { resolvePersonImage } from '@/lib/article-art';
 
-export default function AuthorsIndexPage() {
-  const [authors, setAuthors] = useState<LawAuthor[]>(getAllAuthors());
+export default async function AuthorsIndexPage() {
+  const authors = await getMergedAuthors();
   const articles = getAllArticles();
-
-  // Merge CMS-managed contributors over the bundled baseline (CMS wins by slug),
-  // so anyone added in the admin console appears in the directory.
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const r = await fetch('/api/cms/authors');
-        if (!r.ok) return;
-        const j = await r.json();
-        const cms = Array.isArray(j?.data) ? j.data : [];
-        if (cancelled || cms.length === 0) return;
-        const mapped: LawAuthor[] = cms.map((d: Record<string, unknown>) => ({
-          slug: String(d.slug),
-          name: String(d.name),
-          title: (d.title as string) || '',
-          credentials: (d.credentials as string) || '',
-          bio: (d.bio as string) || '',
-          expertise: Array.isArray(d.expertise) ? (d.expertise as string[]) : [],
-          avatarSeed: String(d.slug),
-          avatarUrl: (d.avatarUrl as string) || undefined,
-          social: (d.social as LawAuthor['social']) || undefined,
-        }));
-        const bySlug = new Map<string, LawAuthor>();
-        getAllAuthors().forEach((a) => bySlug.set(a.slug, a));
-        mapped.forEach((a) => bySlug.set(a.slug, a));
-        setAuthors(Array.from(bySlug.values()));
-      } catch {
-        /* keep bundled */
-      }
-    })();
-    return () => { cancelled = true; };
-  }, []);
 
   const countFor = (slug: string) =>
     articles.filter((a) => authorNameToSlug(a.author) === slug).length;
