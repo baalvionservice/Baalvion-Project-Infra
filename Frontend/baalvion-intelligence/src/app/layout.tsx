@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { Providers } from "./providers";
 
 export const viewport: Viewport = {
   themeColor: "#050810",
@@ -119,7 +120,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         >
           Skip to main content
         </a>
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

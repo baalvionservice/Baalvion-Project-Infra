@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getGlobalTopicIndexData } from "@/lib/data/topic-index";
 import { getTermUrl } from "@/lib/data/utils";
 import { HomeSectionHeading } from "./HomeSectionHeading";
+import { GLOSSARY_LIVE } from "@/config/glossary";
 
 /**
  * "Trending Topics" rail — reuses the glossary's real, content-derived
@@ -10,6 +11,10 @@ import { HomeSectionHeading } from "./HomeSectionHeading";
  * hand-picked term list, so this rail and /topics never disagree.
  */
 export async function TrendingTopics() {
+  // Glossary/topics surface is offline pending AdSense approval — see
+  // src/config/glossary.ts. Nothing to link to, so render nothing.
+  if (!GLOSSARY_LIVE) return null;
+
   const { topics, trending_topics } = await getGlobalTopicIndexData();
   if (trending_topics.length === 0) return null;
 

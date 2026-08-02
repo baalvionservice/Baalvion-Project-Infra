@@ -58,11 +58,9 @@ export default function TopNav() {
             <span className="world-kicker font-black text-sm tracking-wide">IMPERIALPEDIA</span>
           </Link>
           <nav className="hidden md:flex items-center gap-1 text-xs text-white/60 font-medium">
-            <a href="/markets" className="hover:text-[hsl(var(--cnbc-red))] transition-colors px-2 py-1">Markets</a>
+            <Link href="/market-news" className="hover:text-[hsl(var(--cnbc-red))] transition-colors px-2 py-1">Markets</Link>
             <span className="text-white/20">|</span>
-            <a href="/personal-finance" className="hover:text-[hsl(var(--cnbc-red))] transition-colors px-2 py-1">Personal Finance</a>
-            <span className="text-white/20">|</span>
-            <a href="/terms" className="hover:text-[hsl(var(--cnbc-red))] transition-colors px-2 py-1">Glossary</a>
+            <Link href="/personal-finance" className="hover:text-[hsl(var(--cnbc-red))] transition-colors px-2 py-1">Personal Finance</Link>
           </nav>
         </div>
         <div className="flex items-center gap-3 text-xs text-white/50">

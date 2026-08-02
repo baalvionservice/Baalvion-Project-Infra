@@ -1,4 +1,5 @@
 import React from 'react';
+import { notFound } from 'next/navigation';
 import { Container } from '@/design-system/layout/container';
 import { Section } from '@/design-system/layout/section';
 import { Text } from '@/design-system/typography/text';
@@ -7,6 +8,7 @@ import { TopicIndexClient } from './TopicIndexClient';
 import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
 import { Grid as GridIcon } from 'lucide-react';
+import { GLOSSARY_LIVE } from '@/config/glossary';
 
 export const metadata: Metadata = buildMetadata({
   canonical: '/topics',
@@ -19,6 +21,8 @@ export const metadata: Metadata = buildMetadata({
  * Orchestrates the discovery of thousands of financial concepts across alphabetical and categorical matrices.
  */
 export default async function GlobalTopicIndexPage() {
+  if (!GLOSSARY_LIVE) notFound();
+
   const data = await getGlobalTopicIndexData();
 
   return (

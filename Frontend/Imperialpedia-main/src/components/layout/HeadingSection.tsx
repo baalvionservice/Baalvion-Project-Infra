@@ -23,7 +23,7 @@ export default function HeadingSection({ eyebrow, title, description }: HeadingP
             <h1 className="text-4xl lg:text-5xl font-bold tracking-wide">
                 {title}
             </h1>
-            <p className="mt-3 text-gray-500 tracking-wide font-light text-base lg:text-lg max-w-5xl mx-auto">
+            <p className="mt-3 text-muted-foreground tracking-wide font-light text-base lg:text-lg max-w-5xl mx-auto">
                 {description}
             </p>
         </div>

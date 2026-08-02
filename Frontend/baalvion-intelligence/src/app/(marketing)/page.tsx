@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Bot, LineChart, Megaphone, Radar, Sparkles } from "lucide-react";
+import { ArrowRight, Bot, LineChart, Megaphone, Plug, Radar, Sparkles } from "lucide-react";
 
 import { Hero } from "@/components/hero";
 import { LiveDemoWidget } from "@/components/live-demo-widget";
@@ -12,6 +12,11 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { trends } from "@/lib/mock-data";
 
 const personas = [
+  {
+    icon: Plug,
+    title: "For AI Agent Builders",
+    description: "Drop our MCP server into Claude or any MCP-compatible agent — no API glue code required.",
+  },
   {
     icon: Bot,
     title: "For AI Startups",
@@ -63,6 +68,16 @@ const alertExample = `Alert me when:
   - Tesla sentiment turns negative
   - AI funding news appears`;
 
+const mcpConfigExample = `{
+  "mcpServers": {
+    "baalvion-intelligence": {
+      "command": "npx",
+      "args": ["-y", "@baalvion/news-mcp-server"],
+      "env": { "BAALVION_API_KEY": "bk_live_..." }
+    }
+  }
+}`;
+
 export default function HomePage() {
   return (
     <>
@@ -82,7 +97,7 @@ export default function HomePage() {
             <span className="eyebrow mx-auto w-fit justify-center">Problems we solve</span>
             <h2>Built for the people who monitor the world for a living</h2>
           </div>
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-5">
             {personas.map((persona) => (
               <Card key={persona.title} className="glow-card">
                 <CardHeader>
@@ -136,6 +151,40 @@ export default function HomePage() {
             <div className="lg:col-span-1">
               <TrendLeaderboard title="Fastest growing topics today" items={trends.slice(0, 5)} />
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-t border-border bg-card/40">
+        <div className="section-container section-y">
+          <div className="grid items-center gap-10 lg:grid-cols-2">
+            <div>
+              <span className="eyebrow w-fit">For AI agents</span>
+              <h2 className="mt-3">Ship it as an MCP server, not a fetch() call</h2>
+              <p className="mt-3 text-muted-foreground">
+                Add Baalvion Intelligence to Claude Desktop, Claude Code, or any MCP-compatible agent in one config
+                block. Your agent gets <code className="rounded bg-background/60 px-1.5 py-0.5 font-mono text-xs">search_news</code>,{" "}
+                <code className="rounded bg-background/60 px-1.5 py-0.5 font-mono text-xs">get_trending</code>, and{" "}
+                <code className="rounded bg-background/60 px-1.5 py-0.5 font-mono text-xs">get_article</code> tools
+                out of the box — no custom API wrapper to write or maintain.
+              </p>
+              <Button className="mt-6" variant="outline" asChild>
+                <Link href="/docs">
+                  View MCP setup docs
+                  <ArrowRight className="h-4 w-4" aria-hidden />
+                </Link>
+              </Button>
+            </div>
+            <Card className="glow-card">
+              <CardHeader>
+                <h3 className="text-base font-semibold text-foreground">claude_desktop_config.json</h3>
+              </CardHeader>
+              <CardContent>
+                <pre className="overflow-x-auto rounded-md border border-border bg-background p-4 font-mono text-xs leading-relaxed text-foreground/90">
+                  <code>{mcpConfigExample}</code>
+                </pre>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>

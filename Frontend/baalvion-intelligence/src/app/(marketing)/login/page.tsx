@@ -3,6 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAuthSDK } from "@baalvion/auth-sdk/react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,9 +15,11 @@ const OAUTH_ERROR_MESSAGE = "Couldn't sign in with that provider. Please try aga
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = useAuthSDK();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (new URLSearchParams(window.location.search).has("oauth_error")) {
@@ -24,18 +27,28 @@ export default function LoginPage() {
     }
   }, []);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!EMAIL_PATTERN.test(email)) {
       setError("Enter a valid email address.");
       return;
     }
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
+    if (password.length < 1) {
+      setError("Enter your password.");
       return;
     }
+
     setError(null);
-    router.push("/dashboard/overview");
+    setIsSubmitting(true);
+    try {
+      await login(email, password);
+      const next = new URLSearchParams(window.location.search).get("next");
+      router.push(next && next.startsWith("/") ? next : "/dashboard/overview");
+    } catch {
+      setError("Incorrect email or password.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -57,7 +70,13 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           <div className="space-y-2">
             <Label htmlFor="login-email">Email</Label>
-            <Input id="login-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <Input
+              id="login-email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="login-password">Password</Label>
@@ -66,11 +85,12 @@ export default function LoginPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
             />
           </div>
           {error && <p className="text-xs text-signal-negative">{error}</p>}
-          <Button type="submit" className="w-full">
-            Sign in
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? "Signing in…" : "Sign in"}
           </Button>
         </form>
 

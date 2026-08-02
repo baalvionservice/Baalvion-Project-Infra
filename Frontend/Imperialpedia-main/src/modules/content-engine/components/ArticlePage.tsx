@@ -145,15 +145,8 @@ export const ArticlePage = ({
 
           {article.citations?.length ? <SourcesCited citations={article.citations} /> : null}
 
-          <div className="mt-16 pt-8 border-t text-center">
-            <Button
-              variant="outline"
-              className="rounded-xl h-12 px-8 font-bold"
-              asChild
-            >
-              <Link href="/terms">Explore Full Glossary</Link>
-            </Button>
-          </div>
+          {/* "Explore Full Glossary" CTA omitted — /terms is offline pending
+              AdSense approval, see src/config/glossary.ts. */}
         </div>
 
         <RelatedArticles

@@ -2,6 +2,7 @@ import { ApiResponse, SearchResult, AdvancedSearchFilters } from '@/types';
 import type { SearchResultType } from '@/types/search';
 import { errorHandler } from '@/lib/errors/error-handler';
 import { sortByRelevance } from '@/lib/utils/search';
+import { GLOSSARY_LIVE } from '@/config/glossary';
 
 /**
  * @fileOverview Global Search — LIVE across imperialpedia-service (entities/creators/assets)
@@ -65,6 +66,9 @@ export const searchService = {
       const out: SearchResult[] = [];
       if (imp.status === 'fulfilled') {
         for (const r of imp.value?.data ?? []) {
+          // Glossary is offline pending AdSense approval (src/config/glossary.ts) —
+          // don't surface search results that would route to a 404'd term page.
+          if (!GLOSSARY_LIVE && r.type === 'term') continue;
           out.push({
             id: `${r.type}-${r.slug}`,
             type: TYPE_MAP[r.type] || 'topic',

@@ -4,6 +4,7 @@ import { Container } from "@/design-system/layout/container";
 import { buildMetadata } from "@/lib/seo";
 import { fetchTermBySlug, fetchTermsByLetter } from "@/lib/data/term-live";
 import type { Term } from "@/lib/data/terms";
+import { GLOSSARY_LIVE } from "@/config/glossary";
 
 // Refresh published listings periodically without freezing them at build time.
 export const revalidate = 300;
@@ -65,6 +66,8 @@ export default async function TermsByLetterPage({
 }: {
   params: Promise<{ letter: string }>;
 }) {
+  if (!GLOSSARY_LIVE) notFound();
+
   const { letter: raw } = await params;
   const letter = raw.toLowerCase();
 

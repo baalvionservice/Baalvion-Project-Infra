@@ -11,6 +11,7 @@ const jwt = require('./config/jwt');
 const redis = require('./config/redis');
 const requestContext = require('./middleware/requestContext');
 const v1Routes = require('./routes/v1');
+const billingController = require('./controllers/billingController');
 const { errorHandler, notFoundHandler } = require('./middleware/errorMiddleware');
 const { startDeliveryWorker, stopDeliveryWorker } = require('./workers/deliveryWorker');
 const { startEventConsumer, stopEventConsumer } = require('./consumers/eventConsumer');
@@ -27,6 +28,10 @@ app.use(helmet());
 // Global IP rate limiter (express-rate-limit, CodeQL-recognized) — generous DoS ceiling.
 app.use(rateLimit({ windowMs: 60_000, max: Number(process.env.IP_RATE_LIMIT_MAX) || 1000, standardHeaders: true, legacyHeaders: false, message: { success: false, error: { code: 'RATE_LIMITED', message: 'Too many requests' } } }));
 app.use(cors({ origin: config.corsOrigins, credentials: true }));
+// Razorpay webhook needs the RAW body for signature verification — registered before
+// express.json() below, which would otherwise consume and parse it first. Public (no
+// authenticate/requireDeveloper): Razorpay calls this directly, authenticated only by signature.
+app.post('/v1/billing/razorpay-webhook', express.raw({ type: 'application/json' }), billingController.handleRazorpayWebhook);
 app.use(express.json({ limit: '2mb' }));
 app.use(requestContext);
 

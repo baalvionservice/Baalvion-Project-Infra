@@ -7,6 +7,7 @@ import { terms } from "@/lib/data/terms";
 import TableOfContents from "./components/TableOfContents";
 import RelatedTerms from "./components/RelatedTerms";
 import { env } from "@/config/env";
+import { GLOSSARY_LIVE } from "@/config/glossary";
 
 export async function generateStaticParams() {
   return terms.map((term) => {
@@ -40,6 +41,8 @@ export default async function Page({
 }: {
   params: Promise<{ letter: string; slug: string }>;
 }) {
+  if (!GLOSSARY_LIVE) notFound();
+
   const { letter, slug } = await params;
   const term = await fetchTermBySlug(slug);
 

@@ -19,8 +19,6 @@ const ALLOW = [
   '/financial-intelligence/',
   '/authors',
   '/authors/',
-  '/terms/',
-  '/topics/',
   '/financial-tools/',
 ];
 
@@ -42,6 +40,16 @@ const DISALLOW = [
   // same topics/slugs (compound-interest, loan, investment, ...), backed by mock
   // data, body is a literal "Coming Soon" placeholder. Was live and indexable.
   '/calculators/',
+  // Glossary/topic-discovery surface offline pending Google AdSense approval —
+  // every route under these prefixes now 404s. Remove once GLOSSARY_LIVE flips
+  // back to true in src/config/glossary.ts.
+  // "/terms$" (not a bare "/terms" prefix) so this doesn't also swallow the
+  // unrelated, still-live "/terms-of-service" page above.
+  '/terms$',
+  '/terms/',
+  '/terms-beginning-with-',
+  '/topics',
+  '/learning-paths',
 ];
 
 // AI crawlers explicitly allowed (same allow/disallow scope as regular search

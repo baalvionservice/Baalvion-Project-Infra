@@ -3,6 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAuthSDK } from "@baalvion/auth-sdk/react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,10 +15,12 @@ const OAUTH_ERROR_MESSAGE = "Couldn't sign up with that provider. Please try aga
 
 export default function SignupPage() {
   const router = useRouter();
+  const { refresh } = useAuthSDK();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (new URLSearchParams(window.location.search).has("oauth_error")) {
@@ -25,7 +28,7 @@ export default function SignupPage() {
     }
   }, []);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (name.trim().length < 2) {
       setError("Enter your full name.");
@@ -35,12 +38,33 @@ export default function SignupPage() {
       setError("Enter a valid email address.");
       return;
     }
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters.");
       return;
     }
+
     setError(null);
-    router.push("/dashboard/overview");
+    setIsSubmitting(true);
+    try {
+      const response = await fetch("/auth-bff/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, fullName: name.trim() }),
+      });
+      const body = await response.json();
+      if (!response.ok || !body.success) {
+        setError(body?.error?.message ?? "Couldn't create your account. Please try again.");
+        return;
+      }
+      await refresh();
+
+      const requestedPlan = new URLSearchParams(window.location.search).get("plan");
+      router.push(requestedPlan ? `/dashboard/billing?plan=${encodeURIComponent(requestedPlan)}` : "/dashboard/overview");
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -62,11 +86,17 @@ export default function SignupPage() {
         <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           <div className="space-y-2">
             <Label htmlFor="signup-name">Full name</Label>
-            <Input id="signup-name" value={name} onChange={(e) => setName(e.target.value)} />
+            <Input id="signup-name" value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="signup-email">Work email</Label>
-            <Input id="signup-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <Input
+              id="signup-email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="signup-password">Password</Label>
@@ -75,11 +105,12 @@ export default function SignupPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              autoComplete="new-password"
             />
           </div>
           {error && <p className="text-xs text-signal-negative">{error}</p>}
-          <Button type="submit" className="w-full">
-            Create account
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? "Creating account…" : "Create account"}
           </Button>
         </form>
 

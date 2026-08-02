@@ -41,6 +41,19 @@ module.exports = {
         secretBytes: Number(process.env.API_KEY_SECRET_BYTES || 24),
     },
 
+    // Self-serve upgrade path: this service creates a Razorpay Order (amount + currency + `notes:
+    // { orgId, planSlug }`) for an authenticated user, the frontend opens Razorpay Checkout with
+    // that order, and on payment.captured/order.paid this service raises the org's API key quota
+    // scope. See services/razorpayBillingService.js. Unset RAZORPAY_KEY_ID/KEY_SECRET means
+    // checkout order creation fails closed (503); unset RAZORPAY_WEBHOOK_SECRET means the webhook
+    // route rejects everything (401) rather than silently no-op'ing on a real charge.
+    razorpay: {
+        keyId:         process.env.RAZORPAY_KEY_ID || '',
+        keySecret:     process.env.RAZORPAY_KEY_SECRET || '',
+        webhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET || '',
+        currency:      process.env.RAZORPAY_CURRENCY || 'USD',
+    },
+
     webhooks: {
         deliveryEnabled: (process.env.WEBHOOK_DELIVERY || 'true') === 'true',
         tickMs:          Number(process.env.WEBHOOK_TICK_MS || 5000),
