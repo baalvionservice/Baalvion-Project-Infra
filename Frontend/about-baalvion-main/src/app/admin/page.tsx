@@ -33,9 +33,10 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const adminToken = localStorage.getItem('admin_token') || '';
         const [pRes, iRes, pgRes, eRes] = await Promise.all([
           fetch('/api/projects'),
-          fetch('/api/inquiry'),
+          fetch('/api/inquiry', { headers: { 'x-admin-key': adminToken } }),
           fetch('/api/pages'),
           fetch('/api/ecosystem')
         ]);

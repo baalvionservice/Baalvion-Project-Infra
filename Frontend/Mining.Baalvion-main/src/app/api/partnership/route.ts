@@ -11,12 +11,11 @@
 
 import { partnershipSchema } from "@/lib/validation/forms";
 import { rateLimit } from "@/lib/rate-limit";
-import { sendEmail } from "@/lib/email";
+import { sendLead } from "@/lib/leadNotify";
 import { serverLogger } from "@/lib/server-logger";
 
 export const runtime = "nodejs";
 
-const PARTNERSHIPS_EMAIL = "partnerships@baalvion.com";
 const RATE_LIMIT = 5;
 const RATE_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
 const GENERIC_ERROR =
@@ -84,23 +83,18 @@ export async function POST(req: Request): Promise<Response> {
     }
 
     // Notify the partnerships desk. Email failure must not fail the submission.
-    const emailResult = await sendEmail({
-      to: PARTNERSHIPS_EMAIL,
-      replyTo: data.email,
-      subject: `New partnership survey: ${data.company}`,
-      text: [
-        `Name: ${data.name}`,
-        `Company: ${data.company}`,
-        `Email: ${data.email}`,
-        `Phone: ${data.phone}`,
-        `Material: ${data.material}`,
-        `Monthly volume: ${data.volume}`,
-        `Supply type: ${data.supply_type ?? "n/a"}`,
-        `Budget: ${data.budget ?? "n/a"}`,
-        `Challenges: ${data.challenges.join(", ")}`,
-        `Source: ${data.source ?? "unknown"}`,
-      ].join("\n"),
-    });
+    const emailResult = await sendLead("mining-partnership", [
+      { k: "Name", v: data.name },
+      { k: "Company", v: data.company },
+      { k: "Email", v: data.email },
+      { k: "Phone", v: data.phone },
+      { k: "Material", v: data.material },
+      { k: "Monthly volume", v: data.volume },
+      { k: "Supply type", v: data.supply_type ?? "n/a" },
+      { k: "Budget", v: data.budget ?? "n/a" },
+      { k: "Challenges", v: data.challenges.join(", ") },
+      { k: "Source", v: data.source ?? "unknown" },
+    ]);
 
     // Redacted summary only — no PII beyond what's needed for triage metrics.
     serverLogger.info("partnership.submission_received", {
@@ -110,7 +104,6 @@ export async function POST(req: Request): Promise<Response> {
       emailDomain: data.email.split("@")[1] ?? "unknown",
       source: data.source ?? "unknown",
       emailDelivered: emailResult.success,
-      emailProvider: emailResult.provider,
     });
 
     return Response.json({

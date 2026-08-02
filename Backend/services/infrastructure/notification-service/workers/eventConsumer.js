@@ -36,15 +36,45 @@ async function dispatch(eventType, payload, meta = {}) {
 
     switch (eventType) {
         // Auth events → emails
-        case 'auth.registered':
+        case 'auth.registered': {
+            // brand comes from the signup site (see auth-service's resolveBrand()); falls back
+            // to the flagship 'baalvion' theme when the signup path can't determine one (e.g.
+            // OAuth callbacks, which don't carry an Origin header). Email verification is a
+            // SEPARATE event/template (auth.email_verification_requested below) — the welcome
+            // email itself doesn't need a verify link.
+            const lifecycleData = { fullName: payload.fullName || null, brand: payload.brand || 'baalvion' };
             await emailQueue.add('welcome', {
                 to:            payload.email,
                 templateName:  'welcome',
                 idempotencyKey: `welcome:${payload.userId}`,
-                data: {
-                    name:      payload.fullName || 'there',
-                    verifyUrl: `${config.appUrl}/verify-email?token=${payload.verifyToken}`,
-                },
+                data: lifecycleData,
+            });
+            // Onboarding sequence — delayed sends off the SAME signup event, deduped by
+            // idempotencyKey exactly like the immediate welcome send (BullMQ jobId dedup).
+            const DAY_MS = 24 * 60 * 60 * 1000;
+            await emailQueue.add('onboarding-day1', {
+                to: payload.email, templateName: 'onboardingDay1',
+                idempotencyKey: `onboarding-day1:${payload.userId}`, data: lifecycleData,
+            }, { delay: 1 * DAY_MS });
+            await emailQueue.add('onboarding-day3', {
+                to: payload.email, templateName: 'onboardingDay3',
+                idempotencyKey: `onboarding-day3:${payload.userId}`, data: lifecycleData,
+            }, { delay: 3 * DAY_MS });
+            await emailQueue.add('onboarding-day7', {
+                to: payload.email, templateName: 'onboardingDay7',
+                idempotencyKey: `onboarding-day7:${payload.userId}`, data: lifecycleData,
+            }, { delay: 7 * DAY_MS });
+            break;
+        }
+
+        // Published by auth-service's jobs/reengagementCron.js (periodic inactivity scan) —
+        // one event per eligible user, already deduped there via reengagement_sent_at.
+        case 'user.reengagement_due':
+            await emailQueue.add('reengagement', {
+                to:            payload.email,
+                templateName:  'reengagement',
+                idempotencyKey: `reengagement:${payload.userId}:${new Date().toISOString().slice(0, 10)}`,
+                data: { fullName: payload.fullName || null, brand: payload.brand || 'baalvion' },
             });
             break;
 

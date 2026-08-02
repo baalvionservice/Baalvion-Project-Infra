@@ -60,8 +60,16 @@ module.exports = {
             process.env.PUBLIC_APP_URL ||
             process.env.APP_URL ||
             'http://localhost:8080',
-        // Where the post-login redirect lands (the SPA /auth/sso-callback route).
-        appUrl: process.env.APP_URL || process.env.PUBLIC_APP_URL || 'http://localhost:8080',
+        // Where the post-login redirect lands (the SPA /auth/sso-callback route). Same
+        // priority as publicBaseUrl (must be the SAME origin the browser round-tripped
+        // through) — deliberately checked BEFORE the shared/global APP_URL, because in the
+        // consolidated deploy proxy-service shares one .env with unrelated sites whose
+        // APP_URL points elsewhere. Set OAUTH_PUBLIC_BASE_URL to pin this regardless of that.
+        appUrl:
+            process.env.OAUTH_PUBLIC_BASE_URL ||
+            process.env.APP_URL ||
+            process.env.PUBLIC_APP_URL ||
+            'http://localhost:8080',
         // How long the start→callback transaction cookie (state nonce + PKCE verifier) lives.
         stateTtlMs: Number(process.env.OAUTH_STATE_TTL_MS || 10 * 60 * 1000),
         google: {
