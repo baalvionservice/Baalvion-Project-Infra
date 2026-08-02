@@ -13,10 +13,12 @@
 	email ops@baalvion.com
 }
 
-# ── Central auth surface → identity app (auth-gateway) ──
+# ── Central auth surface → shared sign-in frontend (auth-baalvion). Its own
+# /auth-bff/* rewrite proxies to auth-service internally — this domain never talked
+# to the auth-gateway BFF as a UI, that was a stopgap before auth-baalvion existed. ──
 auth.baalvion.com {
 	encode gzip zstd
-	reverse_proxy app-identity:3026
+	reverse_proxy app-auth-web:3055
 }
 
 # ── auth-service direct surface (consumer social login: Google/Facebook/Discord) ──
@@ -64,6 +66,16 @@ api.baalvion.com {
 	@cms_collect path /api/v1/collect /api/v1/collect.js /api/v1/analytics/openapi.json
 	handle @cms_collect {
 		reverse_proxy app-platform:3018
+	}
+
+	# Public lead-capture (UNAUTHENTICATED) — separately-deployed Vercel frontends (Mining,
+	# about-baalvion, Imperialpedia, …) have no shared secret with the backend network, so their
+	# contact-form API routes call this instead of the internalAuth-gated /v1/notifications/*.
+	# notification-service validates against a hardcoded site->recipient allowlist (never a
+	# caller-supplied address) and rate-limits per IP — see controller/publicController.js.
+	@lead_public path /v1/public/lead
+	handle @lead_public {
+		reverse_proxy app-edge-realtime:3031
 	}
 
 	# Payment public surface (Java PSP gateway, app-payments:3015 — runs under --profile payments):

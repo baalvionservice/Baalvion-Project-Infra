@@ -75,13 +75,13 @@ export const Navbar = ({ isMarketplace: _isMarketplace }: { isMarketplace?: bool
           ))}
           {isAuthenticated && (
             <Link
-              href="/invoices"
+              href="/dashboard"
               className={cn(
                 "relative px-4 py-2 text-[12px] font-bold uppercase tracking-widest transition-colors min-h-[44px] flex items-center rounded-md hover:bg-white/5",
-                pathname === '/invoices' ? "text-brand-green bg-brand-green/5" : "text-text-muted hover:text-white"
+                pathname === '/dashboard' ? "text-brand-green bg-brand-green/5" : "text-text-muted hover:text-white"
               )}
             >
-              My Orders
+              Dashboard
             </Link>
           )}
         </div>
@@ -212,14 +212,14 @@ export const Navbar = ({ isMarketplace: _isMarketplace }: { isMarketplace?: bool
                 ))}
                 {isAuthenticated && (
                   <Link
-                    href="/invoices"
+                    href="/dashboard"
                     onClick={() => setIsMobileOpen(false)}
                     className={cn(
                       "text-2xl font-bold uppercase italic py-4 border-b border-white/5 flex items-center justify-between group",
-                      pathname === '/invoices' ? "text-brand-green" : "text-white"
+                      pathname === '/dashboard' ? "text-brand-green" : "text-white"
                     )}
                   >
-                    My Orders
+                    Dashboard
                     <ArrowRight className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </Link>
                 )}
