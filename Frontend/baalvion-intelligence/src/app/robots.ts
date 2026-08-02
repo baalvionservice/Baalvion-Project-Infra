@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: ["/dashboard/"],
     },
-    sitemap: "https://signals.baalvion.com/sitemap.xml",
+    sitemap: "https://signal.baalvion.com/sitemap.xml",
   };
 }

@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const baseUrl = "https://signals.baalvion.com";
+const baseUrl = "https://signal.baalvion.com";
 
 const routes = [
   "",
@@ -8,12 +8,15 @@ const routes = [
   "/docs",
   "/docs/getting-started",
   "/docs/authentication",
+  "/docs/mcp-server",
   "/blog",
   "/company/about",
   "/company/contact",
   "/company/careers",
   "/legal/privacy",
   "/legal/terms",
+  "/legal/refund-policy",
+  "/legal/shipping-policy",
   "/login",
   "/signup",
 ];

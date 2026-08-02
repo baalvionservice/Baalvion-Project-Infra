@@ -31,6 +31,10 @@ export default function AboutPage() {
           Baalvion Intelligence turns 15M+ articles a day from 50,000+ sources into structured,
           queryable intelligence — built for developers, analysts, and the AI agents they ship.
         </p>
+        <p className="mt-3 text-sm text-muted-foreground">
+          We serve customers worldwide, from solo developers to enterprise teams, with plans billed
+          in USD via Razorpay.
+        </p>
       </div>
 
       <div className="mt-14 grid gap-5 md:grid-cols-3">
