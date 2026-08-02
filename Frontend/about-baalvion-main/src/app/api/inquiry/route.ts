@@ -4,14 +4,18 @@ import { z } from 'zod';
 import { db } from '@/lib/db';
 import { rateLimit } from '@/lib/rate-limit';
 import { sendLead } from '@/lib/leadNotify';
-import { env } from '@/lib/env';
 
 // Was a hardcoded literal ("secure-admin-key") checked into source — anyone with repo read
 // access had full delete/update rights over every inquiry, and GET returned every inquiry's
 // name/email/message with NO auth at all. Now checked against ADMIN_SECRET_KEY (the same
-// server secret lib/env.ts already validates and requires at boot in production — not a new
-// var to configure), fails CLOSED when unset rather than falling back to a guessable default.
-const ADMIN_KEY = env.server.adminSecretKey;
+// server secret lib/env.ts validates and requires at runtime boot in production — not a new
+// var to configure), fails CLOSED when unset. Read directly via process.env rather than
+// importing lib/env's `env` object: that module's validateEnv() throws on import whenever
+// ADMIN_SECRET_KEY is absent from the CURRENT process (including Next's build-time page-data
+// collection step, which may run in an environment without production secrets) — importing
+// it here made `next build` hard-fail in CI even though this route only needs the value at
+// request time, when Vercel's runtime env is what's actually in scope.
+const ADMIN_KEY = process.env.ADMIN_SECRET_KEY;
 
 function isAuthorized(req: Request): boolean {
   if (!ADMIN_KEY) return false;
