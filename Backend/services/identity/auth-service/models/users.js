@@ -31,6 +31,10 @@ module.exports = function (sequelize, DataTypes) {
         // See migration 011_oauth_identity.sql + service/oauthLogin.js.
         oauth_provider:    { type: DataTypes.STRING(32), allowNull: true, defaultValue: null },
         oauth_provider_id: { type: DataTypes.TEXT, allowNull: true, defaultValue: null },
+        // Lifecycle-email theming/dedup — see migration 016_lifecycle_reengagement.sql and
+        // jobs/reengagementCron.js.
+        signup_brand:         { type: DataTypes.STRING(50), allowNull: true, defaultValue: null },
+        reengagement_sent_at: { type: DataTypes.DATE, allowNull: true, defaultValue: null },
     }, {
         sequelize,
         tableName: 'users',

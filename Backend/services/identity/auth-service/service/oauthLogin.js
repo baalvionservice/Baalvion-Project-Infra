@@ -144,7 +144,7 @@ async function loginWithProfile(profile, { ipAddress, userAgent, brand } = {}) {
   // 3 — new user → create (passwordless) + provision org + owner membership (mirrors register)
   if (!user) {
     const randomHash = await password.hash('oauth:' + crypto.randomBytes(24).toString('hex'));
-    user = await userRepo.create({ email: normEmail, passwordHash: randomHash, fullName: profile.fullName });
+    user = await userRepo.create({ email: normEmail, passwordHash: randomHash, fullName: profile.fullName, brand });
     await db.User.update(
       { oauth_provider: profile.provider, oauth_provider_id: profile.providerUserId, avatar_url: profile.avatarUrl || null, email_verified_at: new Date() },
       { where: { id: user.id } },

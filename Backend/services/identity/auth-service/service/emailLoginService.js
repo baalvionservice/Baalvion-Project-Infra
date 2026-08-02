@@ -226,7 +226,7 @@ async function loginForEmail(normEmail, { firstName, lastName, ipAddress, userAg
     if (!user) {
         // Passwordless account — an unusable 'otp:'+random hash so password login can never match.
         const placeholderHash = await passwordUtil.hash('otp:' + crypto.randomBytes(24).toString('hex'));
-        user = await userRepo.create({ email: normEmail, passwordHash: placeholderHash, firstName, lastName });
+        user = await userRepo.create({ email: normEmail, passwordHash: placeholderHash, firstName, lastName, brand });
         await db.User.update({ email_verified_at: new Date() }, { where: { id: user.id } });
         const workspaceLabel = firstName ? `${firstName}'s Workspace` : `${normEmail.split('@')[0]}'s Workspace`;
         const org = await orgRepo.create({ name: workspaceLabel, ownerId: user.id, type: 'buyer' });
