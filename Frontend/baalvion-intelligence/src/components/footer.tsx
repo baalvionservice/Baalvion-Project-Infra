@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Radar } from "lucide-react";
 
+import { legalEntity } from "@/lib/legal-entity";
+
 const columns = [
   {
     title: "Products",
@@ -72,11 +74,22 @@ export function Footer() {
         ))}
       </div>
       <div className="border-t border-border py-6">
-        <div className="section-container flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
-          <p>© {new Date().getFullYear()} Baalvion Intelligence. All rights reserved.</p>
-          <a href="mailto:support@baalvion.com" className="hover:text-foreground">
-            support@baalvion.com
-          </a>
+        <div className="section-container space-y-2">
+          <p className="text-xs text-muted-foreground">
+            {legalEntity.name} &middot; CIN: {legalEntity.cin} &middot; Registered Office:{" "}
+            {legalEntity.registeredOffice}
+          </p>
+          <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+            <p>© {new Date().getFullYear()} {legalEntity.name}. All rights reserved.</p>
+            <div className="flex items-center gap-4">
+              <a href={`tel:${legalEntity.phone.replace(/\s+/g, "")}`} className="hover:text-foreground">
+                {legalEntity.phone}
+              </a>
+              <a href={`mailto:${legalEntity.supportEmail}`} className="hover:text-foreground">
+                {legalEntity.supportEmail}
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </footer>
