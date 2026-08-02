@@ -67,6 +67,17 @@ async function dispatch(eventType, payload, meta = {}) {
             break;
         }
 
+        // Published by auth-service's jobs/reengagementCron.js (periodic inactivity scan) —
+        // one event per eligible user, already deduped there via reengagement_sent_at.
+        case 'user.reengagement_due':
+            await emailQueue.add('reengagement', {
+                to:            payload.email,
+                templateName:  'reengagement',
+                idempotencyKey: `reengagement:${payload.userId}:${new Date().toISOString().slice(0, 10)}`,
+                data: { fullName: payload.fullName || null, brand: payload.brand || 'baalvion' },
+            });
+            break;
+
         case 'auth.email_verification_requested':
             await emailQueue.add('email-verify', {
                 to:            payload.email,

@@ -10,7 +10,7 @@ class UserRepository {
         return db.User.findByPk(id);
     }
 
-    async create({ email, passwordHash, fullName, firstName, lastName }) {
+    async create({ email, passwordHash, fullName, firstName, lastName, brand }) {
         const first = firstName ? String(firstName).trim() : null;
         const last  = lastName  ? String(lastName).trim()  : null;
         // full_name stays the canonical display value (every downstream presenter reads it). When
@@ -23,6 +23,9 @@ class UserRepository {
             first_name:    first,
             last_name:     last,
             status:        'active',
+            // Which site this account signed up on — themes later lifecycle emails
+            // (re-engagement). See utils/brandFromOrigin.js at the call sites.
+            signup_brand:  brand || null,
         });
     }
 
@@ -100,6 +103,35 @@ class UserRepository {
 
     async setMfaRequired(userId, required) {
         return db.User.update({ mfa_required: !!required }, { where: { id: userId } });
+    }
+
+    /**
+     * Users eligible for a re-engagement email: active, verified, no sign-in since
+     * `inactiveSinceDays`, and either never sent one or not sent one within `cooldownDays`.
+     * Ordered by staleness (most inactive first) so a capped `limit` still reaches the users
+     * who've been gone longest, run over run.
+     */
+    async findInactiveForReengagement({ inactiveSinceDays, cooldownDays, limit }) {
+        const { Op } = require('sequelize');
+        const inactiveCutoff = new Date(Date.now() - inactiveSinceDays * 24 * 60 * 60 * 1000);
+        const cooldownCutoff = new Date(Date.now() - cooldownDays * 24 * 60 * 60 * 1000);
+        return db.User.findAll({
+            where: {
+                status: 'active',
+                email_verified_at: { [Op.ne]: null },
+                last_login_at: { [Op.ne]: null, [Op.lt]: inactiveCutoff },
+                [Op.or]: [
+                    { reengagement_sent_at: null },
+                    { reengagement_sent_at: { [Op.lt]: cooldownCutoff } },
+                ],
+            },
+            order: [['last_login_at', 'ASC']],
+            limit,
+        });
+    }
+
+    async markReengagementSent(userId) {
+        return db.User.update({ reengagement_sent_at: new Date() }, { where: { id: userId } });
     }
 }
 

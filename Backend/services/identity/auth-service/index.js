@@ -17,6 +17,7 @@ const { errorHandler, notFoundHandler } = require('./middleware/errorMiddleware'
 const { auditMiddleware } = require('./services/auditService');
 const db             = require('./models');
 const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-shutdown');
+const { startReengagementCron } = require('./jobs/reengagementCron');
 
 const app    = express();
 const server = http.createServer(app);
@@ -73,7 +74,12 @@ const start = async () => {
         console.log(`[Auth] Service running on port ${config.port} (RS256 + Redis=${redis.isAvailable()})`)
     );
 
-    // 4 — Graceful shutdown (drains HTTP, then runs cleanup handlers in parallel)
+    // 4 — Re-engagement cron (finds inactive users, publishes one event per user to the
+    // event bus; notification-service sends the actual email — see jobs/reengagementCron.js)
+    const reengagementCron = startReengagementCron();
+
+    // 5 — Graceful shutdown (drains HTTP, then runs cleanup handlers in parallel)
+    registerShutdown('reengagement-cron', async () => reengagementCron.stop());
     registerShutdown('redis', async () => {
         const r = require('./config/redis');
         const c = (r.getClient && r.getClient()) || r.client || (typeof r.quit === 'function' ? r : null);

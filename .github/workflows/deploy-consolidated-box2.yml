@@ -479,6 +479,36 @@ jobs:
               psql "postgresql://${DB_USER}@${DB_HOST}:${DB_PORT}/${DB_NAME}" -v ON_ERROR_STOP=1 -f /tmp/014.sql
             echo "::notice title=Migration applied::auth.oauth_clients/oauth_authorization_codes/oauth_refresh_tokens/api_keys are current."
 
+      - name: Apply auth-service lifecycle/re-engagement columns migration (idempotent)
+        if: steps.gate.outputs.ready == 'true'
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.CORE2_EC2_HOST }}
+          username: ${{ secrets.CORE2_EC2_USER }}
+          key: ${{ secrets.CORE2_EC2_SSH_KEY }}
+          # 016_lifecycle_reengagement.sql: adds auth.users.signup_brand + reengagement_sent_at
+          # (additive nullable columns + an index) for jobs/reengagementCron.js, which starts
+          # querying these at boot the moment this image rolls -- must land before the roll,
+          # same reasoning/pattern as the 014 migration step above.
+          script: |
+            set -euo pipefail
+            cd /opt/baalvion-box2
+            git fetch --all --prune
+            git checkout main
+            git pull --ff-only
+            ENV=deploy/consolidated/.env
+            DB_HOST="$(grep -E '^DB_HOST=' "$ENV" | head -1 | cut -d= -f2- | tr -d '\r')"
+            DB_PORT="$(grep -E '^DB_PORT=' "$ENV" | head -1 | cut -d= -f2- | tr -d '\r')"
+            DB_NAME="$(grep -E '^DB_NAME=' "$ENV" | head -1 | cut -d= -f2- | tr -d '\r')"
+            DB_USER="$(grep -E '^DB_USER=' "$ENV" | head -1 | cut -d= -f2- | tr -d '\r')"
+            DB_PASSWORD="$(grep -E '^DB_PASSWORD=' "$ENV" | head -1 | cut -d= -f2- | tr -d '\r')"
+            docker run --rm -i \
+              -e PGSSLMODE=require -e PGPASSWORD="$DB_PASSWORD" \
+              -v "$(pwd)/Backend/services/identity/auth-service/migrations/016_lifecycle_reengagement.sql:/tmp/016.sql:ro" \
+              postgres:16-alpine \
+              psql "postgresql://${DB_USER}@${DB_HOST}:${DB_PORT}/${DB_NAME}" -v ON_ERROR_STOP=1 -f /tmp/016.sql
+            echo "::notice title=Migration applied::auth.users.signup_brand/reengagement_sent_at are current."
+
       - name: Pull + roll on box2
         if: steps.gate.outputs.ready == 'true'
         uses: appleboy/ssh-action@v1
