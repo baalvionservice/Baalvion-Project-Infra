@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { articlesPublicApi } from '@/lib/api/client';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { ArticleCard } from '@/components/knowledge/ArticleCard';
 import SearchBar from '@/components/search/SearchBar';
@@ -25,44 +24,18 @@ export default function SearchResultsPage() {
 function SearchContent() {
   const searchParams = useSearchParams();
   const rawQuery = searchParams.get('q') || "";
-  const [articles, setArticles] = useState<any[]>([]);
+  const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!rawQuery) { setArticles([]); return; }
+    if (!rawQuery) { setResults([]); return; }
     setLoading(true);
-    articlesPublicApi.list({ search: rawQuery, limit: 100, status: 'published' })
-      .then(res => setArticles(res.data?.data?.items || res.data?.data || []))
-      .catch(() => setArticles([]))
+    fetch(`/api/search?q=${encodeURIComponent(rawQuery)}&limit=100`)
+      .then(res => res.json())
+      .then(json => setResults(json?.data?.items || []))
+      .catch(() => setResults([]))
       .finally(() => setLoading(false));
   }, [rawQuery]);
-
-  const results = useMemo(() => {
-    if (!articles.length || !rawQuery) return [];
-    const q = rawQuery.toLowerCase();
-
-    return articles
-      .map(art => {
-        let score = 0;
-        const title = (art.title || '').toLowerCase();
-        const summary = (art.excerpt || art.summary || "").toLowerCase();
-        const keywords = (art.tags || art.keywords || []).map((k: string) => k.toLowerCase());
-
-        if (title === q) score += 100;
-        else if (title.startsWith(q)) score += 80;
-        else if (title.includes(q)) score += 60;
-
-        if (keywords.includes(q)) score += 40;
-        else if (keywords.some((k: string) => k.includes(q))) score += 20;
-
-        if (summary.includes(q)) score += 10;
-        score += (art.views || 0) / 1000;
-
-        return { ...art, score };
-      })
-      .filter(art => art.score > 0)
-      .sort((a, b) => b.score - a.score);
-  }, [articles, rawQuery]);
 
   return (
     <div className="min-h-screen bg-white">
