@@ -1,3 +1,5 @@
+import type { PaidPlanSlug } from "./plan-quota";
+
 export interface Plan {
   name: string;
   price: string;
@@ -6,6 +8,8 @@ export interface Plan {
   features: string[];
   highlighted?: boolean;
   cta: string;
+  /** Present only for paid, self-serve plans — maps to a Stripe Payment Link (see payment-links.ts). */
+  slug?: PaidPlanSlug;
 }
 
 export const plans: Plan[] = [
@@ -30,6 +34,7 @@ export const plans: Plan[] = [
       "30-day history",
     ],
     cta: "Start Starter",
+    slug: "starter",
   },
   {
     name: "Growth",
@@ -45,6 +50,7 @@ export const plans: Plan[] = [
     ],
     highlighted: true,
     cta: "Start Growth",
+    slug: "growth",
   },
   {
     name: "Pro",
@@ -59,6 +65,7 @@ export const plans: Plan[] = [
       "1-year history",
     ],
     cta: "Start Pro",
+    slug: "pro",
   },
   {
     name: "Enterprise",

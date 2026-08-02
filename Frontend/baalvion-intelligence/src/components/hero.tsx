@@ -31,7 +31,7 @@ export function Hero() {
           <p className="mx-auto max-w-2xl text-lg">
             Monitor companies, industries, competitors, and world events across millions of news
             articles. Get AI summaries, sentiment, trends, and real-time alerts through one simple
-            API.
+            API — or plug it straight into Claude and other AI agents with our MCP server.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Button size="lg" asChild>

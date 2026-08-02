@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description: "How to authenticate requests to the Baalvion Intelligence News API with bearer tokens.",
 };
 
-const authHeaderExample = `Authorization: Bearer bvi_live_51H8x2K...`;
+const authHeaderExample = `Authorization: Bearer bk_live_51H8x2K...`;
 
 export default function AuthenticationPage() {
   return (

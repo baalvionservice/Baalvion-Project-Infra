@@ -17,6 +17,8 @@
   "routes": [{ "pattern": "signal.baalvion.com", "custom_domain": true }],
   "vars": {
     "NEWS_SERVICE_URL": "https://news.baalvion.com",
+    "AUTH_SERVICE_URL": "https://auth-api.baalvion.com",
+    "DEVELOPER_SERVICE_URL": "https://developer-api.baalvion.com",
     "NEXT_PRIVATE_MINIMAL_MODE": "1"
   }
 }

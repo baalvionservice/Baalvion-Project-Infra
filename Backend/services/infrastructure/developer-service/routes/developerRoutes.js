@@ -4,6 +4,7 @@ const rateLimit = require('express-rate-limit');
 const keys = require('../controllers/keyController');
 const hooks = require('../controllers/webhookController');
 const catalog = require('../controllers/catalogController');
+const billing = require('../controllers/billingController');
 const asyncHandler = require('../utils/asyncHandler');
 const { internalOrUser, requireInternal } = require('../middleware/authMiddleware');
 const { requireDeveloper } = require('../middleware/guards');
@@ -31,6 +32,9 @@ const dispatchRateLimit = rateLimit({
 // ── internal hot-path (gateway → key verify): strictly service principal ──
 router.post('/keys/verify', requireInternal, asyncHandler(keys.verify));
 
+// ── public: launch-offer banner state (no auth — read-only, no secrets) ──
+router.get('/billing/launch-offer', asyncHandler(billing.getLaunchOfferStatus));
+
 // ── everything below requires a developer role (or X-Internal-Key) ──
 router.use(internalOrUser, requireDeveloper);
 
@@ -41,6 +45,9 @@ router.get('/keys/:id',         asyncHandler(keys.get));
 router.post('/keys/:id/rotate', asyncHandler(keys.rotate));
 router.post('/keys/:id/revoke', asyncHandler(keys.revoke));
 router.patch('/keys/:id/scopes', asyncHandler(keys.updateScopes));
+
+// Self-serve billing (baalvion-intelligence): create a Razorpay order for the caller's own org.
+router.post('/billing/checkout/:plan', asyncHandler(billing.createCheckoutOrder));
 
 // Webhook endpoints
 router.post('/webhooks',                  asyncHandler(hooks.create));

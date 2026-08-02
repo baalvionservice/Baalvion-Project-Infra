@@ -44,3 +44,24 @@ export interface TrendingResponse {
   windowHours: number;
   items: TrendingItem[];
 }
+
+// Mirrors developer-service's apiKeyService.publicView() row shape
+// (Backend/services/infrastructure/developer-service/services/apiKeyService.js).
+export interface ApiKeyRecord {
+  id: string;
+  org_id: string | null;
+  name: string;
+  mode: "live" | "test";
+  key_prefix: string;
+  last4: string;
+  scopes: string[];
+  status: "active" | "revoked";
+  expires_at: string | null;
+  rate_limit_per_min: number;
+  created_at: string;
+  rotated_at: string | null;
+  revoked_at: string | null;
+  last_used_at: string | null;
+  /** Present only in the response body immediately after issue/rotate — shown once. */
+  key?: string;
+}

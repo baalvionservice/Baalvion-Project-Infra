@@ -11,11 +11,14 @@ async function proxy(request: NextRequest, path: string[]) {
   const target = new URL(`${AUTH_SERVICE_URL}/v1/auth/${path.join("/")}`);
   target.search = request.nextUrl.search;
 
+  const authorization = request.headers.get("authorization");
+
   const upstream = await fetch(target, {
     method: request.method,
     headers: {
       cookie: request.headers.get("cookie") ?? "",
       "content-type": request.headers.get("content-type") ?? "application/json",
+      ...(authorization ? { authorization } : {}),
     },
     body: ["GET", "HEAD"].includes(request.method) ? undefined : await request.text(),
     redirect: "manual",

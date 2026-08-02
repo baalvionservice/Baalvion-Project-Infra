@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description: "Make your first request to the Baalvion Intelligence News API in under five minutes.",
 };
 
-const requestExample = `curl https://api.baalvion.com/v1/news?entity=OpenAI \\
+const requestExample = `curl https://news.baalvion.com/v1/news?entity=OpenAI \\
   -H "Authorization: Bearer YOUR_API_KEY"`;
 
 const responseExample = `{

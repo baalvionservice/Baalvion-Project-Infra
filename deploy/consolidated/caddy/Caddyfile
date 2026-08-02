@@ -354,3 +354,13 @@ news.baalvion.com {
 	encode gzip zstd
 	reverse_proxy app-platform:3045
 }
+
+# ── Developer key management + billing checkout/webhook → developer-service. Called server-side
+# by the baalvion-intelligence Cloudflare Worker (/api/keys/*, /api/billing/* route handlers
+# forward the signed-in user's own RS256 access token; developer-service verifies it directly —
+# no BFF gating needed) and by Razorpay (/v1/billing/razorpay-webhook, authenticated by
+# X-Razorpay-Signature, not a session).
+developer-api.baalvion.com {
+	encode gzip zstd
+	reverse_proxy app-platform:3042
+}
