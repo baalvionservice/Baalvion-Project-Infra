@@ -114,7 +114,7 @@ jobs:
           ssh -i ~/.ssh/box2_key "${{ secrets.CORE2_EC2_USER }}@${{ secrets.CORE2_EC2_HOST }}" "rm -f /tmp/diag_token.txt" || true
 
       - name: Upload token as artifact (not subject to log masking)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: diag-token
           path: diag_token.txt
