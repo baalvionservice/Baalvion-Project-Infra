@@ -59,8 +59,11 @@ export async function fetchRelatedArticles(
         slug: a.slug,
         featuredImage: (a as any).featuredImage || undefined,
       }));
+    // Bundled entries are static filler with no featuredImage -- when a slug
+    // exists in both sources the CMS version (real data, incl. admin-set
+    // photos) must win. Same precedence as CategoryContent.tsx / search route.ts.
     const bySlug = new Map<string, RelatedArticle>();
-    for (const a of [...cmsArticles, ...bundled]) bySlug.set(a.slug, a);
+    for (const a of [...bundled, ...cmsArticles]) bySlug.set(a.slug, a);
     return Array.from(bySlug.values()).slice(0, 4);
   } catch {
     return bundled.slice(0, 4);
