@@ -146,3 +146,6 @@ error-report.txt
 # security-alert exports (regenerable; never commit alert data)
 _codeql_alerts.json
 _dependabot_alerts.json
+
+.vercel
+.env*.local
