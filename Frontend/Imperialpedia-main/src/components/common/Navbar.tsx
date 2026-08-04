@@ -47,7 +47,6 @@ const NAV: NavCategory[] = [
     links: [
       { label: "Market News", href: "/market-news" },
       { label: "Live Market News", href: "/live-market-news" },
-      { label: "Company News", href: "/company-news" },
       { label: "Earnings", href: "/earnings" },
       { label: "Crypto", href: "/crypto" },
       { label: "Economic Calendar", href: "/calendar" },
@@ -108,12 +107,7 @@ const NAV: NavCategory[] = [
     label: "Reviews",
     href: "/reviews",
     links: [
-      { label: "Broker Reviews", href: "/broker-reviews" },
-      { label: "Bank Reviews", href: "/bank-reviews" },
-      { label: "Credit Card Reviews", href: "/credit-card-reviews" },
       { label: "Loan Reviews", href: "/loan-reviews" },
-      { label: "Insurance Reviews", href: "/insurance-reviews" },
-      { label: "Robo-Advisors", href: "/robo-advisors" },
       { label: "App Reviews", href: "/app-reviews" },
       { label: "Tax Software", href: "/tax-software" },
     ],
