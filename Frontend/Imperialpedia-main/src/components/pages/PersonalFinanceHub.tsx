@@ -70,10 +70,7 @@ const CALCULATORS = [
 /** Evergreen explainer pages that exist today, kept out of the news feed entirely. */
 const MONEY_GUIDES = [
   { href: "/emergency-fund", label: "Building an Emergency Fund" },
-  { href: "/wealth-building", label: "Wealth-Building Strategies" },
   { href: "/budget-rules", label: "Budget Rules Compared" },
-  { href: "/debt-repayment-strategies", label: "Debt Repayment Strategies" },
-  { href: "/estate-planning", label: "Estate Planning Basics" },
 ];
 
 const EXPLORE_MORE = [
