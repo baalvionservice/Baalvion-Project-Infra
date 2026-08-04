@@ -212,8 +212,13 @@ const nextConfig: NextConfig = {
               // api.baalvion.com is the cms-service tracker UnifiedAnalytics.tsx injects
               // (`/api/v1/collect.js`) — without it in script-src(-elem) the browser blocks
               // the tag and first-party analytics silently never fires.
-              `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://adservice.google.com https://api.baalvion.com`,
-              "script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://adservice.google.com https://api.baalvion.com",
+              // *.adtrafficquality.google serves sodar2.js, the ad-traffic-quality/fraud-check
+              // script AdSense's own show_ads_impl.js loads directly (a <script> tag, not just
+              // a fetch/XHR ping) — it was only allow-listed under connect-src, so the script
+              // load itself was still blocked and threw an uncaught error in AdSense's code on
+              // every page load. Confirmed live via a headless-browser console-error sweep.
+              `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://adservice.google.com https://api.baalvion.com https://*.adtrafficquality.google`,
+              "script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://adservice.google.com https://api.baalvion.com https://*.adtrafficquality.google",
               "style-src 'self' 'unsafe-inline'",
               // 'self' + data: (inline generated SVG artwork) + imperialpedia.com +
               // api.baalvion.com (cms-service-hosted generated artwork) are the only

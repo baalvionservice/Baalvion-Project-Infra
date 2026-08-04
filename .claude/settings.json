@@ -172,7 +172,41 @@
       "Bash(xargs grep -l \"payments/checkout\\\\|/payments/provider\")",
       "Bash(curl -s https://signal.baalvion.com/ --max-time 15)",
       "Bash(curl -s --compressed https://signal.baalvion.com/company/contact --max-time 15 -o /tmp/contact.html)",
-      "Bash(rm -f /tmp/contact.html)"
+      "Bash(rm -f /tmp/contact.html)",
+      "Bash(pkill -f \"next start -p 3098\")",
+      "Bash(curl -s -m 8 \"http://localhost:3011/api/v1/public/imperialpedia\" -H \"Accept: application/json\")",
+      "Bash(curl -s -m 8 -o /tmp/cms_resp.json -w \"HTTP_STATUS=%{http_code} CURL_EXIT=%{exitcode}\\\\n\" \"http://localhost:3011/api/v1/public/imperialpedia\" -H \"Accept: application/json\")",
+      "Bash(curl -s -m 10 -o /tmp/cms_prod_resp.json -w \"HTTP_STATUS=%{http_code}\\\\n\" \"https://api.baalvion.com/api/v1/public/imperialpedia\" -H \"Accept: application/json\")",
+      "Bash(curl -s -m 10 -o /tmp/prod_home.html -w \"HTTP_STATUS=%{http_code}\\\\n\" \"https://imperialpedia.com/\" -H \"Accept: text/html\")",
+      "Bash(curl -s -m 10 -D /tmp/prod_headers.txt -o /tmp/prod_home2.html -w \"HTTP_STATUS=%{http_code} TIME=%{time_total}s\\\\n\" \"https://imperialpedia.com/\")",
+      "Bash(grep -oE 'src\\\\\\\\?\":?\\\\\\\\?\"https?://[^\"\\\\\\\\]+' /tmp/prod_home2.html)",
+      "Bash(grep -oE 'https?:\\\\\\\\?/\\\\\\\\?/[a-zA-Z0-9.-]+\\\\.\\(com|net|io\\)[a-zA-Z0-9/._-]*' /tmp/prod_home2.html)",
+      "Bash(tr -d '\\\\\\\\')",
+      "Bash(cp /tmp/check_page.mjs \"d:\\\\Baalvion Projects\\\\check_page_temp.mjs\")",
+      "Bash(node check_page_temp.mjs)",
+      "Bash(sed -i \"s/from 'playwright'/from '@playwright\\\\/test'/\" check_page_temp.mjs)",
+      "Bash(curl -s -o /dev/null -w \"STATUS=%{http_code}\\\\n\" \"https://imperialpedia.com/_next/image?url=https%3A%2F%2Fapi.baalvion.com%2Fuploads%2F7f97bc8a-afee-4409-ae12-ab709d0d2f12.png&w=640&q=75\")",
+      "Bash(curl -s -o /dev/null -w \"STATUS=%{http_code}\\\\n\" \"https://api.baalvion.com/uploads/7f97bc8a-afee-4409-ae12-ab709d0d2f12.png\")",
+      "Bash(curl -s -o /dev/null -w \"next/image endpoint STATUS=%{http_code}\\\\n\" \"https://imperialpedia.com/_next/image?url=https%3A%2F%2Fapi.baalvion.com%2Fuploads%2F7f97bc8a-afee-4409-ae12-ab709d0d2f12.png&w=640&q=75\")",
+      "Bash(curl -s -D - -o /dev/null \"https://imperialpedia.com/\")",
+      "Bash(curl -s -m 15 \"https://imperialpedia.com/terms\")",
+      "Bash(curl -s -D - -o /dev/null -m 15 \"https://imperialpedia.com/terms\")",
+      "WebFetch(domain:developers.cloudflare.com)",
+      "WebFetch(domain:opennext.js.org)",
+      "WebFetch(domain:github.com)",
+      "Bash(xargs -I {} bash -c \"gh run view {} --log 2>&1 | tail -100\")",
+      "Bash(curl -s -m 15 \"https://imperialpedia.com/\" -o /tmp/ip_home.html -w \"home page: %{http_code}\\\\n\")",
+      "Bash(curl -s -o /dev/null -w \"STATUS=%{http_code}\\\\n\" -m 15 \"https://api.baalvion.com/uploads/7f97bc8a-afee-4409-ae12-ab709d0d2f12.png\")",
+      "Bash(curl -s -o /dev/null -w \"STATUS=%{http_code}\\\\n\" -m 15 \"https://imperialpedia.com/_next/image?url=https%3A%2F%2Fapi.baalvion.com%2Fuploads%2F7f97bc8a-afee-4409-ae12-ab709d0d2f12.png&w=3840&q=75\")",
+      "Bash(curl -s -o /dev/null -w \"STATUS=%{http_code}\\\\n\" -m 15 \"https://imperialpedia.com/_next/image?url=https%3A%2F%2Fapi.baalvion.com%2Fuploads%2F0f54a370-b2b4-43c8-8384-6391e8814469.png&w=3840&q=75\")",
+      "Bash(curl -s -o /dev/null -w \"STATUS=%{http_code}\\\\n\" -m 15 \"https://imperialpedia.com/_next/image?url=https%3A%2F%2Fapi.baalvion.com%2Fuploads%2Fd8364963-9681-460d-bd39-8d85d36770cd.png&w=3840&q=75\")",
+      "Bash(curl -sS -o /dev/null -w \"HTTP:%{http_code} TYPE:%{content_type} SIZE:%{size_download}\\\\n\" \"https://api.baalvion.com/uploads/7f97bc8a-afee-4409-ae12-ab709d0d2f12.png\")",
+      "Bash(curl -sS -o /dev/null -w \"HTTP:%{http_code} TYPE:%{content_type} SIZE:%{size_download}\\\\n\" \"https://imperialpedia.com/_next/image?url=https%3A%2F%2Fapi.baalvion.com%2Fuploads%2F7f97bc8a-afee-4409-ae12-ab709d0d2f12.png&w=1200&q=75\")",
+      "Bash(curl -sS -D - -o /dev/null \"https://api.baalvion.com/uploads/7f97bc8a-afee-4409-ae12-ab709d0d2f12.png\")",
+      "Bash(curl -sS \"https://imperialpedia.com/_next/image?url=https%3A%2F%2Fapi.baalvion.com%2Fuploads%2F7f97bc8a-afee-4409-ae12-ab709d0d2f12.png&w=1200&q=75\")",
+      "Bash(curl -sS -D - -o /dev/null \"https://imperialpedia.com/_next/image?url=https%3A%2F%2Fapi.baalvion.com%2Fuploads%2F7f97bc8a-afee-4409-ae12-ab709d0d2f12.png&w=1200&q=75\")",
+      "Bash(curl -sS -D - -o /dev/null \"https://imperialpedia.com/\")",
+      "Bash(node \"C:\\\\Users\\\\ALLENK~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\d--Baalvion-Projects\\\\a450208d-39fb-4882-9fcf-4299dadef2b7\\\\scratchpad\\\\delete-ranges.js\")"
     ],
     "additionalDirectories": [
       "D:\\wt-pay\\Backend\\services\\commerce\\financial-services-java\\payment-service\\src\\main\\java\\com\\baalvion\\payment\\gateway\\service",
@@ -203,7 +237,8 @@
       "C:\\Users\\ALLENK~1\\AppData\\Local\\Temp\\reengagement-wt\\Backend\\services\\identity\\auth-service",
       "C:\\Users\\ALLENK~1\\AppData\\Local\\Temp\\reengagement-wt\\Backend\\services\\infrastructure\\notification-service\\workers",
       "C:\\Users\\ALLENK~1\\AppData\\Local\\Temp\\reengagement-wt\\.github\\workflows",
-      "\\tmp"
+      "\\tmp",
+      "d:\\ip-terms-fix-wt\\Frontend\\Imperialpedia-main\\src\\app\\terms"
     ]
   }
 }
