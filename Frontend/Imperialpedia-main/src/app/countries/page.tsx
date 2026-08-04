@@ -9,6 +9,7 @@ import { FilterBar } from '@/components/lists/FilterBar';
 import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
 import { Globe } from 'lucide-react';
+import { notFound } from 'next/navigation';
 
 interface Props {
   searchParams: Promise<{ page?: string; region?: string }>;
@@ -29,15 +30,21 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
 
 const ITEMS_PER_PAGE = 12;
 
+// Permanently retired region filter views — removed from circulation, kept
+// out of the generated filter list, and 404'd if the URL is hit directly.
+const RETIRED_REGIONS = ['north-america'];
+
 export default async function CountriesListPage({ searchParams }: Props) {
   const params = await searchParams;
   const page = parseInt(params.page || '1');
   const region = params.region || 'all';
 
+  if (RETIRED_REGIONS.includes(region.toLowerCase())) notFound();
+
   const allCountries = await loadCountries();
-  
+
   // Filter Logic
-  const filtered = allCountries.filter(c => 
+  const filtered = allCountries.filter(c =>
     region === 'all' || c.region.toLowerCase().replace(' ', '-') === region.toLowerCase()
   );
 
@@ -48,10 +55,12 @@ export default async function CountriesListPage({ searchParams }: Props) {
   const paginated = filtered.slice(start, start + ITEMS_PER_PAGE);
 
   // Derived filter options
-  const regions = Array.from(new Set(allCountries.map(c => c.region))).map(r => ({
-    label: r,
-    value: r.toLowerCase().replace(' ', '-')
-  }));
+  const regions = Array.from(new Set(allCountries.map(c => c.region)))
+    .map(r => ({
+      label: r,
+      value: r.toLowerCase().replace(' ', '-')
+    }))
+    .filter(r => !RETIRED_REGIONS.includes(r.value));
 
   return (
     <main className="min-h-screen bg-background pt-16 pb-32 animate-in fade-in duration-700">
