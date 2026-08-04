@@ -120,24 +120,6 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaDescription:
       'Independent, editorially reviewed comparisons of banks, credit cards, loans, and banking apps.',
   },
-  'bank-reviews': {
-    tag: 'BANK REVIEWS',
-    title: 'Bank Reviews',
-    description:
-      'In-depth reviews of banks and credit unions, covering fees, rates, features, and who each is best for.',
-    metaTitle: 'Bank Reviews — Fees, Rates & Features Compared',
-    metaDescription:
-      'Independent bank reviews covering fees, interest rates, features, and who each bank is best suited for.',
-  },
-  'credit-card-reviews': {
-    tag: 'CREDIT CARD REVIEWS',
-    title: 'Credit Card Reviews',
-    description:
-      'Reviews of cashback, travel, and secured credit cards, with real pros, cons, and fee breakdowns.',
-    metaTitle: 'Credit Card Reviews — Rewards, Fees & Ratings',
-    metaDescription:
-      'Independent credit card reviews covering rewards, fees, interest rates, and who each card is best for.',
-  },
   'loan-reviews': {
     tag: 'LOAN REVIEWS',
     title: 'Loan Reviews',
@@ -164,42 +146,6 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaTitle: 'Financial Product Reviews & Comparisons',
     metaDescription:
       'Independent reviews and comparisons of banks, brokers, credit cards, loans, robo-advisors, and financial apps to help you choose with confidence.',
-  },
-  'broker-reviews': {
-    tag: 'BROKER REVIEWS',
-    title: 'Broker Reviews',
-    description:
-      'Independent reviews of online brokers, comparing fees, platforms, investment options, and who each is best for.',
-    metaTitle: 'Broker Reviews — Fees, Platforms & Ratings Compared',
-    metaDescription:
-      'Independent broker reviews covering fees, account types, investment options, and trading platforms.',
-  },
-  'insurance-reviews': {
-    tag: 'INSURANCE REVIEWS',
-    title: 'Insurance Reviews',
-    description:
-      'Independent reviews of life, auto, and home insurers, comparing coverage, pricing factors, and who each is best for.',
-    metaTitle: 'Insurance Reviews — Coverage & Ratings Compared',
-    metaDescription:
-      'Independent insurance company reviews covering coverage options, policy types, and who each insurer is best suited for.',
-  },
-  'advisor-reviews': {
-    tag: 'ADVISOR REVIEWS',
-    title: 'Financial Advisor Reviews',
-    description:
-      'Independent reviews of financial advisory firms and services, comparing fees, minimums, and services offered.',
-    metaTitle: 'Financial Advisor Reviews — Fees & Services Compared',
-    metaDescription:
-      'Independent reviews of financial advisory firms, comparing advisory fees, account minimums, and services offered.',
-  },
-  'robo-advisors': {
-    tag: 'ROBO-ADVISOR REVIEWS',
-    title: 'Robo-Advisor Reviews',
-    description:
-      'Independent reviews of automated investing platforms, comparing management fees, portfolio options, and tax features.',
-    metaTitle: 'Robo-Advisor Reviews — Fees & Features Compared',
-    metaDescription:
-      'Independent robo-advisor reviews covering management fees, portfolio construction, tax-loss harvesting, and account minimums.',
   },
   'tax-software': {
     tag: 'TAX SOFTWARE REVIEWS',
@@ -712,7 +658,6 @@ export const STATIC_CATEGORY_MAP: Record<string, NewsCategory> = {
   commodities: 'Markets',
   'market-news': 'Markets',
   'live-market-news': 'Markets',
-  'company-news': 'Markets',
   earnings: 'Markets',
   global: 'Markets',
   portfolio: 'Markets',
@@ -773,15 +718,9 @@ export const STATIC_CATEGORY_MAP: Record<string, NewsCategory> = {
   insurance: 'PersonalFinance',
   // Reviews / guides
   reviews: 'Guides',
-  'advisor-reviews': 'Guides',
   'app-reviews': 'Guides',
-  'bank-reviews': 'Guides',
   'banking-reviews': 'Guides',
-  'broker-reviews': 'Guides',
-  'credit-card-reviews': 'Guides',
-  'insurance-reviews': 'Guides',
   'loan-reviews': 'Guides',
-  'robo-advisors': 'Guides',
   'tax-software': 'Guides',
   'financial-calculators': 'Guides',
   calendar: 'Guides',
@@ -850,7 +789,7 @@ const CATEGORY_GROUPS: CategoryGroup[] = [
   {
     label: 'MARKETS',
     href: '/market-news',
-    children: ['live-market-news', 'company-news', 'earnings', 'crypto', 'calendar'],
+    children: ['live-market-news', 'earnings', 'crypto', 'calendar'],
   },
   {
     label: 'BANKING',
@@ -870,7 +809,7 @@ const CATEGORY_GROUPS: CategoryGroup[] = [
   {
     label: 'REVIEWS',
     href: '/reviews',
-    children: ['broker-reviews', 'bank-reviews', 'credit-card-reviews', 'loan-reviews', 'insurance-reviews', 'robo-advisors', 'app-reviews', 'tax-software', 'advisor-reviews'],
+    children: ['loan-reviews', 'app-reviews', 'tax-software'],
   },
   {
     label: 'BUDGETING',
