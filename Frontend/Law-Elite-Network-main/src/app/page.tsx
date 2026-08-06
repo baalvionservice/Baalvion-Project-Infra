@@ -131,7 +131,7 @@ export default async function KnowledgeHomePage() {
 
         {/* Category sections */}
         <div className="py-8 border-t border-slate-200">
-          {articlesByCategory.map((cat) => (
+          {articlesByCategory.map((cat: any) => (
             <CategorySection key={cat.slug} name={cat.name} slug={cat.slug} articles={cat.articles} />
           ))}
         </div>
