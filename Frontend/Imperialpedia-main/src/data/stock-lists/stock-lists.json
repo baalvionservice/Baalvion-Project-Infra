@@ -4,76 +4,189 @@
     "name": "Top Stocks",
     "description": "Widely held, large-capitalization companies that make up the core of many diversified portfolios.",
     "longDescription": "Top stocks are typically the largest, most liquid companies on major exchanges — the names most frequently held by index funds, pension funds, and retail investors alike. Their scale usually means deeper analyst coverage, tighter bid-ask spreads, and more predictable trading volume than smaller companies, though size alone doesn't guarantee lower risk: a large-cap company can still underperform if its growth stalls or its valuation runs ahead of its earnings. Investors commonly use this group as a starting point for building a core portfolio position before layering in sector-specific or higher-risk names.",
-    "matchTags": ["large-cap", "blue-chip"]
+    "matchTags": ["large-cap", "blue-chip"],
+    "faq": []
   },
   {
     "slug": "trending-stocks",
     "name": "Trending Stocks",
     "description": "Companies generating outsized investor attention and trading volume.",
     "longDescription": "Trending stocks see unusually high trading volume, media coverage, or social-media discussion relative to their normal baseline — often triggered by an earnings surprise, product launch, index inclusion, or a viral narrative unrelated to fundamentals. Elevated attention tends to come with elevated volatility in both directions, since a crowded trade can reverse quickly once the catalyst fades or short-term traders exit. This grouping is best treated as a watchlist of what the market is currently focused on, not a signal that a stock is fundamentally undervalued.",
-    "matchTags": ["growth", "meme-stock"]
+    "matchTags": ["growth", "meme-stock"],
+    "faq": [
+      {
+        "question": "What makes a stock start \"trending\"?",
+        "answer": "Most commonly earnings surprises, analyst rating changes, M&A news, regulatory developments, or coordinated retail and social-media attention — each with different implications for how durable the move is likely to be."
+      },
+      {
+        "question": "Is a trending stock automatically a good buy?",
+        "answer": "No. Trending reflects attention and volume, not valuation or quality. Check the underlying catalyst and compare against sector fundamentals before treating momentum as a thesis."
+      },
+      {
+        "question": "How can I tell if a move is institutional or retail-driven?",
+        "answer": "Volume relative to the stock's average, options activity, and the nature of the catalyst (fundamental news versus social attention) are the most reliable signals."
+      },
+      {
+        "question": "Where can I find sector context for a trending stock?",
+        "answer": "Check the relevant sector list — semiconductor, banking, healthcare, energy, or EV stocks — to see whether a move is isolated to one company or part of a broader sector trend."
+      }
+    ]
   },
   {
     "slug": "dividend-stocks",
     "name": "Dividend Stocks",
     "description": "Companies with a track record of returning cash to shareholders through regular dividend payments.",
     "longDescription": "Dividend-paying companies typically operate in mature industries with predictable cash flow, allowing them to return capital to shareholders on a regular schedule rather than reinvesting every dollar into growth. Key metrics for evaluating this group include dividend yield (annual payout as a percentage of share price), payout ratio (the share of earnings paid out, where a very high ratio can signal an unsustainable dividend), and dividend growth history. A high yield alone isn't necessarily attractive — it can also reflect a falling share price or financial distress, so yield should always be read alongside the underlying business's earnings trend.",
-    "matchTags": ["dividend"]
+    "matchTags": ["dividend"],
+    "faq": []
   },
   {
     "slug": "ai-stocks",
     "name": "AI Stocks",
     "description": "Companies building or heavily monetizing artificial intelligence infrastructure and applications.",
     "longDescription": "This group spans the full AI value chain: chipmakers and cloud providers supplying the compute infrastructure that trains and runs models, software companies building AI-native products, and established businesses integrating AI into existing product lines. Because the space is still young and valuations often price in years of future growth, earnings can be more sensitive to shifts in AI-spending sentiment than to near-term results. Distinguishing companies with real, monetizing AI revenue from those simply attaching the label to existing products is one of the more useful exercises when researching names in this list.",
-    "matchTags": ["ai-stocks", "AI"]
+    "matchTags": ["ai-stocks", "AI"],
+    "faq": []
   },
   {
     "slug": "technology-stocks",
     "name": "Technology Stocks",
     "description": "Companies in software, hardware, semiconductors, and internet services.",
     "longDescription": "The technology sector covers software (subscription and licensed), hardware and devices, semiconductors, and internet/platform businesses — a broad enough range that the group's risk profile varies widely by sub-industry. Software companies tend to carry high margins and recurring revenue but trade at valuation multiples sensitive to interest-rate expectations; hardware and semiconductor companies are more cyclical, tracking capital-spending and consumer-electronics demand cycles. Because technology names are often priced on future growth rather than current earnings, this sector has historically shown larger swings than the broader market during both rallies and pullbacks.",
-    "matchTags": ["technology-stocks", "chips"]
+    "matchTags": ["technology-stocks", "chips"],
+    "faq": []
   },
   {
     "slug": "banking-stocks",
     "name": "Banking Stocks",
     "description": "Commercial and investment banks, insurers, and other financial institutions.",
     "longDescription": "Bank profitability is driven largely by net interest margin — the spread between what a bank earns on loans and pays out on deposits — which makes this sector unusually sensitive to central-bank interest-rate policy. Banks are also more regulated than most sectors, with capital-adequacy and stress-test requirements that shape how much cash they can return to shareholders through dividends or buybacks. Credit quality (the share of loans at risk of default) is another metric worth tracking, since it tends to deteriorate with a lag after economic conditions weaken.",
-    "matchTags": ["banking-stocks"]
+    "matchTags": ["banking-stocks"],
+    "faq": [
+      {
+        "question": "Why do bank stocks react so strongly to Fed rate decisions?",
+        "answer": "Because their core profitability — net interest margin — is directly determined by the spread between loan rates and deposit rates, both of which move with Fed policy."
+      },
+      {
+        "question": "What's the difference between a money-center bank and a regional bank?",
+        "answer": "Money-center banks operate diversified national and global businesses across banking, trading, and advisory; regional banks are geographically concentrated and more dependent on traditional deposit-and-loan banking."
+      },
+      {
+        "question": "What is net interest margin?",
+        "answer": "The difference between interest income earned on loans and investments and interest paid on deposits and borrowings, expressed as a percentage of earning assets — the core profitability measure for banks."
+      },
+      {
+        "question": "How does deposit competition from high-yield savings accounts affect bank stocks?",
+        "answer": "It raises banks' cost of funding as customers move cash into higher-yielding accounts, which can compress net interest margins if loan rates don't rise proportionately."
+      }
+    ]
   },
   {
     "slug": "energy-stocks",
     "name": "Energy Stocks",
     "description": "Oil, gas, and utility companies tied to global energy production and consumption.",
     "longDescription": "Energy-sector earnings are closely tied to commodity prices — crude oil, natural gas, and refined products — which are themselves driven by global supply agreements, geopolitical events, and demand cycles largely outside any single company's control. Upstream producers (extraction) tend to be more directly exposed to commodity-price swings than integrated majors or downstream refiners, whose margins can benefit when crude prices fall even as producer revenue declines. Utilities within this group behave differently again, generating more stable, regulated cash flow that makes them comparatively defensive relative to producers.",
-    "matchTags": ["energy-stocks"]
+    "matchTags": ["energy-stocks"],
+    "faq": [
+      {
+        "question": "Why do integrated energy majors perform more steadily than pure-play producers?",
+        "answer": "Because refining and midstream operations generate revenue that isn't directly tied to crude prices, partially offsetting weak upstream earnings during price downturns."
+      },
+      {
+        "question": "How does OPEC+ affect energy stock prices?",
+        "answer": "Production quota decisions directly influence global oil supply and, by extension, pricing — coordinated supply cuts tend to support prices, while quota breakdowns can trigger sharp declines."
+      },
+      {
+        "question": "What's the difference between upstream, midstream, and downstream?",
+        "answer": "Upstream is exploration and production, midstream is transport and storage (pipelines), and downstream is refining and marketing to end consumers."
+      },
+      {
+        "question": "Are energy stocks a good inflation hedge?",
+        "answer": "Historically energy has performed relatively well during inflationary periods driven by commodity price increases, though this isn't a guaranteed relationship and varies by inflation source."
+      }
+    ]
   },
   {
     "slug": "healthcare-stocks",
     "name": "Healthcare Stocks",
     "description": "Pharmaceutical, biotechnology, medical device, and health services companies.",
     "longDescription": "Healthcare spans several distinct business models: large pharmaceutical companies with diversified drug portfolios, biotechnology firms whose value often hinges on a small number of clinical-trial outcomes, medical-device makers, and health-services or insurance providers. Regulatory decisions — drug approvals, patent expirations, and reimbursement policy — can move individual names sharply regardless of broader market conditions, which is part of why this sector has historically shown lower correlation to economic cycles than more discretionary industries. Patent cliffs, where a blockbuster drug loses exclusivity and faces generic competition, are a recurring risk worth understanding when evaluating pharmaceutical names specifically.",
-    "matchTags": ["healthcare-stocks"]
+    "matchTags": ["healthcare-stocks"],
+    "faq": [
+      {
+        "question": "Why is biotech riskier than large-cap pharma?",
+        "answer": "Biotech companies are often dependent on the outcome of a small number of clinical trials, with limited or no diversified revenue to cushion a failed readout. Large pharma companies have broad, revenue-generating product portfolios."
+      },
+      {
+        "question": "What is a \"patent cliff\"?",
+        "answer": "The period when a drug loses patent exclusivity and faces generic competition, typically causing a sharp, rapid decline in the branded drug's revenue."
+      },
+      {
+        "question": "How does M&A activity affect biotech stock prices?",
+        "answer": "Large pharmaceutical companies frequently acquire smaller biotechs to acquire pipeline assets, and acquisition announcements often come with significant premiums to the prior trading price."
+      },
+      {
+        "question": "Is healthcare considered a defensive sector?",
+        "answer": "Generally yes for pharma, insurance, and staples-like demand, but biotech introduces growth-stock-level volatility that doesn't fit the traditional \"defensive\" label."
+      }
+    ]
   },
   {
     "slug": "ev-stocks",
     "name": "EV Stocks",
     "description": "Electric vehicle manufacturers and the supply chains that support them.",
     "longDescription": "This list covers electric-vehicle manufacturers alongside the battery, charging-infrastructure, and raw-material suppliers that support them. The sector is capital-intensive — building manufacturing capacity requires heavy upfront investment well before production scales — so profitability timelines and cash-burn rates are especially important to track for newer entrants, versus established automakers adding EV lines alongside existing combustion-vehicle businesses. Government incentives, battery-material costs (particularly lithium and other key inputs), and charging-network buildout are recurring factors that move sentiment across the group.",
-    "matchTags": ["ev-stocks"]
+    "matchTags": ["ev-stocks"],
+    "faq": [
+      {
+        "question": "Why did so many EV startups struggle after 2021?",
+        "answer": "Many went public via SPAC mergers with pre-revenue or early-revenue business models, then faced capital-intensive scaling challenges just as financing conditions tightened and competition intensified."
+      },
+      {
+        "question": "What's the most important metric for evaluating an EV manufacturer?",
+        "answer": "Gross margin per vehicle delivered, alongside delivery growth — together they show whether a company is scaling sustainably or burning cash to grow."
+      },
+      {
+        "question": "How do battery costs affect EV stock valuations?",
+        "answer": "Batteries are typically the single largest cost component in an EV; falling battery costs directly support margin expansion, while raw-material price spikes compress it."
+      },
+      {
+        "question": "Are legacy automakers a safer EV investment than pure-plays?",
+        "answer": "They're generally better capitalized with diversified revenue from existing combustion-vehicle sales, but often move more slowly on EV-specific execution and carry higher fixed costs."
+      }
+    ]
   },
   {
     "slug": "semiconductor-stocks",
     "name": "Semiconductor Stocks",
     "description": "Chipmakers and the equipment and design companies behind the global semiconductor supply chain.",
     "longDescription": "Semiconductors sit at the base of the technology supply chain, spanning chip designers, foundries that manufacture at scale, and the equipment makers whose tools those foundries depend on. The industry is historically cyclical, moving through periods of undersupply (when demand for chips in phones, PCs, data centers, or vehicles outruns manufacturing capacity) and oversupply (when that capacity catches up or demand cools), which shows up in earnings and stock prices well before it's visible in headline economic data. Export controls and geographic concentration of advanced manufacturing are additional factors specific to this sector.",
-    "matchTags": ["semiconductors", "chips"]
+    "matchTags": ["semiconductors", "chips"],
+    "faq": [
+      {
+        "question": "What's the difference between a fabless chip company and a foundry?",
+        "answer": "Fabless companies design chips but outsource manufacturing; foundries own and operate the fabrication plants. TSMC is the dominant foundry; most U.S. chip designers are fabless."
+      },
+      {
+        "question": "Why is ASML considered a chokepoint company?",
+        "answer": "It's currently the sole global supplier of the extreme ultraviolet lithography systems required to manufacture the most advanced chips, giving it outsized pricing power and geopolitical significance."
+      },
+      {
+        "question": "Are semiconductor stocks cyclical?",
+        "answer": "Historically yes — demand and pricing move through multi-year boom-bust cycles tied to inventory levels and end-demand shifts, though AI infrastructure spending has extended the current upcycle."
+      },
+      {
+        "question": "How exposed are semiconductor stocks to U.S.-China trade policy?",
+        "answer": "Significantly. Export restrictions on advanced chips and manufacturing equipment directly affect revenue for both U.S. designers and equipment makers selling into the Chinese market."
+      }
+    ]
   },
   {
     "slug": "high-growth-stocks",
     "name": "High Growth Stocks",
     "description": "Companies prioritizing rapid revenue expansion, often reinvesting earnings rather than paying dividends.",
     "longDescription": "High-growth companies typically reinvest most or all of their cash flow into expanding the business — new markets, product development, or customer acquisition — rather than returning capital through dividends, on the premise that reinvested capital compounds faster than a payout would. Because their valuations often reflect years of expected future growth, these stocks tend to be more sensitive to changes in interest rates (which affect how future earnings are discounted to present value) and to any sign that growth is decelerating. This makes the group higher-risk and typically more volatile than the broader market, in exchange for greater upside if the growth thesis plays out.",
-    "matchTags": ["growth"]
+    "matchTags": ["growth"],
+    "faq": []
   }
 ]

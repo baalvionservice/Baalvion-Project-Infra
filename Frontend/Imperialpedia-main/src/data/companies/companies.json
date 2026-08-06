@@ -456,5 +456,176 @@
       "https://en.wikipedia.org/wiki/OpenAI"
     ],
     "editorialOverview": "OpenAI is the AI research and product company behind ChatGPT and the GPT model family, and arguably the company most responsible for making generative AI a mainstream consumer and enterprise product rather than a research curiosity. Founded in 2015 in San Francisco as a nonprofit research lab, OpenAI restructured over time into a \"capped-profit\" company under nonprofit oversight in order to raise the enormous capital its ambitions required, a structure that remains a point of ongoing legal and public debate as the company edges toward a full public listing.\n\nOpenAI's growth over the past two years has been extraordinary by almost any startup benchmark: annualized revenue exceeded $20 billion at the end of 2025, roughly triple its 2024 level, and by mid-2026 the company was generating an estimated $2 billion per month, putting its annualized run rate above $25 billion. ChatGPT itself has become one of the most widely used consumer products in history, crossing 900 million weekly active users and 1 billion monthly active users, with 92% of Fortune 500 companies reportedly using it in some capacity — a penetration rate that few enterprise software products, let alone a company barely a decade old, have ever achieved this quickly.\n\nThat growth has been financed by an equally extraordinary run of capital-raising. OpenAI's valuation reached $852 billion following a March 2026 funding round that brought in $122 billion of fresh capital — the largest private-company valuation on record at the time. The company filed a confidential S-1 with the SEC in May 2026, working with Goldman Sachs, Morgan Stanley, and JPMorgan on a prospective public listing, with CEO Sam Altman initially targeting a September 2026 debut. By late June 2026, however, reporting suggested OpenAI was leaning toward delaying the actual listing into 2027 rather than accept a lower valuation in a 2026 offering — Altman has been quoted describing any meaningful discount from a targeted roughly $1 trillion valuation as a \"non-starter,\" underscoring how much of OpenAI's near-term strategy is now shaped by valuation negotiations as much as by product or research priorities.\n\nOpenAI's position is unusual in a specific way worth noting for anyone evaluating the company: Altman himself owns no equity in OpenAI, an arrangement that has raised its own governance questions even as OpenAI's investors — most prominently Microsoft, which supplies much of OpenAI's cloud computing infrastructure and has deep product integration through Copilot — have poured tens of billions of dollars into the company. That Microsoft relationship is both OpenAI's greatest structural advantage (guaranteed large-scale compute and enterprise distribution) and a long-term complication, since Microsoft's own AI ambitions and OpenAI's commercial interests as an increasingly independent, IPO-track company don't perfectly align over time.\n\nThe larger risk to OpenAI's business is one shared by the entire generative AI sector: the enormous, compounding cost of training and running frontier models, competition from well-capitalized rivals (Google's Gemini, Anthropic's Claude, and a fast-growing set of open-source and Chinese models), and a valuation that already prices in years of continued explosive growth. Whether OpenAI's revenue growth can keep pace with its costs and its valuation — rather than requiring perpetual new funding rounds to stay afloat — is the central question hanging over the company as it approaches, and possibly delays, becoming a public one."
+  },
+  {
+    "id": "comp-12",
+    "name": "AMD",
+    "slug": "amd",
+    "type": "company",
+    "category": "Technology",
+    "description": "Designs processors and graphics chips, including Ryzen and EPYC CPUs and Radeon and Instinct GPUs, competing directly with Intel and Nvidia.",
+    "industry": "semiconductors",
+    "country": "united-states",
+    "founded_year": 1969,
+    "headquarters": "Santa Clara, CA",
+    "employees": 26000,
+    "website": "https://www.amd.com",
+    "technologies": [
+      "semiconductors",
+      "generative-ai",
+      "graphics-processing"
+    ],
+    "competitors": [
+      "nvidia",
+      "intel"
+    ],
+    "tags": [
+      "semiconductors",
+      "chips",
+      "large-cap"
+    ],
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z",
+    "ticker": "AMD",
+    "legalName": "Advanced Micro Devices, Inc.",
+    "stockExchange": "NASDAQ",
+    "isPublic": true,
+    "sameAs": [
+      "https://en.wikipedia.org/wiki/AMD"
+    ],
+    "editorialOverview": "AMD designs processors and graphics chips across three core product lines: Ryzen (consumer and workstation CPUs), EPYC (data-center server CPUs), and Radeon and Instinct (gaming GPUs and AI accelerators). Like most of its chip-design peers, AMD is fabless — it designs chips but outsources manufacturing, primarily to TSMC — which keeps its capital expenditure far lower than an integrated device manufacturer but ties its production capacity and cost structure to foundry availability and advanced-node allocation.\n\nThe company's strategic center of gravity has shifted decisively toward data-center compute over the past several years. EPYC server CPUs have taken sustained market share from Intel's long-dominant Xeon line by combining competitive per-core performance with more cores per socket, and the Instinct MI-series accelerators represent AMD's primary challenger position against Nvidia in AI training and inference hardware. AMD's 2022 acquisition of Xilinx added a substantial embedded and adaptive-computing (FPGA) business serving industrial, communications, and aerospace customers, diversifying revenue beyond its historically PC- and console-cycle-driven Client and Gaming segments.\n\nAMD's chief competitive challenge in AI accelerators is less about raw chip performance than software ecosystem maturity: Nvidia's CUDA platform has more than a decade of developer tooling, libraries, and institutional familiarity behind it, a lock-in effect AMD's competing ROCm software stack is still working to close. That gap is a large part of why AMD remains a distant, if credible, second in AI accelerator market share despite genuine hardware competitiveness on paper.\n\nThe company's principal risks mirror the rest of the semiconductor industry: dependence on TSMC for leading-edge manufacturing capacity, exposure to U.S. export-control policy that shapes which AI chips can be sold into China, and the historically cyclical nature of PC and gaming demand, which can swing AMD's Client and Gaming segment results independently of the more secular Data Center growth story.",
+    "faq": [
+      {
+        "question": "What does AMD actually make?",
+        "answer": "Processors and graphics chips: Ryzen (consumer/workstation CPUs), EPYC (server CPUs), and Radeon/Instinct (gaming GPUs and AI accelerators)."
+      },
+      {
+        "question": "Is AMD a direct Nvidia competitor?",
+        "answer": "In AI accelerators, yes, though Nvidia holds a dominant share position. AMD is the most credible alternative supplier, not a peer in scale or software ecosystem maturity."
+      },
+      {
+        "question": "Why does AMD's gross margin trail Nvidia's?",
+        "answer": "AMD's revenue mix includes lower-margin CPU and gaming products alongside AI accelerators, while Nvidia's mix skews more heavily toward high-margin data-center GPUs with software attach."
+      },
+      {
+        "question": "Is AMD a fabless company?",
+        "answer": "Yes — AMD designs its chips but outsources manufacturing, primarily to TSMC, unlike Intel, which manufactures most of its own chips in-house."
+      }
+    ]
+  },
+  {
+    "id": "comp-13",
+    "name": "JPMorgan Chase",
+    "slug": "jpmorgan-chase",
+    "type": "company",
+    "category": "Financial Services",
+    "description": "The largest U.S. bank by assets, operating across consumer banking, investment banking, commercial banking, and asset and wealth management.",
+    "industry": "banking",
+    "country": "united-states",
+    "founded_year": 2000,
+    "headquarters": "New York, NY",
+    "employees": 309000,
+    "website": "https://www.jpmorganchase.com",
+    "technologies": [
+      "fintech",
+      "digital-banking"
+    ],
+    "competitors": [
+      "bank-of-america",
+      "citigroup",
+      "wells-fargo",
+      "goldman-sachs",
+      "morgan-stanley"
+    ],
+    "tags": [
+      "banking-stocks",
+      "large-cap",
+      "blue-chip",
+      "dividend"
+    ],
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z",
+    "ticker": "JPM",
+    "legalName": "JPMorgan Chase & Co.",
+    "stockExchange": "NYSE",
+    "isPublic": true,
+    "sameAs": [
+      "https://en.wikipedia.org/wiki/JPMorgan_Chase"
+    ],
+    "editorialOverview": "JPMorgan Chase is the largest U.S. bank by assets and market capitalization, formed in its current structure through the 2000 merger of J.P. Morgan & Co. and Chase Manhattan Corporation, and operating across four primary segments: Consumer & Community Banking (retail deposits, credit cards, auto lending), Corporate & Investment Bank (underwriting, M&A advisory, trading), Commercial Banking (middle-market and corporate lending), and Asset & Wealth Management. That diversification across all four major banking lines simultaneously is JPM's defining structural advantage — most competitors lead in one or two of these businesses rather than all four at scale.\n\nUnlike pure-play regional lenders, JPM's investment banking and trading operations mean its earnings are influenced by capital markets activity — deal volume, IPO activity, and trading revenue — in addition to the traditional deposit-and-loan banking economics that drive net interest income. That combination gives JPM more revenue diversity than a typical commercial bank, but also more sensitivity to capital-markets cycles than a bank confined to consumer and commercial lending.\n\nAs a globally systemically important bank (G-SIB), JPM operates under heavier regulatory capital requirements than smaller institutions, including elevated Common Equity Tier 1 (CET1) capital ratios and annual Federal Reserve stress testing. That regulatory overlay shapes how much capital JPM can return to shareholders through dividends and buybacks in a given year, and is a standard reference point when comparing its capital position against peer banks.\n\nJPM's principal risks track the broader banking sector: credit quality across its consumer and commercial loan books tends to deteriorate with a lag after economic conditions weaken, net interest margin is directly exposed to Federal Reserve rate policy, and investment banking and trading revenue can swing meaningfully with capital-markets sentiment and deal activity independent of the underlying health of its core lending business.",
+    "faq": [
+      {
+        "question": "What makes JPMorgan Chase different from a regional bank?",
+        "answer": "Scale and diversification — JPM operates meaningful investment banking, trading, and wealth management businesses alongside traditional consumer and commercial banking, while most regional banks are concentrated in deposit-and-loan lending."
+      },
+      {
+        "question": "What is CET1 and why does it matter for JPM?",
+        "answer": "Common Equity Tier 1 capital ratio measures a bank's core capital against risk-weighted assets. As a globally systemically important bank (G-SIB), JPM faces higher regulatory capital requirements than smaller banks."
+      },
+      {
+        "question": "How does capital markets activity affect JPM's earnings?",
+        "answer": "Investment banking fees and trading revenue are tied to deal volume, IPO activity, and market volatility, adding a layer of earnings variability that pure consumer banks don't have."
+      },
+      {
+        "question": "Is JPMorgan Chase the same company as J.P. Morgan?",
+        "answer": "JPMorgan Chase & Co. is the current parent company, formed by the 2000 merger of J.P. Morgan & Co. and Chase Manhattan Corporation. \"J.P. Morgan\" today refers to the firm's investment banking and asset management brand within that same parent company."
+      }
+    ]
+  },
+  {
+    "id": "comp-14",
+    "name": "Netflix",
+    "slug": "netflix",
+    "type": "company",
+    "category": "Technology",
+    "description": "The largest global subscription streaming service by paid membership, producing and licensing film and television content across more than 190 countries.",
+    "industry": "streaming-media",
+    "country": "united-states",
+    "founded_year": 1997,
+    "headquarters": "Los Gatos, CA",
+    "employees": 14000,
+    "website": "https://www.netflix.com",
+    "technologies": [
+      "streaming-video",
+      "recommendation-systems"
+    ],
+    "competitors": [
+      "disney",
+      "amazon",
+      "apple"
+    ],
+    "tags": [
+      "technology-stocks",
+      "large-cap",
+      "growth"
+    ],
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z",
+    "ticker": "NFLX",
+    "legalName": "Netflix, Inc.",
+    "stockExchange": "NASDAQ",
+    "isPublic": true,
+    "sameAs": [
+      "https://en.wikipedia.org/wiki/Netflix"
+    ],
+    "editorialOverview": "Netflix is the largest global subscription streaming service by paid membership, operating in more than 190 countries with a content library spanning licensed titles and a substantial slate of Netflix-produced originals. Unlike traditional media companies still balancing legacy linear-TV economics against streaming investment, Netflix operates as a streaming-native business — a cleaner cost structure, but also one that lacks the cable-bundle and theatrical revenue diversification that competitors like Disney can still draw on.\n\nThe company's business model has evolved meaningfully beyond its original single-tier subscription structure. The introduction of a lower-priced, ad-supported membership tier opened a distinct advertising revenue stream and a price point aimed at more price-sensitive households, while a broader push to monetize password sharing — converting previously non-paying household viewers into direct or extra-member revenue — addressed a long-standing gap between Netflix's reported subscriber base and its actual viewership. Together, these shifts moved Netflix's growth narrative away from pure subscriber-count expansion toward revenue per member and margin.\n\nContent strategy remains the core of Netflix's competitive position: a mix of high-budget scripted originals, licensed catalog titles, and a growing slate of live and sports-adjacent programming aimed at extending engagement beyond traditional film and series releases. That content spend is also Netflix's largest and most consequential cost line — how it's allocated between originals and licensed titles shapes both near-term margin and the durability of subscriber engagement.\n\nNetflix's principal competitive risk is straightforward: it competes for household entertainment spending and attention against well-capitalized rivals with their own franchises and distribution advantages, including Disney+ (backed by Disney's broader theme-park, theatrical, and legacy-IP business), Amazon Prime Video (bundled into a broader Prime membership rather than sold as a standalone streaming business), and Apple TV+ (positioned as a value-add within Apple's hardware and services ecosystem). Sustaining subscriber growth and pricing power in an increasingly crowded, content-cost-intensive streaming market is the central ongoing challenge for the business.",
+    "faq": [
+      {
+        "question": "Why did Netflix introduce an ad-supported tier?",
+        "answer": "To open a distinct advertising revenue stream and offer a lower price point that can attract price-sensitive subscribers who might otherwise churn or never sign up, as growth in mature streaming markets slowed."
+      },
+      {
+        "question": "How is Netflix different from Disney+ as a business?",
+        "answer": "Netflix is a pure streaming business; Disney+ is one part of a larger company that also earns from theme parks, theatrical releases, and legacy linear-TV networks, giving Disney more revenue diversification but a more complex overall business."
+      },
+      {
+        "question": "What does Netflix spend the most money on?",
+        "answer": "Content — the mix of licensed titles and Netflix-produced originals is the company's largest and most consequential cost line, directly affecting both margin and subscriber engagement."
+      },
+      {
+        "question": "Where does Netflix fit in the broader market?",
+        "answer": "It's typically classified under Communication Services or Technology depending on the index provider, competing directly with Disney+, Amazon Prime Video, and Apple TV+ for streaming subscribers."
+      }
+    ]
   }
 ]

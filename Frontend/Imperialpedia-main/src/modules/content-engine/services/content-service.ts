@@ -29,6 +29,7 @@ function mapToArticleModel(raw: any): Article {
     updatedAt: raw.updatedAt || raw.publishedAt || new Date().toISOString(),
     category: raw.category || "General",
     categorySlug: raw.categorySlug,
+    contentType: raw.contentType,
     tags: raw.tags || [],
     status: (raw.status as ArticleStatus) || "published",
     readingTime: raw.meta?.readingTime || raw.readingTime || 0,

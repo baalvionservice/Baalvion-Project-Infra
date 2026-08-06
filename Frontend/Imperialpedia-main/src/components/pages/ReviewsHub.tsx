@@ -1,14 +1,8 @@
 import Link from "next/link";
 import {
-  LineChart,
-  Landmark,
-  CreditCard,
   HandCoins,
-  Umbrella,
-  Bot,
   Smartphone,
   Receipt,
-  Users,
   ArrowRight,
   BookOpen,
 } from "lucide-react";
@@ -35,28 +29,19 @@ import { newsArticleHref } from "@/lib/data/article-url";
 const SLUG = "reviews";
 const TOPIC_FETCH_LIMIT = 12;
 
-/** The 9 real review sub-categories with live pages today. */
+/** The real review sub-categories with live pages today. */
 const TOPICS: Array<{
   slug: string;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
 }> = [
-  { slug: "broker-reviews", label: "Broker Reviews", icon: LineChart },
-  { slug: "bank-reviews", label: "Bank Reviews", icon: Landmark },
-  { slug: "credit-card-reviews", label: "Credit Card Reviews", icon: CreditCard },
   { slug: "loan-reviews", label: "Loan Reviews", icon: HandCoins },
-  { slug: "insurance-reviews", label: "Insurance Reviews", icon: Umbrella },
-  { slug: "robo-advisors", label: "Robo-Advisor Reviews", icon: Bot },
   { slug: "app-reviews", label: "Finance App Reviews", icon: Smartphone },
   { slug: "tax-software", label: "Tax Software Reviews", icon: Receipt },
-  { slug: "advisor-reviews", label: "Advisor Reviews", icon: Users },
 ];
 
 /** "Find The Right Product" concept tiles — each links to a real, live category page. */
 const START_HERE_CONCEPTS = [
-  { emoji: "📈", label: "Investing Platforms", description: "Compare brokers, trading apps, and investment platforms.", href: "/broker-reviews" },
-  { emoji: "🏦", label: "Banks", description: "Compare savings accounts, checking accounts, and digital banks.", href: "/bank-reviews" },
-  { emoji: "💳", label: "Credit Cards", description: "Find cards based on rewards, fees, and benefits.", href: "/credit-card-reviews" },
   { emoji: "💰", label: "Loans", description: "Compare personal loans, mortgages, and lenders.", href: "/loan-reviews" },
   { emoji: "📱", label: "Finance Apps", description: "Review budgeting, investing, and money management apps.", href: "/app-reviews" },
 ];
