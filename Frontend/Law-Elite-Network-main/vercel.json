@@ -4,6 +4,7 @@
   "env": {
     "NEXT_PUBLIC_GA_ID": "G-YKQ97ZPWWH"
   },
-  "buildCommand": "pnpm run build",
+  "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
+  "buildCommand": "cd ../.. && pnpm exec turbo run build --filter=law-elite-network-web",
   "outputDirectory": ".next"
 }
