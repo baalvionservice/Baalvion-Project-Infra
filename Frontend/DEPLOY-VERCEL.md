@@ -60,8 +60,13 @@ tolerates absent workspace members.)
 
 ## Special cases
 
-- **`Law-Elite-Network-main`** has no `@baalvion/*` workspace deps, so it builds
-  standalone with Vercel defaults (only an `ignoreCommand`). Leave it as-is.
+- **`Law-Elite-Network-main`** now depends on `@baalvion/illustrations`
+  (added for generated SVG artwork) and must use the standard `vercel.json`
+  pattern above. It previously shipped with a Vercel-defaults `buildCommand`
+  (`pnpm run build`, no `installCommand`) from before that dependency was
+  added — that skips the turbo workspace-dependency build graph, so
+  `@baalvion/illustrations/dist` never gets built and the app fails at build
+  time with `Cannot find module '.../@baalvion/illustrations/dist/index.js'`.
 - **`For Invstors and Founders`** is a Vite app — its turbo build outputs `dist`,
   not `.next`. The standard `vercel.json` still applies.
 - **`admin-platform`** builds its single workspace dep directly
