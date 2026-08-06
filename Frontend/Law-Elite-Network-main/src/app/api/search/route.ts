@@ -36,6 +36,7 @@ async function getSearchableArticles(): Promise<LawArticle[]> {
       views: c.views ?? 0,
       featured: !!c.featured,
       imageSeed: c.slug,
+      featuredImage: c.featuredImage,
     });
   });
   return Array.from(bySlug.values());

@@ -41,6 +41,8 @@ export interface LawArticle {
   imageSeed: string;
   /** Country this guide is jurisdiction-specific to, e.g. "United States". Absent for worldwide-general content. */
   country?: string;
+  /** Real featured image (e.g. from the CMS admin panel), when known. Falls back to the deterministic editorial image via resolveArticleImage() when absent. */
+  featuredImage?: string;
 }
 
 import { LAW_ARTICLES } from './articles';
