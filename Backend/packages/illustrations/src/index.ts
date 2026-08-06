@@ -86,8 +86,14 @@ export async function writeArticleArtRaster(
   const fs = require('fs') as typeof import('fs');
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const path = require('path') as typeof import('path');
+  // `typeof import('sharp')` resolves via sharp's dual ESM/CJS `exports` map (sharp
+  // >=0.35 ships both), and TS picks that up ambiguously against the plain `require()`
+  // call actually made here — resolving to the ESM namespace type (no call signature)
+  // rather than the CJS default export TS sees at runtime. require() itself already
+  // returns `any`, so this cast added type-checking only; drop it rather than fight the
+  // dual-package hazard.
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const sharp = require('sharp') as typeof import('sharp');
+  const sharp = require('sharp');
 
   const art = generateArticleArt(input);
   fs.mkdirSync(path.dirname(absOutPath), { recursive: true });
