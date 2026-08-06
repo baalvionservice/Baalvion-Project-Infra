@@ -5,7 +5,7 @@
  * TODO: Connect to payment API for purchases
  */
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { Video, Newspaper, ShoppingBag, Crown, Star, Calendar, Clock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

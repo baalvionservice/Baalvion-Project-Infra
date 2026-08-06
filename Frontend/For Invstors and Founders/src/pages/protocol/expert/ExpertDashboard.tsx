@@ -5,7 +5,7 @@
  * TODO: Connect to payment API for actual earnings
  */
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { Users, UserCheck, UserX, DollarSign, TrendingUp, Activity } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ProtocolLayout from "@/components/protocol/ProtocolLayout";

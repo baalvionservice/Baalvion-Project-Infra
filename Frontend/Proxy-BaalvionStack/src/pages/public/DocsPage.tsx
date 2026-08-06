@@ -26,7 +26,7 @@ import {
   AlertTriangle,
   ArrowRight
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { publicApi } from "@/lib/platformClient";
