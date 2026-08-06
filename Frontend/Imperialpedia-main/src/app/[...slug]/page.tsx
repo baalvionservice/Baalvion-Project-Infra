@@ -66,11 +66,61 @@ function isDatedSegments(segments: string[]): segments is [string, string, strin
   );
 }
 
+// Permanently retired article slugs — deleted from cms-service, but kept blocked
+// here too as a hard guarantee: a stale Vercel Data/Route Cache entry from before
+// the deletion (or any future ISR regeneration hiccup on a not-found result) can
+// never resurrect one of these, since this check short-circuits before any fetch.
+const RETIRED_ARTICLE_SLUGS = new Set([
+  "building-multiple-income-streams",
+  "checklist-before-choosing-any-financial-product",
+  "common-bank-fees-and-how-to-avoid-them",
+  "cost-of-living-adjustments-and-real-income",
+  "credit-card-apr-and-grace-periods-explained",
+  "credit-unions-vs-banks",
+  "estimated-quarterly-taxes-for-freelancers",
+  "fdic-deposit-insurance-explained",
+  "health-insurance-deductibles-copays-coinsurance-explained",
+  "homeowners-vs-renters-insurance",
+  "how-insurance-premiums-are-calculated",
+  "how-much-life-insurance-coverage-you-need",
+  "how-regulators-protect-financial-consumers",
+  "how-to-evaluate-a-bank-before-opening-an-account",
+  "how-to-evaluate-a-brokerage-before-you-open-an-account",
+  "how-to-evaluate-a-credit-card-offer",
+  "how-to-evaluate-a-robo-advisor",
+  "how-to-evaluate-an-insurance-company",
+  "how-to-evaluate-customer-reviews-and-spot-fake-ones",
+  "how-to-interpret-fed-rate-announcements",
+  "how-to-negotiate-a-raise-or-salary",
+  "how-to-read-a-quarterly-earnings-report",
+  "how-to-switch-banks-without-disruption",
+  "how-w4-paycheck-withholding-works",
+  "how-we-review-financial-products-and-services",
+  "insider-trading-form-4-filings-explained",
+  "insurance-financial-strength-ratings-explained",
+  "market-news-terminology-glossary",
+  "mergers-and-acquisitions-explained",
+  "online-banks-vs-traditional-banks",
+  "reading-earnings-season-news-coverage",
+  "red-flags-in-financial-product-marketing",
+  "robo-advisor-fee-structures-explained",
+  "separating-market-noise-from-signal",
+  "side-income-1099-vs-w2-basics",
+  "sipc-protection-explained",
+  "standard-deduction-vs-itemizing",
+  "stock-buybacks-and-dividends-explained",
+  "tax-credits-vs-tax-deductions-explained",
+  "understanding-company-news-what-moves-stock-prices",
+  "understanding-sec-filings-10k-10q-8k",
+  "understanding-star-ratings-and-review-methodology-limitations",
+]);
+
 // Wrapped in React's cache() so generateMetadata and the page component — which
 // both resolve the same slug on every request — share one lookup (and one
 // live cms-service round-trip) instead of two, per Next's documented pattern
 // for sharing data between generateMetadata and the page it describes.
 const findNewsArticle = cache(async (slug: string): Promise<NewsArticle | null> => {
+  if (RETIRED_ARTICLE_SLUGS.has(slug)) return null;
   return (
     newsArticles.find((a) => a.slug === slug) ??
     (await getPublishedNewsBySlug(slug)) ??

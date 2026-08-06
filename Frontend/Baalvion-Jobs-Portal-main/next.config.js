@@ -89,6 +89,14 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   images: {
+    // Vercel's on-demand Image Optimization API (/_next/image) is metered and caps out
+    // under real traffic — once the quota is hit it returns 402 Payment Required
+    // (x-vercel-error: OPTIMIZED_IMAGE_REQUEST_PAYMENT_REQUIRED) for EVERY image on the
+    // site, confirmed live on jobs.baalvion.com. `unoptimized: true` makes next/image
+    // render the original src directly — no resize/reformat pass, no Vercel billing
+    // dependency — matching the same fix already shipped on imperialpedia.com and
+    // lawelitenetwork.com.
+    unoptimized: true,
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       {

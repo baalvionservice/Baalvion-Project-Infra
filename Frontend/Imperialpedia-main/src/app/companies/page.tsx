@@ -1,4 +1,5 @@
 import React from 'react';
+import { notFound } from 'next/navigation';
 import { Container } from '@/design-system/layout/container';
 import { Section } from '@/design-system/layout/section';
 import { Text } from '@/design-system/typography/text';
@@ -44,10 +45,16 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
 
 const ITEMS_PER_PAGE = 12;
 
+// Permanently retired industry filter views — removed from circulation, kept
+// out of the generated filter list, and 404'd if the URL is hit directly.
+const RETIRED_INDUSTRIES = ['semiconductors', 'software'];
+
 export default async function CompaniesListPage({ searchParams }: Props) {
   const params = await searchParams;
   const page = parseInt(params.page || '1');
   const industry = params.industry || 'all';
+
+  if (RETIRED_INDUSTRIES.includes(industry.toLowerCase())) notFound();
 
   const allCompanies = await loadCompanies();
 
@@ -65,10 +72,12 @@ export default async function CompaniesListPage({ searchParams }: Props) {
   // Derived filter options — humanizeSlug turns "consumer-electronics" into
   // "Consumer Electronics" instead of the broken "Consumer-electronics" a naive
   // first-letter capitalize produced on hyphenated slugs.
-  const industries = Array.from(new Set(allCompanies.map(c => c.industry))).map(i => ({
-    label: humanizeSlug(i),
-    value: i.toLowerCase().replace(' ', '-')
-  }));
+  const industries = Array.from(new Set(allCompanies.map(c => c.industry)))
+    .map(i => ({
+      label: humanizeSlug(i),
+      value: i.toLowerCase().replace(' ', '-')
+    }))
+    .filter(i => !RETIRED_INDUSTRIES.includes(i.value));
 
   const breadcrumb: Breadcrumb = {
     items: [

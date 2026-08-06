@@ -194,6 +194,13 @@ const nextConfig: NextConfig = {
     // render the original file directly (still respects remotePatterns for
     // which hosts are allowed), trading resize/AVIF-WebP conversion for images
     // that actually render without a Vercel plan/billing change.
+    //
+    // This fix already merged, but the deployment that should have shipped it
+    // was rejected by Vercel's account-wide Hobby-plan build-rate limit
+    // (commit status: "Deployment rate limited — retry in 24 hours") — so
+    // production kept serving the pre-fix build. That window has passed;
+    // this comment-only touch gives Vercel's turbo-ignore a reason to
+    // re-attempt the deploy for this app instead of skipping it as unaffected.
     unoptimized: true,
     // Self, the cms-service origin, known avatar hosts, PLUS a catch-all for
     // any other https host. Content authors and ad networks add new image

@@ -5,7 +5,8 @@
   "buildCommand": "cd ../.. && pnpm exec turbo run build --filter=imperialpedia-web",
   "env": {
     "NEXT_PUBLIC_GA_ID": "G-5WVH95P61Z",
-    "NEXT_PUBLIC_GTM_ID": "GTM-MFDQSXT5"
+    "NEXT_PUBLIC_GTM_ID": "GTM-MFDQSXT5",
+    "NEXT_PUBLIC_ADSENSE_CLIENT": "ca-pub-8968452296456450"
   },
   "headers": [
     {

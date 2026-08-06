@@ -120,24 +120,6 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaDescription:
       'Independent, editorially reviewed comparisons of banks, credit cards, loans, and banking apps.',
   },
-  'bank-reviews': {
-    tag: 'BANK REVIEWS',
-    title: 'Bank Reviews',
-    description:
-      'In-depth reviews of banks and credit unions, covering fees, rates, features, and who each is best for.',
-    metaTitle: 'Bank Reviews — Fees, Rates & Features Compared',
-    metaDescription:
-      'Independent bank reviews covering fees, interest rates, features, and who each bank is best suited for.',
-  },
-  'credit-card-reviews': {
-    tag: 'CREDIT CARD REVIEWS',
-    title: 'Credit Card Reviews',
-    description:
-      'Reviews of cashback, travel, and secured credit cards, with real pros, cons, and fee breakdowns.',
-    metaTitle: 'Credit Card Reviews — Rewards, Fees & Ratings',
-    metaDescription:
-      'Independent credit card reviews covering rewards, fees, interest rates, and who each card is best for.',
-  },
   'loan-reviews': {
     tag: 'LOAN REVIEWS',
     title: 'Loan Reviews',
@@ -164,42 +146,6 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaTitle: 'Financial Product Reviews & Comparisons',
     metaDescription:
       'Independent reviews and comparisons of banks, brokers, credit cards, loans, robo-advisors, and financial apps to help you choose with confidence.',
-  },
-  'broker-reviews': {
-    tag: 'BROKER REVIEWS',
-    title: 'Broker Reviews',
-    description:
-      'Independent reviews of online brokers, comparing fees, platforms, investment options, and who each is best for.',
-    metaTitle: 'Broker Reviews — Fees, Platforms & Ratings Compared',
-    metaDescription:
-      'Independent broker reviews covering fees, account types, investment options, and trading platforms.',
-  },
-  'insurance-reviews': {
-    tag: 'INSURANCE REVIEWS',
-    title: 'Insurance Reviews',
-    description:
-      'Independent reviews of life, auto, and home insurers, comparing coverage, pricing factors, and who each is best for.',
-    metaTitle: 'Insurance Reviews — Coverage & Ratings Compared',
-    metaDescription:
-      'Independent insurance company reviews covering coverage options, policy types, and who each insurer is best suited for.',
-  },
-  'advisor-reviews': {
-    tag: 'ADVISOR REVIEWS',
-    title: 'Financial Advisor Reviews',
-    description:
-      'Independent reviews of financial advisory firms and services, comparing fees, minimums, and services offered.',
-    metaTitle: 'Financial Advisor Reviews — Fees & Services Compared',
-    metaDescription:
-      'Independent reviews of financial advisory firms, comparing advisory fees, account minimums, and services offered.',
-  },
-  'robo-advisors': {
-    tag: 'ROBO-ADVISOR REVIEWS',
-    title: 'Robo-Advisor Reviews',
-    description:
-      'Independent reviews of automated investing platforms, comparing management fees, portfolio options, and tax features.',
-    metaTitle: 'Robo-Advisor Reviews — Fees & Features Compared',
-    metaDescription:
-      'Independent robo-advisor reviews covering management fees, portfolio construction, tax-loss harvesting, and account minimums.',
   },
   'tax-software': {
     tag: 'TAX SOFTWARE REVIEWS',
@@ -621,17 +567,6 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaDescription:
       'Quarterly earnings coverage — revenue, profit, and guidance from the companies that move the stock market.',
   },
-  'wealth-building': {
-    tag: 'WEALTH BUILDING',
-    title: 'Wealth Building',
-    description:
-      'Long-term strategies for growing net worth — saving rate, investing discipline, income growth, and the habits that compound over decades.',
-    intro:
-      "Long-term wealth accumulation is driven by three interacting levers: how much of income gets saved and invested (savings rate), the rate of return earned on that money, and time — the longest-held dollars benefit the most from compounding. Of the three, savings rate is usually the one within the most direct personal control, especially earlier in a career when investment balances are still small and additional contributions matter more than market returns on existing capital. Income growth compounds the effect further, since a rising income that maintains rather than expands lifestyle spending directly increases the amount available to save and invest each year.",
-    metaTitle: 'Wealth Building Strategies & Guides',
-    metaDescription:
-      'Practical wealth-building strategies covering saving rate, investing discipline, income growth, and the habits that compound over a lifetime.',
-  },
   'budget-rules': {
     tag: 'BUDGET RULES',
     title: 'Budget Rules',
@@ -642,28 +577,6 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaTitle: 'Budget Rules & Frameworks Explained',
     metaDescription:
       'Compare proven budget rules and frameworks, including the 50/30/20 rule and zero-based budgeting, to find the system that fits your income.',
-  },
-  'debt-repayment-strategies': {
-    tag: 'DEBT REPAYMENT',
-    title: 'Debt Repayment Strategies',
-    description:
-      'Side-by-side comparisons of debt payoff methods — snowball, avalanche, and consolidation — to help you pick the fastest path out of debt.',
-    intro:
-      "The two most commonly compared debt payoff methods are the snowball method, paying off the smallest balance first for quick psychological wins and then rolling that payment into the next-smallest debt, and the avalanche method, paying off the highest-interest debt first, which minimizes total interest paid over time. Mathematically, avalanche saves more money; behaviorally, snowball's early wins help some people stay motivated through a long payoff process — the better method is often whichever one an individual will actually stick with. Debt consolidation, which combines multiple debts into a single loan or balance-transfer offer, can also lower the effective interest rate, but works best when the underlying spending patterns that created the debt have also been addressed.",
-    metaTitle: 'Debt Repayment Strategies Compared',
-    metaDescription:
-      'Compare debt repayment strategies including the snowball method, avalanche method, and consolidation to find the fastest path out of debt.',
-  },
-  'estate-planning': {
-    tag: 'ESTATE PLANNING',
-    title: 'Estate Planning',
-    description:
-      'Wills, trusts, powers of attorney, and beneficiary designations — the essentials of planning how your assets are managed and passed on.',
-    intro:
-      "Estate planning is the process of arranging how assets will be managed during incapacity and distributed after death. A will directs asset distribution and names guardians for minor children, while a living trust can let assets bypass the probate court process entirely — generally faster and more private than a will alone. A complete plan typically also includes powers of attorney, both financial and healthcare, authorizing someone to act on your behalf if you become unable to, and a healthcare directive specifying your medical care wishes. Beneficiary designations on retirement accounts and life insurance policies pass outside a will entirely, which is why keeping those designations current is one of the most commonly overlooked parts of estate planning.",
-    metaTitle: 'Estate Planning Guides — Wills, Trusts & Beneficiaries',
-    metaDescription:
-      'Learn how wills, trusts, powers of attorney, and beneficiary designations work together in an estate plan, and what often gets overlooked.',
   },
   planning: {
     tag: 'FINANCIAL PLANNING',
@@ -712,7 +625,6 @@ export const STATIC_CATEGORY_MAP: Record<string, NewsCategory> = {
   commodities: 'Markets',
   'market-news': 'Markets',
   'live-market-news': 'Markets',
-  'company-news': 'Markets',
   earnings: 'Markets',
   global: 'Markets',
   portfolio: 'Markets',
@@ -757,14 +669,11 @@ export const STATIC_CATEGORY_MAP: Record<string, NewsCategory> = {
   'cd-rates': 'PersonalFinance',
   'money-market': 'PersonalFinance',
   'emergency-fund': 'PersonalFinance',
-  'wealth-building': 'PersonalFinance',
   'budget-rules': 'PersonalFinance',
-  'debt-repayment-strategies': 'PersonalFinance',
   'financial-independence': 'PersonalFinance',
   'money-management': 'PersonalFinance',
   income: 'PersonalFinance',
   taxes: 'PersonalFinance',
-  'estate-planning': 'PersonalFinance',
   planning: 'PersonalFinance',
   retirement: 'PersonalFinance',
   loans: 'PersonalFinance',
@@ -773,15 +682,9 @@ export const STATIC_CATEGORY_MAP: Record<string, NewsCategory> = {
   insurance: 'PersonalFinance',
   // Reviews / guides
   reviews: 'Guides',
-  'advisor-reviews': 'Guides',
   'app-reviews': 'Guides',
-  'bank-reviews': 'Guides',
   'banking-reviews': 'Guides',
-  'broker-reviews': 'Guides',
-  'credit-card-reviews': 'Guides',
-  'insurance-reviews': 'Guides',
   'loan-reviews': 'Guides',
-  'robo-advisors': 'Guides',
   'tax-software': 'Guides',
   'financial-calculators': 'Guides',
   calendar: 'Guides',
@@ -850,7 +753,7 @@ const CATEGORY_GROUPS: CategoryGroup[] = [
   {
     label: 'MARKETS',
     href: '/market-news',
-    children: ['live-market-news', 'company-news', 'earnings', 'crypto', 'calendar'],
+    children: ['live-market-news', 'earnings', 'crypto', 'calendar'],
   },
   {
     label: 'BANKING',
@@ -860,7 +763,7 @@ const CATEGORY_GROUPS: CategoryGroup[] = [
   {
     label: 'PERSONAL FINANCE',
     href: '/personal-finance',
-    children: ['budgeting', 'debt', 'credit', 'planning', 'financial-independence', 'money-management', 'financial-calculators', 'estate-planning'],
+    children: ['budgeting', 'debt', 'credit', 'planning', 'financial-independence', 'money-management', 'financial-calculators'],
   },
   {
     label: 'ECONOMY',
@@ -870,12 +773,12 @@ const CATEGORY_GROUPS: CategoryGroup[] = [
   {
     label: 'REVIEWS',
     href: '/reviews',
-    children: ['broker-reviews', 'bank-reviews', 'credit-card-reviews', 'loan-reviews', 'insurance-reviews', 'robo-advisors', 'app-reviews', 'tax-software', 'advisor-reviews'],
+    children: ['loan-reviews', 'app-reviews', 'tax-software'],
   },
   {
     label: 'BUDGETING',
     href: '/budgeting',
-    children: ['budgeting-basics', 'monthly-budget', 'saving-money', 'family-budget', 'student-budget', 'budgeting-apps', 'advanced-budgeting', 'budget-rules', 'emergency-fund', 'wealth-building', 'debt-repayment-strategies'],
+    children: ['budgeting-basics', 'monthly-budget', 'saving-money', 'family-budget', 'student-budget', 'budgeting-apps', 'advanced-budgeting', 'budget-rules', 'emergency-fund'],
   },
 ];
 
