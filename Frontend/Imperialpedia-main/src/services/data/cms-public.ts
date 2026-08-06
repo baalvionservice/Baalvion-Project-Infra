@@ -283,6 +283,30 @@ export async function listCmsContent(
   return { items: env.data ?? [], total: env.pagination?.total ?? (env.data?.length ?? 0) };
 }
 
+/**
+ * Like `listCmsContent`, but walks every page instead of returning one — for callers
+ * that genuinely need the full set (e.g. aggregating FAQ data across every article in
+ * a category) rather than a bounded preview. A single request with a large `limit`
+ * isn't enough: cms-service caps each response at 100 regardless of what's asked for
+ * (see the totalPages note on `getArticleCategoryMap` below), so once a category
+ * passes 100 published articles a plain `listCmsContent({..., limit: 100})` silently
+ * drops the rest. `params.page`/`params.limit` are ignored — this always starts at
+ * page 1 and walks to the end.
+ */
+export async function listAllCmsContent(params: CmsListParams = {}): Promise<CmsContent[]> {
+  const first = await listCmsContent({ ...params, page: 1 });
+  const items = [...first.items];
+  const totalPages = Math.max(1, Math.ceil(first.total / Math.max(items.length, 1)));
+  for (let page = 2; page <= totalPages; page++) {
+    try {
+      items.push(...(await listCmsContent({ ...params, page })).items);
+    } catch {
+      break;
+    }
+  }
+  return items;
+}
+
 export async function getCmsContentBySlug(slug: string): Promise<CmsContent> {
   const env = await cmsFetch<CmsItemEnvelope>(`/content/${encodeURIComponent(slug)}`);
   return env.data;
@@ -791,10 +815,28 @@ export function cmsContentToNews(raw: CmsContent): NewsArticle {
 
 // Convenience wrappers for the News pages — swallow failures so callers can fall
 // back to the static set without try/catch noise.
+//
+// Walks pages when `limit` exceeds what a single request actually returns (cms-service
+// caps at 100 regardless of what's asked for — see the totalPages note on
+// getArticleCategoryMap above). sitemap-service.ts calls this with limit=1000 wanting
+// every published news item; without the walk it silently got only the first ~100,
+// the same under-collection bug fixed in articles-service.ts's getArticles. The two
+// small callers (limit=60) are unaffected — the loop is a no-op when everything already
+// came back in one page.
 export async function getPublishedNews(limit = 50): Promise<NewsArticle[]> {
   try {
-    const { items } = await listCmsContent({ contentType: 'news', limit });
-    return items.map(cmsContentToNews);
+    const first = await listCmsContent({ contentType: 'news', page: 1, limit });
+    const items = [...first.items];
+    const effectivePageSize = Math.max(items.length, 1);
+    const totalPages = Math.max(1, Math.ceil(first.total / effectivePageSize));
+    for (let page = 2; page <= totalPages && items.length < limit; page++) {
+      try {
+        items.push(...(await listCmsContent({ contentType: 'news', page, limit })).items);
+      } catch {
+        break;
+      }
+    }
+    return items.slice(0, limit).map(cmsContentToNews);
   } catch {
     return [];
   }

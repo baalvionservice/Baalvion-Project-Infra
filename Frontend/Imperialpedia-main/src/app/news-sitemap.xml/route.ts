@@ -31,7 +31,25 @@ export async function GET(): Promise<Response> {
 
   let recent: { slug: string; title: string; publishedAt: string }[] = [];
   try {
-    const { items } = await listCmsContent({ contentType: 'news', limit: 1000 });
+    // Walks pages rather than trusting one limit=1000 request — cms-service caps
+    // each response at 100 regardless of what's asked for (see the totalPages note
+    // on getArticleCategoryMap in cms-public.ts), the same under-collection bug
+    // fixed in articles-service.ts's getArticles. Results sort publishedAt DESC, so
+    // once a page's oldest item is already outside the 2-day window there's nothing
+    // older left worth fetching another page for.
+    const items: Awaited<ReturnType<typeof listCmsContent>>['items'] = [];
+    let page = 1;
+    let totalPages = 1;
+    do {
+      const res = await listCmsContent({ contentType: 'news', page, limit: 1000 });
+      items.push(...res.items);
+      totalPages = Math.max(1, Math.ceil(res.total / Math.max(res.items.length, 1)));
+      const oldestOnPage = res.items[res.items.length - 1];
+      const oldestPublished = oldestOnPage?.publishedAt ? Date.parse(oldestOnPage.publishedAt) : NaN;
+      if (res.items.length === 0 || (Number.isFinite(oldestPublished) && oldestPublished < cutoff)) break;
+      page += 1;
+    } while (page <= totalPages);
+
     recent = items
       .filter((a) => {
         const published = a.publishedAt ? Date.parse(a.publishedAt) : NaN;
