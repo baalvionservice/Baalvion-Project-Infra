@@ -10,6 +10,8 @@
  * module only covers CMS-managed editorial surfaces and degrades gracefully to
  * `null` when the CMS is unreachable so callers can fall back to built-in copy.
  */
+import { toNewCategorySlug } from '@/lib/category-slugs';
+
 // In production default to the API gateway's public delivery host (the former
 // fail-fast refused to start without CMS_PUBLIC_URL, so a forgotten deploy var
 // silently forced the static fallback). A deploy can still override via
@@ -245,7 +247,16 @@ function toArticle(c: CmsContent): CmsArticle {
     excerpt: c.excerpt ?? undefined,
     alphabet,
     content: blocksToHtml(c.contentBlocks),
-    category: c.category ? { name: c.category.name, slug: c.category.slug } : undefined,
+    // The CMS still tags content with the pre-rename category slug (e.g.
+    // `business-corporate`), but every route/link on this site now uses the
+    // renamed slug (`business`). Without normalizing here, category-page
+    // filtering (`cmsGetArticles(_, categorySlug)`) never matches any article
+    // in a renamed category — so those pages fall back to bundled placeholder
+    // art instead of the article's real uploaded image — and article-url.ts /
+    // Breadcrumbs / RelatedArticles build links to the dead old slug.
+    category: c.category
+      ? { name: c.category.name, slug: toNewCategorySlug(c.category.slug) }
+      : undefined,
     author: typeof author === 'string' ? author : undefined,
     readingTime: typeof cf.readingTime === 'string' ? cf.readingTime : undefined,
     featured: !!cf.featured,
