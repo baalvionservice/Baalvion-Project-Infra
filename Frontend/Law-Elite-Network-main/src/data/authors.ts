@@ -30,7 +30,7 @@ export interface LawAuthor {
   /** Optional explicit portrait URL (CMS-managed authors); overrides the seed. */
   avatarUrl?: string;
   /** Optional public profile links. */
-  social?: { x?: string; linkedin?: string };
+  social?: { x?: string; linkedin?: string; facebook?: string; instagram?: string };
 }
 
 export const LAW_AUTHORS: LawAuthor[] = [

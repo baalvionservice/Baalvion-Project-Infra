@@ -47,7 +47,9 @@ export default async function AuthorLayout(
   const a = await resolveAuthor(slug);
   const url = `${SITE}/author/${slug}`;
   const image = a && resolvePersonImage({ avatarUrl: (a as { avatarUrl?: string }).avatarUrl, name: a.name, avatarSeed: (a as { avatarSeed?: string }).avatarSeed || slug });
-  const sameAs = a?.social ? [a.social.linkedin, a.social.x].filter(Boolean) : undefined;
+  const sameAs = a?.social
+    ? [a.social.linkedin, a.social.x, a.social.facebook, a.social.instagram].filter(Boolean)
+    : undefined;
 
   const personLd = a && {
     '@context': 'https://schema.org',
