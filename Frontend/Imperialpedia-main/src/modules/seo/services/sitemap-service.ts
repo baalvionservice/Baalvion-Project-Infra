@@ -11,6 +11,7 @@ import { ALL_TRACKED_SYMBOLS } from "@/lib/data/marketsLoader";
 import { env } from "@/config/env";
 import { logger } from "@/lib/errors/logger";
 import { GLOSSARY_LIVE } from "@/config/glossary";
+import { categoryHasLiveContent } from "@/components/pages/CategoryFeed";
 
 /**
  * @fileOverview Scalable XML sitemap system for 10k–1M+ URLs.
@@ -74,14 +75,14 @@ export const sitemapService = {
     // (routes deleted) — the Creators feature was pulled from the site.
     // "/terms", "/topics", "/learning-paths" removed — glossary/topic-discovery
     // surface is offline pending AdSense approval, see src/config/glossary.ts.
-    // "/taxes", "/insurance", "/government", "/politics", "/income", "/news",
-    // "/latest" removed from this static list — those 7 currently have zero
-    // published content (empty CategoryFeed/news hubs, ~40KB of template chrome
-    // and nothing else), exactly the thin/low-value pattern AdSense flags. They're
-    // submitted conditionally below, once real content actually exists for them —
-    // same noindex-until-real-content treatment as each page's own generateMetadata
-    // (see CategoryFeed.tsx's categoryHasLiveContent).
-    const corePages = ["", "/about","/app-reviews","/financial-intelligence","/auto-loans","/banking","/banking-reviews","/bonds","/brokers","/budgeting","/budgeting-apps","/calendar","/cd-rates","/checking","/commodities","/companies","/contact","/countries","/credit","/credit-cards","/crypto","/cryptocurrency","/debt","/earnings","/economy","/emergency-fund","/etfs","/explore","/fed","/financial-calculators","/financial-tools","/financial-tools/compound-interest","/financial-tools/inflation","/financial-tools/investment","/financial-tools/loan","/fiscal-policy","/gdp","/global","/indicators","/inflation","/interest-rates","/investing","/knowledge-map","/live-market-news","/loan-reviews","/loans","/market-news","/monetary-policy","/money-market","/mortgages","/mutual-funds","/options","/personal-finance","/planning","/privacy-policy","/real-estate","/retirement","/reviews","/savings","/stocks","/student-loans","/tax-software","/technologies","/terms-of-service","/transparency","/unemployment","/world","/world/us","/world/europe","/world/asia","/world/china","/world/emerging"];
+    // Every CategoryFeed-backed topic hub (taxes, bonds, crypto, debt, ...) is
+    // also removed from this static list: each one individually noindexes itself
+    // via its own generateMetadata + categoryHasLiveContent (empty hubs read to
+    // Google as exactly the thin/low-value content pattern that blocks AdSense
+    // approval), and submitting a noindexed URL in the sitemap is a contradiction
+    // Search Console flags. All of them are submitted conditionally below instead,
+    // by that same categoryHasLiveContent check, once real content exists.
+    const corePages = ["","/about","/financial-intelligence","/banking","/budgeting","/companies","/contact","/countries","/economy","/explore","/financial-tools","/financial-tools/compound-interest","/financial-tools/inflation","/financial-tools/investment","/financial-tools/loan","/investing","/knowledge-map","/market-news","/personal-finance","/privacy-policy","/reviews","/stocks","/technologies","/terms-of-service","/transparency","/world","/world/us","/world/europe","/world/asia","/world/china","/world/emerging"];
     corePages.forEach((path) => {
       entries.push({
         loc: `${base}${path}`,
@@ -163,14 +164,32 @@ export const sitemapService = {
       });
     });
 
-    // Topic hubs that are empty right now (see the corePages comment above) —
-    // submit the hub itself only once it actually has a published article, so
-    // Google is never handed an empty CategoryFeed page. Derived from the same
-    // `articles` list just walked above, so this needs no extra fetch and picks
-    // up new content the moment it's published — no code change or redeploy.
-    const categorySlugsWithArticles = new Set(articles.map((a) => a.categorySlug).filter(Boolean));
-    (["taxes", "insurance", "government", "politics", "income"] as const).forEach((slug) => {
-      if (categorySlugsWithArticles.has(slug)) {
+    // Every CategoryFeed-backed topic hub — submit the hub itself only once it
+    // actually has a published article, so Google is never handed an empty
+    // CategoryFeed page (~40KB of template chrome and nothing else). Checked via
+    // the exact same `categoryHasLiveContent` each hub's own generateMetadata
+    // uses to decide noindex, so the sitemap and each page's own robots meta can
+    // never disagree with each other. Picks up new content the moment it's
+    // published in the CMS — no code change or redeploy.
+    const TOPIC_HUB_SLUGS = [
+      "advanced-budgeting", "app-reviews", "auto-loans", "banking-reviews", "bonds",
+      "brokers", "budget-rules", "budgeting-apps", "budgeting-basics", "calendar",
+      "cd-rates", "checking", "commodities", "credit", "credit-cards", "crypto",
+      "cryptocurrency", "debt", "earnings", "emergency-fund", "etfs",
+      "family-budget", "fed", "financial-calculators", "financial-independence",
+      "fiscal-policy", "gdp", "global", "government", "income", "indicators",
+      "inflation", "insurance", "interest-rates", "live-market-news",
+      "loan-reviews", "loans", "monetary-policy", "money-management",
+      "money-market", "monthly-budget", "mortgages", "mutual-funds", "options",
+      "planning", "politics", "portfolio", "real-estate", "retirement",
+      "saving-money", "savings", "student-budget", "student-loans",
+      "tax-software", "taxes", "unemployment",
+    ] as const;
+    const topicHubResults = await Promise.all(
+      TOPIC_HUB_SLUGS.map(async (slug) => ({ slug, hasContent: await safe(categoryHasLiveContent(slug), false) })),
+    );
+    topicHubResults.forEach(({ slug, hasContent }) => {
+      if (hasContent) {
         entries.push({ loc: `${base}/${slug}`, lastmod: today, changefreq: "weekly", priority: 0.7 });
       }
     });

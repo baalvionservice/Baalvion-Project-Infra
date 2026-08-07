@@ -1,40 +1,12 @@
-import React from 'react';
-import type { Metadata } from 'next';
-import { Container } from '@/design-system/layout/container';
-import { Text } from '@/design-system/typography/text';
-import { Section } from '@/design-system/layout/section';
+import { notFound } from 'next/navigation';
 
-// Placeholder page (no real pricing content yet) — keep out of search results
-// until real tiers/prices ship. See also robots.ts DISALLOW.
-export const metadata: Metadata = {
-  robots: { index: false, follow: false },
-};
-
+// No real pricing content — the live, working subscription flow is at
+// /premium/subscribe. This route was a skeleton placeholder ("Free/Pro/
+// Enterprise" cards with no real copy) that was only excluded via noindex +
+// robots.ts DISALLOW, which doesn't stop a human (or a manual AdSense
+// reviewer) from opening the URL directly and finding unfinished content.
+// Hard 404 so there's nothing live to find. Remove once real pricing tiers
+// ship here, or delete this route entirely in favor of /premium/subscribe.
 export default function PricingPage() {
-  return (
-    <main className="min-h-screen bg-background pt-20">
-      <Container>
-        <Section spacing="sm" className="text-center">
-          <Text variant="h1" as="h1">Intelligence Access</Text>
-          <Text variant="body" className="text-muted-foreground mt-4 max-w-xl mx-auto">
-            Select your tier to unlock the full depth of the Imperialpedia Index.
-          </Text>
-          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {['Free', 'Pro', 'Enterprise'].map((tier) => (
-              <div key={tier} className="bg-card border rounded-3xl p-8 flex flex-col items-center">
-                <Text variant="h3" className="mb-2">{tier}</Text>
-                <div className="h-px w-full bg-border my-6" />
-                <div className="space-y-4 w-full mb-8">
-                  {[1, 2, 3].map((j) => (
-                    <div key={j} className="h-3 w-full bg-muted rounded" />
-                  ))}
-                </div>
-                <div className="mt-auto w-full h-12 bg-primary rounded-xl" />
-              </div>
-            ))}
-          </div>
-        </Section>
-      </Container>
-    </main>
-  );
+  notFound();
 }
