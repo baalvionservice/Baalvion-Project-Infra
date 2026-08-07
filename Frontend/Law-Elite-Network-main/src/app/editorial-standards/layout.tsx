@@ -5,6 +5,7 @@ const description = "How Law Elite Network researches, writes, fact-checks, revi
 export const metadata: Metadata = {
   title,
   description,
+  keywords: ['editorial standards', 'legal content fact-checking', 'law elite network editorial policy', 'source verification'],
   alternates: { canonical: `${SITE}/editorial-standards` },
   openGraph: { type: 'website', url: `${SITE}/editorial-standards`, title, description },
   twitter: { card: 'summary_large_image', title, description },

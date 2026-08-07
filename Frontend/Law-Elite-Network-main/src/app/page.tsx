@@ -131,7 +131,7 @@ export default async function KnowledgeHomePage() {
 
         {/* Category sections */}
         <div className="py-8 border-t border-slate-200">
-          {articlesByCategory.map((cat: any) => (
+          {articlesByCategory.map((cat: { id: string; name: string; slug: string; articles: any[] }) => (
             <CategorySection key={cat.slug} name={cat.name} slug={cat.slug} articles={cat.articles} />
           ))}
         </div>
@@ -148,6 +148,3 @@ export default async function KnowledgeHomePage() {
     </div>
   );
 }
-// Force rebuild at Mon Aug  3 00:52:42 IST 2026
-// Deploy timestamp: Mon Aug  3 01:25:18 IST 2026
-// Vercel deploy with secrets: 1785700666

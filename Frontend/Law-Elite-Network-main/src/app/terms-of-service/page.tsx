@@ -279,7 +279,7 @@ export default function TermsOfServicePage() {
               <p>If you have questions about these Terms, please contact us:</p>
               <ul>
                 <li>Email: <a href="mailto:legal@lawelitenetwork.com">legal@lawelitenetwork.com</a></li>
-                <li>Mail: Law Elite Network, 12 Executive Tower, BKC, Mumbai, MH 400051, India</li>
+                <li>Mail: Law Elite Network, C/o Dilip Kumar Kuldeep, Upper Mania, Po- Pakjhola, Semiliguda, Koraput, Odisha 764036, India (CIN: U43121OD2025PTC048479)</li>
                 <li>Or visit our <Link href="/contact-us">Contact</Link> page.</li>
               </ul>
             </Block>
@@ -297,7 +297,7 @@ export default function TermsOfServicePage() {
 function Block({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   return (
     <div id={id} className="space-y-6 scroll-mt-32">
-      <h2 className="text-[32px] font-bold text-slate-900 font-serif leading-tight">{title}</h2>
+      <h2 className="text-[26px] md:text-[32px] font-bold text-slate-900 font-serif leading-tight">{title}</h2>
       <div className="prose-legal max-w-none space-y-4 text-slate-700 leading-relaxed [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:space-y-2 [&_a]:text-blue-600 [&_a:hover]:underline">
         {children}
       </div>

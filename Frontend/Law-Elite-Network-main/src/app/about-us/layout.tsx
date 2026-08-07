@@ -5,6 +5,7 @@ const description = "Law Elite Network is the global platform connecting verifie
 export const metadata: Metadata = {
   title,
   description,
+  keywords: ['about law elite network', 'legal knowledge platform', 'legal education publisher', 'law elite network mission'],
   alternates: { canonical: `${SITE}/about-us` },
   openGraph: { type: 'website', url: `${SITE}/about-us`, title, description },
   twitter: { card: 'summary_large_image', title, description },

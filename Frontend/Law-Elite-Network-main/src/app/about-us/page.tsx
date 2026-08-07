@@ -76,7 +76,7 @@ export default function AboutUsPage() {
 
             <Block id="who-we-are" title="Who We Are">
               <p>
-                Law Elite Network was founded in 2011 with the mission of helping people understand the law and improve
+                Law Elite Network was founded on March 11, 2025 with the mission of helping people understand the law and improve
                 their professional and legal outcomes. We are a legal knowledge platform — part of the{' '}
                 <Link href="/">Elite Knowledge Group</Link> publishing family — that publishes clear, well-sourced legal
                 explainers and operates a directory through which readers can discover qualified practitioners.
@@ -214,7 +214,7 @@ export default function AboutUsPage() {
 function Block({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   return (
     <div id={id} className="space-y-6 scroll-mt-32">
-      <h2 className="text-[32px] font-bold text-slate-900 font-serif leading-tight">{title}</h2>
+      <h2 className="text-[26px] md:text-[32px] font-bold text-slate-900 font-serif leading-tight">{title}</h2>
       <div className="prose-legal max-w-none space-y-4 text-lg text-slate-700 leading-relaxed font-medium [&_a]:text-blue-600 [&_a:hover]:underline [&_a]:decoration-blue-200 [&_a]:decoration-2 [&_a]:underline-offset-4">
         {children}
       </div>

@@ -2,7 +2,6 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Clock } from 'lucide-react';
 import { articleUrl } from '@/lib/article-url';
 
 interface LatestRailProps {
@@ -12,7 +11,7 @@ interface LatestRailProps {
 
 /**
  * CNBC-style "Latest" column: a tight, text-first stack of recent headlines
- * with category kickers and read-time. Sits beside the lead story.
+ * with category kickers. Sits beside the lead story.
  */
 export function LatestRail({ articles, title = 'Essential Reads' }: LatestRailProps) {
   if (!articles || articles.length === 0) return null;
@@ -37,11 +36,6 @@ export function LatestRail({ articles, title = 'Essential Reads' }: LatestRailPr
               <h3 className="font-headline text-[15px] font-bold leading-snug text-slate-900 dark:text-white group-hover:text-news-600 transition-colors line-clamp-2">
                 {art.title}
               </h3>
-              {art.readingTime ? (
-                <span className="mt-1.5 inline-flex items-center gap-1 text-[11px] text-slate-400 dark:text-slate-500 font-medium">
-                  <Clock className="w-3 h-3" /> {art.readingTime} min read
-                </span>
-              ) : null}
             </Link>
           </li>
         ))}

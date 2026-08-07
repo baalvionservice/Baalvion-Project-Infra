@@ -114,7 +114,7 @@ export default async function AuthorProfilePage(
                           {art.title}
                         </h3>
                         <p className="mt-auto pt-2 text-[12px] font-medium text-slate-400">
-                          {art.readingTime} min read · {art.updatedAt}
+                          {art.updatedAt}
                         </p>
                       </div>
                     </div>
