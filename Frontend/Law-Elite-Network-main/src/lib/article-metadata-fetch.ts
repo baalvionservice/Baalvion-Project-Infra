@@ -38,8 +38,11 @@ async function fetchFromLawService(slug: string): Promise<any | null> {
  * away from itself -- a self-defeating canonical.
  */
 export async function fetchArticleForMetadata(slug: string): Promise<any | null> {
+  // Same empty-draft guard as lib/article-fetch.ts: a CMS record with no
+  // content blocks yet shouldn't get a real, indexable canonical/title --
+  // fall through to law-service/bundled/seed instead.
   const cms = await cmsGetArticleBySlug(slug);
-  if (cms) {
+  if (cms && cms.content) {
     return {
       id: cms.id,
       title: cms.title,

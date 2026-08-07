@@ -5,6 +5,7 @@ const description = "How Law Elite Network separates its commercial lawyer-refer
 export const metadata: Metadata = {
   title,
   description,
+  keywords: ['conflict of interest policy', 'editorial independence', 'lawyer referral disclosure', 'commercial vs editorial separation'],
   alternates: { canonical: `${SITE}/conflict-of-interest-policy` },
   openGraph: { type: 'website', url: `${SITE}/conflict-of-interest-policy`, title, description },
   twitter: { card: 'summary_large_image', title, description },

@@ -50,14 +50,28 @@ export default function ContactUsPage() {
             />
           </div>
 
-          <div className="bg-slate-900 rounded-[3rem] p-12 text-white text-center relative overflow-hidden">
+          <div className="bg-slate-900 rounded-[3rem] p-12 text-white relative overflow-hidden">
              <div className="absolute top-0 left-0 p-8 opacity-10"><ShieldCheck className="w-24 h-24" /></div>
-             <h3 className="text-2xl font-bold font-serif italic mb-4">Mailing Address</h3>
-             <p className="text-slate-400 font-medium leading-relaxed">
-               12 Executive Tower, BKC<br />
-               Mumbai, MH 400051<br />
-               India
-             </p>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-10 text-center">
+               <div>
+                 <h3 className="text-2xl font-bold font-serif italic mb-4">Headquarters</h3>
+                 <p className="text-slate-400 font-medium leading-relaxed">
+                   Yeshwant Avenue Building, NX, NX Road<br />
+                   Y K Nagar, Virar West, Virar<br />
+                   Maharashtra 401303, India<br />
+                   <a href="tel:+918951284770" className="hover:text-white transition-colors">+91 89512 84770</a>
+                 </p>
+               </div>
+               <div>
+                 <h3 className="text-2xl font-bold font-serif italic mb-4">Registered Office</h3>
+                 <p className="text-slate-400 font-medium leading-relaxed">
+                   C/o Dilip Kumar Kuldeep, Upper Mania<br />
+                   Po- Pakjhola, Semiliguda<br />
+                   Koraput, Odisha 764036, India<br />
+                   CIN: U43121OD2025PTC048479
+                 </p>
+               </div>
+             </div>
           </div>
 
         </div>

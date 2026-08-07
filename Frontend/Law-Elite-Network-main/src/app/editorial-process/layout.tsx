@@ -5,6 +5,7 @@ const description = "How Law Elite Network produces accurate, expert-reviewed le
 export const metadata: Metadata = {
   title,
   description,
+  keywords: ['editorial process', 'legal content review process', 'how our articles are written', 'expert-reviewed legal content'],
   alternates: { canonical: `${SITE}/editorial-process` },
   openGraph: { type: 'website', url: `${SITE}/editorial-process`, title, description },
   twitter: { card: 'summary_large_image', title, description },

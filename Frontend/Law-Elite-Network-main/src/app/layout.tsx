@@ -109,9 +109,14 @@ export const metadata: Metadata = {
   },
 };
 
+// 'Organization', not 'LegalService' -- LegalService is schema.org's type for
+// an actual law firm/practitioner, which contradicts About Us's own "we are
+// an educational publisher, not a law firm" disclosure. Misrepresenting the
+// site's nature in structured data is exactly the kind of mismatch a review
+// (AdSense or search quality) can flag.
 const organizationJsonLd = {
   '@context': 'https://schema.org',
-  '@type': 'LegalService',
+  '@type': 'Organization',
   name: 'Law Elite Network',
   url: SITE_URL,
   logo: `${SITE_URL}/logo.png`,

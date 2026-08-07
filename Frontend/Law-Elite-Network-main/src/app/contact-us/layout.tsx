@@ -5,6 +5,7 @@ const description = "Contact Law Elite Network — reach our team for support, p
 export const metadata: Metadata = {
   title,
   description,
+  keywords: ['contact law elite network', 'legal support contact', 'law elite network customer service'],
   alternates: { canonical: `${SITE}/contact-us` },
   openGraph: { type: 'website', url: `${SITE}/contact-us`, title, description },
   twitter: { card: 'summary_large_image', title, description },

@@ -19,8 +19,11 @@ export async function fetchArticleForRender(
     if (preview) return preview;
   }
 
+  // Only trust the CMS record if it actually has a body -- a draft saved
+  // with no content blocks yet would otherwise render as a public,
+  // indexable empty article page. Same guard the seed fallback below uses.
   const cms = await cmsGetArticleBySlug(slug);
-  if (cms) return cms;
+  if (cms && cms.content) return cms;
 
   try {
     const res = await articlesPublicApi.get(slug);

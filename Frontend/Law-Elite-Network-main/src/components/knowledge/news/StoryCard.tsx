@@ -3,7 +3,6 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { resolveArticleImage } from '@/lib/article-art';
 import { formatArticleDate } from '@/lib/format-date';
@@ -26,17 +25,11 @@ function Kicker({ article }: { article: any }) {
 function Byline({ article }: { article: any }) {
   const author = article?.author;
   const date = formatArticleDate(article?.updatedAt || article?.updated_at);
-  const reading = article?.readingTime;
   return (
     <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-slate-500 dark:text-slate-400 font-medium">
       {author && <span className="text-slate-700 dark:text-slate-300 font-semibold">{author}</span>}
       {author && date && <span className="text-slate-300 dark:text-slate-600">·</span>}
       {date && <span>{date}</span>}
-      {reading ? (
-        <span className="inline-flex items-center gap-1 text-slate-400 dark:text-slate-500">
-          <Clock className="w-3 h-3" /> {reading} min read
-        </span>
-      ) : null}
     </div>
   );
 }

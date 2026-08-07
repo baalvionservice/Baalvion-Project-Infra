@@ -65,7 +65,7 @@ export default function AdvertisePage() {
 
           <section className="space-y-20">
             <div id="audience" className="space-y-6">
-              <h2 className="text-[32px] font-bold text-slate-900 font-serif leading-tight">Platform Overview</h2>
+              <h2 className="text-[26px] md:text-[32px] font-bold text-slate-900 font-serif leading-tight">Platform Overview</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div className="space-y-2">
                   <p className="text-4xl font-bold text-blue-600 font-serif">72+</p>
@@ -87,7 +87,7 @@ export default function AdvertisePage() {
             </div>
 
             <div id="partnerships" className="space-y-8">
-              <h2 className="text-[32px] font-bold text-slate-900 font-serif leading-tight">B2B Partnership Tiers</h2>
+              <h2 className="text-[26px] md:text-[32px] font-bold text-slate-900 font-serif leading-tight">B2B Partnership Tiers</h2>
               <div className="p-10 bg-slate-900 rounded-[3rem] text-white relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/10 rounded-full blur-3xl" />
                 <div className="relative z-10 space-y-6">

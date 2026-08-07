@@ -65,14 +65,14 @@ export default function EditorialProcessPage() {
 
           <section className="space-y-20">
             <div id="standards" className="space-y-6">
-              <h2 className="text-[32px] font-bold text-slate-900 font-serif leading-tight">Our Standards</h2>
+              <h2 className="text-[26px] md:text-[32px] font-bold text-slate-900 font-serif leading-tight">Our Standards</h2>
               <div className="prose-legal">
                 <p>Every strategic dossier published within the network undergoes a rigorous verification protocol overseen by our distinguished Editorial Board.</p>
               </div>
             </div>
 
             <div id="fact-checking" className="space-y-12">
-              <h2 className="text-[32px] font-bold text-slate-900 font-serif leading-tight">Fact-Checking Protocol</h2>
+              <h2 className="text-[26px] md:text-[32px] font-bold text-slate-900 font-serif leading-tight">Fact-Checking Protocol</h2>
               <div className="space-y-6">
                 <Step icon={<SearchCheck className="w-5 h-5" />} title="Intelligence Sourcing" desc="Cross-referencing global legal statutes and precedents." />
                 <Step icon={<Award className="w-5 h-5" />} title="Expert Verification" desc="Technical audit by verified practitioners in relevant domains." />

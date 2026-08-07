@@ -30,6 +30,9 @@ export async function generateMetadata(
   return {
     title,
     description,
+    keywords: [a.name, a.title, ...(a.expertise || []), 'legal editor', 'law elite network contributor'].filter(
+      (x): x is string => Boolean(x),
+    ),
     alternates: { canonical: url },
     robots: { index: true, follow: true },
     openGraph: { type: 'profile', url, title, description, images: [{ url: image, alt: a.name }] },

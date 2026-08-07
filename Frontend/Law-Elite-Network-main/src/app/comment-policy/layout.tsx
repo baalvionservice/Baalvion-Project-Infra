@@ -5,6 +5,7 @@ const description = "Rules for reader comments and lawyer reviews on Law Elite N
 export const metadata: Metadata = {
   title,
   description,
+  keywords: ['comment policy', 'review moderation policy', 'lawyer review guidelines', 'fake review policy'],
   alternates: { canonical: `${SITE}/comment-policy` },
   openGraph: { type: 'website', url: `${SITE}/comment-policy`, title, description },
   twitter: { card: 'summary_large_image', title, description },

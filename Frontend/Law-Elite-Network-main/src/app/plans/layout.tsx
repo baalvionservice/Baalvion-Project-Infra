@@ -5,6 +5,7 @@ const description = "Choose a Law Elite Network plan — flexible options for cl
 export const metadata: Metadata = {
   title,
   description,
+  keywords: ['law elite network pricing', 'legal subscription plans', 'lawyer membership plans', 'legal consultation plans'],
   alternates: { canonical: `${SITE}/plans` },
   openGraph: { type: 'website', url: `${SITE}/plans`, title, description },
   twitter: { card: 'summary_large_image', title, description },

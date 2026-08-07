@@ -8,6 +8,7 @@ const description =
 export const metadata: Metadata = {
   title,
   description,
+  keywords: ['law elite network contributors', 'legal editors', 'legal writers team', 'legal content authors'],
   alternates: { canonical: `${SITE}/authors` },
   robots: { index: true, follow: true },
   openGraph: { type: 'website', url: `${SITE}/authors`, title, description },

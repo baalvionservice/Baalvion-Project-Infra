@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Clock, Eye } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import { resolveArticleImage } from '@/lib/article-art';
 import { formatArticleDate } from '@/lib/format-date';
 import { articleUrl } from '@/lib/article-url';
@@ -62,11 +62,6 @@ export function ArticleCard({ article }: ArticleCardProps) {
         <div className="mt-3 pt-3 border-t border-slate-100 space-y-2">
           <Byline article={article} />
           <div className="flex items-center gap-4 text-[12px] text-slate-400 font-medium">
-            {article.readingTime ? (
-              <span className="inline-flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5" /> {article.readingTime} min read
-              </span>
-            ) : null}
             {article.views ? (
               <span className="inline-flex items-center gap-1.5">
                 <Eye className="w-3.5 h-3.5" /> {Number(article.views).toLocaleString()} views

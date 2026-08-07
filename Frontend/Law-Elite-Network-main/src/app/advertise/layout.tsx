@@ -5,6 +5,7 @@ const description = "Reach a global audience of legal professionals and clients 
 export const metadata: Metadata = {
   title,
   description,
+  keywords: ['advertise with law elite network', 'legal industry advertising', 'law firm sponsorship', 'legal media partnerships'],
   alternates: { canonical: `${SITE}/advertise` },
   openGraph: { type: 'website', url: `${SITE}/advertise`, title, description },
   twitter: { card: 'summary_large_image', title, description },

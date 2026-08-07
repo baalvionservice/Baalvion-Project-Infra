@@ -5,6 +5,7 @@ const description = "How to report an error on Law Elite Network and how we revi
 export const metadata: Metadata = {
   title,
   description,
+  keywords: ['corrections policy', 'report an error', 'legal content corrections', 'editorial accountability'],
   alternates: { canonical: `${SITE}/corrections` },
   openGraph: { type: 'website', url: `${SITE}/corrections`, title, description },
   twitter: { card: 'summary_large_image', title, description },

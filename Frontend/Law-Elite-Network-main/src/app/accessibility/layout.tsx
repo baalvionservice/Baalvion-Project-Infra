@@ -5,6 +5,7 @@ const description = "Law Elite Network's commitment to WCAG 2.2 AA accessibility
 export const metadata: Metadata = {
   title,
   description,
+  keywords: ['accessibility statement', 'WCAG 2.2 AA compliance', 'website accessibility', 'report accessibility barrier'],
   alternates: { canonical: `${SITE}/accessibility` },
   openGraph: { type: 'website', url: `${SITE}/accessibility`, title, description },
   twitter: { card: 'summary_large_image', title, description },
