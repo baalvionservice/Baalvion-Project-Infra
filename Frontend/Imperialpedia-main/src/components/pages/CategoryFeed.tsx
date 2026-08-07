@@ -17,6 +17,23 @@ type Props = {
 };
 
 /**
+ * Whether this category has real content to show — live CMS articles or a
+ * committed baked snapshot. Deliberately excludes the bundled demo fallback
+ * (`staticCategoryFor`/`newsArticles`): that's a display-only placeholder so
+ * the page is never blank to a visitor, not genuine content, so it shouldn't
+ * count toward "this page is worth indexing." Used by each topic page's
+ * `generateMetadata` to noindex an empty category until it has real articles
+ * — same pattern as the glossary's GLOSSARY_LIVE flag, but per-category and
+ * automatic: publish an article for the category in the admin panel and the
+ * page re-indexes on its own, no code change or redeploy needed.
+ */
+export async function categoryHasLiveContent(slug: string): Promise<boolean> {
+  const live = await getCategoryArticles(slug, 1);
+  if (live.length > 0) return true;
+  return staticCategoryNews(slug).length > 0;
+}
+
+/**
  * Shared, CMS-driven topic page. Pulls published articles for the given category
  * from cms-service; if the CMS has none yet, falls back to the bundled static set
  * (filtered to the closest NewsCategory) so the page is never empty during the

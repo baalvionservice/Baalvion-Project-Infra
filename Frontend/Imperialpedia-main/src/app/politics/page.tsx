@@ -10,11 +10,23 @@ import { Metadata } from "next";
 
 const SLUG = "politics";
 
-export const metadata: Metadata = buildMetadata({
-  title: 'Politics',
-  description: 'Politics news and analysis from Imperialpedia.',
-  canonical: '/politics',
-});
+// Empty category hubs read to Google as exactly the thin/low-value content
+// pattern that blocks AdSense approval (see GLOSSARY_LIVE in config/glossary.ts
+// for the same call made for the glossary). noindex until this category has a
+// real published article — flips back automatically once one exists, no
+// redeploy needed. Demo/mock content (the `newsArticles` fallback further
+// down) deliberately doesn't count as "real" here — it's a display-only
+// placeholder, not something worth indexing.
+export async function generateMetadata(): Promise<Metadata> {
+  const live = await getCategoryArticles(SLUG, 1);
+  const hasContent = live.length > 0 || staticCategoryNews(SLUG).length > 0;
+  return buildMetadata({
+    title: 'Politics',
+    description: 'Politics news and analysis from Imperialpedia.',
+    canonical: '/politics',
+    noIndex: !hasContent,
+  });
+}
 
 function formatDate(dateString: string) {
   const date = new Date(dateString);

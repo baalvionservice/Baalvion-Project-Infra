@@ -74,7 +74,14 @@ export const sitemapService = {
     // (routes deleted) — the Creators feature was pulled from the site.
     // "/terms", "/topics", "/learning-paths" removed — glossary/topic-discovery
     // surface is offline pending AdSense approval, see src/config/glossary.ts.
-    const corePages = ["", "/about","/app-reviews","/financial-intelligence","/auto-loans","/banking","/banking-reviews","/bonds","/brokers","/budgeting","/budgeting-apps","/calendar","/cd-rates","/checking","/commodities","/companies","/contact","/countries","/credit","/credit-cards","/crypto","/cryptocurrency","/debt","/earnings","/economy","/emergency-fund","/etfs","/explore","/fed","/financial-calculators","/financial-tools","/financial-tools/compound-interest","/financial-tools/inflation","/financial-tools/investment","/financial-tools/loan","/fiscal-policy","/gdp","/global","/government","/income","/indicators","/inflation","/insurance","/interest-rates","/investing","/knowledge-map","/latest","/live-market-news","/loan-reviews","/loans","/market-news","/monetary-policy","/money-market","/mortgages","/mutual-funds","/news","/options","/personal-finance","/planning","/politics","/privacy-policy","/real-estate","/retirement","/reviews","/savings","/stocks","/student-loans","/tax-software","/taxes","/technologies","/terms-of-service","/transparency","/unemployment","/world","/world/us","/world/europe","/world/asia","/world/china","/world/emerging"];
+    // "/taxes", "/insurance", "/government", "/politics", "/income", "/news",
+    // "/latest" removed from this static list — those 7 currently have zero
+    // published content (empty CategoryFeed/news hubs, ~40KB of template chrome
+    // and nothing else), exactly the thin/low-value pattern AdSense flags. They're
+    // submitted conditionally below, once real content actually exists for them —
+    // same noindex-until-real-content treatment as each page's own generateMetadata
+    // (see CategoryFeed.tsx's categoryHasLiveContent).
+    const corePages = ["", "/about","/app-reviews","/financial-intelligence","/auto-loans","/banking","/banking-reviews","/bonds","/brokers","/budgeting","/budgeting-apps","/calendar","/cd-rates","/checking","/commodities","/companies","/contact","/countries","/credit","/credit-cards","/crypto","/cryptocurrency","/debt","/earnings","/economy","/emergency-fund","/etfs","/explore","/fed","/financial-calculators","/financial-tools","/financial-tools/compound-interest","/financial-tools/inflation","/financial-tools/investment","/financial-tools/loan","/fiscal-policy","/gdp","/global","/indicators","/inflation","/interest-rates","/investing","/knowledge-map","/live-market-news","/loan-reviews","/loans","/market-news","/monetary-policy","/money-market","/mortgages","/mutual-funds","/options","/personal-finance","/planning","/privacy-policy","/real-estate","/retirement","/reviews","/savings","/stocks","/student-loans","/tax-software","/technologies","/terms-of-service","/transparency","/unemployment","/world","/world/us","/world/europe","/world/asia","/world/china","/world/emerging"];
     corePages.forEach((path) => {
       entries.push({
         loc: `${base}${path}`,
@@ -156,6 +163,18 @@ export const sitemapService = {
       });
     });
 
+    // Topic hubs that are empty right now (see the corePages comment above) —
+    // submit the hub itself only once it actually has a published article, so
+    // Google is never handed an empty CategoryFeed page. Derived from the same
+    // `articles` list just walked above, so this needs no extra fetch and picks
+    // up new content the moment it's published — no code change or redeploy.
+    const categorySlugsWithArticles = new Set(articles.map((a) => a.categorySlug).filter(Boolean));
+    (["taxes", "insurance", "government", "politics", "income"] as const).forEach((slug) => {
+      if (categorySlugsWithArticles.has(slug)) {
+        entries.push({ loc: `${base}/${slug}`, lastmod: today, changefreq: "weekly", priority: 0.7 });
+      }
+    });
+
     // Real glossary terms — matches the actual `/terms/[letter]/[slug]` pages 1:1
     // (previously sourced from a small hardcoded mock glossary that didn't match the
     // real term set, which meant submitted URLs could 404).
@@ -186,6 +205,14 @@ export const sitemapService = {
     pushEntities(companies, "/companies", 0.8);
     pushEntities(countries, "/countries");
     pushEntities(technologies, "/technologies");
+
+    // "/news" and "/latest" are the same empty-hub case as the topic pages
+    // above, just keyed on published `news` content instead of a category —
+    // submit them only once at least one news item is actually published.
+    if (news.length > 0) {
+      entries.push({ loc: `${base}/news`, lastmod: today, changefreq: "daily", priority: 0.7 });
+      entries.push({ loc: `${base}/latest`, lastmod: today, changefreq: "daily", priority: 0.7 });
+    }
 
     // Market quote pages — every symbol this site actually renders a
     // `/markets/quote/[symbol]` page for (same tracked list the markets
