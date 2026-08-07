@@ -12,7 +12,7 @@ import type { NextRequest } from 'next/server';
  * authorization is enforced in the API + client guards.
  */
 const REFRESH_COOKIE = process.env.NEXT_PUBLIC_REFRESH_COOKIE_NAME || 'baalvion_refresh';
-const PROTECTED_PREFIXES = ['/admin', '/creator/dashboard', '/editor', '/writer', '/premium'];
+const PROTECTED_PREFIXES = ['/admin', '/creator/dashboard', '/editor', '/writer', '/premium', '/outline'];
 // /premium/subscribe is the public pricing/upsell page — it must stay reachable by
 // anonymous visitors (and crawlers) or nobody can see what they'd be paying for.
 const PUBLIC_EXCEPTIONS = ['/premium/subscribe'];
@@ -89,6 +89,7 @@ export const config = {
     '/editor/:path*',
     '/writer/:path*',
     '/premium/:path*',
+    '/outline/:path*',
     // IndexNow key verification file (any top-level *.txt request; the handler
     // above checks it against INDEXNOW_KEY and falls through otherwise).
     '/:indexnowFile.txt',

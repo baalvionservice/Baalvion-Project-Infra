@@ -30,6 +30,7 @@ const DISALLOW = [
   '/dashboard/',
   '/editor/',
   '/writer/',
+  '/outline',
   '/auth/',
   '/maintenance',
   // Placeholder/skeleton pages with no real content yet — keep out of crawl

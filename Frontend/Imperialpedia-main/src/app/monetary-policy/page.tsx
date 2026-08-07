@@ -1,10 +1,19 @@
-import { CategoryFeed } from "@/components/pages/CategoryFeed";
+import { CategoryFeed, categoryHasLiveContent } from "@/components/pages/CategoryFeed";
 import { topicMeta } from "@/lib/topic-config";
 import { buildMetadata } from "@/lib/seo";
+import { Metadata } from "next";
 
 const SLUG = "monetary-policy";
 
-export const metadata = buildMetadata(topicMeta(SLUG));
+// Empty category hubs read to Google as exactly the thin/low-value content
+// pattern that blocks AdSense approval (see GLOSSARY_LIVE in config/glossary.ts
+// for the same call made for the glossary). noindex until this category has a
+// real published article — flips back automatically once one exists, no
+// redeploy needed.
+export async function generateMetadata(): Promise<Metadata> {
+  const hasContent = await categoryHasLiveContent(SLUG);
+  return buildMetadata({ ...topicMeta(SLUG), noIndex: !hasContent });
+}
 
 // Topic hub — content is CMS articles only (verified: no import of
 // marketsLoader/worldFeed/live-quote data anywhere in this page's component
