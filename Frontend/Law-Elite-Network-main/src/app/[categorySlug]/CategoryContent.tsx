@@ -20,6 +20,8 @@ function bundledSubcategories(categoryId: string) {
 interface CategoryContentProps {
   categorySlug: string;
   categoryId: string;
+  /** CMS-authored articles for this category, fetched server-side by the parent page (see [categorySlug]/page.tsx). */
+  cmsArticles?: any[];
 }
 
 /**
@@ -28,7 +30,7 @@ interface CategoryContentProps {
  * client-only because it's genuinely interactive (subcategory/alphabet
  * filtering, ?sub= deep-link preselect).
  */
-export function CategoryContent({ categorySlug, categoryId }: CategoryContentProps) {
+export function CategoryContent({ categorySlug, categoryId, cmsArticles = [] }: CategoryContentProps) {
   const searchParams = useSearchParams();
 
   const [subcategories, setSubcategories] = useState<any[]>([]);
@@ -69,13 +71,18 @@ export function CategoryContent({ categorySlug, categoryId }: CategoryContentPro
     [subcategories, categorySlug],
   );
 
-  // Bundled articles for this category are the baseline; API results win.
+  // Bundled articles for this category are the baseline; CMS (admin-authored, incl.
+  // uploaded featured images) wins on a slug collision, then law-service results.
   const articles = useMemo(() => {
     const bundled = getArticlesByCategorySlug(categorySlug);
-    if (apiArticles.length === 0) return bundled;
-    const seen = new Set(apiArticles.map((a) => a.slug));
-    return [...apiArticles, ...bundled.filter((a) => !seen.has(a.slug))];
-  }, [apiArticles, categorySlug]);
+    const seen = new Set<string>();
+    const combined = [...cmsArticles, ...apiArticles, ...bundled].filter((a) => {
+      if (!a?.slug || seen.has(a.slug)) return false;
+      seen.add(a.slug);
+      return true;
+    });
+    return combined;
+  }, [cmsArticles, apiArticles, categorySlug]);
 
   const filteredArticles = useMemo(() => {
     let results = [...articles];

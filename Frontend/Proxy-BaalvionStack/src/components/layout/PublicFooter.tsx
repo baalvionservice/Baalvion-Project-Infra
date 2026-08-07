@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { Zap, Shield, Lock, FileText, Scale } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router";
 import { useAuth } from "@/contexts/AuthContext";
 import { startOAuthLogin, oauthErrorMessage } from "@/lib/oauth";
 import { EmailOtpLogin } from "@/components/auth/EmailOtpLogin";

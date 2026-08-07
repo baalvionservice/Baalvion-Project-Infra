@@ -5,7 +5,7 @@ import { Section } from "@/design-system/layout/section";
 import { Text } from "@/design-system/typography/text";
 import { ArrowLeft } from "lucide-react";
 import { buildMetadata } from "@/lib/seo";
-import { getCategoryArticles, listCmsContent, cmsContentToArticle } from "@/services/data/cms-public";
+import { getCategoryArticles, listAllCmsContent, cmsContentToArticle } from "@/services/data/cms-public";
 import { staticArticleList } from "@/services/data/static-content";
 import FAQItem from "@/components/faq/FAQItem";
 
@@ -20,7 +20,7 @@ export const dynamic = "force-dynamic";
 export default async function StocksFaqPage() {
   let faqSource: { faq?: { question: string; answer: string }[] }[] = [];
   try {
-    const { items } = await listCmsContent({ categorySlug: "stocks", contentType: "article", limit: 100 });
+    const items = await listAllCmsContent({ categorySlug: "stocks", contentType: "article" });
     faqSource = items.map((raw) => cmsContentToArticle(raw));
   } catch {
     faqSource = [];

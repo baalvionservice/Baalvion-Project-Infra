@@ -4,7 +4,7 @@
  * TODO: Connect to auth system for member verification
  */
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { Shield, Eye, Lock, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AmbientBackground from "@/components/protocol/AmbientBackground";

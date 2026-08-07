@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { Award, TrendingUp, MessageSquare, Zap, Star, Target, Flame, Bookmark } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useVerified } from "@/hooks/useVerified";
 import { VerifiedBadge } from "@/components/auth/VerifiedBadge";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";

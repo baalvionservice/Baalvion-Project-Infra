@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { supabase } from "@/integrations/supabase/client";
 import MainLayout from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";

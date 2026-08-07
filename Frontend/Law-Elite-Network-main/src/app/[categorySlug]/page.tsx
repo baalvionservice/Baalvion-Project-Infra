@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { categoriesPublicApi } from '@/lib/api/client';
+import { cmsGetArticles } from '@/lib/cms';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { getArticlesByCategorySlug } from '@/data/law-content';
 import seedData from '../../../docs/seed-data.json';
@@ -36,6 +37,13 @@ export default async function CategoryPage(
 ) {
   const { categorySlug } = await params;
   const category = await fetchCategory(categorySlug);
+
+  // CMS-authored articles (admin panel, incl. any uploaded featured image) for this
+  // category. CategoryContent previously only queried law-service (empty in production),
+  // so these — and their images — never appeared on the practice-area page even though
+  // the article detail page rendered them correctly. Fetched here (server) because
+  // cms.ts's env vars are server-only, then handed down as a prop.
+  const cmsArticles = await cmsGetArticles(undefined, categorySlug).catch(() => []);
 
   // Real 404 (not a themed component with an implicit 200) -- this segment is
   // now a top-level catch-all for any unmatched single path segment site-wide,
@@ -86,7 +94,7 @@ export default async function CategoryPage(
           </div>
         </section>
 
-        <CategoryContent categorySlug={categorySlug} categoryId={category.id} />
+        <CategoryContent categorySlug={categorySlug} categoryId={category.id} cmsArticles={cmsArticles} />
       </main>
 
       <PublicFooter />

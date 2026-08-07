@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { TrendingUp, AlertTriangle, ArrowUpRight } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip, ReferenceLine } from "recharts";
 
 const forecastData = [
