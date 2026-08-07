@@ -229,12 +229,16 @@ const OVERRIDES: Record<string, TopicCopy> = {
     intro:
       "Cryptocurrency refers to digital assets secured by blockchain technology — a distributed, cryptographically verified ledger that records ownership and transactions without relying on a central bank or clearinghouse. Bitcoin, the first and largest cryptocurrency, was designed primarily as a store of value and medium of exchange; Ethereum and other smart-contract platforms extended the technology to support decentralized applications, lending protocols, and tokenized assets. The asset class remains considerably more volatile than traditional equities or bonds, trades continuously across a fragmented set of exchanges, and its regulatory treatment still varies significantly by country — all factors worth understanding before treating price moves in isolation.",
     metaTitle: 'Cryptocurrency News & Analysis',
+    metaDescription:
+      'Cryptocurrency news and market analysis — Bitcoin, Ethereum, DeFi, and the blockchain infrastructure behind digital assets.',
   },
   portfolio: {
     tag: 'PORTFOLIO',
     title: 'Portfolio Management',
     description:
       'Asset allocation, diversification, risk tolerance, and the ongoing discipline of managing an investment portfolio.',
+    intro:
+      "A portfolio's asset allocation — the mix of stocks, bonds, cash, and other assets — is generally a bigger driver of long-term returns and volatility than picking individual securities within each category. Diversification, spreading investments across assets that don't all move together, reduces the impact of any single holding or sector performing poorly, though it can't eliminate market-wide risk. The right allocation depends heavily on time horizon and risk tolerance: a longer runway to retirement generally supports a higher stock allocation, since there's more time to recover from downturns, while a shorter horizon typically calls for more bonds and cash to preserve what's already been saved. Periodic rebalancing — selling what's grown to be overweight and buying what's become underweight — keeps a portfolio aligned with its original target mix rather than drifting with the market.",
     metaTitle: 'Portfolio Management Guides & Strategy',
     metaDescription:
       'Learn how to allocate assets, diversify, assess risk tolerance, and manage a portfolio for the long term.',
@@ -244,6 +248,8 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'Brokers',
     description:
       'How brokers work, what separates full-service from discount platforms, and how to evaluate one before opening an account.',
+    intro:
+      "A brokerage account is the account through which stocks, bonds, ETFs, and other securities are actually bought and sold, and the broker holding it can range from a full-service firm offering personalized advice for a fee to a discount online platform charging little or no commission on trades. Beyond commissions, it's worth comparing account minimums, available investment types, order execution quality, and, for margin or options trading, the specific fees and requirements involved. Brokers operating in the U.S. are required to be registered with the SEC and members of FINRA, and client cash and securities are typically protected up to SIPC limits in the event the brokerage itself fails — separate from, and not a guarantee against, investment losses.",
     metaTitle: 'Broker Guides — Fees, Regulation & Account Types',
     metaDescription:
       'Independent guides to choosing a stock broker — fee structures, regulation, account types, and what beginners should look for.',
@@ -262,14 +268,22 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'Stocks',
     description:
       'Equity research, earnings, sector moves, and the company news that drives share prices.',
+    intro:
+      "A stock represents fractional ownership in a company, and its price reflects what investors are collectively willing to pay for a claim on that company's future earnings — moving on everything from quarterly results to shifts in interest rates and investor sentiment. Common metrics like market capitalization (share price times shares outstanding), the price-to-earnings ratio, and dividend yield help compare companies of different sizes and business models on a similar footing, though no single metric tells the whole story on its own. Individual stocks carry company-specific risk that a diversified fund doesn't, which is why most long-term investing guidance treats single-stock picking and broad index exposure as different tools for different goals rather than substitutes for each other.",
     metaTitle: 'Stock Market News & Equity Analysis',
+    metaDescription:
+      'Stock market news, earnings coverage, and equity analysis — sector moves, company fundamentals, and the stories driving share prices.',
   },
   bonds: {
     tag: 'BONDS',
     title: 'Bonds & Fixed Income',
     description:
       'Yields, duration, credit, and the fixed-income markets that anchor diversified portfolios.',
+    intro:
+      "A bond is a loan an investor makes to a government or company in exchange for regular interest payments and the return of principal at maturity. Bond prices move inversely to interest rates — when rates rise, existing bonds with lower fixed payments become less attractive and their prices fall, and the size of that swing is measured by duration, with longer-maturity bonds generally more rate-sensitive than shorter ones. Credit ratings from agencies like Moody's and S&P gauge the issuer's ability to repay, separating investment-grade debt from higher-yielding, higher-risk 'junk' bonds. Because bonds typically move differently than stocks, especially during equity downturns, they're commonly used to reduce overall portfolio volatility rather than purely to maximize returns.",
     metaTitle: 'Bond Market News & Fixed Income Analysis',
+    metaDescription:
+      'Bond market news and fixed-income analysis — yields, duration, credit ratings, and how interest rate moves affect bond prices.',
   },
   etfs: {
     tag: 'ETFS',
@@ -279,6 +293,19 @@ const OVERRIDES: Record<string, TopicCopy> = {
     intro:
       "An exchange-traded fund (ETF) is a basket of securities — stocks, bonds, commodities, or a mix — that trades on an exchange throughout the day like an individual stock, combining the diversification of a mutual fund with intraday liquidity. Most ETFs are passively managed, tracking an index like the S&P 500 at a low annual expense ratio, though actively managed and leveraged or inverse ETFs also exist with different risk profiles and costs. Because ETF shares are created and redeemed by authorized participants rather than the fund buying and selling securities directly for each investor, they're also generally more tax-efficient than traditional mutual funds in a taxable account.",
     metaTitle: 'ETF News & Fund Analysis',
+    metaDescription:
+      'ETF news, fund flows, and expense-ratio comparisons — how exchange-traded funds work and how to use them in a portfolio.',
+  },
+  'mutual-funds': {
+    tag: 'MUTUAL FUNDS',
+    title: 'Mutual Funds',
+    description:
+      'How mutual funds work, active vs. passive management, fees, and how they compare to ETFs for long-term investing.',
+    intro:
+      "A mutual fund pools money from many investors to buy a diversified basket of stocks, bonds, or other securities, managed by a professional fund manager on behalf of shareholders. Actively managed funds aim to beat a benchmark index through security selection and typically charge higher expense ratios to cover that research and trading; passively managed index funds instead track a benchmark at a much lower cost, and the majority of active funds underperform their benchmark over long periods once fees are counted. Unlike ETFs, mutual fund shares are priced and traded once per day at the fund's net asset value rather than continuously throughout the trading session, and some funds carry minimum investment requirements or sales loads worth checking before buying in.",
+    metaTitle: 'Mutual Fund News & Fund Analysis',
+    metaDescription:
+      'Mutual fund guides and analysis — active vs. passive management, expense ratios, and how mutual funds compare to ETFs.',
   },
   'real-estate': {
     tag: 'REAL ESTATE',
@@ -288,6 +315,8 @@ const OVERRIDES: Record<string, TopicCopy> = {
     intro:
       "Real estate coverage spans residential and commercial property markets, the mortgage financing that supports them, and real estate investment trusts (REITs) that let investors gain property exposure without directly owning buildings. Housing activity is unusually sensitive to interest rates, since most home purchases are financed — a rise in mortgage rates directly raises monthly payments and can cool both home prices and transaction volume even without any change in the underlying value of the properties themselves. REITs, by contrast, trade like stocks and are valued partly on property fundamentals and partly on the same interest-rate sensitivity that affects dividend-paying equities generally.",
     metaTitle: 'Real Estate News & Property Investing',
+    metaDescription:
+      'Real estate news, mortgage rate trends, and REIT analysis — how property markets, financing, and interest rates connect.',
   },
   commodities: {
     tag: 'COMMODITIES',
@@ -305,7 +334,11 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'Retirement Planning',
     description:
       'Build and protect your nest egg — 401(k)s, IRAs, withdrawal strategy, and retiring on your terms.',
+    intro:
+      "Retirement accounts fall into two broad tax treatments: traditional accounts like a 401(k) or traditional IRA give a tax deduction on contributions now with withdrawals taxed later, while Roth accounts are funded with after-tax dollars so qualified withdrawals in retirement are tax-free — the better choice generally depends on whether your tax rate is likely to be higher now or in retirement. Employer 401(k) plans often include a matching contribution, commonly treated as an immediate, guaranteed return worth capturing before investing elsewhere. As retirement approaches, withdrawal strategy becomes as important as accumulation — sequencing which accounts to draw from first, and at what rate, to manage taxes and reduce the risk of outliving savings during a market downturn early in retirement.",
     metaTitle: 'Retirement Planning News & Strategy',
+    metaDescription:
+      'Retirement planning guides — 401(k)s, IRAs, contribution limits, and withdrawal strategy for building and protecting a nest egg.',
   },
   taxes: {
     tag: 'TAXES',
@@ -525,6 +558,8 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'Options Trading',
     description:
       'Calls, puts, and strategy basics for investors using options to hedge risk or generate income.',
+    intro:
+      "An option is a contract that gives the buyer the right, but not the obligation, to buy (a call) or sell (a put) an underlying asset at a set strike price before a specific expiration date, in exchange for an upfront premium paid to the seller. Options can be used to hedge an existing position against a decline, generate income by selling contracts against shares already owned (covered calls), or speculate on a price move with less capital than buying the underlying asset outright — each use case carries a very different risk profile. Because an option's value depends on the underlying price, time remaining until expiration, and implied volatility, its price can move sharply even when the underlying barely does, which is why options are generally considered a more advanced tool than buying stocks or funds directly.",
     metaTitle: 'Options Trading News & Strategy Guides',
     metaDescription:
       'Options trading explained — calls, puts, spreads, and how investors use options to hedge risk or generate income.',
