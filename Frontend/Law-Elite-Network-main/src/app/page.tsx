@@ -1,8 +1,7 @@
-"use client";
-
-import React, { useEffect, useMemo, useState } from 'react';
+import React from 'react';
 import { categoriesPublicApi, articlesPublicApi } from '@/lib/api/client';
 import { mergeArticles } from '@/data/law-content';
+import { cmsGetArticles } from '@/lib/cms';
 import { TopicTicker } from '@/components/knowledge/news/TopicTicker';
 import { StoryCard } from '@/components/knowledge/news/StoryCard';
 import { LatestRail } from '@/components/knowledge/news/LatestRail';
@@ -30,62 +29,63 @@ function deriveCategories(pool: any[]): { id: string; name: string; slug: string
   return [...map.values()];
 }
 
-export default function KnowledgeHomePage() {
-  const [apiCategories, setApiCategories] = useState<any[]>([]);
-  const [apiArticles, setApiArticles] = useState<any[]>([]);
-
-  useEffect(() => {
+// Server component so it can read the CMS directly (cms.ts's CMS_PUBLIC_URL/CMS_WEBSITE_SLUG
+// env vars are server-only). Previously this ran client-side and only queried law-service's
+// /v1/articles, which is empty in production — every admin-authored article (and its uploaded
+// featured image) lives in the CMS, so the homepage silently showed only the bundled/static
+// placeholder set no matter what was published. cmsGetArticles() already carries featuredImage
+// through (see lib/cms.ts's CmsArticle.featuredImage comment); this just wires it into the pool.
+export default async function KnowledgeHomePage() {
+  const [cmsArticles, apiCategoriesRaw, apiArticles] = await Promise.all([
+    cmsGetArticles().catch(() => []),
     categoriesPublicApi
       .list()
-      .then((res) => {
-        const data = res.data?.data;
-        if (Array.isArray(data) && data.length > 0) setApiCategories(data);
-      })
-      .catch(() => {});
-
+      .then((res: any) => (Array.isArray(res.data?.data) ? res.data.data : []))
+      .catch(() => []),
     articlesPublicApi
       .list({ sortBy: 'views', order: 'desc', limit: 50, status: 'published' })
-      .then((res) => {
+      .then((res: any) => {
         const items = res.data?.data?.items || res.data?.data || [];
-        if (Array.isArray(items)) setApiArticles(items);
+        return Array.isArray(items) ? items : [];
       })
-      .catch(() => {});
-  }, []);
+      .catch(() => []),
+  ]);
+  const apiCategories = apiCategoriesRaw;
 
-  const pool = useMemo(() => mergeArticles(apiArticles), [apiArticles]);
+  // CMS is the authoritative admin-managed source, so it wins on a slug collision;
+  // mergeArticles() then fills any remaining gap with the bundled/static set.
+  const seenSlugs = new Set<string>();
+  const combinedSource = [...cmsArticles, ...apiArticles].filter((a: any) => {
+    if (!a?.slug || seenSlugs.has(a.slug)) return false;
+    seenSlugs.add(a.slug);
+    return true;
+  });
+  const pool = mergeArticles(combinedSource);
 
-  const trending = useMemo(() => [...pool].sort((a, b) => (b.views || 0) - (a.views || 0)), [pool]);
+  const trending = [...pool].sort((a, b) => (b.views || 0) - (a.views || 0));
 
   const lead = trending[0];
   const heroSecondary = trending.slice(1, 3);
   const latest = trending.slice(3, 7);
 
-  const usedSlugs = useMemo(() => {
-    const seen = new Set<string>();
-    if (lead) seen.add(lead.slug);
-    heroSecondary.forEach((a) => seen.add(a.slug));
-    latest.forEach((a) => seen.add(a.slug));
-    return seen;
-  }, [lead, heroSecondary, latest]);
+  const usedSlugs = new Set<string>();
+  if (lead) usedSlugs.add(lead.slug);
+  heroSecondary.forEach((a) => usedSlugs.add(a.slug));
+  latest.forEach((a) => usedSlugs.add(a.slug));
 
-  const categories = useMemo(() => {
-    if (apiCategories.length > 0) {
-      return apiCategories.map((c) => ({ id: c.id, name: c.name, slug: c.slug }));
-    }
-    return deriveCategories(pool);
-  }, [apiCategories, pool]);
+  const categories = apiCategories.length > 0
+    ? apiCategories.map((c: any) => ({ id: c.id, name: c.name, slug: c.slug }))
+    : deriveCategories(pool);
 
-  const articlesByCategory = useMemo(() => {
-    return categories.map((cat) => ({
-      ...cat,
-      articles: pool
-        .filter((a) => !usedSlugs.has(a.slug))
-        .filter(
-          (a) => categoryIdOf(a) === String(cat.id) || categorySlugOf(a) === cat.slug,
-        )
-        .slice(0, 3),
-    }));
-  }, [categories, pool, usedSlugs]);
+  const articlesByCategory = categories.map((cat: any) => ({
+    ...cat,
+    articles: pool
+      .filter((a) => !usedSlugs.has(a.slug))
+      .filter(
+        (a) => categoryIdOf(a) === String(cat.id) || categorySlugOf(a) === cat.slug,
+      )
+      .slice(0, 3),
+  }));
 
   return (
     <div className="min-h-screen bg-white pt-[60px] lg:pt-[96px]">
@@ -131,7 +131,7 @@ export default function KnowledgeHomePage() {
 
         {/* Category sections */}
         <div className="py-8 border-t border-slate-200">
-          {articlesByCategory.map((cat) => (
+          {articlesByCategory.map((cat: any) => (
             <CategorySection key={cat.slug} name={cat.name} slug={cat.slug} articles={cat.articles} />
           ))}
         </div>
