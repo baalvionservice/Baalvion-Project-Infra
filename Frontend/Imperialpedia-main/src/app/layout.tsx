@@ -131,15 +131,18 @@ export default async function RootLayout({
         {adsenseClient && (
           <>
             <meta name="google-adsense-account" content={adsenseClient} />
-            {/* AdSense's site-verification check looks for this snippet between
-                <head> and </head> -- it was previously loaded from <body> via
-                Analytics, which works for ad delivery but doesn't match what the
-                verification crawler is documented to check for. */}
+            {/* AdSense's site-verification check looks for this snippet as a literal
+                <script> tag in the page's HTML source. strategy="afterInteractive"
+                only emits a <link rel="preload"> server-side and injects the real
+                <script> tag client-side after hydration, so the verification crawler
+                (which reads raw HTML) never sees it. beforeInteractive is the only
+                strategy Next.js renders as an actual <script> tag in the server HTML
+                -- it's restricted to the root layout, which is where this lives. */}
             <Script
               async
               src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`}
               crossOrigin="anonymous"
-              strategy="afterInteractive"
+              strategy="beforeInteractive"
             />
           </>
         )}
