@@ -9,6 +9,8 @@ export interface AuthorSeo {
 export interface AuthorSocial {
   x?: string;
   linkedin?: string;
+  facebook?: string;
+  instagram?: string;
 }
 
 export interface WebsiteAuthor {

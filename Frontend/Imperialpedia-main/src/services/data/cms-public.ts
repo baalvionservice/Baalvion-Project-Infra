@@ -171,7 +171,7 @@ export interface CmsAuthor {
   avatarUrl?: string | null;
   videoUrl?: string | null;
   expertise?: string[];
-  social?: { x?: string; linkedin?: string } | null;
+  social?: { x?: string; linkedin?: string; facebook?: string; instagram?: string } | null;
   seoMetadata?: { title?: string; description?: string; keywords?: string[]; ogImage?: string; noIndex?: boolean } | null;
 }
 
@@ -375,7 +375,7 @@ export interface ResolvedAuthor {
   expertise?: string[];
   avatarUrl?: string;
   videoUrl?: string;
-  social: { twitter?: string; linkedin?: string; website?: string };
+  social: { twitter?: string; linkedin?: string; website?: string; facebook?: string; instagram?: string };
   /** Usual editorial role (writer/reviewer/fact-checker) — from the static roster
    *  (config/authors.ts) only; the CMS-managed record has no equivalent field. */
   role?: 'writer' | 'reviewer' | 'fact-checker';
@@ -398,7 +398,12 @@ export async function resolveAuthor(slug: string): Promise<ResolvedAuthor | null
       expertise: live.expertise?.length ? live.expertise : undefined,
       avatarUrl: live.avatarUrl || undefined,
       videoUrl: live.videoUrl || undefined,
-      social: { twitter: live.social?.x || undefined, linkedin: live.social?.linkedin || undefined },
+      social: {
+        twitter: live.social?.x || undefined,
+        linkedin: live.social?.linkedin || undefined,
+        facebook: live.social?.facebook || undefined,
+        instagram: live.social?.instagram || undefined,
+      },
     };
   }
 
@@ -416,6 +421,8 @@ export async function resolveAuthor(slug: string): Promise<ResolvedAuthor | null
         twitter: fallback.social?.twitter,
         linkedin: fallback.social?.linkedin,
         website: fallback.social?.website,
+        facebook: fallback.social?.facebook,
+        instagram: fallback.social?.instagram,
       },
     };
   }
@@ -447,7 +454,12 @@ export async function findAuthorProfileByName(name: string): Promise<ResolvedAut
       expertise: liveMatch.expertise?.length ? liveMatch.expertise : undefined,
       avatarUrl: liveMatch.avatarUrl || undefined,
       videoUrl: liveMatch.videoUrl || undefined,
-      social: { twitter: liveMatch.social?.x || undefined, linkedin: liveMatch.social?.linkedin || undefined },
+      social: {
+        twitter: liveMatch.social?.x || undefined,
+        linkedin: liveMatch.social?.linkedin || undefined,
+        facebook: liveMatch.social?.facebook || undefined,
+        instagram: liveMatch.social?.instagram || undefined,
+      },
     };
   }
 
@@ -465,6 +477,8 @@ export async function findAuthorProfileByName(name: string): Promise<ResolvedAut
       twitter: staticMatch.social?.twitter,
       linkedin: staticMatch.social?.linkedin,
       website: staticMatch.social?.website,
+      facebook: staticMatch.social?.facebook,
+      instagram: staticMatch.social?.instagram,
     },
   };
 }

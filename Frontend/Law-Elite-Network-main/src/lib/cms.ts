@@ -318,7 +318,7 @@ export interface CmsAuthor {
   bio?: string;
   avatarUrl?: string;
   expertise?: string[];
-  social?: { x?: string; linkedin?: string };
+  social?: { x?: string; linkedin?: string; facebook?: string; instagram?: string };
 }
 
 function toAuthor(raw: any): CmsAuthor | null {

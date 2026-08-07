@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Navbar } from '@/components/navbar';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
-import { Linkedin, Twitter, BookOpen } from 'lucide-react';
+import { Linkedin, Twitter, Facebook, Instagram, BookOpen } from 'lucide-react';
 import { authorNameToSlug } from '@/data/authors';
 import { getMergedAuthorBySlug } from '@/lib/authors-server';
 import { getAllArticles, type LawArticle } from '@/data/law-content';
@@ -66,6 +66,16 @@ export default async function AuthorProfilePage(
                 {author.social?.x && (
                   <a href={author.social.x} target="_blank" rel="noopener noreferrer" aria-label={`${author.name} on X`} className="text-slate-400 hover:text-blue-600 transition-colors">
                     <Twitter className="w-5 h-5" />
+                  </a>
+                )}
+                {author.social?.facebook && (
+                  <a href={author.social.facebook} target="_blank" rel="noopener noreferrer" aria-label={`${author.name} on Facebook`} className="text-slate-400 hover:text-blue-600 transition-colors">
+                    <Facebook className="w-5 h-5" />
+                  </a>
+                )}
+                {author.social?.instagram && (
+                  <a href={author.social.instagram} target="_blank" rel="noopener noreferrer" aria-label={`${author.name} on Instagram`} className="text-slate-400 hover:text-blue-600 transition-colors">
+                    <Instagram className="w-5 h-5" />
                   </a>
                 )}
               </div>
