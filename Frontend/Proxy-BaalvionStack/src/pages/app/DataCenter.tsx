@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Download, Database, Shield, FileText, Trash2, AlertTriangle } from "lucide-react";
 import { SEOHead } from "@/components/SEOHead";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { exportApi, privacyApi } from "@/lib/platformClient";
 
 const exportItems = [

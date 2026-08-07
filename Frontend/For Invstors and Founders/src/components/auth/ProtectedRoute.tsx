@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate, useLocation } from "react-router";
 import { supabase, type AuthUser as User } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 

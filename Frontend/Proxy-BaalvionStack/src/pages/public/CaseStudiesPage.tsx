@@ -13,7 +13,7 @@ import {
   Zap,
   CheckCircle
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { publicApi } from "@/lib/platformClient";
 import { caseStudies as fallbackCaseStudies } from "@/data/mockData";

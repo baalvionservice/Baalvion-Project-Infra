@@ -29,7 +29,7 @@ import {
   AlertTriangle,
   TrendingUp,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 
 const planDetails: Record<PlanType, { name: string; price: string; color: string; features: string[] }> = {
   free: {

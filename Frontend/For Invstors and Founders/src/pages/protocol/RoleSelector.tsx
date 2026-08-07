@@ -4,7 +4,7 @@
  * TODO: Validate user permissions before allowing role access
  */
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { Shield, GraduationCap, Crown, ChevronRight, Eye } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import AmbientBackground from "@/components/protocol/AmbientBackground";

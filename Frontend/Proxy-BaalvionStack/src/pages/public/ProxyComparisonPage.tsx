@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, X, ArrowRight, Globe, Smartphone, Server } from "lucide-react";
 import { SEOHead } from "@/components/SEOHead";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 
 const proxyTypes = [
   {

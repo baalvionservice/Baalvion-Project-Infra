@@ -22,7 +22,7 @@ import {
   AreaChart,
   Area
 } from "recharts";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { CountryAlertsPanel } from "@/components/admin/CountryAlertsPanel";
 import { IPPoolHealthSection } from "@/components/admin/IPPoolHealthSection";
 import { useAdminDashboard, useAdminUsers, useAdminRevenueSummary, useAdminSystemMetrics, useAdminTicketsPreview } from "@/hooks/useAdmin";

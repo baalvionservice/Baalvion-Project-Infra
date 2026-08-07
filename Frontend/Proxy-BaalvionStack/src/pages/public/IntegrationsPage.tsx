@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Code, Terminal, Webhook, Puzzle, ArrowRight, Copy } from "lucide-react";
 import { SEOHead } from "@/components/SEOHead";
 import { toast } from "sonner";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 
 const integrations = [
   { name: "Puppeteer", category: "browser", description: "Headless Chrome automation with proxy support", badge: "Popular", code: `const browser = await puppeteer.launch({\n  args: ['--proxy-server=http://proxy.baalvion.com:8080']\n});\nconst page = await browser.newPage();\nawait page.authenticate({\n  username: 'user',\n  password: 'API_KEY'\n});` },
