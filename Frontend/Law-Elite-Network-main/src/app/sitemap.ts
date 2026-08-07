@@ -3,6 +3,7 @@ import { getAllArticles } from '@/data/law-content';
 import { getAllAuthors } from '@/data/authors';
 import { articleUrl } from '@/lib/article-url';
 import { toNewCategorySlug } from '@/lib/category-slugs';
+import { cmsGetArticles } from '@/lib/cms';
 
 // Render at request time, never at build time. This route fetches from law-service,
 // and a build-time fetch against an unreachable API blocks `next build` (CI timeout).
@@ -54,9 +55,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     process.env.NEXT_PUBLIC_API_BASE_URL?.trim() ||
     (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3015/v1');
 
-  const [articles, categories] = await Promise.all([
+  const [articles, categories, cmsArticles] = await Promise.all([
     safeFetch<ArticleEntry>(`${apiBase}/articles?limit=1000`),
     safeFetch<CategoryEntry>(`${apiBase}/categories`),
+    cmsGetArticles().catch(() => []),
   ]);
 
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -72,6 +74,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/careers`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.5 },
     { url: `${BASE_URL}/advertise`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4 },
     { url: `${BASE_URL}/editorial-process`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
+    { url: `${BASE_URL}/policies`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
     { url: `${BASE_URL}/privacy-policy`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.2 },
     { url: `${BASE_URL}/terms-of-service`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.2 },
     { url: `${BASE_URL}/editorial-disclosure-policy`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.2 },
@@ -84,11 +87,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/comment-policy`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.15 },
   ];
 
-  // Bundled articles (always present) unioned with live-API results, deduped by
-  // slug -- API wins on lastModified when both exist. Previously this only mapped
-  // `articles` (API-sourced), so whenever the live API was unreachable the 45
-  // bundled guides had zero <url> entries in the sitemap at all, despite being
-  // fully real, indexable content reachable via internal links.
+  // Bundled articles (always present) unioned with live-API results and CMS
+  // (admin-authored) articles, deduped by slug -- later entries win on a
+  // collision. CMS wins last: it's the admin-authored, real-photo content and
+  // the source of truth when a slug exists in more than one place (same
+  // precedence CategoryContent.tsx uses for the on-page article list).
+  // Previously this only mapped `articles` (law-service), so whenever that API
+  // was unreachable (empty in production) the 45 bundled guides had zero <url>
+  // entries, AND the ~74 real CMS-authored articles were never included at
+  // all -- most of the site's actual content had no sitemap entry.
   const articleEntries = new Map<string, { url: string; lastModified: Date }>();
   getAllArticles().forEach((a) => {
     articleEntries.set(a.slug, {
@@ -100,6 +107,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     articleEntries.set(a.slug, {
       url: `${BASE_URL}${articleUrl(a)}`,
       lastModified: new Date(a.updated_at || a.updatedAt || Date.now()),
+    });
+  });
+  cmsArticles.forEach((a) => {
+    articleEntries.set(a.slug, {
+      url: `${BASE_URL}${articleUrl(a)}`,
+      lastModified: new Date(a.updatedAt || Date.now()),
     });
   });
 

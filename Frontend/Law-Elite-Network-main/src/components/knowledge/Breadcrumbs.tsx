@@ -4,6 +4,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { ChevronRight, Home } from 'lucide-react';
+import { CURRENT_CATEGORY_SLUGS } from '@/lib/category-slugs';
 
 interface BreadcrumbsProps {
   category?: { name: string; slug: string };
@@ -17,13 +18,21 @@ interface BreadcrumbsProps {
  * deep link) so it never appears here.
  */
 export function Breadcrumbs({ category, articleTitle }: BreadcrumbsProps) {
+  // A CMS article's category slug isn't guaranteed to be one of the site's 8
+  // real category pages (e.g. a narrow one-off like `criminal-law-dui-defense`
+  // instead of `criminal-law`) -- articleUrl() already falls back to the flat
+  // /article/{slug} URL for those (see article-url.ts), so this crumb must
+  // apply the same check or it links straight into a 404.
+  const hasRealCategory =
+    !!category && (CURRENT_CATEGORY_SLUGS as readonly string[]).includes(category.slug);
+
   return (
     <nav className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-8 animate-in fade-in slide-in-from-left-2 duration-700">
       <Link href="/" className="hover:text-blue-600 transition-colors flex items-center gap-1.5">
         <Home className="w-3 h-3" /> Home
       </Link>
 
-      {category && (
+      {hasRealCategory && category && (
         <>
           <ChevronRight className="w-3 h-3 text-slate-200" />
           <Link href={`/${category.slug}`} className="hover:text-blue-600 transition-colors">
