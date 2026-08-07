@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
-import { getCategoryArticles, listCmsContent, cmsContentToArticle } from "@/services/data/cms-public";
+import { getCategoryArticles, listAllCmsContent, cmsContentToArticle } from "@/services/data/cms-public";
 import { staticCategoryNews, staticArticleList } from "@/services/data/static-content";
 import { topicCopy, staticCategoryFor } from "@/lib/topic-config";
 import { FeaturedArticleCard } from "@/components/pages/FeaturedArticleCard";
@@ -175,7 +175,7 @@ export async function StocksHub() {
   // FAQ — aggregated from every live stocks article's own FAQ data, deduped.
   let faqSource: { faq?: { question: string; answer: string }[] }[] = [];
   try {
-    const { items } = await listCmsContent({ categorySlug: SLUG, contentType: "article", limit: 100 });
+    const items = await listAllCmsContent({ categorySlug: SLUG, contentType: "article" });
     faqSource = items.map((raw) => cmsContentToArticle(raw));
   } catch {
     faqSource = [];
