@@ -22,6 +22,7 @@ const ALLOW = [
   '/privacy-policy',
   '/terms-of-service',
   '/editorial-disclosure-policy',
+  '/policies',
   '/article/',
   '/law/',
   '/business',

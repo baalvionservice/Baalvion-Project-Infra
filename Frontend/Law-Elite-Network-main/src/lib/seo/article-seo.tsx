@@ -3,6 +3,7 @@ import { getAuthorByName } from '@/data/authors';
 import { resolveArticleImage } from '@/lib/article-art';
 import { extractFaqFromHtml } from '@/lib/seo/faq-extractor';
 import { articleUrl } from '@/lib/article-url';
+import { CURRENT_CATEGORY_SLUGS } from '@/lib/category-slugs';
 
 const titleCase = (s: string) => s.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
@@ -87,8 +88,13 @@ export function ArticleJsonLd({ article, slug, site }: { article: any | null; sl
       }
     : null;
   const cat = article?.category;
+  // Same real-category check as Breadcrumbs.tsx / article-url.ts -- a CMS
+  // article's category slug may not be one of the 8 real category pages, and
+  // this JSON-LD is structured data Google actually parses, so an `item` URL
+  // that 404s here is worse than a broken visible link.
+  const catIsReal = !!cat?.slug && (CURRENT_CATEGORY_SLUGS as readonly string[]).includes(cat.slug);
   const crumbs: Array<{ name: string; item: string }> = [{ name: 'Home', item: site }];
-  if (cat?.name && cat?.slug) crumbs.push({ name: cat.name, item: `${site}/${cat.slug}` });
+  if (catIsReal && cat?.name && cat?.slug) crumbs.push({ name: cat.name, item: `${site}/${cat.slug}` });
   crumbs.push({ name: article?.title || titleCase(slug), item: url });
   const breadcrumbLd = {
     '@context': 'https://schema.org',
