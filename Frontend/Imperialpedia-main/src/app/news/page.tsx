@@ -2,6 +2,7 @@ import { newsArticles, NewsCategory } from "@/lib/data.news";
 import { getPublishedNews, listCmsContent, cmsContentToNews } from "@/services/data/cms-public";
 import { buildMetadata } from "@/lib/seo";
 import { env } from "@/config/env";
+import { Metadata } from "next";
 
 import { BreakingTicker } from "@/components/news/BreakingTicker";
 import { NewsHero } from "@/components/news/NewsHero";
@@ -14,12 +15,21 @@ import { NewsSidebar } from "@/components/news/NewsSidebar";
 import { NewsletterBand } from "@/components/landing/investopedia/NewsletterBand";
 import { newsArticleHref } from "@/lib/data/article-url";
 
-export const metadata = buildMetadata({
-  canonical: '/news',
-  title: "Financial News and Analysis",
-  description:
-    "Stay informed with the latest financial news, market insights, and expert analysis. Our news section covers global markets, economic trends, and investment strategies to help you make informed decisions.",
-});
+// Empty hubs read to Google as exactly the thin/low-value content pattern
+// that blocks AdSense approval (see GLOSSARY_LIVE in config/glossary.ts for
+// the same call made for the glossary). noindex while no `news` content has
+// been published — flips back automatically the moment one is, no redeploy
+// needed.
+export async function generateMetadata(): Promise<Metadata> {
+  const liveNews = await getPublishedNews(1);
+  return buildMetadata({
+    canonical: '/news',
+    title: "Financial News and Analysis",
+    description:
+      "Stay informed with the latest financial news, market insights, and expert analysis. Our news section covers global markets, economic trends, and investment strategies to help you make informed decisions.",
+    noIndex: liveNews.length === 0,
+  });
+}
 
 const FEED_PAGE_SIZE = 12;
 const NICHE_CATEGORIES: NewsCategory[] = [
