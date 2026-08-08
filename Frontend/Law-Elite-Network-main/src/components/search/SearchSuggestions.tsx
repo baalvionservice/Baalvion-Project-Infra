@@ -17,7 +17,7 @@ export default function SearchSuggestions({ suggestions, query, onSelect }: Sear
   return (
     <div className="absolute top-full left-0 right-0 z-50 mt-4 bg-white border border-slate-100 rounded-[2rem] shadow-[0_40px_80px_-20px_rgba(0,0,0,0.15)] overflow-hidden animate-in slide-in-from-top-2 duration-300">
       <div className="bg-slate-50/50 px-6 py-3 border-b border-slate-100 flex items-center justify-between">
-        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Intelligence Matches</span>
+        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Related Guides</span>
         <Sparkles className="w-3.5 h-3.5 text-blue-400 animate-pulse" />
       </div>
       
@@ -36,7 +36,7 @@ export default function SearchSuggestions({ suggestions, query, onSelect }: Sear
                 {highlightText(item.title, query)}
               </p>
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                Strategic Dossier
+                Guide
               </p>
             </div>
             <ChevronRight className="w-4 h-4 text-slate-200 group-hover:text-blue-400 transition-all group-hover:translate-x-1" />
@@ -46,7 +46,7 @@ export default function SearchSuggestions({ suggestions, query, onSelect }: Sear
 
       <div className="p-4 bg-slate-50 border-t border-slate-100 text-center">
         <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-          Press <span className="text-slate-900">Enter</span> for full audit view
+          Press <span className="text-slate-900">Enter</span> to see all results
         </p>
       </div>
     </div>

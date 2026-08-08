@@ -32,7 +32,7 @@ export function BreakingTicker({ articles }: Props) {
 
   return (
     <div
-      className="sticky top-0 z-40 flex items-stretch bg-news-600 text-white dark:bg-news-700"
+      className="sticky top-[60px] lg:top-[96px] z-40 flex items-stretch bg-news-600 text-white dark:bg-news-700"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >

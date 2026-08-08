@@ -18,8 +18,6 @@ import { cn } from '@/lib/utils';
 import { isSubcategoryPopulated } from '@/lib/subcategory-or-article';
 import seedData from '../../../docs/seed-data.json';
 import { useAuth } from '@/hooks/useAuth';
-import LanguageSwitcher from '@/components/LanguageSwitcher';
-import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { sharedSignInUrl } from '@/lib/shared-auth';
 
 // The top nav bar has room for ~11 items (Home/News/World + up to 8 topics) inside
@@ -123,9 +121,6 @@ export function PublicNavbar() {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            <LanguageSwitcher />
-            <ThemeToggle />
-
             {isAuthenticated ? (
               <Link href={dashboardHref}>
                 <button className="inline-flex items-center gap-2 px-4 h-9 rounded-md bg-[#0B1F3A] text-white text-[12px] font-bold tracking-wide hover:bg-blue-800 transition-colors">
@@ -270,6 +265,28 @@ export function PublicNavbar() {
       {isMobileMenuOpen && (
         <div className="lg:hidden border-t border-slate-100 bg-white shadow-2xl max-h-[calc(100vh-64px)] overflow-y-auto">
           <div className="p-4 space-y-1">
+            {/* Sign In is `hidden sm:inline-flex` in the desktop utility row above,
+                so on a true mobile viewport it never appears outside this drawer --
+                surface it here as the drawer's own primary action. */}
+            {isAuthenticated ? (
+              <Link
+                href={dashboardHref}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center justify-center gap-2 mb-3 h-11 rounded-md bg-[#0B1F3A] text-white text-sm font-bold tracking-wide"
+              >
+                <LayoutDashboard className="w-4 h-4" /> Dashboard
+              </Link>
+            ) : (
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  window.location.assign(sharedSignInUrl());
+                }}
+                className="w-full flex items-center justify-center gap-2 mb-3 h-11 rounded-md bg-[#0B1F3A] text-white text-sm font-bold tracking-wide"
+              >
+                <UserPlus className="w-4 h-4" /> Sign In
+              </button>
+            )}
             <Link
               href="/"
               onClick={() => setIsMobileMenuOpen(false)}

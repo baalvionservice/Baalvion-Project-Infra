@@ -1,13 +1,45 @@
 import React from 'react';
 import Link from 'next/link';
 import { Globe2 } from 'lucide-react';
+import type { Metadata } from 'next';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { COUNTRIES, getCountryArticleCounts } from '@/data/countries';
+
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+
+export const metadata: Metadata = {
+  title: 'Legal Guides by Country | Law Elite Network',
+  description: 'Browse plain-language legal guides organized by jurisdiction — the same library, structured around the country each guide applies to.',
+  alternates: { canonical: `${SITE}/countries` },
+  robots: { index: true, follow: true },
+  openGraph: { type: 'website', url: `${SITE}/countries`, title: 'Legal Guides by Country | Law Elite Network', description: 'Browse plain-language legal guides organized by jurisdiction.' },
+  twitter: { card: 'summary_large_image', title: 'Legal Guides by Country | Law Elite Network', description: 'Browse plain-language legal guides organized by jurisdiction.' },
+};
 
 export default async function CountriesIndexPage() {
   const counts = await getCountryArticleCounts();
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'Legal Guides by Country',
+    description: 'Plain-language legal guides organized by jurisdiction.',
+    url: `${SITE}/countries`,
+    isPartOf: { '@type': 'WebSite', name: 'Law Elite Network', url: SITE },
+  };
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE },
+      { '@type': 'ListItem', position: 2, name: 'Countries', item: `${SITE}/countries` },
+    ],
+  };
+
   return (
+    <>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
     <div className="min-h-screen bg-white pt-[60px] lg:pt-[96px]">
       <main className="pb-24">
         <section className="border-b border-slate-200 bg-slate-50/60">
@@ -45,5 +77,6 @@ export default async function CountriesIndexPage() {
 
       <PublicFooter />
     </div>
+    </>
   );
 }

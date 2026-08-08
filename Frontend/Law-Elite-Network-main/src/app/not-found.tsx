@@ -28,23 +28,23 @@ export default function NotFound() {
           </div>
 
           <div className="space-y-4">
-            <h1 className="font-serif text-5xl md:text-6xl font-bold italic text-slate-900 tracking-tight">Intelligence Not Located</h1>
-            <p className="text-slate-500 text-lg md:text-xl italic font-medium max-w-sm mx-auto leading-relaxed">
-              The requested professional record could not be synchronized with our active network mapping.
+            <h1 className="font-serif text-5xl md:text-6xl font-bold text-slate-900 tracking-tight">Page Not Found</h1>
+            <p className="text-slate-500 text-lg md:text-xl font-medium max-w-sm mx-auto leading-relaxed">
+              The page you're looking for doesn't exist or may have moved. Try searching, or head back to the homepage.
             </p>
           </div>
 
           <div className="pt-6">
             <Button asChild className="bg-slate-900 hover:bg-blue-600 text-white rounded-2xl px-12 h-16 font-bold uppercase text-[10px] tracking-[0.3em] shadow-2xl transition-all interactive-lift">
               <Link href="/">
-                <ArrowLeft className="mr-3 w-5 h-5" /> Return to Command Center
+                <ArrowLeft className="mr-3 w-5 h-5" /> Back to Homepage
               </Link>
             </Button>
           </div>
 
           <div className="pt-16 border-t border-slate-50 opacity-40">
             <p className="text-[9px] font-bold uppercase tracking-[0.4em] text-slate-400">
-              Protocol Error 404 • Discovery Ledger Misaligned
+              404 — Page Not Found
             </p>
           </div>
         </div>

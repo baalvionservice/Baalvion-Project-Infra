@@ -50,9 +50,15 @@ export function PublicFooter() {
                 <li><Link href="/business" className="hover:text-blue-300 transition-colors">Business & Corporate</Link></li>
                 <li><Link href="/criminal-law" className="hover:text-blue-300 transition-colors">Criminal Law</Link></li>
                 <li><Link href="/family-law" className="hover:text-blue-300 transition-colors">Family & Personal</Link></li>
+                <li><Link href="/real-estate-law" className="hover:text-blue-300 transition-colors">Property & Real Estate</Link></li>
                 <li><Link href="/tax-finance" className="hover:text-blue-300 transition-colors">Tax & Finance</Link></li>
                 <li><Link href="/employment-law" className="hover:text-blue-300 transition-colors">Employment & Labor</Link></li>
                 <li><Link href="/tech-ip" className="hover:text-blue-300 transition-colors">Technology & IP</Link></li>
+                <li><Link href="/disputes" className="hover:text-blue-300 transition-colors">Dispute Resolution</Link></li>
+              </ul>
+              <ul className="space-y-4 text-[13px] font-bold uppercase tracking-widest mt-8 pt-8 border-t border-white/10">
+                <li><Link href="/news" className="hover:text-blue-300 transition-colors">Legal News</Link></li>
+                <li><Link href="/countries" className="hover:text-blue-300 transition-colors">Browse by Country</Link></li>
               </ul>
             </div>
 
