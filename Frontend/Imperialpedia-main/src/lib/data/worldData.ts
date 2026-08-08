@@ -521,18 +521,3 @@ export const topStories = rawTopStories.map((item) => ({
   image: categoryImage(item.category),
 }));
 
-export const navCategories = [
-  "Markets",
-  "Business",
-  "Investing",
-  "Tech",
-  "Politics",
-  "World",
-  "Finance",
-  "Health & Science",
-  "Media",
-  "Real Estate",
-  "Energy",
-  "Climate",
-  "Personal Finance",
-];

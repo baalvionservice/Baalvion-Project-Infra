@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ImperialpediaMark } from "@/components/icons/ImperialpediaMark";
 
 /**
@@ -5,13 +6,38 @@ import { ImperialpediaMark } from "@/components/icons/ImperialpediaMark";
  * world/Footer.tsx (already dark, just the `#ce2b2b` → canonical
  * `hsl(var(--cnbc-red))` hex swap needed) so all three routes share one
  * footer instead of three near-duplicate copies.
+ *
+ * Every link below points at a real, live route. A few of the original CNBC
+ * template labels (Watchlist, Screener, Newsletters, Podcasts, Apps) have no
+ * corresponding page on this site and were dropped rather than left as
+ * href="#" or pointed at a route that would 404 — both fail Google's
+ * crawlable-links requirement just as badly as the placeholder they replace.
  */
 export default function Footer() {
-  const links = [
-    ["News", "World Markets", "Business", "Tech", "Politics"],
-    ["Investing", "Personal Finance", "Watchlist", "Premium", "Screener"],
-    ["About Imperialpedia", "Advertise", "Careers", "Privacy Policy", "Terms"],
-    ["Contact", "Newsletters", "Podcasts", "RSS Feeds", "Apps"],
+  const links: { label: string; href: string }[][] = [
+    [
+      { label: "News", href: "/news" },
+      { label: "World Markets", href: "/world" },
+      { label: "Business", href: "/market-news" },
+      { label: "Politics", href: "/politics" },
+    ],
+    [
+      { label: "Investing", href: "/investing" },
+      { label: "Personal Finance", href: "/personal-finance" },
+      { label: "Tech", href: "/technologies" },
+      { label: "Premium", href: "/premium" },
+    ],
+    [
+      { label: "About Imperialpedia", href: "/about" },
+      { label: "Advertise", href: "/advertise" },
+      { label: "Careers", href: "/careers" },
+      { label: "Contact", href: "/contact" },
+    ],
+    [
+      { label: "Privacy Policy", href: "/privacy-policy" },
+      { label: "Terms", href: "/terms-of-service" },
+      { label: "RSS Feeds", href: "/feed.xml" },
+    ],
   ];
 
   return (
@@ -33,13 +59,13 @@ export default function Footer() {
           {links.map((col, i) => (
             <div key={i} className="space-y-2">
               {col.map((link) => (
-                <a
-                  key={link}
-                  href="#"
+                <Link
+                  key={link.href}
+                  href={link.href}
                   className="block text-xs text-gray-400 hover:text-white transition-colors"
                 >
-                  {link}
-                </a>
+                  {link.label}
+                </Link>
               ))}
             </div>
           ))}

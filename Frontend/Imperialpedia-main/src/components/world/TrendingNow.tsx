@@ -1,4 +1,5 @@
 import type { WorldData } from "@/lib/data/worldRegions";
+import { StoryLink } from "@/components/common/StoryLink";
 
 /** CNBC-style "Trending Now" rail — top of the live "latest" feed, numbered. */
 export default function TrendingNow({ latest }: { latest: WorldData["latest"] }) {
@@ -14,16 +15,18 @@ export default function TrendingNow({ latest }: { latest: WorldData["latest"] })
       </div>
       <ol className="divide-y divide-border">
         {items.map((item, i) => (
-          <li
-            key={item.id}
-            className="group flex items-start gap-2.5 px-3 py-2.5 hover:bg-muted transition-colors cursor-pointer"
-          >
-            <span className="world-kicker text-lg font-black text-white/20 leading-none w-5 shrink-0">
-              {i + 1}
-            </span>
-            <span className="text-xs font-semibold leading-snug text-foreground group-hover:text-[hsl(var(--cnbc-red))] transition-colors line-clamp-2">
-              {item.headline}
-            </span>
+          <li key={item.id}>
+            <StoryLink
+              item={item}
+              className="group flex items-start gap-2.5 px-3 py-2.5 hover:bg-muted transition-colors"
+            >
+              <span className="world-kicker text-lg font-black text-white/20 leading-none w-5 shrink-0">
+                {i + 1}
+              </span>
+              <span className="text-xs font-semibold leading-snug text-foreground group-hover:text-[hsl(var(--cnbc-red))] transition-colors line-clamp-2">
+                {item.headline}
+              </span>
+            </StoryLink>
           </li>
         ))}
       </ol>

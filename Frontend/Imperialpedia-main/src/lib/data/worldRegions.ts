@@ -39,6 +39,8 @@ export interface Indicator {
   change: string;
   percent: string;
   positive: boolean;
+  /** Canonical symbol for /markets/quote/{symbol}, when this instrument has a quote page. */
+  symbol?: string;
 }
 
 export interface FeaturedStory {
@@ -50,6 +52,38 @@ export interface FeaturedStory {
   time: string;
   author: string;
   tag: string | null;
+  /** Owned article (CMS/editorial) — resolved via storyHref() in article-url.ts. */
+  slug?: string;
+  dateISO?: string;
+  /** External link — set instead of slug/dateISO for wire content with no owned article page. */
+  href?: string;
+}
+
+export interface LatestNewsItem {
+  id: number;
+  time: string;
+  category: string;
+  headline: string;
+  positive: boolean | null;
+  slug?: string;
+  dateISO?: string;
+  href?: string;
+}
+
+export interface NewsGridItem {
+  id: number;
+  headline: string;
+  time: string;
+  image?: string | null;
+  slug?: string;
+  dateISO?: string;
+  href?: string;
+}
+
+export interface NewsGridSection {
+  section: string;
+  color: string;
+  items: NewsGridItem[];
 }
 
 export interface MarketRow {
@@ -57,6 +91,8 @@ export interface MarketRow {
   value: string;
   change: string;
   positive: boolean;
+  /** Canonical symbol for /markets/quote/{symbol}, when this instrument has a quote page. */
+  symbol?: string;
 }
 
 export interface MarketRegionGroup {
@@ -81,8 +117,8 @@ export interface WorldData {
   indicators: Indicator[];
   featured: FeaturedStory[];
   markets: MarketRegionGroup[];
-  latest: typeof latestNews;
-  sections: typeof newsGridSections;
+  latest: LatestNewsItem[];
+  sections: NewsGridSection[];
   watchlist: WatchlistItem[];
   /** Region ids enabled in the admin World Control panel (undefined = all). */
   enabledRegions?: RegionId[];

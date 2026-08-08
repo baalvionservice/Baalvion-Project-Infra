@@ -285,6 +285,10 @@ function toIndicator(def: SymbolDef, q: Quote): Indicator {
     change: sign + fmt(change, def.dec),
     percent: sign + pct.toFixed(2) + "%",
     positive,
+    // /markets/quote/{symbol} uses ALL_TRACKED_SYMBOLS' canonical form, not
+    // the raw Yahoo ticker (e.g. "DJI", not "^DJI") -- undefined (no link)
+    // for instruments this pipeline has no canonical mapping/quote page for.
+    symbol: CANONICAL_SYMBOL_MAP[def.symbol],
   };
 }
 
@@ -316,6 +320,7 @@ function buildMarkets(
         value: ind.value,
         change: ind.percent,
         positive: ind.positive,
+        symbol: ind.symbol,
         group: d.group ?? "Americas",
       };
     });
@@ -543,6 +548,8 @@ function bundleFromArticles(arts: RawArticle[]): NewsBundle | null {
       time: relativeTime(a.ms),
       author: a.domain ?? "Newswire",
       tag: i === 0 ? "BREAKING" : null,
+      // Wire content has no owned article page -- link out to the original source.
+      href: a.url,
     };
   });
 
@@ -552,6 +559,7 @@ function bundleFromArticles(arts: RawArticle[]): NewsBundle | null {
     category: classifyCategory(a.title),
     headline: a.title,
     positive: classifyPositive(a.title),
+    href: a.url,
   }));
 
   // Bucket the remaining articles by category into topical sections.
@@ -569,6 +577,7 @@ function bundleFromArticles(arts: RawArticle[]): NewsBundle | null {
         headline: a.title,
         time: relativeTime(a.ms),
         image: safeImage(undefined, classifyCategory(a.title), a.title),
+        href: a.url,
       }));
     return { section: def.section, color: "#0a2463", items };
   }).filter((s) => s.items.length > 0);
@@ -735,6 +744,9 @@ async function buildCmsNews(region: RegionId): Promise<NewsBundle | null> {
       time: CMS_TIME(c),
       author: "Imperialpedia",
       tag: i === 0 ? "EXCLUSIVE" : null,
+      // Owned editorial content -- links to the real article page via storyHref().
+      slug: c.slug,
+      dateISO: c.publishedAt ?? undefined,
     };
   });
 
@@ -744,6 +756,8 @@ async function buildCmsNews(region: RegionId): Promise<NewsBundle | null> {
     category: mapCmsCategory(c.category?.name, c.title),
     headline: c.title,
     positive: classifyPositive(c.title),
+    slug: c.slug,
+    dateISO: c.publishedAt ?? undefined,
   }));
 
   const buckets = new Map<string, CmsContent[]>();
@@ -760,6 +774,8 @@ async function buildCmsNews(region: RegionId): Promise<NewsBundle | null> {
         headline: c.title,
         time: CMS_TIME(c),
         image: safeImage(c.featuredImage, mapCmsCategory(c.category?.name, c.title), c.title),
+        slug: c.slug,
+        dateISO: c.publishedAt ?? undefined,
       }));
     return { section: def.section, color: "#0a2463", items: its };
   }).filter((s) => s.items.length > 0);
@@ -806,6 +822,9 @@ async function topUpNews(
       category: f.category,
       headline: f.headline,
       positive: null as boolean | null,
+      slug: f.slug,
+      dateISO: f.dateISO,
+      href: f.href,
     })),
   ].filter((i) => !seen.has(i.headline.toLowerCase()));
 

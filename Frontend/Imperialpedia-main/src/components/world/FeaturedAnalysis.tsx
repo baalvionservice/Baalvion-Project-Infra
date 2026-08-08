@@ -1,5 +1,6 @@
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import type { WorldData } from "@/lib/data/worldRegions";
+import { StoryLink } from "@/components/common/StoryLink";
 
 /** CNBC's "PRO News and Analysis" module, rebranded — reuses real section
  * items already fetched for the page (no new data source). No fake "PRO"
@@ -16,26 +17,28 @@ export default function FeaturedAnalysis({ sections }: { sections: WorldData["se
       </h2>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-5">
         {items.map((item) => (
-          <div key={item.id} className="flex gap-3">
-            <div className="relative w-24 h-16 shrink-0 rounded-sm overflow-hidden">
-              <OptimizedImage
-                src={item.image}
-                alt={item.headline}
-                fill
-                className="object-cover"
-                sizes="96px"
-              />
-            </div>
+          <StoryLink key={item.id} item={item} className="flex gap-3">
+            {item.image && (
+              <div className="relative w-24 h-16 shrink-0 rounded-sm overflow-hidden">
+                <OptimizedImage
+                  src={item.image}
+                  alt={item.headline}
+                  fill
+                  className="object-cover"
+                  sizes="96px"
+                />
+              </div>
+            )}
             <div className="min-w-0">
               <span className="world-kicker inline-block bg-[hsl(var(--cnbc-surface))] text-white text-[8px] font-black px-1.5 py-0.5 mb-1 tracking-wide">
                 ANALYSIS
               </span>
-              <p className="text-xs font-semibold leading-snug text-foreground hover:text-[hsl(var(--cnbc-red))] hover:underline cursor-pointer line-clamp-3">
+              <p className="text-xs font-semibold leading-snug text-foreground hover:text-[hsl(var(--cnbc-red))] hover:underline line-clamp-3">
                 {item.headline}
               </p>
               <span className="text-[10px] text-muted-foreground mt-1 block">{item.time}</span>
             </div>
-          </div>
+          </StoryLink>
         ))}
       </div>
     </div>

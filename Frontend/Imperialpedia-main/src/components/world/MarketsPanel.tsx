@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import type { Indicator, WorldData } from "@/lib/data/worldRegions";
 
 interface Props {
@@ -58,30 +59,39 @@ export default function MarketsPanel({ markets, watchlist, indicators }: Props) 
                 </span>
               </div>
               <div className="divide-y divide-border">
-                {region.markets.map((m) => (
-                  <div
-                    key={m.name}
-                    className="flex items-center justify-between px-2 sm:px-3 py-1.5 sm:py-2 hover:bg-muted cursor-pointer transition-colors"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <span className="text-[10px] sm:text-xs font-bold text-foreground truncate block">
-                        {m.name}
-                      </span>
-                    </div>
-                    <div className="text-right flex-shrink-0">
-                      <div className="text-[10px] sm:text-xs font-mono text-foreground">
-                        {m.value}
+                {region.markets.map((m) => {
+                  const content = (
+                    <>
+                      <div className="min-w-0 flex-1">
+                        <span className="text-[10px] sm:text-xs font-bold text-foreground truncate block">
+                          {m.name}
+                        </span>
                       </div>
-                      <div
-                        className={`text-[9px] sm:text-[11px] font-mono font-bold ${
-                          m.positive ? "text-[hsl(var(--cnbc-green))]" : "text-[hsl(var(--cnbc-red))]"
-                        }`}
-                      >
-                        {m.positive ? "▲" : "▼"} {m.change}
+                      <div className="text-right flex-shrink-0">
+                        <div className="text-[10px] sm:text-xs font-mono text-foreground">
+                          {m.value}
+                        </div>
+                        <div
+                          className={`text-[9px] sm:text-[11px] font-mono font-bold ${
+                            m.positive ? "text-[hsl(var(--cnbc-green))]" : "text-[hsl(var(--cnbc-red))]"
+                          }`}
+                        >
+                          {m.positive ? "▲" : "▼"} {m.change}
+                        </div>
                       </div>
+                    </>
+                  );
+                  const rowClass = "flex items-center justify-between px-2 sm:px-3 py-1.5 sm:py-2 hover:bg-muted transition-colors";
+                  return m.symbol ? (
+                    <Link key={m.name} href={`/markets/quote/${m.symbol}`} className={rowClass}>
+                      {content}
+                    </Link>
+                  ) : (
+                    <div key={m.name} className={rowClass}>
+                      {content}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ))}
@@ -96,28 +106,37 @@ export default function MarketsPanel({ markets, watchlist, indicators }: Props) 
       {activeTab === "fx" && (
         <div>
           <div className="divide-y divide-border">
-            {fxCommodity.map((i) => (
-              <div
-                key={i.name}
-                className="flex items-center justify-between px-2 sm:px-3 py-1.5 sm:py-2 hover:bg-muted cursor-pointer transition-colors"
-              >
-                <div className="min-w-0 flex-1">
-                  <span className="text-[10px] sm:text-xs font-bold text-foreground truncate block">
-                    {i.name}
-                  </span>
-                </div>
-                <div className="text-right flex-shrink-0">
-                  <div className="text-[10px] sm:text-xs font-mono text-foreground">{i.value}</div>
-                  <div
-                    className={`text-[9px] sm:text-[11px] font-mono font-bold ${
-                      i.positive ? "text-[hsl(var(--cnbc-green))]" : "text-[hsl(var(--cnbc-red))]"
-                    }`}
-                  >
-                    {i.positive ? "▲" : "▼"} {i.percent}
+            {fxCommodity.map((i) => {
+              const content = (
+                <>
+                  <div className="min-w-0 flex-1">
+                    <span className="text-[10px] sm:text-xs font-bold text-foreground truncate block">
+                      {i.name}
+                    </span>
                   </div>
+                  <div className="text-right flex-shrink-0">
+                    <div className="text-[10px] sm:text-xs font-mono text-foreground">{i.value}</div>
+                    <div
+                      className={`text-[9px] sm:text-[11px] font-mono font-bold ${
+                        i.positive ? "text-[hsl(var(--cnbc-green))]" : "text-[hsl(var(--cnbc-red))]"
+                      }`}
+                    >
+                      {i.positive ? "▲" : "▼"} {i.percent}
+                    </div>
+                  </div>
+                </>
+              );
+              const rowClass = "flex items-center justify-between px-2 sm:px-3 py-1.5 sm:py-2 hover:bg-muted transition-colors";
+              return i.symbol ? (
+                <Link key={i.name} href={`/markets/quote/${i.symbol}`} className={rowClass}>
+                  {content}
+                </Link>
+              ) : (
+                <div key={i.name} className={rowClass}>
+                  {content}
                 </div>
-              </div>
-            ))}
+              );
+            })}
             {fxCommodity.length === 0 && (
               <p className="px-3 py-4 text-xs text-muted-foreground">No FX/commodity data for this region.</p>
             )}
@@ -134,9 +153,10 @@ export default function MarketsPanel({ markets, watchlist, indicators }: Props) 
           </div>
           <div className="divide-y divide-border">
             {watchlist.map((item) => (
-              <div
+              <Link
                 key={item.ticker}
-                className="grid grid-cols-3 items-center px-2 sm:px-3 py-2 sm:py-2.5 hover:bg-muted cursor-pointer transition-colors"
+                href={`/markets/quote/${item.ticker}`}
+                className="grid grid-cols-3 items-center px-2 sm:px-3 py-2 sm:py-2.5 hover:bg-muted transition-colors"
               >
                 <div className="min-w-0">
                   <div className="text-[10px] sm:text-xs font-black text-foreground">
@@ -158,7 +178,7 @@ export default function MarketsPanel({ markets, watchlist, indicators }: Props) 
                 >
                   {item.change}
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
           <div className="p-2 sm:p-3">

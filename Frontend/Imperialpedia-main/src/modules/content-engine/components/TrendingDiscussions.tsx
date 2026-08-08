@@ -4,7 +4,6 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Text } from '@/design-system/typography/text';
 import { Flame, MessageSquare, ChevronRight } from 'lucide-react';
-import Link from 'next/link';
 
 interface TrendingDiscussionsProps {
   topics: string[];
@@ -24,17 +23,21 @@ export function TrendingDiscussions({ topics }: TrendingDiscussionsProps) {
       <CardContent className="p-0">
         <div className="divide-y divide-white/5">
           {topics.map((topic, i) => (
-            <Link key={i} href="#" className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors group">
+            // No dedicated thread/forum page exists for a bare topic string yet --
+            // a real href will be added once this module is wired to a live
+            // discussions feature. Not a Link in the meantime: an href="#" here
+            // would be a crawlable link to nowhere, worse than no link at all.
+            <div key={i} className="flex items-center justify-between p-4 group">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="p-2 rounded-lg bg-background/50 border border-white/5 text-muted-foreground group-hover:text-primary transition-colors">
+                <div className="p-2 rounded-lg bg-background/50 border border-white/5 text-muted-foreground">
                   <MessageSquare className="h-3.5 w-3.5" />
                 </div>
-                <Text variant="caption" className="font-bold truncate group-hover:text-foreground transition-colors">
+                <Text variant="caption" className="font-bold truncate">
                   {topic}
                 </Text>
               </div>
-              <ChevronRight className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />
-            </Link>
+              <ChevronRight className="h-3 w-3 text-muted-foreground opacity-0 transition-all" />
+            </div>
           ))}
         </div>
         <div className="p-4 pt-0">

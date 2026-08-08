@@ -2,6 +2,7 @@
 import { useRef } from "react";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import type { FeaturedStory } from "@/lib/data/worldRegions";
+import { StoryLink } from "@/components/common/StoryLink";
 
 /** CNBC-style horizontal "Special Reports" carousel — reuses the same real,
  * live featured stories already fetched for the hero (no new data source). */
@@ -40,9 +41,10 @@ export default function SpecialReports({ featured }: { featured: FeaturedStory[]
       </div>
       <div ref={scrollRef} className="flex gap-3 overflow-x-auto scrollbar-hide scroll-smooth">
         {featured.map((story) => (
-          <div
+          <StoryLink
             key={story.id}
-            className="relative shrink-0 w-64 h-36 rounded-sm overflow-hidden group cursor-pointer"
+            item={story}
+            className="relative shrink-0 w-64 h-36 rounded-sm overflow-hidden group block"
           >
             <OptimizedImage
               src={story.image}
@@ -56,7 +58,7 @@ export default function SpecialReports({ featured }: { featured: FeaturedStory[]
               <p className="text-white text-xs font-bold leading-snug line-clamp-3">{story.headline}</p>
               <p className="world-kicker text-[hsl(var(--cnbc-gold))] text-[10px] mt-1">{story.author}</p>
             </div>
-          </div>
+          </StoryLink>
         ))}
       </div>
     </div>
