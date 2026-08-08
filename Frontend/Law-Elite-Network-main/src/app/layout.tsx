@@ -188,18 +188,18 @@ export default async function RootLayout({
         {ADSENSE_CLIENT && (
           <>
             <meta name="google-adsense-account" content={ADSENSE_CLIENT} />
-            {/* AdSense's site-verification check looks for this snippet as a literal
-                <script> tag in the page's HTML source. strategy="afterInteractive"
-                only emits a <link rel="preload"> server-side and injects the real
-                <script> tag client-side after hydration, so the verification crawler
-                (which reads raw HTML) never sees it. beforeInteractive is the only
-                strategy Next.js renders as an actual <script> tag in the server HTML
-                -- it's restricted to the root layout, which is where this lives. */}
-            <Script
+            {/* AdSense's site-verification check regex-matches the raw HTML for a
+                literal <script async src="...adsbygoogle.js...crossorigin...">
+                tag. next/script's <Script> component -- for every strategy,
+                including beforeInteractive -- never emits that literal tag; it
+                registers the URL in a self.__next_s.push([...]) bootstrap array
+                instead, so the crawler never finds a match. A plain native
+                <script> element renders as literal HTML text, which is what
+                the crawler is regex-matching. */}
+            <script
               async
               src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
               crossOrigin="anonymous"
-              strategy="beforeInteractive"
             />
           </>
         )}
