@@ -59,9 +59,9 @@ export default async function WorldPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
 
-      {lead && <BreakingTicker articles={news} />}
-
       <div className="pt-[60px] lg:pt-[96px]">
+        {lead && <BreakingTicker articles={news} />}
+
         <section className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40">
           <div className="container mx-auto px-4 sm:px-6 max-w-7xl py-12 md:py-16">
             <span className="kicker">Global Coverage</span>

@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, Globe2, ArrowRight } from 'lucide-react';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { RelatedArticles, fetchRelatedArticles } from '@/components/knowledge/RelatedArticles';
 import { Breadcrumbs } from '@/components/knowledge/Breadcrumbs';
@@ -99,6 +99,15 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
 
                 <ArticleAuthorByline authorName={authorName} updatedAt={updatedAt} matchedAuthor={matchedAuthor} />
 
+                {/* Jurisdiction badge -- only renders once an article actually
+                    carries article.country (see src/data/countries.ts); no
+                    article does yet, so this is dormant capability, not a claim. */}
+                {article.country && (
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-news-600 bg-slate-50 border border-slate-100 px-2.5 py-1 rounded-full">
+                    <Globe2 className="w-3 h-3" aria-hidden="true" /> {article.country}
+                  </span>
+                )}
+
                 <figure className="pt-6">
                   <div className="aspect-[16/9] relative overflow-hidden bg-slate-50 rounded-lg">
                     <Image
@@ -116,6 +125,15 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
                 className="prose-legal max-w-none pt-8"
                 dangerouslySetInnerHTML={{ __html: processedContent }}
               />
+
+              <div className="pt-6 border-t border-slate-100">
+                <Link
+                  href="/editorial-process"
+                  className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-slate-500 hover:text-news-600 transition-colors"
+                >
+                  How we publish and review legal education <ArrowRight className="w-3 h-3" aria-hidden="true" />
+                </Link>
+              </div>
 
               <RelatedArticles articles={relatedArticles} />
             </article>
@@ -135,13 +153,13 @@ export function ArticleNotFound() {
       <div className="w-24 h-24 rounded-3xl bg-slate-50 flex items-center justify-center text-slate-200 mb-8 border border-slate-100 shadow-inner">
         <BookOpen className="w-12 h-12" />
       </div>
-      <h2 className="text-3xl font-bold text-slate-900 mb-4 italic">Intelligence Record Missing</h2>
-      <p className="text-slate-500 italic mb-10 max-w-sm mx-auto leading-relaxed">
-        The requested strategic dossier could not be synchronized with our global knowledge ledger.
+      <h2 className="text-3xl font-bold text-slate-900 mb-4">Guide Not Found</h2>
+      <p className="text-slate-500 mb-10 max-w-sm mx-auto leading-relaxed">
+        We couldn't find the guide you're looking for. It may have been moved, retitled, or isn't published yet.
       </p>
       <Link href="/">
         <button className="bg-slate-900 text-white px-10 h-14 rounded-2xl font-bold text-[10px] uppercase tracking-[0.2em] shadow-2xl hover:bg-blue-600 transition-all interactive-lift">
-          Return to Discovery Hub
+          Return to Homepage
         </button>
       </Link>
     </div>

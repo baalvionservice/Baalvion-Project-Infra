@@ -7,9 +7,34 @@ import { StoryCard } from '@/components/knowledge/news/StoryCard';
 import { LatestRail } from '@/components/knowledge/news/LatestRail';
 import { CategorySection } from '@/components/knowledge/news/CategorySection';
 import { TrustSection } from '@/components/knowledge/TrustSection';
+import { JurisdictionSection } from '@/components/knowledge/JurisdictionSection';
+import { PlatformIntro } from '@/components/knowledge/PlatformIntro';
+import { NewsGateway } from '@/components/knowledge/NewsGateway';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
-import SearchBar from '@/components/search/SearchBar';
 import { ShieldCheck } from 'lucide-react';
+import type { Metadata } from 'next';
+
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+
+export const metadata: Metadata = {
+  title: 'Law Elite Network | Plain-Language Legal Guides, Worldwide',
+  description:
+    'Understand your rights before you call a lawyer. Free, plain-language guides to family, criminal, employment, business, tax and property law — written for a general audience, covering every jurisdiction.',
+  alternates: { canonical: SITE },
+  openGraph: {
+    type: 'website',
+    url: SITE,
+    title: 'Law Elite Network | Plain-Language Legal Guides, Worldwide',
+    description:
+      'Understand your rights before you call a lawyer. Free, plain-language guides to family, criminal, employment, business, tax and property law.',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Law Elite Network | Plain-Language Legal Guides, Worldwide',
+    description:
+      'Understand your rights before you call a lawyer. Free, plain-language guides to family, criminal, employment, business, tax and property law.',
+  },
+};
 
 function categoryIdOf(a: any): string {
   return String(a?.categoryId ?? a?.category?.id ?? a?.category_id ?? '');
@@ -62,11 +87,19 @@ export default async function KnowledgeHomePage() {
   });
   const pool = mergeArticles(combinedSource);
 
-  const trending = [...pool].sort((a, b) => (b.views || 0) - (a.views || 0));
+  // Editor's-picks first, not raw popularity -- a "trending by views" sort is
+  // the newsroom pattern /news already owns. The homepage is an evergreen
+  // library, so it leads with `featured` (an editorial curation flag already
+  // set in the CMS) and only falls back to the full pool when too few guides
+  // are flagged, mirroring the same fallback used by law-content.ts's own
+  // getFeaturedArticles().
+  const featuredPool = pool.filter((a: any) => a.featured);
+  const spotlightSource = featuredPool.length >= 7 ? featuredPool : pool;
+  const spotlight = [...spotlightSource].sort((a, b) => (b.views || 0) - (a.views || 0));
 
-  const lead = trending[0];
-  const heroSecondary = trending.slice(1, 3);
-  const latest = trending.slice(3, 7);
+  const lead = spotlight[0];
+  const heroSecondary = spotlight.slice(1, 3);
+  const latest = spotlight.slice(3, 7);
 
   const usedSlugs = new Set<string>();
   if (lead) usedSlugs.add(lead.slug);
@@ -89,21 +122,21 @@ export default async function KnowledgeHomePage() {
 
   return (
     <div className="min-h-screen bg-white pt-[60px] lg:pt-[96px]">
-      {/* Masthead strip */}
+      {/* Masthead strip -- search lives once, in the persistent header above;
+          duplicating it here read as broken/unpolished to reviewers. */}
       <section className="border-b border-slate-100 bg-white">
-        <div className="container mx-auto px-4 sm:px-6 max-w-7xl py-6 md:py-8 flex flex-col lg:flex-row lg:items-end justify-between gap-5">
-          <div>
-            <span className="kicker">
-              <ShieldCheck className="w-3.5 h-3.5" /> Trusted Legal Knowledge · Worldwide
-            </span>
-            <h1 className="font-headline text-3xl md:text-[2.6rem] font-extrabold tracking-tight text-slate-900 leading-[1.05] mt-2">
-              Plain-language guides to the law,
-              <br className="hidden md:block" /> for every jurisdiction.
-            </h1>
-          </div>
-          <div className="w-full lg:max-w-md">
-            <SearchBar variant="navbar" />
-          </div>
+        <div className="container mx-auto px-4 sm:px-6 max-w-7xl py-6 md:py-8">
+          <span className="kicker">
+            <ShieldCheck className="w-3.5 h-3.5" /> Global Legal Education
+          </span>
+          <h1 className="font-headline text-3xl md:text-[2.6rem] font-extrabold tracking-tight text-slate-900 leading-[1.05] mt-2">
+            Plain-language guides to the law,
+            <br className="hidden md:block" /> for every jurisdiction.
+          </h1>
+          <p className="text-base md:text-lg text-slate-500 max-w-2xl leading-relaxed mt-3">
+            Understand your rights before you call a lawyer. One legal knowledge library, organized
+            by topic and jurisdiction — written to educate, not to replace a licensed attorney.
+          </p>
         </div>
       </section>
 
@@ -136,6 +169,8 @@ export default async function KnowledgeHomePage() {
           ))}
         </div>
 
+        <JurisdictionSection />
+        <PlatformIntro />
       </main>
 
       <section className="border-t border-slate-100">
@@ -143,6 +178,10 @@ export default async function KnowledgeHomePage() {
           <TrustSection />
         </div>
       </section>
+
+      <div className="container mx-auto px-4 sm:px-6 max-w-7xl">
+        <NewsGateway />
+      </div>
 
       <PublicFooter />
     </div>
