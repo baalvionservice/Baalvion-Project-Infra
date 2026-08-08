@@ -13,9 +13,9 @@ export const disputeResolutionExtra2Articles: LawArticle[] = [
     slug: 'small-claims-court-guide',
     alphabet: 'S',
     categoryId: 'cat_dispute_resolution',
-    subcategoryId: 'sub_dr_mediation',
+    subcategoryId: 'sub_dr_litigation',
     category: DISPUTE_RESOLUTION_CATEGORY,
-    subcategory: { id: 'sub_dr_mediation', name: 'Mediation', slug: 'mediation' },
+    subcategory: { id: 'sub_dr_litigation', name: 'Litigation', slug: 'litigation' },
     summary:
       'Small claims court offers a fast, low-cost, informal way to resolve modest money disputes without lawyers — ideal for unpaid debts, faulty goods, and minor contract problems.',
     author: 'Sofia Almeida',
@@ -92,9 +92,9 @@ export const disputeResolutionExtra2Articles: LawArticle[] = [
     slug: 'what-is-a-class-action-lawsuit',
     alphabet: 'W',
     categoryId: 'cat_dispute_resolution',
-    subcategoryId: 'sub_dr_arbitration',
+    subcategoryId: 'sub_dr_litigation',
     category: DISPUTE_RESOLUTION_CATEGORY,
-    subcategory: { id: 'sub_dr_arbitration', name: 'Arbitration', slug: 'arbitration' },
+    subcategory: { id: 'sub_dr_litigation', name: 'Litigation', slug: 'litigation' },
     summary:
       'A class action lets one lawsuit represent many people harmed in the same way, making it practical to hold powerful defendants accountable for widespread but individually small losses.',
     author: 'Daniel Okafor',

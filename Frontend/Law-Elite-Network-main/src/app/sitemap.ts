@@ -4,6 +4,7 @@ import { getAllAuthors } from '@/data/authors';
 import { articleUrl } from '@/lib/article-url';
 import { toNewCategorySlug } from '@/lib/category-slugs';
 import { cmsGetArticles } from '@/lib/cms';
+import { COUNTRIES, getCountryArticleCounts } from '@/data/countries';
 
 // Render at request time, never at build time. This route fetches from law-service,
 // and a build-time fetch against an unreachable API blocks `next build` (CI timeout).
@@ -151,10 +152,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.45,
   }));
 
+  // Country hubs: only index /countries/[country] once it actually has at
+  // least one jurisdiction-specific article. An empty hub is a thin/duplicate
+  // page for crawlers, not a real destination -- see Phase N of the SEO plan.
+  const countryCounts = await getCountryArticleCounts();
+  const populatedCountries = COUNTRIES.filter((c) => (countryCounts[c.slug] || 0) > 0);
+  const countryRoutes: MetadataRoute.Sitemap = populatedCountries.length
+    ? [
+        { url: `${BASE_URL}/countries`, lastModified: new Date(), changeFrequency: 'weekly' as const, priority: 0.6 },
+        ...populatedCountries.map((c) => ({
+          url: `${BASE_URL}/countries/${c.slug}`,
+          lastModified: new Date(),
+          changeFrequency: 'weekly' as const,
+          priority: 0.55,
+        })),
+      ]
+    : [];
+
   return [
     ...staticRoutes,
     ...articleRoutes,
     ...categoryRoutes,
     ...authorRoutes,
+    ...countryRoutes,
   ];
 }

@@ -29,6 +29,7 @@ export async function fetchRelatedArticles(
   currentSlug: string,
   categorySlug?: string,
   categoryName?: string,
+  subcategorySlug?: string,
 ): Promise<RelatedArticle[]> {
   if (!categorySlug) return [];
 
@@ -64,10 +65,26 @@ export async function fetchRelatedArticles(
     // photos) must win. Same precedence as CategoryContent.tsx / search route.ts.
     const bySlug = new Map<string, RelatedArticle>();
     for (const a of [...bundled, ...cmsArticles]) bySlug.set(a.slug, a);
-    return Array.from(bySlug.values()).slice(0, 4);
+    return prioritizeSubcategory(Array.from(bySlug.values()), subcategorySlug).slice(0, 4);
   } catch {
-    return bundled.slice(0, 4);
+    return prioritizeSubcategory(bundled, subcategorySlug).slice(0, 4);
   }
+}
+
+/**
+ * Same-category candidates are otherwise taken in plain array order, so a
+ * category with more than 4 articles silently hides everything past the
+ * first 4 (e.g. a jurisdiction cluster added after the original bundled set
+ * would never surface on its own pillar article). Move same-subcategory
+ * matches first -- still capped to 4 by the caller -- so a topic cluster
+ * stays mutually linked as it grows, without touching unrelated articles'
+ * ordering when there's no subcategory overlap to begin with.
+ */
+function prioritizeSubcategory(articles: RelatedArticle[], subcategorySlug?: string): RelatedArticle[] {
+  if (!subcategorySlug) return articles;
+  const matched = articles.filter((a) => a.subcategorySlug === subcategorySlug);
+  const rest = articles.filter((a) => a.subcategorySlug !== subcategorySlug);
+  return [...matched, ...rest];
 }
 
 export function RelatedArticles({ articles }: { articles: RelatedArticle[] }) {
