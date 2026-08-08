@@ -13,9 +13,9 @@ export const technologyIpExtra2Articles: LawArticle[] = [
     slug: 'what-is-a-patent-and-how-to-get-one',
     alphabet: 'W',
     categoryId: 'cat_technology_ip',
-    subcategoryId: 'sub_ti_trademark',
+    subcategoryId: 'sub_ti_patent',
     category: TECHNOLOGY_IP_CATEGORY,
-    subcategory: { id: 'sub_ti_trademark', name: 'Trademarks', slug: 'trademarks' },
+    subcategory: { id: 'sub_ti_patent', name: 'Patents', slug: 'patents' },
     summary:
       'A patent gives an inventor a time-limited monopoly over a new invention in exchange for publicly disclosing how it works — but only if it is new, useful, and non-obvious.',
     author: 'Aisha Rahman',

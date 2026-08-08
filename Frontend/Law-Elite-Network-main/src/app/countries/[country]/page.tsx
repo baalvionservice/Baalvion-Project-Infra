@@ -5,6 +5,7 @@ import type { Metadata } from 'next';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { ArticleCard } from '@/components/knowledge/ArticleCard';
 import { getCountryBySlug, getArticlesByCountrySlug } from '@/data/countries';
+import { articleUrl } from '@/lib/article-url';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 
@@ -46,9 +47,28 @@ export default async function CountryPage(
     ],
   };
 
+  // Only emit CollectionPage/hasPart when there is real content to enumerate --
+  // an empty hasPart on a page with zero guides would contradict the page's
+  // own "No guides yet" empty state (Phase J: JSON-LD must not overstate content).
+  const collectionLd = articles.length > 0 ? {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: `${country.name} Legal Guides`,
+    description: `Plain-language legal guides and explainers specific to ${country.name}.`,
+    url: `${SITE}/countries/${countrySlug}`,
+    hasPart: articles.map((a) => ({
+      '@type': 'Article',
+      headline: a.title,
+      url: `${SITE}${articleUrl(a)}`,
+    })),
+  } : null;
+
   return (
     <>
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+    {collectionLd && (
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionLd) }} />
+    )}
     <div className="min-h-screen bg-white pt-[60px] lg:pt-[96px]">
       <main className="pb-24">
         <section className="border-b border-slate-200 bg-slate-50/60">

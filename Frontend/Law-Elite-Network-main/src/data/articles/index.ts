@@ -23,6 +23,7 @@ import { taxFinanceExtra2Articles } from './tax-finance-extra2';
 import { employmentLaborArticles } from './employment-labor';
 import { employmentLaborExtraArticles } from './employment-labor-extra';
 import { employmentLaborExtra2Articles } from './employment-labor-extra2';
+import { employmentLaborJurisdictionArticles } from './employment-labor-jurisdiction';
 import { technologyIpArticles } from './technology-ip';
 import { technologyIpExtra2Articles } from './technology-ip-extra2';
 import { disputeResolutionArticles } from './dispute-resolution';
@@ -47,6 +48,7 @@ export const LAW_ARTICLES: LawArticle[] = [
   ...employmentLaborArticles,
   ...employmentLaborExtraArticles,
   ...employmentLaborExtra2Articles,
+  ...employmentLaborJurisdictionArticles,
   ...technologyIpArticles,
   ...technologyIpExtra2Articles,
   ...disputeResolutionArticles,

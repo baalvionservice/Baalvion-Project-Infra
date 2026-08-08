@@ -72,7 +72,7 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
   const updatedAt = formatArticleDate(article.updatedAt || article.updated_at) || 'February 12, 2025';
   const processedContent = injectHeadingIds(article.content || '');
   const toc = extractToc(processedContent);
-  const relatedArticles = await fetchRelatedArticles(slug, category?.slug, category?.name);
+  const relatedArticles = await fetchRelatedArticles(slug, category?.slug, category?.name, article.subcategory?.slug);
 
   return (
     <div className="min-h-screen bg-white selection:bg-blue-100 selection:text-blue-900">
