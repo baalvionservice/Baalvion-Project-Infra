@@ -1,9 +1,26 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ImperialpediaMark } from "@/components/icons/ImperialpediaMark";
-import { navCategories } from "@/lib/data/worldData";
 import { SearchModal } from "@/components/search/SearchModal";
+
+// Real destinations only. The original navCategories list (worldData.ts) also
+// had "Health & Science", "Media", "Energy", and "Climate" -- none of which
+// have a corresponding page anywhere on the site, so rather than link them to
+// a 404 (or leave them as decorative buttons that go nowhere, the bug this
+// list replaces) they're left out entirely.
+const NAV_CATEGORIES: { label: string; href: string }[] = [
+  { label: "Markets", href: "/market-news" },
+  { label: "Business", href: "/market-news" },
+  { label: "Investing", href: "/investing" },
+  { label: "Tech", href: "/technologies" },
+  { label: "Politics", href: "/politics" },
+  { label: "World", href: "/world" },
+  { label: "Finance", href: "/financial-intelligence" },
+  { label: "Real Estate", href: "/real-estate" },
+  { label: "Personal Finance", href: "/personal-finance" },
+];
 
 // "Wed, Apr 8, 2026" was hardcoded here — never wired to an actual clock, so it
 // just froze at whatever date someone typed in and never matched "today."
@@ -42,7 +59,7 @@ function useLiveMastheadClock(): string {
  * same move, to avoid a separate follow-up edit.
  */
 export default function TopNav() {
-  const [activeCategory, setActiveCategory] = useState("World");
+  const pathname = usePathname();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const liveClock = useLiveMastheadClock();
 
@@ -102,18 +119,18 @@ export default function TopNav() {
       {/* Category nav */}
       <div className="overflow-x-auto scrollbar-hide">
         <nav className="flex items-center px-4 gap-0 min-w-max">
-          {navCategories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
+          {NAV_CATEGORIES.map((cat) => (
+            <Link
+              key={cat.label}
+              href={cat.href}
               className={`world-kicker text-xs font-semibold tracking-wide px-3 py-3 border-b-2 transition-all whitespace-nowrap ${
-                activeCategory === cat
+                pathname === cat.href
                   ? "border-[hsl(var(--cnbc-red))] text-[hsl(var(--cnbc-red))]"
                   : "border-transparent text-white/60 hover:text-[hsl(var(--cnbc-red))] hover:border-white/30"
               }`}
             >
-              {cat.toUpperCase()}
-            </button>
+              {cat.label.toUpperCase()}
+            </Link>
           ))}
         </nav>
       </div>

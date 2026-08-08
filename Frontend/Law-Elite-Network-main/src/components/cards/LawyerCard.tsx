@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Star, Briefcase, MapPin, ShieldCheck, ChevronRight, CheckCircle2, Zap } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import Image from 'next/image';
 import { resolvePersonImage } from '@/lib/article-art';
 
@@ -36,9 +36,7 @@ interface LawyerCardProps {
  * Fixed contrast for light Bank-Grade UI backgrounds.
  */
 function LawyerCardComponent({ lawyer }: LawyerCardProps) {
-  const router = useRouter();
-
-  const specs = Array.isArray(lawyer.specialization) 
+  const specs = Array.isArray(lawyer.specialization)
     ? lawyer.specialization 
     : [lawyer.specialization];
 
@@ -123,12 +121,14 @@ function LawyerCardComponent({ lawyer }: LawyerCardProps) {
             </div>
             
             <div className="flex gap-2">
-              <Button 
-                size="sm" 
+              <Button
+                asChild
+                size="sm"
                 className="bg-[#0B1F3A] text-white hover:bg-slate-800 h-10 px-5 text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all shadow-lg active:scale-95"
-                onClick={() => router.push(`/lawyer/${lawyer.id}`)}
               >
-                View Dossier <ChevronRight className="ml-1 w-3 h-3" />
+                <Link href={`/lawyer/${lawyer.id}`}>
+                  View Dossier <ChevronRight className="ml-1 w-3 h-3" />
+                </Link>
               </Button>
             </div>
           </div>
