@@ -81,6 +81,12 @@ export default function robots(): MetadataRoute.Robots {
 
   return {
     rules: [
+      // Google's AdSense ad-serving crawler needs full access to read page
+      // content and choose relevant/safe ads, even on routes hidden from
+      // search engines below -- with no dedicated rule it falls back to the
+      // '*' group's DISALLOW list, which is Google's documented cause of
+      // "couldn't verify your site" / ads not serving.
+      { userAgent: 'Mediapartners-Google', allow: '/' },
       { userAgent: '*', allow: ALLOW, disallow: DISALLOW },
       ...AI_USER_AGENTS.map((userAgent) => ({ userAgent, allow: ALLOW, disallow: DISALLOW })),
     ],
