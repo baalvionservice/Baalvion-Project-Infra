@@ -259,18 +259,21 @@ function createRunner(cfg) {
         try {
           await api('PATCH', `/cms/websites/${encodeURIComponent(SITE)}/content/${existsId}`, body);
           report.updated++; log(`  ~ updated  ${d.slug}`);
-          // ensure it stays published
-          try { await api('POST', `/cms/websites/${encodeURIComponent(SITE)}/content/${existsId}/workflow/transition`, { action: 'publish' }); report.published++; } catch { /* may already be published */ }
+          // ensure it stays published, unless this run is explicitly draft-only
+          if (!flags.draft) {
+            try { await api('POST', `/cms/websites/${encodeURIComponent(SITE)}/content/${existsId}/workflow/transition`, { action: 'publish' }); report.published++; } catch { /* may already be published */ }
+          }
         } catch (e) { if (e.fatal) throw e; warn(`update ${d.slug}: ${e.message}`); report.errors++; }
         continue;
       }
 
-      if (flags.dryRun) { log(`  + would create + publish  ${d.slug}  (${d.contentBlocks.length} blocks)`); report.created++; continue; }
+      if (flags.dryRun) { log(`  + would create${flags.draft ? '' : ' + publish'}  ${d.slug}  (${d.contentBlocks.length} blocks)`); report.created++; continue; }
       try {
         const created = await api('POST', `/cms/websites/${encodeURIComponent(SITE)}/content`, body);
         const id = created?.data?.id ?? created?.id;
         report.created++; log(`  + created  ${d.slug}  (${id})`);
-        if (id) { await api('POST', `/cms/websites/${encodeURIComponent(SITE)}/content/${id}/workflow/transition`, { action: 'publish' }); report.published++; log('    ✓ published'); }
+        if (flags.draft) { log('    ○ left as draft (--draft)'); }
+        else if (id) { await api('POST', `/cms/websites/${encodeURIComponent(SITE)}/content/${id}/workflow/transition`, { action: 'publish' }); report.published++; log('    ✓ published'); }
       } catch (e) { if (e.fatal) throw e; warn(`content ${d.slug}: ${e.message}`); report.errors++; }
     }
 

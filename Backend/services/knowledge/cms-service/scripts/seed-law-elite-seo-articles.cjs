@@ -34,7 +34,7 @@ const ARGS = process.argv.slice(2);
 const FLAG = (n) => ARGS.includes(`--${n}`);
 const OPT = (n) => { const h = ARGS.find((a) => a.startsWith(`--${n}=`)); return h ? h.split('=').slice(1).join('=') : undefined; };
 const ONLY = OPT('only');
-const flags = { export: FLAG('export'), dryRun: FLAG('dry-run'), update: FLAG('update') };
+const flags = { export: FLAG('export'), dryRun: FLAG('dry-run'), update: FLAG('update'), draft: FLAG('draft') };
 
 const HOUSE_AUTHOR = { name: 'Law Elite Editorial', title: 'Legal Research & Editorial Desk', site: 'LawEliteNetwork.com' };
 
@@ -145,7 +145,7 @@ async function main() {
   console.log(`  target : ${TARGET_BASE}`);
   console.log(`  site   : ${SITE}   category: ${CATEGORY_SLUG}`);
   console.log(`  source : ${CONTENT_DIR}`);
-  console.log(`  mode   : ${flags.export ? 'EXPORT' : flags.dryRun ? 'DRY RUN' : flags.update ? 'UPDATE + CREATE' : 'CREATE + PUBLISH'}`);
+  console.log(`  mode   : ${flags.export ? 'EXPORT' : flags.dryRun ? 'DRY RUN' : flags.update ? 'UPDATE + CREATE' : flags.draft ? 'CREATE (DRAFT, no publish)' : 'CREATE + PUBLISH'}`);
   console.log(`  count  : ${all.length} article(s)\n`);
 
   const docs = all.map(buildDoc);
