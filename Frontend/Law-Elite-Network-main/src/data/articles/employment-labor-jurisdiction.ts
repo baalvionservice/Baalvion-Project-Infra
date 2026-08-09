@@ -285,4 +285,216 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
 
 <p><em>This article is general legal information, not legal advice. Figures such as the high income threshold are indexed annually — confirm the current amount with the Fair Work Commission, and consult an Australian employment lawyer for advice on your specific situation.</em></p>`,
   },
+  {
+    id: 'el-305',
+    title: 'Non-Compete Enforceability by State: The Current U.S. Landscape',
+    slug: 'non-compete-enforceability-by-state-us',
+    alphabet: 'N',
+    categoryId: 'cat_employment_labor',
+    subcategoryId: 'sub_el_contracts',
+    category: EMPLOYMENT_LABOR_CATEGORY,
+    subcategory: { id: 'sub_el_contracts', name: 'Employment Contracts', slug: 'employment-contracts' },
+    summary:
+      'A handful of U.S. states void non-competes outright, a growing group bans them below a wage threshold, and the rest apply a common-law reasonableness test — now that the FTC’s 2024 nationwide rule is dead, enforceability is once again entirely a state-by-state question.',
+    author: 'Daniel Okoro',
+    updatedAt: 'August 9, 2026',
+    readingTime: 11,
+    views: 0,
+    featured: false,
+    imageSeed: 'non-compete-enforceability-by-state-us',
+    country: 'United States',
+    content: `<p>Ask whether non-compete agreements are enforceable in the United States, and the honest answer is: it depends entirely on which state you're standing in. There is no federal non-compete law today — a rule that would have created one was finalized, then struck down, then formally abandoned. In its absence, the fifty states have gone in sharply different directions: a handful now void non-competes almost entirely, a growing group bans them only below a wage threshold, and the rest still apply a case-by-case reasonableness test that can uphold or kill the exact same clause depending on how it's drafted. This guide maps that current landscape — not a rewrite of the general worldwide explainer, but the specific, fast-moving U.S. state-by-state picture as it stands today.</p>
+
+<div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>California, North Dakota, Oklahoma, and Minnesota void nearly all employee non-competes outright; Washington State will join them from June 30, 2027, and Wyoming enacted a narrower 2025 ban with executive and business-sale carve-outs.</li><li>A growing number of states — including Colorado, Illinois, Oregon, and Washington, D.C. — don't ban non-competes outright but void them for employees earning below an annually adjusted wage threshold.</li><li>The FTC's 2024 nationwide non-compete rule is no longer in effect in any sense: a federal court vacated it in 2024, the FTC dropped its appeal and formally accepted the vacatur in September 2025, and the rule was struck from the Code of Federal Regulations in February 2026. Non-compete law is once again entirely a state matter.</li><li>In the roughly two dozen states with neither a ban nor a threshold, courts apply a common-law reasonableness test to scope, duration, and geography — and some states will narrow ("blue-pencil") an overbroad clause while others simply void it.</li><li>This is one of the most legislatively active areas of U.S. employment law: dozens of bills move through state legislatures every year, so treat any specific figure here as a snapshot to verify against current state guidance before relying on it.</li></ul></div>
+
+<h2>States That Void Non-Competes Outright</h2>
+<p>Four states currently treat employee non-competes as void as a matter of course, with only narrow exceptions:</p>
+<ul>
+<li><strong>California</strong> has the strictest and most closely watched rule. Business and Professions Code §16600 voids nearly all employee non-competes, and two 2023 laws sharpened it further: AB 1076 required employers to notify current and former employees by February 14, 2024 that any non-compete clause in their contract was void, and SB 699 reaches beyond California's own borders — it voids a non-compete against a California employee <em>regardless of where or when the agreement was signed</em>, and creates a private right of action letting an employee sue an employer that tries to enforce one, with damages, injunctive relief, and attorney's fees available to a prevailing employee.</li>
+<li><strong>North Dakota</strong> (N.D. Cent. Code §9-08-06) and <strong>Oklahoma</strong> (15 Okla. Stat. §219A) have voided employment non-competes for decades, each with narrow exceptions tied to selling a business or dissolving a partnership; Oklahoma additionally allows a narrow non-solicitation restriction on a former employer's established customers.</li>
+<li><strong>Minnesota</strong> banned non-competes effective July 1, 2023 (Minn. Stat. §181.988), for contracts entered into on or after that date — the ban is not retroactive, so a Minnesota non-compete signed before mid-2023 may still be analyzed under the state's older reasonableness rules.</li>
+</ul>
+<p><strong>Washington State</strong> will become the newest member of this group, but not yet: Governor Bob Ferguson signed a sweeping, retroactive ban (ESHB 1155) on March 23, 2026, that voids virtually all non-competition covenants, including "customer non-servicing" and forfeiture-for-competition clauses — but it does not take effect until <strong>June 30, 2027</strong>, with employer notice obligations following on October 1, 2027. Until that date, Washington's existing wage-threshold rule (below) continues to apply.</p>
+<p><strong>Wyoming</strong> enacted a 2025 law that is often lumped in with the outright bans but is meaningfully narrower: effective July 1, 2025, it voids most non-competes going forward, but non-competes remain enforceable for "executive and management personnel" and their professional staff, and for agreements tied to a business sale; physician non-competes are void outright as a separate rule. A Wyoming non-compete is not automatically dead the way a California one is — whether it survives depends heavily on the employee's role.</p>
+
+<h2>A Common Misconception: Montana</h2>
+<p>Montana's restraint-of-trade statute (Mont. Code Ann. §28-2-703) uses language superficially similar to California's void-non-compete rule, which leads some summaries to mistakenly group Montana with the ban states. It shouldn't be. Since a mid-1980s shift in its case law, the Montana Supreme Court has permitted <em>reasonable</em> non-competes, putting Montana much closer to the common-law reasonableness states discussed below than to the four true "void" states above.</p>
+
+<h2>Wage-Threshold States: Banned Below a Number, Allowed Above It</h2>
+<p>A separate and growing category doesn't ban non-competes across the board — it bans them only for employees earning below a specific wage, on the theory that lower-paid workers have the least bargaining power and the least access to the kind of trade secrets a non-compete is meant to protect. These thresholds are typically adjusted every year, so any dollar figure is a snapshot, not a permanent rule:</p>
+<ul>
+<li><strong>Colorado</strong> voids non-competes for workers earning below its state-adjusted threshold (set at $130,014 for 2026), with a separate, lower threshold for non-solicitation-only agreements (60% of the same figure).</li>
+<li><strong>Illinois</strong>, under the Freedom to Work Act, sets separate thresholds for non-competes ($75,000 for 2026) and non-solicitation agreements ($45,000 for 2026), with both figures scheduled to keep rising in stages through 2037.</li>
+<li><strong>Oregon</strong> voids non-competes below its own annually indexed threshold ($116,427 for 2026).</li>
+<li><strong>Washington, D.C.</strong> bars non-competes below a general threshold ($162,164 for 2026) with a materially higher figure for "medical specialists" ($270,274 for 2026), both adjusted annually, and requires written disclosure of the restriction no later than when the job offer is accepted.</li>
+<li><strong>Washington State</strong>, until its full 2027 ban takes effect, currently voids non-competes below its own state threshold, adjusted annually.</li>
+<li>Several other states — including <strong>Maine, Rhode Island, Virginia,</strong> and <strong>Maryland</strong> — also apply their own wage-based thresholds, each set at a different figure and adjusted on its own schedule; because these numbers move every year and differ meaningfully by state, check the current figure with the relevant state labor agency rather than relying on a number printed in any general guide, including this one.</li>
+</ul>
+<p>Two states take a related but different approach rather than a flat dollar figure. <strong>Massachusetts</strong>'s Noncompetition Agreement Act doesn't set a wage floor at all — instead it requires "garden leave" pay (at least 50% of the employee's highest annualized base salary from the prior two years, paid throughout the restricted period) or other mutually agreed consideration, caps most non-competes at one year, and requires ten days' written notice before an employer tries to enforce one after termination. <strong>Nevada</strong> doesn't use a dollar threshold either — it bans non-competes for employees paid solely on an hourly basis, limits enforcement following a layoff to the severance period, and shifts attorney's fees onto an employer that tries to enforce a non-compete a court finds void.</p>
+
+<h2>The Federal Rule That Rose and Fell</h2>
+<p>For a period, it looked like all of this state-by-state variation might become moot. The Federal Trade Commission finalized a rule on April 23, 2024 that would have banned most non-competes nationwide, regardless of state law. It never took effect. A federal court in <em>Ryan LLC v. FTC</em> vacated the rule nationwide on August 20, 2024, holding the FTC lacked the statutory authority to issue it. The FTC initially appealed to the Fifth Circuit, but under new leadership the Commission reversed course: on September 4, 2025, it voted to drop the appeal and formally accede to the vacatur, and in February 2026 the rule was formally removed from the Code of Federal Regulations. <strong>As of today, there is no federal non-compete rule in effect, in any form</strong> — the FTC has instead said it will pursue non-competes case by case under its existing authority rather than through a blanket rule, and a separate bill in Congress (the Workforce Mobility Act) that would restrict non-competes by statute remains stalled in committee. Non-compete law, for now, is exactly what it was before 2024: a matter of state law, state by state.</p>
+
+<h2>Everywhere Else: The Common-Law Reasonableness Test</h2>
+<p>In the roughly two dozen states without a ban or a wage threshold, courts fall back on the traditional common-law test: a non-compete is enforceable only if it protects a legitimate business interest — trade secrets, confidential information, or genuine client relationships, not simply the avoidance of ordinary competition — and is reasonable in geographic scope, duration, and the activities it restricts. A restriction covering a wider territory than the employer actually operates in, or lasting longer than necessary to let the interest fade (commonly two years or less, though this varies), is vulnerable to challenge even in a state with no statutory ban at all.</p>
+<p>States differ sharply on what happens when a court finds a clause overbroad. Some states — commonly cited as Florida and Texas — will "blue-pencil" the clause, narrowing an overreaching restriction to something reasonable and enforcing what's left, which is more favorable to employers drafting cautiously. Other states — commonly cited as Arkansas, Georgia, Nebraska, Virginia, and Wisconsin — decline to rewrite an unreasonable clause at all and instead void it in its entirety, a "red pencil" approach that puts far more pressure on getting the original drafting right. Because this split is decided by each state's case law rather than a single national rule, an employer operating across several of these states cannot assume the same non-compete language will be treated the same way in each one.</p>
+
+<h2>A Fast-Moving Area of Law</h2>
+<p>Non-compete law is one of the most legislatively active corners of U.S. employment law: trackers such as Beck Reed Riden's widely cited 50-state non-compete survey counted roughly 101 non-compete bills pending across 34 states as of early 2026. Several states enacted new restrictions in just the first half of 2026 alone — Tennessee added a $70,000 wage floor effective July 1, 2026, and Louisiana barred non-competes for interns and apprentices effective August 1, 2026. A significant share of recent state activity specifically targets non-competes for physicians and other licensed healthcare workers, a sector where several states have moved to restrict or ban them even while leaving the general rule for other employees unchanged. Given this pace of change, treat every figure and rule in this guide as accurate as of its publication date, and confirm the current rule in the specific state that matters to you before signing or enforcing anything.</p>
+
+<h2>Frequently Asked Questions</h2>
+<h3>Does the FTC's non-compete rule still apply anywhere in the U.S.?</h3>
+<p>No. The rule was vacated by a federal court in August 2024, the FTC abandoned its appeal and formally accepted that outcome in September 2025, and the rule was removed from the Code of Federal Regulations in February 2026. Non-compete enforceability today depends entirely on the law of the applicable state.</p>
+<h3>If my state has a wage threshold, does that mean my non-compete is automatically enforceable if I earn above it?</h3>
+<p>Not necessarily. Clearing the wage threshold generally removes that specific statutory bar, but the clause can still be challenged as unreasonable in scope, duration, or geography, or on other grounds under the state's general contract law — a wage threshold is a floor beneath which a non-compete is void, not a guarantee that everything above it is automatically valid.</p>
+<h3>I signed my non-compete years ago in a state that has since banned them — is it still enforceable?</h3>
+<p>It depends on the specific law. Some bans, like Minnesota's, apply only to agreements signed on or after the effective date, leaving older agreements subject to the prior legal rule; others, like California's SB 699, are written to reach existing agreements more broadly. Check the effective date and retroactivity language of the specific state's statute, since this detail varies and materially changes the answer.</p>
+
+<h2>Sources &amp; Further Reading</h2>
+<ul>
+<li>Cal. Bus. &amp; Prof. Code §§16600, 16600.1, 16600.5; California AB 1076 and SB 699 (2023)</li>
+<li>N.D. Cent. Code §9-08-06; 15 Okla. Stat. §219A; Minn. Stat. §181.988; Wyoming SF 107 (2025); Washington ESHB 1155 (2026)</li>
+<li>Colo. Rev. Stat. §8-2-113; Illinois Freedom to Work Act (820 ILCS 90); Or. Rev. Stat. §653.295; D.C. Ban on Non-Compete Agreements Amendment Act</li>
+<li>Federal Trade Commission, non-compete rule rulemaking docket and September 2025 accession to vacatur; <em>Ryan LLC v. FTC</em>, N.D. Tex. (2024)</li>
+<li>Beck Reed Riden LLP, 50-State Noncompete Survey (updated periodically)</li>
+</ul>
+
+<h2>Practical Next Steps</h2>
+<p>Start by identifying which category your state falls into — outright ban, wage threshold, or common-law reasonableness — since that alone determines what question actually matters for your situation. If your state uses a wage threshold, confirm the current figure directly with the state labor agency rather than an older printed source, since these numbers change annually. If you're being asked to sign a new non-compete, or your employer is trying to enforce an existing one, the state-specific rules above are a starting point, not a substitute for a consultation with an employment lawyer licensed in that state, particularly given how quickly this area of law is moving. For the general, worldwide framework this guide builds on, see <a href="/employment-law/what-is-a-non-compete-agreement">What Is a Non-Compete Agreement?</a> and, for the related question of when a U.S. dismissal itself is unlawful, <a href="/employment-law/at-will-employment-exceptions-by-state">At-Will Employment Exceptions in the U.S.: A State-by-State Guide</a>.</p>
+
+<p><em>This article is general legal information, not legal advice. Non-compete law varies by state and changes frequently — confirm the current rule in the applicable state and consult a lawyer licensed there before signing, relying on, or attempting to enforce a non-compete agreement.</em></p>`,
+  },
+  {
+    id: 'el-306',
+    title: "Ontario's Non-Compete Ban vs. the Rest of Canada",
+    slug: 'ontario-non-compete-ban-vs-rest-of-canada',
+    alphabet: 'O',
+    categoryId: 'cat_employment_labor',
+    subcategoryId: 'sub_el_contracts',
+    category: EMPLOYMENT_LABOR_CATEGORY,
+    subcategory: { id: 'sub_el_contracts', name: 'Employment Contracts', slug: 'employment-contracts' },
+    summary:
+      "Ontario has banned most employee non-compete agreements by statute since October 2021. Everywhere else in Canada, a non-compete still lives or dies under the common law's demanding reasonableness test, and Quebec applies its own distinct civil-law framework.",
+    author: 'Daniel Okoro',
+    updatedAt: 'August 9, 2026',
+    readingTime: 10,
+    views: 0,
+    featured: false,
+    imageSeed: 'ontario-non-compete-ban-vs-rest-of-canada',
+    country: 'Canada',
+    content: `<p>Ontario is the only Canadian province that has banned non-compete agreements by statute. Everywhere else in Canada, a non-compete clause lives or dies under the common law's demanding "reasonableness" test — and Quebec applies its own distinct civil-law framework on top of that. The result is a patchwork that catches many employees and employers by surprise: a clause that would be automatically void in Toronto can still be argued over, and sometimes enforced, in Calgary or Halifax. A federal bill introduced in 2026 could extend Ontario's approach to federally regulated workers, but as of today it remains a proposal, not law.</p>
+
+<div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>Ontario's Employment Standards Act, 2000 has banned most employee non-compete agreements since October 25, 2021, with narrow exceptions for senior executives and sellers of a business.</li><li>Non-competes signed in Ontario before October 25, 2021 are not automatically void — they remain subject to the ordinary common-law reasonableness test, as confirmed in <em>Parekh v. Schecter</em> (2022).</li><li>Outside Ontario, Canadian courts apply a strict reasonableness test to non-competes and, unlike courts in some U.S. states, will not "blue-pencil" (rewrite) an overbroad clause to make it enforceable — an unreasonable clause is simply void.</li><li>Quebec governs non-competes through Civil Code article 2089, a written-contract regime distinct from the common law, and puts the burden of proving the clause is reasonable on the employer.</li><li>Federally regulated employees currently have no non-compete-specific protection in the Canada Labour Code, though a 2026 federal bill would change that if passed.</li></ul></div>
+
+<h2>Ontario's Statutory Ban</h2>
+<p>Ontario added Part XV.1 to the Employment Standards Act, 2000 ("ESA") through the Working for Workers Act, 2021, and the government confirms it "was deemed to have come into force on October 25, 2021." Section 67.1 defines a non-compete agreement broadly, as any agreement — or any part of one — that prohibits an employee "from engaging in any business, work, occupation, profession, project or other activity that is in competition with the employer's business after the employment relationship between the employee and the employer ends." Section 67.2 then makes any such agreement void, subject to two exceptions. The definition catches a clause regardless of how it's labelled, and it applies whether or not the restriction is limited by time or geography — Ontario didn't narrow non-competes, it removed them for almost every employee.</p>
+
+<h2>The Two Exceptions</h2>
+<h3>Senior Executives</h3>
+<p>The ban does not apply to an "executive," a term the ESA defines by naming specific C-suite titles: Chief Executive Officer, President, Chief Administrative Officer, Chief Operating Officer, Chief Financial Officer, Chief Information Officer, Chief Legal Officer, Chief Human Resources Officer, Chief Corporate Development Officer, "or any other chief executive position." Employment lawyers have flagged real ambiguity around this list — it's unclear whether it's exhaustive or whether a title like Executive Vice President would qualify — and Ontario courts have not yet fully settled the question. An employer relying on the executive exception for anyone other than a clearly listed C-suite role should not assume the exception applies without legal advice.</p>
+<h3>Sale of a Business</h3>
+<p>The ban also does not apply where a business — or part of one — is sold or leased and the seller becomes an employee of the purchaser immediately after the sale, provided the non-compete is contained in the purchase agreement itself. This exception recognizes that a business buyer typically needs the seller's promise not to immediately re-enter the market and compete with the very business just sold, which is a different transaction from an ordinary employer restricting an ordinary employee.</p>
+
+<h2>What About Clauses Signed Before October 25, 2021?</h2>
+<p>A common misconception is that Ontario's ban retroactively voided every existing non-compete. It didn't. The Ontario government's own guidance confirms Part XV.1 "does not prohibit or void non-compete agreements that were entered into prior to October 25, 2021" — those older clauses remain subject to ordinary common-law scrutiny, exactly as they would have been before the ESA amendment. The Ontario Superior Court confirmed this directly in <em>Parekh v. Schecter</em> (2022), enforcing a non-compete tied to a $5.6 million dental practice sale because the agreement predated the statutory cutoff, even though the same clause would likely be void if signed today. Anyone reviewing an older Ontario non-compete needs to check the signature date against October 25, 2021 before assuming either that it's automatically void or automatically enforceable.</p>
+
+<h2>Non-Solicitation and Confidentiality Clauses Are Different</h2>
+<p>Ontario's ban targets non-compete clauses specifically — it does not touch non-solicitation agreements (which stop a departing employee from poaching clients or colleagues without banning them from the field entirely) or confidentiality agreements, provided those clauses are genuinely what they claim to be. A non-solicitation clause drafted so broadly that it functions as a disguised non-compete — for example, one that effectively bars an employee from working in their field at all — risks being recharacterized by a court as a non-compete in substance, and struck down under the same statutory ban despite its label.</p>
+
+<h2>Everywhere Else in Canada: The Common-Law Reasonableness Test</h2>
+<p>No other Canadian province or territory has enacted an Ontario-style statutory ban. Outside Ontario, a non-compete is presumed unenforceable as an unlawful restraint of trade unless the employer can show it is reasonable — a burden the employer carries, not the employee. Courts weigh whether the restriction's duration, geographic scope, and the activities it restricts go no further than necessary to protect a legitimate business interest, such as trade secrets or genuine client relationships, rather than simply suppressing ordinary competition.</p>
+<p>The leading authority is the Supreme Court of Canada's decision in <em>Shafron v. KRG Insurance Brokers (Western) Inc.</em>, 2009 SCC 6. Shafron had sold his insurance agency to KRG and continued working for the buyer under a covenant restricting him from competing within the "Metropolitan City of Vancouver" for three years after leaving — a phrase with no fixed legal meaning. The Court found the clause ambiguous and therefore unenforceable, and — critically for how Canadian courts approach these clauses generally — declined to simply delete the offending word and enforce what remained.</p>
+
+<h3>Why Canadian Courts Rarely Rewrite an Overbroad Clause</h3>
+<p>This is one of the sharpest contrasts with the United States, where some states' courts will "blue-pencil" an overbroad non-compete — narrowing it to a reasonable scope and enforcing what's left. Canadian courts generally will not. <em>Shafron</em> held that judicial severance is available only in rare cases where the offending part is trivial and not part of the covenant's main purpose, which is a high bar the facts in that case didn't meet. In practice, this means a Canadian employer largely gets one attempt to draft an enforceable clause — an overreaching non-compete is far more likely to be struck down entirely than narrowed and saved, which is exactly why careful, conservative drafting matters more in Canada than it might elsewhere.</p>
+
+<h2>Quebec's Distinct Civil-Law Framework</h2>
+<p>Quebec does not follow the common law at all — non-competes there are governed by the Civil Code of Québec, a written-contract regime. Article 2089 requires that a non-competition stipulation be in writing and expressed in clear terms, and be "limited, as to time, place and type of employment, to what is necessary for the protection of the legitimate interests of the employer." The Civil Code puts the burden of proving the stipulation is valid squarely on the employer. A related provision, article 2095, makes a non-compete unenforceable if the employer terminated the employee without a serious reason, or gave the employee just cause to resign — reflecting a principle that an employer that ended the relationship unfairly cannot also restrict what the employee does next.</p>
+
+<h2>Federally Regulated Employees: A Change That May Be Coming</h2>
+<p>Employees of federally regulated industries — banking, telecommunications, interprovincial transportation, and similar sectors — fall under the Canada Labour Code for matters like hours and termination, but the Code currently has no non-compete-specific provision at all. Their restrictive covenants are governed by the same common-law (or, in Quebec, civil-law) principles that apply to provincially regulated employees in the same province.</p>
+<p>That may be about to change. Bill C-31, the Budget 2025 Implementation Act, No. 2, introduced in the House of Commons on May 6, 2026, would add a new division to the Canada Labour Code explicitly modeled on Ontario's ESA framework — prohibiting non-competes for federally regulated employees with the same two categories of exception (business sale, senior executives), and including a one-year transition period before existing clauses would become void. As of this writing, the bill is at second reading in the House of Commons and has not been passed into law. <strong>Treat this as a proposal to watch, not a rule currently in force</strong> — federally regulated employees today have the same common-law protection (and the same burden on the employer to justify a restriction) as other non-Ontario, non-Quebec employees, unless and until Bill C-31 or similar legislation is actually enacted.</p>
+
+<h2>Frequently Asked Questions</h2>
+<h3>Does Ontario's non-compete ban apply to me if I work for a federally regulated employer in Ontario?</h3>
+<p>Generally no — the ESA is provincial employment standards legislation and does not apply to federally regulated employers (banks, telecoms, airlines, and similar sectors) even if they operate in Ontario. Those employees currently rely on the common-law reasonableness test unless a federal law like the proposed Bill C-31 is enacted.</p>
+<h3>If my non-compete is void under Ontario's ESA, can my employer still enforce a non-solicitation clause in the same contract?</h3>
+<p>Often yes, provided the non-solicitation clause is genuinely limited to protecting client and colleague relationships rather than functioning as a disguised ban on working in the field. Courts assess what the clause actually does, not just what it's labelled.</p>
+<h3>Will a Canadian court narrow my overbroad non-compete instead of striking it down completely?</h3>
+<p>Outside narrow circumstances, no. Following the Supreme Court's approach in <em>Shafron</em>, Canadian courts generally refuse to "blue-pencil" an unreasonable restraint into a reasonable one — an overbroad clause is typically void in its entirety, which is a real risk for employers relying on broadly worded restrictions.</p>
+
+<h2>Sources &amp; Further Reading</h2>
+<ul>
+<li>Employment Standards Act, 2000, S.O. 2000, c. 41, Part XV.1 (ss. 67.1–67.2), as added by the Working for Workers Act, 2021 — Government of Ontario</li>
+<li><em>Parekh et al. v. Schecter et al.</em>, 2022 ONSC 302 (Ont. Sup. Ct. J.)</li>
+<li><em>Shafron v. KRG Insurance Brokers (Western) Inc.</em>, 2009 SCC 6</li>
+<li>Civil Code of Québec, arts. 2089 and 2095</li>
+<li>Bill C-31, Budget 2025 Implementation Act, No. 2, House of Commons of Canada (introduced May 6, 2026; not yet enacted)</li>
+</ul>
+
+<h2>Practical Next Steps</h2>
+<p>If you're an Ontario employee, start by checking the signature date on your non-compete against October 25, 2021 — that single fact determines whether the statutory ban or the older common-law test applies to your clause. If you're outside Ontario, or federally regulated, assume your non-compete must clear the common-law reasonableness bar, and remember the burden of proving that falls on your employer, not you. Because the exceptions, the Quebec civil-law rules, and the federal bill's progress can all shift the analysis, a short consultation with an employment lawyer licensed in the relevant province is the safest way to know where you actually stand. For the general, worldwide framework this guide builds on, see <a href="/employment-law/what-is-a-non-compete-agreement">What Is a Non-Compete Agreement?</a> and, for what happens when a Canadian employment relationship ends more broadly, <a href="/employment-law/wrongful-dismissal-canada-reasonable-notice">Wrongful Dismissal in Canada: How 'Reasonable Notice' Is Calculated</a>.</p>
+
+<p><em>This article is general legal information, not legal advice. Employment law varies by province and territory and changes over time — consult a lawyer licensed in the relevant jurisdiction before acting.</em></p>`,
+  },
+  {
+    id: 'el-307',
+    title: "Australia's Incoming Non-Compete Ban for Sub-Threshold Workers",
+    slug: 'australia-non-compete-ban-sub-threshold-workers',
+    alphabet: 'A',
+    categoryId: 'cat_employment_labor',
+    subcategoryId: 'sub_el_contracts',
+    category: EMPLOYMENT_LABOR_CATEGORY,
+    subcategory: { id: 'sub_el_contracts', name: 'Employment Contracts', slug: 'employment-contracts' },
+    summary:
+      "Australia has announced, and consulted on, a plan to ban non-compete clauses for workers below the high-income threshold from 2027 — but no bill has been introduced into Parliament, and today's non-competes are still governed by the ordinary common-law reasonableness test.",
+    author: 'Daniel Okoro',
+    updatedAt: 'August 9, 2026',
+    readingTime: 9,
+    views: 0,
+    featured: false,
+    imageSeed: 'australia-non-compete-ban-sub-threshold-workers',
+    country: 'Australia',
+    content: `<p>If you've read that Australia has banned non-compete clauses for most workers, that's ahead of where the law actually stands. The federal government has announced the policy, run a full public consultation on how it should work, and set a target start date — but as of today, no bill has been introduced into Parliament, and no non-compete ban is in force anywhere in Australia. This guide separates what has actually been announced and consulted on from what remains to be legislated, and explains the rule that governs non-competes right now, while the reform is still being designed.</p>
+
+<div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>The government announced its intention to ban non-compete clauses for workers earning below the Fair Work Act high-income threshold in the 2025-26 Federal Budget, handed down on 25 March 2025, with a target start of 2027.</li><li>As of today, this remains a policy proposal, not law: no bill has been introduced into the Australian Parliament, and Treasury's public consultation on the reform's design closed in September 2025 with the details still being finalized.</li><li>The current high-income threshold, which the ban would use as its cutoff, is $190,100 for the 2026-27 financial year (from 1 July 2026) — a figure that is itself adjusted every year and would need to be checked again by the time any ban actually commences.</li><li>Until a ban is enacted, non-competes in Australia remain governed by the ordinary common-law restraint-of-trade doctrine: void unless the employer proves the restriction is reasonable.</li><li>New South Wales has its own statute, the Restraints of Trade Act 1976 (NSW), letting courts partially enforce an unreasonable restraint rather than strike it out entirely — a state-specific rule, not a national one.</li></ul></div>
+
+<h2>What Has Actually Been Announced</h2>
+<p>The proposal traces back to a Treasury issues paper published in April 2024, examining non-compete clauses and other worker restraints as part of a broader competition policy review. That consultation fed directly into the 2025-26 Federal Budget, handed down on 25 March 2025, in which the government announced its intention to ban non-compete clauses for most workers earning below the Fair Work Act's high-income threshold, targeting a start date of 2027. Treasury then ran a further public consultation specifically on the reform's design between July and September 2025, drawing dozens of submissions, with the stated purpose of helping the government finalize the policy's details.</p>
+
+<h2>The Most Important Fact: This Is Not Yet Law</h2>
+<p><strong>As of today, no bill implementing this ban has been introduced into the Australian Parliament.</strong> The Fair Work Ombudsman's own current guidance confirms this directly, stating plainly that the Fair Work Act doesn't set any rules for non-compete clauses in employment contracts and that it cannot advise on them — a clear signal that the announced reform has not yet become operative law. The government has announced the policy, consulted on it, and stated a target commencement year, but design work on the details was reportedly still ongoing as of mid-2026, with no exposure draft of legislation formally introduced. Treat any claim that Australia "has banned" non-competes, or that a specific bill is already before Parliament, with real skepticism until you can confirm it against Treasury's own consultation page or the Australian Parliament's official bill register — this is a fast-moving policy area, and secondary sources have not always kept pace accurately with where the reform actually stands.</p>
+
+<h2>What the Ban Is Expected to Cover</h2>
+<p>Based on the government's own announcements and consultation materials, the proposal targets non-compete clauses specifically — restrictions on working for a competitor or starting a competing business after employment ends — for workers earning below the high-income threshold. That threshold is itself indexed annually: it was $175,000 at the time of the original Budget announcement, rose to $183,100 from 1 July 2025, and stands at $190,100 for the 2026-27 financial year from 1 July 2026. Because the ban's proposed design and its target date both sit in the future, and because this threshold moves every year regardless of the reform's progress, don't assume today's figure will still be the relevant one once any ban actually takes effect.</p>
+<p>A sale-of-business exception has been consistently discussed as likely to survive into any final version of the reform, on the same logic used in other jurisdictions — a business buyer typically needs some assurance the seller won't immediately re-enter the market and compete. Beyond that, Treasury's own consultation has left open questions genuinely undecided as of this writing, including whether non-solicitation clauses (as distinct from non-competes) would be swept into any new restriction, and what carve-outs, if any, would apply for senior executives or equity holders. Some specific numeric figures — particular restraint-length caps or equity-ownership thresholds — circulate in secondary commentary online, but could not be confirmed against an official government source at the time of writing; treat any such specific figure as unverified until Treasury or an introduced bill confirms it.</p>
+
+<h2>A Related but Separate Reform: No-Poach and Wage-Fixing Agreements</h2>
+<p>Bundled into the same general policy conversation, but legally distinct, is a separate proposal to restrict "no-poach" and wage-fixing agreements — arrangements between <em>businesses</em> not to hire each other's staff or to coordinate on wages, as opposed to a restriction between an employer and its own employee. This strand would work through the Competition and Consumer Act 2010 rather than the Fair Work Act, shares the same April 2024 Treasury origin and the same 2025-26 Budget announcement, but is a separate mechanism from the employee non-compete ban discussed above, and sits at a similar not-yet-enacted stage.</p>
+
+<h2>What Governs Non-Competes in Australia Right Now</h2>
+<p>Until any ban actually passes into law, non-compete clauses in Australia are governed by the ordinary common-law restraint-of-trade doctrine, applied consistently across the country: a restraint is presumed void unless the party trying to enforce it — almost always the employer — proves it is reasonable, meaning no broader than necessary to protect a legitimate business interest such as confidential information, trade connections, or client goodwill, and reasonable in its duration, geographic scope, and the activities it restricts.</p>
+<p>New South Wales has its own additional statute layered on top of this general common-law rule: the Restraints of Trade Act 1976 (NSW) provides that a restraint of trade is valid to the extent it is not against public policy, which lets NSW courts read down or partially enforce an unreasonable restraint rather than voiding it outright — a more flexible approach than the stricter severance principles that apply under the general common law elsewhere in Australia. This is a New South Wales-specific rule; no other state or territory has an equivalent statute, so the same overly broad non-compete clause could be partially rescued by a NSW court while being struck down entirely in another state.</p>
+
+<h2>Frequently Asked Questions</h2>
+<h3>Has Australia banned non-compete clauses for lower-paid workers?</h3>
+<p>Not yet. The government has announced this as a policy goal and consulted on how it would work, targeting 2027, but no bill has been introduced into Parliament and no ban is currently in force anywhere in Australia.</p>
+<h3>If I'm asked to sign a non-compete today, does the proposed ban protect me?</h3>
+<p>No — a proposal that hasn't been enacted has no legal effect. A non-compete signed today is governed by the existing common-law reasonableness test (and, in New South Wales, the Restraints of Trade Act 1976), not by the reform that's still being designed.</p>
+<h3>When will the ban actually take effect?</h3>
+<p>The government's target has been 2027, but that target predates a bill even being introduced, and the exact commencement date isn't fixed until legislation is actually passed. Check Treasury's consultation page or the Australian Parliament's bill register for the current status before relying on any specific date.</p>
+
+<h2>Sources &amp; Further Reading</h2>
+<ul>
+<li>Australian Government, 2025-26 Federal Budget (25 March 2025), non-compete clause reform announcement</li>
+<li>Australian Treasury, consultation on non-compete clauses and other restraints on workers (2024 issues paper; 2025 design consultation)</li>
+<li>Fair Work Ombudsman (fairwork.gov.au) — current guidance confirming no statutory non-compete rules are yet in force</li>
+<li>Restraints of Trade Act 1976 (NSW)</li>
+</ul>
+
+<h2>Practical Next Steps</h2>
+<p>If you're being asked to sign a non-compete in Australia today, assess it under the law that actually applies right now — the common-law reasonableness test, plus the NSW-specific statute if that's the relevant state — not the reform that's still being designed. If you're an employer planning restrictive covenants with an eye on the next few years, keep an eye on Treasury's consultation outcomes and the parliamentary bill register rather than assuming any specific reported detail is final. Because this is a genuinely fast-moving area with real potential for the rules to change materially before 2027, a consultation with an employment lawyer is the most reliable way to get both today's answer and a read on how exposed a given clause might be to the coming reform. For the general, worldwide framework this guide builds on, see <a href="/employment-law/what-is-a-non-compete-agreement">What Is a Non-Compete Agreement?</a> and, for how Australian dismissals themselves are challenged, <a href="/employment-law/unfair-dismissal-australia-fair-work-commission">Unfair Dismissal in Australia: Eligibility and the Fair Work Commission Process</a>.</p>
+
+<p><em>This article is general legal information, not legal advice, and describes a law reform that had not been enacted as of publication. Confirm the current status with the Fair Work Ombudsman or Treasury, and consult an Australian employment lawyer before signing or relying on a non-compete agreement.</em></p>`,
+  },
 ];

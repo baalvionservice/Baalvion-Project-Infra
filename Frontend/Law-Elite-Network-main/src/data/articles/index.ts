@@ -16,6 +16,7 @@ import { criminalLawJurisdictionArticles } from './criminal-law-jurisdiction';
 import { familyPersonalArticles } from './family-personal';
 import { familyPersonalExtraArticles } from './family-personal-extra';
 import { familyPersonalExtra2Articles } from './family-personal-extra2';
+import { familyPersonalJurisdictionArticles } from './family-personal-jurisdiction';
 import { propertyRealEstateArticles } from './property-real-estate';
 import { propertyRealEstateExtraArticles } from './property-real-estate-extra';
 import { propertyRealEstateExtra2Articles } from './property-real-estate-extra2';
@@ -30,6 +31,7 @@ import { employmentLaborExtra2Articles } from './employment-labor-extra2';
 import { employmentLaborJurisdictionArticles } from './employment-labor-jurisdiction';
 import { technologyIpArticles } from './technology-ip';
 import { technologyIpExtra2Articles } from './technology-ip-extra2';
+import { technologyIpJurisdictionArticles } from './technology-ip-jurisdiction';
 import { disputeResolutionArticles } from './dispute-resolution';
 import { disputeResolutionExtra2Articles } from './dispute-resolution-extra2';
 import { lciaArbitrationSeriesArticles } from './lcia-arbitration-series';
@@ -46,6 +48,7 @@ export const LAW_ARTICLES: LawArticle[] = [
   ...familyPersonalArticles,
   ...familyPersonalExtraArticles,
   ...familyPersonalExtra2Articles,
+  ...familyPersonalJurisdictionArticles,
   ...propertyRealEstateArticles,
   ...propertyRealEstateExtraArticles,
   ...propertyRealEstateExtra2Articles,
@@ -60,6 +63,7 @@ export const LAW_ARTICLES: LawArticle[] = [
   ...employmentLaborJurisdictionArticles,
   ...technologyIpArticles,
   ...technologyIpExtra2Articles,
+  ...technologyIpJurisdictionArticles,
   ...disputeResolutionArticles,
   ...disputeResolutionExtra2Articles,
   ...lciaArbitrationSeriesArticles,
