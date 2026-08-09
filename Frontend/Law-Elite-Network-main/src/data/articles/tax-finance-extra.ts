@@ -94,9 +94,9 @@ export const taxFinanceExtraArticles: LawArticle[] = [
     slug: 'vat-vs-sales-tax',
     alphabet: 'V',
     categoryId: 'cat_tax_finance',
-    subcategoryId: 'sub_tf_gst',
+    subcategoryId: 'sub_tf_sales_vat',
     category: TAX_FINANCE_CATEGORY,
-    subcategory: { id: 'sub_tf_gst', name: 'GST', slug: 'gst' },
+    subcategory: { id: 'sub_tf_sales_vat', name: 'Sales Tax & VAT', slug: 'sales-tax-vat' },
     summary:
       'VAT is collected in stages across the supply chain with credits for business inputs, while sales tax is charged once at the final sale to the consumer.',
     author: 'Daniel Okafor',

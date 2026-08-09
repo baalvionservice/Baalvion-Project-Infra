@@ -19,7 +19,7 @@ const CRIMINAL_LAW_CATEGORY = {
 export const criminalLawJurisdictionArticles: LawArticle[] = [
   {
     id: 'cl-301',
-    title: "What Are Your Miranda Rights? When Police Must Warn You (and When They Don't)",
+    title: 'What Are Your Miranda Rights? A Plain-Language Guide',
     slug: 'miranda-rights-explained',
     alphabet: 'W',
     categoryId: 'cat_criminal_law',
@@ -27,7 +27,7 @@ export const criminalLawJurisdictionArticles: LawArticle[] = [
     category: CRIMINAL_LAW_CATEGORY,
     subcategory: { id: 'sub_cl_police', name: 'Police Procedures', slug: 'police-procedures' },
     summary:
-      'Miranda warnings are only required before custodial interrogation, not at the moment of arrest — and skipping them does not automatically get a case thrown out. Here is what the warning actually covers and when it applies.',
+      "Miranda warnings are only required before custodial interrogation, not at arrest — and skipping them doesn't automatically get a case thrown out.",
     author: 'Aisha Rahman',
     updatedAt: 'August 9, 2026',
     readingTime: 10,
@@ -94,7 +94,7 @@ export const criminalLawJurisdictionArticles: LawArticle[] = [
   },
   {
     id: 'cl-302',
-    title: 'The Right to Silence in England and Wales: The Police Caution and Adverse Inferences Explained',
+    title: 'The Right to Silence in the UK: The Police Caution Explained',
     slug: 'right-to-silence-uk-police-caution',
     alphabet: 'T',
     categoryId: 'cat_criminal_law',
@@ -102,7 +102,7 @@ export const criminalLawJurisdictionArticles: LawArticle[] = [
     category: CRIMINAL_LAW_CATEGORY,
     subcategory: { id: 'sub_cl_police', name: 'Police Procedures', slug: 'police-procedures' },
     summary:
-      "In England and Wales you still have a right to silence, but unlike in the US, staying silent can be held against you in specific circumstances. Here is what the caution actually means and when it can hurt your defence.",
+      'In England and Wales you still have a right to silence, but unlike in the US, staying silent can be held against you in specific circumstances.',
     author: 'Aisha Rahman',
     updatedAt: 'August 9, 2026',
     readingTime: 10,
@@ -153,7 +153,7 @@ export const criminalLawJurisdictionArticles: LawArticle[] = [
   },
   {
     id: 'cl-303',
-    title: 'Your Charter Rights When Arrested in Canada: Section 10(a) and 10(b) Explained',
+    title: 'Your Charter Rights When Arrested in Canada',
     slug: 'charter-rights-on-arrest-canada',
     alphabet: 'Y',
     categoryId: 'cat_criminal_law',
@@ -161,7 +161,7 @@ export const criminalLawJurisdictionArticles: LawArticle[] = [
     category: CRIMINAL_LAW_CATEGORY,
     subcategory: { id: 'sub_cl_police', name: 'Police Procedures', slug: 'police-procedures' },
     summary:
-      "Canada's arrest rights come from the Charter, not a fixed warning script — and they trigger on the broader concept of 'detention,' not just formal arrest. Section 10(a) and 10(b) work differently from both the US Miranda rule and the UK caution.",
+      "Canada's arrest rights come from the Charter, not a fixed script, and trigger on 'detention' broadly — different from US Miranda and UK caution rules.",
     author: 'Aisha Rahman',
     updatedAt: 'August 9, 2026',
     readingTime: 10,
@@ -220,7 +220,7 @@ export const criminalLawJurisdictionArticles: LawArticle[] = [
   },
   {
     id: 'cl-304',
-    title: 'The Right to Silence in Australia: What the Police Caution Actually Means',
+    title: 'The Right to Silence in Australia Explained',
     slug: 'right-to-silence-australia',
     alphabet: 'T',
     categoryId: 'cat_criminal_law',
@@ -228,7 +228,7 @@ export const criminalLawJurisdictionArticles: LawArticle[] = [
     category: CRIMINAL_LAW_CATEGORY,
     subcategory: { id: 'sub_cl_police', name: 'Police Procedures', slug: 'police-procedures' },
     summary:
-      "Australia has no constitutional bill of rights, so the right to silence rests on common law and the Evidence Act — and unlike the federal position, New South Wales carves out a real exception for serious offences. Here is what actually applies, and where it varies.",
+      'Australia has no bill of rights, so the right to silence rests on common law and the Evidence Act — and NSW carves out an exception for serious offences.',
     author: 'Aisha Rahman',
     updatedAt: 'August 9, 2026',
     readingTime: 9,

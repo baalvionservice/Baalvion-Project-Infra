@@ -21,7 +21,7 @@ const ARBITRATION_SUBCATEGORY = {
 export const lciaArbitrationSeriesArticles: LawArticle[] = [
   {
     id: 'dr-004',
-    title: 'The Comprehensive Practitioner’s Guide to LCIA International Arbitration in London',
+    title: "A Practitioner's Guide to LCIA Arbitration in London",
     slug: 'lcia-international-arbitration-london-practitioner-guide',
     alphabet: 'T',
     categoryId: 'cat_dispute_resolution',
@@ -29,7 +29,7 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
     category: DISPUTE_RESOLUTION_CATEGORY,
     subcategory: ARBITRATION_SUBCATEGORY,
     summary:
-      'A full lifecycle walkthrough of LCIA arbitration under the LCIA Arbitration Rules 2020 — filing, tribunal formation, case management, the award, and enforcement — read alongside the English Arbitration Act 1996 as amended by the Arbitration Act 2025.',
+      'A full lifecycle walkthrough of LCIA arbitration — filing, tribunal formation, case management, and the award — read with the Arbitration Act 2025 reforms.',
     content: `<p>LCIA international arbitration is a private, institutionally administered process governed by the LCIA Arbitration Rules 2020, in which a case begins with a Request for Arbitration to the LCIA Registrar, proceeds before a tribunal appointed by the LCIA Court and normally seated in London by default under Article 16.2, and ends in a binding award enforceable in more than 160 New York Convention states. This guide walks a practitioner through every one of those stages in order.</p>
 
 <div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>A case opens with a Request for Arbitration and a fixed £1,950 registration fee; the Response is due within 28 days.</li><li>The default is a sole arbitrator (Article 5) unless the parties agree otherwise or the LCIA Court determines that three is warranted by complexity or quantum — and the LCIA Court, not the parties directly, formally appoints.</li><li>Absent agreement, the seat defaults to London (Article 16.2), pulling in the English Arbitration Act 1996 as amended by the Arbitration Act 2025 as the procedural law.</li><li>The tribunal has an express power to dismiss manifestly unmeritorious claims early (Article 22.1(viii)), and since 1 August 2025 a parallel statutory summary disposal power exists under section 39A of the 1996 Act.</li><li>There is no ICC-style institutional scrutiny of the award before it issues — the tribunal finalizes and issues it directly, targeting (not guaranteeing) issuance within three months of final submissions.</li></ul></div>
@@ -48,7 +48,7 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
 </ul>
 
 <h3>What law actually governs the arbitration itself?</h3>
-<p>Absent agreement, Article 16.2 defaults the seat to London, which brings the English Arbitration Act 1996 — as amended by the Arbitration Act 2025 — into play as the procedural (curial) law. Since 1 August 2025, section 6A of the Act adds a further default: absent an express choice, the law governing the arbitration agreement itself is the law of the seat. This is distinct from, and does not override, whatever law the parties chose to govern the substance of their underlying contract — the seat's procedural law and the contract's governing law are separate questions that should be drafted separately.</p>
+<p>Absent agreement, Article 16.2 defaults the seat to London, which brings the English Arbitration Act 1996 — as amended by the Arbitration Act 2025 — into play as the procedural (curial) law. Since 1 August 2025, section 6A of the Act adds a further default: absent an express choice, the law governing the arbitration agreement itself is the law of the seat. This is distinct from, and does not override, whatever law the parties chose to govern the substance of their underlying contract — the seat's procedural law and the contract's governing law are separate questions that should be drafted separately. This is one of several reforms under the Arbitration Act 2025 affecting a London-seated case — for the Act's other changes (arbitrator disclosure duties, summary disposal, and streamlined jurisdictional challenges), see <a href="/disputes/english-arbitration-act-2025-london-seated-arbitration">How the English Arbitration Act 2025 Governs London-Seated Arbitral Proceedings</a>.</p>
 
 <h3>How is the case actually managed once the tribunal is formed?</h3>
 <p>Article 14 imposes general duties on the tribunal to act fairly, adopt procedures suitable to the case, and avoid unnecessary delay or expense. In practice this produces an early case management conference that sets a procedural timetable, document production scope (generally narrower than U.S.-style discovery, with the IBA Rules on the Taking of Evidence commonly used as guidance rather than binding text), and directions for witness and expert evidence. Article 22.1(viii) gives the tribunal an express power to dismiss, on an early basis, any claim or defence that is manifestly outside its jurisdiction, inadmissible, or manifestly without merit — a genuine cost-control lever available from the outset, not just at a final hearing.</p>
@@ -57,7 +57,7 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
 <p>Article 15.10 directs the tribunal to use its best endeavours to issue the award within three months of the last submissions on the case — an aspirational target, not a guaranteed deadline. Article 26 requires the award to be in writing, reasoned (unless the parties agree otherwise), signed, dated, and to state the seat. Unlike the ICC, the LCIA has no institutional scrutiny step before issuance: the tribunal finalizes and sends the award directly to the parties.</p>
 
 <h3>What about costs and urgent relief?</h3>
-<p>Cost mechanics (registration fee, hourly rates, cost allocation) and the three distinct urgency mechanisms (expedited tribunal formation, Emergency Arbitrator, and expedited replacement-arbitrator appointment) are substantial enough to warrant their own treatment — see <a href="/disputes/lcia-arbitration-costs-administrative-fees-calculated">How LCIA Arbitration Costs and Administrative Fees Are Calculated</a> and <a href="/disputes/lcia-expedited-formation-emergency-arbitrator-mechanics">The Mechanics of LCIA Expedited Formation and Emergency Arbitrator Appointments</a>.</p>
+<p>Cost mechanics (registration fee, hourly rates, cost allocation) and the three distinct urgency mechanisms (expedited tribunal formation, Emergency Arbitrator, and expedited replacement-arbitrator appointment) are substantial enough to warrant their own treatment — see <a href="/disputes/lcia-arbitration-costs-administrative-fees-calculated">How LCIA Arbitration Costs and Administrative Fees Are Calculated</a> and <a href="/disputes/lcia-expedited-formation-emergency-arbitrator-mechanics">The Mechanics of LCIA Expedited Formation and Emergency Arbitrator Appointments</a>. Hearing-venue logistics for the merits hearing itself are a separate, practical consideration — see <a href="/disputes/booking-hearing-rooms-london-international-arbitration-centre">A Logistics Guide to Booking Hearing Rooms at London's International Arbitration Centres</a>.</p>
 
 <h2>A Full Case Lifecycle in Practice: Real-World Scenario</h2>
 <p>Consider a £22 million core-banking software licensing and joint-development agreement between a UK challenger bank and an Indian fintech developer, containing an LCIA clause seated in London. Three years in, the bank alleges the developer failed to deliver a compliant compliance module and files a Request for Arbitration; the developer disputes jurisdiction over part of the claim and files a counterclaim.</p>
@@ -90,7 +90,7 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
 <li><strong>Prepare the case management conference agenda proactively.</strong> Come with a proposed procedural timetable and document production scope rather than waiting for the tribunal to set the pace.</li>
 <li><strong>Use Article 22.1(viii) early determination strategically, not reflexively.</strong> It is most effective against claims genuinely outside jurisdiction or manifestly unarguable, not merely weak on the facts.</li>
 <li><strong>Track the Article 15.10 award timetable.</strong> It is a target, not an enforceable deadline — diplomatic but persistent follow-up matters.</li>
-<li><strong>Plan enforcement jurisdiction-by-jurisdiction before the award issues.</strong> Identify where the counterparty holds assets and whether those states are New York Convention parties.</li>
+<li><strong>Plan enforcement jurisdiction-by-jurisdiction before the award issues.</strong> Identify where the counterparty holds assets and whether those states are New York Convention parties — see <a href="/disputes/enforcing-foreign-arbitral-awards-london-new-york-convention">Enforcing Foreign Arbitral Awards in London</a> for the enforcement mechanics themselves.</li>
 <li><strong>Budget against the hourly cost model throughout the case</strong>, not just at the outset — see the dedicated costs guide linked above.</li>
 </ol>
 
@@ -128,7 +128,7 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
   },
   {
     id: 'dr-005',
-    title: 'How LCIA Arbitration Costs and Administrative Fees Are Calculated',
+    title: 'How LCIA Arbitration Costs Are Calculated',
     slug: 'lcia-arbitration-costs-administrative-fees-calculated',
     alphabet: 'H',
     categoryId: 'cat_dispute_resolution',
@@ -136,7 +136,7 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
     category: DISPUTE_RESOLUTION_CATEGORY,
     subcategory: ARBITRATION_SUBCATEGORY,
     summary:
-      'A breakdown of the LCIA Schedule of Arbitration Costs — the fixed registration fee, arbitrator and Secretariat hourly rate caps, deposits, and how the tribunal allocates costs between the parties — with a budgeting framework for corporate counsel.',
+      'A breakdown of LCIA arbitration costs — the registration fee, hourly rate caps, deposits, and how the tribunal allocates costs — with a budgeting framework.',
     content: `<p>LCIA arbitration costs are calculated almost entirely on a time basis: arbitrators, tribunal secretaries, and the LCIA Secretariat itself bill by the hour against capped rates published in the LCIA Schedule of Arbitration Costs, on top of a fixed £1,950 non-refundable registration fee paid on filing. Total cost is therefore driven by hours actually worked, not by the sum in dispute — the opposite structural model from an ad valorem institution like the ICC.</p>
 
 <div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>The registration fee is fixed at £1,950, unchanged in the 1 December 2023 Schedule revision, and is non-refundable regardless of outcome.</li><li>Arbitrator hourly rates are capped in a range of £250 to £650 per hour — the maximum was raised from £500 to £650 in the 2023 revision.</li><li>Tribunal secretaries bill at £100 to £250 per hour; LCIA Secretariat staff bill at their own role-based rates (Registrar/Deputy Registrar £300/hr, Counsel £285/hr, Case Administrators £220/hr, Casework Accounting £190/hr).</li><li>Article 28 gives the tribunal discretion over cost allocation — the general principle is that costs follow the event, but the tribunal can apportion differently and can also order recovery of a party's reasonable legal costs.</li><li>The LCIA Court can require deposits on account of costs as the case proceeds (Article 24); non-payment can lead to suspension of the proceedings.</li></ul></div>
@@ -164,7 +164,7 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
 <li><strong>Jurisdictional challenges:</strong> preliminary fights over the tribunal's jurisdiction generate substantial billable hours before the underlying dispute is even reached.</li>
 <li><strong>Document-heavy production:</strong> contested document requests and disputes over scope add arbitrator and Secretariat time directly.</li>
 <li><strong>Expert evidence and hearing length:</strong> more experts and longer hearings mean more arbitrator hours at the capped hourly rate, plus separate hearing-venue costs (see the logistics guide linked below).</li>
-<li><strong>Emergency Arbitrator applications:</strong> an urgent interim-relief application is a discrete, front-loaded cost event on top of the main case budget.</li>
+<li><strong>Emergency Arbitrator applications:</strong> an urgent interim-relief application is a discrete, front-loaded cost event on top of the main case budget — see <a href="/disputes/lcia-expedited-formation-emergency-arbitrator-mechanics">The Mechanics of LCIA Expedited Formation and Emergency Arbitrator Appointments</a> for how the mechanism itself works.</li>
 </ul>
 
 <h2>Cost Comparative Scenario: Budgeting a Mid-Size Commercial Dispute</h2>
@@ -221,7 +221,7 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
 </ul>
 
 <h2>Practical Next Steps</h2>
-<p>Before filing or responding to a Request for Arbitration, build a cost model using the current Schedule of Costs figures above rather than relying on an outdated rate card, and revisit that model at each major procedural milestone — tribunal formation, document production, and hearing scheduling — since each is a distinct point where the forecast can shift materially. Because cost allocation under Article 28 is discretionary, keep a clean record of procedural conduct and reasonable settlement offers throughout the case, not just at the end, since the tribunal will look to that record when it decides who pays.</p>
+<p>Before filing or responding to a Request for Arbitration, build a cost model using the current Schedule of Costs figures above rather than relying on an outdated rate card, and revisit that model at each major procedural milestone — tribunal formation, document production, and hearing scheduling — since each is a distinct point where the forecast can shift materially. Because cost allocation under Article 28 is discretionary, keep a clean record of procedural conduct and reasonable settlement offers throughout the case, not just at the end, since the tribunal will look to that record when it decides who pays. For where cost planning fits into the full case lifecycle, see <a href="/disputes/lcia-international-arbitration-london-practitioner-guide">The Comprehensive Practitioner's Guide to LCIA International Arbitration in London</a>.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
     author: 'Marcus Whitfield',
@@ -233,7 +233,7 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
   },
   {
     id: 'dr-006',
-    title: 'The Mechanics of LCIA Expedited Formation and Emergency Arbitrator Appointments',
+    title: 'LCIA Expedited Formation and Emergency Arbitrator Rules',
     slug: 'lcia-expedited-formation-emergency-arbitrator-mechanics',
     alphabet: 'T',
     categoryId: 'cat_dispute_resolution',
@@ -241,8 +241,8 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
     category: DISPUTE_RESOLUTION_CATEGORY,
     subcategory: ARBITRATION_SUBCATEGORY,
     summary:
-      'How LCIA Articles 9A, 9B, and 9C actually work — expedited formation of the full Tribunal, the Emergency Arbitrator’s 3-day appointment and 14-day decision deadline, and expedited replacement-arbitrator appointment — and when to use each.',
-    content: `<p>The LCIA Arbitration Rules 2020 give parties three distinct urgency mechanisms, not one. Article 9A lets a party ask the LCIA Court to expedite formation of the full Tribunal itself in cases of exceptional urgency. Article 9B lets a party obtain a temporary Emergency Arbitrator — appointed within three days and required to decide within 14 days — for interim relief before any Tribunal exists. Article 9C lets a party expedite the appointment of a replacement arbitrator mid-case. Knowing which one actually fits the problem, and what each can and cannot deliver, is what determines how fast real relief arrives.</p>
+      "How LCIA Articles 9A, 9B, and 9C work — expedited Tribunal formation, the Emergency Arbitrator's 3-day appointment, and replacement-arbitrator rules.",
+    content: `<p>The LCIA Arbitration Rules 2020 give parties three distinct urgency mechanisms, not one. Article 9A lets a party ask the LCIA Court to expedite formation of the full Tribunal itself in cases of exceptional urgency. Article 9B lets a party obtain a temporary Emergency Arbitrator — appointed within three days and required to decide within 14 days — for interim relief before any Tribunal exists. Article 9C lets a party expedite the appointment of a replacement arbitrator mid-case. Knowing which one actually fits the problem, and what each can and cannot deliver, is what determines how fast real relief arrives. These sit alongside the ordinary LCIA case timeline covered in <a href="/disputes/lcia-international-arbitration-london-practitioner-guide">The Comprehensive Practitioner's Guide to LCIA International Arbitration in London</a>.</p>
 
 <div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>Article 9A fast-tracks formation of the real, permanent Tribunal for cases of "exceptional urgency" — the LCIA Court acts "as expeditiously as possible," with no temporary arbitrator involved.</li><li>Article 9B's Emergency Arbitrator is appointed within three days of the Registrar receiving the application and must decide the claim for emergency relief within 14 days of appointment (Articles 9.8–9.9).</li><li>That 14-day deadline can only be extended by the LCIA Court in exceptional circumstances, or by written agreement of all parties to the emergency proceedings.</li><li>An Emergency Arbitrator can order or award anything the full Tribunal itself could order — but the relief is provisional, and remains subject to confirmation, variation, or reversal once the Tribunal is formed.</li><li>Article 9C serves a different purpose entirely: expediting the appointment of a replacement arbitrator after a vacancy, not delivering urgent relief to a party.</li></ul></div>
 
@@ -268,7 +268,7 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
 <p>Yes. The Emergency Arbitrator provisions in particular can be excluded by express agreement of the parties. This is a genuine drafting decision worth considering at the contract stage — most commercial parties leave it available, but a party that specifically does not want a counterparty able to obtain fast unilateral interim relief should address this explicitly in the clause rather than assume the default suits them.</p>
 
 <h3>How does this compare with seeking relief from a national court instead?</h3>
-<p>Section 44 of the Arbitration Act 1996 — unaffected in its core scope by the Arbitration Act 2025, which strengthens court support for arbitration more broadly — preserves the English court's own power to grant interim relief in support of an arbitration, including specifically in support of Emergency Arbitrator proceedings. In practice, counsel often has a real choice between the LCIA's own Article 9B mechanism and a section 44 application to the English court, particularly where the relief sought needs to bind a third party or asset that an Emergency Arbitrator — who has no jurisdiction over non-parties — simply cannot reach.</p>
+<p>Section 44 of the Arbitration Act 1996 — unaffected in its core scope by the Arbitration Act 2025, which strengthens court support for arbitration more broadly — preserves the English court's own power to grant interim relief in support of an arbitration, including specifically in support of Emergency Arbitrator proceedings. In practice, counsel often has a real choice between the LCIA's own Article 9B mechanism and a section 44 application to the English court, particularly where the relief sought needs to bind a third party or asset that an Emergency Arbitrator — who has no jurisdiction over non-parties — simply cannot reach. For the Arbitration Act 2025's other reforms to a London-seated arbitration, see <a href="/disputes/english-arbitration-act-2025-london-seated-arbitration">How the English Arbitration Act 2025 Governs London-Seated Arbitral Proceedings</a>.</p>
 
 <h2>Real-World Scenario: Racing the Clock on a Licence Breach</h2>
 <p>A technology licensor discovers its licensee is about to sub-license disputed IP to a third party in breach of an exclusivity clause, with the sub-licence set to close within days. The licensor needs to stop it before the underlying dispute can even be fully argued.</p>
@@ -334,7 +334,7 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
   },
   {
     id: 'dr-007',
-    title: 'How the English Arbitration Act 2025 Governs London-Seated Arbitral Proceedings',
+    title: 'How the Arbitration Act 2025 Governs London Arbitration',
     slug: 'english-arbitration-act-2025-london-seated-arbitration',
     alphabet: 'H',
     categoryId: 'cat_dispute_resolution',
@@ -342,7 +342,7 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
     category: DISPUTE_RESOLUTION_CATEGORY,
     subcategory: ARBITRATION_SUBCATEGORY,
     summary:
-      'How the Arbitration Act 2025 — in force since 1 August 2025 — amends the Arbitration Act 1996: the new default governing law for arbitration agreements, a codified disclosure duty, streamlined section 67 jurisdictional challenges, statutory summary disposal, and strengthened arbitrator immunity.',
+      'How the Arbitration Act 2025 reforms London arbitration: governing law, arbitrator disclosure, jurisdictional challenges, and summary disposal.',
     content: `<p>The Arbitration Act 2025 — in force since 1 August 2025, and applying to arbitrations commenced (and related court proceedings and awards) on or after that date — amends the Arbitration Act 1996 rather than replacing it. Its practical effect on any London-seated arbitration, whether administered by the LCIA, the ICC, or conducted ad hoc, comes down to five changes: a new default rule on the law governing the arbitration agreement, a mandatory codified disclosure duty for arbitrators, a streamlined section 67 jurisdictional-challenge procedure, an express statutory summary disposal power, and strengthened arbitrator immunity.</p>
 
 <div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>Section 6A: absent express agreement, the law governing the arbitration agreement is the law of the seat — reversing the more fact-specific common-law default from <em>Enka v Chubb</em>.</li><li>The disclosure duty is now codified and mandatory — it cannot be excluded by party agreement, and applies to circumstances that might reasonably give rise to justifiable doubts as to an arbitrator's impartiality.</li><li>Section 67 jurisdictional challenges are streamlined: the court can now remit a successful challenge back to the tribunal, a remedy previously not consistently available across all challenge routes.</li><li>A new section 39A gives tribunals an express statutory summary disposal power — a "no real prospect of success" standard — unless the parties agree otherwise.</li><li>Arbitrator immunity is strengthened: no costs liability for a reasonable resignation, and no costs liability on a removal application unless the arbitrator acted in bad faith.</li></ul></div>
@@ -350,7 +350,7 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
 <h2>What the Arbitration Act 2025 Actually Changed</h2>
 
 <h3>What law governs the arbitration agreement now?</h3>
-<p>New section 6A of the 1996 Act provides that, absent the parties' express agreement to the contrary, the law applicable to the arbitration agreement is the law of the seat. In practice, for a London-seated arbitration with no express choice of law for the arbitration clause itself, English law now applies to that clause by statutory default. This replaces the more nuanced common-law position that previously applied following the Supreme Court's decision in <em>Enka v Chubb</em>, and is expected to reduce the number of preliminary disputes over which law governs the arbitration agreement before the underlying dispute is even reached. Party autonomy is preserved throughout — section 6A only operates as a fallback where the parties have not made an express choice.</p>
+<p>New section 6A of the 1996 Act provides that, absent the parties' express agreement to the contrary, the law applicable to the arbitration agreement is the law of the seat. In practice, for a London-seated arbitration with no express choice of law for the arbitration clause itself, English law now applies to that clause by statutory default. This replaces the more nuanced common-law position that previously applied following the Supreme Court's decision in <em>Enka v Chubb</em>, and is expected to reduce the number of preliminary disputes over which law governs the arbitration agreement before the underlying dispute is even reached. Party autonomy is preserved throughout — section 6A only operates as a fallback where the parties have not made an express choice. For how this default interacts with the choice between LCIA and ICC rules in a cross-border contract, see <a href="/disputes/lcia-vs-icc-rules-cross-border-arbitration">LCIA vs ICC Rules: A Strategic Evaluation for Cross-Border Commercial Disputes</a>.</p>
 
 <h3>What must arbitrators disclose, and can parties waive it?</h3>
 <p>The Act codifies the duty recognized by the Supreme Court in <em>Halliburton v Chubb</em>: an arbitrator, or a person approached about a potential appointment, must disclose as soon as reasonably practicable any circumstances that might reasonably give rise to justifiable doubts as to their impartiality in relation to the proceedings or potential proceedings. This duty is mandatory and applies regardless of any contrary agreement by the parties — it cannot be contracted out of.</p>
@@ -381,7 +381,7 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
 <tbody>
 <tr><td style="padding:0.85rem 1rem; border:1px solid #e2e8f0;">Governing law of the arbitration agreement</td><td style="padding:0.85rem 1rem; border:1px solid #e2e8f0;">Fact-specific common-law test (<em>Enka v Chubb</em>)</td><td style="padding:0.85rem 1rem; border:1px solid #e2e8f0;">Statutory default: law of the seat (s.6A)</td><td style="padding:0.85rem 1rem; border:1px solid #e2e8f0;">English law governs the arbitration clause by default, since the arbitration commenced after 1 Aug 2025</td></tr>
 <tr><td style="padding:0.85rem 1rem; border:1px solid #e2e8f0;">Arbitrator disclosure</td><td style="padding:0.85rem 1rem; border:1px solid #e2e8f0;">Common-law duty (<em>Halliburton v Chubb</em>)</td><td style="padding:0.85rem 1rem; border:1px solid #e2e8f0;">Codified, mandatory statutory duty</td><td style="padding:0.85rem 1rem; border:1px solid #e2e8f0;">No difference in substance, but now unwaivable by agreement</td></tr>
-<tr><td style="padding:0.85rem 1rem; border:1px solid #e2e8f0;">Summary disposal</td><td style="padding:0.85rem 1rem; border:1px solid #e2e8f0;">No independent statutory power</td><td style="padding:0.85rem 1rem; border:1px solid #e2e8f0;">Section 39A "no real prospect of success" power</td><td style="padding:0.85rem 1rem; border:1px solid #e2e8f0;">A weak counterclaim can now be tested under both s.39A and LCIA Art. 22.1(viii)</td></tr>
+<tr><td style="padding:0.85rem 1rem; border:1px solid #e2e8f0;">Summary disposal</td><td style="padding:0.85rem 1rem; border:1px solid #e2e8f0;">No independent statutory power</td><td style="padding:0.85rem 1rem; border:1px solid #e2e8f0;">Section 39A "no real prospect of success" power</td><td style="padding:0.85rem 1rem; border:1px solid #e2e8f0;">A weak counterclaim can now be tested under both s.39A and <a href="/disputes/lcia-international-arbitration-london-practitioner-guide">LCIA Art. 22.1(viii)</a></td></tr>
 <tr><td style="padding:0.85rem 1rem; border:1px solid #e2e8f0;">Section 67 challenge remedy</td><td style="padding:0.85rem 1rem; border:1px solid #e2e8f0;">Remittal not consistently available</td><td style="padding:0.85rem 1rem; border:1px solid #e2e8f0;">Remittal available on a successful challenge</td><td style="padding:0.85rem 1rem; border:1px solid #e2e8f0;">Lower risk of a full restart if jurisdiction is later successfully challenged</td></tr>
 </tbody>
 </table>
@@ -428,7 +428,7 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
   },
   {
     id: 'dr-008',
-    title: 'Enforcing Foreign Arbitral Awards in London: Challenges Under the New York Convention',
+    title: 'Enforcing Foreign Arbitral Awards in London',
     slug: 'enforcing-foreign-arbitral-awards-london-new-york-convention',
     alphabet: 'E',
     categoryId: 'cat_dispute_resolution',
@@ -436,7 +436,7 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
     category: DISPUTE_RESOLUTION_CATEGORY,
     subcategory: ARBITRATION_SUBCATEGORY,
     summary:
-      'How to enforce a foreign arbitral award against assets in England and Wales under sections 100–103 of the Arbitration Act 1996 and CPR Part 62 — the narrow statutory refusal grounds, the procedure, and the practical complications of state-linked debtors.',
+      'How to enforce a foreign arbitral award in England and Wales under the Arbitration Act 1996 — the narrow refusal grounds and enforcement procedure.',
     content: `<p>Enforcing a foreign arbitral award in London means applying to the English court under sections 100 to 103 of the Arbitration Act 1996 — which implements the 1958 New York Convention domestically — for permission to enforce the award in the same manner as a judgment, typically by a without-notice application under CPR Part 62. The respondent is limited to the narrow, closed list of statutory refusal grounds in section 103, not a fresh review of the merits.</p>
 
 <div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>Sections 100–103 of the Arbitration Act 1996 implement the New York Convention in England and Wales, which has been a Convention state since 1975.</li><li>The standard route is an arbitration claim form under CPR Part 62, generally filed without notice initially, supported by an authenticated award and arbitration agreement under section 102.</li><li>Section 103(2) sets out a closed list of refusal grounds mirroring Article V(1) of the New York Convention — incapacity, an invalid arbitration agreement, improper notice, an award exceeding its submission, improper tribunal composition or procedure, or an award not yet binding or set aside at the seat.</li><li>Section 103(3) allows refusal on public policy grounds — narrowly construed by English courts and rarely successful on its own.</li><li>The burden is on the party resisting enforcement to prove a refusal ground applies — not on the award-creditor to prove the award is correct.</li></ul></div>
@@ -444,7 +444,7 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
 <h2>How Enforcement Actually Works in the English Courts</h2>
 
 <h3>What is the legal basis for enforcement?</h3>
-<p>England and Wales has been a New York Convention state since 1975, and sections 100 to 103 of the Arbitration Act 1996 give that Convention domestic legal effect. A foreign award made in another Convention state is, subject to the narrow statutory grounds discussed below, treated as binding and enforceable in England without a re-examination of the underlying dispute.</p>
+<p>England and Wales has been a New York Convention state since 1975, and sections 100 to 103 of the Arbitration Act 1996 give that Convention domestic legal effect. A foreign award made in another Convention state is, subject to the narrow statutory grounds discussed below, treated as binding and enforceable in England without a re-examination of the underlying dispute. This Part III enforcement machinery is distinct from the Part I reforms the Arbitration Act 2025 made to the arbitration process itself — see <a href="/disputes/english-arbitration-act-2025-london-seated-arbitration">How the English Arbitration Act 2025 Governs London-Seated Arbitral Proceedings</a>.</p>
 
 <h3>What documents and procedure are actually required?</h3>
 <p>Under section 102(1)(a), the party seeking enforcement must produce the duly authenticated original award (or a certified copy) and the original arbitration agreement (or a certified copy), with certified translations where the documents are not in English. Procedurally, the application is made under CPR Part 62 by an arbitration claim form, generally without notice to the respondent in the first instance. If the court is satisfied, it grants permission to enforce the award "in the same manner as a judgment" under section 101(2), after which a formal enforcement order is drawn up.</p>
@@ -518,7 +518,7 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
 </ul>
 
 <h2>Practical Next Steps</h2>
-<p>Before filing an enforcement application, map the debtor's known assets in England and Wales and confirm the section 102 documentation is complete and properly authenticated. If the debtor is a state or state-linked entity, run a separate immunity analysis on each specific asset before assuming it is executable. Because the without-notice stage moves quickly but a contested hearing can take months, build both timelines into the client's expectations from the outset, and have enforcement counsel review the underlying award for any procedural vulnerability — notice, tribunal composition, scope — before, not after, the debtor raises it.</p>
+<p>Before filing an enforcement application, map the debtor's known assets in England and Wales and confirm the section 102 documentation is complete and properly authenticated. If the debtor is a state or state-linked entity, run a separate immunity analysis on each specific asset before assuming it is executable. Because the without-notice stage moves quickly but a contested hearing can take months, build both timelines into the client's expectations from the outset, and have enforcement counsel review the underlying award for any procedural vulnerability — notice, tribunal composition, scope — before, not after, the debtor raises it. For the full LCIA case lifecycle that produces the award being enforced, see <a href="/disputes/lcia-international-arbitration-london-practitioner-guide">The Comprehensive Practitioner's Guide to LCIA International Arbitration in London</a>.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
     author: 'Marcus Whitfield',
@@ -530,7 +530,7 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
   },
   {
     id: 'dr-009',
-    title: 'A Logistics Guide to Booking Hearing Rooms at London’s International Arbitration Centres',
+    title: "Booking Hearing Rooms at London's Arbitration Centres",
     slug: 'booking-hearing-rooms-london-international-arbitration-centre',
     alphabet: 'A',
     categoryId: 'cat_dispute_resolution',
@@ -538,7 +538,7 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
     category: DISPUTE_RESOLUTION_CATEGORY,
     subcategory: ARBITRATION_SUBCATEGORY,
     summary:
-      'The practical logistics of booking a London arbitration hearing venue — how the International Arbitration Centre and the International Dispute Resolution Centre actually differ, how the booking process works, and how to budget venue cost separately from institutional and arbitrator fees.',
+      'The practical logistics of booking a London arbitration hearing venue — how the IAC and IDRC differ, the booking process, and budgeting venue cost separately.',
     content: `<p>London has two purpose-built, institution-independent hearing venues that host the large majority of LCIA-, ICC-, and ad hoc-administered hearings: the International Arbitration Centre (IAC) at 190 Fleet Street, and the International Dispute Resolution Centre (IDRC) near St Paul's Cathedral. Booking either follows the same basic sequence — identify room-size and format needs, request a hold, confirm through a signed booking agreement, and arrange technology and catering as separate line items from the room fee itself.</p>
 
 <div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>Neither the LCIA nor the ICC owns the physical venue for most hearings — counsel or the tribunal secretary books hearing space separately, as a distinct commercial arrangement from the institution's own administrative fees.</li><li>The IAC, established in 2019 at 190 Fleet Street, spans three floors of hearing, mediation, and breakout rooms, with its largest rooms seating up to roughly 60 people.</li><li>The IDRC offers more than 70 rooms in total, including 18 large hearing-capable rooms, with its biggest reconfigurable room accommodating up to roughly 200 people and smaller hearing rooms seating around 15.</li><li>Venue cost is priced per day (plus VAT) and is entirely separate from the LCIA's or ICC's own Schedule of Costs — it needs its own line item in the case budget.</li><li>Popular venues can book out months in advance during peak arbitration hearing season, so placing an early hold matters more than comparing headline rates.</li></ul></div>
@@ -546,7 +546,7 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
 <h2>How Hearing-Room Logistics Actually Work in London Arbitration</h2>
 
 <h3>Who is actually responsible for booking the room?</h3>
-<p>Not the LCIA or ICC Secretariat. The institution administers the case — tribunal formation, procedural timetable, correspondence — but the physical hearing venue is normally contracted directly by counsel for the parties, or by a tribunal secretary if one has been appointed, as a separate commercial booking with the venue itself.</p>
+<p>Not the LCIA or ICC Secretariat. The institution administers the case — tribunal formation, procedural timetable, correspondence — but the physical hearing venue is normally contracted directly by counsel for the parties, or by a tribunal secretary if one has been appointed, as a separate commercial booking with the venue itself. For the rest of the case timeline this hearing sits within, see <a href="/disputes/lcia-international-arbitration-london-practitioner-guide">The Comprehensive Practitioner's Guide to LCIA International Arbitration in London</a>.</p>
 
 <h3>What venues actually exist, and how do they differ?</h3>
 <ul>

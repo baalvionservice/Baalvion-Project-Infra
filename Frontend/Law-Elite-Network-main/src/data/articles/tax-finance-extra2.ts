@@ -17,7 +17,7 @@ export const taxFinanceExtra2Articles: LawArticle[] = [
     category: TAX_FINANCE_CATEGORY,
     subcategory: { id: 'sub_tf_income', name: 'Income Tax', slug: 'income-tax' },
     summary:
-      'A tax deduction reduces the income on which you are taxed, lowering your bill — but it works differently from a tax credit, and the rules depend heavily on where you live.',
+      "A tax deduction reduces the income you're taxed on, lowering your bill — but it works differently from a credit, and rules vary by where you live.",
     author: 'Priya Nair',
     updatedAt: 'June 21, 2026',
     readingTime: 8,
@@ -95,7 +95,7 @@ export const taxFinanceExtra2Articles: LawArticle[] = [
     category: TAX_FINANCE_CATEGORY,
     subcategory: { id: 'sub_tf_corporate', name: 'Corporate Tax', slug: 'corporate-tax' },
     summary:
-      'A tax audit is an official review of your tax return and records to check the figures are accurate — usually routine, manageable, and far less alarming than people fear.',
+      'A tax audit is an official review of your return and records to check the figures are accurate — usually routine and less alarming than people fear.',
     author: 'Rajesh Iyer',
     updatedAt: 'June 19, 2026',
     readingTime: 8,

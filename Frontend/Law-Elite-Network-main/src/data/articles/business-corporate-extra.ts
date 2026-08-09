@@ -9,7 +9,7 @@ const BUSINESS_CORPORATE_CATEGORY = {
 export const businessCorporateExtraArticles: LawArticle[] = [
   {
     id: 'bc-101',
-    title: 'LLC vs Corporation: Which Business Structure Should You Choose?',
+    title: 'LLC vs Corporation: Which Should You Choose?',
     slug: 'llc-vs-corporation',
     alphabet: 'L',
     categoryId: 'cat_business_corporate',
@@ -17,7 +17,7 @@ export const businessCorporateExtraArticles: LawArticle[] = [
     category: BUSINESS_CORPORATE_CATEGORY,
     subcategory: { id: 'sub_bc_formation', name: 'Company Formation', slug: 'company-formation' },
     summary:
-      'An LLC offers flexible, pass-through ownership with limited liability, while a corporation suits raising outside capital — the right choice depends on tax, control, and growth plans.',
+      'An LLC offers flexible, pass-through ownership with limited liability, while a corporation suits raising capital — the choice depends on your goals.',
     author: 'Marcus Hale',
     updatedAt: 'June 18, 2026',
     readingTime: 10,
@@ -92,7 +92,7 @@ export const businessCorporateExtraArticles: LawArticle[] = [
     category: BUSINESS_CORPORATE_CATEGORY,
     subcategory: { id: 'sub_bc_contracts', name: 'Contracts', slug: 'contracts' },
     summary:
-      'A non-disclosure agreement is a contract that legally binds one or both parties to keep shared information confidential and not use it for unauthorised purposes.',
+      'A non-disclosure agreement is a contract binding one or both parties to keep shared information confidential and not use it without authorization.',
     author: 'Elena Rossi',
     updatedAt: 'June 11, 2026',
     readingTime: 8,

@@ -17,7 +17,7 @@ const PROPERTY_REAL_ESTATE_CATEGORY = {
 export const propertyRealEstateJurisdictionArticles: LawArticle[] = [
   {
     id: 'pr-301',
-    title: 'Tenancy Deposit Protection in England and Wales: The Rules Every Landlord Must Follow',
+    title: 'Tenancy Deposit Protection in England and Wales',
     slug: 'tenancy-deposit-protection-uk',
     alphabet: 'T',
     categoryId: 'cat_property_real_estate',
@@ -25,7 +25,7 @@ export const propertyRealEstateJurisdictionArticles: LawArticle[] = [
     category: PROPERTY_REAL_ESTATE_CATEGORY,
     subcategory: { id: 'sub_pr_rental', name: 'Rental Agreements', slug: 'rental-agreements' },
     summary:
-      'A landlord in England and Wales who takes a deposit must protect it in an approved scheme within 30 days or face a court penalty of up to three times its value — a rule now applying to a wider pool of tenancies since the Renters\' Rights Act 2025 took effect.',
+      'A landlord in England and Wales must protect a deposit in an approved scheme within 30 days or face a penalty of up to three times its value.',
     author: 'Daniel Okafor',
     updatedAt: 'August 9, 2026',
     readingTime: 9,

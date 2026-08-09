@@ -17,7 +17,7 @@ export const businessCorporateExtra2Articles: LawArticle[] = [
     category: BUSINESS_CORPORATE_CATEGORY,
     subcategory: { id: 'sub_bc_formation', name: 'Company Formation', slug: 'company-formation' },
     summary:
-      'Forming an LLC means choosing a name, filing formation documents with the state, appointing a registered agent, and writing an operating agreement that governs the business.',
+      'Forming an LLC means choosing a name, filing formation documents with the state, appointing a registered agent, and writing an operating agreement.',
     author: 'Marcus Hale',
     updatedAt: 'June 22, 2026',
     readingTime: 10,
@@ -96,7 +96,7 @@ export const businessCorporateExtra2Articles: LawArticle[] = [
     category: BUSINESS_CORPORATE_CATEGORY,
     subcategory: { id: 'sub_bc_contracts', name: 'Contracts', slug: 'contracts' },
     summary:
-      'When a contract is broken, the law offers remedies such as damages, specific performance, or cancellation — aimed at putting the wronged party where the contract promised they would be.',
+      'When a contract is broken, the law offers remedies like damages, specific performance, or cancellation, aimed at putting the wronged party right.',
     author: 'Elena Rossi',
     updatedAt: 'June 20, 2026',
     readingTime: 9,

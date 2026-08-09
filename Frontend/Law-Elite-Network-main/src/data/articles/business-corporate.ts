@@ -101,7 +101,7 @@ export const businessCorporateArticles: LawArticle[] = [
 <ul>
 <li><strong>Sole proprietorship:</strong> simplest to start, but the owner is personally liable for all debts.</li>
 <li><strong>Partnership:</strong> two or more owners share profits and, in a general partnership, personal liability.</li>
-<li><strong>Limited liability company:</strong> a flexible entity (an LLC in the US, a private limited company elsewhere) that caps owner liability.</li>
+<li><strong>Limited liability company:</strong> a flexible entity (an <a href="/business/how-to-form-an-llc-step-by-step">LLC</a> in the US, a private limited company elsewhere) that caps owner liability.</li>
 <li><strong>Corporation:</strong> a more formal entity suited to raising capital and issuing shares to many investors.</li>
 </ul>
 <p>Owners weigh limited liability, tax treatment, administrative burden, and credibility with customers and investors when deciding.</p>
@@ -126,7 +126,7 @@ export const businessCorporateArticles: LawArticle[] = [
 </ul>
 
 <h2>How Jurisdictions Differ</h2>
-<p>In the United States, companies are formed under state law, and Delaware is a popular choice for its developed corporate case law. The United Kingdom offers fast, low-cost online incorporation through a single national registry. Across the European Union, each member state has its own rules, though several directives have harmonized aspects of disclosure. In India, incorporation is largely digital but involves obtaining director identification and digital signatures first. Founders operating internationally should not assume the cheapest or fastest registry is best; tax residence, where customers are, and where staff sit often matter more.</p>
+<p>In the United States, companies are formed under state law, and Delaware is a popular choice for its developed corporate case law; eligible corporations may also elect S corporation tax status for pass-through treatment (see <a href="/business/what-is-an-s-corporation">What Is an S Corporation? How the Tax Election Actually Works</a>). The United Kingdom offers fast, low-cost online incorporation through a single national registry — see <a href="/business/uk-company-formation-companies-house">Forming a Private Limited Company in the UK via Companies House</a> for the Companies House process itself. Canada splits incorporation authority between the federal government and the provinces, a choice with real consequences for where the company can operate (see <a href="/business/federal-vs-provincial-incorporation-canada">Federal vs. Provincial Incorporation in Canada</a>). Australia runs company registration through its national regulator (see <a href="/business/company-registration-australia-asic">Registering a Company in Australia: The ASIC Process</a>). Across the European Union, each member state has its own rules, though several directives have harmonized aspects of disclosure. In India, incorporation is largely digital but involves obtaining director identification and digital signatures first. Founders operating internationally should not assume the cheapest or fastest registry is best; tax residence, where customers are, and where staff sit often matter more.</p>
 
 <h2>Common Pitfalls</h2>
 <ul>

@@ -11,7 +11,7 @@ export const criminalLawArticles: LawArticle[] = [
     category: { id: 'cat_criminal_law', name: 'Criminal Law', slug: 'criminal-law' },
     subcategory: { id: 'sub_cl_bail', name: 'Bail', slug: 'bail' },
     summary:
-      'Bail is the legal mechanism that lets an accused person remain free before trial, usually in exchange for conditions or money guaranteeing their return to court.',
+      'Bail is the legal mechanism letting an accused remain free before trial, usually in exchange for conditions or money guaranteeing court return.',
     author: 'Aisha Rahman',
     updatedAt: 'April 9, 2026',
     readingTime: 8,
@@ -88,7 +88,7 @@ export const criminalLawArticles: LawArticle[] = [
     category: { id: 'cat_criminal_law', name: 'Criminal Law', slug: 'criminal-law' },
     subcategory: { id: 'sub_cl_whitecollar', name: 'White Collar Crime', slug: 'white-collar-crime' },
     summary:
-      'White-collar crime refers to non-violent, financially motivated offences such as fraud, bribery, and embezzlement, usually committed through deception in a business or professional setting.',
+      'White-collar crime refers to non-violent, financially motivated offences such as fraud, bribery, and embezzlement, typically committed through deception.',
     author: 'Daniel Okafor',
     updatedAt: 'March 22, 2026',
     readingTime: 9,

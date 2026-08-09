@@ -17,7 +17,7 @@ const EMPLOYMENT_LABOR_CATEGORY = {
 export const employmentLaborJurisdictionArticles: LawArticle[] = [
   {
     id: 'el-301',
-    title: 'At-Will Employment Exceptions in the U.S.: A State-by-State Guide',
+    title: 'At-Will Employment Exceptions in the US by State',
     slug: 'at-will-employment-exceptions-by-state',
     alphabet: 'A',
     categoryId: 'cat_employment_labor',
@@ -25,7 +25,7 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
     category: EMPLOYMENT_LABOR_CATEGORY,
     subcategory: { id: 'sub_el_termination', name: 'Wrongful Termination', slug: 'wrongful-termination' },
     summary:
-      'Every U.S. state except Montana follows at-will employment, but courts in most states have carved out real exceptions — public policy, implied contract, and good faith — that limit when an employer can actually fire you.',
+      'Every US state except Montana follows at-will employment, but most courts recognize real exceptions — public policy, implied contract, and good faith.',
     author: 'Daniel Okoro',
     updatedAt: 'August 9, 2026',
     readingTime: 10,
@@ -94,7 +94,7 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
   },
   {
     id: 'el-302',
-    title: 'Unfair Dismissal in the UK: Qualifying Period, Rights and the 2027 Changes',
+    title: 'Unfair Dismissal in the UK: Rights and 2027 Changes',
     slug: 'unfair-dismissal-uk-guide',
     alphabet: 'U',
     categoryId: 'cat_employment_labor',
@@ -102,7 +102,7 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
     category: EMPLOYMENT_LABOR_CATEGORY,
     subcategory: { id: 'sub_el_termination', name: 'Wrongful Termination', slug: 'wrongful-termination' },
     summary:
-      'UK employees currently need two years of service to claim unfair dismissal — but that qualifying period is set to fall to six months from January 2027 under the Employment Rights Act 2025. Here is what applies today and what changes.',
+      "UK employees currently need two years' service to claim unfair dismissal — falling to six months from January 2027 under the Employment Rights Act 2025.",
     author: 'Daniel Okoro',
     updatedAt: 'August 9, 2026',
     readingTime: 9,
@@ -162,7 +162,7 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
   },
   {
     id: 'el-303',
-    title: "Wrongful Dismissal in Canada: How 'Reasonable Notice' Is Calculated",
+    title: 'Wrongful Dismissal in Canada: Reasonable Notice',
     slug: 'wrongful-dismissal-canada-reasonable-notice',
     alphabet: 'W',
     categoryId: 'cat_employment_labor',
@@ -170,7 +170,7 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
     category: EMPLOYMENT_LABOR_CATEGORY,
     subcategory: { id: 'sub_el_termination', name: 'Wrongful Termination', slug: 'wrongful-termination' },
     summary:
-      "Canada has no true at-will employment — every non-federal employee is owed either working notice or pay in lieu, and courts calculate that notice case by case using the Bardal factors, not a fixed formula.",
+      'Canada has no true at-will employment — every non-federal employee is owed notice or pay in lieu, calculated case-by-case using the Bardal factors.',
     author: 'Daniel Okoro',
     updatedAt: 'August 9, 2026',
     readingTime: 9,
@@ -222,7 +222,7 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
   },
   {
     id: 'el-304',
-    title: 'Unfair Dismissal in Australia: Eligibility and the Fair Work Commission Process',
+    title: 'Unfair Dismissal in Australia: The Fair Work Process',
     slug: 'unfair-dismissal-australia-fair-work-commission',
     alphabet: 'U',
     categoryId: 'cat_employment_labor',
@@ -230,7 +230,7 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
     category: EMPLOYMENT_LABOR_CATEGORY,
     subcategory: { id: 'sub_el_termination', name: 'Wrongful Termination', slug: 'wrongful-termination' },
     summary:
-      "Australian employees who meet the minimum employment period and income eligibility rules can challenge a dismissal that was harsh, unjust or unreasonable — but only within a strict 21-day window to lodge with the Fair Work Commission.",
+      'Australian employees meeting service and income eligibility can challenge a harsh dismissal — within a strict 21-day Fair Work Commission window.',
     author: 'Daniel Okoro',
     updatedAt: 'August 9, 2026',
     readingTime: 9,
@@ -287,7 +287,7 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
   },
   {
     id: 'el-305',
-    title: 'Non-Compete Enforceability by State: The Current U.S. Landscape',
+    title: 'Non-Compete Enforceability by State in the US',
     slug: 'non-compete-enforceability-by-state-us',
     alphabet: 'N',
     categoryId: 'cat_employment_labor',
@@ -295,7 +295,7 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
     category: EMPLOYMENT_LABOR_CATEGORY,
     subcategory: { id: 'sub_el_contracts', name: 'Employment Contracts', slug: 'employment-contracts' },
     summary:
-      'A handful of U.S. states void non-competes outright, a growing group bans them below a wage threshold, and the rest apply a common-law reasonableness test — now that the FTC’s 2024 nationwide rule is dead, enforceability is once again entirely a state-by-state question.',
+      'A few US states void non-competes outright, more ban them below a wage threshold, and the rest use a reasonableness test — now a state-by-state question.',
     author: 'Daniel Okoro',
     updatedAt: 'August 9, 2026',
     readingTime: 11,
@@ -374,7 +374,7 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
     category: EMPLOYMENT_LABOR_CATEGORY,
     subcategory: { id: 'sub_el_contracts', name: 'Employment Contracts', slug: 'employment-contracts' },
     summary:
-      "Ontario has banned most employee non-compete agreements by statute since October 2021. Everywhere else in Canada, a non-compete still lives or dies under the common law's demanding reasonableness test, and Quebec applies its own distinct civil-law framework.",
+      "Ontario has banned most employee non-competes by statute since 2021. Elsewhere in Canada the common-law reasonableness test applies; Quebec has its own rules.",
     author: 'Daniel Okoro',
     updatedAt: 'August 9, 2026',
     readingTime: 10,
@@ -439,7 +439,7 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
   },
   {
     id: 'el-307',
-    title: "Australia's Incoming Non-Compete Ban for Sub-Threshold Workers",
+    title: "Australia's Incoming Non-Compete Ban Explained",
     slug: 'australia-non-compete-ban-sub-threshold-workers',
     alphabet: 'A',
     categoryId: 'cat_employment_labor',
@@ -447,7 +447,7 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
     category: EMPLOYMENT_LABOR_CATEGORY,
     subcategory: { id: 'sub_el_contracts', name: 'Employment Contracts', slug: 'employment-contracts' },
     summary:
-      "Australia has announced, and consulted on, a plan to ban non-compete clauses for workers below the high-income threshold from 2027 — but no bill has been introduced into Parliament, and today's non-competes are still governed by the ordinary common-law reasonableness test.",
+      'Australia has proposed banning non-competes below a high-income threshold from 2027, but no bill exists yet — the common-law test still applies today.',
     author: 'Daniel Okoro',
     updatedAt: 'August 9, 2026',
     readingTime: 9,

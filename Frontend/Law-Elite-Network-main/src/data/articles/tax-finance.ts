@@ -84,7 +84,7 @@ export const taxFinanceArticles: LawArticle[] = [
     category: { id: 'cat_tax_finance', name: 'Tax & Finance', slug: 'tax-finance' },
     subcategory: { id: 'sub_tf_income', name: 'Income Tax', slug: 'income-tax' },
     summary:
-      'An accessible explainer covering how individuals are taxed on what they earn, the deductions and brackets involved, and how filing duties differ around the world.',
+      'An accessible explainer on how individuals are taxed on their earnings, the deductions and brackets involved, and how filing duties differ worldwide.',
     author: 'Daniel Okafor',
     updatedAt: 'May 2, 2026',
     readingTime: 8,

@@ -19,9 +19,18 @@ const ALLOW = [
   '/careers',
   '/advertise',
   '/editorial-process',
+  '/editorial-standards',
+  '/corrections',
   '/privacy-policy',
   '/terms-of-service',
   '/editorial-disclosure-policy',
+  '/cookie-policy',
+  '/ai-usage-policy',
+  '/diversity-policy',
+  '/accessibility',
+  '/conflict-of-interest-policy',
+  '/sponsored-content-policy',
+  '/comment-policy',
   '/policies',
   '/article/',
   '/law/',
@@ -34,6 +43,9 @@ const ALLOW = [
   '/tech-ip',
   '/disputes',
   '/countries',
+  '/world',
+  '/authors',
+  '/author/',
 ];
 
 const DISALLOW = [

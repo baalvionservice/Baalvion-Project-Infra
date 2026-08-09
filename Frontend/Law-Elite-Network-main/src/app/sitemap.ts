@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 import { getAllArticles } from '@/data/law-content';
 import { getAllAuthors } from '@/data/authors';
 import { articleUrl } from '@/lib/article-url';
-import { toNewCategorySlug } from '@/lib/category-slugs';
+import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
 import { cmsGetArticles } from '@/lib/cms';
 import { COUNTRIES, getCountryArticleCounts } from '@/data/countries';
 
@@ -127,12 +127,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Subcategories no longer have a dedicated URL -- they're a filter chip on
   // the category page (?sub=), not a separate indexable page -- so there's no
   // subcategory-routes block here anymore.
-  const categoryRoutes: MetadataRoute.Sitemap = categories.map((c) => ({
-    url: `${BASE_URL}/${toNewCategorySlug(c.slug)}`,
-    lastModified: new Date(c.updated_at || c.updatedAt || Date.now()),
-    changeFrequency: 'weekly',
-    priority: 0.6,
-  }));
+  //
+  // Category hubs prefer live API data (real lastModified) but fall back to
+  // the static CURRENT_CATEGORY_SLUGS list per-slug -- in production the
+  // /categories API has been observed to return empty, which previously
+  // dropped all 8 category hub URLs (e.g. /disputes) from the sitemap
+  // entirely. Filtering the fallback to slugs the API didn't already cover
+  // means a partial API response still gets topped up rather than
+  // duplicated.
+  const apiCategorySlugs = new Set(categories.map((c) => toNewCategorySlug(c.slug)));
+  const categoryRoutes: MetadataRoute.Sitemap = [
+    ...categories.map((c) => ({
+      url: `${BASE_URL}/${toNewCategorySlug(c.slug)}`,
+      lastModified: new Date(c.updated_at || c.updatedAt || Date.now()),
+      changeFrequency: 'weekly' as const,
+      priority: 0.6,
+    })),
+    ...CURRENT_CATEGORY_SLUGS.filter((slug) => !apiCategorySlugs.has(slug)).map((slug) => ({
+      url: `${BASE_URL}/${slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.6,
+    })),
+  ];
 
   // Author profile pages — one per contributor for E-E-A-T discoverability.
   // lastModified tracks the author's most recently updated bundled article (authors
