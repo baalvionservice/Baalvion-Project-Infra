@@ -6,6 +6,10 @@ import { categoriesPublicApi } from '@/lib/api/client';
 import { cmsGetArticles } from '@/lib/cms';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { getArticlesByCategorySlug } from '@/data/law-content';
+import { ROOT_FLAT_ARTICLE_SLUGS } from '@/lib/article-url';
+import { fetchArticleForRender } from '@/lib/article-fetch';
+import { ArticleView } from '@/components/knowledge/ArticleView';
+import { ArticleJsonLd } from '@/lib/seo/article-seo';
 import seedData from '../../../docs/seed-data.json';
 import { CategoryContent } from './CategoryContent';
 
@@ -24,6 +28,12 @@ const CMS_ONLY_CATEGORIES: Record<string, { id: string; name: string; slug: stri
     name: 'Maritime & Offshore Injury Law',
     slug: 'maritime-offshore-injury-law',
     description: 'Guides covering maritime and offshore injury law, including the Jones Act, LHWCA, OCSLA, and general maritime law claims.',
+  },
+  'cruise-ship-passenger-vessel-accidents': {
+    id: 'cms-cat-cruise-ship-passenger-vessel-accidents',
+    name: 'Cruise Ship & Passenger Vessel Accidents',
+    slug: 'cruise-ship-passenger-vessel-accidents',
+    description: 'Guides covering cruise ship and passenger vessel accident claims, including passenger injuries, cruise ticket contracts, and maritime law issues specific to cruise travel.',
   },
 };
 
@@ -55,18 +65,35 @@ export default async function CategoryPage(
   const { categorySlug } = await params;
   const category = await fetchCategory(categorySlug);
 
-  // CMS-authored articles (admin panel, incl. any uploaded featured image) for this
-  // category. CategoryContent previously only queried law-service (empty in production),
-  // so these — and their images — never appeared on the practice-area page even though
-  // the article detail page rendered them correctly. Fetched here (server) because
-  // cms.ts's env vars are server-only, then handed down as a prop.
-  const cmsArticles = await cmsGetArticles(undefined, categorySlug).catch(() => []);
+  // A handful of standalone guides (see ROOT_FLAT_ARTICLE_SLUGS) are published
+  // at a bare root URL instead of the usual /{category}/{slug} shape, so this
+  // catch-all segment doubles as their article route -- checked only for the
+  // explicit allowlist so an ordinary unknown/mistyped category still 404s
+  // without an extra CMS round-trip.
+  if (!category && ROOT_FLAT_ARTICLE_SLUGS.has(categorySlug)) {
+    const article = await fetchArticleForRender(categorySlug);
+    if (article) {
+      return (
+        <>
+          <ArticleJsonLd article={article} slug={categorySlug} site={SITE} />
+          <ArticleView article={article} slug={categorySlug} />
+        </>
+      );
+    }
+  }
 
   // Real 404 (not a themed component with an implicit 200) -- this segment is
   // now a top-level catch-all for any unmatched single path segment site-wide,
   // not just paths that already start with /law/, so it must fail closed.
   // src/app/[categorySlug]/not-found.tsx renders the themed empty state.
   if (!category) notFound();
+
+  // CMS-authored articles (admin panel, incl. any uploaded featured image) for this
+  // category. CategoryContent previously only queried law-service (empty in production),
+  // so these — and their images — never appeared on the practice-area page even though
+  // the article detail page rendered them correctly. Fetched here (server) because
+  // cms.ts's env vars are server-only, then handed down as a prop.
+  const cmsArticles = await cmsGetArticles(undefined, categorySlug).catch(() => []);
 
   const jsonLd = {
     '@context': 'https://schema.org',

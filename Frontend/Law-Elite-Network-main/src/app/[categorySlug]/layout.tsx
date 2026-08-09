@@ -1,5 +1,8 @@
 import type { Metadata } from 'next';
 import { CURRENT_CATEGORY_SLUGS } from '@/lib/category-slugs';
+import { ROOT_FLAT_ARTICLE_SLUGS } from '@/lib/article-url';
+import { fetchArticleForMetadata } from '@/lib/article-metadata-fetch';
+import { buildArticleMetadata } from '@/lib/seo/article-seo';
 
 const API = process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3015/v1');
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
@@ -30,6 +33,14 @@ export async function generateMetadata(
   { params }: { params: Promise<{ categorySlug: string }> },
 ): Promise<Metadata> {
   const { categorySlug } = await params;
+  // A handful of standalone guides render as an article through this same
+  // catch-all segment (see ROOT_FLAT_ARTICLE_SLUGS / page.tsx) -- give them
+  // real article metadata (indexable canonical, OG, etc.) instead of falling
+  // into the "unrecognized category" branch below, which would noindex them.
+  if (ROOT_FLAT_ARTICLE_SLUGS.has(categorySlug)) {
+    const a = await fetchArticleForMetadata(categorySlug);
+    return buildArticleMetadata(a, categorySlug, SITE);
+  }
   // Unrecognized slug -> page.tsx will notFound(); don't emit an indexable
   // canonical/title for a category that doesn't exist (this segment is now a
   // top-level catch-all, not scoped under /law/ anymore).
