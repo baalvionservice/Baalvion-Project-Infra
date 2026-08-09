@@ -17,6 +17,11 @@ export const ROOT_FLAT_ARTICLE_SLUGS = new Set([
   'boating-accident-liability-and-fault',
   'best-car-accident-lawyer',
   'what-does-a-car-accident-lawyer-do',
+  'divorce-law-in-maryland',
+  'how-divorce-works-in-the-us',
+  'us-constitution-how-laws-are-made',
+  'how-the-us-legal-system-works',
+  'how-many-laws-are-there-in-the-us',
 ]);
 
 /**
