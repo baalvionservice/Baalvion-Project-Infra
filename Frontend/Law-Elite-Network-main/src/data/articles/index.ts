@@ -8,18 +8,22 @@ import type { LawArticle } from '../law-content';
 import { businessCorporateArticles } from './business-corporate';
 import { businessCorporateExtraArticles } from './business-corporate-extra';
 import { businessCorporateExtra2Articles } from './business-corporate-extra2';
+import { businessCorporateJurisdictionArticles } from './business-corporate-jurisdiction';
 import { criminalLawArticles } from './criminal-law';
 import { criminalLawExtraArticles } from './criminal-law-extra';
 import { criminalLawExtra2Articles } from './criminal-law-extra2';
+import { criminalLawJurisdictionArticles } from './criminal-law-jurisdiction';
 import { familyPersonalArticles } from './family-personal';
 import { familyPersonalExtraArticles } from './family-personal-extra';
 import { familyPersonalExtra2Articles } from './family-personal-extra2';
 import { propertyRealEstateArticles } from './property-real-estate';
 import { propertyRealEstateExtraArticles } from './property-real-estate-extra';
 import { propertyRealEstateExtra2Articles } from './property-real-estate-extra2';
+import { propertyRealEstateJurisdictionArticles } from './property-real-estate-jurisdiction';
 import { taxFinanceArticles } from './tax-finance';
 import { taxFinanceExtraArticles } from './tax-finance-extra';
 import { taxFinanceExtra2Articles } from './tax-finance-extra2';
+import { taxFinanceJurisdictionArticles } from './tax-finance-jurisdiction';
 import { employmentLaborArticles } from './employment-labor';
 import { employmentLaborExtraArticles } from './employment-labor-extra';
 import { employmentLaborExtra2Articles } from './employment-labor-extra2';
@@ -28,23 +32,28 @@ import { technologyIpArticles } from './technology-ip';
 import { technologyIpExtra2Articles } from './technology-ip-extra2';
 import { disputeResolutionArticles } from './dispute-resolution';
 import { disputeResolutionExtra2Articles } from './dispute-resolution-extra2';
+import { lciaArbitrationSeriesArticles } from './lcia-arbitration-series';
 
 export const LAW_ARTICLES: LawArticle[] = [
   ...businessCorporateArticles,
   ...businessCorporateExtraArticles,
   ...businessCorporateExtra2Articles,
+  ...businessCorporateJurisdictionArticles,
   ...criminalLawArticles,
   ...criminalLawExtraArticles,
   ...criminalLawExtra2Articles,
+  ...criminalLawJurisdictionArticles,
   ...familyPersonalArticles,
   ...familyPersonalExtraArticles,
   ...familyPersonalExtra2Articles,
   ...propertyRealEstateArticles,
   ...propertyRealEstateExtraArticles,
   ...propertyRealEstateExtra2Articles,
+  ...propertyRealEstateJurisdictionArticles,
   ...taxFinanceArticles,
   ...taxFinanceExtraArticles,
   ...taxFinanceExtra2Articles,
+  ...taxFinanceJurisdictionArticles,
   ...employmentLaborArticles,
   ...employmentLaborExtraArticles,
   ...employmentLaborExtra2Articles,
@@ -53,4 +62,5 @@ export const LAW_ARTICLES: LawArticle[] = [
   ...technologyIpExtra2Articles,
   ...disputeResolutionArticles,
   ...disputeResolutionExtra2Articles,
+  ...lciaArbitrationSeriesArticles,
 ];
