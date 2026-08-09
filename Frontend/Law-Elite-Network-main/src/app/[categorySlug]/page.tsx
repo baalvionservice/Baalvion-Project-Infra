@@ -11,7 +11,24 @@ import { CategoryContent } from './CategoryContent';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 
+// Categories created directly in the CMS (not part of the original 8 bundled
+// practice areas in docs/seed-data.json, and not in law-service's /categories
+// API) still need a hub landing page to resolve -- CategoryContent below
+// already lists their real articles correctly via cmsGetArticles(undefined,
+// categorySlug), so only the masthead name/description was missing. Kept
+// separate from seed-data.json (which also feeds the main nav + admin catalog
+// manager) so a new CMS category doesn't silently appear in global nav.
+const CMS_ONLY_CATEGORIES: Record<string, { id: string; name: string; slug: string; description: string }> = {
+  'maritime-offshore-injury-law': {
+    id: 'cms-cat-maritime-offshore-injury-law',
+    name: 'Maritime & Offshore Injury Law',
+    slug: 'maritime-offshore-injury-law',
+    description: 'Guides covering maritime and offshore injury law, including the Jones Act, LHWCA, OCSLA, and general maritime law claims.',
+  },
+};
+
 function bundledCategory(slug: string) {
+  if (CMS_ONLY_CATEGORIES[slug]) return CMS_ONLY_CATEGORIES[slug];
   const cat = (seedData as any).categories?.find((c: any) => c.slug === slug);
   if (cat) return { id: cat.id, name: cat.name, slug: cat.slug, description: cat.description };
   const first = getArticlesByCategorySlug(slug)[0];
