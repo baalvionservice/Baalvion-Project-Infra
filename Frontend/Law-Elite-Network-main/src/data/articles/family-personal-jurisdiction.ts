@@ -18,7 +18,7 @@ const FAMILY_PERSONAL_CATEGORY = {
 export const familyPersonalJurisdictionArticles: LawArticle[] = [
   {
     id: 'fp-301',
-    title: 'Community Property vs. Equitable Distribution in U.S. Divorce',
+    title: 'Community Property vs Equitable Distribution in the US',
     slug: 'community-property-vs-equitable-distribution-us',
     alphabet: 'C',
     categoryId: 'cat_family_personal',
@@ -26,7 +26,7 @@ export const familyPersonalJurisdictionArticles: LawArticle[] = [
     category: FAMILY_PERSONAL_CATEGORY,
     subcategory: { id: 'sub_fp_divorce', name: 'Divorce', slug: 'divorce' },
     summary:
-      'Nine U.S. states divide marital property as community property; the rest use equitable distribution. Neither system means what people often assume — and the two systems differ more, and community property states differ more among themselves, than a simple summary suggests.',
+      'Nine US states use community property; the rest use equitable distribution — and neither works quite as most people assume.',
     author: 'Sofia Almeida',
     updatedAt: 'August 9, 2026',
     readingTime: 9,
@@ -92,7 +92,7 @@ export const familyPersonalJurisdictionArticles: LawArticle[] = [
     category: FAMILY_PERSONAL_CATEGORY,
     subcategory: { id: 'sub_fp_divorce', name: 'Divorce', slug: 'divorce' },
     summary:
-      'No-fault divorce changed how a marriage ends in England and Wales — it did nothing to change how the money gets divided, which still runs on the Matrimonial Causes Act 1973 and a wide judicial discretion now under active government review.',
+      'No-fault divorce changed how a marriage ends in England and Wales, not how money is divided — that still runs on the Matrimonial Causes Act 1973.',
     author: 'Sofia Almeida',
     updatedAt: 'August 9, 2026',
     readingTime: 10,
@@ -112,7 +112,7 @@ export const familyPersonalJurisdictionArticles: LawArticle[] = [
 <p>This is a list of things the court must weigh, not a formula that outputs a percentage. Two marriages with similar length and similar assets can end in different settlements because the section 25 factors point differently on the specific facts.</p>
 
 <h2>The Types of Financial Orders</h2>
-<p>A court resolving a financial claim can make several kinds of orders, and settlements often combine more than one: <strong>lump sum orders</strong>, requiring one spouse to pay the other a specific sum; <strong>property adjustment orders</strong>, which can transfer, sell, or otherwise deal with property, including the family home; <strong>pension sharing orders</strong> (and, less commonly today, pension attachment orders), which split a pension's value between the spouses rather than leaving it entirely with whoever built it up; and <strong>periodical payments orders</strong> — ongoing spousal maintenance, paid on a regular basis rather than as a single sum.</p>
+<p>A court resolving a financial claim can make several kinds of orders, and settlements often combine more than one: <strong>lump sum orders</strong>, requiring one spouse to pay the other a specific sum; <strong>property adjustment orders</strong>, which can transfer, sell, or otherwise deal with property, including the family home; <strong>pension sharing orders</strong> (and, less commonly today, pension attachment orders), which split a pension's value between the spouses rather than leaving it entirely with whoever built it up; and <strong>periodical payments orders</strong> — ongoing spousal maintenance, paid on a regular basis rather than as a single sum (see <a href="/family-law/alimony-and-spousal-support-explained">Alimony and Spousal Support Explained</a> for how this kind of ongoing support is approached more generally).</p>
 <p>Alongside these, the law encourages a "clean break" where appropriate: section 25A of the 1973 Act places a duty on the court to <em>consider</em> whether the parties' financial obligations to each other can be ended as soon as is just and reasonable after the divorce, rather than continuing indefinitely. This is a duty to consider a clean break, not a guarantee of one — some marriages, particularly longer ones with a significant income disparity, will still result in ongoing periodical payments rather than a single final settlement.</p>
 
 <h2>Why a Consent Order Matters More Than People Expect</h2>
@@ -162,7 +162,7 @@ export const familyPersonalJurisdictionArticles: LawArticle[] = [
     category: FAMILY_PERSONAL_CATEGORY,
     subcategory: { id: 'sub_fp_divorce', name: 'Divorce', slug: 'divorce' },
     summary:
-      "Australia has no presumption of a 50/50 property split. The Family Law Amendment Act 2024 put the courts' long-standing four-step approach directly into the statute, added an explicit family violence factor, and created a new framework for companion animals.",
+      "Australia has no 50/50 property-split presumption. The Family Law Amendment Act 2024 codified the courts' four-step approach and added a family violence factor.",
     author: 'Sofia Almeida',
     updatedAt: 'August 9, 2026',
     readingTime: 9,

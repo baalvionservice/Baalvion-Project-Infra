@@ -10,7 +10,8 @@
     "build": "pnpm run generate:article-art && next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test src/**/*.test.ts"
   },
   "dependencies": {
     "@baalvion/illustrations": "workspace:*",

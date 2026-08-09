@@ -9,7 +9,7 @@ const FAMILY_PERSONAL_CATEGORY = {
 export const familyPersonalArticles: LawArticle[] = [
   {
     id: 'fp-001',
-    title: 'How Divorce Works: A Plain-Language Guide to Ending a Marriage',
+    title: 'How Divorce Works: A Plain-Language Guide',
     slug: 'how-divorce-works-guide',
     alphabet: 'D',
     categoryId: 'cat_family_personal',

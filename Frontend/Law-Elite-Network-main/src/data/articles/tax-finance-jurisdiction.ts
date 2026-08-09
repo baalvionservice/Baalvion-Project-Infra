@@ -21,7 +21,7 @@ const TAX_FINANCE_CATEGORY = {
 export const taxFinanceJurisdictionArticles: LawArticle[] = [
   {
     id: 'tf-301',
-    title: 'Capital Gains Tax When You Sell Your Home in the U.S.: The Section 121 Exclusion Explained',
+    title: 'Capital Gains Tax When You Sell Your Home in the US',
     slug: 'capital-gains-tax-selling-a-home-us',
     alphabet: 'C',
     categoryId: 'cat_tax_finance',
@@ -29,7 +29,7 @@ export const taxFinanceJurisdictionArticles: LawArticle[] = [
     category: TAX_FINANCE_CATEGORY,
     subcategory: { id: 'sub_tf_income', name: 'Income Tax', slug: 'income-tax' },
     summary:
-      'Most US home sellers pay $0 federal capital gains tax under IRC Section 121 — but the exclusion is capped, has real ownership-and-use tests, and Congress is currently debating whether to raise it.',
+      'Most US home sellers pay $0 federal capital gains tax under IRC Section 121 — but the exclusion is capped, has ownership tests, and Congress may raise it.',
     author: 'Priya Nair',
     updatedAt: 'August 9, 2026',
     readingTime: 10,
@@ -85,7 +85,7 @@ export const taxFinanceJurisdictionArticles: LawArticle[] = [
   },
   {
     id: 'tf-302',
-    title: 'Capital Gains Tax When You Sell Property in the UK: Private Residence Relief Explained',
+    title: 'Capital Gains Tax on UK Property: Private Residence Relief',
     slug: 'capital-gains-tax-uk-property-private-residence-relief',
     alphabet: 'C',
     categoryId: 'cat_tax_finance',
@@ -93,7 +93,7 @@ export const taxFinanceJurisdictionArticles: LawArticle[] = [
     category: TAX_FINANCE_CATEGORY,
     subcategory: { id: 'sub_tf_income', name: 'Income Tax', slug: 'income-tax' },
     summary:
-      "Selling your only or main home in the UK is usually completely free of Capital Gains Tax through Private Residence Relief — but letting part of the property, a second home, or a taxable gain can trigger a strict 60-day HMRC reporting deadline most sellers have never heard of.",
+      'Selling your only or main UK home is usually free of Capital Gains Tax via Private Residence Relief — but some sales trigger a 60-day HMRC reporting deadline.',
     author: 'Priya Nair',
     updatedAt: 'August 9, 2026',
     readingTime: 10,
@@ -145,7 +145,7 @@ export const taxFinanceJurisdictionArticles: LawArticle[] = [
   },
   {
     id: 'tf-303',
-    title: 'The Principal Residence Exemption: How Canada Taxes (or Doesn\'t Tax) Your Home Sale',
+    title: "Canada's Principal Residence Exemption Explained",
     slug: 'principal-residence-exemption-canada',
     alphabet: 'T',
     categoryId: 'cat_tax_finance',
@@ -153,7 +153,7 @@ export const taxFinanceJurisdictionArticles: LawArticle[] = [
     category: TAX_FINANCE_CATEGORY,
     subcategory: { id: 'sub_tf_income', name: 'Income Tax', slug: 'income-tax' },
     summary:
-      "Canada's Principal Residence Exemption can eliminate 100% of the gain on your home with no dollar cap — but since 2016, you must report every sale to the CRA, even fully exempt ones, or risk losing the exemption and facing real penalties.",
+      "Canada's Principal Residence Exemption can eliminate 100% of a home-sale gain with no cap — but every sale must be reported to the CRA since 2016.",
     author: 'Priya Nair',
     updatedAt: 'August 9, 2026',
     readingTime: 9,
@@ -203,7 +203,7 @@ export const taxFinanceJurisdictionArticles: LawArticle[] = [
   },
   {
     id: 'tf-304',
-    title: 'Capital Gains Tax on Your Home in Australia: The Main Residence Exemption and the 50% Discount',
+    title: 'Capital Gains Tax on Your Home in Australia Explained',
     slug: 'capital-gains-tax-main-residence-exemption-australia',
     alphabet: 'C',
     categoryId: 'cat_tax_finance',
@@ -211,7 +211,7 @@ export const taxFinanceJurisdictionArticles: LawArticle[] = [
     category: TAX_FINANCE_CATEGORY,
     subcategory: { id: 'sub_tf_income', name: 'Income Tax', slug: 'income-tax' },
     summary:
-      "Australia combines two separate mechanisms: a full main residence exemption that can wipe out CGT on your home entirely, and a general 50% discount for other assets — which a 2026 Budget reform is set to replace with cost-base indexation from July 2027.",
+      'Australia combines a full main-residence CGT exemption with a 50% discount for other assets — a 2026 Budget reform will replace the discount with indexing.',
     author: 'Priya Nair',
     updatedAt: 'August 9, 2026',
     readingTime: 10,

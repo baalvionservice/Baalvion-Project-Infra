@@ -26,7 +26,7 @@ export const technologyIpJurisdictionArticles: LawArticle[] = [
     category: TECHNOLOGY_IP_CATEGORY,
     subcategory: { id: 'sub_ti_privacy', name: 'Data Privacy', slug: 'data-privacy' },
     summary:
-      'For years, UK GDPR was essentially a copy of the EU GDPR under a different regulator. The Data (Use and Access) Act 2025 changed that, rewriting the UK’s rules on legitimate interests, automated decisions, cookies, and international transfers.',
+      'UK GDPR was once a copy of EU GDPR. The Data (Use and Access) Act 2025 rewrote the rules on legitimate interests, automated decisions, cookies, and transfers.',
     author: 'Marcus Hale',
     updatedAt: 'August 9, 2026',
     readingTime: 9,

@@ -94,7 +94,7 @@ export const propertyRealEstateExtraArticles: LawArticle[] = [
     category: propertyRealEstateCategory,
     subcategory: { id: 'sub_pr_rental', name: 'Rental Agreements', slug: 'rental-agreements' },
     summary:
-      'Landlords are usually responsible for major and structural repairs, while tenants handle minor upkeep and damage they cause — but the exact split depends on the lease and local law.',
+      'Landlords are usually responsible for major and structural repairs, while tenants handle minor upkeep — but the split depends on the lease and local law.',
     author: 'Daniel Okafor',
     updatedAt: 'June 5, 2026',
     readingTime: 9,

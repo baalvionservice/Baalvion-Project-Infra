@@ -17,7 +17,7 @@ export const propertyRealEstateExtra2Articles: LawArticle[] = [
     category: PROPERTY_REAL_ESTATE_CATEGORY,
     subcategory: { id: 'sub_pr_rental', name: 'Rental Agreements', slug: 'rental-agreements' },
     summary:
-      'Eviction is the legal process a landlord must follow to remove a tenant — usually requiring proper notice, a court order, and lawful enforcement, never self-help removal.',
+      'Eviction is the legal process a landlord must follow to remove a tenant — requiring proper notice, a court order, and lawful enforcement, never self-help.',
     author: 'Sofia Almeida',
     updatedAt: 'June 22, 2026',
     readingTime: 9,

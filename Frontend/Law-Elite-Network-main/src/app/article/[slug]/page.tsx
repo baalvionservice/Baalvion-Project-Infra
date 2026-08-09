@@ -1,7 +1,7 @@
-import { permanentRedirect } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { fetchArticleForRender } from '@/lib/article-fetch';
 import { articleUrl } from '@/lib/article-url';
-import { ArticleView, ArticleNotFound } from '@/components/knowledge/ArticleView';
+import { ArticleView } from '@/components/knowledge/ArticleView';
 
 /**
  * Legacy flat URL. Canonical articles now live at /[categorySlug]/[articleSlug]
@@ -21,7 +21,9 @@ export default async function ArticleDeepDivePage(
   const isPreview = Boolean(previewToken && previewExp);
   const article = await fetchArticleForRender(slug, previewToken, previewExp);
 
-  if (!article) return <ArticleNotFound />;
+  // Real 404 (not the themed ArticleNotFound with an implicit 200) -- see
+  // src/app/article/[slug]/not-found.tsx for the themed empty state.
+  if (!article) notFound();
 
   // Never redirect away from a live-preview request: the CMS admin iframe opens
   // exactly this URL with previewToken/previewExp, and next.config.ts only grants

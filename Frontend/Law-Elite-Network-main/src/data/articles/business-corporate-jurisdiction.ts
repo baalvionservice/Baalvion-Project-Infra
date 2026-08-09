@@ -17,7 +17,7 @@ const BUSINESS_CORPORATE_CATEGORY = {
 export const businessCorporateJurisdictionArticles: LawArticle[] = [
   {
     id: 'bc-301',
-    title: 'What Is an S Corporation? How the Tax Election Actually Works',
+    title: 'What Is an S Corporation? The Tax Election Explained',
     slug: 'what-is-an-s-corporation',
     alphabet: 'W',
     categoryId: 'cat_business_corporate',
@@ -25,7 +25,7 @@ export const businessCorporateJurisdictionArticles: LawArticle[] = [
     category: BUSINESS_CORPORATE_CATEGORY,
     subcategory: { id: 'sub_bc_formation', name: 'Company Formation', slug: 'company-formation' },
     summary:
-      "An S corporation isn't a type of company you form — it's a US federal tax election an eligible corporation or LLC makes with the IRS. Here is who qualifies, how to file, and why it's the default recommendation for so many small US businesses.",
+      "An S corporation isn't a company type — it's a US federal tax election an eligible corporation or LLC makes with the IRS. Here's who qualifies and how to file.",
     author: 'Elena Rossi',
     updatedAt: 'August 9, 2026',
     readingTime: 10,
@@ -95,7 +95,7 @@ export const businessCorporateJurisdictionArticles: LawArticle[] = [
   },
   {
     id: 'bc-302',
-    title: 'Forming a Private Limited Company in the UK via Companies House',
+    title: 'Forming a UK Private Limited Company via Companies House',
     slug: 'uk-company-formation-companies-house',
     alphabet: 'F',
     categoryId: 'cat_business_corporate',
@@ -103,7 +103,7 @@ export const businessCorporateJurisdictionArticles: LawArticle[] = [
     category: BUSINESS_CORPORATE_CATEGORY,
     subcategory: { id: 'sub_bc_formation', name: 'Company Formation', slug: 'company-formation' },
     summary:
-      'UK company formation is fast, but the rules behind it have changed sharply in the past two years — new fees, a stricter registered-office standard, and mandatory identity verification for directors. Here is the process as it actually stands today.',
+      'UK company formation is fast, but the rules have changed sharply — new fees, a stricter registered-office standard, and mandatory director ID checks.',
     author: 'Elena Rossi',
     updatedAt: 'August 9, 2026',
     readingTime: 10,
@@ -180,7 +180,7 @@ export const businessCorporateJurisdictionArticles: LawArticle[] = [
     category: BUSINESS_CORPORATE_CATEGORY,
     subcategory: { id: 'sub_bc_formation', name: 'Company Formation', slug: 'company-formation' },
     summary:
-      'Incorporating federally under the Canada Business Corporations Act and incorporating provincially both create a fully protected company — the real difference is name protection and registration overhead, not liability.',
+      'Incorporating federally or provincially in Canada both create a fully protected company — the real difference is name protection, not liability.',
     author: 'Elena Rossi',
     updatedAt: 'August 9, 2026',
     readingTime: 9,
@@ -247,7 +247,7 @@ export const businessCorporateJurisdictionArticles: LawArticle[] = [
     category: BUSINESS_CORPORATE_CATEGORY,
     subcategory: { id: 'sub_bc_formation', name: 'Company Formation', slug: 'company-formation' },
     summary:
-      'Registering a company in Australia runs through ASIC and touches two separate identifying numbers — the ACN and the ABN — plus a director residency rule and a Director ID that has to be obtained before appointment.',
+      'Registering a company in Australia runs through ASIC and involves two ID numbers — the ACN and ABN — plus a director residency rule and a Director ID.',
     author: 'Elena Rossi',
     updatedAt: 'August 9, 2026',
     readingTime: 9,

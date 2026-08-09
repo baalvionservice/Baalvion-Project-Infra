@@ -17,7 +17,7 @@ export const familyPersonalExtraArticles: LawArticle[] = [
     category: FAMILY_PERSONAL_CATEGORY,
     subcategory: { id: 'sub_fp_marriage', name: 'Marriage Registration', slug: 'marriage-registration' },
     summary:
-      'A prenuptial agreement lets a couple decide in advance how property and finances are handled if they divorce, but courts will not enforce terms that are unfair or harm children.',
+      "A prenuptial agreement lets a couple decide in advance how property is handled in divorce, but courts won't enforce terms that are unfair or harm children.",
     author: 'Sofia Almeida',
     updatedAt: 'June 14, 2026',
     readingTime: 9,
