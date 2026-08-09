@@ -22,6 +22,11 @@ export const ROOT_FLAT_ARTICLE_SLUGS = new Set([
   'us-constitution-how-laws-are-made',
   'how-the-us-legal-system-works',
   'how-many-laws-are-there-in-the-us',
+  'is-sharia-law-legal-in-the-united-states',
+  'muslim-law-and-legal-practices-in-the-us',
+  'weird-silly-crazy-laws-in-the-usa',
+  'best-law-schools-in-the-usa',
+  'law-enforcement-in-1900s-america',
 ]);
 
 /**
