@@ -4947,6 +4947,9 @@ importers:
       recharts:
         specifier: ^2.15.1
         version: 2.15.4(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      sharp:
+        specifier: 0.35.3
+        version: 0.35.3(@types/node@20.19.43)
       tailwind-merge:
         specifier: ^3.0.1
         version: 3.6.0

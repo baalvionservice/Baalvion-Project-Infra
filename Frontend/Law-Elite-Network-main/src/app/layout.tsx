@@ -44,6 +44,14 @@ const sourceSerif = Source_Serif_4({
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 const CMS_SLUG = process.env.NEXT_PUBLIC_CMS_WEBSITE_SLUG || 'law-elite-network';
 
+// Search-console ownership proofs. Both no-op (render nothing) until the
+// matching env var is set in Vercel with the real code from Google Search
+// Console ("Settings → Ownership verification → HTML tag") / Bing Webmaster
+// Tools ("Settings → Site verification → Meta tag") — pasting the code alone
+// is not indexing, only the prerequisite for submitting the sitemap there.
+const GOOGLE_SITE_VERIFICATION = process.env.GOOGLE_SITE_VERIFICATION?.trim();
+const BING_SITE_VERIFICATION = process.env.BING_SITE_VERIFICATION?.trim();
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   icons: {
@@ -107,6 +115,12 @@ export const metadata: Metadata = {
     canonical: SITE_URL,
     types: { 'application/rss+xml': '/feed.xml' },
   },
+  ...((GOOGLE_SITE_VERIFICATION || BING_SITE_VERIFICATION) && {
+    verification: {
+      ...(GOOGLE_SITE_VERIFICATION && { google: GOOGLE_SITE_VERIFICATION }),
+      ...(BING_SITE_VERIFICATION && { other: { 'msvalidate.01': BING_SITE_VERIFICATION } }),
+    },
+  }),
 };
 
 // 'Organization', not 'LegalService' -- LegalService is schema.org's type for
@@ -174,6 +188,13 @@ export default async function RootLayout({
       className={cn(inter.variable, libreFranklin.variable, sourceSerif.variable)}
     >
       <head>
+        {/* Warm the connection (DNS + TLS) to the origins the LCP image (article/
+            homepage hero) is actually sourced from before our own resize proxy
+            (src/app/api/image/route.ts, see next.config.ts images.loader)
+            fetches them, so that upstream fetch doesn't pay handshake latency
+            on top of download time. */}
+        <link rel="preconnect" href="https://api.baalvion.com" />
+        <link rel="preconnect" href="https://firebasestorage.googleapis.com" crossOrigin="anonymous" />
         {/* Google Consent Mode v2 -- must be pushed to dataLayer BEFORE gtag('js', ...)
             and gtag('config', ...) run (in GoogleAnalytics below) and before the AdSense
             loader below, so no GA/ads cookie is set for a visitor who hasn't chosen yet.
