@@ -6,6 +6,7 @@ slug: contingency-fee-agreements-explained
 category: Personal Injury Lawyer
 categorySlug: personal-injury-lawyer
 keywords: [contingency fee agreement, contingency fee, how do lawyers get paid, personal injury lawyer fees]
+author: deepak-kumar-kuldeep
 ---
 
 # How Contingency Fee Agreements Work

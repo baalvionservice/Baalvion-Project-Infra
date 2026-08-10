@@ -6,6 +6,7 @@ slug: boating-accident-liability-and-fault
 category: Boating Accidents
 categorySlug: boating-accidents
 keywords: [boating accident liability, boating accident fault, jet ski accident]
+author: deepak-kumar-kuldeep
 ---
 
 # Who Is Liable in a Boating Accident?

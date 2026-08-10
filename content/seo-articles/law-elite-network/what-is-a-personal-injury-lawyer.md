@@ -6,6 +6,7 @@ slug: what-is-a-personal-injury-lawyer
 category: Personal Injury Lawyer
 categorySlug: personal-injury-lawyer
 keywords: [what is a personal injury lawyer, personal injury lawyer, personal injury attorney, personal injury law]
+author: deepak-kumar-kuldeep
 ---
 
 # What Is a Personal Injury Lawyer?

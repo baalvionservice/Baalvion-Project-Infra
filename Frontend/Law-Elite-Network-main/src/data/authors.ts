@@ -21,12 +21,13 @@
  * education for a worldwide audience — it is NOT jurisdiction-specific legal
  * advice, and a profile here does not imply an attorney–client relationship.
  *
- * `social` is intentionally omitted below for every bundled contributor: none
- * of the 11 has an individual LinkedIn/X account on file, only the shared
- * @lawelitenetwork company accounts. Rendering those as "{Name} on LinkedIn"
- * (and as Person.sameAs in structured data) would misrepresent a company page
- * as that person's own profile. Only set `social` on a contributor once a URL
- * that is genuinely that individual's own account exists.
+ * `social` is intentionally omitted below for most bundled contributors: none
+ * of the original 11 has an individual LinkedIn/X account on file, only the
+ * shared @lawelitenetwork company accounts. Rendering those as "{Name} on
+ * LinkedIn" (and as Person.sameAs in structured data) would misrepresent a
+ * company page as that person's own profile. Only set `social` on a
+ * contributor once a URL that is genuinely that individual's own account
+ * exists — as confirmed for Deepak Kumar Kuldeep below.
  */
 
 export interface LawAuthor {
@@ -170,6 +171,118 @@ export const LAW_AUTHORS: LawAuthor[] = [
       'His guides treat dispute resolution as a set of deliberate choices rather than an inevitable march to trial, and he edits the network’s dispute-resolution coverage.',
     expertise: ['Dispute Resolution'],
     avatarSeed: 'marcus-whitfield',
+  },
+  {
+    slug: 'deepak-kumar-kuldeep',
+    name: 'Deepak Kumar Kuldeep',
+    title: 'Maritime & Personal Injury Law Contributor',
+    credentials: 'BSc Nautical Science · Maritime law background, Law Elite Network',
+    bio:
+      'Deepak Kumar Kuldeep covers Law Elite Network’s personal injury and maritime law desk, drawing on a background in maritime law and a BSc in Nautical Science. ' +
+      'He writes and reviews the network’s guides on personal injury claims, offshore and maritime injury law, cruise ship and passenger vessel accidents, and boating and car accident cases, along with its coverage of religious law and unusual state and local laws.',
+    expertise: ['Personal Injury Lawyer', 'Maritime & Offshore Injury Law', 'Cruise Ship & Passenger Vessel Accidents', 'Boating Accidents', 'Car Accidents', 'Religion, Law & Weird Laws'],
+    avatarSeed: 'deepak-kumar-kuldeep',
+    social: { linkedin: 'https://in.linkedin.com/in/allenkrewzz' },
+  },
+  {
+    slug: 'waki-malik',
+    name: 'Waki Malik',
+    title: 'Lawyer & Legal Contributor',
+    credentials: 'Lawyer · Certification in Dispute Resolution through Mediation, National Law School of India University',
+    bio:
+      'Waki Malik is a lawyer based in Kanpur, Uttar Pradesh, with experience across several areas of legal practice, including IT law, patent law, consumer law, property law, corporate law, immigration law, entertainment law, and labor and employment law. ' +
+      'He has also completed certification in Dispute Resolution through Mediation from the National Law School of India University, and contributes to Law Elite Network’s coverage of business, technology, employment, property, and dispute-resolution topics.',
+    expertise: ['Business & Corporate', 'Technology & IP', 'Employment & Labor', 'Property & Real Estate', 'Dispute Resolution'],
+    avatarSeed: 'waki-malik',
+    social: { linkedin: 'https://in.linkedin.com/in/wakimalik' },
+  },
+  {
+    slug: 'aman-thakur',
+    name: 'Aman Thakur',
+    title: 'Advocate & Legal Contributor',
+    credentials: 'Advocate · LL.B., Meerut College',
+    bio:
+      'Aman Thakur is an advocate with a professional background in family-law matters, including custody, guardianship, visitation rights, and Hindu family law. ' +
+      'He contributes practical family and personal-law content to Law Elite Network, drawing on his legal-practice experience in these areas.',
+    expertise: ['Family & Personal'],
+    avatarSeed: 'aman-thakur',
+    social: { linkedin: 'https://in.linkedin.com/in/aman-thakur-b30015247' },
+  },
+  {
+    slug: 'maria-harizanova',
+    name: 'Maria Harizanova',
+    title: 'Employment Law Contributor',
+    credentials: 'Master’s degree, Boston University School of Law · Admitted, New York State Bar · Member, Bulgarian Bar Association',
+    bio:
+      'Maria Harizanova is a lawyer with a background in employment law and international legal practice, including employment, whistleblowing, employee mobility, corporate, and regulatory matters. ' +
+      'She contributes Law Elite Network’s employment and workplace-law content, along with related business-law coverage.',
+    expertise: ['Employment & Labor', 'Business & Corporate'],
+    avatarSeed: 'maria-harizanova',
+    social: { linkedin: 'https://bg.linkedin.com/in/maria-harizanova-6b0329115' },
+  },
+  {
+    slug: 'claire-hannon',
+    name: 'Claire Hannon',
+    title: 'Corporate & Tax Contributor',
+    credentials: 'BSc · LLB (Hons) · Graduate Diploma in Applied Finance · GAICD · AGIA',
+    bio:
+      'Claire Hannon has a professional background combining legal, financial, and corporate governance experience, holding a Bachelor of Science, a Bachelor of Laws with Honours, a Graduate Diploma in Applied Finance, and GAICD and AGIA designations. ' +
+      'She contributes Law Elite Network’s corporate governance, business, and tax and finance content.',
+    expertise: ['Business & Corporate', 'Tax & Finance'],
+    avatarSeed: 'claire-hannon',
+    social: { linkedin: 'https://au.linkedin.com/in/claire-hannon' },
+  },
+  {
+    slug: 'yessica-ruiz',
+    name: 'Yessica Ruiz',
+    title: 'Legal Administrative Contributor',
+    credentials: 'Legal Administrative Assistant',
+    bio:
+      'Yessica Ruiz has a professional background in legal administration and legal support work. ' +
+      'She contributes general legal-process and legal-education content to Law Elite Network — explaining how the U.S. legal system and lawmaking process work, and the network’s legal-history guides — rather than articles requiring attorney-level legal opinions.',
+    expertise: ['Legal Education & History', 'U.S. Law & Constitution'],
+    avatarSeed: 'yessica-ruiz',
+    social: { linkedin: 'https://www.linkedin.com/in/yessica-ruiz-b277ba281' },
+  },
+  {
+    slug: 'abinesh-raj',
+    name: 'Abinesh Raj',
+    title: 'Contributor',
+    credentials: 'Contributor, Law Elite Network',
+    bio: 'Abinesh Raj is a contributor to Law Elite Network. His specific professional background and area of expertise are pending confirmation, so he is not yet attributed to a practice-area category.',
+    expertise: [],
+    avatarSeed: 'abinesh-raj',
+    social: { linkedin: 'https://in.linkedin.com/in/abinesh-raj-6718b2315' },
+  },
+  {
+    slug: 'aishwarya-gorak',
+    name: 'Aishwarya Gorak',
+    title: 'Contributor',
+    credentials: 'Contributor, Law Elite Network',
+    bio: 'Aishwarya Gorak is a contributor to Law Elite Network. Her professional background is pending confirmation, so she is not yet attributed to a practice-area category.',
+    expertise: [],
+    avatarSeed: 'aishwarya-gorak',
+    social: { linkedin: 'https://in.linkedin.com/in/aishwarya-gorak-766956139' },
+  },
+  {
+    slug: 'diksha-singhal',
+    name: 'Diksha Singhal',
+    title: 'Contributor',
+    credentials: 'Contributor, Law Elite Network',
+    bio: 'Diksha Singhal is a contributor to Law Elite Network. Her professional background is pending confirmation, so she is not yet attributed to a practice-area category.',
+    expertise: [],
+    avatarSeed: 'diksha-singhal',
+    social: { linkedin: 'https://www.linkedin.com/in/diksha-singhal-aa11b6192/' },
+  },
+  {
+    slug: 'anna-solovieva',
+    name: 'Anna Solovieva',
+    title: 'Contributor',
+    credentials: 'Contributor, Law Elite Network',
+    bio: 'Anna Solovieva is a contributor to Law Elite Network, with a background including research, public relations, project management, and political consulting. Her legal or policy background is pending confirmation, so she is not yet attributed to a practice-area category.',
+    expertise: [],
+    avatarSeed: 'anna-solovieva',
+    social: { linkedin: 'https://be.linkedin.com/in/anna-solovieva-049b7b60' },
   },
 ];
 

@@ -267,6 +267,12 @@ function createRunner(cfg) {
         continue;
       }
 
+      // New item, but this run has already created its cap — leave it for the next scheduled
+      // invocation rather than creating everything in one go.
+      if (flags.limit && report.created >= flags.limit) {
+        log(`  = skip (limit ${flags.limit} reached)  ${d.slug}`); report.skipped++; continue;
+      }
+
       if (flags.dryRun) { log(`  + would create${flags.draft ? '' : ' + publish'}  ${d.slug}  (${d.contentBlocks.length} blocks)`); report.created++; continue; }
       try {
         const created = await api('POST', `/cms/websites/${encodeURIComponent(SITE)}/content`, body);

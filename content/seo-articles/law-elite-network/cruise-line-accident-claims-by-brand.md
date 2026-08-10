@@ -6,6 +6,7 @@ slug: cruise-line-accident-claims-by-brand
 category: Cruise Ship & Passenger Vessel Accidents
 categorySlug: cruise-ship-passenger-vessel-accidents
 keywords: [cruise line accident claims, carnival cruise accident lawyer, royal caribbean accident lawyer, cruise ship injury by brand]
+author: deepak-kumar-kuldeep
 ---
 
 # Cruise Line Accident Claims: Carnival, Disney & More

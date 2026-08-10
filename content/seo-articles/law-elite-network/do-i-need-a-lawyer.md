@@ -6,6 +6,7 @@ slug: do-i-need-a-lawyer
 category: Personal Injury Lawyer
 categorySlug: personal-injury-lawyer
 keywords: [do i need a lawyer, when to hire a lawyer, do i need an attorney]
+author: deepak-kumar-kuldeep
 ---
 
 # Do I Need a Lawyer?

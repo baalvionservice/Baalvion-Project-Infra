@@ -6,6 +6,7 @@ slug: us-constitution-how-laws-are-made
 category: U.S. Law & Constitution
 categorySlug: us-law-and-constitution
 keywords: [who makes laws in usa, constitutional preamble, which branch passes laws, when was the constitution written]
+author: yessica-ruiz
 ---
 
 # The U.S. Constitution and How Federal Laws Are Made

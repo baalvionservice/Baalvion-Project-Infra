@@ -6,6 +6,7 @@ slug: jones-act-vs-general-maritime-law
 category: Maritime & Offshore Injury Law
 categorySlug: maritime-offshore-injury-law
 keywords: [jones act vs general maritime law, jones act vs maritime law, unseaworthiness vs jones act]
+author: deepak-kumar-kuldeep
 ---
 
 # Jones Act vs. General Maritime Law

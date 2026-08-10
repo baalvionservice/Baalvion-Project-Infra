@@ -6,6 +6,7 @@ slug: is-sharia-law-legal-in-the-united-states
 category: Religion, Law & Weird Laws
 categorySlug: religion-law-and-weird-laws
 keywords: [sharia law in usa, is sharia law legal in the usa, is there sharia law in usa]
+author: deepak-kumar-kuldeep
 ---
 
 # Is Sharia Law Legal in the United States?

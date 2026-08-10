@@ -47,6 +47,14 @@ const login = z.object({
     password: z.string().min(1),
 });
 
+// M2M token endpoint (service/clientCredentialsService.js). client_id/client_secret may arrive
+// via HTTP Basic auth instead of the body — the controller merges those in before validating.
+const clientCredentials = z.object({
+    grant_type: z.literal('client_credentials'),
+    client_id: z.string().min(1),
+    client_secret: z.string().min(1),
+});
+
 const forgotPassword = z.object({ email: z.string().email() });
 
 const resetPassword = z.object({
@@ -135,7 +143,7 @@ const updateOrg = z.object({
 const setOrgStatus = z.object({ status: orgStatusEnum });
 
 module.exports = {
-    register, login, forgotPassword, resetPassword, verifyEmail, updateMe, mfaVerify, mfaChallenge,
+    register, login, clientCredentials, forgotPassword, resetPassword, verifyEmail, updateMe, mfaVerify, mfaChallenge,
     mfaEnrollStart, mfaEnroll, phoneOtpRequest, phoneOtpVerify, emailOtpRequest, emailOtpVerify,
     createOrg, inviteMember, bulkInvite, updateMemberRole, acceptInvite, transferOwnership,
     platformCreateOrg, updateOrg, setOrgStatus,

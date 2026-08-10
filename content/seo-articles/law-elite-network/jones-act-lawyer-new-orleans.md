@@ -6,6 +6,7 @@ slug: jones-act-lawyer-new-orleans
 category: Maritime & Offshore Injury Law
 categorySlug: maritime-offshore-injury-law
 keywords: [jones act lawyer new orleans, new orleans maritime lawyer, louisiana jones act attorney]
+author: deepak-kumar-kuldeep
 ---
 
 # Jones Act Lawyer New Orleans, LA

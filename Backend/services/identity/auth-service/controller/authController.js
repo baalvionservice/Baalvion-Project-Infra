@@ -6,6 +6,7 @@ const { sendSuccess } = require('../utils/response');
 const { AppError } = require('../utils/errors');
 const config = require('../config/appConfig');
 const { issueOnBehalf: issueOnBehalfSvc } = require('../service/issueOnBehalf');
+const { clientCredentialsGrant } = require('../service/clientCredentialsService');
 const { brandFromRequest } = require('../utils/brandFromOrigin');
 
 const parseClientInfo = (req) => ({
@@ -64,6 +65,33 @@ exports.issueOnBehalf = async (req, res, next) => {
         const { email } = req.body || {};
         if (!email) throw new AppError('VALIDATION_ERROR', 'email is required', 400);
         const result = await issueOnBehalfSvc({ email, service: req.internalService, ...parseClientInfo(req) });
+        sendSuccess(req, res, result);
+    } catch (err) { next(err); }
+};
+
+// OAuth-style machine-to-machine token endpoint. Public (like /login) — trust comes from the
+// client_secret itself, not a prior session. client_id/client_secret may arrive via HTTP Basic
+// auth (RFC 6749 2.3.1) instead of the body; Basic wins only when the body didn't already supply
+// them, so an explicit body value is never silently overridden.
+exports.token = async (req, res, next) => {
+    try {
+        const body = { ...req.body };
+        const authHeader = req.headers.authorization || '';
+        if (authHeader.startsWith('Basic ')) {
+            const decoded = Buffer.from(authHeader.slice(6), 'base64').toString('utf8');
+            const sep = decoded.indexOf(':');
+            if (sep !== -1) {
+                body.client_id = body.client_id || decoded.slice(0, sep);
+                body.client_secret = body.client_secret || decoded.slice(sep + 1);
+            }
+        }
+        const parsed = schemas.clientCredentials.safeParse(body);
+        if (!parsed.success) throw new AppError('VALIDATION_ERROR', 'Invalid input', 400, parsed.error.flatten());
+        const result = await clientCredentialsGrant({
+            clientId: parsed.data.client_id,
+            clientSecret: parsed.data.client_secret,
+            ...parseClientInfo(req),
+        });
         sendSuccess(req, res, result);
     } catch (err) { next(err); }
 };

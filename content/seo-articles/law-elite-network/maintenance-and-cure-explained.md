@@ -6,6 +6,7 @@ slug: maintenance-and-cure-explained
 category: Maritime & Offshore Injury Law
 categorySlug: maritime-offshore-injury-law
 keywords: [maintenance and cure, maintenance and cure explained, seaman maintenance and cure]
+author: deepak-kumar-kuldeep
 ---
 
 # Maintenance and Cure Explained

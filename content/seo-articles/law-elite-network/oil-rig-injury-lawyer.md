@@ -6,6 +6,7 @@ slug: oil-rig-injury-lawyer
 category: Maritime & Offshore Injury Law
 categorySlug: maritime-offshore-injury-law
 keywords: [oil rig injury lawyer, offshore drilling injury lawyer, oil rig injury attorney]
+author: deepak-kumar-kuldeep
 ---
 
 # Oil Rig Injury Lawyer
