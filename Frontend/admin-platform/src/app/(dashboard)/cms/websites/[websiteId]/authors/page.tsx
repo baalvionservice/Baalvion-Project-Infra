@@ -320,7 +320,7 @@ export default function WebsiteAuthorsPage({
               />
               <p className="text-[10px] text-muted-foreground">
                 Shown publicly under the byline and in Person structured data. Only enter a formal
-                credential (degree, license, bar admission) if it is genuinely this person's and you
+                credential (degree, license, bar admission) if it is genuinely this person&apos;s and you
                 can verify it — otherwise use an editorial role/desk description instead.
               </p>
             </div>
