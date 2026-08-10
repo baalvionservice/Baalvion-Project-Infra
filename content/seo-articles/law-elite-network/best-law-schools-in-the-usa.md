@@ -4,6 +4,7 @@ metaTitle: Best Law Schools in the USA — Rankings & How to Choose
 metaDescription: A comprehensive guide to evaluating U.S. law schools — ABA accreditation, how rankings work, bar passage, employment outcomes, and cost.
 slug: best-law-schools-in-the-usa
 category: Legal Education & History
+categorySlug: legal-education-and-history
 keywords: [best law schools in the usa]
 ---
 

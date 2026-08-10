@@ -4,6 +4,7 @@ metaTitle: Law Enforcement in 1900s America — A History
 metaDescription: A historically accurate look at policing in early 1900s America — city police, county sheriffs, patrol and investigation methods, and how it evolved into modern policing.
 slug: law-enforcement-in-1900s-america
 category: Legal Education & History
+categorySlug: legal-education-and-history
 keywords: [what was law enforcement life in 1900 in usa]
 ---
 

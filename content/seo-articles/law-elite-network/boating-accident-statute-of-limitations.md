@@ -3,6 +3,8 @@ title: Boating Accident Statute of Limitations
 metaTitle: Boating Accident Statute of Limitations by State
 metaDescription: Boating accident filing deadlines vary by state and legal claim. Learn why there is no single statute of limitations for every boating accident.
 slug: boating-accident-statute-of-limitations
+category: Boating Accidents
+categorySlug: boating-accidents
 keywords: [boating accident statute of limitations]
 ---
 

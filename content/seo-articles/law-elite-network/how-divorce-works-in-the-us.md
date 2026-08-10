@@ -3,6 +3,8 @@ title: How Divorce Works in the United States
 metaTitle: How Divorce Works in the U.S.
 metaDescription: A national overview of how divorce works in the United States — grounds, residency rules, property division, custody, and support — and why the details depend on your state.
 slug: how-divorce-works-in-the-us
+category: Family & Personal
+categorySlug: family-law
 keywords: [how divorce works in the us, us divorce process, no-fault divorce, divorce law by state]
 author: sofia-almeida
 ---

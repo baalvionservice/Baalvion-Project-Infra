@@ -20,17 +20,17 @@ Maritime, offshore, cruise ship, boating, and general personal injury law each c
 
 **General maritime law** — The body of federal common law (judge-made law, as opposed to a specific statute) that governs maritime torts, including negligence and unseaworthiness claims, developed through admiralty court decisions over time rather than through a single comprehensive federal statute.
 
-**Jones Act** — A federal statute, 46 U.S.C. § 30104, that gives an injured "seaman" the right to sue their employer for negligence and, in the case of death, gives certain survivors the right to bring a wrongful death claim. The Jones Act is distinct from general maritime law and from state workers' compensation systems, and it applies specifically to qualifying seamen rather than to all maritime workers.
+**Jones Act** — A federal statute, 46 U.S.C. § 30104, that gives an injured "seaman" the right to sue their employer for negligence and, in the case of death, gives certain survivors the right to bring a wrongful death claim. The Jones Act is distinct from general maritime law and from state workers' compensation systems, and it applies specifically to qualifying seamen rather than to all maritime workers. See our full guide to [Jones Act & seaman's injury rights](/jones-act-seamans-injury-rights/).
 
 **Seaman** — A legal status, not just a job title, referring to someone who has an employment-based connection to a vessel (or fleet of vessels) in navigation that is substantial in both its nature and duration. Whether a particular worker legally qualifies as a "seaman" is a fact-specific question that significantly affects which legal framework — the Jones Act, the LHWCA, or something else — applies to an injury.
 
-**Seaman's claim** — A general term for a legal claim brought by a qualifying seaman against an employer or vessel, which can include a Jones Act negligence claim, an unseaworthiness claim under general maritime law, and a claim for maintenance and cure, potentially pursued together in the same case.
+**Seaman's claim** — A general term for a legal claim brought by a qualifying seaman against an employer or vessel, which can include a Jones Act negligence claim, an unseaworthiness claim under general maritime law, and a claim for maintenance and cure, potentially pursued together in the same case. See our guide to [Jones Act vs. general maritime law](/jones-act-vs-general-maritime-law/).
 
-**Maintenance and cure** — A long-standing maritime doctrine, distinct from a negligence claim, under which a shipowner or employer must provide a qualifying seaman injured or who falls ill while in service of the vessel with "maintenance" (a daily living allowance) and "cure" (medical expenses) until the seaman reaches maximum medical improvement — regardless of who was at fault for the injury. This no-fault obligation has deep roots in maritime law and was addressed by the U.S. Supreme Court in *The Osceola*, 189 U.S. 158 (1903).
+**Maintenance and cure** — A long-standing maritime doctrine, distinct from a negligence claim, under which a shipowner or employer must provide a qualifying seaman injured or who falls ill while in service of the vessel with "maintenance" (a daily living allowance) and "cure" (medical expenses) until the seaman reaches maximum medical improvement — regardless of who was at fault for the injury. This no-fault obligation has deep roots in maritime law and was addressed by the U.S. Supreme Court in *The Osceola*, 189 U.S. 158 (1903). See our full guide, [maintenance and cure explained](/maintenance-and-cure-explained/).
 
 **Unseaworthiness** — A general maritime law doctrine holding that a vessel owner has a duty to provide a vessel, its equipment, and its crew that are reasonably fit for their intended purpose. A vessel or condition that falls short of that standard is "unseaworthy," and an injury caused by an unseaworthy condition can support a claim separate from an ordinary negligence claim, and separate from a Jones Act claim.
 
-**Longshore and Harbor Workers' Compensation Act (LHWCA)** — A federal workers' compensation statute, 33 U.S.C. § 901 et seq., that provides benefits to certain maritime workers injured on navigable waters or in adjoining areas used for loading, unloading, repairing, or building vessels — such as longshore workers and harbor workers — who do not qualify as "seamen" under the Jones Act.
+**Longshore and Harbor Workers' Compensation Act (LHWCA)** — A federal workers' compensation statute, 33 U.S.C. § 901 et seq., that provides benefits to certain maritime workers injured on navigable waters or in adjoining areas used for loading, unloading, repairing, or building vessels — such as longshore workers and harbor workers — who do not qualify as "seamen" under the Jones Act. See our [oil rig injury lawyer guide](/oil-rig-injury-lawyer/) for how this applies to offshore platform workers.
 
 **Death on the High Seas Act (DOHSA)** — A federal statute, 46 U.S.C. § 30302 et seq., providing a wrongful death remedy for deaths occurring more than three nautical miles from U.S. shores, with its own specific rules about who may bring a claim and what damages are recoverable, distinct from state wrongful death statutes.
 
@@ -46,17 +46,17 @@ Maritime, offshore, cruise ship, boating, and general personal injury law each c
 
 ## Types of Accidents
 
-**Offshore accident** — A general term for an accident occurring in connection with offshore work or operations, such as on a drilling platform, production facility, or offshore support vessel.
+**Offshore accident** — A general term for an accident occurring in connection with offshore work or operations, such as on a drilling platform, production facility, or offshore support vessel. See our [offshore accident lawyer guide](/offshore-accident-lawyer/).
 
-**Maritime accident** — A general term for an accident occurring on navigable water or in connection with vessel operations, which may implicate maritime law depending on the specific facts.
+**Maritime accident** — A general term for an accident occurring on navigable water or in connection with vessel operations, which may implicate maritime law depending on the specific facts. See our [maritime accident lawyer guide](/maritime-accident-lawyer/).
 
 **Boating accident** — An incident involving a vessel — such as a motorboat, sailboat, personal watercraft, or similar craft — that results in injury, death, or property damage. See our [boating accident lawyer](/boating-accident-lawyer/) guide for a detailed discussion of how these claims typically work.
 
-**Cruise ship accident** — An incident resulting in injury aboard a cruise ship or during a cruise-related activity, such as a shore excursion, which is often governed by a combination of maritime law and the specific terms of the passenger's cruise ticket contract. See our [Cruise Ship & Passenger Vessel Accidents](/cruise-ship-passenger-vessel-accidents/) hub for related guides.
+**Cruise ship accident** — An incident resulting in injury aboard a cruise ship or during a cruise-related activity, such as a shore excursion, which is often governed by a combination of maritime law and the specific terms of the passenger's cruise ticket contract. See our [cruise ship accident lawyer guide](/cruise-ship-accident-lawyer/) and the [Cruise Ship & Passenger Vessel Accidents](/cruise-ship-passenger-vessel-accidents/) hub for related guides.
 
 **Passenger vessel** — A vessel, such as a cruise ship or ferry, whose primary purpose is transporting paying passengers, as distinguished from a commercial cargo vessel or a private recreational boat.
 
-**Tender boat** — A smaller vessel used to transport passengers between a larger ship (such as a cruise ship anchored offshore) and the shore, when the larger vessel cannot dock directly at a port.
+**Tender boat** — A smaller vessel used to transport passengers between a larger ship (such as a cruise ship anchored offshore) and the shore, when the larger vessel cannot dock directly at a port. See our guide to [tender boat, excursion & dinner cruise accidents](/tender-boat-excursion-dinner-cruise-accidents/).
 
 ## Liability & Negligence
 

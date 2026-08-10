@@ -3,6 +3,8 @@ title: Who Is Liable in a Boating Accident?
 metaTitle: Who Is Liable in a Boating Accident?
 metaDescription: Learn how liability and fault are generally analyzed after a boating or jet ski accident, including operator, owner, and manufacturer liability.
 slug: boating-accident-liability-and-fault
+category: Boating Accidents
+categorySlug: boating-accidents
 keywords: [boating accident liability, boating accident fault, jet ski accident]
 ---
 

@@ -11,37 +11,10 @@ import { fetchArticleForRender } from '@/lib/article-fetch';
 import { ArticleView } from '@/components/knowledge/ArticleView';
 import { ArticleJsonLd } from '@/lib/seo/article-seo';
 import seedData from '../../../docs/seed-data.json';
+import { CMS_ONLY_CATEGORIES } from '@/lib/cms-only-categories';
 import { CategoryContent } from './CategoryContent';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
-
-// Categories created directly in the CMS (not part of the original 8 bundled
-// practice areas in docs/seed-data.json, and not in law-service's /categories
-// API) still need a hub landing page to resolve -- CategoryContent below
-// already lists their real articles correctly via cmsGetArticles(undefined,
-// categorySlug), so only the masthead name/description was missing. Kept
-// separate from seed-data.json (which also feeds the main nav + admin catalog
-// manager) so a new CMS category doesn't silently appear in global nav.
-const CMS_ONLY_CATEGORIES: Record<string, { id: string; name: string; slug: string; description: string }> = {
-  'maritime-offshore-injury-law': {
-    id: 'cms-cat-maritime-offshore-injury-law',
-    name: 'Maritime & Offshore Injury Law',
-    slug: 'maritime-offshore-injury-law',
-    description: 'Guides covering maritime and offshore injury law, including the Jones Act, LHWCA, OCSLA, and general maritime law claims.',
-  },
-  'cruise-ship-passenger-vessel-accidents': {
-    id: 'cms-cat-cruise-ship-passenger-vessel-accidents',
-    name: 'Cruise Ship & Passenger Vessel Accidents',
-    slug: 'cruise-ship-passenger-vessel-accidents',
-    description: 'Guides covering cruise ship and passenger vessel accident claims, including passenger injuries, cruise ticket contracts, and maritime law issues specific to cruise travel.',
-  },
-  'personal-injury-lawyer': {
-    id: 'cms-cat-personal-injury-lawyer',
-    name: 'Personal Injury Lawyer',
-    slug: 'personal-injury-lawyer',
-    description: 'Educational guides on personal injury law, including what personal injury lawyers do, how contingency fees and legal costs work, how to choose and work with an attorney, statutes of limitations, free legal aid resources, and maritime and accident-law terminology.',
-  },
-};
 
 function bundledCategory(slug: string) {
   if (CMS_ONLY_CATEGORIES[slug]) return CMS_ONLY_CATEGORIES[slug];
@@ -134,7 +107,7 @@ export default async function CategoryPage(
             </Link>
             <span className="kicker">Practice Area</span>
             <h1 className="font-headline text-4xl md:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.02] mt-3">
-              {category.name}
+              {category.pillarTitle || category.name}
             </h1>
             {category.description && (
               <p className="text-lg md:text-xl text-slate-500 max-w-2xl leading-relaxed mt-4">
@@ -142,6 +115,16 @@ export default async function CategoryPage(
               </p>
             )}
           </div>
+          {/* Written pillar / "Complete Guide" body for hubs that also serve as a
+              standalone article at this same URL (see cms-only-categories.ts). */}
+          {category.descriptionHtml && (
+            <div className="container mx-auto px-4 sm:px-6 max-w-7xl pb-4">
+              <div
+                className="prose-legal max-w-3xl"
+                dangerouslySetInnerHTML={{ __html: category.descriptionHtml }}
+              />
+            </div>
+          )}
         </section>
 
         <CategoryContent categorySlug={categorySlug} categoryId={category.id} cmsArticles={cmsArticles} />

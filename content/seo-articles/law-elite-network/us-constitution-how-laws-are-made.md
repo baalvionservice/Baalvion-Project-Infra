@@ -3,6 +3,8 @@ title: The U.S. Constitution and How Federal Laws Are Made
 metaTitle: The U.S. Constitution & How Federal Laws Are Made
 metaDescription: An authoritative guide to the U.S. Constitution, the three branches of government, and how a bill becomes federal law — from committee to presidential signature.
 slug: us-constitution-how-laws-are-made
+category: U.S. Law & Constitution
+categorySlug: us-law-and-constitution
 keywords: [who makes laws in usa, constitutional preamble, which branch passes laws, when was the constitution written]
 ---
 

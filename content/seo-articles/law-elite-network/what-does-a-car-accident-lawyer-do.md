@@ -3,6 +3,8 @@ title: What Does a Car Accident Lawyer Do?
 metaTitle: What Does a Car Accident Lawyer Do?
 metaDescription: A clear, step-by-step explanation of what a car accident lawyer does — from the first consultation through investigation, negotiation, and trial.
 slug: what-does-a-car-accident-lawyer-do
+category: Car Accidents
+categorySlug: car-accidents
 keywords: [lawyer for car accident, car accident injury lawyer]
 ---
 
