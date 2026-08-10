@@ -35,6 +35,12 @@ const CMS_ONLY_CATEGORIES: Record<string, { id: string; name: string; slug: stri
     slug: 'cruise-ship-passenger-vessel-accidents',
     description: 'Guides covering cruise ship and passenger vessel accident claims, including passenger injuries, cruise ticket contracts, and maritime law issues specific to cruise travel.',
   },
+  'personal-injury-lawyer': {
+    id: 'cms-cat-personal-injury-lawyer',
+    name: 'Personal Injury Lawyer',
+    slug: 'personal-injury-lawyer',
+    description: 'Educational guides on personal injury law, including what personal injury lawyers do, how contingency fees and legal costs work, how to choose and work with an attorney, statutes of limitations, free legal aid resources, and maritime and accident-law terminology.',
+  },
 };
 
 function bundledCategory(slug: string) {

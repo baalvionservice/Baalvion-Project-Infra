@@ -28,6 +28,8 @@ export const CURRENT_CATEGORY_SLUGS = [
   'tech-ip',
   'disputes',
   'maritime-offshore-injury-law',
+  'cruise-ship-passenger-vessel-accidents',
+  'personal-injury-lawyer',
 ] as const;
 
 /** Every slug the /law/{slug} URL shape ever used, for validating old redirect requests. */
