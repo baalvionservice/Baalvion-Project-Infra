@@ -26,7 +26,7 @@ const ICON_MAP: Record<string, LucideIcon> = { Globe, Award, ShieldCheck, Zap };
 const FALLBACK_STATS: Stat[] = [
   { icon: "Award", label: "Practice Areas", value: "8" },
   { icon: "Globe", label: "Legal Guides", value: "72+" },
-  { icon: "ShieldCheck", label: "Expert Contributors", value: "11" },
+  { icon: "ShieldCheck", label: "Editorial Contributors", value: "11" },
   { icon: "Zap", label: "Specializations Covered", value: "26" }
 ];
 

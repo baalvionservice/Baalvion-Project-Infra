@@ -35,7 +35,7 @@ export default function PrivacyPolicyPage() {
 
           <header className="mb-12">
             <div className="flex items-center gap-2 mb-6">
-              <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-blue-600 bg-blue-50 px-2 py-1 rounded">Compliance Dossier</span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-blue-600 bg-blue-50 px-2 py-1 rounded">Privacy &amp; Compliance</span>
             </div>
             <h1 className="text-[44px] md:text-[56px] font-bold text-slate-900 tracking-tight font-serif mb-3 leading-tight">
               Privacy Policy
@@ -92,7 +92,7 @@ export default function PrivacyPolicyPage() {
                 <li>Respond to inquiries and provide customer support;</li>
                 <li>Send newsletters and updates where you have opted in;</li>
                 <li>Analyze traffic and usage patterns to improve our editorial coverage;</li>
-                <li>Display relevant advertising through third-party advertising partners;</li>
+                <li>Display relevant advertising through third-party advertising partners, where advertising is shown;</li>
                 <li>Detect, prevent, and address fraud, abuse, and security issues;</li>
                 <li>Comply with applicable legal and regulatory requirements.</li>
               </ul>
@@ -111,13 +111,13 @@ export default function PrivacyPolicyPage() {
             </Block>
 
             <Block id="advertising" title="Advertising & Google AdSense">
-              <p>This website displays advertising served by third-party advertising networks, including <strong>Google AdSense</strong> (which uses Google&apos;s ad-serving technology, formerly branded <strong>Google DoubleClick</strong>, now part of Google Marketing Platform). These partners help fund our free legal content.</p>
+              <p>This website may display advertising served by third-party advertising networks, including <strong>Google AdSense</strong> (which uses Google&apos;s ad-serving technology, formerly branded <strong>Google DoubleClick</strong>, now part of Google Marketing Platform), to help fund our free legal content. The sections below describe how that advertising works if and when it is shown.</p>
               <ul>
-                <li>Google, as a third-party vendor, uses cookies — including what was formerly known as the DoubleClick cookie — to serve ads on this site based on a user&apos;s prior visits to this website and other websites.</li>
-                <li>Google&apos;s use of advertising cookies enables it and its partners to serve ads to you based on your visit to this site and/or other sites on the Internet.</li>
+                <li>Where Google serves ads on this site, it may, as a third-party vendor, use cookies — including what was formerly known as the DoubleClick cookie — based on a user&apos;s prior visits to this website and other websites.</li>
+                <li>Where used, Google&apos;s advertising cookies enable it and its partners to serve ads to you based on your visit to this site and/or other sites on the Internet.</li>
                 <li>You may opt out of personalized advertising by visiting <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener noreferrer">Google Ads Settings</a>.</li>
                 <li>You can opt out of a third-party vendor&apos;s use of cookies for personalized advertising by visiting <a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener noreferrer">www.aboutads.info</a>.</li>
-                <li>Third-party networks operating on this site may also place and read third-party cookies on your browser, or use web beacons, to collect information in the course of ads being served. For more information, see <a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener noreferrer">How Google uses information from sites that use its services</a>.</li>
+                <li>Any third-party networks operating on this site may also place and read third-party cookies on your browser, or use web beacons, to collect information in the course of ads being served. For more information, see <a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener noreferrer">How Google uses information from sites that use its services</a>.</li>
               </ul>
               <p>We do not control the third-party cookies used by these advertisers and recommend reviewing their respective privacy policies.</p>
             </Block>
@@ -177,7 +177,7 @@ export default function PrivacyPolicyPage() {
             </Block>
 
             <Block id="contact-privacy" title="Contact Privacy Team">
-              <p>For any questions about this Privacy Policy or our data practices, contact our Compliance Office:</p>
+              <p>For any questions about this Privacy Policy or our data practices, contact us:</p>
               <ul>
                 <li>Email: <a href="mailto:legal@lawelitenetwork.com">legal@lawelitenetwork.com</a></li>
                 <li>Mail: Law Elite Network, C/o Dilip Kumar Kuldeep, Upper Mania, Po- Pakjhola, Semiliguda, Koraput, Odisha 764036, India (CIN: U43121OD2025PTC048479)</li>

@@ -69,7 +69,10 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
   const category = article.category;
   const authorName: string = (typeof article.author === 'string' ? article.author : article.author?.name) || 'Law Elite Editorial';
   const matchedAuthor = await getMergedAuthorByName(authorName);
-  const updatedAt = formatArticleDate(article.updatedAt || article.updated_at) || 'February 12, 2025';
+  // No hardcoded fallback date here: if a record genuinely has no real
+  // timestamp, ArticleAuthorByline omits the "Updated" line rather than show
+  // a fabricated date.
+  const updatedAt = formatArticleDate(article.updatedAt || article.updated_at);
   const processedContent = injectHeadingIds(article.content || '');
   const toc = extractToc(processedContent);
   const relatedArticles = await fetchRelatedArticles(slug, category?.slug, category?.name, article.subcategory?.slug);

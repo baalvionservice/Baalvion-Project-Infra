@@ -141,8 +141,8 @@ export default function EditorialDisclosurePolicyPage() {
 
             <Block icon={<Handshake className="w-6 h-6 text-blue-600" />} title="4. Advertising, Affiliate &amp; Referral Disclosure">
               <p>
-                Law Elite Network is supported in part by advertising, including ads served through Google AdSense.
-                Some outbound links, and some placements within our{' '}
+                Law Elite Network is a free publication that may be supported in part by advertising, including
+                through Google AdSense, to help fund our content. Some outbound links, and some placements within our{' '}
                 <Link href="/lawyers" className="text-blue-600 hover:underline">lawyer directory</Link>, may also be
                 compensated — for example, a referral arrangement where a lawyer or firm pays a fee when a reader is
                 connected to them through our{' '}

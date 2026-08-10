@@ -36,5 +36,5 @@ export async function fetchArticleForRender(
   if (bundled) return bundled;
 
   const seedMatch = (seedData as any).articles?.find((a: any) => a.slug === slug && a.content);
-  return seedMatch ? { ...seedMatch, updatedAt: 'February 12, 2025' } : null;
+  return seedMatch ?? null;
 }

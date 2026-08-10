@@ -79,6 +79,6 @@ export async function fetchArticleForMetadata(slug: string): Promise<any | null>
 
   const seedMatch = (seedData as any).articles?.find((a: any) => a.slug === slug && a.content);
   return seedMatch
-    ? { ...seedMatch, excerpt: seedMatch.excerpt || seedMatch.summary, body: seedMatch.content, updated_at: 'February 12, 2025' }
+    ? { ...seedMatch, excerpt: seedMatch.excerpt || seedMatch.summary, body: seedMatch.content }
     : null;
 }

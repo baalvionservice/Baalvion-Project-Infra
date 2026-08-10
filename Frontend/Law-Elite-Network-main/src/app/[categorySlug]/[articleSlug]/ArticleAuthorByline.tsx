@@ -11,7 +11,8 @@ import type { LawAuthor } from '@/data/authors';
 
 interface ArticleAuthorBylineProps {
   authorName: string;
-  updatedAt: string;
+  /** Omitted (not a fabricated placeholder) when the article has no real timestamp. */
+  updatedAt?: string;
   matchedAuthor: LawAuthor | null;
 }
 
@@ -68,7 +69,7 @@ export function ArticleAuthorByline({ authorName, updatedAt, matchedAuthor }: Ar
             </div>
           </PopoverContent>
         </Popover>
-        Updated {updatedAt}
+        {updatedAt && <>Updated {updatedAt}</>}
       </div>
     </div>
   );
