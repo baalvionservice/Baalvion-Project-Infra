@@ -150,7 +150,8 @@ export function useDashboardData({ canonicalId, website }: Args): DashboardData 
       totalContent: s?.totalContent ?? content.data?.pagination?.total ?? items.length,
       publishedContent: s?.publishedContent ?? items.filter((i) => i.status === 'published').length,
       draftContent: s?.draftContent ?? items.filter((i) => i.status === 'draft').length,
-      scheduledContent: wf?.scheduled ?? items.filter((i) => i.status === 'scheduled').length,
+      scheduledContent:
+        s?.scheduledContent ?? wf?.scheduled ?? items.filter((i) => i.status === 'scheduled').length,
       pendingApprovals: wf?.pending ?? s?.pendingReview ?? 0,
       totalCategories: rootCats,
       totalSubcategories: subCats,
