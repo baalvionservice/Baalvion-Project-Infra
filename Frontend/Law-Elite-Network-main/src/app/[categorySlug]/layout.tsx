@@ -3,6 +3,7 @@ import { CURRENT_CATEGORY_SLUGS } from '@/lib/category-slugs';
 import { ROOT_FLAT_ARTICLE_SLUGS } from '@/lib/article-url';
 import { fetchArticleForMetadata } from '@/lib/article-metadata-fetch';
 import { buildArticleMetadata } from '@/lib/seo/article-seo';
+import { CMS_ONLY_CATEGORIES } from '@/lib/cms-only-categories';
 
 const API = process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3015/v1');
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
@@ -48,9 +49,10 @@ export async function generateMetadata(
     return { robots: { index: false, follow: false } };
   }
   const cat = await fetchCategory(categorySlug);
-  const name = cat?.name || titleCase(categorySlug);
-  const title = `${name} Attorneys & Legal Services | Law Elite Network`;
-  const description = cat?.description
+  const cmsOnly = CMS_ONLY_CATEGORIES[categorySlug];
+  const name = cat?.name || cmsOnly?.name || titleCase(categorySlug);
+  const title = cmsOnly?.metaTitle || `${name} Attorneys & Legal Services | Law Elite Network`;
+  const description = cat?.description || cmsOnly?.metaDescription || cmsOnly?.description
     || `Find verified ${name} lawyers across 188 countries and read expert ${name} guides on Law Elite Network.`;
   const url = `${SITE}/${categorySlug}`;
   return {

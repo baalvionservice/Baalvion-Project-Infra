@@ -3,6 +3,8 @@ title: How to Find the Best Car Accident Lawyer
 metaTitle: "Best Car Accident Lawyer: How to Choose"
 metaDescription: There is no single "best" car accident lawyer for everyone. Learn how to evaluate experience, fees, and communication to choose the right fit.
 slug: best-car-accident-lawyer
+category: Car Accidents
+categorySlug: car-accidents
 keywords: [best car accident lawyer]
 ---
 

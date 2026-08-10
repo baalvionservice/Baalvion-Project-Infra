@@ -4,6 +4,7 @@ metaTitle: Islamic (Muslim) Law and Legal Practices in the U.S.
 metaDescription: How Muslim Americans navigate marriage, divorce, contracts, and inheritance within the U.S. legal system — religious practice versus what courts will enforce.
 slug: muslim-law-and-legal-practices-in-the-us
 category: Religion, Law & Weird Laws
+categorySlug: religion-law-and-weird-laws
 keywords: [muslim law in usa]
 ---
 

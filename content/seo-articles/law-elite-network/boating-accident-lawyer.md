@@ -3,6 +3,8 @@ title: Boating Accident Lawyer
 metaTitle: Boating Accident Lawyer | Injured on the Water?
 metaDescription: Learn what a boating accident lawyer does, who may be liable after a boat, jet ski, or watercraft accident, and how these cases are typically handled.
 slug: boating-accident-lawyer
+category: Boating Accidents
+categorySlug: boating-accidents
 keywords: [boating accident lawyer, boat accident attorney, boating accident attorney]
 ---
 

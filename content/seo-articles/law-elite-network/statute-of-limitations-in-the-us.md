@@ -83,6 +83,7 @@ Because state legislatures amend limitations statutes over time, and because the
 ## Related Reading on This Site
 
 - [Boating Accident Statute of Limitations](/boating-accident-statute-of-limitations/) — a claim-specific look at how these deadlines apply to boating and watercraft injury cases
+- [Offshore Accident Statute of Limitations](/offshore-accident-statute-of-limitations/) — how Jones Act, LHWCA, and other maritime deadlines differ from ordinary state timelines
 - [How the U.S. Legal System Works](/how-the-us-legal-system-works/) — background on the broader court system these deadlines operate within
 - [What Is a Personal Injury Lawyer?](/what-is-a-personal-injury-lawyer/) — how a lawyer helps evaluate and protect a claim, including deadline issues
 - [Maritime & Offshore Injury Law](/maritime-offshore-injury-law/) — related guides covering federal maritime claims, which often carry their own distinct deadlines

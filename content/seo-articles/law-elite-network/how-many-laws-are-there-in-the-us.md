@@ -3,6 +3,8 @@ title: How Many Laws Are There in the U.S.?
 metaTitle: How Many Laws Are There in the United States?
 metaDescription: There's no single accepted count of "how many laws" exist in the U.S. Here's why — and how federal, state, and local law actually fit together.
 slug: how-many-laws-are-there-in-the-us
+category: U.S. Law & Constitution
+categorySlug: us-law-and-constitution
 keywords: [how many laws are there in usa, number of federal laws, us code cfr laws count]
 ---
 

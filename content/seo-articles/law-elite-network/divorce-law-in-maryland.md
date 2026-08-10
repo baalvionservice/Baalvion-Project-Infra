@@ -3,6 +3,8 @@ title: Divorce Law in Maryland: What You Need to Know
 metaTitle: Divorce Law in Maryland: A Complete Guide
 metaDescription: A complete, up-to-date guide to divorce law in Maryland — grounds for divorce, residency rules, property division, alimony, custody, child support, and the filing process.
 slug: divorce-law-in-maryland
+category: Family & Personal
+categorySlug: family-law
 keywords: [divorce law in maryland usa, maryland absolute divorce, maryland divorce grounds, maryland child custody law, maryland alimony]
 author: sofia-almeida
 ---

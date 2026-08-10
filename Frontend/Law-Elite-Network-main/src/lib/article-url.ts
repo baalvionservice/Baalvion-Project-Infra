@@ -35,6 +35,29 @@ export const ROOT_FLAT_ARTICLE_SLUGS = new Set([
   'do-i-need-a-lawyer',
   'how-much-does-a-lawyer-cost',
   'maritime-offshore-accident-law-glossary',
+  // Category A -- Offshore & Maritime Injury Law (page 1 renders at the
+  // category hub URL itself; see cms-only-categories.ts pillarTitle/descriptionHtml).
+  'offshore-accident-lawyer',
+  'offshore-injury-lawyer',
+  'maritime-accident-lawyer',
+  'maritime-injury-lawyer',
+  'oil-rig-injury-lawyer',
+  'oil-rig-accident-lawyer',
+  'jones-act-seamans-injury-rights',
+  'houston-offshore-accident-attorney',
+  'jones-act-lawyer-new-orleans',
+  'maintenance-and-cure-explained',
+  'jones-act-vs-general-maritime-law',
+  'offshore-injury-settlement-value',
+  'causes-of-offshore-oil-rig-accidents',
+  'offshore-accident-statute-of-limitations',
+  // Category B -- Cruise Ship & Passenger Vessel Accidents
+  'cruise-ship-accident-lawyer',
+  'cruise-ship-accident-lawyer-miami',
+  'cruise-ship-accident-lawyer-florida',
+  'cruise-ship-accident-lawyer-los-angeles',
+  'cruise-line-accident-claims-by-brand',
+  'tender-boat-excursion-dinner-cruise-accidents',
 ]);
 
 /**

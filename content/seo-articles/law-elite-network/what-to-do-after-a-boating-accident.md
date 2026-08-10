@@ -3,6 +3,8 @@ title: What to Do After a Boating Accident
 metaTitle: What to Do After a Boating Accident
 metaDescription: A practical, step-by-step guide to what to do after a boating accident — safety, reporting, evidence, medical care, insurance, and deadlines.
 slug: what-to-do-after-a-boating-accident
+category: Boating Accidents
+categorySlug: boating-accidents
 keywords: [what to do after a boating accident]
 ---
 

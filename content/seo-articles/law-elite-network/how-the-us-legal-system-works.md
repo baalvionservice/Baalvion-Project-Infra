@@ -3,6 +3,8 @@ title: How the U.S. Legal System Works
 metaTitle: How the U.S. Legal System Works
 metaDescription: A foundational guide to how the U.S. legal system works — federal, state, and local law, courts, judges, juries, civil vs. criminal cases, and how laws are made and interpreted.
 slug: how-the-us-legal-system-works
+category: U.S. Law & Constitution
+categorySlug: us-law-and-constitution
 keywords: [how the us legal system works, us legal system overview, federal vs state law, us court system explained]
 ---
 

@@ -4,6 +4,7 @@ metaTitle: Weird, Silly & Crazy Laws in the USA
 metaDescription: A verified, source-checked look at real unusual laws in the USA — current state statutes, municipal ordinances, and the viral "weird law" claims that don't check out.
 slug: weird-silly-crazy-laws-in-the-usa
 category: Religion, Law & Weird Laws
+categorySlug: religion-law-and-weird-laws
 keywords: [silly laws in usa, dumb laws in the usa, crazy laws in the usa]
 ---
 
