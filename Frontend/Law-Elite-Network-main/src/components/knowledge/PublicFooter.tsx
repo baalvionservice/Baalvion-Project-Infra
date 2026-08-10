@@ -72,6 +72,7 @@ export function PublicFooter() {
                 <li><Link href="/advertise" className="hover:text-white transition-colors">Advertise</Link></li>
                 <li><Link href="/editorial-standards" className="hover:text-white transition-colors">Editorial Standards</Link></li>
                 <li><Link href="/editorial-process" className="hover:text-white transition-colors">Editorial Process</Link></li>
+                <li><Link href="/corrections" className="hover:text-white transition-colors">Corrections</Link></li>
               </ul>
             </div>
 

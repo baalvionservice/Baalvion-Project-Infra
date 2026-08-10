@@ -206,11 +206,12 @@ export default function EditorialStandardsPage() {
 
             <Block id="independence" title="Independence & Advertising">
               <p>
-                Law Elite Network is supported in part by advertising, including ads served by third-party networks such
-                as Google AdSense. Our editorial decisions are made independently of any advertising or commercial
-                relationship. Advertisements are clearly distinguishable from editorial content, and the presence of an
-                advertiser never influences whether or how we cover a topic. Where content is sponsored or commercial in
-                nature, we label it as such.
+                Law Elite Network is a free publication that may be supported in part by advertising, including
+                through third-party networks such as Google AdSense, to help fund our content. Our editorial decisions
+                are made independently of any advertising or commercial relationship. Where advertising appears, it is
+                clearly distinguishable from editorial content, and the presence of an advertiser never influences
+                whether or how we cover a topic. Where content is sponsored or commercial in nature, we label it as
+                such.
               </p>
             </Block>
 

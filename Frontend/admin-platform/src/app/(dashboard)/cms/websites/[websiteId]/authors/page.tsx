@@ -314,10 +314,15 @@ export default function WebsiteAuthorsPage({
               <Label className="text-xs">Credentials</Label>
               <Input
                 className="h-8 text-xs"
-                placeholder="e.g. LL.M. · 12+ years covering corporate law"
+                placeholder="e.g. Corporate & Securities desk, Acme Media — only real, verifiable credentials"
                 value={form.credentials}
                 onChange={(e) => setForm((f) => ({ ...f, credentials: e.target.value }))}
               />
+              <p className="text-[10px] text-muted-foreground">
+                Shown publicly under the byline and in Person structured data. Only enter a formal
+                credential (degree, license, bar admission) if it is genuinely this person's and you
+                can verify it — otherwise use an editorial role/desk description instead.
+              </p>
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs">Biography</Label>

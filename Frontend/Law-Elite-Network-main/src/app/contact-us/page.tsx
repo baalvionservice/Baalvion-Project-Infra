@@ -19,34 +19,34 @@ export default function ContactUsPage() {
               Contact Us
             </h1>
             <p className="text-xl text-slate-500 font-medium italic max-w-xl mx-auto">
-              Our professional concierge team is available to assist with network inquiries and strategic support.
+              Reach the right team below, or send a general inquiry — we read everything and respond as quickly as we can.
             </p>
           </header>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
-            <ContactCard 
-              icon={<Mail className="w-6 h-6" />} 
-              title="Concierge Support" 
+            <ContactCard
+              icon={<Mail className="w-6 h-6" />}
+              title="General & Membership"
               contact="concierge@lawelitenetwork.com"
-              desc="Inquiries regarding memberships and consultations."
+              desc="Account questions, memberships, and consultations."
             />
-            <ContactCard 
-              icon={<MessageSquare className="w-6 h-6" />} 
-              title="Editorial Inquiries" 
+            <ContactCard
+              icon={<MessageSquare className="w-6 h-6" />}
+              title="Editorial Inquiries"
               contact="editorial@lawelitenetwork.com"
-              desc="Questions regarding dossiers and knowledge integrity."
+              desc="Questions or feedback about our articles and guides."
             />
-            <ContactCard 
-              icon={<Globe className="w-6 h-6" />} 
-              title="Global Press" 
+            <ContactCard
+              icon={<Globe className="w-6 h-6" />}
+              title="Press"
               contact="press@lawelitenetwork.com"
-              desc="Media and broadcasting inquiries."
+              desc="Media inquiries."
             />
-            <ContactCard 
-              icon={<ShieldCheck className="w-6 h-6" />} 
-              title="Compliance Office" 
+            <ContactCard
+              icon={<ShieldCheck className="w-6 h-6" />}
+              title="Privacy & Legal"
               contact="legal@lawelitenetwork.com"
-              desc="Privacy and statutory regulatory matters."
+              desc="Privacy questions and legal or regulatory correspondence."
             />
           </div>
 

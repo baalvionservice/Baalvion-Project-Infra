@@ -210,9 +210,9 @@ export default function TermsOfServicePage() {
             <Block id="third-party" title="Third-Party Links & Advertising">
               <p>
                 The Service may contain links to third-party websites, references to third-party practitioners, and
-                advertisements served by third-party advertising networks, including <strong>Google AdSense</strong> and
-                other ad partners. These links, references, and advertisements are provided for convenience and to help
-                fund our free content.
+                advertisements that, where shown, are served by third-party advertising networks, including{' '}
+                <strong>Google AdSense</strong> and other ad partners. These links, references, and any advertisements
+                are provided for convenience and to help fund our free content.
               </p>
               <ul>
                 <li>Advertisements are clearly distinguishable from editorial content, and the presence of an advertisement does not constitute an endorsement by Law Elite Network.</li>
