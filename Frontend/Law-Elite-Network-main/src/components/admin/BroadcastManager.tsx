@@ -7,15 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { 
-  Radio, 
-  Send, 
-  Users, 
-  ShieldCheck, 
+import {
+  Radio,
+  Send,
+  ShieldCheck,
   AlertTriangle,
   Loader2,
-  Globe,
-  Gavel
 } from "lucide-react";
 import { 
   Select, 
@@ -140,35 +137,6 @@ export default function BroadcastManager() {
                   <span>Last Broadcast:</span>
                   <span>14H AGO</span>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white border-slate-200 shadow-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Network Reach</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <Globe className="w-3.5 h-3.5 text-blue-600" />
-                  <span className="text-[10px] font-bold uppercase">Jurisdictions</span>
-                </div>
-                <span className="text-xs font-bold">120+</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <Gavel className="w-3.5 h-3.5 text-blue-600" />
-                  <span className="text-[10px] font-bold uppercase">Lawyers</span>
-                </div>
-                <span className="text-xs font-bold">5,420</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <Users className="w-3.5 h-3.5 text-blue-600" />
-                  <span className="text-[10px] font-bold uppercase">Clients</span>
-                </div>
-                <span className="text-xs font-bold">12,890</span>
               </div>
             </CardContent>
           </Card>
