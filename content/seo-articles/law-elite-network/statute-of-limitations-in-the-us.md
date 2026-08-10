@@ -6,6 +6,7 @@ slug: statute-of-limitations-in-the-us
 category: Personal Injury Lawyer
 categorySlug: personal-injury-lawyer
 keywords: [statute of limitations in the us, statute of limitations by state, personal injury statute of limitations]
+author: deepak-kumar-kuldeep
 ---
 
 # Statute of Limitations in the U.S.

@@ -6,6 +6,7 @@ slug: offshore-accident-statute-of-limitations
 category: Maritime & Offshore Injury Law
 categorySlug: maritime-offshore-injury-law
 keywords: [offshore accident statute of limitations, jones act statute of limitations, lhwca deadline]
+author: deepak-kumar-kuldeep
 ---
 
 # Offshore Accident Statute of Limitations

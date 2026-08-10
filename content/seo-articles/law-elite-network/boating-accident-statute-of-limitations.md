@@ -6,6 +6,7 @@ slug: boating-accident-statute-of-limitations
 category: Boating Accidents
 categorySlug: boating-accidents
 keywords: [boating accident statute of limitations]
+author: deepak-kumar-kuldeep
 ---
 
 # Boating Accident Statute of Limitations

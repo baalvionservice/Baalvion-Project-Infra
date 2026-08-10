@@ -6,6 +6,7 @@ slug: maritime-offshore-accident-law-glossary
 category: Personal Injury Lawyer
 categorySlug: personal-injury-lawyer
 keywords: [maritime law glossary, admiralty law terms, jones act glossary, accident law glossary]
+author: deepak-kumar-kuldeep
 ---
 
 # Maritime, Offshore & Accident Law Glossary

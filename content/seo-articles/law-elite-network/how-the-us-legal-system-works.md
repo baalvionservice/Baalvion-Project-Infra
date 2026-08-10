@@ -6,6 +6,7 @@ slug: how-the-us-legal-system-works
 category: U.S. Law & Constitution
 categorySlug: us-law-and-constitution
 keywords: [how the us legal system works, us legal system overview, federal vs state law, us court system explained]
+author: yessica-ruiz
 ---
 
 # How the U.S. Legal System Works

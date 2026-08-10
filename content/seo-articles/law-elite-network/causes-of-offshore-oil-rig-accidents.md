@@ -6,6 +6,7 @@ slug: causes-of-offshore-oil-rig-accidents
 category: Maritime & Offshore Injury Law
 categorySlug: maritime-offshore-injury-law
 keywords: [causes of offshore accidents, oil rig accident causes, offshore drilling accident causes]
+author: deepak-kumar-kuldeep
 ---
 
 # Common Causes of Offshore & Oil Rig Accidents
