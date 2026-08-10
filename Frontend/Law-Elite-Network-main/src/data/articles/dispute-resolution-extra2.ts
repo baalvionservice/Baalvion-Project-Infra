@@ -103,6 +103,7 @@ export const disputeResolutionExtra2Articles: LawArticle[] = [
     views: 7050,
     featured: false,
     imageSeed: 'class-action-lawsuit-explained',
+    country: 'United States',
     content: `<p>A class action lawsuit is a legal case in which one or a few people sue on behalf of a much larger group — the "class" — who were all harmed in the same way by the same conduct. Instead of thousands of individuals each filing separate cases, a single lawsuit resolves the shared issue for everyone at once. This makes it possible to challenge large companies or institutions over harms that affect many people but may be too small, individually, to justify the cost of suing alone.</p>
 
 <div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>A class action lets a few representatives sue on behalf of a large group with similar claims.</li><li>It is efficient for widespread harms where each person's loss is too small to litigate alone.</li><li>A court must usually "certify" the class before the case can proceed as a group action.</li><li>Members often have the right to opt out and pursue their own case instead.</li><li>The mechanism is strong in the US but more limited or differently structured elsewhere.</li></ul></div>

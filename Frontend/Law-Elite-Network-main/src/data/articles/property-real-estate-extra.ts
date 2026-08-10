@@ -24,6 +24,7 @@ export const propertyRealEstateExtraArticles: LawArticle[] = [
     views: 5240,
     featured: false,
     imageSeed: 'easement-right-of-way',
+    country: 'United States',
     content: `<p>An easement is a legal right to use a portion of someone else's land for a particular purpose, without owning that land. The most familiar example is a right of way — a path or driveway that lets one property owner cross a neighbour's land to reach a road. Easements are a quiet but important feature of property law, because they can add value to one property while permanently limiting what the owner of another can do.</p>
 
 <div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>An easement is the right to use another person's land for a defined purpose, not to own it.</li><li>It usually benefits one property (the dominant land) and burdens another (the servient land).</li><li>Common types include rights of way, drainage, light, and utility access.</li><li>Easements often "run with the land", binding future owners, not just the original parties.</li><li>They can be created by agreement, long use, or necessity, with rules differing by jurisdiction.</li></ul></div>

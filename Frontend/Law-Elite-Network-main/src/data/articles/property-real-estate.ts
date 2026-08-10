@@ -28,6 +28,7 @@ export const propertyRealEstateArticles: LawArticle[] = [
     views: 7420,
     featured: true,
     imageSeed: 'buying-property-checklist',
+    country: 'United States',
     content: `<p>Buying property is, for most people, the largest single transaction they will ever make. Yet many buyers focus on the price and the view while overlooking the legal questions that decide whether they will actually own what they think they are buying. A property transaction transfers <strong>title</strong> — the legal right to own and use land — and the buyer's job before completion is to confirm that the seller can pass good title free of unwelcome surprises. This process of verification is known as <strong>due diligence</strong>, and skipping it is the single most common cause of expensive property disputes.</p>
 
 <div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>Confirm the seller genuinely owns the property and has the legal right to sell it.</li><li>Search for encumbrances — mortgages, liens, easements, and charges that travel with the land.</li><li>Verify boundaries, permitted use, and that buildings have proper approvals.</li><li>Read the contract carefully and understand exactly when ownership and risk pass to you.</li><li>Budget for taxes, registration fees, and other transaction costs beyond the headline price.</li></ul></div>

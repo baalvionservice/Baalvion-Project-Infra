@@ -17,6 +17,7 @@ export const businessCorporateArticles: LawArticle[] = [
     views: 8700,
     featured: true,
     imageSeed: 'lawelite-shareholder-pact',
+    country: 'United States',
     content: `<p>A shareholder agreement is a private contract signed by some or all of the owners of a company. While a company\'s constitution or articles set the public, default rules, a shareholder agreement adds a confidential layer that spells out how the owners will actually run the business, divide profits, resolve disputes, and leave. It is one of the most useful documents a privately held company can have, yet many founders skip it until a conflict makes the gap painfully obvious.</p>
 
 <div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>A shareholder agreement is a private contract that supplements, but does not replace, a company\'s constitution or articles of association.</li><li>It typically covers decision-making rights, share transfers, exit terms, dividends, and dispute resolution.</li><li>Transfer controls such as pre-emption rights, drag-along, and tag-along clauses protect both majority and minority owners.</li><li>The agreement binds only its signatories, so coverage gaps appear when new owners join without signing.</li><li>Enforceability and required formalities differ across jurisdictions, so local legal review is essential.</li></ul></div>
@@ -172,6 +173,7 @@ export const businessCorporateArticles: LawArticle[] = [
     views: 4300,
     featured: false,
     imageSeed: 'lawelite-startup-foundations',
+    country: 'United States',
     content: `<p>Startup law is not a single field but the cluster of legal decisions that founders face in a company\'s earliest months: how to split ownership, who owns the intellectual property, how to bring on a team, and how to take in outside money without losing control. These choices are made quickly and cheaply at the start, yet they shape the company\'s value for years. Getting the foundations right is far easier than untangling them later during a funding round or acquisition.</p>
 
 <div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>Founder equity should usually vest over time so that ownership reflects continued contribution.</li><li>Intellectual property must be assigned to the company, not left with individual founders or contractors.</li><li>Early fundraising instruments such as convertible notes and SAFEs delay setting a fixed valuation.</li><li>Compliant hiring, equity, and data practices reduce the risk of problems surfacing during due diligence.</li><li>Rules on securities, employment, and IP differ by country, so structures should be checked locally.</li></ul></div>

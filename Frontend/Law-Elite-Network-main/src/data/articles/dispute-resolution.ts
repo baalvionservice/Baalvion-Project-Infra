@@ -273,5 +273,6 @@ export const disputeResolutionArticles: LawArticle[] = [
     views: 0,
     featured: false,
     imageSeed: 'lcia-vs-icc-arbitration-rules-comparison',
+    country: 'International',
   },
 ];

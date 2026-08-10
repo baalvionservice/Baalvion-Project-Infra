@@ -125,6 +125,7 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
     views: 0,
     featured: true,
     imageSeed: 'lcia-international-arbitration-london-guide',
+    country: 'International',
   },
   {
     id: 'dr-005',
@@ -230,6 +231,7 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
     views: 0,
     featured: false,
     imageSeed: 'lcia-arbitration-costs-fees-schedule',
+    country: 'International',
   },
   {
     id: 'dr-006',
@@ -331,6 +333,7 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
     views: 0,
     featured: false,
     imageSeed: 'lcia-emergency-arbitrator-expedited-formation',
+    country: 'International',
   },
   {
     id: 'dr-007',
@@ -425,6 +428,7 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
     views: 0,
     featured: false,
     imageSeed: 'english-arbitration-act-2025-reforms',
+    country: 'International',
   },
   {
     id: 'dr-008',
@@ -527,6 +531,7 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
     views: 0,
     featured: false,
     imageSeed: 'enforcing-foreign-arbitral-awards-london',
+    country: 'International',
   },
   {
     id: 'dr-009',
@@ -625,5 +630,6 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
     views: 0,
     featured: false,
     imageSeed: 'london-arbitration-hearing-room-booking-logistics',
+    country: 'International',
   },
 ];

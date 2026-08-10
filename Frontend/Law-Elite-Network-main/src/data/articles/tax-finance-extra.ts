@@ -24,6 +24,7 @@ export const taxFinanceExtraArticles: LawArticle[] = [
     views: 7860,
     featured: true,
     imageSeed: 'capital-gains-tax-explained',
+    country: 'United States',
     content: `<p>Capital gains tax is a tax on the profit you make when you sell or dispose of an asset for more than it cost you. The "gain" is the difference between what you receive and what you originally paid, not the full sale price. It applies to things like shares, investment property, and business interests, and it is one of the most widely misunderstood taxes because it is triggered by a sale, not by simply owning something that has risen in value.</p>
 
 <div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>Capital gains tax is charged on the profit from selling an asset, not on the whole sale price.</li><li>It is usually triggered by a sale or disposal, not by an unrealised rise in value.</li><li>Many systems tax long-held assets more lightly than short-term gains.</li><li>Allowances, exemptions, and reliefs — such as for a main home — can reduce or remove the tax.</li><li>Rates, exemptions, and rules differ sharply between countries and change with budgets.</li></ul></div>

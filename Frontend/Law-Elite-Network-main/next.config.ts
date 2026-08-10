@@ -159,6 +159,18 @@ const nextConfig: NextConfig = {
       { source: '/copyright-policy', destination: '/editorial-disclosure-policy', permanent: true },
       { source: '/affiliate-disclosure', destination: '/editorial-disclosure-policy', permanent: true },
       { source: '/disclaimer', destination: '/terms-of-service', permanent: true },
+      // Trailing-slash duplicates of root-flat article/category URLs -- the
+      // canonical form (articleUrl() in src/lib/article-url.ts and the
+      // category-hub routes) never has a trailing slash, but these specific
+      // slugs were also being linked/indexed with one, creating a duplicate
+      // crawlable URL for the same content.
+      { source: '/oil-rig-injury-lawyer/', destination: '/oil-rig-injury-lawyer', permanent: true },
+      { source: '/offshore-accident-statute-of-limitations/', destination: '/offshore-accident-statute-of-limitations', permanent: true },
+      { source: '/offshore-accident-lawyer/', destination: '/offshore-accident-lawyer', permanent: true },
+      { source: '/maritime-offshore-injury-law/', destination: '/maritime-offshore-injury-law', permanent: true },
+      { source: '/maritime-accident-lawyer/', destination: '/maritime-accident-lawyer', permanent: true },
+      { source: '/maintenance-and-cure-explained/', destination: '/maintenance-and-cure-explained', permanent: true },
+      { source: '/legal-aid-and-free-legal-help-in-the-us/', destination: '/legal-aid-and-free-legal-help-in-the-us', permanent: true },
     ];
   },
 

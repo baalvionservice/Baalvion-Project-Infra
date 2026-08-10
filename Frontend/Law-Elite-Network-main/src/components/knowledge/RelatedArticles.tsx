@@ -56,7 +56,7 @@ export async function fetchRelatedArticles(
         categorySlug: a.category?.slug,
         // CMS content has no subcategory field (lib/cms.ts toArticle()) --
         // articleUrl() falls back to the flat /article/{slug} URL for these.
-        author: 'Law Elite Editorial',
+        author: a.author || 'Law Elite Editorial',
         slug: a.slug,
         featuredImage: (a as any).featuredImage || undefined,
       }));
