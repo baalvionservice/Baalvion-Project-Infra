@@ -22,6 +22,18 @@ const loginLimiter = rateLimit({
     skipFailedRequests: false,
 });
 
+// POST /auth/token (client_credentials) — 30 attempts per 15 minutes per IP. Higher than
+// /login since legitimate scheduled callers may retry on transient failures, but still bounded
+// to slow down client_secret guessing.
+const tokenLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 30,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, error: { code: 'RATE_LIMITED', message: 'Too many token requests. Please try again in 15 minutes.' } },
+    skipFailedRequests: false,
+});
+
 // POST /auth/accept-invite — 20 attempts per hour per IP
 const acceptInviteLimiter = rateLimit({
     windowMs: 60 * 60 * 1000,
@@ -41,6 +53,10 @@ router.get('/oauth/:provider/callback', oauthCtrl.callback);
 
 router.post('/register',       registerLimiter,     ctrl.register);
 router.post('/login',          loginLimiter,        ctrl.login);
+
+// OAuth-style client_credentials grant for unattended machine callers (scheduled jobs). Public —
+// trust comes from the client_secret, not a session. See service/clientCredentialsService.js.
+router.post('/token',          tokenLimiter,        ctrl.token);
 
 // Passwordless email-OTP login (public). request → emails a code; verify → mints a session.
 // Reachable from every frontend via its /auth-bff/* rewrite to auth-service /v1/auth/*.
