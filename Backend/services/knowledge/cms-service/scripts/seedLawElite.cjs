@@ -245,12 +245,12 @@ const HOMEPAGE = [
   {
     title: 'Law Elite Network — Home', slug: 'home', cat: 'corporate-law',
     excerpt: 'The legal knowledge hub: vetted dossiers, expert topics, and trusted counsel.',
-    seo: { title: 'Law Elite Network | Global Legal Knowledge Hub', description: 'Authoritative legal dossiers and vetted practitioners across 120+ jurisdictions.' },
+    seo: { title: 'Law Elite Network | Global Legal Knowledge Hub', description: 'Authoritative legal dossiers and vetted practitioners, organized by topic and jurisdiction.' },
     cf: {
       hero: {
         label: 'Global Legal Knowledge Hub',
         title: 'The law, made navigable.',
-        subtitle: 'Authoritative dossiers and vetted counsel across 120+ jurisdictions.',
+        subtitle: 'Authoritative dossiers and vetted counsel, organized by topic and jurisdiction.',
         ctaPrimary: 'Explore Topics',
         ctaSecondary: 'Find Counsel',
       },
@@ -262,11 +262,16 @@ const HOMEPAGE = [
         { name: 'Visas & Citizenship', slug: 'immigration-law' },
         { name: 'Property Closings', slug: 'real-estate-law' },
       ],
+      // Kept in sync with TrustSection.tsx's FALLBACK_STATS -- real, bundled-library
+      // figures, not invented ones. See that file for why the old numbers here
+      // ("120+ Global Jurisdictions", "500+ Expert Topics", "12K+ Verified Dossiers",
+      // "50K+ Active Members") were replaced: they had no data behind them, and this
+      // seed is exactly what was overriding the honest fallback on the live site.
       trustStats: [
-        { icon: 'Globe', label: 'Global Jurisdictions', value: '120+' },
-        { icon: 'Award', label: 'Expert Topics', value: '500+' },
-        { icon: 'ShieldCheck', label: 'Verified Dossiers', value: '12K+' },
-        { icon: 'Zap', label: 'Active Members', value: '50K+' },
+        { icon: 'Award', label: 'Practice Areas', value: '8' },
+        { icon: 'Globe', label: 'Legal Guides', value: '72+' },
+        { icon: 'ShieldCheck', label: 'Editorial Contributors', value: '11' },
+        { icon: 'Zap', label: 'Specializations Covered', value: '26' },
       ],
     },
     blocks: [ head(0, 'The law, made navigable.'), para(1, 'Law Elite Network turns dense statute and case law into clear, practitioner-reviewed dossiers — and connects you to vetted counsel when you need more.') ],
