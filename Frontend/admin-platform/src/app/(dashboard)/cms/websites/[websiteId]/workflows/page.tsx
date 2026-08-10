@@ -10,7 +10,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import WorkflowPipeline from '@/components/cms/workflow/WorkflowPipeline';
 import ApprovalQueue from '@/components/cms/workflow/ApprovalQueue';
 import ReviewerPanel from '@/components/cms/workflow/ReviewerPanel';
-import { useWebsite } from '@/lib/queries/cms-websites.queries';
+import { useWebsite, useWebsiteStats } from '@/lib/queries/cms-websites.queries';
 import { useWorkflowStats } from '@/lib/queries/cms-workflow.queries';
 import { useCmsPermissions } from '@/lib/queries/cms-permissions.queries';
 import { useUIStore } from '@/lib/store/uiStore';
@@ -26,6 +26,11 @@ export default function WebsiteWorkflowsPage({
   const { data: website } = useWebsite(websiteId);
   const canonicalId = website?.id ?? '';
   const { data: stats } = useWorkflowStats(canonicalId);
+  // useWorkflowStats hits a workflow-stats endpoint that doesn't exist on the
+  // backend (always 404s, so `stats` is always undefined) -- fall back to the
+  // real, working per-website stats endpoint so these tiles show actual counts
+  // instead of silently pinning at 0. See dashboard-data.ts for the same fix.
+  const { data: wsStats } = useWebsiteStats(canonicalId);
   const perms = useCmsPermissions(canonicalId);
 
   useEffect(() => {
@@ -37,10 +42,10 @@ export default function WebsiteWorkflowsPage({
   }, [website, setBreadcrumbs, websiteId]);
 
   const summary = [
-    { label: 'Pending review', value: stats?.pending ?? 0, icon: Clock, color: 'text-yellow-500' },
-    { label: 'Drafts', value: stats?.draft ?? 0, icon: FileEdit, color: 'text-amber-500' },
-    { label: 'Scheduled', value: stats?.scheduled ?? 0, icon: CalendarClock, color: 'text-violet-500' },
-    { label: 'Published', value: stats?.published ?? 0, icon: CheckCircle, color: 'text-green-500' },
+    { label: 'Pending review', value: stats?.pending ?? wsStats?.pendingReview ?? 0, icon: Clock, color: 'text-yellow-500' },
+    { label: 'Drafts', value: stats?.draft ?? wsStats?.draftContent ?? 0, icon: FileEdit, color: 'text-amber-500' },
+    { label: 'Scheduled', value: stats?.scheduled ?? wsStats?.scheduledContent ?? 0, icon: CalendarClock, color: 'text-violet-500' },
+    { label: 'Published', value: stats?.published ?? wsStats?.publishedContent ?? 0, icon: CheckCircle, color: 'text-green-500' },
   ];
 
   return (

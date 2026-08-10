@@ -107,6 +107,7 @@ export interface WebsiteStats {
   totalContent: number;
   publishedContent: number;
   draftContent: number;
+  scheduledContent: number;
   pendingReview: number;
   totalMedia: number;
   mediaStorageUsedMb: number;
