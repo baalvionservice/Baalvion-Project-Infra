@@ -27,6 +27,14 @@ export const ROOT_FLAT_ARTICLE_SLUGS = new Set([
   'weird-silly-crazy-laws-in-the-usa',
   'best-law-schools-in-the-usa',
   'law-enforcement-in-1900s-america',
+  'what-is-a-personal-injury-lawyer',
+  'contingency-fee-agreements-explained',
+  'how-to-choose-a-personal-injury-lawyer',
+  'statute-of-limitations-in-the-us',
+  'legal-aid-and-free-legal-help-in-the-us',
+  'do-i-need-a-lawyer',
+  'how-much-does-a-lawyer-cost',
+  'maritime-offshore-accident-law-glossary',
 ]);
 
 /**
