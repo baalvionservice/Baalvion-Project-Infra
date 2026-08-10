@@ -6,6 +6,7 @@ slug: how-much-does-a-lawyer-cost
 category: Personal Injury Lawyer
 categorySlug: personal-injury-lawyer
 keywords: [how much does a lawyer cost, lawyer fees, attorney fees, cost of hiring a lawyer]
+author: deepak-kumar-kuldeep
 ---
 
 # How Much Does a Lawyer Cost?

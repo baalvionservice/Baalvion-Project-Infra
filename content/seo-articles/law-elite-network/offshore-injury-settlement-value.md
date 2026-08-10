@@ -6,6 +6,7 @@ slug: offshore-injury-settlement-value
 category: Maritime & Offshore Injury Law
 categorySlug: maritime-offshore-injury-law
 keywords: [offshore injury settlement, offshore accident settlement value, jones act settlement]
+author: deepak-kumar-kuldeep
 ---
 
 # How Offshore Injury Settlements Are Calculated

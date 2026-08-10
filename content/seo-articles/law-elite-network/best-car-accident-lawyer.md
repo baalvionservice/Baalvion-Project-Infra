@@ -6,6 +6,7 @@ slug: best-car-accident-lawyer
 category: Car Accidents
 categorySlug: car-accidents
 keywords: [best car accident lawyer]
+author: deepak-kumar-kuldeep
 ---
 
 # How to Find the Best Car Accident Lawyer

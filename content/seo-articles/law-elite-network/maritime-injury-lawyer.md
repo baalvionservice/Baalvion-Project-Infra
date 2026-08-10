@@ -6,6 +6,7 @@ slug: maritime-injury-lawyer
 category: Maritime & Offshore Injury Law
 categorySlug: maritime-offshore-injury-law
 keywords: [maritime injury lawyer, jones act injury lawyer, seaman injury attorney]
+author: deepak-kumar-kuldeep
 ---
 
 # Maritime Injury Lawyer

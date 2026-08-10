@@ -6,6 +6,7 @@ slug: best-law-schools-in-the-usa
 category: Legal Education & History
 categorySlug: legal-education-and-history
 keywords: [best law schools in the usa]
+author: yessica-ruiz
 ---
 
 # Best Law Schools in the USA

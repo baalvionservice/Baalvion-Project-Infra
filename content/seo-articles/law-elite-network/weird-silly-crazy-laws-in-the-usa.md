@@ -6,6 +6,7 @@ slug: weird-silly-crazy-laws-in-the-usa
 category: Religion, Law & Weird Laws
 categorySlug: religion-law-and-weird-laws
 keywords: [silly laws in usa, dumb laws in the usa, crazy laws in the usa]
+author: deepak-kumar-kuldeep
 ---
 
 # Weird, Silly & Crazy Laws in the USA

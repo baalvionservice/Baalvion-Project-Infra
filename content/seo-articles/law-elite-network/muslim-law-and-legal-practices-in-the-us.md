@@ -6,6 +6,7 @@ slug: muslim-law-and-legal-practices-in-the-us
 category: Religion, Law & Weird Laws
 categorySlug: religion-law-and-weird-laws
 keywords: [muslim law in usa]
+author: deepak-kumar-kuldeep
 ---
 
 # Muslim Law and Legal Practices in the United States

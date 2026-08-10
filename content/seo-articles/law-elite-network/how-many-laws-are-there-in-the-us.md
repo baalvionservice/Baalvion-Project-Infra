@@ -6,6 +6,7 @@ slug: how-many-laws-are-there-in-the-us
 category: U.S. Law & Constitution
 categorySlug: us-law-and-constitution
 keywords: [how many laws are there in usa, number of federal laws, us code cfr laws count]
+author: yessica-ruiz
 ---
 
 # How Many Laws Are There in the U.S.?

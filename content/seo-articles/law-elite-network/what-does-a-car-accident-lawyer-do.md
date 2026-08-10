@@ -6,6 +6,7 @@ slug: what-does-a-car-accident-lawyer-do
 category: Car Accidents
 categorySlug: car-accidents
 keywords: [lawyer for car accident, car accident injury lawyer]
+author: deepak-kumar-kuldeep
 ---
 
 # What Does a Car Accident Lawyer Do?

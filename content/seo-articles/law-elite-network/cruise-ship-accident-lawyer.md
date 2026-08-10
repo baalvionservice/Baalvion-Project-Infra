@@ -6,6 +6,7 @@ slug: cruise-ship-accident-lawyer
 category: Cruise Ship & Passenger Vessel Accidents
 categorySlug: cruise-ship-passenger-vessel-accidents
 keywords: [cruise ship accident lawyer, cruise ship injury lawyer, injured on a cruise]
+author: deepak-kumar-kuldeep
 ---
 
 # Cruise Ship Accident Lawyer

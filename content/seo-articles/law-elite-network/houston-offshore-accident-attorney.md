@@ -6,6 +6,7 @@ slug: houston-offshore-accident-attorney
 category: Maritime & Offshore Injury Law
 categorySlug: maritime-offshore-injury-law
 keywords: [houston offshore accident attorney, houston offshore injury lawyer, texas offshore accident lawyer]
+author: deepak-kumar-kuldeep
 ---
 
 # Houston Offshore Accident Attorney
