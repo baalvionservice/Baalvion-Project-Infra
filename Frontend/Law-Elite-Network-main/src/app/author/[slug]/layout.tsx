@@ -26,7 +26,15 @@ export async function generateMetadata(
   }
   const title = `${a.name}${a.title ? ` — ${a.title}` : ''}`;
   const description = String(a.bio || `${a.name} writes legal-education guides for Law Elite Network.`).slice(0, 200);
-  const image = resolvePersonImage({ avatarUrl: (a as { avatarUrl?: string }).avatarUrl, name: a.name, avatarSeed: (a as { avatarSeed?: string }).avatarSeed || slug });
+  const personImage = resolvePersonImage({ avatarUrl: (a as { avatarUrl?: string }).avatarUrl, name: a.name, avatarSeed: (a as { avatarSeed?: string }).avatarSeed || slug });
+  // resolvePersonImage falls back to an inline SVG data: URI when a
+  // contributor has no real avatarUrl (every bundled author today) -- fine
+  // for the on-page <Image>, but WhatsApp/Facebook/Twitter crawlers don't
+  // fetch data: URIs for og:image, so a shared author link would render with
+  // no image. Swap in the site's real branded PNG (same one the homepage
+  // falls back to) only for the share-preview tags; the on-page avatar keeps
+  // using the silhouette via resolvePersonImage() in the page component below.
+  const image = personImage.startsWith('data:') ? `${SITE}/opengraph-image` : personImage;
   return {
     title,
     description,

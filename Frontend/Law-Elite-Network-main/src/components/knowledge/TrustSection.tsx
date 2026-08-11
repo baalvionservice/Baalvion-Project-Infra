@@ -1,34 +1,15 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import Link from 'next/link';
 import {
   ShieldCheck,
-  Award,
-  Zap,
-  Globe,
   Languages,
   MapPin,
   BookMarked,
   RotateCcw,
   GraduationCap,
-  type LucideIcon,
 } from 'lucide-react';
-
-type Stat = { icon: string; label: string; value: string };
-
-const ICON_MAP: Record<string, LucideIcon> = { Globe, Award, ShieldCheck, Zap };
-
-// Real, verifiable figures -- computed from the bundled editorial library
-// (72 published guides, 8 practice areas, 11 named contributors), not
-// aspirational numbers. Previously this fell back to invented figures
-// ("12K+ Verified Dossiers", "50K+ Active Members", "120+ Global
-// Jurisdictions") with no data behind them whenever the CMS had no override.
-const FALLBACK_STATS: Stat[] = [
-  { icon: "Award", label: "Practice Areas", value: "8" },
-  { icon: "Globe", label: "Legal Guides", value: "72+" },
-  { icon: "ShieldCheck", label: "Editorial Contributors", value: "11" },
-  { icon: "Zap", label: "Specializations Covered", value: "26" }
-];
 
 // The methodology we actually follow (mirrors /editorial-standards) --
 // only principles the site's real practices back up, no invented claims.
@@ -67,26 +48,9 @@ const PRINCIPLES = [
 
 /**
  * @fileOverview TrustSection
- * The homepage's editorial-standard statement (six methodology principles)
- * plus platform stats. Stats are managed in the central CMS (admin-platform
- * console) and read via the same-origin /api/cms/homepage route, falling
- * back to the built-in figures if unavailable.
+ * The homepage's editorial-standard statement -- six methodology principles.
  */
 export function TrustSection() {
-  const [stats, setStats] = useState<Stat[]>(FALLBACK_STATS);
-
-  useEffect(() => {
-    let active = true;
-    fetch('/api/cms/homepage')
-      .then((r) => (r.ok ? r.json() : null))
-      .then((j) => {
-        const cms = j?.data?.trustStats;
-        if (active && Array.isArray(cms) && cms.length) setStats(cms);
-      })
-      .catch(() => {});
-    return () => { active = false; };
-  }, []);
-
   return (
     <div className="py-20 border-t border-slate-100">
       <div className="max-w-2xl mx-auto text-center space-y-2 mb-12">
@@ -109,24 +73,18 @@ export function TrustSection() {
         ))}
       </div>
 
-      <div className="mt-16 pt-14 border-t border-slate-100 text-center">
-        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-8">By the Numbers</p>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl mx-auto">
-          {stats.map((stat, i) => {
-            const Icon = ICON_MAP[stat.icon] || Globe;
-            return (
-              <div key={i} className="space-y-3 group">
-                <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center mx-auto group-hover:bg-blue-600 group-hover:text-white transition-all duration-500 shadow-inner">
-                  <Icon className="w-5 h-5 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-3xl font-bold text-slate-900 tracking-tighter">{stat.value}</p>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{stat.label}</p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+      <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mt-12 text-[12.5px] font-bold uppercase tracking-wider">
+        <Link href="/editorial-standards" className="text-blue-700 hover:text-news-600 transition-colors">
+          Editorial Standards
+        </Link>
+        <span className="text-slate-300" aria-hidden="true">·</span>
+        <Link href="/editorial-process" className="text-blue-700 hover:text-news-600 transition-colors">
+          Editorial Process
+        </Link>
+        <span className="text-slate-300" aria-hidden="true">·</span>
+        <Link href="/corrections" className="text-blue-700 hover:text-news-600 transition-colors">
+          Corrections Policy
+        </Link>
       </div>
     </div>
   );

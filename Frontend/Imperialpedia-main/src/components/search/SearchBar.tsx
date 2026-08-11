@@ -10,19 +10,26 @@ interface SearchBarProps {
   value: string;
   onChange: (val: string) => void;
   onFocus?: () => void;
+  /** Called on Enter / form submit — lets standalone pages (e.g. /search, 404)
+   * navigate on submit instead of only reacting to live `onChange` like the
+   * command-palette modal does. Omit to keep the modal's live-search behavior. */
+  onSubmit?: (val: string) => void;
   className?: string;
   placeholder?: string;
   autoFocus?: boolean;
 }
 
 /**
- * Standardized Search Input node.
+ * Standardized Search Input node — the one search bar style used everywhere
+ * on the site (command palette, /search page, 404 page) so search never
+ * looks or behaves differently depending on where a visitor opens it.
  */
-export const SearchBar = ({ 
-  value, 
-  onChange, 
-  onFocus, 
-  className, 
+export const SearchBar = ({
+  value,
+  onChange,
+  onFocus,
+  onSubmit,
+  className,
   placeholder = "Search countries, companies, industries, technologies...",
   autoFocus
 }: SearchBarProps) => {
@@ -30,7 +37,7 @@ export const SearchBar = ({
   // hint at all — there's no key combo to press, just the icon/input itself.
   const hint = shortcutLabel(useShortcutHint());
 
-  return (
+  const input = (
     <div className={cn("relative w-full group", className)}>
       <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
       <Input
@@ -47,5 +54,18 @@ export const SearchBar = ({
         </div>
       )}
     </div>
+  );
+
+  if (!onSubmit) return input;
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit(value);
+      }}
+    >
+      {input}
+    </form>
   );
 };

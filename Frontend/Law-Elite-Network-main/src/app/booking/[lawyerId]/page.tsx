@@ -122,9 +122,9 @@ export default function BookingPage() {
         <div className="text-center glass-panel p-12 rounded-3xl border-white/5">
           <Gavel className="w-16 h-16 text-muted-foreground/20 mx-auto mb-6" />
           <h2 className="text-2xl font-headline italic mb-2">Practitioner Not Found</h2>
-          <Link href="/lawyers">
+          <Link href="/">
             <Button variant="link" className="text-accent uppercase tracking-widest text-[10px] font-bold">
-              Return to Discovery
+              Return to Homepage
             </Button>
           </Link>
         </div>

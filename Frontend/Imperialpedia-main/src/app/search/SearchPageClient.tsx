@@ -1,24 +1,67 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { SearchBar } from "@/app/latest/components/SearchBar";
+import { SearchBar } from "@/components/search/SearchBar";
+import { SearchResultItem } from "@/components/search/SearchResultItem";
 import { searchService } from "@/services/data/search-service";
 import type { SearchResult } from "@/types/search";
-import { Loader2, ArrowUpRight } from "lucide-react";
+import type { Article } from "@/modules/content-engine/types";
+import { newsArticleHref } from "@/lib/data/article-url";
+import { Container } from "@/design-system/layout/container";
+import { Text } from "@/design-system/typography/text";
+import { Loader2, SearchX, Sparkles } from "lucide-react";
 
-const TYPE_LABEL: Record<string, string> = {
-  company: "Company", country: "Country", industry: "Industry", technology: "Technology",
-  market: "Market", article: "Article", author: "Creator", glossary: "Glossary",
-  topic: "Market", calculator: "Tool",
-};
+interface SearchPageClientProps {
+  trendingArticles: Article[];
+}
 
-function SearchContent() {
+function TrendingArticles({ articles }: { articles: Article[] }) {
+  if (articles.length === 0) return null;
+  return (
+    <div className="mt-4">
+      <div className="flex items-center gap-2 text-primary mb-6">
+        <Sparkles className="h-4 w-4" />
+        <Text variant="label" className="text-xs font-bold uppercase tracking-widest">
+          Trending on Imperialpedia
+        </Text>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {articles.map((article) => (
+          <Link
+            key={article.id}
+            href={newsArticleHref({
+              slug: article.slug,
+              publishedAt: article.publishedAt || article.updatedAt,
+              contentType: article.contentType,
+              categorySlug: article.categorySlug,
+            })}
+            className="flex items-center justify-between p-4 rounded-2xl hover:bg-muted/50 transition-all group border border-transparent hover:border-border/50"
+          >
+            <Text variant="bodySmall" weight="bold" className="group-hover:text-primary transition-colors line-clamp-2">
+              {article.title}
+            </Text>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SearchContent({ trendingArticles }: SearchPageClientProps) {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const query = searchParams.get("q") || "";
+  const initialQuery = searchParams.get("q") || "";
+  const [inputValue, setInputValue] = useState(initialQuery);
+  const [query, setQuery] = useState(initialQuery);
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setInputValue(initialQuery);
+    setQuery(initialQuery);
+  }, [initialQuery]);
 
   useEffect(() => {
     if (!query) {
@@ -40,91 +83,84 @@ function SearchContent() {
     };
   }, [query]);
 
+  const handleSubmit = (value: string) => {
+    const trimmed = value.trim();
+    router.push(trimmed ? `/search?q=${encodeURIComponent(trimmed)}` : "/search");
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="bg-white dark:bg-gray-800 shadow-sm">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Search Imperialpedia
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              Articles, companies, markets, glossary, reviews, creators &amp; more
-            </p>
-          </div>
-          <SearchBar placeholder="Search the index..." />
-        </div>
-      </div>
+    <main className="min-h-screen bg-background pt-16 pb-32">
+      <Container className="max-w-3xl">
+        <header className="mb-10 text-center">
+          <Text variant="h1" as="h1" className="text-3xl lg:text-4xl font-bold tracking-tight mb-2">
+            Search Imperialpedia
+          </Text>
+          <Text variant="body" className="text-muted-foreground">
+            Companies, countries, industries, technologies, articles &amp; reviews
+          </Text>
+        </header>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {query && (
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
-            {loading ? "Searching" : `${results.length} result${results.length === 1 ? "" : "s"}`} for &ldquo;{query}&rdquo;
-          </h2>
-        )}
+        <SearchBar
+          value={inputValue}
+          onChange={setInputValue}
+          onSubmit={handleSubmit}
+          autoFocus
+          placeholder="Search companies, countries, articles..."
+        />
 
-        {loading && (
-          <div className="flex justify-center py-16">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        )}
+        <div className="mt-10">
+          {loading && (
+            <div className="p-12 text-center flex flex-col items-center gap-3">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              <Text variant="caption" className="uppercase tracking-widest font-bold text-muted-foreground">
+                Searching...
+              </Text>
+            </div>
+          )}
 
-        {!loading && query && results.length === 0 && (
-          <p className="text-center py-16 text-gray-500 dark:text-gray-400">
-            No results found. Try a different term.
-          </p>
-        )}
+          {!loading && query && (
+            <Text variant="label" className="text-xs uppercase tracking-widest text-muted-foreground mb-4 block">
+              {results.length} result{results.length === 1 ? "" : "s"} for &ldquo;{query}&rdquo;
+            </Text>
+          )}
 
-        {!loading && !query && (
-          <p className="text-center py-16 text-gray-600 dark:text-gray-400">
-            Enter a search term to explore the index.
-          </p>
-        )}
-
-        <div className="space-y-3">
-          {results.map((r) => (
-            <Link
-              key={r.id}
-              href={r.route}
-              className="group block rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 hover:border-primary/50 transition-colors"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="inline-block text-[10px] font-bold uppercase tracking-widest text-primary bg-primary/10 px-2 py-0.5 rounded">
-                      {TYPE_LABEL[r.type] || r.type}
-                    </span>
-                    {r.category && (
-                      <span className="text-[11px] text-gray-400 uppercase tracking-wide">{r.category}</span>
-                    )}
-                  </div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-primary transition-colors truncate">
-                    {r.title}
-                  </h3>
-                  {r.snippet && (
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{r.snippet}</p>
-                  )}
-                </div>
-                <ArrowUpRight className="h-5 w-5 text-gray-300 group-hover:text-primary shrink-0" />
+          {!loading && query && results.length === 0 && (
+            <div className="p-12 text-center flex flex-col items-center gap-4 bg-muted/20 rounded-2xl border-2 border-dashed mb-10">
+              <SearchX className="w-10 h-10 text-muted-foreground opacity-50" />
+              <div>
+                <Text variant="bodySmall" weight="bold">No results found for &ldquo;{query}&rdquo;</Text>
+                <Text variant="caption" className="text-muted-foreground mt-1">
+                  Try a different term, or browse what&apos;s trending below.
+                </Text>
               </div>
-            </Link>
-          ))}
+            </div>
+          )}
+
+          {!loading && results.length > 0 && (
+            <div className="space-y-1 mb-10">
+              {results.map((result) => (
+                <SearchResultItem key={result.id} {...result} />
+              ))}
+            </div>
+          )}
+
+          {!loading && results.length === 0 && <TrendingArticles articles={trendingArticles} />}
         </div>
-      </div>
-    </div>
+      </Container>
+    </main>
   );
 }
 
-export function SearchPageClient() {
+export function SearchPageClient({ trendingArticles }: SearchPageClientProps) {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600" />
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       }
     >
-      <SearchContent />
+      <SearchContent trendingArticles={trendingArticles} />
     </Suspense>
   );
 }

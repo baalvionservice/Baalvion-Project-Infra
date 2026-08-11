@@ -9,9 +9,13 @@ import { CategorySection } from '@/components/knowledge/news/CategorySection';
 import { TrustSection } from '@/components/knowledge/TrustSection';
 import { JurisdictionSection } from '@/components/knowledge/JurisdictionSection';
 import { PlatformIntro } from '@/components/knowledge/PlatformIntro';
+import { WhatYouCanFind } from '@/components/knowledge/WhatYouCanFind';
+import { WhoIsThisFor } from '@/components/knowledge/WhoIsThisFor';
 import { NewsGateway } from '@/components/knowledge/NewsGateway';
+import { HomepageDisclaimer } from '@/components/knowledge/HomepageDisclaimer';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
-import { ShieldCheck } from 'lucide-react';
+import { ShieldCheck, ArrowRight, Globe2 } from 'lucide-react';
+import Link from 'next/link';
 import type { Metadata } from 'next';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
@@ -130,17 +134,34 @@ export default async function KnowledgeHomePage() {
             <ShieldCheck className="w-3.5 h-3.5" /> Global Legal Education
           </span>
           <h1 className="font-headline text-3xl md:text-[2.6rem] font-extrabold tracking-tight text-slate-900 leading-[1.05] mt-2">
-            Plain-language guides to the law,
-            <br className="hidden md:block" /> for every jurisdiction.
+            Plain-language legal information
+            <br className="hidden md:block" /> for a global audience.
           </h1>
           <p className="text-base md:text-lg text-slate-500 max-w-2xl leading-relaxed mt-3">
-            Understand your rights before you call a lawyer. One legal knowledge library, organized
-            by topic and jurisdiction — written to educate, not to replace a licensed attorney.
+            Law Elite Network is an independent legal-information platform helping people understand
+            laws, legal procedures, rights, regulations, and legal concepts across different
+            jurisdictions.
           </p>
+          <div className="flex flex-wrap items-center gap-3 mt-6">
+            <a
+              href="#legal-guides"
+              className="inline-flex items-center gap-2 px-5 h-11 rounded-md bg-[#0B1F3A] text-white text-[13px] font-bold tracking-wide hover:bg-blue-800 transition-colors"
+            >
+              Explore Legal Guides <ArrowRight className="w-4 h-4" />
+            </a>
+            <Link
+              href="/countries"
+              className="inline-flex items-center gap-2 px-5 h-11 rounded-md border border-slate-200 text-slate-700 text-[13px] font-bold tracking-wide hover:border-news-600 hover:text-news-600 transition-colors"
+            >
+              <Globe2 className="w-4 h-4" /> Browse by Jurisdiction
+            </Link>
+          </div>
         </div>
       </section>
 
-      <TopicTicker categories={categories} />
+      <div id="practice-areas">
+        <TopicTicker categories={categories} />
+      </div>
 
       <main className="container mx-auto px-4 sm:px-6 max-w-7xl">
         {/* Hero: lead + secondary + latest rail */}
@@ -163,14 +184,16 @@ export default async function KnowledgeHomePage() {
         </section>
 
         {/* Category sections */}
-        <div className="py-8 border-t border-slate-200">
+        <div id="legal-guides" className="py-8 border-t border-slate-200 scroll-mt-24">
           {articlesByCategory.map((cat: { id: string; name: string; slug: string; articles: any[] }) => (
             <CategorySection key={cat.slug} name={cat.name} slug={cat.slug} articles={cat.articles} />
           ))}
         </div>
 
+        <WhatYouCanFind />
         <JurisdictionSection />
         <PlatformIntro />
+        <WhoIsThisFor />
       </main>
 
       <section className="border-t border-slate-100">
@@ -181,6 +204,10 @@ export default async function KnowledgeHomePage() {
 
       <div className="container mx-auto px-4 sm:px-6 max-w-7xl">
         <NewsGateway />
+      </div>
+
+      <div className="container mx-auto px-4 sm:px-6 max-w-7xl">
+        <HomepageDisclaimer />
       </div>
 
       <PublicFooter />

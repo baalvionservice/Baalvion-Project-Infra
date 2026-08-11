@@ -6,13 +6,10 @@ import { Text } from '@/design-system/typography/text';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
-import { 
-  Users, 
-  ArrowLeft, 
-  Search, 
-  Filter, 
-  ChevronLeft, 
-  ChevronRight,
+import {
+  Users,
+  ArrowLeft,
+  Search,
   UserCheck,
   UserPlus
 } from 'lucide-react';
@@ -82,12 +79,6 @@ export function FollowersClient({ creator, initialFollowers, initialFollowing }:
               <UserPlus className="h-4 w-4" /> Following ({initialFollowing.length})
             </TabsTrigger>
           </TabsList>
-          
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="h-9 rounded-xl border-white/10 text-xs font-bold bg-card/30">
-              <Filter className="mr-2 h-3.5 w-3.5" /> Sort: Newest
-            </Button>
-          </div>
         </div>
 
         <TabsContent value="followers" className="mt-0">
@@ -120,21 +111,6 @@ export function FollowersClient({ creator, initialFollowers, initialFollowing }:
           )}
         </TabsContent>
       </Tabs>
-
-      {/* Pagination Footer */}
-      {filteredData.length > 0 && (
-        <div className="flex items-center justify-center gap-4 pt-10">
-          <Button variant="outline" size="sm" className="h-10 px-4 rounded-xl font-bold" disabled>
-            <ChevronLeft className="h-4 w-4 mr-2" /> Previous
-          </Button>
-          <div className="flex items-center gap-2">
-            <Button variant="default" size="sm" className="w-10 h-10 rounded-xl font-bold">1</Button>
-          </div>
-          <Button variant="outline" size="sm" className="h-10 px-4 rounded-xl font-bold" disabled>
-            Next <ChevronRight className="h-4 w-4 ml-2" />
-          </Button>
-        </div>
-      )}
     </div>
   );
 }

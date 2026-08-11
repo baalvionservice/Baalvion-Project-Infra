@@ -12,14 +12,14 @@ export const bestCdRatesReview: ReviewArticle = withReviewArt({
   metaDescription:
     "Find the best CD rates of April 2026. We compared rates, terms, and minimum deposits from top banks to help you earn more on your savings.",
   reviewedBy: {
-    name: "Sarah Mitchell",
-    title: "Senior Banking Editor",
-    slug: "sarah-mitchell",
+    name: "Tamanna Shaikh",
+    title: "Senior Editor",
+    slug: "tamanna-shaikh",
   },
-  factCheckedBy: { name: "James Okafor", title: "Certified Financial Planner", slug: "james-okafor" },
+  factCheckedBy: { name: "Deepak Kuldeep", title: "Fact-Checking Editor", slug: "deepak-kuldeep" },
   methodologyLink: "#methodology",
   methodology:
-    "We evaluated 40+ banks and credit unions, comparing APY rates, minimum deposit requirements, early withdrawal penalties, and FDIC/NCUA insurance coverage. Rates were verified directly from institution websites in April 2026. Our overall scores weight APY (50%), minimum deposit (20%), penalty structure (20%), and brand trust (10%).",
+    "We evaluated 40+ banks and credit unions, comparing APY rates, minimum deposit requirements, early withdrawal penalties, and FDIC/NCUA insurance coverage. Rates were verified directly from institution websites in April 2026.",
   comparisonColumns: ["APY", "Term", "Min. Deposit", "Early Withdrawal", "Score"],
   picks: [
     {
@@ -85,7 +85,7 @@ export const bestCdRatesReview: ReviewArticle = withReviewArt({
       whyWeChoseIt: [
         {
           heading: "Best Overall",
-          body: "Marcus by Goldman Sachs consistently ranks among the top CDs nationally for its combination of a market-leading APY, zero minimum deposit, and the backing of one of Wall Street's most trusted names. If you want maximum yield with minimal friction, this is our top pick.",
+          body: "Marcus by Goldman Sachs combines a highly competitive APY with zero minimum deposit and no monthly fees. If you want strong yield with minimal friction, this is our top pick.",
         },
         {
           heading: "Best High-Yield CD",
@@ -93,7 +93,7 @@ export const bestCdRatesReview: ReviewArticle = withReviewArt({
         },
       ],
       pros: [
-        "One of the highest APYs available nationally",
+        "Highly competitive APY",
         "No minimum deposit required",
         "No monthly maintenance fees",
         "FDIC insured up to $250,000",
@@ -134,7 +134,7 @@ export const bestCdRatesReview: ReviewArticle = withReviewArt({
         "No-penalty CD available with no early withdrawal fee after 6 days",
         "Wide range of term options from 3 months to 5 years",
         "Competitive rates across all term lengths",
-        "Excellent mobile app rated 4.7 stars in the App Store",
+        "Well-rated mobile app",
       ],
       cons: [
         "Standard CD APY slightly below Marcus",

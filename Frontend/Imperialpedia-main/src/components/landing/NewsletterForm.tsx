@@ -72,8 +72,7 @@ export const NewsletterForm = () => {
         setName("");
 
         addToast({
-          message:
-            "Subscription Active: You are now synchronized with the wire.",
+          message: data.message || "Thanks for signing up.",
           type: "success",
         });
 

@@ -67,8 +67,7 @@ export default function SponsoredContentPolicyPage() {
             <Block icon={<Eye className="w-6 h-6 text-blue-600" />} title="Verified vs. Paid Placement">
               <p>
                 It is important to distinguish two separate designations on our site. A &quot;Verified&quot; badge in
-                our{' '}
-                <Link href="/lawyers" className="text-blue-600 hover:underline">lawyer directory</Link> reflects an
+                our lawyer directory reflects an
                 editorial or credentialing check, described in our{' '}
                 <Link href="/editorial-standards" className="text-blue-600 hover:underline">Editorial Standards</Link>.
                 A paid or sponsored placement, by contrast, reflects a commercial arrangement disclosed under our{' '}

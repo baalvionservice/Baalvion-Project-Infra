@@ -94,8 +94,7 @@ export async function InvestingHub() {
   }
   if (!isLive) {
     const cat = staticCategoryFor(SLUG);
-    const filtered = cat ? newsArticles.filter((a) => a.category === cat) : [];
-    articles = filtered.length ? filtered : newsArticles;
+    articles = cat ? newsArticles.filter((a) => a.category === cat) : [];
   }
 
   const featured = articles.find((a) => a.featured) ?? articles[0];

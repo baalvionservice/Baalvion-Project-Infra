@@ -8,6 +8,7 @@
 // an empty (but valid) sitemap instead of a 500.
 
 import { listCmsContent } from '@/services/data/cms-public';
+import { articleUrl } from '@/lib/data/article-url';
 import { env } from '@/config/env';
 
 const SITE = env.siteUrl || 'https://imperialpedia.com';
@@ -62,7 +63,9 @@ export async function GET(): Promise<Response> {
 
   const urls = recent
     .map((a) => {
-      const loc = `${SITE}/${a.slug}`;
+      // Bare /<slug> 301s to the dated canonical (see article-url.ts) — submit the
+      // canonical path directly instead of a URL that just redirects there.
+      const loc = `${SITE}${articleUrl(a.publishedAt, a.slug)}`;
       const publicationDate = new Date(a.publishedAt).toISOString();
       return `  <url>
     <loc>${escapeXml(loc)}</loc>

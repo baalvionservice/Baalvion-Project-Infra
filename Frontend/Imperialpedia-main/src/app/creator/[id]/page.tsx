@@ -19,11 +19,11 @@ export async function generateMetadata({ params }: CreatorPageProps): Promise<Me
   const creator = response.data;
 
   if (!creator) {
-    return buildMetadata({ title: 'Expert Not Found', noIndex: true });
+    return buildMetadata({ title: 'Contributor Not Found', noIndex: true });
   }
 
   return buildMetadata({
-    title: `${creator.displayName} — Financial Intelligence Expert`,
+    title: `${creator.displayName} — ${creator.title || 'Contributor'}`,
     description: creator.bio,
     ogImage: creator.avatar,
     ogType: 'article', // Using article for personal profile pages can be appropriate or standard website

@@ -26,8 +26,7 @@ export default function CommentPolicyPage() {
 
           <div className="border-l-4 border-blue-600 bg-slate-50 rounded-r-2xl p-8 mb-16">
             <p className="text-slate-700 leading-relaxed">
-              Readers can comment on our articles and leave reviews of lawyers listed in our{' '}
-              <Link href="/lawyers" className="text-blue-600 hover:underline">directory</Link>. Both spaces are
+              Readers can comment on our articles and leave reviews of lawyers listed in our directory. Both spaces are
               valuable because they are honest, which is why we hold them to clear rules and moderate them actively.
             </p>
           </div>
@@ -40,8 +39,8 @@ export default function CommentPolicyPage() {
                 <li>Defamatory claims presented as fact — including accusations of misconduct against a named
                   lawyer or firm that are not substantiated;</li>
                 <li>Impersonation of another person, a lawyer, a firm, or a Law Elite Network staff member;</li>
-                <li>Using the comment or review section to solicit legal representation outside our intended{' '}
-                  <Link href="/appointments" className="text-blue-600 hover:underline">appointments</Link> flow, or to
+                <li>Using the comment or review section to solicit legal representation outside our intended
+                  appointments flow, or to
                   advertise unrelated services;</li>
                 <li>Spam, coordinated posting, or content unrelated to the article or lawyer being reviewed.</li>
               </ul>

@@ -16,7 +16,7 @@ export default function RelatedTerms({ terms }: RelatedTermsProps) {
     <section className=" pt-12 mt-16">
       <div className="mb-8">
         <h3 className="text-2xl font-bold text-foreground mb-2">
-          Related Articles
+          Related Terms
         </h3>
       </div>
 

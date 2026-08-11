@@ -14,7 +14,6 @@ import { JsonLd } from "@/modules/seo-engine/components/JsonLd";
 import { breadcrumbService } from "@/modules/seo-engine/services/breadcrumb-service";
 import { QuickStats } from "@/components/entity/QuickStats";
 import { RelatedHighlights } from "@/components/entity/RelatedHighlights";
-import { EntityAnalytics } from "@/components/entity/EntityAnalytics";
 import { EntityTags } from "@/components/entity/EntityTags";
 
 interface PageProps {
@@ -78,8 +77,6 @@ export default async function Page({ params }: PageProps) {
             />
 
             <EntityEditorialOverview entityName={tech.name} overview={tech.editorialOverview} />
-
-            <EntityAnalytics type="technology" slug={tech.slug} />
 
             <RelatedEntities
               entities={[

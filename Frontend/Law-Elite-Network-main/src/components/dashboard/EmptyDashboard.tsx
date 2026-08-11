@@ -1,19 +1,15 @@
 "use client";
 
 import React from 'react';
-import { 
-  Briefcase, 
-  Search, 
-  FileText, 
-  ShieldCheck, 
-  Award, 
-  Zap, 
+import {
+  Briefcase,
+  FileText,
+  ShieldCheck,
+  Award,
+  Zap,
   ArrowRight,
-  ChevronRight,
   PlusCircle
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
 import CreateCaseModal from '@/components/case/CreateCaseModal';
 
 interface EmptyDashboardProps {
@@ -49,32 +45,19 @@ export default function EmptyDashboard({ userId, onRefresh }: EmptyDashboardProp
           
           <div className="flex flex-wrap gap-4">
             <CreateCaseModal userId={userId} onSuccess={onRefresh} />
-            <Button variant="outline" className="border-slate-200 hover:bg-slate-50 rounded-lg px-8 h-12 font-bold text-xs uppercase tracking-widest" asChild>
-              <Link href="/lawyers">Find Elite Counsel</Link>
-            </Button>
           </div>
         </div>
       </section>
 
       {/* Action Cards Grid */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <ActionCard 
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <ActionCard
           icon={<PlusCircle className="w-8 h-8 text-blue-600" />}
           title="Create First Brief"
           description="Submit your legal matter to the network for elite practitioner discovery."
           cta={<CreateCaseModal userId={userId} onSuccess={onRefresh} />}
         />
-        <ActionCard 
-          icon={<Search className="w-8 h-8 text-blue-600" />}
-          title="Consultation Hub"
-          description="Identify and secure executive sessions with top-ranked domain experts."
-          cta={
-            <Button variant="link" className="text-blue-600 p-0 font-bold uppercase text-[10px] tracking-widest h-auto group" asChild>
-              <Link href="/lawyers">Explore Discovery <ChevronRight className="ml-1 w-3 h-3 group-hover:translate-x-1 transition-all" /></Link>
-            </Button>
-          }
-        />
-        <ActionCard 
+        <ActionCard
           icon={<FileText className="w-8 h-8 text-blue-600" />}
           title="Secure Vault"
           description="Establish your E2E encrypted dossier for sensitive document management."

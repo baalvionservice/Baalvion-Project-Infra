@@ -1,60 +1,90 @@
-'use client';
-
 import React from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
 import { Container } from '@/design-system/layout/container';
 import { Text } from '@/design-system/typography/text';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { SearchX, ArrowLeft, Search, Globe } from 'lucide-react';
-import Link from 'next/link';
+import { SearchX, ArrowLeft, Sparkles } from 'lucide-react';
+import { InlineSearchBar } from '@/components/search/InlineSearchBar';
+import { getArticles } from '@/modules/content-engine/services/content-service';
+import { newsArticleHref } from '@/lib/data/article-url';
+import { articleArtDataUri } from '@baalvion/illustrations';
 
 /**
- * Professional 404 Node Not Found Page.
- * Styled to match the platform's sophisticated dark UI.
+ * 404 page. Server component, so a broken link always renders something
+ * useful even if the CMS/API is unreachable — `getArticles` falls back to a
+ * bundled article set rather than throwing (see content-service.ts). Offers a
+ * real, working search bar and real trending articles instead of a dead end.
  */
-export default function NotFound() {
+export default async function NotFound() {
+  const { data: trending } = await getArticles(1, 6);
+
   return (
-    <main className="min-h-screen bg-background flex items-center justify-center py-20 animate-in fade-in duration-700">
+    <main className="min-h-screen bg-background py-20 animate-in fade-in duration-700">
       <Container className="max-w-2xl text-center space-y-10">
         <div className="space-y-6">
-          <div className="relative mx-auto w-32 h-32 flex items-center justify-center">
-            <div className="absolute inset-0 rounded-[2.5rem] bg-destructive/10 animate-pulse" />
-            <div className="absolute inset-2 rounded-[2rem] border-2 border-destructive/20" />
-            <SearchX className="h-12 w-12 text-destructive relative z-10" />
+          <div className="relative mx-auto w-24 h-24 flex items-center justify-center">
+            <div className="absolute inset-0 rounded-[2rem] bg-muted/50" />
+            <SearchX className="h-10 w-10 text-muted-foreground relative z-10" />
           </div>
-          
+
           <div className="space-y-2">
-            <Badge variant="outline" className="border-destructive/30 text-destructive uppercase tracking-widest text-[10px] font-bold px-3 mb-2">Error 404</Badge>
-            <Text variant="h1" as="h1" className="text-4xl lg:text-6xl font-bold tracking-tight">Node Not Located</Text>
+            <Text variant="h1" as="h1" className="text-4xl lg:text-5xl font-bold tracking-tight">Page not found</Text>
             <Text variant="body" className="text-muted-foreground text-lg leading-relaxed max-w-lg mx-auto">
-              The intelligence node you requested does not exist in the Imperialpedia Index. It may have been de-indexed or moved during a cluster re-shard.
+              The page you&apos;re looking for doesn&apos;t exist or may have moved. Try searching, or head back to the homepage.
             </Text>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
-          <Button variant="outline" className="h-12 rounded-xl font-bold border-white/10 bg-card/30 gap-2" asChild>
-            <Link href="/"><ArrowLeft className="h-4 w-4" /> Go Home</Link>
-          </Button>
-          <Button variant="outline" className="h-12 rounded-xl font-bold border-white/10 bg-card/30 gap-2" asChild>
-            <Link href="/search"><Search className="h-4 w-4" /> Global Search</Link>
-          </Button>
-          <Button className="h-12 rounded-xl font-bold bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20" asChild>
-            <Link href="/knowledge-map">Open Graph</Link>
-          </Button>
+        <div className="max-w-md mx-auto">
+          <InlineSearchBar placeholder="Search companies, countries, articles..." />
         </div>
 
-        <div className="pt-12 border-t border-white/5 flex flex-col items-center gap-4">
-          <div className="flex items-center gap-3 text-muted-foreground text-xs uppercase font-bold tracking-widest">
-            <Globe className="h-4 w-4" /> Indexing Engine: Stable
-          </div>
-          <Text variant="caption" className="text-muted-foreground italic">
-            "Searching for specific alpha? Our AI can help you find related research nodes."
-          </Text>
-          {/* TODO: Suggest alternative pages or content dynamically using AI in Phase 2 */}
-          {/* Example: "Looking for companies in a specific country? Click here." */}
-        </div>
+        <Button variant="outline" className="h-12 rounded-xl font-bold border-white/10 bg-card/30 gap-2" asChild>
+          <Link href="/"><ArrowLeft className="h-4 w-4" /> Back to Homepage</Link>
+        </Button>
       </Container>
+
+      {trending.length > 0 && (
+        <Container className="max-w-5xl mt-20 pt-16 border-t border-white/5">
+          <div className="flex items-center justify-center gap-2 text-primary mb-10">
+            <Sparkles className="h-4 w-4" />
+            <Text variant="label" className="text-xs font-bold uppercase tracking-widest">
+              Trending on Imperialpedia
+            </Text>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {trending.map((article) => {
+              const href = newsArticleHref({
+                slug: article.slug,
+                publishedAt: article.publishedAt || article.updatedAt,
+                contentType: article.contentType,
+                categorySlug: article.categorySlug,
+              });
+              const img =
+                article.featuredImage ||
+                articleArtDataUri({ title: article.title, category: article.category, seed: article.slug });
+
+              return (
+                <Link key={article.id} href={href} className="group block">
+                  <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-muted mb-3">
+                    <Image
+                      src={img}
+                      alt=""
+                      fill
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                  <Text variant="bodySmall" weight="bold" className="group-hover:text-primary transition-colors line-clamp-2">
+                    {article.title}
+                  </Text>
+                </Link>
+              );
+            })}
+          </div>
+        </Container>
+      )}
     </main>
   );
 }
