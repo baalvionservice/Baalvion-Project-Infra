@@ -6,6 +6,7 @@ slug: offshore-accident-lawyer
 category: Maritime & Offshore Injury Law
 categorySlug: maritime-offshore-injury-law
 keywords: [offshore accident lawyer, offshore injury attorney, offshore accident attorney]
+author: deepak-kumar-kuldeep
 ---
 
 # Offshore Accident Lawyer

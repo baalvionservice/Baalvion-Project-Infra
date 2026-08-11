@@ -6,6 +6,7 @@ slug: tender-boat-excursion-dinner-cruise-accidents
 category: Cruise Ship & Passenger Vessel Accidents
 categorySlug: cruise-ship-passenger-vessel-accidents
 keywords: [tender boat accident, shore excursion accident lawyer, dinner cruise accident lawyer]
+author: deepak-kumar-kuldeep
 ---
 
 # Tender Boat, Excursion & Dinner Cruise Accidents

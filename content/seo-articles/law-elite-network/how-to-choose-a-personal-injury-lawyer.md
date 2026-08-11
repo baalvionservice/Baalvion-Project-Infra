@@ -6,6 +6,7 @@ slug: how-to-choose-a-personal-injury-lawyer
 category: Personal Injury Lawyer
 categorySlug: personal-injury-lawyer
 keywords: [how to choose a personal injury lawyer, choosing a personal injury attorney, finding a personal injury lawyer]
+author: deepak-kumar-kuldeep
 ---
 
 # How to Choose a Personal Injury Lawyer

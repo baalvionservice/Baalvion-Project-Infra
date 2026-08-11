@@ -6,6 +6,7 @@ slug: cruise-ship-accident-lawyer-los-angeles
 category: Cruise Ship & Passenger Vessel Accidents
 categorySlug: cruise-ship-passenger-vessel-accidents
 keywords: [cruise ship accident lawyer los angeles, los angeles cruise injury lawyer, california cruise ship lawyer]
+author: deepak-kumar-kuldeep
 ---
 
 # Cruise Ship Accident Lawyer in Los Angeles

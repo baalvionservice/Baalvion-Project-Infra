@@ -6,6 +6,7 @@ slug: boating-accident-lawyer
 category: Boating Accidents
 categorySlug: boating-accidents
 keywords: [boating accident lawyer, boat accident attorney, boating accident attorney]
+author: deepak-kumar-kuldeep
 ---
 
 # Boating Accident Lawyer

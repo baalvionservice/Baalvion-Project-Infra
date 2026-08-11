@@ -6,6 +6,7 @@ slug: law-enforcement-in-1900s-america
 category: Legal Education & History
 categorySlug: legal-education-and-history
 keywords: [what was law enforcement life in 1900 in usa]
+author: yessica-ruiz
 ---
 
 # What Was Law Enforcement Like in 1900s America?

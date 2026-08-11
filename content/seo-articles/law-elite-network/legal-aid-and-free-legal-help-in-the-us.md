@@ -6,6 +6,7 @@ slug: legal-aid-and-free-legal-help-in-the-us
 category: Personal Injury Lawyer
 categorySlug: personal-injury-lawyer
 keywords: [free legal help, legal aid, free legal aid near me, legal services corporation]
+author: deepak-kumar-kuldeep
 ---
 
 # Legal Aid and Free Legal Help in the United States

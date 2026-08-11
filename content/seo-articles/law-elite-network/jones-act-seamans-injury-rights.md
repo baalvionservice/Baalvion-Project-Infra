@@ -6,6 +6,7 @@ slug: jones-act-seamans-injury-rights
 category: Maritime & Offshore Injury Law
 categorySlug: maritime-offshore-injury-law
 keywords: [jones act, jones act seaman rights, jones act explained, seaman injury rights]
+author: deepak-kumar-kuldeep
 ---
 
 # Jones Act & Seaman's Injury Rights Explained

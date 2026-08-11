@@ -6,6 +6,7 @@ slug: cruise-ship-accident-lawyer-miami
 category: Cruise Ship & Passenger Vessel Accidents
 categorySlug: cruise-ship-passenger-vessel-accidents
 keywords: [cruise ship accident lawyer miami, miami cruise injury lawyer, cruise ship lawyer florida]
+author: deepak-kumar-kuldeep
 ---
 
 # Cruise Ship Accident Lawyer in Miami, FL

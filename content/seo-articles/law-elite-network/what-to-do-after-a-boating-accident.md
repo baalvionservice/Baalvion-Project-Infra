@@ -6,6 +6,7 @@ slug: what-to-do-after-a-boating-accident
 category: Boating Accidents
 categorySlug: boating-accidents
 keywords: [what to do after a boating accident]
+author: deepak-kumar-kuldeep
 ---
 
 # What to Do After a Boating Accident
