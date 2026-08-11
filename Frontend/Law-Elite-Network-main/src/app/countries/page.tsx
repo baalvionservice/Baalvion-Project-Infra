@@ -16,28 +16,41 @@ const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 // /opengraph-image fallback is otherwise silently dropped -- WhatsApp/social
 // crawlers ignore robots but read these tags, and an og:image-less share
 // renders as a bare text link.
-export const metadata: Metadata = {
-  title: { absolute: 'Legal Guides by Country | Law Elite Network' },
-  description: 'Browse plain-language legal guides organized by jurisdiction — the same library, structured around the country each guide applies to.',
-  alternates: { canonical: `${SITE}/countries` },
-  robots: { index: true, follow: true },
-  openGraph: {
-    type: 'website',
-    url: `${SITE}/countries`,
-    title: 'Legal Guides by Country | Law Elite Network',
-    description: 'Browse plain-language legal guides organized by jurisdiction.',
-    images: [{ url: `${SITE}/opengraph-image`, width: 1200, height: 630, alt: 'Law Elite Network — Global Legal Intelligence' }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Legal Guides by Country | Law Elite Network',
-    description: 'Browse plain-language legal guides organized by jurisdiction.',
-    images: [`${SITE}/twitter-image`],
-  },
-};
+//
+// Indexed only once at least one country actually has real jurisdiction-
+// specific articles -- see the matching check (and full rationale) in
+// ./layout.tsx's generateMetadata, which this must stay consistent with.
+export async function generateMetadata(): Promise<Metadata> {
+  const counts = await getCountryArticleCounts();
+  const hasPopulatedCountry = Object.values(counts).some((n) => n > 0);
+  return {
+    title: { absolute: 'Legal Guides by Country | Law Elite Network' },
+    description: 'Browse plain-language legal guides organized by jurisdiction — the same library, structured around the country each guide applies to.',
+    alternates: { canonical: `${SITE}/countries` },
+    robots: { index: hasPopulatedCountry, follow: true },
+    openGraph: {
+      type: 'website',
+      url: `${SITE}/countries`,
+      title: 'Legal Guides by Country | Law Elite Network',
+      description: 'Browse plain-language legal guides organized by jurisdiction.',
+      images: [{ url: `${SITE}/opengraph-image`, width: 1200, height: 630, alt: 'Law Elite Network — Global Legal Intelligence' }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: 'Legal Guides by Country | Law Elite Network',
+      description: 'Browse plain-language legal guides organized by jurisdiction.',
+      images: [`${SITE}/twitter-image`],
+    },
+  };
+}
 
 export default async function CountriesIndexPage() {
   const counts = await getCountryArticleCounts();
+  // Countries with published guides first, so the directory leads with what's
+  // actually there rather than burying it alphabetically among empty entries.
+  const sortedCountries = [...COUNTRIES].sort(
+    (a, b) => (counts[b.slug] || 0) - (counts[a.slug] || 0),
+  );
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -71,26 +84,38 @@ export default async function CountriesIndexPage() {
             <p className="text-lg md:text-xl text-slate-500 max-w-2xl leading-relaxed mt-4">
               Jurisdiction-specific explainers, browsable by country.
             </p>
+            <p className="text-[15px] text-slate-500 max-w-2xl leading-relaxed mt-4">
+              This directory covers the jurisdictions LawEliteNetwork currently writes about. Each
+              country page explains the basics of that jurisdiction's legal system and links to any
+              country-specific guides we've published — jurisdictions without dedicated guides yet
+              are marked below rather than left to look more complete than they are. Coverage is
+              added over time, not all at once.
+            </p>
           </div>
         </section>
 
         <div className="container mx-auto px-4 sm:px-6 max-w-7xl pt-10">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {COUNTRIES.map((country) => (
-              <Link
-                key={country.slug}
-                href={`/countries/${country.slug}`}
-                className="group flex items-center justify-between p-6 rounded-xl border border-slate-200 hover:border-news-600 hover:shadow-md transition-all"
-              >
-                <div className="flex items-center gap-3">
-                  <Globe2 className="w-5 h-5 text-slate-300 group-hover:text-news-600 transition-colors" />
-                  <span className="font-headline text-lg font-bold text-slate-900">{country.name}</span>
-                </div>
-                <span className="text-[12px] font-bold uppercase tracking-wider text-slate-400">
-                  {counts[country.slug] || 0} {counts[country.slug] === 1 ? 'guide' : 'guides'}
-                </span>
-              </Link>
-            ))}
+            {sortedCountries.map((country) => {
+              const count = counts[country.slug] || 0;
+              return (
+                <Link
+                  key={country.slug}
+                  href={`/countries/${country.slug}`}
+                  className="group flex items-center justify-between p-6 rounded-xl border border-slate-200 hover:border-news-600 hover:shadow-md transition-all"
+                >
+                  <div className="flex items-center gap-3">
+                    <Globe2 className="w-5 h-5 text-slate-300 group-hover:text-news-600 transition-colors" />
+                    <span className="font-headline text-lg font-bold text-slate-900">{country.name}</span>
+                  </div>
+                  <span
+                    className={`text-[12px] font-bold uppercase tracking-wider ${count > 0 ? 'text-news-600' : 'text-slate-400'}`}
+                  >
+                    {count > 0 ? `${count} ${count === 1 ? 'guide' : 'guides'}` : 'Coming soon'}
+                  </span>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </main>
