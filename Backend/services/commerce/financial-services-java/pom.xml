@@ -56,9 +56,10 @@
          modern Docker Engine API; 1.19.x fails against Docker Engine 25+/Desktop with HTTP 400. -->
     <testcontainers.version>1.21.4</testcontainers.version>
     <!-- Override the Spring Boot BOM's pgjdbc (which carries CVE-2024-1597 SQLi via
-         PreferQueryMode=SIMPLE and CVE-2026-42198 SCRAM DoS). 42.7.11 patches both. Property is
-         BOM-managed, so this overrides every module's postgresql dependency. -->
-    <postgresql.version>42.7.11</postgresql.version>
+         PreferQueryMode=SIMPLE, CVE-2026-42198 SCRAM DoS, and CVE-2026-54291 MITM
+         protection bypass via SCRAM-SHA-256-PLUS downgrade). 42.7.12 patches all three.
+         Property is BOM-managed, so this overrides every module's postgresql dependency. -->
+    <postgresql.version>42.7.12</postgresql.version>
     <!-- NOTE: the Spring Boot 3.5-era Tomcat/Netty/spring-kafka version overrides were removed for
          the 4.1.0 migration. SB4 ships Jakarta EE 11 (Tomcat 11) and spring-kafka 4.x; pinning the
          old majors here would conflict with the BOM. The 4.1.0 BOM already carries the CVE-patched
