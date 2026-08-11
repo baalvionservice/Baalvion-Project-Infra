@@ -50,7 +50,11 @@ function score(article: LawArticle, q: string): number {
   else if (title.startsWith(q)) s += 80;
   else if (title.includes(q)) s += 60;
   if (summary.includes(q)) s += 10;
-  s += (article.views || 0) / 1000;
+  // Only use popularity as a tie-breaker among actual text matches — applying it
+  // unconditionally (regardless of match) meant every query scored > 0 for any
+  // article with views, so unrelated queries never returned "no results" and
+  // instead silently surfaced the site's most-viewed articles as fake matches.
+  if (s > 0) s += (article.views || 0) / 1000;
   return s;
 }
 
