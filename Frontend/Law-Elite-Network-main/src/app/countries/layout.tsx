@@ -12,7 +12,7 @@ const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
  * sitemapped once at least one article carries real country metadata.
  */
 export const metadata: Metadata = {
-  title: 'Legal Guides by Country | Law Elite Network',
+  title: { absolute: 'Legal Guides by Country | Law Elite Network' },
   alternates: { canonical: `${SITE}/countries` },
   robots: { index: false, follow: true },
 };

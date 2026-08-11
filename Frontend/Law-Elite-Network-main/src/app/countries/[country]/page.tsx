@@ -18,13 +18,24 @@ export async function generateMetadata(
   const title = `${country.name} Legal Guides | Law Elite Network`;
   const description = `Plain-language legal guides and explainers specific to ${country.name}.`;
   const url = `${SITE}/countries/${countrySlug}`;
+  // images set explicitly: a page-level openGraph/twitter object replaces
+  // (not merges with) the root layout's, so without this the root's
+  // generated /opengraph-image fallback is silently dropped and a shared
+  // link renders with no image on WhatsApp/social previews -- see the same
+  // note in ../page.tsx.
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: { canonical: url },
     robots: { index: true, follow: true },
-    openGraph: { type: 'website', url, title, description },
-    twitter: { card: 'summary_large_image', title, description },
+    openGraph: {
+      type: 'website',
+      url,
+      title,
+      description,
+      images: [{ url: `${SITE}/opengraph-image`, width: 1200, height: 630, alt: 'Law Elite Network — Global Legal Intelligence' }],
+    },
+    twitter: { card: 'summary_large_image', title, description, images: [`${SITE}/twitter-image`] },
   };
 }
 

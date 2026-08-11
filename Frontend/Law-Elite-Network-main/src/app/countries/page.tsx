@@ -7,13 +7,33 @@ import { COUNTRIES, getCountryArticleCounts } from '@/data/countries';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 
+// title.absolute, not a plain string: this segment's own title already bakes
+// in the "| Law Elite Network" suffix, and the root layout's title.template
+// ('%s | Law Elite Network') would otherwise wrap it a second time -- see the
+// identical note in src/lib/seo/article-seo.tsx. `images` is set explicitly
+// on openGraph/twitter because a page-level `openGraph`/`twitter` object
+// replaces (not merges with) the root layout's, so the root's generated
+// /opengraph-image fallback is otherwise silently dropped -- WhatsApp/social
+// crawlers ignore robots but read these tags, and an og:image-less share
+// renders as a bare text link.
 export const metadata: Metadata = {
-  title: 'Legal Guides by Country | Law Elite Network',
+  title: { absolute: 'Legal Guides by Country | Law Elite Network' },
   description: 'Browse plain-language legal guides organized by jurisdiction — the same library, structured around the country each guide applies to.',
   alternates: { canonical: `${SITE}/countries` },
   robots: { index: true, follow: true },
-  openGraph: { type: 'website', url: `${SITE}/countries`, title: 'Legal Guides by Country | Law Elite Network', description: 'Browse plain-language legal guides organized by jurisdiction.' },
-  twitter: { card: 'summary_large_image', title: 'Legal Guides by Country | Law Elite Network', description: 'Browse plain-language legal guides organized by jurisdiction.' },
+  openGraph: {
+    type: 'website',
+    url: `${SITE}/countries`,
+    title: 'Legal Guides by Country | Law Elite Network',
+    description: 'Browse plain-language legal guides organized by jurisdiction.',
+    images: [{ url: `${SITE}/opengraph-image`, width: 1200, height: 630, alt: 'Law Elite Network — Global Legal Intelligence' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Legal Guides by Country | Law Elite Network',
+    description: 'Browse plain-language legal guides organized by jurisdiction.',
+    images: [`${SITE}/twitter-image`],
+  },
 };
 
 export default async function CountriesIndexPage() {

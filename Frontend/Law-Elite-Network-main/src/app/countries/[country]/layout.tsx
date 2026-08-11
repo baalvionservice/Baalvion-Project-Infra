@@ -15,7 +15,7 @@ export async function generateMetadata(
   const country = getCountryBySlug(countrySlug);
   if (!country) return { robots: { index: false, follow: false } };
   return {
-    title: `${country.name} Legal Guides | Law Elite Network`,
+    title: { absolute: `${country.name} Legal Guides | Law Elite Network` },
     alternates: { canonical: `${SITE}/countries/${countrySlug}` },
     robots: { index: false, follow: true },
   };
