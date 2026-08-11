@@ -37,6 +37,7 @@ db.Subscription = require('./subscriptions')(sequelize, DataTypes);
 db.Payment = require('./payments')(sequelize, DataTypes);
 db.AffiliateProduct = require('./affiliate_products')(sequelize, DataTypes);
 db.AffiliateClick = require('./affiliate_clicks')(sequelize, DataTypes);
+db.NewsletterSubscriber = require('./newsletter_subscribers')(sequelize, DataTypes);
 
 // Associations
 // Plan -> Subscriptions / Payments -> Subscription (billing)

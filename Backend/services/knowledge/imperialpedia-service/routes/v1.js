@@ -43,4 +43,5 @@ router.use('/glossary', require('./glossaryRoutes'));
 router.use('/world-config', require('./worldConfigRoutes'));
 router.use('/payments', require('./paymentRoutes'));
 router.use('/affiliate-products', require('./affiliateRoutes'));
+router.use('/newsletter', require('./newsletterRoutes'));
 module.exports = router;

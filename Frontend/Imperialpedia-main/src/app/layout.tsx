@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     template: '%s | Imperialpedia',
   },
   description:
-    'Imperialpedia is the definitive financial intelligence platform. Expert analysis, live market data, and a global community of investors and analysts.',
+    'Imperialpedia is a financial intelligence and reference platform: an encyclopedic knowledge graph of companies, countries, industries, and technologies alongside live market data and editorially reviewed articles.',
   keywords: [
     'financial intelligence',
     'market analysis',
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
     siteName: 'Imperialpedia',
     title: 'Imperialpedia — The Financial Intelligence Network',
     description:
-      'Expert financial analysis, live market data, and a global investor community.',
+      'An encyclopedic knowledge graph of companies, countries, industries, and technologies, alongside live market data and editorially reviewed articles.',
     images: [
       {
         url: `${env.siteUrl}/og-image.png`,
@@ -69,7 +69,7 @@ export const metadata: Metadata = {
     creator: '@imperialpedia',
     title: 'Imperialpedia — The Financial Intelligence Network',
     description:
-      'Expert financial analysis, live market data, and a global investor community.',
+      'An encyclopedic knowledge graph of companies, countries, industries, and technologies, alongside live market data and editorially reviewed articles.',
     images: [`${env.siteUrl}/og-image.png`],
   },
   robots: {

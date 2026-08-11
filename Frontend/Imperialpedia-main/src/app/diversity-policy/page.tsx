@@ -31,7 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return buildMetadata({
     title: 'Diversity Policy',
     description:
-      'How Imperialpedia represents a broad range of financial situations, backgrounds, and voices across its coverage and Financial Review Board.',
+      'How Imperialpedia represents a broad range of financial situations, backgrounds, and voices across its coverage.',
     canonical: '/diversity-policy',
   });
 }
@@ -77,12 +77,13 @@ function DiversityPolicyFallback() {
 
           <div className="space-y-4">
             <Text variant="h3" className="text-xl font-bold">
-              2. Diversity on the Financial Review Board
+              2. Consistent review regardless of topic
             </Text>
             <Text variant="body" className="text-muted-foreground leading-relaxed">
-              We aim for our Financial Review Board to reflect a range of professional
-              backgrounds and perspectives within personal finance and markets, so that the
-              review process itself benefits from more than one point of view on a given topic.
+              An article aimed at someone opening their first savings account goes through the
+              same editorial review and fact-check as one on portfolio construction or retirement
+              planning — coverage for readers earlier in their financial journey gets the same
+              scrutiny as coverage aimed at more experienced readers, not a lighter pass.
             </Text>
           </div>
 

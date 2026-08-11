@@ -1,33 +1,28 @@
-import React from 'react';
-import { Container } from '@/design-system/layout/container';
-import { getCreatorVerificationStatus } from '@/services/data/creators-service';
-import { VerificationClient } from './VerificationClient';
 import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
-
-// Reads live verification status from imperialpedia-service (no-store) — render on demand.
-export const dynamic = 'force-dynamic';
+import { FeatureUnavailable } from '@/components/system/FeatureUnavailable';
 
 export const metadata: Metadata = buildMetadata({
-  title: 'Expert Authentication Hub | Imperialpedia',
-  description: 'Manage your verified expert status and credentials for the Intelligence Index.',
+  title: 'Creator Verification | Imperialpedia',
+  description: 'Creator verification is in development for Imperialpedia.',
 });
 
 /**
- * Expert Verification Page (Server Entry).
- * Fetches current verification lifecycle state and hands off to the interactive hub.
+ * Was rendering a fake submission flow (simulated API delay, hardcoded document
+ * list, and a permanently hardcoded demo user's status regardless of who was
+ * logged in) with copy claiming review by "platform leads" and a "Compliance
+ * Hub" that don't exist, plus fabricated incentive claims ("3.5x more
+ * visibility", "exclusive grants"). Removed entirely rather than fixed in
+ * place, per the site's real-data-first policy — see the mock-data
+ * remediation report and FeatureUnavailable's doc comment.
  */
-export default async function ExpertVerificationPage() {
-  // Mock fetching for Lead Expert Eleanor Vance (already verified in mock)
-  // For standard user simulation, this would return 'unverified'
-  const response = await getCreatorVerificationStatus('u-1');
-  const verificationStatus = response.data;
-
+export default function CreatorVerificationPage() {
   return (
-    <main className="min-h-screen bg-background pt-8">
-      <Container className="max-w-6xl">
-        <VerificationClient initialStatus={verificationStatus} />
-      </Container>
-    </main>
+    <FeatureUnavailable
+      title="Creator Verification"
+      reason="Creator verification isn't connected to a live review process yet."
+      backHref="/creator/dashboard"
+      backLabel="Back to Dashboard"
+    />
   );
 }

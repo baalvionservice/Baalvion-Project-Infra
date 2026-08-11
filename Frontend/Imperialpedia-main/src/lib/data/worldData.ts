@@ -129,7 +129,7 @@ const rawFeaturedNews = [
     summary:
       "Wall Street rallied sharply Friday after Federal Reserve officials suggested that interest rate cuts are still possible this year despite stubborn inflation readings.",
     time: "2 hours ago",
-    author: "Sarah Johnson",
+    author: "Imperialpedia Markets Desk",
     tag: "BREAKING",
   },
   {
@@ -140,7 +140,7 @@ const rawFeaturedNews = [
     summary:
       "The American economy added far more jobs than expected last month, complicating the Fed's path to cutting interest rates.",
     time: "4 hours ago",
-    author: "Michael Torres",
+    author: "Imperialpedia Markets Desk",
     tag: null,
   },
   {
@@ -151,7 +151,7 @@ const rawFeaturedNews = [
     summary:
       "The chipmaker's stock reached new all-time highs after analysts raised price targets citing insatiable demand for its H100 GPU.",
     time: "5 hours ago",
-    author: "Lisa Chen",
+    author: "Imperialpedia Markets Desk",
     tag: null,
   },
 ];

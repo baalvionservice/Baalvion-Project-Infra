@@ -12,18 +12,18 @@ export type TierPresentation = Pick<SubscriptionTier, 'description' | 'features'
 export const TIER_PRESENTATION: Record<string, TierPresentation> = {
   'tier-free': {
     description: 'Foundational access for retail learners.',
-    features: ['Access to basic content', 'Limited calculators'],
+    features: ['Free articles', 'Financial calculators'],
     color: 'primary',
   },
   'tier-pro': {
-    description: 'The definitive suite for serious analysts.',
-    features: ['Full content access', 'Advanced calculators', 'AI portfolio insights'],
+    description: 'Full access to premium articles and tools.',
+    features: ['Everything in Free', 'Full access to premium-only articles'],
     isPopular: true,
     color: 'secondary',
   },
   'tier-enterprise': {
-    description: 'Institutional-grade research infrastructure.',
-    features: ['Team accounts', 'API access', 'Custom reports'],
+    description: 'Bulk data access for teams and integrations.',
+    features: ['Everything in Pro', 'Global Data Package API access'],
     color: 'emerald',
   },
 };

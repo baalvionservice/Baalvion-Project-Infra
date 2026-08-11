@@ -169,8 +169,7 @@ export async function PersonalFinanceHub() {
   }
   if (!isLive) {
     const cat = staticCategoryFor(SLUG);
-    const filtered = cat ? newsArticles.filter((a) => a.category === cat) : [];
-    articles = filtered.length ? filtered : newsArticles;
+    articles = cat ? newsArticles.filter((a) => a.category === cat) : [];
   }
 
   const claim = makeClaimer();

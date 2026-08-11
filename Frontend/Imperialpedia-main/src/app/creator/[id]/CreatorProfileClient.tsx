@@ -12,29 +12,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cn } from "@/lib/utils";
 import {
   ShieldCheck,
-  UserPlus,
-  UserMinus,
   BookOpen,
   Twitter,
   Linkedin,
   Globe,
   Github,
   Youtube,
-  ChevronRight,
   Layers,
   GraduationCap,
   Briefcase,
-  Zap,
   Search,
-  Activity,
-  Bell,
-  BellOff,
-  Flame,
-  Loader2,
 } from "lucide-react";
 import { format } from "date-fns";
 import Link from "next/link";
@@ -48,7 +37,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { AnalystPerformanceDashboard } from "@/modules/creators/components/AnalystPerformanceDashboard";
 import {
   Tooltip,
   TooltipContent,
@@ -65,9 +53,6 @@ interface CreatorProfileClientProps {
  * Features credential matrix, impact telemetry, and published intelligence registry.
  */
 export function CreatorProfileClient({ creator }: CreatorProfileClientProps) {
-  const [isFollowing, setIsFollowing] = useState(false);
-  const [notifsActive, setNotifsActive] = useState(true);
-  const [followers, setFollowers] = useState(creator.stats.followersCount);
   const [content, setContent] = useState<CreatorContentItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -85,15 +70,6 @@ export function CreatorProfileClient({ creator }: CreatorProfileClientProps) {
     }
     loadExtraData();
   }, [creator.id]);
-
-  const toggleFollow = () => {
-    if (isFollowing) {
-      setFollowers((prev) => prev - 1);
-    } else {
-      setFollowers((prev) => prev + 1);
-    }
-    setIsFollowing(!isFollowing);
-  };
 
   const getSocialIcon = (platform: string) => {
     switch (platform.toLowerCase()) {
@@ -165,15 +141,13 @@ export function CreatorProfileClient({ creator }: CreatorProfileClientProps) {
                               weight="bold"
                               className="text-secondary mb-1"
                             >
-                              Verification Matrix Complete
+                              Verified
                             </Text>
                             <Text
                               variant="caption"
                               className="text-muted-foreground leading-relaxed"
                             >
-                              This expert has provided verifiable proof of
-                              industry credentials, academic research, and
-                              institutional affiliation.
+                              This contributor&apos;s account has been verified by Imperialpedia.
                             </Text>
                           </TooltipContent>
                         </Tooltip>
@@ -192,56 +166,16 @@ export function CreatorProfileClient({ creator }: CreatorProfileClientProps) {
                       variant="bodySmall"
                       className="text-muted-foreground font-bold"
                     >
-                      {creator.company || "Independent Institutional Analyst"}
+                      {creator.company || "Independent Contributor"}
                     </Text>
                   </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <Button
-                    size="lg"
-                    variant={isFollowing ? "outline" : "default"}
-                    className={`h-12 px-8 rounded-2xl font-bold transition-all ${
-                      !isFollowing
-                        ? "shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90"
-                        : "border-white/10"
-                    }`}
-                    onClick={toggleFollow}
-                  >
-                    {isFollowing ? (
-                      <>
-                        <UserMinus className="mr-2 h-4 w-4" /> Unfollow
-                      </>
-                    ) : (
-                      <>
-                        <UserPlus className="mr-2 h-4 w-4" /> Follow Expert
-                      </>
-                    )}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className={cn(
-                      "h-12 w-12 rounded-2xl border-white/10 transition-colors",
-                      notifsActive
-                        ? "text-primary bg-primary/5 border-primary/20"
-                        : "text-muted-foreground"
-                    )}
-                    onClick={() => setNotifsActive(!notifsActive)}
-                  >
-                    {notifsActive ? (
-                      <Bell className="h-5 w-5" />
-                    ) : (
-                      <BellOff className="h-5 w-5" />
-                    )}
-                  </Button>
                 </div>
               </div>
 
               <div className="flex flex-wrap gap-8 py-2">
                 <div className="flex flex-col">
                   <span className="text-3xl font-bold tracking-tighter">
-                    {followers.toLocaleString()}
+                    {creator.stats.followersCount.toLocaleString()}
                   </span>
                   <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">
                     Followers
@@ -252,7 +186,7 @@ export function CreatorProfileClient({ creator }: CreatorProfileClientProps) {
                     {creator.stats.articlesCount}
                   </span>
                   <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">
-                    Insights
+                    Articles
                   </span>
                 </div>
                 <div className="flex flex-col">
@@ -261,14 +195,6 @@ export function CreatorProfileClient({ creator }: CreatorProfileClientProps) {
                   </span>
                   <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">
                     Total Reads
-                  </span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-3xl font-bold tracking-tighter text-primary">
-                    {creator.stats.engagementScore || 92}%
-                  </span>
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">
-                    Credibility
                   </span>
                 </div>
               </div>
@@ -313,27 +239,19 @@ export function CreatorProfileClient({ creator }: CreatorProfileClientProps) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
         {/* Main Intelligence Column */}
         <div className="lg:col-span-8 space-y-12">
-          <Tabs defaultValue="performance" className="w-full space-y-10">
+          <div className="w-full space-y-10">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 border-b border-white/5 pb-4">
-              <TabsList className="bg-card/30 border border-white/5 p-1 h-12 rounded-2xl">
-                <TabsTrigger
-                  value="performance"
-                  className="px-8 h-10 gap-2 rounded-xl font-bold text-xs data-[state=active]:bg-primary"
-                >
-                  <Activity className="h-4 w-4" /> Performance Audit
-                </TabsTrigger>
-                <TabsTrigger
-                  value="published"
-                  className="px-8 h-10 gap-2 rounded-xl font-bold text-xs data-[state=active]:bg-primary"
-                >
-                  <BookOpen className="h-4 w-4" /> Research Archive
-                </TabsTrigger>
-              </TabsList>
+              <Text
+                variant="h3"
+                className="flex items-center gap-2 px-1 font-bold text-sm uppercase tracking-widest"
+              >
+                <BookOpen className="h-4 w-4" /> Published Articles
+              </Text>
 
               <div className="relative group w-full sm:w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 <Input
-                  placeholder="Filter intelligence nodes..."
+                  placeholder="Filter articles..."
                   className="pl-10 h-10 bg-card/30 border-white/10 rounded-xl text-xs"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -341,31 +259,16 @@ export function CreatorProfileClient({ creator }: CreatorProfileClientProps) {
               </div>
             </div>
 
-            {/* PERFORMANCE TAB */}
-            <TabsContent value="performance" className="mt-0">
-              <AnalystPerformanceDashboard
-                stats={{
-                  engagementScore: creator.stats.engagementScore || 0,
-                  accuracyScore: creator.stats.accuracyScore || 0,
-                  credibilityScore: creator.stats.credibilityScore || 0,
-                  totalReads: creator.stats.totalReads || 0,
-                }}
-                performanceHistory={mockPerformanceHistory}
-              />
-            </TabsContent>
-
-            {/* RESEARCH ARCHIVE TAB */}
-            <TabsContent value="published" className="mt-0">
-              <Card className="glass-card border-none shadow-2xl overflow-hidden">
+            <Card className="glass-card border-none shadow-2xl overflow-hidden">
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-muted/20 border-b border-white/5">
                         <TableHead className="pl-8 font-bold text-[10px] uppercase tracking-widest py-6">
-                          Intelligence Title
+                          Title
                         </TableHead>
                         <TableHead className="font-bold text-[10px] uppercase tracking-widest">
-                          Taxonomy
+                          Category
                         </TableHead>
                         <TableHead className="font-bold text-[10px] uppercase tracking-widest text-center">
                           Reads
@@ -374,7 +277,7 @@ export function CreatorProfileClient({ creator }: CreatorProfileClientProps) {
                           Likes
                         </TableHead>
                         <TableHead className="text-right pr-8 font-bold text-[10px] uppercase tracking-widest">
-                          Handshake
+                          Published
                         </TableHead>
                       </TableRow>
                     </TableHeader>
@@ -407,36 +310,20 @@ export function CreatorProfileClient({ creator }: CreatorProfileClientProps) {
                             {(item.likes || 0).toLocaleString()}
                           </TableCell>
                           <TableCell className="text-right pr-8">
-                            <div className="flex flex-col items-end">
-                              <span className="text-[10px] font-bold text-muted-foreground uppercase">
-                                {format(
-                                  new Date(item.createdAt),
-                                  "MMM d, yyyy"
-                                )}
-                              </span>
-                              <span className="text-[8px] text-emerald-500 font-bold uppercase tracking-widest">
-                                Verified Index
-                              </span>
-                            </div>
+                            <span className="text-[10px] font-bold text-muted-foreground uppercase">
+                              {format(
+                                new Date(item.createdAt),
+                                "MMM d, yyyy"
+                              )}
+                            </span>
                           </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
                   </Table>
                 </div>
-                <div className="p-4 bg-muted/10 border-t border-white/5 flex justify-center">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-primary"
-                  >
-                    Full Chronological Matrix{" "}
-                    <ChevronRight className="ml-1 h-3 w-3" />
-                  </Button>
-                </div>
               </Card>
-            </TabsContent>
-          </Tabs>
+          </div>
         </div>
 
         {/* Sidebar Context Column */}
@@ -539,29 +426,6 @@ export function CreatorProfileClient({ creator }: CreatorProfileClientProps) {
                 </Badge>
               ))}
             </div>
-          </div>
-
-          <div className="p-8 rounded-[3rem] bg-primary/5 border border-primary/20 space-y-4 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
-              <Flame className="h-16 w-16 text-primary" />
-            </div>
-            <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-widest">
-              <Zap className="h-4 w-4" /> Strategy Access
-            </div>
-            <Text
-              variant="caption"
-              className="text-muted-foreground leading-relaxed italic block"
-            >
-              "Upgrade to **Institutional Pro** to access{" "}
-              {creator.displayName.split(" ")[0]}'s real-time model portolios
-              and trade signals."
-            </Text>
-            <Button
-              className="w-full h-12 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold text-xs shadow-lg shadow-primary/20"
-              asChild
-            >
-              <Link href="/premium/subscribe">Launch Pro Intelligence</Link>
-            </Button>
           </div>
         </div>
       </div>

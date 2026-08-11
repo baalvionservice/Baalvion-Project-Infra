@@ -15,7 +15,7 @@ export const metadata: Metadata = buildMetadata({
   canonical: '/explore',
   title: "Explore Global Knowledge",
   description:
-    "Navigate the Imperialpedia Index. Discover countries, companies, industries, and technologies across our 1M+ intelligence nodes.",
+    "Navigate the Imperialpedia Index. Discover country profiles, company profiles, and technologies in one structured knowledge base.",
 });
 
 /**
@@ -44,8 +44,8 @@ export default function ExplorePage() {
             variant="body"
             className="text-muted-foreground text-xl leading-relaxed max-w-2xl mb-12"
           >
-            Audit the world's most scalable intelligence network. Traverse
-            interconnected nodes across every financial and technical domain.
+            Browse country profiles, company profiles, and technologies —
+            each linked to related entities and relevant articles.
           </Text>
 
           {/* Expanded Search Entry */}
@@ -95,7 +95,7 @@ export default function ExplorePage() {
           </div>
         </Section>
 
-        {/* Scalability Callout */}
+        {/* Learn More Callout */}
         <footer className="mt-32 p-12 lg:p-20 rounded-[3.5rem] bg-primary/5 border border-primary/20 relative overflow-hidden text-center">
           <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none">
             <TrendingUp size={300} className="text-primary" />
@@ -105,22 +105,23 @@ export default function ExplorePage() {
               variant="outline"
               className="border-primary/30 text-primary uppercase font-bold tracking-widest text-[10px] px-4 h-7 mb-4"
             >
-              Scale Telemetry
+              Keep Exploring
             </Badge>
             <Text variant="h2" className="text-3xl font-bold">
-              1,000,000+ Intelligence Nodes
+              New profiles added regularly
             </Text>
             <Text variant="body" className="text-muted-foreground">
-              Our programmatic SEO engine index is constantly expanding. Every
-              node is cross-referenced via our institutional-grade knowledge
-              graph to ensure structural data integrity.
+              Every country, company, and technology profile links to related
+              entities and articles, so you can keep following a topic as far
+              as it goes.
             </Text>
             <div className="pt-6">
               <Button
                 size="lg"
                 className="rounded-2xl h-14 px-10 font-bold shadow-xl shadow-primary/20"
+                asChild
               >
-                Register for Analyst Access
+                <Link href="/latest">See the latest articles</Link>
               </Button>
             </div>
           </div>

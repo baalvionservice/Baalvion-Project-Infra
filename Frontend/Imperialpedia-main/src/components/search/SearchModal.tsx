@@ -62,9 +62,9 @@ export const SearchModal = ({ open, onOpenChange }: { open: boolean; onOpenChang
         className="max-w-2xl p-0 overflow-hidden bg-card border-white/10 shadow-3xl top-[6vh] sm:top-[10vh] translate-y-0 max-h-[88vh] flex flex-col"
       >
         <DialogHeader className="sr-only">
-          <DialogTitle>Global Search Matrix</DialogTitle>
+          <DialogTitle>Search Imperialpedia</DialogTitle>
           <DialogDescription>
-            Search across millions of institutional knowledge nodes.
+            Search companies, countries, technologies, and articles.
           </DialogDescription>
         </DialogHeader>
         <div className="p-4 border-b border-white/5 shrink-0">
@@ -72,7 +72,7 @@ export const SearchModal = ({ open, onOpenChange }: { open: boolean; onOpenChang
             value={query}
             onChange={setQuery}
             autoFocus
-            placeholder="Type to search our millions of nodes..."
+            placeholder="Search companies, countries, articles..."
           />
         </div>
         <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar">
