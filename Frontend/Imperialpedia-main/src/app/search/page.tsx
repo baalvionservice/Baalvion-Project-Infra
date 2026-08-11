@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { buildMetadata } from "@/lib/seo/metadata-builder";
 import { SearchPageClient } from "./SearchPageClient";
+import { getArticles } from "@/modules/content-engine/services/content-service";
 
 // Internal site search results are infinite, near-duplicate URL space
 // (`?q=` accepts anything) — Google explicitly recommends `noindex` for this
@@ -28,6 +29,10 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function SearchPage() {
-  return <SearchPageClient />;
+export default async function SearchPage() {
+  // Real, CMS-backed articles (same source as the homepage's "Latest Articles"
+  // rail) — surfaced when a search has no query yet or returns nothing, so a
+  // visitor always has somewhere useful to go instead of a dead end.
+  const { data: trendingArticles } = await getArticles(1, 6);
+  return <SearchPageClient trendingArticles={trendingArticles} />;
 }
