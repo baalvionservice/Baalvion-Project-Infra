@@ -173,7 +173,6 @@ function LawyerDashboardContent() {
               <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500 flex items-center gap-2">
                 <Clock className="w-3.5 h-3.5 text-blue-600" /> Upcoming Agenda
               </h3>
-              <Link href="/appointments" className="text-[9px] font-bold text-blue-600 hover:underline uppercase transition-colors">View All</Link>
             </div>
             {appointments.length > 0 ? (
               appointments.slice(0, 3).map((apt: any) => (

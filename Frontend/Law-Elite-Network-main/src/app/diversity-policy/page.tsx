@@ -46,8 +46,7 @@ export default function DiversityPolicyPage() {
 
             <Block icon={<Users className="w-6 h-6 text-blue-600" />} title="Diverse Voices in Our Directory and Contributors">
               <p>
-                We aim for our{' '}
-                <Link href="/lawyers" className="text-blue-600 hover:underline">lawyer directory</Link> and our{' '}
+                We aim for our lawyer directory and our{' '}
                 <Link href="/authors" className="text-blue-600 hover:underline">contributor roster</Link> to reflect
                 the diversity of the legal profession itself, across practice focus, firm size, geography, and
                 background. Verification and inclusion criteria are applied consistently to every applicant,
