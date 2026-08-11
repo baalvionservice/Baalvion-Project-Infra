@@ -1,18 +1,14 @@
 'use client';
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Text } from '@/design-system/typography/text';
-import { 
-  Bell, 
-  CheckCircle2, 
-  AlertCircle, 
-  Info, 
-  Trash2, 
-  Clock,
-  ArrowRight,
-  ExternalLink
+import {
+  Bell,
+  CheckCircle2,
+  AlertCircle,
+  Info,
+  Clock
 } from 'lucide-react';
 import { useAppStore } from '@/lib/state/app-store';
 import { format } from 'date-fns';
@@ -30,16 +26,11 @@ export default function WriterNotificationsPage() {
 
   return (
     <div className="space-y-8 pb-12">
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <Text variant="h1" as="h1" className="text-3xl font-bold">Updates & Alerts</Text>
-          <Text variant="bodySmall" className="text-muted-foreground mt-1">
-            Stay informed on your publication status and editorial feedback.
-          </Text>
-        </div>
-        <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">
-          <Trash2 className="mr-2 h-4 w-4" /> Clear All
-        </Button>
+      <header>
+        <Text variant="h1" as="h1" className="text-3xl font-bold">Updates & Alerts</Text>
+        <Text variant="bodySmall" className="text-muted-foreground mt-1">
+          Stay informed on your publication status and editorial feedback.
+        </Text>
       </header>
 
       <div className="max-w-4xl mx-auto space-y-4">
@@ -78,16 +69,11 @@ export default function WriterNotificationsPage() {
                     <Text variant="bodySmall" className="text-muted-foreground leading-relaxed">
                       {notif.message}
                     </Text>
-                    <div className="pt-3 flex gap-3">
-                      <Button variant="link" className="p-0 h-auto text-xs text-primary group" asChild>
-                        <a href="#">
-                          View Details <ArrowRight className="ml-1 h-3 w-3 group-hover:translate-x-1 transition-transform" />
-                        </a>
-                      </Button>
-                      {!notif.read && (
-                        <div className="w-2 h-2 rounded-full bg-primary mt-2" />
-                      )}
-                    </div>
+                    {!notif.read && (
+                      <div className="pt-3">
+                        <div className="w-2 h-2 rounded-full bg-primary" />
+                      </div>
+                    )}
                   </div>
                 </div>
               </CardContent>
@@ -95,17 +81,6 @@ export default function WriterNotificationsPage() {
           ))
         )}
       </div>
-
-      <Card className="max-w-4xl mx-auto glass-card bg-primary/5 border-primary/20">
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <ExternalLink className="h-5 w-5 text-primary" /> Integrated Workflow
-          </CardTitle>
-          <CardDescription>
-            Our approval system is tied directly to the Intelligence Index. Most reviews are completed within one business day.
-          </CardDescription>
-        </CardHeader>
-      </Card>
     </div>
   );
 }

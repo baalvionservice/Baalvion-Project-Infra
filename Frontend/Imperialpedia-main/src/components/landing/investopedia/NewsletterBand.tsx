@@ -31,7 +31,7 @@ export function NewsletterBand() {
       const data = await res.json();
       if (res.ok && data.success) {
         setStatus("success");
-        setMessage("You're subscribed. Check your inbox for confirmation.");
+        setMessage(data.message || "Thanks for signing up.");
         setEmail("");
       } else {
         setStatus("error");

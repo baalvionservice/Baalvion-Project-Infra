@@ -6,37 +6,26 @@ import { Text } from '@/design-system/typography/text';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { 
-  BookOpen, 
-  ChevronLeft, 
-  ChevronRight, 
-  Eye, 
+import {
+  BookOpen,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
   ArrowLeft,
   Search,
   Filter,
   ArrowUpRight,
-  Edit,
-  Trash2,
-  Layers,
-  MoreVertical,
-  Clock
+  Layers
 } from 'lucide-react';
 import Link from 'next/link';
 import { Input } from '@/components/ui/input';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from '@/components/ui/select';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
-import { toast } from '@/hooks/use-toast';
 
 const ITEMS_PER_PAGE = 6;
 
@@ -46,34 +35,35 @@ interface CreatorContentClientProps {
 }
 
 /**
- * Enhanced content discovery and management archive for an individual expert.
- * Supports multi-factor filtering, pagination, and mock administrative actions.
+ * Public content archive for an individual creator. This is a public,
+ * unauthenticated page (no ownership check on the viewer), so it must never
+ * offer edit/delete actions on someone else's content — those only ever
+ * belong on the creator's own authenticated dashboard.
  */
 export function CreatorContentClient({ creator, initialContent }: CreatorContentClientProps) {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
-  const [content, setContent] = useState<CreatorContentItem[]>(initialContent);
 
   // Derive unique categories for filtering
-  const categories = useMemo(() => 
+  const categories = useMemo(() =>
     ['all', ...Array.from(new Set(initialContent.map(item => item.category)))],
     [initialContent]
   );
 
   // Filter & Search Logic
   const filteredContent = useMemo(() => {
-    return content.filter(item => {
-      const matchesSearch = 
+    return initialContent.filter(item => {
+      const matchesSearch =
         item.title.toLowerCase().includes(search.toLowerCase()) ||
         item.snippet?.toLowerCase().includes(search.toLowerCase()) ||
         item.tags.some(t => t.toLowerCase().includes(search.toLowerCase()));
-      
+
       const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
 
       return matchesSearch && matchesCategory;
     });
-  }, [content, search, selectedCategory]);
+  }, [initialContent, search, selectedCategory]);
 
   // Pagination Logic
   const totalPages = Math.ceil(filteredContent.length / ITEMS_PER_PAGE);
@@ -81,15 +71,6 @@ export function CreatorContentClient({ creator, initialContent }: CreatorContent
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
-
-  const handleDelete = (id: string, title: string) => {
-    setContent(prev => prev.filter(item => item.id !== id));
-    toast({
-      title: "Insight Removed",
-      description: `"${title}" has been purged from the Intelligence Index.`,
-      variant: "destructive",
-    });
-  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -155,27 +136,7 @@ export function CreatorContentClient({ creator, initialContent }: CreatorContent
                   <Badge variant="outline" className="text-[10px] font-bold border-primary/20 bg-primary/5 text-primary">
                     {item.category}
                   </Badge>
-                  <div className="flex items-center gap-2">
-                    {getStatusBadge(item.status)}
-                    
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem asChild>
-                          <Link href={`/creator/dashboard/editor?id=${item.id}`} className="cursor-pointer">
-                            <Edit className="mr-2 h-4 w-4" /> Edit Analysis
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(item.id, item.title)}>
-                          <Trash2 className="mr-2 h-4 w-4" /> Delete Insight
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
+                  {getStatusBadge(item.status)}
                 </div>
                 <CardTitle className="text-xl line-clamp-2 leading-tight group-hover:text-primary transition-colors">
                   {item.title}
@@ -183,9 +144,11 @@ export function CreatorContentClient({ creator, initialContent }: CreatorContent
               </CardHeader>
               
               <CardContent className="p-6 pt-2 flex-grow">
-                <Text variant="bodySmall" className="text-muted-foreground line-clamp-3 mb-6 leading-relaxed">
-                  {item.snippet || "Access high-impact financial intelligence and expert research nodes within the Imperialpedia Index."}
-                </Text>
+                {item.snippet && (
+                  <Text variant="bodySmall" className="text-muted-foreground line-clamp-3 mb-6 leading-relaxed">
+                    {item.snippet}
+                  </Text>
+                )}
                 
                 <div className="flex flex-wrap gap-1">
                   {item.tags.map(tag => (
@@ -201,10 +164,6 @@ export function CreatorContentClient({ creator, initialContent }: CreatorContent
                   <div className="flex items-center gap-1.5">
                     <Eye className="h-3.5 w-3.5 text-primary" />
                     <Text variant="caption">{(item.views / 1000).toFixed(1)}k</Text>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <Clock className="h-3.5 w-3.5" />
-                    <Text variant="caption">8m read</Text>
                   </div>
                 </div>
                 

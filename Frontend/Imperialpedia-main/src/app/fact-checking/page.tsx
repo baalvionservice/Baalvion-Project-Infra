@@ -31,7 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return buildMetadata({
     title: 'Fact-Checking Policy',
     description:
-      'The source hierarchy and review process Imperialpedia uses to verify financial claims, from government data to our Financial Review Board.',
+      'The source hierarchy and review process Imperialpedia uses to verify financial claims, from government data through editorial review and fact-checking.',
     canonical: '/fact-checking',
   });
 }
@@ -79,13 +79,14 @@ function FactCheckingFallback() {
 
           <div className="space-y-4">
             <Text variant="h3" className="text-xl font-bold">
-              2. Role of the Financial Review Board
+              2. Editorial review and fact-checking
             </Text>
             <Text variant="body" className="text-muted-foreground leading-relaxed">
-              Our Financial Review Board reviews higher-risk articles — retirement, tax, credit,
-              and core investing topics — both before initial publication and on a recurring
-              schedule afterward, checking that cited figures still match the current primary
-              source and that the guidance given remains accurate as rules and rates change.
+              Every article is checked by an editorial reviewer and a fact-checker before it
+              publishes. For higher-risk topics — retirement, tax, credit, and core investing
+              fundamentals — that same review also happens on a recurring basis after
+              publication, checking that cited figures still match the current primary source
+              and that the guidance given remains accurate as rules and rates change.
             </Text>
           </div>
 

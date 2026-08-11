@@ -111,11 +111,12 @@ function EditorialPolicyFallback() {
               4. Final sign-off
             </Text>
             <Text variant="body" className="text-muted-foreground leading-relaxed">
-              Final sign-off on published content rests with the editorial team, informed by our
-              Financial Review Board, a group of subject-matter reviewers who check higher-risk
-              topics (tax, retirement, credit, investing fundamentals) before and after
-              publication. No single contributor can publish YMYL (&ldquo;your money, your
-              life&rdquo;) content without that review step.
+              Every published article names a writer, an editorial reviewer, and a fact-checker.
+              The reviewer checks the draft against its cited sources and house style before it
+              goes live, and the fact-checker verifies the specific figures, rates, and claims
+              made in the piece. No article publishes without going through both steps, and
+              higher-risk topics (tax, retirement, credit, investing fundamentals) get the same
+              two-person review as everything else.
             </Text>
           </div>
 

@@ -31,7 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return buildMetadata({
     title: 'Conflict of Interest Policy',
     description:
-      'How writers, reviewers, and Financial Review Board members disclose personal financial interests, and why undisclosed conflicts trigger content review.',
+      'How writers, reviewers, and fact-checkers disclose personal financial interests, and why undisclosed conflicts trigger content review.',
     canonical: '/conflict-of-interest-policy',
   });
 }
@@ -73,10 +73,9 @@ function ConflictOfInterestPolicyFallback() {
               1. Disclosure obligations
             </Text>
             <Text variant="body" className="text-muted-foreground leading-relaxed">
-              Writers, editors, and members of our Financial Review Board are required to
-              disclose any personal financial interest — a holding, an advisory role, a paid
-              relationship — relevant to a topic they write about or review before contributing
-              to that content.
+              Writers, editorial reviewers, and fact-checkers are required to disclose any
+              personal financial interest — a holding, an advisory role, a paid relationship —
+              relevant to a topic they write about or review before contributing to that content.
             </Text>
           </div>
 

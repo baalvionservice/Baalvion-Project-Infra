@@ -23,7 +23,7 @@ export const bestOnlineBrokersReview: ReviewArticle = withReviewArt({
   },
   methodologyLink: "#methodology",
   methodology:
-    "We evaluated 30+ brokers on commissions and fees, investment selection, platform and tools quality, educational resources, customer service, and account minimums. We opened live accounts and executed real trades on each platform. Scores weight fees (30%), platform quality (25%), investment options (20%), education (15%), and support (10%).",
+    "We evaluated 30+ brokers on commissions and fees, investment selection, platform and tools quality, educational resources, customer service, and account minimums, using each broker's published rate schedules, account disclosures, and publicly available platform documentation.",
   comparisonColumns: [
     "Stock Trades",
     "Account Min.",
@@ -37,7 +37,7 @@ export const bestOnlineBrokersReview: ReviewArticle = withReviewArt({
       categoryLabel: "Best Overall",
       providerName: "Fidelity Investments",
       summaryBlurb:
-        "No commissions, excellent research, and top-rated service.",
+        "No commissions, wide investment selection, and strong research tools.",
       ctaUrl: "https://www.fidelity.com",
       ctaLabel: "Open an Account",
     },
@@ -90,26 +90,26 @@ export const bestOnlineBrokersReview: ReviewArticle = withReviewArt({
       whyWeChoseIt: [
         {
           heading: "Best Overall",
-          body: "For the fourth consecutive year, Fidelity reigns supreme in bringing critical full-service brokerage features, sophisticated tools, and low fees to a wide range of traders and investors across continually enhanced platforms.",
+          body: "Fidelity combines full-service brokerage features, a broad range of tools, and low fees for a wide range of traders and investors.",
         },
         {
           heading: "Best for ETFs",
-          body: "Fidelity is our top broker for ETFs because of its rich ETF-focused educational content and research tools, expansive ETF offering, and fractional ETF trading. Fidelity is a repeat winner in this category, having earned the top spot from Charles Schwab in 2023.",
+          body: "Fidelity is our pick for ETFs because of its ETF-focused educational content and research tools, expansive ETF offering, and fractional ETF trading.",
         },
         {
           heading: "Best for Low Costs",
-          body: "Fidelity has long been an industry leader when it comes to lowering fees, and its transparent and compelling fee schedule is the reason why—for the fourth year running—it wins for low costs.",
+          body: "Fidelity's fee schedule is transparent and competitive across trading, account minimums, and mutual fund expense ratios, which is why it wins for low costs.",
         },
         {
           heading: "Best for Cash Management",
-          body: "Finding the best brokerage account for cash management is not just about earning the highest possible interest rate. It's also about seamless integration with essential, no-fee banking features and insurance. In these areas, Fidelity's cash management offering is unmatched, with solid passive earnings power on uninvested cash and reimbursable access to a global network of ATMs.",
+          body: "Finding the best brokerage account for cash management is not just about earning the highest possible interest rate. It's also about seamless integration with essential, no-fee banking features and insurance. Fidelity's cash management offering pairs competitive earnings on uninvested cash with reimbursable access to a global network of ATMs.",
         },
       ],
       pros: [
         "No payment for order flow (PFOF) makes for excellent order execution",
         "Strong portfolio analysis and account features",
-        "Superior trading platforms for all types of investors",
-        "Top-tier educational content, screening tools, and research capabilities",
+        "Full-featured trading platforms for both new and experienced investors",
+        "Broad educational content, screening tools, and research capabilities",
         "FDIC insurance up to $4 million on uninvested cash",
       ],
       cons: [
@@ -182,7 +182,7 @@ export const bestOnlineBrokersReview: ReviewArticle = withReviewArt({
       whyWeChoseIt: [
         {
           heading: "Best for Active Traders",
-          body: "Interactive Brokers' IBKR Pro platform delivers the margin rates, order routing controls, and execution quality that active traders demand. With access to 150+ global markets and sophisticated algorithmic order types, no other retail broker comes close for high-frequency or multi-asset trading.",
+          body: "Interactive Brokers' IBKR Pro platform delivers the margin rates, order routing controls, and execution quality that active traders demand, with access to 150+ global markets and sophisticated algorithmic order types.",
         },
         {
           heading: "Best for International Trading",
@@ -202,7 +202,7 @@ export const bestOnlineBrokersReview: ReviewArticle = withReviewArt({
         "Customer service can be slow during peak hours",
       ],
       overview:
-        "Interactive Brokers was founded in 1978 by Thomas Peterffy and has grown into one of the world's largest electronic brokers. The firm is known for its technological sophistication, ultra-low costs for high-volume traders, and its unmatched global market access. IBKR processes over 2.5 million trades per day and holds over $400 billion in customer equity.",
+        "Interactive Brokers was founded in 1978 by Thomas Peterffy and has grown into one of the world's largest electronic brokers. The firm is known for its technological sophistication, low costs for high-volume traders, and broad global market access.",
       ctaUrl: "https://www.interactivebrokers.com",
       ctaLabel: "Open an Account",
     },
@@ -225,7 +225,7 @@ export const bestOnlineBrokersReview: ReviewArticle = withReviewArt({
         },
         {
           heading: "Best Mobile App",
-          body: "Robinhood's mobile app sets the standard for simplicity in the brokerage industry. Real-time quotes, one-tap order entry, and a clean portfolio view make it the most usable trading app for investors who manage their money primarily on a smartphone.",
+          body: "Robinhood's mobile app is built around simplicity. Real-time quotes, one-tap order entry, and a clean portfolio view make it a strong fit for investors who manage their money primarily on a smartphone.",
         },
       ],
       pros: [
@@ -306,7 +306,7 @@ export const bestOnlineBrokersReview: ReviewArticle = withReviewArt({
     {
       question: "Are online brokers safe?",
       answer:
-        "Yes. All reputable US brokers are SIPC insured for up to $500,000 (including $250,000 in cash) in case the broker fails. They are also regulated by FINRA and the SEC. Your investments are held in your name separately from the broker's assets.",
+        "Generally, yes. Reputable US brokers are SIPC insured for up to $500,000 (including $250,000 in cash) in case the broker fails, and are regulated by FINRA and the SEC. Your investments are held in your name separately from the broker's assets. SIPC coverage protects against broker failure, not against investment losses.",
     },
     {
       question: "Do all online brokers charge zero commissions now?",
