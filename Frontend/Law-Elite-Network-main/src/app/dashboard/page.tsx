@@ -18,9 +18,8 @@ import LawyerSnapshot from '@/components/dashboard/LawyerSnapshot';
 import CaseTimeline from '@/components/dashboard/CaseTimeline';
 import SubscriptionOverview from '@/components/dashboard/SubscriptionOverview';
 import { 
-  ShieldCheck, 
-  Award, 
-  Search,
+  ShieldCheck,
+  Award,
   Clock,
   Briefcase,
   TrendingUp,
@@ -115,13 +114,6 @@ function DashboardContent() {
         </div>
         <div className="flex gap-3">
           <CreateCaseModal userId={user?.userId || ''} onSuccess={refresh} />
-          <Button 
-            variant="outline"
-            className="border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 rounded-lg px-6 font-semibold text-xs uppercase tracking-wider shadow-sm transition-all"
-            onClick={() => router.push('/lawyers')}
-          >
-            <Search className="w-4 h-4 mr-2 text-slate-400" /> Find Counsel
-          </Button>
         </div>
       </header>
 

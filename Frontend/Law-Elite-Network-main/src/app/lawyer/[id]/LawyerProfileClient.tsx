@@ -9,7 +9,7 @@ import { handleEvent } from '@/services/automationService';
 import { EVENTS } from '@/lib/automation/eventTriggers';
 import { useAuthStore } from '@/store/authStore';
 import LawyerDetail from '@/components/sections/LawyerDetail';
-import { Loader2, ArrowLeft, Gavel, Search } from 'lucide-react';
+import { Loader2, ArrowLeft, Gavel } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
@@ -63,11 +63,6 @@ export default function LawyerProfileClient({ id }: { id: string }) {
             <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
             Return to Discovery
           </button>
-          <Link href="/lawyers">
-            <Button variant="outline" size="sm" className="h-8 border-slate-200 text-[9px] font-bold uppercase tracking-widest text-slate-500">
-              <Search className="w-3 h-3 mr-1.5" /> Full Marketplace
-            </Button>
-          </Link>
         </div>
 
         {loading ? (
@@ -86,9 +81,9 @@ export default function LawyerProfileClient({ id }: { id: string }) {
             <p className="text-slate-500 max-w-xs mx-auto italic mb-8 font-medium">
               The requested professional record could not be located in the elite network.
             </p>
-            <Link href="/lawyers">
+            <Link href="/">
               <Button className="bg-[#0B1F3A] text-white hover:bg-slate-800 rounded-lg px-10 h-12 font-bold uppercase text-[10px] tracking-widest shadow-md">
-                Return to Discovery
+                Return to Homepage
               </Button>
             </Link>
           </div>

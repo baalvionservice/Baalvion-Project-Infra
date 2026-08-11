@@ -19,7 +19,16 @@ const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 function bundledCategory(slug: string) {
   if (CMS_ONLY_CATEGORIES[slug]) return CMS_ONLY_CATEGORIES[slug];
   const cat = (seedData as any).categories?.find((c: any) => c.slug === slug);
-  if (cat) return { id: cat.id, name: cat.name, slug: cat.slug, description: cat.description };
+  if (cat) {
+    return {
+      id: cat.id,
+      name: cat.name,
+      slug: cat.slug,
+      description: cat.description,
+      descriptionHtml: cat.descriptionHtml,
+      pillarTitle: cat.pillarTitle,
+    };
+  }
   const first = getArticlesByCategorySlug(slug)[0];
   return first ? { ...first.category, description: '' } : null;
 }
@@ -28,13 +37,22 @@ function bundledCategory(slug: string) {
  * Server-side so the masthead H1 + description are present in the first
  * response — the previous client-only version fetched the category in
  * useEffect, so crawlers only ever saw a loading spinner (no <h1> at all).
+ *
+ * Local (bundled/CMS-only) fields always merge under the live result rather
+ * than being discarded on a live hit: law-service's /categories response has
+ * no concept of `descriptionHtml`/`pillarTitle` (the written hub-overview
+ * content), so a live category with the same slug would otherwise silently
+ * blank out editorial copy that only exists locally -- e.g. tech-ip's.
  */
 async function fetchCategory(slug: string): Promise<any | null> {
+  const local = bundledCategory(slug);
   try {
     const res = await categoriesPublicApi.get(slug);
-    return res.data?.data || bundledCategory(slug);
+    const live = res.data?.data;
+    if (!live) return local;
+    return local ? { ...local, ...live } : live;
   } catch {
-    return bundledCategory(slug);
+    return local;
   }
 }
 

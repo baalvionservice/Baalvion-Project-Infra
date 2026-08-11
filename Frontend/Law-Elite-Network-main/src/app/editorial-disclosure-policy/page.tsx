@@ -82,9 +82,7 @@ export default function EditorialDisclosurePolicyPage() {
                   Nagar, Virar West, Virar, Maharashtra 401303, India
                 </span>
                 . This entity is the publisher of the editorial content on this site and the operator of the lawyer
-                directory and matching features found at{' '}
-                <Link href="/lawyers" className="text-blue-600 hover:underline">/lawyers</Link> and{' '}
-                <Link href="/appointments" className="text-blue-600 hover:underline">/appointments</Link>.
+                directory and matching features.
               </p>
               <p>
                 Editorial decisions — what we cover, how we describe legal topics, and which lawyers meet our
@@ -142,11 +140,10 @@ export default function EditorialDisclosurePolicyPage() {
             <Block icon={<Handshake className="w-6 h-6 text-blue-600" />} title="4. Advertising, Affiliate &amp; Referral Disclosure">
               <p>
                 Law Elite Network is a free publication that may be supported in part by advertising, including
-                through Google AdSense, to help fund our content. Some outbound links, and some placements within our{' '}
-                <Link href="/lawyers" className="text-blue-600 hover:underline">lawyer directory</Link>, may also be
+                through Google AdSense, to help fund our content. Some outbound links, and some placements within our
+                lawyer directory, may also be
                 compensated — for example, a referral arrangement where a lawyer or firm pays a fee when a reader is
-                connected to them through our{' '}
-                <Link href="/appointments" className="text-blue-600 hover:underline">Appointments</Link> flow, or a
+                connected to them through our appointments flow, or a
                 paid promotional placement described on our{' '}
                 <Link href="/advertise" className="text-blue-600 hover:underline">Advertise</Link> page. Where a link
                 or listing involves compensation, we aim to make that clear in context.

@@ -15,13 +15,31 @@ import { articleUrl } from '@/lib/article-url';
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 const FEED_PAGE_SIZE = 12;
 
+// title.absolute + explicit openGraph/twitter images: same fix as
+// src/app/countries/page.tsx -- a plain-string title here gets the root
+// layout's '%s | Law Elite Network' template applied on top of the suffix
+// already baked into this string (double suffix), and a page-level
+// openGraph/twitter object replaces (not merges with) the root's, silently
+// dropping its generated /opengraph-image fallback so shared links show no
+// image on WhatsApp/social previews.
 export const metadata: Metadata = {
-  title: 'Legal News | Law Elite Network',
+  title: { absolute: 'Legal News | Law Elite Network' },
   description: 'Breaking legal news, regulatory updates, and analysis from Law Elite Network — clear, worldwide coverage written for a general audience.',
   alternates: { canonical: `${SITE}/news` },
   robots: { index: true, follow: true },
-  openGraph: { type: 'website', url: `${SITE}/news`, title: 'Legal News | Law Elite Network', description: 'Breaking legal news, regulatory updates, and analysis from Law Elite Network.' },
-  twitter: { card: 'summary_large_image', title: 'Legal News | Law Elite Network', description: 'Breaking legal news, regulatory updates, and analysis from Law Elite Network.' },
+  openGraph: {
+    type: 'website',
+    url: `${SITE}/news`,
+    title: 'Legal News | Law Elite Network',
+    description: 'Breaking legal news, regulatory updates, and analysis from Law Elite Network.',
+    images: [{ url: `${SITE}/opengraph-image`, width: 1200, height: 630, alt: 'Law Elite Network — Global Legal Intelligence' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Legal News | Law Elite Network',
+    description: 'Breaking legal news, regulatory updates, and analysis from Law Elite Network.',
+    images: [`${SITE}/twitter-image`],
+  },
 };
 
 /** Groups news articles by practice-area category, richest categories first. */

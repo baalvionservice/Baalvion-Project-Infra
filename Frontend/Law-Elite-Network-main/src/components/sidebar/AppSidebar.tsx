@@ -6,12 +6,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuthContext } from "@/context/AuthContext";
 import { 
-  LayoutDashboard, 
-  Briefcase, 
-  CalendarClock, 
-  MessageSquare, 
-  Search, 
-  Settings2, 
+  LayoutDashboard,
+  Briefcase,
+  MessageSquare,
+  Settings2,
   Users, 
   ShieldAlert, 
   History, 
@@ -56,13 +54,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       { title: "Legal Briefs", url: "/cases", icon: Briefcase },
       { title: "My Counsel", url: "/my-counsel", icon: Users },
       { title: "Document Vault", url: "/vault", icon: ShieldCheck },
-      { title: "Appointments", url: "/appointments", icon: CalendarClock },
       { title: "Messages", url: "/chat", icon: MessageSquare },
       { title: "Notifications", url: "/notifications", icon: Bell },
       { title: "Billing Hub", url: "/billing", icon: FileText },
       { title: "Settlements", url: "/transactions", icon: IndianRupee },
       { title: "Membership", url: "/plans", icon: Award },
-      { title: "Find Counsel", url: "/lawyers", icon: Search },
       { title: "Settings", url: "/profile", icon: Settings2 },
     ],
     lawyer: [
@@ -72,7 +68,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       { title: "My Network", url: "/network", icon: Users },
       { title: "Communities", url: "/groups", icon: MessageSquare },
       { title: "Active Matters", url: "/cases", icon: Briefcase },
-      { title: "Schedule", url: "/appointments", icon: CalendarClock },
       { title: "Secure Uplink", url: "/chat", icon: MessageSquare },
       { title: "Vault", url: "/vault", icon: ShieldCheck },
       { title: "Earnings", url: "/lawyer/earnings", icon: IndianRupee },

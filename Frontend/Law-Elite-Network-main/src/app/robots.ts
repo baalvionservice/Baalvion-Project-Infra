@@ -54,7 +54,6 @@ const DISALLOW = [
   '/profile',
   '/cases/',
   '/chat/',
-  '/appointments',
   '/vault',
   '/transactions',
   '/billing',
@@ -70,11 +69,8 @@ const DISALLOW = [
   '/forgot-password',
   '/reset-password',
   '/access-denied',
-  // Lawyer directory is empty until real, verified attorney data is loaded —
-  // pulled from nav/sitemap and disallowed here so it isn't crawled or
-  // indexed while it's just an empty results page. Re-enable alongside the
-  // nav links in PublicNavbar/PublicFooter/homepage once populated.
-  '/lawyers',
+  // Individual lawyer profile pages remain reachable; the /lawyers directory
+  // page itself was removed from the frontend, so it needs no disallow entry.
   '/lawyer/',
   '/api/',
 ];

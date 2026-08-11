@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 
 /**
  * Homepage "what is this platform" explainer -- states the education-vs-advice
@@ -12,19 +13,24 @@ export function PlatformIntro() {
       <div className="max-w-3xl">
         <span className="kicker">What We Do</span>
         <h2 className="font-headline text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 mt-2 mb-5">
-          An independent legal-education publisher
+          What Is Law Elite Network?
         </h2>
         <div className="space-y-4 text-[15px] leading-relaxed text-slate-600">
           <p>
-            Law Elite Network explains what legal concepts, rights, procedures and terminology
-            actually mean — in plain language, organized by topic and by jurisdiction, so you can
-            understand a legal system before you have to navigate it.
+            Law Elite Network is a legal-information and education platform created to make complex
+            legal topics easier to understand. We organize legal information by subject and
+            jurisdiction so readers can find relevant resources more easily.
           </p>
           <p>
-            That's legal <em>education</em>, not individualized legal advice. Our guides help you
-            recognize what applies to your situation and prepare better questions for a
-            conversation with counsel — the specifics of any real case still belong with a
-            qualified, licensed lawyer in the relevant jurisdiction.
+            Law Elite Network provides general legal information for educational and research
+            purposes. It is <strong className="text-slate-800">not a law firm</strong> and does not
+            provide individualized legal advice or legal representation — see our full{' '}
+            <Link href="/terms-of-service#disclaimers" className="text-blue-600 hover:underline">
+              Legal Disclaimer
+            </Link>
+            . Our guides help you recognize what applies to your situation and prepare better
+            questions for a conversation with counsel — the specifics of any real case still belong
+            with a qualified, licensed lawyer in the relevant jurisdiction.
           </p>
         </div>
       </div>

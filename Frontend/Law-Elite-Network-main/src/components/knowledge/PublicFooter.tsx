@@ -83,6 +83,7 @@ export function PublicFooter() {
                 <li><Link href="/terms-of-service" className="hover:text-white transition-colors">Terms of Service &amp; Legal Disclaimer</Link></li>
                 <li><Link href="/cookie-policy" className="hover:text-white transition-colors">Cookie Policy</Link></li>
                 <li><Link href="/editorial-disclosure-policy" className="hover:text-white transition-colors">Editorial, DMCA &amp; Disclosure Policy</Link></li>
+                <li><Link href="/ai-usage-policy" className="hover:text-white transition-colors">AI Usage Policy</Link></li>
               </ul>
             </div>
           </div>
