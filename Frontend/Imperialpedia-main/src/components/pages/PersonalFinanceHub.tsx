@@ -51,12 +51,15 @@ const TOPICS: Array<{
   { slug: "money-management", label: "Money Management", icon: Wallet },
 ];
 
-/** Real review categories relevant to personal-finance decisions (advisors, robo-advisors, tax software, insurance). */
+/** Real review categories relevant to personal-finance decisions. "advisor-reviews",
+ * "robo-advisors", and "insurance-reviews" previously listed here don't exist as CMS
+ * categories or page routes (verified: 0 published articles under any of the three,
+ * and none has a src/app route) — every card rendered from them linked to a permanent
+ * 404 with a "0 reviews" count. "loan-reviews" and "tax-software" are the real,
+ * populated categories most relevant to personal-finance decisions (borrowing, taxes). */
 const RELATED_REVIEWS: Array<{ slug: string; label: string }> = [
-  { slug: "advisor-reviews", label: "Advisor Reviews" },
-  { slug: "robo-advisors", label: "Robo-Advisors" },
+  { slug: "loan-reviews", label: "Loan Reviews" },
   { slug: "tax-software", label: "Tax Software" },
-  { slug: "insurance-reviews", label: "Insurance Reviews" },
 ];
 
 /** Real calculator pages that exist today (see src/services/mock-api/calculators.ts). */

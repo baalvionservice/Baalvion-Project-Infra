@@ -24,7 +24,17 @@ type Props = {
  * tabs only changes which already-live set is displayed.
  */
 export function InvestingTopicExplorer({ topics, articlesByTopic, allArticles }: Props) {
-  const [active, setActive] = React.useState<string>("all");
+  // Default to "All" only when it actually has something to show. When the hub's own
+  // top-level category is thin (e.g. /investing's "investing" CMS category has just 3
+  // articles, all consumed by the featured/sidebar sections above this component),
+  // "All" renders empty even though every individual topic tab has real content one
+  // click away — a visitor lands straight on a false "no content" message instead of
+  // the real articles sitting right there. Falls back to the first populated topic;
+  // if truly everything is empty, "all" stays the default and the empty state is honest.
+  const firstPopulatedTopic = topics.find((t) => (articlesByTopic[t.slug]?.length ?? 0) > 0)?.slug;
+  const [active, setActive] = React.useState<string>(
+    allArticles.length > 0 ? "all" : firstPopulatedTopic ?? "all"
+  );
 
   const visibleTopics = React.useMemo(
     () => topics.filter((t) => (articlesByTopic[t.slug]?.length ?? 0) > 0),

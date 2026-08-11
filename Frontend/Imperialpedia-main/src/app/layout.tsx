@@ -121,6 +121,38 @@ export default async function RootLayout({
       className={cn(sourceSerif.variable)}
     >
       <head>
+        {/* Google Consent Mode v2 -- must run BEFORE the GTM/GA loaders and the
+            AdSense loader below, so no GA/ads cookie is set for a visitor who
+            hasn't chosen yet. CookieConsentBanner updates this to 'granted' on
+            accept; until then every visitor (EEA or not) defaults to denied,
+            satisfying Google's EU User Consent Policy for AdSense/Analytics.
+            This must be a literal <script> tag, not next/script's <Script>
+            component -- per the same reasoning as the AdSense script below,
+            next/script (any strategy, including beforeInteractive) doesn't
+            emit a literal synchronously-executing tag in place; it registers
+            the code in a self.__next_s.push([...]) bootstrap array that can
+            run after later async scripts have already fetched and executed.
+            Previously this lived in Analytics.tsx gated on NEXT_PUBLIC_GA_ID
+            (and rendered as a next/script Script in <body>), so a visitor got
+            zero consent-default protection whenever GA_ID was unset, and even
+            when set, it landed after the AdSense/GA loaders in practice. */}
+        <script
+          id="consent-default"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              window.gtag = gtag;
+              gtag('consent', 'default', {
+                ad_storage: 'denied',
+                ad_user_data: 'denied',
+                ad_personalization: 'denied',
+                analytics_storage: 'denied',
+                wait_for_update: 500,
+              });
+            `,
+          }}
+        />
         <GoogleTagManagerScript />
         <meta
           name="viewport"
