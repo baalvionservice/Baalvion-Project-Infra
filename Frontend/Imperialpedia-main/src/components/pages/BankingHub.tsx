@@ -52,10 +52,14 @@ const PRODUCT_TOPICS: Array<{
   { slug: "money-market", label: "Money Market Accounts", icon: Landmark },
 ];
 
-/** Real review-category slugs — a dedicated area, never mixed into the guide sections. */
+/** Real review-category slugs — a dedicated area, never mixed into the guide sections.
+ * "bank-reviews" and "credit-card-reviews" previously listed here don't exist as CMS
+ * categories or page routes (verified: 0 published articles under either slug, and
+ * neither has a src/app route) — every card rendered from them linked to a permanent
+ * 404 with a "0 reviews" count. "banking-reviews" is the real, populated category that
+ * covers both banks and cards (same slug used in the Navbar's "Banking Reviews" link). */
 const REVIEW_TOPICS: Array<{ slug: string; label: string }> = [
-  { slug: "bank-reviews", label: "Bank Reviews" },
-  { slug: "credit-card-reviews", label: "Credit Card Reviews" },
+  { slug: "banking-reviews", label: "Banking Reviews" },
   { slug: "loan-reviews", label: "Loan Reviews" },
   { slug: "app-reviews", label: "App Reviews" },
 ];
