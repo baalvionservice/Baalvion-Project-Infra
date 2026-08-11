@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import Link from 'next/link';
 import {
   ShieldCheck,
   Languages,
@@ -70,6 +71,20 @@ export function TrustSection() {
             <p className="text-[13.5px] text-slate-500 leading-relaxed">{p.body}</p>
           </div>
         ))}
+      </div>
+
+      <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mt-12 text-[12.5px] font-bold uppercase tracking-wider">
+        <Link href="/editorial-standards" className="text-blue-700 hover:text-news-600 transition-colors">
+          Editorial Standards
+        </Link>
+        <span className="text-slate-300" aria-hidden="true">·</span>
+        <Link href="/editorial-process" className="text-blue-700 hover:text-news-600 transition-colors">
+          Editorial Process
+        </Link>
+        <span className="text-slate-300" aria-hidden="true">·</span>
+        <Link href="/corrections" className="text-blue-700 hover:text-news-600 transition-colors">
+          Corrections Policy
+        </Link>
       </div>
     </div>
   );
