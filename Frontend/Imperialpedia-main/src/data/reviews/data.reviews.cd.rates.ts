@@ -12,11 +12,11 @@ export const bestCdRatesReview: ReviewArticle = withReviewArt({
   metaDescription:
     "Find the best CD rates of April 2026. We compared rates, terms, and minimum deposits from top banks to help you earn more on your savings.",
   reviewedBy: {
-    name: "Sarah Mitchell",
-    title: "Senior Banking Editor",
-    slug: "sarah-mitchell",
+    name: "Tamanna Shaikh",
+    title: "Senior Editor",
+    slug: "tamanna-shaikh",
   },
-  factCheckedBy: { name: "James Okafor", title: "Certified Financial Planner", slug: "james-okafor" },
+  factCheckedBy: { name: "Deepak Kuldeep", title: "Fact-Checking Editor", slug: "deepak-kuldeep" },
   methodologyLink: "#methodology",
   methodology:
     "We evaluated 40+ banks and credit unions, comparing APY rates, minimum deposit requirements, early withdrawal penalties, and FDIC/NCUA insurance coverage. Rates were verified directly from institution websites in April 2026.",

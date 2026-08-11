@@ -12,14 +12,14 @@ export const bestReliefCompanies: ReviewArticle = withReviewArt({
   metaDescription:
     "Find the best debt relief companies of April 2026, compared by accreditation, fees, program length, and how debt settlement actually works.",
   reviewedBy: {
-    name: "Priya Nair",
-    title: "Senior Loans Editor",
-    slug: "priya-nair",
+    name: "Tamanna Shaikh",
+    title: "Senior Editor",
+    slug: "tamanna-shaikh",
   },
   factCheckedBy: {
-    name: "Daniel Osei",
-    title: "Personal Finance Analyst",
-    slug: "daniel-osei",
+    name: "Deepak Kuldeep",
+    title: "Fact-Checking Editor",
+    slug: "deepak-kuldeep",
   },
   methodologyLink: "#methodology",
   methodology:

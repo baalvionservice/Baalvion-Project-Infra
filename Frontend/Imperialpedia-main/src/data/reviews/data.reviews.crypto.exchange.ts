@@ -12,11 +12,11 @@ export const bestCryptoExchangesReview: ReviewArticle = withReviewArt({
   metaDescription:
     "Find the best cryptocurrency exchanges of April 2026. We ranked platforms by fees, security, coin selection, and user experience.",
   reviewedBy: {
-    name: "Alex Torres",
-    title: "Senior Crypto Editor",
-    slug: "alex-torres",
+    name: "Tamanna Shaikh",
+    title: "Senior Editor",
+    slug: "tamanna-shaikh",
   },
-  factCheckedBy: { name: "Priya Nair", title: "Blockchain Analyst", slug: "priya-nair" },
+  factCheckedBy: { name: "Deepak Kuldeep", title: "Fact-Checking Editor", slug: "deepak-kuldeep" },
   methodologyLink: "#methodology",
   methodology:
     "We evaluated 20+ cryptocurrency exchanges across trading fees, available coins, security track record, regulatory compliance, ease of use, staking options, and customer support quality, using each platform's published fee schedules, security disclosures, and regulatory filings.",

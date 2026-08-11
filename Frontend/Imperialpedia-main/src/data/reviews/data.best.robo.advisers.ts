@@ -12,14 +12,14 @@ export const bestRoboAdvisers: ReviewArticle = withReviewArt({
   metaDescription:
     "Find the best robo-advisors of April 2026, ranked by advisory fees, tax-loss harvesting, portfolio options, and account minimums.",
   reviewedBy: {
-    name: "Marcus Reid",
-    title: "Senior Investing Editor",
-    slug: "marcus-reid",
+    name: "Tamanna Shaikh",
+    title: "Senior Editor",
+    slug: "tamanna-shaikh",
   },
   factCheckedBy: {
-    name: "Linda Zhao",
-    title: "CFA Charterholder",
-    slug: "linda-zhao",
+    name: "Deepak Kuldeep",
+    title: "Fact-Checking Editor",
+    slug: "deepak-kuldeep",
   },
   methodologyLink: "#methodology",
   methodology:
