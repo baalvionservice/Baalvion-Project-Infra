@@ -175,3 +175,32 @@
 .key-takeaways li {
   @apply text-base md:text-lg text-slate-700 leading-relaxed font-medium italic;
 }
+
+/* Callout boxes — "what this means" style notes inside article bodies.
+   Semantic color per variant, in the site's own palette (no Investopedia orange). */
+.callout {
+  @apply my-8 p-6 rounded-xl border-l-4 text-[1.05rem] leading-relaxed;
+}
+.callout p { @apply mb-0 text-inherit font-serif; }
+.callout-info { @apply bg-blue-50 border-blue-600 text-slate-800; }
+.callout-warning { @apply bg-amber-50 border-amber-500 text-slate-800; }
+.callout-success { @apply bg-emerald-50 border-emerald-600 text-slate-800; }
+.callout-error { @apply bg-red-50 border-red-600 text-slate-800; }
+
+/* Collapsible "Article Sources" — same disclosure pattern as the reference,
+   in the site's own type/border language instead of a copied color scheme. */
+.prose-legal details {
+  @apply my-10 border border-slate-200 rounded-xl px-6 py-4;
+}
+.prose-legal details summary {
+  @apply cursor-pointer select-none text-[11px] font-bold uppercase tracking-[0.2em] text-slate-900 list-none flex items-center justify-between;
+}
+.prose-legal details summary::-webkit-details-marker { display: none; }
+.prose-legal details summary::after {
+  content: '▾';
+  color: #94a3b8;
+  transition: transform 0.2s ease;
+}
+.prose-legal details[open] summary::after { transform: rotate(180deg); }
+.prose-legal details ul { @apply mt-5 mb-0 pl-5 space-y-3; }
+.prose-legal details li { @apply text-[1rem] leading-relaxed text-slate-600 font-serif; }

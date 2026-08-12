@@ -5,23 +5,46 @@ import Image from 'next/image';
 import { Navbar } from '@/components/navbar';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { Linkedin, Twitter, Facebook, Instagram, BookOpen } from 'lucide-react';
-import { authorNameToSlug } from '@/data/authors';
+import { authorNameToSlug, getAllAuthors } from '@/data/authors';
 import { getMergedAuthorBySlug } from '@/lib/authors-server';
-import { getAllArticles, type LawArticle } from '@/data/law-content';
+import { mergeArticles, type LawArticle } from '@/data/law-content';
+import { cmsGetArticles } from '@/lib/cms';
 import { resolveArticleImage, resolvePersonImage } from '@/lib/article-art';
 import { articleUrl } from '@/lib/article-url';
+
+// Serve a cached page and refresh it in the background every 5 minutes,
+// instead of re-rendering (and re-fetching from the CMS) on every single
+// visitor/Googlebot request.
+export const revalidate = 300;
+
+// `revalidate` above only produces a cached HTML response for paths Next
+// knows about ahead of time -- without this, a dynamic segment with no
+// generateStaticParams renders fully per-request regardless of `revalidate`.
+// The bundled authors are a small, known, local list, so prerendering them
+// here is what actually makes this route ISR'd for them. CMS-only authors
+// (not in this list) still render fine on demand via getMergedAuthorBySlug --
+// dynamicParams stays true by default.
+export function generateStaticParams() {
+  return getAllAuthors().map((a) => ({ slug: a.slug }));
+}
 
 export default async function AuthorProfilePage(
   { params }: { params: Promise<{ slug: string }> },
 ) {
   const { slug } = await params;
-  const author = await getMergedAuthorBySlug(slug);
+  const [author, cmsArticles] = await Promise.all([
+    getMergedAuthorBySlug(slug),
+    cmsGetArticles().catch(() => []),
+  ]);
   if (!author) notFound();
 
   // Match a byline ("Elena Rossi") to this profile by its normalized slug.
-  const articles: LawArticle[] = getAllArticles()
+  // mergeArticles() folds in CMS-sourced guides (CMS wins by slug) so a
+  // contributor whose work lives only in the CMS isn't shown as having
+  // published nothing.
+  const articles: LawArticle[] = mergeArticles(cmsArticles)
     .filter((a) => authorNameToSlug(a.author) === author.slug)
-    .sort((a, b) => b.views - a.views);
+    .sort((a, b) => (b.views ?? 0) - (a.views ?? 0));
 
   const avatar = resolvePersonImage({ avatarUrl: author.avatarUrl, name: author.name, avatarSeed: author.avatarSeed });
   const bioParagraphs = author.bio.split('\n').map((p) => p.trim()).filter(Boolean);
@@ -118,7 +141,7 @@ export default async function AuthorProfilePage(
                       </div>
                       <div className="p-5 flex flex-col flex-1">
                         <span className="text-[12px] font-bold text-blue-600 uppercase tracking-tight mb-2">
-                          {art.category.name}
+                          {art.category?.name ?? 'Legal Guide'}
                         </span>
                         <h3 className="text-[17px] font-bold text-slate-900 leading-[1.3] mb-3 group-hover:text-blue-700 transition-colors line-clamp-3">
                           {art.title}

@@ -35,9 +35,19 @@ export async function getMergedAuthors(): Promise<LawAuthor[]> {
 }
 
 export async function getMergedAuthorBySlug(slug: string): Promise<LawAuthor | null> {
-  const cms = await cmsGetAuthorBySlug(slug).catch(() => null);
-  if (cms) return fromCms(cms);
-  return LAW_AUTHORS.find((a) => a.slug === slug) ?? null;
+  const bundled = LAW_AUTHORS.find((a) => a.slug === slug) ?? null;
+  try {
+    const cms = await cmsGetAuthorBySlug(slug, true);
+    if (cms) return fromCms(cms);
+  } catch (err) {
+    // CMS unreachable. A bundled profile still renders fine (degrade
+    // silently, same as before); with no bundled fallback either, we can't
+    // tell "this author doesn't exist" from "CMS is down right now" -- throw
+    // instead of returning null so the caller's notFound() doesn't lock in a
+    // false 404 for a profile that was working moments ago.
+    if (!bundled) throw err;
+  }
+  return bundled;
 }
 
 export async function getMergedAuthorByName(name: string): Promise<LawAuthor | null> {

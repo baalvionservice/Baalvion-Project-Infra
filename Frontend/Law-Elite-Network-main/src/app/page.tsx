@@ -1,5 +1,5 @@
 import React from 'react';
-import { categoriesPublicApi, articlesPublicApi } from '@/lib/api/client';
+import { fetchPublicApi } from '@/lib/api/public-fetch';
 import { mergeArticles } from '@/data/law-content';
 import { cmsGetArticles } from '@/lib/cms';
 import { TopicTicker } from '@/components/knowledge/news/TopicTicker';
@@ -19,6 +19,11 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+
+// Serve a cached page and refresh it in the background every 5 minutes,
+// instead of re-rendering (and re-fetching from the CMS/law-service) on
+// every single visitor/Googlebot request.
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: 'Law Elite Network | Plain-Language Legal Guides, Worldwide',
@@ -67,17 +72,11 @@ function deriveCategories(pool: any[]): { id: string; name: string; slug: string
 export default async function KnowledgeHomePage() {
   const [cmsArticles, apiCategoriesRaw, apiArticles] = await Promise.all([
     cmsGetArticles().catch(() => []),
-    categoriesPublicApi
-      .list()
-      .then((res: any) => (Array.isArray(res.data?.data) ? res.data.data : []))
-      .catch(() => []),
-    articlesPublicApi
-      .list({ sortBy: 'views', order: 'desc', limit: 50, status: 'published' })
-      .then((res: any) => {
-        const items = res.data?.data?.items || res.data?.data || [];
-        return Array.isArray(items) ? items : [];
-      })
-      .catch(() => []),
+    fetchPublicApi('/categories').then((j) => (Array.isArray(j?.data) ? j.data : [])),
+    fetchPublicApi('/articles', { sortBy: 'views', order: 'desc', limit: 50, status: 'published' }).then((j) => {
+      const items = j?.data?.items || j?.data || [];
+      return Array.isArray(items) ? items : [];
+    }),
   ]);
   const apiCategories = apiCategoriesRaw;
 

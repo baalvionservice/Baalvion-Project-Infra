@@ -2,7 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { notFound } from 'next/navigation';
-import { categoriesPublicApi } from '@/lib/api/client';
+import { fetchPublicApi } from '@/lib/api/public-fetch';
 import { cmsGetArticles } from '@/lib/cms';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { getArticlesByCategorySlug } from '@/data/law-content';
@@ -13,8 +13,23 @@ import { ArticleJsonLd } from '@/lib/seo/article-seo';
 import seedData from '../../../docs/seed-data.json';
 import { CMS_ONLY_CATEGORIES } from '@/lib/cms-only-categories';
 import { CategoryContent } from './CategoryContent';
+import { CURRENT_CATEGORY_SLUGS } from '@/lib/category-slugs';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+
+// Serve a cached page and refresh it in the background every 5 minutes,
+// instead of re-rendering (and re-fetching from the CMS/law-service) on
+// every single visitor/Googlebot request.
+export const revalidate = 300;
+
+// `revalidate` above only produces a cached HTML response for paths Next
+// knows about ahead of time -- without this, a dynamic segment with no
+// generateStaticParams renders fully per-request regardless of `revalidate`.
+// The 8 practice-area hubs are a small, known, local list, so prerendering
+// them here is what actually makes this route ISR'd instead of always-live.
+export function generateStaticParams() {
+  return CURRENT_CATEGORY_SLUGS.map((categorySlug) => ({ categorySlug }));
+}
 
 function bundledCategory(slug: string) {
   if (CMS_ONLY_CATEGORIES[slug]) return CMS_ONLY_CATEGORIES[slug];
@@ -46,14 +61,10 @@ function bundledCategory(slug: string) {
  */
 async function fetchCategory(slug: string): Promise<any | null> {
   const local = bundledCategory(slug);
-  try {
-    const res = await categoriesPublicApi.get(slug);
-    const live = res.data?.data;
-    if (!live) return local;
-    return local ? { ...local, ...live } : live;
-  } catch {
-    return local;
-  }
+  const j = await fetchPublicApi(`/categories/${encodeURIComponent(slug)}`);
+  const live = j?.data;
+  if (!live) return local;
+  return local ? { ...local, ...live } : live;
 }
 
 export default async function CategoryPage(

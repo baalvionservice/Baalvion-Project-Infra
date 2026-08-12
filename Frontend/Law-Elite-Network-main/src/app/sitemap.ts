@@ -1,4 +1,5 @@
 import { MetadataRoute } from 'next';
+import { unstable_cache } from 'next/cache';
 import { getAllArticles } from '@/data/law-content';
 import { getAllAuthors } from '@/data/authors';
 import { articleUrl } from '@/lib/article-url';
@@ -9,6 +10,10 @@ import { COUNTRIES, getCountryArticleCounts } from '@/data/countries';
 // Render at request time, never at build time. This route fetches from law-service,
 // and a build-time fetch against an unreachable API blocks `next build` (CI timeout).
 // force-dynamic guarantees the production build never depends on an external service.
+// Caching still happens -- see getCachedSitemapEntries() below -- via
+// unstable_cache, which caches data independently of how the route itself
+// renders, so Googlebot/browser hits within the cache window get the cached
+// result instead of triggering a fresh CMS/law-service round-trip.
 export const dynamic = 'force-dynamic';
 
 // Hard cap on any sitemap fetch so a slow/hung upstream degrades to the static
@@ -35,7 +40,7 @@ async function safeFetch<T>(url: string): Promise<T[]> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
-    const res = await fetch(url, { cache: 'no-store', signal: controller.signal });
+    const res = await fetch(url, { next: { revalidate: 1800 }, signal: controller.signal });
     if (!res.ok) return [];
     const json = await res.json();
     const d = json?.data;
@@ -49,7 +54,16 @@ async function safeFetch<T>(url: string): Promise<T[]> {
   }
 }
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+/**
+ * Actual sitemap assembly, wrapped below in unstable_cache() so it only runs
+ * live (hitting law-service + the CMS) once per revalidate window instead of
+ * on every request -- the route itself stays force-dynamic (see the comment
+ * above), but the expensive part is still cached. If a request lands mid-
+ * window, unstable_cache serves the last successfully cached result instead
+ * of re-running this, so a transient upstream outage can't intermittently
+ * drop CMS/live-API routes from what Googlebot sees.
+ */
+async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
   // No localhost fallback in production: an unset build arg yields '' so safeFetch
   // fails closed (sitemap degrades to static routes) instead of probing localhost.
   const apiBase =
@@ -193,4 +207,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...authorRoutes,
     ...countryRoutes,
   ];
+}
+
+const getCachedSitemapEntries = unstable_cache(
+  buildSitemapEntries,
+  ['law-elite-network-sitemap-entries'],
+  { revalidate: 1800 },
+);
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  return getCachedSitemapEntries();
 }
