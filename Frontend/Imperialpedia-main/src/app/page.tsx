@@ -18,6 +18,7 @@ import { KnowledgeCategories } from "@/components/home/KnowledgeCategories";
 import { FeaturedCompanies } from "@/components/home/FeaturedCompanies";
 import { RecentlyUpdated } from "@/components/home/RecentlyUpdated";
 import { HomeSectionSkeleton } from "@/components/home/HomeSectionSkeleton";
+import { Leadership } from "@/components/home/Leadership";
 
 // The homepage previously inherited the root layout's generic metadata verbatim
 // (no page-level `generateMetadata`) — every list/detail page in the app calls
@@ -86,6 +87,8 @@ export default function Home() {
       </Suspense>
 
       <NewsletterBand />
+
+      <Leadership />
     </div>
   );
 }
