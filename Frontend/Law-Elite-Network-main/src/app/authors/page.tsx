@@ -5,12 +5,25 @@ import { Navbar } from '@/components/navbar';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { authorNameToSlug } from '@/data/authors';
 import { getMergedAuthors } from '@/lib/authors-server';
-import { getAllArticles } from '@/data/law-content';
+import { mergeArticles } from '@/data/law-content';
+import { cmsGetArticles } from '@/lib/cms';
 import { resolvePersonImage } from '@/lib/article-art';
 
+// Serve a cached page and refresh it in the background every 5 minutes,
+// instead of re-rendering (and re-fetching from the CMS) on every single
+// visitor/Googlebot request.
+export const revalidate = 300;
+
 export default async function AuthorsIndexPage() {
-  const authors = await getMergedAuthors();
-  const articles = getAllArticles();
+  const [authors, cmsArticles] = await Promise.all([
+    getMergedAuthors(),
+    cmsGetArticles().catch(() => []),
+  ]);
+  // CMS-authored guides (e.g. the maritime/injury desk) never lived in the
+  // bundled array, so counting bundled-only silently showed "0 guides" for
+  // any contributor whose real work is CMS-sourced. mergeArticles() is the
+  // same CMS-wins-by-slug pool the homepage already uses.
+  const articles = mergeArticles(cmsArticles);
 
   const countFor = (slug: string) =>
     articles.filter((a) => authorNameToSlug(a.author) === slug).length;

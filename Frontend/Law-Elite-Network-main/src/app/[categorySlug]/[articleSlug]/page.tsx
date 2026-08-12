@@ -3,6 +3,11 @@ import { fetchArticleForRender } from '@/lib/article-fetch';
 import { articleUrl } from '@/lib/article-url';
 import { ArticleView } from '@/components/knowledge/ArticleView';
 
+// No route-level `revalidate` here: reading `searchParams` (for CMS preview
+// below) makes this route inherently per-request dynamic, so full-route ISR
+// wouldn't apply anyway. The CMS/law-service reads it depends on are still
+// cached (see lib/article-fetch.ts), which is what actually keeps this fast.
+
 export default async function ArticlePage(
   { params, searchParams }: {
     params: Promise<{ categorySlug: string; articleSlug: string }>;

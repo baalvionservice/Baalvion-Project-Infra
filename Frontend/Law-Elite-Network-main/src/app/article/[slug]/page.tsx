@@ -9,6 +9,11 @@ import { ArticleView } from '@/components/knowledge/ArticleView';
  * permanently (308) redirect there instead of serving duplicate content at two
  * URLs. Only an article with no category at all (rare/orphaned content) has no
  * other URL to redirect to, so this route renders it directly.
+ *
+ * No route-level `revalidate` here: reading `searchParams` (for CMS preview
+ * below) makes this route inherently per-request dynamic, so full-route ISR
+ * wouldn't apply anyway. The CMS/law-service reads it depends on are still
+ * cached (see lib/article-fetch.ts), which is what actually keeps this fast.
  */
 export default async function ArticleDeepDivePage(
   { params, searchParams }: {

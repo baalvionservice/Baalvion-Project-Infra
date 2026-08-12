@@ -8,20 +8,23 @@ const API = process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || (process.env.NODE_EN
 // title instead of blocking metadata generation and the page render.
 const FETCH_TIMEOUT_MS = 4000;
 
+// Deliberately does not catch a network failure (mirrors lib/article-fetch.ts's
+// fetchArticleFromLawService): a clean non-2xx response resolves `null`
+// ("law-service confirms no such article"), but a thrown/aborted fetch
+// propagates so fetchArticleForMetadata can tell "not found" apart from
+// "unreachable right now" instead of collapsing both into a false 404.
 async function fetchFromLawService(slug: string): Promise<any | null> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
     // /articles/:slug resolves by slug (the ?slug= list filter is not applied server-side).
     const r = await fetch(`${API}/articles/${encodeURIComponent(slug)}`, {
-      next: { revalidate: 3600 },
+      next: { revalidate: 300 },
       signal: controller.signal,
     });
     if (!r.ok) return null;
     const j = await r.json();
     return j?.data ?? null;
-  } catch {
-    return null;
   } finally {
     clearTimeout(timer);
   }
@@ -38,28 +41,40 @@ async function fetchFromLawService(slug: string): Promise<any | null> {
  * away from itself -- a self-defeating canonical.
  */
 export async function fetchArticleForMetadata(slug: string): Promise<any | null> {
+  // Tracks whether a source failed outright rather than cleanly reporting "no
+  // such record" -- see the throw at the bottom, mirrors article-fetch.ts.
+  let upstreamFailed = false;
+
   // Same empty-draft guard as lib/article-fetch.ts: a CMS record with no
   // content blocks yet shouldn't get a real, indexable canonical/title --
   // fall through to law-service/bundled/seed instead.
-  const cms = await cmsGetArticleBySlug(slug);
-  if (cms && cms.content) {
-    return {
-      id: cms.id,
-      title: cms.title,
-      excerpt: cms.excerpt,
-      tags: [],
-      category: cms.category,
-      author: cms.author,
-      contentType: cms.contentType,
-      updated_at: cms.updatedAt,
-      published_at: cms.updatedAt,
-      cover_image: cms.featuredImage,
-      body: cms.content,
-    };
+  try {
+    const cms = await cmsGetArticleBySlug(slug, true);
+    if (cms && cms.content) {
+      return {
+        id: cms.id,
+        title: cms.title,
+        excerpt: cms.excerpt,
+        tags: [],
+        category: cms.category,
+        author: cms.author,
+        contentType: cms.contentType,
+        updated_at: cms.updatedAt,
+        published_at: cms.updatedAt,
+        cover_image: cms.featuredImage,
+        body: cms.content,
+      };
+    }
+  } catch {
+    upstreamFailed = true;
   }
 
-  const fromLawService = await fetchFromLawService(slug);
-  if (fromLawService) return fromLawService;
+  try {
+    const fromLawService = await fetchFromLawService(slug);
+    if (fromLawService) return fromLawService;
+  } catch {
+    upstreamFailed = true;
+  }
 
   const bundled = getArticleBySlug(slug);
   if (bundled) {
@@ -78,7 +93,16 @@ export async function fetchArticleForMetadata(slug: string): Promise<any | null>
   }
 
   const seedMatch = (seedData as any).articles?.find((a: any) => a.slug === slug && a.content);
-  return seedMatch
-    ? { ...seedMatch, excerpt: seedMatch.excerpt || seedMatch.summary, body: seedMatch.content }
-    : null;
+  if (seedMatch) {
+    return { ...seedMatch, excerpt: seedMatch.excerpt || seedMatch.summary, body: seedMatch.content };
+  }
+
+  // Nothing matched and a source failed outright -- throw instead of
+  // resolving null so a transient CMS/law-service outage doesn't quietly bake
+  // a humanized-slug fallback title/canonical into the ISR cache for a page
+  // that was rendering correctly moments ago.
+  if (upstreamFailed) {
+    throw new Error(`Unable to resolve article metadata for "${slug}": content sources are temporarily unavailable`);
+  }
+  return null;
 }

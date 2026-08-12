@@ -108,22 +108,44 @@ export interface CmsHomepage {
   trustStats: Array<{ icon: string; label: string; value: string }>;
 }
 
-async function fetchJSON(url: string): Promise<any | null> {
+// Public editorial content changes by admin action, not by the second — a short
+// revalidation window keeps pages fast (served from cache, no live round-trip
+// on every visitor/Googlebot hit) while still picking up new publishes quickly.
+const DEFAULT_REVALIDATE_SECONDS = 300;
+
+/**
+ * `revalidate: false` opts a call out of caching entirely (`no-store`) for
+ * genuinely real-time reads (the draft-preview endpoint). `strict: true` makes
+ * a network-level failure (timeout/abort/DNS/connection error) reject instead
+ * of resolving `null` — callers that need to tell "CMS confirms this doesn't
+ * exist" apart from "CMS is unreachable right now" (so they don't 404 a page
+ * that only *might* be gone) opt into this; every other caller keeps the
+ * original null-on-any-failure behavior by leaving it off.
+ */
+async function fetchJSON(
+  url: string,
+  opts: { revalidate?: number | false; strict?: boolean } = {},
+): Promise<any | null> {
+  const { revalidate = DEFAULT_REVALIDATE_SECONDS, strict = false } = opts;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
-    const r = await fetch(url, { cache: 'no-store', signal: controller.signal });
-    if (!r.ok) return null;
+    const r = await fetch(url, {
+      ...(revalidate === false ? { cache: 'no-store' as const } : { next: { revalidate } }),
+      signal: controller.signal,
+    });
+    if (!r.ok) return null; // clean HTTP response: CMS confirms no such record — not a failure.
     return await r.json();
-  } catch {
+  } catch (err) {
+    if (strict) throw err; // network/timeout failure — let the caller decide, don't paper over it as "not found".
     return null;
   } finally {
     clearTimeout(timer);
   }
 }
 
-async function getContent(slug: string): Promise<CmsContent | null> {
-  const j = await fetchJSON(`${BASE}/content/${encodeURIComponent(slug)}`);
+async function getContent(slug: string, strict = false): Promise<CmsContent | null> {
+  const j = await fetchJSON(`${BASE}/content/${encodeURIComponent(slug)}`, { strict });
   return j && j.data ? (j.data as CmsContent) : null;
 }
 
@@ -304,9 +326,13 @@ export async function cmsGetArticles(letter?: string, categorySlug?: string): Pr
   return arts.sort((a, b) => a.title.localeCompare(b.title));
 }
 
-/** Fetch a single CMS article by slug (used as a fallback on the article page). */
-export async function cmsGetArticleBySlug(slug: string): Promise<CmsArticle | null> {
-  const c = await getContent(slug);
+/**
+ * Fetch a single CMS article by slug (used as a fallback on the article page).
+ * Pass `strict: true` to reject on a network failure instead of resolving
+ * `null` — see fetchJSON's `strict` doc for why the render/metadata paths need it.
+ */
+export async function cmsGetArticleBySlug(slug: string, strict = false): Promise<CmsArticle | null> {
+  const c = await getContent(slug, strict);
   return c ? toArticle(c) : null;
 }
 
@@ -337,7 +363,7 @@ export async function cmsGetNewsPage(
  */
 export async function cmsGetPreviewContent(slug: string, exp: string, token: string): Promise<CmsArticle | null> {
   const qs = new URLSearchParams({ exp, token }).toString();
-  const j = await fetchJSON(`${BASE}/content/${encodeURIComponent(slug)}/preview?${qs}`);
+  const j = await fetchJSON(`${BASE}/content/${encodeURIComponent(slug)}/preview?${qs}`, { revalidate: false });
   return j && j.data ? toArticle(j.data as CmsContent) : null;
 }
 
@@ -379,9 +405,13 @@ export async function cmsGetAuthors(): Promise<CmsAuthor[]> {
   return j.data.map(toAuthor).filter(Boolean) as CmsAuthor[];
 }
 
-/** Fetch a single CMS author profile by slug (null until the backend ships it). */
-export async function cmsGetAuthorBySlug(slug: string): Promise<CmsAuthor | null> {
-  const j = await fetchJSON(`${BASE}/authors/${encodeURIComponent(slug)}`);
+/**
+ * Fetch a single CMS author profile by slug (null until the backend ships it,
+ * or when the CMS confirms no such profile). Pass `strict: true` to reject on
+ * a network failure instead — see fetchJSON's `strict` doc.
+ */
+export async function cmsGetAuthorBySlug(slug: string, strict = false): Promise<CmsAuthor | null> {
+  const j = await fetchJSON(`${BASE}/authors/${encodeURIComponent(slug)}`, { strict });
   return j && j.data ? toAuthor(j.data) : null;
 }
 
