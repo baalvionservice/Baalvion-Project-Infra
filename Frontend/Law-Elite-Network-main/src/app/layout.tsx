@@ -2,7 +2,7 @@
 import React from "react";
 import type { Metadata } from "next";
 import Script from "next/script";
-import { Inter, Libre_Franklin, Source_Serif_4 } from "next/font/google";
+import localFont from "next/font/local";
 import { AuthProvider } from '@/context/AuthContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { I18nProvider } from '@/i18n/I18nProvider';
@@ -19,24 +19,29 @@ import './globals.css';
 
 // Editorial type system: Libre Franklin (Franklin-Gothic display, à la
 // Investopedia/CNBC mastheads) + Inter (UI body) + Source Serif 4 (long-form
-// article reading). Self-hosted via next/font — removes the render-blocking
-// fonts.googleapis.com request + preconnects, adds automatic font-display:
-// swap and preloading of the fonts actually used above the fold.
-const inter = Inter({
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
+// article reading). Vendored as local variable-font files (see src/fonts/)
+// rather than next/font/google -- the latter fetches from fonts.gstatic.com
+// at *build* time (not just runtime), and Vercel's build environment
+// intermittently can't reach it ("Failed to fetch font file"), failing the
+// whole production build. Local files remove that network dependency
+// entirely. Each file is the same single latin-subset variable font Google
+// was already serving for every weight in its range, downloaded straight
+// from the same CDN URL next/font/google was using.
+const inter = localFont({
+  src: '../fonts/Inter-Variable.woff2',
+  weight: '300 700',
   variable: '--font-body',
   display: 'swap',
 });
-const libreFranklin = Libre_Franklin({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800', '900'],
+const libreFranklin = localFont({
+  src: '../fonts/LibreFranklin-Variable.woff2',
+  weight: '400 900',
   variable: '--font-headline',
   display: 'swap',
 });
-const sourceSerif = Source_Serif_4({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
+const sourceSerif = localFont({
+  src: '../fonts/SourceSerif4-Variable.woff2',
+  weight: '400 700',
   variable: '--font-serif',
   display: 'swap',
 });
