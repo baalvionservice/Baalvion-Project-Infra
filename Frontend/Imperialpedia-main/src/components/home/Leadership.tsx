@@ -66,6 +66,7 @@ export async function Leadership() {
   ]);
 
   const stats = [
+    { value: "2022", label: "Founded" },
     { value: `${companies.length}+`, label: "Companies Tracked" },
     { value: `${countries.length}+`, label: "Countries Covered" },
     { value: `${technologies.length}+`, label: "Technologies Explained" },
@@ -77,12 +78,15 @@ export async function Leadership() {
         <div>
           <h2 className="text-3xl font-black tracking-tight text-foreground">Our Mission</h2>
           <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground">
-            Imperialpedia exists to make markets, money, and economic ideas easier to understand.
-            We connect readers with trustworthy, organized information on investing, personal
-            finance, and the wider economy — with transparent sourcing and a focus on education,
-            not hype.
+            Imperialpedia began as an independent project on March 26, 2022, built on a simple
+            idea: financial information shouldn&apos;t be confusing. As the platform grew, it found
+            a permanent home under Baalvion Industries Private Limited, incorporated on March 11,
+            2025 — giving the work behind Imperialpedia a real legal foundation and the resources
+            to keep building. Today, we connect readers with trustworthy, organized information on
+            investing, personal finance, and the wider economy — with transparent sourcing and a
+            focus on education, not hype.
           </p>
-          <div className="mt-8 grid grid-cols-3 gap-6">
+          <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-4">
             {stats.map((stat) => (
               <div key={stat.label}>
                 <span className="block text-3xl font-black text-primary">{stat.value}</span>
