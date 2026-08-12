@@ -1,6 +1,6 @@
 import React from "react";
+import { loadCompanies, loadCountries, loadTechnologies } from "@/lib/data/loaders";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { HomeSectionHeading } from "./HomeSectionHeading";
 
 interface Leader {
   name: string;
@@ -48,41 +48,94 @@ const EXECUTIVE_COMMITTEE: Leader[] = [
   },
 ];
 
-export function Leadership() {
+/**
+ * "Our Mission" + "Leadership" — the closing trust section, mirroring how
+ * reference editorial sites pair a mission statement and real stats with a
+ * leadership/advisor list near the bottom of the homepage. The stats reuse
+ * the same live loaders KnowledgeCategories draws from (never a separate,
+ * driftable number) rather than the kind of round, unverifiable claims
+ * ("30+ Million Readers") this codebase has deliberately stripped out of
+ * other properties' homepages elsewhere -- see the Law Elite Network and
+ * Imperialpedia "remove unverifiable stats" history.
+ */
+export async function Leadership() {
+  const [companies, countries, technologies] = await Promise.all([
+    loadCompanies(),
+    loadCountries(),
+    loadTechnologies(),
+  ]);
+
+  const stats = [
+    { value: `${companies.length}+`, label: "Companies Tracked" },
+    { value: `${countries.length}+`, label: "Countries Covered" },
+    { value: `${technologies.length}+`, label: "Technologies Explained" },
+  ];
+
   return (
-    <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 border-t border-border">
-      <HomeSectionHeading
-        title="Leadership"
-        href="https://ir.baalvion.com/governance/leadership"
-        hrefLabel="Meet the full leadership team"
-      />
-      <p className="mb-6 max-w-2xl text-sm text-muted-foreground">
-        Imperialpedia is published by Baalvion Industries Private Limited. Our executive
-        committee is listed on Baalvion&apos;s investor-relations site, linked below.
-      </p>
-      <div className="grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-4">
-        {EXECUTIVE_COMMITTEE.map((leader) => (
+    <section className="border-t border-border bg-muted/30">
+      <div className="mx-auto grid max-w-7xl gap-12 px-4 py-14 sm:px-6 lg:grid-cols-[1fr_380px] lg:px-8">
+        <div>
+          <h2 className="text-3xl font-black tracking-tight text-foreground">Our Mission</h2>
+          <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground">
+            Imperialpedia exists to make markets, money, and economic ideas easier to understand.
+            We connect readers with trustworthy, organized information on investing, personal
+            finance, and the wider economy — with transparent sourcing and a focus on education,
+            not hype.
+          </p>
+          <div className="mt-8 grid grid-cols-3 gap-6">
+            {stats.map((stat) => (
+              <div key={stat.label}>
+                <span className="block text-3xl font-black text-primary">{stat.value}</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  {stat.label}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="border-t border-border pt-8 lg:border-l lg:border-t-0 lg:pl-12 lg:pt-0">
+          <h2 className="text-xl font-black tracking-tight text-foreground">Leadership</h2>
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+            Imperialpedia is published by Baalvion Industries Private Limited. Our executive
+            committee is listed on Baalvion&apos;s investor-relations site.
+          </p>
+          <ul className="mt-6 space-y-5">
+            {EXECUTIVE_COMMITTEE.map((leader) => (
+              <li key={leader.name}>
+                <a
+                  href={leader.profileHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center gap-3"
+                >
+                  <Avatar className="h-14 w-14 shrink-0 rounded-lg border border-border">
+                    {leader.photo && <AvatarImage src={leader.photo} alt={leader.name} className="rounded-lg" />}
+                    <AvatarFallback className="rounded-lg text-sm font-bold">
+                      {leader.initials}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-bold leading-snug text-foreground transition-colors group-hover:text-primary">
+                      {leader.name}
+                    </p>
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      {leader.title}
+                    </p>
+                  </div>
+                </a>
+              </li>
+            ))}
+          </ul>
           <a
-            key={leader.name}
-            href={leader.profileHref}
+            href="https://ir.baalvion.com/governance/leadership"
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex flex-col items-center gap-3 text-center"
+            className="mt-6 inline-block text-sm font-bold text-primary hover:underline"
           >
-            <Avatar className="h-24 w-24 border border-border">
-              {leader.photo && <AvatarImage src={leader.photo} alt={leader.name} />}
-              <AvatarFallback className="text-lg font-bold">{leader.initials}</AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="font-bold leading-snug text-foreground transition-colors group-hover:text-primary">
-                {leader.name}
-              </p>
-              <p className="mt-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                {leader.title}
-              </p>
-            </div>
+            Meet the full leadership team →
           </a>
-        ))}
+        </div>
       </div>
     </section>
   );
