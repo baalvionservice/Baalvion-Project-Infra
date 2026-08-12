@@ -232,8 +232,8 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
     summary:
       'Australian employees meeting service and income eligibility can challenge a harsh dismissal — within a strict 21-day Fair Work Commission window.',
     author: 'Daniel Okoro',
-    updatedAt: 'August 9, 2026',
-    readingTime: 9,
+    updatedAt: 'August 12, 2026',
+    readingTime: 11,
     views: 0,
     featured: false,
     imageSeed: 'unfair-dismissal-australia-fair-work-commission',
@@ -257,6 +257,8 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
 <h2>The 21-Day Deadline</h2>
 <p>An unfair dismissal application must be lodged with the Fair Work Commission within 21 calendar days after the dismissal takes effect. This is one of the strictest deadlines in Australian law — the Commission may only extend it in exceptional circumstances, and missing it is one of the most common reasons a genuinely strong case never gets heard. If you are considering a claim, treat the 21-day clock as the first and most urgent fact to establish, before assessing the merits of the case itself.</p>
 
+<div class="callout callout-warning"><p><strong>The 21 days run from the date the dismissal took effect — not from when you decide to act, and not from your last physical day at work in every case.</strong> Confirming that exact trigger date is more urgent than assessing how strong your case is, since a strong case that's lodged late is not heard at all.</p></div>
+
 <h2>How the Process Works</h2>
 <ol>
 <li><strong>Lodge the application:</strong> file with the Fair Work Commission within the 21-day window, identifying the dismissal and the outcome sought.</li>
@@ -265,6 +267,21 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
 <li><strong>Remedy:</strong> if the claim succeeds, the Commission can order reinstatement or, more commonly in practice, compensation — capped at the lower of 26 weeks' pay or half the high income threshold at the time of dismissal.</li>
 </ol>
 
+<h3>A Worked Timeline Example</h3>
+<p>To make the deadline concrete: if an employee's dismissal takes effect on a Monday, the 21-day clock runs continuously — including weekends — and expires three weeks later, on the Monday three weeks after. A conciliation conference, if the matter proceeds, is typically listed some weeks after that, often conducted by phone or video rather than in person. This is illustrative only — the exact dates in a real matter depend on the Commission's current listing timeframes and should be confirmed directly with the Commission once an application is lodged.</p>
+
+<h2>Unfair Dismissal vs Other Pathways</h2>
+<p>Unfair dismissal is only one of several routes a dismissed Australian employee might have, and they are not interchangeable — each has its own forum, deadline, and cap.</p>
+<table>
+<thead><tr><th>Pathway</th><th>What it covers</th><th>Deadline</th><th>Outcome cap</th></tr></thead>
+<tbody>
+<tr><td><strong>Unfair dismissal</strong> (Fair Work Act Pt 3-2)</td><td>A dismissal that was harsh, unjust, or unreasonable, subject to the eligibility gates above</td><td>21 calendar days from dismissal</td><td>Reinstatement, or compensation capped at the lower of 26 weeks' pay or half the high income threshold</td></tr>
+<tr><td><strong>General protections dismissal claim</strong> (Fair Work Act Pt 3-1, s.365)</td><td>Dismissal for a prohibited reason — e.g. exercising a workplace right, discrimination, or union membership — with no minimum service or income cap</td><td>21 calendar days from dismissal</td><td>Uncapped compensation; no minimum-service or high-income exclusion applies</td></tr>
+<tr><td><strong>Breach of contract</strong> (common law, state/territory courts)</td><td>An employer failing to honour the employment contract itself, e.g. notice or termination-payment terms</td><td>Generally around six years in most states and territories (ordinary contract limitation period — confirm the exact period locally)</td><td>Damages for the contractual loss actually suffered, generally uncapped by statute</td></tr>
+</tbody>
+</table>
+<p>Because the general protections pathway has no minimum-service or income-threshold gate, an employee who doesn't qualify for unfair dismissal — for instance, someone dismissed after only three months — may still have a general protections claim if the real reason for dismissal was a prohibited one.</p>
+
 <h2>Frequently Asked Questions</h2>
 <h3>How long do I have to file an unfair dismissal claim in Australia?</h3>
 <p>21 calendar days from the date the dismissal takes effect. The Fair Work Commission will only extend this deadline in exceptional circumstances, so acting quickly matters more than having every detail of your case worked out first.</p>
@@ -272,16 +289,21 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
 <p>Generally 6 months of continuous service, extended to 12 months if your employer is a small business with fewer than 15 employees.</p>
 <h3>Is there an income limit on who can claim unfair dismissal?</h3>
 <p>Yes, unless you're covered by a modern award or enterprise agreement. The high income threshold is $190,100 for dismissals on or after 1 July 2026, and this figure is indexed annually — confirm the current amount for your specific dismissal date.</p>
+<h3>What's the difference between unfair dismissal and a general protections claim?</h3>
+<p>Unfair dismissal asks whether the dismissal itself was harsh, unjust, or unreasonable, and only certain employees are eligible to ask that question. A general protections claim asks a different question — was the real reason for dismissal a prohibited one, such as exercising a workplace right or discrimination — and it has no minimum-service or income-threshold gate, though a claimant generally cannot pursue both an unfair dismissal application and a general protections dismissal claim over the same dismissal at the same time.</p>
+<h3>Can I bring a claim if I resigned rather than being formally dismissed?</h3>
+<p>Sometimes — a resignation that was genuinely forced by an employer's conduct (sometimes called constructive dismissal) can still count as a dismissal for Fair Work Act purposes, but this is a fact-specific and often harder claim to establish than a straightforward termination, since the employee bears the burden of showing the resignation wasn't truly voluntary.</p>
 
-<h2>Sources &amp; Further Reading</h2>
+<h2>Practical Next Steps</h2>
+<p>If you've just been dismissed and think it may have been unfair, calculate your 21-day deadline first — it runs from the date the dismissal took effect, not from your last physical day at work in every case, so confirm the exact trigger date. From there, check your length of service against the minimum employment period and your earnings against the current high income threshold before assessing the substance of your case. For the general, worldwide picture of what makes a dismissal unlawful, see <a href="/employment-law/when-is-a-dismissal-wrongful-termination">When Is a Dismissal Considered Wrongful Termination?</a></p>
+
+<details><summary>Article Sources</summary>
 <ul>
 <li>Fair Work Act 2009 (Cth), particularly ss. 382, 385, 392, and 394 — eligibility, the meaning of unfair dismissal, remedies, and the application deadline</li>
 <li>Fair Work Commission (fwc.gov.au) — official unfair dismissal guidance and current high income threshold figures</li>
 <li>Fair Work Ombudsman (fairwork.gov.au) — general employee-facing guidance on ending employment</li>
 </ul>
-
-<h2>Practical Next Steps</h2>
-<p>If you've just been dismissed and think it may have been unfair, calculate your 21-day deadline first — it runs from the date the dismissal took effect, not from your last physical day at work in every case, so confirm the exact trigger date. From there, check your length of service against the minimum employment period and your earnings against the current high income threshold before assessing the substance of your case. For the general, worldwide picture of what makes a dismissal unlawful, see <a href="/employment-law/when-is-a-dismissal-wrongful-termination">When Is a Dismissal Considered Wrongful Termination?</a></p>
+</details>
 
 <p><em>This article is general legal information, not legal advice. Figures such as the high income threshold are indexed annually — confirm the current amount with the Fair Work Commission, and consult an Australian employment lawyer for advice on your specific situation.</em></p>`,
   },
