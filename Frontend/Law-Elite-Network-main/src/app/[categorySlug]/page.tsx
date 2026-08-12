@@ -119,7 +119,7 @@ export default async function CategoryPage(
           <div className="container mx-auto px-4 sm:px-6 max-w-7xl py-12 md:py-16">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 text-[12px] font-bold uppercase tracking-wider text-slate-400 hover:text-news-600 transition-colors group mb-6"
+              className="flex w-fit items-center gap-2 text-[12px] font-bold uppercase tracking-wider text-slate-400 hover:text-news-600 transition-colors group mb-6"
             >
               <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" /> All Topics
             </Link>
