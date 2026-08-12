@@ -114,7 +114,13 @@ export async function Leadership() {
                   className="group flex items-center gap-3"
                 >
                   <Avatar className="h-14 w-14 shrink-0 rounded-lg border border-border">
-                    {leader.photo && <AvatarImage src={leader.photo} alt={leader.name} className="rounded-lg" />}
+                    {leader.photo && (
+                      <AvatarImage
+                        src={leader.photo}
+                        alt={leader.name}
+                        className="rounded-lg grayscale transition-all duration-300 group-hover:grayscale-0"
+                      />
+                    )}
                     <AvatarFallback className="rounded-lg text-sm font-bold">
                       {leader.initials}
                     </AvatarFallback>
