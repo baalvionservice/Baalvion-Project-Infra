@@ -101,7 +101,7 @@ export function RelatedArticles({ articles }: { articles: RelatedArticle[] }) {
               <div className="bg-white border border-slate-200 overflow-hidden shadow-sm group-hover:shadow-md transition-all duration-300 flex flex-col h-full">
                 <div className="relative aspect-[3/2] overflow-hidden bg-slate-100">
                   <Image
-                    src={resolveArticleImage({ featuredImage: art.featuredImage, title: art.title, category: { name: art.category }, id: art.id })}
+                    src={resolveArticleImage({ featuredImage: art.featuredImage, title: art.title, category: { name: art.category }, id: art.id, slug: art.slug })}
                     alt={art.title}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-500"

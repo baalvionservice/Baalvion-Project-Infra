@@ -80,6 +80,13 @@ interface CmsContent {
   customFields?: Record<string, any> | null;
   seoMetadata?: Record<string, any> | null;
   category?: { id: string; name: string; slug: string } | null;
+  /**
+   * Every category tagged on this content (public-service resolves `categoryIds`
+   * into full records). Includes both the top-level practice-area category and,
+   * when assigned in the admin panel's "add sub-category under X" control, its
+   * child — `parentId` is null for the former, set for the latter.
+   */
+  categories?: Array<{ id: string; name: string; slug: string; parentId: string | null }> | null;
   status: string;
   publishedAt?: string | null;
   viewCount?: number;
@@ -212,6 +219,14 @@ export interface CmsArticle {
   /** Rendered HTML body for the article detail page. */
   content: string;
   category?: { name: string; slug?: string };
+  /**
+   * Practice-area sub-topic (e.g. "Bail" under "Criminal Law"), when the admin
+   * panel's nested-category control was used to tag this article. Matched
+   * against law-service/bundled subcategories by `slug` — the two systems use
+   * unrelated ids, so slug is the only key that lines up across both. Absent
+   * when the article carries only its top-level category.
+   */
+  subcategory?: { id: string; name: string; slug: string };
   /** Named byline (E-E-A-T) — matches the bundled/law-service string convention. */
   author?: string;
   readingTime?: string;
@@ -240,6 +255,9 @@ function toArticle(c: CmsContent): CmsArticle {
   const rawLetter = (cf.alphabet || (c.title || '#').charAt(0) || '#').toString().toUpperCase();
   const alphabet = /[A-Z]/.test(rawLetter.charAt(0)) ? rawLetter.charAt(0) : '#';
   const author = typeof cf.author === 'string' ? cf.author : cf.author?.name;
+  // A non-null parentId marks a nested sub-category (e.g. "Bail" under
+  // "Criminal Law") rather than the top-level practice area itself.
+  const childCategory = c.categories?.find((cat) => cat.parentId);
   return {
     id: c.id,
     slug: c.slug,
@@ -256,6 +274,9 @@ function toArticle(c: CmsContent): CmsArticle {
     // Breadcrumbs / RelatedArticles build links to the dead old slug.
     category: c.category
       ? { name: c.category.name, slug: toNewCategorySlug(c.category.slug) }
+      : undefined,
+    subcategory: childCategory
+      ? { id: childCategory.id, name: childCategory.name, slug: childCategory.slug }
       : undefined,
     author: typeof author === 'string' ? author : undefined,
     readingTime: typeof cf.readingTime === 'string' ? cf.readingTime : undefined,
