@@ -113,7 +113,7 @@ export async function Leadership() {
                   rel="noopener noreferrer"
                   className="group flex items-center gap-3"
                 >
-                  <Avatar className="h-14 w-14 shrink-0 rounded-lg border border-border">
+                  <Avatar className="h-16 w-16 shrink-0 rounded-lg border border-border">
                     {leader.photo && (
                       <AvatarImage
                         src={leader.photo}
