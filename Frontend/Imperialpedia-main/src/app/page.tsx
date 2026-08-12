@@ -11,6 +11,7 @@ import { TERM_OF_DAY } from "@/components/landing/investopedia/content";
 
 import { HomeIntro, homeFaqItems } from "@/components/home/HomeIntro";
 import { HomeEditorial } from "@/components/home/HomeEditorial";
+import { ExploreTopics } from "@/components/home/ExploreTopics";
 import { LatestArticles } from "@/components/home/LatestArticles";
 import { MarketHighlights } from "@/components/home/MarketHighlights";
 import { TrendingTopics } from "@/components/home/TrendingTopics";
@@ -36,10 +37,12 @@ export async function generateMetadata(): Promise<Metadata> {
 
 /**
  * Imperialpedia home — a discovery hub, not just an editorial landing page.
- * Structure: static "what is this" intro (immediate paint) → CMS-backed
- * editorial layer (real lead story / topic rows, grouped from whatever
- * categories are actually published) → live discovery rails, each in its
- * own Suspense boundary so a slow data source (market feed, CMS, live
+ * Structure: static "what is this" intro (immediate paint) → always-on topic
+ * navigation (ExploreTopics — doesn't depend on the CMS having published
+ * anything, so the page never collapses down to just Term of Day + newsletter)
+ * → CMS-backed editorial layer (real lead story / topic rows, grouped from
+ * whatever categories are actually published) → live discovery rails, each in
+ * its own Suspense boundary so a slow data source (market feed, CMS, live
  * entity service) never blocks the rest of the page from rendering.
  */
 export default function Home() {
@@ -51,6 +54,8 @@ export default function Home() {
       <HomeIntro />
 
       <TrendingBar />
+
+      <ExploreTopics />
 
       <Suspense fallback={<HomeSectionSkeleton cards={4} />}>
         <HomeEditorial />
