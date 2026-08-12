@@ -5,7 +5,8 @@ import { newsArticleHref } from "@/lib/data/article-url";
 import type { Article as LandingArticle, TopicGroup } from "@/components/landing/investopedia/types";
 
 const FETCH_LIMIT = 30;
-const SECONDARY_COUNT = 5;
+const RELATED_PER_LEAD = 3;
+const OTHER_TOP_STORIES_COUNT = 6;
 const MAX_TOPIC_GROUPS = 4;
 const ARTICLES_PER_TOPIC = 4;
 
@@ -45,7 +46,13 @@ function toLandingArticle(article: ContentArticle): LandingArticle {
 
 export interface HomeEditorial {
   lead: LandingArticle;
-  secondary: LandingArticle[];
+  /** Same-category articles related to `lead` — omitted (not padded with unrelated ones) when there aren't any. */
+  leadRelated: LandingArticle[];
+  /** Second hero story, Investopedia-style two-up header — absent when the CMS has only one article. */
+  secondaryLead: LandingArticle | null;
+  secondaryLeadRelated: LandingArticle[];
+  /** Headline-only list below the two leads, no images — Investopedia's "Other Top Stories". */
+  otherTopStories: LandingArticle[];
   topicGroups: TopicGroup[];
 }
 
@@ -65,9 +72,42 @@ export async function getHomeEditorial(): Promise<HomeEditorial | null> {
   const { data: articles } = await getArticles(1, FETCH_LIMIT);
   if (articles.length === 0) return null;
 
-  const [leadSource, ...rest] = articles;
-  const secondarySource = rest.slice(0, SECONDARY_COUNT);
-  const remaining = rest.slice(SECONDARY_COUNT);
+  const used = new Set<string>();
+  const take = (from: ContentArticle[]) => from.find((a) => !used.has(a.slug));
+  const takeRelated = (category: string | undefined, count: number, pool: ContentArticle[]) => {
+    if (!category) return [] as ContentArticle[];
+    const picked: ContentArticle[] = [];
+    for (const a of pool) {
+      if (picked.length >= count) break;
+      if (used.has(a.slug) || a.category !== category) continue;
+      picked.push(a);
+      used.add(a.slug);
+    }
+    return picked;
+  };
+
+  const leadSource = take(articles);
+  if (!leadSource) return null;
+  used.add(leadSource.slug);
+
+  const leadRelatedSource = takeRelated(leadSource.category, RELATED_PER_LEAD, articles);
+
+  const secondaryLeadSource = take(articles);
+  if (secondaryLeadSource) used.add(secondaryLeadSource.slug);
+
+  const secondaryLeadRelatedSource = secondaryLeadSource
+    ? takeRelated(secondaryLeadSource.category, RELATED_PER_LEAD, articles)
+    : [];
+
+  const otherTopStoriesSource: ContentArticle[] = [];
+  for (const a of articles) {
+    if (otherTopStoriesSource.length >= OTHER_TOP_STORIES_COUNT) break;
+    if (used.has(a.slug)) continue;
+    otherTopStoriesSource.push(a);
+    used.add(a.slug);
+  }
+
+  const remaining = articles.filter((a) => !used.has(a.slug));
 
   const byCategory = new Map<string, ContentArticle[]>();
   for (const article of remaining) {
@@ -96,7 +136,10 @@ export async function getHomeEditorial(): Promise<HomeEditorial | null> {
 
   return {
     lead: toLandingArticle(leadSource),
-    secondary: secondarySource.map(toLandingArticle),
+    leadRelated: leadRelatedSource.map(toLandingArticle),
+    secondaryLead: secondaryLeadSource ? toLandingArticle(secondaryLeadSource) : null,
+    secondaryLeadRelated: secondaryLeadRelatedSource.map(toLandingArticle),
+    otherTopStories: otherTopStoriesSource.map(toLandingArticle),
     topicGroups,
   };
 }

@@ -16,7 +16,13 @@ export async function HomeEditorial() {
 
   return (
     <>
-      <LeadStory lead={editorial.lead} secondary={editorial.secondary} />
+      <LeadStory
+        lead={editorial.lead}
+        leadRelated={editorial.leadRelated}
+        secondaryLead={editorial.secondaryLead}
+        secondaryLeadRelated={editorial.secondaryLeadRelated}
+        otherTopStories={editorial.otherTopStories}
+      />
       {editorial.topicGroups.map((group) => (
         <TopicSection key={group.title} group={group} />
       ))}
