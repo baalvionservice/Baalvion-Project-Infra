@@ -3,6 +3,7 @@ import { Metadata } from "next";
 import { JsonLd } from "@/modules/seo-engine/components/JsonLd";
 import { buildMetadata } from "@/lib/seo/metadata-builder";
 import { structuredData } from "@/lib/seo/structuredData";
+import { AdSenseUnit } from "@/components/common/AdSense";
 
 import { TrendingBar } from "@/components/landing/investopedia/TrendingBar";
 import { TermOfDay } from "@/components/landing/investopedia/TermOfDay";
@@ -57,6 +58,11 @@ export default function Home() {
 
       <ExploreTopics />
 
+      {/* Top AdSense Unit - Display ad above main content */}
+      <div className="my-8 px-4">
+        <AdSenseUnit slot="8362925887" format="auto" responsive={true} />
+      </div>
+
       <Suspense fallback={<HomeSectionSkeleton cards={4} />}>
         <HomeEditorial />
       </Suspense>
@@ -70,6 +76,11 @@ export default function Home() {
       <Suspense fallback={<HomeSectionSkeleton cards={4} />}>
         <LatestArticles />
       </Suspense>
+
+      {/* Mid-page AdSense Unit */}
+      <div className="my-8 px-4">
+        <AdSenseUnit slot="8362925887" format="auto" responsive={true} />
+      </div>
 
       <Suspense fallback={<HomeSectionSkeleton cards={2} />}>
         <MarketHighlights />
@@ -86,6 +97,11 @@ export default function Home() {
       <Suspense fallback={<HomeSectionSkeleton cards={6} />}>
         <RecentlyUpdated />
       </Suspense>
+
+      {/* Bottom AdSense Unit */}
+      <div className="my-8 px-4">
+        <AdSenseUnit slot="8362925887" format="auto" responsive={true} />
+      </div>
 
       <Suspense fallback={<HomeSectionSkeleton cards={6} />}>
         <TrendingTopics />
