@@ -77,12 +77,12 @@ const BROWSE_CHIPS: Array<{ label: string; href: string; icon: React.ComponentTy
   { label: "Budgeting Basics", href: "/budgeting-basics", icon: Wallet },
   { label: "Budget Templates", href: "/budgeting-basics", icon: FileSpreadsheet },
   { label: "Saving Money", href: "/saving-money", icon: PiggyBank },
-  { label: "Expense Tracking", href: "/financial-intelligence/how-to-track-expenses", icon: Receipt },
+  { label: "Expense Tracking", href: "/budgeting-apps", icon: Receipt },
   { label: "Monthly Budget", href: "/monthly-budget", icon: CalendarDays },
   { label: "Family Budget", href: "/family-budget", icon: Users },
   { label: "Student Budget", href: "/student-budget", icon: GraduationCap },
   { label: "Zero-Based Budget", href: "/budget-rules", icon: Scale },
-  { label: "50/30/20 Rule", href: "/financial-intelligence/50-30-20-budget-rule-explained", icon: PieChart },
+  { label: "50/30/20 Rule", href: "/budget-rules", icon: PieChart },
   { label: "Emergency Fund", href: "/emergency-fund", icon: ShieldAlert },
   { label: "Debt Payoff", href: "/debt", icon: CreditCard },
   { label: "Cash Envelope", href: "/budget-rules", icon: Mail },
@@ -91,7 +91,7 @@ const BROWSE_CHIPS: Array<{ label: string; href: string; icon: React.ComponentTy
 ];
 
 const BUDGETING_TOOLS = [
-  { href: "/financial-intelligence/50-30-20-budget-rule-explained", label: "50/30/20 Calculator" },
+  { href: "/budget-rules", label: "50/30/20 Calculator" },
   { href: "/financial-tools", label: "All Financial Tools" },
 ];
 

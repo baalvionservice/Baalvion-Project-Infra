@@ -14,7 +14,6 @@ import { HomeEditorial } from "@/components/home/HomeEditorial";
 import { LatestArticles } from "@/components/home/LatestArticles";
 import { MarketHighlights } from "@/components/home/MarketHighlights";
 import { TrendingTopics } from "@/components/home/TrendingTopics";
-import { KnowledgeCategories } from "@/components/home/KnowledgeCategories";
 import { FeaturedCompanies } from "@/components/home/FeaturedCompanies";
 import { RecentlyUpdated } from "@/components/home/RecentlyUpdated";
 import { HomeSectionSkeleton } from "@/components/home/HomeSectionSkeleton";
@@ -67,10 +66,6 @@ export default function Home() {
 
       <Suspense fallback={<HomeSectionSkeleton cards={2} />}>
         <MarketHighlights />
-      </Suspense>
-
-      <Suspense fallback={<HomeSectionSkeleton cards={4} />}>
-        <KnowledgeCategories />
       </Suspense>
 
       <Suspense fallback={<HomeSectionSkeleton cards={4} />}>

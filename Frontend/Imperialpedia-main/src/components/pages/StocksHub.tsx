@@ -391,12 +391,6 @@ export async function StocksHub() {
                 {c.name}
               </Link>
             ))}
-            <Link
-              href="/companies"
-              className="inline-flex items-center gap-2 rounded-full border border-gray-200 px-4 py-2 text-xs font-semibold text-primary transition-colors hover:border-gray-900"
-            >
-              All Companies <ArrowRight className="h-3 w-3" />
-            </Link>
           </div>
         </section>
 

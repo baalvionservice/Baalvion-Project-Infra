@@ -2,7 +2,6 @@ import React from "react";
 import { Container } from "@/design-system/layout/container";
 import { Section } from "@/components/ui/Section";
 import { Text } from "@/design-system/typography/text";
-import { ExploreCategories } from "@/components/explore/ExploreCategories";
 import { ExploreClient } from "@/components/explore/ExploreClient";
 import { buildMetadata } from "@/lib/seo/metadata-builder";
 import { Metadata } from "next";
@@ -52,9 +51,6 @@ export default function ExplorePage() {
           <ExploreClient />
         </header>
 
-        {/* Discovery Categories */}
-        <ExploreCategories />
-
         {/* Trending Section */}
         <Section
           title="High-Impact Topics"
@@ -62,16 +58,8 @@ export default function ExplorePage() {
         >
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              {
-                label: "Artificial Intelligence",
-                href: "/technologies/generative-ai",
-              },
               { label: "Semiconductors", href: "/companies/nvidia" },
               { label: "Global Finance", href: "/companies/berkshire-hathaway" },
-              {
-                label: "Economic Benchmarks",
-                href: "/countries/united-states",
-              },
             ].map((topic) => (
               <Link key={topic.label} href={topic.href} className="group">
                 <div className="p-6 rounded-2xl bg-card/30 border border-white/5 hover:border-primary/30 transition-all flex items-center justify-between">
