@@ -7,6 +7,7 @@ import { RelatedArticles, fetchRelatedArticles } from '@/components/knowledge/Re
 import { Breadcrumbs } from '@/components/knowledge/Breadcrumbs';
 import { ArticleTOC } from '@/app/[categorySlug]/[articleSlug]/ArticleTOC';
 import { ArticleAuthorByline } from '@/app/[categorySlug]/[articleSlug]/ArticleAuthorByline';
+import { ArticleAdWrapper } from '@/components/knowledge/ArticleAdWrapper';
 import { getMergedAuthorByName } from '@/lib/authors-server';
 import { resolveArticleImage } from '@/lib/article-art';
 import { formatArticleDate } from '@/lib/format-date';
@@ -23,6 +24,16 @@ function injectHeadingIds(html: string): string {
     const id = text.toLowerCase().replace(/\W/g, '-');
     return `<${tag} id="${id}" class="scroll-mt-32">${text}</${tag}>`;
   });
+}
+
+/**
+ * Count words in HTML/text content
+ * Used to determine if ads should be placed
+ */
+function countWords(html: string): number {
+  // Strip HTML tags and count words
+  const text = html.replace(/<[^>]+>/g, '');
+  return text.split(/\s+/).filter((word) => word.length > 0).length;
 }
 
 /**
@@ -74,6 +85,7 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
   // a fabricated date.
   const updatedAt = formatArticleDate(article.updatedAt || article.updated_at);
   const processedContent = injectHeadingIds(article.content || '');
+  const wordCount = countWords(processedContent);
   const toc = extractToc(processedContent);
   const relatedArticles = await fetchRelatedArticles(slug, category?.slug, category?.name, article.subcategory?.slug);
 
@@ -124,10 +136,12 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
                 </figure>
               </header>
 
-              <div
-                className="prose-legal max-w-none pt-8"
-                dangerouslySetInnerHTML={{ __html: processedContent }}
-              />
+              <ArticleAdWrapper wordCount={wordCount} enableAds={true}>
+                <div
+                  className="prose-legal max-w-none pt-8"
+                  dangerouslySetInnerHTML={{ __html: processedContent }}
+                />
+              </ArticleAdWrapper>
 
               <div className="pt-6 border-t border-slate-100">
                 <Link

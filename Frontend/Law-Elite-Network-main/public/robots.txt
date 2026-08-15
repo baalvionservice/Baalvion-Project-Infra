@@ -1,0 +1,75 @@
+# Law Elite Network - robots.txt
+# Production-ready configuration for SEO and AdSense monetization
+
+# Default rules for all bots
+User-agent: *
+Allow: /
+
+# Disallow private/admin areas
+Disallow: /admin/
+Disallow: /api/
+Disallow: /private/
+Disallow: /.env
+Disallow: /.next/
+Disallow: /node_modules/
+
+# Allow search engines to crawl static content
+Allow: /public/
+Allow: /images/
+Allow: /assets/
+Allow: /styles/
+
+# Specific rules for Google
+User-agent: Googlebot
+Allow: /
+Allow: /ads.txt
+
+# Allow Google AdSense crawler specifically
+User-agent: Google-AdBot
+Allow: /
+Allow: /ads.txt
+
+# Allow Google Ad Review Bot (for verification)
+User-agent: AdsBot-Google
+Allow: /
+Allow: /ads.txt
+
+# Allow Google-Ads-Google-Site-Verification
+User-agent: Google-Ads-Google-Site-Verification
+Allow: /
+Allow: /ads.txt
+
+# Specific rules for other major search engines
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Baiduspider
+Allow: /
+
+# Disallow bad bots
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+# Crawl delay
+Crawl-delay: 1
+
+# Sitemap
+Sitemap: https://lawelitenetwork.com/sitemap.xml
+Sitemap: https://www.lawelitenetwork.com/sitemap.xml
+
+# Additional rules for monetization
+# Allow AdSense crawler to access all content for ad placement
+User-agent: Mediapartners-Google
+Allow: /
