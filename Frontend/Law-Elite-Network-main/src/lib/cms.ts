@@ -240,7 +240,7 @@ export interface CmsArticle {
   alphabet: string;
   /** Rendered HTML body for the article detail page. */
   content: string;
-  category?: { name: string; slug?: string };
+  category?: { id?: string; name: string; slug?: string };
   /**
    * Practice-area sub-topic (e.g. "Bail" under "Criminal Law"), when the admin
    * panel's nested-category control was used to tag this article. Matched
@@ -295,7 +295,7 @@ function toArticle(c: CmsContent): CmsArticle {
     // art instead of the article's real uploaded image — and article-url.ts /
     // Breadcrumbs / RelatedArticles build links to the dead old slug.
     category: c.category
-      ? { name: c.category.name, slug: toNewCategorySlug(c.category.slug) }
+      ? { id: c.category.id, name: c.category.name, slug: toNewCategorySlug(c.category.slug) }
       : undefined,
     subcategory: childCategory
       ? { id: childCategory.id, name: childCategory.name, slug: childCategory.slug }
