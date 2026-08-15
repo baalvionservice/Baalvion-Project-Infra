@@ -1,14 +1,21 @@
 import { MetadataRoute } from 'next';
+import { CURRENT_CATEGORY_SLUGS } from '@/lib/category-slugs';
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 
-// The 8 practice-area categories are top-level routes (/{slug} + nested
+// Practice-area categories are top-level routes (/{slug} + nested
 // /{slug}/{article}) since the URL restructure -- listed explicitly even
 // though '/' already covers them, for parity with the other section prefixes
-// below. /law/ stays allowed forever: those URLs now permanently (308)
-// redirect to their new home, and a redirect source must stay crawlable for
-// Google to keep following and crediting it -- disallowing it would strand
-// the old URLs' accumulated ranking signal instead of transferring it.
+// below. Sourced from CURRENT_CATEGORY_SLUGS (lib/category-slugs.ts) instead
+// of a hardcoded duplicate list -- this previously still listed only the
+// original 8 categories after 8 more were added there, so newer categories
+// (e.g. /boating-accidents, /legal-education-and-history) had no explicit
+// Allow entry even though CURRENT_CATEGORY_SLUGS elsewhere in the codebase
+// already treats them as real, indexable routes. /law/ stays allowed
+// forever: those URLs now permanently (308) redirect to their new home, and
+// a redirect source must stay crawlable for Google to keep following and
+// crediting it -- disallowing it would strand the old URLs' accumulated
+// ranking signal instead of transferring it.
 const ALLOW = [
   '/',
   '/news',
@@ -34,14 +41,7 @@ const ALLOW = [
   '/policies',
   '/article/',
   '/law/',
-  '/business',
-  '/criminal-law',
-  '/family-law',
-  '/real-estate-law',
-  '/tax-finance',
-  '/employment-law',
-  '/tech-ip',
-  '/disputes',
+  ...CURRENT_CATEGORY_SLUGS.map((slug) => `/${slug}`),
   '/countries',
   '/world',
   '/authors',
