@@ -22,6 +22,15 @@ module.exports = function (sequelize, DataTypes) {
         videoUrl: { type: DataTypes.TEXT, allowNull: true },
         // Array of focus areas, e.g. ["Business & Corporate", "Tax & Finance"].
         expertise: { type: DataTypes.JSONB, allowNull: false, defaultValue: [] },
+        // Array of degrees/schools, e.g. ["M.D. — University of Mississippi"].
+        education: { type: DataTypes.JSONB, allowNull: false, defaultValue: [] },
+        // Array of professional certifications, e.g. ["CFP®", "CFA"].
+        certifications: { type: DataTypes.JSONB, allowNull: false, defaultValue: [] },
+        // Usual editorial function — drives the public role badge on /authors/{slug}.
+        editorialRole: {
+            type: DataTypes.ENUM('writer', 'reviewer', 'fact-checker', 'contributor'),
+            allowNull: true,
+        },
         // { x?: string, linkedin?: string, facebook?: string, instagram?: string }
         social: { type: DataTypes.JSONB, allowNull: false, defaultValue: {} },
         // { title?, description?, keywords?, ogImage?, noIndex? }

@@ -46,9 +46,6 @@ const START_HERE_CONCEPTS = [
   { emoji: "📱", label: "Finance Apps", description: "Review budgeting, investing, and money management apps.", href: "/app-reviews" },
 ];
 
-/** Which 4 real "Best X Compared" pages lead the Featured Reviews rail. */
-const FEATURED_REVIEW_SLUGS = ["best-online-brokers", "best-savings-rates", "best-robo-advisers", "best-mortgage-rates"];
-
 const EXPLORE_MORE = [
   { href: "/investing", label: "Investing" },
   { href: "/market-news", label: "Market News" },
@@ -169,10 +166,6 @@ export async function ReviewsHub() {
   const allReviews = (await Promise.all(reviewSlugs.map((slug) => fetchReviewBySlug(slug)))).filter(
     (r): r is ReviewArticle => Boolean(r)
   );
-  const reviewBySlug = new Map(allReviews.map((r) => [r.slug, r]));
-  const featuredReviews = FEATURED_REVIEW_SLUGS.map((slug) => reviewBySlug.get(slug)).filter(
-    (r): r is ReviewArticle => Boolean(r)
-  );
 
   // 4) Topic sections — pillar + supporting grid per sub-category.
   const topicSections = TOPICS.map((t) => ({
@@ -287,19 +280,6 @@ export async function ReviewsHub() {
             ))}
           </div>
         </section>
-
-        {featuredReviews.length > 0 && (
-          <section>
-            <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
-              Featured Reviews
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featuredReviews.map((r) => (
-                <BuyingGuideCard key={r.slug} review={r} />
-              ))}
-            </div>
-          </section>
-        )}
 
         {featured && (
           <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">

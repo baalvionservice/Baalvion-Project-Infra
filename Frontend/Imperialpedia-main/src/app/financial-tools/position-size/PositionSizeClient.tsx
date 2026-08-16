@@ -7,9 +7,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Ruler, RefreshCcw, ArrowLeft, CheckCircle2 } from 'lucide-react';
-import Link from 'next/link';
+import { CalculatorHeader } from '@/components/financial-tools/CalculatorHeader';
+import { Ruler, CheckCircle2 } from 'lucide-react';
 import { financialMath } from '@/modules/calculators/utils/calculations';
 
 export default function PositionSizeClient() {
@@ -48,55 +47,46 @@ export default function PositionSizeClient() {
   };
 
   return (
-    <main className="min-h-screen bg-background pt-20 pb-32">
+    <main className="min-h-screen bg-background pt-12 pb-32">
       <Container isNarrow>
-        <Button variant="ghost" size="sm" className="mb-8 p-0 hover:bg-transparent text-muted-foreground hover:text-primary group" asChild>
-          <Link href="/financial-tools"><ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" /> Back to Dashboard</Link>
-        </Button>
+        <CalculatorHeader
+          category="Stocks"
+          title="Position Size Calculator"
+          description="Work out how many shares to buy so a single trade never risks more than a fixed percentage of your account."
+          icon={Ruler}
+        />
 
-        <header className="mb-12">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20 text-primary shadow-sm">
-              <Ruler className="h-7 w-7" />
-            </div>
-            <Badge variant="outline" className="text-primary border-primary/30 uppercase tracking-widest text-[10px] font-bold px-3 py-1">
-              Stocks
-            </Badge>
+        <Card className="border-gray-100 rounded-2xl overflow-hidden">
+          <div className="px-8 py-4 border-b border-gray-100">
+            <Text variant="caption" className="text-gray-400 font-bold uppercase tracking-widest text-xs">Enter Your Numbers</Text>
           </div>
-          <Text variant="h1" as="h1" className="text-4xl lg:text-6xl font-bold mb-4 tracking-tight">Position Size Calculator</Text>
-          <Text variant="body" className="text-muted-foreground text-lg leading-relaxed">
-            Work out how many shares to buy so a single trade never risks more than a fixed percentage of your account.
-          </Text>
-        </header>
-
-        <Card className="glass-card border-none shadow-2xl overflow-hidden">
           <CardContent className="p-8">
             <form onSubmit={handleCalculate} className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-3">
                   <Label htmlFor="accountSize" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Account Size ($)</Label>
-                  <Input id="accountSize" type="number" value={accountSize} onChange={(e) => setAccountSize(e.target.value)} className="h-12 rounded-xl" placeholder="e.g. 25000" />
+                  <Input id="accountSize" type="number" value={accountSize} onChange={(e) => setAccountSize(e.target.value)} className="h-12" placeholder="e.g. 25000" />
                 </div>
                 <div className="space-y-3">
                   <Label htmlFor="riskPercent" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Risk Per Trade (%)</Label>
-                  <Input id="riskPercent" type="number" step="0.1" value={riskPercent} onChange={(e) => setRiskPercent(e.target.value)} className="h-12 rounded-xl" placeholder="e.g. 1" />
+                  <Input id="riskPercent" type="number" step="0.1" value={riskPercent} onChange={(e) => setRiskPercent(e.target.value)} className="h-12" placeholder="e.g. 1" />
                 </div>
                 <div className="space-y-3">
                   <Label htmlFor="entryPrice" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Entry Price ($)</Label>
-                  <Input id="entryPrice" type="number" value={entryPrice} onChange={(e) => setEntryPrice(e.target.value)} className="h-12 rounded-xl" placeholder="e.g. 50" />
+                  <Input id="entryPrice" type="number" value={entryPrice} onChange={(e) => setEntryPrice(e.target.value)} className="h-12" placeholder="e.g. 50" />
                 </div>
                 <div className="space-y-3">
                   <Label htmlFor="stopLoss" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Stop-Loss Price ($)</Label>
-                  <Input id="stopLoss" type="number" value={stopLoss} onChange={(e) => setStopLoss(e.target.value)} className="h-12 rounded-xl" placeholder="e.g. 46" />
+                  <Input id="stopLoss" type="number" value={stopLoss} onChange={(e) => setStopLoss(e.target.value)} className="h-12" placeholder="e.g. 46" />
                 </div>
               </div>
               {error && <p className="text-sm text-destructive">{error}</p>}
               <div className="flex flex-col sm:flex-row gap-4 pt-2">
-                <Button type="button" variant="outline" onClick={handleReset} className="h-14 flex-1 rounded-2xl font-bold">
-                  <RefreshCcw className="mr-2 h-4 w-4" /> Reset
+                <Button type="button" variant="outline" onClick={handleReset} className="h-12 flex-1">
+                  Reset
                 </Button>
-                <Button type="submit" className="h-14 flex-1 bg-primary hover:bg-primary/90 text-white rounded-2xl font-bold">
-                  Calculate Position Size
+                <Button type="submit" className="h-12 flex-1 font-semibold">
+                  Calculate
                 </Button>
               </div>
             </form>
@@ -104,20 +94,22 @@ export default function PositionSizeClient() {
         </Card>
 
         {result && (
-          <Card className="glass-card border-none shadow-2xl overflow-hidden mt-8">
+          <Card className="border-gray-100 rounded-2xl overflow-hidden mt-8">
+            <div className="px-8 py-4 border-b border-gray-100 flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+              <Text variant="caption" className="text-gray-400 font-bold uppercase tracking-widest text-xs">Result</Text>
+            </div>
             <CardContent className="p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="md:col-span-2">
-                <div className="flex items-center gap-2 text-emerald-500 mb-2 font-bold text-sm">
-                  <CheckCircle2 className="h-4 w-4" /> Shares to Buy
-                </div>
-                <div className="text-5xl font-bold tracking-tighter text-foreground">{result.shares.toLocaleString()}</div>
+                <Text variant="label" className="text-gray-400 uppercase tracking-widest text-xs">Shares to Buy</Text>
+                <div className="text-5xl font-bold tracking-tighter text-primary">{result.shares.toLocaleString()}</div>
               </div>
               <div>
-                <Text variant="label" className="text-muted-foreground">Dollar Risk at Stop-Loss</Text>
+                <Text variant="label" className="text-gray-400 uppercase tracking-widest text-xs">Dollar Risk at Stop-Loss</Text>
                 <div className="text-xl font-bold text-foreground">{formatCurrency(result.riskAmount)}</div>
               </div>
               <div>
-                <Text variant="label" className="text-muted-foreground">Position Value</Text>
+                <Text variant="label" className="text-gray-400 uppercase tracking-widest text-xs">Position Value</Text>
                 <div className="text-xl font-bold text-foreground">{formatCurrency(result.positionValue)}</div>
               </div>
             </CardContent>

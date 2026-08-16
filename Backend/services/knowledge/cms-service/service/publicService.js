@@ -232,7 +232,7 @@ async function getPublicCategory(websiteSlug, categorySlug) {
 }
 
 // Public author/contributor profiles for E-E-A-T bylines and /author pages.
-const AUTHOR_ATTRS = ['id', 'slug', 'name', 'title', 'credentials', 'bio', 'avatarUrl', 'videoUrl', 'expertise', 'social', 'seoMetadata'];
+const AUTHOR_ATTRS = ['id', 'slug', 'name', 'title', 'credentials', 'bio', 'avatarUrl', 'videoUrl', 'expertise', 'education', 'certifications', 'editorialRole', 'social', 'seoMetadata'];
 
 async function listPublicAuthors(websiteSlug) {
     const website = await _resolveWebsite(websiteSlug);

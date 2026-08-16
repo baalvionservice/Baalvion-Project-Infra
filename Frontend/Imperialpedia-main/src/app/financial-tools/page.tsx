@@ -1,116 +1,283 @@
 import React from 'react';
-import { Container } from '@/design-system/layout/container';
-import { Section } from '@/design-system/layout/section';
-import { Text } from '@/design-system/typography/text';
+import Link from 'next/link';
 import { getCalculatorList } from '@/services/mock-api/calculators';
 import { CalculatorCard } from '@/modules/calculators/components/CalculatorCard';
-import { PieChart, Calculator as CalcIcon, Sparkles } from 'lucide-react';
+import { Calculator as CalcIcon, Mail, Compass, ArrowRight, Clock, TrendingUp, Landmark, PieChart } from 'lucide-react';
 import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
+import HeadingSection from '@/components/layout/HeadingSection';
+import { TrustBar } from '@/components/pages/TrustBar';
+import FAQItem from '@/components/faq/FAQItem';
+import { env } from '@/config/env';
 import {
   financialToolsHubIntro,
   financialToolsCategoryBlurbs,
   financialToolsHubClosing,
+  financialToolsHubFAQ,
 } from '@/components/financial-tools/hub-content';
 
 export const metadata: Metadata = buildMetadata({
   canonical: '/financial-tools',
-  title: 'Financial Planning Hub | Imperialpedia',
-  description: 'Precision instruments for wealth planning. Explore our suite of compound interest, loan, and investment calculators.',
+  title: 'Financial Calculators | Imperialpedia',
+  description: 'Free financial calculators for compound interest, loans, investing, inflation, and trading — each with the formula, a worked example, and plain-language explanation.',
 });
 
-/**
- * Main dashboard for the Financial Tools Platform.
- * Aggregates all interactive calculators with categorized discovery.
- */
+/** The three broadly-applicable calculators, spotlighted above the full
+ * category grid — an editorial "start here" pick, not a popularity claim. */
+const START_HERE_SLUGS = ['compound-interest', 'loan', 'investment'];
+
+/** Slugs that actually have a working page under /financial-tools/[slug].
+ * mockCalculators (services/mock-api/calculators.ts) still lists "retirement"
+ * and "portfolio" tools with no corresponding route — linking to them 404s.
+ * Filtering here keeps the hub honest until those tools ship. */
+const LIVE_SLUGS = new Set([
+  'compound-interest', 'loan', 'investment', 'inflation',
+  'cagr', 'dividend', 'position-size', 'profit-loss',
+]);
+
+/** Goal → calculator map. Real editorial content answering the question a
+ * reader actually has before they know a calculator's name — every entry
+ * points at a real, working tool (see LIVE_SLUGS). */
+const CHOOSER: { question: string; slug: string; label: string }[] = [
+  { question: 'How much will my savings actually grow over time?', slug: 'compound-interest', label: 'Compound Interest Calculator' },
+  { question: 'What will this loan really cost me, total?', slug: 'loan', label: 'Loan Payment Calculator' },
+  { question: 'Will my contributions get me to my investing goal?', slug: 'investment', label: 'Investment Growth Calculator' },
+  { question: 'What will today\'s money be worth years from now?', slug: 'inflation', label: 'Inflation Calculator' },
+  { question: 'Which of two investments actually grew faster?', slug: 'cagr', label: 'CAGR Calculator' },
+  { question: 'How much income would this dividend stock generate?', slug: 'dividend', label: 'Dividend Calculator' },
+  { question: 'How many shares can I buy without over-risking the trade?', slug: 'position-size', label: 'Position Size Calculator' },
+  { question: 'Did I actually profit on that trade, after fees?', slug: 'profit-loss', label: 'Profit/Loss Calculator' },
+];
+
 export default async function FinancialToolsDashboard() {
   const response = await getCalculatorList();
-  const tools = response.data;
+  const allTools = response.data;
+  const tools = allTools.filter((t) => LIVE_SLUGS.has(t.slug));
+  const comingSoon = allTools.filter((t) => !LIVE_SLUGS.has(t.slug));
+  const categories = Array.from(new Set(tools.map((t) => t.category)));
+  const startHere = START_HERE_SLUGS.map((slug) => tools.find((t) => t.slug === slug)).filter(
+    (t): t is (typeof tools)[number] => Boolean(t)
+  );
+  const startHereIcons = [TrendingUp, Landmark, PieChart];
 
-  // Group tools by category for structured display
-  const categories = Array.from(new Set(tools.map(t => t.category)));
+  const base = (env.siteUrl || 'https://imperialpedia.com').replace(/\/$/, '');
+  const pageUrl = `${base}/financial-tools`;
+  const collectionSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'Financial Calculators',
+    description: 'Free financial calculators for compound interest, loans, investing, inflation, and trading.',
+    url: pageUrl,
+    isPartOf: { '@type': 'WebSite', name: 'Imperialpedia', url: base },
+    mainEntity: {
+      '@type': 'ItemList',
+      itemListElement: tools.map((tool, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: tool.name,
+        url: `${base}/financial-tools/${tool.slug}`,
+      })),
+    },
+  };
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: base },
+      { '@type': 'ListItem', position: 2, name: 'Financial Calculators', item: pageUrl },
+    ],
+  };
 
   return (
-    <main className="min-h-screen bg-background pt-16 pb-32">
-      <Section spacing="md">
-        <Container>
-          <header className="mb-20 max-w-4xl">
-            <div className="flex items-center gap-3 text-primary mb-6">
-              <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
-                <PieChart className="h-6 w-6" />
-              </div>
-              <Text variant="label" className="font-bold tracking-widest uppercase">Interactive Intelligence</Text>
-            </div>
-            <Text variant="h1" as="h1" className="text-4xl lg:text-7xl font-bold mb-6 tracking-tight">
-              Interactive <span className="text-primary">Planning Hub</span>
-            </Text>
-            <Text variant="body" className="text-muted-foreground text-xl leading-relaxed max-w-3xl">
-              Master your financial future with our suite of precision instruments. From debt management to retirement modeling, our tools provide the clarity you need to navigate complex fiscal decisions.
-            </Text>
-            <Text variant="body" className="text-muted-foreground text-base leading-relaxed max-w-3xl mt-6">
-              {financialToolsHubIntro}
-            </Text>
-          </header>
+    <div className="min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
 
-          <div className="space-y-24">
-            {categories.map((category) => (
-              <div key={category} className="space-y-10">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-2xl bg-muted/50 border border-white/5 flex items-center justify-center shadow-inner">
-                    <CalcIcon className="h-6 w-6 text-primary" />
-                  </div>
+      <HeadingSection
+        title="Financial Calculators"
+        description="Free tools for the math that actually changes a decision — what compounding does to savings, what a loan really costs, how to size a trade. Every tool below shows its formula and a worked example on its own page, not just an output."
+      />
+      <TrustBar />
+
+      <div className="max-w-7xl mx-auto px-4 py-4 space-y-16">
+        <p className="max-w-3xl text-sm leading-relaxed text-gray-500">
+          {financialToolsHubIntro}
+        </p>
+
+        {/* Start Here — the three broadly-applicable calculators, spotlighted */}
+        <section>
+          <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2 border-b border-gray-100">
+            Start Here
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {startHere.map((tool, i) => {
+              const Icon = startHereIcons[i] ?? CalcIcon;
+              return (
+                <Link
+                  key={tool.id}
+                  href={`/financial-tools/${tool.slug}`}
+                  className="group flex flex-col gap-4 rounded-2xl border border-gray-100 bg-gray-50 p-6 transition-colors hover:border-gray-900"
+                >
+                  <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-primary shadow-sm">
+                    <Icon className="h-5 w-5" />
+                  </span>
                   <div>
-                    <Text variant="h3" className="font-bold">{category}</Text>
-                    <div className="h-1 w-12 bg-primary rounded-full mt-1 opacity-50" />
+                    <h3 className="text-lg font-bold text-foreground leading-tight group-hover:text-primary transition-colors">
+                      {tool.name}
+                    </h3>
+                    <p className="mt-2 text-sm leading-relaxed text-gray-500">
+                      {tool.description}
+                    </p>
                   </div>
-                  <div className="flex-grow h-px bg-gradient-to-r from-border to-transparent ml-4" />
-                </div>
+                  <span className="mt-auto inline-flex items-center gap-1 text-xs font-semibold text-foreground group-hover:underline">
+                    Open calculator
+                    <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
 
-                {financialToolsCategoryBlurbs[category] && (
-                  <Text variant="body" className="text-muted-foreground leading-relaxed max-w-3xl -mt-4">
-                    {financialToolsCategoryBlurbs[category]}
-                  </Text>
-                )}
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {tools
-                    .filter(t => t.category === category)
-                    .map((tool) => (
-                      <CalculatorCard key={tool.id} tool={tool} />
-                    ))
-                  }
-                </div>
-              </div>
+        {/* Which Calculator Should I Use? — a goal-based lookup, not just a category grid */}
+        <section>
+          <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2 border-b border-gray-100">
+            <Compass className="h-4 w-4" />
+            Which Calculator Should I Use?
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {CHOOSER.map((item) => (
+              <Link
+                key={item.slug}
+                href={`/financial-tools/${item.slug}`}
+                className="group flex items-center justify-between gap-4 rounded-xl border border-gray-100 px-5 py-4 transition-colors hover:border-gray-900"
+              >
+                <span className="text-sm text-foreground leading-snug">{item.question}</span>
+                <span className="shrink-0 inline-flex items-center gap-1 text-xs font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                  {item.label}
+                  <ArrowRight className="h-3 w-3" />
+                </span>
+              </Link>
             ))}
           </div>
+        </section>
 
-          <Text variant="body" className="text-muted-foreground leading-relaxed max-w-3xl mt-24">
-            {financialToolsHubClosing}
-          </Text>
+        {categories.map((category) => (
+          <section key={category}>
+            <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-3 pb-2 border-b border-gray-100">
+              <CalcIcon className="h-4 w-4" />
+              {category}
+            </h2>
 
-          <Section spacing="lg" className="mt-32">
-            <div className="p-12 lg:p-20 rounded-[3.5rem] bg-primary/5 border border-primary/20 text-center relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 transition-transform group-hover:scale-110 duration-1000" />
-              <div className="absolute bottom-0 left-0 w-64 h-64 bg-secondary/5 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2" />
-              
-              <div className="relative z-10 space-y-8 max-w-2xl mx-auto">
-                <div className="w-16 h-16 bg-primary/20 rounded-3xl flex items-center justify-center mx-auto shadow-2xl">
-                  <Sparkles className="h-8 w-8 text-primary" />
-                </div>
-                <div>
-                  <Text variant="h2" className="mb-4">Custom Modeling Required?</Text>
-                  <Text variant="body" className="text-muted-foreground text-lg">
-                    The Imperialpedia Index is constantly expanding. If you require a specialized calculator for institutional or private wealth research, our engineering team can architect it.
-                  </Text>
-                </div>
-                <button className="px-12 h-16 bg-primary hover:bg-primary/90 text-white rounded-2xl font-bold shadow-2xl shadow-primary/30 transition-all hover:scale-105 active:scale-95">
-                  Request Precision Tool
-                </button>
-              </div>
+            {financialToolsCategoryBlurbs[category] && (
+              <p className="max-w-3xl text-sm leading-relaxed text-gray-500 mb-6">
+                {financialToolsCategoryBlurbs[category]}
+              </p>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {tools
+                .filter(t => t.category === category)
+                .map((tool) => (
+                  <CalculatorCard key={tool.id} tool={tool} />
+                ))
+              }
             </div>
-          </Section>
-        </Container>
-      </Section>
-    </main>
+          </section>
+        ))}
+
+        {comingSoon.length > 0 && (
+          <section>
+            <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2 border-b border-gray-100">
+              <Clock className="h-4 w-4" />
+              Coming Soon
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {comingSoon.map((tool) => (
+                <div
+                  key={tool.id}
+                  className="flex flex-col gap-4 rounded-2xl border border-dashed border-gray-200 p-6 opacity-70"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-50 text-gray-400">
+                      <CalcIcon className="h-5 w-5" />
+                    </span>
+                    <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+                      In Progress
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-500 leading-tight">{tool.name}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-gray-400 line-clamp-3">{tool.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        <p className="max-w-3xl text-sm leading-relaxed text-gray-500">
+          {financialToolsHubClosing}
+        </p>
+
+        {/* FAQ — about the calculator library itself, distinct from each tool's own formula FAQ */}
+        <section>
+          <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2 border-b border-gray-100">
+            Frequently Asked Questions
+          </h2>
+          <div className="rounded-2xl border border-gray-100 px-4">
+            {financialToolsHubFAQ.map((f) => (
+              <FAQItem key={f.question} question={f.question} answer={f.answer} />
+            ))}
+          </div>
+        </section>
+
+        <section className="flex flex-col items-center gap-4 rounded-2xl bg-gray-50 py-12 text-center px-6">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-primary shadow-sm">
+            <Mail className="h-5 w-5" />
+          </div>
+          <h3 className="text-lg font-bold text-foreground">Need a Calculator We Don't Have Yet?</h3>
+          <p className="max-w-md text-sm text-muted-foreground">
+            Imperialpedia's calculator library keeps growing. Let us know what you're trying to work out and our editorial team will consider it for a future addition.
+          </p>
+          <a
+            href="mailto:editorial@imperialpedia.com"
+            className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-6 py-2.5 text-sm font-semibold text-foreground transition-colors hover:border-gray-900"
+          >
+            Suggest a Calculator
+          </a>
+        </section>
+
+        {/* Explore More — cross-links into the site's editorial hubs */}
+        <section>
+          <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2 border-b border-gray-100">
+            Explore More
+          </h2>
+          <div className="flex flex-wrap gap-x-8 gap-y-3">
+            {[
+              { href: '/personal-finance', label: 'Personal Finance' },
+              { href: '/investing', label: 'Investing' },
+              { href: '/stocks', label: 'Stocks' },
+              { href: '/economy', label: 'Economy' },
+            ].map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="inline-flex items-center gap-1 text-sm font-semibold text-foreground hover:text-primary"
+              >
+                {link.label}
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            ))}
+          </div>
+        </section>
+      </div>
+    </div>
   );
 }

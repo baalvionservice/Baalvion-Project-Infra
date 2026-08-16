@@ -21,6 +21,7 @@ import FeaturedImagePanel from './FeaturedImagePanel';
 import NewsMetaPanel, { type NewsMeta } from './NewsMetaPanel';
 import CustomFieldsPanel from './CustomFieldsPanel';
 import ReviewerPanel from './ReviewerPanel';
+import FactCheckerPanel from './FactCheckerPanel';
 import CitationsPanel from './CitationsPanel';
 import ContentWorkflowBadge from './ContentWorkflowBadge';
 import RelatedContentSuggestions from './newsroom/RelatedContentSuggestions';
@@ -394,6 +395,11 @@ export default function ContentEditor({ content, userRole, canPublish, websiteTi
                     bordered={false}
                   />
                   <ReviewerPanel
+                    websiteId={content.websiteId}
+                    value={customFields}
+                    onChange={(v) => { setCustomFields(v); markUnsaved(); }}
+                  />
+                  <FactCheckerPanel
                     websiteId={content.websiteId}
                     value={customFields}
                     onChange={(v) => { setCustomFields(v); markUnsaved(); }}

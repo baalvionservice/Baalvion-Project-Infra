@@ -3,28 +3,27 @@
 import React, { useState } from 'react';
 import { Container } from '@/design-system/layout/container';
 import { Text } from '@/design-system/typography/text';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from '@/components/ui/select';
-import { 
-  Tooltip, 
-  TooltipContent, 
-  TooltipTrigger 
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger
 } from '@/components/ui/tooltip';
 import { calculatorsService } from '@/services/data';
 import { CalculatorResultModal } from '@/modules/calculators/components/CalculatorResultModal';
-import { TrendingUp, RefreshCcw, ArrowLeft, Info, CheckCircle2, Loader2, HelpCircle } from 'lucide-react';
-import Link from 'next/link';
+import { CalculatorHeader } from '@/components/financial-tools/CalculatorHeader';
+import { TrendingUp, CheckCircle2, Loader2, HelpCircle } from 'lucide-react';
 import { useCalculatorStore } from '@/lib/state/calculator-store';
 
 export default function CompoundInterestClient() {
@@ -80,32 +79,19 @@ export default function CompoundInterestClient() {
     new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
 
   return (
-    <main className="min-h-screen bg-background pt-20 pb-32">
+    <main className="min-h-screen bg-background pt-12 pb-32">
       <Container isNarrow>
-        <Button variant="ghost" size="sm" className="mb-8 p-0 hover:bg-transparent text-muted-foreground hover:text-primary group" asChild>
-          <Link href="/financial-tools"><ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" /> Back to Dashboard</Link>
-        </Button>
-
-        <header className="mb-12">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20 text-primary shadow-sm">
-              <TrendingUp className="h-7 w-7" />
-            </div>
-            <Badge variant="outline" className="text-primary border-primary/30 uppercase tracking-widest text-[10px] font-bold px-3 py-1">
-              Wealth Building
-            </Badge>
-          </div>
-          <Text variant="h1" as="h1" className="text-4xl lg:text-6xl font-bold mb-4 tracking-tight">Compound Interest Engine</Text>
-          <Text variant="body" className="text-muted-foreground text-lg leading-relaxed">
-            Determine the future value of your capital by analyzing the impact of time and compounding frequency on your principal.
-          </Text>
-        </header>
+        <CalculatorHeader
+          category="Wealth Building"
+          title="Compound Interest Calculator"
+          description="Determine the future value of your capital by modeling how time and compounding frequency affect your principal."
+          icon={TrendingUp}
+        />
 
         <div className="space-y-8">
-          <Card className="glass-card border-none shadow-2xl overflow-hidden">
-            <div className="bg-primary/5 px-8 py-4 border-b border-white/5 flex items-center gap-2">
-              <Info className="h-4 w-4 text-primary" />
-              <Text variant="caption" className="text-primary font-bold uppercase tracking-widest">Growth Parameters</Text>
+          <Card className="border-gray-100 rounded-2xl overflow-hidden">
+            <div className="px-8 py-4 border-b border-gray-100">
+              <Text variant="caption" className="text-gray-400 font-bold uppercase tracking-widest text-xs">Enter Your Numbers</Text>
             </div>
             <CardContent className="p-8">
               <form onSubmit={handleCalculate} className="space-y-8">
@@ -128,7 +114,7 @@ export default function CompoundInterestClient() {
                       value={principal} 
                       onChange={(e) => updateCompound({ principal: e.target.value, errors: { ...errors, principal: '' } })}
                       error={errors.principal}
-                      className="h-12 bg-background/50 rounded-xl border-white/10"
+                      className="h-12"
                       placeholder="e.g. 10000"
                       disabled={calculating}
                     />
@@ -153,7 +139,7 @@ export default function CompoundInterestClient() {
                       value={rate} 
                       onChange={(e) => updateCompound({ rate: e.target.value, errors: { ...errors, rate: '' } })}
                       error={errors.rate}
-                      className="h-12 bg-background/50 rounded-xl border-white/10"
+                      className="h-12"
                       placeholder="e.g. 7.5"
                       disabled={calculating}
                     />
@@ -177,7 +163,7 @@ export default function CompoundInterestClient() {
                       value={years} 
                       onChange={(e) => updateCompound({ years: e.target.value, errors: { ...errors, years: '' } })}
                       error={errors.years}
-                      className="h-12 bg-background/50 rounded-xl border-white/10"
+                      className="h-12"
                       placeholder="e.g. 20"
                       disabled={calculating}
                     />
@@ -211,12 +197,12 @@ export default function CompoundInterestClient() {
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                  <Button type="button" variant="outline" onClick={handleReset} className="h-14 flex-1 rounded-2xl font-bold border-white/10 hover:bg-white/5 transition-all" disabled={calculating}>
-                    <RefreshCcw className="mr-2 h-4 w-4" /> Reset Tool
+                  <Button type="button" variant="outline" onClick={handleReset} className="h-12 flex-1" disabled={calculating}>
+                    Reset
                   </Button>
-                  <Button type="submit" disabled={calculating} className="h-14 flex-1 bg-primary hover:bg-primary/90 text-white rounded-2xl font-bold shadow-xl shadow-primary/20 transition-all scale-[1.02] active:scale-100">
+                  <Button type="submit" disabled={calculating} className="h-12 flex-1 font-semibold">
                     {calculating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                    Analyze Growth
+                    Calculate
                   </Button>
                 </div>
               </form>
@@ -225,34 +211,29 @@ export default function CompoundInterestClient() {
 
           {calculating && (
             <div className="space-y-4">
-              <Skeleton className="h-48 w-full rounded-3xl" />
+              <Skeleton className="h-48 w-full rounded-2xl" />
             </div>
           )}
 
           {result && !calculating && (
-            <Card className="glass-card border-none shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <CardHeader className="bg-emerald-500/10 border-b border-emerald-500/20 py-4 px-8">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg flex items-center gap-2 text-emerald-500">
-                    <CheckCircle2 className="h-5 w-5" /> Summary Result
-                  </CardTitle>
-                  <Badge variant="secondary" className="bg-emerald-500/20 text-emerald-500 border-none font-bold uppercase tracking-tighter">
-                    Calculation Stable
-                  </Badge>
-                </div>
-              </CardHeader>
+            <Card className="border-gray-100 rounded-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="border-b border-gray-100 py-4 px-8">
+                <Text variant="caption" className="text-gray-400 font-bold uppercase tracking-widest text-xs flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600" /> Result
+                </Text>
+              </div>
               <CardContent className="p-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                   <div className="space-y-2">
-                    <Text variant="label" className="text-muted-foreground">Estimated Future Value</Text>
-                    <div className="text-5xl font-bold tracking-tighter text-foreground">
+                    <Text variant="label" className="text-gray-400 uppercase tracking-widest text-xs">Estimated Future Value</Text>
+                    <div className="text-5xl font-bold tracking-tighter text-primary">
                       {formatCurrency(result)}
                     </div>
-                    <Text variant="caption" className="text-emerald-500 font-bold block mt-2">
+                    <Text variant="caption" className="text-emerald-600 font-bold block mt-2">
                       +{formatCurrency(result - Number(principal))} in projected earnings
                     </Text>
                   </div>
-                  <div className="p-6 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 italic text-sm text-muted-foreground leading-relaxed">
+                  <div className="p-6 rounded-xl bg-gray-50 border border-gray-100 italic text-sm text-gray-500 leading-relaxed">
                     "Based on a {rate}% annual rate, your initial capital of {formatCurrency(Number(principal))} is projected to yield high returns over {years} years."
                   </div>
                 </div>

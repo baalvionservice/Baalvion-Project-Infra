@@ -19,6 +19,14 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import FeaturedImagePanel from '@/components/cms/FeaturedImagePanel';
+import {
   useWebsiteAuthors,
   useCreateAuthor,
   useUpdateAuthor,
@@ -27,7 +35,16 @@ import {
 import { useWebsite } from '@/lib/queries/cms-websites.queries';
 import { useUIStore } from '@/lib/store/uiStore';
 import { useCmsStore } from '@/lib/store/cmsStore';
-import type { WebsiteAuthor } from '@/lib/types/cms-authors.types';
+import type { AuthorEditorialRole, WebsiteAuthor } from '@/lib/types/cms-authors.types';
+
+const NO_ROLE = '__none__';
+
+const EDITORIAL_ROLE_OPTIONS: { value: AuthorEditorialRole; label: string }[] = [
+  { value: 'writer', label: 'Writer' },
+  { value: 'reviewer', label: 'Reviewer' },
+  { value: 'fact-checker', label: 'Fact-Checker' },
+  { value: 'contributor', label: 'Contributor' },
+];
 
 interface AuthorForm {
   name: string;
@@ -38,6 +55,9 @@ interface AuthorForm {
   avatarUrl: string;
   videoUrl: string;
   expertise: string; // comma-separated in the form
+  education: string; // comma-separated in the form
+  certifications: string; // comma-separated in the form
+  editorialRole: string; // AuthorEditorialRole or NO_ROLE
   linkedin: string;
   x: string;
   facebook: string;
@@ -59,6 +79,9 @@ const DEFAULT_FORM: AuthorForm = {
   avatarUrl: '',
   videoUrl: '',
   expertise: '',
+  education: '',
+  certifications: '',
+  editorialRole: NO_ROLE,
   linkedin: '',
   x: '',
   facebook: '',
@@ -118,6 +141,9 @@ export default function WebsiteAuthorsPage({
       avatarUrl: a.avatarUrl ?? '',
       videoUrl: a.videoUrl ?? '',
       expertise: (a.expertise ?? []).join(', '),
+      education: (a.education ?? []).join(', '),
+      certifications: (a.certifications ?? []).join(', '),
+      editorialRole: a.editorialRole ?? NO_ROLE,
       linkedin: a.social?.linkedin ?? '',
       x: a.social?.x ?? '',
       facebook: a.social?.facebook ?? '',
@@ -139,6 +165,9 @@ export default function WebsiteAuthorsPage({
 
   const handleSave = () => {
     const expertise = form.expertise.split(',').map((k) => k.trim()).filter(Boolean);
+    const education = form.education.split(',').map((k) => k.trim()).filter(Boolean);
+    const certifications = form.certifications.split(',').map((k) => k.trim()).filter(Boolean);
+    const editorialRole = form.editorialRole === NO_ROLE ? null : (form.editorialRole as AuthorEditorialRole);
     const keywords = form.keywords.split(',').map((k) => k.trim()).filter(Boolean);
     const social = {
       ...(form.linkedin ? { linkedin: form.linkedin } : {}),
@@ -167,6 +196,9 @@ export default function WebsiteAuthorsPage({
             avatarUrl: form.avatarUrl || null,
             videoUrl: form.videoUrl || null,
             expertise,
+            education,
+            certifications,
+            editorialRole,
             social,
             seoMetadata,
             status: form.status ? 'active' : 'inactive',
@@ -186,6 +218,9 @@ export default function WebsiteAuthorsPage({
           avatarUrl: form.avatarUrl || null,
           videoUrl: form.videoUrl || null,
           expertise,
+          education,
+          certifications,
+          editorialRole,
           social,
           seoMetadata,
         },
@@ -343,14 +378,47 @@ export default function WebsiteAuthorsPage({
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">Portrait URL (optional)</Label>
+              <Label className="text-xs">Education</Label>
               <Input
                 className="h-8 text-xs"
-                placeholder="https://… (square headshot)"
-                value={form.avatarUrl}
-                onChange={(e) => setForm((f) => ({ ...f, avatarUrl: e.target.value }))}
+                placeholder="e.g. M.D., University of Mississippi (comma separated)"
+                value={form.education}
+                onChange={(e) => setForm((f) => ({ ...f, education: e.target.value }))}
               />
             </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Certifications</Label>
+              <Input
+                className="h-8 text-xs"
+                placeholder="e.g. CFP®, CFA (comma separated)"
+                value={form.certifications}
+                onChange={(e) => setForm((f) => ({ ...f, certifications: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Editorial role</Label>
+              <Select
+                value={form.editorialRole}
+                onValueChange={(v) => setForm((f) => ({ ...f, editorialRole: v }))}
+              >
+                <SelectTrigger className="h-8 text-xs">
+                  <SelectValue placeholder="Not set" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NO_ROLE}>Not set</SelectItem>
+                  {EDITORIAL_ROLE_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value} className="text-xs">
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <FeaturedImagePanel
+              value={form.avatarUrl}
+              onChange={(url) => setForm((f) => ({ ...f, avatarUrl: url }))}
+              label="Author Photo"
+            />
             <div className="space-y-1.5">
               <Label className="text-xs">Video URL (optional)</Label>
               <Input

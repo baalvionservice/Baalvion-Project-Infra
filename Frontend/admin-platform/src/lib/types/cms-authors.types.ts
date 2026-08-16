@@ -13,6 +13,8 @@ export interface AuthorSocial {
   instagram?: string;
 }
 
+export type AuthorEditorialRole = 'writer' | 'reviewer' | 'fact-checker' | 'contributor';
+
 export interface WebsiteAuthor {
   id: string;
   websiteId: string;
@@ -24,6 +26,9 @@ export interface WebsiteAuthor {
   avatarUrl?: string;
   videoUrl?: string;
   expertise: string[];
+  education?: string[];
+  certifications?: string[];
+  editorialRole?: AuthorEditorialRole | null;
   social?: AuthorSocial;
   seoMetadata?: AuthorSeo;
   status: 'active' | 'inactive';
@@ -43,6 +48,9 @@ export interface CreateAuthorPayload {
   avatarUrl?: string | null;
   videoUrl?: string | null;
   expertise?: string[];
+  education?: string[];
+  certifications?: string[];
+  editorialRole?: AuthorEditorialRole | null;
   social?: AuthorSocial;
   seoMetadata?: AuthorSeo;
   sortOrder?: number;
@@ -57,6 +65,9 @@ export interface UpdateAuthorPayload {
   avatarUrl?: string | null;
   videoUrl?: string | null;
   expertise?: string[];
+  education?: string[];
+  certifications?: string[];
+  editorialRole?: AuthorEditorialRole | null;
   social?: AuthorSocial;
   seoMetadata?: AuthorSeo;
   status?: 'active' | 'inactive';

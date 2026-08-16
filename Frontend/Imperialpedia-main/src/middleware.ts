@@ -29,8 +29,82 @@ const ADMIN_CONSOLE_URL =
 
 const INDEXNOW_KEY = process.env.INDEXNOW_KEY;
 
+// SEO cleanup pass (2026-08): these URLs are permanently killed, not redirected —
+// thin/duplicate hub pages, their query-filtered variants (blocking the bare path
+// covers every ?query= combination of it too), a handful of thin entity pages, and
+// near-duplicate articles that never merited a redirect target. 410 (not 404) tells
+// crawlers the removal is intentional and permanent so they deindex rather than retry.
+// /financial-intelligence/emergency-fund-guide and /financial-intelligence/high-risk-vs-low-risk-stocks
+// were on the original candidate list but are excluded: the former is the live target
+// of the existing `/articles/emergency-funds` redirect in next.config.ts, and the latter
+// is already 301'd away there — killing either would break that redirect chain.
+const REMOVED_PATHS = new Set<string>([
+  '/technologies',
+  '/technologies/quantum-computing',
+  '/technologies/machine-learning',
+  '/technologies/large-language-models',
+  '/technologies/generative-ai',
+  '/technologies/blockchain',
+  '/companies',
+  '/countries',
+  '/countries/united-states',
+  '/countries/taiwan',
+  '/countries/south-korea',
+  '/stocks/dollarcost-averaging-explained',
+  '/investing/what-is-dollarcost-averaging',
+  '/personal-finance/dollar-cost-averaging',
+  '/financial-intelligence/money-management-for-students',
+  '/financial-intelligence/best-money-habits-of-millionaires',
+  '/financial-intelligence/debt-snowball-vs-debt-avalanche',
+  '/financial-intelligence/smart-spending-habits',
+  '/financial-intelligence/passive-income-ideas',
+  '/financial-intelligence/side-hustles-for-beginners',
+  '/financial-intelligence/family-financial-planning',
+  '/financial-intelligence/how-inflation-affects-your-savings',
+  '/financial-intelligence/how-much-savings-should-you-have',
+  '/financial-intelligence/how-to-track-expenses',
+  '/financial-intelligence/best-personal-finance-apps',
+  '/financial-intelligence/financial-independence-guide',
+  '/financial-intelligence/what-is-market-capitalization',
+  '/financial-intelligence/what-is-dollar-cost-averaging',
+  '/financial-intelligence/personal-net-worth-calculator-guide',
+  '/financial-intelligence/how-to-start-investing-in-stocks',
+  '/financial-intelligence/how-to-invest-during-a-recession',
+  '/financial-intelligence/how-to-improve-financial-discipline',
+  '/financial-intelligence/how-to-create-a-monthly-budget',
+  '/financial-intelligence/how-to-buy-stocks-online',
+  '/financial-intelligence/how-to-build-wealth-from-scratch',
+  '/financial-intelligence/how-to-build-a-stock-portfolio',
+  '/financial-intelligence/how-to-analyze-a-stock',
+  '/financial-intelligence/how-often-should-you-rebalance-your-portfolio',
+  '/financial-intelligence/how-much-money-do-you-need-to-start-investing',
+  '/financial-intelligence/growth-stocks-vs-value-stocks',
+  '/financial-intelligence/financial-goals-framework',
+  '/financial-intelligence/dividend-stocks-for-passive-income',
+  '/financial-intelligence/common-stock-investing-mistakes',
+  '/financial-intelligence/common-money-mistakes',
+  '/financial-intelligence/best-stocks-for-beginners',
+  '/financial-intelligence/best-long-term-stocks',
+  '/financial-intelligence/50-30-20-budget-rule-explained',
+  '/best-robo-advisers',
+  '/best-personal-loans',
+  '/best-online-brokers',
+  '/best-mortgage-rates',
+  '/best-life-insurance',
+  '/best-savings-rates',
+  '/best-debt-relief-companies',
+  '/best-crypto-exchanges',
+  '/best-cd-rates',
+]);
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Permanently killed URLs — see REMOVED_PATHS above. Checked before every other
+  // rule so a removed path never falls through to auth gates or legacy redirects.
+  if (REMOVED_PATHS.has(pathname)) {
+    return new NextResponse('Gone', { status: 410 });
+  }
 
   // IndexNow key verification file — search engines fetch https://<host>/<key>.txt
   // to confirm domain ownership before trusting any /api/revalidate ping. Without
@@ -93,5 +167,24 @@ export const config = {
     // IndexNow key verification file (any top-level *.txt request; the handler
     // above checks it against INDEXNOW_KEY and falls through otherwise).
     '/:indexnowFile.txt',
+    // REMOVED_PATHS coverage — permanently killed URLs (see the set above).
+    '/technologies',
+    '/technologies/:path*',
+    '/companies',
+    '/countries',
+    '/countries/:path*',
+    '/stocks/:path*',
+    '/investing/:path*',
+    '/personal-finance/:path*',
+    '/financial-intelligence/:path*',
+    '/best-robo-advisers',
+    '/best-personal-loans',
+    '/best-online-brokers',
+    '/best-mortgage-rates',
+    '/best-life-insurance',
+    '/best-savings-rates',
+    '/best-debt-relief-companies',
+    '/best-crypto-exchanges',
+    '/best-cd-rates',
   ],
 };

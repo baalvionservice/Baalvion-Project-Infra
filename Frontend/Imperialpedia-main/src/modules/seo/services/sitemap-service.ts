@@ -82,7 +82,11 @@ export const sitemapService = {
     // approval), and submitting a noindexed URL in the sitemap is a contradiction
     // Search Console flags. All of them are submitted conditionally below instead,
     // by that same categoryHasLiveContent check, once real content exists.
-    const corePages = ["","/about","/financial-intelligence","/banking","/budgeting","/companies","/contact","/countries","/economy","/explore","/financial-tools","/financial-tools/compound-interest","/financial-tools/inflation","/financial-tools/investment","/financial-tools/loan","/investing","/knowledge-map","/market-news","/personal-finance","/privacy-policy","/reviews","/stocks","/technologies","/terms-of-service","/transparency","/world","/world/us","/world/europe","/world/asia","/world/china","/world/emerging"];
+    // "/companies", "/countries", "/technologies" are also removed — the hub pages
+    // (and every ?query= variant of them) were permanently killed in the 2026-08 SEO
+    // cleanup pass, see REMOVED_PATHS in middleware.ts. Individual entity pages
+    // (e.g. /companies/apple) are unaffected and still submitted below via pushEntities.
+    const corePages = ["","/about","/financial-intelligence","/banking","/budgeting","/contact","/economy","/explore","/financial-tools","/financial-tools/compound-interest","/financial-tools/inflation","/financial-tools/investment","/financial-tools/loan","/investing","/knowledge-map","/market-news","/personal-finance","/privacy-policy","/reviews","/stocks","/terms-of-service","/transparency","/world","/world/us","/world/europe","/world/asia","/world/china","/world/emerging"];
     corePages.forEach((path) => {
       entries.push({
         loc: `${base}${path}`,
@@ -154,8 +158,53 @@ export const sitemapService = {
       listSafe(calculatorsService.getCalculatorList()),
     ]);
 
+    // Thin/duplicate articles permanently killed in the 2026-08 SEO cleanup pass (see
+    // REMOVED_PATHS in middleware.ts) — excluded here too so a still-published CMS row
+    // for one of these slugs never gets submitted to a URL that now 410s. Matched by
+    // full path since the 3 dollar-cost-averaging duplicates live under different
+    // categorySlugs (stocks/investing/personal-finance), not financial-intelligence.
+    const REMOVED_ARTICLE_PATHS = new Set([
+      "/stocks/dollarcost-averaging-explained",
+      "/investing/what-is-dollarcost-averaging",
+      "/personal-finance/dollar-cost-averaging",
+      "/financial-intelligence/money-management-for-students",
+      "/financial-intelligence/best-money-habits-of-millionaires",
+      "/financial-intelligence/debt-snowball-vs-debt-avalanche",
+      "/financial-intelligence/smart-spending-habits",
+      "/financial-intelligence/passive-income-ideas",
+      "/financial-intelligence/side-hustles-for-beginners",
+      "/financial-intelligence/family-financial-planning",
+      "/financial-intelligence/how-inflation-affects-your-savings",
+      "/financial-intelligence/how-much-savings-should-you-have",
+      "/financial-intelligence/how-to-track-expenses",
+      "/financial-intelligence/best-personal-finance-apps",
+      "/financial-intelligence/financial-independence-guide",
+      "/financial-intelligence/what-is-market-capitalization",
+      "/financial-intelligence/what-is-dollar-cost-averaging",
+      "/financial-intelligence/personal-net-worth-calculator-guide",
+      "/financial-intelligence/how-to-start-investing-in-stocks",
+      "/financial-intelligence/how-to-invest-during-a-recession",
+      "/financial-intelligence/how-to-improve-financial-discipline",
+      "/financial-intelligence/how-to-create-a-monthly-budget",
+      "/financial-intelligence/how-to-buy-stocks-online",
+      "/financial-intelligence/how-to-build-wealth-from-scratch",
+      "/financial-intelligence/how-to-build-a-stock-portfolio",
+      "/financial-intelligence/how-to-analyze-a-stock",
+      "/financial-intelligence/how-often-should-you-rebalance-your-portfolio",
+      "/financial-intelligence/how-much-money-do-you-need-to-start-investing",
+      "/financial-intelligence/growth-stocks-vs-value-stocks",
+      "/financial-intelligence/financial-goals-framework",
+      "/financial-intelligence/dividend-stocks-for-passive-income",
+      "/financial-intelligence/common-stock-investing-mistakes",
+      "/financial-intelligence/common-money-mistakes",
+      "/financial-intelligence/best-stocks-for-beginners",
+      "/financial-intelligence/best-long-term-stocks",
+      "/financial-intelligence/50-30-20-budget-rule-explained",
+    ]);
+
     articles.forEach((article) => {
       const path = article.categorySlug ? `/${article.categorySlug}/${article.slug}` : `/financial-intelligence/${article.slug}`;
+      if (REMOVED_ARTICLE_PATHS.has(path)) return;
       entries.push({
         loc: `${base}${path}`,
         lastmod: article.publishedAt?.split("T")[0] || today,
@@ -217,13 +266,18 @@ export const sitemapService = {
       safe(loadTechnologies(), []),
       safe(getPublishedNews(1000), []),
     ]);
-    const pushEntities = (items: Array<{ slug?: string }>, prefix: string, priority = 0.7) =>
+    // 5 technology and 3 country entity pages permanently killed in the 2026-08 SEO
+    // cleanup pass (REMOVED_PATHS in middleware.ts) — the hub prefixes above are also
+    // gone, but pushEntities is keyed by slug alone so these need their own exclusion.
+    const REMOVED_TECHNOLOGY_SLUGS = new Set(["quantum-computing", "machine-learning", "large-language-models", "generative-ai", "blockchain"]);
+    const REMOVED_COUNTRY_SLUGS = new Set(["united-states", "taiwan", "south-korea"]);
+    const pushEntities = (items: Array<{ slug?: string }>, prefix: string, priority = 0.7, exclude?: Set<string>) =>
       (items || []).forEach((e) => {
-        if (e?.slug) entries.push({ loc: `${base}${prefix}/${e.slug}`, changefreq: "weekly", priority });
+        if (e?.slug && !exclude?.has(e.slug)) entries.push({ loc: `${base}${prefix}/${e.slug}`, changefreq: "weekly", priority });
       });
     pushEntities(companies, "/companies", 0.8);
-    pushEntities(countries, "/countries");
-    pushEntities(technologies, "/technologies");
+    pushEntities(countries, "/countries", 0.7, REMOVED_COUNTRY_SLUGS);
+    pushEntities(technologies, "/technologies", 0.7, REMOVED_TECHNOLOGY_SLUGS);
 
     // "/news" and "/latest" are the same empty-hub case as the topic pages
     // above, just keyed on published `news` content instead of a category —
