@@ -17,6 +17,7 @@ import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { ShieldCheck, ArrowRight, Globe2 } from 'lucide-react';
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 
@@ -109,9 +110,18 @@ export default async function KnowledgeHomePage() {
   heroSecondary.forEach((a) => usedSlugs.add(a.slug));
   latest.forEach((a) => usedSlugs.add(a.slug));
 
-  const categories = apiCategories.length > 0
-    ? apiCategories.map((c: any) => ({ id: c.id, name: c.name, slug: c.slug }))
+  // Both sources (live law-service categories and CMS-derived article categories)
+  // can surface stray/legacy/subcategory slugs that have no real page -- e.g.
+  // `family-law-child-custody`, `legal-guides`. TopicTicker links every entry
+  // here unconditionally, so an unfiltered list turns into dead links straight
+  // off the homepage. Restrict to the site's curated practice-area hubs.
+  const currentSlugSet = new Set<string>(CURRENT_CATEGORY_SLUGS);
+  const rawCategories = apiCategories.length > 0
+    ? apiCategories.map((c: any) => ({ id: c.id, name: c.name, slug: toNewCategorySlug(c.slug) }))
     : deriveCategories(pool);
+  const categories = rawCategories.filter((c: { id: string; name: string; slug: string }) =>
+    currentSlugSet.has(c.slug),
+  );
 
   const articlesByCategory = categories.map((cat: any) => ({
     ...cat,
