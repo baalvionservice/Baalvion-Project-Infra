@@ -1,6 +1,5 @@
 import { Container } from "@/design-system/layout/container";
 import { Text } from "@/design-system/typography/text";
-import { Card, CardContent } from "@/components/ui/card";
 import { getSiteContent } from "@/lib/data/site-content";
 
 export type ToolExplainerContent = {
@@ -45,76 +44,72 @@ export function ToolExplainer({ content }: Props) {
 
   return (
     <Container isNarrow>
-      <div className="space-y-8 pb-16">
-        <Card className="glass-card border-none shadow-xl overflow-hidden">
-          <CardContent className="p-8 space-y-6">
-            <div>
-              <Text variant="h2" as="h2" className="text-2xl font-bold mb-3">
-                How the {toolName} Works
-              </Text>
-              <Text variant="body" className="text-muted-foreground leading-relaxed">
-                {intro}
-              </Text>
-            </div>
+      <div className="space-y-10 pb-16">
+        <div className="rounded-2xl border border-gray-100 p-8 space-y-6">
+          <div>
+            <Text variant="h2" as="h2" className="text-2xl font-bold mb-3">
+              How the {toolName} Works
+            </Text>
+            <Text variant="body" className="text-gray-500 leading-relaxed">
+              {intro}
+            </Text>
+          </div>
 
-            <div className="rounded-xl border border-white/10 bg-background/50 p-5">
-              <Text variant="caption" className="text-primary font-bold uppercase tracking-widest mb-2 block">
-                Formula
-              </Text>
-              <code className="block text-sm font-mono text-foreground mb-4">{formula}</code>
-              <ul className="space-y-1">
-                {formulaLegend.map((item) => (
-                  <li key={item.symbol} className="text-sm text-muted-foreground">
-                    <span className="font-mono font-semibold text-foreground">{item.symbol}</span> — {item.meaning}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="space-y-3">
-              {howItWorks.map((paragraph, i) => (
-                <Text key={i} variant="body" className="text-muted-foreground leading-relaxed">
-                  {paragraph}
-                </Text>
+          <div className="rounded-xl border border-gray-100 bg-gray-50 p-5">
+            <Text variant="caption" className="text-gray-400 font-bold uppercase tracking-widest mb-2 block text-xs">
+              Formula
+            </Text>
+            <code className="block text-sm font-mono text-foreground mb-4">{formula}</code>
+            <ul className="space-y-1">
+              {formulaLegend.map((item) => (
+                <li key={item.symbol} className="text-sm text-gray-500">
+                  <span className="font-mono font-semibold text-foreground">{item.symbol}</span> — {item.meaning}
+                </li>
               ))}
-            </div>
+            </ul>
+          </div>
 
-            <div className="rounded-xl border border-primary/20 bg-primary/5 p-5">
-              <Text variant="caption" className="text-primary font-bold uppercase tracking-widest mb-3 block">
-                Worked Example: {example.title}
+          <div className="space-y-3">
+            {howItWorks.map((paragraph, i) => (
+              <Text key={i} variant="body" className="text-gray-500 leading-relaxed">
+                {paragraph}
               </Text>
-              <ol className="space-y-1.5 list-decimal list-inside">
-                {example.steps.map((step, i) => (
-                  <li key={i} className="text-sm text-muted-foreground">
-                    {step}
-                  </li>
-                ))}
-              </ol>
-              <Text variant="body" className="mt-3 font-semibold text-foreground">
-                {example.result}
-              </Text>
-            </div>
-          </CardContent>
-        </Card>
+            ))}
+          </div>
+
+          <div className="rounded-xl border border-gray-100 bg-gray-50 p-5">
+            <Text variant="caption" className="text-primary font-bold uppercase tracking-widest mb-3 block text-xs">
+              Worked Example: {example.title}
+            </Text>
+            <ol className="space-y-1.5 list-decimal list-inside">
+              {example.steps.map((step, i) => (
+                <li key={i} className="text-sm text-gray-500">
+                  {step}
+                </li>
+              ))}
+            </ol>
+            <Text variant="body" className="mt-3 font-semibold text-foreground">
+              {example.result}
+            </Text>
+          </div>
+        </div>
 
         {faq.length > 0 && (
-          <Card className="glass-card border-none shadow-xl overflow-hidden">
-            <CardContent className="p-8 space-y-5">
-              <Text variant="h3" as="h3" className="text-lg font-bold">
-                Frequently Asked Questions
-              </Text>
-              {faq.map((f) => (
-                <div key={f.question}>
-                  <Text variant="body" className="font-semibold text-foreground">
-                    {f.question}
-                  </Text>
-                  <Text variant="body" className="text-muted-foreground mt-1 leading-relaxed">
-                    {f.answer}
-                  </Text>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+          <div className="rounded-2xl border border-gray-100 p-8 space-y-5">
+            <Text variant="h3" as="h3" className="text-lg font-bold">
+              Frequently Asked Questions
+            </Text>
+            {faq.map((f) => (
+              <div key={f.question} className="border-t border-gray-100 pt-4 first:border-t-0 first:pt-0">
+                <Text variant="body" className="font-semibold text-foreground">
+                  {f.question}
+                </Text>
+                <Text variant="body" className="text-gray-500 mt-1 leading-relaxed">
+                  {f.answer}
+                </Text>
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </Container>

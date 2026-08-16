@@ -22,7 +22,12 @@ export const LiveQuoteCard = async ({ ticker }: LiveQuoteCardProps) => {
   const asset = await getAssetQuote(ticker);
   if (!asset || asset.current_price == null) return null;
 
-  const up = (asset.change_pct_24h ?? 0) >= 0;
+  // The API serializes Postgres NUMERIC columns as strings despite the
+  // `number | null` type — same coercion MarketHighlights/MarketRow already
+  // apply for this exact field.
+  const price = Number(asset.current_price);
+  const pct = asset.change_pct_24h != null ? Number(asset.change_pct_24h) : null;
+  const up = (pct ?? 0) >= 0;
   const marketCap = fmtMarketCap(asset.market_cap);
 
   return (
@@ -33,12 +38,12 @@ export const LiveQuoteCard = async ({ ticker }: LiveQuoteCardProps) => {
         </Text>
         <div className="flex items-baseline gap-2">
           <span className="text-2xl font-bold tracking-tight">
-            ${asset.current_price.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+            ${price.toLocaleString(undefined, { maximumFractionDigits: 2 })}
           </span>
-          {asset.change_pct_24h != null && (
+          {pct != null && (
             <span className={`flex items-center gap-0.5 text-sm font-semibold ${up ? 'text-green-600 dark:text-green-500' : 'text-red-600 dark:text-red-500'}`}>
               {up ? <TrendingUp className="h-3.5 w-3.5" /> : <TrendingDown className="h-3.5 w-3.5" />}
-              {up ? '+' : ''}{asset.change_pct_24h.toFixed(2)}%
+              {up ? '+' : ''}{pct.toFixed(2)}%
             </span>
           )}
         </div>

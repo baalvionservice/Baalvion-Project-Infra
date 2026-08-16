@@ -7,17 +7,16 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { 
-  Tooltip, 
-  TooltipContent, 
-  TooltipTrigger 
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger
 } from '@/components/ui/tooltip';
 import { calculatorsService } from '@/services/data';
 import { CalculatorResultModal } from '@/modules/calculators/components/CalculatorResultModal';
-import { PieChart as PieIcon, RefreshCcw, ArrowLeft, Info, TrendingUp, CheckCircle2, Loader2, HelpCircle } from 'lucide-react';
-import Link from 'next/link';
+import { CalculatorHeader } from '@/components/financial-tools/CalculatorHeader';
+import { PieChart as PieIcon, TrendingUp, CheckCircle2, Loader2, HelpCircle } from 'lucide-react';
 import { useCalculatorStore } from '@/lib/state/calculator-store';
 import { 
   AreaChart, 
@@ -86,36 +85,20 @@ export default function InvestmentClient() {
     new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
 
   return (
-    <main className="min-h-screen bg-background pt-20 pb-32">
+    <main className="min-h-screen bg-background pt-12 pb-32">
       <Container>
-        <Button variant="ghost" size="sm" className="mb-8 p-0 hover:bg-transparent text-muted-foreground hover:text-primary group" asChild>
-          <Link href="/financial-tools">
-            <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" /> 
-            Back to Dashboard
-          </Link>
-        </Button>
-
-        <header className="mb-12 max-w-3xl">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20 text-primary shadow-sm">
-              <PieIcon className="h-7 w-7" />
-            </div>
-            <Badge variant="outline" className="text-primary border-primary/30 uppercase tracking-widest text-[10px] font-bold px-3 py-1">
-              Investment ROI
-            </Badge>
-          </div>
-          <Text variant="h1" as="h1" className="text-4xl lg:text-6xl font-bold mb-4 tracking-tight">Investment ROI Engine</Text>
-          <Text variant="body" className="text-muted-foreground text-lg leading-relaxed">
-            Project your long-term wealth accumulation by modeling recurring contributions against historical market benchmarks.
-          </Text>
-        </header>
+        <CalculatorHeader
+          category="Investing"
+          title="Investment Growth Calculator"
+          description="Project long-term wealth accumulation by modeling recurring contributions against an expected annual return."
+          icon={PieIcon}
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-4 space-y-8">
-            <Card className="glass-card border-none shadow-2xl h-fit">
-              <div className="bg-primary/5 px-6 py-4 border-b border-white/5 flex items-center gap-2">
-                <Info className="h-4 w-4 text-primary" />
-                <Text variant="caption" className="text-primary font-bold uppercase tracking-widest">Growth Inputs</Text>
+            <Card className="border-gray-100 rounded-2xl h-fit">
+              <div className="px-6 py-4 border-b border-gray-100">
+                <Text variant="caption" className="text-gray-400 font-bold uppercase tracking-widest text-xs">Enter Your Numbers</Text>
               </div>
               <CardContent className="p-6">
                 <form onSubmit={handleCalculate} className="space-y-6">
@@ -137,7 +120,7 @@ export default function InvestmentClient() {
                       value={principal} 
                       onChange={(e) => updateInvestment({ principal: e.target.value, errors: { ...errors, principal: '' } })}
                       error={errors.principal}
-                      className="h-11 bg-background/50 border-white/10"
+                      className="h-11"
                       placeholder="5000"
                       disabled={calculating}
                     />
@@ -161,7 +144,7 @@ export default function InvestmentClient() {
                       value={monthly} 
                       onChange={(e) => updateInvestment({ monthly: e.target.value, errors: { ...errors, monthly: '' } })}
                       error={errors.monthly}
-                      className="h-11 bg-background/50 border-white/10"
+                      className="h-11"
                       placeholder="500"
                       disabled={calculating}
                     />
@@ -186,7 +169,7 @@ export default function InvestmentClient() {
                       value={rate} 
                       onChange={(e) => updateInvestment({ rate: e.target.value, errors: { ...errors, rate: '' } })}
                       error={errors.rate}
-                      className="h-11 bg-background/50 border-white/10"
+                      className="h-11"
                       placeholder="8"
                       disabled={calculating}
                     />
@@ -210,19 +193,19 @@ export default function InvestmentClient() {
                       value={years} 
                       onChange={(e) => updateInvestment({ years: e.target.value, errors: { ...errors, years: '' } })}
                       error={errors.years}
-                      className="h-11 bg-background/50 border-white/10"
+                      className="h-11"
                       placeholder="20"
                       disabled={calculating}
                     />
                   </div>
 
                   <div className="flex flex-col gap-3 pt-4">
-                    <Button type="submit" disabled={calculating} className="h-12 w-full bg-primary hover:bg-primary/90 text-white rounded-xl font-bold shadow-lg shadow-primary/20 transition-all">
+                    <Button type="submit" disabled={calculating} className="h-12 w-full font-semibold">
                       {calculating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                      Analyze Projections
+                      Calculate
                     </Button>
                     <Button type="button" variant="ghost" onClick={handleReset} className="h-10 w-full text-muted-foreground hover:text-foreground" disabled={calculating}>
-                      <RefreshCcw className="mr-2 h-3.5 w-3.5" /> Reset Parameters
+                      Reset
                     </Button>
                   </div>
                 </form>
@@ -230,7 +213,7 @@ export default function InvestmentClient() {
             </Card>
 
             {(calculating || result) && (
-              <Card className="glass-card border-none bg-primary/5 border-primary/20 animate-in fade-in duration-500">
+              <Card className="border-gray-100 bg-gray-50 animate-in fade-in duration-500">
                 <CardContent className="p-6">
                   {calculating ? (
                     <div className="space-y-2">
@@ -240,11 +223,11 @@ export default function InvestmentClient() {
                   ) : (
                     <>
                       <div className="flex items-center justify-between mb-4">
-                        <Text variant="label" className="text-primary">Summary Value</Text>
-                        <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                        <Text variant="label" className="text-gray-400 uppercase tracking-widest text-xs">Summary Value</Text>
+                        <CheckCircle2 className="h-4 w-4 text-emerald-600" />
                       </div>
-                      <div className="text-3xl font-bold mb-1">{formatCurrency(result || 0)}</div>
-                      <Text variant="caption" className="text-muted-foreground">Projected capital in {years} years.</Text>
+                      <div className="text-3xl font-bold mb-1 text-primary">{formatCurrency(result || 0)}</div>
+                      <Text variant="caption" className="text-gray-500">Projected capital in {years} years.</Text>
                     </>
                   )}
                 </CardContent>
@@ -253,12 +236,12 @@ export default function InvestmentClient() {
           </div>
 
           <div className="lg:col-span-8">
-            <Card className="glass-card border-none shadow-2xl h-full overflow-hidden flex flex-col">
-              <CardHeader className="bg-card/30 border-b border-white/5">
+            <Card className="border-gray-100 rounded-2xl h-full overflow-hidden flex flex-col">
+              <CardHeader className="border-b border-gray-100">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <TrendingUp className="h-5 w-5 text-primary" /> Growth Trajectory
                 </CardTitle>
-                <CardDescription>Visualizing the power of recurring contributions and compound market yields.</CardDescription>
+                <CardDescription>How your balance grows as contributions compound month over month.</CardDescription>
               </CardHeader>
               <CardContent className="p-8 flex-grow flex flex-col justify-center min-h-[400px]">
                 {calculating ? (
@@ -269,25 +252,25 @@ export default function InvestmentClient() {
                       <AreaChart data={chartData}>
                         <defs>
                           <linearGradient id="colorBalance" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#8272F2" stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor="#8272F2" stopOpacity={0}/>
+                            <stop offset="5%" stopColor="#1d4fc4" stopOpacity={0.25}/>
+                            <stop offset="95%" stopColor="#1d4fc4" stopOpacity={0}/>
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
-                        <XAxis dataKey="year" stroke="#888888" fontSize={10} tickLine={false} axisLine={false} label={{ value: 'Years', position: 'insideBottom', offset: -5, fontSize: 10 }} />
-                        <YAxis stroke="#888888" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(val) => `$${val / 1000}k`} />
-                        <RechartsTooltip contentStyle={{ backgroundColor: '#1C1822', border: '1px solid #ffffff10', borderRadius: '12px' }} formatter={(value: number) => [formatCurrency(value), 'Capital Maturity']} />
-                        <Area type="monotone" dataKey="balance" stroke="#8272F2" fillOpacity={1} fill="url(#colorBalance)" strokeWidth={3} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
+                        <XAxis dataKey="year" stroke="#9ca3af" fontSize={10} tickLine={false} axisLine={false} label={{ value: 'Years', position: 'insideBottom', offset: -5, fontSize: 10 }} />
+                        <YAxis stroke="#9ca3af" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(val) => `$${val / 1000}k`} />
+                        <RechartsTooltip contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #f3f4f6', borderRadius: '12px' }} formatter={(value: number) => [formatCurrency(value), 'Capital Maturity']} />
+                        <Area type="monotone" dataKey="balance" stroke="#1d4fc4" fillOpacity={1} fill="url(#colorBalance)" strokeWidth={2.5} />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
                 ) : (
                   <div className="text-center space-y-4 opacity-50">
-                    <div className="w-20 h-20 bg-muted/20 rounded-full flex items-center justify-center mx-auto">
-                      <TrendingUp className="h-10 w-10 text-muted-foreground" />
+                    <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto">
+                      <TrendingUp className="h-10 w-10 text-gray-400" />
                     </div>
                     <Text variant="bodySmall" className="italic">
-                      Define your investment goals to generate a visual performance chart.
+                      Enter your investment goals to generate a growth chart.
                     </Text>
                   </div>
                 )}

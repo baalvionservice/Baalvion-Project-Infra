@@ -36,45 +36,44 @@ export const CalculatorResultModal = ({
 }: CalculatorResultModalProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-md glass-card border-primary/20 p-0 overflow-hidden">
+      <DialogContent className="max-w-md p-0 overflow-hidden">
         <DialogHeader className="sr-only">
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
             {description}
           </DialogDescription>
         </DialogHeader>
-        
-        <div className="bg-primary/5 p-8 text-center border-b border-white/5 relative">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-secondary" />
-          <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle2 className="h-10 w-10 text-emerald-500" />
+
+        <div className="bg-gray-50 p-8 text-center border-b border-gray-100">
+          <div className="w-14 h-14 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-5">
+            <CheckCircle2 className="h-8 w-8 text-emerald-600" />
           </div>
-          <Text variant="label" className="text-primary mb-2">Calculation Complete</Text>
-          <Text variant="h2" className="text-4xl font-bold mb-2">{result}</Text>
+          <Text variant="label" className="text-gray-400 uppercase tracking-widest text-xs mb-2">Result</Text>
+          <Text variant="h2" className="text-4xl font-bold mb-2 text-foreground">{result}</Text>
           <Text variant="bodySmall" className="text-muted-foreground">{title}</Text>
         </div>
-        
+
         <div className="p-8 space-y-6">
-          <div className="p-4 rounded-2xl bg-card border border-white/5 italic text-sm text-center text-muted-foreground leading-relaxed">
+          <div className="p-4 rounded-xl bg-gray-50 border border-gray-100 italic text-sm text-center text-gray-500 leading-relaxed">
             "{description}"
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <Button variant="outline" size="sm" className="h-11 rounded-xl">
+            <Button variant="outline" size="sm" className="h-11">
               <Share2 className="mr-2 h-4 w-4" /> Share
             </Button>
-            <Button variant="outline" size="sm" className="h-11 rounded-xl">
+            <Button variant="outline" size="sm" className="h-11">
               <Download className="mr-2 h-4 w-4" /> Export
             </Button>
           </div>
         </div>
 
-        <DialogFooter className="p-6 bg-muted/20 border-t border-white/5 flex flex-row gap-3">
-          <Button variant="ghost" onClick={onReset} className="flex-1 rounded-xl">
+        <DialogFooter className="p-6 bg-gray-50 border-t border-gray-100 flex flex-row gap-3">
+          <Button variant="ghost" onClick={onReset} className="flex-1">
             <RefreshCcw className="mr-2 h-4 w-4" /> Recalculate
           </Button>
-          <Button onClick={onClose} className="flex-1 bg-primary hover:bg-primary/90 rounded-xl font-bold shadow-lg shadow-primary/20">
-            Close Results
+          <Button onClick={onClose} className="flex-1 font-semibold">
+            Close
           </Button>
         </DialogFooter>
       </DialogContent>

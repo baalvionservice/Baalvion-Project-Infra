@@ -26,3 +26,34 @@ export const financialToolsCategoryBlurbs: Record<string, string> = {
 
 export const financialToolsHubClosing =
   "None of these calculators replace a licensed financial advisor, a CPA, or your own judgment about risk tolerance and goals — they exist to make the underlying math fast, visible, and easy to re-run under different assumptions, so the decision you eventually make is an informed one rather than a guess. If a specific scenario isn't covered here, each calculator's own page includes the exact formula it uses, a worked example, and answers to the questions people most often ask about that calculation, so you can verify the math yourself rather than taking the output on faith.";
+
+/** General FAQ about the calculator library itself — separate from each tool's
+ * own formula-specific FAQ (see tool-explainer-content.ts), which covers the
+ * math. These cover the tools as a product: cost, accuracy, and data handling. */
+export const financialToolsHubFAQ: { question: string; answer: string }[] = [
+  {
+    question: "Are Imperialpedia's financial calculators free to use?",
+    answer:
+      "Yes. Every calculator on this page is free, requires no account or signup, and has no usage limit. There's no premium tier that unlocks additional precision or removes a paywall on results.",
+  },
+  {
+    question: "How accurate are the results?",
+    answer:
+      "Each calculator uses the exact formula shown on its own page — the same standard formulas used in finance textbooks and by financial professionals (e.g., the standard amortization formula for loans, or A = P(1 + r/n)^(nt) for compound interest). Accuracy is only as good as the numbers you enter; the tools don't forecast future rates or returns for you.",
+  },
+  {
+    question: "Do you store the numbers I enter?",
+    answer:
+      "No. Calculations run entirely in your browser from the values you type in. Nothing you enter into a calculator — principal, rate, account size, trade prices — is sent to Imperialpedia's servers or stored.",
+  },
+  {
+    question: "Where do the formulas come from?",
+    answer:
+      "Standard, published financial formulas — not a proprietary model. Each calculator's page shows the formula, defines every variable, and walks through a hand-verified worked example, so you can check the math independently instead of trusting a black box.",
+  },
+  {
+    question: "Can I use these for tax or legal decisions?",
+    answer:
+      "Treat them as planning and estimation tools, not tax or legal advice. Real-world numbers involve variables these calculators don't model — taxes, fees beyond what's explicitly asked for, and individual circumstances — so confirm anything consequential with a CPA, tax professional, or financial advisor.",
+  },
+];
