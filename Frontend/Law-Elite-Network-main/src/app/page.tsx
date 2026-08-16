@@ -1,16 +1,49 @@
-"use client";
-
-import React, { useEffect, useMemo, useState } from 'react';
-import { categoriesPublicApi, articlesPublicApi } from '@/lib/api/client';
+import React from 'react';
+import { fetchPublicApi } from '@/lib/api/public-fetch';
 import { mergeArticles } from '@/data/law-content';
+import { cmsGetArticles } from '@/lib/cms';
 import { TopicTicker } from '@/components/knowledge/news/TopicTicker';
 import { StoryCard } from '@/components/knowledge/news/StoryCard';
 import { LatestRail } from '@/components/knowledge/news/LatestRail';
 import { CategorySection } from '@/components/knowledge/news/CategorySection';
 import { TrustSection } from '@/components/knowledge/TrustSection';
+import { JurisdictionSection } from '@/components/knowledge/JurisdictionSection';
+import { PlatformIntro } from '@/components/knowledge/PlatformIntro';
+import { WhatYouCanFind } from '@/components/knowledge/WhatYouCanFind';
+import { WhoIsThisFor } from '@/components/knowledge/WhoIsThisFor';
+import { NewsGateway } from '@/components/knowledge/NewsGateway';
+import { HomepageDisclaimer } from '@/components/knowledge/HomepageDisclaimer';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
-import SearchBar from '@/components/search/SearchBar';
-import { ShieldCheck } from 'lucide-react';
+import { ShieldCheck, ArrowRight, Globe2 } from 'lucide-react';
+import Link from 'next/link';
+import type { Metadata } from 'next';
+
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+
+// Serve a cached page and refresh it in the background every 5 minutes,
+// instead of re-rendering (and re-fetching from the CMS/law-service) on
+// every single visitor/Googlebot request.
+export const revalidate = 300;
+
+export const metadata: Metadata = {
+  title: 'Law Elite Network | Plain-Language Legal Guides, Worldwide',
+  description:
+    'Understand your rights before you call a lawyer. Free, plain-language guides to family, criminal, employment, business, tax and property law — written for a general audience, covering every jurisdiction.',
+  alternates: { canonical: SITE },
+  openGraph: {
+    type: 'website',
+    url: SITE,
+    title: 'Law Elite Network | Plain-Language Legal Guides, Worldwide',
+    description:
+      'Understand your rights before you call a lawyer. Free, plain-language guides to family, criminal, employment, business, tax and property law.',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Law Elite Network | Plain-Language Legal Guides, Worldwide',
+    description:
+      'Understand your rights before you call a lawyer. Free, plain-language guides to family, criminal, employment, business, tax and property law.',
+  },
+};
 
 function categoryIdOf(a: any): string {
   return String(a?.categoryId ?? a?.category?.id ?? a?.category_id ?? '');
@@ -30,84 +63,104 @@ function deriveCategories(pool: any[]): { id: string; name: string; slug: string
   return [...map.values()];
 }
 
-export default function KnowledgeHomePage() {
-  const [apiCategories, setApiCategories] = useState<any[]>([]);
-  const [apiArticles, setApiArticles] = useState<any[]>([]);
+// Server component so it can read the CMS directly (cms.ts's CMS_PUBLIC_URL/CMS_WEBSITE_SLUG
+// env vars are server-only). Previously this ran client-side and only queried law-service's
+// /v1/articles, which is empty in production — every admin-authored article (and its uploaded
+// featured image) lives in the CMS, so the homepage silently showed only the bundled/static
+// placeholder set no matter what was published. cmsGetArticles() already carries featuredImage
+// through (see lib/cms.ts's CmsArticle.featuredImage comment); this just wires it into the pool.
+export default async function KnowledgeHomePage() {
+  const [cmsArticles, apiCategoriesRaw, apiArticles] = await Promise.all([
+    cmsGetArticles().catch(() => []),
+    fetchPublicApi('/categories').then((j) => (Array.isArray(j?.data) ? j.data : [])),
+    fetchPublicApi('/articles', { sortBy: 'views', order: 'desc', limit: 50, status: 'published' }).then((j) => {
+      const items = j?.data?.items || j?.data || [];
+      return Array.isArray(items) ? items : [];
+    }),
+  ]);
+  const apiCategories = apiCategoriesRaw;
 
-  useEffect(() => {
-    categoriesPublicApi
-      .list()
-      .then((res) => {
-        const data = res.data?.data;
-        if (Array.isArray(data) && data.length > 0) setApiCategories(data);
-      })
-      .catch(() => {});
+  // CMS is the authoritative admin-managed source, so it wins on a slug collision;
+  // mergeArticles() then fills any remaining gap with the bundled/static set.
+  const seenSlugs = new Set<string>();
+  const combinedSource = [...cmsArticles, ...apiArticles].filter((a: any) => {
+    if (!a?.slug || seenSlugs.has(a.slug)) return false;
+    seenSlugs.add(a.slug);
+    return true;
+  });
+  const pool = mergeArticles(combinedSource);
 
-    articlesPublicApi
-      .list({ sortBy: 'views', order: 'desc', limit: 50, status: 'published' })
-      .then((res) => {
-        const items = res.data?.data?.items || res.data?.data || [];
-        if (Array.isArray(items)) setApiArticles(items);
-      })
-      .catch(() => {});
-  }, []);
+  // Editor's-picks first, not raw popularity -- a "trending by views" sort is
+  // the newsroom pattern /news already owns. The homepage is an evergreen
+  // library, so it leads with `featured` (an editorial curation flag already
+  // set in the CMS) and only falls back to the full pool when too few guides
+  // are flagged, mirroring the same fallback used by law-content.ts's own
+  // getFeaturedArticles().
+  const featuredPool = pool.filter((a: any) => a.featured);
+  const spotlightSource = featuredPool.length >= 7 ? featuredPool : pool;
+  const spotlight = [...spotlightSource].sort((a, b) => (b.views || 0) - (a.views || 0));
 
-  const pool = useMemo(() => mergeArticles(apiArticles), [apiArticles]);
+  const lead = spotlight[0];
+  const heroSecondary = spotlight.slice(1, 3);
+  const latest = spotlight.slice(3, 7);
 
-  const trending = useMemo(() => [...pool].sort((a, b) => (b.views || 0) - (a.views || 0)), [pool]);
+  const usedSlugs = new Set<string>();
+  if (lead) usedSlugs.add(lead.slug);
+  heroSecondary.forEach((a) => usedSlugs.add(a.slug));
+  latest.forEach((a) => usedSlugs.add(a.slug));
 
-  const lead = trending[0];
-  const heroSecondary = trending.slice(1, 3);
-  const latest = trending.slice(3, 7);
+  const categories = apiCategories.length > 0
+    ? apiCategories.map((c: any) => ({ id: c.id, name: c.name, slug: c.slug }))
+    : deriveCategories(pool);
 
-  const usedSlugs = useMemo(() => {
-    const seen = new Set<string>();
-    if (lead) seen.add(lead.slug);
-    heroSecondary.forEach((a) => seen.add(a.slug));
-    latest.forEach((a) => seen.add(a.slug));
-    return seen;
-  }, [lead, heroSecondary, latest]);
-
-  const categories = useMemo(() => {
-    if (apiCategories.length > 0) {
-      return apiCategories.map((c) => ({ id: c.id, name: c.name, slug: c.slug }));
-    }
-    return deriveCategories(pool);
-  }, [apiCategories, pool]);
-
-  const articlesByCategory = useMemo(() => {
-    return categories.map((cat) => ({
-      ...cat,
-      articles: pool
-        .filter((a) => !usedSlugs.has(a.slug))
-        .filter(
-          (a) => categoryIdOf(a) === String(cat.id) || categorySlugOf(a) === cat.slug,
-        )
-        .slice(0, 3),
-    }));
-  }, [categories, pool, usedSlugs]);
+  const articlesByCategory = categories.map((cat: any) => ({
+    ...cat,
+    articles: pool
+      .filter((a) => !usedSlugs.has(a.slug))
+      .filter(
+        (a) => categoryIdOf(a) === String(cat.id) || categorySlugOf(a) === cat.slug,
+      )
+      .slice(0, 3),
+  }));
 
   return (
     <div className="min-h-screen bg-white pt-[60px] lg:pt-[96px]">
-      {/* Masthead strip */}
+      {/* Masthead strip -- search lives once, in the persistent header above;
+          duplicating it here read as broken/unpolished to reviewers. */}
       <section className="border-b border-slate-100 bg-white">
-        <div className="container mx-auto px-4 sm:px-6 max-w-7xl py-6 md:py-8 flex flex-col lg:flex-row lg:items-end justify-between gap-5">
-          <div>
-            <span className="kicker">
-              <ShieldCheck className="w-3.5 h-3.5" /> Trusted Legal Knowledge · Worldwide
-            </span>
-            <h1 className="font-headline text-3xl md:text-[2.6rem] font-extrabold tracking-tight text-slate-900 leading-[1.05] mt-2">
-              Plain-language guides to the law,
-              <br className="hidden md:block" /> for every jurisdiction.
-            </h1>
-          </div>
-          <div className="w-full lg:max-w-md">
-            <SearchBar variant="navbar" />
+        <div className="container mx-auto px-4 sm:px-6 max-w-7xl py-6 md:py-8">
+          <span className="kicker">
+            <ShieldCheck className="w-3.5 h-3.5" /> Global Legal Education
+          </span>
+          <h1 className="font-headline text-3xl md:text-[2.6rem] font-extrabold tracking-tight text-slate-900 leading-[1.05] mt-2">
+            Plain-language legal information
+            <br className="hidden md:block" /> for a global audience.
+          </h1>
+          <p className="text-base md:text-lg text-slate-500 max-w-2xl leading-relaxed mt-3">
+            Law Elite Network is an independent legal-information platform helping people understand
+            laws, legal procedures, rights, regulations, and legal concepts across different
+            jurisdictions.
+          </p>
+          <div className="flex flex-wrap items-center gap-3 mt-6">
+            <a
+              href="#legal-guides"
+              className="inline-flex items-center gap-2 px-5 h-11 rounded-md bg-[#0B1F3A] text-white text-[13px] font-bold tracking-wide hover:bg-blue-800 transition-colors"
+            >
+              Explore Legal Guides <ArrowRight className="w-4 h-4" />
+            </a>
+            <Link
+              href="/countries"
+              className="inline-flex items-center gap-2 px-5 h-11 rounded-md border border-slate-200 text-slate-700 text-[13px] font-bold tracking-wide hover:border-news-600 hover:text-news-600 transition-colors"
+            >
+              <Globe2 className="w-4 h-4" /> Browse by Jurisdiction
+            </Link>
           </div>
         </div>
       </section>
 
-      <TopicTicker categories={categories} />
+      <div id="practice-areas">
+        <TopicTicker categories={categories} />
+      </div>
 
       <main className="container mx-auto px-4 sm:px-6 max-w-7xl">
         {/* Hero: lead + secondary + latest rail */}
@@ -130,12 +183,16 @@ export default function KnowledgeHomePage() {
         </section>
 
         {/* Category sections */}
-        <div className="py-8 border-t border-slate-200">
-          {articlesByCategory.map((cat) => (
+        <div id="legal-guides" className="py-8 border-t border-slate-200 scroll-mt-24">
+          {articlesByCategory.map((cat: { id: string; name: string; slug: string; articles: any[] }) => (
             <CategorySection key={cat.slug} name={cat.name} slug={cat.slug} articles={cat.articles} />
           ))}
         </div>
 
+        <WhatYouCanFind />
+        <JurisdictionSection />
+        <PlatformIntro />
+        <WhoIsThisFor />
       </main>
 
       <section className="border-t border-slate-100">
@@ -144,10 +201,15 @@ export default function KnowledgeHomePage() {
         </div>
       </section>
 
+      <div className="container mx-auto px-4 sm:px-6 max-w-7xl">
+        <NewsGateway />
+      </div>
+
+      <div className="container mx-auto px-4 sm:px-6 max-w-7xl">
+        <HomepageDisclaimer />
+      </div>
+
       <PublicFooter />
     </div>
   );
 }
-// Force rebuild at Mon Aug  3 00:52:42 IST 2026
-// Deploy timestamp: Mon Aug  3 01:25:18 IST 2026
-// Vercel deploy with secrets: 1785700666

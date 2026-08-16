@@ -5,6 +5,7 @@ const description = "Law Elite Network terms of service governing use of the pla
 export const metadata: Metadata = {
   title,
   description,
+  keywords: ['law elite network terms of service', 'legal disclaimer', 'terms and conditions', 'not legal advice notice'],
   alternates: { canonical: `${SITE}/terms-of-service` },
   openGraph: { type: 'website', url: `${SITE}/terms-of-service`, title, description },
   twitter: { card: 'summary_large_image', title, description },

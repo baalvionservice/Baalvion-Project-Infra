@@ -36,6 +36,13 @@ export const articlesService = {
       if (items.length > 0) {
         const categoryMap = await getArticleCategoryMap();
         const data = items.map((raw) => cmsContentToArticle(raw, categoryMap));
+        // cms-service caps page size at 100 server-side regardless of the requested
+        // `limit` (see cms-public.ts's getArticleCategoryMap for the same note) — so
+        // deriving totalPages from the *requested* limit undercounts whenever a caller
+        // asks for more than 100 (e.g. sitemap-service's getPage(1, 1000)), silently
+        // truncating callers that walk pagination.totalPages to just the first page.
+        // Deriving it from the actual returned page size fixes that.
+        const effectivePageSize = Math.max(items.length, 1);
         return {
           data,
           success: true,
@@ -44,10 +51,10 @@ export const articlesService = {
           timestamp: nowIso(),
           pagination: {
             currentPage: page,
-            totalPages: Math.max(1, Math.ceil(total / limit)),
+            totalPages: Math.max(1, Math.ceil(total / effectivePageSize)),
             pageSize: limit,
             totalItems: total,
-            hasNextPage: page * limit < total,
+            hasNextPage: page * effectivePageSize < total,
             hasPreviousPage: page > 1,
           },
         };
@@ -149,6 +156,9 @@ export const articlesService = {
         limit,
       });
       const categoryMap = await getArticleCategoryMap();
+      // Same server-side page-size cap as getArticles above — derive totalPages from
+      // what actually came back, not the requested limit.
+      const effectivePageSize = Math.max(items.length, 1);
       return {
         data: items.map((raw) => cmsContentToArticle(raw, categoryMap)),
         success: true,
@@ -157,10 +167,10 @@ export const articlesService = {
         timestamp: nowIso(),
         pagination: {
           currentPage: page,
-          totalPages: Math.max(1, Math.ceil(total / limit)),
+          totalPages: Math.max(1, Math.ceil(total / effectivePageSize)),
           pageSize: limit,
           totalItems: total,
-          hasNextPage: page * limit < total,
+          hasNextPage: page * effectivePageSize < total,
           hasPreviousPage: page > 1,
         },
       };

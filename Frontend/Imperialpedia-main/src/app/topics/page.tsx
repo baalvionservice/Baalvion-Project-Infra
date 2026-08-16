@@ -13,12 +13,11 @@ import { GLOSSARY_LIVE } from '@/config/glossary';
 export const metadata: Metadata = buildMetadata({
   canonical: '/topics',
   title: 'Global Topic Index | Financial Intelligence Directory',
-  description: 'Explore our master directory of financial topics. Thousands of expert-vetted definitions, guides, and insights categorized for at-scale discovery.',
+  description: 'Explore our directory of financial topics, glossary terms, and guides organized alphabetically and by category.',
 });
 
 /**
  * Global Topic Index Hub (Server Entry).
- * Orchestrates the discovery of thousands of financial concepts across alphabetical and categorical matrices.
  */
 export default async function GlobalTopicIndexPage() {
   if (!GLOSSARY_LIVE) notFound();
@@ -40,7 +39,7 @@ export default async function GlobalTopicIndexPage() {
               Topic <span className="text-primary">Intelligence Index</span>
             </Text>
             <Text variant="body" className="text-muted-foreground text-xl leading-relaxed max-w-3xl">
-              Traverse the Imperialpedia knowledge graph. Explore expert-curated definitions, market trends, and learning paths across millions of indexable nodes.
+              Browse Imperialpedia's financial glossary and topic guides, organized alphabetically and by category.
             </Text>
           </header>
 

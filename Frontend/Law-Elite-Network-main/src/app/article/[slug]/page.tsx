@@ -1,7 +1,7 @@
-import { permanentRedirect } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { fetchArticleForRender } from '@/lib/article-fetch';
 import { articleUrl } from '@/lib/article-url';
-import { ArticleView, ArticleNotFound } from '@/components/knowledge/ArticleView';
+import { ArticleView } from '@/components/knowledge/ArticleView';
 
 /**
  * Legacy flat URL. Canonical articles now live at /[categorySlug]/[articleSlug]
@@ -9,6 +9,11 @@ import { ArticleView, ArticleNotFound } from '@/components/knowledge/ArticleView
  * permanently (308) redirect there instead of serving duplicate content at two
  * URLs. Only an article with no category at all (rare/orphaned content) has no
  * other URL to redirect to, so this route renders it directly.
+ *
+ * No route-level `revalidate` here: reading `searchParams` (for CMS preview
+ * below) makes this route inherently per-request dynamic, so full-route ISR
+ * wouldn't apply anyway. The CMS/law-service reads it depends on are still
+ * cached (see lib/article-fetch.ts), which is what actually keeps this fast.
  */
 export default async function ArticleDeepDivePage(
   { params, searchParams }: {
@@ -21,7 +26,9 @@ export default async function ArticleDeepDivePage(
   const isPreview = Boolean(previewToken && previewExp);
   const article = await fetchArticleForRender(slug, previewToken, previewExp);
 
-  if (!article) return <ArticleNotFound />;
+  // Real 404 (not the themed ArticleNotFound with an implicit 200) -- see
+  // src/app/article/[slug]/not-found.tsx for the themed empty state.
+  if (!article) notFound();
 
   // Never redirect away from a live-preview request: the CMS admin iframe opens
   // exactly this URL with previewToken/previewExp, and next.config.ts only grants

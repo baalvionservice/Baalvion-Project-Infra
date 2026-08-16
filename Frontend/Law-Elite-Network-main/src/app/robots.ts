@@ -19,9 +19,19 @@ const ALLOW = [
   '/careers',
   '/advertise',
   '/editorial-process',
+  '/editorial-standards',
+  '/corrections',
   '/privacy-policy',
   '/terms-of-service',
   '/editorial-disclosure-policy',
+  '/cookie-policy',
+  '/ai-usage-policy',
+  '/diversity-policy',
+  '/accessibility',
+  '/conflict-of-interest-policy',
+  '/sponsored-content-policy',
+  '/comment-policy',
+  '/policies',
   '/article/',
   '/law/',
   '/business',
@@ -33,6 +43,9 @@ const ALLOW = [
   '/tech-ip',
   '/disputes',
   '/countries',
+  '/world',
+  '/authors',
+  '/author/',
 ];
 
 const DISALLOW = [
@@ -41,7 +54,6 @@ const DISALLOW = [
   '/profile',
   '/cases/',
   '/chat/',
-  '/appointments',
   '/vault',
   '/transactions',
   '/billing',
@@ -57,11 +69,8 @@ const DISALLOW = [
   '/forgot-password',
   '/reset-password',
   '/access-denied',
-  // Lawyer directory is empty until real, verified attorney data is loaded —
-  // pulled from nav/sitemap and disallowed here so it isn't crawled or
-  // indexed while it's just an empty results page. Re-enable alongside the
-  // nav links in PublicNavbar/PublicFooter/homepage once populated.
-  '/lawyers',
+  // Individual lawyer profile pages remain reachable; the /lawyers directory
+  // page itself was removed from the frontend, so it needs no disallow entry.
   '/lawyer/',
   '/api/',
 ];
@@ -92,6 +101,12 @@ const AI_USER_AGENTS = [
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
+      // Google's AdSense ad-serving crawler needs full access to read page
+      // content and choose relevant/safe ads, even on routes hidden from
+      // search engines below -- with no dedicated rule it falls back to the
+      // '*' group's DISALLOW list, which is Google's documented cause of
+      // "couldn't verify your site" / ads not serving.
+      { userAgent: 'Mediapartners-Google', allow: '/' },
       { userAgent: '*', allow: ALLOW, disallow: DISALLOW },
       ...AI_USER_AGENTS.map((userAgent) => ({ userAgent, allow: ALLOW, disallow: DISALLOW })),
     ],

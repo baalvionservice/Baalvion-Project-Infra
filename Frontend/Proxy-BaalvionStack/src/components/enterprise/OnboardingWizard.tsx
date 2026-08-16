@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { useEnterprise } from "@/contexts/EnterpriseContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import {
   Rocket,
   Search,

@@ -28,7 +28,7 @@ import { ComparisonsSection, findComparisons } from "@/components/pages/Comparis
 import { ArticleCard } from "@/app/news/NewsArticleCard";
 import HeadingSection from "@/components/layout/HeadingSection";
 import { NewsletterForm } from "@/components/landing/NewsletterForm";
-import FAQItem from "@/components/faq/FAQItem";
+import FAQAccordionSection from "@/components/faq/FAQAccordionSection";
 import { env } from "@/config/env";
 import { newsArticleHref } from "@/lib/data/article-url";
 
@@ -51,12 +51,15 @@ const TOPICS: Array<{
   { slug: "money-management", label: "Money Management", icon: Wallet },
 ];
 
-/** Real review categories relevant to personal-finance decisions (advisors, robo-advisors, tax software, insurance). */
+/** Real review categories relevant to personal-finance decisions. "advisor-reviews",
+ * "robo-advisors", and "insurance-reviews" previously listed here don't exist as CMS
+ * categories or page routes (verified: 0 published articles under any of the three,
+ * and none has a src/app route) — every card rendered from them linked to a permanent
+ * 404 with a "0 reviews" count. "loan-reviews" and "tax-software" are the real,
+ * populated categories most relevant to personal-finance decisions (borrowing, taxes). */
 const RELATED_REVIEWS: Array<{ slug: string; label: string }> = [
-  { slug: "advisor-reviews", label: "Advisor Reviews" },
-  { slug: "robo-advisors", label: "Robo-Advisors" },
+  { slug: "loan-reviews", label: "Loan Reviews" },
   { slug: "tax-software", label: "Tax Software" },
-  { slug: "insurance-reviews", label: "Insurance Reviews" },
 ];
 
 /** Real calculator pages that exist today (see src/services/mock-api/calculators.ts). */
@@ -169,8 +172,7 @@ export async function PersonalFinanceHub() {
   }
   if (!isLive) {
     const cat = staticCategoryFor(SLUG);
-    const filtered = cat ? newsArticles.filter((a) => a.category === cat) : [];
-    articles = filtered.length ? filtered : newsArticles;
+    articles = cat ? newsArticles.filter((a) => a.category === cat) : [];
   }
 
   const claim = makeClaimer();
@@ -464,18 +466,7 @@ export async function PersonalFinanceHub() {
         )}
 
         {/* FAQ */}
-        {faqs.length > 0 && (
-          <section>
-            <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
-              Frequently Asked Questions
-            </h3>
-            <div className="rounded-2xl border border-gray-100 px-4">
-              {faqs.map((f) => (
-                <FAQItem key={f.question} question={f.question} answer={f.answer} />
-              ))}
-            </div>
-          </section>
-        )}
+        <FAQAccordionSection faqs={faqs} />
 
         {/* Newsletter signup */}
         <section className="flex flex-col items-center gap-4 rounded-2xl bg-gray-50 py-12 text-center">

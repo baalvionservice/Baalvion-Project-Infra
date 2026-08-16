@@ -17,7 +17,7 @@ export const employmentLaborExtra2Articles: LawArticle[] = [
     category: EMPLOYMENT_LABOR_CATEGORY,
     subcategory: { id: 'sub_el_rights', name: 'Employee Rights', slug: 'employee-rights' },
     summary:
-      'At-will employment lets either employer or employee end the job at any time, for almost any reason — but important legal exceptions stop it from meaning "for any reason at all".',
+      'At-will employment lets either side end the job at any time, for almost any reason — but legal exceptions stop it from meaning "for any reason at all".',
     author: 'Daniel Okoro',
     updatedAt: 'June 23, 2026',
     readingTime: 8,
@@ -96,7 +96,7 @@ export const employmentLaborExtra2Articles: LawArticle[] = [
     category: EMPLOYMENT_LABOR_CATEGORY,
     subcategory: { id: 'sub_el_contracts', name: 'Employment Contracts', slug: 'employment-contracts' },
     summary:
-      'A severance agreement is a contract offering a departing employee pay or benefits, usually in exchange for promises like waiving the right to sue — so it should be read carefully.',
+      'A severance agreement offers a departing employee pay or benefits, usually in exchange for promises like waiving the right to sue — read it carefully.',
     author: 'Marcus Whitfield',
     updatedAt: 'June 20, 2026',
     readingTime: 8,

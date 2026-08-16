@@ -97,8 +97,8 @@ export default function InvoiceDetailPage() {
                 <div className="space-y-1">
                   <p className="text-xs font-bold text-slate-900">Registered Office:</p>
                   <p className="text-[10px] text-slate-500 leading-relaxed max-w-[200px]">
-                    12 Executive Tower, BKC, Mumbai, MH 400051<br />
-                    Corporate Registry: LEN-992-001
+                    Upper Mania, Po- Pakjhola, Semiliguda, Koraput, Odisha 764036<br />
+                    CIN: U43121OD2025PTC048479
                   </p>
                 </div>
               </div>

@@ -46,7 +46,12 @@ export async function generateMetadata(
     description,
     keywords: [l.name, ...(l.specializations || []), l.country, l.city, 'lawyer', 'attorney', 'legal consultation'].filter(Boolean) as string[],
     alternates: { canonical: url },
-    robots: { index: true, follow: true },
+    // robots.ts disallows the whole /lawyer/ path for every crawler while the
+    // directory has no real, verified attorney data yet -- index: true here
+    // would contradict that and claim indexability for pages Google is told
+    // not to crawl in the first place. Flip back to true alongside re-enabling
+    // /lawyers in robots.ts once real profiles are live.
+    robots: { index: false, follow: true },
     openGraph: {
       type: 'profile',
       url,

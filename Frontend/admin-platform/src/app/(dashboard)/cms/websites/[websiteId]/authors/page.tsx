@@ -60,6 +60,8 @@ interface AuthorForm {
   editorialRole: string; // AuthorEditorialRole or NO_ROLE
   linkedin: string;
   x: string;
+  facebook: string;
+  instagram: string;
   status: boolean; // true = active
   seoTitle: string;
   seoDescription: string;
@@ -82,6 +84,8 @@ const DEFAULT_FORM: AuthorForm = {
   editorialRole: NO_ROLE,
   linkedin: '',
   x: '',
+  facebook: '',
+  instagram: '',
   status: true,
   seoTitle: '',
   seoDescription: '',
@@ -142,6 +146,8 @@ export default function WebsiteAuthorsPage({
       editorialRole: a.editorialRole ?? NO_ROLE,
       linkedin: a.social?.linkedin ?? '',
       x: a.social?.x ?? '',
+      facebook: a.social?.facebook ?? '',
+      instagram: a.social?.instagram ?? '',
       status: a.status !== 'inactive',
       seoTitle: seo.title ?? '',
       seoDescription: seo.description ?? '',
@@ -166,6 +172,8 @@ export default function WebsiteAuthorsPage({
     const social = {
       ...(form.linkedin ? { linkedin: form.linkedin } : {}),
       ...(form.x ? { x: form.x } : {}),
+      ...(form.facebook ? { facebook: form.facebook } : {}),
+      ...(form.instagram ? { instagram: form.instagram } : {}),
     };
     const seoMetadata = {
       ...(form.seoTitle ? { title: form.seoTitle } : {}),
@@ -341,10 +349,15 @@ export default function WebsiteAuthorsPage({
               <Label className="text-xs">Credentials</Label>
               <Input
                 className="h-8 text-xs"
-                placeholder="e.g. LL.M. · 12+ years covering corporate law"
+                placeholder="e.g. Corporate & Securities desk, Acme Media — only real, verifiable credentials"
                 value={form.credentials}
                 onChange={(e) => setForm((f) => ({ ...f, credentials: e.target.value }))}
               />
+              <p className="text-[10px] text-muted-foreground">
+                Shown publicly under the byline and in Person structured data. Only enter a formal
+                credential (degree, license, bar admission) if it is genuinely this person&apos;s and you
+                can verify it — otherwise use an editorial role/desk description instead.
+              </p>
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs">Biography</Label>
@@ -432,7 +445,26 @@ export default function WebsiteAuthorsPage({
                   onChange={(e) => setForm((f) => ({ ...f, x: e.target.value }))}
                 />
               </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Facebook URL</Label>
+                <Input
+                  className="h-8 text-xs"
+                  value={form.facebook}
+                  onChange={(e) => setForm((f) => ({ ...f, facebook: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Instagram URL</Label>
+                <Input
+                  className="h-8 text-xs"
+                  value={form.instagram}
+                  onChange={(e) => setForm((f) => ({ ...f, instagram: e.target.value }))}
+                />
+              </div>
             </div>
+            <p className="-mt-1 text-[10px] text-muted-foreground">
+              Any social field left blank is simply omitted from the public author page — only filled-in links show up.
+            </p>
 
             {dialog.editing && (
               <div className="flex items-center justify-between">

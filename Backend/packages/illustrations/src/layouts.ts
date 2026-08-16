@@ -10,6 +10,13 @@ export interface LayoutInput {
 
 const WIDTH = 800;
 const HEIGHT = 600;
+// writeArticleArtRaster() rasterizes this 800x600 (4:3) canvas into a 1200x630
+// OG-image box with sharp's `fit: 'cover'`, which scales by width (1.5x, since
+// that's the larger factor) and center-crops the height — only y ∈ [90, 510]
+// of this canvas survives into the actual PNG. Icons/text placed outside that
+// band render fine in the raw SVG but get silently clipped in every generated
+// article-art PNG (this is how it was discovered: a cloud icon and a gavel
+// icon each rendered visibly cut off). Keep all elements within [90, 510].
 
 function svgShell(palette: Palette, body: string): string {
   return (
@@ -59,12 +66,12 @@ function iconGrid({ icons, palette, kicker }: LayoutInput): string {
   const positions: Array<[number, number, number]> = [
     [140, 160, 170],
     [460, 140, 150],
-    [300, 380, 160],
+    [300, 340, 160],
   ];
   const parts = icons
     .slice(0, 3)
     .map((icon, i) => renderIconGroup(icon, positions[i][0], positions[i][1], positions[i][2], i === 0 ? palette.accent : palette.ink));
-  parts.push(kickerText(kicker, palette, 60, 60));
+  parts.push(kickerText(kicker, palette, 60, 115));
   return svgShell(palette, parts.join(''));
 }
 
@@ -77,14 +84,14 @@ function centerBadge({ icons, palette, kicker }: LayoutInput): string {
   ];
   const rest = icons.slice(1, 3);
   rest.forEach((icon, i) => {
-    parts.push(renderIconGroup(icon, 60 + i * 620, 60, 70, palette.ink));
+    parts.push(renderIconGroup(icon, 60 + i * 620, 100, 70, palette.ink));
   });
   return svgShell(palette, parts.join(''));
 }
 
 function chartBand({ icons, palette, kicker }: LayoutInput): string {
   const parts = [
-    kickerText(kicker, palette, 60, 90),
+    kickerText(kicker, palette, 60, 115),
     `<polyline points="60,460 220,380 360,420 520,300 700,220" fill="none" stroke="${palette.accent}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.55" />`,
   ];
   const primary = icons[0];
@@ -99,7 +106,7 @@ function chartBand({ icons, palette, kicker }: LayoutInput): string {
 function diagonalSplit({ icons, palette, kicker }: LayoutInput): string {
   const parts = [
     `<polygon points="0,600 800,0 800,600" fill="${palette.accent}" opacity="0.08" />`,
-    kickerText(kicker, palette, 60, 100),
+    kickerText(kicker, palette, 60, 115),
   ];
   const primary = icons[0];
   parts.push(renderIconGroup(primary, 470, 220, 190, palette.accent));

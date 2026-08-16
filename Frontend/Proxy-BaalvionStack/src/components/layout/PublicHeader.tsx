@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Zap, Menu, X, ChevronDown } from "lucide-react";
 import { useState } from "react";

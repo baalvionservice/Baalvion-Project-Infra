@@ -46,8 +46,7 @@ export default function DiversityPolicyPage() {
 
             <Block icon={<Users className="w-6 h-6 text-blue-600" />} title="Diverse Voices in Our Directory and Contributors">
               <p>
-                We aim for our{' '}
-                <Link href="/lawyers" className="text-blue-600 hover:underline">lawyer directory</Link> and our{' '}
+                We aim for our lawyer directory and our{' '}
                 <Link href="/authors" className="text-blue-600 hover:underline">contributor roster</Link> to reflect
                 the diversity of the legal profession itself, across practice focus, firm size, geography, and
                 background. Verification and inclusion criteria are applied consistently to every applicant,
@@ -90,7 +89,7 @@ function Block({ icon, title, children }: { icon: React.ReactNode; title: string
     <div className="space-y-4 scroll-mt-32">
       <div className="flex items-center gap-3">
         <div className="w-11 h-11 rounded-2xl bg-blue-50 flex items-center justify-center shrink-0">{icon}</div>
-        <h2 className="text-[28px] font-bold text-slate-900 font-serif leading-tight">{title}</h2>
+        <h2 className="text-[22px] md:text-[28px] font-bold text-slate-900 font-serif leading-tight">{title}</h2>
       </div>
       <div className="prose-legal max-w-none text-slate-700 leading-relaxed space-y-4 pl-14">{children}</div>
     </div>

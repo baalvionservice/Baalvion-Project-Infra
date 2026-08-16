@@ -5,6 +5,7 @@ const description = "How Law Elite Network uses AI as a drafting aid, why every 
 export const metadata: Metadata = {
   title,
   description,
+  keywords: ['AI usage policy', 'AI-assisted legal content', 'human-reviewed AI content', 'responsible AI disclosure'],
   alternates: { canonical: `${SITE}/ai-usage-policy` },
   openGraph: { type: 'website', url: `${SITE}/ai-usage-policy`, title, description },
   twitter: { card: 'summary_large_image', title, description },

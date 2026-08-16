@@ -5,6 +5,7 @@ const description = "Join Law Elite Network and help build the world's leading g
 export const metadata: Metadata = {
   title,
   description,
+  keywords: ['law elite network careers', 'legal tech jobs', 'work at law elite network', 'legal editor jobs'],
   alternates: { canonical: `${SITE}/careers` },
   openGraph: { type: 'website', url: `${SITE}/careers`, title, description },
   twitter: { card: 'summary_large_image', title, description },

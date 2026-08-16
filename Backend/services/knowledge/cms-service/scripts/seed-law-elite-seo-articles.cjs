@@ -34,7 +34,11 @@ const ARGS = process.argv.slice(2);
 const FLAG = (n) => ARGS.includes(`--${n}`);
 const OPT = (n) => { const h = ARGS.find((a) => a.startsWith(`--${n}=`)); return h ? h.split('=').slice(1).join('=') : undefined; };
 const ONLY = OPT('only');
-const flags = { export: FLAG('export'), dryRun: FLAG('dry-run'), update: FLAG('update') };
+// Caps how many NEW items this run actually creates (updates to already-existing items don't
+// count against it) — lets a scheduled job drip-feed a large backlog a few at a time instead of
+// dumping everything in one run. Unset/0 = no cap (existing behavior).
+const LIMIT = OPT('limit') ? Number(OPT('limit')) : undefined;
+const flags = { export: FLAG('export'), dryRun: FLAG('dry-run'), update: FLAG('update'), draft: FLAG('draft'), limit: LIMIT };
 
 const HOUSE_AUTHOR = { name: 'Law Elite Editorial', title: 'Legal Research & Editorial Desk', site: 'LawEliteNetwork.com' };
 
@@ -42,17 +46,27 @@ const HOUSE_AUTHOR = { name: 'Law Elite Editorial', title: 'Legal Research & Edi
 // to one of these real, credentialed bylines (E-E-A-T) instead of the generic
 // house byline. Keep in sync if that authors list changes.
 const AUTHORS_BY_SLUG = {
-  'elena-rossi': { name: 'Elena Rossi', slug: 'elena-rossi', title: 'Corporate & Securities Editor', credentials: 'LL.M. Corporate Law · 12+ years covering company and securities law' },
-  'marcus-hale': { name: 'Marcus Hale', slug: 'marcus-hale', title: 'Technology & Data Protection Editor', credentials: 'J.D. · 10+ years in technology, IP, and privacy law' },
-  'priya-menon': { name: 'Priya Menon', slug: 'priya-menon', title: 'Startups & Venture Contributor', credentials: 'LL.B. · Startup and early-stage venture legal writer' },
-  'sofia-almeida': { name: 'Sofia Almeida', slug: 'sofia-almeida', title: 'Family Law Editor', credentials: 'LL.M. Family Law · 14+ years writing on family and matrimonial law' },
-  'rajesh-iyer': { name: 'Rajesh Iyer', slug: 'rajesh-iyer', title: 'Family & Children’s Law Contributor', credentials: 'LL.B. · Family law writer focused on custody and child welfare' },
-  'eleanor-whitfield': { name: 'Eleanor Whitfield', slug: 'eleanor-whitfield', title: 'Estate Planning & Probate Editor', credentials: 'LL.M. · 15+ years in wills, trusts, and estate planning' },
-  'priya-nair': { name: 'Priya Nair', slug: 'priya-nair', title: 'Senior Legal Editor', credentials: 'LL.M. · 13+ years across commercial, tax, employment, and IP law' },
-  'daniel-okafor': { name: 'Daniel Okafor', slug: 'daniel-okafor', title: 'Criminal & Regulatory Editor', credentials: 'J.D. · 11+ years writing on criminal, tax, and regulatory law' },
-  'daniel-okoro': { name: 'Daniel Okoro', slug: 'daniel-okoro', title: 'Employment Law Contributor', credentials: 'LL.B. · Employment and workplace-rights writer' },
-  'aisha-rahman': { name: 'Aisha Rahman', slug: 'aisha-rahman', title: 'Criminal Justice Contributor', credentials: 'J.D. · Criminal justice and procedure writer' },
-  'marcus-whitfield': { name: 'Marcus Whitfield', slug: 'marcus-whitfield', title: 'Dispute Resolution Editor', credentials: 'LL.M. Dispute Resolution · Arbitration and mediation writer' },
+  'elena-rossi': { name: 'Elena Rossi', slug: 'elena-rossi', title: 'Corporate & Securities Editor', credentials: 'Corporate & Securities desk, Law Elite Network' },
+  'marcus-hale': { name: 'Marcus Hale', slug: 'marcus-hale', title: 'Technology & Data Protection Editor', credentials: 'Technology & Data Protection desk, Law Elite Network' },
+  'priya-menon': { name: 'Priya Menon', slug: 'priya-menon', title: 'Startups & Venture Contributor', credentials: 'Startups & Venture desk, Law Elite Network' },
+  'sofia-almeida': { name: 'Sofia Almeida', slug: 'sofia-almeida', title: 'Family Law Editor', credentials: 'Family Law desk, Law Elite Network' },
+  'rajesh-iyer': { name: 'Rajesh Iyer', slug: 'rajesh-iyer', title: 'Family & Children’s Law Contributor', credentials: 'Family & Children’s Law desk, Law Elite Network' },
+  'eleanor-whitfield': { name: 'Eleanor Whitfield', slug: 'eleanor-whitfield', title: 'Estate Planning & Probate Editor', credentials: 'Estate Planning & Probate desk, Law Elite Network' },
+  'priya-nair': { name: 'Priya Nair', slug: 'priya-nair', title: 'Senior Legal Editor', credentials: 'Senior Editor, Law Elite Network' },
+  'daniel-okafor': { name: 'Daniel Okafor', slug: 'daniel-okafor', title: 'Criminal & Regulatory Editor', credentials: 'Criminal & Regulatory desk, Law Elite Network' },
+  'daniel-okoro': { name: 'Daniel Okoro', slug: 'daniel-okoro', title: 'Employment Law Contributor', credentials: 'Employment Law desk, Law Elite Network' },
+  'aisha-rahman': { name: 'Aisha Rahman', slug: 'aisha-rahman', title: 'Criminal Justice Contributor', credentials: 'Criminal Justice desk, Law Elite Network' },
+  'marcus-whitfield': { name: 'Marcus Whitfield', slug: 'marcus-whitfield', title: 'Dispute Resolution Editor', credentials: 'Dispute Resolution desk, Law Elite Network' },
+  'deepak-kumar-kuldeep': { name: 'Deepak Kumar Kuldeep', slug: 'deepak-kumar-kuldeep', title: 'Maritime & Personal Injury Law Contributor', credentials: 'BSc Nautical Science · Maritime law background' },
+  'waki-malik': { name: 'Waki Malik', slug: 'waki-malik', title: 'Lawyer & Legal Contributor', credentials: 'Lawyer · Certification in Dispute Resolution through Mediation, National Law School of India University' },
+  'aman-thakur': { name: 'Aman Thakur', slug: 'aman-thakur', title: 'Advocate & Legal Contributor', credentials: 'Advocate · LL.B., Meerut College' },
+  'maria-harizanova': { name: 'Maria Harizanova', slug: 'maria-harizanova', title: 'Employment Law Contributor', credentials: 'Master’s degree, Boston University School of Law · Admitted, New York State Bar' },
+  'claire-hannon': { name: 'Claire Hannon', slug: 'claire-hannon', title: 'Corporate & Tax Contributor', credentials: 'BSc · LLB (Hons) · GAICD · AGIA' },
+  'yessica-ruiz': { name: 'Yessica Ruiz', slug: 'yessica-ruiz', title: 'Legal Administrative Contributor', credentials: 'Legal Administrative Assistant' },
+  'abinesh-raj': { name: 'Abinesh Raj', slug: 'abinesh-raj', title: 'Contributor', credentials: 'Contributor, Law Elite Network' },
+  'aishwarya-gorak': { name: 'Aishwarya Gorak', slug: 'aishwarya-gorak', title: 'Contributor', credentials: 'Contributor, Law Elite Network' },
+  'diksha-singhal': { name: 'Diksha Singhal', slug: 'diksha-singhal', title: 'Contributor', credentials: 'Contributor, Law Elite Network' },
+  'anna-solovieva': { name: 'Anna Solovieva', slug: 'anna-solovieva', title: 'Contributor', credentials: 'Contributor, Law Elite Network' },
 };
 
 // ── minimal frontmatter parser (title/metaTitle/metaDescription/slug/category/keywords) ──
@@ -110,7 +124,14 @@ function buildDoc(a) {
   const words = wordCount(a.body);
   const keywords = Array.isArray(a.meta.keywords) ? a.meta.keywords : [];
   const alphabet = (a.title || '#').trim().charAt(0).toUpperCase();
-  const author = AUTHORS_BY_SLUG[a.meta.author] || HOUSE_AUTHOR;
+  // Byline resolves to a real cms_authors record only when meta.author matches a
+  // known slug — authorSlug is what links the article to that record (admin's
+  // per-author guide count and the content-editor's author picker both key off
+  // customFields.authorSlug, not customFields.author). Previously this only ever
+  // set `author`, so every seeded article was invisible from both of those even
+  // when it had a real, named byline.
+  const knownAuthor = AUTHORS_BY_SLUG[a.meta.author];
+  const author = knownAuthor || HOUSE_AUTHOR;
   // Real taxonomy category (business-corporate, tax-finance, ...) so the article
   // shows up under the matching /law/[categorySlug] hub and its breadcrumb —
   // falls back to the run-wide legal-guides bucket when a file doesn't set one.
@@ -125,6 +146,7 @@ function buildDoc(a) {
     seoMetadata: { title: a.meta.metaTitle || a.title, description: a.meta.metaDescription || a.excerpt, keywords },
     customFields: {
       author,
+      ...(knownAuthor ? { authorSlug: a.meta.author } : {}),
       wordCount: words,
       readingTime: `${Math.max(1, Math.round(words / 200))} min read`,
       focusKeyword: keywords[0] || '',
@@ -145,7 +167,7 @@ async function main() {
   console.log(`  target : ${TARGET_BASE}`);
   console.log(`  site   : ${SITE}   category: ${CATEGORY_SLUG}`);
   console.log(`  source : ${CONTENT_DIR}`);
-  console.log(`  mode   : ${flags.export ? 'EXPORT' : flags.dryRun ? 'DRY RUN' : flags.update ? 'UPDATE + CREATE' : 'CREATE + PUBLISH'}`);
+  console.log(`  mode   : ${flags.export ? 'EXPORT' : flags.dryRun ? 'DRY RUN' : flags.update ? 'UPDATE + CREATE' : flags.draft ? 'CREATE (DRAFT, no publish)' : 'CREATE + PUBLISH'}`);
   console.log(`  count  : ${all.length} article(s)\n`);
 
   const docs = all.map(buildDoc);

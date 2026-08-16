@@ -5,6 +5,7 @@ const description = "Law Elite Network privacy policy — how we collect, use, a
 export const metadata: Metadata = {
   title,
   description,
+  keywords: ['law elite network privacy policy', 'data protection', 'personal data collection', 'GDPR'],
   alternates: { canonical: `${SITE}/privacy-policy` },
   openGraph: { type: 'website', url: `${SITE}/privacy-policy`, title, description },
   twitter: { card: 'summary_large_image', title, description },

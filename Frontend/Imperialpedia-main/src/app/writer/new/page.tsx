@@ -1,18 +1,19 @@
-"use client";
-
-import React, { Suspense } from "react";
-import { ArticleEditor } from "@/modules/content-engine/components/ArticleEditor";
-
-// Prevent prerendering for this page since it uses client-side form hooks
-export const dynamic = "force-dynamic";
+import { FeatureUnavailable } from "@/components/system/FeatureUnavailable";
 
 /**
- * Page for creating a new financial intelligence article.
+ * Was rendering ArticleEditor, whose "Submit for Review"/"Save Draft" only ran
+ * a setTimeout and showed a success toast — no API call, nothing ever saved
+ * or submitted. Removed entirely rather than fixed in place, per the site's
+ * real-data-first policy — see the mock-data remediation report and
+ * FeatureUnavailable's doc comment.
  */
 export default function NewArticlePage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <ArticleEditor />
-    </Suspense>
+    <FeatureUnavailable
+      title="Article Editor"
+      reason="The writer article editor isn't connected to a live publishing pipeline yet."
+      backHref="/"
+      backLabel="Back to Imperialpedia"
+    />
   );
 }

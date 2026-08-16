@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Clock, Eye } from "lucide-react";
+import { Eye } from "lucide-react";
 import type { CmsArticle } from "@/lib/cms";
 import { resolveArticleImage } from "@/lib/article-art";
 import { articleUrl } from "@/lib/article-url";
@@ -39,11 +39,6 @@ export function TodayHighlights({ articles }: Props) {
                 {article.title}
               </h3>
               <div className="mt-auto flex items-center gap-3 text-[11px] text-slate-400 dark:text-slate-500">
-                {article.readingTime && (
-                  <span className="flex items-center gap-1">
-                    <Clock className="h-3 w-3" /> {article.readingTime} min
-                  </span>
-                )}
                 {typeof article.views === "number" && (
                   <span className="flex items-center gap-1">
                     <Eye className="h-3 w-3" /> {article.views.toLocaleString()}

@@ -5,6 +5,7 @@ const description = "Search verified lawyers and expert legal articles across 18
 export const metadata: Metadata = {
   title,
   description,
+  keywords: ['search lawyers', 'find legal resources', 'legal article search', 'find a lawyer near me'],
   alternates: { canonical: `${SITE}/search` },
   openGraph: { type: 'website', url: `${SITE}/search`, title, description },
   twitter: { card: 'summary_large_image', title, description },

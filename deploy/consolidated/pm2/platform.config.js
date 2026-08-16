@@ -38,10 +38,31 @@ module.exports = {
           'baalvion-ir': 'https://ir.baalvion.com/api/revalidate',
           'law-elite-network': 'https://lawelitenetwork.com/api/revalidate',
         }),
+        // Was unset -> appConfig.js's dev-only default (localhost:3000/3030/5173) applied in
+        // prod, so every browser request from a real site was silently CORS-blocked (no
+        // Access-Control-Allow-Origin at all -- server-side cms.ts reads were unaffected,
+        // only the client-side public/website-info fetch and the /collect.js analytics
+        // beacon UnifiedAnalytics.tsx injects broke). Origins here are exactly the 3 sites
+        // whose UnifiedAnalytics.tsx calls cms-service from the browser -- the other
+        // REVALIDATE_WEBHOOKS sites (about-baalvion, baalvion-ir) only read cms-service
+        // server-side and don't need a CORS entry.
+        CORS_ORIGINS: 'https://lawelitenetwork.com,https://imperialpedia.com,https://www.amarisemaisonavenue.com',
       },
     },
     svc('imperialpedia-service', 'knowledge/imperialpedia-service',3004),
-    svc('law-service',           'knowledge/law-service',          3015, 256, 384), // multer/S3/ws + billing worker
+    {
+      // multer/S3/ws + billing worker. Same unset-CORS_ORIGINS bug as cms-service above --
+      // browser calls from the public site (categoriesPublicApi/subcategoriesPublicApi/
+      // articlesPublicApi in Law-Elite-Network-main/src/lib/api/client.ts) and from
+      // admin-platform's client-rendered /law dashboard page (admin.baalvion.com) were both
+      // silently CORS-blocked with no Access-Control-Allow-Origin header at all.
+      ...svc('law-service', 'knowledge/law-service', 3015, 256, 384),
+      env: {
+        NODE_ENV: 'production',
+        PORT: '3015',
+        CORS_ORIGINS: 'https://lawelitenetwork.com,https://admin.baalvion.com',
+      },
+    },
     // news-service. Public News API for baalvion-intelligence (signal.baalvion.com), reached via
     // the news.baalvion.com Caddy route. Its API key auth calls developer-service's
     // /v1/keys/verify over localhost using INTERNAL_API_KEY — same shared secret on both sides

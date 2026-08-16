@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { User, Star, MessageSquare, ShieldCheck, ChevronRight } from "lucide-react";
+import { User, Star, MessageSquare, ShieldCheck } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -75,9 +75,6 @@ export default function LawyerSnapshot({ lawyer }: { lawyer?: any }) {
               <MessageSquare className="w-3.5 h-3.5 mr-2" /> Message Counsel
             </Link>
           </Button>
-          <Link href="/lawyers" className="text-[9px] font-bold text-slate-400 hover:text-blue-600 uppercase tracking-tighter block text-center transition-colors">
-            View Full Dossier <ChevronRight className="w-2.5 h-2.5 inline" />
-          </Link>
         </div>
       </CardContent>
     </Card>

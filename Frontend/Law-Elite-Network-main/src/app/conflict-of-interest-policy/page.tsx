@@ -27,9 +27,7 @@ export default function ConflictOfInterestPolicyPage() {
           <div className="border-l-4 border-blue-600 bg-slate-50 rounded-r-2xl p-8 mb-16">
             <p className="text-slate-700 leading-relaxed">
               Law Elite Network both publishes independent legal commentary and connects readers with lawyers for
-              hire through our{' '}
-              <Link href="/lawyers" className="text-blue-600 hover:underline">directory</Link> and{' '}
-              <Link href="/appointments" className="text-blue-600 hover:underline">appointments</Link> features.
+              hire through our directory and appointments features.
               Operating both a media outlet and a referral service creates conflict-of-interest risks that we manage
               explicitly, rather than leave unaddressed.
             </p>
@@ -98,7 +96,7 @@ function Block({ icon, title, children }: { icon: React.ReactNode; title: string
     <div className="space-y-4 scroll-mt-32">
       <div className="flex items-center gap-3">
         <div className="w-11 h-11 rounded-2xl bg-blue-50 flex items-center justify-center shrink-0">{icon}</div>
-        <h2 className="text-[28px] font-bold text-slate-900 font-serif leading-tight">{title}</h2>
+        <h2 className="text-[22px] md:text-[28px] font-bold text-slate-900 font-serif leading-tight">{title}</h2>
       </div>
       <div className="prose-legal max-w-none text-slate-700 leading-relaxed space-y-4 pl-14">{children}</div>
     </div>

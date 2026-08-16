@@ -66,14 +66,14 @@ export default function CareersPage() {
 
           <section className="space-y-20">
             <div id="mission" className="space-y-6">
-              <h2 className="text-[32px] font-bold text-slate-900 font-serif leading-tight">Our Mission</h2>
+              <h2 className="text-[26px] md:text-[32px] font-bold text-slate-900 font-serif leading-tight">Our Mission</h2>
               <div className="prose-legal">
                 <p>Join a team dedicated to democratizing elite legal intelligence for global enterprises and individuals alike.</p>
               </div>
             </div>
 
             <div id="culture" className="space-y-6">
-              <h2 className="text-[32px] font-bold text-slate-900 font-serif leading-tight">Culture & Values</h2>
+              <h2 className="text-[26px] md:text-[32px] font-bold text-slate-900 font-serif leading-tight">Culture & Values</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <ValueCard icon={<Briefcase className="w-5 h-5" />} title="Excellence" />
                 <ValueCard icon={<Users className="w-5 h-5" />} title="Collaboration" />

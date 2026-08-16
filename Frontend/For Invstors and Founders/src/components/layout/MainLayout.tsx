@@ -1,5 +1,5 @@
 import { ReactNode, useState, useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router";
 import { 
   Zap, Search, Menu, X, Moon, Sun, LogOut,
   MessageSquare, ShoppingBag, LayoutDashboard, User, Trophy, Sparkles, Briefcase, Wallet, Handshake, Rocket, Crown, Pencil, ClipboardList, KanbanSquare

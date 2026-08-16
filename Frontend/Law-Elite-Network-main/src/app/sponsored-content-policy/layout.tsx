@@ -5,6 +5,7 @@ const description = "How Law Elite Network labels sponsored posts and featured p
 export const metadata: Metadata = {
   title,
   description,
+  keywords: ['sponsored content policy', 'paid placement disclosure', 'advertising disclosure', 'featured listing policy'],
   alternates: { canonical: `${SITE}/sponsored-content-policy` },
   openGraph: { type: 'website', url: `${SITE}/sponsored-content-policy`, title, description },
   twitter: { card: 'summary_large_image', title, description },

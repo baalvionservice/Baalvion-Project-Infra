@@ -20,6 +20,8 @@ export interface AuthorSocialLinks {
   twitter?: string;
   linkedin?: string;
   website?: string;
+  facebook?: string;
+  instagram?: string;
 }
 
 export interface AuthorProfile {

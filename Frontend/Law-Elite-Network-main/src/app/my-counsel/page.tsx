@@ -6,16 +6,12 @@ import { getMyCounsel } from "@/services/counsel/counselService";
 import { useAuthStore } from "@/store/authStore";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import LawyerCard from "@/components/cards/LawyerCard";
-import { 
-  Users, 
-  Briefcase, 
-  Loader2, 
-  ShieldCheck, 
-  Search,
-  ArrowRight
+import {
+  Users,
+  Briefcase,
+  Loader2,
+  ShieldCheck
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
 
 /**
  * @fileOverview My Counsel Registry
@@ -66,11 +62,6 @@ function MyCounselContent() {
           <h1 className="text-4xl font-bold text-slate-900 leading-tight">My Counsel</h1>
           <p className="text-slate-500 text-sm font-medium italic">Identify and manage your assigned executive practitioners within the network.</p>
         </div>
-        <Link href="/lawyers">
-          <Button className="bg-[#0B1F3A] text-white hover:bg-slate-800 rounded-xl px-6 font-bold shadow-lg">
-            <Search className="w-4 h-4 mr-2" /> Find New Counsel
-          </Button>
-        </Link>
       </header>
 
       {loading ? (
@@ -85,11 +76,6 @@ function MyCounselContent() {
           <p className="text-slate-500 max-w-xs mx-auto italic text-sm mb-8 font-medium">
             You have not yet committed any legal briefs or assigned elite practitioners to your matters.
           </p>
-          <Link href="/lawyers">
-            <Button className="bg-[#0B1F3A] text-white rounded-xl px-10 h-12 font-bold uppercase text-[10px] tracking-widest shadow-lg">
-              Explore the Discovery Marketplace
-            </Button>
-          </Link>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

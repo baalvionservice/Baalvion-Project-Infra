@@ -11,10 +11,10 @@ export const criminalLawArticles: LawArticle[] = [
     category: { id: 'cat_criminal_law', name: 'Criminal Law', slug: 'criminal-law' },
     subcategory: { id: 'sub_cl_bail', name: 'Bail', slug: 'bail' },
     summary:
-      'Bail is the legal mechanism that lets an accused person remain free before trial, usually in exchange for conditions or money guaranteeing their return to court.',
+      'Bail is the legal mechanism letting an accused remain free before trial, usually in exchange for conditions or money guaranteeing court return.',
     author: 'Aisha Rahman',
-    updatedAt: 'April 9, 2026',
-    readingTime: 8,
+    updatedAt: 'August 12, 2026',
+    readingTime: 10,
     views: 7420,
     featured: true,
     imageSeed: 'bail-courthouse-keys-scales',
@@ -46,36 +46,51 @@ export const criminalLawArticles: LawArticle[] = [
 <p>Rather than focusing on money, many jurisdictions attach conditions: regular reporting to a police station, a curfew, electronic monitoring, surrendering a passport, residing at a fixed address, or avoiding contact with named people. A surety — a third party who pledges money or accepts responsibility — is also widely used.</p>
 
 <h2>How Bail Differs Across Jurisdictions</h2>
-<p>The label is shared but the practice is not.</p>
-<ul>
-<li><strong>United States:</strong> Monetary bail and commercial bail bondsmen are common, though several states have moved toward risk-based release to reduce reliance on cash.</li>
-<li><strong>United Kingdom:</strong> Cash bail is rare; conditional bail and sureties dominate, and failing to surrender is a distinct offence.</li>
-<li><strong>India:</strong> Offences are classified as bailable or non-bailable, which shapes whether bail is a right or a matter of judicial discretion.</li>
-<li><strong>Parts of the EU:</strong> Several systems lean on supervision and reporting conditions rather than financial deposits.</li>
-</ul>
+<p>The label is shared but the practice is not. The table below compares how four systems typically handle the bail decision — treat it as a starting orientation, not a substitute for checking the current rule in the specific court involved.</p>
+<table>
+<thead><tr><th>Jurisdiction</th><th>Typical mechanism</th><th>Who usually decides first</th><th>Cash deposit common?</th></tr></thead>
+<tbody>
+<tr><td><strong>United States</strong></td><td>Monetary bail, commercial bail bondsmen in many states</td><td>Judge or magistrate at arraignment</td><td>Yes, though several states have shifted toward risk-based release</td></tr>
+<tr><td><strong>United Kingdom</strong></td><td>Conditional bail with sureties; failing to surrender is a separate offence</td><td>Police (pre-charge) or magistrates' court</td><td>Rare</td></tr>
+<tr><td><strong>India</strong></td><td>Offences classified bailable or non-bailable, shaping whether bail is a right or discretionary</td><td>Police (bailable offences) or magistrate/sessions court</td><td>Sometimes, alongside a surety</td></tr>
+<tr><td><strong>Parts of the EU</strong></td><td>Supervision, reporting, and residence conditions</td><td>Investigating judge or equivalent judicial officer</td><td>Uncommon; financial guarantees are the exception, not the default</td></tr>
+</tbody>
+</table>
 
 <h2>What Happens If Conditions Are Broken</h2>
-<p>Failing to appear or breaching a condition is treated seriously. The court may issue a warrant, revoke bail, forfeit any money or surety pledged, and order the person detained until trial. A breach can also count against future bail applications.</p>
+<p>Failing to appear or breaching a condition is treated seriously. The court may issue a warrant, revoke bail, forfeit any money or surety pledged, and order the person detained until trial. A breach can also count against future bail applications, and in some jurisdictions failing to surrender is prosecuted as a separate offence on top of whatever the original case was about — meaning a person can end up facing an additional charge that exists purely because of a missed court date, unconnected to whether the original allegation is ever proven.</p>
 
-<h2>Applying for Bail and What to Expect at the Hearing</h2>
-<p>A bail hearing is typically brief but consequential — often the accused's first real chance to argue for release is measured in minutes, not hours. Prosecutors present the case against release (flight risk, danger to the public, strength of evidence), and the defence responds with proposed conditions, sureties, and community ties. Where bail is refused, most systems allow a further application if circumstances change — for example, a new address, a job offer, or an offer of a more substantial surety — rather than requiring the accused to wait indefinitely for trial. In many jurisdictions there is also a right to renew a bail application before a higher court if the first is refused, so an initial refusal is not always final.</p>
+<div class="callout callout-info"><p><strong>If a surety is involved, put it in writing before the hearing:</strong> the exact amount pledged, the specific conditions being vouched for, and what happens if a court date is missed. Sureties who understand the stakes up front are far less likely to be caught off guard by a forfeiture demand later.</p></div>
+
+<h2>A Bail Hearing, Step by Step</h2>
+<p>The process is typically brief but consequential — often the accused's first real chance to argue for release is measured in minutes, not hours. In broad terms, a first bail hearing tends to move through the same stages almost everywhere:</p>
+<ol>
+<li><strong>The charge is read and the stage of the case is confirmed</strong> — whether this is a first appearance, a bail-variation hearing, or bail pending appeal changes what the court can consider.</li>
+<li><strong>The prosecution states its position</strong> — typically the seriousness of the allegation, any flight-risk or public-safety concern, and whether it consents to release or opposes it.</li>
+<li><strong>The defence responds</strong> — proposing concrete conditions (a residence, a surety, a curfew, surrender of a passport) and addressing the specific objections raised, rather than arguing release in the abstract.</li>
+<li><strong>The decision-maker weighs the factors</strong> covered above — offence severity, flight risk, danger to others, and ties to the community — and either grants bail (with or without conditions), remands the person in custody, or adjourns for more information.</li>
+<li><strong>If bail is refused, most systems allow a further application</strong> if circumstances change — a new address, a job offer, or a stronger surety — and many also allow the refusal to be renewed before a higher court, so one refusal is rarely the final word.</li>
+</ol>
 
 <h2>Frequently Asked Questions</h2>
 <p><strong>Can bail be granted for any offence?</strong> No — in most systems, the most serious offences (murder, certain violent or terrorism-related charges) carry a presumption against bail, or a much higher bar to clear, reflecting the greater flight risk and public-safety concern.</p>
 <p><strong>Do I get my bail money back if I'm found guilty?</strong> Generally yes — a cash bail deposit is a guarantee of appearance, not a fine, so it is usually returned once the case concludes, provided every condition was honored, regardless of the verdict.</p>
 <p><strong>Can bail conditions be changed after they're set?</strong> Yes — either side can apply to vary conditions if circumstances change, such as needing to travel for work or a change of address, though the court retains discretion to refuse a variation that increases risk.</p>
 <p><strong>Does having a lawyer at the bail hearing actually change the outcome?</strong> In practice, often yes — a lawyer familiar with local bail practice can propose concrete, credible conditions (a suitable surety, a verified address, a realistic curfew) that a self-represented defendant may not think to offer, and can respond immediately to the prosecutor's specific objections rather than leaving them unanswered.</p>
+<p><strong>What is a surety, exactly, and what happens to them if the accused doesn't show up?</strong> A surety is a third party — often a family member or friend — who pledges money or property, or simply their word backed by a financial promise, that the accused will attend court. If the accused fails to appear, the surety can be required to forfeit the pledged amount, which is precisely why sureties tend to keep close track of the person they've vouched for.</p>
+<p><strong>Is bail the same thing as being released "on your own recognizance"?</strong> No — release on recognizance (sometimes called an unconditional or personal undertaking) means the person is released purely on their written promise to return, with no money and often no conditions attached, typically reserved for lower-risk cases. Bail, by contrast, usually involves conditions, a surety, or a financial deposit precisely because the risk profile is judged to be higher.</p>
 
-<h2>Sources & Further Reading</h2>
+<h2>Practical Next Steps</h2>
+<p>If you or someone you know is facing a bail decision, find out who makes the decision locally, what conditions are realistic, and whether a surety is needed. Gather proof of address, employment, and community ties early — a letter from an employer confirming a job, a signed tenancy agreement, or a utility bill in the person's name can all help demonstrate the community ties a court weighs. Keep a clear written record of every condition imposed, set reminders well ahead of every reporting date, and never miss a court date: punctual, complete compliance is the single most important factor in keeping bail and in any later application to vary or restore it.</p>
+
+<details><summary>Article Sources</summary>
 <ul>
 <li>U.S. Bail Reform Act of 1984 and subsequent state risk-assessment reforms</li>
 <li>UK Bail Act 1976</li>
 <li>India, Bharatiya Nagarik Suraksha Sanhita (bailable/non-bailable offence classification)</li>
 <li>Council of Europe, pre-trial detention guidance</li>
 </ul>
-
-<h2>Practical Next Steps</h2>
-<p>If you or someone you know is facing a bail decision, find out who makes the decision locally, what conditions are realistic, and whether a surety is needed. Gather proof of address, employment, and community ties early, keep a clear record of every condition imposed, and never miss a court date — punctual compliance is the single most important factor in keeping bail and in any later application.</p>
+</details>
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
   },
   {
@@ -88,7 +103,7 @@ export const criminalLawArticles: LawArticle[] = [
     category: { id: 'cat_criminal_law', name: 'Criminal Law', slug: 'criminal-law' },
     subcategory: { id: 'sub_cl_whitecollar', name: 'White Collar Crime', slug: 'white-collar-crime' },
     summary:
-      'White-collar crime refers to non-violent, financially motivated offences such as fraud, bribery, and embezzlement, usually committed through deception in a business or professional setting.',
+      'White-collar crime refers to non-violent, financially motivated offences such as fraud, bribery, and embezzlement, typically committed through deception.',
     author: 'Daniel Okafor',
     updatedAt: 'March 22, 2026',
     readingTime: 9,

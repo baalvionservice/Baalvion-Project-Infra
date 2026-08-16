@@ -16,7 +16,7 @@ export const SearchResults = ({ results, loading, onItemClick, query }: SearchRe
     return (
       <div className="p-12 text-center flex flex-col items-center gap-3">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        <Text variant="caption" className="animate-pulse uppercase tracking-widest font-bold">Scanning Knowledge Index...</Text>
+        <Text variant="caption" className="animate-pulse uppercase tracking-widest font-bold">Searching...</Text>
       </div>
     );
   }
@@ -27,7 +27,7 @@ export const SearchResults = ({ results, loading, onItemClick, query }: SearchRe
         <SearchX className="w-10 h-10 text-muted-foreground opacity-50" />
         <div>
           <Text variant="bodySmall" weight="bold">No results found for "{query}"</Text>
-          <Text variant="caption" className="text-muted-foreground mt-1">Try a different financial node or taxonomy.</Text>
+          <Text variant="caption" className="text-muted-foreground mt-1">Try a different term, or see full results on the search page.</Text>
         </div>
       </div>
     );
@@ -36,7 +36,7 @@ export const SearchResults = ({ results, loading, onItemClick, query }: SearchRe
   return (
     <div className="p-2 space-y-1">
       <div className="px-4 py-2">
-        <Text variant="label" className="text-[9px] opacity-50 tracking-[0.2em]">Top Findings</Text>
+        <Text variant="label" className="text-[9px] opacity-50 tracking-[0.2em]">Results</Text>
       </div>
       {results.map((result) => (
         <SearchResultItem 

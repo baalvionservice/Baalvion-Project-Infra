@@ -1,6 +1,7 @@
 "use client";
 import type { WorldData } from "@/lib/data/worldRegions";
 import { useState } from "react";
+import { StoryLink } from "@/components/common/StoryLink";
 
 const categoryColors: Record<string, string> = {
   MARKETS: "bg-blue-100 text-blue-700",
@@ -33,9 +34,10 @@ export default function LatestNews({ latest }: { latest: WorldData["latest"] }) 
       {/* News list */}
       <div className="divide-y divide-border">
         {visible.map((item) => (
-          <div
+          <StoryLink
             key={item.id}
-            className="px-4 py-3 hover:bg-muted transition-colors cursor-pointer group"
+            item={item}
+            className="block px-4 py-3 hover:bg-muted transition-colors group"
           >
             <div className="flex items-center justify-between mb-1">
               <span className={`text-[9px] font-black tracking-wider px-1.5 py-0.5 rounded-sm ${categoryColors[item.category] || "bg-muted text-muted-foreground"}`}>
@@ -51,7 +53,7 @@ export default function LatestNews({ latest }: { latest: WorldData["latest"] }) 
                 {item.positive ? "▲ BULLISH" : "▼ BEARISH"}
               </span>
             )}
-          </div>
+          </StoryLink>
         ))}
       </div>
 

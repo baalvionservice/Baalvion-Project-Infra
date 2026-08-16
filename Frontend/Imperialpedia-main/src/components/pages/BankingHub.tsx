@@ -28,7 +28,7 @@ import { ComparisonsSection, findComparisons } from "@/components/pages/Comparis
 import { ArticleCard } from "@/app/news/NewsArticleCard";
 import HeadingSection from "@/components/layout/HeadingSection";
 import { NewsletterForm } from "@/components/landing/NewsletterForm";
-import FAQItem from "@/components/faq/FAQItem";
+import FAQAccordionSection from "@/components/faq/FAQAccordionSection";
 import { env } from "@/config/env";
 import { newsArticleHref } from "@/lib/data/article-url";
 
@@ -52,10 +52,14 @@ const PRODUCT_TOPICS: Array<{
   { slug: "money-market", label: "Money Market Accounts", icon: Landmark },
 ];
 
-/** Real review-category slugs — a dedicated area, never mixed into the guide sections. */
+/** Real review-category slugs — a dedicated area, never mixed into the guide sections.
+ * "bank-reviews" and "credit-card-reviews" previously listed here don't exist as CMS
+ * categories or page routes (verified: 0 published articles under either slug, and
+ * neither has a src/app route) — every card rendered from them linked to a permanent
+ * 404 with a "0 reviews" count. "banking-reviews" is the real, populated category that
+ * covers both banks and cards (same slug used in the Navbar's "Banking Reviews" link). */
 const REVIEW_TOPICS: Array<{ slug: string; label: string }> = [
-  { slug: "bank-reviews", label: "Bank Reviews" },
-  { slug: "credit-card-reviews", label: "Credit Card Reviews" },
+  { slug: "banking-reviews", label: "Banking Reviews" },
   { slug: "loan-reviews", label: "Loan Reviews" },
   { slug: "app-reviews", label: "App Reviews" },
 ];
@@ -175,8 +179,7 @@ export async function BankingHub() {
   }
   if (!isLive) {
     const cat = staticCategoryFor(SLUG);
-    const filtered = cat ? newsArticles.filter((a) => a.category === cat) : [];
-    articles = filtered.length ? filtered : newsArticles;
+    articles = cat ? newsArticles.filter((a) => a.category === cat) : [];
   }
 
   const claim = makeClaimer();
@@ -476,18 +479,7 @@ export async function BankingHub() {
         )}
 
         {/* FAQ */}
-        {faqs.length > 0 && (
-          <section>
-            <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
-              Frequently Asked Questions
-            </h3>
-            <div className="rounded-2xl border border-gray-100 px-4">
-              {faqs.map((f) => (
-                <FAQItem key={f.question} question={f.question} answer={f.answer} />
-              ))}
-            </div>
-          </section>
-        )}
+        <FAQAccordionSection faqs={faqs} />
 
         {/* Newsletter signup */}
         <section className="flex flex-col items-center gap-4 rounded-2xl bg-gray-50 py-12 text-center">

@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/design-system/typography/text';
-import { CheckCircle2, Share2, Download, RefreshCcw } from 'lucide-react';
+import { CheckCircle2, RefreshCcw } from 'lucide-react';
 
 interface CalculatorResultModalProps {
   isOpen: boolean;
@@ -58,14 +58,9 @@ export const CalculatorResultModal = ({
             "{description}"
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <Button variant="outline" size="sm" className="h-11">
-              <Share2 className="mr-2 h-4 w-4" /> Share
-            </Button>
-            <Button variant="outline" size="sm" className="h-11">
-              <Download className="mr-2 h-4 w-4" /> Export
-            </Button>
-          </div>
+          <Text variant="caption" className="block text-center text-muted-foreground">
+            Estimate only, based on the inputs above — not a guarantee of future results or investment advice.
+          </Text>
         </div>
 
         <DialogFooter className="p-6 bg-gray-50 border-t border-gray-100 flex flex-row gap-3">

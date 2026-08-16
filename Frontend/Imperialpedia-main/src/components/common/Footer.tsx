@@ -15,59 +15,6 @@ const Container = ({ children }: { children: React.ReactNode }) => (
 );
 // ─────────────────────────────────────────────────────────────────────────────
 
-const SOCIAL_LINKS = [
-  {
-    label: 'Facebook',
-    href: 'https://facebook.com',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-        <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-      </svg>
-    ),
-  },
-  {
-    label: 'Instagram',
-    href: 'https://instagram.com',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-        <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-      </svg>
-    ),
-  },
-  {
-    label: 'LinkedIn',
-    href: 'https://linkedin.com',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
-        <rect x="2" y="9" width="4" height="12" />
-        <circle cx="4" cy="4" r="2" />
-      </svg>
-    ),
-  },
-  {
-    label: 'TikTok',
-    href: 'https://tiktok.com',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.75a8.17 8.17 0 0 0 4.78 1.53V6.83a4.85 4.85 0 0 1-1.01-.14z" />
-      </svg>
-    ),
-  },
-  {
-    label: 'YouTube',
-    href: 'https://youtube.com',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-        <path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.95C18.88 4 12 4 12 4s-6.88 0-8.59.47A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.95C5.12 20 12 20 12 20s6.88 0 8.59-.47a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z" />
-        <polygon fill="#2d3a4f" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" />
-      </svg>
-    ),
-  },
-];
-
 // Core site navigation — kept separate from the Company/Editorial/Legal
 // columns below, which are policy & about-the-company links, not site nav.
 // "Dictionary" (/terms) intentionally omitted — glossary is offline pending
@@ -128,16 +75,36 @@ const PILL_BUTTON_CLASS =
   'hover:bg-white/10 hover:border-white/40 transition-colors duration-150 no-underline';
 
 // ─── Inline Newsletter ────────────────────────────────────────────────────────
-// Replace <InlineNewsletter /> with your real <Newsletter /> component
+// Posts to the same /api/newsletter route as components/common/Newsletter.tsx
+// and the homepage's NewsletterBand, restyled to fit this footer column.
 function InlineNewsletter() {
   const [email, setEmail] = useState('');
-  const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [message, setMessage] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.includes('@')) { setStatus('error'); return; }
-    setStatus('success');
-    setEmail('');
+    if (!email.includes('@')) { setStatus('error'); setMessage('Please enter a valid email.'); return; }
+    setStatus('loading');
+    try {
+      const res = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setStatus('success');
+        setMessage(data.message || 'Thanks for signing up.');
+        setEmail('');
+      } else {
+        setStatus('error');
+        setMessage(data.message || 'Something went wrong. Please try again.');
+      }
+    } catch {
+      setStatus('error');
+      setMessage('Network error. Please try again.');
+    }
   };
 
   return (
@@ -147,6 +114,7 @@ function InlineNewsletter() {
         placeholder="Enter your email address"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
+        disabled={status === 'loading'}
         className="
           w-full rounded px-3.5 py-2.5 text-sm
           bg-white/[0.07] border border-white/[0.12]
@@ -155,14 +123,18 @@ function InlineNewsletter() {
           transition-colors duration-150
         "
       />
-      <button type="submit" className={`${PILL_BUTTON_CLASS} w-full bg-blue-500 border-blue-500 hover:bg-blue-600 hover:border-blue-600`}>
-        Sign Up Now
+      <button
+        type="submit"
+        disabled={status === 'loading'}
+        className={`${PILL_BUTTON_CLASS} w-full bg-blue-500 border-blue-500 hover:bg-blue-600 hover:border-blue-600 disabled:opacity-70`}
+      >
+        {status === 'loading' ? 'Signing up…' : 'Sign Up Now'}
       </button>
       {status === 'success' && (
-        <p className="text-green-400 text-xs">✓ You&apos;re subscribed!</p>
+        <p className="text-green-400 text-xs">✓ {message}</p>
       )}
       {status === 'error' && (
-        <p className="text-red-400 text-xs">Please enter a valid email.</p>
+        <p className="text-red-400 text-xs">{message}</p>
       )}
     </form>
   );
@@ -220,7 +192,7 @@ export default function Footer() {
           pb-12 border-b border-white/[0.08]
         ">
 
-          {/* Brand column — logo + newsletter + socials */}
+          {/* Brand column — logo + newsletter */}
           <div className="flex flex-col gap-7 sm:col-span-2 lg:col-span-1">
 
             {/* Logo */}
@@ -234,27 +206,6 @@ export default function Footer() {
                 Imperial<span className="text-blue-400">pedia</span>
               </span>
             </Link>
-
-            {/* Social icons */}
-            <div className="w-full">
-              <p className="text-[10px] font-bold text-center md:text-start tracking-[0.18em] uppercase text-slate-100/60 mb-3 font-sans">
-                Follow Us
-              </p>
-              <nav className="flex items-center  gap-4 flex-wrap" aria-label="Social media links">
-                {SOCIAL_LINKS.map((s) => (
-                  <a
-                    key={s.label}
-                    href={s.href}
-                    className="text-slate-100 hover:text-white transition-colors duration-150 grid place-items-center"
-                    aria-label={s.label}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {s.icon}
-                  </a>
-                ))}
-              </nav>
-            </div>
           </div>
 
           {/* Nav columns — grid layout on tablet/desktop; a compact accordion

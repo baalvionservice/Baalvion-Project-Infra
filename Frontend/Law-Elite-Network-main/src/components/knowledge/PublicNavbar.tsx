@@ -7,10 +7,11 @@ import {
   Menu,
   X,
   ChevronRight,
-  ChevronDown,
+  ChevronLeft,
   Search as SearchIcon,
   UserPlus,
   LayoutDashboard,
+  Linkedin,
 } from 'lucide-react';
 import { LawEliteMark } from '@/components/icons/LawEliteMark';
 import SearchBar from '../search/SearchBar';
@@ -18,8 +19,6 @@ import { cn } from '@/lib/utils';
 import { isSubcategoryPopulated } from '@/lib/subcategory-or-article';
 import seedData from '../../../docs/seed-data.json';
 import { useAuth } from '@/hooks/useAuth';
-import LanguageSwitcher from '@/components/LanguageSwitcher';
-import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { sharedSignInUrl } from '@/lib/shared-auth';
 
 // The top nav bar has room for ~11 items (Home/News/World + up to 8 topics) inside
@@ -51,6 +50,26 @@ export function PublicNavbar() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  // Which top-level category the full-screen mobile drawer has drilled into --
+  // null shows the flat category list (drawer "home"), matching the two-screen
+  // pattern of simple mobile nav menus (list -> tap -> subtopics) instead of
+  // every category accordion-expanding in place at once.
+  const [mobileDrawerCategory, setMobileDrawerCategory] = useState<string | null>(null);
+
+  // Full-screen overlay: lock background scroll while it's open.
+  useEffect(() => {
+    if (!isMobileMenuOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [isMobileMenuOpen]);
+
+  function closeMobileMenu() {
+    setIsMobileMenuOpen(false);
+    setMobileDrawerCategory(null);
+  }
 
   useEffect(() => {
     const load = async () => {
@@ -93,6 +112,35 @@ export function PublicNavbar() {
     );
   }, [activeCategory, activeCategoryData, subcategories]);
 
+  // Same "hide empty topics" rule as the desktop mega-menu, applied per
+  // category so the mobile drawer's top-level list only shows a drill-down
+  // chevron on categories that actually have somewhere to drill into.
+  const categoriesWithSubcategories = useMemo(() => {
+    const set = new Set<string>();
+    for (const cat of categories) {
+      const has = subcategories.some(
+        (sub) =>
+          String(sub.category_id || sub.categoryId) === String(cat.id) &&
+          isSubcategoryPopulated(cat.slug, sub.slug),
+      );
+      if (has) set.add(cat.id);
+    }
+    return set;
+  }, [categories, subcategories]);
+
+  const mobileDrawerCategoryData = useMemo(
+    () => categories.find((c) => c.id === mobileDrawerCategory),
+    [mobileDrawerCategory, categories],
+  );
+  const mobileDrawerSubcategories = useMemo(() => {
+    if (!mobileDrawerCategory || !mobileDrawerCategoryData) return [];
+    return subcategories.filter(
+      (sub) =>
+        String(sub.category_id || sub.categoryId) === String(mobileDrawerCategory) &&
+        isSubcategoryPopulated(mobileDrawerCategoryData.slug, sub.slug),
+    );
+  }, [mobileDrawerCategory, mobileDrawerCategoryData, subcategories]);
+
   const dashboardHref =
     role === 'admin' ? '/admin/dashboard' : role === 'lawyer' ? '/lawyer/dashboard' : '/dashboard';
 
@@ -123,9 +171,6 @@ export function PublicNavbar() {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            <LanguageSwitcher />
-            <ThemeToggle />
-
             {isAuthenticated ? (
               <Link href={dashboardHref}>
                 <button className="inline-flex items-center gap-2 px-4 h-9 rounded-md bg-[#0B1F3A] text-white text-[12px] font-bold tracking-wide hover:bg-blue-800 transition-colors">
@@ -149,7 +194,7 @@ export function PublicNavbar() {
               <SearchIcon className="w-5 h-5" />
             </button>
             <button
-              onClick={() => setIsMobileMenuOpen((v) => !v)}
+              onClick={() => (isMobileMenuOpen ? closeMobileMenu() : setIsMobileMenuOpen(true))}
               className="lg:hidden w-9 h-9 flex items-center justify-center text-slate-900"
               aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
               aria-expanded={isMobileMenuOpen}
@@ -266,67 +311,149 @@ export function PublicNavbar() {
         )}
       </nav>
 
-      {/* ── Mobile drawer ─────────────────────────────────────────── */}
+      {/* ── Mobile drawer: full-screen, two-screen (list -> drill in) ── */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden border-t border-slate-100 bg-white shadow-2xl max-h-[calc(100vh-64px)] overflow-y-auto">
-          <div className="p-4 space-y-1">
-            <Link
-              href="/"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="block py-3 px-2 text-sm font-bold text-slate-900 border-b border-slate-100"
-            >
-              Home
+        <div className="lg:hidden fixed inset-0 z-[10000] bg-white flex flex-col">
+          {/* Drawer header: brand + close, same row every screen so the drawer never re-flows height. */}
+          <div className="flex items-center justify-between h-[60px] px-4 border-b border-slate-100 shrink-0">
+            <Link href="/" onClick={closeMobileMenu} className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-md bg-[#0F2440] flex items-center justify-center">
+                <LawEliteMark variant="white" className="w-5 h-5" />
+              </div>
+              <span className="font-headline text-[1.05rem] font-extrabold tracking-tight text-slate-900">
+                Law Elite
+              </span>
             </Link>
-            <Link
-              href="/news"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="block py-3 px-2 text-sm font-bold text-slate-900 border-b border-slate-100"
+            <button
+              onClick={closeMobileMenu}
+              className="w-9 h-9 flex items-center justify-center text-slate-900"
+              aria-label="Close navigation menu"
             >
-              News
-            </Link>
-            <Link
-              href="/world"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="block py-3 px-2 text-sm font-bold text-slate-900 border-b border-slate-100"
-            >
-              World
-            </Link>
-            <p className="pt-4 pb-2 px-2 text-[11px] font-bold uppercase tracking-[0.2em] text-news-600">
-              Topics
-            </p>
-            {categories.map((cat) => (
-              <details key={cat.id} className="group border-b border-slate-50">
-                <summary className="flex items-center justify-between py-3 px-2 cursor-pointer list-none">
-                  <span className="text-sm font-bold text-slate-900">{cat.name}</span>
-                  <ChevronDown className="w-4 h-4 text-slate-400 group-open:rotate-180 transition-transform" />
-                </summary>
-                <div className="pb-3 pl-3 grid grid-cols-1 gap-0.5">
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+
+          <div className="px-4 py-3 border-b border-slate-100 shrink-0">
+            <SearchBar variant="navbar" />
+          </div>
+
+          <div className="flex-1 overflow-y-auto overscroll-contain">
+            {!mobileDrawerCategory ? (
+              // ── Screen 1: flat top-level list ──
+              <nav aria-label="Mobile navigation">
+                {[
+                  { label: 'Home', href: '/' },
+                  { label: 'News', href: '/news' },
+                  { label: 'World', href: '/world' },
+                ].map((item) => (
                   <Link
-                    href={`/${cat.slug}`}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="py-1.5 text-xs font-bold text-blue-700"
+                    key={item.href}
+                    href={item.href}
+                    onClick={closeMobileMenu}
+                    className="flex items-center justify-between h-14 px-5 text-[15px] font-bold text-slate-900 border-b border-slate-100 active:bg-slate-50"
                   >
-                    View all guides →
+                    {item.label}
                   </Link>
-                  {subcategories
-                    .filter(
-                      (sub) =>
-                        String(sub.category_id || sub.categoryId) === String(cat.id) &&
-                        isSubcategoryPopulated(cat.slug, sub.slug),
-                    )
-                    .map((sub) => (
-                      <Link
-                        key={sub.id}
-                        href={`/${cat.slug}?sub=${sub.slug}`}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="py-1.5 text-xs font-medium text-slate-500 hover:text-news-600"
-                      >
-                        {sub.name}
-                      </Link>
-                    ))}
-                </div>
-              </details>
-            ))}
+                ))}
+                {categories.map((cat) =>
+                  categoriesWithSubcategories.has(cat.id) ? (
+                    <button
+                      key={cat.id}
+                      onClick={() => setMobileDrawerCategory(cat.id)}
+                      className="w-full flex items-center justify-between h-14 px-5 text-[15px] font-bold text-slate-900 border-b border-slate-100 active:bg-slate-50"
+                    >
+                      {cat.name}
+                      <ChevronRight className="w-5 h-5 text-slate-300" />
+                    </button>
+                  ) : (
+                    <Link
+                      key={cat.id}
+                      href={`/${cat.slug}`}
+                      onClick={closeMobileMenu}
+                      className="flex items-center justify-between h-14 px-5 text-[15px] font-bold text-slate-900 border-b border-slate-100 active:bg-slate-50"
+                    >
+                      {cat.name}
+                    </Link>
+                  ),
+                )}
+              </nav>
+            ) : (
+              // ── Screen 2: subtopics of the tapped category ──
+              <nav aria-label={`${mobileDrawerCategoryData?.name} topics`}>
+                <button
+                  onClick={() => setMobileDrawerCategory(null)}
+                  className="w-full flex items-center gap-2 h-14 px-5 text-[15px] font-bold text-slate-900 border-b border-slate-100 active:bg-slate-50"
+                >
+                  <ChevronLeft className="w-5 h-5 text-slate-400" />
+                  {mobileDrawerCategoryData?.name}
+                </button>
+                <Link
+                  href={`/${mobileDrawerCategoryData?.slug}`}
+                  onClick={closeMobileMenu}
+                  className="flex items-center justify-between h-12 px-5 text-[13px] font-bold text-blue-700 border-b border-slate-100 active:bg-slate-50"
+                >
+                  View all {mobileDrawerCategoryData?.name} guides
+                  <ChevronRight className="w-4 h-4" />
+                </Link>
+                {mobileDrawerSubcategories.map((sub) => (
+                  <Link
+                    key={sub.id}
+                    href={`/${mobileDrawerCategoryData?.slug}?sub=${sub.slug}`}
+                    onClick={closeMobileMenu}
+                    className="flex items-center h-12 px-5 text-[14px] font-semibold text-slate-700 border-b border-slate-50 active:bg-slate-50"
+                  >
+                    {sub.name}
+                  </Link>
+                ))}
+              </nav>
+            )}
+          </div>
+
+          {/* Drawer footer: sign-in (hidden sm:inline-flex in the tier-1 row above, so
+              this is its only surface on a true mobile viewport) + social, mirroring the
+              account/follow block most editorial-site mobile menus close on. */}
+          <div className="shrink-0 border-t border-slate-100 px-5 py-4 flex items-center justify-between">
+            {isAuthenticated ? (
+              <Link
+                href={dashboardHref}
+                onClick={closeMobileMenu}
+                className="inline-flex items-center gap-2 text-sm font-bold text-slate-900"
+              >
+                <LayoutDashboard className="w-4 h-4" /> Dashboard
+              </Link>
+            ) : (
+              <button
+                onClick={() => {
+                  closeMobileMenu();
+                  window.location.assign(sharedSignInUrl());
+                }}
+                className="inline-flex items-center gap-2 text-sm font-bold text-slate-900"
+              >
+                <UserPlus className="w-4 h-4" /> Sign In
+              </button>
+            )}
+            <div className="flex items-center gap-4">
+              <Link
+                href="https://www.linkedin.com/company/law-elite-network"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Law Elite Network on LinkedIn"
+                className="text-slate-400 hover:text-slate-900 transition-colors"
+              >
+                <Linkedin className="w-5 h-5" aria-hidden="true" />
+              </Link>
+              <Link
+                href="https://x.com/lawelitenetwork"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Law Elite Network on X"
+                className="text-slate-400 hover:text-slate-900 transition-colors"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
+              </Link>
+            </div>
           </div>
         </div>
       )}

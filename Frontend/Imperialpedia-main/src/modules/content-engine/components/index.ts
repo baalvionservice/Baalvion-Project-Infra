@@ -13,5 +13,4 @@ export * from './ArticleCard';
 export * from './CategoryHeader';
 export * from './RelatedArticles';
 export * from './TagList';
-export * from './SearchResults';
 export * from './TrendingDiscussions';

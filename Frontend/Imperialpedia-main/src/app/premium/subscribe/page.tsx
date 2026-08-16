@@ -8,8 +8,8 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = buildMetadata({
   canonical: '/premium/subscribe',
-  title: 'Upgrade Your Intelligence | Premium Access',
-  description: 'Select a premium tier to unlock advanced analyst tools, institutional-grade calculators, and real-time market oversight.',
+  title: 'Premium Access | Imperialpedia',
+  description: 'Select a premium tier to unlock full access to premium-only articles, plus bulk data access for teams on Enterprise.',
 });
 
 /**

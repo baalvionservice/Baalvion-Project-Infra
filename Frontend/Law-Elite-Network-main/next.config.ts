@@ -12,19 +12,6 @@ function originOf(url?: string): string {
 
 const apiOrigin = originOf(process.env.NEXT_PUBLIC_API_BASE_URL);
 const gatewayOrigin = originOf(process.env.NEXT_PUBLIC_GATEWAY_URL);
-const siteOrigin = originOf(process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com');
-const siteUrl = (() => {
-  try {
-    return siteOrigin ? new URL(siteOrigin) : null;
-  } catch {
-    return null;
-  }
-})();
-const siteHostname = siteUrl?.hostname || '';
-// next/image remotePatterns requires 'http' | 'https' specifically — derive it from the
-// actual site origin instead of assuming https, so this also matches local dev
-// (NEXT_PUBLIC_APP_URL=http://localhost:...).
-const siteProtocol: 'http' | 'https' = siteUrl?.protocol === 'http:' ? 'http' : 'https';
 
 const wsExplicit = originOf(process.env.NEXT_PUBLIC_WS_URL);
 const wsDerived = apiOrigin ? apiOrigin.replace(/^http/, 'ws') : '';
@@ -118,7 +105,11 @@ const nextConfig: NextConfig = {
   // (@opentelemetry/instrumentation, require-in-the-middle, protobufjs, express). Removes the
   // "Critical dependency: the request of a dependency is an expression" build warnings with no
   // behaviour change — src/ai/* is `server-only`, reached only through flows / route handlers.
+  // sharp (src/app/api/image/route.ts) ships a native binary per-platform —
+  // same reasoning as the Genkit/OpenTelemetry entries below, plus it needs
+  // to stay out of the Edge bundle graph entirely.
   serverExternalPackages: [
+    'sharp',
     'genkit',
     '@genkit-ai/core',
     '@genkit-ai/ai',
@@ -159,6 +150,18 @@ const nextConfig: NextConfig = {
       { source: '/copyright-policy', destination: '/editorial-disclosure-policy', permanent: true },
       { source: '/affiliate-disclosure', destination: '/editorial-disclosure-policy', permanent: true },
       { source: '/disclaimer', destination: '/terms-of-service', permanent: true },
+      // Trailing-slash duplicates of root-flat article/category URLs -- the
+      // canonical form (articleUrl() in src/lib/article-url.ts and the
+      // category-hub routes) never has a trailing slash, but these specific
+      // slugs were also being linked/indexed with one, creating a duplicate
+      // crawlable URL for the same content.
+      { source: '/oil-rig-injury-lawyer/', destination: '/oil-rig-injury-lawyer', permanent: true },
+      { source: '/offshore-accident-statute-of-limitations/', destination: '/offshore-accident-statute-of-limitations', permanent: true },
+      { source: '/offshore-accident-lawyer/', destination: '/offshore-accident-lawyer', permanent: true },
+      { source: '/maritime-offshore-injury-law/', destination: '/maritime-offshore-injury-law', permanent: true },
+      { source: '/maritime-accident-lawyer/', destination: '/maritime-accident-lawyer', permanent: true },
+      { source: '/maintenance-and-cure-explained/', destination: '/maintenance-and-cure-explained', permanent: true },
+      { source: '/legal-aid-and-free-legal-help-in-the-us/', destination: '/legal-aid-and-free-legal-help-in-the-us', permanent: true },
     ];
   },
 
@@ -190,79 +193,23 @@ const nextConfig: NextConfig = {
     // Vercel's /_next/image optimizer is gated behind a paid quota on this
     // project — every request 402s (X-Vercel-Error: OPTIMIZED_IMAGE_REQUEST_
     // PAYMENT_REQUIRED) regardless of how remotePatterns is configured, which
-    // silently broke every image on the site. unoptimized:true makes next/image
-    // render the original file directly (still respects remotePatterns for
-    // which hosts are allowed), trading resize/AVIF-WebP conversion for images
-    // that actually render without a Vercel plan/billing change.
-    unoptimized: true,
-    // Self, the cms-service origin, known avatar hosts, PLUS a catch-all for
-    // any other https host. Content authors and ad networks add new image
-    // hosts constantly (new CMS media bucket, a contributor's avatar
-    // provider, a new ad creative CDN) — a fixed allowlist means every new
-    // host 400s through next/image ("hostname not configured") until someone
-    // edits this file and redeploys, which is the same failure class as the
-    // original bug, just moved. Safe to leave wide open here because
-    // unoptimized:true means Next never proxy-fetches these URLs server-side
-    // (no SSRF surface) — the browser fetches them directly, same as a plain
-    // <img src>. The explicit entries below are kept for documentation/intent
-    // even though the wildcard already covers them.
-    remotePatterns: [
-      // `resolveArticleImage()` (src/lib/article-art.ts) builds an absolute
-      // `${SITE}/article-art/<slug>.png` URL even for our own self-hosted static
-      // assets. next/image treats any absolute URL as "remote" regardless of
-      // origin, so without this pattern every article hero image 400s through
-      // /_next/image (hostname not configured under images in next.config.js).
-      ...(siteHostname
-        ? [
-            {
-              protocol: siteProtocol,
-              hostname: siteHostname,
-              pathname: '/**',
-            },
-          ]
-        : []),
-      {
-        protocol: 'https',
-        hostname: 'api.baalvion.com',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'firebasestorage.googleapis.com',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'lh3.googleusercontent.com',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: '**',
-        pathname: '/**',
-      },
-      // Dev-only so `next dev` also tolerates http image sources (e.g. a
-      // teammate's local MinIO/S3 emulator) without needing config edits.
-      ...(isDev
-        ? [
-            {
-              protocol: 'http' as const,
-              hostname: '**',
-              pathname: '/**',
-            },
-          ]
-        : []),
-    ],
-    // Mobile performance optimizations — serve modern formats + right-sized
-    // variants instead of one oversized source image to every device.
-    formats: ['image/webp', 'image/avif'],
+    // previously forced unoptimized:true (images render at source
+    // resolution/format — a real LCP cost). A custom loader replaces the
+    // built-in optimizer with our own sharp-based resize endpoint
+    // (src/app/api/image/route.ts) instead, so images stay resized + WebP
+    // without per-image Vercel cost. Because the loader owns the whole URL,
+    // Next skips its own remotePatterns/dangerouslyAllowSVG host
+    // validation — the real host allowlist (SSRF-relevant, since that route
+    // fetches server-side) now lives in route.ts's ALLOWED_HOSTS, kept in
+    // sync with the hosts this used to list here (site origin,
+    // api.baalvion.com, firebasestorage.googleapis.com,
+    // lh3.googleusercontent.com).
+    loader: 'custom',
+    loaderFile: './src/lib/image-loader.ts',
+    // Candidate widths next/image will request from the loader for a given
+    // `sizes` — must match ALLOWED_WIDTHS in src/app/api/image/route.ts.
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    minimumCacheTTL: 60,
-    // Every SVG served through next/image here is our own deterministically generated
-    // artwork (@baalvion/illustrations) — never user-uploaded — so it's safe to allow.
-    dangerouslyAllowSVG: true,
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   experimental: {
     optimizePackageImports: ['@/components', '@/lib'],

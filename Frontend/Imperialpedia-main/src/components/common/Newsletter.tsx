@@ -65,11 +65,11 @@ export default function Newsletter() {
 
       if (data.success) {
         setStatus("success");
-        setMessage("Synchronization complete. You are now subscribed.");
+        setMessage(data.message || "Thanks for signing up.");
         setEmail("");
 
         addToast({
-          message: "Handshake Successful: Subscription active.",
+          message: "Thanks for signing up.",
           type: "success",
         });
 
@@ -102,7 +102,7 @@ export default function Newsletter() {
           aria-hidden="true"
         />
         <Text variant="h4" className="font-bold">
-          Subscription Node Active
+          Thanks for signing up
         </Text>
         <Text variant="bodySmall" className="text-muted-foreground">
           {message}

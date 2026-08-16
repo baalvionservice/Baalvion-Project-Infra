@@ -106,7 +106,7 @@ export function PremiumClient({ data }: PremiumClientProps) {
         </div>
         <Text variant="h1" as="h1" className="text-4xl lg:text-6xl font-bold tracking-tight">Unlock the Full Index</Text>
         <Text variant="body" className="text-muted-foreground text-lg leading-relaxed">
-          Scale your research with advanced AI tools, real-time portfolio oversight, and exclusive expert intelligence nodes.
+          Unlock full access to premium-only articles and financial calculators, plus a bulk data feed for teams that need it.
         </Text>
 
         <div className="flex items-center justify-center gap-4 pt-8">
@@ -196,10 +196,10 @@ export function PremiumClient({ data }: PremiumClientProps) {
             <div className="p-3 rounded-2xl bg-muted text-muted-foreground">
               <Lock className="h-6 w-6" />
             </div>
-            <Text variant="h4" className="font-bold">Institutional Reports</Text>
+            <Text variant="h4" className="font-bold">Premium Articles</Text>
           </div>
           <Text variant="bodySmall" className="text-muted-foreground leading-relaxed">
-            Deep-dive audits from verified analysts are restricted to **Pro** and **Enterprise** nodes. Unlock access to view the latest sector rotations.
+            Articles marked Premium are free to preview but require a Pro or Enterprise subscription to read in full.
           </Text>
           <Button variant="link" className="p-0 h-auto w-fit text-primary font-bold text-xs" asChild>
             <button onClick={() => handleTierSelect(data.tiers.find(t => t.id === 'tier-pro')!)}>
@@ -216,14 +216,14 @@ export function PremiumClient({ data }: PremiumClientProps) {
             <div className="p-3 rounded-2xl bg-primary/10 text-primary">
               <Zap className="h-6 w-6" />
             </div>
-            <Text variant="h4" className="font-bold">AI Analyst Suite</Text>
+            <Text variant="h4" className="font-bold">Global Data Package</Text>
           </div>
           <Text variant="bodySmall" className="text-muted-foreground leading-relaxed">
-            Unlimited execution of Bull/Bear case generation and catalyst detection scanners. Real-time data synthesis across 1M+ nodes.
+            A unified API feed of Imperialpedia&rsquo;s articles and structured content, available to Enterprise subscribers.
           </Text>
           <Button variant="link" className="p-0 h-auto w-fit text-primary font-bold text-xs" asChild>
-            <button onClick={() => handleTierSelect(data.tiers.find(t => t.id === 'tier-pro')!)}>
-              Launch Analyst Suite <ArrowRight className="ml-1.5 h-3 w-3" />
+            <button onClick={() => handleTierSelect(data.tiers.find(t => t.id === 'tier-enterprise')!)}>
+              Explore Enterprise <ArrowRight className="ml-1.5 h-3 w-3" />
             </button>
           </Button>
         </Card>
@@ -306,9 +306,9 @@ export function PremiumClient({ data }: PremiumClientProps) {
       {/* Trust Badges */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-10 pt-16 border-t border-white/5 text-center">
         {[
-          { icon: <Lock className="h-8 w-8 text-primary mx-auto" />, title: "Secure Handshake", desc: "Enterprise-grade 256-bit encryption for all identity nodes." },
-          { icon: <ShieldCheck className="h-8 w-8 text-secondary mx-auto" />, title: "Verified Vetting", desc: "Subscribing supports our institutional expert audit cycles." },
-          { icon: <Globe className="h-8 w-8 text-emerald-500 mx-auto" />, title: "Global Settlement", desc: "Supporting 135+ currencies across 50 international nodes." }
+          { icon: <Lock className="h-8 w-8 text-primary mx-auto" />, title: "Secure Checkout", desc: "Payments are processed by Razorpay — we never see or store your card or UPI details." },
+          { icon: <ShieldCheck className="h-8 w-8 text-secondary mx-auto" />, title: "Editorial Independence", desc: "Subscribing doesn't change what we cover. Advertisers and sponsors don't get a say in editorial decisions either." },
+          { icon: <Globe className="h-8 w-8 text-emerald-500 mx-auto" />, title: "Encrypted Connection", desc: "All traffic to Imperialpedia is encrypted in transit via HTTPS." }
         ].map((item, idx) => (
           <div key={idx} className="space-y-4 p-8 rounded-[2.5rem] bg-card/30 border border-white/5 hover:border-primary/20 transition-all group">
             <div className="mb-2 group-hover:scale-110 transition-transform">{item.icon}</div>

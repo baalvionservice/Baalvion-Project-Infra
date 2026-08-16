@@ -26,10 +26,21 @@ export async function generateMetadata(
   }
   const title = `${a.name}${a.title ? ` — ${a.title}` : ''}`;
   const description = String(a.bio || `${a.name} writes legal-education guides for Law Elite Network.`).slice(0, 200);
-  const image = resolvePersonImage({ avatarUrl: (a as { avatarUrl?: string }).avatarUrl, name: a.name, avatarSeed: (a as { avatarSeed?: string }).avatarSeed || slug });
+  const personImage = resolvePersonImage({ avatarUrl: (a as { avatarUrl?: string }).avatarUrl, name: a.name, avatarSeed: (a as { avatarSeed?: string }).avatarSeed || slug });
+  // resolvePersonImage falls back to an inline SVG data: URI when a
+  // contributor has no real avatarUrl (every bundled author today) -- fine
+  // for the on-page <Image>, but WhatsApp/Facebook/Twitter crawlers don't
+  // fetch data: URIs for og:image, so a shared author link would render with
+  // no image. Swap in the site's real branded PNG (same one the homepage
+  // falls back to) only for the share-preview tags; the on-page avatar keeps
+  // using the silhouette via resolvePersonImage() in the page component below.
+  const image = personImage.startsWith('data:') ? `${SITE}/opengraph-image` : personImage;
   return {
     title,
     description,
+    keywords: [a.name, a.title, ...(a.expertise || []), 'legal editor', 'law elite network contributor'].filter(
+      (x): x is string => Boolean(x),
+    ),
     alternates: { canonical: url },
     robots: { index: true, follow: true },
     openGraph: { type: 'profile', url, title, description, images: [{ url: image, alt: a.name }] },
@@ -44,7 +55,9 @@ export default async function AuthorLayout(
   const a = await resolveAuthor(slug);
   const url = `${SITE}/author/${slug}`;
   const image = a && resolvePersonImage({ avatarUrl: (a as { avatarUrl?: string }).avatarUrl, name: a.name, avatarSeed: (a as { avatarSeed?: string }).avatarSeed || slug });
-  const sameAs = a?.social ? [a.social.linkedin, a.social.x].filter(Boolean) : undefined;
+  const sameAs = a?.social
+    ? [a.social.linkedin, a.social.x, a.social.facebook, a.social.instagram].filter(Boolean)
+    : undefined;
 
   const personLd = a && {
     '@context': 'https://schema.org',
@@ -55,12 +68,6 @@ export default async function AuthorLayout(
     jobTitle: a.title || undefined,
     description: a.bio || undefined,
     knowsAbout: a.expertise && a.expertise.length ? a.expertise : undefined,
-    // Bar admission / experience line — shown to human readers under the byline
-    // (see the `credentials` field on CmsAuthor/LawAuthor) but previously absent
-    // from structured data, so crawlers had no machine-readable E-E-A-T signal.
-    hasCredential: a.credentials
-      ? { '@type': 'EducationalOccupationalCredential', name: a.credentials }
-      : undefined,
     sameAs: sameAs && sameAs.length ? sameAs : undefined,
     worksFor: { '@type': 'Organization', name: 'Law Elite Network', url: SITE },
   };

@@ -10,8 +10,8 @@ export default function CreatorDashboardPage() {
     <FeatureUnavailable
       title="Creator Dashboard"
       reason="Dashboard analytics aren't connected to a live data source yet. Your public profile and published articles are live at /creator/[id]."
-      backHref="/creator/dashboard/create"
-      backLabel="Write a New Article"
+      backHref="/"
+      backLabel="Back to Imperialpedia"
     />
   );
 }

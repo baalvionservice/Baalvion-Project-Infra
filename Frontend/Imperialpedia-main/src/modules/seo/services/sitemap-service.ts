@@ -11,6 +11,7 @@ import { ALL_TRACKED_SYMBOLS } from "@/lib/data/marketsLoader";
 import { env } from "@/config/env";
 import { logger } from "@/lib/errors/logger";
 import { GLOSSARY_LIVE } from "@/config/glossary";
+import { categoryHasLiveContent } from "@/components/pages/CategoryFeed";
 
 /**
  * @fileOverview Scalable XML sitemap system for 10k–1M+ URLs.
@@ -74,11 +75,18 @@ export const sitemapService = {
     // (routes deleted) — the Creators feature was pulled from the site.
     // "/terms", "/topics", "/learning-paths" removed — glossary/topic-discovery
     // surface is offline pending AdSense approval, see src/config/glossary.ts.
-    // "/companies", "/countries", "/technologies" removed — the hub pages (and every
-    // ?query= variant of them) were permanently killed in the 2026-08 SEO cleanup pass,
-    // see REMOVED_PATHS in middleware.ts. Individual entity pages (e.g. /companies/apple)
-    // are unaffected and still submitted below via pushEntities.
-    const corePages = ["", "/about","/app-reviews","/financial-intelligence","/auto-loans","/banking","/banking-reviews","/bonds","/brokers","/budgeting","/budgeting-apps","/calendar","/cd-rates","/checking","/commodities","/contact","/credit","/credit-cards","/crypto","/cryptocurrency","/debt","/earnings","/economy","/emergency-fund","/etfs","/explore","/fed","/financial-calculators","/financial-tools","/financial-tools/compound-interest","/financial-tools/inflation","/financial-tools/investment","/financial-tools/loan","/fiscal-policy","/gdp","/global","/government","/income","/indicators","/inflation","/insurance","/interest-rates","/investing","/knowledge-map","/latest","/live-market-news","/loan-reviews","/loans","/market-news","/monetary-policy","/money-market","/mortgages","/mutual-funds","/news","/options","/personal-finance","/planning","/politics","/privacy-policy","/real-estate","/retirement","/reviews","/savings","/stocks","/student-loans","/tax-software","/taxes","/terms-of-service","/transparency","/unemployment","/world","/world/us","/world/europe","/world/asia","/world/china","/world/emerging"];
+    // Every CategoryFeed-backed topic hub (taxes, bonds, crypto, debt, ...) is
+    // also removed from this static list: each one individually noindexes itself
+    // via its own generateMetadata + categoryHasLiveContent (empty hubs read to
+    // Google as exactly the thin/low-value content pattern that blocks AdSense
+    // approval), and submitting a noindexed URL in the sitemap is a contradiction
+    // Search Console flags. All of them are submitted conditionally below instead,
+    // by that same categoryHasLiveContent check, once real content exists.
+    // "/companies", "/countries", "/technologies" are also removed — the hub pages
+    // (and every ?query= variant of them) were permanently killed in the 2026-08 SEO
+    // cleanup pass, see REMOVED_PATHS in middleware.ts. Individual entity pages
+    // (e.g. /companies/apple) are unaffected and still submitted below via pushEntities.
+    const corePages = ["","/about","/financial-intelligence","/banking","/budgeting","/contact","/economy","/explore","/financial-tools","/financial-tools/compound-interest","/financial-tools/inflation","/financial-tools/investment","/financial-tools/loan","/investing","/knowledge-map","/market-news","/personal-finance","/privacy-policy","/reviews","/stocks","/terms-of-service","/transparency","/world","/world/us","/world/europe","/world/asia","/world/china","/world/emerging"];
     corePages.forEach((path) => {
       entries.push({
         loc: `${base}${path}`,
@@ -205,6 +213,36 @@ export const sitemapService = {
       });
     });
 
+    // Every CategoryFeed-backed topic hub — submit the hub itself only once it
+    // actually has a published article, so Google is never handed an empty
+    // CategoryFeed page (~40KB of template chrome and nothing else). Checked via
+    // the exact same `categoryHasLiveContent` each hub's own generateMetadata
+    // uses to decide noindex, so the sitemap and each page's own robots meta can
+    // never disagree with each other. Picks up new content the moment it's
+    // published in the CMS — no code change or redeploy.
+    const TOPIC_HUB_SLUGS = [
+      "advanced-budgeting", "app-reviews", "auto-loans", "banking-reviews", "bonds",
+      "brokers", "budget-rules", "budgeting-apps", "budgeting-basics", "calendar",
+      "cd-rates", "checking", "commodities", "credit", "credit-cards", "crypto",
+      "cryptocurrency", "debt", "earnings", "emergency-fund", "etfs",
+      "family-budget", "fed", "financial-calculators", "financial-independence",
+      "fiscal-policy", "gdp", "global", "government", "income", "indicators",
+      "inflation", "insurance", "interest-rates", "live-market-news",
+      "loan-reviews", "loans", "monetary-policy", "money-management",
+      "money-market", "monthly-budget", "mortgages", "mutual-funds", "options",
+      "planning", "politics", "portfolio", "real-estate", "retirement",
+      "saving-money", "savings", "student-budget", "student-loans",
+      "tax-software", "taxes", "unemployment",
+    ] as const;
+    const topicHubResults = await Promise.all(
+      TOPIC_HUB_SLUGS.map(async (slug) => ({ slug, hasContent: await safe(categoryHasLiveContent(slug), false) })),
+    );
+    topicHubResults.forEach(({ slug, hasContent }) => {
+      if (hasContent) {
+        entries.push({ loc: `${base}/${slug}`, lastmod: today, changefreq: "weekly", priority: 0.7 });
+      }
+    });
+
     // Real glossary terms — matches the actual `/terms/[letter]/[slug]` pages 1:1
     // (previously sourced from a small hardcoded mock glossary that didn't match the
     // real term set, which meant submitted URLs could 404).
@@ -240,6 +278,14 @@ export const sitemapService = {
     pushEntities(companies, "/companies", 0.8);
     pushEntities(countries, "/countries", 0.7, REMOVED_COUNTRY_SLUGS);
     pushEntities(technologies, "/technologies", 0.7, REMOVED_TECHNOLOGY_SLUGS);
+
+    // "/news" and "/latest" are the same empty-hub case as the topic pages
+    // above, just keyed on published `news` content instead of a category —
+    // submit them only once at least one news item is actually published.
+    if (news.length > 0) {
+      entries.push({ loc: `${base}/news`, lastmod: today, changefreq: "daily", priority: 0.7 });
+      entries.push({ loc: `${base}/latest`, lastmod: today, changefreq: "daily", priority: 0.7 });
+    }
 
     // Market quote pages — every symbol this site actually renders a
     // `/markets/quote/[symbol]` page for (same tracked list the markets

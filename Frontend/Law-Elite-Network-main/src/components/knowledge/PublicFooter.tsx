@@ -50,9 +50,15 @@ export function PublicFooter() {
                 <li><Link href="/business" className="hover:text-blue-300 transition-colors">Business & Corporate</Link></li>
                 <li><Link href="/criminal-law" className="hover:text-blue-300 transition-colors">Criminal Law</Link></li>
                 <li><Link href="/family-law" className="hover:text-blue-300 transition-colors">Family & Personal</Link></li>
+                <li><Link href="/real-estate-law" className="hover:text-blue-300 transition-colors">Property & Real Estate</Link></li>
                 <li><Link href="/tax-finance" className="hover:text-blue-300 transition-colors">Tax & Finance</Link></li>
                 <li><Link href="/employment-law" className="hover:text-blue-300 transition-colors">Employment & Labor</Link></li>
                 <li><Link href="/tech-ip" className="hover:text-blue-300 transition-colors">Technology & IP</Link></li>
+                <li><Link href="/disputes" className="hover:text-blue-300 transition-colors">Dispute Resolution</Link></li>
+              </ul>
+              <ul className="space-y-4 text-[13px] font-bold uppercase tracking-widest mt-8 pt-8 border-t border-white/10">
+                <li><Link href="/news" className="hover:text-blue-300 transition-colors">Legal News</Link></li>
+                <li><Link href="/countries" className="hover:text-blue-300 transition-colors">Browse by Country</Link></li>
               </ul>
             </div>
 
@@ -66,6 +72,7 @@ export function PublicFooter() {
                 <li><Link href="/advertise" className="hover:text-white transition-colors">Advertise</Link></li>
                 <li><Link href="/editorial-standards" className="hover:text-white transition-colors">Editorial Standards</Link></li>
                 <li><Link href="/editorial-process" className="hover:text-white transition-colors">Editorial Process</Link></li>
+                <li><Link href="/corrections" className="hover:text-white transition-colors">Corrections</Link></li>
               </ul>
             </div>
 
@@ -76,6 +83,7 @@ export function PublicFooter() {
                 <li><Link href="/terms-of-service" className="hover:text-white transition-colors">Terms of Service &amp; Legal Disclaimer</Link></li>
                 <li><Link href="/cookie-policy" className="hover:text-white transition-colors">Cookie Policy</Link></li>
                 <li><Link href="/editorial-disclosure-policy" className="hover:text-white transition-colors">Editorial, DMCA &amp; Disclosure Policy</Link></li>
+                <li><Link href="/ai-usage-policy" className="hover:text-white transition-colors">AI Usage Policy</Link></li>
               </ul>
             </div>
           </div>
@@ -96,8 +104,8 @@ export function PublicFooter() {
             Law Elite <span className="text-slate-400">Network.</span>
           </span>
           <p className="text-[11px] font-medium text-slate-500">
-            Law Elite is part of the <Link href="/" className="text-blue-600 hover:underline">Elite Knowledge Group</Link> publishing family. 
-            © {new Date().getFullYear()} All rights reserved.
+            Law Elite is part of the <Link href="/" className="text-blue-600 hover:underline">Elite Knowledge Group</Link> publishing family.
+            © {new Date().getFullYear()} All rights reserved. CIN: U43121OD2025PTC048479
           </p>
         </div>
       </div>

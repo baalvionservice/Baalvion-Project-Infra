@@ -17,6 +17,7 @@ export const businessCorporateArticles: LawArticle[] = [
     views: 8700,
     featured: true,
     imageSeed: 'lawelite-shareholder-pact',
+    country: 'United States',
     content: `<p>A shareholder agreement is a private contract signed by some or all of the owners of a company. While a company\'s constitution or articles set the public, default rules, a shareholder agreement adds a confidential layer that spells out how the owners will actually run the business, divide profits, resolve disputes, and leave. It is one of the most useful documents a privately held company can have, yet many founders skip it until a conflict makes the gap painfully obvious.</p>
 
 <div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>A shareholder agreement is a private contract that supplements, but does not replace, a company\'s constitution or articles of association.</li><li>It typically covers decision-making rights, share transfers, exit terms, dividends, and dispute resolution.</li><li>Transfer controls such as pre-emption rights, drag-along, and tag-along clauses protect both majority and minority owners.</li><li>The agreement binds only its signatories, so coverage gaps appear when new owners join without signing.</li><li>Enforceability and required formalities differ across jurisdictions, so local legal review is essential.</li></ul></div>
@@ -101,7 +102,7 @@ export const businessCorporateArticles: LawArticle[] = [
 <ul>
 <li><strong>Sole proprietorship:</strong> simplest to start, but the owner is personally liable for all debts.</li>
 <li><strong>Partnership:</strong> two or more owners share profits and, in a general partnership, personal liability.</li>
-<li><strong>Limited liability company:</strong> a flexible entity (an LLC in the US, a private limited company elsewhere) that caps owner liability.</li>
+<li><strong>Limited liability company:</strong> a flexible entity (an <a href="/business/how-to-form-an-llc-step-by-step">LLC</a> in the US, a private limited company elsewhere) that caps owner liability.</li>
 <li><strong>Corporation:</strong> a more formal entity suited to raising capital and issuing shares to many investors.</li>
 </ul>
 <p>Owners weigh limited liability, tax treatment, administrative burden, and credibility with customers and investors when deciding.</p>
@@ -126,7 +127,7 @@ export const businessCorporateArticles: LawArticle[] = [
 </ul>
 
 <h2>How Jurisdictions Differ</h2>
-<p>In the United States, companies are formed under state law, and Delaware is a popular choice for its developed corporate case law. The United Kingdom offers fast, low-cost online incorporation through a single national registry. Across the European Union, each member state has its own rules, though several directives have harmonized aspects of disclosure. In India, incorporation is largely digital but involves obtaining director identification and digital signatures first. Founders operating internationally should not assume the cheapest or fastest registry is best; tax residence, where customers are, and where staff sit often matter more.</p>
+<p>In the United States, companies are formed under state law, and Delaware is a popular choice for its developed corporate case law; eligible corporations may also elect S corporation tax status for pass-through treatment (see <a href="/business/what-is-an-s-corporation">What Is an S Corporation? How the Tax Election Actually Works</a>). The United Kingdom offers fast, low-cost online incorporation through a single national registry — see <a href="/business/uk-company-formation-companies-house">Forming a Private Limited Company in the UK via Companies House</a> for the Companies House process itself. Canada splits incorporation authority between the federal government and the provinces, a choice with real consequences for where the company can operate (see <a href="/business/federal-vs-provincial-incorporation-canada">Federal vs. Provincial Incorporation in Canada</a>). Australia runs company registration through its national regulator (see <a href="/business/company-registration-australia-asic">Registering a Company in Australia: The ASIC Process</a>). Across the European Union, each member state has its own rules, though several directives have harmonized aspects of disclosure. In India, incorporation is largely digital but involves obtaining director identification and digital signatures first. Founders operating internationally should not assume the cheapest or fastest registry is best; tax residence, where customers are, and where staff sit often matter more.</p>
 
 <h2>Common Pitfalls</h2>
 <ul>
@@ -172,6 +173,7 @@ export const businessCorporateArticles: LawArticle[] = [
     views: 4300,
     featured: false,
     imageSeed: 'lawelite-startup-foundations',
+    country: 'United States',
     content: `<p>Startup law is not a single field but the cluster of legal decisions that founders face in a company\'s earliest months: how to split ownership, who owns the intellectual property, how to bring on a team, and how to take in outside money without losing control. These choices are made quickly and cheaply at the start, yet they shape the company\'s value for years. Getting the foundations right is far easier than untangling them later during a funding round or acquisition.</p>
 
 <div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>Founder equity should usually vest over time so that ownership reflects continued contribution.</li><li>Intellectual property must be assigned to the company, not left with individual founders or contractors.</li><li>Early fundraising instruments such as convertible notes and SAFEs delay setting a fixed valuation.</li><li>Compliant hiring, equity, and data practices reduce the risk of problems surfacing during due diligence.</li><li>Rules on securities, employment, and IP differ by country, so structures should be checked locally.</li></ul></div>

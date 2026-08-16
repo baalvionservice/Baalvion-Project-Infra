@@ -2,7 +2,9 @@ import type { Metadata } from 'next';
 import { getAuthorByName } from '@/data/authors';
 import { resolveArticleImage } from '@/lib/article-art';
 import { extractFaqFromHtml } from '@/lib/seo/faq-extractor';
+import { toIsoDate } from '@/lib/seo/normalize-date';
 import { articleUrl } from '@/lib/article-url';
+import { CURRENT_CATEGORY_SLUGS } from '@/lib/category-slugs';
 
 const titleCase = (s: string) => s.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
@@ -17,14 +19,28 @@ export function buildArticleMetadata(article: any | null, slug: string, site: st
   // No server-side record: humanize the slug so the title is still specific (not bare "Article").
   if (!article) {
     const humanized = `${titleCase(slug)} | Law Elite Network`;
-    return { title: humanized, alternates: { canonical: url }, openGraph: { type: 'article', url, title: humanized } };
+    // title.absolute (not a plain string) so this ignores whatever title
+    // template is/isn't active on the matched layout chain -- see the
+    // `title` comment below for why that matters.
+    return { title: { absolute: humanized }, alternates: { canonical: url }, openGraph: { type: 'article', url, title: humanized } };
   }
   const title = article.title;
+  const brandedTitle = `${title} | Law Elite Network`;
   const description = String(article.excerpt || article.title).slice(0, 300);
   const authorName = (typeof article.author === 'string' ? article.author : article.author?.name) || article.author_name || undefined;
   const ogImage = resolveArticleImage({ ...article, title, slug });
   return {
-    title,
+    // title.absolute, not a plain string: this route is reachable through two
+    // different layout nestings (/article/[slug] direct under root, and
+    // /[categorySlug]/[articleSlug] under a category layout that sets its own
+    // plain-string title for the category route). A plain string here would
+    // pick up the root layout's "%s | Law Elite Network" template in the
+    // first case (correct) but get no template applied in the second case
+    // (the category layout's own title resets the inherited template) --
+    // producing inconsistent branding across the two URL patterns. Baking
+    // the suffix in explicitly and using `absolute` makes it identical
+    // either way, with exactly one suffix.
+    title: { absolute: brandedTitle },
     description,
     keywords: [...(article.tags || []), 'legal guide', 'law', 'legal advice'].filter(Boolean),
     alternates: { canonical: url },
@@ -35,8 +51,8 @@ export function buildArticleMetadata(article: any | null, slug: string, site: st
       url,
       title,
       description,
-      publishedTime: article.published_at || undefined,
-      modifiedTime: article.updated_at || undefined,
+      publishedTime: toIsoDate(article.published_at),
+      modifiedTime: toIsoDate(article.updated_at),
       authors: authorName ? [authorName] : undefined,
       images: [{ url: ogImage, alt: title }],
     },
@@ -64,8 +80,8 @@ export function ArticleJsonLd({ article, slug, site }: { article: any | null; sl
     headline: article.title,
     description: article.excerpt || undefined,
     image: articleImage ? [articleImage] : undefined,
-    datePublished: article.published_at || undefined,
-    dateModified: article.updated_at || article.published_at || undefined,
+    datePublished: toIsoDate(article.published_at),
+    dateModified: toIsoDate(article.updated_at) || toIsoDate(article.published_at),
     mainEntityOfPage: url,
     author: authorLd,
     publisher: { '@type': 'Organization', name: 'Law Elite Network', logo: { '@type': 'ImageObject', url: `${site}/logo.png` } },
@@ -87,8 +103,13 @@ export function ArticleJsonLd({ article, slug, site }: { article: any | null; sl
       }
     : null;
   const cat = article?.category;
+  // Same real-category check as Breadcrumbs.tsx / article-url.ts -- a CMS
+  // article's category slug may not be one of the 8 real category pages, and
+  // this JSON-LD is structured data Google actually parses, so an `item` URL
+  // that 404s here is worse than a broken visible link.
+  const catIsReal = !!cat?.slug && (CURRENT_CATEGORY_SLUGS as readonly string[]).includes(cat.slug);
   const crumbs: Array<{ name: string; item: string }> = [{ name: 'Home', item: site }];
-  if (cat?.name && cat?.slug) crumbs.push({ name: cat.name, item: `${site}/${cat.slug}` });
+  if (catIsReal && cat?.name && cat?.slug) crumbs.push({ name: cat.name, item: `${site}/${cat.slug}` });
   crumbs.push({ name: article?.title || titleCase(slug), item: url });
   const breadcrumbLd = {
     '@context': 'https://schema.org',

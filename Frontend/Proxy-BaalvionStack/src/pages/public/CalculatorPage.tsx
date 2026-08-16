@@ -20,7 +20,7 @@ import {
   CheckCircle,
   Info
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { publicApi } from "@/lib/platformClient";
 import { pricingPlans as fallbackPlans } from "@/data/mockData";

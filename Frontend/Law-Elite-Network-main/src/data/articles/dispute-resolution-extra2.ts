@@ -13,11 +13,11 @@ export const disputeResolutionExtra2Articles: LawArticle[] = [
     slug: 'small-claims-court-guide',
     alphabet: 'S',
     categoryId: 'cat_dispute_resolution',
-    subcategoryId: 'sub_dr_mediation',
+    subcategoryId: 'sub_dr_litigation',
     category: DISPUTE_RESOLUTION_CATEGORY,
-    subcategory: { id: 'sub_dr_mediation', name: 'Mediation', slug: 'mediation' },
+    subcategory: { id: 'sub_dr_litigation', name: 'Litigation', slug: 'litigation' },
     summary:
-      'Small claims court offers a fast, low-cost, informal way to resolve modest money disputes without lawyers — ideal for unpaid debts, faulty goods, and minor contract problems.',
+      'Small claims court offers a fast, low-cost way to resolve modest money disputes without lawyers — ideal for unpaid debts and minor contract problems.',
     author: 'Sofia Almeida',
     updatedAt: 'June 23, 2026',
     readingTime: 9,
@@ -92,17 +92,18 @@ export const disputeResolutionExtra2Articles: LawArticle[] = [
     slug: 'what-is-a-class-action-lawsuit',
     alphabet: 'W',
     categoryId: 'cat_dispute_resolution',
-    subcategoryId: 'sub_dr_arbitration',
+    subcategoryId: 'sub_dr_litigation',
     category: DISPUTE_RESOLUTION_CATEGORY,
-    subcategory: { id: 'sub_dr_arbitration', name: 'Arbitration', slug: 'arbitration' },
+    subcategory: { id: 'sub_dr_litigation', name: 'Litigation', slug: 'litigation' },
     summary:
-      'A class action lets one lawsuit represent many people harmed in the same way, making it practical to hold powerful defendants accountable for widespread but individually small losses.',
+      'A class action lets one lawsuit represent many people harmed the same way, making it practical to hold defendants accountable for widespread small losses.',
     author: 'Daniel Okafor',
     updatedAt: 'June 21, 2026',
     readingTime: 9,
     views: 7050,
     featured: false,
     imageSeed: 'class-action-lawsuit-explained',
+    country: 'United States',
     content: `<p>A class action lawsuit is a legal case in which one or a few people sue on behalf of a much larger group — the "class" — who were all harmed in the same way by the same conduct. Instead of thousands of individuals each filing separate cases, a single lawsuit resolves the shared issue for everyone at once. This makes it possible to challenge large companies or institutions over harms that affect many people but may be too small, individually, to justify the cost of suing alone.</p>
 
 <div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>A class action lets a few representatives sue on behalf of a large group with similar claims.</li><li>It is efficient for widespread harms where each person's loss is too small to litigate alone.</li><li>A court must usually "certify" the class before the case can proceed as a group action.</li><li>Members often have the right to opt out and pursue their own case instead.</li><li>The mechanism is strong in the US but more limited or differently structured elsewhere.</li></ul></div>

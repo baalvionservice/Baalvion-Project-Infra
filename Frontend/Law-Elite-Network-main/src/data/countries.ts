@@ -35,19 +35,36 @@ export function countryNameToSlug(name: string): string | null {
 /**
  * Bundled + CMS articles tagged with the given country, CMS-wins-by-slug --
  * mirrors the merge pattern in CategoryContent.tsx / law-content.ts's
- * mergeArticles(). Returns [] for every country today (no article has country
- * metadata yet); this is the aggregator the section flips on once real
- * jurisdiction-specific content exists.
+ * mergeArticles().
+ *
+ * Country membership is decided from EITHER source's `country` field, not
+ * just the winning (CMS) record's own -- editing a bundled article's slug in
+ * the CMS admin (e.g. to attach a real featured image) doesn't always carry
+ * customFields.country along with it. Gating purely on the CMS record's own
+ * tag silently dropped the country match and fell back to the imageless
+ * bundled version even once a real photo had been uploaded for that same
+ * slug.
  */
 export async function getArticlesByCountrySlug(countrySlug: string): Promise<Array<LawArticle | CmsArticle>> {
   const country = getCountryBySlug(countrySlug);
   if (!country) return [];
 
-  const bundled = getAllArticles().filter((a) => a.country && countryNameToSlug(a.country) === countrySlug);
-  const cms = (await cmsGetArticles()).filter((a) => a.country && countryNameToSlug(a.country) === countrySlug);
+  const bundled = getAllArticles();
+  const cms = await cmsGetArticles();
+  const cmsBySlug = new Map(cms.map((a) => [a.slug, a]));
+  const bundledBySlug = new Map(bundled.map((a) => [a.slug, a]));
 
-  const seen = new Set(cms.map((a) => a.slug));
-  return [...cms, ...bundled.filter((a) => !seen.has(a.slug))];
+  const isCountryMatch = (a: { country?: string | null } | undefined) =>
+    !!a?.country && countryNameToSlug(a.country) === countrySlug;
+
+  const slugs = new Set([
+    ...bundled.filter(isCountryMatch).map((a) => a.slug),
+    ...cms.filter(isCountryMatch).map((a) => a.slug),
+  ]);
+
+  return Array.from(slugs)
+    .map((slug) => cmsBySlug.get(slug) ?? bundledBySlug.get(slug))
+    .filter((a): a is LawArticle | CmsArticle => Boolean(a));
 }
 
 /** Article count per country, for the /countries index. */

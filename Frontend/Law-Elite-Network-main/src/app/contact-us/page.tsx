@@ -19,45 +19,59 @@ export default function ContactUsPage() {
               Contact Us
             </h1>
             <p className="text-xl text-slate-500 font-medium italic max-w-xl mx-auto">
-              Our professional concierge team is available to assist with network inquiries and strategic support.
+              Reach the right team below, or send a general inquiry — we read everything and respond as quickly as we can.
             </p>
           </header>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
-            <ContactCard 
-              icon={<Mail className="w-6 h-6" />} 
-              title="Concierge Support" 
+            <ContactCard
+              icon={<Mail className="w-6 h-6" />}
+              title="General & Membership"
               contact="concierge@lawelitenetwork.com"
-              desc="Inquiries regarding memberships and consultations."
+              desc="Account questions, memberships, and consultations."
             />
-            <ContactCard 
-              icon={<MessageSquare className="w-6 h-6" />} 
-              title="Editorial Inquiries" 
+            <ContactCard
+              icon={<MessageSquare className="w-6 h-6" />}
+              title="Editorial Inquiries"
               contact="editorial@lawelitenetwork.com"
-              desc="Questions regarding dossiers and knowledge integrity."
+              desc="Questions or feedback about our articles and guides."
             />
-            <ContactCard 
-              icon={<Globe className="w-6 h-6" />} 
-              title="Global Press" 
+            <ContactCard
+              icon={<Globe className="w-6 h-6" />}
+              title="Press"
               contact="press@lawelitenetwork.com"
-              desc="Media and broadcasting inquiries."
+              desc="Media inquiries."
             />
-            <ContactCard 
-              icon={<ShieldCheck className="w-6 h-6" />} 
-              title="Compliance Office" 
+            <ContactCard
+              icon={<ShieldCheck className="w-6 h-6" />}
+              title="Privacy & Legal"
               contact="legal@lawelitenetwork.com"
-              desc="Privacy and statutory regulatory matters."
+              desc="Privacy questions and legal or regulatory correspondence."
             />
           </div>
 
-          <div className="bg-slate-900 rounded-[3rem] p-12 text-white text-center relative overflow-hidden">
+          <div className="bg-slate-900 rounded-[3rem] p-12 text-white relative overflow-hidden">
              <div className="absolute top-0 left-0 p-8 opacity-10"><ShieldCheck className="w-24 h-24" /></div>
-             <h3 className="text-2xl font-bold font-serif italic mb-4">Mailing Address</h3>
-             <p className="text-slate-400 font-medium leading-relaxed">
-               12 Executive Tower, BKC<br />
-               Mumbai, MH 400051<br />
-               India
-             </p>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-10 text-center">
+               <div>
+                 <h3 className="text-2xl font-bold font-serif italic mb-4">Headquarters</h3>
+                 <p className="text-slate-400 font-medium leading-relaxed">
+                   Yeshwant Avenue Building, NX, NX Road<br />
+                   Y K Nagar, Virar West, Virar<br />
+                   Maharashtra 401303, India<br />
+                   <a href="tel:+918951284770" className="hover:text-white transition-colors">+91 89512 84770</a>
+                 </p>
+               </div>
+               <div>
+                 <h3 className="text-2xl font-bold font-serif italic mb-4">Registered Office</h3>
+                 <p className="text-slate-400 font-medium leading-relaxed">
+                   C/o Dilip Kumar Kuldeep, Upper Mania<br />
+                   Po- Pakjhola, Semiliguda<br />
+                   Koraput, Odisha 764036, India<br />
+                   CIN: U43121OD2025PTC048479
+                 </p>
+               </div>
+             </div>
           </div>
 
         </div>

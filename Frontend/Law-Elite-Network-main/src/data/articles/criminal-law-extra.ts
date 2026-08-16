@@ -17,7 +17,7 @@ export const criminalLawExtraArticles: LawArticle[] = [
     category: CRIMINAL_LAW_CATEGORY,
     subcategory: { id: 'sub_cl_police', name: 'Police Procedures', slug: 'police-procedures' },
     summary:
-      'If you are arrested, you generally have the right to stay silent, to know why you are being held, and to a lawyer — knowing these rights protects you under pressure.',
+      "If you are arrested, you generally have the right to stay silent, know why you're held, and have a lawyer — knowing these rights protects you.",
     author: 'Aisha Rahman',
     updatedAt: 'June 16, 2026',
     readingTime: 9,

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Outlet, Link, Navigate, useLocation } from "react-router-dom";
+import { Outlet, Link, Navigate, useLocation } from "react-router";
 import { useAuth } from "@/contexts/AuthContext";
 import { AppSidebar } from "./AppSidebar";
 import { AppHeader } from "./AppHeader";

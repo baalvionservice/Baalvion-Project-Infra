@@ -31,7 +31,7 @@ module.exports = function (sequelize, DataTypes) {
             type: DataTypes.ENUM('writer', 'reviewer', 'fact-checker', 'contributor'),
             allowNull: true,
         },
-        // { x?: string, linkedin?: string }
+        // { x?: string, linkedin?: string, facebook?: string, instagram?: string }
         social: { type: DataTypes.JSONB, allowNull: false, defaultValue: {} },
         // { title?, description?, keywords?, ogImage?, noIndex? }
         seoMetadata: { type: DataTypes.JSONB, allowNull: true, defaultValue: {} },

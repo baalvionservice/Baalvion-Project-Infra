@@ -29,6 +29,7 @@ export async function fetchRelatedArticles(
   currentSlug: string,
   categorySlug?: string,
   categoryName?: string,
+  subcategorySlug?: string,
 ): Promise<RelatedArticle[]> {
   if (!categorySlug) return [];
 
@@ -55,16 +56,35 @@ export async function fetchRelatedArticles(
         categorySlug: a.category?.slug,
         // CMS content has no subcategory field (lib/cms.ts toArticle()) --
         // articleUrl() falls back to the flat /article/{slug} URL for these.
-        author: 'Law Elite Editorial',
+        author: a.author || 'Law Elite Editorial',
         slug: a.slug,
         featuredImage: (a as any).featuredImage || undefined,
       }));
+    // Bundled entries are static filler with no featuredImage -- when a slug
+    // exists in both sources the CMS version (real data, incl. admin-set
+    // photos) must win. Same precedence as CategoryContent.tsx / search route.ts.
     const bySlug = new Map<string, RelatedArticle>();
-    for (const a of [...cmsArticles, ...bundled]) bySlug.set(a.slug, a);
-    return Array.from(bySlug.values()).slice(0, 4);
+    for (const a of [...bundled, ...cmsArticles]) bySlug.set(a.slug, a);
+    return prioritizeSubcategory(Array.from(bySlug.values()), subcategorySlug).slice(0, 4);
   } catch {
-    return bundled.slice(0, 4);
+    return prioritizeSubcategory(bundled, subcategorySlug).slice(0, 4);
   }
+}
+
+/**
+ * Same-category candidates are otherwise taken in plain array order, so a
+ * category with more than 4 articles silently hides everything past the
+ * first 4 (e.g. a jurisdiction cluster added after the original bundled set
+ * would never surface on its own pillar article). Move same-subcategory
+ * matches first -- still capped to 4 by the caller -- so a topic cluster
+ * stays mutually linked as it grows, without touching unrelated articles'
+ * ordering when there's no subcategory overlap to begin with.
+ */
+function prioritizeSubcategory(articles: RelatedArticle[], subcategorySlug?: string): RelatedArticle[] {
+  if (!subcategorySlug) return articles;
+  const matched = articles.filter((a) => a.subcategorySlug === subcategorySlug);
+  const rest = articles.filter((a) => a.subcategorySlug !== subcategorySlug);
+  return [...matched, ...rest];
 }
 
 export function RelatedArticles({ articles }: { articles: RelatedArticle[] }) {
@@ -81,7 +101,7 @@ export function RelatedArticles({ articles }: { articles: RelatedArticle[] }) {
               <div className="bg-white border border-slate-200 overflow-hidden shadow-sm group-hover:shadow-md transition-all duration-300 flex flex-col h-full">
                 <div className="relative aspect-[3/2] overflow-hidden bg-slate-100">
                   <Image
-                    src={resolveArticleImage({ featuredImage: art.featuredImage, title: art.title, category: { name: art.category }, id: art.id })}
+                    src={resolveArticleImage({ featuredImage: art.featuredImage, title: art.title, category: { name: art.category }, id: art.id, slug: art.slug })}
                     alt={art.title}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-500"

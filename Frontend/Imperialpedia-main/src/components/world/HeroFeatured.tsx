@@ -1,5 +1,6 @@
 import type { FeaturedStory } from "@/lib/data/worldRegions";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
+import { StoryLink } from "@/components/common/StoryLink";
 
 export default function HeroFeatured({ featured }: { featured: FeaturedStory[] }) {
   const [main, ...secondary] = featured;
@@ -7,7 +8,7 @@ export default function HeroFeatured({ featured }: { featured: FeaturedStory[] }
   return (
     <div className="flex flex-col md:grid md:grid-cols-3 gap-px bg-border border-b border-border">
       {/* Main hero story */}
-      <div className="md:col-span-2 bg-card group cursor-pointer">
+      <StoryLink item={main} className="md:col-span-2 bg-card group block">
         <div className="relative overflow-hidden h-[230px] sm:h-[300px] md:h-[340px] lg:h-[420px]">
           <OptimizedImage
             src={main.image}
@@ -42,14 +43,15 @@ export default function HeroFeatured({ featured }: { featured: FeaturedStory[] }
             </div>
           </div>
         </div>
-      </div>
+      </StoryLink>
 
       {/* Secondary stories - Stack on mobile */}
       <div className="bg-card divide-y divide-border">
         {secondary.map((story) => (
-          <div
+          <StoryLink
             key={story.id}
-            className="group cursor-pointer p-3 sm:p-4 hover:bg-muted transition-colors"
+            item={story}
+            className="group block p-3 sm:p-4 hover:bg-muted transition-colors"
           >
             <span className="world-kicker text-[9px] sm:text-[10px] font-black tracking-widest text-[hsl(var(--cnbc-red))] uppercase">
               {story.category}
@@ -65,7 +67,7 @@ export default function HeroFeatured({ featured }: { featured: FeaturedStory[] }
               <span>•</span>
               <span>{story.time}</span>
             </div>
-          </div>
+          </StoryLink>
         ))}
       </div>
     </div>

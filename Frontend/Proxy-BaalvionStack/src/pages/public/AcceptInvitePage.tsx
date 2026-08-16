@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router";
 import { useAuth } from "@/contexts/AuthContext";
 import { authClient, InviteDetails } from "@/lib/authClient";
 import { useForm } from "react-hook-form";

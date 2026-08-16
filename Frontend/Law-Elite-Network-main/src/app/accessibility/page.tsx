@@ -37,8 +37,7 @@ export default function AccessibilityPage() {
             <Block icon={<Accessibility className="w-6 h-6 text-blue-600" />} title="Our Standard">
               <p>
                 We aim to meet the Web Content Accessibility Guidelines (WCAG) 2.2 at Level AA across our core
-                pages, including our article pages and{' '}
-                <Link href="/lawyers" className="text-blue-600 hover:underline">lawyer directory</Link>. This
+                pages, including our article pages and lawyer directory. This
                 includes attention to color contrast, keyboard navigation, semantic heading structure, descriptive
                 link text, and alternative text for meaningful images.
               </p>
@@ -47,9 +46,8 @@ export default function AccessibilityPage() {
             <Block icon={<Wrench className="w-6 h-6 text-blue-600" />} title="Ongoing Improvement">
               <p>
                 Accessibility is not a one-time project; it is an ongoing part of how we build and maintain the
-                site. As we publish new features, redesign templates, or add tools such as appointment scheduling
-                through{' '}
-                <Link href="/appointments" className="text-blue-600 hover:underline">Appointments</Link>, we review
+                site. As we publish new features, redesign templates, or add tools such as appointment scheduling,
+                we review
                 them against our accessibility standard and correct issues as they are identified, in the same spirit
                 as our{' '}
                 <Link href="/corrections" className="text-blue-600 hover:underline">Corrections</Link> process for
@@ -95,7 +93,7 @@ function Block({ icon, title, children }: { icon: React.ReactNode; title: string
     <div className="space-y-4 scroll-mt-32">
       <div className="flex items-center gap-3">
         <div className="w-11 h-11 rounded-2xl bg-blue-50 flex items-center justify-center shrink-0">{icon}</div>
-        <h2 className="text-[28px] font-bold text-slate-900 font-serif leading-tight">{title}</h2>
+        <h2 className="text-[22px] md:text-[28px] font-bold text-slate-900 font-serif leading-tight">{title}</h2>
       </div>
       <div className="prose-legal max-w-none text-slate-700 leading-relaxed space-y-4 pl-14">{children}</div>
     </div>

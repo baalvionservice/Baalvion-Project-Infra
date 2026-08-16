@@ -9,7 +9,7 @@ const BUSINESS_CORPORATE_CATEGORY = {
 export const businessCorporateExtraArticles: LawArticle[] = [
   {
     id: 'bc-101',
-    title: 'LLC vs Corporation: Which Business Structure Should You Choose?',
+    title: 'LLC vs Corporation: Which Should You Choose?',
     slug: 'llc-vs-corporation',
     alphabet: 'L',
     categoryId: 'cat_business_corporate',
@@ -17,13 +17,14 @@ export const businessCorporateExtraArticles: LawArticle[] = [
     category: BUSINESS_CORPORATE_CATEGORY,
     subcategory: { id: 'sub_bc_formation', name: 'Company Formation', slug: 'company-formation' },
     summary:
-      'An LLC offers flexible, pass-through ownership with limited liability, while a corporation suits raising outside capital — the right choice depends on tax, control, and growth plans.',
+      'An LLC offers flexible, pass-through ownership with limited liability, while a corporation suits raising capital — the choice depends on your goals.',
     author: 'Marcus Hale',
     updatedAt: 'June 18, 2026',
     readingTime: 10,
     views: 8240,
     featured: true,
     imageSeed: 'llc-vs-corporation-structure',
+    country: 'United States',
     content: `<p>An LLC (limited liability company) is a flexible business entity that shields its owners from personal liability while usually passing profits straight through to their personal tax returns. A corporation is a more formal entity, owned through shares, that is taxed in its own right and is built to raise capital from many investors. Both give you limited liability; the real decision turns on how you want to be taxed, how you plan to fund growth, and how much administrative formality you are willing to carry.</p>
 
 <div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>Both LLCs and corporations protect owners' personal assets from most business debts.</li><li>LLCs are flexible and typically taxed once, on the owners; corporations are taxed as separate entities and may face double taxation.</li><li>Corporations issue shares and are the natural choice for raising venture capital or going public.</li><li>LLCs carry lighter paperwork; corporations require boards, officers, minutes, and stricter formalities.</li><li>The exact rules — and even whether an "LLC" exists — vary by country, so structure choice should be checked locally.</li></ul></div>
@@ -92,13 +93,14 @@ export const businessCorporateExtraArticles: LawArticle[] = [
     category: BUSINESS_CORPORATE_CATEGORY,
     subcategory: { id: 'sub_bc_contracts', name: 'Contracts', slug: 'contracts' },
     summary:
-      'A non-disclosure agreement is a contract that legally binds one or both parties to keep shared information confidential and not use it for unauthorised purposes.',
+      'A non-disclosure agreement is a contract binding one or both parties to keep shared information confidential and not use it without authorization.',
     author: 'Elena Rossi',
     updatedAt: 'June 11, 2026',
     readingTime: 8,
     views: 6730,
     featured: false,
     imageSeed: 'nda-confidentiality-contract',
+    country: 'United States',
     content: `<p>A non-disclosure agreement, or NDA, is a contract in which one or more parties promise to keep certain information secret and to use it only for an agreed purpose. Also called a confidentiality agreement, it is one of the most common documents in business — signed before sharing a product idea, financial data, customer lists, or any other sensitive material. Its job is simple but valuable: it turns a moral expectation of discretion into a legally enforceable obligation.</p>
 
 <div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>An NDA legally binds a party to keep specified information confidential and not misuse it.</li><li>NDAs can be one-way (one side discloses) or mutual (both sides share secrets).</li><li>Key terms include what counts as confidential, the permitted purpose, the duration, and the exceptions.</li><li>Common carve-outs exclude information that is already public or independently developed.</li><li>Enforceability and reasonableness standards vary by jurisdiction, so scope must be carefully drafted.</li></ul></div>

@@ -206,11 +206,12 @@ export default function EditorialStandardsPage() {
 
             <Block id="independence" title="Independence & Advertising">
               <p>
-                Law Elite Network is supported in part by advertising, including ads served by third-party networks such
-                as Google AdSense. Our editorial decisions are made independently of any advertising or commercial
-                relationship. Advertisements are clearly distinguishable from editorial content, and the presence of an
-                advertiser never influences whether or how we cover a topic. Where content is sponsored or commercial in
-                nature, we label it as such.
+                Law Elite Network is a free publication that may be supported in part by advertising, including
+                through third-party networks such as Google AdSense, to help fund our content. Our editorial decisions
+                are made independently of any advertising or commercial relationship. Where advertising appears, it is
+                clearly distinguishable from editorial content, and the presence of an advertiser never influences
+                whether or how we cover a topic. Where content is sponsored or commercial in nature, we label it as
+                such.
               </p>
             </Block>
 
@@ -238,7 +239,7 @@ export default function EditorialStandardsPage() {
 function Block({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   return (
     <div id={id} className="space-y-6 scroll-mt-32">
-      <h2 className="text-[32px] font-bold text-slate-900 font-serif leading-tight">{title}</h2>
+      <h2 className="text-[26px] md:text-[32px] font-bold text-slate-900 font-serif leading-tight">{title}</h2>
       <div className="prose-legal max-w-none space-y-4 text-slate-700 leading-relaxed [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:space-y-2 [&_a]:text-blue-600 [&_a:hover]:underline">
         {children}
       </div>

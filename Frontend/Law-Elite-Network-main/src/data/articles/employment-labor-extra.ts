@@ -17,7 +17,7 @@ export const employmentLaborExtraArticles: LawArticle[] = [
     category: EMPLOYMENT_LABOR_CATEGORY,
     subcategory: { id: 'sub_el_contracts', name: 'Employment Contracts', slug: 'employment-contracts' },
     summary:
-      'A non-compete agreement restricts an employee from working for competitors or starting a rival business for a set time after leaving — but courts only enforce reasonable limits.',
+      'A non-compete agreement restricts an employee from joining competitors or starting a rival business for a set time — but courts only enforce reasonable limits.',
     author: 'Priya Nair',
     updatedAt: 'June 15, 2026',
     readingTime: 9,
@@ -95,7 +95,7 @@ export const employmentLaborExtraArticles: LawArticle[] = [
     category: EMPLOYMENT_LABOR_CATEGORY,
     subcategory: { id: 'sub_el_rights', name: 'Employee Rights', slug: 'employee-rights' },
     summary:
-      'The difference between an employee and an independent contractor turns on control and independence, and it determines rights, tax, and protections for the worker.',
+      'The difference between an employee and independent contractor turns on control and independence, and it determines rights, tax, and protections.',
     author: 'Daniel Okoro',
     updatedAt: 'June 6, 2026',
     readingTime: 9,

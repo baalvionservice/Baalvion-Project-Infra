@@ -17,13 +17,14 @@ export const taxFinanceExtra2Articles: LawArticle[] = [
     category: TAX_FINANCE_CATEGORY,
     subcategory: { id: 'sub_tf_income', name: 'Income Tax', slug: 'income-tax' },
     summary:
-      'A tax deduction reduces the income on which you are taxed, lowering your bill — but it works differently from a tax credit, and the rules depend heavily on where you live.',
+      "A tax deduction reduces the income you're taxed on, lowering your bill — but it works differently from a credit, and rules vary by where you live.",
     author: 'Priya Nair',
     updatedAt: 'June 21, 2026',
     readingTime: 8,
     views: 7480,
     featured: false,
     imageSeed: 'tax-deductions-explained',
+    country: 'United States',
     content: `<p>A tax deduction is an amount you are allowed to subtract from your income before your tax is calculated, which lowers the portion of your income that is actually taxed. If you earn a certain amount and qualify for deductions, you pay tax only on what is left after subtracting them. Deductions are one of the most common ways individuals and businesses legally reduce their tax bills — but they are often misunderstood, especially the difference between a deduction and a tax credit.</p>
 
 <div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>A deduction reduces your taxable income, not your tax bill directly.</li><li>A deduction's value depends on your tax rate; a credit reduces tax owed directly.</li><li>Common deductions cover business expenses, certain interest, donations, and retirement contributions.</li><li>Many systems offer a standard deduction as a simple alternative to itemising.</li><li>What is deductible — and by how much — varies sharply between countries.</li></ul></div>
@@ -95,13 +96,14 @@ export const taxFinanceExtra2Articles: LawArticle[] = [
     category: TAX_FINANCE_CATEGORY,
     subcategory: { id: 'sub_tf_corporate', name: 'Corporate Tax', slug: 'corporate-tax' },
     summary:
-      'A tax audit is an official review of your tax return and records to check the figures are accurate — usually routine, manageable, and far less alarming than people fear.',
+      'A tax audit is an official review of your return and records to check the figures are accurate — usually routine and less alarming than people fear.',
     author: 'Rajesh Iyer',
     updatedAt: 'June 19, 2026',
     readingTime: 8,
     views: 5980,
     featured: false,
     imageSeed: 'tax-audit-review-process',
+    country: 'United States',
     content: `<p>A tax audit is an examination by a tax authority of your tax return and supporting records to verify that the income, deductions, and other figures you reported are correct. For most people and businesses, an audit is not an accusation of wrongdoing; it is a check. Returns are selected for many reasons — random sampling, computer flags, mismatched information, or simply being in a higher-risk category. Knowing what an audit involves, and how to respond calmly and properly, turns an intimidating event into a manageable process.</p>
 
 <div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>A tax audit is a review of your return and records to confirm the figures are accurate.</li><li>Being audited does not automatically mean you did anything wrong.</li><li>Audits range from simple correspondence checks to detailed field examinations.</li><li>Good records are your best protection — they prove what you reported.</li><li>Audit powers, time limits, and appeal rights differ by jurisdiction.</li></ul></div>

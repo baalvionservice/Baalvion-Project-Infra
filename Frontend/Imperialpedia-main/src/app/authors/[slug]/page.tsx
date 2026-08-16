@@ -19,7 +19,7 @@ import { breadcrumbService } from '@/modules/seo-engine/services/breadcrumb-serv
 import { structuredData } from '@/lib/seo/structured-data';
 import { env } from '@/config/env';
 import { Metadata } from 'next';
-import { Twitter, Linkedin, Globe, PlayCircle, BadgeCheck, Newspaper, GraduationCap, Award } from 'lucide-react';
+import { Twitter, Linkedin, Globe, Facebook, Instagram, PlayCircle, BadgeCheck, Newspaper, GraduationCap, Award } from 'lucide-react';
 
 interface AuthorPageProps {
   params: Promise<{ slug: string }>;
@@ -88,9 +88,13 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
     return bDate - aDate;
   });
   const profileUrl = `${env.siteUrl}/authors/${author.slug}`;
-  const sameAs = [author.social.twitter, author.social.linkedin, author.social.website].filter(
-    (v): v is string => Boolean(v)
-  );
+  const sameAs = [
+    author.social.twitter,
+    author.social.linkedin,
+    author.social.website,
+    author.social.facebook,
+    author.social.instagram,
+  ].filter((v): v is string => Boolean(v));
   const personSchema = structuredData.person({
     name: author.name,
     jobTitle: author.title,
@@ -218,6 +222,20 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
                       <Button variant="outline" size="icon" className="rounded-full" asChild>
                         <a href={author.social.website} target="_blank" rel="noopener noreferrer" title="Website">
                           <Globe className="h-4 w-4" />
+                        </a>
+                      </Button>
+                    )}
+                    {author.social.facebook && (
+                      <Button variant="outline" size="icon" className="rounded-full" asChild>
+                        <a href={author.social.facebook} target="_blank" rel="noopener noreferrer" title="Facebook">
+                          <Facebook className="h-4 w-4" />
+                        </a>
+                      </Button>
+                    )}
+                    {author.social.instagram && (
+                      <Button variant="outline" size="icon" className="rounded-full" asChild>
+                        <a href={author.social.instagram} target="_blank" rel="noopener noreferrer" title="Instagram">
+                          <Instagram className="h-4 w-4" />
                         </a>
                       </Button>
                     )}

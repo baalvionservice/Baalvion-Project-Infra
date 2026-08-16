@@ -13,6 +13,8 @@ const authorSeoSchema = z.object({
 const socialSchema = z.object({
     x: z.string().url().optional(),
     linkedin: z.string().url().optional(),
+    facebook: z.string().url().optional(),
+    instagram: z.string().url().optional(),
 }).optional();
 
 const createAuthorSchema = z.object({

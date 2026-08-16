@@ -27,6 +27,14 @@ export const CURRENT_CATEGORY_SLUGS = [
   'employment-law',
   'tech-ip',
   'disputes',
+  'maritime-offshore-injury-law',
+  'cruise-ship-passenger-vessel-accidents',
+  'personal-injury-lawyer',
+  'boating-accidents',
+  'car-accidents',
+  'us-law-and-constitution',
+  'religion-law-and-weird-laws',
+  'legal-education-and-history',
 ] as const;
 
 /** Every slug the /law/{slug} URL shape ever used, for validating old redirect requests. */

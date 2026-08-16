@@ -5,6 +5,7 @@ const description = "How Law Elite Network uses strictly necessary, analytics, a
 export const metadata: Metadata = {
   title,
   description,
+  keywords: ['law elite network cookie policy', 'cookie preferences', 'website cookies', 'advertising cookies'],
   alternates: { canonical: `${SITE}/cookie-policy` },
   openGraph: { type: 'website', url: `${SITE}/cookie-policy`, title, description },
   twitter: { card: 'summary_large_image', title, description },

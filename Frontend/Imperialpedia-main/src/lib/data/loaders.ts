@@ -43,19 +43,53 @@ const STATIC: Record<string, unknown[]> = {
 // can appear: 60s, not indefinitely no-store, but still bounded and fast.
 const ENTITY_REVALIDATE_SECONDS = 60;
 
+const ENTITY_PAGE_SIZE = 500; // imperialpedia-service's own hard cap (entitiesController.js)
+
 // List a type from the service; fall back to bundled static data on empty/error.
+// Walks every page rather than trusting a single limit=500 request to be enough —
+// today's roster (companies/countries/technologies each in the tens) fits in one
+// page, but the roadmap calls for company profiles "at scale" (thousands), and a
+// single-page fetch would then silently drop everything past the first 500 with
+// no error, the same class of bug that under-collected the article sitemap (see
+// articles-service.ts) just without even a page-walk attempt to catch it.
 async function fetchList<T>(type: string, fallback: unknown[]): Promise<T[]> {
+  const items: unknown[] = [];
   try {
-    const res = await fetch(`${IMP_API}/entities?type=${type}&limit=500`, {
+    // Page 1 failing means the service is genuinely unreachable/erroring — fall
+    // back to bundled static data entirely, same as the original single-request
+    // behavior.
+    const first = await fetch(`${IMP_API}/entities?type=${type}&limit=${ENTITY_PAGE_SIZE}&page=1`, {
       next: { revalidate: ENTITY_REVALIDATE_SECONDS },
       signal: AbortSignal.timeout(6000),
     });
-    if (!res.ok) throw new Error(String(res.status));
-    const json = await res.json();
-    const items: unknown[] = json?.data?.items ?? [];
+    if (!first.ok) throw new Error(String(first.status));
+    const firstJson = await first.json();
+    const firstItems: unknown[] = firstJson?.data?.items ?? [];
+    items.push(...firstItems);
+    const total = firstJson?.data?.pagination?.total ?? firstItems.length;
+    // Derive from the actual page size returned, not the requested limit — the
+    // service may itself cap lower than what was asked for.
+    const totalPages = Math.max(1, Math.ceil(total / Math.max(firstItems.length, 1)));
+
+    // A later page failing (transient blip) shouldn't discard the real data
+    // page 1 already returned — keep what we have instead of falling back to
+    // possibly-stale bundled JSON.
+    for (let page = 2; page <= totalPages; page++) {
+      try {
+        const res = await fetch(`${IMP_API}/entities?type=${type}&limit=${ENTITY_PAGE_SIZE}&page=${page}`, {
+          next: { revalidate: ENTITY_REVALIDATE_SECONDS },
+          signal: AbortSignal.timeout(6000),
+        });
+        if (!res.ok) break;
+        const json = await res.json();
+        items.push(...(json?.data?.items ?? []));
+      } catch {
+        break;
+      }
+    }
     return (items.length > 0 ? items : fallback) as T[];
   } catch {
-    return fallback as T[];
+    return items.length > 0 ? (items as T[]) : (fallback as T[]);
   }
 }
 

@@ -39,6 +39,8 @@ export interface Indicator {
   change: string;
   percent: string;
   positive: boolean;
+  /** Canonical symbol for /markets/quote/{symbol}, when this instrument has a quote page. */
+  symbol?: string;
 }
 
 export interface FeaturedStory {
@@ -50,6 +52,38 @@ export interface FeaturedStory {
   time: string;
   author: string;
   tag: string | null;
+  /** Owned article (CMS/editorial) — resolved via storyHref() in article-url.ts. */
+  slug?: string;
+  dateISO?: string;
+  /** External link — set instead of slug/dateISO for wire content with no owned article page. */
+  href?: string;
+}
+
+export interface LatestNewsItem {
+  id: number;
+  time: string;
+  category: string;
+  headline: string;
+  positive: boolean | null;
+  slug?: string;
+  dateISO?: string;
+  href?: string;
+}
+
+export interface NewsGridItem {
+  id: number;
+  headline: string;
+  time: string;
+  image?: string | null;
+  slug?: string;
+  dateISO?: string;
+  href?: string;
+}
+
+export interface NewsGridSection {
+  section: string;
+  color: string;
+  items: NewsGridItem[];
 }
 
 export interface MarketRow {
@@ -57,6 +91,8 @@ export interface MarketRow {
   value: string;
   change: string;
   positive: boolean;
+  /** Canonical symbol for /markets/quote/{symbol}, when this instrument has a quote page. */
+  symbol?: string;
 }
 
 export interface MarketRegionGroup {
@@ -81,8 +117,8 @@ export interface WorldData {
   indicators: Indicator[];
   featured: FeaturedStory[];
   markets: MarketRegionGroup[];
-  latest: typeof latestNews;
-  sections: typeof newsGridSections;
+  latest: LatestNewsItem[];
+  sections: NewsGridSection[];
   watchlist: WatchlistItem[];
   /** Region ids enabled in the admin World Control panel (undefined = all). */
   enabledRegions?: RegionId[];
@@ -187,7 +223,7 @@ const rawFeatured: Record<RegionId, Array<Omit<FeaturedStory, "image"> & { image
       summary:
         "Strength in Nvidia, Microsoft and Apple lifted the benchmark to an all-time high as traders dialed back fears over the timing of Federal Reserve rate cuts.",
       time: "1 hour ago",
-      author: "Sarah Johnson",
+      author: "Imperialpedia Markets Desk",
       tag: "BREAKING",
     },
     {
@@ -198,7 +234,7 @@ const rawFeatured: Record<RegionId, Array<Omit<FeaturedStory, "image"> & { image
       summary:
         "The labor market showed renewed strength in March, complicating the Fed's path toward easing later this year.",
       time: "3 hours ago",
-      author: "Michael Torres",
+      author: "Imperialpedia Markets Desk",
       tag: null,
     },
     {
@@ -209,7 +245,7 @@ const rawFeatured: Record<RegionId, Array<Omit<FeaturedStory, "image"> & { image
       summary:
         "Analysts raised price targets again, citing data-center demand that continues to run well ahead of production.",
       time: "4 hours ago",
-      author: "Lisa Chen",
+      author: "Imperialpedia Markets Desk",
       tag: null,
     },
   ],
@@ -222,7 +258,7 @@ const rawFeatured: Record<RegionId, Array<Omit<FeaturedStory, "image"> & { image
       summary:
         "The STOXX 600 closed at an all-time high after policymakers struck a dovish tone on the outlook for inflation across the euro zone.",
       time: "2 hours ago",
-      author: "Henrik Brandt",
+      author: "Imperialpedia Markets Desk",
       tag: "BREAKING",
     },
     {
@@ -233,7 +269,7 @@ const rawFeatured: Record<RegionId, Array<Omit<FeaturedStory, "image"> & { image
       summary:
         "Headline prices fell closer to the ECB's 2% target, reinforcing market bets on a first cut as soon as June.",
       time: "3 hours ago",
-      author: "Camille Laurent",
+      author: "Imperialpedia Markets Desk",
       tag: null,
     },
     {
@@ -244,7 +280,7 @@ const rawFeatured: Record<RegionId, Array<Omit<FeaturedStory, "image"> & { image
       summary:
         "Oil held its gains as supply discipline from producers offset signs of weaker industrial activity in Germany.",
       time: "5 hours ago",
-      author: "Diego Fuentes",
+      author: "Imperialpedia Markets Desk",
       tag: null,
     },
   ],
@@ -257,7 +293,7 @@ const rawFeatured: Record<RegionId, Array<Omit<FeaturedStory, "image"> & { image
       summary:
         "Tokyo led regional gains as the currency's slide boosted the earnings outlook for automakers and electronics giants.",
       time: "2 hours ago",
-      author: "Kenji Nakamura",
+      author: "Imperialpedia Markets Desk",
       tag: "BREAKING",
     },
     {
@@ -268,7 +304,7 @@ const rawFeatured: Record<RegionId, Array<Omit<FeaturedStory, "image"> & { image
       summary:
         "Stronger overseas shipments offered a tentative sign of stabilization for the world's second-largest economy.",
       time: "4 hours ago",
-      author: "Mei Ling",
+      author: "Imperialpedia Markets Desk",
       tag: null,
     },
     {
@@ -279,7 +315,7 @@ const rawFeatured: Record<RegionId, Array<Omit<FeaturedStory, "image"> & { image
       summary:
         "The contract chipmaker's results rippled through the region, sending Samsung and SK Hynix higher in Seoul.",
       time: "6 hours ago",
-      author: "Park Ji-ho",
+      author: "Imperialpedia Markets Desk",
       tag: null,
     },
   ],
@@ -292,7 +328,7 @@ const rawFeatured: Record<RegionId, Array<Omit<FeaturedStory, "image"> & { image
       summary:
         "Mainland and Hong Kong equities rallied after authorities outlined new measures to stabilize the troubled real-estate market.",
       time: "1 hour ago",
-      author: "Mei Ling",
+      author: "Imperialpedia Markets Desk",
       tag: "BREAKING",
     },
     {
@@ -303,7 +339,7 @@ const rawFeatured: Record<RegionId, Array<Omit<FeaturedStory, "image"> & { image
       summary:
         "The stronger-than-expected print eased concerns about momentum, though property remained a persistent drag.",
       time: "3 hours ago",
-      author: "Wang Hao",
+      author: "Imperialpedia Markets Desk",
       tag: null,
     },
     {
@@ -314,7 +350,7 @@ const rawFeatured: Record<RegionId, Array<Omit<FeaturedStory, "image"> & { image
       summary:
         "Internet heavyweights climbed after officials indicated the years-long crackdown on the sector was easing.",
       time: "5 hours ago",
-      author: "Lin Yu",
+      author: "Imperialpedia Markets Desk",
       tag: null,
     },
   ],
@@ -327,7 +363,7 @@ const rawFeatured: Record<RegionId, Array<Omit<FeaturedStory, "image"> & { image
       summary:
         "A softer greenback drew investors back to higher-yielding assets, lifting equities from Mumbai to São Paulo.",
       time: "2 hours ago",
-      author: "Priya Nair",
+      author: "Imperialpedia Markets Desk",
       tag: "BREAKING",
     },
     {
@@ -338,7 +374,7 @@ const rawFeatured: Record<RegionId, Array<Omit<FeaturedStory, "image"> & { image
       summary:
         "Overseas funds piled back into Indian equities, betting on resilient growth and a stable policy backdrop.",
       time: "4 hours ago",
-      author: "Priya Nair",
+      author: "Imperialpedia Markets Desk",
       tag: null,
     },
     {
@@ -349,7 +385,7 @@ const rawFeatured: Record<RegionId, Array<Omit<FeaturedStory, "image"> & { image
       summary:
         "Lower iron-ore and oil prices dragged on heavyweight miners and producers, snapping a three-day winning streak.",
       time: "6 hours ago",
-      author: "João Pereira",
+      author: "Imperialpedia Markets Desk",
       tag: null,
     },
   ],

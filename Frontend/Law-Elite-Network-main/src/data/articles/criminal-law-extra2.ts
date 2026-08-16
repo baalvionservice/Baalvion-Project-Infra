@@ -17,7 +17,7 @@ export const criminalLawExtra2Articles: LawArticle[] = [
     category: CRIMINAL_LAW_CATEGORY,
     subcategory: { id: 'sub_cl_defense', name: 'Criminal Defense', slug: 'criminal-defense' },
     summary:
-      'DUI and DWI are offences for driving while impaired by alcohol or drugs, usually measured against a legal blood-alcohol limit and carrying fines, licence loss, and sometimes jail.',
+      'DUI and DWI are offences for driving while impaired, usually measured against a legal blood-alcohol limit, carrying fines, licence loss, and sometimes jail.',
     author: 'Daniel Okafor',
     updatedAt: 'June 21, 2026',
     readingTime: 9,
@@ -97,7 +97,7 @@ export const criminalLawExtra2Articles: LawArticle[] = [
     category: CRIMINAL_LAW_CATEGORY,
     subcategory: { id: 'sub_cl_police', name: 'Police Procedures', slug: 'police-procedures' },
     summary:
-      'Police usually need a warrant or a recognised exception to search you, your home, or your car — and knowing when a search is lawful protects you and any later defence.',
+      'Police usually need a warrant or a recognized exception to search you, your home, or your car — knowing when a search is lawful protects your defence.',
     author: 'Aisha Rahman',
     updatedAt: 'June 19, 2026',
     readingTime: 9,
