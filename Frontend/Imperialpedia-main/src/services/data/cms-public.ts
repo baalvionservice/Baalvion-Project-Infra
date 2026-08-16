@@ -171,6 +171,9 @@ export interface CmsAuthor {
   avatarUrl?: string | null;
   videoUrl?: string | null;
   expertise?: string[];
+  education?: string[];
+  certifications?: string[];
+  editorialRole?: 'writer' | 'reviewer' | 'fact-checker' | 'contributor' | null;
   social?: { x?: string; linkedin?: string } | null;
   seoMetadata?: { title?: string; description?: string; keywords?: string[]; ogImage?: string; noIndex?: boolean } | null;
 }
@@ -349,12 +352,15 @@ export interface ResolvedAuthor {
   bio: string;
   credentials?: string;
   expertise?: string[];
+  education?: string[];
+  certifications?: string[];
   avatarUrl?: string;
   videoUrl?: string;
   social: { twitter?: string; linkedin?: string; website?: string };
-  /** Usual editorial role (writer/reviewer/fact-checker) — from the static roster
-   *  (config/authors.ts) only; the CMS-managed record has no equivalent field. */
-  role?: 'writer' | 'reviewer' | 'fact-checker';
+  /** Usual editorial role (writer/reviewer/fact-checker/contributor) — sourced from the
+   *  CMS-managed record's `editorialRole` when present, falling back to the static
+   *  roster's `role` (config/authors.ts) for offline/fallback profiles. */
+  role?: 'writer' | 'reviewer' | 'fact-checker' | 'contributor';
 }
 
 /**
@@ -372,9 +378,12 @@ export async function resolveAuthor(slug: string): Promise<ResolvedAuthor | null
       bio: live.bio || '',
       credentials: live.credentials || undefined,
       expertise: live.expertise?.length ? live.expertise : undefined,
+      education: live.education?.length ? live.education : undefined,
+      certifications: live.certifications?.length ? live.certifications : undefined,
       avatarUrl: live.avatarUrl || undefined,
       videoUrl: live.videoUrl || undefined,
       social: { twitter: live.social?.x || undefined, linkedin: live.social?.linkedin || undefined },
+      role: live.editorialRole || undefined,
     };
   }
 

@@ -19,7 +19,7 @@ import { breadcrumbService } from '@/modules/seo-engine/services/breadcrumb-serv
 import { structuredData } from '@/lib/seo/structured-data';
 import { env } from '@/config/env';
 import { Metadata } from 'next';
-import { Twitter, Linkedin, Globe, PlayCircle, BadgeCheck, Newspaper } from 'lucide-react';
+import { Twitter, Linkedin, Globe, PlayCircle, BadgeCheck, Newspaper, GraduationCap, Award } from 'lucide-react';
 
 interface AuthorPageProps {
   params: Promise<{ slug: string }>;
@@ -98,6 +98,8 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
     url: profileUrl,
     image: author.avatarUrl,
     sameAs: sameAs.length ? sameAs : undefined,
+    alumniOf: author.education,
+    knowsAbout: author.expertise,
   });
   const breadcrumb = breadcrumbService.generateBreadcrumbForAuthor(author.name, author.slug);
   const roleBadge =
@@ -105,7 +107,9 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
       ? 'Editorial Reviewer'
       : author.role === 'fact-checker'
         ? 'Fact-Checking Editor'
-        : 'Staff Writer';
+        : author.role === 'contributor'
+          ? 'Contributor'
+          : 'Staff Writer';
 
   return (
     <main className="min-h-screen bg-background pt-16">
@@ -143,6 +147,47 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
                     <Text variant="body" className="text-muted-foreground text-lg leading-relaxed max-w-2xl">
                       {author.bio}
                     </Text>
+                  )}
+
+                  {author.expertise?.length ? (
+                    <div className="flex flex-wrap gap-1.5">
+                      {author.expertise.map((topic) => (
+                        <Badge key={topic} variant="secondary" className="text-[10px] font-semibold">
+                          {topic}
+                        </Badge>
+                      ))}
+                    </div>
+                  ) : null}
+
+                  {(author.education?.length || author.certifications?.length) && (
+                    <div className="grid gap-4 sm:grid-cols-2 max-w-2xl border-t border-border/60 pt-4">
+                      {author.education?.length ? (
+                        <div className="flex gap-2.5">
+                          <GraduationCap className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                          <div>
+                            <Text variant="bodySmall" className="text-muted-foreground uppercase tracking-widest font-bold text-[10px] mb-1">
+                              Education
+                            </Text>
+                            <Text variant="bodySmall" className="text-foreground/90 leading-snug">
+                              {author.education.join(' · ')}
+                            </Text>
+                          </div>
+                        </div>
+                      ) : null}
+                      {author.certifications?.length ? (
+                        <div className="flex gap-2.5">
+                          <Award className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                          <div>
+                            <Text variant="bodySmall" className="text-muted-foreground uppercase tracking-widest font-bold text-[10px] mb-1">
+                              Certifications
+                            </Text>
+                            <Text variant="bodySmall" className="text-foreground/90 leading-snug">
+                              {author.certifications.join(' · ')}
+                            </Text>
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
                   )}
 
                   <div className="flex flex-wrap items-center gap-8 pt-2">

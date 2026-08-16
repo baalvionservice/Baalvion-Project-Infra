@@ -137,6 +137,10 @@ export const structuredData = {
     url: string;
     image?: string;
     sameAs?: string[];
+    /** Degrees/schools (from the author's `education` field) — emitted as `alumniOf`. */
+    alumniOf?: string[];
+    /** Focus areas (from the author's `expertise` field) — emitted as `knowsAbout`. */
+    knowsAbout?: string[];
   }): StructuredData => ({
     '@context': 'https://schema.org',
     '@type': 'ProfilePage',
@@ -148,6 +152,10 @@ export const structuredData = {
       url: data.url,
       image: data.image,
       sameAs: data.sameAs,
+      alumniOf: data.alumniOf?.length
+        ? data.alumniOf.map((name) => ({ '@type': 'EducationalOrganization', name }))
+        : undefined,
+      knowsAbout: data.knowsAbout?.length ? data.knowsAbout : undefined,
       worksFor: {
         '@type': 'Organization',
         name: 'Imperialpedia',
