@@ -33,6 +33,13 @@ const todayIso = () => new Date().toISOString().slice(0, 10);
  * `customFields.reviewedAt`, the same extension point the primary byline (`authorSlug`)
  * already uses, so it needs no new backend field or migration. Powers the "Reviewed by"
  * E-E-A-T trust strip on the public article.
+ *
+ * Jurisdiction and bar/license are stored per-article (`customFields.reviewerJurisdiction`
+ * / `reviewerBarLicense`), not on the contributor's general profile — the same reviewer
+ * can be relevantly barred differently depending on which article they reviewed, and
+ * cms_authors deliberately excludes bar/credential claims from the shared profile (see
+ * the public site's authors data file). Leave both blank unless publicly verifiable —
+ * they render on the live article, so an unverifiable value should stay empty.
  */
 export default function ReviewerPanel({ websiteId, value, onChange }: Props) {
   const { data: authors } = useWebsiteAuthors(websiteId);
@@ -40,6 +47,8 @@ export default function ReviewerPanel({ websiteId, value, onChange }: Props) {
 
   const reviewerSlug = asString(value.reviewerSlug);
   const reviewedAt = asString(value.reviewedAt);
+  const reviewerJurisdiction = asString(value.reviewerJurisdiction);
+  const reviewerBarLicense = asString(value.reviewerBarLicense);
   const selected = (authors ?? []).find((a) => a.slug === reviewerSlug);
 
   const setReviewer = (slug: string) => {
@@ -48,7 +57,7 @@ export default function ReviewerPanel({ websiteId, value, onChange }: Props) {
   };
 
   const clearReviewer = () => {
-    const { reviewerSlug: _s, reviewedAt: _d, ...rest } = value;
+    const { reviewerSlug: _s, reviewedAt: _d, reviewerJurisdiction: _j, reviewerBarLicense: _b, ...rest } = value;
     onChange(rest);
   };
 
@@ -110,6 +119,28 @@ export default function ReviewerPanel({ websiteId, value, onChange }: Props) {
               onChange={(e) => onChange({ ...value, reviewedAt: e.target.value })}
             />
           </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-xs">Jurisdiction</Label>
+            <Input
+              className="h-8 text-xs"
+              placeholder="e.g. California, or United States (federal)"
+              value={reviewerJurisdiction}
+              onChange={(e) => onChange({ ...value, reviewerJurisdiction: e.target.value })}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-xs">Bar / license</Label>
+            <Input
+              className="h-8 text-xs"
+              placeholder="Only if publicly verifiable"
+              value={reviewerBarLicense}
+              onChange={(e) => onChange({ ...value, reviewerBarLicense: e.target.value })}
+            />
+            <p className="text-[10px] text-muted-foreground">Leave blank unless this can be independently verified — it renders on the live article.</p>
+          </div>
+
           <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-xs text-muted-foreground" onClick={clearReviewer}>
             <X className="h-3.5 w-3.5" /> Remove reviewer
           </Button>

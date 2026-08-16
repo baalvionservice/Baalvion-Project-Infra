@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { CmsArticle } from "@/lib/cms";
 import { articleUrl } from "@/lib/article-url";
+import { CURRENT_CATEGORY_SLUGS } from "@/lib/category-slugs";
 
 type Props = {
   articles: CmsArticle[];
@@ -29,10 +30,16 @@ export function Sidebar({ articles }: Props) {
   const withViews = articles.filter((a) => typeof a.views === "number");
   const mostViewed = [...withViews].sort((a, b) => (b.views ?? 0) - (a.views ?? 0)).slice(0, 5);
   const editorsPicks = articles.filter((a) => a.featured).slice(0, 5);
+  // An article's `category.slug` isn't guaranteed to be one of the site's
+  // real category pages (e.g. a CMS article whose primary category resolved
+  // to a nested/legacy slug like `family-law-child-custody`) -- linking those
+  // unconditionally turns "Trending Topics" into dead links. articleUrl.ts /
+  // Breadcrumbs.tsx apply the same guard for the same reason.
+  const currentSlugSet = new Set<string>(CURRENT_CATEGORY_SLUGS);
   const categories = Array.from(
     new Map(
       articles
-        .filter((a) => a.category?.slug)
+        .filter((a) => a.category?.slug && currentSlugSet.has(a.category.slug))
         .map((a) => [a.category!.slug, a.category!.name] as const),
     ).entries(),
   );

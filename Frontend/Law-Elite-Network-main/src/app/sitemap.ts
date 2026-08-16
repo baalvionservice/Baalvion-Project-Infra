@@ -150,13 +150,20 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
   // means a partial API response still gets topped up rather than
   // duplicated.
   const apiCategorySlugs = new Set(categories.map((c) => toNewCategorySlug(c.slug)));
+  // law-service's /categories list can include stray/legacy rows that were
+  // never meant to be indexable pages (they 404 -- see [categorySlug]/page.tsx's
+  // fetchCategory) -- filtering to the curated list here stops those dead URLs
+  // from ever being submitted to Google in the first place.
+  const currentSlugSet = new Set<string>(CURRENT_CATEGORY_SLUGS);
   const categoryRoutes: MetadataRoute.Sitemap = [
-    ...categories.map((c) => ({
-      url: `${BASE_URL}/${toNewCategorySlug(c.slug)}`,
-      lastModified: new Date(c.updated_at || c.updatedAt || Date.now()),
-      changeFrequency: 'weekly' as const,
-      priority: 0.6,
-    })),
+    ...categories
+      .filter((c) => currentSlugSet.has(toNewCategorySlug(c.slug)))
+      .map((c) => ({
+        url: `${BASE_URL}/${toNewCategorySlug(c.slug)}`,
+        lastModified: new Date(c.updated_at || c.updatedAt || Date.now()),
+        changeFrequency: 'weekly' as const,
+        priority: 0.6,
+      })),
     ...CURRENT_CATEGORY_SLUGS.filter((slug) => !apiCategorySlugs.has(slug)).map((slug) => ({
       url: `${BASE_URL}/${slug}`,
       lastModified: new Date(),

@@ -132,7 +132,7 @@ export default async function AuthorProfilePage(
                     <div className="bg-white border border-slate-200 overflow-hidden shadow-sm group-hover:shadow-md transition-all duration-300 flex flex-col h-full">
                       <div className="relative aspect-[3/2] overflow-hidden bg-slate-100">
                         <Image
-                          src={resolveArticleImage({ title: art.title, category: art.category, id: art.id })}
+                          src={resolveArticleImage(art)}
                           alt={art.title}
                           fill
                           className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -143,12 +143,9 @@ export default async function AuthorProfilePage(
                         <span className="text-[12px] font-bold text-blue-600 uppercase tracking-tight mb-2">
                           {art.category?.name ?? 'Legal Guide'}
                         </span>
-                        <h3 className="text-[17px] font-bold text-slate-900 leading-[1.3] mb-3 group-hover:text-blue-700 transition-colors line-clamp-3">
+                        <h3 className="text-[17px] font-bold text-slate-900 leading-[1.3] group-hover:text-blue-700 transition-colors line-clamp-3">
                           {art.title}
                         </h3>
-                        <p className="mt-auto pt-2 text-[12px] font-medium text-slate-400">
-                          {art.updatedAt}
-                        </p>
                       </div>
                     </div>
                   </Link>

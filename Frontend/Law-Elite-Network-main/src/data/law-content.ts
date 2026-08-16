@@ -43,6 +43,28 @@ export interface LawArticle {
   country?: string;
   /** Real featured image (e.g. from the CMS admin panel), when known. Falls back to the deterministic editorial image via resolveArticleImage() when absent. */
   featuredImage?: string;
+  /**
+   * Real, checkable citations (statutes, regulations, court opinions, agency
+   * guidance) backing this guide's legal claims -- each verified to exist at
+   * `url` before being added. Omit a source entirely, or omit `url` on one
+   * that lacks a stable free full-text link, rather than link to something
+   * unverified. See /editorial-process.
+   */
+  primarySources?: { label: string; url?: string }[];
+  /**
+   * Set only once a real, named legal professional has actually reviewed this
+   * guide -- see the "Reviewed by" policy in editorial-process. Never
+   * populate with an invented name or unverified bar/license number.
+   */
+  reviewedBy?: {
+    name: string;
+    /** e.g. "California" or "United States (federal)". */
+    jurisdiction?: string;
+    /** Bar number / license, only when publicly verifiable. */
+    barLicense?: string;
+    /** Human-readable, e.g. "August 2026". */
+    reviewDate: string;
+  };
 }
 
 import { LAW_ARTICLES } from './articles';

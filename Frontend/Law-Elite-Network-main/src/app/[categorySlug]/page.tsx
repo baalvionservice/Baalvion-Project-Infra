@@ -61,6 +61,14 @@ function bundledCategory(slug: string) {
  */
 async function fetchCategory(slug: string): Promise<any | null> {
   const local = bundledCategory(slug);
+  // Only trust a live law-service category if the slug is one of the site's
+  // curated practice-area hubs. law-service's DB can contain stray/legacy/
+  // subcategory rows (e.g. `family-law-child-custody`, `legal-guides`) that
+  // were never meant to be standalone pages -- trusting any live "found"
+  // result unconditionally let those render as real (but empty, zero-article)
+  // 200 pages instead of 404ing, which is exactly the kind of thin/orphan
+  // content Google flags and that can jeopardize AdSense approval.
+  if (!(CURRENT_CATEGORY_SLUGS as readonly string[]).includes(slug)) return local;
   const j = await fetchPublicApi(`/categories/${encodeURIComponent(slug)}`);
   const live = j?.data;
   if (!live) return local;

@@ -17,6 +17,7 @@ import { LawEliteMark } from '@/components/icons/LawEliteMark';
 import SearchBar from '../search/SearchBar';
 import { cn } from '@/lib/utils';
 import { isSubcategoryPopulated } from '@/lib/subcategory-or-article';
+import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
 import seedData from '../../../docs/seed-data.json';
 import { useAuth } from '@/hooks/useAuth';
 import { sharedSignInUrl } from '@/lib/shared-auth';
@@ -78,8 +79,17 @@ export function PublicNavbar() {
           categoriesPublicApi.list(),
           subcategoriesPublicApi.list(),
         ]);
-        const cats = catRes.data?.data || [];
+        const rawCats = catRes.data?.data || [];
         const subs = subRes.data?.data || [];
+        // law-service's bulk /categories list can include stray/legacy/pre-rename
+        // rows that have no real page (they 404 -- see [categorySlug]/page.tsx's
+        // fetchCategory). This nav renders every one it's given as a clickable
+        // link site-wide, so restrict to the curated practice-area hubs and
+        // normalize old slugs the same way sitemap.ts/article-url.ts already do.
+        const currentSlugSet = new Set<string>(CURRENT_CATEGORY_SLUGS);
+        const cats = rawCats
+          .map((c: any) => ({ ...c, slug: toNewCategorySlug(c.slug) }))
+          .filter((c: any) => currentSlugSet.has(c.slug));
         if (cats.length > 0) {
           setCategories(cats);
           setSubcategories(subs);
