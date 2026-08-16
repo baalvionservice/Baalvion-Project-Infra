@@ -212,6 +212,20 @@ api.baalvion.com {
 		reverse_proxy app-platform:3004
 	}
 
+	# cms-service public delivery, namespaced form. The frontends' NEXT_PUBLIC_CMS_PUBLIC_URL
+	# (search-service.ts, cms-public.ts, worldFeed.ts, …) calls
+	# api.baalvion.com/api/v1/knowledge/cms/api/v1/public/*; cms-service (app-platform:3018)
+	# mounts its public router at /api/v1/public (see routes/v1.js), unauthenticated by design.
+	# Same class of gap as @knowledge_law and @knowledge_imperialpedia above — without this
+	# carve-out the request falls through to the proxy-service BFF, which blanket-requires a
+	# bearer token and 401s ("No bearer token provided") before cms-service is ever reached,
+	# silently dropping every article/news result (e.g. site search never finding CMS content).
+	@knowledge_cms path /api/v1/knowledge/cms /api/v1/knowledge/cms/*
+	handle @knowledge_cms {
+		uri strip_prefix /api/v1/knowledge/cms
+		reverse_proxy app-platform:3018
+	}
+
 	# Everything else → the consumer/admin BFF (proxy-service, session-gated) — unchanged.
 	handle {
 		reverse_proxy app-edge-realtime:4000
