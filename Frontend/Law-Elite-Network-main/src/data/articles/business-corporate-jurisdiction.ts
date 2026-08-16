@@ -33,6 +33,13 @@ export const businessCorporateJurisdictionArticles: LawArticle[] = [
     featured: false,
     imageSeed: 's-corporation-tax-election-us',
     country: 'United States',
+    primarySources: [
+      { label: '26 U.S.C. § 1361 — S corporation defined (Cornell Legal Information Institute)', url: 'https://www.law.cornell.edu/uscode/text/26/1361' },
+      { label: 'IRS, Instructions for Form 2553, Election by a Small Business Corporation', url: 'https://www.irs.gov/instructions/i2553' },
+      { label: 'IRS, Revenue Procedure 2013-30 (late S-election relief for reasonable cause)', url: 'https://www.irs.gov/pub/irs-drop/rp-13-30.pdf' },
+      { label: 'David E. Watson, P.C. v. United States, 668 F.3d 1008 (8th Cir. 2012) — reasonable-compensation standard', url: 'https://www.courtlistener.com/opinion/623171/david-e-watson-pc-v-united-states/' },
+      { label: 'IRS, Rev. Rul. 74-44, 1974-1 C.B. 287 — shareholder-officer compensation recharacterized as wages' },
+    ],
     content: `<p>Ask a small business owner in the US what an "S-corp" is, and many will describe it as a kind of company, alongside an LLC or a corporation. That's not quite right. An S corporation isn't a separate legal entity type at all — it's a federal tax election that an eligible corporation, or an LLC that chooses to be taxed as a corporation, files with the IRS. You still form a corporation or LLC under your state's law first; the S-election only changes how the entity's profits are taxed afterward, and eligibility for it comes with real, strictly enforced conditions.</p>
 
 <div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>"S-corp" is a tax election under Subchapter S of the Internal Revenue Code, made by filing IRS Form 2553 — not a distinct entity type you form at the state level.</li><li>Eligibility is strict: no more than 100 shareholders, only individuals, certain trusts, or estates as shareholders (no corporations or partnerships), no nonresident alien shareholders, and only one class of stock.</li><li>Like an LLC or partnership, profits and losses pass through to shareholders' personal returns, avoiding the corporate-level "double taxation" a standard C-corp faces.</li><li>The main planning driver for most small businesses is self-employment tax: shareholder-employees pay payroll tax only on "reasonable compensation," not on additional profit distributions — a distinction the IRS actively audits.</li><li>The one-class-of-stock rule is exactly why most venture-backed startups use C-corps instead — S-corp status can't support the preferred-stock structures investors typically require.</li></ul></div>
@@ -59,7 +66,7 @@ export const businessCorporateJurisdictionArticles: LawArticle[] = [
 
 <h2>The Real Reason Most Small Businesses Elect It: Self-Employment Tax</h2>
 <p>Pass-through taxation alone doesn't fully explain the S-corp's popularity — an LLC taxed as a partnership already gets that. The distinct advantage is how S-corp profits interact with self-employment tax. A shareholder who actively works in the business must be paid "reasonable compensation" as a W-2 employee, and that salary is subject to ordinary payroll taxes (Social Security and Medicare). But profit distributed beyond that reasonable salary is generally not subject to self-employment tax at all — a real and often substantial saving compared to a sole proprietorship or a default LLC, where all business profit is typically subject to self-employment tax regardless of how much of it reflects the owner's active labor.</p>
-<p>This is also the single most audited feature of S-corp taxation. The IRS has long taken the position, reflected in guidance including Revenue Ruling 74-44 and reinforced in court decisions such as <em>Watson v. Commissioner</em>, that shareholder-employees cannot set an artificially low salary purely to shift income into the untaxed distribution category. "Reasonable compensation" is judged against what the role would command in the market, considering the shareholder's duties, time devoted to the business, comparable industry salaries, and the company's overall profitability — an underpaid-salary S-corp is one of the more common triggers for an IRS audit adjustment.</p>
+<p>This is also the single most audited feature of S-corp taxation. The IRS has long taken the position, reflected in guidance including Revenue Ruling 74-44 and reinforced in court decisions such as <em>David E. Watson, P.C. v. United States</em>, 668 F.3d 1008 (8th Cir. 2012), that shareholder-employees cannot set an artificially low salary purely to shift income into the untaxed distribution category. "Reasonable compensation" is judged against what the role would command in the market, considering the shareholder's duties, time devoted to the business, comparable industry salaries, and the company's overall profitability — an underpaid-salary S-corp is one of the more common triggers for an IRS audit adjustment.</p>
 
 <h2>Real Limitations</h2>
 <ul>
@@ -82,10 +89,10 @@ export const businessCorporateJurisdictionArticles: LawArticle[] = [
 
 <h2>Sources &amp; Further Reading</h2>
 <ul>
-<li>Internal Revenue Code, Subchapter S, §§ 1361–1379</li>
-<li>IRS, Instructions for Form 2553, Election by a Small Business Corporation</li>
-<li>IRS, Revenue Procedure 2013-30 (late S-election relief for reasonable cause)</li>
-<li>IRS, Revenue Ruling 74-44, and <em>Watson v. Commissioner</em>, 668 F.3d 1008 (8th Cir. 2012) — reasonable compensation standard</li>
+<li>Internal Revenue Code, Subchapter S, §§ 1361–1379 (<a href="https://www.law.cornell.edu/uscode/text/26/1361" target="_blank" rel="noopener noreferrer nofollow">26 U.S.C. § 1361</a>)</li>
+<li>IRS, <a href="https://www.irs.gov/instructions/i2553" target="_blank" rel="noopener noreferrer nofollow">Instructions for Form 2553, Election by a Small Business Corporation</a></li>
+<li>IRS, <a href="https://www.irs.gov/pub/irs-drop/rp-13-30.pdf" target="_blank" rel="noopener noreferrer nofollow">Revenue Procedure 2013-30</a> (late S-election relief for reasonable cause)</li>
+<li>IRS, Revenue Ruling 74-44, and <em><a href="https://www.courtlistener.com/opinion/623171/david-e-watson-pc-v-united-states/" target="_blank" rel="noopener noreferrer nofollow">David E. Watson, P.C. v. United States</a></em>, 668 F.3d 1008 (8th Cir. 2012) — reasonable compensation standard</li>
 </ul>
 
 <h2>Practical Next Steps</h2>

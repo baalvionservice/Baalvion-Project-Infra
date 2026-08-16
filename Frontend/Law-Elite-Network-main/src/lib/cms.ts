@@ -293,6 +293,39 @@ export interface CmsArticle {
   customFields?: Record<string, any>;
   /** Country this guide is jurisdiction-specific to (customFields.country), e.g. "United States". Absent for worldwide-general content. */
   country?: string;
+  /**
+   * Real, checkable source citations, admin-entered via CitationsPanel into
+   * `customFields.citations` as `{ title, url }[]` -- remapped to `label` here
+   * to match the public `primarySources` shape shared with bundled LawArticle
+   * data (@/data/law-content).
+   */
+  primarySources?: { label: string; url?: string }[];
+  /**
+   * Raw reviewer fields set by the admin ReviewerPanel -- `reviewerSlug`
+   * resolves against the cms_authors/bundled author directory (the same
+   * extension point the primary byline uses), so the display name and
+   * credentials line come from there, not from a fabricated string here.
+   * `reviewerJurisdiction`/`reviewerBarLicense` are per-article (the same
+   * reviewer can be barred differently depending on which article they
+   * reviewed) rather than fields on the author's general profile.
+   */
+  reviewerSlug?: string;
+  reviewedAt?: string;
+  reviewerJurisdiction?: string;
+  reviewerBarLicense?: string;
+}
+
+/**
+ * `customFields` is arbitrary admin-entered JSON from a remote API -- narrow
+ * it before trusting the shape. Reads the same `citations: { title, url }[]`
+ * array CitationsPanel (admin-platform) writes.
+ */
+function readPrimarySources(value: unknown): { label: string; url?: string }[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const sources = value
+    .filter((s): s is Record<string, unknown> => !!s && typeof s === 'object' && typeof s.title === 'string')
+    .map((s) => ({ label: s.title as string, url: typeof s.url === 'string' ? s.url : undefined }));
+  return sources.length > 0 ? sources : undefined;
 }
 
 function toArticle(c: CmsContent): CmsArticle {
@@ -332,6 +365,11 @@ function toArticle(c: CmsContent): CmsArticle {
     views: typeof c.viewCount === 'number' ? c.viewCount : undefined,
     customFields: c.customFields ?? undefined,
     country: typeof cf.country === 'string' ? cf.country : undefined,
+    primarySources: readPrimarySources(cf.citations),
+    reviewerSlug: typeof cf.reviewerSlug === 'string' ? cf.reviewerSlug : undefined,
+    reviewedAt: typeof cf.reviewedAt === 'string' ? cf.reviewedAt : undefined,
+    reviewerJurisdiction: typeof cf.reviewerJurisdiction === 'string' ? cf.reviewerJurisdiction : undefined,
+    reviewerBarLicense: typeof cf.reviewerBarLicense === 'string' ? cf.reviewerBarLicense : undefined,
   };
 }
 
