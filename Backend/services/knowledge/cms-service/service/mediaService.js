@@ -13,6 +13,7 @@ const { QueryTypes } = require('sequelize');
 const { sequelize } = require('../models');
 const { AppError } = require('../utils/errors');
 const s3 = require('../utils/s3Client');
+const { processImage, generateThumbnail, extractMetadata } = require('@baalvion/upload/image.js');
 
 // Storage driver: 'minio' (S3 object storage) or 'local' (filesystem, dev fallback).
 const DRIVER      = (process.env.MEDIA_DRIVER || 'local').toLowerCase();
@@ -28,6 +29,17 @@ const EXT_BY_MIME = {
     'image/svg+xml': '.svg', 'application/pdf': '.pdf', 'video/mp4': '.mp4',
 };
 
+// Raster formats we re-encode on upload. SVG (already vector/tiny) and GIF (animation would
+// be lost through a naive resize) are stored as-is; everything else gets resized to a sane
+// display width and converted to WebP so every future page view ships a small file.
+const COMPRESSIBLE_MIME = new Set(['image/jpeg', 'image/png', 'image/webp']);
+// Imperialpedia (and the other CMS-driven sites) render article/hero art at at most ~33vw of
+// a desktop viewport per src/lib/performance.ts's `sizes` breakpoints — 1600px covers that at
+// typical device pixel ratios with headroom, without shipping a 4K-native upload to every
+// visitor. Consumers still asking for a smaller crop use thumbnailUrl.
+const MAIN_MAX_WIDTH = Number(process.env.MEDIA_IMAGE_MAX_WIDTH || 1600);
+const MAIN_QUALITY   = Number(process.env.MEDIA_IMAGE_QUALITY || 80);
+
 function ensureDir() { fs.mkdirSync(UPLOAD_DIR, { recursive: true }); }
 function sel(sql, replacements) { return sequelize.query(sql, { replacements, type: QueryTypes.SELECT }); }
 
@@ -42,33 +54,73 @@ function shape(r) {
     };
 }
 
+async function persist(key, data, contentType) {
+    if (DRIVER === 'minio') {
+        await s3.ensureBucket(BUCKET);
+        await s3.putObject(BUCKET, key, data, contentType);
+        return s3.publicUrl(BUCKET, key);
+    }
+    ensureDir();
+    fs.writeFileSync(path.join(UPLOAD_DIR, key), data);
+    return `${PUBLIC_BASE}/uploads/${key}`;
+}
+
 // ── Files ────────────────────────────────────────────────────────────────────
 async function saveUpload({ filePart, folderId = null, orgId, uploadedBy }) {
     if (!filePart || !filePart.filename) throw new AppError('VALIDATION_ERROR', 'No file uploaded (expected field "file")', 400);
     if (!filePart.data || !filePart.data.length) throw new AppError('VALIDATION_ERROR', 'Uploaded file is empty', 400);
     if (filePart.data.length > MAX_BYTES) throw new AppError('PAYLOAD_TOO_LARGE', 'File exceeds size limit', 413);
 
-    const mime = filePart.contentType || 'application/octet-stream';
-    const ext  = path.extname(filePart.filename) || EXT_BY_MIME[mime] || '';
-    const key  = `${crypto.randomUUID()}${ext}`;
+    let mime = filePart.contentType || 'application/octet-stream';
+    let data = filePart.data;
+    let width = null, height = null, optimizedAt = null, thumbnailUrl = null;
 
-    let url;
-    if (DRIVER === 'minio') {
-        await s3.ensureBucket(BUCKET);
-        await s3.putObject(BUCKET, key, filePart.data, mime);
-        url = s3.publicUrl(BUCKET, key);
-    } else {
-        ensureDir();
-        fs.writeFileSync(path.join(UPLOAD_DIR, key), filePart.data);
-        url = `${PUBLIC_BASE}/uploads/${key}`;
+    // Compress+resize photos before they ever reach storage. Vercel's on-demand image
+    // optimizer is disabled sitewide on imperialpedia (next.config.ts `images.unoptimized`)
+    // to avoid its metered per-transform billing — which just shifted the cost onto raw
+    // origin bandwidth instead, since every view then downloads the untouched upload.
+    // Doing the resize/reformat once, here, keeps every future page view cheap regardless
+    // of which CMS site or CDN in front of it.
+    if (COMPRESSIBLE_MIME.has(mime)) {
+        try {
+            const processed = await processImage(data, {
+                width: MAIN_MAX_WIDTH, format: 'webp', quality: MAIN_QUALITY, fit: 'inside',
+            });
+            // A small already-compressed source (e.g. a pre-optimized mozjpeg photo) can
+            // come out the same size or larger after a forced WebP re-encode — only adopt
+            // the re-encoded bytes when they're a genuine win, otherwise keep the original.
+            const adoptWebp = processed.length < data.length;
+            const meta = await extractMetadata(adoptWebp ? processed : data);
+            if (adoptWebp) { data = processed; mime = 'image/webp'; }
+            width = meta.width || null;
+            height = meta.height || null;
+            optimizedAt = new Date();
+
+            const thumb = await generateThumbnail(filePart.data);
+            const thumbKey = `${crypto.randomUUID()}-thumb.jpg`;
+            thumbnailUrl = await persist(thumbKey, thumb, 'image/jpeg');
+        } catch (err) {
+            // Source passed the magic-byte + malware guard in the controller but sharp
+            // couldn't decode it (truncated/exotic encoding) — store the original bytes
+            // rather than failing the upload outright.
+            console.warn(`[mediaService] image compression failed for "${filePart.filename}": ${err.message}`);
+        }
     }
+
+    const ext = EXT_BY_MIME[mime] || path.extname(filePart.filename) || '';
+    const key = `${crypto.randomUUID()}${ext}`;
+    const url = await persist(key, data, mime);
+
     const [row] = await sel(`
         INSERT INTO cms.cms_media_assets
-            (org_id, folder_id, storage_key, filename, original_name, mime_type, size, url, uploaded_by)
-        VALUES (:orgId, :folderId, :key, :filename, :originalName, :mime, :size, :url, :uploadedBy)
+            (org_id, folder_id, storage_key, filename, original_name, mime_type, size, url,
+             thumbnail_url, width, height, optimized_at, uploaded_by)
+        VALUES (:orgId, :folderId, :key, :filename, :originalName, :mime, :size, :url,
+                :thumbnailUrl, :width, :height, :optimizedAt, :uploadedBy)
         RETURNING *`,
         { orgId: orgId || null, folderId, key, filename: key, originalName: filePart.filename,
-          mime, size: filePart.data.length, url, uploadedBy: uploadedBy || null });
+          mime, size: data.length, url, thumbnailUrl, width, height, optimizedAt,
+          uploadedBy: uploadedBy || null });
     return shape(row);
 }
 
@@ -102,11 +154,15 @@ async function updateFile(orgId, id, { altText, filename }) {
 }
 
 async function deleteFile(orgId, id) {
-    const [row] = await sel(`SELECT storage_key FROM cms.cms_media_assets WHERE id = :id AND (:orgId::uuid IS NULL OR org_id = :orgId)`, { id, orgId: orgId || null });
+    const [row] = await sel(`SELECT storage_key, thumbnail_url FROM cms.cms_media_assets WHERE id = :id AND (:orgId::uuid IS NULL OR org_id = :orgId)`, { id, orgId: orgId || null });
     if (!row) throw new AppError('NOT_FOUND', 'Media file not found', 404);
     await sel(`DELETE FROM cms.cms_media_assets WHERE id = :id`, { id });
-    if (DRIVER === 'minio') { try { await s3.deleteObject(BUCKET, row.storage_key); } catch { /* already gone */ } }
-    else { try { fs.unlinkSync(path.join(UPLOAD_DIR, row.storage_key)); } catch { /* already gone */ } }
+    const thumbKey = row.thumbnail_url ? row.thumbnail_url.split('/').pop() : null;
+    const keys = thumbKey ? [row.storage_key, thumbKey] : [row.storage_key];
+    for (const k of keys) {
+        if (DRIVER === 'minio') { try { await s3.deleteObject(BUCKET, k); } catch { /* already gone */ } }
+        else { try { fs.unlinkSync(path.join(UPLOAD_DIR, k)); } catch { /* already gone */ } }
+    }
     return { id };
 }
 
@@ -158,5 +214,5 @@ async function deleteFolder(orgId, id) {
 module.exports = {
     saveUpload, listFiles, getFile, updateFile, deleteFile, bulkDelete, signedUrl,
     listFolders, createFolder, deleteFolder,
-    UPLOAD_DIR, PUBLIC_BASE,
+    UPLOAD_DIR, PUBLIC_BASE, DRIVER, BUCKET, MAIN_MAX_WIDTH, MAIN_QUALITY, COMPRESSIBLE_MIME,
 };
