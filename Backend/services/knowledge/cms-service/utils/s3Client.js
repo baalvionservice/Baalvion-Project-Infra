@@ -92,6 +92,7 @@ async function ensureBucket(bucket) {
 
 const putObject = (bucket, key, body, contentType) => request('PUT', bucket, key, { body, contentType });
 const deleteObject = (bucket, key) => request('DELETE', bucket, key);
+const getObject = (bucket, key) => request('GET', bucket, key).then((r) => r.body);
 
 /** Presigned GET URL (query-string SigV4). */
 function presignedGetUrl(bucket, key, expires = 3600) {
@@ -119,4 +120,4 @@ function presignedGetUrl(bucket, key, expires = 3600) {
 
 function publicUrl(bucket, key) { return `${PUBLIC_URL}/${uriEncode(bucket)}/${uriEncode(key, false)}`; }
 
-module.exports = { ensureBucket, putObject, deleteObject, presignedGetUrl, publicUrl, ENDPOINT, PUBLIC_URL };
+module.exports = { ensureBucket, putObject, getObject, deleteObject, presignedGetUrl, publicUrl, ENDPOINT, PUBLIC_URL };

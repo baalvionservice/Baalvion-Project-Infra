@@ -18,6 +18,7 @@ export interface ImageMetadata {
   format: string;
   size: number;
   hasAlpha: boolean;
+  pages: number;
 }
 
 // ─── Image Processing ─────────────────────────────────────────────────────────
@@ -30,7 +31,7 @@ export async function processImage(
   buffer: Buffer,
   opts: ProcessImageOptions = {},
 ): Promise<Buffer> {
-  let pipeline = sharp(buffer);
+  let pipeline = sharp(buffer, { animated: true }).rotate(); // auto-orient from EXIF before any resize
 
   if (opts.width || opts.height) {
     pipeline = pipeline.resize(opts.width, opts.height, {
@@ -66,17 +67,18 @@ export async function processImage(
 }
 
 /**
- * Generate a 200x200 JPEG thumbnail from an image buffer.
+ * Generate a 400x400 JPEG thumbnail from an image buffer (cover-cropped, no upscale).
  */
 export async function generateThumbnail(buffer: Buffer): Promise<Buffer> {
   return sharp(buffer)
-    .resize(200, 200, { fit: 'cover', withoutEnlargement: true })
+    .rotate()
+    .resize(400, 400, { fit: 'cover', withoutEnlargement: true })
     .jpeg({ quality: 75, mozjpeg: true })
     .toBuffer();
 }
 
 /**
- * Extract image metadata (dimensions, format, file size, alpha channel).
+ * Extract image metadata (dimensions, format, file size, alpha channel, animated frame count).
  */
 export async function extractMetadata(buffer: Buffer): Promise<ImageMetadata> {
   const meta = await sharp(buffer).metadata();
@@ -86,5 +88,6 @@ export async function extractMetadata(buffer: Buffer): Promise<ImageMetadata> {
     format: meta.format ?? 'unknown',
     size: meta.size ?? buffer.byteLength,
     hasAlpha: meta.hasAlpha ?? false,
+    pages: meta.pages ?? 1,
   };
 }
