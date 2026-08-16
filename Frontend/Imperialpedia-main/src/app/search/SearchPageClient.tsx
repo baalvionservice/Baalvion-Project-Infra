@@ -5,13 +5,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { SearchBar } from "@/components/search/SearchBar";
 import { SearchResultItem } from "@/components/search/SearchResultItem";
-import { searchService } from "@/services/data/search-service";
 import type { SearchResult } from "@/types/search";
 import type { Article } from "@/modules/content-engine/types";
 import { newsArticleHref } from "@/lib/data/article-url";
 import { Container } from "@/design-system/layout/container";
 import { Text } from "@/design-system/typography/text";
-import { Loader2, SearchX, Sparkles } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
 
 interface SearchPageClientProps {
   trendingArticles: Article[];
@@ -68,19 +67,25 @@ function SearchContent({ trendingArticles }: SearchPageClientProps) {
       setResults([]);
       return;
     }
-    let active = true;
+    // Route through /api/search (same endpoint the command palette uses)
+    // instead of calling searchService.performSearch directly from the
+    // browser: that call fetches cms-service and imperialpedia-service
+    // straight from the client, and both only CORS-allowlist local dev
+    // origins — in production the CMS/article portion of results is
+    // silently dropped by the browser. Server-side fetches (this route,
+    // and the RSC-side cms-public.ts) aren't subject to that restriction.
+    const controller = new AbortController();
     setLoading(true);
-    searchService
-      .performSearch(query)
-      .then((res) => {
-        if (active) setResults(res.data || []);
+    fetch(`/api/search?q=${encodeURIComponent(query)}`, { signal: controller.signal })
+      .then((res) => res.json())
+      .then((data: SearchResult[]) => setResults(data))
+      .catch((e) => {
+        if ((e as Error).name !== 'AbortError') console.error(e);
       })
       .finally(() => {
-        if (active) setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       });
-    return () => {
-      active = false;
-    };
+    return () => controller.abort();
   }, [query]);
 
   const handleSubmit = (value: string) => {
@@ -125,14 +130,19 @@ function SearchContent({ trendingArticles }: SearchPageClientProps) {
           )}
 
           {!loading && query && results.length === 0 && (
-            <div className="p-12 text-center flex flex-col items-center gap-4 bg-muted/20 rounded-2xl border-2 border-dashed mb-10">
-              <SearchX className="w-10 h-10 text-muted-foreground opacity-50" />
-              <div>
-                <Text variant="bodySmall" weight="bold">No results found for &ldquo;{query}&rdquo;</Text>
-                <Text variant="caption" className="text-muted-foreground mt-1">
-                  Try a different term, or browse what&apos;s trending below.
-                </Text>
-              </div>
+            // CNBC-style no-results state: plain editorial text behind a red
+            // rule, not a rounded dashed-border card with a big icon — same
+            // treatment as the command-palette's SearchResults.tsx.
+            <div className="py-10 border-t-2 border-[hsl(var(--cnbc-red))] mb-10">
+              <Text variant="label" className="text-[hsl(var(--cnbc-red))] text-[10px] font-bold uppercase tracking-[0.2em]">
+                No Results
+              </Text>
+              <Text variant="bodySmall" weight="bold" className="mt-2">
+                No results found for &ldquo;{query}&rdquo;
+              </Text>
+              <Text variant="caption" className="text-muted-foreground mt-1">
+                Try a different term, or browse what&apos;s trending below.
+              </Text>
             </div>
           )}
 
