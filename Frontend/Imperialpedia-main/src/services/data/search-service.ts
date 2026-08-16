@@ -11,12 +11,23 @@ import { GLOSSARY_LIVE } from '@/config/glossary';
  * fabricated search results.
  */
 
-// Localhost is a dev-only default; production resolves to ''.
+// Falling back to '' in production (the previous behavior here) turns every
+// fetch below into a bare relative path like "/imperialpedia/content?...".
+// That's fine for a browser (resolves against the current origin) but this
+// module also runs server-side (searchService.performSearch is called
+// directly from /api/search's route handler), where Node's fetch requires an
+// absolute URL and throws instead — silently dropping every result whenever
+// the env var isn't set at build time. Every sibling data-loader
+// (cms-public.ts, worldFeed.ts, marketsLoader.ts, …) already falls back to
+// the real gateway host in production for exactly this reason; this module
+// was the one holdout still defaulting to ''.
 const IS_PROD = process.env.NODE_ENV === 'production';
 const IMP_API =
-  process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL || (IS_PROD ? '' : 'http://localhost:3004/api/v1');
+  process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL ||
+  (IS_PROD ? 'https://api.baalvion.com/api/v1/knowledge/imperialpedia/api/v1' : 'http://localhost:3004/api/v1');
 const CMS_PUBLIC =
-  process.env.NEXT_PUBLIC_CMS_PUBLIC_URL || (IS_PROD ? '' : 'http://localhost:3018/api/v1/public');
+  process.env.NEXT_PUBLIC_CMS_PUBLIC_URL ||
+  (IS_PROD ? 'https://api.baalvion.com/api/v1/knowledge/cms/api/v1/public' : 'http://localhost:3018/api/v1/public');
 const SITE = process.env.NEXT_PUBLIC_CMS_SITE_SLUG || 'imperialpedia';
 
 const TYPE_MAP: Record<string, SearchResultType> = {
@@ -27,10 +38,8 @@ const TYPE_MAP: Record<string, SearchResultType> = {
 
 const routeFor = (type: string, slug: string, name: string): string => {
   switch (type) {
-    case 'company': return `/companies/${slug}`;
     case 'country': return `/countries/${slug}`;
     case 'industry': return `/industries/${slug}`;
-    case 'technology': return `/technologies/${slug}`;
     case 'term': {
       const c = (name || slug).charAt(0).toLowerCase() || 'a';
       return `/terms/${/^[0-9]/.test(c) ? 'num' : c}/${slug}`;
@@ -69,6 +78,9 @@ export const searchService = {
           // Glossary is offline pending AdSense approval (src/config/glossary.ts) —
           // don't surface search results that would route to a 404'd term page.
           if (!GLOSSARY_LIVE && r.type === 'term') continue;
+          // /companies and /technologies (list + [slug] detail pages) were
+          // removed site-wide — neither type has a page to route search hits to.
+          if (r.type === 'company' || r.type === 'technology') continue;
           out.push({
             id: `${r.type}-${r.slug}`,
             type: TYPE_MAP[r.type] || 'topic',
