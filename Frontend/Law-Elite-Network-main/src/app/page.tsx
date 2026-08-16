@@ -1,17 +1,26 @@
 import React from 'react';
 import { fetchPublicApi } from '@/lib/api/public-fetch';
 import { mergeArticles } from '@/data/law-content';
-import { cmsGetArticles } from '@/lib/cms';
+import { cmsGetArticles, cmsGetNews } from '@/lib/cms';
+import { getMergedAuthors } from '@/lib/authors-server';
+import { authorNameToSlug } from '@/data/authors';
+import { COUNTRIES } from '@/data/countries';
 import { TopicTicker } from '@/components/knowledge/news/TopicTicker';
 import { StoryCard } from '@/components/knowledge/news/StoryCard';
 import { LatestRail } from '@/components/knowledge/news/LatestRail';
 import { CategorySection } from '@/components/knowledge/news/CategorySection';
+import { GetLegalHelpCard } from '@/components/knowledge/GetLegalHelpCard';
+import { LatestGuidesGrid } from '@/components/knowledge/LatestGuidesGrid';
+import { PracticeAreaChart } from '@/components/knowledge/PracticeAreaChart';
+import { LatestNewsList } from '@/components/knowledge/LatestNewsList';
+import { FeaturedGuideSpotlight } from '@/components/knowledge/FeaturedGuideSpotlight';
+import { ForProfessionalsSection } from '@/components/knowledge/ForProfessionalsSection';
+import { MissionAndBoardSection } from '@/components/knowledge/MissionAndBoardSection';
 import { TrustSection } from '@/components/knowledge/TrustSection';
 import { JurisdictionSection } from '@/components/knowledge/JurisdictionSection';
 import { PlatformIntro } from '@/components/knowledge/PlatformIntro';
 import { WhatYouCanFind } from '@/components/knowledge/WhatYouCanFind';
 import { WhoIsThisFor } from '@/components/knowledge/WhoIsThisFor';
-import { NewsGateway } from '@/components/knowledge/NewsGateway';
 import { HomepageDisclaimer } from '@/components/knowledge/HomepageDisclaimer';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { ShieldCheck, ArrowRight, Globe2 } from 'lucide-react';
@@ -71,13 +80,15 @@ function deriveCategories(pool: any[]): { id: string; name: string; slug: string
 // placeholder set no matter what was published. cmsGetArticles() already carries featuredImage
 // through (see lib/cms.ts's CmsArticle.featuredImage comment); this just wires it into the pool.
 export default async function KnowledgeHomePage() {
-  const [cmsArticles, apiCategoriesRaw, apiArticles] = await Promise.all([
+  const [cmsArticles, apiCategoriesRaw, apiArticles, newsItems, editorialBoard] = await Promise.all([
     cmsGetArticles().catch(() => []),
     fetchPublicApi('/categories').then((j) => (Array.isArray(j?.data) ? j.data : [])),
     fetchPublicApi('/articles', { sortBy: 'views', order: 'desc', limit: 50, status: 'published' }).then((j) => {
       const items = j?.data?.items || j?.data || [];
       return Array.isArray(items) ? items : [];
     }),
+    cmsGetNews(4).catch(() => []),
+    getMergedAuthors().catch(() => []),
   ]);
   const apiCategories = apiCategoriesRaw;
 
@@ -110,6 +121,18 @@ export default async function KnowledgeHomePage() {
   heroSecondary.forEach((a) => usedSlugs.add(a.slug));
   latest.forEach((a) => usedSlugs.add(a.slug));
 
+  // Editor's Pick spotlight (Investopedia's "Making Sense of Modern Crypto"
+  // slot) -- one real featured guide, not already shown above, paired with
+  // its actual byline's author profile.
+  const spotlightGuide =
+    spotlight.find((a: any) => a?.featured && a?.slug && !usedSlugs.has(a.slug)) ||
+    spotlight.find((a: any) => a?.slug && !usedSlugs.has(a.slug)) ||
+    null;
+  if (spotlightGuide) usedSlugs.add(spotlightGuide.slug);
+  const spotlightAuthor = spotlightGuide?.author
+    ? editorialBoard.find((a: any) => a.slug === authorNameToSlug(spotlightGuide.author)) || null
+    : null;
+
   // Both sources (live law-service categories and CMS-derived article categories)
   // can surface stray/legacy/subcategory slugs that have no real page -- e.g.
   // `family-law-child-custody`, `legal-guides`. TopicTicker links every entry
@@ -122,6 +145,33 @@ export default async function KnowledgeHomePage() {
   const categories = rawCategories.filter((c: { id: string; name: string; slug: string }) =>
     currentSlugSet.has(c.slug),
   );
+
+  // Full (unsliced) per-category counts for the homepage's "Guides by
+  // Practice Area" chart -- deliberately computed from the whole `pool`, not
+  // the already-excludes-hero-slugs filter below, since a library snapshot
+  // should reflect real totals rather than "what's left to show."
+  const categoryCounts = categories.map((cat: any) => ({
+    name: cat.name,
+    slug: cat.slug,
+    count: pool.filter((a: any) => categoryIdOf(a) === String(cat.id) || categorySlugOf(a) === cat.slug).length,
+  }));
+
+  // "Latest Guides" grid: prefer the CMS's own date-sorted feed (real
+  // publishedAt-derived dates) and only fall back to the merged pool when the
+  // CMS is sparse, mirroring the same threshold used for `spotlightSource`.
+  const latestGuidesSource = cmsArticles.length >= 8 ? cmsArticles : pool;
+  const latestGuides = [...latestGuidesSource]
+    .filter((a: any) => a?.slug && !usedSlugs.has(a.slug))
+    .sort((a: any, b: any) => (b.updatedAt || '').localeCompare(a.updatedAt || ''))
+    .slice(0, 8);
+  latestGuides.forEach((a: any) => usedSlugs.add(a.slug));
+
+  const homeStats = {
+    guides: pool.length,
+    practiceAreas: categories.length,
+    jurisdictions: COUNTRIES.length,
+  };
+  const editorialBoardPreview = editorialBoard.slice(0, 4);
 
   const articlesByCategory = categories.map((cat: any) => ({
     ...cat,
@@ -186,9 +236,22 @@ export default async function KnowledgeHomePage() {
                 </div>
               )}
             </div>
-            <div className="lg:col-span-4">
+            <div className="lg:col-span-4 space-y-9">
               <LatestRail articles={latest} />
+              <GetLegalHelpCard />
             </div>
+          </div>
+        </section>
+
+        {/* Latest Guides grid */}
+        <LatestGuidesGrid articles={latestGuides} />
+
+        {/* Library snapshot + newsroom + editor's pick */}
+        <section className="py-8 border-t border-slate-200">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <PracticeAreaChart data={categoryCounts} />
+            <LatestNewsList news={newsItems} />
+            <FeaturedGuideSpotlight article={spotlightGuide} author={spotlightAuthor} />
           </div>
         </section>
 
@@ -203,6 +266,9 @@ export default async function KnowledgeHomePage() {
         <JurisdictionSection />
         <PlatformIntro />
         <WhoIsThisFor />
+
+        <ForProfessionalsSection />
+        <MissionAndBoardSection stats={homeStats} authors={editorialBoardPreview} />
       </main>
 
       <section className="border-t border-slate-100">
@@ -210,10 +276,6 @@ export default async function KnowledgeHomePage() {
           <TrustSection />
         </div>
       </section>
-
-      <div className="container mx-auto px-4 sm:px-6 max-w-7xl">
-        <NewsGateway />
-      </div>
 
       <div className="container mx-auto px-4 sm:px-6 max-w-7xl">
         <HomepageDisclaimer />
