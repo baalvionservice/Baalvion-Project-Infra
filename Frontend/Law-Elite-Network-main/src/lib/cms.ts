@@ -149,14 +149,37 @@ async function getContent(slug: string, strict = false): Promise<CmsContent | nu
   return j && j.data ? (j.data as CmsContent) : null;
 }
 
+// The CMS delivery API silently clamps every page to 100 items regardless of
+// the `limit` sent (confirmed: `limit=200` still returns exactly 100, with
+// `pagination.limit` echoed back as 100) -- so a caller asking for more than
+// 100 (cmsGetArticles requests 200) got only page 1 and silently lost
+// everything past it. With 150 published articles, that meant the last ~50
+// were absent from every CMS-list-backed page (homepage, category grids)
+// even though their OWN detail page (a direct per-slug fetch, not this list)
+// found them fine -- on pages with a bundled/static fallback for the same
+// slug, that showed as the generic placeholder art instead of the article's
+// real uploaded photo; on pages without one, the article just didn't appear
+// at all. Loop pages until we've collected what the caller actually asked
+// for (or the API runs out), instead of trusting one request to cover it.
+const LIST_CONTENT_MAX_PAGES = 20;
+
 async function listContent(params: Record<string, string | number> = {}): Promise<CmsContent[]> {
-  const qs = new URLSearchParams();
-  qs.set('limit', String(params.limit ?? 200));
-  for (const [k, v] of Object.entries(params)) {
-    if (k !== 'limit') qs.set(k, String(v));
+  const requestedLimit = Number(params.limit ?? 200);
+  const all: CmsContent[] = [];
+  for (let page = 1; page <= LIST_CONTENT_MAX_PAGES && all.length < requestedLimit; page++) {
+    const qs = new URLSearchParams();
+    qs.set('limit', String(requestedLimit));
+    qs.set('page', String(page));
+    for (const [k, v] of Object.entries(params)) {
+      if (k !== 'limit' && k !== 'page') qs.set(k, String(v));
+    }
+    const j = await fetchJSON(`${BASE}/content?${qs.toString()}`);
+    const items = j && Array.isArray(j.data) ? (j.data as CmsContent[]) : [];
+    if (items.length === 0) break;
+    all.push(...items);
+    if (!j?.pagination?.hasNext) break;
   }
-  const j = await fetchJSON(`${BASE}/content?${qs.toString()}`);
-  return j && Array.isArray(j.data) ? (j.data as CmsContent[]) : [];
+  return all.slice(0, requestedLimit);
 }
 
 /**
