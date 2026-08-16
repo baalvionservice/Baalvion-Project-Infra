@@ -11,6 +11,7 @@ import { mergeArticles, type LawArticle } from '@/data/law-content';
 import { cmsGetArticles } from '@/lib/cms';
 import { resolveArticleImage, resolvePersonImage } from '@/lib/article-art';
 import { articleUrl } from '@/lib/article-url';
+import { formatArticleDate } from '@/lib/format-date';
 
 // Serve a cached page and refresh it in the background every 5 minutes,
 // instead of re-rendering (and re-fetching from the CMS) on every single
@@ -132,7 +133,7 @@ export default async function AuthorProfilePage(
                     <div className="bg-white border border-slate-200 overflow-hidden shadow-sm group-hover:shadow-md transition-all duration-300 flex flex-col h-full">
                       <div className="relative aspect-[3/2] overflow-hidden bg-slate-100">
                         <Image
-                          src={resolveArticleImage({ title: art.title, category: art.category, id: art.id })}
+                          src={resolveArticleImage(art)}
                           alt={art.title}
                           fill
                           className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -147,7 +148,7 @@ export default async function AuthorProfilePage(
                           {art.title}
                         </h3>
                         <p className="mt-auto pt-2 text-[12px] font-medium text-slate-400">
-                          {art.updatedAt}
+                          {formatArticleDate(art.updatedAt)}
                         </p>
                       </div>
                     </div>

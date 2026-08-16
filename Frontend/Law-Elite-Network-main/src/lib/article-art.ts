@@ -15,6 +15,17 @@ const BUNDLED_ARTICLE_SLUGS = new Set(getAllArticles().map((a) => a.slug));
  * bundled articles (a real crawlable raster URL, required for og:image/NewsArticle.image
  * — social crawlers don't reliably fetch SVG data URIs), and only falls back to the
  * inline SVG data URI when neither exists. Never falls back to a stock/placeholder image.
+ *
+ * ALWAYS pass the full article object straight through (`resolveArticleImage(article)`).
+ * Every field below is optional, so TypeScript will not warn if a caller hand-picks a
+ * subset instead (e.g. `resolveArticleImage({ title, category, id })`) — but silently
+ * dropping `featuredImage`/`slug` is exactly what makes this fall through to the generic
+ * illustration for an article that actually has a real uploaded photo elsewhere on the
+ * site. That happened once already (the /author/[slug] guide grid) and read as "images
+ * are broken" rather than "an editor forgot a field." If you only have a few fields on
+ * hand (a differently-shaped API response), spread them explicitly: `{ ...source,
+ * featuredImage: source.real_image_field }` — never construct a bespoke literal that
+ * quietly omits `featuredImage` or `slug`.
  */
 export function resolveArticleImage(article: {
   featuredImage?: string | null;
