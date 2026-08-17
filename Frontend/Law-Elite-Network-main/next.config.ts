@@ -66,7 +66,10 @@ const securityHeaders = [
       // remarketing/ad-service tags. api.baalvion.com is the cms-service
       // analytics collect.js — it was in connect-src/img-src but missing here,
       // so the site's own tracker was silently CSP-blocked on every page.
-      `script-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://www.googletagmanager.com https://api.baalvion.com https://*.googlesyndication.com https://*.doubleclick.net https://*.googleadservices.com https://*.google.com${
+      // *.adtrafficquality.google also serves the sodar/sodar2.js ad-traffic-quality
+      // script itself (loaded via <script src>, not just fetch/XHR) — it was only in
+      // connect-src below, so the browser blocked the script load outright.
+      `script-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://www.googletagmanager.com https://api.baalvion.com https://*.googlesyndication.com https://*.doubleclick.net https://*.googleadservices.com https://*.google.com https://*.adtrafficquality.google${
         isDev ? " 'unsafe-eval'" : ''
       }`,
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
