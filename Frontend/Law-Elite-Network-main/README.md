@@ -235,6 +235,15 @@ Public `NEXT_PUBLIC_*` values are inlined into the client bundle (rebuild after 
 | `AUTH_SERVICE_URL` | `http://localhost:3001` | Server-only upstream the `/api/auth/*` BFF proxies to (Node auth-service) |
 | `NODE_ENV` | — | `production` enables `Secure` cookies in the auth proxy (stripped in dev) |
 
+**`AUTH_SERVICE_URL` in production:** must be set to `https://api.baalvion.com/api/v1/identity/auth`
+(the api-gateway's `/api/v1/identity/auth` namespace, which forwards to auth-service unchanged —
+see `Backend/infra/api-gateway/dynamic.yml`'s "FRONTEND CONTRACT" comment). This is a **required**
+Vercel env var (Production environment) — `src/lib/env.ts`'s `requireServerEnv()` throws at request
+time if it's unset, which 500s every call to `/api/auth/*` (including the silent refresh every
+anonymous page load makes). Not committed to `.env.example` because this app's `.gitignore` excludes
+all `.env*` files; set it directly in the Vercel dashboard and redeploy (new env vars don't apply to
+already-built deployments).
+
 ## Notes / Gotchas
 
 - **Dev port is 9002**, not 3000 (`next dev -p 9002`).
