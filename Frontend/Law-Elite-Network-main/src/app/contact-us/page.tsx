@@ -3,8 +3,7 @@
 import React from 'react';
 import { Navbar } from '@/components/navbar';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
-import { Mail, MessageSquare, ShieldCheck, Globe } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Mail, MessageSquare, ShieldCheck } from 'lucide-react';
 
 export default function ContactUsPage() {
   return (
@@ -26,27 +25,17 @@ export default function ContactUsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
             <ContactCard
               icon={<Mail className="w-6 h-6" />}
-              title="General & Membership"
-              contact="concierge@lawelitenetwork.com"
-              desc="Account questions, memberships, and consultations."
+              title="Email"
+              contact="Founder@baalvion.com"
+              contactHref="mailto:Founder@baalvion.com"
+              desc="General, membership, editorial, press, and privacy/legal inquiries — one team reads and routes every message."
             />
             <ContactCard
               icon={<MessageSquare className="w-6 h-6" />}
-              title="Editorial Inquiries"
-              contact="editorial@lawelitenetwork.com"
-              desc="Questions or feedback about our articles and guides."
-            />
-            <ContactCard
-              icon={<Globe className="w-6 h-6" />}
-              title="Press"
-              contact="press@lawelitenetwork.com"
-              desc="Media inquiries."
-            />
-            <ContactCard
-              icon={<ShieldCheck className="w-6 h-6" />}
-              title="Privacy & Legal"
-              contact="legal@lawelitenetwork.com"
-              desc="Privacy questions and legal or regulatory correspondence."
+              title="Phone"
+              contact="+91 89512 84770"
+              contactHref="tel:+918951284770"
+              desc="Reach us directly during business hours (IST) for urgent matters."
             />
           </div>
 
@@ -82,12 +71,20 @@ export default function ContactUsPage() {
   );
 }
 
-function ContactCard({ icon, title, contact, desc }: any) {
+type ContactCardProps = {
+  icon: React.ReactNode;
+  title: string;
+  contact: string;
+  contactHref: string;
+  desc: string;
+};
+
+function ContactCard({ icon, title, contact, contactHref, desc }: ContactCardProps) {
   return (
     <div className="p-8 border border-slate-100 rounded-[2rem] bg-slate-50/50 hover:shadow-xl transition-all group">
       <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-blue-600 mb-6 shadow-sm group-hover:bg-blue-600 group-hover:text-white transition-all">{icon}</div>
       <h4 className="text-xl font-bold text-slate-900 mb-2">{title}</h4>
-      <p className="text-blue-600 font-bold mb-4">{contact}</p>
+      <a href={contactHref} className="text-blue-600 font-bold mb-4 block hover:underline">{contact}</a>
       <p className="text-sm text-slate-500 italic font-medium">{desc}</p>
     </div>
   );

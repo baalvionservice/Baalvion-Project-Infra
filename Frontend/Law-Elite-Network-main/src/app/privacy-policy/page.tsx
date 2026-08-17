@@ -7,7 +7,7 @@ import { List, ShieldCheck, Lock } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
-const LAST_UPDATED = 'June 30, 2026';
+const LAST_UPDATED = 'August 17, 2026';
 
 export default function PrivacyPolicyPage() {
   const [isExpanded, setIsExpanded] = useState(true);
@@ -76,7 +76,7 @@ export default function PrivacyPolicyPage() {
           <section className="space-y-16">
 
             <Block id="collection" title="Information We Collect">
-              <p>Law Elite Network (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) collects information to operate and improve our legal knowledge and practitioner-discovery platform at lawelitenetwork.com. We collect:</p>
+              <p>Law Elite Network (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) is a brand operated by <strong>Baalvion Industries Private Limited</strong>, part of the Baalvion Group, and this policy governs the legal knowledge and practitioner-discovery platform at lawelitenetwork.com. It collects:</p>
               <ul>
                 <li><strong>Information you provide:</strong> name, email address, and account details when you register, subscribe to our newsletter, contact us, or request a consultation.</li>
                 <li><strong>Information collected automatically:</strong> IP address, browser type, device identifiers, pages visited, referring URLs, and time spent on pages, gathered through cookies and analytics tools.</li>
@@ -161,7 +161,7 @@ export default function PrivacyPolicyPage() {
                 <li>Withdraw consent where processing is based on consent;</li>
                 <li>Opt out of personalized advertising and marketing communications.</li>
               </ul>
-              <p>Residents of the EU/EEA and UK have rights under the GDPR; California residents have rights under the CCPA/CPRA, including the right to opt out of the &quot;sale&quot; or &quot;sharing&quot; of personal information. To exercise any right, contact us at <a href="mailto:legal@lawelitenetwork.com">legal@lawelitenetwork.com</a>.</p>
+              <p>Residents of the EU/EEA and UK have rights under the GDPR; California residents have rights under the CCPA/CPRA, including the right to opt out of the &quot;sale&quot; or &quot;sharing&quot; of personal information. To exercise any right, contact us at <a href="mailto:Founder@baalvion.com">Founder@baalvion.com</a>.</p>
             </Block>
 
             <Block id="international" title="International Data Transfers">
@@ -179,10 +179,12 @@ export default function PrivacyPolicyPage() {
             <Block id="contact-privacy" title="Contact Privacy Team">
               <p>For any questions about this Privacy Policy or our data practices, contact us:</p>
               <ul>
-                <li>Email: <a href="mailto:legal@lawelitenetwork.com">legal@lawelitenetwork.com</a></li>
-                <li>Mail: Law Elite Network, C/o Dilip Kumar Kuldeep, Upper Mania, Po- Pakjhola, Semiliguda, Koraput, Odisha 764036, India (CIN: U43121OD2025PTC048479)</li>
+                <li>Email: <a href="mailto:Founder@baalvion.com">Founder@baalvion.com</a></li>
+                <li>Phone: <a href="tel:+918951284770">+91 89512 84770</a></li>
+                <li>Operating office: Baalvion Industries Private Limited, Yeshwant Avenue Building, NX Road, Y K Nagar, Virar West, Virar, Maharashtra 401303, India</li>
+                <li>Registered office: C/o Dilip Kumar Kuldeep, Upper Mania, Po- Pakjhola, Semiliguda, Koraput, Odisha 764036, India (CIN: U43121OD2025PTC048479)</li>
               </ul>
-              <p>See also our <Link href="/terms-of-service" className="text-blue-600 hover:underline">Terms of Service</Link>.</p>
+              <p>See also our <Link href="/terms-of-service" className="text-blue-600 hover:underline">Terms of Service</Link> and our <Link href="/contact-us" className="text-blue-600 hover:underline">Contact Us</Link> page.</p>
             </Block>
 
           </section>

@@ -3,25 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-
-const CONSENT_KEY = "imperialpedia_cookie_consent";
-
-declare global {
-  interface Window {
-    gtag?: (...args: unknown[]) => void;
-  }
-}
-
-function updateGoogleConsent(granted: boolean) {
-  if (typeof window === "undefined" || !window.gtag) return;
-  const state = granted ? "granted" : "denied";
-  window.gtag("consent", "update", {
-    ad_storage: state,
-    ad_user_data: state,
-    ad_personalization: state,
-    analytics_storage: state,
-  });
-}
+import { getStoredConsent, setConsent, hasGlobalPrivacyControl } from "@/lib/consent";
 
 // Gates GA/AdSense cookies behind an explicit choice (Google Consent Mode v2 --
 // see Analytics.tsx's 'consent: default' call, which denies everything until this
@@ -32,17 +14,26 @@ export function CookieConsentBanner() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem(CONSENT_KEY);
+    const stored = getStoredConsent();
     if (stored === "accepted") {
-      updateGoogleConsent(true);
-    } else if (stored !== "declined") {
-      setVisible(true);
+      setConsent(true); // re-affirm granted state to gtag on this load
+      return;
     }
+    if (stored === "declined") return;
+
+    // Global Privacy Control (https://globalprivacycontrol.org/) is a legally
+    // recognized opt-out signal under CCPA/CPRA — honor it immediately instead
+    // of waiting for a banner interaction, and skip showing the banner at all.
+    if (hasGlobalPrivacyControl()) {
+      setConsent(false);
+      return;
+    }
+
+    setVisible(true);
   }, []);
 
   const decide = (accepted: boolean) => {
-    localStorage.setItem(CONSENT_KEY, accepted ? "accepted" : "declined");
-    updateGoogleConsent(accepted);
+    setConsent(accepted);
     setVisible(false);
   };
 

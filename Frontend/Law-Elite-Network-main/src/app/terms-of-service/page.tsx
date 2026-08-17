@@ -7,7 +7,7 @@ import { List } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
-const LAST_UPDATED = 'June 30, 2026';
+const LAST_UPDATED = 'August 17, 2026';
 
 export default function TermsOfServicePage() {
   const [isExpanded, setIsExpanded] = useState(true);
@@ -189,7 +189,7 @@ export default function TermsOfServicePage() {
                 All content on the Service — including articles, text, graphics, logos, illustrations, the &quot;Law
                 Elite Network&quot; name and marks, page layouts, and the selection and arrangement of content — is owned
                 by or licensed to Law Elite Network and is protected by copyright, trademark, and other intellectual
-                property laws. The Elite Knowledge Group publishing family and its licensors retain all rights not
+                property laws. Baalvion Industries Private Limited, part of the Baalvion Group, and its licensors retain all rights not
                 expressly granted.
               </p>
               <p>
