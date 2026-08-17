@@ -1,6 +1,6 @@
 import { cache, Suspense } from "react";
 import { newsArticles, NewsArticle, NewsCategory } from "@/lib/data.news";
-import { getPublishedNewsBySlug, findAuthorProfileByName } from "@/services/data/cms-public";
+import { getPublishedNewsBySlug, findAuthorProfileByName, resolveAuthor } from "@/services/data/cms-public";
 import { buildMetadata } from "@/lib/seo";
 import { formatDate } from "@/services/format-date";
 import Image from "next/image";
@@ -40,6 +40,7 @@ import {
 } from "@/lib/article/render-helpers";
 import { TrendingNowModule, MoreInCategoryModule } from "@/components/article/ArticleSidebarModules";
 import { ArticleByline } from "@/components/article/ArticleByline";
+import { SourcesCited } from "@/modules/content-engine/components/SourcesCited";
 import { ListenBar } from "@/components/article/ListenBar";
 
 type ArticleType = NewsArticle;
@@ -259,6 +260,10 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
   const canonicalUrl = `${baseUrl}${canonicalPath}`;
 
   const authorProfile = await findAuthorProfileByName(article.author.name);
+  const [reviewerProfile, factCheckerProfile] = await Promise.all([
+    article.reviewerSlug ? resolveAuthor(article.reviewerSlug) : Promise.resolve(null),
+    article.factCheckerSlug ? resolveAuthor(article.factCheckerSlug) : Promise.resolve(null),
+  ]);
   const categoryPath = CATEGORY_HREF[article.category];
 
   // Persisted, save-time entity-mention detection (full body, all 4 entity
@@ -428,17 +433,42 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
             )}
 
             <div className="flex flex-wrap items-center justify-between gap-4 py-5 mt-5 border-y border-gray-200">
-              <ArticleByline
-                authorName={article.author.name}
-                authorTitle={article.author.title}
-                authorProfile={authorProfile}
-                publishedLine={
-                  <>
-                    Published {formatDateTime(article.publishedAt)}
-                    {article.updatedAt && <> · Updated {formatDateTime(article.updatedAt)}</>}
-                  </>
-                }
-              />
+              <div className="flex flex-col gap-1.5">
+                <ArticleByline
+                  authorName={article.author.name}
+                  authorTitle={article.author.title}
+                  authorProfile={authorProfile}
+                  publishedLine={
+                    <>
+                      Published {formatDateTime(article.publishedAt)}
+                      {article.updatedAt && <> · Updated {formatDateTime(article.updatedAt)}</>}
+                    </>
+                  }
+                />
+                {(reviewerProfile || factCheckerProfile) && (
+                  <p className="text-xs text-gray-500">
+                    {reviewerProfile && (
+                      <>
+                        Reviewed by{" "}
+                        <Link href={`/authors/${reviewerProfile.slug}`} className="font-semibold text-gray-700 hover:text-[#CC0000]">
+                          {reviewerProfile.name}
+                        </Link>
+                        {article.reviewedAt && <> on {formatDate(article.reviewedAt)}</>}
+                      </>
+                    )}
+                    {reviewerProfile && factCheckerProfile && " · "}
+                    {factCheckerProfile && (
+                      <>
+                        Fact-checked by{" "}
+                        <Link href={`/authors/${factCheckerProfile.slug}`} className="font-semibold text-gray-700 hover:text-[#CC0000]">
+                          {factCheckerProfile.name}
+                        </Link>
+                        {article.factCheckedAt && <> on {formatDate(article.factCheckedAt)}</>}
+                      </>
+                    )}
+                  </p>
+                )}
+              </div>
               <ShareBar url={canonicalUrl} title={article.title} />
             </div>
 
@@ -497,6 +527,8 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
                 </a>
               </p>
             )}
+
+            {article.citations?.length ? <SourcesCited citations={article.citations} /> : null}
 
             {article.tags && article.tags.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-8 pt-6 border-t border-gray-200">

@@ -44,9 +44,15 @@ export async function GET(request: Request) {
   }
 
   try {
-    const { data, error, status } = await searchService.performSearch(q);
+    const { data, error } = await searchService.performSearch(q);
     if (error) {
-      return NextResponse.json({ error }, { status: status || 500 });
+      // performSearch already caught the failure and still returns its normal
+      // `data: []` shape — every caller (SearchModal, SearchResults) expects
+      // this route to always resolve to an array. Discarding `data` here and
+      // returning `{ error }` instead (the previous behavior) handed callers
+      // a bare object where they call `.map()`, crashing the results list
+      // instead of just showing "no results".
+      console.error('Search API upstream failure', error);
     }
     return NextResponse.json(data, {
       headers: {
@@ -55,6 +61,9 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     console.error('Search API failure', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    // Same reasoning as above: callers always expect an array back from this
+    // route, so an unexpected failure still resolves to `[]` rather than an
+    // object that breaks `results.map(...)`.
+    return NextResponse.json([], { status: 500 });
   }
 }

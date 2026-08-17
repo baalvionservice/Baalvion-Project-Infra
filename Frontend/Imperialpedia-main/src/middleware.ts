@@ -29,6 +29,76 @@ const ADMIN_CONSOLE_URL =
 
 const INDEXNOW_KEY = process.env.INDEXNOW_KEY;
 
+// Bare `new NextResponse('Gone', { status: 410 })` rendered as unstyled plain
+// text — technically correct for crawlers but a dead end for a real visitor
+// who followed an old link/bookmark here. Self-contained HTML (matches the
+// site's light editorial theme — royal-blue primary, near-black text) so a
+// permanently-removed URL still looks like part of the site, with a way back.
+function goneResponse(): NextResponse {
+  const html = `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex" />
+<title>Page removed — Imperialpedia</title>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    color: #212121;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    padding: 24px;
+  }
+  main { max-width: 30rem; text-align: center; }
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #666666;
+    border: 1px solid #e3e3e3;
+    border-radius: 999px;
+    padding: 4px 12px;
+    margin-bottom: 20px;
+  }
+  h1 { font-size: 1.75rem; font-weight: 800; margin: 0 0 12px; letter-spacing: -0.01em; }
+  p { font-size: 15px; line-height: 1.6; color: #666666; margin: 0 0 28px; }
+  a.button {
+    display: inline-block;
+    background: #1d4fc4;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 14px;
+    text-decoration: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+  }
+  a.button:hover { opacity: 0.9; }
+</style>
+</head>
+<body>
+<main>
+  <span class="badge">410 &middot; Removed</span>
+  <h1>This page has been removed</h1>
+  <p>The page you're looking for was permanently taken down and no longer exists. Head back to the homepage to keep exploring.</p>
+  <a class="button" href="/">Back to Imperialpedia</a>
+</main>
+</body>
+</html>`;
+  return new NextResponse(html, {
+    status: 410,
+    headers: { 'Content-Type': 'text/html; charset=utf-8' },
+  });
+}
+
 // SEO cleanup pass (2026-08): these URLs are permanently killed, not redirected —
 // thin/duplicate hub pages, their query-filtered variants (blocking the bare path
 // covers every ?query= combination of it too), a handful of thin entity pages, and
@@ -39,13 +109,6 @@ const INDEXNOW_KEY = process.env.INDEXNOW_KEY;
 // of the existing `/articles/emergency-funds` redirect in next.config.ts, and the latter
 // is already 301'd away there — killing either would break that redirect chain.
 const REMOVED_PATHS = new Set<string>([
-  '/technologies',
-  '/technologies/quantum-computing',
-  '/technologies/machine-learning',
-  '/technologies/large-language-models',
-  '/technologies/generative-ai',
-  '/technologies/blockchain',
-  '/companies',
   '/countries',
   '/countries/united-states',
   '/countries/taiwan',
@@ -103,7 +166,14 @@ export function middleware(request: NextRequest) {
   // Permanently killed URLs — see REMOVED_PATHS above. Checked before every other
   // rule so a removed path never falls through to auth gates or legacy redirects.
   if (REMOVED_PATHS.has(pathname)) {
-    return new NextResponse('Gone', { status: 410 });
+    return goneResponse();
+  }
+
+  // /companies and /technologies (list + every [slug] detail page) were removed
+  // site-wide — the whole prefix 410s rather than just the handful of individual
+  // paths Google had already indexed, since the route itself no longer exists.
+  if (pathname === '/companies' || pathname.startsWith('/companies/') || pathname === '/technologies' || pathname.startsWith('/technologies/')) {
+    return goneResponse();
   }
 
   // IndexNow key verification file — search engines fetch https://<host>/<key>.txt
@@ -171,6 +241,7 @@ export const config = {
     '/technologies',
     '/technologies/:path*',
     '/companies',
+    '/companies/:path*',
     '/countries',
     '/countries/:path*',
     '/stocks/:path*',

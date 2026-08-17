@@ -13,7 +13,6 @@ import { SearchResults } from './SearchResults';
 import { SearchDefaultPanel, SearchDefaultData } from './SearchDefaultPanel';
 import { SearchResult } from '@/types/search';
 import { Text } from '@/design-system/typography/text';
-import { Command } from 'lucide-react';
 
 const EMPTY_DEFAULT_DATA: SearchDefaultData = { popularSymbols: [], trending: [] };
 
@@ -55,20 +54,30 @@ export const SearchModal = ({ open, onOpenChange }: { open: boolean; onOpenChang
       return;
     }
 
+    // AbortController per debounce cycle: without it, a slower earlier request
+    // (e.g. "a") can resolve after a faster later one (e.g. "ap") and clobber
+    // its results with stale data — the visible symptom being results that
+    // don't match what's currently typed, or a spinner that flickers back on.
+    const controller = new AbortController();
     const timer = setTimeout(async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+        const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`, {
+          signal: controller.signal,
+        });
         const data = await res.json();
         setResults(data);
       } catch (e) {
-        console.error(e);
+        if ((e as Error).name !== 'AbortError') console.error(e);
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
     }, 300);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
   }, [query]);
 
   // Reset query on close
@@ -100,7 +109,7 @@ export const SearchModal = ({ open, onOpenChange }: { open: boolean; onOpenChang
             value={query}
             onChange={setQuery}
             autoFocus
-            placeholder="Search companies, countries, articles..."
+            placeholder="Search quotes, news, & videos"
           />
         </div>
         <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar">
@@ -122,21 +131,6 @@ export const SearchModal = ({ open, onOpenChange }: { open: boolean; onOpenChang
               onItemClick={() => onOpenChange(false)}
             />
           )}
-        </div>
-        {/* Keyboard hints only make sense on a device with a physical keyboard —
-            hidden on touch/small screens instead of showing dead ESC/↵ affordances. */}
-        <div className="hidden sm:flex p-4 bg-muted/20 border-t border-white/5 items-center justify-between">
-          <div className="flex gap-4">
-            <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase">
-              <span className="p-1 rounded bg-background border border-white/10">ESC</span> Close
-            </div>
-            <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase">
-              <span className="p-1 rounded bg-background border border-white/10">↵</span> Navigate
-            </div>
-          </div>
-          <div className="flex items-center gap-2 text-primary font-bold text-[10px] uppercase">
-            <Command size={12} /> Search Engine Active
-          </div>
         </div>
       </DialogContent>
     </Dialog>

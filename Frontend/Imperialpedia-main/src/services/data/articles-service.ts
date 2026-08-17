@@ -195,6 +195,41 @@ export const articlesService = {
     }
   },
 
+  /**
+   * Server-side category-filtered fetch — unlike getArticlesByCategory in
+   * content-service.ts (which filters the 100 most-recent articles *across
+   * every category*, silently missing a category once 100+ more-recent
+   * articles from other categories exist), this asks cms-service to filter
+   * by categorySlug directly, so it returns real matches regardless of how
+   * that category ranks by recency site-wide.
+   */
+  async getArticlesByCategorySlug(
+    categorySlug: string,
+    limit = 100
+  ): Promise<ApiResponse<Article[]>> {
+    try {
+      const { items } = await listCmsContent({ contentType: "article", categorySlug, limit });
+      const categoryMap = await getArticleCategoryMap();
+      return {
+        data: items.map((raw) => cmsContentToArticle(raw, categoryMap)),
+        success: true,
+        statusCode: 200,
+        message: "Articles retrieved successfully",
+        timestamp: nowIso(),
+      };
+    } catch (error) {
+      const appError = errorHandler.handleError(error);
+      return {
+        data: [],
+        success: false,
+        statusCode: appError.statusCode,
+        message: appError.message,
+        timestamp: nowIso(),
+        path: "/api/articles",
+      };
+    }
+  },
+
   async getFeaturedArticles(): Promise<ApiResponse<Article[]>> {
     try {
       const { items } = await listCmsContent({ contentType: "article", limit: 6 });

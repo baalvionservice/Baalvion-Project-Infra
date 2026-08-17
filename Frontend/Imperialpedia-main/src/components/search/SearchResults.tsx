@@ -2,7 +2,7 @@ import React from 'react';
 import { SearchResultItem } from './SearchResultItem';
 import { Text } from '@/design-system/typography/text';
 import { SearchResult } from '@/types/search';
-import { Loader2, SearchX } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 interface SearchResultsProps {
   results: SearchResult[];
@@ -22,13 +22,21 @@ export const SearchResults = ({ results, loading, onItemClick, query }: SearchRe
   }
 
   if (query && results.length === 0) {
+    // CNBC-style no-results state: plain editorial text behind a red rule,
+    // not a rounded dashed-border card with a big icon — matches the rest
+    // of the site's CNBC re-theme (see components/cnbc/TopNav.tsx) instead
+    // of reading like a generic SaaS empty state.
     return (
-      <div className="p-12 text-center flex flex-col items-center gap-4 bg-muted/20 rounded-2xl mx-4 my-2 border-2 border-dashed">
-        <SearchX className="w-10 h-10 text-muted-foreground opacity-50" />
-        <div>
-          <Text variant="bodySmall" weight="bold">No results found for "{query}"</Text>
-          <Text variant="caption" className="text-muted-foreground mt-1">Try a different term, or see full results on the search page.</Text>
-        </div>
+      <div className="px-4 py-10 border-t-2 border-[hsl(var(--cnbc-red))]">
+        <Text variant="label" className="text-[hsl(var(--cnbc-red))] text-[10px] font-bold uppercase tracking-[0.2em]">
+          No Results
+        </Text>
+        <Text variant="bodySmall" weight="bold" className="mt-2">
+          No results found for &ldquo;{query}&rdquo;
+        </Text>
+        <Text variant="caption" className="text-muted-foreground mt-1">
+          Try a different term, or see full results on the search page.
+        </Text>
       </div>
     );
   }

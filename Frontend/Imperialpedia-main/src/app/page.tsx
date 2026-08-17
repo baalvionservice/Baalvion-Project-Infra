@@ -13,13 +13,19 @@ import { TERM_OF_DAY } from "@/components/landing/investopedia/content";
 import { HomeIntro, homeFaqItems } from "@/components/home/HomeIntro";
 import { HomeEditorial } from "@/components/home/HomeEditorial";
 import { ExploreTopics } from "@/components/home/ExploreTopics";
-import { LatestArticles } from "@/components/home/LatestArticles";
 import { MarketHighlights } from "@/components/home/MarketHighlights";
 import { TrendingTopics } from "@/components/home/TrendingTopics";
-import { FeaturedCompanies } from "@/components/home/FeaturedCompanies";
-import { RecentlyUpdated } from "@/components/home/RecentlyUpdated";
 import { HomeSectionSkeleton } from "@/components/home/HomeSectionSkeleton";
 import { Leadership } from "@/components/home/Leadership";
+import { ImperialpediaTalks } from "@/components/home/ImperialpediaTalks";
+import { HowWeWork } from "@/components/home/HowWeWork";
+import { EditorialStandards } from "@/components/home/EditorialStandards";
+import { EditorialTeam } from "@/components/home/EditorialTeam";
+import { SourcesMethodology } from "@/components/home/SourcesMethodology";
+import { WhatWeCover } from "@/components/home/WhatWeCover";
+import { HowToUse } from "@/components/home/HowToUse";
+import { FeaturedKnowledge } from "@/components/home/FeaturedKnowledge";
+import { AllCategories } from "@/components/home/AllCategories";
 
 // The homepage previously inherited the root layout's generic metadata verbatim
 // (no page-level `generateMetadata`) — every list/detail page in the app calls
@@ -29,7 +35,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return buildMetadata({
     title: "Imperialpedia — Financial Intelligence Knowledge Graph",
     description:
-      "Explore companies, countries, industries, and technologies alongside live market data and reviewed articles on investing, the economy, and personal finance.",
+      "Explore countries and industries alongside live market data and reviewed articles on investing, the economy, and personal finance.",
     canonical: "/",
     ogType: "website",
   });
@@ -57,6 +63,10 @@ export default function Home() {
 
       <ExploreTopics />
 
+      <Suspense fallback={<HomeSectionSkeleton cards={4} />}>
+        <AllCategories />
+      </Suspense>
+
       {/* Top AdSense Unit - Display ad above main content */}
       <div className="my-8 px-4">
         <AdSenseUnit slot="8362925887" format="auto" responsive={true} />
@@ -72,25 +82,17 @@ export default function Home() {
         href={TERM_OF_DAY.href}
       />
 
-      <Suspense fallback={<HomeSectionSkeleton cards={4} />}>
-        <LatestArticles />
-      </Suspense>
-
       {/* Mid-page AdSense Unit */}
       <div className="my-8 px-4">
         <AdSenseUnit slot="8362925887" format="auto" responsive={true} />
       </div>
 
+      <Suspense fallback={<HomeSectionSkeleton cards={4} />}>
+        <ImperialpediaTalks />
+      </Suspense>
+
       <Suspense fallback={<HomeSectionSkeleton cards={2} />}>
         <MarketHighlights />
-      </Suspense>
-
-      <Suspense fallback={<HomeSectionSkeleton cards={4} />}>
-        <FeaturedCompanies />
-      </Suspense>
-
-      <Suspense fallback={<HomeSectionSkeleton cards={6} />}>
-        <RecentlyUpdated />
       </Suspense>
 
       {/* Bottom AdSense Unit */}
@@ -101,6 +103,25 @@ export default function Home() {
       <Suspense fallback={<HomeSectionSkeleton cards={6} />}>
         <TrendingTopics />
       </Suspense>
+
+      <WhatWeCover />
+
+      <HowToUse />
+
+      <FeaturedKnowledge />
+
+      {/* Trust chapter — how content gets made, what we stand for, who makes
+          it, and what we cite — grouped under one tinted band (mirrors
+          Leadership's own band below) so it reads as one distinct section of
+          the page instead of four more white rails continuing the scroll. */}
+      <div className="bg-muted/30 border-t border-border">
+        <HowWeWork />
+        <EditorialStandards />
+        <Suspense fallback={<HomeSectionSkeleton cards={6} />}>
+          <EditorialTeam />
+        </Suspense>
+        <SourcesMethodology />
+      </div>
 
       <NewsletterBand />
 

@@ -15,8 +15,9 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/services/query-client";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { usePathname } from "next/navigation";
+import { AdSenseClientProvider } from "@/components/common/AdSenseClientContext";
 
-type RootLayoutClientProps = Readonly<{ children: React.ReactNode }>;
+type RootLayoutClientProps = Readonly<{ children: React.ReactNode; adsenseClient: string | null }>;
 
 // Routes that ship their own CNBC-style masthead/footer (src/components/cnbc/*
 // via each route's own layout.tsx) and must not also get the sitewide
@@ -26,7 +27,7 @@ type RootLayoutClientProps = Readonly<{ children: React.ReactNode }>;
 // Footer) despite world/layout.tsx's comment claiming otherwise.
 const CNBC_ROUTES = ["/world", "/news", "/market-news"];
 
-export default function RootLayoutClient({ children }: RootLayoutClientProps) {
+export default function RootLayoutClient({ children, adsenseClient }: RootLayoutClientProps) {
     const pathname = usePathname();
     const suppressGlobalChrome =
         pathname?.startsWith("/admin") ||
@@ -44,18 +45,20 @@ export default function RootLayoutClient({ children }: RootLayoutClientProps) {
                         <ThemeProvider>
                             <ToastProvider>
                                 <TooltipProvider>
-                                    {!suppressGlobalChrome && <Navbar />}
-                                    <main
-                                        id="main-content"
-                                        className={cn("flex-grow outline-none", !suppressGlobalChrome && "pt-16 lg:pt-[108px]")}
-                                        tabIndex={-1}
-                                    >
-                                        {children}
-                                    </main>
-                                    {!suppressGlobalChrome && <Footer />}
-                                    <CookieConsentBanner />
-                                    <Toaster />
-                                    <SonnerToaster />
+                                    <AdSenseClientProvider clientId={adsenseClient}>
+                                        {!suppressGlobalChrome && <Navbar />}
+                                        <main
+                                            id="main-content"
+                                            className={cn("flex-grow outline-none", !suppressGlobalChrome && "pt-16 lg:pt-[108px]")}
+                                            tabIndex={-1}
+                                        >
+                                            {children}
+                                        </main>
+                                        {!suppressGlobalChrome && <Footer />}
+                                        <CookieConsentBanner />
+                                        <Toaster />
+                                        <SonnerToaster />
+                                    </AdSenseClientProvider>
                                 </TooltipProvider>
                             </ToastProvider>
                         </ThemeProvider>

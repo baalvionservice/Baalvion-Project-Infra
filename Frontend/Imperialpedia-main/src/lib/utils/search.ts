@@ -1,4 +1,4 @@
-import { loadCountries, loadCompanies, loadTechnologies } from '@/lib/data/loaders';
+import { loadCountries } from '@/lib/data/loaders';
 import { getAllMarketAssets } from '@/lib/data/marketsLoader';
 import { entityRouteSegment } from '@/lib/utils/seo';
 import { SearchResult, SearchResultType } from '@/types/search';
@@ -9,9 +9,9 @@ import { SearchResult, SearchResultType } from '@/types/search';
  * Replaces the previous implementation, which matched against `@/data/*.json` — flat,
  * orphaned fixture files each containing exactly one seeded record left over from before
  * the `data/<type>/<type>.json` restructure. This now reads from the same live-first,
- * static-fallback loaders (`lib/data/loaders.ts`) that power `/companies`, `/countries`,
- * `/industries`, and `/technologies`, plus the live market-asset feed, so a search result
- * can never be staler or thinner than what the index pages themselves show.
+ * static-fallback loaders (`lib/data/loaders.ts`) that power `/countries` and
+ * `/industries`, plus the live market-asset feed, so a search result can never
+ * be staler or thinner than what the index pages themselves show.
  */
 
 const MAX_LEVENSHTEIN_LEN = 12; // bound the DP table for pathological input lengths
@@ -133,8 +133,10 @@ function pushEntityResults(
 }
 
 /**
- * Core search across the knowledge graph: companies, countries, industries,
- * technologies, and live market assets (indices/stocks/crypto/commodities/currencies).
+ * Core search across the knowledge graph: countries, industries, and live
+ * market assets (indices/stocks/crypto/commodities/currencies). Companies and
+ * technologies are intentionally excluded — /companies and /technologies were
+ * removed site-wide, so those entities have no page to route a search hit to.
  * People are intentionally not included — no `person` entity loader/backend exists yet
  * (tracked as a known gap; see docs/SEARCH_STANDARD.md).
  */
@@ -142,17 +144,13 @@ export async function searchEntities(query: string, limit = 20): Promise<SearchR
   const q = query.toLowerCase().trim();
   if (!q || q.length < 2) return [];
 
-  const [countries, companies, technologies, assets] = await Promise.all([
+  const [countries, assets] = await Promise.all([
     loadCountries(),
-    loadCompanies(),
-    loadTechnologies(),
     getAllMarketAssets(),
   ]);
 
   const results: SearchResult[] = [];
   pushEntityResults(results, countries, 'country');
-  pushEntityResults(results, companies, 'company');
-  pushEntityResults(results, technologies, 'technology');
 
   for (const asset of assets) {
     if (!asset.name || !asset.symbol) continue;

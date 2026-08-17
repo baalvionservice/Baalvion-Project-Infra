@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useAdSenseClientId } from './AdSenseClientContext';
 
 // Extend window type for adsbygoogle
 declare global {
@@ -33,7 +34,11 @@ export function AdSenseUnit({
   responsive = true,
   className = '',
 }: AdSenseUnitProps) {
-  const clientId = process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_ID;
+  // Real, CMS-managed publisher ID threaded down from app/layout.tsx via
+  // AdSenseClientProvider — see AdSenseClientContext.tsx for why this
+  // replaced a direct process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_ID read (wrong,
+  // never-configured env var name; every ad unit silently rendered nothing).
+  const clientId = useAdSenseClientId();
 
   useEffect(() => {
     // Wait for adsbygoogle script to load, then push ad unit
@@ -58,7 +63,7 @@ export function AdSenseUnit({
   if (!clientId) {
     if (process.env.NODE_ENV === 'development') {
       console.warn(
-        'NEXT_PUBLIC_GOOGLE_ADSENSE_ID environment variable is not set'
+        'AdSense client ID unavailable — either the CMS has no adsensePublisherId configured (Website → SEO → Monetization) and NEXT_PUBLIC_ADSENSE_CLIENT is unset, or this component rendered outside <AdSenseClientProvider>.'
       );
     }
     return null;

@@ -1,9 +1,9 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { AlignLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Article } from "./types";
+import { ArticleCard } from "./ArticleCard";
 
 type Props = {
   lead: Article;
@@ -48,19 +48,11 @@ function HeroStory({ article, related, priority }: { article: Article; related: 
           <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
             Related
           </span>
-          <ul className="mt-2 space-y-2.5">
+          <div className="mt-1">
             {related.map((r) => (
-              <li key={r.href}>
-                <Link
-                  href={r.href}
-                  className="group flex items-start gap-2 text-sm font-semibold text-foreground hover:text-primary transition-colors"
-                >
-                  <AlignLeft className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" aria-hidden />
-                  <span className="line-clamp-2">{r.title}</span>
-                </Link>
-              </li>
+              <ArticleCard key={r.href} article={r} variant="row" />
             ))}
-          </ul>
+          </div>
         </div>
       )}
     </div>
@@ -91,13 +83,7 @@ export function LeadStory({ lead, leadRelated, secondaryLead, secondaryLeadRelat
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 sm:gap-x-10">
             {otherTopStories.map((a) => (
-              <Link
-                key={a.href}
-                href={a.href}
-                className="block py-2.5 border-b border-border text-sm font-bold text-foreground hover:text-primary transition-colors"
-              >
-                {a.title}
-              </Link>
+              <ArticleCard key={a.href} article={a} variant="row" />
             ))}
           </div>
         </div>

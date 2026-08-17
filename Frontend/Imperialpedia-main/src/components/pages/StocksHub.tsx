@@ -10,7 +10,6 @@ import {
   Calculator,
   ArrowRight,
   Flame,
-  Building2,
   BarChart3,
   ListChecks,
 } from "lucide-react";
@@ -52,16 +51,6 @@ const LEARNING_PATH_SLUGS = [
   "fundamental-analysis-explained",
 ];
 
-const FLAGSHIP_COMPANIES = [
-  { slug: "apple", name: "Apple" },
-  { slug: "microsoft", name: "Microsoft" },
-  { slug: "nvidia", name: "NVIDIA" },
-  { slug: "amazon", name: "Amazon" },
-  { slug: "tesla", name: "Tesla" },
-  { slug: "alphabet", name: "Alphabet" },
-  { slug: "meta", name: "Meta" },
-  { slug: "berkshire-hathaway", name: "Berkshire Hathaway" },
-];
 
 const MARKET_INDEXES = [
   { slug: "sp-500", name: "S&P 500" },
@@ -372,25 +361,6 @@ export async function StocksHub() {
             articlesByTopic={articlesBySection}
             allArticles={rest}
           />
-        </section>
-
-        {/* Popular Companies */}
-        <section>
-          <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
-            <Building2 className="h-4 w-4" />
-            Popular Companies
-          </h3>
-          <div className="flex flex-wrap gap-3">
-            {FLAGSHIP_COMPANIES.map((c) => (
-              <Link
-                key={c.slug}
-                href={`/companies/${c.slug}`}
-                className="inline-flex items-center gap-2 rounded-full border border-gray-200 px-4 py-2 text-xs font-semibold text-foreground transition-colors hover:border-gray-900"
-              >
-                {c.name}
-              </Link>
-            ))}
-          </div>
         </section>
 
         {/* Popular Indexes */}

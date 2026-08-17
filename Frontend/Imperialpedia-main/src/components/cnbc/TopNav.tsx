@@ -14,7 +14,6 @@ const NAV_CATEGORIES: { label: string; href: string }[] = [
   { label: "Markets", href: "/market-news" },
   { label: "Business", href: "/market-news" },
   { label: "Investing", href: "/investing" },
-  { label: "Tech", href: "/technologies" },
   { label: "Politics", href: "/politics" },
   { label: "World", href: "/world" },
   { label: "Finance", href: "/financial-intelligence" },
