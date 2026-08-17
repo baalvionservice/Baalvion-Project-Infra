@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 import { unstable_cache } from 'next/cache';
 import { getAllArticles } from '@/data/law-content';
-import { getAllAuthors } from '@/data/authors';
+import { getMergedAuthors } from '@/lib/authors-server';
 import { articleUrl } from '@/lib/article-url';
 import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
 import { cmsGetArticles } from '@/lib/cms';
@@ -183,7 +183,11 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
     if (!existing || parsed > existing) latestByAuthor.set(a.author, parsed);
   });
 
-  const authorRoutes: MetadataRoute.Sitemap = getAllAuthors().map((a) => ({
+  // Merged (bundled + CMS-added) authors -- CMS-only authors were previously
+  // dropped from the sitemap because this used the bundled-only getAllAuthors(),
+  // even though their /author/[slug] pages render fine and are linked from /authors.
+  const mergedAuthors = await getMergedAuthors();
+  const authorRoutes: MetadataRoute.Sitemap = mergedAuthors.map((a) => ({
     url: `${BASE_URL}/author/${a.slug}`,
     lastModified: latestByAuthor.get(a.name) || new Date(),
     changeFrequency: 'monthly',

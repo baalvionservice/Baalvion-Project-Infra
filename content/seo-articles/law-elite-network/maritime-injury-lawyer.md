@@ -11,7 +11,7 @@ author: deepak-kumar-kuldeep
 
 # Maritime Injury Lawyer
 
-A maritime injury lawyer represents seamen and other maritime workers injured in the course of their work, with a particular focus on claims arising under the Jones Act and general maritime law. This guide focuses specifically on the Jones Act claims process for injured seamen. For a broader look at offshore and maritime injury claims generally, see our [maritime accident lawyer guide](/maritime-accident-lawyer/) and our [Jones Act and seaman's injury rights guide](/jones-act-seamans-injury-rights/). This is general legal information, not legal advice about any specific injury.
+A maritime injury lawyer represents seamen and other maritime workers injured in the course of their work, with a particular focus on claims arising under the Jones Act and general maritime law. This guide focuses specifically on **which legal claims an injured seaman has and how a Jones Act case works** — seaman status, negligence, unseaworthiness, and maintenance and cure. If you're instead trying to work out **what compensation an offshore injury (seaman, LHWCA, or OCSLA) may be worth**, our [offshore injury lawyer guide](/offshore-injury-lawyer/) covers that comparison across all three frameworks in more depth. For a broader look at offshore and maritime injury claims generally, see our [maritime accident lawyer guide](/maritime-accident-lawyer/) and our [Jones Act and seaman's injury rights guide](/jones-act-seamans-injury-rights/). This is general legal information, not legal advice about any specific injury.
 
 ## Who the Jones Act Covers
 
@@ -45,7 +45,7 @@ Employers and their insurers commonly raise defenses in Jones Act cases, includi
 
 ## Compensation in a Jones Act Claim
 
-Compensation in a successful Jones Act or unseaworthiness claim may potentially include past and future medical expenses, lost wages and diminished earning capacity, pain and suffering, and, for surviving family members in a fatal accident, wrongful death damages. Maintenance and cure is generally recovered separately from these categories. No specific amount can be predicted without a full case evaluation; see our guide to [how offshore injury settlements are calculated](/offshore-injury-settlement-value/) for the general factors involved.
+Compensation in a successful Jones Act or unseaworthiness claim may potentially include past and future medical expenses, lost wages and diminished earning capacity, pain and suffering, and, for surviving family members in a fatal accident, wrongful death damages. Maintenance and cure is generally recovered separately from these categories. No specific amount can be predicted without a full case evaluation; see our guide to [how offshore injury settlements are calculated](/offshore-injury-settlement-value/) for the general factors involved, or our [offshore injury lawyer guide](/offshore-injury-lawyer/) for how compensation compares across Jones Act, LHWCA, and OCSLA claims.
 
 ## Statute of Limitations for Jones Act Claims
 

@@ -69,7 +69,32 @@ const AUTHORS_BY_SLUG = {
   'anna-solovieva': { name: 'Anna Solovieva', slug: 'anna-solovieva', title: 'Contributor', credentials: 'Contributor, Law Elite Network' },
 };
 
-// ── minimal frontmatter parser (title/metaTitle/metaDescription/slug/category/keywords) ──
+// Splits a bracketed frontmatter array on top-level commas only -- commas
+// inside a quoted item (e.g. a case name like "Jerome B. Grubart, Inc. v. ...")
+// stay part of that item instead of being treated as a new array entry.
+function splitArrayItems(inner) {
+  const items = [];
+  let current = '';
+  let quote = null;
+  for (const ch of inner) {
+    if (quote) {
+      if (ch === quote) quote = null;
+      current += ch;
+    } else if (ch === '"' || ch === "'") {
+      quote = ch;
+      current += ch;
+    } else if (ch === ',') {
+      items.push(current);
+      current = '';
+    } else {
+      current += ch;
+    }
+  }
+  items.push(current);
+  return items.map((s) => s.trim().replace(/^["']|["']$/g, '')).filter(Boolean);
+}
+
+// ── minimal frontmatter parser (title/metaTitle/metaDescription/slug/category/keywords/citations) ──
 function parseFrontmatter(raw) {
   const m = raw.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
   if (!m) return { meta: {}, body: raw };
@@ -80,7 +105,7 @@ function parseFrontmatter(raw) {
     const key = kv[1];
     let val = kv[2].trim();
     if (val.startsWith('[') && val.endsWith(']')) {
-      meta[key] = val.slice(1, -1).split(',').map((s) => s.trim().replace(/^["']|["']$/g, '')).filter(Boolean);
+      meta[key] = splitArrayItems(val.slice(1, -1));
     } else {
       meta[key] = val.replace(/^["']|["']$/g, '');
     }
@@ -119,10 +144,29 @@ function loadArticles() {
   });
 }
 
+// Frontmatter `citations: ["title|url", "title only (no stable free link)", ...]`
+// reuses the existing bracket-array parsing in parseFrontmatter (same mechanism
+// as `keywords`) -- `|url` is optional, matching the primarySources doc comment
+// on LawArticle: omit the url on a citation that lacks a stable free full-text
+// link rather than link to something unverified. Maps to customFields.citations,
+// which readPrimarySources() in Frontend/.../src/lib/cms.ts reads and remaps to
+// the public `primarySources` shape shared with bundled LawArticle data.
+function parseCitations(raw) {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((entry) => {
+      const [title, url] = String(entry).split('|').map((s) => s.trim());
+      if (!title) return null;
+      return url ? { title, url } : { title };
+    })
+    .filter(Boolean);
+}
+
 function buildDoc(a) {
   const contentBlocks = markdownToBlocks(a.body, { htmlOnly: true });
   const words = wordCount(a.body);
   const keywords = Array.isArray(a.meta.keywords) ? a.meta.keywords : [];
+  const citations = parseCitations(a.meta.citations);
   const alphabet = (a.title || '#').trim().charAt(0).toUpperCase();
   // Byline resolves to a real cms_authors record only when meta.author matches a
   // known slug — authorSlug is what links the article to that record (admin's
@@ -154,6 +198,7 @@ function buildDoc(a) {
       alphabet: /[A-Z]/.test(alphabet) ? alphabet : '#',
       category: a.meta.category || CATEGORY_NAME,
       schemaRecommendation: 'Article',
+      ...(citations.length ? { citations } : {}),
     },
     ...(categorySlug ? { categorySlug, categoryName: categoryName || a.meta.category } : {}),
     contentBlocks,

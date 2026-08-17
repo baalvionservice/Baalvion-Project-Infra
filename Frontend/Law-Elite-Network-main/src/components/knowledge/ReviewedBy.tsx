@@ -1,5 +1,6 @@
 import React from 'react';
-import { BadgeCheck } from 'lucide-react';
+import Link from 'next/link';
+import { BadgeCheck, Info } from 'lucide-react';
 
 export interface ReviewedByInfo {
   name: string;
@@ -9,13 +10,26 @@ export interface ReviewedByInfo {
 }
 
 /**
- * Attorney-review credit line. Renders nothing when `info` is absent -- see
- * the `reviewedBy` doc comment on LawArticle and /editorial-process: this
- * network only claims named-attorney review where it has actually happened,
- * never as a default "reviewed by our team" placeholder.
+ * Attorney-review credit line. Never claims review happened when it didn't --
+ * see the `reviewedBy` doc comment on LawArticle and /editorial-process: this
+ * network only credits a named attorney where review actually took place.
+ * When it didn't, that limitation is stated plainly rather than left blank --
+ * per /editorial-process ("Legal review status") a reader should never have
+ * to guess whether a guide was attorney-reviewed.
  */
 export function ReviewedBy({ info }: { info?: ReviewedByInfo }) {
-  if (!info) return null;
+  if (!info) {
+    return (
+      <div className="flex items-start gap-2.5 text-[13px] text-slate-500 bg-slate-50 border border-slate-100 rounded-lg px-4 py-3">
+        <Info className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" aria-hidden="true" />
+        <p>
+          Legal review: Not independently reviewed by a licensed attorney. This guide is general legal
+          information researched and edited under our{' '}
+          <Link href="/editorial-process" className="text-blue-600 hover:underline">Editorial Process</Link>.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-start gap-2.5 text-[13px] text-slate-600 bg-blue-50/60 border border-blue-100 rounded-lg px-4 py-3">
