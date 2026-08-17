@@ -7,8 +7,8 @@
  */
 
 export const TERM_OF_DAY = {
-  term: "Compound Interest",
+  term: "Dollar-Cost Averaging",
   definition:
-    "Compound interest is the interest you earn on both your original principal and the interest that has already accumulated. Because each period's interest is added to the balance, growth accelerates over time — the engine behind long-term investing and the reason starting early matters so much.",
-  href: "/financial-tools/compound-interest",
+    "Dollar-cost averaging means investing a fixed amount on a regular schedule, regardless of price. Because you buy more units when prices are low and fewer when they're high, your average cost per unit smooths out over time — reducing the risk of mistiming the market and building a calm, repeatable investing habit.",
+  href: "/personal-finance",
 };
