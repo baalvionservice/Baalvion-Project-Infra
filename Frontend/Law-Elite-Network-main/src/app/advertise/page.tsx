@@ -1,24 +1,51 @@
-"use client";
-
-import React, { useState } from 'react';
+import React from 'react';
 import { Navbar } from '@/components/navbar';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
-import { List, TrendingUp, Globe, BarChart3 } from 'lucide-react';
+import { AdvertiseToc } from '@/components/knowledge/AdvertiseToc';
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
+import { fetchPublicApi } from '@/lib/api/public-fetch';
+import { mergeArticles } from '@/data/law-content';
+import { cmsGetArticles } from '@/lib/cms';
+import { getMergedAuthors } from '@/lib/authors-server';
+import { CURRENT_CATEGORY_SLUGS } from '@/lib/category-slugs';
 
-export default function AdvertisePage() {
-  const [isExpanded, setIsExpanded] = useState(true);
+// Server component so the platform-overview stats below are computed from
+// the same real data sources the homepage uses, instead of the hardcoded
+// "72+ / 8 / 11" figures this page shipped with (8 practice areas was stale
+// the moment the network grew to 16). The only client-side bit -- the
+// collapsible table of contents -- is split out into AdvertiseToc.tsx.
+export const revalidate = 300;
 
-  const tocLinks = [
-    { label: "Platform Demographics", id: "audience" },
-    { label: "B2B Partnership Tiers", id: "partnerships" },
-    { label: "Content Integration", id: "content" },
-    { label: "Network Intelligence Ads", id: "ads" },
-    { label: "Brand Integrity Standards", id: "standards" },
-    { label: "Case Studies", id: "case-studies" },
-    { label: "Request Media Kit", id: "media-kit" },
-  ];
+// Only the two sections this page actually has content for. The previous
+// version listed 7 anchors ("Content Integration", "Network Intelligence
+// Ads", "Brand Integrity Standards", "Case Studies", "Request Media Kit")
+// that pointed at sections which were never built -- dead in-page links.
+const TOC_LINKS = [
+  { label: 'Platform Overview', id: 'audience' },
+  { label: 'B2B Partnership Tiers', id: 'partnerships' },
+];
+
+export default async function AdvertisePage() {
+  const [cmsArticles, apiArticles, editorialBoard] = await Promise.all([
+    cmsGetArticles().catch(() => []),
+    fetchPublicApi('/articles', { limit: 200, status: 'published' })
+      .then((j) => {
+        const items = j?.data?.items || j?.data || [];
+        return Array.isArray(items) ? items : [];
+      })
+      .catch(() => []),
+    getMergedAuthors().catch(() => []),
+  ]);
+
+  const seenSlugs = new Set<string>();
+  const combinedSource = [...cmsArticles, ...apiArticles].filter((a: any) => {
+    if (!a?.slug || seenSlugs.has(a.slug)) return false;
+    seenSlugs.add(a.slug);
+    return true;
+  });
+  const guidesCount = mergeArticles(combinedSource).length;
+  const practiceAreaCount = CURRENT_CATEGORY_SLUGS.length;
+  const contributorCount = editorialBoard.length;
 
   return (
     <div className="min-h-screen bg-white">
@@ -26,41 +53,13 @@ export default function AdvertisePage() {
 
       <main className="pt-32 pb-24">
         <div className="container mx-auto px-6 max-w-4xl">
-          
+
           <header className="mb-12">
             <h1 className="text-[44px] md:text-[56px] font-bold text-slate-900 tracking-tight font-serif mb-10 leading-tight">
               Advertise
             </h1>
 
-            <div className="relative border border-slate-200 p-8 pt-6 rounded-none bg-slate-50/30">
-              <div className="flex items-center gap-2 mb-6">
-                <List className="w-4 h-4 text-blue-600" />
-                <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-900">Table of Contents</span>
-              </div>
-
-              {isExpanded && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-3 animate-in fade-in duration-300">
-                  {tocLinks.map((link) => (
-                    <div key={link.id} className="flex items-start gap-2 group">
-                      <CoralArrow className="mt-1 shrink-0" />
-                      <Link 
-                        href={`#${link.id}`}
-                        className="text-[15px] font-medium text-slate-800 hover:text-blue-600 underline decoration-slate-200 hover:decoration-blue-600 decoration-1 underline-offset-4 transition-all"
-                      >
-                        {link.label}
-                      </Link>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <button 
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-[#a3a3a3] hover:bg-slate-600 text-white text-[10px] font-bold uppercase px-3 py-1 rounded-sm transition-all shadow-sm"
-              >
-                {isExpanded ? 'Close -' : 'Expand +'}
-              </button>
-            </div>
+            <AdvertiseToc links={TOC_LINKS} />
           </header>
 
           <section className="space-y-20">
@@ -68,20 +67,20 @@ export default function AdvertisePage() {
               <h2 className="text-[26px] md:text-[32px] font-bold text-slate-900 font-serif leading-tight">Platform Overview</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div className="space-y-2">
-                  <p className="text-4xl font-bold text-blue-600 font-serif">72+</p>
+                  <p className="text-4xl font-bold text-blue-600 font-serif">{guidesCount}</p>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Published Legal Guides</p>
                 </div>
                 <div className="space-y-2">
-                  <p className="text-4xl font-bold text-blue-600 font-serif">8</p>
+                  <p className="text-4xl font-bold text-blue-600 font-serif">{practiceAreaCount}</p>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Practice Area Verticals</p>
                 </div>
                 <div className="space-y-2">
-                  <p className="text-4xl font-bold text-blue-600 font-serif">11</p>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Expert Contributors</p>
+                  <p className="text-4xl font-bold text-blue-600 font-serif">{contributorCount}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Contributing Authors</p>
                 </div>
               </div>
               <p className="text-sm text-slate-500 max-w-2xl">
-                Every guide is written and reviewed by a named legal contributor across our practice areas, giving
+                Every guide is written and attributed to a named contributor across our practice areas, giving
                 advertisers a brand-safe, subject-matter-relevant context rather than generic traffic.
               </p>
             </div>
@@ -92,8 +91,13 @@ export default function AdvertisePage() {
                 <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/10 rounded-full blur-3xl" />
                 <div className="relative z-10 space-y-6">
                   <h3 className="text-2xl font-bold italic font-serif">Elite Network Sponsorship</h3>
-                  <p className="text-slate-400 leading-relaxed italic">Align your brand with high-intent legal intelligence and distinguished practitioners.</p>
-                  <button className="bg-blue-600 hover:bg-blue-700 text-white px-10 h-14 rounded-2xl font-bold text-[10px] uppercase tracking-widest shadow-xl transition-all">Request Partnership Protocol</button>
+                  <p className="text-slate-400 leading-relaxed italic">Align your brand with high-intent legal-education content and readers researching real questions.</p>
+                  <Link
+                    href="/contact-us"
+                    className="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white px-10 h-14 rounded-2xl font-bold text-[10px] uppercase tracking-widest shadow-xl transition-all"
+                  >
+                    Request Partnership Details
+                  </Link>
                 </div>
               </div>
             </div>
@@ -104,13 +108,5 @@ export default function AdvertisePage() {
 
       <PublicFooter />
     </div>
-  );
-}
-
-function CoralArrow({ className }: { className?: string }) {
-  return (
-    <svg className={cn("w-4 h-4 text-[#ff6b6b]", className)} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M15 15l-3 3-3-3" /><path d="M12 18V9a3 3 0 0 1 3-3h3" />
-    </svg>
   );
 }

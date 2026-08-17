@@ -159,11 +159,34 @@ export default async function KnowledgeHomePage() {
   // "Latest Guides" grid: prefer the CMS's own date-sorted feed (real
   // publishedAt-derived dates) and only fall back to the merged pool when the
   // CMS is sparse, mirroring the same threshold used for `spotlightSource`.
+  // Capped at 2-per-category so a single practice area with a recent content
+  // batch (e.g. Dispute Resolution) can't dominate every slot -- backfills
+  // from the overflow (still most-recent-first) if the cap leaves the grid
+  // short of 8, so sparse days never render fewer than the source supports.
   const latestGuidesSource = cmsArticles.length >= 8 ? cmsArticles : pool;
-  const latestGuides = [...latestGuidesSource]
+  const latestGuidesSorted = [...latestGuidesSource]
     .filter((a: any) => a?.slug && !usedSlugs.has(a.slug))
-    .sort((a: any, b: any) => (b.updatedAt || '').localeCompare(a.updatedAt || ''))
-    .slice(0, 8);
+    .sort((a: any, b: any) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
+
+  const MAX_PER_CATEGORY = 2;
+  const perCategoryCount = new Map<string, number>();
+  const latestGuides: any[] = [];
+  const latestGuidesOverflow: any[] = [];
+  for (const a of latestGuidesSorted) {
+    const catKey = categorySlugOf(a) || categoryIdOf(a) || 'uncategorized';
+    const count = perCategoryCount.get(catKey) || 0;
+    if (count < MAX_PER_CATEGORY) {
+      latestGuides.push(a);
+      perCategoryCount.set(catKey, count + 1);
+    } else {
+      latestGuidesOverflow.push(a);
+    }
+    if (latestGuides.length >= 8) break;
+  }
+  for (const a of latestGuidesOverflow) {
+    if (latestGuides.length >= 8) break;
+    latestGuides.push(a);
+  }
   latestGuides.forEach((a: any) => usedSlugs.add(a.slug));
 
   const homeStats = {
