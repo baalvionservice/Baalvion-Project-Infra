@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 const title = 'Plans & Pricing';
-const description = "Choose a Law Elite Network plan — flexible options for clients and verified lawyers. Access elite legal counsel across 188 countries.";
+const description = "Compare Law Elite Network membership plans — flexible options for clients and legal professionals accessing guides, tools, and network features.";
 export const metadata: Metadata = {
   title,
   description,

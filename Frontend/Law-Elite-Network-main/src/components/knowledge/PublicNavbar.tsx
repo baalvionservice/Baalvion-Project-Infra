@@ -280,7 +280,7 @@ export function PublicNavbar() {
                   </h3>
                   <p className="text-sm text-slate-500 leading-relaxed mb-5">
                     {activeCategoryData.description ||
-                      'Expert-reviewed guides and explainers across this practice area.'}
+                      'Plain-language guides and explainers across this practice area.'}
                   </p>
                   <Link
                     href={`/${activeCategoryData.slug}`}

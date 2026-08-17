@@ -1,68 +1,81 @@
 import React from 'react';
 import Link from 'next/link';
-import { Award, Search, BookOpen, ShieldCheck, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
-// Mirrors "Investopedia for Advisors" -- four cards, every one pointing at a
-// real, publicly reachable route (registration is public; the dashboard
-// pages behind it are not linked from here).
-const CARDS = [
+// Secondary links shown as a ruled list beside the primary CTA -- no "find a
+// lawyer directory" entry here on purpose: the practitioner directory has no
+// real, verified attorney data yet (see src/app/lawyer/[id]/page.tsx and
+// robots.ts), so promising directory search to professionals would be a
+// false claim.
+const SECONDARY_LINKS = [
   {
-    icon: Award,
-    title: 'Join Our Network',
-    body: 'List your practice and get discovered by readers researching your practice areas.',
-    href: '/register',
+    title: 'Advertise With Us',
+    body: 'Reach readers researching your practice areas through sponsorship.',
+    href: '/advertise',
   },
   {
-    icon: Search,
-    title: 'Find a Lawyer',
-    body: 'Search the directory by practice area and jurisdiction.',
-    href: '/search',
-  },
-  {
-    icon: BookOpen,
     title: 'Practice Areas',
     body: 'See every legal topic the network currently covers.',
     href: '#legal-guides',
   },
   {
-    icon: ShieldCheck,
     title: 'Editorial Standards',
     body: 'How our guides are researched, written, and reviewed.',
     href: '/editorial-standards',
   },
 ];
 
+/**
+ * Dark, full-bleed masthead band -- deliberately breaks the light card-grid
+ * rhythm every other homepage section uses, the way a real front page runs
+ * one inverted "pull-out" module rather than repeating the same card shape
+ * top to bottom. Every link resolves to a real, publicly reachable route
+ * (registration is public; the dashboard pages behind it are not linked
+ * from here).
+ */
 export function ForProfessionalsSection() {
   return (
     <section className="py-16 border-t border-slate-200">
-      <div className="rounded-2xl bg-slate-50/70 border border-slate-100 px-6 py-12 md:px-12">
-        <div className="max-w-2xl mx-auto text-center mb-10">
-          <span className="kicker justify-center">For Legal Professionals</span>
-          <h2 className="font-headline text-2xl md:text-3xl font-extrabold text-slate-900 mt-2">
-            Law Elite Network for Attorneys
-          </h2>
-          <p className="text-sm text-slate-500 mt-3 leading-relaxed">
-            Resources for practitioners who want to reach readers researching their practice areas,
-            or simply want to see how the network operates.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-5xl mx-auto">
-          {CARDS.map((c) => (
+      <div className="bg-slate-900 text-white px-6 py-14 md:px-14 md:py-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
+          <div className="lg:col-span-7">
+            <span className="kicker !text-red-400">For Legal Professionals</span>
+            <h2 className="font-headline text-3xl md:text-4xl font-extrabold mt-3 leading-[1.1] tracking-tight">
+              Law Elite Network for Attorneys
+            </h2>
+            <p className="text-slate-400 mt-4 max-w-md leading-relaxed">
+              Resources for practitioners who want to reach readers researching their practice
+              areas, or simply want to see how the network operates.
+            </p>
             <Link
-              key={c.title}
-              href={c.href}
-              className="group bg-white p-6 rounded-xl border border-slate-200 hover:border-news-600 hover:shadow-sm transition-all"
+              href="/register"
+              className="mt-7 inline-flex items-center gap-2 px-6 h-12 bg-white text-slate-900 text-[13px] font-bold tracking-wide hover:bg-slate-100 transition-colors"
             >
-              <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mb-4 group-hover:bg-blue-100 transition-colors">
-                <c.icon className="w-[18px] h-[18px] text-blue-600" aria-hidden="true" />
-              </div>
-              <h3 className="text-[15px] font-bold text-slate-900 mb-1.5">{c.title}</h3>
-              <p className="text-[13px] text-slate-500 leading-relaxed">{c.body}</p>
-              <span className="mt-3 inline-flex items-center gap-1 text-[12px] font-bold text-blue-700 group-hover:text-news-600 transition-colors">
-                Learn more <ArrowRight className="w-3 h-3" />
-              </span>
+              Join Our Network <ArrowRight className="w-4 h-4" />
             </Link>
-          ))}
+          </div>
+          <div className="lg:col-span-5 lg:border-l lg:border-white/10 lg:pl-10">
+            <div className="divide-y divide-white/10">
+              {SECONDARY_LINKS.map((c) => (
+                <Link
+                  key={c.title}
+                  href={c.href}
+                  className="group flex items-center justify-between gap-3 py-4"
+                >
+                  <div className="min-w-0">
+                    <h3 className="text-[14px] font-bold text-white group-hover:text-red-400 transition-colors">
+                      {c.title}
+                    </h3>
+                    <p className="text-[12.5px] text-slate-400 mt-0.5">{c.body}</p>
+                  </div>
+                  <ArrowRight
+                    className="w-4 h-4 text-slate-500 group-hover:text-red-400 transition-colors shrink-0"
+                    aria-hidden="true"
+                  />
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </section>
