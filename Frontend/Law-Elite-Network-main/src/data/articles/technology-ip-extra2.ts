@@ -18,7 +18,7 @@ export const technologyIpExtra2Articles: LawArticle[] = [
     subcategory: { id: 'sub_ti_patent', name: 'Patents', slug: 'patents' },
     summary:
       "A patent gives an inventor a time-limited monopoly over an invention in exchange for disclosing how it works — but only if it's new, useful, and non-obvious.",
-    author: 'Aisha Rahman',
+    author: 'Marcus Hale',
     updatedAt: 'June 24, 2026',
     readingTime: 10,
     views: 7910,

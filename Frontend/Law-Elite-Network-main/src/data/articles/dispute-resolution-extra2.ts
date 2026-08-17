@@ -18,7 +18,7 @@ export const disputeResolutionExtra2Articles: LawArticle[] = [
     subcategory: { id: 'sub_dr_litigation', name: 'Litigation', slug: 'litigation' },
     summary:
       'Small claims court offers a fast, low-cost way to resolve modest money disputes without lawyers — ideal for unpaid debts and minor contract problems.',
-    author: 'Sofia Almeida',
+    author: 'Marcus Whitfield',
     updatedAt: 'June 23, 2026',
     readingTime: 9,
     views: 8470,
@@ -97,7 +97,7 @@ export const disputeResolutionExtra2Articles: LawArticle[] = [
     subcategory: { id: 'sub_dr_litigation', name: 'Litigation', slug: 'litigation' },
     summary:
       'A class action lets one lawsuit represent many people harmed the same way, making it practical to hold defendants accountable for widespread small losses.',
-    author: 'Daniel Okafor',
+    author: 'Marcus Whitfield',
     updatedAt: 'June 21, 2026',
     readingTime: 9,
     views: 7050,
