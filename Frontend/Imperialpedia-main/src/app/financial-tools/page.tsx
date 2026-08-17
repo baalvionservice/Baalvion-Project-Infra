@@ -2,7 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { getCalculatorList } from '@/services/mock-api/calculators';
 import { CalculatorCard } from '@/modules/calculators/components/CalculatorCard';
-import { Calculator as CalcIcon, Mail, Compass, ArrowRight, Clock, TrendingUp, Landmark, PieChart } from 'lucide-react';
+import { Calculator as CalcIcon, Mail, Compass, ArrowRight, TrendingUp, Landmark, PieChart } from 'lucide-react';
 import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
 import HeadingSection from '@/components/layout/HeadingSection';
@@ -53,7 +53,6 @@ export default async function FinancialToolsDashboard() {
   const response = await getCalculatorList();
   const allTools = response.data;
   const tools = allTools.filter((t) => LIVE_SLUGS.has(t.slug));
-  const comingSoon = allTools.filter((t) => !LIVE_SLUGS.has(t.slug));
   const categories = Array.from(new Set(tools.map((t) => t.category)));
   const startHere = START_HERE_SLUGS.map((slug) => tools.find((t) => t.slug === slug)).filter(
     (t): t is (typeof tools)[number] => Boolean(t)
@@ -191,36 +190,6 @@ export default async function FinancialToolsDashboard() {
             </div>
           </section>
         ))}
-
-        {comingSoon.length > 0 && (
-          <section>
-            <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2 border-b border-gray-100">
-              <Clock className="h-4 w-4" />
-              Coming Soon
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {comingSoon.map((tool) => (
-                <div
-                  key={tool.id}
-                  className="flex flex-col gap-4 rounded-2xl border border-dashed border-gray-200 p-6 opacity-70"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-50 text-gray-400">
-                      <CalcIcon className="h-5 w-5" />
-                    </span>
-                    <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
-                      In Progress
-                    </span>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-500 leading-tight">{tool.name}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-gray-400 line-clamp-3">{tool.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
 
         <p className="max-w-3xl text-sm leading-relaxed text-gray-500">
           {financialToolsHubClosing}
