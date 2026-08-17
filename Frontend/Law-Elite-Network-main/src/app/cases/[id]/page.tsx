@@ -22,7 +22,6 @@ import {
   Trash2,
   CheckSquare,
   BookOpen,
-  IndianRupee,
   Plus
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -33,8 +32,6 @@ import { formatDistanceToNow } from 'date-fns';
 import EditCaseModal from '@/components/case/EditCaseModal';
 import ChatWindow from '@/components/chat/ChatWindow';
 import DocumentVault from '@/components/case/DocumentVault';
-import AIInsights from '@/components/case/AIInsights';
-import CasePredictions from '@/components/case/CasePredictions';
 import CaseTimeline from '@/components/dashboard/CaseTimeline';
 import TaskSystem from '@/components/case/TaskSystem';
 import TimeTracker from '@/components/case/TimeTracker';
@@ -195,11 +192,6 @@ export default function CaseDetailPage() {
                       </p>
                     </CardContent>
                   </Card>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <AIInsights caseData={legalCase} />
-                    <CasePredictions caseData={legalCase} />
-                  </div>
                 </TabsContent>
 
                 <TabsContent value="workflow" className="animate-in fade-in duration-500">
@@ -235,30 +227,6 @@ export default function CaseDetailPage() {
                 </CardHeader>
                 <CardContent className="p-6">
                   <CaseTimeline currentStatus={legalCase.status} compact />
-                </CardContent>
-              </Card>
-
-              <Card className="border-slate-200 bg-white shadow-sm overflow-hidden">
-                <CardHeader className="bg-slate-50/50 border-b border-slate-100">
-                  <CardTitle className="text-xs font-bold uppercase tracking-widest text-slate-500">Financial Standing</CardTitle>
-                </CardHeader>
-                <CardContent className="p-6 space-y-6">
-                  <div className="flex justify-between items-end pb-4 border-b border-slate-100">
-                    <div>
-                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Settlement Protocol</p>
-                      <p className="text-sm font-bold text-slate-900">Fixed Fee Tier</p>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-xl font-bold text-blue-600 flex items-center gap-1">
-                        <IndianRupee className="w-4 h-4" /> 5,000
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-3 p-3 rounded-xl bg-blue-50 border border-blue-100">
-                    <ShieldCheck className="w-5 h-5 text-blue-600" />
-                    <p className="text-[10px] font-bold text-blue-700 uppercase tracking-tight">Funds Secured in Escrow</p>
-                  </div>
                 </CardContent>
               </Card>
 
