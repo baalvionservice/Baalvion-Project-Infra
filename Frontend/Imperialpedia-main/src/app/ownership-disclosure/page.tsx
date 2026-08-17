@@ -36,7 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-const LAST_UPDATED = 'July 5, 2026';
+const LAST_UPDATED = 'August 17, 2026';
 
 export default async function OwnershipDisclosurePage() {
   return (
@@ -70,10 +70,21 @@ function OwnershipDisclosureFallback() {
             </Text>
             <Text variant="body" className="text-muted-foreground leading-relaxed">
               {env.appName} is operated by{' '}
-              <strong>[PLACEHOLDER: legal entity name and registered business address]</strong>.
-              This is the legal entity responsible for the content published on this site and for
-              its compliance with applicable law.
+              <strong className="text-foreground">Baalvion Industries Private Limited</strong>,
+              part of the Baalvion Group. This is the legal entity responsible for the content
+              published on this site and for its compliance with applicable law.
             </Text>
+            <ul className="list-disc pl-6 space-y-2 text-muted-foreground leading-relaxed">
+              <li>
+                <strong className="text-foreground">Operating office:</strong> Yeshwant Avenue
+                Building, NX Road, Y K Nagar, Virar West, Virar, Maharashtra 401303, India
+              </li>
+              <li>
+                <strong className="text-foreground">Registered office:</strong> C/o Dilip Kumar
+                Kuldeep, Upper Mania, Po- Pakjhola, Semiliguda, Koraput, Odisha 764036, India (CIN:
+                U43121OD2025PTC048479)
+              </li>
+            </ul>
           </div>
 
           <div className="space-y-4">

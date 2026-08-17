@@ -18,11 +18,36 @@ export interface TopicCopy {
   /** Hero description sentence. */
   description: string;
   /**
-   * Longer educational primer paragraph (~100-150 words), rendered below the
-   * article feed on <CategoryFeed> so the page has substantive, unique prose
-   * independent of how many articles are currently published in the category.
+   * Longer educational primer, rendered below the article feed on <CategoryFeed>
+   * so the page has substantive, unique prose independent of how many articles
+   * are currently published in the category. Either a single ~100-150 word
+   * paragraph, or an array of paragraphs (~600-800 words total) for hubs that
+   * need deeper, multi-paragraph treatment to clear Google's thin-content bar.
    */
-  intro?: string;
+  intro?: string | string[];
+  /**
+   * Scannable 3-5 point summary rendered as a bulleted callout above the main
+   * copy — the fast answer for a reader who wants the gist before committing
+   * to the full page.
+   */
+  keyTakeaways?: string[];
+  /**
+   * Structured long-form body for flagship hubs: named H2 sections instead of
+   * unlabeled paragraphs, so the page reads as a real guide rather than a
+   * single dense block. Takes precedence over `intro` in rendering when present.
+   */
+  sections?: { heading: string; body: string[] }[];
+  /**
+   * Direct-answer FAQ block matching real search queries for this topic.
+   * Rendered with FAQPage structured data.
+   */
+  faqs?: { question: string; answer: string }[];
+  /**
+   * Curated contextual internal links with descriptive (not generic) anchor
+   * text, rendered as a "Related reading" block — distinct from the automatic
+   * sibling-tab strip, which uses the topic's own title as anchor text.
+   */
+  relatedReading?: { slug: string; anchor: string }[];
   /** SEO <title> — defaults to `${title} — News & Analysis`. */
   metaTitle?: string;
   /** SEO meta description — defaults to `description`. */
@@ -53,6 +78,71 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'Checking Accounts',
     description:
       'Compare checking account types, fees, and features, and learn how everyday banking accounts work.',
+    keyTakeaways: [
+      "Checking accounts are for transactions, not growth — most pay negligible interest, though high-yield checking exists, usually with requirements attached.",
+      "FDIC (or NCUA) insurance covers up to $250,000 per depositor, per ownership category, per institution — verify a bank's status directly via FDIC BankFind rather than trusting a website badge.",
+      "The monthly fee that matters most is rarely the advertised one — check how it's waived and what the real overdraft policy is.",
+      "Online banks generally win on fees and ATM reimbursement; branch banks win on in-person service and cash handling.",
+    ],
+    sections: [
+      {
+        heading: "What a Checking Account Is For",
+        body: [
+          "A checking account is the deposit account built for frequent, everyday transactions — debit card purchases, bill payments, direct deposit, and ATM withdrawals — as opposed to a savings account, which is designed to hold money and earn interest with fewer transactions. Nearly all checking accounts pay little to no interest, since their core function is liquidity and transaction volume rather than growth, though a smaller category of high-yield or interest-bearing checking accounts exists, usually at online banks with lower overhead, sometimes requiring a minimum balance or a set number of monthly debit transactions to earn the advertised rate.",
+        ],
+      },
+      {
+        heading: "Fees: Where Accounts Actually Differ",
+        body: [
+          "Monthly maintenance fees are common but frequently waivable — through a minimum balance, a recurring direct deposit, or enrollment in paperless statements — so the advertised fee on an account isn't necessarily what most account holders actually pay. Overdraft fees are the more consequential cost to watch: they're charged when a transaction is processed against insufficient funds, and while regulation requires opt-in consent for debit card and ATM overdraft coverage specifically, checks and automatic payments can still overdraw an account without that same opt-in requirement. Many banks now offer a small overdraft cushion or a grace period before the fee applies, and some have eliminated overdraft fees entirely as a competitive feature, which is worth comparing directly rather than assuming all banks handle it the same way.",
+        ],
+      },
+      {
+        heading: "How Your Deposits Are Protected",
+        body: [
+          "Account protection is a genuine, checkable fact rather than a marketing claim: deposits at FDIC-member banks are insured up to $250,000 per depositor, per ownership category, per bank, and the equivalent protection at credit unions comes from the NCUA under the same coverage limit. Any account holder can confirm a bank's FDIC status directly through the FDIC's BankFind tool before opening an account, which is a more reliable check than a badge on a bank's website.",
+        ],
+      },
+      {
+        heading: "Online Banks vs. Traditional Banks",
+        body: [
+          "Online-only banks and neobanks have pushed the checking account market toward fewer fees and often better ATM network access through fee-reimbursement partnerships, in exchange for no physical branch access — a real tradeoff for anyone who deposits cash regularly or prefers in-person service for account issues. Traditional banks and credit unions, by contrast, generally offer more account types, in-person support, and integrated product bundles (checking tied to a mortgage or investment account, for instance) at the cost of typically lower interest rates and, in some cases, higher fees.",
+        ],
+      },
+      {
+        heading: "What to Compare Beyond the Interest Rate",
+        body: [
+          "The details that matter more than the marketing headline are: the monthly fee and how it's waived, the overdraft policy and whether a cushion exists, ATM access and reimbursement terms if the bank has a limited branch footprint, and how quickly direct deposits post — some banks now advertise early direct deposit, posting funds up to a day or two before the official pay date. None of these show up in a simple interest-rate comparison, which is why the \"best\" checking account genuinely depends on how an individual actually banks day to day rather than a single ranked list.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "Is my money safe in a checking account?",
+        answer:
+          "Yes, at an FDIC-member bank or NCUA-insured credit union, deposits are insured up to $250,000 per depositor, per ownership category, per institution — confirm a bank's status directly through the FDIC's BankFind tool before opening an account.",
+      },
+      {
+        question: "What's a normal checking account fee?",
+        answer:
+          "Monthly maintenance fees commonly range from roughly $5 to $15 at traditional banks, though they're frequently waivable through a minimum balance, direct deposit, or e-statements — many online banks charge none at all.",
+      },
+      {
+        question: "Do checking accounts earn interest?",
+        answer:
+          "Standard checking accounts typically pay little to nothing. Some banks offer interest-bearing or \"rewards\" checking with a modest rate, usually requiring a minimum number of monthly debit transactions or a minimum balance to qualify.",
+      },
+      {
+        question: "What happens if I overdraw my account?",
+        answer:
+          "Regulation requires opt-in consent for debit card and ATM overdraft coverage specifically, but checks and automatic payments can still overdraw without that same opt-in. Many banks now offer a small cushion or grace period, and some have eliminated overdraft fees entirely — worth comparing directly.",
+      },
+    ],
+    relatedReading: [
+      { slug: "money-market", anchor: "A higher-yield alternative for balances you don't need daily" },
+      { slug: "banking-reviews", anchor: "Independent comparisons of bank fees and features" },
+      { slug: "credit-cards", anchor: "How a linked credit card's grace period differs from a debit card's" },
+    ],
     metaTitle: 'Checking Accounts — Guides & Comparisons',
     metaDescription:
       'Understand checking account fees, features, and how to choose the right everyday banking account for your needs.',
@@ -62,6 +152,71 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'Credit Cards',
     description:
       'How credit cards work, interest and rewards explained, and how to use credit responsibly.',
+    keyTakeaways: [
+      "A credit card is revolving credit — interest only accrues if you carry a balance past the due date; paying in full avoids it entirely.",
+      "Card APR compounds daily on the average daily balance, so it can outpace what a simple annual-rate calculation suggests.",
+      "Rewards only net positive for cardholders who pay in full — carrying a balance typically erases rewards value many times over.",
+      "Credit utilization (balance vs. limit) is one of the most heavily weighted scoring factors after payment history — what counts is the balance at your statement closing date, not the due date.",
+    ],
+    sections: [
+      {
+        heading: "How Revolving Credit Works",
+        body: [
+          "A credit card is a revolving line of credit: rather than borrowing a fixed amount once, like a personal loan, a cardholder can carry a balance up to an assigned credit limit, repay any portion of it, and borrow again as the balance is paid down, with no fixed end date on the account itself. Interest only accrues on a carried balance — paying the statement balance in full by the due date each cycle avoids interest entirely on purchases, which is why the same card can be effectively free to use for one person and expensive for another depending purely on repayment behavior rather than the card itself.",
+        ],
+      },
+      {
+        heading: "How Card Interest Is Actually Calculated",
+        body: [
+          "The annual percentage rate on a credit card is calculated and applied differently from an installment loan: interest typically compounds daily based on the average daily balance, which is why card APRs, though quoted as an annual figure, can meaningfully outpace what a simple monthly-rate calculation would suggest over time. Card issuers set individual rates within a published range based on creditworthiness at approval, and many cards carry a variable rate tied to the prime rate, meaning the APR can shift when the Federal Reserve changes its benchmark rate even without any change to the cardholder's own credit standing.",
+        ],
+      },
+      {
+        heading: "When Rewards Are Actually Worth It",
+        body: [
+          "Rewards structures — cash back, points, or airline and hotel miles — are a genuine value driver but only net-positive for cardholders who pay in full each month; carrying a balance at typical card interest rates erases rewards value many times over, which is the central math issuers rely on in offering rewards cards in the first place. Beyond the headline rewards rate, the details that matter more in practice are foreign transaction fees, whether rewards expire or can be pooled across cards from the same issuer, and redemption value, since points and miles are frequently worth less than face value when redeemed for cash back versus travel.",
+        ],
+      },
+      {
+        heading: "Credit Utilization and Your Score",
+        body: [
+          "Credit utilization — the balance carried relative to the total credit limit, both per card and across all revolving accounts — is one of the more heavily weighted factors in credit scoring models after payment history, which means a card's usefulness for building credit isn't just about using it, but about keeping reported balances low relative to the limit, particularly around the statement closing date rather than the payment due date. Requesting a credit limit increase, when approved, can improve utilization without changing spending habits at all, simply by widening the denominator in that ratio.",
+        ],
+      },
+      {
+        heading: "Protections That Are Specific to Credit Cards",
+        body: [
+          "Federal protections specific to credit cards include a 21-day minimum grace period between when a statement is issued and payment is due, limits on when and how much an issuer can raise rates on existing balances under the CARD Act, and zero-liability policies most major issuers offer for unauthorized charges — protections that don't automatically extend to debit cards in the same way, which is one of the more consequential practical differences between the two card types beyond the credit-versus-cash-flow distinction most people default to.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "What's a good credit utilization ratio?",
+        answer:
+          "Commonly cited guidance is under 30%, with the strongest scores usually associated with utilization in the single digits — measured both per card and across all revolving accounts combined. What gets reported is your balance at the statement closing date, not what you owe on the due date.",
+      },
+      {
+        question: "Is it bad to carry a small balance on purpose to \"build credit\"?",
+        answer:
+          "No — this is a common myth. Paying in full every month builds credit just as effectively, through on-time payment history, without paying any interest; carrying a balance provides no scoring benefit.",
+      },
+      {
+        question: "Why did my credit card APR go up without me doing anything?",
+        answer:
+          "Many cards carry a variable rate tied to the prime rate, so the APR can rise when the Federal Reserve raises its benchmark rate, even with no change to your own credit standing or payment history.",
+      },
+      {
+        question: "How long is a credit card grace period?",
+        answer:
+          "Federal rules require a minimum 21-day grace period between when your statement is issued and when payment is due, during which no interest accrues on that statement's balance if it's paid in full.",
+      },
+    ],
+    relatedReading: [
+      { slug: "loans", anchor: "When a personal loan beats revolving credit for a larger expense" },
+      { slug: "banking-reviews", anchor: "Independent card comparisons by rewards vs. APR" },
+      { slug: "checking", anchor: "Why debit cards don't carry the same legal protections" },
+    ],
     metaTitle: 'Credit Cards — Guides, Rewards & Interest Explained',
     metaDescription:
       'Learn how credit cards work, how interest and rewards are calculated, and how to choose and use a credit card wisely.',
@@ -71,6 +226,71 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'Personal Loans',
     description:
       'How personal loans work, interest rates, fees, and when a loan makes sense versus other borrowing options.',
+    keyTakeaways: [
+      "Personal loans are fixed-rate, fixed-term installment loans — compare APR, not just the interest rate, since origination fees can make a \"cheaper\" rate cost more overall.",
+      "Rates are driven almost entirely by credit score, debt-to-income ratio, and credit history, since most personal loans are unsecured.",
+      "Debt consolidation only saves money if the new rate beats your current average rate and you don't run the paid-off cards back up.",
+      "A soft-pull prequalification lets you compare offers from multiple lenders without hurting your credit score.",
+    ],
+    sections: [
+      {
+        heading: "How Personal Loans Work",
+        body: [
+          "A personal loan is a lump-sum installment loan, typically unsecured, that's repaid in fixed monthly payments over a set term — usually two to seven years — rather than drawn down and repaid on a revolving basis like a credit card. Because most personal loans aren't backed by collateral, lenders price the risk almost entirely off the borrower's credit profile: credit score, length of credit history, existing debt-to-income ratio, and verified income all factor into both approval and the interest rate offered, which is why the same loan amount can carry very different rates from one applicant to the next. A smaller category of secured personal loans exists too, usually backed by a savings account or certificate of deposit, and these generally carry lower rates in exchange for the lender having an asset to claim if payments stop.",
+        ],
+      },
+      {
+        heading: "What Determines Your Rate",
+        body: [
+          "The number that matters most when comparing offers is the annual percentage rate (APR), not the headline interest rate — APR folds in the origination fee that many lenders deduct from the loan proceeds before disbursing them, so a loan advertised at a lower rate but a higher origination fee can end up costing more than one with a slightly higher rate and no fee. Most lenders let borrowers check their likely rate through a soft credit pull that doesn't affect their score, with a hard inquiry only occurring once an application is formally submitted; comparing several prequalified offers within a short window is standard practice and, for scoring purposes, multiple hard pulls for the same loan type within about two weeks are typically treated as a single inquiry.",
+        ],
+      },
+      {
+        heading: "Common Uses — And the Debt Consolidation Math",
+        body: [
+          "Personal loans are most commonly used for debt consolidation, medical expenses, home improvement projects too small to justify a home equity loan, or major one-time purchases. Debt consolidation is worth a specific caveat: rolling several credit card balances into one fixed-rate personal loan can lower the total interest paid and simplify payments, but only if the new loan's rate is meaningfully lower than the average rate on the debt being consolidated, and only if the freed-up card limits don't get run back up afterward — a pattern that turns a debt-reduction move into additional debt.",
+        ],
+      },
+      {
+        heading: "Personal Loans vs. Other Borrowing Options",
+        body: [
+          "A home equity line of credit or loan is typically cheaper for large expenses but requires home equity and puts the house up as collateral; a 401(k) loan avoids a credit check and interest paid effectively goes back to the borrower's own account, but leaving the job before it's repaid can trigger the remaining balance coming due; and credit cards offer more flexibility for smaller, revolving needs but carry substantially higher average interest rates for anyone who carries a balance. Buy-now-pay-later products are a newer, generally shorter-term alternative for point-of-sale purchases specifically, with their own separate underwriting and repayment structure.",
+        ],
+      },
+      {
+        heading: "Before You Sign",
+        body: [
+          "It's worth checking a lender's registration and complaint history — the Consumer Financial Protection Bureau maintains a public complaint database — and reading the full repayment schedule for prepayment penalties, which aren't universal but do exist on some loans and can erase the benefit of paying a loan off early. A loan that's difficult to explain simply, or that pressures a fast decision, is a common early signal worth slowing down for regardless of the advertised rate.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "What credit score do I need for a personal loan?",
+        answer:
+          "There's no universal minimum — many lenders will consider borrowers in the high-500s to low-600s FICO range, though approval odds and rate quality improve substantially above roughly 670. Lenders also weigh income and debt-to-income ratio, so strong income can offset a lower score with some lenders.",
+      },
+      {
+        question: "Does applying for a personal loan hurt your credit score?",
+        answer:
+          "Checking your rate through prequalification uses a soft inquiry, which doesn't affect your score. A formal application triggers a hard inquiry, which typically causes a small, temporary dip; multiple hard inquiries for personal loans within a short rate-shopping window are usually counted as one.",
+      },
+      {
+        question: "Is a personal loan better than a credit card for debt consolidation?",
+        answer:
+          "It can be, if the loan's fixed APR is meaningfully lower than the average rate on the card balances being consolidated and the fixed payoff date creates discipline a revolving card doesn't. It backfires if the newly freed-up card limits get spent back down.",
+      },
+      {
+        question: "Can you pay off a personal loan early?",
+        answer:
+          "Usually yes, but check for a prepayment penalty first — most personal loans don't have one, but some do, and it can erase part of the interest savings from paying early.",
+      },
+    ],
+    relatedReading: [
+      { slug: "credit-cards", anchor: "How credit card interest actually compounds" },
+      { slug: "money-market", anchor: "Where to park savings while you pay down debt" },
+      { slug: "banking-reviews", anchor: "Independent lender and rate reviews" },
+    ],
     metaTitle: 'Personal Loans — Rates, Fees & Guides',
     metaDescription:
       'Understand how personal loans work, what determines your interest rate, and how to compare loan offers.',
@@ -107,6 +327,71 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'Money Market Accounts',
     description:
       'How money market accounts work and when they make sense versus savings accounts and CDs.',
+    keyTakeaways: [
+      "A money market account is a deposit account (FDIC/NCUA-insured), not a money market mutual fund (an uninsured investment product) — the similar names hide very different protections.",
+      "Rates are variable and move with broader interest-rate conditions, unlike a CD's fixed rate for a fixed term.",
+      "Many banks still enforce their own version of the old federal 6-per-cycle withdrawal limit even though the federal rule was suspended in 2020 — check the specific bank's policy.",
+      "Best suited for money that needs to stay liquid and insured but isn't for daily spending, like an emergency fund or a near-term savings goal.",
+    ],
+    sections: [
+      {
+        heading: "What a Money Market Account Actually Is",
+        body: [
+          "A money market account is a deposit account, held at a bank or credit union, that combines features of a savings account with limited transaction access more typical of checking — many money market accounts come with check-writing privileges or a debit card, something standard savings accounts usually don't offer, while still paying a rate closer to a savings or high-yield savings account. This should not be confused with a money market mutual fund, a separate investment product that holds short-term, high-quality debt instruments and is not FDIC-insured — the naming overlap is one of the more common sources of confusion in personal banking, and the two products carry meaningfully different protections.",
+        ],
+      },
+      {
+        heading: "How Your Money Is Protected — and What Isn't Insured",
+        body: [
+          "Because money market accounts are deposit accounts rather than investment products, they carry the same FDIC insurance (or NCUA insurance at credit unions) up to $250,000 per depositor, per ownership category, per institution as a standard checking or savings account — the tradeoff for that safety and liquidity is a rate that, while typically higher than a standard savings account, still generally trails what could be earned in longer-duration investments over time. Rates on money market accounts are variable and move with broader interest-rate conditions, so the rate advertised at account opening isn't fixed for any set period, unlike a certificate of deposit.",
+        ],
+      },
+      {
+        heading: "Minimum Balances, Fees, and Tiered Rates",
+        body: [
+          "Many money market accounts historically required a higher minimum balance to open or to earn the advertised rate, and some still charge a monthly fee or reduce the rate if the balance falls below a set threshold — a structural difference from many high-yield savings accounts, particularly at online banks, which have increasingly dropped minimum balance requirements entirely to compete for deposits. Some accounts also apply tiered rates, where a higher balance earns a better rate on the full balance or on the portion above a threshold, which is worth checking directly since the marketed \"up to\" rate often only applies at the top tier.",
+        ],
+      },
+      {
+        heading: "Withdrawal Limits: What Regulation D Still Means Today",
+        body: [
+          "Regulation D historically limited certain types of withdrawals and transfers from savings and money market accounts to six per statement cycle; that federal rule was suspended in 2020, though many banks still enforce their own version of the limit as an internal account term, so it's worth confirming a given bank's actual policy rather than assuming the old federal limit still applies uniformly.",
+        ],
+      },
+      {
+        heading: "When a Money Market Account Makes Sense",
+        body: [
+          "Money market accounts tend to make the most sense for money that needs to stay liquid and insured but isn't needed for day-to-day spending — an emergency fund, or savings earmarked for a near-term goal like a home down payment — where a CD's fixed term and early-withdrawal penalty would be too restrictive, and a standard checking account's typically negligible interest rate would leave meaningful yield on the table for no added benefit.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "Is a money market account the same as a money market fund?",
+        answer:
+          "No — a money market account is a bank/credit-union deposit account with FDIC or NCUA insurance; a money market mutual fund is a separate, uninsured investment product holding short-term debt instruments. The similar name is one of the most common sources of confusion in personal banking.",
+      },
+      {
+        question: "Is a money market account better than a savings account?",
+        answer:
+          "It depends on the specific accounts being compared — money market accounts often pay a comparable or slightly higher rate and may add check-writing or debit access, but some still carry higher minimum balance requirements than fee-free high-yield savings accounts.",
+      },
+      {
+        question: "How many withdrawals can I make from a money market account?",
+        answer:
+          "The federal Regulation D limit of six per statement cycle was suspended in 2020, but many banks still enforce their own internal version of that limit — confirm the specific policy with your bank rather than assuming.",
+      },
+      {
+        question: "Is a money market account a good place for an emergency fund?",
+        answer:
+          "Generally yes — it combines FDIC/NCUA-insured safety with same-day or near-same-day liquidity, which matters more for an emergency fund than chasing the highest possible yield.",
+      },
+    ],
+    relatedReading: [
+      { slug: "checking", anchor: "How everyday transaction accounts differ from savings-oriented ones" },
+      { slug: "loans", anchor: "If you're weighing dipping into savings vs. borrowing" },
+      { slug: "banking-reviews", anchor: "Current rate and fee comparisons across banks" },
+    ],
     metaTitle: 'Money Market Accounts Explained',
     metaDescription:
       'Understand how money market accounts work and how they compare to savings accounts and CDs.',
@@ -116,6 +401,77 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'Banking Reviews',
     description:
       'Independent reviews of banks, credit cards, loans, and banking apps to help you compare real options.',
+    keyTakeaways: [
+      "Reviews here evaluate actual terms against advertised terms, not just marketing claims — and note when terms were last verified, since offers change often.",
+      "A card or account can be a strong pick for one type of user and a poor one for another (e.g. pays in full vs. carries a balance) — recommendations specify which.",
+      "Lender reviews weigh origination fees and real approval requirements, not just the advertised rate range that only the strongest applicants actually get.",
+      "Any sponsored or business relationship is disclosed separately from the review itself and doesn't influence the factors weighed.",
+    ],
+    sections: [
+      {
+        heading: "What This Section Actually Evaluates",
+        body: [
+          "This section covers independent, editorially reviewed comparisons of banks, credit unions, credit cards, loan products, and banking apps — evaluating what each product actually offers against its advertised terms, rather than simply relaying marketing claims. Bank and card offers change relatively often (introductory APRs, welcome bonuses, and fee structures in particular), so reviews here are treated as reflecting terms as of the time they were last verified, with a note on when that was, rather than a permanently fixed ranking.",
+        ],
+      },
+      {
+        heading: "How Bank Reviews Are Weighed",
+        body: [
+          "Bank reviews weigh a consistent set of factors across every institution covered: interest rates on deposit accounts relative to the broader market at the time, fee structures including monthly maintenance, overdraft, and out-of-network ATM fees, minimum balance requirements, mobile and online banking functionality, customer service accessibility, and — as a baseline requirement rather than a differentiator — confirmed FDIC or NCUA deposit insurance. A bank that scores well on rate but poorly on fee transparency or customer service isn't treated as automatically better than one with a more modest rate and fewer hidden costs, since the \"best\" account genuinely depends on how a given reader actually banks.",
+        ],
+      },
+      {
+        heading: "Credit Cards: Two Different Questions",
+        body: [
+          "For credit cards specifically, reviews separate two distinct questions that are easy to conflate: whether a card is a good value for someone who pays their balance in full every month (where rewards structure, annual fee, and sign-up bonus terms dominate), versus whether it's a reasonable option for someone who may occasionally carry a balance (where APR, promotional 0% periods, and balance transfer terms matter far more than rewards). A card can be a strong recommendation under one framing and a poor one under the other, which is why reviews here specify which reader a given recommendation is aimed at rather than issuing a single blanket verdict.",
+        ],
+      },
+      {
+        heading: "How Loan and Lender Reviews Are Built",
+        body: [
+          "Loan and lender reviews focus on the details that don't always show up in advertised rates: origination fees and how they affect APR versus the headline interest rate, prepayment penalties, funding speed, and the lender's actual credit-score and income requirements versus its advertised range, since many lenders advertise a wide rate range that in practice is only accessible to the strongest applicants. Where available, reviews also note a lender's complaint history with the Consumer Financial Protection Bureau as a factual data point rather than an editorial opinion.",
+        ],
+      },
+      {
+        heading: "What Banking App Reviews Cover",
+        body: [
+          "Banking app reviews evaluate core functionality (mobile check deposit, bill pay, budgeting and spending tools, peer-to-peer transfers), security practices including two-factor authentication and how quickly the bank actually responds to reported fraud, and account-opening friction — whether an account can realistically be opened and funded entirely from a phone, which for online-only banks in particular is often the deciding factor for whether the product is usable in practice rather than just on paper.",
+        ],
+      },
+      {
+        heading: "Editorial Independence",
+        body: [
+          "None of the coverage here is sponsored placement disguised as editorial ranking — where a bank or lender has a business relationship with the site, that's disclosed separately from the review itself, and disclosed relationships have no bearing on the factors weighed above.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "How often are bank and card reviews updated?",
+        answer:
+          "Terms are noted as reflecting what was verified as of a specific date rather than presented as permanently fixed, since introductory APRs, bonuses, and fee structures change relatively often.",
+      },
+      {
+        question: "Are these reviews sponsored?",
+        answer:
+          "Where a bank or lender has a business relationship with the site, that's disclosed separately from the review itself, and it has no bearing on the factors weighed in the evaluation.",
+      },
+      {
+        question: "What matters more — a card's rewards rate or its APR?",
+        answer:
+          "It depends entirely on whether you pay your balance in full each month. For someone who does, rewards structure and annual fee dominate; for someone who might carry a balance, APR and any 0% promotional period matter far more than rewards.",
+      },
+      {
+        question: "What should I check before trusting a lender review?",
+        answer:
+          "Whether it discloses actual approval requirements (not just the advertised rate range), origination fees and how they affect real APR, and the lender's complaint history with the Consumer Financial Protection Bureau.",
+      },
+    ],
+    relatedReading: [
+      { slug: "loans", anchor: "How personal loan APR and origination fees actually work" },
+      { slug: "credit-cards", anchor: "The mechanics behind card interest and rewards" },
+      { slug: "checking", anchor: "What to compare beyond a bank's advertised rate" },
+    ],
     metaTitle: 'Banking Reviews — Banks, Cards & Apps Compared',
     metaDescription:
       'Independent, editorially reviewed comparisons of banks, credit cards, loans, and banking apps.',
@@ -177,8 +533,71 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'Economic Indicators',
     description:
       'CPI, PPI, retail sales, consumer confidence, PMI, and the data investors watch to read the health of the economy.',
-    intro:
-      "Economic indicators are the data releases investors and policymakers use to gauge the direction of the economy, generally grouped into leading indicators (which tend to change before the economy does, like building permits or consumer confidence), lagging indicators (which confirm a trend already underway, like the unemployment rate), and coincident indicators (which move alongside the economy in real time, like industrial production). CPI and PPI measure price changes at the consumer and producer level respectively; PMI surveys gauge whether manufacturing and services activity is expanding or contracting. No single indicator tells the whole story, which is why economists and markets typically weigh several together rather than reacting to any one release in isolation.",
+    keyTakeaways: [
+      "Indicators split into leading (change first), lagging (confirm a trend), and coincident (move with the economy) — no single release tells the full story.",
+      "Release dates are scheduled in advance, so markets often react more to the surprise versus consensus than to the raw number itself.",
+      "Initial readings are provisional — GDP and jobs data both get revised in subsequent months, sometimes enough to change the narrative.",
+      "Core inflation (ex food & energy) is weighted more heavily by the Fed than headline inflation, since food and energy prices move on supply factors monetary policy can't influence.",
+    ],
+    sections: [
+      {
+        heading: "The Three Types of Indicators",
+        body: [
+          "Economic indicators are the data releases investors and policymakers use to gauge the direction of the economy, generally grouped into leading indicators (which tend to change before the economy does, like building permits or consumer confidence), lagging indicators (which confirm a trend already underway, like the unemployment rate), and coincident indicators (which move alongside the economy in real time, like industrial production). CPI and PPI measure price changes at the consumer and producer level respectively; PMI surveys gauge whether manufacturing and services activity is expanding or contracting. No single indicator tells the whole story, which is why economists and markets typically weigh several together rather than reacting to any one release in isolation.",
+        ],
+      },
+      {
+        heading: "Who Publishes What, and When",
+        body: [
+          "Most major indicators are published on a fixed, pre-announced schedule by a specific government agency or private research group, which is part of why they move markets the way they do: the Bureau of Labor Statistics releases the Consumer Price Index and the monthly jobs report, the Census Bureau covers retail sales and durable goods orders, the Institute for Supply Management publishes the manufacturing and services PMI surveys, and organizations like the Conference Board and University of Michigan track consumer confidence and sentiment through separate survey methodologies. Because release dates are known in advance, economists publish consensus estimates beforehand, and markets often react less to the raw number than to how far it deviates from that consensus — a \"weaker than expected\" reading can move markets more than an objectively weak number that matched forecasts.",
+        ],
+      },
+      {
+        heading: "Why Initial Numbers Get Revised",
+        body: [
+          "Initial readings are provisional, not final, and revisions are a normal and expected part of the process rather than a sign something went wrong. GDP is reported in a sequence of advance, second, and third estimates as more complete source data comes in over the following months; the monthly jobs report similarly revises the prior two months' payroll figures alongside each new release, sometimes by enough to change the overall narrative about labor market strength. Economists who follow this closely watch the revisions almost as carefully as the new headline number, since a strong initial report followed by a sharp downward revision tells a meaningfully different story than a strong report that holds up.",
+        ],
+      },
+      {
+        heading: "How Indicators Move Markets",
+        body: [
+          "Indicators feed directly into the Federal Reserve's dual mandate of price stability and maximum employment, which is why inflation and labor data in particular move interest-rate expectations, and through them, bond yields, the dollar, and equity valuations, sometimes within minutes of a release. The core CPI or core PCE reading — inflation with volatile food and energy prices stripped out — is generally weighted more heavily by policymakers than the headline figure, since food and energy prices swing on supply factors that monetary policy has little influence over, while core inflation is thought to better reflect underlying price pressure in the broader economy.",
+        ],
+      },
+      {
+        heading: "How to Actually Use This Data",
+        body: [
+          "For individual investors, indicators are more useful as context for understanding why markets are moving and what the policy backdrop looks like than as a basis for short-term trading decisions — by the time a scheduled release hits, a meaningful part of the expected outcome is often already reflected in asset prices, and the sharpest moves tend to come from the surprise relative to consensus rather than the absolute number itself.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "What's the difference between CPI and PPI?",
+        answer:
+          "CPI (Consumer Price Index) measures price changes paid by consumers; PPI (Producer Price Index) measures price changes received by producers and sellers. PPI often moves first, since producer costs can flow through to consumer prices with a lag.",
+      },
+      {
+        question: "Why do economic data releases get revised?",
+        answer:
+          "Initial readings are based on incomplete source data collected under tight deadlines; agencies update the figures as more complete data comes in over the following months or years — a normal, expected part of the process, not a sign of error.",
+      },
+      {
+        question: "Which indicator does the Fed care about most?",
+        answer:
+          "The Fed's preferred inflation gauge is core PCE (Personal Consumption Expenditures, excluding food and energy), though it weighs the full range of labor and price data together under its dual mandate of price stability and maximum employment.",
+      },
+      {
+        question: "Can I trade off economic data releases?",
+        answer:
+          "It's genuinely difficult for individual investors — a meaningful part of the expected outcome is often already priced in before release, and the sharpest moves come from the surprise relative to consensus, which is hard to predict systematically.",
+      },
+    ],
+    relatedReading: [
+      { slug: "fiscal-policy", anchor: "How government spending and taxation add another lever" },
+      { slug: "monetary-policy", anchor: "How the Fed actually sets interest-rate policy" },
+      { slug: "global", anchor: "How international data feeds into the same picture" },
+    ],
     metaTitle: 'Economic Indicators Explained',
     metaDescription:
       'Learn how CPI, PPI, retail sales, consumer confidence, and other leading and lagging indicators reveal the direction of the economy.',
@@ -219,6 +638,71 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'Cryptocurrency & Digital Assets',
     description:
       'Bitcoin, Ethereum, DeFi, and the infrastructure of digital money — coverage that separates signal from hype.',
+    keyTakeaways: [
+      "Crypto trades continuously across fragmented global exchanges — there's no single official closing price, and liquidity is thinner than large-cap equities.",
+      "Spot Bitcoin and Ethereum ETFs gave traditional brokerage accounts direct exposure, and their daily fund-flow data is now itself a market-moving signal.",
+      "Custody matters as much as price: exchange-held assets carry exchange counterparty risk, self-custody carries key-security risk — neither has an FDIC/SIPC-style backstop.",
+      "With no earnings reports or dividends to anchor valuation, coverage leans on on-chain data, exchange flows, and macro correlation instead of fundamentals-driven analysis.",
+    ],
+    sections: [
+      {
+        heading: "How Crypto Markets Actually Trade",
+        body: [
+          "Crypto markets trade differently from traditional equity markets in ways that shape both price behavior and how coverage of them should be read. There's no single central exchange or closing bell — spot trading runs continuously across a fragmented set of global exchanges, each with its own order book, liquidity, and, at times, its own price for the same asset, so a headline price is really an aggregate or a reference from one major venue rather than a single official quote the way a stock's closing price is. That fragmentation, combined with generally thinner liquidity than large-cap equities, is a major reason crypto assets tend to move in sharper, faster swings on comparable news or macro shifts.",
+        ],
+      },
+      {
+        heading: "What Actually Moves Crypto Prices",
+        body: [
+          "Price action in crypto is unusually sensitive to a narrow set of drivers: broad risk sentiment and dollar strength (crypto has increasingly traded in step with high-growth tech equities during periods of macro stress), regulatory developments in major jurisdictions, exchange-specific events like large withdrawals or solvency concerns, and, for Bitcoin specifically, periodic supply-side events like the roughly four-year halving that cuts new-issuance rewards to miners. Futures and options markets on major exchanges, along with the funding rates on perpetual futures contracts, are also closely watched as a read on whether leveraged positioning is skewed long or short — a supplementary signal with no real equivalent most retail equity investors track day to day.",
+        ],
+      },
+      {
+        heading: "How Spot ETFs Changed Market Structure",
+        body: [
+          "The approval of U.S. spot Bitcoin ETFs, followed by spot Ethereum ETFs, materially changed market structure by giving traditional brokerage accounts direct exposure without self-custody, and the resulting fund flows — inflows and outflows reported daily — are now themselves a market-moving data point that didn't exist as a coverage category before. Institutional participation more broadly has grown alongside this, though it remains a smaller share of overall volume than retail and algorithmic trading, both of which tend to amplify volatility rather than dampen it.",
+        ],
+      },
+      {
+        heading: "Custody: The Risk That Isn't About Price",
+        body: [
+          "Custody is a market-structure detail worth understanding distinctly from price: assets held on an exchange are subject to that exchange's solvency and security, while self-custody in a personal wallet removes exchange counterparty risk but shifts full responsibility for key security to the holder, with no FDIC- or SIPC-equivalent backstop in either case. Several major exchange failures have made this distinction a genuinely material part of risk assessment rather than a technical footnote.",
+        ],
+      },
+      {
+        heading: "Why Crypto Coverage Reads Differently Than Stock Coverage",
+        body: [
+          "Because the asset class trades continuously, carries no earnings reports or dividends to anchor valuation the way equities do, and remains subject to evolving and jurisdiction-specific regulation, crypto market coverage tends to weight on-chain data, exchange flows, and macro correlation more heavily than the fundamentals-driven analysis used for stocks — a different toolkit for a market that behaves differently, not simply a riskier version of the same one.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "Why does crypto move so much more than stocks?",
+        answer:
+          "Thinner liquidity spread across many fragmented exchanges, continuous 24/7 trading with no closing bell to let information settle, and heavy participation from leveraged and algorithmic traders all amplify moves that would be smaller in a deeper, single-venue market.",
+      },
+      {
+        question: "Is it safer to hold crypto on an exchange or in my own wallet?",
+        answer:
+          "Each shifts the risk rather than eliminating it — an exchange holding carries that exchange's solvency and security risk, while self-custody removes that but makes the holder fully responsible for key security, with no deposit-insurance equivalent either way.",
+      },
+      {
+        question: "What is Bitcoin halving?",
+        answer:
+          "A pre-programmed event roughly every four years that cuts the reward miners receive for confirming new blocks in half, reducing the pace of new Bitcoin supply entering circulation.",
+      },
+      {
+        question: "Do spot Bitcoin ETFs actually hold Bitcoin?",
+        answer:
+          "Yes — unlike earlier futures-based crypto ETFs, spot Bitcoin and Ethereum ETFs hold the underlying asset directly, which is why their daily net inflows and outflows are watched as a real demand signal.",
+      },
+    ],
+    relatedReading: [
+      { slug: "cryptocurrency", anchor: "The fundamentals — blockchain, DeFi, and how digital assets actually work" },
+      { slug: "indicators", anchor: "The macro data that moves risk sentiment across markets" },
+      { slug: "banking-reviews", anchor: "Independent app and platform reviews" },
+    ],
     metaTitle: 'Crypto News & Digital Asset Analysis',
   },
   cryptocurrency: {
@@ -416,8 +900,71 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'Budgeting Apps',
     description:
       'Comparisons of budgeting apps, spreadsheets, and manual tracking methods to help you find the system you’ll actually stick with.',
-    intro:
-      "Budgeting apps generally fall into a few categories: automatic account-aggregation tools that pull in transactions and categorize spending with minimal manual entry, zero-based budgeting apps that require actively assigning every dollar a job, and simple expense trackers that log spending without enforcing a plan. Spreadsheets and manual tracking remain viable alternatives for people who want full control over categories and formulas without a subscription cost, though they require more discipline to keep updated. The most effective tool is rarely the one with the most features — it's the one whose friction level matches how much manual effort someone will realistically keep up with.",
+    keyTakeaways: [
+      "Budgeting apps split into automatic tracking, zero-based/envelope, and hybrid — the right one depends on how much manual effort you'll actually keep up with, not which has the most features.",
+      "Nearly all apps connect to banks through a third-party aggregator (Plaid, MX) rather than storing your password directly — the real privacy question is what that aggregator and the app do with your categorized spending data.",
+      "A free app isn't automatically the better deal once affiliate/data-sharing practices are counted, and a paid app isn't automatically more effective if you won't use the extra features.",
+      "Sync reliability depends more on your bank's integration with the aggregator than on which app you choose.",
+    ],
+    sections: [
+      {
+        heading: "The Three Basic Approaches",
+        body: [
+          "Budgeting apps generally fall into a few categories: automatic account-aggregation tools that pull in transactions and categorize spending with minimal manual entry, zero-based budgeting apps that require actively assigning every dollar a job, and simple expense trackers that log spending without enforcing a plan. Spreadsheets and manual tracking remain viable alternatives for people who want full control over categories and formulas without a subscription cost, though they require more discipline to keep updated. The most effective tool is rarely the one with the most features — it's the one whose friction level matches how much manual effort someone will realistically keep up with.",
+        ],
+      },
+      {
+        heading: "How Account Connections Actually Work",
+        body: [
+          "Account connectivity is handled almost universally today through third-party aggregators like Plaid or MX rather than an app directly storing a user's bank login credentials — worth understanding because it means the meaningful security question isn't \"does this app store my password,\" which it typically doesn't, but rather what data the aggregator itself retains, how long, and what the app's own privacy policy says about selling or sharing categorized spending data, which varies significantly and is worth reading directly rather than assuming from an app's price point.",
+        ],
+      },
+      {
+        heading: "How These Apps Actually Make Money",
+        body: [
+          "Pricing models split roughly into three types: fully free apps that monetize through affiliate partnerships or targeted financial product recommendations based on spending data, freemium apps with a paid tier unlocking features like custom categories, bill negotiation, or ad-free use, and subscription-only apps with no free tier at all, which is more common among the more advanced zero-based budgeting tools that require ongoing manual categorization work from the user and price accordingly. A free app isn't automatically the better deal once its data-sharing and recommendation practices are factored in, and a paid app isn't automatically more effective if the user won't actually engage with the extra features.",
+        ],
+      },
+      {
+        heading: "Effort vs. Outcome: The Real Tradeoff",
+        body: [
+          "The core determinant of whether any budgeting app actually works long-term has less to do with feature set than with how much manual maintenance it demands relative to how much the user is willing to do consistently — fully automated tracking apps have a lower ongoing effort requirement but tend to produce a passive spending report rather than an active budgeting habit, while zero-based and envelope-style apps require more upfront and ongoing manual categorization but tend to produce a stronger sense of where every dollar is actually going, which is the specific outcome a subset of users are looking for and a specific source of abandonment for users who aren't.",
+        ],
+      },
+      {
+        heading: "What to Compare Beyond the App Store Rating",
+        body: [
+          "Beyond category and price, practical differences worth comparing directly include whether the app supports shared or joint accounts for couples budgeting together, how it handles irregular income (a meaningful gap in some rigid envelope-style tools), export functionality if a user wants to move their data to a different app later, and how reliably transactions actually sync — a persistently delayed or broken bank connection undermines even the best-designed budgeting method, and connection reliability varies more by which bank an account is held at than by which budgeting app is used, since it depends on that bank's own integration with the underlying account aggregator.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "Is it safe to link my bank account to a budgeting app?",
+        answer:
+          "Most apps connect through a regulated third-party aggregator like Plaid or MX rather than storing your bank password directly. The more relevant question is what that aggregator and the app itself do with your transaction data — check the privacy policy rather than assuming based on price.",
+      },
+      {
+        question: "What's the difference between zero-based budgeting and just tracking spending?",
+        answer:
+          "Zero-based budgeting assigns every dollar of income a specific job before you spend it; tracking apps categorize spending after the fact. Tracking requires less ongoing effort but tends to produce a passive report rather than an active spending plan.",
+      },
+      {
+        question: "Are free budgeting apps worth it?",
+        answer:
+          "Often yes, but check how they monetize — commonly through affiliate partnerships or targeted financial product recommendations based on your spending data — since that's the tradeoff for no subscription fee.",
+      },
+      {
+        question: "Why does my bank connection keep breaking in my budgeting app?",
+        answer:
+          "Sync reliability is driven mostly by how well your specific bank integrates with the underlying account aggregator, not by which budgeting app you're using — a common frustration across apps when it happens with certain banks.",
+      },
+    ],
+    relatedReading: [
+      { slug: "checking", anchor: "The account fees and features a budget actually has to work around" },
+      { slug: "money-market", anchor: "Where to put money once a budget frees it up" },
+      { slug: "credit-cards", anchor: "How utilization affects your score independent of your budget" },
+    ],
     metaTitle: 'Best Budgeting Apps & Tracking Methods Compared',
     metaDescription:
       'Compare the best budgeting apps, spreadsheet templates, and manual tracking methods to find the budgeting system that fits how you actually manage money.',

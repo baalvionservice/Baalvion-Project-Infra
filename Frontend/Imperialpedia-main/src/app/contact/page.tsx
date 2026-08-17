@@ -52,8 +52,6 @@ export default async function ContactPage() {
 /** Functional contact channels (email cards + form) — shown under the CMS copy. */
 function ContactChannels() {
   const mailtoGeneral = `mailto:${env.contactEmail}?subject=${encodeURIComponent('Imperialpedia inquiry')}`;
-  const mailtoSupport = `mailto:${env.supportEmail}`;
-  const mailtoExperts = `mailto:${env.expertsEmail}`;
 
   return (
     <>
@@ -65,17 +63,18 @@ function ContactChannels() {
             </div>
             <div className="space-y-2">
               <Text variant="h3" className="text-2xl font-bold">
-                General &amp; support
+                Email
               </Text>
               <Text variant="bodySmall" className="text-muted-foreground leading-relaxed">
-                Site issues, press, and general questions.
+                General, support, press, and expert/verification inquiries — one team reads and
+                routes every message.
               </Text>
             </div>
             <Link
-              href={mailtoSupport}
+              href={mailtoGeneral}
               className="font-mono text-primary font-bold hover:underline break-all"
             >
-              {env.supportEmail}
+              {env.contactEmail}
             </Link>
           </CardContent>
         </Card>
@@ -87,17 +86,17 @@ function ContactChannels() {
             </div>
             <div className="space-y-2">
               <Text variant="h3" className="text-2xl font-bold">
-                Creators &amp; experts
+                Phone
               </Text>
               <Text variant="bodySmall" className="text-muted-foreground leading-relaxed">
-                Verification, contributor programs, and expert onboarding.
+                Reach us directly during business hours (IST) for urgent matters.
               </Text>
             </div>
             <Link
-              href={mailtoExperts}
+              href={`tel:${env.contactPhone.replace(/\s+/g, '')}`}
               className="font-mono text-secondary font-bold hover:underline break-all"
             >
-              {env.expertsEmail}
+              {env.contactPhone}
             </Link>
           </CardContent>
         </Card>
@@ -122,8 +121,6 @@ function ContactChannels() {
 
 function ContactFallback() {
   const mailtoGeneral = `mailto:${env.contactEmail}?subject=${encodeURIComponent('Imperialpedia inquiry')}`;
-  const mailtoSupport = `mailto:${env.supportEmail}`;
-  const mailtoExperts = `mailto:${env.expertsEmail}`;
 
   return (
     <main className="min-h-screen bg-background pt-24 pb-32">
@@ -152,17 +149,18 @@ function ContactFallback() {
               </div>
               <div className="space-y-2">
                 <Text variant="h3" className="text-2xl font-bold">
-                  General &amp; support
+                  Email
                 </Text>
                 <Text variant="bodySmall" className="text-muted-foreground leading-relaxed">
-                  Site issues, press, and general questions.
+                  General, support, press, and expert/verification inquiries — one team reads and
+                  routes every message.
                 </Text>
               </div>
               <Link
-                href={mailtoSupport}
+                href={mailtoGeneral}
                 className="font-mono text-primary font-bold hover:underline break-all"
               >
-                {env.supportEmail}
+                {env.contactEmail}
               </Link>
             </CardContent>
           </Card>
@@ -174,20 +172,32 @@ function ContactFallback() {
               </div>
               <div className="space-y-2">
                 <Text variant="h3" className="text-2xl font-bold">
-                  Creators &amp; experts
+                  Phone
                 </Text>
                 <Text variant="bodySmall" className="text-muted-foreground leading-relaxed">
-                  Verification, contributor programs, and expert onboarding.
+                  Reach us directly during business hours (IST) for urgent matters.
                 </Text>
               </div>
               <Link
-                href={mailtoExperts}
+                href={`tel:${env.contactPhone.replace(/\s+/g, '')}`}
                 className="font-mono text-secondary font-bold hover:underline break-all"
               >
-                {env.expertsEmail}
+                {env.contactPhone}
               </Link>
             </CardContent>
           </Card>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16 text-center text-sm text-muted-foreground">
+          <p>
+            <strong className="text-foreground">Operating office:</strong> Yeshwant Avenue
+            Building, NX Road, Y K Nagar, Virar West, Virar, Maharashtra 401303, India
+          </p>
+          <p>
+            <strong className="text-foreground">Registered office:</strong> Baalvion Industries
+            Private Limited, Upper Mania, Po- Pakjhola, Semiliguda, Koraput, Odisha 764036, India
+            (CIN: U43121OD2025PTC048479)
+          </p>
         </div>
 
         <Card className="glass-card p-8 md:p-10 border-white/5 bg-card/30 mb-10">

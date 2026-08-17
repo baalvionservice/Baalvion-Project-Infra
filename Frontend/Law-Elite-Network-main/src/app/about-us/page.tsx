@@ -77,8 +77,8 @@ export default function AboutUsPage() {
             <Block id="who-we-are" title="Who We Are">
               <p>
                 Law Elite Network was founded on March 11, 2025 with the mission of helping people understand the law and improve
-                their professional and legal outcomes. We are a legal knowledge platform — part of the{' '}
-                <Link href="/">Elite Knowledge Group</Link> publishing family — that publishes clear, well-sourced legal
+                their professional and legal outcomes. We are a legal knowledge platform operated by{' '}
+                <strong>Baalvion Industries Private Limited</strong>, part of the Baalvion Group — that publishes clear, well-sourced legal
                 explainers and operates a directory through which readers can discover qualified practitioners.
               </p>
               <p>
@@ -178,7 +178,7 @@ export default function AboutUsPage() {
                 explained.
               </p>
               <p>
-                Law Elite Network is part of the <Link href="/">Elite Knowledge Group</Link> publishing family, which
+                Law Elite Network is operated by Baalvion Industries Private Limited, part of the Baalvion Group, which
                 supports our editorial independence and gives our team the resources to maintain a large and growing
                 library to a consistent standard.
               </p>

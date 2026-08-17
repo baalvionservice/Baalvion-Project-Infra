@@ -29,6 +29,13 @@
     --positive: 145 63% 35%;
     --negative: 4 74% 49%;
     --breaking: 0 72% 51%; /* BreakingTicker's current red-600 look, unscoped default */
+    /* Scrollbar thumb: dark brown/near-black, always visible against the white
+       background — previously this used --muted (96% lightness, i.e. almost
+       white-on-white) with a blue hover state, so the thumb was invisible
+       until you happened to hover exactly over it, which read as "the page
+       won't scroll" when trying to drag it. */
+    --scrollbar-thumb: 20 12% 22%;
+    --scrollbar-thumb-hover: 20 15% 12%;
   }
 
   .dark {
@@ -53,6 +60,9 @@
     --ring: 218 90% 66%;
     --positive: 145 55% 50%;
     --negative: 4 70% 60%;
+    /* Lighter warm tone so the thumb still reads clearly against the dark background. */
+    --scrollbar-thumb: 30 18% 55%;
+    --scrollbar-thumb-hover: 30 22% 68%;
   }
 }
 
@@ -226,14 +236,23 @@
   @apply bg-card/50 backdrop-blur-md border border-white/10;
 }
 
+html {
+  /* Firefox scrollbar coloring — no shorthand equivalent to the webkit rules below. */
+  scrollbar-color: hsl(var(--scrollbar-thumb)) hsl(var(--background));
+}
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 14px;
 }
 ::-webkit-scrollbar-track {
   @apply bg-background;
 }
 ::-webkit-scrollbar-thumb {
-  @apply bg-muted hover:bg-primary/50 transition-colors rounded-full border-4 border-background;
+  background-color: hsl(var(--scrollbar-thumb));
+  border: 3px solid hsl(var(--background));
+  @apply transition-colors rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--scrollbar-thumb-hover));
 }
 
 @layer utilities {

@@ -70,14 +70,23 @@ export function AdSenseUnit({
   }
 
   return (
-    <ins
-      className={`adsbygoogle ${className}`}
-      style={{ display: 'block' }}
-      data-ad-client={clientId}
-      data-ad-slot={slot}
-      data-ad-format={format}
-      data-full-width-responsive={responsive ? 'true' : 'false'}
-    />
+    // Reserves space for the ad before Google's script measures and resizes
+    // the <ins> element. Without this, every ad slot starts at zero height
+    // and the page jumps by the ad's real height (often 250px+) the moment
+    // each one loads — a major cause of layout shift and janky scrolling on
+    // pages with several ad units, like the homepage. Heights approximate
+    // AdSense's typical responsive rectangle/banner sizes; the slot can still
+    // grow taller if the served creative is bigger, it just never starts flat.
+    <div className={`min-h-[100px] sm:min-h-[250px] ${className}`}>
+      <ins
+        className="adsbygoogle"
+        style={{ display: 'block' }}
+        data-ad-client={clientId}
+        data-ad-slot={slot}
+        data-ad-format={format}
+        data-full-width-responsive={responsive ? 'true' : 'false'}
+      />
+    </div>
   );
 }
 

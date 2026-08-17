@@ -13,9 +13,6 @@ import type { NextRequest } from 'next/server';
  */
 const REFRESH_COOKIE = process.env.NEXT_PUBLIC_REFRESH_COOKIE_NAME || 'baalvion_refresh';
 const PROTECTED_PREFIXES = ['/admin', '/creator/dashboard', '/editor', '/writer', '/premium', '/outline'];
-// /premium/subscribe is the public pricing/upsell page — it must stay reachable by
-// anonymous visitors (and crawlers) or nobody can see what they'd be paying for.
-const PUBLIC_EXCEPTIONS = ['/premium/subscribe'];
 
 // The retired per-app /admin panel redirects to the central admin-platform
 // console. The console URL is env-driven so production points at the real CMS;
@@ -165,6 +162,28 @@ const REMOVED_PATHS = new Set<string>([
   '/best-debt-relief-companies',
   '/best-crypto-exchanges',
   '/best-cd-rates',
+  '/financial-independence-guide',
+  '/personal-finance/financial-goals-framework',
+  '/income',
+  '/insurance',
+  '/insurance-reviews',
+  '/ai-analyst',
+  '/robo-advisors',
+  '/topics',
+  '/search',
+  '/terms-beginning-with-c',
+  '/housing-market-cools-mortgage-rates',
+  '/fed-holds-rates-inflation-cooling',
+  '/bitcoin-surges-institutional-demand',
+  '/tech-stocks-ai-spending-boom',
+  '/etf-inflows-record-february',
+  '/sp500-record-high-earnings',
+  '/gold-hits-2400-safe-haven',
+  '/terms',
+  '/terms/m/marital-deduction',
+  '/terms-beginning-with-num',
+  '/terms-beginning-with-z',
+  '/premium/subscribe',
 ]);
 
 export function middleware(request: NextRequest) {
@@ -218,8 +237,7 @@ export function middleware(request: NextRequest) {
 
   // 2) Coarse auth gate on protected areas
   const isProtected = PROTECTED_PREFIXES.some((p) => pathname.startsWith(p));
-  const isPublicException = PUBLIC_EXCEPTIONS.includes(pathname);
-  if (isProtected && !isPublicException) {
+  if (isProtected) {
     const hasSession = Boolean(request.cookies.get(REFRESH_COOKIE)?.value);
     if (!hasSession) {
       const signInUrl = request.nextUrl.clone();

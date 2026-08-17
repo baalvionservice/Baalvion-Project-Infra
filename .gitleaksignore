@@ -70,3 +70,12 @@ ff84c90c5d1d992d42a242cbe557b11efc9de3f5:.gitleaksignore:generic-api-key:51
 # Same curl-auth-header false positive as the help-baalvion API docs above,
 # now on the new Reports API doc page (`Bearer YOUR_API_KEY` placeholder).
 ec98fe7f78b057a9a6e8d548416ada7a3715e2a2:Frontend/help-baalvion/src/app/(docs)/api/reports/page.tsx:curl-auth-header:50
+
+# controlthemarket LIVE_SERVER_VERIFICATION.md — same curl-auth-header false
+# positive as the docs pages above: every flagged line is a `-H "Authorization:
+# Bearer YOUR_TOKEN"` example in a curl snippet showing developers the request
+# shape, not a real credential. Verified by reading all 4 lines directly.
+b6f9b5f95d9ec54848e6174860fe29b8b5b79e1c:Frontend/controlthemarket-main/LIVE_SERVER_VERIFICATION.md:curl-auth-header:135
+b6f9b5f95d9ec54848e6174860fe29b8b5b79e1c:Frontend/controlthemarket-main/LIVE_SERVER_VERIFICATION.md:curl-auth-header:423
+b6f9b5f95d9ec54848e6174860fe29b8b5b79e1c:Frontend/controlthemarket-main/LIVE_SERVER_VERIFICATION.md:curl-auth-header:440
+b6f9b5f95d9ec54848e6174860fe29b8b5b79e1c:Frontend/controlthemarket-main/LIVE_SERVER_VERIFICATION.md:curl-auth-header:450
