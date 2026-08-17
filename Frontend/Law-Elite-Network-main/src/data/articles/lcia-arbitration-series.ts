@@ -546,7 +546,7 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
       'The practical logistics of booking a London arbitration hearing venue — how the IAC and IDRC differ, the booking process, and budgeting venue cost separately.',
     content: `<p>London has two purpose-built, institution-independent hearing venues that host the large majority of LCIA-, ICC-, and ad hoc-administered hearings: the International Arbitration Centre (IAC) at 190 Fleet Street, and the International Dispute Resolution Centre (IDRC) near St Paul's Cathedral. Booking either follows the same basic sequence — identify room-size and format needs, request a hold, confirm through a signed booking agreement, and arrange technology and catering as separate line items from the room fee itself.</p>
 
-<div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>Neither the LCIA nor the ICC owns the physical venue for most hearings — counsel or the tribunal secretary books hearing space separately, as a distinct commercial arrangement from the institution's own administrative fees.</li><li>The IAC, established in 2019 at 190 Fleet Street, spans three floors of hearing, mediation, and breakout rooms, with its largest rooms seating up to roughly 60 people.</li><li>The IDRC offers more than 70 rooms in total, including 18 large hearing-capable rooms, with its biggest reconfigurable room accommodating up to roughly 200 people and smaller hearing rooms seating around 15.</li><li>Venue cost is priced per day (plus VAT) and is entirely separate from the LCIA's or ICC's own Schedule of Costs — it needs its own line item in the case budget.</li><li>Popular venues can book out months in advance during peak arbitration hearing season, so placing an early hold matters more than comparing headline rates.</li></ul></div>
+<div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>Neither the LCIA nor the ICC owns the physical venue for most hearings — counsel or the tribunal secretary books hearing space separately, as a distinct commercial arrangement from the institution's own administrative fees.</li><li>The IAC, established in 2019 at 190 Fleet Street, spans three floors of hearing, mediation, and breakout rooms, with its largest rooms seating up to roughly 60 people.</li><li>The IDRC offers over 100 rooms in total, including 20 large hearing-capable rooms, with individual hearing rooms accommodating between roughly 15 and 100 people depending on size.</li><li>Venue cost is priced per day (plus VAT) and is entirely separate from the LCIA's or ICC's own Schedule of Costs — it needs its own line item in the case budget.</li><li>Popular venues can book out months in advance during peak arbitration hearing season, so placing an early hold matters more than comparing headline rates.</li></ul></div>
 
 <h2>How Hearing-Room Logistics Actually Work in London Arbitration</h2>
 
@@ -556,7 +556,7 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
 <h3>What venues actually exist, and how do they differ?</h3>
 <ul>
 <li><strong>International Arbitration Centre (IAC):</strong> located at 190 Fleet Street, near the Chancery Lane junction, established in 2019 and spread across three floors of hearing rooms, mediation rooms, and breakout spaces. Larger rooms seat up to roughly 60 people. The centre is normally open 8:00 a.m. to 6:00 p.m. on weekdays, closed overnight and on weekends absent a special arrangement, and will hold a preferred date free of charge for up to seven days while a booking is confirmed.</li>
-<li><strong>International Dispute Resolution Centre (IDRC):</strong> located near St Paul's Cathedral, offering more than 70 rooms in total, of which 18 are large rooms suitable for hearings and the remainder serve as breakout or retirement rooms and smaller meeting spaces. Rooms are soundproofed and equipped with full Category 6 wiring for voice and data. The centre can reconfigure its largest room to accommodate up to roughly 200 people, while smaller hearing rooms comfortably seat around 15.</li>
+<li><strong>International Dispute Resolution Centre (IDRC):</strong> located near St Paul's Cathedral, offering over 100 rooms in total, of which 20 are large rooms suitable for hearings and the remainder serve as breakout or retirement rooms and smaller meeting spaces. Rooms are soundproofed and equipped with full Category 6 wiring for voice and data. The centre's arbitration hearing rooms accommodate between roughly 15 and 100 people depending on size.</li>
 </ul>
 
 <h3>How does the booking process actually work?</h3>
@@ -613,23 +613,21 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
 <h3>Are the IAC and IDRC used only for LCIA cases?</h3>
 <p>No. Both are independent venues used across LCIA, ICC, SIAC, ad hoc, and other institutionally administered arbitrations — booking either is not tied to which institution is administering the underlying case.</p>
 
-<h2>Sources & Further Reading</h2>
-<ul>
-<li>International Arbitration Centre (IAC), 190 Fleet Street, London</li>
-<li>International Dispute Resolution Centre (IDRC), London</li>
-<li>LCIA Arbitration Rules 2020, Article 16 (distinguishing the legal seat from the physical hearing venue)</li>
-</ul>
-
 <h2>Practical Next Steps</h2>
 <p>As soon as hearing dates are set with the tribunal, place a hold at a suitable venue rather than waiting for the procedural timetable to be finalized in every other respect — popular venues and dates move quickly. Build a separate venue budget line alongside the arbitrator and institutional cost forecast, and confirm technology, transcription, and catering requirements well ahead of the first hearing day. Because venue terms and current rate cards sit outside any arbitral institution's rules, request them directly from the venue and confirm cancellation terms before signing.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
     author: 'Marcus Whitfield',
-    updatedAt: 'August 9, 2026',
+    updatedAt: 'August 17, 2026',
     readingTime: 11,
     views: 0,
     featured: false,
     imageSeed: 'london-arbitration-hearing-room-booking-logistics',
     country: 'International',
+    primarySources: [
+      { label: 'International Arbitration Centre (IAC), 190 Fleet Street, London — official site', url: 'https://www.iac-london.com/' },
+      { label: 'International Dispute Resolution Centre (IDRC), London — facilities & rooms', url: 'https://www.idrc.co.uk/facilities/rooms/' },
+      { label: 'LCIA Arbitration Rules 2020, Article 16 (distinguishing the legal seat from the physical hearing venue)', url: 'https://www.lcia.org/Dispute_Resolution_Services/lcia-arbitration-rules-2020.aspx' },
+    ],
   },
 ];
