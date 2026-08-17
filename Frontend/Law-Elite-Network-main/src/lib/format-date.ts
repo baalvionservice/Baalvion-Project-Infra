@@ -11,3 +11,12 @@ export function formatArticleDate(value?: string | null): string | undefined {
   if (Number.isNaN(date.getTime())) return value;
   return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 }
+
+/** Same source handling as formatArticleDate(), but without the day -- used where only "Month Year" is wanted (e.g. author profile guide cards). */
+export function formatArticleMonthYear(value?: string | null): string | undefined {
+  if (!value) return value ?? undefined;
+  if (!/^\d{4}-\d{2}-\d{2}/.test(value)) return value;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+}

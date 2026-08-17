@@ -7,9 +7,32 @@ import { RelatedArticles, fetchRelatedArticles } from '@/components/knowledge/Re
 import { Breadcrumbs } from '@/components/knowledge/Breadcrumbs';
 import { ArticleTOC } from '@/app/[categorySlug]/[articleSlug]/ArticleTOC';
 import { ArticleAuthorByline } from '@/app/[categorySlug]/[articleSlug]/ArticleAuthorByline';
-import { getMergedAuthorByName } from '@/lib/authors-server';
+import { ArticleAdWrapper } from '@/components/knowledge/ArticleAdWrapper';
+import { PrimarySources } from '@/components/knowledge/PrimarySources';
+import { ReviewedBy } from '@/components/knowledge/ReviewedBy';
+import { getMergedAuthorByName, getMergedAuthorBySlug } from '@/lib/authors-server';
 import { resolveArticleImage } from '@/lib/article-art';
-import { formatArticleDate } from '@/lib/format-date';
+import { formatArticleDate, formatArticleMonthYear } from '@/lib/format-date';
+import type { ReviewedByInfo } from '@/components/knowledge/ReviewedBy';
+
+/**
+ * Bundled LawArticle data carries a resolved `reviewedBy` object directly.
+ * CMS-sourced articles instead carry a raw `reviewerSlug` (ReviewerPanel in
+ * admin-platform) that must be resolved against the author directory for a
+ * real name/credentials -- same pattern as the primary byline just below.
+ */
+async function resolveReviewedBy(article: any): Promise<ReviewedByInfo | undefined> {
+  if (article.reviewedBy) return article.reviewedBy;
+  if (!article.reviewerSlug || !article.reviewedAt) return undefined;
+  const reviewer = await getMergedAuthorBySlug(article.reviewerSlug);
+  if (!reviewer) return undefined;
+  return {
+    name: reviewer.name,
+    jurisdiction: article.reviewerJurisdiction || undefined,
+    barLicense: article.reviewerBarLicense || undefined,
+    reviewDate: formatArticleMonthYear(article.reviewedAt) || article.reviewedAt,
+  };
+}
 
 interface TOCItem {
   id: string;
@@ -23,6 +46,16 @@ function injectHeadingIds(html: string): string {
     const id = text.toLowerCase().replace(/\W/g, '-');
     return `<${tag} id="${id}" class="scroll-mt-32">${text}</${tag}>`;
   });
+}
+
+/**
+ * Count words in HTML/text content
+ * Used to determine if ads should be placed
+ */
+function countWords(html: string): number {
+  // Strip HTML tags and count words
+  const text = html.replace(/<[^>]+>/g, '');
+  return text.split(/\s+/).filter((word) => word.length > 0).length;
 }
 
 /**
@@ -68,12 +101,16 @@ function extractToc(html: string): TOCItem[] {
 export async function ArticleView({ article, slug }: { article: any; slug: string }) {
   const category = article.category;
   const authorName: string = (typeof article.author === 'string' ? article.author : article.author?.name) || 'Law Elite Editorial';
-  const matchedAuthor = await getMergedAuthorByName(authorName);
+  const [matchedAuthor, reviewedBy] = await Promise.all([
+    getMergedAuthorByName(authorName),
+    resolveReviewedBy(article),
+  ]);
   // No hardcoded fallback date here: if a record genuinely has no real
   // timestamp, ArticleAuthorByline omits the "Updated" line rather than show
   // a fabricated date.
   const updatedAt = formatArticleDate(article.updatedAt || article.updated_at);
   const processedContent = injectHeadingIds(article.content || '');
+  const wordCount = countWords(processedContent);
   const toc = extractToc(processedContent);
   const relatedArticles = await fetchRelatedArticles(slug, category?.slug, category?.name, article.subcategory?.slug);
 
@@ -102,14 +139,17 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
 
                 <ArticleAuthorByline authorName={authorName} updatedAt={updatedAt} matchedAuthor={matchedAuthor} />
 
-                {/* Jurisdiction badge -- only renders once an article actually
-                    carries article.country (see src/data/countries.ts); no
-                    article does yet, so this is dormant capability, not a claim. */}
-                {article.country && (
-                  <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-news-600 bg-slate-50 border border-slate-100 px-2.5 py-1 rounded-full">
-                    <Globe2 className="w-3 h-3" aria-hidden="true" /> {article.country}
-                  </span>
-                )}
+                <div className="flex flex-wrap items-center gap-3">
+                  {/* Jurisdiction badge -- only renders once an article actually
+                      carries article.country (see src/data/countries.ts). */}
+                  {article.country && (
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-news-600 bg-slate-50 border border-slate-100 px-2.5 py-1 rounded-full">
+                      <Globe2 className="w-3 h-3" aria-hidden="true" /> {article.country}
+                    </span>
+                  )}
+                </div>
+
+                <ReviewedBy info={reviewedBy} />
 
                 <figure className="pt-6">
                   <div className="aspect-[16/9] relative overflow-hidden bg-slate-50 rounded-lg">
@@ -124,10 +164,14 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
                 </figure>
               </header>
 
-              <div
-                className="prose-legal max-w-none pt-8"
-                dangerouslySetInnerHTML={{ __html: processedContent }}
-              />
+              <ArticleAdWrapper wordCount={wordCount} enableAds={true}>
+                <div
+                  className="prose-legal max-w-none pt-8"
+                  dangerouslySetInnerHTML={{ __html: processedContent }}
+                />
+              </ArticleAdWrapper>
+
+              <PrimarySources sources={article.primarySources} />
 
               <div className="pt-6 border-t border-slate-100">
                 <Link

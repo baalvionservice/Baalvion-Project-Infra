@@ -5,7 +5,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { resolveArticleImage } from '@/lib/article-art';
-import { formatArticleDate } from '@/lib/format-date';
 import { articleUrl } from '@/lib/article-url';
 
 type Variant = 'lead' | 'default' | 'horizontal';
@@ -24,12 +23,10 @@ function Kicker({ article }: { article: any }) {
 
 function Byline({ article }: { article: any }) {
   const author = article?.author;
-  const date = formatArticleDate(article?.updatedAt || article?.updated_at);
+  if (!author) return null;
   return (
     <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-slate-500 dark:text-slate-400 font-medium">
-      {author && <span className="text-slate-700 dark:text-slate-300 font-semibold">{author}</span>}
-      {author && date && <span className="text-slate-300 dark:text-slate-600">·</span>}
-      {date && <span>{date}</span>}
+      <span className="text-slate-700 dark:text-slate-300 font-semibold">{author}</span>
     </div>
   );
 }

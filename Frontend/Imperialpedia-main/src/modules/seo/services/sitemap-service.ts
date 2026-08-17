@@ -268,7 +268,9 @@ export const sitemapService = {
     ]);
     // 3 country entity pages permanently killed in the 2026-08 SEO cleanup pass
     // (REMOVED_PATHS in middleware.ts) — pushEntities is keyed by slug alone so
-    // these need their own exclusion.
+    // these need their own exclusion. Companies and technologies aren't submitted
+    // at all: both routes (hub + every individual [slug] page) were removed
+    // site-wide, not just a handful of slugs.
     const REMOVED_COUNTRY_SLUGS = new Set(["united-states", "taiwan", "south-korea"]);
     const pushEntities = (items: Array<{ slug?: string }>, prefix: string, priority = 0.7, exclude?: Set<string>) =>
       (items || []).forEach((e) => {

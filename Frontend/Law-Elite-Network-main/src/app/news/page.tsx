@@ -4,7 +4,7 @@ import { cmsGetNews, cmsGetNewsPage, type CmsArticle } from '@/lib/cms';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { BreakingTicker } from '@/components/knowledge/news/BreakingTicker';
 import { NewsHero } from '@/components/knowledge/news/NewsHero';
-import { CategorySection } from '@/components/knowledge/news/CategorySection';
+import { ExploreNews } from '@/components/knowledge/news/ExploreNews';
 import { TodayHighlights } from '@/components/knowledge/news/TodayHighlights';
 import { VideoCarousel } from '@/components/knowledge/news/VideoCarousel';
 import { LatestFeed } from '@/components/knowledge/news/LatestFeed';
@@ -42,19 +42,6 @@ export const metadata: Metadata = {
   },
 };
 
-/** Groups news articles by practice-area category, richest categories first. */
-function groupByCategory(articles: CmsArticle[]): Array<{ name: string; slug: string; articles: CmsArticle[] }> {
-  const groups = new Map<string, { name: string; slug: string; articles: CmsArticle[] }>();
-  for (const article of articles) {
-    const slug = article.category?.slug;
-    if (!slug) continue;
-    const group = groups.get(slug) ?? { name: article.category!.name, slug, articles: [] };
-    group.articles.push(article);
-    groups.set(slug, group);
-  }
-  return [...groups.values()].sort((a, b) => b.articles.length - a.articles.length);
-}
-
 /**
  * /news — CMS-first legal news hub. Reads content published with
  * contentType: 'news' in the central CMS (admin.baalvion.com); no bundled
@@ -66,7 +53,6 @@ export default async function NewsPage() {
   const lead = news[0];
   const rest = news.slice(1);
   const trending = rest.slice(0, 12);
-  const categorySections = groupByCategory(rest).slice(0, 6);
 
   let initialFeed = rest;
   let initialHasMore = false;
@@ -133,9 +119,7 @@ export default async function NewsPage() {
               <>
                 <NewsHero lead={lead} trending={trending} />
 
-                {categorySections.map((group) => (
-                  <CategorySection key={group.slug} name={group.name} slug={group.slug} articles={group.articles} />
-                ))}
+                <ExploreNews articles={rest} />
 
                 <TodayHighlights articles={rest} />
 

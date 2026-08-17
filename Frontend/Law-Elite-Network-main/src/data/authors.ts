@@ -286,8 +286,16 @@ export const LAW_AUTHORS: LawAuthor[] = [
   },
 ];
 
-/** Normalize a free-text byline ("Elena Rossi") to a profile slug ("elena-rossi"). */
-export function authorNameToSlug(name: string): string {
+/**
+ * Normalize a free-text byline ("Elena Rossi") to a profile slug ("elena-rossi").
+ * Some CMS/API articles have no `author` field at all -- callers filter/find
+ * across the whole article pool by slug (see /authors, /author/[slug]), so a
+ * bare `undefined.trim()` there took down the entire page for every reader,
+ * not just the byline-less article. Empty in, empty out; an empty slug never
+ * matches a real author.
+ */
+export function authorNameToSlug(name: string | null | undefined): string {
+  if (!name) return '';
   return name
     .trim()
     .toLowerCase()

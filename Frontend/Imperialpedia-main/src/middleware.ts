@@ -109,6 +109,13 @@ function goneResponse(): NextResponse {
 // of the existing `/articles/emergency-funds` redirect in next.config.ts, and the latter
 // is already 301'd away there — killing either would break that redirect chain.
 const REMOVED_PATHS = new Set<string>([
+  '/technologies',
+  '/technologies/quantum-computing',
+  '/technologies/machine-learning',
+  '/technologies/large-language-models',
+  '/technologies/generative-ai',
+  '/technologies/blockchain',
+  '/companies',
   '/countries',
   '/countries/united-states',
   '/countries/taiwan',

@@ -149,14 +149,37 @@ async function getContent(slug: string, strict = false): Promise<CmsContent | nu
   return j && j.data ? (j.data as CmsContent) : null;
 }
 
+// The CMS delivery API silently clamps every page to 100 items regardless of
+// the `limit` sent (confirmed: `limit=200` still returns exactly 100, with
+// `pagination.limit` echoed back as 100) -- so a caller asking for more than
+// 100 (cmsGetArticles requests 200) got only page 1 and silently lost
+// everything past it. With 150 published articles, that meant the last ~50
+// were absent from every CMS-list-backed page (homepage, category grids)
+// even though their OWN detail page (a direct per-slug fetch, not this list)
+// found them fine -- on pages with a bundled/static fallback for the same
+// slug, that showed as the generic placeholder art instead of the article's
+// real uploaded photo; on pages without one, the article just didn't appear
+// at all. Loop pages until we've collected what the caller actually asked
+// for (or the API runs out), instead of trusting one request to cover it.
+const LIST_CONTENT_MAX_PAGES = 20;
+
 async function listContent(params: Record<string, string | number> = {}): Promise<CmsContent[]> {
-  const qs = new URLSearchParams();
-  qs.set('limit', String(params.limit ?? 200));
-  for (const [k, v] of Object.entries(params)) {
-    if (k !== 'limit') qs.set(k, String(v));
+  const requestedLimit = Number(params.limit ?? 200);
+  const all: CmsContent[] = [];
+  for (let page = 1; page <= LIST_CONTENT_MAX_PAGES && all.length < requestedLimit; page++) {
+    const qs = new URLSearchParams();
+    qs.set('limit', String(requestedLimit));
+    qs.set('page', String(page));
+    for (const [k, v] of Object.entries(params)) {
+      if (k !== 'limit' && k !== 'page') qs.set(k, String(v));
+    }
+    const j = await fetchJSON(`${BASE}/content?${qs.toString()}`);
+    const items = j && Array.isArray(j.data) ? (j.data as CmsContent[]) : [];
+    if (items.length === 0) break;
+    all.push(...items);
+    if (!j?.pagination?.hasNext) break;
   }
-  const j = await fetchJSON(`${BASE}/content?${qs.toString()}`);
-  return j && Array.isArray(j.data) ? (j.data as CmsContent[]) : [];
+  return all.slice(0, requestedLimit);
 }
 
 /**
@@ -240,7 +263,7 @@ export interface CmsArticle {
   alphabet: string;
   /** Rendered HTML body for the article detail page. */
   content: string;
-  category?: { name: string; slug?: string };
+  category?: { id?: string; name: string; slug?: string };
   /**
    * Practice-area sub-topic (e.g. "Bail" under "Criminal Law"), when the admin
    * panel's nested-category control was used to tag this article. Matched
@@ -270,6 +293,39 @@ export interface CmsArticle {
   customFields?: Record<string, any>;
   /** Country this guide is jurisdiction-specific to (customFields.country), e.g. "United States". Absent for worldwide-general content. */
   country?: string;
+  /**
+   * Real, checkable source citations, admin-entered via CitationsPanel into
+   * `customFields.citations` as `{ title, url }[]` -- remapped to `label` here
+   * to match the public `primarySources` shape shared with bundled LawArticle
+   * data (@/data/law-content).
+   */
+  primarySources?: { label: string; url?: string }[];
+  /**
+   * Raw reviewer fields set by the admin ReviewerPanel -- `reviewerSlug`
+   * resolves against the cms_authors/bundled author directory (the same
+   * extension point the primary byline uses), so the display name and
+   * credentials line come from there, not from a fabricated string here.
+   * `reviewerJurisdiction`/`reviewerBarLicense` are per-article (the same
+   * reviewer can be barred differently depending on which article they
+   * reviewed) rather than fields on the author's general profile.
+   */
+  reviewerSlug?: string;
+  reviewedAt?: string;
+  reviewerJurisdiction?: string;
+  reviewerBarLicense?: string;
+}
+
+/**
+ * `customFields` is arbitrary admin-entered JSON from a remote API -- narrow
+ * it before trusting the shape. Reads the same `citations: { title, url }[]`
+ * array CitationsPanel (admin-platform) writes.
+ */
+function readPrimarySources(value: unknown): { label: string; url?: string }[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const sources = value
+    .filter((s): s is Record<string, unknown> => !!s && typeof s === 'object' && typeof s.title === 'string')
+    .map((s) => ({ label: s.title as string, url: typeof s.url === 'string' ? s.url : undefined }));
+  return sources.length > 0 ? sources : undefined;
 }
 
 function toArticle(c: CmsContent): CmsArticle {
@@ -295,7 +351,7 @@ function toArticle(c: CmsContent): CmsArticle {
     // art instead of the article's real uploaded image — and article-url.ts /
     // Breadcrumbs / RelatedArticles build links to the dead old slug.
     category: c.category
-      ? { name: c.category.name, slug: toNewCategorySlug(c.category.slug) }
+      ? { id: c.category.id, name: c.category.name, slug: toNewCategorySlug(c.category.slug) }
       : undefined,
     subcategory: childCategory
       ? { id: childCategory.id, name: childCategory.name, slug: childCategory.slug }
@@ -309,6 +365,11 @@ function toArticle(c: CmsContent): CmsArticle {
     views: typeof c.viewCount === 'number' ? c.viewCount : undefined,
     customFields: c.customFields ?? undefined,
     country: typeof cf.country === 'string' ? cf.country : undefined,
+    primarySources: readPrimarySources(cf.citations),
+    reviewerSlug: typeof cf.reviewerSlug === 'string' ? cf.reviewerSlug : undefined,
+    reviewedAt: typeof cf.reviewedAt === 'string' ? cf.reviewedAt : undefined,
+    reviewerJurisdiction: typeof cf.reviewerJurisdiction === 'string' ? cf.reviewerJurisdiction : undefined,
+    reviewerBarLicense: typeof cf.reviewerBarLicense === 'string' ? cf.reviewerBarLicense : undefined,
   };
 }
 
