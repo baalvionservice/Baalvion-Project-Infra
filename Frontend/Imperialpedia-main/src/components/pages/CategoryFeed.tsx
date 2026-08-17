@@ -10,6 +10,7 @@ import { SubtopicTabs } from "@/components/pages/SubtopicTabs";
 import HeadingSection from "@/components/layout/HeadingSection";
 import { env } from "@/config/env";
 import { newsArticleHref } from "@/lib/data/article-url";
+import Link from "next/link";
 
 type Props = {
   /** CMS category slug + topic-config key (e.g. "banking"). */
@@ -47,6 +48,7 @@ export async function CategoryFeed({ slug }: Props) {
   // takes precedence over the bundled default in topic-config.ts.
   const liveTopic = await getSiteContent<{ intro?: string }>("topic-hub", slug);
   const intro = liveTopic?.intro ?? copy.intro;
+  const introParagraphs = Array.isArray(intro) ? intro : intro ? [intro] : [];
 
   // 1) Live CMS content for this category.
   let articles: NewsArticle[] = await getCategoryArticles(slug, 30);
@@ -105,6 +107,17 @@ export async function CategoryFeed({ slug }: Props) {
       { "@type": "ListItem", position: 2, name: copy.title, item: pageUrl },
     ],
   };
+  const faqSchema = copy.faqs?.length
+    ? {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: copy.faqs.map((f) => ({
+          "@type": "Question",
+          name: f.question,
+          acceptedAnswer: { "@type": "Answer", text: f.answer },
+        })),
+      }
+    : null;
 
   return (
     <div className="min-h-screen">
@@ -116,13 +129,93 @@ export async function CategoryFeed({ slug }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
+      {faqSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+        />
+      )}
       <HeadingSection tag={copy.tag} eyebrow={parentFor(slug)} title={copy.title} description={copy.description} />
 
-      {intro && (
+      {(copy.keyTakeaways?.length || copy.sections?.length || introParagraphs.length > 0 || copy.faqs?.length || copy.relatedReading?.length) ? (
         <div className="max-w-7xl mx-auto px-4">
-          <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground pb-6">{intro}</p>
+          <div className="max-w-3xl pb-8">
+            {copy.keyTakeaways && copy.keyTakeaways.length > 0 && (
+              <div className="mb-8 rounded-lg border border-border bg-muted/30 p-5">
+                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">
+                  Key Takeaways
+                </p>
+                <ul className="space-y-2">
+                  {copy.keyTakeaways.map((point, i) => (
+                    <li key={i} className="flex gap-2 text-sm leading-relaxed text-foreground">
+                      <span aria-hidden="true" className="text-primary">&bull;</span>
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {copy.sections && copy.sections.length > 0 ? (
+              <div className="space-y-8">
+                {copy.sections.map((section, i) => (
+                  <div key={i}>
+                    <h2 className="text-lg font-bold text-foreground mb-3">{section.heading}</h2>
+                    <div className="space-y-3">
+                      {section.body.map((paragraph, j) => (
+                        <p key={j} className="text-sm leading-relaxed text-muted-foreground">
+                          {paragraph}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              introParagraphs.length > 0 && (
+                <div className="space-y-4">
+                  {introParagraphs.map((paragraph, i) => (
+                    <p key={i} className="text-sm leading-relaxed text-muted-foreground">
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
+              )
+            )}
+
+            {copy.faqs && copy.faqs.length > 0 && (
+              <div className="mt-10">
+                <h2 className="text-lg font-bold text-foreground mb-4">Frequently Asked Questions</h2>
+                <div className="space-y-5">
+                  {copy.faqs.map((faq, i) => (
+                    <div key={i}>
+                      <h3 className="text-sm font-bold text-foreground mb-1">{faq.question}</h3>
+                      <p className="text-sm leading-relaxed text-muted-foreground">{faq.answer}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {copy.relatedReading && copy.relatedReading.length > 0 && (
+              <div className="mt-10 rounded-lg border border-border p-5">
+                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">
+                  Related Reading
+                </p>
+                <ul className="space-y-2">
+                  {copy.relatedReading.map((link) => (
+                    <li key={link.slug}>
+                      <Link href={`/${link.slug}`} className="text-sm font-semibold text-primary hover:underline">
+                        {link.anchor}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
-      )}
+      ) : null}
 
       {siblings && (
         <div className="max-w-7xl mx-auto px-4">
