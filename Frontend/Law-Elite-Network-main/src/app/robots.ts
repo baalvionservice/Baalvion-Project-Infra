@@ -73,6 +73,11 @@ const DISALLOW = [
   // page itself was removed from the frontend, so it needs no disallow entry.
   '/lawyer/',
   '/api/',
+  // Auth-gated, not linked from the sitemap, but not previously disallowed --
+  // add explicitly so no crawl path (internal link, external backlink) can
+  // reach them and find only an auth wall.
+  '/network',
+  '/groups',
 ];
 
 // AI crawlers explicitly allowed (same allow/disallow scope as regular search
