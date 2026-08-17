@@ -18,6 +18,12 @@ export const criminalLawArticles: LawArticle[] = [
     views: 7420,
     featured: true,
     imageSeed: 'bail-courthouse-keys-scales',
+    primarySources: [
+      { label: '18 U.S.C. § 3142 — Bail Reform Act of 1984, release/detention factors (Cornell Legal Information Institute)', url: 'https://www.law.cornell.edu/uscode/text/18/3142' },
+      { label: 'Bail Act 1976 (UK)', url: 'https://www.legislation.gov.uk/ukpga/1976/63' },
+      { label: 'India, Bharatiya Nagarik Suraksha Sanhita 2023 — bailable/non-bailable offence classification' },
+      { label: 'Council of Europe, pre-trial detention guidance' },
+    ],
     content: `<p>Bail is one of the oldest ideas in criminal procedure: a person accused of a crime should not automatically be locked up before a court has decided whether they are guilty. Instead, the law allows their conditional release while the case proceeds. The core trade-off is always the same everywhere — balancing an individual's liberty and presumption of innocence against the public interest in making sure the accused returns to court and does not interfere with the case. How that balance is struck, and whether money changes hands at all, varies dramatically between countries.</p>
 
 <div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>Bail is conditional pre-trial release, not a finding of innocence or a penalty.</li><li>It can be granted by police or by a court, depending on the jurisdiction and the seriousness of the offence.</li><li>Many countries rarely use cash bail; conditions such as reporting, sureties, or surrendering a passport are common.</li><li>Breaching bail conditions or failing to appear is itself an offence and usually leads to detention.</li></ul></div>
@@ -110,6 +116,12 @@ export const criminalLawArticles: LawArticle[] = [
     views: 5380,
     featured: false,
     imageSeed: 'whitecollar-ledger-magnifier-suit',
+    primarySources: [
+      { label: 'Foreign Corrupt Practices Act of 1977, 15 U.S.C. §§ 78dd-1 et seq. — U.S. DOJ Criminal Division, FCPA Unit', url: 'https://www.justice.gov/criminal/criminal-fraud/foreign-corrupt-practices-act' },
+      { label: 'Bribery Act 2010 (UK)', url: 'https://www.legislation.gov.uk/ukpga/2010/23' },
+      { label: 'India, Prevention of Money Laundering Act 2002' },
+      { label: 'Financial Action Task Force (FATF), anti-money-laundering recommendations' },
+    ],
     content: `<p>White-collar crime describes a broad family of non-violent offences committed for financial gain, typically through deception, concealment, or abuse of trust rather than force. The term was coined to capture wrongdoing by people in positions of respectability and authority — executives, accountants, public officials, and professionals — who use their access and expertise to break the law. Although no one is physically hurt at the moment of the offence, the harm can be enormous, draining pensions, collapsing companies, and undermining public confidence in markets and institutions.</p>
 
 <div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>White-collar crime is financially motivated and built on deception, not violence.</li><li>Common examples include fraud, embezzlement, bribery, insider trading, and money laundering.</li><li>Proving intent — that the accused acted dishonestly and knowingly — is central and often hard.</li><li>Penalties can include imprisonment, heavy fines, asset confiscation, and disqualification from holding office.</li></ul></div>

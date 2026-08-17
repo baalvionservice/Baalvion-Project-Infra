@@ -7,6 +7,7 @@ category: Boating Accidents
 categorySlug: boating-accidents
 keywords: [boating accident statute of limitations]
 author: deepak-kumar-kuldeep
+citations: ["46 U.S.C. § 30106 -- federal maritime tort limitations period|https://www.law.cornell.edu/uscode/text/46/30106", "28 U.S.C. § 1333 -- admiralty jurisdiction and the saving-to-suitors clause|https://www.law.cornell.edu/uscode/text/28/1333", "Jerome B. Grubart, Inc. v. Great Lakes Dredge & Dock Co., 513 U.S. 527 (1995)|https://supreme.justia.com/cases/federal/us/513/527/", "Cal. Code Civ. Proc. § 335.1|https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=335.1&lawCode=CCP", "Tex. Civ. Prac. & Rem. Code § 16.003|https://statutes.capitol.texas.gov/Docs/CP/htm/CP.16.htm", "Fla. Stat. § 95.11 (as amended by 2023 Fla. Laws ch. 2023-15, HB 837)|https://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute&URL=0000-0099/0095/Sections/0095.11.html", "N.Y. C.P.L.R. § 214(5)|https://www.nysenate.gov/legislation/laws/CVP/214", "Federal Tort Claims Act, 28 U.S.C. §§ 1346(b), 2671-2680|https://www.law.cornell.edu/uscode/text/28/1346"]
 ---
 
 # Boating Accident Statute of Limitations

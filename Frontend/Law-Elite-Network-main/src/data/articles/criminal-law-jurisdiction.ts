@@ -35,6 +35,12 @@ export const criminalLawJurisdictionArticles: LawArticle[] = [
     featured: false,
     imageSeed: 'miranda-rights-custodial-interrogation-us',
     country: 'United States',
+    primarySources: [
+      { label: 'Miranda v. Arizona, 384 U.S. 436 (1966)', url: 'https://supreme.justia.com/cases/federal/us/384/436/' },
+      { label: 'New York v. Quarles, 467 U.S. 649 (1984) — public safety exception', url: 'https://supreme.justia.com/cases/federal/us/467/649/' },
+      { label: 'Berghuis v. Thompkins, 560 U.S. 370 (2010) — unambiguous invocation', url: 'https://supreme.justia.com/cases/federal/us/560/370/' },
+      { label: 'Vega v. Tekoh, 597 U.S. 134 (2022) — no § 1983 claim for a Miranda violation alone', url: 'https://supreme.justia.com/cases/federal/us/597/21-499/' },
+    ],
     content: `<p>"You have the right to remain silent." Most people in the United States can recite some version of the Miranda warning from television before they can recite their own rights accurately. That gap matters, because two of the most common beliefs about Miranda are wrong: police are not required to read it the moment they arrest you, and failing to read it does not automatically make a case go away. Miranda rights are narrower, more procedural, and more interesting than the TV version — and knowing exactly when they apply is what actually protects you.</p>
 
 <div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>Miranda warnings are only constitutionally required before "custodial interrogation" — being arrested alone does not trigger them.</li><li>There is no single mandatory script; the Supreme Court requires the substance of four warnings, not exact wording.</li><li>You must unambiguously invoke your right to silence or to a lawyer — simply staying quiet is not enough to stop questioning under current law.</li><li>A Miranda violation generally makes the unwarned statement inadmissible, but it does not automatically dismiss the case, and it does not by itself support a civil lawsuit against police.</li><li>A narrow "public safety" exception lets police ask unwarned questions when there is an immediate danger to resolve first.</li></ul></div>
@@ -110,6 +116,12 @@ export const criminalLawJurisdictionArticles: LawArticle[] = [
     featured: false,
     imageSeed: 'right-to-silence-police-caution-uk',
     country: 'United Kingdom',
+    primarySources: [
+      { label: 'Police and Criminal Evidence Act 1984, section 58 (right to legal advice)', url: 'https://www.legislation.gov.uk/ukpga/1984/60/section/58' },
+      { label: 'Criminal Justice and Public Order Act 1994, sections 34–37 (adverse inferences)', url: 'https://www.legislation.gov.uk/ukpga/1994/33/section/34' },
+      { label: 'R v Cowan [1996] QB 373 — jury direction limits on drawing inferences' },
+      { label: 'R v Argent [1997] 2 Cr App R 27 — factors relevant to legal-advice reliance' },
+    ],
     content: `<p>Anyone who has watched a US crime drama has heard some version of "you have the right to remain silent." The caution given by police in England and Wales starts the same way — but ends very differently. Under the Police and Criminal Evidence Act 1984 (PACE) and the Criminal Justice and Public Order Act 1994, staying silent during questioning can, in specific and limited circumstances, be held against you at trial. That single difference from the American approach is the most important thing to understand about the right to silence in this jurisdiction.</p>
 
 <div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>The statutory caution wording is fixed by PACE Code C and must convey that silence "may harm your defence" — unlike the US, it does not simply promise silence carries no cost.</li><li>Sections 34–37 of the Criminal Justice and Public Order Act 1994 let a court or jury draw an "adverse inference" from certain kinds of silence during police questioning.</li><li>You cannot be convicted solely because you stayed silent — there must be a case to answer independent of the inference.</li><li>Everyone in police detention has a right to free, private legal advice, and whether you took that advice affects how any inference is assessed.</li><li>The adverse-inference regime applies to police questioning and to trial; it does not remove the general principle that the prosecution must prove its case.</li></ul></div>
@@ -169,6 +181,12 @@ export const criminalLawJurisdictionArticles: LawArticle[] = [
     featured: false,
     imageSeed: 'charter-rights-arrest-detention-canada',
     country: 'Canada',
+    primarySources: [
+      { label: 'Canadian Charter of Rights and Freedoms, sections 10 and 24(2)', url: 'https://laws-lois.justice.gc.ca/eng/const/page-12.html' },
+      { label: 'R v Suberu, 2009 SCC 33 — "without delay" and detention triggering section 10', url: 'https://www.canlii.org/en/ca/scc/doc/2009/2009scc33/2009scc33.html' },
+      { label: 'R v Sinclair, 2010 SCC 35 — scope of the right to counsel during questioning', url: 'https://www.canlii.org/en/ca/scc/doc/2010/2010scc35/2010scc35.html' },
+      { label: 'R v Grant, 2009 SCC 32 — detention test and section 24(2) exclusion framework', url: 'https://www.canlii.org/en/ca/scc/doc/2009/2009scc32/2009scc32.html' },
+    ],
     content: `<p>Canada has no single police script equivalent to the American Miranda warning or the fixed wording of the England and Wales caution. Instead, arrest and detention rights flow directly from the Canadian Charter of Rights and Freedoms — specifically section 10, which guarantees the right to be told why you're being held and the right to a lawyer. The Supreme Court of Canada has spent decades interpreting exactly what those guarantees require in practice, and the resulting framework is meaningfully different from both its American and British counterparts.</p>
 
 <div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>Section 10(a) guarantees the right to be promptly told the reason for your arrest or detention; section 10(b) guarantees the right to retain and instruct counsel "without delay."</li><li>Charter rights are triggered by "detention," a broader concept than formal arrest that can include being stopped and questioned without being told you're free to leave.</li><li>Section 10(b) creates three distinct police duties: inform you of the right, give you a reasonable opportunity to exercise it, and hold off eliciting evidence until you've had that opportunity.</li><li>The right to counsel generally does not include having a lawyer physically present during questioning, per <em>R v Sinclair</em> — a real difference from how some other systems operate.</li><li>Evidence obtained in breach of section 10 is not automatically excluded; courts apply a structured balancing test under section 24(2).</li></ul></div>
@@ -236,6 +254,10 @@ export const criminalLawJurisdictionArticles: LawArticle[] = [
     featured: false,
     imageSeed: 'right-to-silence-police-caution-australia',
     country: 'Australia',
+    primarySources: [
+      { label: 'Evidence Act 1995 (Cth), section 89 (evidence of silence)', url: 'https://www8.austlii.edu.au/cgi-bin/viewdoc/au/legis/cth/consol_act/ea199580/s89.html' },
+      { label: 'Evidence Act 1995 (NSW), section 89A (special caution, serious indictable offences)', url: 'https://www.austlii.edu.au/cgi-bin/viewdoc/au/legis/nsw/consol_act/ea199580/s89a.html' },
+    ],
     content: `<p>Australia's starting point is different from the other three countries in this series. There is no national constitutional bill of rights equivalent to the US Bill of Rights or the Canadian Charter, so the right to silence rests on common law, reinforced by the uniform Evidence Act framework most states and territories have adopted. Criminal procedure is also predominantly a state and territory matter, which means the position is not perfectly uniform nationwide — most visibly in New South Wales, which carved out a real exception in 2013 that doesn't exist in the same form elsewhere.</p>
 
 <div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>The right to silence in Australia is a common-law right, codified for evidentiary purposes at section 89 of the Evidence Act 1995 (Cth) and mirrored in most states and territories that adopted the uniform Evidence Act model.</li><li>Section 89 generally prevents an unfavourable inference from being drawn from a person's silence when questioned by police.</li><li>New South Wales is a significant exception: since 2013, section 89A allows an adverse inference in serious indictable offence cases, but only after a formal "special caution" given in the presence of a lawyer.</li><li>Criminal procedure varies by state and territory — always confirm the specific position where the questioning takes place rather than assuming a single national rule.</li><li>Access to legal aid, duty lawyers, and support-person requirements for young or vulnerable people also varies by jurisdiction.</li></ul></div>

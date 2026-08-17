@@ -7,6 +7,7 @@ category: Maritime & Offshore Injury Law
 categorySlug: maritime-offshore-injury-law
 keywords: [offshore accident statute of limitations, jones act statute of limitations, lhwca deadline]
 author: deepak-kumar-kuldeep
+citations: ["46 U.S.C. § 30106 -- Jones Act / maritime tort, three-year limitations period|https://www.law.cornell.edu/uscode/text/46/30106", "46 U.S.C. § 30302 -- Death on the High Seas Act|https://www.law.cornell.edu/uscode/text/46/30302", "33 U.S.C. § 905(b) -- LHWCA third-party vessel negligence claim|https://www.law.cornell.edu/uscode/text/33/905"]
 ---
 
 # Offshore Accident Statute of Limitations

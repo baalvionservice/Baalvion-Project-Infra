@@ -162,6 +162,19 @@ const nextConfig: NextConfig = {
       { source: '/maritime-accident-lawyer/', destination: '/maritime-accident-lawyer', permanent: true },
       { source: '/maintenance-and-cure-explained/', destination: '/maintenance-and-cure-explained', permanent: true },
       { source: '/legal-aid-and-free-legal-help-in-the-us/', destination: '/legal-aid-and-free-legal-help-in-the-us', permanent: true },
+      // Phase 4 SEO/IA consolidation: cruise-ship-accident-lawyer-florida
+      // substantially restated cruise-ship-accident-lawyer-miami's central legal
+      // point (ticket-contract forum-selection clause -> S.D. Fla. federal court,
+      // same Carnival v. Shute citation, same 46 U.S.C. § 30508 deadline) without
+      // adding proportionate unique content, and already linked to the Miami page
+      // as the more detailed treatment. Consolidated rather than left as a
+      // near-duplicate competing for the same search intent.
+      { source: '/cruise-ship-accident-lawyer-florida', destination: '/cruise-ship-accident-lawyer-miami', permanent: true },
+      // navigating-the-divorce-process (legacy CMS stub, ~19 words, no
+      // jurisdiction stated) covers exactly the ground how-divorce-works-in-the-us
+      // already covers in full (2,700+ words, explicit state-by-state framing).
+      // Redirected rather than rewritten into a third competing divorce-process page.
+      { source: '/article/navigating-the-divorce-process', destination: '/family-law/how-divorce-works-in-the-us', permanent: true },
     ];
   },
 

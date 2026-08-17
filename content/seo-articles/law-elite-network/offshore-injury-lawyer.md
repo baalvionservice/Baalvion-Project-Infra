@@ -11,7 +11,7 @@ author: deepak-kumar-kuldeep
 
 # Offshore Injury Lawyer
 
-An offshore injury lawyer focuses on the compensation side of an offshore accident claim — helping an injured worker understand what may be recoverable, under which legal framework, and how that value is generally assessed. This guide looks at offshore injury claims specifically through the lens of compensation: what it can include, what affects it, and how the process typically works. For a broader overview of offshore accident claims generally, see our [offshore accident lawyer guide](/offshore-accident-lawyer/). This is general legal information, not legal advice about any specific injury.
+An offshore injury lawyer focuses on the compensation side of an offshore accident claim — helping an injured worker understand what may be recoverable, under which legal framework, and how that value is generally assessed. This guide looks at offshore injury claims specifically through the lens of compensation, **comparing Jones Act, LHWCA, and OCSLA claims side by side**: what each can include, what affects value, and how the process typically works. If you already know you're a Jones Act seaman and want the seaman-status test plus the specific claims (negligence, unseaworthiness, maintenance and cure) available to you, our [maritime injury lawyer guide](/maritime-injury-lawyer/) covers that in more depth. For a broader overview of offshore accident claims generally, see our [offshore accident lawyer guide](/offshore-accident-lawyer/). This is general legal information, not legal advice about any specific injury.
 
 ## Why Compensation Depends on the Legal Framework
 
