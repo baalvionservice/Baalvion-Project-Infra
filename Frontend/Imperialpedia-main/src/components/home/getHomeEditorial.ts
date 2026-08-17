@@ -4,6 +4,7 @@ import { getArticlesByCategorySlug } from "@/modules/content-engine/services/cat
 import type { Article as ContentArticle } from "@/modules/content-engine/types/article";
 import { getPublicCategoryBySlug, getCategoryDirectory } from "@/services/data/cms-public";
 import { newsArticleHref } from "@/lib/data/article-url";
+import { isRemovedArticlePath } from "@/lib/content/removed-article-paths";
 import type { Article as LandingArticle, TopicGroup } from "@/components/landing/investopedia/types";
 
 // cms-service caps page size at 100 server-side regardless of what's
@@ -116,7 +117,7 @@ export interface PersonalFinanceSpotlight {
 export async function getHomeEditorial(): Promise<HomeEditorial | null> {
   const { data: fetchedArticles } = await getArticles(1, FETCH_LIMIT);
   const articles = fetchedArticles.filter(
-    (a) => (a.category || "").trim().toLowerCase() !== TALKS_CATEGORY,
+    (a) => (a.category || "").trim().toLowerCase() !== TALKS_CATEGORY && !isRemovedArticlePath(a),
   );
   if (articles.length === 0) return null;
 
@@ -178,7 +179,9 @@ export async function getHomeEditorial(): Promise<HomeEditorial | null> {
         getArticlesByCategorySlug(entry.slug),
         getPublicCategoryBySlug(entry.slug),
       ]);
-      const groupArticles = categoryArticles.filter((a) => !used.has(a.slug)).slice(0, ARTICLES_PER_TOPIC);
+      const groupArticles = categoryArticles
+        .filter((a) => !used.has(a.slug) && !isRemovedArticlePath(a))
+        .slice(0, ARTICLES_PER_TOPIC);
       if (groupArticles.length === 0) return null;
       for (const a of groupArticles) used.add(a.slug);
       return {
@@ -196,7 +199,7 @@ export async function getHomeEditorial(): Promise<HomeEditorial | null> {
   // 30-article generic pool, so the section reflects the category's real
   // depth instead of whatever happened to be recent across every category.
   const { data: personalFinanceArticles } = await getArticlesByCategorySlug("personal-finance");
-  const pfCandidates = personalFinanceArticles.filter((a) => !used.has(a.slug));
+  const pfCandidates = personalFinanceArticles.filter((a) => !used.has(a.slug) && !isRemovedArticlePath(a));
   const pfLeadSource = pfCandidates[0];
   let personalFinance: PersonalFinanceSpotlight | null = null;
   if (pfLeadSource) {
