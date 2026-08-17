@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import type { ResolvedAuthor } from "@/services/data/cms-public";
+import { AdSenseUnit } from "@/components/common/AdSense";
 
 interface ArticlePageProps {
   slug: string;
@@ -147,6 +148,12 @@ export const ArticlePage = ({
 
           {/* "Explore Full Glossary" CTA omitted — /terms is offline pending
               AdSense approval, see src/config/glossary.ts. */}
+
+          {/* Post-article AdSense unit — after the primary content so it never
+              interrupts reading, same slot/pattern as the homepage units. */}
+          <div className="my-8">
+            <AdSenseUnit slot="8362925887" format="auto" responsive={true} />
+          </div>
         </div>
 
         <RelatedArticles
