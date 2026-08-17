@@ -38,7 +38,7 @@ export function ArticleCard({ article, variant = "card" }: Props) {
 
   return (
     <Link href={article.href} className="group block">
-      <div className="relative aspect-[16/9] w-full overflow-hidden bg-muted">
+      <div className="relative aspect-[16/9] w-full overflow-hidden bg-muted rounded-sm transition-shadow duration-300 group-hover:shadow-lg">
         <Image
           src={article.image}
           alt=""

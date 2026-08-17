@@ -18,8 +18,13 @@ interface RelatedEntitiesProps {
 export const RelatedEntities = ({ entities }: RelatedEntitiesProps) => {
   if (!entities || entities.length === 0) return null;
 
+  // /companies and /technologies (list + [slug] detail pages) were removed
+  // site-wide — neither entity type has a page to link to anymore.
+  const linkable = entities.filter((e) => e.type !== 'company' && e.type !== 'technology');
+  if (linkable.length === 0) return null;
+
   // Group entities by type for superior discovery navigation
-  const grouped = entities.reduce((acc, entity) => {
+  const grouped = linkable.reduce((acc, entity) => {
     const type = entity.type;
     if (!acc[type]) acc[type] = [];
     acc[type].push(entity);

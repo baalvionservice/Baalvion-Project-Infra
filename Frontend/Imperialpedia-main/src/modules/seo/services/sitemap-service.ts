@@ -2,7 +2,7 @@ import {
   articlesService,
   calculatorsService,
 } from "@/services/data";
-import { loadCompanies, loadCountries, loadTechnologies } from "@/lib/data/loaders";
+import { loadCountries } from "@/lib/data/loaders";
 import { fetchAllTerms } from "@/lib/data/term-live";
 import { reviewSlugs } from "@/lib/data/review-live";
 import { getPublishedNews } from "@/services/data/cms-public";
@@ -82,10 +82,12 @@ export const sitemapService = {
     // approval), and submitting a noindexed URL in the sitemap is a contradiction
     // Search Console flags. All of them are submitted conditionally below instead,
     // by that same categoryHasLiveContent check, once real content exists.
-    // "/companies", "/countries", "/technologies" are also removed — the hub pages
-    // (and every ?query= variant of them) were permanently killed in the 2026-08 SEO
-    // cleanup pass, see REMOVED_PATHS in middleware.ts. Individual entity pages
-    // (e.g. /companies/apple) are unaffected and still submitted below via pushEntities.
+    // "/countries" hub is also removed — the hub page (and every ?query= variant of
+    // it) was permanently killed in the 2026-08 SEO cleanup pass, see REMOVED_PATHS in
+    // middleware.ts. Individual country pages (e.g. /countries/japan) are unaffected
+    // and still submitted below via pushEntities.
+    // "/companies" and "/technologies" (hub + every individual [slug] detail page)
+    // were removed site-wide and are not submitted at all.
     const corePages = ["","/about","/financial-intelligence","/banking","/budgeting","/contact","/economy","/explore","/financial-tools","/financial-tools/compound-interest","/financial-tools/inflation","/financial-tools/investment","/financial-tools/loan","/investing","/knowledge-map","/market-news","/personal-finance","/privacy-policy","/reviews","/stocks","/terms-of-service","/transparency","/world","/world/us","/world/europe","/world/asia","/world/china","/world/emerging"];
     corePages.forEach((path) => {
       entries.push({
@@ -260,24 +262,21 @@ export const sitemapService = {
     });
 
     // 3. Structured entities + review guides + published news.
-    const [companies, countries, technologies, news] = await Promise.all([
-      safe(loadCompanies(), []),
+    const [countries, news] = await Promise.all([
       safe(loadCountries(), []),
-      safe(loadTechnologies(), []),
       safe(getPublishedNews(1000), []),
     ]);
-    // 5 technology and 3 country entity pages permanently killed in the 2026-08 SEO
-    // cleanup pass (REMOVED_PATHS in middleware.ts) — the hub prefixes above are also
-    // gone, but pushEntities is keyed by slug alone so these need their own exclusion.
-    const REMOVED_TECHNOLOGY_SLUGS = new Set(["quantum-computing", "machine-learning", "large-language-models", "generative-ai", "blockchain"]);
+    // 3 country entity pages permanently killed in the 2026-08 SEO cleanup pass
+    // (REMOVED_PATHS in middleware.ts) — pushEntities is keyed by slug alone so
+    // these need their own exclusion. Companies and technologies aren't submitted
+    // at all: both routes (hub + every individual [slug] page) were removed
+    // site-wide, not just a handful of slugs.
     const REMOVED_COUNTRY_SLUGS = new Set(["united-states", "taiwan", "south-korea"]);
     const pushEntities = (items: Array<{ slug?: string }>, prefix: string, priority = 0.7, exclude?: Set<string>) =>
       (items || []).forEach((e) => {
         if (e?.slug && !exclude?.has(e.slug)) entries.push({ loc: `${base}${prefix}/${e.slug}`, changefreq: "weekly", priority });
       });
-    pushEntities(companies, "/companies", 0.8);
     pushEntities(countries, "/countries", 0.7, REMOVED_COUNTRY_SLUGS);
-    pushEntities(technologies, "/technologies", 0.7, REMOVED_TECHNOLOGY_SLUGS);
 
     // "/news" and "/latest" are the same empty-hub case as the topic pages
     // above, just keyed on published `news` content instead of a category —

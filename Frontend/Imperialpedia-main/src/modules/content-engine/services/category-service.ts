@@ -1,9 +1,8 @@
 import { Category } from "../types/category";
 import { Article } from "../types/article";
 import { MOCK_CATEGORIES } from "../models/category";
-import { getArticles } from "./content-service";
 import { ApiResponse } from "@/types/api";
-import { slugify } from "../utils/slugify";
+import { articlesService } from "@/services/data";
 
 /**
  * @fileOverview Service layer for managing and retrieving content categories.
@@ -58,20 +57,20 @@ export async function getCategoryBySlug(
 }
 
 /**
- * Fetches all articles belonging to a specific category slug.
+ * Fetches all articles belonging to a specific category slug — filtered
+ * server-side by cms-service. Previously this pulled the 100 most-recent
+ * articles *site-wide* and filtered client-side, which silently returned
+ * nothing for any category that wasn't well-represented in that recent
+ * slice (e.g. a category with 80+ real articles published over a month ago,
+ * once 100+ more-recent articles from other categories existed).
  */
 export async function getArticlesByCategorySlug(
-  slug: string
+  slug: string,
+  limit = 100
 ): Promise<ApiResponse<Article[]>> {
-  const allArticlesResponse = await getArticles(1, 100);
-
-  const targetSlug = slugify(slug);
-  const filteredArticles = allArticlesResponse.data.filter(
-    (article) => slugify(article.category) === targetSlug
-  );
-
+  const response = await articlesService.getArticlesByCategorySlug(slug, limit);
   return {
-    data: filteredArticles,
-    status: 200,
+    data: response.data,
+    status: response.statusCode,
   };
 }

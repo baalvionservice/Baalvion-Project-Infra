@@ -24,7 +24,6 @@ export default function Footer() {
     [
       { label: "Investing", href: "/investing" },
       { label: "Personal Finance", href: "/personal-finance" },
-      { label: "Tech", href: "/technologies" },
       { label: "Premium", href: "/premium" },
     ],
     [

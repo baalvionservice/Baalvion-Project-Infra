@@ -31,6 +31,8 @@ export interface Article {
   featuredImage: string;
   /** CMS content type ('article' | 'news' | ...) — drives NewsArticle vs Article JSON-LD. */
   contentType?: string;
+  /** Real `videoUrl` column (cms-service migration 20260020) — same field NewsArticle/VideoCarousel already read, just not previously threaded through this model. */
+  videoUrl?: string;
 
   // SEO specific fields
   seoTitle?: string;

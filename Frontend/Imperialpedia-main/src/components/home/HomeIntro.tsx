@@ -14,7 +14,7 @@ export const homeFaqItems: { question: string; answer: string }[] = [
   {
     question: "What is Imperialpedia?",
     answer:
-      "Imperialpedia is a financial intelligence and knowledge platform that combines an encyclopedic reference — companies, countries, industries, and technologies — with live market data and editorially reviewed articles on investing, the economy, and personal finance.",
+      "Imperialpedia is an independent financial education and market information platform covering personal finance, investing, financial markets, and economics. It explains complex financial topics clearly, connects related concepts, and provides practical tools to help readers make better-informed financial decisions.",
   },
   {
     question: "What knowledge does Imperialpedia contain?",
@@ -37,16 +37,14 @@ export function HomeIntro() {
   return (
     <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-10 pb-2">
       <div className="max-w-3xl">
-        <span className="eyebrow">What is Imperialpedia</span>
-        <h1 className="mt-1.5 text-2xl sm:text-3xl font-black leading-tight text-foreground">
-          A knowledge graph for global markets, companies, and the economy
+        <h1 className="text-2xl sm:text-3xl font-black leading-tight text-foreground">
+          Financial Knowledge, Markets &amp; Economics — Explained Clearly
         </h1>
         <p className="mt-3 text-base text-muted-foreground leading-relaxed">
-          Imperialpedia is a financial intelligence and reference platform. It pairs an
-          encyclopedic knowledge graph of companies, countries, industries, and technologies
-          with live market data and editorially reviewed articles on investing, the economy,
-          and personal finance — so a search here can answer both &ldquo;what is this
-          company&rdquo; and &ldquo;what is happening in markets right now.&rdquo;
+          Imperialpedia is an independent financial education and market information platform
+          covering personal finance, investing, financial markets, and economics. We explain
+          complex financial topics clearly, connect related concepts, and provide practical
+          tools to help readers make better-informed financial decisions.
         </p>
       </div>
     </section>

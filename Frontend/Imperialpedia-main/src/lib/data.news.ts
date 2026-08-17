@@ -61,6 +61,17 @@ export interface NewsArticle {
   externalSourceName?: string;
   externalSourceUrl?: string;
   keyTakeaways?: string[];
+  /** Editorial reviewer/fact-checker slugs + timestamps — same customFields columns
+   * cmsContentToArticle already reads for content-engine guides (see cms-public.ts),
+   * just not previously threaded through the news model. Resolved to a full profile
+   * via resolveAuthor() at render time, same as the guide template does. */
+  authorSlug?: string;
+  reviewerSlug?: string;
+  reviewedAt?: string;
+  factCheckerSlug?: string;
+  factCheckedAt?: string;
+  /** Sources cited — CMS customFields.citations, rendered via SourcesCited. */
+  citations?: { title: string; url: string }[];
   body: NewsBodyBlock[];
   tags?: string[];
   /** View count, when the source (CMS) tracks it — omit from UI when absent rather than fabricating a number. */

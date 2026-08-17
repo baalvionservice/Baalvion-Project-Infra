@@ -141,7 +141,7 @@ export async function getCompanyBySlug(slug: string): Promise<CompanyEntity | un
  * knowledge-graph `CompanyEntity` behind a ticker so quote pages can surface real
  * description/leadership/headquarters/sameAs data instead of only the bare price feed.
  * Reuses `loadCompanies()`'s existing cache — no dedicated backend lookup needed since the
- * company roster is small (tens, not thousands) and already fully loaded for `/companies`.
+ * company roster is small (tens, not thousands) and already loaded in full each call.
  */
 export async function getCompanyByTicker(ticker: string): Promise<CompanyEntity | undefined> {
   const companies = await loadCompanies();
@@ -200,6 +200,9 @@ export async function getRelatedEntities(
 
   const seen = new Set<string>([`${entity.type}:${entity.slug}`]);
   const unique = refs
+    // /companies and /technologies (list + [slug] detail pages) were removed
+    // site-wide — neither entity type has a page to link to anymore.
+    .filter((r) => r.type !== 'company' && r.type !== 'technology')
     .filter((r) => {
       const k = `${r.type}:${r.slug}`;
       if (seen.has(k)) return false;

@@ -227,7 +227,7 @@ export default async function RootLayout({
           Skip to main content
         </a>
 
-        <RootLayoutClient>
+        <RootLayoutClient adsenseClient={adsenseClient}>
           {children}
         </RootLayoutClient>
 

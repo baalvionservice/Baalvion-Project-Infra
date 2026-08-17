@@ -179,18 +179,14 @@ export default async function QuotePage({ params, searchParams }: PageProps) {
   const description = company?.description || detail.ai_summary || buildOverviewParagraph(detail, typeLabel);
   const logoOk = !!company?.logo && isAllowedImageHost(company.logo);
 
-  // "About" excerpt — only ever the company's real editorial profile, never
-  // generated. Deliberately capped at the opening paragraph rather than the
-  // full multi-paragraph text: that full profile already lives, verbatim, at
-  // /companies/[slug] (via EntityEditorialOverview), and reproducing all of it
-  // here would put identical long-form prose on two separately canonicalized
-  // URLs. The quote page links to the full profile instead of duplicating it.
+  // "About" section — the company's real editorial profile, never generated.
+  // Rendered in full: the dedicated /companies/[slug] profile page (which used
+  // to carry this long-form text) has been removed, so this is the only place
+  // it's shown.
   const editorialParagraphs = (company?.editorialOverview ?? "")
     .split(/\n\s*\n/)
     .map((p) => p.trim())
     .filter(Boolean);
-  const editorialExcerpt = editorialParagraphs[0];
-  const hasMoreEditorial = editorialParagraphs.length > 1;
 
   // Same array powers the visible <nav> below and the BreadcrumbList JSON-LD —
   // kept as one source so they can never drift out of sync (see
@@ -507,20 +503,15 @@ export default async function QuotePage({ params, searchParams }: PageProps) {
           </div>
         )}
 
-        {company && editorialExcerpt && (
+        {company && editorialParagraphs.length > 0 && (
           <div className="bg-[#111] border border-white/15 rounded-sm p-4">
             <h2 className="text-[11px] font-black uppercase tracking-widest text-white/70 mb-2">
               About {company.name}
             </h2>
             <div className="space-y-3">
-              <p className="text-[13px] text-white/70 leading-relaxed">{editorialExcerpt}</p>
-              {hasMoreEditorial && (
-                <p className="text-[10px] text-white/30">
-                  <Link href={`/companies/${company.slug}`} className="hover:underline">
-                    Read the full {company.name} profile &rarr;
-                  </Link>
-                </p>
-              )}
+              {editorialParagraphs.map((p, i) => (
+                <p key={i} className="text-[13px] text-white/70 leading-relaxed">{p}</p>
+              ))}
             </div>
           </div>
         )}
@@ -552,9 +543,6 @@ export default async function QuotePage({ params, searchParams }: PageProps) {
                 </a>
               </div>
             )}
-            <p className="mt-2 text-[10px] text-white/30">
-              Company profile: <Link href={`/companies/${company.slug}`} className="hover:underline">View full {company.name} profile &rarr;</Link>
-            </p>
           </div>
         )}
 

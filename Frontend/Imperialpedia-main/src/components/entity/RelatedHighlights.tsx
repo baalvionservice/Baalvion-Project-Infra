@@ -14,7 +14,11 @@ interface RelatedHighlightsProps {
  * Surfacing high-level relational nodes for discovery navigation.
  */
 export const RelatedHighlights = ({ entityId }: RelatedHighlightsProps) => {
-  const related = getGraphRelatedEntities(entityId);
+  // /companies and /technologies (list + [slug] detail pages) were removed
+  // site-wide — neither entity type has a page to link to anymore.
+  const related = getGraphRelatedEntities(entityId).filter(
+    (node) => node.type !== 'company' && node.type !== 'technology',
+  );
 
   if (related.length === 0) return null;
 

@@ -30,6 +30,7 @@ function mapToArticleModel(raw: any): Article {
     category: raw.category || "General",
     categorySlug: raw.categorySlug,
     contentType: raw.contentType,
+    videoUrl: raw.videoUrl || undefined,
     tags: raw.tags || [],
     status: (raw.status as ArticleStatus) || "published",
     readingTime: raw.meta?.readingTime || raw.readingTime || 0,

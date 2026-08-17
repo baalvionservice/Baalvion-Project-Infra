@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Globe, Building, Cpu } from 'lucide-react';
+import { Globe } from 'lucide-react';
 import { ExploreCard } from './ExploreCard';
 
 /**
@@ -14,18 +14,6 @@ export const ExploreGrid = () => {
       description: 'Browse global country profiles, economic data, and geopolitical insights from our 200+ sovereign nodes.',
       href: '/countries',
       icon: Globe,
-    },
-    {
-      title: 'Companies',
-      description: 'Audit institutional benchmarks, founding data, and market influence for leading global corporations.',
-      href: '/companies',
-      icon: Building,
-    },
-    {
-      title: 'Technologies',
-      description: 'Trace the evolution of innovation from generative AI to quantum computing and blockchain.',
-      href: '/technologies',
-      icon: Cpu,
     },
   ];
 

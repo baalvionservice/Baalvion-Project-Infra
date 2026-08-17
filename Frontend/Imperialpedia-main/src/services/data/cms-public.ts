@@ -564,6 +564,54 @@ export async function getArticleCategoryMap(): Promise<Map<string, string | unde
   return map;
 }
 
+export interface CategoryDirectoryEntry {
+  name: string;
+  slug: string;
+  articleCount: number;
+}
+
+// Same walk-all-pages + 10-minute cache pattern as getArticleCategoryMap
+// above — built for the same reason: the site has 50+ real categories, but
+// most homepage rails only ever look at the most-recent ~30 articles
+// site-wide. Categories that don't happen to be publishing heavily *right
+// now* (nearly everything except Stocks and Personal Finance, in practice)
+// never entered that recency window and were effectively invisible. This
+// gives any caller the real, full category breadth to select from instead.
+let categoryDirectoryCache: { at: number; entries: CategoryDirectoryEntry[] } | null = null;
+
+export async function getCategoryDirectory(): Promise<CategoryDirectoryEntry[]> {
+  const now = Date.now();
+  if (categoryDirectoryCache && now - categoryDirectoryCache.at < CATEGORY_MAP_TTL_MS) {
+    return categoryDirectoryCache.entries;
+  }
+  const counts = new Map<string, CategoryDirectoryEntry>();
+  try {
+    const first = await listCmsContent({ contentType: 'article', page: 1, limit: 100 });
+    const items = [...first.items];
+    const totalPages = Math.max(1, Math.ceil(first.total / Math.max(items.length, 1)));
+    for (let page = 2; page <= totalPages; page++) {
+      try {
+        items.push(...(await listCmsContent({ contentType: 'article', page, limit: 100 })).items);
+      } catch {
+        break;
+      }
+    }
+    for (const item of items) {
+      const slug = item.category?.slug;
+      const name = item.category?.name;
+      if (!slug || !name) continue;
+      const existing = counts.get(slug);
+      if (existing) existing.articleCount += 1;
+      else counts.set(slug, { name, slug, articleCount: 1 });
+    }
+  } catch {
+    // CMS unreachable — return whatever (possibly empty) list we built.
+  }
+  const entries = [...counts.values()].sort((a, b) => b.articleCount - a.articleCount);
+  categoryDirectoryCache = { at: now, entries };
+  return entries;
+}
+
 function blockToHtml(
   b: CmsBlock,
   headingState: { seenH2: boolean },
@@ -648,6 +696,27 @@ function plainTextLength(blocks?: CmsBlock[], excerpt?: string | null): number {
 }
 
 // ── CMS content → Imperialpedia Article ─────────────────────────────────────
+// Reads customFields.citations ({title,url}[], the shape SourcesCited expects).
+// Falls back to customFields.externalSources ({name,url}[]) — the field name
+// the Personal Finance/Investing Pillars seed scripts actually write (see
+// Backend/services/knowledge/cms-service/scripts/*-pillars-*.data.cjs's
+// `sources` array) — so that already-published content's real citations
+// surface instead of silently rendering no Sources & References box.
+function extractCitations(cf: Record<string, unknown>): { title: string; url: string }[] {
+  const rawCitations = Array.isArray(cf.citations) ? (cf.citations as unknown[]) : [];
+  const citations = rawCitations
+    .map((c) => c as { title?: unknown; url?: unknown })
+    .filter((c) => c && typeof c.title === 'string' && typeof c.url === 'string')
+    .map((c) => ({ title: String(c.title), url: String(c.url) }));
+  if (citations.length) return citations;
+
+  const rawExternalSources = Array.isArray(cf.externalSources) ? (cf.externalSources as unknown[]) : [];
+  return rawExternalSources
+    .map((s) => s as { name?: unknown; title?: unknown; url?: unknown })
+    .filter((s) => s && typeof s.url === 'string' && (typeof s.name === 'string' || typeof s.title === 'string'))
+    .map((s) => ({ title: String(s.title ?? s.name), url: String(s.url) }));
+}
+
 export function cmsContentToArticle(raw: CmsContent, categoryMap?: ReadonlyMap<string, string | undefined>): Article {
   const words = plainTextLength(raw.contentBlocks, raw.excerpt);
   const cf = (raw.customFields ?? {}) as Record<string, unknown>;
@@ -663,11 +732,7 @@ export function cmsContentToArticle(raw: CmsContent, categoryMap?: ReadonlyMap<s
   const reviewedAt = typeof cf.reviewedAt === 'string' ? cf.reviewedAt : undefined;
   const factCheckerSlug = typeof cf.factCheckerSlug === 'string' ? cf.factCheckerSlug : undefined;
   const factCheckedAt = typeof cf.factCheckedAt === 'string' ? cf.factCheckedAt : undefined;
-  const rawCitations = Array.isArray(cf.citations) ? (cf.citations as unknown[]) : [];
-  const citations = rawCitations
-    .map((c) => c as { title?: unknown; url?: unknown })
-    .filter((c) => c && typeof c.title === 'string' && typeof c.url === 'string')
-    .map((c) => ({ title: String(c.title), url: String(c.url) }));
+  const citations = extractCitations(cf);
   return {
     id: raw.id,
     slug: raw.slug,
@@ -786,6 +851,12 @@ export function cmsContentToNews(raw: CmsContent): NewsArticle {
   const cf = (raw.customFields ?? {}) as Record<string, unknown>;
   const author = cf.author as { name?: unknown } | undefined;
   const authorName = author && typeof author.name === 'string' ? author.name : undefined;
+  const authorSlug = typeof cf.authorSlug === 'string' ? cf.authorSlug : undefined;
+  const reviewerSlug = typeof cf.reviewerSlug === 'string' ? cf.reviewerSlug : undefined;
+  const reviewedAt = typeof cf.reviewedAt === 'string' ? cf.reviewedAt : undefined;
+  const factCheckerSlug = typeof cf.factCheckerSlug === 'string' ? cf.factCheckerSlug : undefined;
+  const factCheckedAt = typeof cf.factCheckedAt === 'string' ? cf.factCheckedAt : undefined;
+  const newsCitations = extractCitations(cf);
   const derivedGeo = deriveWorldGeo(raw.categories);
   const worldRegion = (typeof cf.worldRegion === 'string' ? cf.worldRegion : undefined) ?? derivedGeo.region;
   const worldCountry = (typeof cf.worldCountry === 'string' ? cf.worldCountry : undefined) ?? derivedGeo.country;
@@ -822,6 +893,12 @@ export function cmsContentToNews(raw: CmsContent): NewsArticle {
     // every crawler and visitor hitting that article. Drop those items instead.
     galleryImages: raw.galleryImages?.filter((url) => isAllowedImageHost(url)) || undefined,
     videoUrl: raw.videoUrl ?? undefined,
+    authorSlug,
+    reviewerSlug,
+    reviewedAt,
+    factCheckerSlug,
+    factCheckedAt,
+    citations: newsCitations.length ? newsCitations : undefined,
     externalSourceName: raw.externalSourceName ?? undefined,
     externalSourceUrl: raw.externalSourceUrl ?? undefined,
     body: blocksToNewsBody(raw.contentBlocks),

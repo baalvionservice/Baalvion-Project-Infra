@@ -71,6 +71,10 @@ export async function MarketHighlights() {
           </ul>
         </div>
       </div>
+      <p className="mt-5 text-xs text-muted-foreground">
+        Market data is provided for informational and educational purposes. Prices and percentage
+        changes may be delayed or subject to data-provider limitations.
+      </p>
     </section>
   );
 }
