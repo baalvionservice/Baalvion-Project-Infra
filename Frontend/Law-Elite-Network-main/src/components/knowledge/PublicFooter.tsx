@@ -10,16 +10,56 @@ import { FooterNewsletterForm } from '@/components/knowledge/FooterNewsletterFor
  * @fileOverview High-Fidelity Editorial Footer
  * Matches the Investopedia-style layout with dark navy aesthetics and A-Z strip.
  */
+const EXPLORE_LINKS = [
+  { href: '/news', label: 'Legal News' },
+  { href: '/case-law', label: 'Case Law' },
+  { href: '/legislation', label: 'Legislation' },
+  { href: '/law-changes', label: 'Law Changes' },
+  { href: '/countries', label: 'Browse by Country' },
+];
+
+const PRACTICE_AREA_LINKS = [
+  { href: '/business', label: 'Business & Corporate' },
+  { href: '/criminal-law', label: 'Criminal Law' },
+  { href: '/family-law', label: 'Family & Personal' },
+  { href: '/real-estate-law', label: 'Property & Real Estate' },
+  { href: '/tax-finance', label: 'Tax & Finance' },
+  { href: '/employment-law', label: 'Employment & Labor' },
+  { href: '/tech-ip', label: 'Technology & IP' },
+  { href: '/disputes', label: 'Dispute Resolution' },
+];
+
+const ABOUT_LINKS = [
+  { href: '/about-us', label: 'About Us' },
+  { href: '/authors', label: 'Contributors' },
+  { href: '/editorial-standards', label: 'Editorial Standards' },
+  { href: '/editorial-process', label: 'Editorial Process' },
+  { href: '/corrections', label: 'Corrections' },
+  { href: '/contact-us', label: 'Contact Us' },
+  { href: '/careers', label: 'Careers' },
+  { href: '/advertise', label: 'Advertise' },
+];
+
+const LEGAL_LINKS = [
+  { href: '/privacy-policy', label: 'Privacy Policy' },
+  { href: '/terms-of-service', label: 'Terms of Service' },
+  { href: '/terms-of-service#disclaimers', label: 'Disclaimer' },
+  { href: '/cookie-policy', label: 'Cookie Policy' },
+  { href: '/ai-usage-policy', label: 'AI Policy' },
+  { href: '/editorial-disclosure-policy', label: 'DMCA' },
+  { href: '/sponsored-content-policy', label: 'Advertising Disclosure' },
+];
+
 export function PublicFooter() {
   return (
     <footer className="w-full flex flex-col">
       {/* Main Footer Section */}
-      <div className="bg-[#222b3e] text-white pt-16 pb-12">
+      <div className="bg-[#222b3e] text-white pt-10 pb-6 md:pt-16 md:pb-12">
         <div className="container mx-auto px-6 max-w-7xl">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-12 items-start">
-            
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-start">
+
             {/* Left: Branding & Newsletter */}
-            <div className="md:col-span-4 space-y-10">
+            <div className="md:col-span-4 space-y-6 md:space-y-10">
               <Link href="/" className="flex items-center gap-3 group">
                 <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-2xl">
                   <LawEliteMark className="w-6 h-6" />
@@ -44,52 +84,30 @@ export function PublicFooter() {
               </div>
             </div>
 
-            {/* Middle: Primary Navigation */}
-            <div className="md:col-span-3">
-              <ul className="space-y-4 text-[13px] font-bold uppercase tracking-widest">
-                <li><Link href="/business" className="hover:text-blue-300 transition-colors">Business & Corporate</Link></li>
-                <li><Link href="/criminal-law" className="hover:text-blue-300 transition-colors">Criminal Law</Link></li>
-                <li><Link href="/family-law" className="hover:text-blue-300 transition-colors">Family & Personal</Link></li>
-                <li><Link href="/real-estate-law" className="hover:text-blue-300 transition-colors">Property & Real Estate</Link></li>
-                <li><Link href="/tax-finance" className="hover:text-blue-300 transition-colors">Tax & Finance</Link></li>
-                <li><Link href="/employment-law" className="hover:text-blue-300 transition-colors">Employment & Labor</Link></li>
-                <li><Link href="/tech-ip" className="hover:text-blue-300 transition-colors">Technology & IP</Link></li>
-                <li><Link href="/disputes" className="hover:text-blue-300 transition-colors">Dispute Resolution</Link></li>
-              </ul>
-              <ul className="space-y-4 text-[13px] font-bold uppercase tracking-widest mt-8 pt-8 border-t border-white/10">
-                <li><Link href="/news" className="hover:text-blue-300 transition-colors">Legal News</Link></li>
-                <li><Link href="/countries" className="hover:text-blue-300 transition-colors">Browse by Country</Link></li>
-              </ul>
-            </div>
+            <FooterLinkColumn
+              colSpan="md:col-span-3"
+              title="Explore"
+              sections={[
+                { heading: 'Explore', links: EXPLORE_LINKS },
+                { heading: 'Practice Areas (Legal Guides)', links: PRACTICE_AREA_LINKS },
+              ]}
+            />
 
-            {/* Right: Secondary Links */}
-            <div className="md:col-span-2 space-y-4 text-[11px] font-medium text-white/70">
-              <ul className="space-y-3">
-                <li><Link href="/about-us" className="hover:text-white transition-colors">About Us</Link></li>
-                <li><Link href="/authors" className="hover:text-white transition-colors">Our Contributors</Link></li>
-                <li><Link href="/contact-us" className="hover:text-white transition-colors">Contact Us</Link></li>
-                <li><Link href="/careers" className="hover:text-white transition-colors">Careers</Link></li>
-                <li><Link href="/advertise" className="hover:text-white transition-colors">Advertise</Link></li>
-                <li><Link href="/editorial-standards" className="hover:text-white transition-colors">Editorial Standards</Link></li>
-                <li><Link href="/editorial-process" className="hover:text-white transition-colors">Editorial Process</Link></li>
-                <li><Link href="/corrections" className="hover:text-white transition-colors">Corrections</Link></li>
-              </ul>
-            </div>
+            <FooterLinkColumn
+              colSpan="md:col-span-3"
+              title="About"
+              sections={[{ heading: 'About', links: ABOUT_LINKS }]}
+            />
 
-            <div className="md:col-span-3 space-y-4 text-[11px] font-medium text-white/70">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-white/50">Core Policies</p>
-              <ul className="space-y-3">
-                <li><Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
-                <li><Link href="/terms-of-service" className="hover:text-white transition-colors">Terms of Service &amp; Legal Disclaimer</Link></li>
-                <li><Link href="/cookie-policy" className="hover:text-white transition-colors">Cookie Policy</Link></li>
-                <li><Link href="/editorial-disclosure-policy" className="hover:text-white transition-colors">Editorial, DMCA &amp; Disclosure Policy</Link></li>
-                <li><Link href="/ai-usage-policy" className="hover:text-white transition-colors">AI Usage Policy</Link></li>
-              </ul>
-            </div>
+            <FooterLinkColumn
+              colSpan="md:col-span-2"
+              title="Legal"
+              sections={[{ heading: 'Legal', links: LEGAL_LINKS }]}
+            />
           </div>
 
           {/* Additional policies consolidated into dedicated page */}
-          <div className="mt-14 pt-10 border-t border-white/10">
+          <div className="mt-8 pt-6 md:mt-14 md:pt-10 border-t border-white/10">
             <Link href="/policies" className="text-[11px] font-medium text-white/70 hover:text-white transition-colors">
               View all policies and guidelines →
             </Link>
@@ -110,5 +128,54 @@ export function PublicFooter() {
         </div>
       </div>
     </footer>
+  );
+}
+
+type FooterLink = { href: string; label: string };
+type FooterLinkSection = { heading: string; links: FooterLink[] };
+
+/**
+ * Renders as a collapsed <details> disclosure on mobile (see the same
+ * pattern in FrequentlyAskedQuestions.tsx) so the footer's ~28 links don't
+ * all render at full height on small screens, and as the original static
+ * column on md+.
+ */
+function FooterLinkColumn({ title, sections, colSpan }: { title: string; sections: FooterLinkSection[]; colSpan: string }) {
+  return (
+    <div className={colSpan}>
+      <details className="group md:hidden border-b border-white/10">
+        <summary className="cursor-pointer select-none list-none flex items-center justify-between py-4 text-[10px] font-bold uppercase tracking-widest text-white/50">
+          {title}
+          <span className="text-white/40 shrink-0 transition-transform group-open:rotate-180" aria-hidden="true">▾</span>
+        </summary>
+        <div className="space-y-4 pb-4 text-[11px] font-medium text-white/70">
+          {sections.map((section) => (
+            <div key={section.heading} className="space-y-3">
+              {section.heading !== title && (
+                <p className="text-[10px] font-bold uppercase tracking-widest text-white/50">{section.heading}</p>
+              )}
+              <ul className="space-y-3">
+                {section.links.map((link) => (
+                  <li key={link.href}><Link href={link.href} className="hover:text-white transition-colors">{link.label}</Link></li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </details>
+
+      <div className="hidden md:block space-y-4 text-[11px] font-medium text-white/70">
+        {sections.map((section) => (
+          <div key={section.heading} className="space-y-4">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-white/50">{section.heading}</p>
+            <ul className="space-y-3">
+              {section.links.map((link) => (
+                <li key={link.href}><Link href={link.href} className="hover:text-white transition-colors">{link.label}</Link></li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }

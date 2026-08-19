@@ -5,7 +5,6 @@ import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { BreakingTicker } from '@/components/knowledge/news/BreakingTicker';
 import { NewsHero } from '@/components/knowledge/news/NewsHero';
 import { ExploreNews } from '@/components/knowledge/news/ExploreNews';
-import { TodayHighlights } from '@/components/knowledge/news/TodayHighlights';
 import { VideoCarousel } from '@/components/knowledge/news/VideoCarousel';
 import { LatestFeed } from '@/components/knowledge/news/LatestFeed';
 import { Sidebar } from '@/components/knowledge/news/Sidebar';
@@ -120,8 +119,6 @@ export default async function NewsPage() {
                 <NewsHero lead={lead} trending={trending} />
 
                 <ExploreNews articles={rest} />
-
-                <TodayHighlights articles={rest} />
 
                 <VideoCarousel articles={news} />
 

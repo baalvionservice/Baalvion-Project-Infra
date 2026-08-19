@@ -153,6 +153,11 @@ const nextConfig: NextConfig = {
       { source: '/copyright-policy', destination: '/editorial-disclosure-policy', permanent: true },
       { source: '/affiliate-disclosure', destination: '/editorial-disclosure-policy', permanent: true },
       { source: '/disclaimer', destination: '/terms-of-service', permanent: true },
+      // /world pulled the exact same cmsGetNews() feed as /news with no real
+      // geographic filter (its "cross-border"/"every region" copy wasn't
+      // backed by any actual filtering) -- a near-duplicate competing for the
+      // same search intent, consolidated the same way as the redirects above.
+      { source: '/world', destination: '/news', permanent: true },
       // Trailing-slash duplicates of root-flat article/category URLs -- the
       // canonical form (articleUrl() in src/lib/article-url.ts and the
       // category-hub routes) never has a trailing slash, but these specific

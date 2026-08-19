@@ -23,6 +23,7 @@ export default function AboutUsPage() {
     { label: "Worldwide, Multi-Jurisdiction Scope", id: "scope" },
     { label: "General Information, Not Legal Advice", id: "not-advice" },
     { label: "Our Team", id: "team" },
+    { label: "How We're Funded & Editorial Independence", id: "funding" },
     { label: "Standards, Corrections & Contact", id: "standards" },
   ];
 
@@ -30,17 +31,17 @@ export default function AboutUsPage() {
     <div className="min-h-screen bg-white">
       <Navbar />
 
-      <main className="pt-32 pb-24">
+      <main className="pt-20 pb-12 md:pt-32 md:pb-24">
         <div className="container mx-auto px-6 max-w-4xl">
 
-          <header className="mb-12">
-            <h1 className="text-[44px] md:text-[56px] font-bold text-slate-900 tracking-tight font-serif mb-10 leading-tight">
+          <header className="mb-8 md:mb-12">
+            <h1 className="text-[32px] md:text-[56px] font-bold text-slate-900 tracking-tight font-serif mb-6 md:mb-10 leading-tight">
               About Us
             </h1>
 
             {/* HIGH-FIDELITY TABLE OF CONTENTS BOX */}
-            <div className="relative border border-slate-200 p-8 pt-6 rounded-none">
-              <div className="flex items-center gap-2 mb-6">
+            <div className="relative border border-slate-200 p-5 pt-5 md:p-8 md:pt-6 rounded-none">
+              <div className="flex items-center gap-2 mb-4 md:mb-6">
                 <List className="w-4 h-4 text-blue-600" />
                 <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-900">Table of Contents</span>
               </div>
@@ -72,7 +73,7 @@ export default function AboutUsPage() {
           </header>
 
           {/* MAIN CONTENT */}
-          <section className="space-y-16">
+          <section className="space-y-10 md:space-y-16">
 
             <Block id="who-we-are" title="Who We Are">
               <p>
@@ -184,6 +185,30 @@ export default function AboutUsPage() {
               </p>
             </Block>
 
+            <Block id="funding" title="How We're Funded & Editorial Independence">
+              <p>
+                Law Elite Network is a commercial publication, and we believe readers are entitled to know how that
+                works. We generate revenue through B2B advertising and sponsorship placements (see{' '}
+                <Link href="/advertise">Advertise</Link>), and through the lawyer directory and appointment features on
+                our site, where listed practitioners pay referral or placement fees to participate. We do not charge
+                readers to access our guides.
+              </p>
+              <p>
+                Operating both a media outlet and a referral service creates a real conflict-of-interest risk, and we
+                manage it explicitly rather than leave it unaddressed. No referral fee, advertising spend, or directory
+                placement fee entitles a lawyer or firm to editorial coverage, a &quot;Verified&quot; designation, or
+                favorable mention in an article — and the absence of a commercial relationship never results in
+                unfavorable treatment. Commercial arrangements are handled separately from editorial judgments about
+                legal topics, which are governed solely by our{' '}
+                <Link href="/editorial-standards">Editorial Standards</Link>. The full policy, including how writers
+                and reviewers disclose personal ties to the legal industry, is set out in our{' '}
+                <Link href="/conflict-of-interest-policy">Conflict of Interest Policy</Link>; how advertising and
+                referral compensation is disclosed on the site itself is covered in our{' '}
+                <Link href="/editorial-disclosure-policy">Editorial, DMCA &amp; Disclosure Policy</Link> and our{' '}
+                <Link href="/sponsored-content-policy">Sponsored Content Policy</Link>.
+              </p>
+            </Block>
+
             <Block id="standards" title="Standards, Corrections & Contact">
               <p>
                 We hold our work to documented standards and we welcome scrutiny. You can read exactly how we research,
@@ -213,9 +238,9 @@ export default function AboutUsPage() {
 
 function Block({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   return (
-    <div id={id} className="space-y-6 scroll-mt-32">
-      <h2 className="text-[26px] md:text-[32px] font-bold text-slate-900 font-serif leading-tight">{title}</h2>
-      <div className="prose-legal max-w-none space-y-4 text-lg text-slate-700 leading-relaxed font-medium [&_a]:text-blue-600 [&_a:hover]:underline [&_a]:decoration-blue-200 [&_a]:decoration-2 [&_a]:underline-offset-4">
+    <div id={id} className="space-y-4 md:space-y-6 scroll-mt-32">
+      <h2 className="text-[22px] md:text-[32px] font-bold text-slate-900 font-serif leading-tight">{title}</h2>
+      <div className="prose-legal max-w-none space-y-3 md:space-y-4 text-base md:text-lg text-slate-700 leading-relaxed font-medium [&_a]:text-blue-600 [&_a:hover]:underline [&_a]:decoration-blue-200 [&_a]:decoration-2 [&_a]:underline-offset-4">
         {children}
       </div>
     </div>

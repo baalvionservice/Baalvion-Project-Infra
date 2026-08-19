@@ -163,6 +163,11 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
 <p>If you've been dismissed and are unsure whether you qualify, the safest first step is contacting Acas for free early guidance — they can confirm the current position and the applicable time limit for your specific dates of employment. Because the qualifying period is changing on a fixed future date, an employee close to either threshold should get their exact service dates checked rather than relying on a rule of thumb. For the general, worldwide picture of what makes a dismissal unlawful, see <a href="/employment-law/when-is-a-dismissal-wrongful-termination">When Is a Dismissal Considered Wrongful Termination?</a></p>
 
 <p><em>This article is general legal information, not legal advice, and reflects the law as understood at the time of writing during an active legislative transition. Confirm the current qualifying period and any commencement dates with Acas or gov.uk before acting, and consult a solicitor for advice on your specific situation.</em></p>`,
+    primarySources: [
+      { label: 'Acas, Employment Rights Act 2025', url: 'https://www.acas.org.uk/employment-rights-act-2025' },
+      { label: 'Employment Rights Act 2025 (UK)', url: 'https://www.legislation.gov.uk/ukpga/2025/36' },
+      { label: 'The Employment Tribunal Procedure Rules 2024 (UK)', url: 'https://www.legislation.gov.uk/uksi/2024/1155' },
+    ],
   },
   {
     id: 'el-303',
@@ -223,6 +228,10 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
 <p>If you've been let go without cause, start by identifying whether you're provincially or federally regulated, checking whether your contract has an enforceable notice clause, and gathering your length of service, age, and role details — the exact inputs a court would weigh under Bardal. Because the gap between statutory minimums and what a court might actually award can be substantial, a consultation with an employment lawyer before signing any severance offer is usually worthwhile. For the general, worldwide picture of what makes a dismissal unlawful, see <a href="/employment-law/when-is-a-dismissal-wrongful-termination">When Is a Dismissal Considered Wrongful Termination?</a></p>
 
 <p><em>This article is general legal information, not legal advice. Employment law varies by province and territory and changes over time — consult a lawyer licensed in the relevant jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'Bardal v. Globe & Mail Ltd., 1960 CanLII 294 (ON SC)', url: 'https://www.canlii.org/en/on/onsc/doc/1960/1960canlii294/1960canlii294.html' },
+      { label: 'Canada Labour Code, R.S.C., 1985, c. L-2, section 240', url: 'https://laws-lois.justice.gc.ca/eng/acts/L-2/section-240.html' },
+    ],
   },
   {
     id: 'el-304',
@@ -473,6 +482,13 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
 <p>If you're an Ontario employee, start by checking the signature date on your non-compete against October 25, 2021 — that single fact determines whether the statutory ban or the older common-law test applies to your clause. If you're outside Ontario, or federally regulated, assume your non-compete must clear the common-law reasonableness bar, and remember the burden of proving that falls on your employer, not you. Because the exceptions, the Quebec civil-law rules, and the federal bill's progress can all shift the analysis, a short consultation with an employment lawyer licensed in the relevant province is the safest way to know where you actually stand. For the general, worldwide framework this guide builds on, see <a href="/employment-law/what-is-a-non-compete-agreement">What Is a Non-Compete Agreement?</a> and, for what happens when a Canadian employment relationship ends more broadly, <a href="/employment-law/wrongful-dismissal-canada-reasonable-notice">Wrongful Dismissal in Canada: How 'Reasonable Notice' Is Calculated</a>.</p>
 
 <p><em>This article is general legal information, not legal advice. Employment law varies by province and territory and changes over time — consult a lawyer licensed in the relevant jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'Employment Standards Act, 2000, Part XV.1 (Ontario) — non-compete agreements', url: 'https://www.ontario.ca/document/employment-standard-act-policy-and-interpretation-manual/part-xv1-non-compete-agreements' },
+      { label: 'Parekh et al. v. Schecter et al., 2022 ONSC 302' },
+      { label: 'Shafron v. KRG Insurance Brokers (Western) Inc., 2009 SCC 6', url: 'https://www.canlii.org/en/ca/scc/doc/2009/2009scc6/2009scc6.html' },
+      { label: 'Civil Code of Québec, articles 2089 and 2095', url: 'https://www.legisquebec.gouv.qc.ca/en/document/cs/ccq-1991' },
+      { label: 'Bill C-31, Budget 2025 Implementation Act, No. 2 (not yet enacted)' },
+    ],
   },
   {
     id: 'el-307',
@@ -533,5 +549,10 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
 <p>If you're being asked to sign a non-compete in Australia today, assess it under the law that actually applies right now — the common-law reasonableness test, plus the NSW-specific statute if that's the relevant state — not the reform that's still being designed. If you're an employer planning restrictive covenants with an eye on the next few years, keep an eye on Treasury's consultation outcomes and the parliamentary bill register rather than assuming any specific reported detail is final. Because this is a genuinely fast-moving area with real potential for the rules to change materially before 2027, a consultation with an employment lawyer is the most reliable way to get both today's answer and a read on how exposed a given clause might be to the coming reform. For the general, worldwide framework this guide builds on, see <a href="/employment-law/what-is-a-non-compete-agreement">What Is a Non-Compete Agreement?</a> and, for how Australian dismissals themselves are challenged, <a href="/employment-law/unfair-dismissal-australia-fair-work-commission">Unfair Dismissal in Australia: Eligibility and the Fair Work Commission Process</a>.</p>
 
 <p><em>This article is general legal information, not legal advice, and describes a law reform that had not been enacted as of publication. Confirm the current status with the Fair Work Ombudsman or Treasury, and consult an Australian employment lawyer before signing or relying on a non-compete agreement.</em></p>`,
+    primarySources: [
+      { label: 'Australian Treasury, reform to non-compete clauses and other restraints on workers', url: 'https://treasury.gov.au/consultation/c2025-681950' },
+      { label: 'Fair Work Ombudsman, employment contracts', url: 'https://www.fairwork.gov.au/employment-conditions/employment-contracts/get-help-with-employment-contracts' },
+      { label: 'Restraints of Trade Act 1976 (NSW)', url: 'https://legislation.nsw.gov.au/view/whole/pdf/inforce/2024-05-07/act-1976-067' },
+    ],
   },
 ];

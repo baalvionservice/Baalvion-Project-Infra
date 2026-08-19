@@ -164,7 +164,7 @@
   background-color: #ff6b6b;
 }
 
-.key-takeaways h4 {
+.key-takeaways h2 {
   @apply text-[11px] font-bold uppercase tracking-[0.2em] text-slate-900 mb-6 border-none;
 }
 
@@ -205,24 +205,17 @@
 .prose-legal details ul { @apply mt-5 mb-0 pl-5 space-y-3; }
 .prose-legal details li { @apply text-[1rem] leading-relaxed text-slate-600 font-serif; }
 
-/* Same disclosure pattern as above, extracted standalone for <PrimarySources>,
-   which renders as its own section after the article body rather than inside
-   prose-legal HTML -- see src/components/knowledge/PrimarySources.tsx. */
-.article-sources details {
-  @apply border border-slate-300 rounded-lg px-6 py-4;
+/* Always-visible, categorized "Sources" section -- rendered as its own
+   section before the article body rather than inside prose-legal HTML, and
+   deliberately not collapsed behind a <details> disclosure the way the old
+   flat "Article Sources" panel was, since the whole point of moving it above
+   the body is to show real citations before the claims they back. See
+   src/components/knowledge/PrimarySources.tsx. */
+.article-sources {
+  @apply border border-slate-200 rounded-lg px-6 py-6;
 }
-.article-sources summary {
-  @apply cursor-pointer select-none text-[13px] font-bold uppercase tracking-wide text-slate-900 list-none flex items-center justify-between gap-3;
+.article-sources h2 {
+  @apply text-[13px] font-bold uppercase tracking-wide text-slate-900 m-0;
 }
-.article-sources summary::-webkit-details-marker { display: none; }
-.article-sources summary::after {
-  content: '▾';
-  color: #64748b;
-  font-size: 12px;
-  transition: transform 0.2s ease;
-  flex-shrink: 0;
-}
-.article-sources details[open] summary::after { transform: rotate(180deg); }
-.article-sources .article-sources-intro { @apply mt-4 pt-4 border-t border-slate-200 text-[14px] leading-relaxed text-slate-600; }
-.article-sources ol { @apply mt-4 mb-0 pl-5 space-y-3 list-decimal marker:text-slate-400 marker:font-normal; }
-.article-sources li { @apply text-[14px] leading-relaxed text-slate-700; }
+.article-sources-intro { @apply mt-3 text-[14px] leading-relaxed text-slate-600; }
+.article-sources ol { @apply list-decimal pl-5 marker:text-slate-400 marker:font-normal; }

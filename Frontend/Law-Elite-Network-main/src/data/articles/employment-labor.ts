@@ -74,6 +74,12 @@ export const employmentLaborArticles: LawArticle[] = [
 <p>Before signing, read the whole document, ask for clarification on anything vague, and keep a copy for your records. Pay particular attention to pay, notice, and any clause that restricts you after you leave. If the contract involves significant restrictions, equity, or unusual terms — or if it appears to undercut your statutory rights — have it reviewed by a qualified employment lawyer in your country before you commit.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'Employment Rights Act 1996, Part I (UK) — written statement of particulars', url: 'https://www.legislation.gov.uk/ukpga/1996/18/contents' },
+      { label: 'Directive (EU) 2019/1152 on transparent and predictable working conditions', url: 'https://eur-lex.europa.eu/eli/dir/2019/1152/oj/eng' },
+      { label: 'India, Code on Wages 2019 and Industrial Relations Code 2020' },
+      { label: 'U.S. Department of Labor, Employment Law Guide', url: 'https://webapps.dol.gov/elaws/elg/' },
+    ],
   },
   {
     id: 'el-002',
@@ -147,5 +153,12 @@ export const employmentLaborArticles: LawArticle[] = [
 <p>Start by preserving evidence and reviewing your contract and any company policy on dismissal. Many countries offer a government body, tribunal, or labour authority where complaints can be lodged, often with strict deadlines. Because the rules and time limits vary so widely, speak to a qualified employment lawyer in your jurisdiction early — ideally before you sign any settlement or release — so you understand your options while a claim is still possible.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'EEOC, Enforcement Guidance on Retaliation and Related Issues', url: 'https://www.eeoc.gov/laws/guidance/enforcement-guidance-retaliation-and-related-issues' },
+      { label: 'Employment Rights Act 1996, Part X (UK) — unfair dismissal', url: 'https://www.legislation.gov.uk/ukpga/1996/18/contents' },
+      { label: 'Acas Code of Practice on disciplinary and grievance procedures', url: 'https://www.acas.org.uk/acas-code-of-practice-on-disciplinary-and-grievance-procedures' },
+      { label: 'India, Industrial Disputes Act 1947' },
+      { label: 'ILO, Termination of Employment Convention, 1982 (No. 158)', url: 'https://normlex.ilo.org/dyn/nrmlx_en/f?p=NORMLEXPUB:12100:0::NO:::P12100_ILO_CODE:C158' },
+    ],
   },
 ];

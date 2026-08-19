@@ -69,6 +69,12 @@ export const familyPersonalArticles: LawArticle[] = [
 <p>Start by gathering financial records, identifying the court with proper jurisdiction over your residence, and clarifying your priorities for property and any children. Consider an early consultation with a family lawyer or accredited mediator to understand your local rules, and resist signing any agreement before you fully understand its long-term effect. Acting deliberately, rather than reacting to pressure, usually produces a fairer and more durable outcome.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'Divorce, Dissolution and Separation Act 2020 (UK)', url: 'https://www.legislation.gov.uk/ukpga/2020/11/contents' },
+      { label: 'Uniform Marriage and Divorce Act (U.S. model legislation, Uniform Law Commission)' },
+      { label: 'India, Hindu Marriage Act 1955 and Special Marriage Act 1954' },
+      { label: 'HCCH, Hague Conference on Private International Law — family law conventions', url: 'https://www.hcch.net/en/instruments/conventions' },
+    ],
   },
   {
     id: 'fp-002',
@@ -132,6 +138,12 @@ export const familyPersonalArticles: LawArticle[] = [
 <p>Draft a realistic parenting plan that prioritises the child's routine and stability, and try to agree it directly or through mediation before involving a judge. Where safety is a concern, document it and seek advice promptly. Consult a family lawyer about your local rules on custody and relocation, since terminology and procedure vary, and remember that arrangements can be revised as your child grows.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'Hague Convention on the Civil Aspects of International Child Abduction (1980)', url: 'https://www.hcch.net/en/instruments/conventions/full-text/?cid=24' },
+      { label: 'Children Act 1989 (UK) — welfare checklist', url: 'https://www.legislation.gov.uk/ukpga/1989/41/contents' },
+      { label: 'Uniform Child Custody Jurisdiction and Enforcement Act (UCCJEA), Uniform Law Commission', url: 'https://www.uniformlaws.org/committees/community-home?CommunityKey=4cc1b0be-d6c5-4bc2-b157-16b0baf2c56d' },
+      { label: 'India, Guardians and Wards Act 1890' },
+    ],
   },
   {
     id: 'fp-003',
@@ -199,5 +211,11 @@ export const familyPersonalArticles: LawArticle[] = [
 <p>List your assets and the people you want to provide for, then decide on executors and, if relevant, guardians. For straightforward estates a professionally checked template may suffice, but for blended families, business interests, or cross-border assets, consult a qualified will-writer or solicitor. Store the signed original safely, tell your executor where to find it, and revisit it whenever your life circumstances change.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'Wills Act 1837 (UK)', url: 'https://www.legislation.gov.uk/ukpga/Will4and1Vict/7/26/contents' },
+      { label: 'Uniform Probate Code, Uniform Law Commission', url: 'https://www.uniformlaws.org/committees/community-home?CommunityKey=35a4e3e3-de91-4527-aeec-26b1fc41b1c3' },
+      { label: 'India, Indian Succession Act 1925' },
+      { label: 'STEP (Society of Trust and Estate Practitioners), Cross-Border Estates Global Special Interest Group', url: 'https://www.step.org/special-interest-groups/cross-border-estates-global-special-interest-group' },
+    ],
   },
 ];

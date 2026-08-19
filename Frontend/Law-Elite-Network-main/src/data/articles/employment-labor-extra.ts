@@ -84,6 +84,12 @@ export const employmentLaborExtraArticles: LawArticle[] = [
 <p>If you are an employee asked to sign a non-compete, read it closely, note its duration, area, and the activities it restricts, and ask whether it is realistic given how you intend to earn a living. If you are an employer, tailor any restriction narrowly to a genuine interest, as a tight, defensible clause beats a broad one that collapses in court. Because enforceability swings so much by jurisdiction, have any significant non-compete reviewed by an employment lawyer where the work is based before signing or relying on it.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'FTC, Noncompete Rule', url: 'https://www.ftc.gov/legal-library/browse/rules/noncompete-rule' },
+      { label: 'GOV.UK, working paper on options for reform of non-compete clauses in employment contracts', url: 'https://www.gov.uk/government/publications/reform-of-non-compete-clauses-in-employment-contracts-working-paper/working-paper-on-options-for-reform-of-non-compete-clauses-in-employment-contracts' },
+      { label: 'India, Indian Contract Act 1872, Section 27 — restraint of trade', url: 'https://indiankanoon.org/doc/1431516/' },
+      { label: 'OECD Indicators of Employment Protection', url: 'https://www.oecd.org/en/data/datasets/oecd-indicators-of-employment-protection.html' },
+    ],
   },
   {
     id: 'el-102',
@@ -163,5 +169,11 @@ export const employmentLaborExtraArticles: LawArticle[] = [
 <p>If you engage or work as a contractor, examine the real relationship against the usual factors — control, integration, substitution, and financial risk — rather than relying on the contract's wording. Businesses should structure genuine contractor arrangements consistently and keep records that support the classification. Where the relationship is long-term, full-time, or ambiguous, take advice from an employment or tax specialist in your jurisdiction, because the cost of getting classification wrong almost always exceeds the cost of getting it checked.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'DOL, Misclassification of Employees as Independent Contractors Under the FLSA', url: 'https://www.dol.gov/agencies/whd/flsa/misclassification' },
+      { label: 'Uber BV and others v Aslam and others [2021] UKSC 5', url: 'https://www.bailii.org/uk/cases/UKSC/2021/5.html' },
+      { label: 'Directive (EU) 2024/2831 on improving working conditions in platform work', url: 'https://eur-lex.europa.eu/eli/dir/2024/2831/oj/eng' },
+      { label: 'India, Code on Social Security 2020', url: 'https://www.indiacode.nic.in/bitstream/123456789/16823/1/aA2020-36.pdf' },
+    ],
   },
 ];

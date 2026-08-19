@@ -34,6 +34,26 @@ async function fetchArticleFromLawService(slug: string): Promise<any | null> {
 }
 
 /**
+ * A CMS/law-service record entirely replaces the bundled one for a shared
+ * slug (see the source-of-truth order below) -- correct for almost every
+ * field, since the live record is the actively-edited one. But it's whole-
+ * record precedence, not a field merge: a live record authored without ever
+ * opening admin-platform's CitationsPanel has no `primarySources` of its own,
+ * which silently dropped the bundled article's real, pre-verified citations
+ * (see the no-fabrication doc comment on `LawArticle.primarySources`) the
+ * moment the same slug existed in the CMS -- even though those citations are
+ * still accurate. Backfill only this one field, and only when the live
+ * record's own is empty, so a live-authored citation list always wins over
+ * this fallback the moment one exists.
+ */
+function withBundledSourcesFallback(article: any, slug: string): any {
+  if (article?.primarySources?.length) return article;
+  const bundled = getArticleBySlug(slug);
+  if (!bundled?.primarySources?.length) return article;
+  return { ...article, primarySources: bundled.primarySources };
+}
+
+/**
  * Source-of-truth order for the rendered article: CMS (preview-aware) ->
  * law-service -> bundled editorial library -> static seed. Shared by both the
  * canonical route (/[categorySlug]/[articleSlug]) and the legacy flat route
@@ -58,14 +78,14 @@ export async function fetchArticleForRender(
   // indexable empty article page. Same guard the seed fallback below uses.
   try {
     const cms = await cmsGetArticleBySlug(slug, true);
-    if (cms && cms.content) return cms;
+    if (cms && cms.content) return withBundledSourcesFallback(cms, slug);
   } catch {
     upstreamFailed = true;
   }
 
   try {
     const fromLawService = await fetchArticleFromLawService(slug);
-    if (fromLawService) return fromLawService;
+    if (fromLawService) return withBundledSourcesFallback(fromLawService, slug);
   } catch {
     upstreamFailed = true;
   }

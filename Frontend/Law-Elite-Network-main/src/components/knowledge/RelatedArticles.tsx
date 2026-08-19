@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { ArrowRight } from 'lucide-react';
 import { getArticlesByCategorySlug } from '@/data/law-content';
 import { cmsGetArticles } from '@/lib/cms';
 import { resolveArticleImage } from '@/lib/article-art';
@@ -65,18 +66,18 @@ export async function fetchRelatedArticles(
     // photos) must win. Same precedence as CategoryContent.tsx / search route.ts.
     const bySlug = new Map<string, RelatedArticle>();
     for (const a of [...bundled, ...cmsArticles]) bySlug.set(a.slug, a);
-    return prioritizeSubcategory(Array.from(bySlug.values()), subcategorySlug).slice(0, 4);
+    return prioritizeSubcategory(Array.from(bySlug.values()), subcategorySlug).slice(0, 8);
   } catch {
-    return prioritizeSubcategory(bundled, subcategorySlug).slice(0, 4);
+    return prioritizeSubcategory(bundled, subcategorySlug).slice(0, 8);
   }
 }
 
 /**
  * Same-category candidates are otherwise taken in plain array order, so a
- * category with more than 4 articles silently hides everything past the
- * first 4 (e.g. a jurisdiction cluster added after the original bundled set
+ * category with more than 8 articles silently hides everything past the
+ * first 8 (e.g. a jurisdiction cluster added after the original bundled set
  * would never surface on its own pillar article). Move same-subcategory
- * matches first -- still capped to 4 by the caller -- so a topic cluster
+ * matches first -- still capped to 8 by the caller -- so a topic cluster
  * stays mutually linked as it grows, without touching unrelated articles'
  * ordering when there's no subcategory overlap to begin with.
  */
@@ -87,13 +88,28 @@ function prioritizeSubcategory(articles: RelatedArticle[], subcategorySlug?: str
   return [...matched, ...rest];
 }
 
-export function RelatedArticles({ articles }: { articles: RelatedArticle[] }) {
+interface RelatedArticlesProps {
+  articles: RelatedArticle[];
+  /** When present, renders an "Explore {category} in {country} ->" link after the grid -- real destinations only, see ArticleView.tsx. */
+  category?: { name: string; slug: string };
+  subcategory?: { slug: string };
+  country?: string;
+}
+
+export function RelatedArticles({ articles, category, subcategory, country }: RelatedArticlesProps) {
   if (articles.length === 0) return null;
+
+  const exploreHref = category
+    ? subcategory?.slug
+      ? `/${category.slug}?sub=${subcategory.slug}`
+      : `/${category.slug}`
+    : null;
+  const exploreLabel = category ? `Explore ${category.name}${country ? ` in ${country}` : ''}` : null;
 
   return (
     <section className="pt-2 border-t-4 border-blue-600 mt-20 mb-24">
       <div className="container mx-auto px-0">
-        <h2 className="text-3xl font-bold text-slate-900 mb-10 pt-4 px-2">Related Articles</h2>
+        <h2 className="text-3xl font-bold text-slate-900 mb-10 pt-4 px-2">Related Guides</h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 px-2">
           {articles.map((art) => (
@@ -125,6 +141,17 @@ export function RelatedArticles({ articles }: { articles: RelatedArticle[] }) {
             </Link>
           ))}
         </div>
+
+        {exploreHref && exploreLabel && (
+          <div className="px-2 mt-8">
+            <Link
+              href={exploreHref}
+              className="inline-flex items-center gap-1.5 text-[14px] font-bold text-blue-700 hover:text-blue-900 transition-colors"
+            >
+              {exploreLabel} <ArrowRight className="w-4 h-4" aria-hidden="true" />
+            </Link>
+          </div>
+        )}
       </div>
     </section>
   );

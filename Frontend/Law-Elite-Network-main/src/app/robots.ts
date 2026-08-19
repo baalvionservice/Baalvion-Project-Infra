@@ -43,7 +43,6 @@ const ALLOW = [
   '/law/',
   ...CURRENT_CATEGORY_SLUGS.map((slug) => `/${slug}`),
   '/countries',
-  '/world',
   '/authors',
   '/author/',
 ];

@@ -11,8 +11,6 @@ import type { LawAuthor } from '@/data/authors';
 
 interface ArticleAuthorBylineProps {
   authorName: string;
-  /** Omitted (not a fabricated placeholder) when the article has no real timestamp. */
-  updatedAt?: string;
   matchedAuthor: LawAuthor | null;
 }
 
@@ -20,13 +18,14 @@ interface ArticleAuthorBylineProps {
  * Interactive author-bio popover for the article byline. Split out from the
  * article page so the page itself can stay a Server Component — the byline
  * text is still server-rendered by the caller; only the popover behavior
- * needs the client.
+ * needs the client. The "Last Updated" date lives in ArticleMetaHeader now,
+ * not duplicated here.
  */
-export function ArticleAuthorByline({ authorName, updatedAt, matchedAuthor }: ArticleAuthorBylineProps) {
+export function ArticleAuthorByline({ authorName, matchedAuthor }: ArticleAuthorBylineProps) {
   return (
     <div className="space-y-1 text-[14px] text-slate-600">
       <div className="flex flex-wrap items-center gap-1.5">
-        By
+        Written by
         <Popover>
           <PopoverTrigger asChild>
             <span className="font-bold text-blue-700 cursor-pointer border-b border-blue-600 hover:text-blue-900 transition-colors leading-none">
@@ -69,7 +68,6 @@ export function ArticleAuthorByline({ authorName, updatedAt, matchedAuthor }: Ar
             </div>
           </PopoverContent>
         </Popover>
-        {updatedAt && <>Updated {updatedAt}</>}
       </div>
     </div>
   );

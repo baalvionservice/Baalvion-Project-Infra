@@ -38,14 +38,17 @@ export function ReviewedBy({ info }: { info?: ReviewedByInfo }) {
         <p>
           <span className="text-slate-500">Reviewed by </span>
           <span className="font-bold text-slate-900">{info.name}</span>
+          {info.jurisdiction && <span className="text-slate-500"> · Jurisdiction: {info.jurisdiction}</span>}
         </p>
-        <p className="text-[12px] text-slate-500">
-          {info.jurisdiction && <>Jurisdiction: {info.jurisdiction}</>}
-          {info.jurisdiction && info.barLicense && <> · </>}
-          {info.barLicense && <>Bar/license: {info.barLicense}</>}
-          {(info.jurisdiction || info.barLicense) && <> · </>}
-          Review date: {info.reviewDate}
-        </p>
+        {/* Only shown when a real, verifiable bar/license is on file -- never
+            inferred or defaulted, per the no-fabrication rule on this field. */}
+        {info.barLicense && (
+          <p className="text-[12px] text-slate-500">
+            <span className="font-semibold text-slate-600">Professional status: </span>
+            {info.barLicense}
+          </p>
+        )}
+        <p className="text-[12px] text-slate-500">Review date: {info.reviewDate}</p>
       </div>
     </div>
   );

@@ -63,8 +63,10 @@ export function MissionAndBoardSection({ stats, authors }: { stats: HomeStats; a
             Editorial Board
           </h3>
           <p className="text-[13px] text-slate-500 mb-5 leading-relaxed">
-            Law Elite Network&rsquo;s guides are written and reviewed by an editorial team with named,
-            published profiles.
+            The desk editors who lead each practice-area's coverage and edit guides in their
+            subject area, with named, published profiles. Guides are written by our wider
+            contributor team — see the full{' '}
+            <Link href="/authors" className="text-blue-600 hover:underline">contributors list</Link>.
           </p>
           <div className="space-y-4">
             {authors.map((a) => (

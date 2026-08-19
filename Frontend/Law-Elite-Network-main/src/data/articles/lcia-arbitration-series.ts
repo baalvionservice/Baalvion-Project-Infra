@@ -119,6 +119,13 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
 <p>Before filing or responding to a Request for Arbitration, map the case against this lifecycle: confirm the seat and tribunal-size position, prepare for the case management conference rather than reacting to it, and identify early whether any part of the claim is a genuine candidate for Article 22.1(viii) dismissal. For the cost and urgency mechanics referenced above, consult the linked guides. Because procedural choices made in the first weeks of a case are difficult to unwind later, have LCIA-experienced counsel involved from the Request for Arbitration stage, not after the tribunal is formed.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'LCIA Arbitration Rules (2020)', url: 'https://www.lcia.org/Dispute_Resolution_Services/lcia-arbitration-rules-2020.aspx' },
+      { label: 'LCIA, Schedule of Arbitration Costs (2023)', url: 'https://www.lcia.org/dispute_resolution_services/schedule-of-arbitration-costs-2023.aspx' },
+      { label: 'Arbitration Act 1996 (UK)', url: 'https://www.legislation.gov.uk/ukpga/1996/23' },
+      { label: 'Arbitration Act 2025 (UK)', url: 'https://www.legislation.gov.uk/ukpga/2025/4' },
+      { label: 'Convention on the Recognition and Enforcement of Foreign Arbitral Awards (New York, 1958)', url: 'https://uncitral.un.org/en/texts/arbitration/conventions/foreign_arbitral_awards' },
+    ],
     author: 'Marcus Whitfield',
     updatedAt: 'August 9, 2026',
     readingTime: 14,
@@ -225,6 +232,11 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
 <p>Before filing or responding to a Request for Arbitration, build a cost model using the current Schedule of Costs figures above rather than relying on an outdated rate card, and revisit that model at each major procedural milestone — tribunal formation, document production, and hearing scheduling — since each is a distinct point where the forecast can shift materially. Because cost allocation under Article 28 is discretionary, keep a clean record of procedural conduct and reasonable settlement offers throughout the case, not just at the end, since the tribunal will look to that record when it decides who pays. For where cost planning fits into the full case lifecycle, see <a href="/disputes/lcia-international-arbitration-london-practitioner-guide">The Comprehensive Practitioner's Guide to LCIA International Arbitration in London</a>.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'LCIA, Schedule of Arbitration Costs (2023)', url: 'https://www.lcia.org/dispute_resolution_services/schedule-of-arbitration-costs-2023.aspx' },
+      { label: 'LCIA Arbitration Rules (2020)', url: 'https://www.lcia.org/Dispute_Resolution_Services/lcia-arbitration-rules-2020.aspx' },
+      { label: 'LCIA, Guidance Note', url: 'https://www.lcia.org/adr-services/guidance-note.aspx' },
+    ],
     author: 'Marcus Whitfield',
     updatedAt: 'August 9, 2026',
     readingTime: 12,
@@ -327,6 +339,12 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
 <p>Before an emergency actually arises, confirm whether the relevant arbitration clause has excluded the Emergency Arbitrator provisions, and identify in advance which internal stakeholders can authorize an urgent application on short notice — a mechanism with a three-day appointment window is only useful if the business can mobilize within it. When the moment comes, diagnose which of Articles 9A, 9B, or a section 44 court application actually fits the relief needed before filing, since each serves a genuinely different purpose. Because the choice affects what can realistically be achieved within days, involve counsel experienced in LCIA emergency procedure immediately, not after a first attempt has already been filed.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'LCIA Arbitration Rules (2020)', url: 'https://www.lcia.org/Dispute_Resolution_Services/lcia-arbitration-rules-2020.aspx' },
+      { label: 'Arbitration Act 1996, section 44 (UK)', url: 'https://www.legislation.gov.uk/ukpga/1996/23/section/44' },
+      { label: 'Arbitration Act 2025 (UK)', url: 'https://www.legislation.gov.uk/ukpga/2025/4' },
+      { label: 'LCIA, Notes on Emergency Procedures', url: 'https://www.lcia.org/adr-services/lcia-notes-on-emergency-procedures.aspx' },
+    ],
     author: 'Marcus Whitfield',
     updatedAt: 'August 9, 2026',
     readingTime: 12,
@@ -422,6 +440,12 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
 <p>Before advising on a new London-seated arbitration clause, decide deliberately whether to rely on the section 6A default or displace it with an express choice of law for the arbitration agreement, and build that decision into the firm's template clauses. For any arbitration already underway or about to commence, confirm which side of 1 August 2025 the proceedings fall on, since that determines which version of sections 67 and the immunity provisions applies. Because the interaction between section 39A and institution-specific early-determination powers is still a developing area of practice, have counsel with current Arbitration Act 2025 experience review any summary disposal strategy before it is filed.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'Arbitration Act 2025 (UK)', url: 'https://www.legislation.gov.uk/ukpga/2025/4' },
+      { label: 'The Arbitration Act 2025 (Commencement) Regulations 2025 (UK)', url: 'https://www.legislation.gov.uk/uksi/2025/905' },
+      { label: 'Enka Insaat Ve Sanayi AS v OOO Insurance Company Chubb [2020] UKSC 38', url: 'https://www.bailii.org/uk/cases/UKSC/2020/38.html' },
+      { label: 'Halliburton Company v Chubb Bermuda Insurance Ltd [2020] UKSC 48', url: 'https://www.bailii.org/uk/cases/UKSC/2020/48.html' },
+    ],
     author: 'Marcus Whitfield',
     updatedAt: 'August 9, 2026',
     readingTime: 13,
@@ -525,6 +549,12 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
 <p>Before filing an enforcement application, map the debtor's known assets in England and Wales and confirm the section 102 documentation is complete and properly authenticated. If the debtor is a state or state-linked entity, run a separate immunity analysis on each specific asset before assuming it is executable. Because the without-notice stage moves quickly but a contested hearing can take months, build both timelines into the client's expectations from the outset, and have enforcement counsel review the underlying award for any procedural vulnerability — notice, tribunal composition, scope — before, not after, the debtor raises it. For the full LCIA case lifecycle that produces the award being enforced, see <a href="/disputes/lcia-international-arbitration-london-practitioner-guide">The Comprehensive Practitioner's Guide to LCIA International Arbitration in London</a>.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'Arbitration Act 1996, Part III (UK)', url: 'https://www.legislation.gov.uk/ukpga/1996/23' },
+      { label: 'Convention on the Recognition and Enforcement of Foreign Arbitral Awards (New York, 1958), Article V', url: 'https://uncitral.un.org/en/texts/arbitration/conventions/foreign_arbitral_awards' },
+      { label: 'Civil Procedure Rules, Part 62 — Arbitration Claims (UK)', url: 'https://www.justice.gov.uk/courts/procedure-rules/civil/rules/part62/pd_part62' },
+      { label: 'State Immunity Act 1978 (UK)', url: 'https://www.legislation.gov.uk/ukpga/1978/33' },
+    ],
     author: 'Marcus Whitfield',
     updatedAt: 'August 9, 2026',
     readingTime: 13,
