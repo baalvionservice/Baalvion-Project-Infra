@@ -86,6 +86,12 @@ export const criminalLawExtra2Articles: LawArticle[] = [
 <p>The safest approach is prevention: if you have been drinking or taking impairing medication, do not drive. If you are charged, learn the precise offence and limit that apply where it happened, gather any documentation, and speak with a criminal defence lawyer early — procedural details around testing and stops can significantly affect the outcome.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'National Highway Traffic Safety Administration, Drunk Driving statistics and BAC standards', url: 'https://www.nhtsa.gov/risky-driving/drunk-driving' },
+      { label: 'Road Traffic Act 1988, section 5 (UK) — driving with alcohol above the prescribed limit', url: 'https://www.legislation.gov.uk/ukpga/1988/52/section/5' },
+      { label: 'European Transport Safety Council, Blood Alcohol Content (BAC) drink-driving limits across Europe', url: 'https://etsc.eu/issues/drink-driving/blood-alcohol-content-bac-drink-driving-limits-across-europe/' },
+      { label: 'India, Motor Vehicles Act 1988 (as amended) — drink-driving offence' },
+    ],
   },
   {
     id: 'cl-202',
@@ -168,5 +174,12 @@ export const criminalLawExtra2Articles: LawArticle[] = [
 <p>Because search powers differ so much, learn the basic rules for where you live or travel, especially around stop-and-search and vehicle searches. If you believe a search was unlawful, do not argue at the scene — comply, record what happened, and raise it afterward with a lawyer. An improper search can sometimes lead to evidence being excluded, so early legal advice is valuable whenever a search has played a part in a case.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'U.S. Constitution, Fourth Amendment', url: 'https://www.law.cornell.edu/constitution/fourth_amendment' },
+      { label: 'Riley v. California, 573 U.S. 373 (2014) — warrant required to search a cell phone incident to arrest', url: 'https://supreme.justia.com/cases/federal/us/573/373/' },
+      { label: 'Police and Criminal Evidence Act 1984 (PACE) (UK) — search and seizure powers', url: 'https://www.legislation.gov.uk/ukpga/1984/60' },
+      { label: 'Charter of Fundamental Rights of the European Union, Article 7 — respect for private and family life', url: 'https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:12012P/TXT' },
+      { label: 'India, Bharatiya Nagarik Suraksha Sanhita 2023 — search and seizure provisions' },
+    ],
   },
 ];

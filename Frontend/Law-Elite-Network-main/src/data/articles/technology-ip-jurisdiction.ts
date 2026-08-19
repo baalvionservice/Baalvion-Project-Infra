@@ -91,5 +91,12 @@ export const technologyIpJurisdictionArticles: LawArticle[] = [
 <p>If your organization handles personal data connected to both the UK and the EU, treat this as two related but separately maintained compliance programs rather than one — confirm which specific UK reforms (recognised legitimate interests, the new automated-decision-making rules, the cookie exemptions, the new transfer test) actually apply to what you do, since several took effect only in early 2026. Check the ICO's current guidance directly given the regulator itself is mid-transition, and revisit your EU and UK representative and transfer-mechanism arrangements to make sure both sides are actually covered rather than assuming one filing covers both. For the general, worldwide picture of how modern data privacy law works, see <a href="/tech-ip/data-privacy-law-basics">Data Privacy Law Basics: How Personal Data Is Protected</a>.</p>
 
 <p><em>This article is general legal information, not legal advice. UK and EU data protection law is changing rapidly — confirm the current position with the Information Commissioner's Office or the European Data Protection Board, and consult a qualified data protection lawyer for advice on your specific situation.</em></p>`,
+    primarySources: [
+      { label: 'Data Protection Act 2018 (UK)', url: 'https://www.legislation.gov.uk/ukpga/2018/12/contents' },
+      { label: 'Data (Use and Access) Act 2025 (UK)', url: 'https://www.legislation.gov.uk/ukpga/2025/18' },
+      { label: 'ICO, the Data (Use and Access) Act 2025', url: 'https://ico.org.uk/about-the-ico/what-we-do/legislation-we-cover/data-use-and-access-act-2025/' },
+      { label: 'European Commission, renewal of UK data protection adequacy decisions', url: 'https://ec.europa.eu/commission/presscorner/detail/en/ip_25_3059' },
+      { label: 'Privacy and Electronic Communications (EC Directive) Regulations 2003 (UK)', url: 'https://www.legislation.gov.uk/uksi/2003/2426/contents' },
+    ],
   },
 ];

@@ -46,7 +46,7 @@ export function LatestGuidesGrid({ articles }: { articles: any[] }) {
         <div className="flex items-center gap-3">
           <span className="w-1.5 h-6 bg-news-600 rounded-sm" />
           <h2 className="font-headline text-xl md:text-2xl font-extrabold tracking-tight text-slate-900 m-0">
-            Latest Guides
+            Latest Legal Guides
           </h2>
         </div>
       </div>

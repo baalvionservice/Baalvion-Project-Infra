@@ -84,6 +84,13 @@ export const propertyRealEstateExtraArticles: LawArticle[] = [
 <p>If you are buying or developing land, obtain the title documents and search for any registered easements, and walk the boundaries to spot informal paths or pipes that might hint at unregistered rights. Where an easement is unclear or disputed, get it documented in writing rather than relying on past practice. For anything contentious — a blocked right of way, a prescriptive claim, or a development that an easement constrains — consult a property lawyer in the relevant jurisdiction before you commit.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'Law of Property Act 1925 (UK)', url: 'https://www.legislation.gov.uk/ukpga/Geo5/15-16/20/contents' },
+      { label: 'Land Registration Act 2002 (UK)', url: 'https://www.legislation.gov.uk/ukpga/2002/9/contents' },
+      { label: 'Restatement of the Law Third, Property (Servitudes), American Law Institute', url: 'https://www.ali.org/publications/restatement-law-third/property-servitudes' },
+      { label: 'India, Indian Easements Act 1882' },
+      { label: 'International Bar Association, Real Estate Section', url: 'https://www.ibanet.org/unit/Real+Estate+Section/committee/Real+Estate+Section/3101' },
+    ],
   },
   {
     id: 'pr-102',
@@ -165,5 +172,10 @@ export const propertyRealEstateExtraArticles: LawArticle[] = [
 <p>Read your tenancy agreement to see how repair duties are allocated, but remember that local housing law can override unfair terms. Document the property's condition with dated photos at the start and end of the tenancy, report problems in writing as soon as they arise, and learn the basic landlord-tenant rules for your city or country. If a serious repair is ignored or a dispute escalates, seek advice from a local tenants' service or housing lawyer before taking action such as withholding rent.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'Homes (Fitness for Human Habitation) Act 2018 (UK)', url: 'https://www.legislation.gov.uk/ukpga/2018/34/contents' },
+      { label: 'India, Model Tenancy Act 2021 — repair and maintenance provisions' },
+      { label: 'Chartered Institute of Housing, Rethinking Repairs and Maintenance', url: 'https://www.cih.org/knowledge-hub/tenants-and-residents/better-social-housing-review/rethinking-repairs-and-maintenance/' },
+    ],
   },
 ];

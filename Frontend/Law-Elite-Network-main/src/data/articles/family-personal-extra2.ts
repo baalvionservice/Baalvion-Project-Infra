@@ -92,6 +92,12 @@ export const familyPersonalExtra2Articles: LawArticle[] = [
 <p>If you expect spousal support to be an issue, gather a clear picture of both spouses' income, assets, and needs, since these drive the outcome. Learn how your jurisdiction approaches support — guidelines or discretion — and keep any agreement properly documented. Because awards turn heavily on local law and individual facts, advice from a family lawyer early on usually leads to fairer, more durable arrangements.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'Tax Cuts and Jobs Act of 2017, Public Law 115-97 — repeal of the alimony deduction', url: 'https://www.congress.gov/115/plaws/publ97/PLAW-115publ97.pdf' },
+      { label: 'Matrimonial Causes Act 1973, section 25 (UK)', url: 'https://www.legislation.gov.uk/ukpga/1973/18/section/25' },
+      { label: 'Council Regulation (EC) No 4/2009 on maintenance obligations', url: 'https://eur-lex.europa.eu/legal-content/EN/ALL/?uri=CELEX:32009R0004' },
+      { label: 'India, Hindu Adoptions and Maintenance Act 1956' },
+    ],
   },
   {
     id: 'fp-202',
@@ -168,5 +174,12 @@ export const familyPersonalExtra2Articles: LawArticle[] = [
 <p>Start by clarifying your goal: avoiding probate, planning for incapacity, privacy, or tax. Take an inventory of your assets and decide which truly need a trust. Then consult an estate-planning lawyer in your jurisdiction, who can advise whether a living trust, a will, or a combination best fits your situation — and, crucially, make sure any trust you create is properly funded.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'Uniform Trust Code, Uniform Law Commission', url: 'https://www.uniformlaws.org/committees/community-home?CommunityKey=193ff839-7955-4846-8f3c-ce74ac23938d' },
+      { label: 'Trustee Act 2000 (UK)', url: 'https://www.legislation.gov.uk/ukpga/2000/29/contents' },
+      { label: 'HMRC, Trusts, Settlements and Estates Manual', url: 'https://www.gov.uk/hmrc-internal-manuals/trusts-settlements-and-estates-manual/tsem1002' },
+      { label: 'Hague Convention on the Law Applicable to Trusts and on their Recognition (1985)', url: 'https://www.hcch.net/en/instruments/conventions/full-text/?cid=59' },
+      { label: 'India, Indian Trusts Act 1882' },
+    ],
   },
 ];

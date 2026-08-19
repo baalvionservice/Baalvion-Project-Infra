@@ -53,7 +53,7 @@ export function FooterNewsletterForm() {
         id="footer-newsletter-email"
         type="email"
         required
-        placeholder="you@example.com"
+        placeholder="Enter your email address"
         value={email}
         onChange={(e) => {
           setEmail(e.target.value);

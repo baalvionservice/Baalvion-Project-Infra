@@ -89,5 +89,11 @@ export const technologyIpExtra2Articles: LawArticle[] = [
 <p>If you have an invention worth protecting, keep it confidential and document its development before doing anything public. Carry out a prior-art search to test whether it is genuinely new, and decide which markets actually matter to you. Because the claims and procedure are technical and the stakes are high, working with a qualified patent attorney or agent — ideally before any public disclosure — is one of the most valuable investments an inventor can make.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'WIPO, PCT – The International Patent System', url: 'https://www.wipo.int/en/web/pct-system' },
+      { label: 'USPTO, Patent basics', url: 'https://www.uspto.gov/patents/basics' },
+      { label: 'EPO, Unitary Patent Guidelines', url: 'https://www.epo.org/en/legal/guidelines-up' },
+      { label: 'India, Patents Act 1970 (as amended)' },
+    ],
   },
 ];

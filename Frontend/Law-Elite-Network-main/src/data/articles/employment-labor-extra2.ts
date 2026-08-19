@@ -85,6 +85,12 @@ export const employmentLaborExtra2Articles: LawArticle[] = [
 <p>If you are unsure of your status, read your employment contract and any company policies closely, and identify which jurisdiction's rules govern your job. Keep records of performance and any complaints you raise. If you are dismissed and suspect an unlawful reason — discrimination, retaliation, or breach of contract — consult an employment lawyer promptly, because time limits for claims can be short and early advice often shapes the outcome.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'NCSL, At-Will Employment Exceptions by State', url: 'https://www.ncsl.org/research/labor-and-employment/at-will-employment-exceptions-by-state' },
+      { label: 'Employment Rights Act 1996 (UK) — qualifying period for unfair dismissal claims', url: 'https://www.legislation.gov.uk/ukpga/1996/18/contents' },
+      { label: 'EEOC, Facts About Age Discrimination', url: 'https://www.eeoc.gov/laws/guidance/fact-sheet-age-discrimination' },
+      { label: 'ILO, Termination of Employment Convention, 1982 (No. 158)', url: 'https://normlex.ilo.org/dyn/nrmlx_en/f?p=NORMLEXPUB:12100:0::NO:::P12100_ILO_CODE:C158' },
+    ],
   },
   {
     id: 'el-202',
@@ -164,5 +170,11 @@ export const employmentLaborExtra2Articles: LawArticle[] = [
 <p>If you are offered a severance agreement, do not rush. Read every clause, identify exactly what rights you are being asked to release, and confirm whether any statutory entitlements apply regardless. Where the sums are significant or you suspect a legal claim, have an employment lawyer review the document — in some jurisdictions this advice is even a legal requirement for the waiver to be valid.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'EEOC, Older Workers Benefit Protection Act of 1990', url: 'https://www.eeoc.gov/history/older-workers-benefit-protection-act-1990' },
+      { label: 'Employment Rights Act 1996 (UK) — settlement agreements', url: 'https://www.legislation.gov.uk/ukpga/1996/18/contents' },
+      { label: 'India, Industrial Disputes Act 1947 — retrenchment compensation' },
+      { label: 'SHRM, Designing and Administering Severance Pay Plans', url: 'https://www.shrm.org/topics-tools/tools/toolkits/designing-administering-severance-pay-plans' },
+    ],
   },
 ];

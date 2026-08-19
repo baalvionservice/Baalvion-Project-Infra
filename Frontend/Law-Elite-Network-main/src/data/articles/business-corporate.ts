@@ -76,6 +76,12 @@ export const businessCorporateArticles: LawArticle[] = [
 <p>Map out the realistic scenarios that could divide the owners — a death, a sale, a falling out, a need for more capital — and check that the draft answers each one. Make sure the agreement and the constitution are consistent, that valuation and exit mechanics are concrete, and that every current and future owner is bound. Then have it reviewed by a lawyer familiar with company law where the business is incorporated.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'G20/OECD Principles of Corporate Governance (2023)', url: 'https://www.oecd.org/en/publications/g20-oecd-principles-of-corporate-governance-2023_ed750b30-en.html' },
+      { label: 'Companies Act 2006 (UK)', url: 'https://www.legislation.gov.uk/ukpga/2006/46/contents' },
+      { label: 'Delaware General Corporation Law, Title 8, Chapter 1', url: 'https://delcode.delaware.gov/title8/c001/index.html' },
+      { label: 'India, Companies Act 2013' },
+    ],
   },
   {
     id: 'bc-002',
@@ -156,6 +162,12 @@ export const businessCorporateArticles: LawArticle[] = [
 <p>Start by clarifying your goals: liability protection, tax efficiency, and whether you plan to bring in investors. Match those goals to a structure, confirm the registration requirements in the country where you will operate, and put a calendar in place for ongoing filings from day one. A short consultation with a local lawyer or accountant before filing can prevent costly restructuring later.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'GOV.UK, set up a limited company: step by step', url: 'https://www.gov.uk/set-up-limited-company' },
+      { label: 'IRS, About Form 8832, Entity Classification Election', url: 'https://www.irs.gov/forms-pubs/about-form-8832' },
+      { label: 'India, Ministry of Corporate Affairs, company incorporation' },
+      { label: 'OECD Guidelines for Multinational Enterprises on Responsible Business Conduct', url: 'https://www.oecd.org/en/publications/oecd-guidelines-for-multinational-enterprises-on-responsible-business-conduct_81f92357-en.html' },
+    ],
   },
   {
     id: 'bc-003',
@@ -236,5 +248,11 @@ export const businessCorporateArticles: LawArticle[] = [
 <p>Before raising outside money, make sure the cap table is clean, equity vests, and all IP is assigned to the company. Keep organized records of investments, contracts, and equity grants so a future due-diligence process is straightforward. Engage a startup-focused lawyer in your jurisdiction early — the cost is modest compared with fixing foundational problems during a funding round.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'SEC, Private Placements Under Regulation D — Rule 506(b)', url: 'https://www.sec.gov/resources-small-businesses/exempt-offerings/private-placements-rule-506b' },
+      { label: 'HMRC, HS393 Seed Enterprise Investment Scheme — Income Tax and Capital Gains Tax reliefs', url: 'https://www.gov.uk/government/publications/seed-enterprise-investment-scheme-income-tax-and-capital-gains-tax-reliefs-hs393-self-assessment-helpsheet/hs393-seed-enterprise-investment-scheme-income-tax-and-capital-gains-tax-reliefs-2025' },
+      { label: 'Y Combinator, SAFE financing documents', url: 'https://www.ycombinator.com/documents' },
+      { label: 'India, Foreign Exchange Management Act 1999 — rules on startup investment' },
+    ],
   },
 ];

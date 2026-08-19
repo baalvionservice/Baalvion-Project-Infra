@@ -63,6 +63,12 @@ export const disputeResolutionArticles: LawArticle[] = [
 <p>Decide the forum before signing, not after a dispute erupts. Review the dispute-resolution clause in any significant contract and consider whether arbitration's privacy and cross-border enforceability outweigh litigation's appeal rights and lower upfront cost. For international deals, identify a neutral seat and a reputable arbitral institution, and confirm both parties' countries are New York Convention members. Because clause wording determines what you can enforce later, have a qualified lawyer draft or review it.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'UNCITRAL Model Law on International Commercial Arbitration (1985, amended 2006)', url: 'https://uncitral.un.org/en/texts/arbitration/modellaw/commercial_arbitration' },
+      { label: 'Convention on the Recognition and Enforcement of Foreign Arbitral Awards (New York, 1958)', url: 'https://uncitral.un.org/en/texts/arbitration/conventions/foreign_arbitral_awards' },
+      { label: 'ICC, 2021 Arbitration Rules', url: 'https://iccwbo.org/dispute-resolution/dispute-resolution-services/arbitration/rules-procedure/2021-arbitration-rules/' },
+      { label: 'SIAC, Arbitration Rules', url: 'https://www.siac.org.sg/our-rules' },
+    ],
     author: 'Priya Nair',
     updatedAt: 'April 14, 2026',
     readingTime: 9,
@@ -136,6 +142,12 @@ export const disputeResolutionArticles: LawArticle[] = [
 <p>Consider mediation early, especially where preserving a relationship or controlling cost matters. Check whether your contract contains a mediation clause or whether your local courts require an attempt before trial. Choose an accredited, experienced mediator suited to the subject matter, and prepare by clarifying your real interests and your best alternative if no deal is reached. Once terms are agreed, make sure the settlement is written clearly and signed so it is enforceable. Because enforceability rules differ, have a qualified lawyer review the agreement.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'United Nations Convention on International Settlement Agreements Resulting from Mediation (Singapore Convention on Mediation, 2019)', url: 'https://uncitral.un.org/en/texts/mediation/conventions/international_settlement_agreements' },
+      { label: 'Civil Mediation Council (UK)', url: 'https://civilmediation.org/' },
+      { label: 'ABA, Dispute Resolution Section', url: 'https://www.americanbar.org/groups/dispute_resolution/' },
+      { label: 'India, Mediation Act 2023' },
+    ],
     author: 'Marcus Whitfield',
     updatedAt: 'February 27, 2026',
     readingTime: 8,
@@ -267,6 +279,13 @@ export const disputeResolutionArticles: LawArticle[] = [
 <p>Before the next cross-border contract goes out for signature, run the dispute-profile scoring above against the deal's actual value and counterparty risk, then price both institutions' fee models against a realistic claim scenario rather than defaulting to whichever institution appeared in the last template clause. Where the seat will be London, confirm with counsel how the Arbitration Act 2025's section 6A default and summary disposal power under section 39A interact with the chosen institution's own rules, since the two operate together, not in place of each other. Because a poorly drafted or internally inconsistent clause is one of the most common causes of a costly preliminary jurisdictional dispute, have the final clause reviewed by counsel qualified in the seat's law before signature.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'LCIA Arbitration Rules (2020)', url: 'https://www.lcia.org/Dispute_Resolution_Services/lcia-arbitration-rules-2020.aspx' },
+      { label: 'ICC, 2021 Arbitration Rules', url: 'https://iccwbo.org/dispute-resolution/dispute-resolution-services/arbitration/rules-procedure/2021-arbitration-rules/' },
+      { label: 'Arbitration Act 1996 (UK)', url: 'https://www.legislation.gov.uk/ukpga/1996/23' },
+      { label: 'Arbitration Act 2025 (UK)', url: 'https://www.legislation.gov.uk/ukpga/2025/4' },
+      { label: 'Convention on the Recognition and Enforcement of Foreign Arbitral Awards (New York, 1958)', url: 'https://uncitral.un.org/en/texts/arbitration/conventions/foreign_arbitral_awards' },
+    ],
     author: 'Marcus Whitfield',
     updatedAt: 'August 9, 2026',
     readingTime: 13,

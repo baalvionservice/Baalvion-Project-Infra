@@ -67,6 +67,12 @@ export const technologyIpArticles: LawArticle[] = [
 <p>Identify which asset you are trying to protect: if it is a brand name or logo, focus on trademark registration in the markets where you operate; if it is creative content, document authorship and consider voluntary copyright registration where it strengthens enforcement. For cross-border protection, explore the Madrid System for trademarks and rely on the Berne framework for copyright, and seek tailored advice before filing.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'WIPO, Madrid System for the International Registration of Marks', url: 'https://www.wipo.int/en/web/madrid-system' },
+      { label: 'USPTO, Trademark basics', url: 'https://www.uspto.gov/trademarks/basics' },
+      { label: 'Berne Convention for the Protection of Literary and Artistic Works', url: 'https://www.wipo.int/en/web/treaties/ip/berne/index' },
+      { label: 'India, Trade Marks Act 1999 and Copyright Act 1957' },
+    ],
   },
   {
     id: 'ti-002',
@@ -128,5 +134,11 @@ export const technologyIpArticles: LawArticle[] = [
 <p>If your organization handles personal data, start by mapping what you collect, why, and where it flows. Identify a lawful basis for each use, publish a clear privacy notice, build a process for handling individual rights requests, and confirm your security and breach-response measures. Because obligations vary by jurisdiction and evolve quickly, treat privacy compliance as an ongoing program and seek qualified advice for cross-border operations.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'Regulation (EU) 2016/679 (General Data Protection Regulation)', url: 'https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng' },
+      { label: 'India, Digital Personal Data Protection Act 2023', url: 'https://www.meity.gov.in/static/uploads/2024/06/2bf1f0e9f04e6fb4f8fef35e82c42aa5.pdf' },
+      { label: 'Brazil, Lei Geral de Proteção de Dados (Law No. 13,709/2018)', url: 'https://www.gov.br/anpd/pt-br/centrais-de-conteudo/outros-documentos-e-publicacoes-institucionais/lgpd-en-lei-no-13-709-capa.pdf' },
+      { label: 'California Attorney General, California Consumer Privacy Act', url: 'https://oag.ca.gov/privacy/ccpa' },
+    ],
   },
 ];

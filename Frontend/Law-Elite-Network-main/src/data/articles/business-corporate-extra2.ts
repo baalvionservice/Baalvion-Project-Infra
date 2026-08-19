@@ -85,6 +85,11 @@ export const businessCorporateExtra2Articles: LawArticle[] = [
 <p>Begin by confirming which entity actually delivers limited liability where you intend to operate, then work through the filing steps in order and keep copies of every document. Set calendar reminders for ongoing filings so the company stays compliant. For anything beyond a simple single-owner business — multiple members, outside investment, or cross-border operations — a short consultation with a local lawyer or accountant before you file is well worth the cost.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'U.S. Small Business Administration, choose a business structure', url: 'https://www.sba.gov/business-guide/launch-your-business/choose-business-structure' },
+      { label: 'GOV.UK, set up a private limited company', url: 'https://www.gov.uk/limited-company-formation' },
+      { label: 'India, Ministry of Corporate Affairs, LLP and private limited company registration' },
+    ],
   },
   {
     id: 'bc-202',
@@ -163,5 +168,11 @@ export const businessCorporateExtra2Articles: LawArticle[] = [
 <p>If a contract has been broken, start by reading the agreement itself: many contain clauses on remedies, notice, and dispute resolution that control what you can do next. Document the breach and your losses, and take reasonable steps to limit further harm. Then seek advice from a contracts lawyer in the relevant jurisdiction before sending threats or terminating — the strongest remedy is often not the most obvious one, and a wrong move can weaken your position.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'U.C.C. Article 2 — Sales', url: 'https://www.law.cornell.edu/ucc/2' },
+      { label: 'Sale of Goods Act 1979 (UK)', url: 'https://www.legislation.gov.uk/ukpga/1979/54/contents' },
+      { label: 'India, Specific Relief Act 1963 (as amended) and Indian Contract Act 1872' },
+      { label: 'UNIDROIT Principles of International Commercial Contracts 2016', url: 'https://www.unidroit.org/instruments/commercial-contracts/unidroit-principles-2016/' },
+    ],
   },
 ];

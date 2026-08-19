@@ -176,6 +176,12 @@ export const businessCorporateJurisdictionArticles: LawArticle[] = [
 <p>Before filing, confirm the current registration fee and the current registered-office and identity-verification requirements directly on GOV.UK, since all three have changed within the past two years and are likely to change again. If you'll be a director or a person with significant control, plan to complete identity verification at the same time as incorporation rather than treating it as a later formality. Once registered, set calendar reminders for your Corporation Tax registration, confirmation statement, and first accounts deadlines immediately — missing any of them is one of the most common (and most avoidable) ways a new UK company runs into trouble with Companies House or HMRC. For the general, worldwide picture of how company formation works, see <a href="/business/company-formation-overview">How to Form a Company: A Practical Overview</a>.</p>
 
 <p><em>This article is general legal information, not legal advice. UK company law and Companies House fees and procedures change frequently — confirm the current requirements on GOV.UK and consult a UK solicitor or accountant before incorporating.</em></p>`,
+    primarySources: [
+      { label: 'GOV.UK, register your company (private limited company formation)', url: 'https://www.gov.uk/limited-company-formation/register-your-company' },
+      { label: 'Economic Crime and Corporate Transparency Act 2023 (UK)', url: 'https://www.legislation.gov.uk/ukpga/2023/56/contents' },
+      { label: 'Companies Act 2006, section 15 (UK) — certificate of incorporation', url: 'https://www.legislation.gov.uk/ukpga/2006/46/section/15' },
+      { label: 'GOV.UK, verifying your identity for Companies House', url: 'https://www.gov.uk/guidance/verifying-your-identity-for-companies-house' },
+    ],
   },
   {
     id: 'bc-303',
@@ -243,6 +249,12 @@ export const businessCorporateJurisdictionArticles: LawArticle[] = [
 <p>Start by mapping out where your business will actually operate in its first few years, not just where it's headquartered — that answer usually settles the federal-versus-provincial question faster than comparing fees. If your board includes people who aren't Canadian residents, check the current director-residency rule for the specific jurisdiction you're considering before you file, since it can quietly rule out federal incorporation or a particular province. And whichever route you choose, budget for the possibility of extra-provincial registration elsewhere as the business grows — it's a near-certainty for any company that expands beyond its home jurisdiction. For the general, worldwide picture of how company formation works, see <a href="/business/company-formation-overview">How to Form a Company: A Practical Overview</a>.</p>
 
 <p><em>This article is general legal information, not legal advice. Incorporation rules and fees vary by jurisdiction and change over time — consult a lawyer or accountant licensed in the relevant Canadian jurisdiction before incorporating.</em></p>`,
+    primarySources: [
+      { label: 'Canada Business Corporations Act, R.S.C., 1985, c. C-44, section 105 — director residency', url: 'https://laws-lois.justice.gc.ca/eng/acts/C-44/section-105.html' },
+      { label: 'Corporations Canada (ISED) — business corporations', url: 'https://ised-isde.canada.ca/site/corporations-canada/en/business-corporations' },
+      { label: 'Ontario Business Registry', url: 'https://www.ontario.ca/page/ontario-business-registry' },
+      { label: 'Business Corporations Act (British Columbia), SBC 2002, c 57', url: 'https://www.bclaws.gov.bc.ca/civix/document/id/complete/statreg/02057_01' },
+    ],
   },
   {
     id: 'bc-304',
@@ -317,5 +329,11 @@ export const businessCorporateJurisdictionArticles: LawArticle[] = [
 <p>Before you apply, confirm that at least one proposed director meets the Australian residency requirement and that every director has applied for their Director ID — both are common early stumbling blocks. Budget for the current registration fee and the recurring annual review fee using the figures published on asic.gov.au at the time you file, not a number from an older guide. Once registered, calendar your annual review date immediately, since the solvency resolution and fee both run on a clock that starts the moment ASIC approves your company. For the general, worldwide picture of how company formation works, see <a href="/business/company-formation-overview">How to Form a Company: A Practical Overview</a>.</p>
 
 <p><em>This article is general legal information, not legal advice. Australian company registration fees and requirements are updated periodically — confirm the current position on asic.gov.au and consult an Australian lawyer or accountant before registering.</em></p>`,
+    primarySources: [
+      { label: 'Corporations Act 2001 (Cth)', url: 'https://www.legislation.gov.au/C2004A00818/latest' },
+      { label: 'ASIC, register a company', url: 'https://www.asic.gov.au/for-business-and-companies/companies/register-a-company' },
+      { label: 'Australian Business Registry Services, director identification number', url: 'https://www.abrs.gov.au/director-identification-number' },
+      { label: 'Business Registration Service (Australian Government)', url: 'https://register.business.gov.au/' },
+    ],
   },
 ];

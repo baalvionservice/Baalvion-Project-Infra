@@ -81,6 +81,12 @@ export const criminalLawExtraArticles: LawArticle[] = [
 <p>Learn the basic arrest rules for the country and region where you live or travel, since the warnings and time limits differ. If you or someone you know is arrested, prioritise three things: stay calm and non-resistant, clearly invoke the right to silence and a lawyer, and keep a careful record of what happened. Contact a criminal defence lawyer as soon as possible, because early advice often shapes the entire outcome.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'Miranda v. Arizona, 384 U.S. 436 (1966)', url: 'https://supreme.justia.com/cases/federal/us/384/436/' },
+      { label: 'Police and Criminal Evidence Act 1984 (PACE), section 58 (UK) — right to legal advice', url: 'https://www.legislation.gov.uk/ukpga/1984/60/section/58' },
+      { label: 'Directive 2013/48/EU on the right of access to a lawyer in criminal proceedings', url: 'https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32013L0048' },
+      { label: 'India, Constitution of India, Article 22 — protection against arrest and detention in certain cases' },
+    ],
   },
   {
     id: 'cl-102',
@@ -162,5 +168,11 @@ export const criminalLawExtraArticles: LawArticle[] = [
 <p>If you are facing a charge, find out precisely how the offence is classified where you are, because that determines the realistic range of outcomes and the procedure ahead. Take the collateral consequences seriously, not just the headline sentence, and gather any documents relevant to your case. Speak to a criminal defence lawyer early — the classification of a charge is sometimes negotiable, and skilled, timely advice can materially change the result.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'U.S. Bureau of Justice Statistics, State Felony Courts and Felony Laws', url: 'https://bjs.ojp.gov/library/publications/state-felony-courts-and-felony-laws-0' },
+      { label: 'Criminal Law Act 1967, section 1 (UK) — abolition of the distinction between felony and misdemeanour', url: 'https://www.legislation.gov.uk/ukpga/1967/58/section/1' },
+      { label: 'India, Bharatiya Nyaya Sanhita 2023 — offence classification' },
+      { label: 'American Bar Association, Reducing the Impact of Collateral Consequences of Convictions', url: 'https://www.americanbar.org/advocacy/governmental_legislative_work/priorities_policy/criminal_justice_system_improvements/reducing-the-impact-of-collateral-consequences-of-convictions/' },
+    ],
   },
 ];

@@ -73,6 +73,12 @@ export const taxFinanceArticles: LawArticle[] = [
 <p>Map your company's residence and the sources of its income, confirm the current rate and filing calendar in each relevant country, and build a record-keeping routine that captures the documents tax authorities expect. Where the business operates across borders or within a group, engage a tax professional early, because cross-border structures are where the largest risks and reliefs both concentrate.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'OECD/G20, Action Plan on Base Erosion and Profit Shifting', url: 'https://www.oecd.org/en/publications/action-plan-on-base-erosion-and-profit-shifting_9789264202719-en.html' },
+      { label: 'IRS, Publication 542, Corporations', url: 'https://www.irs.gov/publications/p542' },
+      { label: 'HMRC, Corporation Tax: overview', url: 'https://www.gov.uk/corporation-tax' },
+      { label: 'India, Income Tax Act 1961 — corporate tax provisions' },
+    ],
   },
   {
     id: 'tf-002',
@@ -145,5 +151,11 @@ export const taxFinanceArticles: LawArticle[] = [
 <p>Identify every source of income you receive, confirm whether your country expects withholding or an annual return, and check which allowances and credits you genuinely qualify for. Keep clear records throughout the year rather than reconstructing them at deadline, and seek professional help where income spans multiple countries or includes significant investment or business activity.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'OECD Model Tax Convention on Income and on Capital', url: 'https://www.oecd.org/en/topics/oecd-model-tax-convention-on-income-and-on-capital.html' },
+      { label: 'IRS, Publication 17, Your Federal Income Tax', url: 'https://www.irs.gov/publications/p17' },
+      { label: 'HMRC, RDR3: Statutory Residence Test (SRT) notes', url: 'https://www.gov.uk/government/publications/rdr3-statutory-residence-test-srt/guidance-note-for-statutory-residence-test-srt-rdr3' },
+      { label: 'India, Income Tax Act 1961 — residence and taxation provisions' },
+    ],
   },
 ];

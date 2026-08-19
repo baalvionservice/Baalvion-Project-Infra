@@ -88,6 +88,12 @@ export const taxFinanceExtraArticles: LawArticle[] = [
 <p>Before selling a significant asset, work out the likely gain, check which exemptions and reliefs apply, and confirm the reporting deadline in your country. Keep records of what you paid, the costs of buying and selling, and any improvements, as these reduce the taxable gain. For large disposals, business sales, or assets across borders, take advice from a tax professional early, because timing a sale and structuring it correctly can make a substantial difference to the tax due.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'IRS, Topic no. 409, Capital gains and losses', url: 'https://www.irs.gov/taxtopics/tc409' },
+      { label: 'GOV.UK, Capital Gains Tax: what you pay it on, rates and allowances', url: 'https://www.gov.uk/capital-gains-tax' },
+      { label: 'India, Income Tax Act 1961 — capital gains provisions' },
+      { label: 'OECD, Taxing Capital Gains (OECD Taxation Working Papers)', url: 'https://www.oecd.org/en/publications/taxing-capital-gains_9e33bd2b-en.html' },
+    ],
   },
   {
     id: 'tf-102',
@@ -161,5 +167,11 @@ export const taxFinanceExtraArticles: LawArticle[] = [
 <p>Identify whether your country uses VAT, GST, or sales tax, and find the registration threshold and rates that apply to what you sell. Keep clean records of the tax you charge and, under VAT or GST, the tax you pay on inputs so you can claim credits. Where you sell into multiple regions or countries, take professional advice early, because cross-border indirect tax is a frequent source of unexpected liabilities and penalties.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'South Dakota v. Wayfair, Inc., 585 U.S. 162 (2018)', url: 'https://supreme.justia.com/cases/federal/us/585/17-494/' },
+      { label: 'GOV.UK, VAT registration thresholds', url: 'https://www.gov.uk/vat-registration-thresholds' },
+      { label: 'India, Central Goods and Services Tax Act 2017', url: 'https://taxinformation.cbic.gov.in/content/html/tax_repository/gst/acts/2017_CGST_act/documents/Central_Goods_and_Services_Tax_Act__2017_28-September-2022.html' },
+      { label: 'OECD, International VAT/GST Guidelines', url: 'https://www.oecd.org/en/publications/international-vat-gst-guidelines_9789264271401-en.html' },
+    ],
   },
 ];

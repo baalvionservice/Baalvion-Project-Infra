@@ -3,13 +3,12 @@ import { fetchPublicApi } from '@/lib/api/public-fetch';
 import { mergeArticles } from '@/data/law-content';
 import { cmsGetArticles, cmsGetNews } from '@/lib/cms';
 import { getMergedAuthors } from '@/lib/authors-server';
-import { authorNameToSlug } from '@/data/authors';
+import { authorNameToSlug, isEditorRole } from '@/data/authors';
 import { COUNTRIES } from '@/data/countries';
 import { TopicTicker } from '@/components/knowledge/news/TopicTicker';
 import { StoryCard } from '@/components/knowledge/news/StoryCard';
 import { LatestRail } from '@/components/knowledge/news/LatestRail';
 import { CategorySection } from '@/components/knowledge/news/CategorySection';
-import { GetLegalHelpCard } from '@/components/knowledge/GetLegalHelpCard';
 import { LatestGuidesGrid } from '@/components/knowledge/LatestGuidesGrid';
 import { PracticeAreaChart } from '@/components/knowledge/PracticeAreaChart';
 import { LatestNewsList } from '@/components/knowledge/LatestNewsList';
@@ -194,7 +193,13 @@ export default async function KnowledgeHomePage() {
     practiceAreas: categories.length,
     jurisdictions: COUNTRIES.length,
   };
-  const editorialBoardPreview = editorialBoard.slice(0, 4);
+  // "Editorial Board" means desk editors specifically (the real "...Editor"
+  // vs. "...Contributor" role already encoded in each profile's `title`, see
+  // isEditorRole()) -- not an arbitrary slice of the full contributor list,
+  // which previously could show names that don't match who's actually
+  // bylining articles on this same page.
+  const editors = editorialBoard.filter((a: any) => isEditorRole(a.title));
+  const editorialBoardPreview = (editors.length > 0 ? editors : editorialBoard).slice(0, 4);
 
   const articlesByCategory = categories.map((cat: any) => ({
     ...cat,
@@ -261,7 +266,6 @@ export default async function KnowledgeHomePage() {
             </div>
             <div className="lg:col-span-4 space-y-9">
               <LatestRail articles={latest} />
-              <GetLegalHelpCard />
             </div>
           </div>
         </section>
