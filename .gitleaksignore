@@ -79,3 +79,13 @@ b6f9b5f95d9ec54848e6174860fe29b8b5b79e1c:Frontend/controlthemarket-main/LIVE_SER
 b6f9b5f95d9ec54848e6174860fe29b8b5b79e1c:Frontend/controlthemarket-main/LIVE_SERVER_VERIFICATION.md:curl-auth-header:423
 b6f9b5f95d9ec54848e6174860fe29b8b5b79e1c:Frontend/controlthemarket-main/LIVE_SERVER_VERIFICATION.md:curl-auth-header:440
 b6f9b5f95d9ec54848e6174860fe29b8b5b79e1c:Frontend/controlthemarket-main/LIVE_SERVER_VERIFICATION.md:curl-auth-header:450
+
+# Law Elite Network article citation links to uniformlaws.org's public
+# committee pages. `CommunityKey=<guid>` is a public page-identifier query
+# param on their own site (not an auth token), but its entropy trips
+# gitleaks' generic-api-key heuristic. Verified by reading all 4 lines
+# directly -- each is a `{ label, url }` primary-source citation.
+92c392f9f3bbaad014fca2c4490750ab6fc983c6:Frontend/Law-Elite-Network-main/src/data/articles/property-real-estate-extra2.ts:generic-api-key:184
+92c392f9f3bbaad014fca2c4490750ab6fc983c6:Frontend/Law-Elite-Network-main/src/data/articles/family-personal-extra2.ts:generic-api-key:178
+92c392f9f3bbaad014fca2c4490750ab6fc983c6:Frontend/Law-Elite-Network-main/src/data/articles/family-personal.ts:generic-api-key:144
+92c392f9f3bbaad014fca2c4490750ab6fc983c6:Frontend/Law-Elite-Network-main/src/data/articles/family-personal.ts:generic-api-key:216
