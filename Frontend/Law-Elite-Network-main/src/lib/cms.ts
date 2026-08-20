@@ -313,6 +313,24 @@ export interface CmsArticle {
   reviewedAt?: string;
   reviewerJurisdiction?: string;
   reviewerBarLicense?: string;
+  /**
+   * Raw fact-checker fields set by the admin FactCheckerPanel -- same
+   * pattern as reviewerSlug above, resolved against the author directory
+   * rather than trusting a fabricated name/date here.
+   */
+  factCheckerSlug?: string;
+  factCheckedAt?: string;
+  /**
+   * Raw series fields set by the admin SeriesPanel -- `seriesSlug` is
+   * auto-derived there from `seriesTitle` (never hand-typed), so any two
+   * articles sharing a series reliably share this slug. Powers the "Part of
+   * the Series" panel on the public article (see SeriesNotice.tsx).
+   */
+  seriesTitle?: string;
+  seriesSlug?: string;
+  seriesOrder?: number;
+  /** Optional named sub-group within the series (e.g. "Saving for College") -- articles with no section render as flat top-level entries. */
+  seriesSectionTitle?: string;
 }
 
 /**
@@ -370,6 +388,12 @@ function toArticle(c: CmsContent): CmsArticle {
     reviewedAt: typeof cf.reviewedAt === 'string' ? cf.reviewedAt : undefined,
     reviewerJurisdiction: typeof cf.reviewerJurisdiction === 'string' ? cf.reviewerJurisdiction : undefined,
     reviewerBarLicense: typeof cf.reviewerBarLicense === 'string' ? cf.reviewerBarLicense : undefined,
+    factCheckerSlug: typeof cf.factCheckerSlug === 'string' ? cf.factCheckerSlug : undefined,
+    factCheckedAt: typeof cf.factCheckedAt === 'string' ? cf.factCheckedAt : undefined,
+    seriesTitle: typeof cf.seriesTitle === 'string' ? cf.seriesTitle : undefined,
+    seriesSlug: typeof cf.seriesSlug === 'string' ? cf.seriesSlug : undefined,
+    seriesOrder: typeof cf.seriesOrder === 'number' ? cf.seriesOrder : undefined,
+    seriesSectionTitle: typeof cf.seriesSectionTitle === 'string' ? cf.seriesSectionTitle : undefined,
   };
 }
 
@@ -437,6 +461,10 @@ export interface CmsAuthor {
   bio?: string;
   avatarUrl?: string;
   expertise?: string[];
+  /** Degrees/schools, e.g. "M.D. — University of Mississippi". Empty unless verified in the CMS. */
+  education?: string[];
+  /** Professional certifications, e.g. "CFP®". Empty unless verified in the CMS. */
+  certifications?: string[];
   social?: { x?: string; linkedin?: string; facebook?: string; instagram?: string };
 }
 
@@ -450,6 +478,8 @@ function toAuthor(raw: any): CmsAuthor | null {
     bio: raw.bio ?? undefined,
     avatarUrl: raw.avatarUrl ?? raw.avatar_url ?? undefined,
     expertise: Array.isArray(raw.expertise) ? raw.expertise : undefined,
+    education: Array.isArray(raw.education) && raw.education.length ? raw.education : undefined,
+    certifications: Array.isArray(raw.certifications) && raw.certifications.length ? raw.certifications : undefined,
     social: raw.social && typeof raw.social === 'object' ? raw.social : undefined,
   };
 }

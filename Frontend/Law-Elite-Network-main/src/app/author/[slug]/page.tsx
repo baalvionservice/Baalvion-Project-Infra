@@ -48,65 +48,89 @@ export default async function AuthorProfilePage(
 
   const avatar = resolvePersonImage({ avatarUrl: author.avatarUrl, name: author.name, avatarSeed: author.avatarSeed });
   const bioParagraphs = author.bio.split('\n').map((p) => p.trim()).filter(Boolean);
+  const firstName = author.name.split(' ')[0];
+
+  // Bold-label meta rows, Investopedia-style ("Title:", "Education:", ...).
+  // Each row only renders when real data backs it -- education/certifications
+  // are CMS-managed and verified-only (see LawAuthor doc comment), never
+  // inferred, so most profiles simply won't show those rows yet.
+  const metaRows: { label: string; value: string }[] = [
+    author.title && { label: 'Title', value: author.title },
+    author.credentials && { label: 'Affiliation', value: author.credentials },
+    author.education?.length && { label: 'Education', value: author.education.join(', ') },
+    author.certifications?.length && { label: 'Certifications', value: author.certifications.join(', ') },
+    author.expertise.length > 0 && { label: 'Expertise', value: author.expertise.join(', ') },
+  ].filter(Boolean) as { label: string; value: string }[];
+
+  const socialLinks = [
+    author.social?.linkedin && { href: author.social.linkedin, label: 'LinkedIn', Icon: Linkedin },
+    author.social?.x && { href: author.social.x, label: 'X', Icon: Twitter },
+    author.social?.facebook && { href: author.social.facebook, label: 'Facebook', Icon: Facebook },
+    author.social?.instagram && { href: author.social.instagram, label: 'Instagram', Icon: Instagram },
+  ].filter(Boolean) as { href: string; label: string; Icon: typeof Linkedin }[];
 
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
 
-      <main className="pt-32 pb-24">
-        <div className="container mx-auto px-6 max-w-5xl">
-
-          <nav aria-label="Breadcrumb" className="mb-10 text-sm font-medium text-slate-400">
+      <main className="pt-20 pb-24">
+        <div className="container mx-auto px-6 max-w-5xl pt-8">
+          <nav aria-label="Breadcrumb" className="mb-6 text-sm font-medium text-slate-400">
             <Link href="/" className="hover:text-slate-700">Home</Link>
             <span className="mx-2">/</span>
             <Link href="/authors" className="hover:text-slate-700">Contributors</Link>
             <span className="mx-2">/</span>
             <span className="text-slate-700">{author.name}</span>
           </nav>
+        </div>
 
-          <header className="flex flex-col sm:flex-row gap-8 items-start pb-12 mb-12 border-b border-slate-100">
-            <div className="relative w-32 h-32 shrink-0 rounded-3xl overflow-hidden bg-slate-100 shadow-md">
-              <Image src={avatar} alt={author.name} fill className="object-cover" data-ai-hint="professional portrait" />
-            </div>
-            <div className="flex-1">
-              <span className="text-[12px] font-bold text-blue-600 uppercase tracking-tight">{author.title}</span>
-              <h1 className="text-[40px] md:text-[52px] font-bold text-slate-900 tracking-tight font-serif leading-tight mt-1 mb-3">
-                {author.name}
-              </h1>
-              <p className="text-base text-slate-500 font-medium mb-5">{author.credentials}</p>
-
-              <div className="flex flex-wrap items-center gap-3">
-                {author.expertise.map((area) => (
-                  <span key={area} className="text-[12px] font-semibold text-slate-600 bg-slate-100 rounded-full px-3 py-1.5">
-                    {area}
-                  </span>
-                ))}
-                {author.social?.linkedin && (
-                  <a href={author.social.linkedin} target="_blank" rel="noopener noreferrer" aria-label={`${author.name} on LinkedIn`} className="text-slate-400 hover:text-blue-600 transition-colors">
-                    <Linkedin className="w-5 h-5" />
-                  </a>
-                )}
-                {author.social?.x && (
-                  <a href={author.social.x} target="_blank" rel="noopener noreferrer" aria-label={`${author.name} on X`} className="text-slate-400 hover:text-blue-600 transition-colors">
-                    <Twitter className="w-5 h-5" />
-                  </a>
-                )}
-                {author.social?.facebook && (
-                  <a href={author.social.facebook} target="_blank" rel="noopener noreferrer" aria-label={`${author.name} on Facebook`} className="text-slate-400 hover:text-blue-600 transition-colors">
-                    <Facebook className="w-5 h-5" />
-                  </a>
-                )}
-                {author.social?.instagram && (
-                  <a href={author.social.instagram} target="_blank" rel="noopener noreferrer" aria-label={`${author.name} on Instagram`} className="text-slate-400 hover:text-blue-600 transition-colors">
-                    <Instagram className="w-5 h-5" />
-                  </a>
+        {/* Banner */}
+        <div className="bg-blue-50 border-y border-blue-100">
+          <div className="container mx-auto px-6 max-w-5xl py-10 md:py-12">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+              <div className="relative w-28 h-28 sm:w-32 sm:h-32 shrink-0 rounded-2xl overflow-hidden bg-slate-200 shadow-sm">
+                <Image src={avatar} alt={author.name} fill className="object-cover grayscale" data-ai-hint="professional portrait" />
+              </div>
+              <div>
+                <h1 className="text-3xl md:text-[44px] font-bold text-slate-900 tracking-tight font-serif leading-tight">
+                  {author.name}
+                </h1>
+                {socialLinks.length > 0 && (
+                  <div className="flex items-center gap-2 mt-4">
+                    {socialLinks.map(({ href, label, Icon }) => (
+                      <a
+                        key={label}
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`${author.name} on ${label}`}
+                        className="w-9 h-9 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-500 hover:text-blue-600 hover:border-blue-300 transition-colors"
+                      >
+                        <Icon className="w-4 h-4" />
+                      </a>
+                    ))}
+                  </div>
                 )}
               </div>
             </div>
-          </header>
+          </div>
+        </div>
 
-          <section className="max-w-3xl mb-16">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wide mb-4">About {author.name.split(' ')[0]}</h2>
+        <div className="container mx-auto px-6 max-w-5xl pt-10">
+
+          {metaRows.length > 0 && (
+            <dl className="space-y-2 mb-12 text-[15px] leading-relaxed">
+              {metaRows.map(({ label, value }) => (
+                <div key={label}>
+                  <dt className="inline font-bold text-slate-900">{label}: </dt>
+                  <dd className="inline text-slate-700">{value}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+
+          <section className="max-w-3xl mb-14">
+            <h2 className="text-2xl font-bold text-slate-900 font-serif mb-4">Experience</h2>
             <div className="space-y-5 text-[18px] leading-[1.7] text-slate-700 font-serif">
               {bioParagraphs.map((p, i) => (
                 <p key={i}>{p}</p>
@@ -114,12 +138,35 @@ export default async function AuthorProfilePage(
             </div>
           </section>
 
+          {author.education && author.education.length > 0 && (
+            <section className="max-w-3xl mb-14">
+              <h2 className="text-2xl font-bold text-slate-900 font-serif mb-4">Education</h2>
+              <ul className="list-disc pl-5 space-y-1.5 text-[16px] leading-relaxed text-slate-700">
+                {author.education.map((e) => (
+                  <li key={e}>{e}</li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          <section className="max-w-3xl mb-16 pt-8 border-t border-slate-100">
+            <h2 className="text-2xl font-bold text-slate-900 font-serif mb-4">About Law Elite Network</h2>
+            <p className="text-[15px] leading-relaxed text-slate-600">
+              Law Elite Network is a legal knowledge platform that publishes clear, well-sourced legal explainers for a
+              worldwide audience and operates a directory through which readers can discover qualified practitioners.
+              Every profile is created for editorial attribution and is subject to our{' '}
+              <Link href="/editorial-standards" className="text-blue-600 hover:underline">editorial standards</Link>. Learn
+              more in our{' '}
+              <Link href="/about-us" className="text-blue-600 hover:underline">About Us</Link> page.
+            </p>
+          </section>
+
           <section>
             <div className="flex items-center gap-3 mb-10 pt-4 border-t-4 border-blue-600">
               <BookOpen className="w-6 h-6 text-blue-600 mt-4" />
               <h2 className="text-3xl font-bold text-slate-900 pt-4">
-                Guides by {author.name.split(' ')[0]}{' '}
-                <span className="text-slate-400 font-medium text-xl">({articles.length})</span>
+                Latest from {firstName}{' '}
+                {articles.length > 0 && <span className="text-slate-400 font-medium text-xl">({articles.length})</span>}
               </h2>
             </div>
 

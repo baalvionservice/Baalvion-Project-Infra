@@ -22,6 +22,8 @@ function fromCms(a: CmsAuthor): LawAuthor {
     expertise: a.expertise || [],
     avatarSeed: a.slug,
     avatarUrl: a.avatarUrl,
+    education: a.education,
+    certifications: a.certifications,
     social: a.social,
   };
 }

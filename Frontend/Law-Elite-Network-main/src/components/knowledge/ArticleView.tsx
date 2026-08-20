@@ -10,6 +10,8 @@ import { ArticleAuthorByline } from '@/app/[categorySlug]/[articleSlug]/ArticleA
 import { ArticleAdWrapper } from '@/components/knowledge/ArticleAdWrapper';
 import { PrimarySources } from '@/components/knowledge/PrimarySources';
 import { ReviewedBy } from '@/components/knowledge/ReviewedBy';
+import { FactCheckedBy } from '@/components/knowledge/FactCheckedBy';
+import { SeriesNotice } from '@/components/knowledge/SeriesNotice';
 import { ArticleMetaHeader } from '@/components/knowledge/ArticleMetaHeader';
 import { ImportantNotice } from '@/components/knowledge/ImportantNotice';
 import { KeyTakeaways } from '@/components/knowledge/KeyTakeaways';
@@ -23,18 +25,39 @@ import { formatArticleDate, formatArticleMonthYear } from '@/lib/format-date';
 import { extractKeyTakeaways } from '@/lib/seo/key-takeaways-extractor';
 import { extractFaqSection } from '@/lib/seo/faq-section-extractor';
 import { articleUrl } from '@/lib/article-url';
+import { cmsGetArticles } from '@/lib/cms';
 import type { ReviewedByInfo } from '@/components/knowledge/ReviewedBy';
+import type { FactCheckedByInfo } from '@/components/knowledge/FactCheckedBy';
+import type { SeriesInfo } from '@/components/knowledge/SeriesNotice';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+
+/** Profile fields the "Reviewed by" bio popover needs -- same shape ArticleAuthorByline already gets for the primary byline. */
+function reviewerProfileFields(reviewer: { slug: string; bio: string; avatarUrl?: string; avatarSeed: string }) {
+  return {
+    slug: reviewer.slug,
+    bio: reviewer.bio,
+    avatarUrl: reviewer.avatarUrl,
+    avatarSeed: reviewer.avatarSeed,
+  };
+}
 
 /**
  * Bundled LawArticle data carries a resolved `reviewedBy` object directly.
  * CMS-sourced articles instead carry a raw `reviewerSlug` (ReviewerPanel in
  * admin-platform) that must be resolved against the author directory for a
  * real name/credentials -- same pattern as the primary byline just below.
+ *
+ * Either way, once we have a name we try to match it to a real contributor
+ * profile so the "Reviewed by" byline can show the same photo/bio popover as
+ * "Written by" -- see ReviewedBy.tsx. A bundled `reviewedBy` with no matching
+ * profile still renders (name/jurisdiction/date), just without a popover.
  */
 async function resolveReviewedBy(article: any): Promise<ReviewedByInfo | undefined> {
-  if (article.reviewedBy) return article.reviewedBy;
+  if (article.reviewedBy) {
+    const profile = await getMergedAuthorByName(article.reviewedBy.name);
+    return { ...article.reviewedBy, ...(profile ? reviewerProfileFields(profile) : {}) };
+  }
   if (!article.reviewerSlug || !article.reviewedAt) return undefined;
   const reviewer = await getMergedAuthorBySlug(article.reviewerSlug);
   if (!reviewer) return undefined;
@@ -43,7 +66,69 @@ async function resolveReviewedBy(article: any): Promise<ReviewedByInfo | undefin
     jurisdiction: article.reviewerJurisdiction || undefined,
     barLicense: article.reviewerBarLicense || undefined,
     reviewDate: formatArticleMonthYear(article.reviewedAt) || article.reviewedAt,
+    ...reviewerProfileFields(reviewer),
   };
+}
+
+/** Mirrors resolveReviewedBy above -- FactCheckerPanel in admin-platform writes factCheckerSlug/factCheckedAt into the same customFields extension point. */
+async function resolveFactCheckedBy(article: any): Promise<FactCheckedByInfo | undefined> {
+  if (!article.factCheckerSlug || !article.factCheckedAt) return undefined;
+  const checker = await getMergedAuthorBySlug(article.factCheckerSlug);
+  if (!checker) return undefined;
+  return {
+    name: checker.name,
+    checkDate: formatArticleMonthYear(article.factCheckedAt) || article.factCheckedAt,
+    ...reviewerProfileFields(checker),
+  };
+}
+
+/**
+ * Resolves this article's series siblings by matching `seriesSlug` (set via
+ * admin SeriesPanel) against every other CMS article -- never fabricated.
+ * Returns undefined both when the article isn't in a series at all, and when
+ * it nominally is but no sibling shares the slug yet: a "series" of one
+ * reader-facing article isn't a series, and showing the panel then would be
+ * a dead-end disclosure box with nothing else to link to.
+ */
+async function resolveSeriesInfo(article: any): Promise<SeriesInfo | undefined> {
+  if (!article.seriesSlug || !article.seriesTitle) return undefined;
+
+  let siblings: any[] = [];
+  try {
+    siblings = await cmsGetArticles();
+  } catch {
+    return undefined;
+  }
+
+  const entries = siblings
+    .filter((a) => a.seriesSlug === article.seriesSlug && a.slug)
+    .map((a) => ({
+      slug: a.slug as string,
+      title: a.title,
+      categorySlug: a.category?.slug,
+      sectionTitle: a.seriesSectionTitle || undefined,
+      order: typeof a.seriesOrder === 'number' ? a.seriesOrder : Number.MAX_SAFE_INTEGER,
+      current: a.slug === article.slug,
+    }));
+
+  // The current article may not come back from cmsGetArticles() in
+  // preview/draft states -- include it explicitly so it's never missing
+  // from its own series list.
+  if (!entries.some((e) => e.current) && article.slug) {
+    entries.push({
+      slug: article.slug,
+      title: article.title,
+      categorySlug: article.category?.slug,
+      sectionTitle: article.seriesSectionTitle || undefined,
+      order: typeof article.seriesOrder === 'number' ? article.seriesOrder : Number.MAX_SAFE_INTEGER,
+      current: true,
+    });
+  }
+
+  if (entries.length < 2) return undefined;
+
+  entries.sort((a, b) => a.order - b.order || a.title.localeCompare(b.title));
+  return { title: article.seriesTitle, entries };
 }
 
 interface TOCItem {
@@ -113,9 +198,11 @@ function extractToc(html: string): TOCItem[] {
 export async function ArticleView({ article, slug }: { article: any; slug: string }) {
   const category = article.category;
   const authorName: string = (typeof article.author === 'string' ? article.author : article.author?.name) || 'Law Elite Editorial';
-  const [matchedAuthor, reviewedBy] = await Promise.all([
+  const [matchedAuthor, reviewedBy, factCheckedBy, seriesInfo] = await Promise.all([
     getMergedAuthorByName(authorName),
     resolveReviewedBy(article),
+    resolveFactCheckedBy(article),
+    resolveSeriesInfo(article),
   ]);
   // No hardcoded fallback date here: if a record genuinely has no real
   // timestamp, ArticleMetaHeader omits the Published/Last Updated chips
@@ -175,14 +262,13 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
                   readingTimeMinutes={readingTimeMinutes}
                 />
 
-                <div className="space-y-3">
+                <div className="space-y-1.5">
                   <ArticleAuthorByline authorName={authorName} matchedAuthor={matchedAuthor} />
                   <ReviewedBy info={reviewedBy} />
+                  <FactCheckedBy info={factCheckedBy} />
                 </div>
 
-                <ImportantNotice />
-
-                <PrimarySources sources={article.primarySources} />
+                <SeriesNotice series={seriesInfo ?? null} />
 
                 <figure className="pt-6">
                   <div className="aspect-[16/9] relative overflow-hidden bg-slate-50 rounded-lg">
@@ -206,6 +292,10 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
 
               <KeyTakeaways items={keyTakeaways} />
 
+              <ImportantNotice />
+
+              <PrimarySources sources={article.primarySources} />
+
               <FrequentlyAskedQuestions pairs={faqPairs} />
 
               <NextStep category={category} country={article.country} />
@@ -220,6 +310,7 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
               <EditorialInformation
                 authorName={authorName}
                 reviewedBy={reviewedBy}
+                factCheckedBy={factCheckedBy}
                 updatedAt={updatedAt}
                 sourcesCount={article.primarySources?.length || 0}
               />

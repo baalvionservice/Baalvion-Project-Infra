@@ -1,9 +1,11 @@
 import React from 'react';
 import type { ReviewedByInfo } from '@/components/knowledge/ReviewedBy';
+import type { FactCheckedByInfo } from '@/components/knowledge/FactCheckedBy';
 
 interface EditorialInformationProps {
   authorName: string;
   reviewedBy?: ReviewedByInfo;
+  factCheckedBy?: FactCheckedByInfo;
   /** Omitted when the article has no real timestamp -- see ArticleMetaHeader.tsx. */
   updatedAt?: string;
   sourcesCount: number;
@@ -28,7 +30,7 @@ function Row({ label, value }: { label: string; value: string }) {
  * being added, see its doc comment) -- it reports a real count, or says
  * plainly that none are on file yet, never a vague fabricated "yes."
  */
-export function EditorialInformation({ authorName, reviewedBy, updatedAt, sourcesCount }: EditorialInformationProps) {
+export function EditorialInformation({ authorName, reviewedBy, factCheckedBy, updatedAt, sourcesCount }: EditorialInformationProps) {
   return (
     <div className="border border-slate-200 rounded-lg px-6">
       <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-900 pt-5 pb-1">
@@ -39,6 +41,7 @@ export function EditorialInformation({ authorName, reviewedBy, updatedAt, source
         label="Reviewed by"
         value={reviewedBy ? reviewedBy.name : 'Not independently reviewed by a licensed attorney'}
       />
+      {factCheckedBy && <Row label="Fact checked by" value={factCheckedBy.name} />}
       {updatedAt && <Row label="Last updated" value={updatedAt} />}
       <Row
         label="Sources checked"
