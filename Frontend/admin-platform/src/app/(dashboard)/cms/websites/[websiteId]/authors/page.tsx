@@ -272,8 +272,12 @@ export default function WebsiteAuthorsPage({
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted">
-                      <UserRound className="h-5 w-5 text-muted-foreground" />
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted">
+                      {a.avatarUrl ? (
+                        <img src={a.avatarUrl} alt="" className="h-full w-full object-cover" />
+                      ) : (
+                        <UserRound className="h-5 w-5 text-muted-foreground" />
+                      )}
                     </div>
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium">{a.name}</p>
