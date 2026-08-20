@@ -46,6 +46,10 @@ export interface LawAuthor {
   avatarSeed: string;
   /** Optional explicit portrait URL (CMS-managed authors); overrides the seed. */
   avatarUrl?: string;
+  /** Degrees/schools, e.g. "M.D. — University of Mississippi". CMS-managed only; never inferred. */
+  education?: string[];
+  /** Professional certifications, e.g. "CFP®". CMS-managed only; never inferred. */
+  certifications?: string[];
   /** Optional public profile links. */
   social?: { x?: string; linkedin?: string; facebook?: string; instagram?: string };
 }

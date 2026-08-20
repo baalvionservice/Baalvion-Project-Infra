@@ -1,55 +1,56 @@
+"use client";
+
 import React from 'react';
-import Link from 'next/link';
-import { BadgeCheck, Info } from 'lucide-react';
+import { ContributorByline } from '@/components/knowledge/ContributorByline';
 
 export interface ReviewedByInfo {
   name: string;
   jurisdiction?: string;
   barLicense?: string;
   reviewDate: string;
+  /**
+   * Present when the reviewer resolves to a real contributor profile (see
+   * `resolveReviewedBy` in ArticleView.tsx) -- required for the bio popover.
+   * A reviewer credited by name only, with no matching profile, still
+   * renders correctly; it just isn't clickable, since there's no bio/photo
+   * to show and no fabricated one is used.
+   */
+  slug?: string;
+  bio?: string;
+  avatarUrl?: string;
+  avatarSeed?: string;
 }
 
 /**
- * Attorney-review credit line. Never claims review happened when it didn't --
- * see the `reviewedBy` doc comment on LawArticle and /editorial-process: this
- * network only credits a named attorney where review actually took place.
- * When it didn't, that limitation is stated plainly rather than left blank --
- * per /editorial-process ("Legal review status") a reader should never have
- * to guess whether a guide was attorney-reviewed.
+ * "Reviewed by" byline row -- renders nothing when no reviewer is on file
+ * for this article (never claims review happened when it didn't). The
+ * disclosure that a guide is *not* independently attorney-reviewed still
+ * lives in EditorialInformation.tsx further down the page; this row, next
+ * to "Written by", stays quiet until a real reviewer is actually named --
+ * matching the reference's plain stacked-line pattern rather than a boxed
+ * callout up top.
  */
 export function ReviewedBy({ info }: { info?: ReviewedByInfo }) {
-  if (!info) {
-    return (
-      <div className="flex items-start gap-2.5 text-[13px] text-slate-500 bg-slate-50 border border-slate-100 rounded-lg px-4 py-3">
-        <Info className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" aria-hidden="true" />
-        <p>
-          Legal review: Not independently reviewed by a licensed attorney. This guide is general legal
-          information researched and edited under our{' '}
-          <Link href="/editorial-process" className="text-blue-600 hover:underline">Editorial Process</Link>.
-        </p>
-      </div>
-    );
-  }
+  if (!info) return null;
+
+  // Only shown when real, verifiable values are on file -- never inferred
+  // or defaulted, per the no-fabrication rule on these fields.
+  const metaLines = [
+    info.jurisdiction ? `Jurisdiction: ${info.jurisdiction}` : null,
+    info.barLicense ? `Professional status: ${info.barLicense}` : null,
+    `Reviewed: ${info.reviewDate}`,
+  ].filter((line): line is string => Boolean(line));
 
   return (
-    <div className="flex items-start gap-2.5 text-[13px] text-slate-600 bg-blue-50/60 border border-blue-100 rounded-lg px-4 py-3">
-      <BadgeCheck className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" aria-hidden="true" />
-      <div className="space-y-0.5">
-        <p>
-          <span className="text-slate-500">Reviewed by </span>
-          <span className="font-bold text-slate-900">{info.name}</span>
-          {info.jurisdiction && <span className="text-slate-500"> · Jurisdiction: {info.jurisdiction}</span>}
-        </p>
-        {/* Only shown when a real, verifiable bar/license is on file -- never
-            inferred or defaulted, per the no-fabrication rule on this field. */}
-        {info.barLicense && (
-          <p className="text-[12px] text-slate-500">
-            <span className="font-semibold text-slate-600">Professional status: </span>
-            {info.barLicense}
-          </p>
-        )}
-        <p className="text-[12px] text-slate-500">Review date: {info.reviewDate}</p>
-      </div>
-    </div>
+    <ContributorByline
+      label="Reviewed by"
+      name={info.name}
+      avatarUrl={info.avatarUrl}
+      avatarSeed={info.avatarSeed}
+      bio={info.bio}
+      profileSlug={info.slug}
+      repeatLabelInCard
+      metaLines={metaLines}
+    />
   );
 }

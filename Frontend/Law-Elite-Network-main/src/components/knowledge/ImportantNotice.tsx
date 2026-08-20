@@ -15,6 +15,7 @@ export function ImportantNotice() {
       <p>
         <span className="font-bold">Important: </span>
         This article provides general legal information and does not constitute legal advice.
+        Consult a licensed attorney in your jurisdiction for guidance on your specific situation.
       </p>
     </div>
   );
