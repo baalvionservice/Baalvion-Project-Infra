@@ -22,6 +22,7 @@ import NewsMetaPanel, { type NewsMeta } from './NewsMetaPanel';
 import CustomFieldsPanel from './CustomFieldsPanel';
 import ReviewerPanel from './ReviewerPanel';
 import FactCheckerPanel from './FactCheckerPanel';
+import SeriesPanel from './SeriesPanel';
 import CitationsPanel from './CitationsPanel';
 import ContentWorkflowBadge from './ContentWorkflowBadge';
 import RelatedContentSuggestions from './newsroom/RelatedContentSuggestions';
@@ -373,6 +374,10 @@ export default function ContentEditor({ content, userRole, canPublish, websiteTi
                       categories={flatCategories}
                     />
                   </div>
+                  <SeriesPanel
+                    value={customFields}
+                    onChange={(v) => { setCustomFields(v); markUnsaved(); }}
+                  />
                 </TabsContent>
 
                 <TabsContent value="media" className="mt-0 divide-y">
