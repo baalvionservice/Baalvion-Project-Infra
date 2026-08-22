@@ -85,6 +85,12 @@ export const taxFinanceExtra2Articles: LawArticle[] = [
 <p>Begin by listing the deductions you may genuinely qualify for under your local rules, and compare itemising against any standard deduction. Keep organised records throughout the year rather than scrambling at filing time. For anything beyond a simple return — self-employment, investments, or cross-border income — a qualified accountant or tax adviser can ensure you claim everything you are entitled to without crossing the line into a risky position.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'IRS, Publication 501, Dependents, Standard Deduction, and Filing Information', url: 'https://www.irs.gov/publications/p501' },
+      { label: 'GOV.UK, expenses if you\'re self-employed', url: 'https://www.gov.uk/expenses-if-youre-self-employed' },
+      { label: 'India, Income Tax Act 1961, Chapter VI-A deductions' },
+      { label: 'OECD, Tax Policy Reforms 2025', url: 'https://www.oecd.org/en/publications/tax-policy-reforms-2025_de648d27-en.html' },
+    ],
   },
   {
     id: 'tf-202',
@@ -168,5 +174,11 @@ export const taxFinanceExtra2Articles: LawArticle[] = [
 <p>The best defence against a difficult audit is preparation before one ever happens: keep clear, organised records and file accurate returns. If you receive a notice, read it carefully, note the deadlines, and gather the specific documents requested. For anything beyond a simple query — significant sums, business accounts, or suspected penalties — engage an accountant or tax lawyer early to represent you and protect your position.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'IRS, Taxpayer Bill of Rights', url: 'https://www.irs.gov/newsroom/the-taxpayer-bill-of-rights-provides-fundamental-protection-for-all-taxpayers' },
+      { label: 'HMRC, compliance checks factsheets', url: 'https://www.gov.uk/government/collections/hm-revenue-and-customs-compliance-checks-factsheets' },
+      { label: 'India, Income Tax Act 1961 — scrutiny assessment and appeal provisions' },
+      { label: 'OECD Forum on Tax Administration', url: 'https://www.oecd.org/en/networks/oecd-forum-on-tax-administration.html' },
+    ],
   },
 ];

@@ -21,7 +21,6 @@ import {
   TrendingUp,
   ChevronRight,
   Bell,
-  Zap,
   Target,
   Percent,
   UserPlus
@@ -109,44 +108,6 @@ function LawyerDashboardContent() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div className="lg:col-span-8 space-y-12">
-          <section className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50/50 rounded-full -mr-32 -mt-32 blur-3xl" />
-            <div className="flex items-center justify-between mb-8 relative z-10">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shadow-inner">
-                  <Zap className="w-6 h-6" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-slate-900">Intelligence Pulse</h3>
-                  <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Marketplace Velocity v4.2</p>
-                </div>
-              </div>
-              <Badge className="bg-blue-50 text-blue-600 border-blue-100 text-[9px] font-bold uppercase px-3 py-1">
-                Optimized Tier
-              </Badge>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
-              <div className="space-y-1">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Avg Response Latency</p>
-                <p className="text-3xl font-bold text-slate-900">1.4h</p>
-                <div className="flex items-center gap-1 text-[9px] font-bold text-emerald-600 uppercase">
-                  <TrendingUp className="w-3 h-3" /> 12% Lift
-                </div>
-              </div>
-              <div className="space-y-1">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Matter Success Rate</p>
-                <p className="text-3xl font-bold text-slate-900">94.2%</p>
-                <p className="text-[9px] font-bold text-blue-600 uppercase">Network Top 1%</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lead Conversion</p>
-                <p className="text-3xl font-bold text-slate-900">28.5%</p>
-                <p className="text-[9px] font-bold text-slate-400 uppercase">Benchmark: 15%</p>
-              </div>
-            </div>
-          </section>
-
           <section className="space-y-6">
             <CaseList cases={cases} title="Assigned Legal Matters" />
           </section>

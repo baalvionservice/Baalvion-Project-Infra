@@ -66,7 +66,10 @@ const securityHeaders = [
       // remarketing/ad-service tags. api.baalvion.com is the cms-service
       // analytics collect.js — it was in connect-src/img-src but missing here,
       // so the site's own tracker was silently CSP-blocked on every page.
-      `script-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://www.googletagmanager.com https://api.baalvion.com https://*.googlesyndication.com https://*.doubleclick.net https://*.googleadservices.com https://*.google.com${
+      // *.adtrafficquality.google also serves the sodar/sodar2.js ad-traffic-quality
+      // script itself (loaded via <script src>, not just fetch/XHR) — it was only in
+      // connect-src below, so the browser blocked the script load outright.
+      `script-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://www.googletagmanager.com https://api.baalvion.com https://*.googlesyndication.com https://*.doubleclick.net https://*.googleadservices.com https://*.google.com https://*.adtrafficquality.google${
         isDev ? " 'unsafe-eval'" : ''
       }`,
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
@@ -150,6 +153,11 @@ const nextConfig: NextConfig = {
       { source: '/copyright-policy', destination: '/editorial-disclosure-policy', permanent: true },
       { source: '/affiliate-disclosure', destination: '/editorial-disclosure-policy', permanent: true },
       { source: '/disclaimer', destination: '/terms-of-service', permanent: true },
+      // /world pulled the exact same cmsGetNews() feed as /news with no real
+      // geographic filter (its "cross-border"/"every region" copy wasn't
+      // backed by any actual filtering) -- a near-duplicate competing for the
+      // same search intent, consolidated the same way as the redirects above.
+      { source: '/world', destination: '/news', permanent: true },
       // Trailing-slash duplicates of root-flat article/category URLs -- the
       // canonical form (articleUrl() in src/lib/article-url.ts and the
       // category-hub routes) never has a trailing slash, but these specific
@@ -162,6 +170,19 @@ const nextConfig: NextConfig = {
       { source: '/maritime-accident-lawyer/', destination: '/maritime-accident-lawyer', permanent: true },
       { source: '/maintenance-and-cure-explained/', destination: '/maintenance-and-cure-explained', permanent: true },
       { source: '/legal-aid-and-free-legal-help-in-the-us/', destination: '/legal-aid-and-free-legal-help-in-the-us', permanent: true },
+      // Phase 4 SEO/IA consolidation: cruise-ship-accident-lawyer-florida
+      // substantially restated cruise-ship-accident-lawyer-miami's central legal
+      // point (ticket-contract forum-selection clause -> S.D. Fla. federal court,
+      // same Carnival v. Shute citation, same 46 U.S.C. § 30508 deadline) without
+      // adding proportionate unique content, and already linked to the Miami page
+      // as the more detailed treatment. Consolidated rather than left as a
+      // near-duplicate competing for the same search intent.
+      { source: '/cruise-ship-accident-lawyer-florida', destination: '/cruise-ship-accident-lawyer-miami', permanent: true },
+      // navigating-the-divorce-process (legacy CMS stub, ~19 words, no
+      // jurisdiction stated) covers exactly the ground how-divorce-works-in-the-us
+      // already covers in full (2,700+ words, explicit state-by-state framing).
+      // Redirected rather than rewritten into a third competing divorce-process page.
+      { source: '/article/navigating-the-divorce-process', destination: '/family-law/how-divorce-works-in-the-us', permanent: true },
     ];
   },
 

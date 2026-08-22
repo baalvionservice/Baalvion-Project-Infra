@@ -82,6 +82,12 @@ export const businessCorporateExtraArticles: LawArticle[] = [
 <p>Start from your goals: do you want maximum tax flexibility and light admin, or are you building toward outside investment and scale? Map those goals to the entities actually available where you will operate, and confirm the tax treatment with a local accountant before filing. A short consultation with a lawyer or tax adviser at the outset is far cheaper than restructuring during a funding round.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'IRS, LLC Filing as a Corporation or Partnership', url: 'https://www.irs.gov/businesses/small-businesses-self-employed/llc-filing-as-a-corporation-or-partnership' },
+      { label: 'GOV.UK, set up a private limited company', url: 'https://www.gov.uk/limited-company-formation' },
+      { label: 'Germany, Act on Limited Liability Companies (GmbHG)', url: 'https://www.gesetze-im-internet.de/englisch_gmbhg/' },
+      { label: 'India, Limited Liability Partnership Act 2008 and Companies Act 2013' },
+    ],
   },
   {
     id: 'bc-102',
@@ -164,5 +170,11 @@ export const businessCorporateExtraArticles: LawArticle[] = [
 <p>Before signing or sending an NDA, check that the definition of confidential information fits the actual situation, that the permitted purpose is clear, and that the duration and exceptions are reasonable. Avoid one-sided drafts when both parties will share secrets, and never rely on an NDA to suppress lawful disclosures. For high-value information or cross-border deals, have a contracts lawyer in the relevant jurisdiction review the wording before anything sensitive is shared.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: '18 U.S.C. § 1836 — Defend Trade Secrets Act of 2016', url: 'https://www.law.cornell.edu/uscode/text/18/1836' },
+      { label: 'The Trade Secrets (Enforcement, etc.) Regulations 2018 (UK)', url: 'https://www.legislation.gov.uk/uksi/2018/597/made' },
+      { label: 'Directive (EU) 2016/943 on the protection of trade secrets', url: 'https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32016L0943' },
+      { label: 'India, Indian Contract Act 1872, sections on restraint of trade' },
+    ],
   },
 ];

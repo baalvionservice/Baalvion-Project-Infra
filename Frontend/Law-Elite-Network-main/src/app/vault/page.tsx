@@ -12,22 +12,20 @@ import {
   Search, 
   Eye,
   Trash2,
-  Sparkles,
   ArrowUpDown,
   Upload
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import DocumentAIInsights from "@/components/case/DocumentAIInsights";
 
 export default function DocumentVaultPage() {
   return (
@@ -45,8 +43,6 @@ function VaultContent() {
   const [documents, setDocuments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedDoc, setSelectedDoc] = useState<any>(null);
-  const [isInsightsOpen, setIsInsightsOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileRef = React.useRef<HTMLInputElement>(null);
 
@@ -164,7 +160,6 @@ function VaultContent() {
                   <TableHead className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Record Identifier</TableHead>
                   <TableHead className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Matter Link</TableHead>
                   <TableHead className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Uplink Date</TableHead>
-                  <TableHead className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Intelligence</TableHead>
                   <TableHead className="text-right text-[10px] font-bold uppercase tracking-widest text-slate-500">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -189,14 +184,6 @@ function VaultContent() {
                           : new Date(doc.createdAt).toLocaleDateString()}
                       </span>
                     </TableCell>
-                    <TableCell>
-                      <button 
-                        onClick={() => { setSelectedDoc(doc); setIsInsightsOpen(true); }}
-                        className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-[9px] font-bold uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all group/ai"
-                      >
-                        <Sparkles className="w-3 h-3 group-hover/ai:animate-pulse" /> AI Audit
-                      </button>
-                    </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-blue-600" onClick={() => handleView(doc)}>
@@ -214,14 +201,6 @@ function VaultContent() {
           )}
         </div>
       </div>
-
-      {selectedDoc && (
-        <DocumentAIInsights 
-          document={selectedDoc} 
-          isOpen={isInsightsOpen} 
-          onClose={() => setIsInsightsOpen(false)} 
-        />
-      )}
     </div>
   );
 }

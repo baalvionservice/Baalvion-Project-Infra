@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { BookOpen, Globe2, ArrowRight } from 'lucide-react';
+import { BookOpen } from 'lucide-react';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { RelatedArticles, fetchRelatedArticles } from '@/components/knowledge/RelatedArticles';
 import { Breadcrumbs } from '@/components/knowledge/Breadcrumbs';
@@ -10,19 +10,54 @@ import { ArticleAuthorByline } from '@/app/[categorySlug]/[articleSlug]/ArticleA
 import { ArticleAdWrapper } from '@/components/knowledge/ArticleAdWrapper';
 import { PrimarySources } from '@/components/knowledge/PrimarySources';
 import { ReviewedBy } from '@/components/knowledge/ReviewedBy';
+import { FactCheckedBy } from '@/components/knowledge/FactCheckedBy';
+import { SeriesNotice } from '@/components/knowledge/SeriesNotice';
+import { ArticleMetaHeader } from '@/components/knowledge/ArticleMetaHeader';
+import { ImportantNotice } from '@/components/knowledge/ImportantNotice';
+import { KeyTakeaways } from '@/components/knowledge/KeyTakeaways';
+import { FrequentlyAskedQuestions } from '@/components/knowledge/FrequentlyAskedQuestions';
+import { ReportAnError } from '@/components/knowledge/ReportAnError';
+import { EditorialInformation } from '@/components/knowledge/EditorialInformation';
+import { NextStep } from '@/components/knowledge/NextStep';
 import { getMergedAuthorByName, getMergedAuthorBySlug } from '@/lib/authors-server';
 import { resolveArticleImage } from '@/lib/article-art';
 import { formatArticleDate, formatArticleMonthYear } from '@/lib/format-date';
+import { extractKeyTakeaways } from '@/lib/seo/key-takeaways-extractor';
+import { extractFaqSection } from '@/lib/seo/faq-section-extractor';
+import { articleUrl } from '@/lib/article-url';
+import { cmsGetArticles } from '@/lib/cms';
 import type { ReviewedByInfo } from '@/components/knowledge/ReviewedBy';
+import type { FactCheckedByInfo } from '@/components/knowledge/FactCheckedBy';
+import type { SeriesInfo } from '@/components/knowledge/SeriesNotice';
+
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+
+/** Profile fields the "Reviewed by" bio popover needs -- same shape ArticleAuthorByline already gets for the primary byline. */
+function reviewerProfileFields(reviewer: { slug: string; bio: string; avatarUrl?: string; avatarSeed: string }) {
+  return {
+    slug: reviewer.slug,
+    bio: reviewer.bio,
+    avatarUrl: reviewer.avatarUrl,
+    avatarSeed: reviewer.avatarSeed,
+  };
+}
 
 /**
  * Bundled LawArticle data carries a resolved `reviewedBy` object directly.
  * CMS-sourced articles instead carry a raw `reviewerSlug` (ReviewerPanel in
  * admin-platform) that must be resolved against the author directory for a
  * real name/credentials -- same pattern as the primary byline just below.
+ *
+ * Either way, once we have a name we try to match it to a real contributor
+ * profile so the "Reviewed by" byline can show the same photo/bio popover as
+ * "Written by" -- see ReviewedBy.tsx. A bundled `reviewedBy` with no matching
+ * profile still renders (name/jurisdiction/date), just without a popover.
  */
 async function resolveReviewedBy(article: any): Promise<ReviewedByInfo | undefined> {
-  if (article.reviewedBy) return article.reviewedBy;
+  if (article.reviewedBy) {
+    const profile = await getMergedAuthorByName(article.reviewedBy.name);
+    return { ...article.reviewedBy, ...(profile ? reviewerProfileFields(profile) : {}) };
+  }
   if (!article.reviewerSlug || !article.reviewedAt) return undefined;
   const reviewer = await getMergedAuthorBySlug(article.reviewerSlug);
   if (!reviewer) return undefined;
@@ -31,7 +66,69 @@ async function resolveReviewedBy(article: any): Promise<ReviewedByInfo | undefin
     jurisdiction: article.reviewerJurisdiction || undefined,
     barLicense: article.reviewerBarLicense || undefined,
     reviewDate: formatArticleMonthYear(article.reviewedAt) || article.reviewedAt,
+    ...reviewerProfileFields(reviewer),
   };
+}
+
+/** Mirrors resolveReviewedBy above -- FactCheckerPanel in admin-platform writes factCheckerSlug/factCheckedAt into the same customFields extension point. */
+async function resolveFactCheckedBy(article: any): Promise<FactCheckedByInfo | undefined> {
+  if (!article.factCheckerSlug || !article.factCheckedAt) return undefined;
+  const checker = await getMergedAuthorBySlug(article.factCheckerSlug);
+  if (!checker) return undefined;
+  return {
+    name: checker.name,
+    checkDate: formatArticleMonthYear(article.factCheckedAt) || article.factCheckedAt,
+    ...reviewerProfileFields(checker),
+  };
+}
+
+/**
+ * Resolves this article's series siblings by matching `seriesSlug` (set via
+ * admin SeriesPanel) against every other CMS article -- never fabricated.
+ * Returns undefined both when the article isn't in a series at all, and when
+ * it nominally is but no sibling shares the slug yet: a "series" of one
+ * reader-facing article isn't a series, and showing the panel then would be
+ * a dead-end disclosure box with nothing else to link to.
+ */
+async function resolveSeriesInfo(article: any): Promise<SeriesInfo | undefined> {
+  if (!article.seriesSlug || !article.seriesTitle) return undefined;
+
+  let siblings: any[] = [];
+  try {
+    siblings = await cmsGetArticles();
+  } catch {
+    return undefined;
+  }
+
+  const entries = siblings
+    .filter((a) => a.seriesSlug === article.seriesSlug && a.slug)
+    .map((a) => ({
+      slug: a.slug as string,
+      title: a.title,
+      categorySlug: a.category?.slug,
+      sectionTitle: a.seriesSectionTitle || undefined,
+      order: typeof a.seriesOrder === 'number' ? a.seriesOrder : Number.MAX_SAFE_INTEGER,
+      current: a.slug === article.slug,
+    }));
+
+  // The current article may not come back from cmsGetArticles() in
+  // preview/draft states -- include it explicitly so it's never missing
+  // from its own series list.
+  if (!entries.some((e) => e.current) && article.slug) {
+    entries.push({
+      slug: article.slug,
+      title: article.title,
+      categorySlug: article.category?.slug,
+      sectionTitle: article.seriesSectionTitle || undefined,
+      order: typeof article.seriesOrder === 'number' ? article.seriesOrder : Number.MAX_SAFE_INTEGER,
+      current: true,
+    });
+  }
+
+  if (entries.length < 2) return undefined;
+
+  entries.sort((a, b) => a.order - b.order || a.title.localeCompare(b.title));
+  return { title: article.seriesTitle, entries };
 }
 
 interface TOCItem {
@@ -101,17 +198,35 @@ function extractToc(html: string): TOCItem[] {
 export async function ArticleView({ article, slug }: { article: any; slug: string }) {
   const category = article.category;
   const authorName: string = (typeof article.author === 'string' ? article.author : article.author?.name) || 'Law Elite Editorial';
-  const [matchedAuthor, reviewedBy] = await Promise.all([
+  const [matchedAuthor, reviewedBy, factCheckedBy, seriesInfo] = await Promise.all([
     getMergedAuthorByName(authorName),
     resolveReviewedBy(article),
+    resolveFactCheckedBy(article),
+    resolveSeriesInfo(article),
   ]);
   // No hardcoded fallback date here: if a record genuinely has no real
-  // timestamp, ArticleAuthorByline omits the "Updated" line rather than show
-  // a fabricated date.
+  // timestamp, ArticleMetaHeader omits the Published/Last Updated chips
+  // rather than show a fabricated date. Neither the bundled data nor the
+  // live CMS delivery API track a distinct "first published" timestamp
+  // separate from "last updated" today (see ArticleMetaHeader.tsx's doc
+  // comment) -- both chips show the same real date rather than inventing a
+  // second one.
   const updatedAt = formatArticleDate(article.updatedAt || article.updated_at);
   const processedContent = injectHeadingIds(article.content || '');
+  // Real word count from the full rendered body (before Key Takeaways/FAQ are
+  // split out below) drives both ad placement and reading time -- not the
+  // stored `readingTime` field, which the admin UI defaults to a flat guess
+  // (see ArticleEditorModal.tsx) rather than anything measured.
   const wordCount = countWords(processedContent);
-  const toc = extractToc(processedContent);
+  const readingTimeMinutes = Math.max(1, Math.round(wordCount / 200));
+
+  const { items: keyTakeaways, html: contentWithoutKeyTakeaways } = extractKeyTakeaways(processedContent);
+  const { pairs: faqPairs, html: bodyHtml } = extractFaqSection(contentWithoutKeyTakeaways);
+  // TOC built from the final body so every anchor it lists still exists on
+  // the page -- the Key Takeaways/FAQ headings removed above get their own
+  // dedicated sections instead, not a sidebar anchor.
+  const toc = extractToc(bodyHtml);
+
   const relatedArticles = await fetchRelatedArticles(slug, category?.slug, category?.name, article.subcategory?.slug);
 
   return (
@@ -121,6 +236,8 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
 
           <Breadcrumbs
             category={category}
+            country={article.country}
+            subcategory={article.subcategory}
             articleTitle={article.title}
           />
 
@@ -137,19 +254,21 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
                   {article.title}
                 </h1>
 
-                <ArticleAuthorByline authorName={authorName} updatedAt={updatedAt} matchedAuthor={matchedAuthor} />
+                <ArticleMetaHeader
+                  jurisdiction={article.country}
+                  practiceArea={category?.name}
+                  published={updatedAt}
+                  updated={updatedAt}
+                  readingTimeMinutes={readingTimeMinutes}
+                />
 
-                <div className="flex flex-wrap items-center gap-3">
-                  {/* Jurisdiction badge -- only renders once an article actually
-                      carries article.country (see src/data/countries.ts). */}
-                  {article.country && (
-                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-news-600 bg-slate-50 border border-slate-100 px-2.5 py-1 rounded-full">
-                      <Globe2 className="w-3 h-3" aria-hidden="true" /> {article.country}
-                    </span>
-                  )}
+                <div className="space-y-1.5">
+                  <ArticleAuthorByline authorName={authorName} matchedAuthor={matchedAuthor} />
+                  <ReviewedBy info={reviewedBy} />
+                  <FactCheckedBy info={factCheckedBy} />
                 </div>
 
-                <ReviewedBy info={reviewedBy} />
+                <SeriesNotice series={seriesInfo ?? null} />
 
                 <figure className="pt-6">
                   <div className="aspect-[16/9] relative overflow-hidden bg-slate-50 rounded-lg">
@@ -167,22 +286,36 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
               <ArticleAdWrapper wordCount={wordCount} enableAds={true}>
                 <div
                   className="prose-legal max-w-none pt-8"
-                  dangerouslySetInnerHTML={{ __html: processedContent }}
+                  dangerouslySetInnerHTML={{ __html: bodyHtml }}
                 />
               </ArticleAdWrapper>
 
+              <KeyTakeaways items={keyTakeaways} />
+
+              <ImportantNotice />
+
               <PrimarySources sources={article.primarySources} />
 
-              <div className="pt-6 border-t border-slate-100">
-                <Link
-                  href="/editorial-process"
-                  className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-slate-500 hover:text-news-600 transition-colors"
-                >
-                  How we publish and review legal education <ArrowRight className="w-3 h-3" aria-hidden="true" />
-                </Link>
-              </div>
+              <FrequentlyAskedQuestions pairs={faqPairs} />
 
-              <RelatedArticles articles={relatedArticles} />
+              <NextStep category={category} country={article.country} />
+
+              <RelatedArticles
+                articles={relatedArticles}
+                category={category}
+                subcategory={article.subcategory}
+                country={article.country}
+              />
+
+              <EditorialInformation
+                authorName={authorName}
+                reviewedBy={reviewedBy}
+                factCheckedBy={factCheckedBy}
+                updatedAt={updatedAt}
+                sourcesCount={article.primarySources?.length || 0}
+              />
+
+              <ReportAnError title={article.title} url={`${SITE}${articleUrl({ slug, category })}`} />
             </article>
 
           </div>

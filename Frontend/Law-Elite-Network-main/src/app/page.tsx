@@ -3,13 +3,12 @@ import { fetchPublicApi } from '@/lib/api/public-fetch';
 import { mergeArticles } from '@/data/law-content';
 import { cmsGetArticles, cmsGetNews } from '@/lib/cms';
 import { getMergedAuthors } from '@/lib/authors-server';
-import { authorNameToSlug } from '@/data/authors';
+import { authorNameToSlug, isEditorRole } from '@/data/authors';
 import { COUNTRIES } from '@/data/countries';
 import { TopicTicker } from '@/components/knowledge/news/TopicTicker';
 import { StoryCard } from '@/components/knowledge/news/StoryCard';
 import { LatestRail } from '@/components/knowledge/news/LatestRail';
 import { CategorySection } from '@/components/knowledge/news/CategorySection';
-import { GetLegalHelpCard } from '@/components/knowledge/GetLegalHelpCard';
 import { LatestGuidesGrid } from '@/components/knowledge/LatestGuidesGrid';
 import { PracticeAreaChart } from '@/components/knowledge/PracticeAreaChart';
 import { LatestNewsList } from '@/components/knowledge/LatestNewsList';
@@ -159,11 +158,34 @@ export default async function KnowledgeHomePage() {
   // "Latest Guides" grid: prefer the CMS's own date-sorted feed (real
   // publishedAt-derived dates) and only fall back to the merged pool when the
   // CMS is sparse, mirroring the same threshold used for `spotlightSource`.
+  // Capped at 2-per-category so a single practice area with a recent content
+  // batch (e.g. Dispute Resolution) can't dominate every slot -- backfills
+  // from the overflow (still most-recent-first) if the cap leaves the grid
+  // short of 8, so sparse days never render fewer than the source supports.
   const latestGuidesSource = cmsArticles.length >= 8 ? cmsArticles : pool;
-  const latestGuides = [...latestGuidesSource]
+  const latestGuidesSorted = [...latestGuidesSource]
     .filter((a: any) => a?.slug && !usedSlugs.has(a.slug))
-    .sort((a: any, b: any) => (b.updatedAt || '').localeCompare(a.updatedAt || ''))
-    .slice(0, 8);
+    .sort((a: any, b: any) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
+
+  const MAX_PER_CATEGORY = 2;
+  const perCategoryCount = new Map<string, number>();
+  const latestGuides: any[] = [];
+  const latestGuidesOverflow: any[] = [];
+  for (const a of latestGuidesSorted) {
+    const catKey = categorySlugOf(a) || categoryIdOf(a) || 'uncategorized';
+    const count = perCategoryCount.get(catKey) || 0;
+    if (count < MAX_PER_CATEGORY) {
+      latestGuides.push(a);
+      perCategoryCount.set(catKey, count + 1);
+    } else {
+      latestGuidesOverflow.push(a);
+    }
+    if (latestGuides.length >= 8) break;
+  }
+  for (const a of latestGuidesOverflow) {
+    if (latestGuides.length >= 8) break;
+    latestGuides.push(a);
+  }
   latestGuides.forEach((a: any) => usedSlugs.add(a.slug));
 
   const homeStats = {
@@ -171,7 +193,13 @@ export default async function KnowledgeHomePage() {
     practiceAreas: categories.length,
     jurisdictions: COUNTRIES.length,
   };
-  const editorialBoardPreview = editorialBoard.slice(0, 4);
+  // "Editorial Board" means desk editors specifically (the real "...Editor"
+  // vs. "...Contributor" role already encoded in each profile's `title`, see
+  // isEditorRole()) -- not an arbitrary slice of the full contributor list,
+  // which previously could show names that don't match who's actually
+  // bylining articles on this same page.
+  const editors = editorialBoard.filter((a: any) => isEditorRole(a.title));
+  const editorialBoardPreview = (editors.length > 0 ? editors : editorialBoard).slice(0, 4);
 
   const articlesByCategory = categories.map((cat: any) => ({
     ...cat,
@@ -238,7 +266,6 @@ export default async function KnowledgeHomePage() {
             </div>
             <div className="lg:col-span-4 space-y-9">
               <LatestRail articles={latest} />
-              <GetLegalHelpCard />
             </div>
           </div>
         </section>

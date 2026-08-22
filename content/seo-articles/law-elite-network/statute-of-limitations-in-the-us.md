@@ -7,6 +7,7 @@ category: Personal Injury Lawyer
 categorySlug: personal-injury-lawyer
 keywords: [statute of limitations in the us, statute of limitations by state, personal injury statute of limitations]
 author: deepak-kumar-kuldeep
+citations: ["Federal Tort Claims Act, 28 U.S.C. §§ 1346(b), 2671-2680|https://www.law.cornell.edu/uscode/text/28/1346", "46 U.S.C. § 30106 -- federal statute of limitations for maritime tort personal injury and death claims|https://www.law.cornell.edu/uscode/text/46/30106"]
 ---
 
 # Statute of Limitations in the U.S.

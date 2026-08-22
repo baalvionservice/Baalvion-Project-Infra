@@ -13,9 +13,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: 'Please provide a valid email address.' }, { status: 400 });
     }
 
-    // TODO: Connect to email service provider.
+    // TODO: Connect to email service provider. Until that's wired up, don't
+    // promise a confirmation email that will never arrive.
 
-    return NextResponse.json({ success: true, message: "You're subscribed. Check your inbox for confirmation." });
+    return NextResponse.json({ success: true, message: "Thanks -- we've got your email." });
   } catch {
     return NextResponse.json({ success: false, message: 'Something went wrong. Please try again.' }, { status: 500 });
   }

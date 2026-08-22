@@ -3,11 +3,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { articleUrl } from '@/lib/article-url';
 import { resolveArticleImage } from '@/lib/article-art';
-import { formatArticleDate } from '@/lib/format-date';
 
 function GuideCard({ article }: { article: any }) {
   const href = articleUrl(article);
-  const date = formatArticleDate(article.updatedAt);
   return (
     <Link href={href} className="group flex flex-col">
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-slate-100">
@@ -28,7 +26,6 @@ function GuideCard({ article }: { article: any }) {
         <h3 className="font-headline text-[15px] font-bold leading-snug text-slate-900 group-hover:text-news-600 transition-colors line-clamp-3">
           {article.title}
         </h3>
-        {date && <p className="text-[11.5px] text-slate-400 font-medium mt-1.5">{date}</p>}
       </div>
     </Link>
   );
@@ -36,9 +33,9 @@ function GuideCard({ article }: { article: any }) {
 
 /**
  * Investopedia-style "Latest Articles" grid -- a lean, image-led 4-up row
- * (tag + title + date, no summary/byline) pulling the network's most
- * recently published guides, distinct from the fuller StoryCard used in
- * the hero and category sections below it.
+ * (tag + title, no summary/byline/date) pulling the network's most recently
+ * published guides, distinct from the fuller StoryCard used in the hero and
+ * category sections below it.
  */
 export function LatestGuidesGrid({ articles }: { articles: any[] }) {
   if (!articles || articles.length === 0) return null;
@@ -49,7 +46,7 @@ export function LatestGuidesGrid({ articles }: { articles: any[] }) {
         <div className="flex items-center gap-3">
           <span className="w-1.5 h-6 bg-news-600 rounded-sm" />
           <h2 className="font-headline text-xl md:text-2xl font-extrabold tracking-tight text-slate-900 m-0">
-            Latest Guides
+            Latest Legal Guides
           </h2>
         </div>
       </div>

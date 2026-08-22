@@ -119,6 +119,13 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
 <p>Before filing or responding to a Request for Arbitration, map the case against this lifecycle: confirm the seat and tribunal-size position, prepare for the case management conference rather than reacting to it, and identify early whether any part of the claim is a genuine candidate for Article 22.1(viii) dismissal. For the cost and urgency mechanics referenced above, consult the linked guides. Because procedural choices made in the first weeks of a case are difficult to unwind later, have LCIA-experienced counsel involved from the Request for Arbitration stage, not after the tribunal is formed.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'LCIA Arbitration Rules (2020)', url: 'https://www.lcia.org/Dispute_Resolution_Services/lcia-arbitration-rules-2020.aspx' },
+      { label: 'LCIA, Schedule of Arbitration Costs (2023)', url: 'https://www.lcia.org/dispute_resolution_services/schedule-of-arbitration-costs-2023.aspx' },
+      { label: 'Arbitration Act 1996 (UK)', url: 'https://www.legislation.gov.uk/ukpga/1996/23' },
+      { label: 'Arbitration Act 2025 (UK)', url: 'https://www.legislation.gov.uk/ukpga/2025/4' },
+      { label: 'Convention on the Recognition and Enforcement of Foreign Arbitral Awards (New York, 1958)', url: 'https://uncitral.un.org/en/texts/arbitration/conventions/foreign_arbitral_awards' },
+    ],
     author: 'Marcus Whitfield',
     updatedAt: 'August 9, 2026',
     readingTime: 14,
@@ -225,6 +232,11 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
 <p>Before filing or responding to a Request for Arbitration, build a cost model using the current Schedule of Costs figures above rather than relying on an outdated rate card, and revisit that model at each major procedural milestone — tribunal formation, document production, and hearing scheduling — since each is a distinct point where the forecast can shift materially. Because cost allocation under Article 28 is discretionary, keep a clean record of procedural conduct and reasonable settlement offers throughout the case, not just at the end, since the tribunal will look to that record when it decides who pays. For where cost planning fits into the full case lifecycle, see <a href="/disputes/lcia-international-arbitration-london-practitioner-guide">The Comprehensive Practitioner's Guide to LCIA International Arbitration in London</a>.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'LCIA, Schedule of Arbitration Costs (2023)', url: 'https://www.lcia.org/dispute_resolution_services/schedule-of-arbitration-costs-2023.aspx' },
+      { label: 'LCIA Arbitration Rules (2020)', url: 'https://www.lcia.org/Dispute_Resolution_Services/lcia-arbitration-rules-2020.aspx' },
+      { label: 'LCIA, Guidance Note', url: 'https://www.lcia.org/adr-services/guidance-note.aspx' },
+    ],
     author: 'Marcus Whitfield',
     updatedAt: 'August 9, 2026',
     readingTime: 12,
@@ -327,6 +339,12 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
 <p>Before an emergency actually arises, confirm whether the relevant arbitration clause has excluded the Emergency Arbitrator provisions, and identify in advance which internal stakeholders can authorize an urgent application on short notice — a mechanism with a three-day appointment window is only useful if the business can mobilize within it. When the moment comes, diagnose which of Articles 9A, 9B, or a section 44 court application actually fits the relief needed before filing, since each serves a genuinely different purpose. Because the choice affects what can realistically be achieved within days, involve counsel experienced in LCIA emergency procedure immediately, not after a first attempt has already been filed.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'LCIA Arbitration Rules (2020)', url: 'https://www.lcia.org/Dispute_Resolution_Services/lcia-arbitration-rules-2020.aspx' },
+      { label: 'Arbitration Act 1996, section 44 (UK)', url: 'https://www.legislation.gov.uk/ukpga/1996/23/section/44' },
+      { label: 'Arbitration Act 2025 (UK)', url: 'https://www.legislation.gov.uk/ukpga/2025/4' },
+      { label: 'LCIA, Notes on Emergency Procedures', url: 'https://www.lcia.org/adr-services/lcia-notes-on-emergency-procedures.aspx' },
+    ],
     author: 'Marcus Whitfield',
     updatedAt: 'August 9, 2026',
     readingTime: 12,
@@ -422,6 +440,12 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
 <p>Before advising on a new London-seated arbitration clause, decide deliberately whether to rely on the section 6A default or displace it with an express choice of law for the arbitration agreement, and build that decision into the firm's template clauses. For any arbitration already underway or about to commence, confirm which side of 1 August 2025 the proceedings fall on, since that determines which version of sections 67 and the immunity provisions applies. Because the interaction between section 39A and institution-specific early-determination powers is still a developing area of practice, have counsel with current Arbitration Act 2025 experience review any summary disposal strategy before it is filed.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'Arbitration Act 2025 (UK)', url: 'https://www.legislation.gov.uk/ukpga/2025/4' },
+      { label: 'The Arbitration Act 2025 (Commencement) Regulations 2025 (UK)', url: 'https://www.legislation.gov.uk/uksi/2025/905' },
+      { label: 'Enka Insaat Ve Sanayi AS v OOO Insurance Company Chubb [2020] UKSC 38', url: 'https://www.bailii.org/uk/cases/UKSC/2020/38.html' },
+      { label: 'Halliburton Company v Chubb Bermuda Insurance Ltd [2020] UKSC 48', url: 'https://www.bailii.org/uk/cases/UKSC/2020/48.html' },
+    ],
     author: 'Marcus Whitfield',
     updatedAt: 'August 9, 2026',
     readingTime: 13,
@@ -525,6 +549,12 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
 <p>Before filing an enforcement application, map the debtor's known assets in England and Wales and confirm the section 102 documentation is complete and properly authenticated. If the debtor is a state or state-linked entity, run a separate immunity analysis on each specific asset before assuming it is executable. Because the without-notice stage moves quickly but a contested hearing can take months, build both timelines into the client's expectations from the outset, and have enforcement counsel review the underlying award for any procedural vulnerability — notice, tribunal composition, scope — before, not after, the debtor raises it. For the full LCIA case lifecycle that produces the award being enforced, see <a href="/disputes/lcia-international-arbitration-london-practitioner-guide">The Comprehensive Practitioner's Guide to LCIA International Arbitration in London</a>.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'Arbitration Act 1996, Part III (UK)', url: 'https://www.legislation.gov.uk/ukpga/1996/23' },
+      { label: 'Convention on the Recognition and Enforcement of Foreign Arbitral Awards (New York, 1958), Article V', url: 'https://uncitral.un.org/en/texts/arbitration/conventions/foreign_arbitral_awards' },
+      { label: 'Civil Procedure Rules, Part 62 — Arbitration Claims (UK)', url: 'https://www.justice.gov.uk/courts/procedure-rules/civil/rules/part62/pd_part62' },
+      { label: 'State Immunity Act 1978 (UK)', url: 'https://www.legislation.gov.uk/ukpga/1978/33' },
+    ],
     author: 'Marcus Whitfield',
     updatedAt: 'August 9, 2026',
     readingTime: 13,
@@ -546,7 +576,7 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
       'The practical logistics of booking a London arbitration hearing venue — how the IAC and IDRC differ, the booking process, and budgeting venue cost separately.',
     content: `<p>London has two purpose-built, institution-independent hearing venues that host the large majority of LCIA-, ICC-, and ad hoc-administered hearings: the International Arbitration Centre (IAC) at 190 Fleet Street, and the International Dispute Resolution Centre (IDRC) near St Paul's Cathedral. Booking either follows the same basic sequence — identify room-size and format needs, request a hold, confirm through a signed booking agreement, and arrange technology and catering as separate line items from the room fee itself.</p>
 
-<div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>Neither the LCIA nor the ICC owns the physical venue for most hearings — counsel or the tribunal secretary books hearing space separately, as a distinct commercial arrangement from the institution's own administrative fees.</li><li>The IAC, established in 2019 at 190 Fleet Street, spans three floors of hearing, mediation, and breakout rooms, with its largest rooms seating up to roughly 60 people.</li><li>The IDRC offers more than 70 rooms in total, including 18 large hearing-capable rooms, with its biggest reconfigurable room accommodating up to roughly 200 people and smaller hearing rooms seating around 15.</li><li>Venue cost is priced per day (plus VAT) and is entirely separate from the LCIA's or ICC's own Schedule of Costs — it needs its own line item in the case budget.</li><li>Popular venues can book out months in advance during peak arbitration hearing season, so placing an early hold matters more than comparing headline rates.</li></ul></div>
+<div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>Neither the LCIA nor the ICC owns the physical venue for most hearings — counsel or the tribunal secretary books hearing space separately, as a distinct commercial arrangement from the institution's own administrative fees.</li><li>The IAC, established in 2019 at 190 Fleet Street, spans three floors of hearing, mediation, and breakout rooms, with its largest rooms seating up to roughly 60 people.</li><li>The IDRC offers over 100 rooms in total, including 20 large hearing-capable rooms, with individual hearing rooms accommodating between roughly 15 and 100 people depending on size.</li><li>Venue cost is priced per day (plus VAT) and is entirely separate from the LCIA's or ICC's own Schedule of Costs — it needs its own line item in the case budget.</li><li>Popular venues can book out months in advance during peak arbitration hearing season, so placing an early hold matters more than comparing headline rates.</li></ul></div>
 
 <h2>How Hearing-Room Logistics Actually Work in London Arbitration</h2>
 
@@ -556,7 +586,7 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
 <h3>What venues actually exist, and how do they differ?</h3>
 <ul>
 <li><strong>International Arbitration Centre (IAC):</strong> located at 190 Fleet Street, near the Chancery Lane junction, established in 2019 and spread across three floors of hearing rooms, mediation rooms, and breakout spaces. Larger rooms seat up to roughly 60 people. The centre is normally open 8:00 a.m. to 6:00 p.m. on weekdays, closed overnight and on weekends absent a special arrangement, and will hold a preferred date free of charge for up to seven days while a booking is confirmed.</li>
-<li><strong>International Dispute Resolution Centre (IDRC):</strong> located near St Paul's Cathedral, offering more than 70 rooms in total, of which 18 are large rooms suitable for hearings and the remainder serve as breakout or retirement rooms and smaller meeting spaces. Rooms are soundproofed and equipped with full Category 6 wiring for voice and data. The centre can reconfigure its largest room to accommodate up to roughly 200 people, while smaller hearing rooms comfortably seat around 15.</li>
+<li><strong>International Dispute Resolution Centre (IDRC):</strong> located near St Paul's Cathedral, offering over 100 rooms in total, of which 20 are large rooms suitable for hearings and the remainder serve as breakout or retirement rooms and smaller meeting spaces. Rooms are soundproofed and equipped with full Category 6 wiring for voice and data. The centre's arbitration hearing rooms accommodate between roughly 15 and 100 people depending on size.</li>
 </ul>
 
 <h3>How does the booking process actually work?</h3>
@@ -613,23 +643,21 @@ export const lciaArbitrationSeriesArticles: LawArticle[] = [
 <h3>Are the IAC and IDRC used only for LCIA cases?</h3>
 <p>No. Both are independent venues used across LCIA, ICC, SIAC, ad hoc, and other institutionally administered arbitrations — booking either is not tied to which institution is administering the underlying case.</p>
 
-<h2>Sources & Further Reading</h2>
-<ul>
-<li>International Arbitration Centre (IAC), 190 Fleet Street, London</li>
-<li>International Dispute Resolution Centre (IDRC), London</li>
-<li>LCIA Arbitration Rules 2020, Article 16 (distinguishing the legal seat from the physical hearing venue)</li>
-</ul>
-
 <h2>Practical Next Steps</h2>
 <p>As soon as hearing dates are set with the tribunal, place a hold at a suitable venue rather than waiting for the procedural timetable to be finalized in every other respect — popular venues and dates move quickly. Build a separate venue budget line alongside the arbitrator and institutional cost forecast, and confirm technology, transcription, and catering requirements well ahead of the first hearing day. Because venue terms and current rate cards sit outside any arbitral institution's rules, request them directly from the venue and confirm cancellation terms before signing.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
     author: 'Marcus Whitfield',
-    updatedAt: 'August 9, 2026',
+    updatedAt: 'August 17, 2026',
     readingTime: 11,
     views: 0,
     featured: false,
     imageSeed: 'london-arbitration-hearing-room-booking-logistics',
     country: 'International',
+    primarySources: [
+      { label: 'International Arbitration Centre (IAC), 190 Fleet Street, London — official site', url: 'https://www.iac-london.com/' },
+      { label: 'International Dispute Resolution Centre (IDRC), London — facilities & rooms', url: 'https://www.idrc.co.uk/facilities/rooms/' },
+      { label: 'LCIA Arbitration Rules 2020, Article 16 (distinguishing the legal seat from the physical hearing venue)', url: 'https://www.lcia.org/Dispute_Resolution_Services/lcia-arbitration-rules-2020.aspx' },
+    ],
   },
 ];

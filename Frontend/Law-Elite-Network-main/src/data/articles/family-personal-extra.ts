@@ -87,6 +87,12 @@ export const familyPersonalExtraArticles: LawArticle[] = [
 <p>If you are considering a prenup, start the conversation early and approach it as joint planning rather than a one-sided demand. Make full financial disclosure, allow plenty of time before the wedding, and ensure each partner has their own lawyer. Because enforceability varies so much by country, have the agreement drafted and reviewed by a family-law specialist where you intend to live, and revisit it after major life changes such as children or a significant change in wealth.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'Uniform Premarital and Marital Agreements Act (U.S. model legislation, Uniform Law Commission)' },
+      { label: 'Radmacher v Granatino [2010] UKSC 42', url: 'https://www.bailii.org/uk/cases/UKSC/2010/42.html' },
+      { label: 'India, Special Marriage Act 1954 — contractual marital arrangements' },
+      { label: 'Regulation (EU) 2016/1103 on matrimonial property regimes', url: 'https://eur-lex.europa.eu/eli/reg/2016/1103/oj/eng' },
+    ],
   },
   {
     id: 'fp-102',
@@ -169,5 +175,11 @@ export const familyPersonalExtraArticles: LawArticle[] = [
 <p>Gather accurate records of both parents' income and the child's actual costs and care schedule, since these drive any calculation. Use your country's official guidelines or calculator where one exists to get a realistic figure, and put any agreement in a form that can be enforced. Where incomes are complex or parents live in different countries, consult a family-law specialist, and remember that support can be revisited as the child's needs and the parents' circumstances change.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'Hague Convention on the International Recovery of Child Support and Other Forms of Family Maintenance (2007)', url: 'https://www.hcch.net/en/instruments/conventions/full-text/?cid=131' },
+      { label: 'GOV.UK, how the Child Maintenance Service works out child maintenance', url: 'https://www.gov.uk/how-child-maintenance-is-worked-out' },
+      { label: 'U.S. Office of Child Support Enforcement', url: 'https://www.acf.hhs.gov/css' },
+      { label: 'India, Protection of Women from Domestic Violence Act 2005 — maintenance provisions' },
+    ],
   },
 ];

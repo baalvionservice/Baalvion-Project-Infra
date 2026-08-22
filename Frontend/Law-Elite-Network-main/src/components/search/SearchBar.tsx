@@ -67,12 +67,14 @@ export default function SearchBar({ initialValue = "", variant = 'hero' }: Searc
             onChange={(e) => setQueryText(e.target.value)}
             onFocus={() => queryText.length > 1 && setShowSuggestions(true)}
             placeholder="Search topics..."
+            aria-label="Search topics"
             className="w-full h-10 pl-9 pr-8 bg-gray-50 border border-gray-100 rounded-full text-[13px] font-medium placeholder:text-gray-300 focus:outline-none focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-50/50 transition-all"
           />
           {queryText && (
             <button
               type="button"
               onClick={() => setQueryText('')}
+              aria-label="Clear search"
               className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-300 hover:text-[#111827]"
             >
               <X className="h-3 w-3" />

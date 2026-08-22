@@ -11,18 +11,16 @@ import {
   File, 
   ImageIcon,
   ShieldCheck,
-  Plus,
-  Sparkles
+  Plus
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  uploadDocument, 
-  getDocumentsByCase, 
-  deleteDocument 
+import {
+  uploadDocument,
+  getDocumentsByCase,
+  deleteDocument
 } from '@/services/documents/documentService';
-import DocumentAIInsights from './DocumentAIInsights';
 
 interface DocumentVaultProps {
   caseId: string;
@@ -37,8 +35,6 @@ export default function DocumentVault({ caseId, userId }: DocumentVaultProps) {
   const [documents, setDocuments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
-  const [selectedDoc, setSelectedDoc] = useState<any>(null);
-  const [isInsightsOpen, setIsInsightsOpen] = useState(false);
   const { toast } = useToast();
 
   const loadDocs = async () => {
@@ -126,11 +122,6 @@ export default function DocumentVault({ caseId, userId }: DocumentVaultProps) {
     }
   };
 
-  const handleOpenInsights = (doc: any) => {
-    setSelectedDoc(doc);
-    setIsInsightsOpen(true);
-  };
-
   const getFileIcon = (type: string) => {
     const t = type.toLowerCase();
     if (t.includes('pdf')) return <FileText className="w-5 h-5 text-red-400" />;
@@ -200,15 +191,7 @@ export default function DocumentVault({ caseId, userId }: DocumentVaultProps) {
                     {getFileIcon(doc.fileType)}
                   </div>
                   <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-bold text-white truncate group-hover:text-accent transition-colors">{doc.fileName}</p>
-                      <button 
-                        onClick={() => handleOpenInsights(doc)}
-                        className="opacity-0 group-hover:opacity-100 transition-all flex items-center gap-1 px-2 py-0.5 rounded bg-accent/10 border border-accent/20 text-accent text-[8px] font-bold uppercase tracking-tighter hover:bg-accent/20"
-                      >
-                        <Sparkles className="w-2.5 h-2.5" /> Analyze
-                      </button>
-                    </div>
+                    <p className="text-sm font-bold text-white truncate group-hover:text-accent transition-colors">{doc.fileName}</p>
                     <p className="text-[9px] text-muted-foreground uppercase tracking-widest flex items-center gap-2 mt-0.5">
                       {formatSize(doc.fileSize)} • {doc.createdAt ? new Date(doc.createdAt.seconds ? doc.createdAt.seconds * 1000 : doc.createdAt).toLocaleDateString() : 'Syncing...'}
                     </p>
@@ -229,14 +212,6 @@ export default function DocumentVault({ caseId, userId }: DocumentVaultProps) {
           </div>
         )}
       </CardContent>
-
-      {selectedDoc && (
-        <DocumentAIInsights 
-          document={selectedDoc} 
-          isOpen={isInsightsOpen} 
-          onClose={() => setIsInsightsOpen(false)} 
-        />
-      )}
     </Card>
   );
 }

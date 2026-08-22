@@ -33,6 +33,10 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
     featured: false,
     imageSeed: 'at-will-employment-exceptions-us-states',
     country: 'United States',
+    primarySources: [
+      { label: 'Montana Code Annotated § 39-2-904 — elements of wrongful discharge', url: 'https://law.justia.com/codes/montana/title-39/chapter-2/part-9/section-39-2-904/' },
+      { label: 'U.S. Equal Employment Opportunity Commission — federal anti-discrimination and anti-retaliation protections', url: 'https://www.eeoc.gov/' },
+    ],
     content: `<p>At-will employment is the default rule in every U.S. state but one. In plain terms, it means your employer can end your job at any time, without warning and without giving a reason — and you can quit the same way. But "at-will" has never meant "no rules at all." Over the last several decades, state courts and legislatures have carved out real exceptions that limit when a firing is actually lawful, and one state has rejected the doctrine outright. Knowing which exceptions your state recognizes — and which it doesn't — is the difference between a firing that merely feels unfair and one you may be able to legally challenge.</p>
 
 <div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>At-will employment is the default in 49 states; Montana is the sole exception, requiring "good cause" for dismissal after a probationary period.</li><li>Most other states recognize one or more common-law exceptions: public policy, implied contract, and the covenant of good faith and fair dealing.</li><li>A handful of states — commonly cited as Florida, Georgia, Louisiana, and Rhode Island — recognize few or none of these judicially created exceptions.</li><li>Federal anti-discrimination and anti-retaliation law applies regardless of a state's at-will exceptions.</li><li>Exact recognition and scope of each exception varies by state and continues to evolve through case law, so this guide explains the framework, not a substitute for checking current law where you live.</li></ul></div>
@@ -159,6 +163,11 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
 <p>If you've been dismissed and are unsure whether you qualify, the safest first step is contacting Acas for free early guidance — they can confirm the current position and the applicable time limit for your specific dates of employment. Because the qualifying period is changing on a fixed future date, an employee close to either threshold should get their exact service dates checked rather than relying on a rule of thumb. For the general, worldwide picture of what makes a dismissal unlawful, see <a href="/employment-law/when-is-a-dismissal-wrongful-termination">When Is a Dismissal Considered Wrongful Termination?</a></p>
 
 <p><em>This article is general legal information, not legal advice, and reflects the law as understood at the time of writing during an active legislative transition. Confirm the current qualifying period and any commencement dates with Acas or gov.uk before acting, and consult a solicitor for advice on your specific situation.</em></p>`,
+    primarySources: [
+      { label: 'Acas, Employment Rights Act 2025', url: 'https://www.acas.org.uk/employment-rights-act-2025' },
+      { label: 'Employment Rights Act 2025 (UK)', url: 'https://www.legislation.gov.uk/ukpga/2025/36' },
+      { label: 'The Employment Tribunal Procedure Rules 2024 (UK)', url: 'https://www.legislation.gov.uk/uksi/2024/1155' },
+    ],
   },
   {
     id: 'el-303',
@@ -219,6 +228,10 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
 <p>If you've been let go without cause, start by identifying whether you're provincially or federally regulated, checking whether your contract has an enforceable notice clause, and gathering your length of service, age, and role details — the exact inputs a court would weigh under Bardal. Because the gap between statutory minimums and what a court might actually award can be substantial, a consultation with an employment lawyer before signing any severance offer is usually worthwhile. For the general, worldwide picture of what makes a dismissal unlawful, see <a href="/employment-law/when-is-a-dismissal-wrongful-termination">When Is a Dismissal Considered Wrongful Termination?</a></p>
 
 <p><em>This article is general legal information, not legal advice. Employment law varies by province and territory and changes over time — consult a lawyer licensed in the relevant jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'Bardal v. Globe & Mail Ltd., 1960 CanLII 294 (ON SC)', url: 'https://www.canlii.org/en/on/onsc/doc/1960/1960canlii294/1960canlii294.html' },
+      { label: 'Canada Labour Code, R.S.C., 1985, c. L-2, section 240', url: 'https://laws-lois.justice.gc.ca/eng/acts/L-2/section-240.html' },
+    ],
   },
   {
     id: 'el-304',
@@ -238,6 +251,11 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
     featured: false,
     imageSeed: 'unfair-dismissal-australia-fair-work-commission',
     country: 'Australia',
+    primarySources: [
+      { label: 'Fair Work Act 2009 (Cth), section 394 — application for unfair dismissal remedy, 21-day deadline', url: 'https://www.austlii.edu.au/cgi-bin/viewdoc/au/legis/cth/consol_act/fwa2009114/s394.html' },
+      { label: 'Fair Work Act 2009 (Cth), section 382 — when a person is protected from unfair dismissal', url: 'http://www.austlii.edu.au/au/legis/cth/consol_act/fwa2009114/s382.html' },
+      { label: 'Fair Work Commission — unfair dismissal guidance and current high income threshold', url: 'https://www.fwc.gov.au/unfair-dismissals' },
+    ],
     content: `<p>Under the Fair Work Act 2009 (Cth), a dismissal in Australia is "unfair" if it was harsh, unjust, or unreasonable. Unlike a breach-of-contract claim, unfair dismissal is a statutory right enforced through the Fair Work Commission (FWC), Australia's national workplace tribunal — and it comes with strict eligibility rules and one of the shortest filing deadlines in employment law anywhere: 21 calendar days.</p>
 
 <div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>To be eligible, you generally need 6 months' service (12 months if your employer is a small business with fewer than 15 employees), and must earn under the high income threshold or be covered by an award or enterprise agreement.</li><li>The high income threshold is $190,100 for dismissals on or after 1 July 2026, and is adjusted annually — always confirm the figure current at the time of dismissal.</li><li>Applications must be lodged with the Fair Work Commission within 21 calendar days of the dismissal taking effect; extensions are granted only in exceptional circumstances.</li><li>Most claims are resolved through free, informal conciliation before ever reaching a hearing.</li><li>Available remedies are reinstatement or compensation — compensation is capped and reinstatement is comparatively rare in practice.</li></ul></div>
@@ -325,6 +343,12 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
     featured: false,
     imageSeed: 'non-compete-enforceability-by-state-us',
     country: 'United States',
+    primarySources: [
+      { label: 'Ryan LLC v. FTC, N.D. Tex. (2024) — vacatur of the FTC non-compete rule', url: 'https://law.justia.com/cases/federal/district-courts/texas/txndce/3:2024cv00986/389064/211/' },
+      { label: 'Federal Trade Commission, press release on acceding to vacatur of the Non-Compete Clause Rule (Sept. 2025)', url: 'https://www.ftc.gov/news-events/news/press-releases/2025/09/federal-trade-commission-files-accede-vacatur-non-compete-clause-rule' },
+      { label: 'Federal Register — removal of the FTC Non-Compete Rule from the CFR (Feb. 2026)', url: 'https://www.federalregister.gov/documents/2026/02/12/2026-02866/revision-of-the-negative-option-rule-withdrawal-of-the-cars-rule-removal-of-the-non-compete-rule-to' },
+      { label: 'Cal. Bus. & Prof. Code § 16600' },
+    ],
     content: `<p>Ask whether non-compete agreements are enforceable in the United States, and the honest answer is: it depends entirely on which state you're standing in. There is no federal non-compete law today — a rule that would have created one was finalized, then struck down, then formally abandoned. In its absence, the fifty states have gone in sharply different directions: a handful now void non-competes almost entirely, a growing group bans them only below a wage threshold, and the rest still apply a case-by-case reasonableness test that can uphold or kill the exact same clause depending on how it's drafted. This guide maps that current landscape — not a rewrite of the general worldwide explainer, but the specific, fast-moving U.S. state-by-state picture as it stands today.</p>
 
 <div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>California, North Dakota, Oklahoma, and Minnesota void nearly all employee non-competes outright; Washington State will join them from June 30, 2027, and Wyoming enacted a narrower 2025 ban with executive and business-sale carve-outs.</li><li>A growing number of states — including Colorado, Illinois, Oregon, and Washington, D.C. — don't ban non-competes outright but void them for employees earning below an annually adjusted wage threshold.</li><li>The FTC's 2024 nationwide non-compete rule is no longer in effect in any sense: a federal court vacated it in 2024, the FTC dropped its appeal and formally accepted the vacatur in September 2025, and the rule was struck from the Code of Federal Regulations in February 2026. Non-compete law is once again entirely a state matter.</li><li>In the roughly two dozen states with neither a ban nor a threshold, courts apply a common-law reasonableness test to scope, duration, and geography — and some states will narrow ("blue-pencil") an overbroad clause while others simply void it.</li><li>This is one of the most legislatively active areas of U.S. employment law: dozens of bills move through state legislatures every year, so treat any specific figure here as a snapshot to verify against current state guidance before relying on it.</li></ul></div>
@@ -458,6 +482,13 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
 <p>If you're an Ontario employee, start by checking the signature date on your non-compete against October 25, 2021 — that single fact determines whether the statutory ban or the older common-law test applies to your clause. If you're outside Ontario, or federally regulated, assume your non-compete must clear the common-law reasonableness bar, and remember the burden of proving that falls on your employer, not you. Because the exceptions, the Quebec civil-law rules, and the federal bill's progress can all shift the analysis, a short consultation with an employment lawyer licensed in the relevant province is the safest way to know where you actually stand. For the general, worldwide framework this guide builds on, see <a href="/employment-law/what-is-a-non-compete-agreement">What Is a Non-Compete Agreement?</a> and, for what happens when a Canadian employment relationship ends more broadly, <a href="/employment-law/wrongful-dismissal-canada-reasonable-notice">Wrongful Dismissal in Canada: How 'Reasonable Notice' Is Calculated</a>.</p>
 
 <p><em>This article is general legal information, not legal advice. Employment law varies by province and territory and changes over time — consult a lawyer licensed in the relevant jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'Employment Standards Act, 2000, Part XV.1 (Ontario) — non-compete agreements', url: 'https://www.ontario.ca/document/employment-standard-act-policy-and-interpretation-manual/part-xv1-non-compete-agreements' },
+      { label: 'Parekh et al. v. Schecter et al., 2022 ONSC 302' },
+      { label: 'Shafron v. KRG Insurance Brokers (Western) Inc., 2009 SCC 6', url: 'https://www.canlii.org/en/ca/scc/doc/2009/2009scc6/2009scc6.html' },
+      { label: 'Civil Code of Québec, articles 2089 and 2095', url: 'https://www.legisquebec.gouv.qc.ca/en/document/cs/ccq-1991' },
+      { label: 'Bill C-31, Budget 2025 Implementation Act, No. 2 (not yet enacted)' },
+    ],
   },
   {
     id: 'el-307',
@@ -518,5 +549,10 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
 <p>If you're being asked to sign a non-compete in Australia today, assess it under the law that actually applies right now — the common-law reasonableness test, plus the NSW-specific statute if that's the relevant state — not the reform that's still being designed. If you're an employer planning restrictive covenants with an eye on the next few years, keep an eye on Treasury's consultation outcomes and the parliamentary bill register rather than assuming any specific reported detail is final. Because this is a genuinely fast-moving area with real potential for the rules to change materially before 2027, a consultation with an employment lawyer is the most reliable way to get both today's answer and a read on how exposed a given clause might be to the coming reform. For the general, worldwide framework this guide builds on, see <a href="/employment-law/what-is-a-non-compete-agreement">What Is a Non-Compete Agreement?</a> and, for how Australian dismissals themselves are challenged, <a href="/employment-law/unfair-dismissal-australia-fair-work-commission">Unfair Dismissal in Australia: Eligibility and the Fair Work Commission Process</a>.</p>
 
 <p><em>This article is general legal information, not legal advice, and describes a law reform that had not been enacted as of publication. Confirm the current status with the Fair Work Ombudsman or Treasury, and consult an Australian employment lawyer before signing or relying on a non-compete agreement.</em></p>`,
+    primarySources: [
+      { label: 'Australian Treasury, reform to non-compete clauses and other restraints on workers', url: 'https://treasury.gov.au/consultation/c2025-681950' },
+      { label: 'Fair Work Ombudsman, employment contracts', url: 'https://www.fairwork.gov.au/employment-conditions/employment-contracts/get-help-with-employment-contracts' },
+      { label: 'Restraints of Trade Act 1976 (NSW)', url: 'https://legislation.nsw.gov.au/view/whole/pdf/inforce/2024-05-07/act-1976-067' },
+    ],
   },
 ];

@@ -89,6 +89,13 @@ export const propertyRealEstateExtra2Articles: LawArticle[] = [
 <p>Whether you are a landlord or a tenant, start by identifying the exact notice and grounds rules where the property is located, since these control everything that follows. Keep written records of rent, communications, and repairs. Landlords should follow each step precisely; tenants should respond promptly and attend hearings. Given the variation in local law and the stakes involved, advice from a housing lawyer or tenant-support service early in the process is well worth seeking.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'National Low Income Housing Coalition, tenant protections database', url: 'https://nlihc.org/tenant-protections' },
+      { label: 'Renters\' Rights Act 2025 (UK)', url: 'https://www.legislation.gov.uk/ukpga/2025/26/contents' },
+      { label: 'Housing Act 1988, sections 8 and 21 (UK)', url: 'https://www.legislation.gov.uk/ukpga/1988/50/contents' },
+      { label: 'India, Model Tenancy Act 2021' },
+      { label: 'UN-Habitat, Land Tenure Security in Selected Countries', url: 'https://unhabitat.org/land-tenure-security-in-selected-countries' },
+    ],
   },
   {
     id: 'pr-202',
@@ -173,5 +180,11 @@ export const propertyRealEstateExtra2Articles: LawArticle[] = [
 <p>Decide first what you actually need: help with a single transaction, broad ongoing management, or protection if you lose capacity. Choose your agent with great care, define their powers clearly, and check the formalities required where you live — especially for property. Because a POA hands real power to another person, having it prepared or reviewed by a lawyer is a sensible safeguard.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'Uniform Power of Attorney Act, Uniform Law Commission', url: 'https://www.uniformlaws.org/committees/community-home?CommunityKey=b1975254-8370-4a7c-947f-e5af0d6cb07c' },
+      { label: 'Mental Capacity Act 2005 (UK) — lasting powers of attorney', url: 'https://www.legislation.gov.uk/ukpga/2005/9/part/1/crossheading/lasting-powers-of-attorney' },
+      { label: 'India, Powers-of-Attorney Act 1882 and Registration Act 1908' },
+      { label: 'Hague Convention on the International Protection of Adults (2000)', url: 'https://www.hcch.net/en/instruments/conventions/full-text/?cid=71' },
+    ],
   },
 ];

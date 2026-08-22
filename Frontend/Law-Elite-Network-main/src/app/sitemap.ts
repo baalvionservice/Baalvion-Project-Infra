@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 import { unstable_cache } from 'next/cache';
 import { getAllArticles } from '@/data/law-content';
-import { getAllAuthors } from '@/data/authors';
+import { getMergedAuthors } from '@/lib/authors-server';
 import { articleUrl } from '@/lib/article-url';
 import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
 import { cmsGetArticles } from '@/lib/cms';
@@ -81,6 +81,9 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/news`, lastModified: new Date(), changeFrequency: 'hourly', priority: 0.85 },
     { url: `${BASE_URL}/search`, lastModified: new Date(), changeFrequency: 'hourly', priority: 0.9 },
     { url: `${BASE_URL}/plans`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${BASE_URL}/case-law`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${BASE_URL}/legislation`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${BASE_URL}/law-changes`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 },
     { url: `${BASE_URL}/about-us`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
     { url: `${BASE_URL}/authors`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 },
     { url: `${BASE_URL}/editorial-standards`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4 },
@@ -183,7 +186,11 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
     if (!existing || parsed > existing) latestByAuthor.set(a.author, parsed);
   });
 
-  const authorRoutes: MetadataRoute.Sitemap = getAllAuthors().map((a) => ({
+  // Merged (bundled + CMS-added) authors -- CMS-only authors were previously
+  // dropped from the sitemap because this used the bundled-only getAllAuthors(),
+  // even though their /author/[slug] pages render fine and are linked from /authors.
+  const mergedAuthors = await getMergedAuthors();
+  const authorRoutes: MetadataRoute.Sitemap = mergedAuthors.map((a) => ({
     url: `${BASE_URL}/author/${a.slug}`,
     lastModified: latestByAuthor.get(a.name) || new Date(),
     changeFrequency: 'monthly',

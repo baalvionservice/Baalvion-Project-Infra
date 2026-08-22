@@ -99,8 +99,7 @@ function breadcrumbJsonLd(l: any, id: string) {
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Home', item: SITE },
-      { '@type': 'ListItem', position: 2, name: 'Lawyers', item: `${SITE}/lawyers` },
-      { '@type': 'ListItem', position: 3, name: l.name, item: `${SITE}/lawyer/${id}` },
+      { '@type': 'ListItem', position: 2, name: l.name, item: `${SITE}/lawyer/${id}` },
     ],
   };
 }

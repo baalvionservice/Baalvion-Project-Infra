@@ -53,12 +53,17 @@ export async function generateMetadata(
   const cmsOnly = CMS_ONLY_CATEGORIES[categorySlug];
   // Bundled seed-data description (e.g. tech-ip's) -- last real-data fallback
   // before the generic line below, so a category law-service doesn't know
-  // about doesn't fall straight through to an unsupported "188 countries" claim.
+  // about doesn't fall straight through to an unsupported claim (this used to
+  // read "verified lawyers across 188 countries" -- the real jurisdiction
+  // dataset only has 8 entries and the practitioner directory isn't verified).
   const bundledCat = (seedData as any).categories?.find((c: any) => c.slug === categorySlug);
   const name = cat?.name || cmsOnly?.name || bundledCat?.name || titleCase(categorySlug);
-  const title = cmsOnly?.metaTitle || `${name} Attorneys & Legal Services | Law Elite Network`;
+  // Root layout's metadata.title.template ('%s | Law Elite Network') already
+  // appends the site name -- a fallback ending in "| Law Elite Network" here
+  // used to render as "... | Law Elite Network | Law Elite Network".
+  const title = cmsOnly?.metaTitle || `${name} Legal Guides`;
   const description = cat?.description || cmsOnly?.metaDescription || cmsOnly?.description || bundledCat?.description
-    || `Find verified ${name} lawyers across 188 countries and read expert ${name} guides on Law Elite Network.`;
+    || `Plain-language ${name} guides on Law Elite Network -- understand the law before you call a lawyer.`;
   const url = `${SITE}/${categorySlug}`;
   return {
     title,

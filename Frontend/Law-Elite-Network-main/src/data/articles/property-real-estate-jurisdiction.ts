@@ -72,5 +72,11 @@ export const propertyRealEstateJurisdictionArticles: LawArticle[] = [
 <p>If you're a landlord taking a new deposit, protect it with an approved scheme and send the prescribed information within 30 days of receiving the money — set a calendar reminder rather than relying on memory, since both obligations run on the same short clock and missing either one exposes you to a court penalty. If you're a tenant and you're not sure whether your deposit was ever protected, each of the three schemes offers a free online search tool to check. For the broader, worldwide picture of tenant rights around deposits, repairs, and eviction, see <a href="/real-estate-law/understanding-your-rights-as-a-tenant">Understanding Your Rights as a Tenant</a></p>
 
 <p><em>This article is general legal information, not legal advice, and covers England and Wales specifically — Scotland and Northern Ireland run separate tenancy deposit schemes under their own legislation. Consult a solicitor or a housing advice service before acting.</em></p>`,
+    primarySources: [
+      { label: 'Housing Act 2004, section 212 (UK) — tenancy deposit schemes', url: 'https://www.legislation.gov.uk/ukpga/2004/34/section/212' },
+      { label: 'Tenant Fees Act 2019 (UK)', url: 'https://www.legislation.gov.uk/ukpga/2019/4/contents' },
+      { label: 'Renters\' Rights Act 2025 (UK)', url: 'https://www.legislation.gov.uk/ukpga/2025/26/contents' },
+      { label: 'GOV.UK, tenancy deposit protection: overview', url: 'https://www.gov.uk/tenancy-deposit-protection' },
+    ],
   },
 ];

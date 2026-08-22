@@ -46,6 +46,10 @@ export interface LawAuthor {
   avatarSeed: string;
   /** Optional explicit portrait URL (CMS-managed authors); overrides the seed. */
   avatarUrl?: string;
+  /** Degrees/schools, e.g. "M.D. — University of Mississippi". CMS-managed only; never inferred. */
+  education?: string[];
+  /** Professional certifications, e.g. "CFP®". CMS-managed only; never inferred. */
+  certifications?: string[];
   /** Optional public profile links. */
   social?: { x?: string; linkedin?: string; facebook?: string; instagram?: string };
 }
@@ -180,7 +184,7 @@ export const LAW_AUTHORS: LawAuthor[] = [
     bio:
       'Deepak Kumar Kuldeep covers Law Elite Network’s personal injury and maritime law desk, drawing on a background in maritime law and a BSc in Nautical Science. ' +
       'He writes and reviews the network’s guides on personal injury claims, offshore and maritime injury law, cruise ship and passenger vessel accidents, and boating and car accident cases, along with its coverage of religious law and unusual state and local laws.',
-    expertise: ['Personal Injury Lawyer', 'Maritime & Offshore Injury Law', 'Cruise Ship & Passenger Vessel Accidents', 'Boating Accidents', 'Car Accidents', 'Religion, Law & Weird Laws'],
+    expertise: ['Personal Injury Law', 'Maritime & Offshore Injury Law', 'Cruise Ship & Passenger Vessel Accidents', 'Boating Accidents', 'Car Accidents', 'Religion, Law & Weird Laws'],
     avatarSeed: 'deepak-kumar-kuldeep',
     social: { linkedin: 'https://in.linkedin.com/in/allenkrewzz' },
   },
@@ -317,4 +321,18 @@ export function getAuthorBySlug(slug: string): LawAuthor | null {
 export function getAuthorByName(name: string): LawAuthor | null {
   if (!name) return null;
   return getAuthorBySlug(authorNameToSlug(name));
+}
+
+/**
+ * Distinguishes desk editors from contributors using the role that's
+ * already encoded in every bundled `title` above (each one genuinely ends in
+ * either "Editor" or "Contributor" -- confirmed across all 19 profiles).
+ * Not a new/invented classification: it's the real editorial-role signal
+ * that already exists in this data, just not previously surfaced as a
+ * grouping. CMS-managed authors default to "contributor" unless their title
+ * explicitly says otherwise, since a false "editor" claim is worse than an
+ * under-claim here.
+ */
+export function isEditorRole(title: string | null | undefined): boolean {
+  return /editor$/i.test((title || '').trim());
 }

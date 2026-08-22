@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useCallback, CSSProperties } from 'react';
+import { useEffect, useRef, useCallback, useState, CSSProperties } from 'react';
 
 export interface ResponsiveDisplayAdProps {
   /**
@@ -81,6 +81,7 @@ export function ResponsiveDisplayAd({
 }: ResponsiveDisplayAdProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const hasInitialized = useRef(false);
+  const [skeletonVisible, setSkeletonVisible] = useState(true);
 
   const initializeAd = useCallback(() => {
     // Only initialize once per component instance
@@ -92,6 +93,10 @@ export function ResponsiveDisplayAd({
       if (typeof window !== 'undefined' && 'adsbygoogle' in window) {
         hasInitialized.current = true;
         (window.adsbygoogle = window.adsbygoogle || []).push({});
+        // There's no reliable cross-origin load event for the ad iframe, so we drop
+        // the loading placeholder once the push is issued rather than leaving it
+        // rendered indefinitely (it has no other exit condition).
+        setSkeletonVisible(false);
 
         // Track impression
         if (placement) {
@@ -104,12 +109,14 @@ export function ResponsiveDisplayAd({
         console.warn(
           'AdSense script not initialized. Ensure adsbygoogle is loaded in layout.'
         );
+        setSkeletonVisible(false);
         onAdError?.(new Error('AdSense script not available'));
       }
     } catch (error) {
       const err =
         error instanceof Error ? error : new Error('Failed to initialize ad');
       console.error('AdSense initialization error:', err);
+      setSkeletonVisible(false);
       onAdError?.(err);
     }
   }, [slotId, placement, onAdLoaded, onAdError]);
@@ -155,6 +162,7 @@ export function ResponsiveDisplayAd({
       ref={containerRef}
       className={`ad-container ad-placement-${placement} ${className}`}
       style={{
+        position: 'relative',
         minHeight,
         display: 'flex',
         justifyContent: 'center',
@@ -165,26 +173,28 @@ export function ResponsiveDisplayAd({
       aria-label={`Advertisement - ${placement}`}
     >
       {/* Placeholder while ad loads */}
-      <div
-        style={{
-          position: 'absolute',
-          background: 'linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)',
-          backgroundSize: '200% 100%',
-          animation: 'loading 1.5s infinite',
-          width: '100%',
-          height: '100%',
-          minHeight,
-          borderRadius: '4px',
-        }}
-        className="ad-skeleton"
-      >
-        <style>{`
-          @keyframes loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-          }
-        `}</style>
-      </div>
+      {skeletonVisible && (
+        <div
+          style={{
+            position: 'absolute',
+            background: 'linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)',
+            backgroundSize: '200% 100%',
+            animation: 'loading 1.5s infinite',
+            width: '100%',
+            height: '100%',
+            minHeight,
+            borderRadius: '4px',
+          }}
+          className="ad-skeleton"
+        >
+          <style>{`
+            @keyframes loading {
+              0% { background-position: 200% 0; }
+              100% { background-position: -200% 0; }
+            }
+          `}</style>
+        </div>
+      )}
 
       {/* AdSense ad unit */}
       <ins

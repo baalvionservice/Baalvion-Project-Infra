@@ -65,7 +65,7 @@ export const CMS_ONLY_CATEGORIES: Record<string, CmsOnlyCategory> = {
   },
   'personal-injury-lawyer': {
     id: 'cms-cat-personal-injury-lawyer',
-    name: 'Personal Injury Lawyer',
+    name: 'Personal Injury Law',
     slug: 'personal-injury-lawyer',
     description: 'Educational guides on personal injury law, including what personal injury lawyers do, how contingency fees and legal costs work, how to choose and work with an attorney, statutes of limitations, free legal aid resources, and maritime and accident-law terminology.',
   },
@@ -90,7 +90,7 @@ export const CMS_ONLY_CATEGORIES: Record<string, CmsOnlyCategory> = {
 <p><strong>Navigable waters</strong> — broadly, waters usable for interstate or foreign commerce, which can trigger federal maritime jurisdiction. <strong>BUI</strong> — boating under the influence, regulated similarly to DUI in most states. <strong>Negligence</strong> — the failure to operate with the care a reasonable boat operator would use, the usual legal basis for a liability claim.</p>
 
 <h2>Related Legal Areas</h2>
-<p>Boating accidents on recreational, personally owned vessels are generally handled differently from injuries to commercial maritime workers or cruise ship passengers, which involve their own federal statutory frameworks. See <a href="/maritime-offshore-injury-law">Maritime &amp; Offshore Injury Law</a> and <a href="/cruise-ship-passenger-vessel-accidents">Cruise Ship &amp; Passenger Vessel Accidents</a> for those areas, and <a href="/what-is-a-personal-injury-lawyer">Personal Injury Lawyer</a> for concepts that apply across accident types generally.</p>
+<p>Boating accidents on recreational, personally owned vessels are generally handled differently from injuries to commercial maritime workers or cruise ship passengers, which involve their own federal statutory frameworks. See <a href="/maritime-offshore-injury-law">Maritime &amp; Offshore Injury Law</a> and <a href="/cruise-ship-passenger-vessel-accidents">Cruise Ship &amp; Passenger Vessel Accidents</a> for those areas, and <a href="/what-is-a-personal-injury-lawyer">Personal Injury Law</a> for concepts that apply across accident types generally.</p>
 
 <h2>Explore the Guides</h2>
 <p>The guides below cover what to do immediately after an accident, how liability and fault are typically assessed, filing deadlines, and what a boating accident lawyer does.</p>
@@ -122,7 +122,7 @@ export const CMS_ONLY_CATEGORIES: Record<string, CmsOnlyCategory> = {
 <p>Because most car accident lawyers work on contingency (no fee unless they recover money) and free initial consultations are standard, the real evaluation questions are usually about experience with similar cases, communication style, settlement-versus-trial track record, and how the fee agreement is structured. Our guide on <a href="/best-car-accident-lawyer">how to find the best car accident lawyer</a> walks through what to actually compare.</p>
 
 <h2>Related Legal Areas</h2>
-<p>Car accident claims sit inside the broader field of personal injury law. For the parts of that process that apply across accident types — contingency fees, statutes of limitations, and how to work with a lawyer generally — see our <a href="/what-is-a-personal-injury-lawyer">Personal Injury Lawyer</a> hub. Crashes involving boats or watercraft instead of cars follow a different set of rules; see <a href="/boating-accidents">Boating Accidents</a>.</p>
+<p>Car accident claims sit inside the broader field of personal injury law. For the parts of that process that apply across accident types — contingency fees, statutes of limitations, and how to work with a lawyer generally — see our <a href="/what-is-a-personal-injury-lawyer">Personal Injury Law</a> hub. Crashes involving boats or watercraft instead of cars follow a different set of rules; see <a href="/boating-accidents">Boating Accidents</a>.</p>
 
 <h2>Explore the Guides</h2>
 <p>The guides below cover what a car accident lawyer actually does and how to evaluate one. This is a newer section of the site, and we'll add more car-accident-specific guides — on topics like fault determination, dealing with insurance adjusters, and filing deadlines — as they're published.</p>

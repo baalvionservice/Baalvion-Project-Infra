@@ -72,6 +72,12 @@ export const propertyRealEstateArticles: LawArticle[] = [
 <p>Before committing, obtain the title documents and a current register extract, run encumbrance and planning searches, and have a qualified conveyancer or property lawyer review the contract. Insist on written answers to your questions, keep copies of every document, and do not release funds until your adviser confirms the title is clean and the transfer is properly registered. A few weeks of careful checking is cheap insurance against years of litigation.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'American Land Title Association, the FAQs of title insurance for homeowners', url: 'https://www.alta.org/homeowner/resources/Homeowner-The-FAQs-of-Title-Insurance-for-Homeowners2.pdf' },
+      { label: 'HM Land Registry, Practice guide 1: first registrations (unregistered land)', url: 'https://www.gov.uk/government/publications/first-registrations/practice-guide-1-first-registrations' },
+      { label: 'India, Registration Act 1908' },
+      { label: 'RICS, Home Survey Standard', url: 'https://www.rics.org/profession-standards/rics-standards-and-guidance/sector-standards/building-surveying-standards/home-surveys/home-survey-standards' },
+    ],
   },
   {
     id: 'pr-002',
@@ -137,5 +143,12 @@ export const propertyRealEstateArticles: LawArticle[] = [
 <p>Read your agreement in full, keep a written record of every payment and request, and photograph the property at the start and end of the tenancy. Learn the basic landlord-tenant rules for your specific city or country, since they vary widely, and contact a local tenants' advice service or housing lawyer the moment a serious dispute or eviction notice arises. Acting early and in writing is your strongest protection.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'Housing Act 1988 (UK)', url: 'https://www.legislation.gov.uk/ukpga/1988/50/contents' },
+      { label: 'Renters\' Rights Act 2025 (UK)', url: 'https://www.legislation.gov.uk/ukpga/2025/26/contents' },
+      { label: 'HUD, rental assistance tenant rights', url: 'https://www.hud.gov/topics/rental_assistance/tenantrights' },
+      { label: 'India, Model Tenancy Act 2021' },
+      { label: 'European Union Agency for Fundamental Rights, Fundamental Rights Report 2025', url: 'https://fra.europa.eu/en/publication/2025/fundamental-rights-report-2025' },
+    ],
   },
 ];

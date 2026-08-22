@@ -18,7 +18,7 @@ export const disputeResolutionExtra2Articles: LawArticle[] = [
     subcategory: { id: 'sub_dr_litigation', name: 'Litigation', slug: 'litigation' },
     summary:
       'Small claims court offers a fast, low-cost way to resolve modest money disputes without lawyers — ideal for unpaid debts and minor contract problems.',
-    author: 'Sofia Almeida',
+    author: 'Marcus Whitfield',
     updatedAt: 'June 23, 2026',
     readingTime: 9,
     views: 8470,
@@ -85,6 +85,12 @@ export const disputeResolutionExtra2Articles: LawArticle[] = [
 <p>Start by confirming your local monetary limit and the correct forum for your dispute. Send a clear demand letter and keep a copy, then gather every document that supports your claim. Present your case calmly and factually at the hearing. While lawyers are often unnecessary, a brief consultation or free advice service can help for borderline or higher-value claims — and always weigh whether the other side can realistically pay before you invest your time.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'National Center for State Courts, understanding small claims court', url: 'https://www.ncsc.org/resources-courts/understanding-small-claims-court' },
+      { label: 'HM Courts & Tribunals Service, Money Claim Online', url: 'https://www.moneyclaim.gov.uk/' },
+      { label: 'Regulation (EC) No 861/2007 establishing a European Small Claims Procedure', url: 'https://eur-lex.europa.eu/legal-content/EN/ALL/?uri=CELEX:32007R0861' },
+      { label: 'India, Consumer Protection Act 2019' },
+    ],
   },
   {
     id: 'dr-202',
@@ -97,7 +103,7 @@ export const disputeResolutionExtra2Articles: LawArticle[] = [
     subcategory: { id: 'sub_dr_litigation', name: 'Litigation', slug: 'litigation' },
     summary:
       'A class action lets one lawsuit represent many people harmed the same way, making it practical to hold defendants accountable for widespread small losses.',
-    author: 'Daniel Okafor',
+    author: 'Marcus Whitfield',
     updatedAt: 'June 21, 2026',
     readingTime: 9,
     views: 7050,
@@ -168,5 +174,11 @@ export const disputeResolutionExtra2Articles: LawArticle[] = [
 <p>If you believe you are part of a group harmed by the same conduct, watch for class notices and read them carefully, since they explain your options and deadlines. Decide whether your claim is better pursued within the class or individually. Because certification, opt-out rights, and procedures are technical and vary by jurisdiction, speaking with a lawyer experienced in collective litigation early helps you protect your rights and choose the right path.</p>
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
+    primarySources: [
+      { label: 'Federal Rules of Civil Procedure, Rule 23 — Class Actions', url: 'https://www.law.cornell.edu/rules/frcp/rule_23' },
+      { label: 'Civil Procedure Rules, Part 19 — Parties and Group Litigation (UK)', url: 'https://www.justice.gov.uk/courts/procedure-rules/civil/rules/part19' },
+      { label: 'Directive (EU) 2020/1828 on representative actions for consumers', url: 'https://eur-lex.europa.eu/eli/dir/2020/1828/oj/eng' },
+      { label: 'India, Code of Civil Procedure 1908, Order I Rule 8' },
+    ],
   },
 ];

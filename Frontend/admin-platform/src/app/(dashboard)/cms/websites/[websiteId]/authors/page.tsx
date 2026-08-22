@@ -97,6 +97,14 @@ const DEFAULT_FORM: AuthorForm = {
 const autoSlug = (val: string) =>
   val.toLowerCase().replace(/['’]/g, '').replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 
+// The API requires fully-qualified URLs (https://…); the form fields accept
+// bare domains/handles, so add a scheme before it's sent.
+const normalizeUrl = (val: string): string => {
+  const trimmed = val.trim();
+  if (!trimmed) return trimmed;
+  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+};
+
 export default function WebsiteAuthorsPage({
   params,
 }: {
@@ -170,18 +178,19 @@ export default function WebsiteAuthorsPage({
     const editorialRole = form.editorialRole === NO_ROLE ? null : (form.editorialRole as AuthorEditorialRole);
     const keywords = form.keywords.split(',').map((k) => k.trim()).filter(Boolean);
     const social = {
-      ...(form.linkedin ? { linkedin: form.linkedin } : {}),
-      ...(form.x ? { x: form.x } : {}),
-      ...(form.facebook ? { facebook: form.facebook } : {}),
-      ...(form.instagram ? { instagram: form.instagram } : {}),
+      ...(form.linkedin ? { linkedin: normalizeUrl(form.linkedin) } : {}),
+      ...(form.x ? { x: normalizeUrl(form.x) } : {}),
+      ...(form.facebook ? { facebook: normalizeUrl(form.facebook) } : {}),
+      ...(form.instagram ? { instagram: normalizeUrl(form.instagram) } : {}),
     };
     const seoMetadata = {
       ...(form.seoTitle ? { title: form.seoTitle } : {}),
       ...(form.seoDescription ? { description: form.seoDescription } : {}),
       ...(keywords.length ? { keywords } : {}),
-      ...(form.ogImage ? { ogImage: form.ogImage } : {}),
+      ...(form.ogImage ? { ogImage: normalizeUrl(form.ogImage) } : {}),
       ...(form.noIndex ? { noIndex: true } : {}),
     };
+    const videoUrl = form.videoUrl ? normalizeUrl(form.videoUrl) : null;
 
     if (dialog.editing) {
       updateAuthor(
@@ -194,7 +203,7 @@ export default function WebsiteAuthorsPage({
             credentials: form.credentials || null,
             bio: form.bio || null,
             avatarUrl: form.avatarUrl || null,
-            videoUrl: form.videoUrl || null,
+            videoUrl,
             expertise,
             education,
             certifications,
@@ -216,7 +225,7 @@ export default function WebsiteAuthorsPage({
           credentials: form.credentials || null,
           bio: form.bio || null,
           avatarUrl: form.avatarUrl || null,
-          videoUrl: form.videoUrl || null,
+          videoUrl,
           expertise,
           education,
           certifications,
@@ -263,8 +272,12 @@ export default function WebsiteAuthorsPage({
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted">
-                      <UserRound className="h-5 w-5 text-muted-foreground" />
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted">
+                      {a.avatarUrl ? (
+                        <img src={a.avatarUrl} alt="" className="h-full w-full object-cover" />
+                      ) : (
+                        <UserRound className="h-5 w-5 text-muted-foreground" />
+                      )}
                     </div>
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium">{a.name}</p>
@@ -332,7 +345,7 @@ export default function WebsiteAuthorsPage({
               <Input
                 className="h-8 text-xs"
                 value={form.slug}
-                onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))}
+                onChange={(e) => setForm((f) => ({ ...f, slug: autoSlug(e.target.value) }))}
                 placeholder="auto-generated from name"
               />
             </div>
@@ -433,6 +446,7 @@ export default function WebsiteAuthorsPage({
                 <Label className="text-xs">LinkedIn URL</Label>
                 <Input
                   className="h-8 text-xs"
+                  placeholder="linkedin.com/in/…"
                   value={form.linkedin}
                   onChange={(e) => setForm((f) => ({ ...f, linkedin: e.target.value }))}
                 />
@@ -441,6 +455,7 @@ export default function WebsiteAuthorsPage({
                 <Label className="text-xs">X (Twitter) URL</Label>
                 <Input
                   className="h-8 text-xs"
+                  placeholder="x.com/…"
                   value={form.x}
                   onChange={(e) => setForm((f) => ({ ...f, x: e.target.value }))}
                 />
@@ -449,6 +464,7 @@ export default function WebsiteAuthorsPage({
                 <Label className="text-xs">Facebook URL</Label>
                 <Input
                   className="h-8 text-xs"
+                  placeholder="facebook.com/…"
                   value={form.facebook}
                   onChange={(e) => setForm((f) => ({ ...f, facebook: e.target.value }))}
                 />
@@ -457,13 +473,14 @@ export default function WebsiteAuthorsPage({
                 <Label className="text-xs">Instagram URL</Label>
                 <Input
                   className="h-8 text-xs"
+                  placeholder="instagram.com/…"
                   value={form.instagram}
                   onChange={(e) => setForm((f) => ({ ...f, instagram: e.target.value }))}
                 />
               </div>
             </div>
             <p className="-mt-1 text-[10px] text-muted-foreground">
-              Any social field left blank is simply omitted from the public author page — only filled-in links show up.
+              Any social field left blank is simply omitted from the public author page — only filled-in links show up. A bare handle like &quot;linkedin.com/in/name&quot; is fine; https:// is added automatically.
             </p>
 
             {dialog.editing && (

@@ -234,13 +234,7 @@ export function PublicNavbar() {
             href="/news"
             className="flex items-center h-full px-3 shrink-0 whitespace-nowrap text-[12px] font-bold uppercase tracking-wider text-white/90 hover:text-white border-b-[3px] border-transparent hover:border-news-600 transition-colors"
           >
-            News
-          </Link>
-          <Link
-            href="/world"
-            className="flex items-center h-full px-3 shrink-0 whitespace-nowrap text-[12px] font-bold uppercase tracking-wider text-white/90 hover:text-white border-b-[3px] border-transparent hover:border-news-600 transition-colors"
-          >
-            World
+            Legal News
           </Link>
           {categories.slice(0, 8).map((cat) => (
             <div
@@ -280,7 +274,7 @@ export function PublicNavbar() {
                   </h3>
                   <p className="text-sm text-slate-500 leading-relaxed mb-5">
                     {activeCategoryData.description ||
-                      'Expert-reviewed guides and explainers across this practice area.'}
+                      'Plain-language guides and explainers across this practice area.'}
                   </p>
                   <Link
                     href={`/${activeCategoryData.slug}`}
@@ -353,8 +347,7 @@ export function PublicNavbar() {
               <nav aria-label="Mobile navigation">
                 {[
                   { label: 'Home', href: '/' },
-                  { label: 'News', href: '/news' },
-                  { label: 'World', href: '/world' },
+                  { label: 'Legal News', href: '/news' },
                 ].map((item) => (
                   <Link
                     key={item.href}

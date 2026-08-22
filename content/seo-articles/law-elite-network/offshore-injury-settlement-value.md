@@ -7,6 +7,7 @@ category: Maritime & Offshore Injury Law
 categorySlug: maritime-offshore-injury-law
 keywords: [offshore injury settlement, offshore accident settlement value, jones act settlement]
 author: deepak-kumar-kuldeep
+citations: ["46 U.S.C. § 30104 -- Jones Act, seaman's right to sue employer for negligence|https://www.law.cornell.edu/uscode/text/46/30104", "33 U.S.C. § 905(b) -- LHWCA third-party vessel negligence claim|https://www.law.cornell.edu/uscode/text/33/905"]
 ---
 
 # How Offshore Injury Settlements Are Calculated

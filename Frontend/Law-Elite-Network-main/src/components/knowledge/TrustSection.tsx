@@ -1,46 +1,30 @@
-"use client";
-
 import React from 'react';
 import Link from 'next/link';
-import {
-  ShieldCheck,
-  Languages,
-  MapPin,
-  BookMarked,
-  RotateCcw,
-  GraduationCap,
-} from 'lucide-react';
 
 // The methodology we actually follow (mirrors /editorial-standards) --
 // only principles the site's real practices back up, no invented claims.
 const PRINCIPLES = [
   {
-    icon: Languages,
     title: 'Plain language',
     body: 'Complex legal concepts are explained for ordinary readers, not for other lawyers.',
   },
   {
-    icon: MapPin,
     title: 'Jurisdiction first',
     body: 'Legal rules are connected to the jurisdiction in which they apply, not treated as universal.',
   },
   {
-    icon: ShieldCheck,
     title: 'Editorial independence',
     body: 'Educational content is kept separate from advertising and sponsorship decisions.',
   },
   {
-    icon: BookMarked,
     title: 'Source-conscious',
     body: 'Legal claims are checked against authoritative sources where appropriate.',
   },
   {
-    icon: RotateCcw,
     title: 'Corrections matter',
     body: 'Material errors are acknowledged and corrected transparently, not quietly edited away.',
   },
   {
-    icon: GraduationCap,
     title: 'Education, not representation',
     body: "We provide general legal education. We don't replace qualified legal counsel.",
   },
@@ -48,12 +32,15 @@ const PRINCIPLES = [
 
 /**
  * @fileOverview TrustSection
- * The homepage's editorial-standard statement -- six methodology principles.
+ * The homepage's editorial-standard statement -- six methodology principles,
+ * laid out as a ruled charter/table rather than an icon-card grid, since
+ * this is the single highest-trust section on the page and should read like
+ * a printed masthead standard, not a marketing feature list.
  */
 export function TrustSection() {
   return (
     <div className="py-20 border-t border-slate-100">
-      <div className="max-w-2xl mx-auto text-center space-y-2 mb-12">
+      <div className="max-w-2xl mx-auto text-center space-y-2 mb-14">
         <span className="kicker justify-center">Editorial Standards</span>
         <h2 className="text-2xl md:text-3xl font-bold text-slate-900">Our Editorial Standard</h2>
         <p className="text-sm text-slate-500 leading-relaxed">
@@ -61,14 +48,14 @@ export function TrustSection() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-10 max-w-5xl mx-auto">
-        {PRINCIPLES.map((p) => (
-          <div key={p.title} className="space-y-2.5">
-            <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center">
-              <p.icon className="w-[18px] h-[18px] text-blue-600" aria-hidden="true" />
-            </div>
-            <h3 className="text-[15px] font-bold text-slate-900">{p.title}</h3>
-            <p className="text-[13.5px] text-slate-500 leading-relaxed">{p.body}</p>
+      <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-2 border-t border-l border-slate-200">
+        {PRINCIPLES.map((p, i) => (
+          <div key={p.title} className="border-b border-r border-slate-200 p-6 md:p-8">
+            <span className="font-serif text-2xl italic text-news-600" aria-hidden="true">
+              {String(i + 1).padStart(2, '0')}
+            </span>
+            <h3 className="font-headline text-base font-bold text-slate-900 mt-2">{p.title}</h3>
+            <p className="text-[13.5px] text-slate-500 leading-relaxed mt-1.5">{p.body}</p>
           </div>
         ))}
       </div>

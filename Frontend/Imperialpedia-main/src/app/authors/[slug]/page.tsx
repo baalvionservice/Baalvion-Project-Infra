@@ -1,12 +1,11 @@
 import React from 'react';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Container } from '@/design-system/layout/container';
 import { Section } from '@/design-system/layout/section';
 import { Text } from '@/design-system/typography/text';
-import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { ArticleList } from '@/modules/content-engine/components';
 import { getArticles, getArticlesByAuthor } from '@/modules/content-engine/services';
 import { staticArticleList } from '@/services/data/static-content';
@@ -19,7 +18,7 @@ import { breadcrumbService } from '@/modules/seo-engine/services/breadcrumb-serv
 import { structuredData } from '@/lib/seo/structured-data';
 import { env } from '@/config/env';
 import { Metadata } from 'next';
-import { Twitter, Linkedin, Globe, Facebook, Instagram, PlayCircle, BadgeCheck, Newspaper, GraduationCap, Award } from 'lucide-react';
+import { Twitter, Linkedin, Globe, Facebook, Instagram, PlayCircle, Newspaper } from 'lucide-react';
 
 interface AuthorPageProps {
   params: Promise<{ slug: string }>;
@@ -106,158 +105,186 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
     knowsAbout: author.expertise,
   });
   const breadcrumb = breadcrumbService.generateBreadcrumbForAuthor(author.name, author.slug);
-  const roleBadge =
-    author.role === 'reviewer'
-      ? 'Editorial Reviewer'
-      : author.role === 'fact-checker'
-        ? 'Fact-Checking Editor'
-        : author.role === 'contributor'
-          ? 'Contributor'
-          : 'Staff Writer';
+  const firstName = author.name.split(' ')[0];
+
+  // "a bachelor's" / "a bachelor's and a master's" / "a bachelor's, a master's, and a PhD"
+  const joinNatural = (items: string[]) =>
+    items.length <= 1
+      ? (items[0] ?? '')
+      : items.length === 2
+        ? items.join(' and ')
+        : `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`;
+
+  // Short highlight bullets built only from fields this author actually has on
+  // record — never invented tenure/stats, per the site's real-data-only policy.
+  const highlights: string[] = [];
+  if (articles.length > 0) {
+    highlights.push(`Has published ${articles.length} article${articles.length === 1 ? '' : 's'} for Imperialpedia.`);
+  }
+  if (author.education?.length) {
+    highlights.push(`Holds ${joinNatural(author.education)}.`);
+  }
+  if (author.certifications?.length) {
+    highlights.push(`Certified in ${joinNatural(author.certifications)}.`);
+  }
+  if (author.expertise?.length) {
+    highlights.push(`Covers ${author.expertise.slice(0, 6).join(', ')} for Imperialpedia.`);
+  }
+  if (author.credentials) {
+    highlights.push(author.credentials);
+  }
 
   return (
     <main className="min-h-screen bg-background pt-16">
       <JsonLd data={personSchema} />
+
+      <div className="w-full bg-primary/10 border-b border-primary/15">
+        <Container>
+          <div className="pt-6">
+            <Breadcrumbs breadcrumb={breadcrumb} className="mb-0" />
+          </div>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-6 py-10 lg:py-12">
+            <Avatar className="h-32 w-32 sm:h-36 sm:w-36 shrink-0 rounded-md grayscale">
+              {author.avatarUrl && (
+                <AvatarImage src={author.avatarUrl} alt={author.name} className="rounded-md" />
+              )}
+              <AvatarFallback className="rounded-md text-3xl font-bold bg-primary/10 text-primary">
+                {initials(author.name)}
+              </AvatarFallback>
+            </Avatar>
+
+            <div>
+              <Text variant="h1" as="h1" className="tracking-tight">
+                {author.name}
+              </Text>
+              <div className="flex flex-wrap items-center gap-2 mt-3">
+                {author.social.linkedin && (
+                  <Button variant="outline" size="icon" className="rounded-full bg-background" asChild>
+                    <a href={author.social.linkedin} target="_blank" rel="noopener noreferrer" title="LinkedIn">
+                      <Linkedin className="h-4 w-4" />
+                    </a>
+                  </Button>
+                )}
+                {author.social.twitter && (
+                  <Button variant="outline" size="icon" className="rounded-full bg-background" asChild>
+                    <a href={author.social.twitter} target="_blank" rel="noopener noreferrer" title="X (Twitter)">
+                      <Twitter className="h-4 w-4" />
+                    </a>
+                  </Button>
+                )}
+                {author.social.website && (
+                  <Button variant="outline" size="icon" className="rounded-full bg-background" asChild>
+                    <a href={author.social.website} target="_blank" rel="noopener noreferrer" title="Website">
+                      <Globe className="h-4 w-4" />
+                    </a>
+                  </Button>
+                )}
+                {author.social.facebook && (
+                  <Button variant="outline" size="icon" className="rounded-full bg-background" asChild>
+                    <a href={author.social.facebook} target="_blank" rel="noopener noreferrer" title="Facebook">
+                      <Facebook className="h-4 w-4" />
+                    </a>
+                  </Button>
+                )}
+                {author.social.instagram && (
+                  <Button variant="outline" size="icon" className="rounded-full bg-background" asChild>
+                    <a href={author.social.instagram} target="_blank" rel="noopener noreferrer" title="Instagram">
+                      <Instagram className="h-4 w-4" />
+                    </a>
+                  </Button>
+                )}
+                {author.videoUrl && (
+                  <Button variant="outline" size="icon" className="rounded-full bg-background" asChild>
+                    <a href={author.videoUrl} target="_blank" rel="noopener noreferrer" title="Watch intro">
+                      <PlayCircle className="h-4 w-4" />
+                    </a>
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </Container>
+      </div>
+
       <Section spacing="md">
         <Container>
-          <Breadcrumbs breadcrumb={breadcrumb} />
-
-          <Card className="glass-card border-none shadow-2xl mb-16 overflow-hidden relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent pointer-events-none" />
-            <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-primary/5 to-transparent pointer-events-none" />
-            <CardContent className="p-8 lg:p-14 relative z-10">
-              <div className="flex flex-col lg:flex-row gap-10 lg:items-center">
-                <Avatar className="h-36 w-36 lg:h-44 lg:w-44 shrink-0 ring-4 ring-background shadow-2xl border border-primary/20">
-                  {author.avatarUrl && <AvatarImage src={author.avatarUrl} alt={author.name} />}
-                  <AvatarFallback className="text-5xl font-bold bg-primary/10 text-primary">
-                    {initials(author.name)}
-                  </AvatarFallback>
-                </Avatar>
-
-                <div className="flex-1 space-y-5">
-                  <div>
-                    <div className="flex flex-wrap items-center gap-3 mb-2">
-                      <Text variant="h1" as="h1" className="tracking-tight">{author.name}</Text>
-                      <Badge className="bg-primary/10 text-primary border-primary/20 gap-1.5 font-bold uppercase text-[10px] tracking-widest h-6 px-2.5">
-                        <BadgeCheck className="h-3.5 w-3.5" /> {roleBadge}
-                      </Badge>
-                    </div>
-                    <Text variant="h4" className="text-primary font-bold uppercase tracking-widest text-sm">
-                      {author.title} · Imperialpedia
-                    </Text>
-                  </div>
-
-                  {author.bio && (
-                    <Text variant="body" className="text-muted-foreground text-lg leading-relaxed max-w-2xl">
-                      {author.bio}
-                    </Text>
-                  )}
-
-                  {author.expertise?.length ? (
-                    <div className="flex flex-wrap gap-1.5">
-                      {author.expertise.map((topic) => (
-                        <Badge key={topic} variant="secondary" className="text-[10px] font-semibold">
-                          {topic}
-                        </Badge>
-                      ))}
-                    </div>
-                  ) : null}
-
-                  {(author.education?.length || author.certifications?.length) && (
-                    <div className="grid gap-4 sm:grid-cols-2 max-w-2xl border-t border-border/60 pt-4">
-                      {author.education?.length ? (
-                        <div className="flex gap-2.5">
-                          <GraduationCap className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                          <div>
-                            <Text variant="bodySmall" className="text-muted-foreground uppercase tracking-widest font-bold text-[10px] mb-1">
-                              Education
-                            </Text>
-                            <Text variant="bodySmall" className="text-foreground/90 leading-snug">
-                              {author.education.join(' · ')}
-                            </Text>
-                          </div>
-                        </div>
-                      ) : null}
-                      {author.certifications?.length ? (
-                        <div className="flex gap-2.5">
-                          <Award className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                          <div>
-                            <Text variant="bodySmall" className="text-muted-foreground uppercase tracking-widest font-bold text-[10px] mb-1">
-                              Certifications
-                            </Text>
-                            <Text variant="bodySmall" className="text-foreground/90 leading-snug">
-                              {author.certifications.join(' · ')}
-                            </Text>
-                          </div>
-                        </div>
-                      ) : null}
-                    </div>
-                  )}
-
-                  <div className="flex flex-wrap items-center gap-8 pt-2">
-                    <div className="flex flex-col">
-                      <span className="text-2xl font-bold tracking-tighter">{articles.length}</span>
-                      <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">
-                        Articles Published
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-2 pt-1">
-                    {author.social.twitter && (
-                      <Button variant="outline" size="icon" className="rounded-full" asChild>
-                        <a href={author.social.twitter} target="_blank" rel="noopener noreferrer" title="X (Twitter)">
-                          <Twitter className="h-4 w-4" />
-                        </a>
-                      </Button>
-                    )}
-                    {author.social.linkedin && (
-                      <Button variant="outline" size="icon" className="rounded-full" asChild>
-                        <a href={author.social.linkedin} target="_blank" rel="noopener noreferrer" title="LinkedIn">
-                          <Linkedin className="h-4 w-4" />
-                        </a>
-                      </Button>
-                    )}
-                    {author.social.website && (
-                      <Button variant="outline" size="icon" className="rounded-full" asChild>
-                        <a href={author.social.website} target="_blank" rel="noopener noreferrer" title="Website">
-                          <Globe className="h-4 w-4" />
-                        </a>
-                      </Button>
-                    )}
-                    {author.social.facebook && (
-                      <Button variant="outline" size="icon" className="rounded-full" asChild>
-                        <a href={author.social.facebook} target="_blank" rel="noopener noreferrer" title="Facebook">
-                          <Facebook className="h-4 w-4" />
-                        </a>
-                      </Button>
-                    )}
-                    {author.social.instagram && (
-                      <Button variant="outline" size="icon" className="rounded-full" asChild>
-                        <a href={author.social.instagram} target="_blank" rel="noopener noreferrer" title="Instagram">
-                          <Instagram className="h-4 w-4" />
-                        </a>
-                      </Button>
-                    )}
-                    {author.videoUrl && (
-                      <Button variant="outline" className="rounded-full gap-2" asChild>
-                        <a href={author.videoUrl} target="_blank" rel="noopener noreferrer">
-                          <PlayCircle className="h-4 w-4" /> Watch Intro
-                        </a>
-                      </Button>
-                    )}
-                  </div>
-                </div>
+          <div className="max-w-2xl space-y-6 pb-14 mb-14 border-b border-border">
+            <dl className="space-y-1.5 text-sm">
+              <div>
+                <dt className="inline font-bold text-foreground">Title: </dt>
+                <dd className="inline text-muted-foreground">{author.title}</dd>
               </div>
-            </CardContent>
-          </Card>
+              {author.education?.length ? (
+                <div>
+                  <dt className="inline font-bold text-foreground">Education: </dt>
+                  <dd className="inline text-muted-foreground">{author.education.join(' · ')}</dd>
+                </div>
+              ) : null}
+              {author.expertise?.length ? (
+                <div>
+                  <dt className="inline font-bold text-foreground">Expertise: </dt>
+                  <dd className="inline text-muted-foreground">{author.expertise.join(', ')}</dd>
+                </div>
+              ) : null}
+            </dl>
+
+            {highlights.length > 0 && (
+              <ul className="list-disc pl-5 space-y-1.5 text-sm text-muted-foreground">
+                {highlights.map((point) => (
+                  <li key={point}>{point}</li>
+                ))}
+              </ul>
+            )}
+
+            {author.bio && (
+              <div className="space-y-3 pt-2">
+                <Text variant="h4" as="h2" className="font-bold">
+                  Experience
+                </Text>
+                <Text variant="body" className="text-muted-foreground leading-relaxed">
+                  {author.bio}
+                </Text>
+              </div>
+            )}
+
+            {author.education?.length ? (
+              <div className="space-y-3">
+                <Text variant="h4" as="h2" className="font-bold">
+                  Education
+                </Text>
+                <Text variant="body" className="text-muted-foreground leading-relaxed">
+                  {firstName} holds {joinNatural(author.education)}.
+                </Text>
+              </div>
+            ) : null}
+
+            <div className="space-y-3">
+              <Text variant="h4" as="h2" className="font-bold">
+                About Imperialpedia
+              </Text>
+              <Text variant="body" className="text-muted-foreground leading-relaxed">
+                Imperialpedia helps readers understand personal finance, investing, and markets.
+                Every published article names a writer, an editorial reviewer, and a fact-checker,
+                and claims are checked against primary sources before publication. Learn more in
+                our{' '}
+                <Link href="/editorial-policy" className="text-primary hover:underline">
+                  editorial policy
+                </Link>{' '}
+                and{' '}
+                <Link href="/fact-checking" className="text-primary hover:underline">
+                  fact-checking policy
+                </Link>
+                .
+              </Text>
+            </div>
+          </div>
 
           <header className="mb-10 flex flex-wrap items-end justify-between gap-4 border-b pb-6">
             <div>
               <Text variant="label" className="text-primary mb-2 flex items-center gap-1.5">
                 <Newspaper className="h-3.5 w-3.5" /> Full Archive
               </Text>
-              <Text variant="h2">Latest From {author.name.split(' ')[0]}</Text>
+              <Text variant="h2">Latest From {firstName}</Text>
             </div>
             <Text variant="bodySmall" className="text-muted-foreground font-semibold">
               {articles.length} articles
