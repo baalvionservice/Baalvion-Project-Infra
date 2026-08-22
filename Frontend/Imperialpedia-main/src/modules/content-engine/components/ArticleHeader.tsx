@@ -2,44 +2,35 @@
 
 import React from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { Text } from '@/design-system/typography/text';
 import { Article } from '../types';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, User, RefreshCw } from 'lucide-react';
 import { TagList } from './TagList';
-import { authors } from '@/config/authors';
+import { ContributorByline } from './ContributorByline';
+import type { ResolvedAuthor } from '@/services/data/cms-public';
 
 interface ArticleHeaderProps {
   article: Article;
+  /** Full CMS profiles (bio/title/avatar) for the byline hover-cards. */
+  author?: ResolvedAuthor | null;
+  reviewer?: ResolvedAuthor | null;
+  factChecker?: ResolvedAuthor | null;
 }
 
 // Pinned to UTC so the formatted string is identical on the server (SSR) and
 // in the browser (hydration) regardless of either side's local timezone —
-// `date-fns`/`toLocaleDateString` without an explicit timeZone resolve the
-// calendar date from the executing environment's local time, which can put
-// the server and a visitor's browser on different calendar days for the same
-// instant and throw a React hydration-mismatch error (#418).
-const publishedDateFormatter = new Intl.DateTimeFormat('en-US', {
+// see the #418 hydration-mismatch note this guarded against before.
+const updatedDateFormatter = new Intl.DateTimeFormat('en-US', {
   month: 'long',
   day: 'numeric',
   year: 'numeric',
   timeZone: 'UTC',
 });
 
-// Only worth surfacing "Updated" when it's a different calendar day than "Published" —
-// otherwise it's noise (every article's updatedAt starts equal to publishedAt).
-const isMeaningfullyUpdated = (publishedAt?: string, updatedAt?: string): boolean => {
-  if (!updatedAt || !publishedAt) return false;
-  const published = publishedDateFormatter.format(new Date(publishedAt));
-  const updated = publishedDateFormatter.format(new Date(updatedAt));
-  return published !== updated;
-};
-
 /**
  * Renders the top portion of an article, including metadata and featured image.
  */
-export const ArticleHeader = ({ article }: ArticleHeaderProps) => {
+export const ArticleHeader = ({ article, author, reviewer, factChecker }: ArticleHeaderProps) => {
   return (
     <header className="mb-12">
       <div className="space-y-4 mb-8">
@@ -54,48 +45,21 @@ export const ArticleHeader = ({ article }: ArticleHeaderProps) => {
           {article.title}
         </Text>
 
-        <Text variant="h4" className="text-muted-foreground font-normal italic leading-relaxed">
+        <Text variant="body" className="text-muted-foreground font-normal leading-relaxed text-lg lg:text-xl">
           {article.description}
         </Text>
 
-        <div className="flex flex-wrap items-center gap-6 pt-6 text-muted-foreground border-y py-4 mt-8">
-          <div className="flex items-center gap-2">
-            <User className="w-4 h-4 text-primary" />
-            <Text variant="bodySmall" className="font-medium">
-              By{' '}
-              {(() => {
-                // Prefer the author this article is actually tagged with
-                // (customFields.authorSlug); fall back to the site's default author.
-                const slug = article.authorSlug || authors[0]?.slug;
-                const name = article.authorName || authors[0]?.name || 'Imperialpedia';
-                return slug ? (
-                  <Link href={`/authors/${slug}`} className="text-foreground hover:text-primary transition-colors">
-                    {name}
-                  </Link>
-                ) : (
-                  <span className="text-foreground">{name}</span>
-                );
-              })()}
-            </Text>
+        {author ? (
+          <div className="space-y-1 pt-2 pb-2">
+            <ContributorByline
+              label="By"
+              person={author}
+              meta={article.updatedAt ? `Updated ${updatedDateFormatter.format(new Date(article.updatedAt))}` : undefined}
+            />
+            <ContributorByline label="Reviewed by" person={reviewer} />
+            <ContributorByline label="Fact checked by" person={factChecker} />
           </div>
-
-          <div className="flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-primary" />
-            <Text variant="bodySmall">
-              {article.publishedAt ? publishedDateFormatter.format(new Date(article.publishedAt)) : 'Recently'}
-            </Text>
-          </div>
-
-          {isMeaningfullyUpdated(article.publishedAt, article.updatedAt) && (
-            <div className="flex items-center gap-2">
-              <RefreshCw className="w-4 h-4 text-primary" />
-              <Text variant="bodySmall">
-                Updated {publishedDateFormatter.format(new Date(article.updatedAt))}
-              </Text>
-            </div>
-          )}
-
-        </div>
+        ) : null}
       </div>
 
       {article.featuredImage && (

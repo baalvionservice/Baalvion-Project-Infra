@@ -343,6 +343,21 @@ html {
   }
 }
 
+/* Wraps article-body tables (see blocksToHtml's 'table' case in cms-public.ts)
+   so a table wider than the viewport scrolls horizontally within itself on
+   mobile instead of overflowing the page or squeezing every column unreadably
+   narrow. The table keeps a sane minimum width so columns stay legible. */
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 1.5em 0;
+}
+
+.table-scroll table {
+  min-width: 480px;
+  margin: 0;
+}
+
 @keyframes spin {
   from {
     transform: rotate(0deg);
