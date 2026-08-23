@@ -45,7 +45,6 @@ const LEGAL_LINKS = [
   { href: '/terms-of-service', label: 'Terms of Service' },
   { href: '/terms-of-service#disclaimers', label: 'Disclaimer' },
   { href: '/cookie-policy', label: 'Cookie Policy' },
-  { href: '/ai-usage-policy', label: 'AI Policy' },
   { href: '/editorial-disclosure-policy', label: 'DMCA' },
   { href: '/sponsored-content-policy', label: 'Advertising Disclosure' },
 ];

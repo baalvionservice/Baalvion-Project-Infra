@@ -32,7 +32,6 @@ const ALLOW = [
   '/terms-of-service',
   '/editorial-disclosure-policy',
   '/cookie-policy',
-  '/ai-usage-policy',
   '/diversity-policy',
   '/accessibility',
   '/conflict-of-interest-policy',
