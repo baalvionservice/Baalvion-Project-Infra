@@ -282,5 +282,28 @@ export const config = {
     '/best-debt-relief-companies',
     '/best-crypto-exchanges',
     '/best-cd-rates',
+    // Bare top-level entries in REMOVED_PATHS above with no matcher pattern of
+    // their own — middleware never ran for them, so they fell through to the
+    // generic [...slug] 404 instead of the intended 410 goneResponse(). A plain
+    // 404 reads to Google as "maybe temporary, keep re-checking" instead of
+    // "permanently gone, deindex now" — GSC showed several of these stuck in
+    // "Crawled - currently not indexed" for weeks/months because of it.
+    '/income',
+    '/insurance',
+    '/insurance-reviews',
+    '/ai-analyst',
+    '/robo-advisors',
+    '/topics',
+    '/search',
+    '/terms-beginning-with-c',
+    '/terms-beginning-with-num',
+    '/terms-beginning-with-z',
+    '/housing-market-cools-mortgage-rates',
+    '/fed-holds-rates-inflation-cooling',
+    '/bitcoin-surges-institutional-demand',
+    '/tech-stocks-ai-spending-boom',
+    '/etf-inflows-record-february',
+    '/sp500-record-high-earnings',
+    '/gold-hits-2400-safe-haven',
   ],
 };
