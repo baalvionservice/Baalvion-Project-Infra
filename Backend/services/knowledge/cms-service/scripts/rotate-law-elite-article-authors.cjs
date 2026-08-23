@@ -60,6 +60,26 @@ const CATEGORY_TO_AUTHORS = {
   'Business & Corporate': ['elena-rossi', 'marcus-hale', 'priya-menon', 'maria-harizanova', 'waki-malik'],
   'Technology & IP': ['marcus-hale', 'eira-mishra', 'waki-malik'],
   'Property & Real Estate': ['daniel-okafor', 'priya-nair', 'waki-malik'],
+  'Child Custody': ['sofia-almeida', 'rajesh-iyer', 'eleanor-whitfield', 'aman-thakur'],
+  'Leasing': ['daniel-okafor', 'priya-nair', 'waki-malik'],
+  // Deliberately NOT mapped: 'Visas' (work-visa/immigration law) -- no one on
+  // the current 24-person roster has immigration expertise on file. Forcing a
+  // match here would be exactly the fabricated-credential problem this whole
+  // script exists to avoid, so that category is left to skip rather than
+  // guess. Add a real mapping once an immigration-qualified contributor exists.
+};
+
+// 'Legal Guides' is a catch-all category holding several unrelated real
+// topics (confirmed by reading each article's actual title/excerpt, not
+// guessed from the category label) -- a single category-wide author rule
+// would be wrong for most of them, so these five are assigned individually
+// by article id instead of by category.
+const ARTICLE_ID_OVERRIDES = {
+  'a3662f0d-ebd9-4745-bf43-0b8a2ea4aced': 'aisha-rahman',    // Understanding Bail in India -- Criminal Law
+  'b44e10fd-365d-4910-acc7-81e5672cf4ae': 'daniel-okafor',   // Tenant Rights in India -- Property & Real Estate
+  'cc1c5d70-7e79-4814-ab9e-4efba32567ff': 'priya-nair',      // Property Registration in India -- Property & Real Estate
+  'e8b08e17-c166-4b41-a400-d333e2198062': 'marcus-whitfield', // What Is a Legal Notice -- Dispute Resolution
+  'f6c75fe5-8659-41c2-a885-c329a95e03ba': 'marcus-hale',     // How to Report Cybercrime in India -- Technology & IP
 };
 
 const ARGS = process.argv.slice(2);
@@ -101,6 +121,22 @@ async function roster() {
   return bySlug;
 }
 
+// The admin content-list endpoint (used by allPublished) returns only a raw
+// categoryId per article, not a populated category object -- unlike the public
+// delivery API. Resolve names by walking the admin category tree instead.
+async function categoryIdToName() {
+  const tree = await api('GET', `/cms/websites/${encodeURIComponent(SITE)}/categories`);
+  const map = new Map();
+  const walk = (nodes) => {
+    for (const n of nodes ?? []) {
+      map.set(n.id, n.name);
+      walk(n.children);
+    }
+  };
+  walk(tree?.data ?? []);
+  return map;
+}
+
 async function main() {
   console.log('Law Elite Network author assignment (by category expertise)');
   console.log(`  target : ${TARGET_BASE}`);
@@ -114,10 +150,14 @@ async function main() {
   for (const slugs of Object.values(CATEGORY_TO_AUTHORS)) {
     for (const slug of slugs) if (!authorsBySlug.has(slug)) missingRosterSlugs.add(slug);
   }
+  for (const slug of Object.values(ARTICLE_ID_OVERRIDES)) {
+    if (!authorsBySlug.has(slug)) missingRosterSlugs.add(slug);
+  }
   if (missingRosterSlugs.size) {
     throw new Error(`Roster slug(s) not found on /authors: ${[...missingRosterSlugs].join(', ')}`);
   }
 
+  const catNameById = await categoryIdToName();
   const articles = await allPublished();
   console.log(`  found  : ${articles.length} published article(s)\n`);
 
@@ -127,14 +167,17 @@ async function main() {
   let changed = 0, skippedNoCategory = 0, skippedNoMapping = 0;
 
   for (const article of articles) {
-    const categoryName = article.category?.name;
-    if (!categoryName) { skippedNoCategory++; continue; }
-    const candidates = CATEGORY_TO_AUTHORS[categoryName];
-    if (!candidates || candidates.length === 0) { skippedNoMapping++; console.log(`  ! no mapping for category "${categoryName}" (article ${article.id})`); continue; }
+    const categoryName = article.category?.name || catNameById.get(article.categoryId);
 
-    const i = (cursor[categoryName] ?? 0) % candidates.length;
-    cursor[categoryName] = i + 1;
-    const chosenSlug = candidates[i];
+    let chosenSlug = ARTICLE_ID_OVERRIDES[article.id];
+    if (!chosenSlug) {
+      if (!categoryName) { skippedNoCategory++; continue; }
+      const candidates = CATEGORY_TO_AUTHORS[categoryName];
+      if (!candidates || candidates.length === 0) { skippedNoMapping++; console.log(`  ! no mapping for category "${categoryName}" (article ${article.id})`); continue; }
+      const i = (cursor[categoryName] ?? 0) % candidates.length;
+      cursor[categoryName] = i + 1;
+      chosenSlug = candidates[i];
+    }
     const chosen = authorsBySlug.get(chosenSlug);
 
     if (article.authorId === chosen.id) continue; // already correct, idempotent re-run
