@@ -37,20 +37,14 @@ const DISALLOW = [
   // and index until real pricing tiers / dataset listings ship.
   '/pricing',
   '/datasets',
-  // Legacy duplicate of /financial-tools/[slug] (the real, working calculators) --
-  // same topics/slugs (compound-interest, loan, investment, ...), backed by mock
-  // data, body is a literal "Coming Soon" placeholder. Was live and indexable.
-  '/calculators/',
-  // Glossary/topic-discovery surface offline pending Google AdSense approval —
-  // every route under these prefixes now 404s. Remove once GLOSSARY_LIVE flips
-  // back to true in src/config/glossary.ts.
-  // "/terms$" (not a bare "/terms" prefix) so this doesn't also swallow the
-  // unrelated, still-live "/terms-of-service" page above.
-  '/terms$',
-  '/terms/',
-  '/terms-beginning-with-',
-  '/topics',
-  '/learning-paths',
+  // NOTE: /calculators/, /terms (+/terms-beginning-with-), /topics, and
+  // /learning-paths are deliberately NOT disallowed here even though they're
+  // dead (404/410) — every one of them was previously indexed, and blocking a
+  // URL Google already has indexed stops it from ever re-crawling to see the
+  // 404/410, which freezes it in the index instead of removing it (confirmed
+  // via GSC's "Blocked by robots.txt" bucket sitting on old /terms/* URLs).
+  // Once GSC shows them fully deindexed, re-disallowing is optional — there's
+  // no live content behind these paths to protect either way.
 ];
 
 // AI crawlers explicitly allowed (same allow/disallow scope as regular search
