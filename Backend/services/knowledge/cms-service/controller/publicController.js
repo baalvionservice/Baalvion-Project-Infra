@@ -1,5 +1,6 @@
 'use strict';
 const publicService = require('../service/publicService');
+const engagementService = require('../service/engagementService');
 const { sendSuccess, sendPaginated } = require('../utils/response');
 
 const getWebsiteInfo = async (req, res, next) => {
@@ -54,4 +55,35 @@ const getAuthor = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
-module.exports = { getWebsiteInfo, listContent, getContent, getPreviewContent, getCategory, listAuthors, getAuthor };
+const listComments = async (req, res, next) => {
+    try {
+        const comments = await engagementService.listComments(req.params.websiteSlug, req.params.slug);
+        return sendSuccess(req, res, comments);
+    } catch (err) { return next(err); }
+};
+
+const submitComment = async (req, res, next) => {
+    try {
+        const result = await engagementService.submitComment(req.params.websiteSlug, req.params.slug, req.validated);
+        return sendSuccess(req, res, result, 201);
+    } catch (err) { return next(err); }
+};
+
+const getFeedback = async (req, res, next) => {
+    try {
+        const summary = await engagementService.getFeedbackSummary(req.params.websiteSlug, req.params.slug);
+        return sendSuccess(req, res, summary);
+    } catch (err) { return next(err); }
+};
+
+const submitFeedback = async (req, res, next) => {
+    try {
+        const summary = await engagementService.submitFeedback(req.params.websiteSlug, req.params.slug, req.validated);
+        return sendSuccess(req, res, summary);
+    } catch (err) { return next(err); }
+};
+
+module.exports = {
+    getWebsiteInfo, listContent, getContent, getPreviewContent, getCategory, listAuthors, getAuthor,
+    listComments, submitComment, getFeedback, submitFeedback,
+};

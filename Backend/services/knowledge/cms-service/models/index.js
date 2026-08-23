@@ -39,6 +39,8 @@ db.CmsWebsiteMember   = require('./cmsWebsiteMember')(sequelize, DataTypes);
 db.CmsWebsiteIntegration = require('./cmsWebsiteIntegration')(sequelize, DataTypes);
 db.CmsMediaReference  = require('./cmsMediaReference')(sequelize, DataTypes);
 db.CmsContentEntityMention = require('./cmsContentEntityMention')(sequelize, DataTypes);
+db.CmsContentComment  = require('./cmsContentComment')(sequelize, DataTypes);
+db.CmsContentFeedback = require('./cmsContentFeedback')(sequelize, DataTypes);
 db.CmsSeoRedirect     = require('./cmsSeoRedirect')(sequelize, DataTypes);
 db.CmsAuthor          = require('./cmsAuthor')(sequelize, DataTypes);
 db.MarketAsset        = require('./marketAsset')(sequelize, DataTypes);
@@ -81,6 +83,10 @@ db.CmsContent.hasMany(db.CmsContentRevision,  { foreignKey: 'contentId', as: 're
 db.CmsContent.hasOne(db.CmsWorkflow,          { foreignKey: 'contentId', as: 'workflow' });
 db.CmsContent.hasMany(db.CmsMediaReference,   { foreignKey: 'contentId', as: 'mediaRefs' });
 db.CmsContent.hasMany(db.CmsContentEntityMention, { foreignKey: 'contentId', as: 'entityMentions' });
+db.CmsContent.hasMany(db.CmsContentComment,   { foreignKey: 'contentId', as: 'comments' });
+db.CmsContent.hasMany(db.CmsContentFeedback,  { foreignKey: 'contentId', as: 'feedback' });
+db.CmsContentComment.belongsTo(db.CmsContent, { foreignKey: 'contentId', as: 'content' });
+db.CmsContentFeedback.belongsTo(db.CmsContent, { foreignKey: 'contentId', as: 'content' });
 
 // Workflow → ApprovalLogs
 db.CmsWorkflow.belongsTo(db.CmsContent,   { foreignKey: 'contentId', as: 'content' });

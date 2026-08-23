@@ -663,17 +663,32 @@ function blockToHtml(
       const tbody = `<tbody>${rows
         .map((r) => `<tr>${(Array.isArray(r) ? r : []).map((cell) => `<td>${esc(cell)}</td>`).join('')}</tr>`)
         .join('')}</tbody>`;
-      return `<table>${thead}${tbody}</table>`;
+      // Wrapped so a wide table (more columns than a phone screen fits) scrolls
+      // horizontally within itself instead of overflowing the page or forcing
+      // every column to squeeze illegibly narrow — see .table-scroll in globals.css.
+      return `<div class="table-scroll"><table>${thead}${tbody}</table></div>`;
     }
     default:
       return c.text ? `<p>${esc(c.text)}</p>` : '';
   }
 }
 
+// Many articles' content was generated with a trailing raw-HTML block hardcoding
+// "Written by {name} / {title} / ImperialPedia.com / {bio}" (class="author-bio") —
+// baked into the body itself rather than driven by customFields.authorSlug. It's
+// now redundant with (and can disagree with) the real By/Reviewed by/Fact checked
+// by byline in ArticleHeader.tsx, which resolves the actual credited contributors
+// from the CMS author directory — so it's stripped here rather than rendered twice.
+function isLegacyAuthorBioBlock(block: CmsBlock): boolean {
+  const html = block.content?.html;
+  return block.type === 'html' && typeof html === 'string' && /class=["']author-bio["']/i.test(html);
+}
+
 export function blocksToHtml(blocks?: CmsBlock[], categoryMap?: ReadonlyMap<string, string | undefined>): string {
   if (!blocks || !blocks.length) return '';
   const headingState = { seenH2: false };
   return [...blocks]
+    .filter((b) => !isLegacyAuthorBioBlock(b))
     .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
     .map((b) => blockToHtml(b, headingState, categoryMap))
     .filter(Boolean)

@@ -8,7 +8,6 @@ import { getArticleBySlug } from "../services/content-service";
 import { ArticleHeader } from "./ArticleHeader";
 import { ArticleBody } from "./ArticleBody";
 import { RelatedArticles } from "./RelatedArticles";
-import { AuthorCredibilityCard } from "./AuthorCredibilityCard";
 import { SourcesCited } from "./SourcesCited";
 import { Loader2, AlertCircle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,9 +20,9 @@ interface ArticlePageProps {
   slug: string;
   article?: Article | null;
   /** Full author/reviewer/fact-checker profiles, server-resolved by the route (bio,
-   *  credentials, expertise) — powers the AuthorCredibilityCard. Undefined when
-   *  rendered client-side without an initial article (loading fallback path never
-   *  has these). */
+   *  credentials, expertise) — powers the Written by/Reviewed by/Fact checked by
+   *  byline in ArticleHeader. Undefined when rendered client-side without an
+   *  initial article (loading fallback path never has these). */
   author?: ResolvedAuthor | null;
   reviewer?: ResolvedAuthor | null;
   factChecker?: ResolvedAuthor | null;
@@ -114,17 +113,7 @@ export const ArticlePage = ({
     <article className="py-12 lg:py-20">
       <Container>
         <div className="max-w-3xl mx-auto">
-          <ArticleHeader article={article} />
-
-          {author && (
-            <AuthorCredibilityCard
-              author={author}
-              reviewer={reviewer}
-              reviewedAt={article.reviewedAt}
-              factChecker={factChecker}
-              factCheckedAt={article.factCheckedAt}
-            />
-          )}
+          <ArticleHeader article={article} author={author} reviewer={reviewer} factChecker={factChecker} />
 
           {article.body ? (
             <div
@@ -159,6 +148,8 @@ export const ArticlePage = ({
         <RelatedArticles
           currentArticleId={article.id}
           category={article.category}
+          tags={article.tags}
+          categorySlug={article.categorySlug}
         />
       </Container>
     </article>

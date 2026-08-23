@@ -69,7 +69,7 @@ export const disputeResolutionArticles: LawArticle[] = [
       { label: 'ICC, 2021 Arbitration Rules', url: 'https://iccwbo.org/dispute-resolution/dispute-resolution-services/arbitration/rules-procedure/2021-arbitration-rules/' },
       { label: 'SIAC, Arbitration Rules', url: 'https://www.siac.org.sg/our-rules' },
     ],
-    author: 'Priya Nair',
+    author: 'Waki Malik',
     updatedAt: 'April 14, 2026',
     readingTime: 9,
     views: 6420,

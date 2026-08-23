@@ -9,78 +9,24 @@ import { ArticleTOC } from '@/app/[categorySlug]/[articleSlug]/ArticleTOC';
 import { ArticleAuthorByline } from '@/app/[categorySlug]/[articleSlug]/ArticleAuthorByline';
 import { ArticleAdWrapper } from '@/components/knowledge/ArticleAdWrapper';
 import { PrimarySources } from '@/components/knowledge/PrimarySources';
-import { ReviewedBy } from '@/components/knowledge/ReviewedBy';
-import { FactCheckedBy } from '@/components/knowledge/FactCheckedBy';
 import { SeriesNotice } from '@/components/knowledge/SeriesNotice';
 import { ArticleMetaHeader } from '@/components/knowledge/ArticleMetaHeader';
 import { ImportantNotice } from '@/components/knowledge/ImportantNotice';
 import { KeyTakeaways } from '@/components/knowledge/KeyTakeaways';
 import { FrequentlyAskedQuestions } from '@/components/knowledge/FrequentlyAskedQuestions';
 import { ReportAnError } from '@/components/knowledge/ReportAnError';
-import { EditorialInformation } from '@/components/knowledge/EditorialInformation';
-import { NextStep } from '@/components/knowledge/NextStep';
-import { getMergedAuthorByName, getMergedAuthorBySlug } from '@/lib/authors-server';
+import { ArticleFeedback } from '@/components/knowledge/ArticleFeedback';
+import { ArticleComments } from '@/components/knowledge/ArticleComments';
+import { getMergedAuthorByName } from '@/lib/authors-server';
 import { resolveArticleImage } from '@/lib/article-art';
-import { formatArticleDate, formatArticleMonthYear } from '@/lib/format-date';
+import { formatArticleDate } from '@/lib/format-date';
 import { extractKeyTakeaways } from '@/lib/seo/key-takeaways-extractor';
 import { extractFaqSection } from '@/lib/seo/faq-section-extractor';
 import { articleUrl } from '@/lib/article-url';
 import { cmsGetArticles } from '@/lib/cms';
-import type { ReviewedByInfo } from '@/components/knowledge/ReviewedBy';
-import type { FactCheckedByInfo } from '@/components/knowledge/FactCheckedBy';
 import type { SeriesInfo } from '@/components/knowledge/SeriesNotice';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
-
-/** Profile fields the "Reviewed by" bio popover needs -- same shape ArticleAuthorByline already gets for the primary byline. */
-function reviewerProfileFields(reviewer: { slug: string; bio: string; avatarUrl?: string; avatarSeed: string }) {
-  return {
-    slug: reviewer.slug,
-    bio: reviewer.bio,
-    avatarUrl: reviewer.avatarUrl,
-    avatarSeed: reviewer.avatarSeed,
-  };
-}
-
-/**
- * Bundled LawArticle data carries a resolved `reviewedBy` object directly.
- * CMS-sourced articles instead carry a raw `reviewerSlug` (ReviewerPanel in
- * admin-platform) that must be resolved against the author directory for a
- * real name/credentials -- same pattern as the primary byline just below.
- *
- * Either way, once we have a name we try to match it to a real contributor
- * profile so the "Reviewed by" byline can show the same photo/bio popover as
- * "Written by" -- see ReviewedBy.tsx. A bundled `reviewedBy` with no matching
- * profile still renders (name/jurisdiction/date), just without a popover.
- */
-async function resolveReviewedBy(article: any): Promise<ReviewedByInfo | undefined> {
-  if (article.reviewedBy) {
-    const profile = await getMergedAuthorByName(article.reviewedBy.name);
-    return { ...article.reviewedBy, ...(profile ? reviewerProfileFields(profile) : {}) };
-  }
-  if (!article.reviewerSlug || !article.reviewedAt) return undefined;
-  const reviewer = await getMergedAuthorBySlug(article.reviewerSlug);
-  if (!reviewer) return undefined;
-  return {
-    name: reviewer.name,
-    jurisdiction: article.reviewerJurisdiction || undefined,
-    barLicense: article.reviewerBarLicense || undefined,
-    reviewDate: formatArticleMonthYear(article.reviewedAt) || article.reviewedAt,
-    ...reviewerProfileFields(reviewer),
-  };
-}
-
-/** Mirrors resolveReviewedBy above -- FactCheckerPanel in admin-platform writes factCheckerSlug/factCheckedAt into the same customFields extension point. */
-async function resolveFactCheckedBy(article: any): Promise<FactCheckedByInfo | undefined> {
-  if (!article.factCheckerSlug || !article.factCheckedAt) return undefined;
-  const checker = await getMergedAuthorBySlug(article.factCheckerSlug);
-  if (!checker) return undefined;
-  return {
-    name: checker.name,
-    checkDate: formatArticleMonthYear(article.factCheckedAt) || article.factCheckedAt,
-    ...reviewerProfileFields(checker),
-  };
-}
 
 /**
  * Resolves this article's series siblings by matching `seriesSlug` (set via
@@ -198,10 +144,8 @@ function extractToc(html: string): TOCItem[] {
 export async function ArticleView({ article, slug }: { article: any; slug: string }) {
   const category = article.category;
   const authorName: string = (typeof article.author === 'string' ? article.author : article.author?.name) || 'Law Elite Editorial';
-  const [matchedAuthor, reviewedBy, factCheckedBy, seriesInfo] = await Promise.all([
+  const [matchedAuthor, seriesInfo] = await Promise.all([
     getMergedAuthorByName(authorName),
-    resolveReviewedBy(article),
-    resolveFactCheckedBy(article),
     resolveSeriesInfo(article),
   ]);
   // No hardcoded fallback date here: if a record genuinely has no real
@@ -264,8 +208,7 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
 
                 <div className="space-y-1.5">
                   <ArticleAuthorByline authorName={authorName} matchedAuthor={matchedAuthor} />
-                  <ReviewedBy info={reviewedBy} />
-                  <FactCheckedBy info={factCheckedBy} />
+                  {updatedAt && <p className="text-[12.5px] text-slate-400">Updated {updatedAt}</p>}
                 </div>
 
                 <SeriesNotice series={seriesInfo ?? null} />
@@ -298,22 +241,11 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
 
               <FrequentlyAskedQuestions pairs={faqPairs} />
 
-              <NextStep category={category} country={article.country} />
+              <ArticleFeedback slug={slug} />
 
-              <RelatedArticles
-                articles={relatedArticles}
-                category={category}
-                subcategory={article.subcategory}
-                country={article.country}
-              />
+              <ArticleComments slug={slug} />
 
-              <EditorialInformation
-                authorName={authorName}
-                reviewedBy={reviewedBy}
-                factCheckedBy={factCheckedBy}
-                updatedAt={updatedAt}
-                sourcesCount={article.primarySources?.length || 0}
-              />
+              <RelatedArticles articles={relatedArticles} />
 
               <ReportAnError title={article.title} url={`${SITE}${articleUrl({ slug, category })}`} />
             </article>

@@ -10,6 +10,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import WorkflowPipeline from '@/components/cms/workflow/WorkflowPipeline';
 import ApprovalQueue from '@/components/cms/workflow/ApprovalQueue';
 import ReviewerPanel from '@/components/cms/workflow/ReviewerPanel';
+import CommentModerationQueue from '@/components/cms/workflow/CommentModerationQueue';
 import { useWebsite, useWebsiteStats } from '@/lib/queries/cms-websites.queries';
 import { useWorkflowStats } from '@/lib/queries/cms-workflow.queries';
 import { useCmsPermissions } from '@/lib/queries/cms-permissions.queries';
@@ -88,6 +89,7 @@ export default function WebsiteWorkflowsPage({
           <TabsList>
             <TabsTrigger value="pipeline">Pipeline</TabsTrigger>
             <TabsTrigger value="queue">Approval Queue</TabsTrigger>
+            <TabsTrigger value="comments">Comments</TabsTrigger>
             <TabsTrigger value="reviewers">Reviewers</TabsTrigger>
           </TabsList>
 
@@ -97,6 +99,14 @@ export default function WebsiteWorkflowsPage({
 
           <TabsContent value="queue" className="mt-4">
             <ApprovalQueue
+              websiteId={websiteId}
+              canonicalId={canonicalId}
+              canReview={perms.canReview}
+            />
+          </TabsContent>
+
+          <TabsContent value="comments" className="mt-4">
+            <CommentModerationQueue
               websiteId={websiteId}
               canonicalId={canonicalId}
               canReview={perms.canReview}
