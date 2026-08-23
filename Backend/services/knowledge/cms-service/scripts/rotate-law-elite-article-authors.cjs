@@ -1,16 +1,29 @@
 'use strict';
 /*
  * Assigns a real, topically-matched author to every published Law Elite Network
- * article. Right now (2026-08) every one of the 150 published articles carries
- * authorId "1" -- a placeholder that doesn't resolve to any real contributor
- * profile, so the public site falls back to the generic "Law Elite Editorial"
- * byline on all of them regardless of topic. This assigns each article to a
- * contributor whose real expertise (see CATEGORY_TO_AUTHORS below, matched
- * against the Law Elite author roster at /public/law-elite-network/authors)
- * actually covers that article's category -- never an arbitrary or invented
- * match. Where more than one contributor covers a category, articles are
- * round-robined across them (stable order by article id) so the byline isn't
- * monotonously the same person for an entire practice area.
+ * article. Right now (2026-08) every one of the 150 published articles shows
+ * the generic "Law Elite Editorial" byline on the public site regardless of
+ * topic. This assigns each article to a contributor whose real expertise (see
+ * CATEGORY_TO_AUTHORS below, matched against the Law Elite author roster at
+ * /public/law-elite-network/authors) actually covers that article's category
+ * -- never an arbitrary or invented match. Where more than one contributor
+ * covers a category, articles are round-robined across them (stable order by
+ * article id) so the byline isn't monotonously the same person for an entire
+ * practice area.
+ *
+ * IMPORTANT: the public byline is NOT driven by CmsContent.authorId -- that
+ * column is a BIGINT reference to the platform *user* account that created
+ * the row (every article here shows "1", the seeding superadmin), unrelated
+ * to the CmsAuthor contributor-profile table. The frontend's toArticle()
+ * (Frontend/Law-Elite-Network-main/src/lib/cms.ts) instead reads the byline
+ * name from `customFields.author`, a plain string inside the content's JSON
+ * customFields blob -- the same extension point ReviewerPanel/FactCheckerPanel
+ * already use for reviewerSlug/factCheckerSlug/seriesSlug etc. Sequelize's
+ * content.update() replaces that JSON column wholesale, not a deep merge, so
+ * this script merges `author` onto each article's existing customFields
+ * (already present on the list response -- listContent only excludes
+ * contentBlocks) before writing, to avoid wiping out any reviewer/
+ * fact-checker/series data already on file for that article.
  *
  * Mirrors rotate-imperialpedia-article-authors.cjs's auth/base/dry-run
  * conventions exactly.
@@ -22,7 +35,7 @@
  * Note: unlike the public /authors roster lookup, the admin content-list
  * endpoint (GET /cms/websites/:site/content) requires auth regardless of
  * --dry-run, since there is no unauthenticated way to list it -- dry-run
- * only skips the PATCH write at the end, not the read.
+ * only skips the per-article PATCH write at the end, not the initial read.
  *
  * AUTH : CMS_TOKEN = prod super_admin (or cms_editor+ on this website) bearer
  *        from admin.baalvion.com (DevTools -> any /cms/ request while logged
@@ -129,7 +142,8 @@ async function allPublished() {
 }
 
 async function roster() {
-  // Public endpoint -- no auth needed, and gives the real UUIDs to write into authorId.
+  // Public endpoint -- no auth needed. Gives the real display name written into
+  // customFields.author (see file header) for each roster slug.
   const res = await fetch(`${PUBLIC_BASE.replace(/\/+$/, '')}/${encodeURIComponent(SITE)}/authors`);
   const json = await res.json();
   const bySlug = new Map();
@@ -196,11 +210,18 @@ async function main() {
     }
     const chosen = authorsBySlug.get(chosenSlug);
 
-    if (article.authorId === chosen.id) continue; // already correct, idempotent re-run
+    // The public byline reads customFields.author (a plain string) -- see the
+    // file-header note. `article` here already carries the full customFields
+    // blob from the list fetch (listContent only excludes contentBlocks), so
+    // merge onto that directly rather than issuing a second GET per article.
+    const currentCustomFields = article.customFields || {};
+    if (currentCustomFields.author === chosen.name) continue; // already correct, idempotent re-run
 
     console.log(`  ${DRY_RUN ? '[dry-run] would set' : 'setting'} "${article.title}" [${categoryName}] -> ${chosen.name}`);
     if (!DRY_RUN) {
-      await api('PATCH', `/cms/websites/${encodeURIComponent(SITE)}/content/${article.id}`, { authorId: chosen.id });
+      await api('PATCH', `/cms/websites/${encodeURIComponent(SITE)}/content/${article.id}`, {
+        customFields: { ...currentCustomFields, author: chosen.name },
+      });
     }
     changed++;
   }
