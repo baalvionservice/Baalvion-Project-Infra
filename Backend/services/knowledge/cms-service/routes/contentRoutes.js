@@ -3,10 +3,12 @@ const { Router } = require('express');
 const ctrl = require('../controller/contentController');
 const wfCtrl = require('../controller/workflowController');
 const revCtrl = require('../controller/revisionController');
+const commentCtrl = require('../controller/commentModerationController');
 const { loadCmsRole, requireCmsRole } = require('../middleware/cmsAccess');
 const { validate } = require('../middleware/validate');
 const { createContentSchema, updateContentSchema, autosaveContentSchema, bulkUpdateSchema, requestDeletionSchema } = require('../validators/contentSchemas');
 const { transitionSchema } = require('../validators/workflowSchemas');
+const { moderateCommentSchema } = require('../validators/engagementSchemas');
 
 const router = Router({ mergeParams: true }); // receives websiteId from parent
 
@@ -18,6 +20,10 @@ router.post('/import-wire', loadCmsRole, requireCmsRole('cms_editor'), ctrl.impo
 
 // Pending approvals — /cms/websites/:websiteId/content/pending
 router.get('/pending', loadCmsRole, requireCmsRole('cms_reviewer'), wfCtrl.listPending);
+
+// Pending reader comments — /cms/websites/:websiteId/content/comments/pending
+router.get('/comments/pending', loadCmsRole, requireCmsRole('cms_reviewer'), commentCtrl.listPending);
+router.patch('/comments/:commentId/moderate', loadCmsRole, requireCmsRole('cms_reviewer'), validate(moderateCommentSchema), commentCtrl.moderate);
 
 // Deletion requests — /cms/websites/:websiteId/content/deletion-requests. Contributors/authors
 // can't DELETE (requires cms_editor+ below); this is their alternative + the editor's queue.
