@@ -111,6 +111,22 @@ const ARTICLE_ID_OVERRIDES = {
   '83fa1818-db2f-4a24-bbfe-f801d2177735': 'eira-mishra',      // IP Rights: Trademark, Copyright & Patent -- Technology & IP
 };
 
+// Six articles carry categoryId: null outright (confirmed via the admin content
+// list, not the public delivery API's category resolution which can also hide
+// a real-but-inactive category -- these are genuinely empty). All six were
+// created within the same ~8 seconds on 2026-06-28T19:43 -- one bulk-seed run
+// that never set a category for this batch, not an ongoing mystery. Each is
+// assigned a real existing category based on its actual excerpt, not the
+// title alone: [category name, author slug].
+const UNCATEGORIZED_ARTICLE_FIXES = {
+  '0ddac16a-24ab-4a4c-a545-15cfad441efc': ['Property & Real Estate', 'daniel-okafor'],  // Resolving Property Boundary Disputes
+  '0fe363c2-4b17-4c14-90e1-2cd83a36b65e': ['Business & Corporate', 'waki-malik'],       // Corporate Compliance: A Practical Framework
+  '38472413-192c-4173-a9eb-dc5508f0ce34': ['Dispute Resolution', 'marcus-whitfield'],   // Mediation: A Practical Guide
+  '4d36e739-e7be-4f1c-92eb-334208b30356': ['Criminal Law', 'aisha-rahman'],             // White-Collar Investigations: What to Expect
+  '8b31d2bf-3fce-4c88-927a-d2c97a5ca3ad': ['Family & Personal', 'aman-thakur'],         // Navigating the Divorce Process
+  'e97a782f-8451-430e-bfa8-830d6781fd4b': ['Technology & IP', 'eira-mishra'],           // Patent Protection for Startups
+};
+
 const ARGS = process.argv.slice(2);
 const DRY_RUN = ARGS.includes('--dry-run');
 const TOKEN = process.env.CMS_TOKEN || null;
@@ -153,18 +169,22 @@ async function roster() {
 
 // The admin content-list endpoint (used by allPublished) returns only a raw
 // categoryId per article, not a populated category object -- unlike the public
-// delivery API. Resolve names by walking the admin category tree instead.
-async function categoryIdToName() {
+// delivery API. Resolve names (both directions) by walking the admin category
+// tree instead. The reverse (name -> id) map is what lets
+// UNCATEGORIZED_ARTICLE_FIXES assign a real existing category by its plain name.
+async function fetchCategoryMaps() {
   const tree = await api('GET', `/cms/websites/${encodeURIComponent(SITE)}/categories`);
-  const map = new Map();
+  const idToName = new Map();
+  const nameToId = new Map();
   const walk = (nodes) => {
     for (const n of nodes ?? []) {
-      map.set(n.id, n.name);
+      idToName.set(n.id, n.name);
+      nameToId.set(n.name, n.id);
       walk(n.children);
     }
   };
   walk(tree?.data ?? []);
-  return map;
+  return { idToName, nameToId };
 }
 
 async function main() {
@@ -183,11 +203,21 @@ async function main() {
   for (const slug of Object.values(ARTICLE_ID_OVERRIDES)) {
     if (!authorsBySlug.has(slug)) missingRosterSlugs.add(slug);
   }
+  for (const [, authorSlug] of Object.values(UNCATEGORIZED_ARTICLE_FIXES)) {
+    if (!authorsBySlug.has(authorSlug)) missingRosterSlugs.add(authorSlug);
+  }
   if (missingRosterSlugs.size) {
     throw new Error(`Roster slug(s) not found on /authors: ${[...missingRosterSlugs].join(', ')}`);
   }
 
-  const catNameById = await categoryIdToName();
+  const { idToName: catNameById, nameToId: catIdByName } = await fetchCategoryMaps();
+  const missingCategoryNames = Object.values(UNCATEGORIZED_ARTICLE_FIXES)
+    .map(([catName]) => catName)
+    .filter((catName) => !catIdByName.has(catName));
+  if (missingCategoryNames.length) {
+    throw new Error(`Category name(s) not found on /categories: ${missingCategoryNames.join(', ')}`);
+  }
+
   const articles = await allPublished();
   console.log(`  found  : ${articles.length} published article(s)\n`);
 
@@ -197,10 +227,18 @@ async function main() {
   let changed = 0, skippedNoCategory = 0, skippedNoMapping = 0;
 
   for (const article of articles) {
-    const categoryName = article.category?.name || catNameById.get(article.categoryId);
+    let categoryName = article.category?.name || catNameById.get(article.categoryId);
+    let newCategoryId; // only set when this run is also fixing a null categoryId
 
+    const uncatFix = UNCATEGORIZED_ARTICLE_FIXES[article.id];
     let chosenSlug = ARTICLE_ID_OVERRIDES[article.id];
-    if (!chosenSlug) {
+
+    if (uncatFix) {
+      const [fixCategoryName, fixAuthorSlug] = uncatFix;
+      categoryName = fixCategoryName;
+      newCategoryId = catIdByName.get(fixCategoryName);
+      chosenSlug = fixAuthorSlug;
+    } else if (!chosenSlug) {
       if (!categoryName) {
         skippedNoCategory++;
         console.log(`  ! no category on file: "${article.title}" (article ${article.id}, categoryId=${article.categoryId ?? 'null'})`);
@@ -219,11 +257,15 @@ async function main() {
     // blob from the list fetch (listContent only excludes contentBlocks), so
     // merge onto that directly rather than issuing a second GET per article.
     const currentCustomFields = article.customFields || {};
-    if (currentCustomFields.author === chosen.name) continue; // already correct, idempotent re-run
+    const authorAlreadyCorrect = currentCustomFields.author === chosen.name;
+    const categoryAlreadyCorrect = !newCategoryId || article.categoryId === newCategoryId;
+    if (authorAlreadyCorrect && categoryAlreadyCorrect) continue; // idempotent re-run
 
-    console.log(`  ${DRY_RUN ? '[dry-run] would set' : 'setting'} "${article.title}" [${categoryName}] -> ${chosen.name}`);
+    const label = newCategoryId ? `${categoryName} (was uncategorized)` : categoryName;
+    console.log(`  ${DRY_RUN ? '[dry-run] would set' : 'setting'} "${article.title}" [${label}] -> ${chosen.name}`);
     if (!DRY_RUN) {
       await api('PATCH', `/cms/websites/${encodeURIComponent(SITE)}/content/${article.id}`, {
+        ...(newCategoryId ? { categoryId: newCategoryId } : {}),
         customFields: { ...currentCustomFields, author: chosen.name },
       });
     }
