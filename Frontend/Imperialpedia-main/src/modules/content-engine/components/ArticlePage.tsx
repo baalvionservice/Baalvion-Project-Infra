@@ -16,35 +16,6 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import type { ResolvedAuthor } from "@/services/data/cms-public";
 import { AdSenseUnit } from "@/components/common/AdSense";
 
-// The CMS content still bakes a "Frequently Asked Questions" heading (+
-// question sub-headings/answer paragraphs) directly into the article body as
-// plain prose, indistinguishable from regular headings — stripped rather than
-// shown as-is. Rendered heading level varies: blocksToHtml demotes every H2
-// after the article's first one down to H3 (single-H2-per-page SEO rule), so
-// this section can render as either <h2> or <h3> depending on how many H2
-// sections precede it. The individual questions render one level at a time
-// too and always end in "?" (same heuristic extractFaqFromHtml uses) — that's
-// what marks where the FAQ section actually ends, since a demoted "Conclusion"
-// heading afterward can land at the very same tag level.
-function stripFaqSection(html: string): string {
-  const startMatch = html.match(/<h([2-4])[^>]*>\s*Frequently Asked Questions\s*<\/h\1>/i);
-  if (!startMatch || startMatch.index === undefined) return html;
-
-  const headingRe = /<h([2-4])[^>]*>([\s\S]*?)<\/h\1>/gi;
-  headingRe.lastIndex = startMatch.index + startMatch[0].length;
-  let endIndex = html.length;
-  let m: RegExpExecArray | null;
-  while ((m = headingRe.exec(html))) {
-    const text = m[2].replace(/<[^>]+>/g, '').trim();
-    if (!text.endsWith('?')) {
-      endIndex = m.index;
-      break;
-    }
-  }
-
-  return html.slice(0, startMatch.index) + html.slice(endIndex);
-}
-
 interface ArticlePageProps {
   slug: string;
   article?: Article | null;
@@ -156,7 +127,7 @@ export const ArticlePage = ({
                 prose-li:marker:text-primary prose-hr:border-border"
               // Body is rendered from CMS content blocks (cms-public.blocksToHtml).
               // Source is internal, editor-authored content published via the CMS.
-              dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(stripFaqSection(article.body)) }}
+              dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(article.body) }}
             />
           ) : (
             <ArticleBody sections={[]} />

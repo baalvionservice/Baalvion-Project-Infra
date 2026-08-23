@@ -353,6 +353,37 @@ html {
   margin: 1.5em 0;
 }
 
+/* Article-body callout boxes (blocksToHtml's 'callout' block type,
+   class="callout callout-{variant}") — previously rendered as a bare,
+   unstyled <div>. Used for persona scenarios, insider tips, and asides that
+   need to visually break out of the surrounding paragraph flow. */
+.callout {
+  margin: 1.75em 0;
+  padding: 1.1em 1.35em;
+  border-radius: 0.5rem;
+  border: 1px solid hsl(var(--border));
+  border-left-width: 4px;
+  background: hsl(var(--muted) / 0.4);
+  font-size: 0.95em;
+  line-height: 1.6;
+}
+
+.callout p:last-child {
+  margin-bottom: 0;
+}
+
+.callout-info {
+  border-left-color: hsl(var(--primary));
+}
+
+.callout-tip {
+  border-left-color: hsl(142 71% 45%);
+}
+
+.callout-warning {
+  border-left-color: hsl(38 92% 50%);
+}
+
 .table-scroll table {
   min-width: 480px;
   margin: 0;
