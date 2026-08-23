@@ -201,7 +201,11 @@ async function main() {
 
     let chosenSlug = ARTICLE_ID_OVERRIDES[article.id];
     if (!chosenSlug) {
-      if (!categoryName) { skippedNoCategory++; continue; }
+      if (!categoryName) {
+        skippedNoCategory++;
+        console.log(`  ! no category on file: "${article.title}" (article ${article.id}, categoryId=${article.categoryId ?? 'null'})`);
+        continue;
+      }
       const candidates = CATEGORY_TO_AUTHORS[categoryName];
       if (!candidates || candidates.length === 0) { skippedNoMapping++; console.log(`  ! no mapping for category "${categoryName}" (article ${article.id})`); continue; }
       const i = (cursor[categoryName] ?? 0) % candidates.length;
