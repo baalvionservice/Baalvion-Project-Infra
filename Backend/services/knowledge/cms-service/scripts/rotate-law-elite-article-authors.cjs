@@ -62,6 +62,9 @@ const CATEGORY_TO_AUTHORS = {
   'Property & Real Estate': ['daniel-okafor', 'priya-nair', 'waki-malik'],
   'Child Custody': ['sofia-almeida', 'rajesh-iyer', 'eleanor-whitfield', 'aman-thakur'],
   'Leasing': ['daniel-okafor', 'priya-nair', 'waki-malik'],
+  'Trademarks': ['marcus-hale', 'eira-mishra', 'waki-malik'],
+  'Contracts': ['elena-rossi', 'marcus-hale', 'priya-menon', 'maria-harizanova', 'waki-malik'],
+  'DUI Defense': ['aisha-rahman', 'daniel-okafor'],
   // Deliberately NOT mapped: 'Visas' (work-visa/immigration law) -- no one on
   // the current 24-person roster has immigration expertise on file. Forcing a
   // match here would be exactly the fabricated-credential problem this whole
@@ -69,17 +72,30 @@ const CATEGORY_TO_AUTHORS = {
   // guess. Add a real mapping once an immigration-qualified contributor exists.
 };
 
-// 'Legal Guides' is a catch-all category holding several unrelated real
-// topics (confirmed by reading each article's actual title/excerpt, not
-// guessed from the category label) -- a single category-wide author rule
-// would be wrong for most of them, so these five are assigned individually
-// by article id instead of by category.
+// 'Legal Guides' is a catch-all category holding many unrelated real topics
+// (confirmed by reading each article's actual title/excerpt, not guessed
+// from the category label) -- a single category-wide author rule would be
+// wrong for most of them, so every one is assigned individually by article
+// id instead of by category. Several are India-specific consumer/civic-law
+// pieces (RTI, GST, cheque-bounce, FIR) matched to the two India-focused
+// specialists already on the roster (Ritwika Sharma, Hemangi Bhuva) rather
+// than forced onto a generalist whose real expertise doesn't cover them.
 const ARTICLE_ID_OVERRIDES = {
-  'a3662f0d-ebd9-4745-bf43-0b8a2ea4aced': 'aisha-rahman',    // Understanding Bail in India -- Criminal Law
-  'b44e10fd-365d-4910-acc7-81e5672cf4ae': 'daniel-okafor',   // Tenant Rights in India -- Property & Real Estate
-  'cc1c5d70-7e79-4814-ab9e-4efba32567ff': 'priya-nair',      // Property Registration in India -- Property & Real Estate
+  'a3662f0d-ebd9-4745-bf43-0b8a2ea4aced': 'aisha-rahman',     // Understanding Bail in India -- Criminal Law
+  'b44e10fd-365d-4910-acc7-81e5672cf4ae': 'daniel-okafor',    // Tenant Rights in India -- Property & Real Estate
+  'cc1c5d70-7e79-4814-ab9e-4efba32567ff': 'priya-nair',       // Property Registration in India -- Property & Real Estate
   'e8b08e17-c166-4b41-a400-d333e2198062': 'marcus-whitfield', // What Is a Legal Notice -- Dispute Resolution
-  'f6c75fe5-8659-41c2-a885-c329a95e03ba': 'marcus-hale',     // How to Report Cybercrime in India -- Technology & IP
+  'f6c75fe5-8659-41c2-a885-c329a95e03ba': 'marcus-hale',      // How to Report Cybercrime in India -- Technology & IP
+  '109514ac-0333-4610-ba29-4e3db61607a4': 'deepak-kumar-kuldeep', // How to Choose the Right Lawyer -- same generic-legal-help desk as "Do I Need a Lawyer?" etc.
+  '2223e62e-d85a-4fb4-880a-8f14d462dc00': 'rajesh-iyer',      // How to Draft a Will in India -- Family & Personal
+  '28e6f8ad-ca12-4bff-8f95-0db23c4f971c': 'marcus-whitfield', // Consumer Rights in India -- Dispute Resolution
+  '2a7f931a-9dd5-4501-8696-3b23cb9da19a': 'eleanor-whitfield', // The Divorce Process in India -- Family & Personal
+  '3bd98ccd-13c9-4761-928c-ef5279f66a45': 'maria-harizanova', // Employee Rights in India -- Employment & Labor
+  '47e0098d-5336-40df-940d-f1afb6e4a005': 'ritwika-sharma',   // RTI Act: How to File an RTI Application -- Indian constitutional/administrative law
+  '59446f8c-3a01-47d8-a8d4-de075a5285f0': 'hemangi-bhuva',    // GST Basics for Small Businesses -- Indian GST specialist
+  '5c5a6417-74c6-4ae4-ad7b-aa6ad012b624': 'aisha-rahman',     // How to File an FIR in India -- Criminal Law
+  '6a2f3d44-3b3c-4e96-b053-4d369d99ea95': 'daniel-okafor',    // Cheque Bounce (Section 138) -- Criminal Law
+  '83fa1818-db2f-4a24-bbfe-f801d2177735': 'eira-mishra',      // IP Rights: Trademark, Copyright & Patent -- Technology & IP
 };
 
 const ARGS = process.argv.slice(2);
