@@ -78,11 +78,12 @@ const CATEGORY_TO_AUTHORS = {
   'Trademarks': ['marcus-hale', 'eira-mishra', 'waki-malik'],
   'Contracts': ['elena-rossi', 'marcus-hale', 'priya-menon', 'maria-harizanova', 'waki-malik'],
   'DUI Defense': ['aisha-rahman', 'daniel-okafor'],
-  // Deliberately NOT mapped: 'Visas' (work-visa/immigration law) -- no one on
-  // the current 24-person roster has immigration expertise on file. Forcing a
-  // match here would be exactly the fabricated-credential problem this whole
-  // script exists to avoid, so that category is left to skip rather than
-  // guess. Add a real mapping once an immigration-qualified contributor exists.
+  // 'Visas' (work-visa/immigration law): no one on the roster has immigration
+  // expertise on file -- explicitly confirmed with the site owner, who chose
+  // to route it to the broadest-coverage generalist (Waki Malik already spans
+  // 5 other practice areas) rather than leave it unassigned. Replace with a
+  // real immigration-qualified contributor if one joins the roster.
+  'Visas': ['waki-malik'],
 };
 
 // 'Legal Guides' is a catch-all category holding many unrelated real topics
