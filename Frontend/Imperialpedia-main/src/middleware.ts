@@ -120,39 +120,16 @@ const REMOVED_PATHS = new Set<string>([
   '/stocks/dollarcost-averaging-explained',
   '/investing/what-is-dollarcost-averaging',
   '/personal-finance/dollar-cost-averaging',
-  '/financial-intelligence/money-management-for-students',
-  '/financial-intelligence/best-money-habits-of-millionaires',
-  '/financial-intelligence/debt-snowball-vs-debt-avalanche',
-  '/financial-intelligence/smart-spending-habits',
-  '/financial-intelligence/passive-income-ideas',
-  '/financial-intelligence/side-hustles-for-beginners',
-  '/financial-intelligence/family-financial-planning',
-  '/financial-intelligence/how-inflation-affects-your-savings',
-  '/financial-intelligence/how-much-savings-should-you-have',
-  '/financial-intelligence/how-to-track-expenses',
-  '/financial-intelligence/best-personal-finance-apps',
-  '/financial-intelligence/financial-independence-guide',
-  '/financial-intelligence/what-is-market-capitalization',
-  '/financial-intelligence/what-is-dollar-cost-averaging',
-  '/financial-intelligence/personal-net-worth-calculator-guide',
-  '/financial-intelligence/how-to-start-investing-in-stocks',
-  '/financial-intelligence/how-to-invest-during-a-recession',
-  '/financial-intelligence/how-to-improve-financial-discipline',
-  '/financial-intelligence/how-to-create-a-monthly-budget',
-  '/financial-intelligence/how-to-buy-stocks-online',
-  '/financial-intelligence/how-to-build-wealth-from-scratch',
-  '/financial-intelligence/how-to-build-a-stock-portfolio',
-  '/financial-intelligence/how-to-analyze-a-stock',
-  '/financial-intelligence/how-often-should-you-rebalance-your-portfolio',
-  '/financial-intelligence/how-much-money-do-you-need-to-start-investing',
-  '/financial-intelligence/growth-stocks-vs-value-stocks',
+  // The 31 other /financial-intelligence/<slug> paths that used to live here were
+  // REMOVED from this set (2026-08-24 audit): each one is a real, live article
+  // today, just republished under its correct category (mostly /personal-finance/,
+  // some /stocks/, /investing/, /portfolio/) — this route's own page.tsx already
+  // does a category-agnostic slug lookup (resolveArticleForDetail) and 301s to
+  // the live copy when one exists, so forcing a 410 here was destroying live
+  // content's search equity instead of just letting that existing logic run.
+  // Only these 2 have no live equivalent anywhere on the site, so they stay:
   '/financial-intelligence/financial-goals-framework',
-  '/financial-intelligence/dividend-stocks-for-passive-income',
-  '/financial-intelligence/common-stock-investing-mistakes',
-  '/financial-intelligence/common-money-mistakes',
-  '/financial-intelligence/best-stocks-for-beginners',
-  '/financial-intelligence/best-long-term-stocks',
-  '/financial-intelligence/50-30-20-budget-rule-explained',
+  '/financial-intelligence/what-is-dollar-cost-averaging',
   '/best-robo-advisers',
   '/best-personal-loans',
   '/best-online-brokers',
@@ -162,7 +139,9 @@ const REMOVED_PATHS = new Set<string>([
   '/best-debt-relief-companies',
   '/best-crypto-exchanges',
   '/best-cd-rates',
-  '/financial-independence-guide',
+  // '/financial-independence-guide' (bare) removed from this set for the same
+  // reason as the /financial-intelligence/* slugs above — it's a live article
+  // (redirects to /personal-finance/financial-independence-guide, confirmed 200).
   '/personal-finance/financial-goals-framework',
   '/income',
   '/insurance',
