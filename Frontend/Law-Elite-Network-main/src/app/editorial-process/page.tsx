@@ -104,11 +104,7 @@ export default function EditorialProcessPage() {
               <p>
                 Guides are written in plain language for a reader encountering the topic for the first
                 time, with jargon defined and the moments where a reader should consult a licensed
-                attorney signposted explicitly. Where AI-assisted tools are used during drafting — for
-                outlining, summarizing lengthy filings, or suggesting phrasing — the output is treated as
-                raw material, never as a finished product. See our{' '}
-                <Link href="/ai-usage-policy" className="text-blue-600 hover:underline">AI Usage Policy</Link> for the
-                boundaries we apply.
+                attorney signposted explicitly.
               </p>
             </Block>
 

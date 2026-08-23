@@ -18,7 +18,7 @@ export const familyPersonalExtra2Articles: LawArticle[] = [
     subcategory: { id: 'sub_fp_alimony', name: 'Alimony & Maintenance', slug: 'alimony-maintenance' },
     summary:
       'Alimony, or spousal support, is money one spouse may be ordered to pay the other after separation to limit unfair financial hardship.',
-    author: 'Priya Menon',
+    author: 'Aman Thakur',
     updatedAt: 'June 23, 2026',
     readingTime: 9,
     views: 7260,

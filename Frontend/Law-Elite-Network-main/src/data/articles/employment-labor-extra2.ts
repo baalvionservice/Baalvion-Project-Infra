@@ -103,7 +103,7 @@ export const employmentLaborExtra2Articles: LawArticle[] = [
     subcategory: { id: 'sub_el_contracts', name: 'Employment Contracts', slug: 'employment-contracts' },
     summary:
       'A severance agreement offers a departing employee pay or benefits, usually in exchange for promises like waiving the right to sue — read it carefully.',
-    author: 'Marcus Whitfield',
+    author: 'Maria Harizanova',
     updatedAt: 'June 20, 2026',
     readingTime: 8,
     views: 6210,

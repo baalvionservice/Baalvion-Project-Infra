@@ -14,7 +14,6 @@ import {
   Handshake,
   Megaphone,
   Users,
-  Bot,
   Accessibility,
 } from 'lucide-react';
 
@@ -88,12 +87,6 @@ const EDITORIAL_POLICIES: PolicyLink[] = [
     title: 'Sponsored Content Policy',
     description: 'How sponsored or paid content is labeled and kept separate from editorial coverage.',
     icon: <Megaphone className="w-5 h-5 text-blue-600" />,
-  },
-  {
-    href: '/ai-usage-policy',
-    title: 'AI Usage Policy',
-    description: 'Where and how AI tools assist our editorial process, and the human oversight involved.',
-    icon: <Bot className="w-5 h-5 text-blue-600" />,
   },
   {
     href: '/diversity-policy',

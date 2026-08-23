@@ -54,7 +54,7 @@ export default function SeriesPanel({ value, onChange }: Props) {
       <div>
         <Label className="text-sm font-medium">Series</Label>
         <p className="mt-0.5 text-xs text-muted-foreground">
-          Groups this guide with others into a "Part of the Series" panel on the article. Leave blank for a standalone guide.
+          Groups this guide with others into a &quot;Part of the Series&quot; panel on the article. Leave blank for a standalone guide.
         </p>
       </div>
 
@@ -84,7 +84,7 @@ export default function SeriesPanel({ value, onChange }: Props) {
               onChange={(e) => setOrder(e.target.value)}
             />
             <p className="text-[10px] text-muted-foreground">
-              Global position across the whole series (used to sort chapters and pick "Next up").
+              Global position across the whole series (used to sort chapters and pick &quot;Next up&quot;).
             </p>
           </div>
 

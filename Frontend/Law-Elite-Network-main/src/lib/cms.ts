@@ -534,3 +534,78 @@ export async function cmsGetSubcategory(categorySlug: string, subSlug: string): 
     seo: d.seoMetadata ?? d.seo ?? undefined,
   };
 }
+
+// ── Reader engagement: comments + "was this helpful?" feedback ──────────────
+// Real, backend-persisted data only -- see cms-service's service/engagementService.js.
+// Comments start 'pending' and only ever surface here once an editor approves
+// them; feedback counts are a live DB count, never a display-only placeholder.
+
+async function postJSON(url: string, body: unknown): Promise<any | null> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  try {
+    const r = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+    if (!r.ok) return null;
+    return await r.json();
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+export interface CmsArticleComment {
+  id: string;
+  authorName: string;
+  body: string;
+  createdAt: string;
+}
+
+/** Approved comments for an article, newest first. Empty until any exist. */
+export async function cmsGetComments(slug: string): Promise<CmsArticleComment[]> {
+  const j = await fetchJSON(`${BASE}/content/${encodeURIComponent(slug)}/comments`, { revalidate: false });
+  return j && Array.isArray(j.data) ? (j.data as CmsArticleComment[]) : [];
+}
+
+/**
+ * Submit a reader comment. Held for moderation on the backend (status
+ * defaults to 'pending') -- never shown as published immediately. Returns
+ * null on failure so the caller can show a real error instead of a fake
+ * success state.
+ */
+export async function cmsSubmitComment(
+  slug: string,
+  data: { authorName: string; authorEmail: string; body: string },
+): Promise<{ id: string; status: string } | null> {
+  const j = await postJSON(`${BASE}/content/${encodeURIComponent(slug)}/comments`, data);
+  return j && j.data ? j.data : null;
+}
+
+export interface CmsFeedbackSummary {
+  helpful: number;
+  notHelpful: number;
+}
+
+/** Live "was this helpful?" vote counts for an article. */
+export async function cmsGetFeedback(slug: string): Promise<CmsFeedbackSummary | null> {
+  const j = await fetchJSON(`${BASE}/content/${encodeURIComponent(slug)}/feedback`, { revalidate: false });
+  return j && j.data ? (j.data as CmsFeedbackSummary) : null;
+}
+
+/**
+ * Cast (or re-cast) a "was this helpful?" vote. `voterToken` is a
+ * client-generated id stored in localStorage so the same browser can't vote
+ * twice -- see ArticleFeedback.tsx. Returns the updated live summary.
+ */
+export async function cmsSubmitFeedback(
+  slug: string,
+  data: { vote: 'helpful' | 'not_helpful'; voterToken: string },
+): Promise<CmsFeedbackSummary | null> {
+  const j = await postJSON(`${BASE}/content/${encodeURIComponent(slug)}/feedback`, data);
+  return j && j.data ? (j.data as CmsFeedbackSummary) : null;
+}
