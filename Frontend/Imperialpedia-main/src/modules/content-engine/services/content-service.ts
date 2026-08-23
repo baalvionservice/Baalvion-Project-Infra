@@ -105,26 +105,51 @@ export async function getArticlesByCategory(
   };
 }
 
+// Ceiling on how many topic matches the Related Articles box shows — a whole
+// category can run to 80+ articles, which is more a dumped category listing
+// than a "related" box, so the top-scored (most relevant) 16 are shown.
+const MAX_RELATED_ARTICLES = 16;
+
 /**
- * Fetches a list of articles related to the given article.
- * Logic: Same category, excluding the current article.
+ * Fetches articles related to the given one by topic — same category
+ * (server-filtered by categorySlug, so it's the *whole* category rather than
+ * whatever happens to be in the 100 most-recent articles site-wide) plus
+ * shared tags, ranked by relevance, capped at MAX_RELATED_ARTICLES. Falls
+ * back to a short plain most-recent list only when this article has no
+ * category/tags to match on at all.
  */
 export async function getRelatedArticles(
   articleId: string,
-  category?: string
+  category?: string,
+  tags?: string[],
+  categorySlug?: string
 ): Promise<ApiResponse<Article[]>> {
-  const response = await articlesService.getArticles(1, 50);
+  const [categoryPool, recentPool] = await Promise.all([
+    categorySlug ? articlesService.getArticlesByCategorySlug(categorySlug, 100) : Promise.resolve({ data: [] }),
+    articlesService.getArticles(1, 100),
+  ]);
 
-  let related = response.data.filter((article) => article.id !== articleId);
+  const seen = new Set<string>([articleId]);
+  const candidates = [...categoryPool.data, ...recentPool.data].filter((article) => {
+    if (seen.has(article.id)) return false;
+    seen.add(article.id);
+    return true;
+  });
 
-  if (category) {
-    const sameCategory = related.filter((a) => a.category === category);
-    if (sameCategory.length > 0) {
-      related = sameCategory;
-    }
-  }
+  const normalizedTags = new Set((tags ?? []).map((t) => t.toLowerCase()));
+  const scored = candidates
+    .map((article) => {
+      const sharedTags = (article.tags ?? []).filter((t: string) => normalizedTags.has(t.toLowerCase())).length;
+      const sameCategory = category ? article.category === category : false;
+      return { article, score: (sameCategory ? 2 : 0) + sharedTags };
+    })
+    .filter((entry) => entry.score > 0)
+    .sort((a, b) => b.score - a.score);
 
-  const mapped = related.slice(0, 3).map(mapToArticleModel);
+  // No topic signal at all (no category/tags matched anything) — a short
+  // recency fallback so the section isn't empty, not the whole 100-article pool.
+  const related = scored.length > 0 ? scored.map((entry) => entry.article) : candidates.slice(0, 4);
+  const mapped = related.slice(0, MAX_RELATED_ARTICLES).map(mapToArticleModel);
 
   return {
     data: mapped,

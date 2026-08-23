@@ -7,20 +7,11 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Badge } from '@/components/ui/badge';
 import { Text } from '@/design-system/typography/text';
 import { Article } from '../types';
-import { Calendar, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 interface ArticleCardProps {
   article: Article;
 }
-
-// Pinned to UTC — see ArticleHeader.tsx for why: an unpinned local-time format
-// here diverges between SSR and hydration and throws a React #418 crash.
-const cardDateFormatter = new Intl.DateTimeFormat('en-US', {
-  month: 'short',
-  day: 'numeric',
-  year: 'numeric',
-  timeZone: 'UTC',
-});
 
 /**
  * A sophisticated card component to display article previews in listings.
@@ -63,15 +54,10 @@ export const ArticleCard = ({ article }: ArticleCardProps) => {
         </CardContent>
 
         <CardFooter className="p-5 pt-0 border-t border-white/5 flex items-center justify-between text-muted-foreground">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5" />
-              <Text variant="caption">
-                {article.publishedAt ? cardDateFormatter.format(new Date(article.publishedAt)) : 'Recent'}
-              </Text>
-            </div>
-          </div>
-          <ArrowRight className="w-4 h-4 text-primary opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0" />
+          {article.authorName && (
+            <Text variant="caption">By {article.authorName}</Text>
+          )}
+          <ArrowRight className="w-4 h-4 text-primary opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0 ml-auto" />
         </CardFooter>
       </Card>
     </Link>
