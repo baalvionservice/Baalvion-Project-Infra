@@ -18,7 +18,7 @@ export const propertyRealEstateExtra2Articles: LawArticle[] = [
     subcategory: { id: 'sub_pr_rental', name: 'Rental Agreements', slug: 'rental-agreements' },
     summary:
       'Eviction is the legal process a landlord must follow to remove a tenant — requiring proper notice, a court order, and lawful enforcement, never self-help.',
-    author: 'Sofia Almeida',
+    author: 'Waki Malik',
     updatedAt: 'June 22, 2026',
     readingTime: 9,
     views: 8120,
@@ -108,7 +108,7 @@ export const propertyRealEstateExtra2Articles: LawArticle[] = [
     subcategory: { id: 'sub_pr_ownership', name: 'Ownership Rights', slug: 'ownership-rights' },
     summary:
       'A power of attorney is a legal document that lets you authorise someone to act for you on financial, property, or personal matters — within limits you define.',
-    author: 'Rajesh Iyer',
+    author: 'Daniel Okafor',
     updatedAt: 'June 20, 2026',
     readingTime: 8,
     views: 6740,

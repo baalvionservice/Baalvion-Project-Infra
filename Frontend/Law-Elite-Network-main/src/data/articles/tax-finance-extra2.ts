@@ -103,7 +103,7 @@ export const taxFinanceExtra2Articles: LawArticle[] = [
     subcategory: { id: 'sub_tf_corporate', name: 'Corporate Tax', slug: 'corporate-tax' },
     summary:
       'A tax audit is an official review of your return and records to check the figures are accurate — usually routine and less alarming than people fear.',
-    author: 'Rajesh Iyer',
+    author: 'Claire Hannon',
     updatedAt: 'June 19, 2026',
     readingTime: 8,
     views: 5980,
