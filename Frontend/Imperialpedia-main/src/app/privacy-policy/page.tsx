@@ -30,7 +30,7 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-const LAST_UPDATED = 'August 17, 2026';
+const LAST_UPDATED = 'August 24, 2026';
 
 const TOC: Array<{ id: string; label: string }> = [
   { id: 'who-we-are', label: 'Who we are & how to reach us' },

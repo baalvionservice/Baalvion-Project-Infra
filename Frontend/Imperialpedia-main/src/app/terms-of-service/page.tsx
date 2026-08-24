@@ -15,7 +15,7 @@ export const metadata: Metadata = buildMetadata({
   canonical: '/terms-of-service',
 });
 
-const LAST_UPDATED = 'April 8, 2026';
+const LAST_UPDATED = 'August 24, 2026';
 
 export default function TermsOfServicePage() {
   return (
