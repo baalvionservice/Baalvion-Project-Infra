@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { NewsArticle } from "@/lib/data.news";
-import { formatDate } from "@/services/format-date";
 import { newsArticleHref } from "@/lib/data/article-url";
 
 export type EconomicCalendarRow = {
@@ -35,7 +34,6 @@ export function EconomicCalendarTable({ rows, ctaHref = "/calendar" }: Props) {
           <thead>
             <tr className="border-b border-border text-left text-[11px] uppercase tracking-wide text-muted-foreground">
               <th className="px-5 py-2 font-semibold">Event</th>
-              <th className="px-5 py-2 font-semibold">Released</th>
               <th className="px-5 py-2 font-semibold">Coverage</th>
             </tr>
           </thead>
@@ -43,9 +41,6 @@ export function EconomicCalendarTable({ rows, ctaHref = "/calendar" }: Props) {
             {rows.map(({ article, eventType }) => (
               <tr key={article.id} className="border-b border-border last:border-none">
                 <td className="whitespace-nowrap px-5 py-3 font-semibold text-foreground">{eventType}</td>
-                <td className="whitespace-nowrap px-5 py-3 text-muted-foreground">
-                  {formatDate(article.publishedAt)}
-                </td>
                 <td className="max-w-0 px-5 py-3">
                   <Link href={newsArticleHref(article)} className="block truncate text-foreground hover:underline">
                     {article.title}
