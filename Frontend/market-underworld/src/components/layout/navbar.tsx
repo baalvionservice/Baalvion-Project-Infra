@@ -49,7 +49,7 @@ export const Navbar = ({ isMarketplace: _isMarketplace }: { isMarketplace?: bool
   if (isDashboard) return null;
 
   return (
-    <nav className="fixed top-8 left-0 right-0 h-16 z-[1000] bg-[#0B0C0F]/80 backdrop-blur-md border-b border-[#252A33]">
+    <nav className="fixed top-0 md:top-8 left-0 right-0 h-16 z-[1000] bg-[#0B0C0F]/80 backdrop-blur-md border-b border-[#252A33]">
       <div className="max-w-[1440px] mx-auto h-full flex items-center justify-between px-4 sm:px-6">
         <Link href="/" className="flex items-center gap-3 select-none" aria-label="Market Underworld Home">
           <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#39FF14] to-[#3B82F6] flex items-center justify-center text-black font-bold text-[16px]">MU</div>

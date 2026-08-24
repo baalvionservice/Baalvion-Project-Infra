@@ -8,6 +8,7 @@ import { CartProvider } from "@/context/cart-context";
 import { NotificationProvider } from "@/context/notification-context";
 import { LanguageProvider } from "@/context/language-context";
 import { ToastContainer } from "@/components/notifications/toast-container";
+import { Toaster } from "@/components/ui/toaster";
 import { GlobalSearch } from "@/components/layout/global-search";
 import { GoogleAnalytics } from "@/components/layout/google-analytics";
 import { cn } from "@/lib/utils";
@@ -88,6 +89,7 @@ export default function RootLayout({
                     {children}
                   </main>
                   <ToastContainer />
+                  <Toaster />
                   <GlobalSearch />
                 </IdentityProvider>
               </NotificationProvider>
