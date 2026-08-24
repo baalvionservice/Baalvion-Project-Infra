@@ -87,8 +87,8 @@ export const Navbar = ({ isMarketplace: _isMarketplace }: { isMarketplace?: bool
         </div>
 
         <div className="flex items-center gap-2 sm:gap-4">
-          <div className="hidden md:flex items-center gap-2">
-            <button 
+          <div className="hidden lg:flex items-center gap-2">
+            <button
               onClick={() => window.dispatchEvent(new CustomEvent('open-global-search'))}
               className="p-2.5 text-gray-400 hover:text-white transition-colors hover:bg-white/5 rounded-xl border border-white/5"
               aria-label="Open Search"
@@ -126,7 +126,7 @@ export const Navbar = ({ isMarketplace: _isMarketplace }: { isMarketplace?: bool
             </div>
           </div>
 
-          <div className="hidden md:flex items-center gap-3 px-4 py-2 bg-brand-surface rounded border border-brand-border">
+          <div className="hidden lg:flex items-center gap-3 px-4 py-2 bg-brand-surface rounded border border-brand-border">
             {isLoading ? (
               <span className="text-[9px] font-bold text-brand-green uppercase tracking-widest animate-pulse">Scanning...</span>
             ) : (
