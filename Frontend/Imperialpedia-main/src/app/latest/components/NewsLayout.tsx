@@ -18,6 +18,11 @@ export function NewsLayout({
   showSidebar = true,
 }: NewsLayoutProps) {
   const [currentCategory, setCurrentCategory] = useState(initialCategory);
+  // Starts false so the ad below never renders until NewsGrid confirms it
+  // actually has articles -- this category (or the feed as a whole) can
+  // legitimately come back empty, and an ad next to "No articles found" is
+  // the thin-content pattern AdSense review flags.
+  const [hasArticles, setHasArticles] = useState(false);
 
   const handleCategoryChange = (category: string) => {
     setCurrentCategory(category);
@@ -50,9 +55,11 @@ export function NewsLayout({
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-6 sm:py-8">
-        <div className="mb-6 sm:mb-8">
-          <AdSenseUnit slot="8362925887" format="auto" responsive={true} />
-        </div>
+        {hasArticles && (
+          <div className="mb-6 sm:mb-8">
+            <AdSenseUnit slot="8362925887" format="auto" responsive={true} />
+          </div>
+        )}
         <div
           className={`${
             showSidebar ? "flex flex-col lg:grid lg:grid-cols-4 lg:gap-8" : ""
@@ -60,7 +67,7 @@ export function NewsLayout({
         >
           {/* Main Content */}
           <div className={`${showSidebar ? "lg:col-span-3" : ""} order-1`}>
-            <NewsGrid category={currentCategory} />
+            <NewsGrid category={currentCategory} onLoadStateChange={setHasArticles} />
           </div>
 
           {/* Sidebar - Show on top on mobile */}

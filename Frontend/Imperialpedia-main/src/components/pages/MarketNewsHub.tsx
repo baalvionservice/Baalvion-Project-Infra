@@ -377,7 +377,12 @@ export async function MarketNewsHub() {
           </section>
         )}
 
-        <AdSenseUnit slot="8362925887" format="auto" responsive={true} />
+        {/* Gated on real content existing (same condition as the featured section
+            above it) -- this category can legitimately have zero published
+            articles ("No articles published..." below), and an ad next to
+            that empty state is exactly the thin-content pattern AdSense
+            review flags. */}
+        {featured && <AdSenseUnit slot="8362925887" format="auto" responsive={true} />}
 
         {latestGrid.length > 0 && (
           <section>
