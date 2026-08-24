@@ -197,7 +197,15 @@ export async function postChatMessage(slug: string, content: string): Promise<Ch
 // exists for community/access-tier memberships. See community-service's service/billingService.js
 // + payment-service's CryptoGateway for the full non-custodial flow (merchant's own wallet, no
 // address generated or held by this app).
-export type CryptoAsset = 'USDT_TRC20' | 'ETH_BEP20' | 'BTC';
+export type CryptoAsset =
+    | 'USDT_TRC20'
+    | 'ETH_BEP20'
+    | 'BTC'
+    | 'USDT_ERC20'
+    | 'USDC_ERC20'
+    | 'ETH'
+    | 'BNB'
+    | 'USDT_BEP20';
 
 export interface CryptoCheckout {
     chargeId: string;

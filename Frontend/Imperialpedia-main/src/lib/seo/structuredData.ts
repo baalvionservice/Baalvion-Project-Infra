@@ -34,8 +34,11 @@ export const structuredData = {
   }),
 
   /**
-   * WebSite + SearchAction schema — tells crawlers (and AI answer engines) that this
-   * site is directly searchable and how. Rendered once, on the homepage only.
+   * WebSite schema. No SearchAction: /search was permanently removed (see
+   * REMOVED_PATHS in middleware.ts) and site search is now an inline modal/bar
+   * with no query-string-driven results page for Sitelinks Search Box to target
+   * — advertising one here just fed Google a dead URL (confirmed 404) it kept
+   * re-crawling and reporting as "Crawled - currently not indexed" in GSC.
    */
   website: () => ({
     '@context': 'https://schema.org',
@@ -43,11 +46,6 @@ export const structuredData = {
     name: 'Imperialpedia',
     alternateName: 'Imperialpedia — The Financial Intelligence Network',
     url: siteUrl(),
-    potentialAction: {
-      '@type': 'SearchAction',
-      target: `${siteUrl()}/search?q={search_term_string}`,
-      'query-input': 'required name=search_term_string',
-    },
   }),
 
   entity: (entity: any, type: string) => {

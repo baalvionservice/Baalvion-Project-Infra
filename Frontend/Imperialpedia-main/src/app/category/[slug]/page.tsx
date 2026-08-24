@@ -1,4 +1,6 @@
 import { NewsLayout } from "@/app/latest/components/NewsLayout";
+import { Breadcrumbs } from "@/modules/seo-engine/components/Breadcrumbs";
+import { breadcrumbService } from "@/modules/seo-engine/services/breadcrumb-service";
 import { notFound } from "next/navigation";
 
 const categoryMap: Record<string, string> = {
@@ -25,13 +27,25 @@ export function generateStaticParams() {
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
-  const category = categoryMap[(await params).slug.toLowerCase()];
+  const slug = (await params).slug.toLowerCase();
+  const category = categoryMap[slug];
 
   if (!category) {
     notFound();
   }
 
-  return <NewsLayout initialCategory={category} />;
+  // This page had neither a visible breadcrumb trail nor BreadcrumbList
+  // schema before — the shared engine component supplies both from one call.
+  const breadcrumb = breadcrumbService.generateBreadcrumbForCategory(category, slug);
+
+  return (
+    <>
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 pt-6">
+        <Breadcrumbs breadcrumb={breadcrumb} className="mb-0" />
+      </div>
+      <NewsLayout initialCategory={category} />
+    </>
+  );
 }
 
 export async function generateMetadata({ params }: CategoryPageProps) {

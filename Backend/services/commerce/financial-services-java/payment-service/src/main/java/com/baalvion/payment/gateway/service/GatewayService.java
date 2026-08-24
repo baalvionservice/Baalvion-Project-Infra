@@ -258,6 +258,17 @@ public class GatewayService {
     boolean amountValidated = validateWebhookAmount(slug, providerKey, eventKey, payment, result);
 
     payment.setStatus(result.status());
+    // Crypto-only fields (CryptoChainPoller's synthesized WebhookResult carries these in its
+    // payload every poll tick that finds a match; every other provider's payload simply lacks
+    // these keys, so this is a no-op for them — see GatewayPayment#confirmations/transactionHash).
+    Object confirmations = result.payload().get("confirmations");
+    if (confirmations instanceof Number n) {
+      payment.setConfirmations(n.intValue());
+    }
+    Object txHash = result.payload().get("txHash");
+    if (txHash instanceof String s && !s.isBlank()) {
+      payment.setTransactionHash(s);
+    }
     repository.save(payment);
 
     // Record the processed event. The UNIQUE(website_slug, provider, provider_event_id) constraint

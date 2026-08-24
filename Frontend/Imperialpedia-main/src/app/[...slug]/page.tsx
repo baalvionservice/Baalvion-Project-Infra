@@ -22,6 +22,7 @@ import { articlesService } from "@/services/data";
 import { ArticleMarketWidget } from "@/components/markets/ArticleMarketWidget";
 import { isAllowedImageHost } from "@/lib/safe-image";
 import { structuredData } from "@/lib/seo/structured-data";
+import { breadcrumbService } from "@/modules/seo-engine/services/breadcrumb-service";
 import { createEntityLinker } from "@/lib/entityLinkInjector";
 import {
   resolveArticleForDetail,
@@ -40,6 +41,8 @@ import {
 } from "@/lib/article/render-helpers";
 import { TrendingNowModule, MoreInCategoryModule } from "@/components/article/ArticleSidebarModules";
 import { ArticleByline } from "@/components/article/ArticleByline";
+import { PreferredSourceButton } from "@/components/common/PreferredSourceButton";
+import { AdSenseUnit } from "@/components/common/AdSense";
 import { SourcesCited } from "@/modules/content-engine/components/SourcesCited";
 import { ListenBar } from "@/components/article/ListenBar";
 
@@ -272,6 +275,12 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
   // rendered below, and the `mentions` JSON-LD entities here.
   const entityMentions = article.entityMentions ?? [];
   const linker = createEntityLinker(entityMentions);
+  // Split roughly in half so a mid-article AdSense unit can sit between the
+  // two halves without landing mid-paragraph or mid-heading.
+  const demotedBody = demoteExtraHeadings(article.body);
+  const bodySplitIndex = Math.ceil(demotedBody.length / 2);
+  const bodyBlocksTop = demotedBody.slice(0, bodySplitIndex);
+  const bodyBlocksBottom = demotedBody.slice(bodySplitIndex);
   const SCHEMA_TYPE_BY_ENTITY_TYPE: Record<string, string> = {
     company: "Corporation",
     country: "Country",
@@ -355,22 +364,18 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
   // fabricates questions; this is the same visible body content, described.
   const faqSchema = faqPairs.length > 0 ? structuredData.faq(faqPairs) : null;
 
-  // Breadcrumb schema must mirror what's actually rendered in the <nav> below —
-  // a mismatch between visible breadcrumbs and BreadcrumbList schema risks a
-  // manual action for misleading structured data, so the category crumb is only
-  // added here (and only links) when CATEGORY_HREF has a real destination for it.
-  const breadcrumbSchema = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: baseUrl },
-      { "@type": "ListItem", position: 2, name: "World", item: `${baseUrl}/world` },
-      ...(categoryPath
-        ? [{ "@type": "ListItem", position: 3, name: article.category, item: `${baseUrl}${categoryPath}` }]
-        : []),
-      { "@type": "ListItem", position: categoryPath ? 4 : 3, name: article.title, item: canonicalUrl },
-    ],
-  };
+  // Built through the shared breadcrumb engine so the visible <nav> below and
+  // the BreadcrumbList schema both read off this one items array — they can't
+  // drift apart the way two hand-maintained copies could. The category crumb
+  // is only added (and only links) when CATEGORY_HREF has a real destination
+  // for it, so the schema never points at a dead URL.
+  const breadcrumb = breadcrumbService.build([
+    { name: "Home", item: "/" },
+    { name: "World", item: "/world" },
+    ...(categoryPath ? [{ name: article.category, item: categoryPath }] : []),
+    { name: article.title, item: canonicalPath },
+  ]);
+  const breadcrumbSchema = breadcrumbService.generateBreadcrumbSchema(breadcrumb);
 
   return (
     <div className="bg-white min-h-screen">
@@ -492,10 +497,34 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
               )}
             </figure>
 
+            {/* Top-of-article unit, right after the hero image — after the lede/key
+                points/byline so it never interrupts the opening read, same
+                "post-content" philosophy as the content-engine article template. */}
+            <div className="my-6">
+              <AdSenseUnit slot="8362925887" format="auto" responsive={true} />
+            </div>
+
             <div className="prose-none">
-              {demoteExtraHeadings(article.body).map((block, i) => (
+              {bodyBlocksTop.map((block, i) => (
                 <BodyBlock key={i} block={block} linker={linker} />
               ))}
+            </div>
+
+            {bodyBlocksBottom.length > 0 && (
+              <>
+                <div className="my-8">
+                  <AdSenseUnit slot="8362925887" format="auto" responsive={true} />
+                </div>
+                <div className="prose-none">
+                  {bodyBlocksBottom.map((block, i) => (
+                    <BodyBlock key={`bottom-${i}`} block={block} linker={linker} />
+                  ))}
+                </div>
+              </>
+            )}
+
+            <div className="my-8">
+              <AdSenseUnit slot="8362925887" format="auto" responsive={true} />
             </div>
 
             {article.galleryImages && article.galleryImages.length > 0 && (
@@ -557,6 +586,16 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
             <Suspense fallback={null}>
               <TrendingNowModule />
             </Suspense>
+
+            <div>
+              <h2 className="text-xs font-black tracking-widest text-gray-900 uppercase border-b-2 border-gray-200 pb-2 mb-4">
+                Follow Imperialpedia
+              </h2>
+              <p className="text-xs text-gray-500 mb-3 leading-relaxed">
+                Set us as a preferred source on Google to see more of our coverage in Search.
+              </p>
+              <PreferredSourceButton theme="light" />
+            </div>
 
             <Suspense fallback={null}>
               <MoreInCategoryModule categorySlug={article.categorySlug} categoryLabel={article.category} excludeSlug={slug} />
@@ -680,15 +719,15 @@ async function BareSlugPage({ slug }: { slug: string }) {
     dateModified: article.updatedAt || article.publishedAt || '',
     url: `${baseUrl}/${slug}`,
   };
-  const breadcrumbSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: baseUrl },
-      { '@type': 'ListItem', position: 2, name: 'News', item: `${baseUrl}/news` },
-      { '@type': 'ListItem', position: 3, name: article.title, item: `${baseUrl}/${slug}` },
-    ],
-  };
+  // Built through the shared breadcrumb engine so the JSON-LD below always has
+  // a matching visible <nav> — this branch previously emitted BreadcrumbList
+  // schema with no visible trail on the page at all.
+  const breadcrumb = breadcrumbService.build([
+    { name: 'Home', item: '/' },
+    { name: 'News', item: '/news' },
+    { name: article.title, item: `/${slug}` },
+  ]);
+  const breadcrumbSchema = breadcrumbService.generateBreadcrumbSchema(breadcrumb);
 
   return (
     <div className="bg-background min-h-screen">
@@ -701,6 +740,13 @@ async function BareSlugPage({ slug }: { slug: string }) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       <div className="max-w-7xl mx-auto px-4 py-10">
+        <nav aria-label="Breadcrumb" className="text-xs text-muted-foreground mb-6 flex items-center gap-1.5">
+          <Link href="/news" className="hover:text-primary">News</Link>
+          <span>/</span>
+          <span className="text-foreground font-medium truncate max-w-[240px]" aria-current="page">
+            {article.title}
+          </span>
+        </nav>
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-12 xl:gap-16">
           {/* ══ LEFT: Article ══════════════════════════════════════════════ */}
           <article className="md:m-16">
@@ -763,6 +809,12 @@ async function BareSlugPage({ slug }: { slug: string }) {
               {demoteExtraHeadings(article.body).map((block, i) => (
                 <BodyBlock key={i} block={block} />
               ))}
+            </div>
+
+            {/* Post-content unit, same slot/placement pattern used sitewide —
+                never interrupts the primary reading flow. */}
+            <div className="my-8">
+              <AdSenseUnit slot="8362925887" format="auto" responsive={true} />
             </div>
 
             {article.galleryImages && article.galleryImages.length > 0 && (

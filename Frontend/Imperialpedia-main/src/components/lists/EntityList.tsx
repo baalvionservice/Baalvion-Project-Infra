@@ -11,12 +11,19 @@ interface EntityListProps {
   entities: BaseEntity[];
   type: string;
   totalCount: number;
+  /**
+   * Per-entity route override, keyed by slug — see EntityListItem's `href` prop.
+   * A plain object (not a function) since this is a client component and the
+   * caller is usually a server component — functions aren't serializable
+   * across that boundary.
+   */
+  hrefMap?: Record<string, string>;
 }
 
 /**
  * Orchestrates the rendering of a list of knowledge entities.
  */
-export const EntityList = ({ entities, type, totalCount }: EntityListProps) => {
+export const EntityList = ({ entities, type, totalCount, hrefMap }: EntityListProps) => {
   if (entities.length === 0) {
     return (
       <div className="py-24 text-center space-y-6 bg-muted/10 rounded-[3rem] border-2 border-dashed border-white/5">
@@ -48,6 +55,7 @@ export const EntityList = ({ entities, type, totalCount }: EntityListProps) => {
             category={entity.category}
             description={entity.description}
             slug={entity.slug}
+            href={hrefMap?.[entity.slug]}
           />
         ))}
       </Grid>

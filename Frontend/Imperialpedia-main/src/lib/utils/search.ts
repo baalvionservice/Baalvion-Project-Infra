@@ -9,9 +9,9 @@ import { SearchResult, SearchResultType } from '@/types/search';
  * Replaces the previous implementation, which matched against `@/data/*.json` — flat,
  * orphaned fixture files each containing exactly one seeded record left over from before
  * the `data/<type>/<type>.json` restructure. This now reads from the same live-first,
- * static-fallback loaders (`lib/data/loaders.ts`) that power `/countries` and
- * `/industries`, plus the live market-asset feed, so a search result can never
- * be staler or thinner than what the index pages themselves show.
+ * static-fallback loaders (`lib/data/loaders.ts`) that power `/countries`, plus the
+ * live market-asset feed, so a search result can never be staler or thinner than what
+ * the index pages themselves show.
  */
 
 const MAX_LEVENSHTEIN_LEN = 12; // bound the DP table for pathological input lengths
@@ -133,10 +133,11 @@ function pushEntityResults(
 }
 
 /**
- * Core search across the knowledge graph: countries, industries, and live
- * market assets (indices/stocks/crypto/commodities/currencies). Companies and
- * technologies are intentionally excluded — /companies and /technologies were
- * removed site-wide, so those entities have no page to route a search hit to.
+ * Core search across the knowledge graph: countries and live market assets
+ * (indices/stocks/crypto/commodities/currencies). Companies, industries, and
+ * technologies are intentionally excluded — /companies, /industries, and
+ * /technologies were removed site-wide, so those entities have no page to
+ * route a search hit to.
  * People are intentionally not included — no `person` entity loader/backend exists yet
  * (tracked as a known gap; see docs/SEARCH_STANDARD.md).
  */

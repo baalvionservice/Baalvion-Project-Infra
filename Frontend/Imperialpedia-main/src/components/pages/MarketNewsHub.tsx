@@ -38,6 +38,7 @@ import HeadingSection from "@/components/layout/HeadingSection";
 import { NewsletterForm } from "@/components/landing/NewsletterForm";
 import FAQItem from "@/components/faq/FAQItem";
 import { env } from "@/config/env";
+import { AdSenseUnit } from "@/components/common/AdSense";
 
 const SLUG = "market-news";
 // The CMS's actual category slug is "markets" — "market-news" is only this
@@ -376,6 +377,13 @@ export async function MarketNewsHub() {
           </section>
         )}
 
+        {/* Gated on real content existing (same condition as the featured section
+            above it) -- this category can legitimately have zero published
+            articles ("No articles published..." below), and an ad next to
+            that empty state is exactly the thin-content pattern AdSense
+            review flags. */}
+        {featured && <AdSenseUnit slot="8362925887" format="auto" responsive={true} />}
+
         {latestGrid.length > 0 && (
           <section>
             <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-6 pb-2">
@@ -476,7 +484,13 @@ export async function MarketNewsHub() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {topicRails[topic.slug].map((article) => (
-                <ArticleCard key={article.id} article={article} />
+                // categoryLabel override: this topic's real name (e.g. "Earnings",
+                // "Federal Reserve") almost never matches one of the 20 fixed
+                // NewsCategory values, so article.category silently coerces to
+                // the generic "Editorial" catch-all (see toNewsCategory in
+                // cms-public.ts) -- every card in this rail is confirmed to be
+                // about `topic`, so its badge should say so, not "Editorial".
+                <ArticleCard key={article.id} article={article} categoryLabel={topic.label} />
               ))}
             </div>
           </section>

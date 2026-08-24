@@ -89,7 +89,12 @@ export const sitemapService = {
     // and still submitted below via pushEntities.
     // "/companies" and "/technologies" (hub + every individual [slug] detail page)
     // were removed site-wide and are not submitted at all.
-    const corePages = ["","/about","/financial-intelligence","/banking","/budgeting","/contact","/economy","/explore","/financial-tools","/financial-tools/compound-interest","/financial-tools/inflation","/financial-tools/investment","/financial-tools/loan","/investing","/knowledge-map","/market-news","/personal-finance","/privacy-policy","/reviews","/stocks","/terms-of-service","/transparency","/world","/world/us","/world/europe","/world/asia","/world/china","/world/emerging"];
+    // "/knowledge-map" removed — the Knowledge Graph page only ever produced real
+    // connections through companies/industries/technologies, all three of which were
+    // removed site-wide; without them it was countries with zero edges (not a graph)
+    // while still linking out to those dead entity types. Retired entirely rather than
+    // patched (see middleware.ts REMOVED_PATHS and knowledge-graph-service.ts removal).
+    const corePages = ["","/about","/financial-intelligence","/banking","/budgeting","/contact","/economy","/explore","/financial-tools","/financial-tools/compound-interest","/financial-tools/inflation","/financial-tools/investment","/financial-tools/loan","/investing","/market-news","/personal-finance","/privacy-policy","/reviews","/stocks","/terms-of-service","/transparency","/world","/world/us","/world/europe","/world/asia","/world/china","/world/emerging"];
     corePages.forEach((path) => {
       entries.push({
         loc: `${base}${path}`,
@@ -190,8 +195,12 @@ export const sitemapService = {
       "cd-rates", "checking", "commodities", "credit", "credit-cards", "crypto",
       "cryptocurrency", "debt", "earnings", "emergency-fund", "etfs",
       "family-budget", "fed", "financial-calculators", "financial-independence",
-      "fiscal-policy", "gdp", "global", "government", "income", "indicators",
-      "inflation", "insurance", "interest-rates", "live-market-news",
+      // "income" and "insurance" removed — neither has a live route (both
+      // permanently 410 in middleware.ts REMOVED_PATHS), so checking
+      // categoryHasLiveContent for them could submit URLs to the sitemap that
+      // 410 the moment Google fetches them.
+      "fiscal-policy", "gdp", "global", "government", "indicators",
+      "inflation", "interest-rates", "live-market-news",
       "loan-reviews", "loans", "monetary-policy", "money-management",
       "money-market", "monthly-budget", "mortgages", "mutual-funds", "options",
       "planning", "politics", "portfolio", "real-estate", "retirement",

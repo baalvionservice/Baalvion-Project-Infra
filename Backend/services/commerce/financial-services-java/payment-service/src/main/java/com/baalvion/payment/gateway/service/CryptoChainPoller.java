@@ -71,13 +71,17 @@ public class CryptoChainPoller {
     JsonNode raw = readTree(payment.getRawResponse());
     String asset = textOrNull(raw, "asset");
     String address = textOrNull(raw, "address");
-    long targetSmallestUnit = raw.path("targetSmallestUnit").asLong(-1);
-    long taggingOffset = raw.path("taggingOffsetSmallestUnit").asLong(0);
+    // BigInteger, read via .asText() (never .asLong()) — a stable 18-decimal asset's target
+    // amount for a realistic dollar charge overflows a 64-bit long (see CryptoGateway's
+    // ChainMatch javadoc for the real bug this was).
+    String targetStr = textOrNull(raw, "targetSmallestUnit");
+    java.math.BigInteger targetSmallestUnit = targetStr == null ? null : new java.math.BigInteger(targetStr);
+    java.math.BigInteger taggingOffset = java.math.BigInteger.valueOf(raw.path("taggingOffsetSmallestUnit").asLong(0));
     String usdRateStr = textOrNull(raw, "usdRateUsed");
     BigDecimal usdRateUsed = usdRateStr == null ? null : new BigDecimal(usdRateStr);
     String expiresAtStr = textOrNull(raw, "expiresAt");
 
-    if (asset == null || address == null || targetSmallestUnit < 0) {
+    if (asset == null || address == null || targetSmallestUnit == null) {
       log.warn("Crypto poller: charge {} has unparseable rawResponse — skipping", payment.getId());
       return;
     }

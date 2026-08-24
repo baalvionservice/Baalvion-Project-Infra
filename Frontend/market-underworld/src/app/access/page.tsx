@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   ShieldCheck, Lock, Radar, KeyRound, Eye, ScrollText,
@@ -12,6 +13,8 @@ import { GridBackground } from "@/components/access/grid-background";
 import { TierCard, type TierCardData } from "@/components/access/tier-card";
 import { PaymentModal, type AccessTierPlan } from "@/components/access/payment-modal";
 import { getCommunity, type MembershipStatus } from "@/lib/api/community";
+import { useAuth } from "@/context/auth-context";
+import { useToast } from "@/hooks/use-toast";
 
 const TIERS: (TierCardData & { slug: string; redirectTo: string })[] = [
   {
@@ -98,6 +101,9 @@ const FAQS = [
 ];
 
 export default function AccessPage() {
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
+  const { toast } = useToast();
   const [statuses, setStatuses] = useState<Record<string, MembershipStatus | "none">>({});
   const [selectedPlan, setSelectedPlan] = useState<AccessTierPlan | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -121,6 +127,11 @@ export default function AccessPage() {
   };
 
   const openModal = (tier: (typeof TIERS)[number]) => {
+    if (!isAuthenticated) {
+      toast({ title: "Sign in required", description: "Create a free account or sign in before depositing — access tiers are tied to your account." });
+      router.push("/auth/signin");
+      return;
+    }
     setSelectedPlan({ slug: tier.slug, name: tier.name, priceLabel: tier.priceLabel, redirectTo: tier.redirectTo });
     setModalOpen(true);
   };

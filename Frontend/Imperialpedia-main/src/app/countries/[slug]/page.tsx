@@ -6,11 +6,11 @@ import { EntityHeader } from "@/components/knowledge/EntityHeader";
 import { EntityOverview } from "@/components/knowledge/EntityOverview";
 import { EntityEditorialOverview } from "@/components/knowledge/EntityEditorialOverview";
 import { DataTable } from "@/components/knowledge/DataTable";
-import { RelatedEntities } from "@/components/knowledge/RelatedEntities";
 import { getCountryBySlug } from "@/lib/data/loaders";
 import { generateEntityMetadata } from "@/lib/utils/seo";
 import { structuredData } from "@/lib/seo/structuredData";
 import { JsonLd } from "@/modules/seo-engine/components/JsonLd";
+import { Breadcrumbs } from "@/modules/seo-engine/components/Breadcrumbs";
 import { breadcrumbService } from "@/modules/seo-engine/services/breadcrumb-service";
 import { QuickStats } from "@/components/entity/QuickStats";
 import { RelatedHighlights } from "@/components/entity/RelatedHighlights";
@@ -55,14 +55,16 @@ export default async function Page({ params }: PageProps) {
   ];
 
   const schema = structuredData.entity(country, "country");
+  // <Breadcrumbs> renders the visible trail AND injects its BreadcrumbList
+  // JSON-LD from this same object, so the two can never mismatch (a separate
+  // schema-only <JsonLd> here previously had no matching visible nav at all).
   const breadcrumb = breadcrumbService.generateBreadcrumbForEntity(country.name, country.slug, "countries", "Countries");
-  const breadcrumbSchema = breadcrumbService.generateBreadcrumbSchema(breadcrumb);
 
   return (
     <main className="min-h-screen bg-background pt-20 pb-32">
       <JsonLd data={schema} />
-      <JsonLd data={breadcrumbSchema} />
       <Container>
+        <Breadcrumbs breadcrumb={breadcrumb} />
         <EntityHeader name={country.name} type="Country" tags={country.tags} />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mt-12">
@@ -78,33 +80,6 @@ export default async function Page({ params }: PageProps) {
             />
 
             <EntityEditorialOverview entityName={country.name} overview={country.editorialOverview} />
-
-            <RelatedEntities
-              entities={[
-                ...country.industries.map((i: string) => ({
-                  id: `industry-${i}`,
-                  name: i.charAt(0).toUpperCase() + i.slice(1),
-                  slug: i,
-                  type: "industry" as const,
-                  description: `Industry: ${i}`,
-                  category: "industry",
-                  tags: [],
-                  created_at: new Date().toISOString(),
-                  updated_at: new Date().toISOString(),
-                })),
-                ...country.technologies.map((t: string) => ({
-                  id: `tech-${t}`,
-                  name: t.replace("-", " "),
-                  slug: t,
-                  type: "technology" as const,
-                  description: `Technology: ${t}`,
-                  category: "technology",
-                  tags: [],
-                  created_at: new Date().toISOString(),
-                  updated_at: new Date().toISOString(),
-                })),
-              ]}
-            />
           </div>
 
           <aside className="lg:col-span-4 space-y-10">

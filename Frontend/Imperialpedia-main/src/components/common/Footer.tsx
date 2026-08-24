@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { ImperialpediaMark } from '@/components/icons/ImperialpediaMark';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
+import { PreferredSourceButton } from '@/components/common/PreferredSourceButton';
 
 // ─── Remove stubs and restore your real imports in production ─────────────────
 //   import { Container } from '@/design-system/layout/container';
@@ -284,10 +285,11 @@ export default function Footer() {
         </div>
 
         {/* ── Bottom Bar ───────────────────────────────────────────── */}
-        <div className="pt-7">
+        <div className="pt-7 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-slate-500 text-center sm:text-left text-xs font-sans">
             &copy; {new Date().getFullYear()} Imperialpedia. All rights reserved.
           </p>
+          <PreferredSourceButton theme="dark" />
         </div>
 
       </Container>

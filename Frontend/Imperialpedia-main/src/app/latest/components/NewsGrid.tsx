@@ -8,6 +8,10 @@ import { newsArticles, type NewsArticle } from "@/lib/data.news";
 interface NewsGridProps {
   category?: string;
   searchQuery?: string;
+  /** Reports whether the grid ended up with any real articles once loading
+   *  settles, so a parent (e.g. an ad slot placed above this grid) can avoid
+   *  rendering next to an empty "No articles found" result. */
+  onLoadStateChange?: (hasArticles: boolean) => void;
 }
 
 /**
@@ -68,7 +72,7 @@ const fetchNews = async ({
   };
 };
 
-export function NewsGrid({ category = "All", searchQuery }: NewsGridProps) {
+export function NewsGrid({ category = "All", searchQuery, onLoadStateChange }: NewsGridProps) {
   const {
     data,
     fetchNextPage,
@@ -83,6 +87,11 @@ export function NewsGrid({ category = "All", searchQuery }: NewsGridProps) {
       lastPage.hasMore ? lastPage.nextPage : undefined,
     initialPageParam: 1,
   });
+
+  const loadedArticleCount = data?.pages.flatMap((page) => page.articles).length ?? 0;
+  useEffect(() => {
+    if (!isLoading) onLoadStateChange?.(loadedArticleCount > 0);
+  }, [isLoading, loadedArticleCount, onLoadStateChange]);
 
   // Infinite scroll
   useEffect(() => {

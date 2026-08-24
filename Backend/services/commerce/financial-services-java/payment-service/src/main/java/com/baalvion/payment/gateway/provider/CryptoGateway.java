@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.Instant;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -28,64 +29,133 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Crypto (USDT-TRC20 / ETH-BEP20 / BTC) PSP adapter — NON-CUSTODIAL. Unlike Razorpay/Stripe/
- * PayU, there is no live merchant account to call: {@code initiate} hands out the merchant's
- * OWN fixed, pre-configured receiving address (never generated/derived here — see
- * {@link PspProperties.Crypto}'s javadoc) plus a tagged target amount, and NOTHING is
- * automatically confirmed by a provider webhook, because a self-custodied wallet has no
- * webhook to send one. Confirmation instead comes from {@link com.baalvion.payment.gateway.service.CryptoChainPoller},
- * which polls a public block explorer and — on a match — calls this class's
- * {@link #checkForPayment} then feeds the result into the exact same
- * {@code GatewayService.applyWebhook} pipeline every other provider uses.
+ * Crypto PSP adapter — NON-CUSTODIAL. Unlike Razorpay/Stripe/PayU, there is no live merchant
+ * account to call: {@code initiate} hands out the merchant's OWN fixed, pre-configured
+ * receiving address (never generated/derived here — see {@link PspProperties.Crypto}'s javadoc)
+ * plus a tagged target amount, and NOTHING is automatically confirmed by a provider webhook,
+ * because a self-custodied wallet has no webhook to send one. Confirmation instead comes from
+ * {@link com.baalvion.payment.gateway.service.CryptoChainPoller}, which polls a public block
+ * explorer / RPC and — on a match — calls this class's {@link #checkForPayment} then feeds the
+ * result into the exact same {@code GatewayService.applyWebhook} pipeline every other provider
+ * uses.
  *
- * <p>USDT-TRC20 is a stablecoin (flat 1:1 USD peg, no rate lookup needed); BTC and ETH-BEP20
- * (Binance-Peg Ethereum Token) both track a volatile market price, so both go through a live
- * USD-rate lookup at charge-creation time (see {@link #btcUsdRate}/{@link #ethUsdRate}), with
- * the rate used stored in {@code rawResponse} so the SAME rate is used to convert the confirmed
- * on-chain amount back to cents later (never re-fetched, which would drift from the amount the
- * payer was actually shown).
+ * <p><b>Supported assets</b> (8): {@code USDT_TRC20} (Tron), {@code BTC}, {@code ETH_BEP20}
+ * (Binance-Peg Ethereum Token on BSC — NOT native ETH), {@code USDT_ERC20}/{@code USDC_ERC20}
+ * (Ethereum mainnet tokens), {@code ETH} (native Ethereum mainnet coin), {@code BNB} (native
+ * BNB Smart Chain coin), {@code USDT_BEP20} (a THIRD, distinct USDT contract, on BSC — not the
+ * same token as USDT_TRC20 or USDT_ERC20). Each asset's behavior is described once by an
+ * {@link AssetSpec} entry
+ * in {@link #ASSET_SPECS} instead of per-asset copy-pasted branches — adding an 8th asset means
+ * adding one {@code ASSET_SPECS} entry and, if it needs a genuinely new detection technique,
+ * one new {@link ChainVerifier} implementation (most new EVM tokens need neither — they reuse
+ * {@link EvmErc20Verifier} with a different RPC URL / contract address).
+ *
+ * <p><b>Stablecoins</b> (USDT/USDC, any network) are flat 1:1 USD, no rate lookup. BTC, native
+ * ETH, ETH-BEP20, and native BNB all track a volatile market price, so those go through a live
+ * USD-rate lookup at charge-creation time (see {@link #usdRate}), with the rate used stored in
+ * {@code rawResponse} so the SAME rate is used to convert the confirmed on-chain amount back to
+ * cents later (never re-fetched, which would drift from the amount the payer was actually shown).
  *
  * <p><b>Amount-tagging:</b> since many charges can share the SAME address (there is only one
- * merchant wallet, not one address per order), each charge's on-chain target amount gets a
- * tiny deterministic offset (a handful of the smallest unit — negligible value) derived from
- * the order ref, so concurrent charges are individually distinguishable on-chain. The tag is
- * stored in {@code rawResponse} and subtracted back out when converting a confirmed on-chain
+ * merchant wallet per asset, not one address per order), each charge's on-chain target amount
+ * gets a tiny deterministic offset (a handful of the smallest unit — negligible value) derived
+ * from the order ref, so concurrent charges are individually distinguishable on-chain. The tag
+ * is stored in {@code rawResponse} and subtracted back out when converting a confirmed on-chain
  * amount back to the USD-cents unit {@code GatewayService} validates against.
  *
- * <p>⚠ VERIFY AT EXECUTION TIME: {@link #tronGridTransfers}, {@link #bep20Transfers}, and
- * {@link #mempoolAddressTxs}/{@link #mempoolTipHeight} parse TronGrid's, BSC's EVM JSON-RPC,
- * and mempool.space's PUBLICLY DOCUMENTED response shapes as of their current API versions —
- * not confirmed against a live call from this development environment (no outbound network
- * access here). Confirm field names against a real response before relying on this in
- * production; this is the ONE place that risk lives.
+ * <p><b>Native-coin detection is deliberately NOT {@code eth_getLogs}</b>: native ETH/BNB
+ * transfers emit no event log (that's an ERC20/BEP20-only mechanism), so {@link EvmNativeVerifier}
+ * uses an Etherscan/BscScan-compatible "account transaction list" API instead of scanning raw
+ * blocks — scanning every block in the charge-expiry window via {@code eth_getBlockByNumber}
+ * would mean hundreds of individual RPC calls per poll tick per pending charge, which no public
+ * or free-tier RPC endpoint tolerates. This mirrors how BTC already uses mempool.space (an
+ * address-history explorer API) rather than scanning raw blocks itself.
+ *
+ * <p>⚠ VERIFY AT EXECUTION TIME: {@link #tronGridTransfers}, {@link EvmErc20Verifier#check},
+ * {@link EvmNativeVerifier#check}, and {@link #mempoolAddressTxs}/{@link #mempoolTipHeight} parse
+ * TronGrid's, BSC/Ethereum's EVM JSON-RPC, Etherscan/BscScan's, and mempool.space's PUBLICLY
+ * DOCUMENTED response shapes as of their current API versions — not confirmed against a live
+ * call from this development environment (no outbound network access here). The USDT-ERC20 and
+ * USDC-ERC20 mainnet contract addresses in {@link PspProperties.Crypto}'s defaults are likewise
+ * unverified against a live source in this environment — confirm both the API response shapes
+ * and the contract addresses against Etherscan before relying on any of this in production; this
+ * is the ONE place that risk lives.
  */
 @Slf4j
 @Component
 public class CryptoGateway implements PaymentGateway {
 
   static final String PROVIDER = "crypto";
+
   static final String ASSET_USDT_TRC20 = "USDT_TRC20";
   /** Binance-Peg Ethereum Token — a BEP20 (BSC) token tracking ETH/USD, NOT a stablecoin like
-   *  USDT: it needs a live rate lookup at charge time, same as BTC (see {@link #ethUsdRate}). */
+   *  USDT: it needs a live rate lookup at charge time, same as BTC (see {@link #usdRate}). */
   static final String ASSET_ETH_BEP20 = "ETH_BEP20";
   static final String ASSET_BTC = "BTC";
+  static final String ASSET_USDT_ERC20 = "USDT_ERC20";
+  static final String ASSET_USDC_ERC20 = "USDC_ERC20";
+  /** Native Ethereum mainnet ETH — distinct from {@link #ASSET_ETH_BEP20} (a BSC token). */
+  static final String ASSET_ETH = "ETH";
+  /** Native BNB Smart Chain coin — distinct from any BEP20 *token* (there is none here for BNB
+   *  itself; BNB is the chain's own gas/native asset, same relationship as ETH is to Ethereum). */
+  static final String ASSET_BNB = "BNB";
+  /** USDT on BSC (BEP20) — a DIFFERENT token/contract from both {@link #ASSET_USDT_TRC20} and
+   *  {@link #ASSET_USDT_ERC20}; this is what exchanges label "USDT via BEP20/BSC network". Same
+   *  chain as {@link #ASSET_ETH_BEP20} but its own contract — 18 decimals (unlike the TRC20/ERC20
+   *  USDT contracts, which use 6). */
+  static final String ASSET_USDT_BEP20 = "USDT_BEP20";
+
   /** keccak256("Transfer(address,address,uint256)") — the ERC20/BEP20 Transfer event's topic0
-   *  (BSC is EVM-compatible, same event ABI as Ethereum) — a fixed constant, never derived. */
+   *  (EVM chains share the same event ABI) — a fixed constant, never derived. */
   private static final String TRANSFER_EVENT_TOPIC = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
 
-  /** 1 USDT == 1,000,000 microUSDT; 1 USD cent == 1/100 USD == 10,000 microUSDT. */
-  private static final long MICRO_USDT_PER_CENT = 10_000L;
   /** Tagging offset range in the target asset's smallest unit — a few units, negligible value. */
   private static final long TAG_MODULUS = 1000L;
+
+  /**
+   * Describes one supported asset's charge-creation and amount-conversion behavior. Detection
+   * (the actual chain read) is a separate concern, wired up in {@link #buildVerifiers}.
+   *
+   * @param addressConfigKey the {@code ProviderConfig.config}/CMS-vault key holding the
+   *                          merchant's receiving address for this asset (e.g. {@code "btcAddress"})
+   * @param decimals          smallest-unit decimal places (BTC=8, most EVM tokens=6 or 18)
+   * @param unitSuffix        display suffix (e.g. {@code "BTC"}, {@code "USDT"})
+   * @param network           display network label (e.g. {@code "TRC20"}, {@code "ERC20"})
+   * @param stable            true for USD-pegged stablecoins (flat 1:1, no rate lookup)
+   * @param rateCoinGeckoId   CoinGecko id for the live USD rate lookup; null when {@code stable}
+   */
+  private record AssetSpec(
+    String addressConfigKey,
+    int decimals,
+    String unitSuffix,
+    String network,
+    boolean stable,
+    String rateCoinGeckoId
+  ) {}
+
+  private static final Map<String, AssetSpec> ASSET_SPECS = Map.ofEntries(
+    Map.entry(ASSET_USDT_TRC20, new AssetSpec("usdtTrc20Address", 6, "USDT", "TRC20", true, null)),
+    Map.entry(ASSET_BTC, new AssetSpec("btcAddress", 8, "BTC", "BTC", false, "bitcoin")),
+    Map.entry(ASSET_ETH_BEP20, new AssetSpec("ethBep20Address", 18, "ETH", "BEP20", false, "ethereum")),
+    Map.entry(ASSET_USDT_ERC20, new AssetSpec("usdtErc20Address", 6, "USDT", "ERC20", true, null)),
+    Map.entry(ASSET_USDC_ERC20, new AssetSpec("usdcErc20Address", 6, "USDC", "ERC20", true, null)),
+    Map.entry(ASSET_ETH, new AssetSpec("ethAddress", 18, "ETH", "ETH", false, "ethereum")),
+    Map.entry(ASSET_BNB, new AssetSpec("bnbAddress", 18, "BNB", "BNB", false, "binancecoin")),
+    Map.entry(ASSET_USDT_BEP20, new AssetSpec("usdtBep20Address", 18, "USDT", "BEP20", true, null))
+  );
 
   private final PspProperties.Crypto config;
   private final ObjectMapper objectMapper;
   private final RestClient restClient;
 
+  /** One {@link ChainVerifier} per supported asset, built once from {@link #config}. */
+  private final Map<String, ChainVerifier> verifiers;
+
   public CryptoGateway(PspProperties properties, ObjectMapper objectMapper) {
     this.config = properties.getCrypto();
     this.objectMapper = objectMapper;
     this.restClient = RestClient.builder().build();
+    this.verifiers = buildVerifiers();
   }
 
   @Override
@@ -103,26 +173,24 @@ public class CryptoGateway implements PaymentGateway {
     Objects.requireNonNull(cfg, "config");
 
     String asset = assetOf(request);
+    AssetSpec spec = ASSET_SPECS.get(asset);
+    if (spec == null) {
+      throw new IllegalArgumentException(
+        "Unsupported cryptoAsset (expected one of " + ASSET_SPECS.keySet() + "): " + asset);
+    }
+
     long amountCents = request.amount().longValueExact();
     long tagSmallestUnit = taggingOffset(request.orderRef(), asset);
 
-    String address;
-    long targetSmallestUnit;
-    BigDecimal usdRateUsed = null;
+    String address = requireAddress(cfg.configString(spec.addressConfigKey()), globalDefaultAddress(asset), asset);
 
-    if (ASSET_USDT_TRC20.equals(asset)) {
-      address = requireAddress(cfg.configString("usdtTrc20Address"), config.getUsdtTrc20Address(), "USDT-TRC20");
-      targetSmallestUnit = amountCents * MICRO_USDT_PER_CENT + tagSmallestUnit;
-    } else if (ASSET_ETH_BEP20.equals(asset)) {
-      address = requireAddress(cfg.configString("ethBep20Address"), config.getEthBep20Address(), "ETH-BEP20");
-      usdRateUsed = ethUsdRate(cfg.mock());
-      targetSmallestUnit = usdToSmallestUnit(amountCents, usdRateUsed, 18) + tagSmallestUnit;
-    } else if (ASSET_BTC.equals(asset)) {
-      address = requireAddress(cfg.configString("btcAddress"), config.getBtcAddress(), "BTC");
-      usdRateUsed = btcUsdRate(cfg.mock());
-      targetSmallestUnit = usdToSmallestUnit(amountCents, usdRateUsed, 8) + tagSmallestUnit;
+    BigDecimal usdRateUsed = null;
+    java.math.BigInteger targetSmallestUnit;
+    if (spec.stable()) {
+      targetSmallestUnit = stableUnitsForCents(amountCents, spec.decimals()).add(java.math.BigInteger.valueOf(tagSmallestUnit));
     } else {
-      throw new IllegalArgumentException("Unsupported cryptoAsset (expected USDT_TRC20, ETH_BEP20, or BTC): " + asset);
+      usdRateUsed = usdRate(spec.rateCoinGeckoId(), cfg.mock());
+      targetSmallestUnit = usdToSmallestUnit(amountCents, usdRateUsed, spec.decimals()).add(java.math.BigInteger.valueOf(tagSmallestUnit));
     }
 
     String providerRef = "crypto_" + UUID.randomUUID();
@@ -130,7 +198,7 @@ public class CryptoGateway implements PaymentGateway {
 
     Map<String, Object> raw = new LinkedHashMap<>();
     raw.put("asset", asset);
-    raw.put("network", networkOf(asset));
+    raw.put("network", spec.network());
     raw.put("address", address);
     raw.put("targetSmallestUnit", targetSmallestUnit);
     raw.put("taggingOffsetSmallestUnit", tagSmallestUnit);
@@ -144,13 +212,13 @@ public class CryptoGateway implements PaymentGateway {
 
     Map<String, String> clientParams = new LinkedHashMap<>();
     clientParams.put("asset", asset);
-    clientParams.put("network", (String) raw.get("network"));
+    clientParams.put("network", spec.network());
     clientParams.put("address", address);
     // Raw numeric amount (no unit suffix) — lets the client build a BIP21 URI ("bitcoin:<addr>?
     // amount=<amountValue>") for QR codes that pre-fill the amount in the paying wallet, not just
     // amountDisplay's human-readable "0.00081235 BTC" string.
-    clientParams.put("amountValue", amountValue(asset, targetSmallestUnit));
-    clientParams.put("amountDisplay", displayAmount(asset, targetSmallestUnit));
+    clientParams.put("amountValue", amountValue(spec, targetSmallestUnit));
+    clientParams.put("amountDisplay", displayAmount(spec, targetSmallestUnit));
     clientParams.put("expiresAt", expiresAt.toString());
 
     return new GatewayChargeResponse(PROVIDER, providerRef, GatewayStatus.CREATED, clientParams, toJson(raw));
@@ -200,7 +268,33 @@ public class CryptoGateway implements PaymentGateway {
   // Chain-watching (called by CryptoChainPoller, which owns persistence access)
   // ---------------------------------------------------------------------------
 
-  public record ChainMatch(String txHash, long confirmedSmallestUnit, int confirmations) {}
+  // BigInteger, not long: an 18-decimal-token smallest-unit amount for a realistic dollar charge
+  // ($250 of an 18-decimal STABLE token == 2.5x10^20) overflows long's ~9.22x10^18 max. This was
+  // a real bug caught by CryptoGatewayTest before it ever reached a live chain call — a stable,
+  // 18-decimal asset (USDT_BEP20) is the case that exposes it; volatile 18-decimal assets (ETH,
+  // ETH_BEP20, BNB) stay small because their smallest-unit amount is divided by a market rate in
+  // the thousands, not multiplied straight from cents.
+  public record ChainMatch(String txHash, java.math.BigInteger confirmedSmallestUnit, int confirmations) {}
+
+  /** Strategy interface for "has this address received >= target since some time?" — one
+   *  implementation per detection technique, not one per asset (several assets share an
+   *  implementation, parameterized differently; see {@link #buildVerifiers}). */
+  private interface ChainVerifier {
+    Optional<ChainMatch> check(String address, java.math.BigInteger targetSmallestUnit, Instant since);
+  }
+
+  private Map<String, ChainVerifier> buildVerifiers() {
+    Map<String, ChainVerifier> m = new LinkedHashMap<>();
+    m.put(ASSET_USDT_TRC20, new TronTrc20Verifier(config.getUsdtTrc20ContractAddress()));
+    m.put(ASSET_ETH_BEP20, new EvmErc20Verifier(config.getBscRpcUrl(), config.getEthBep20ContractAddress(), config.getBscConfirmationsRequired()));
+    m.put(ASSET_USDT_ERC20, new EvmErc20Verifier(config.getEthRpcUrl(), config.getUsdtErc20ContractAddress(), config.getEthConfirmationsRequired()));
+    m.put(ASSET_USDC_ERC20, new EvmErc20Verifier(config.getEthRpcUrl(), config.getUsdcErc20ContractAddress(), config.getEthConfirmationsRequired()));
+    m.put(ASSET_ETH, new EvmNativeVerifier(config.getEthRpcUrl(), config.getEtherscanApiBaseUrl(), config.getEtherscanApiKey(), config.getEthConfirmationsRequired()));
+    m.put(ASSET_BNB, new EvmNativeVerifier(config.getBscRpcUrl(), config.getBscscanApiBaseUrl(), config.getBscscanApiKey(), config.getBscConfirmationsRequired()));
+    m.put(ASSET_USDT_BEP20, new EvmErc20Verifier(config.getBscRpcUrl(), config.getUsdtBep20ContractAddress(), config.getBscConfirmationsRequired()));
+    m.put(ASSET_BTC, new BitcoinVerifier());
+    return Map.copyOf(m);
+  }
 
   /**
    * Check whether {@code address} has received a not-yet-consumed transfer of at least
@@ -209,7 +303,7 @@ public class CryptoGateway implements PaymentGateway {
    * provider+eventId uniqueness, keyed by this method's returned {@code txHash}) — this method
    * only looks at the chain.
    */
-  public Optional<ChainMatch> checkForPayment(String asset, String address, long targetSmallestUnit, Instant since, ProviderConfig cfg) {
+  public Optional<ChainMatch> checkForPayment(String asset, String address, java.math.BigInteger targetSmallestUnit, Instant since, ProviderConfig cfg) {
     if (cfg.mock()) {
       // Deterministic mock "confirmation": once the charge is at least 5 seconds old, treat it
       // as paid — good enough for local/dev exercising of the full poller -> webhook -> fulfill
@@ -220,32 +314,47 @@ public class CryptoGateway implements PaymentGateway {
       }
       return Optional.empty();
     }
-    return switch (asset) {
-      case ASSET_USDT_TRC20 -> tronGridTransfers(address, targetSmallestUnit);
-      case ASSET_ETH_BEP20 -> bep20Transfers(address, targetSmallestUnit);
-      default -> mempoolAddressTxs(address, targetSmallestUnit);
-    };
+    ChainVerifier verifier = verifiers.get(asset);
+    if (verifier == null) {
+      log.warn("Crypto poller: no chain verifier registered for asset={}", asset);
+      return Optional.empty();
+    }
+    return verifier.check(address, targetSmallestUnit, since);
   }
 
   /** Converts a confirmed on-chain amount + this charge's stored tagging offset back to USD cents. */
-  public long confirmedAmountToCents(String asset, long confirmedSmallestUnit, long taggingOffsetSmallestUnit, BigDecimal usdRateUsed) {
-    long untagged = confirmedSmallestUnit - taggingOffsetSmallestUnit;
-    if (ASSET_USDT_TRC20.equals(asset)) {
-      return untagged / MICRO_USDT_PER_CENT;
+  public long confirmedAmountToCents(String asset, java.math.BigInteger confirmedSmallestUnit, java.math.BigInteger taggingOffsetSmallestUnit, BigDecimal usdRateUsed) {
+    AssetSpec spec = ASSET_SPECS.get(asset);
+    Objects.requireNonNull(spec, () -> "Unknown asset: " + asset);
+    java.math.BigInteger untagged = confirmedSmallestUnit.subtract(taggingOffsetSmallestUnit);
+    if (spec.stable()) {
+      return untagged.divide(stableSmallestUnitsPerCent(spec.decimals())).longValueExact();
     }
-    Objects.requireNonNull(usdRateUsed, "usdRateUsed is required to convert a BTC/ETH amount back to cents");
-    int decimals = ASSET_ETH_BEP20.equals(asset) ? 18 : 8;
-    BigDecimal whole = BigDecimal.valueOf(untagged).movePointLeft(decimals);
+    Objects.requireNonNull(usdRateUsed, "usdRateUsed is required to convert a non-stable asset amount back to cents");
+    BigDecimal whole = new BigDecimal(untagged).movePointLeft(spec.decimals());
     return whole.multiply(usdRateUsed).movePointRight(2).setScale(0, RoundingMode.HALF_UP).longValueExact();
   }
 
   // ---------------------------------------------------------------------------
-  // TronGrid (USDT-TRC20)
+  // TronGrid (USDT-TRC20) — unchanged behavior, contract address now parameterized
   // ---------------------------------------------------------------------------
 
-  private Optional<ChainMatch> tronGridTransfers(String address, long targetSmallestUnit) {
+  private final class TronTrc20Verifier implements ChainVerifier {
+    private final String contractAddress;
+
+    TronTrc20Verifier(String contractAddress) {
+      this.contractAddress = contractAddress;
+    }
+
+    @Override
+    public Optional<ChainMatch> check(String address, java.math.BigInteger targetSmallestUnit, Instant since) {
+      return tronGridTransfers(address, targetSmallestUnit, contractAddress);
+    }
+  }
+
+  private Optional<ChainMatch> tronGridTransfers(String address, java.math.BigInteger targetSmallestUnit, String contractAddress) {
     String url = config.getTronGridBaseUrl() + "/v1/accounts/" + address
-      + "/transactions/trc20?limit=50&contract_address=" + config.getUsdtTrc20ContractAddress();
+      + "/transactions/trc20?limit=50&contract_address=" + contractAddress;
     String body;
     try {
       body = restClient.get().uri(url).retrieve().body(String.class);
@@ -258,8 +367,10 @@ public class CryptoGateway implements PaymentGateway {
       if (!address.equalsIgnoreCase(textOrEmpty(tx, "to"))) {
         continue;
       }
-      long value = tx.path("value").asLong(-1);
-      if (value < targetSmallestUnit) {
+      // TronGrid returns "value" as a decimal STRING specifically to avoid precision loss on
+      // large token amounts — parse it as such, never via asLong().
+      java.math.BigInteger value = parseBigIntegerSafe(textOrEmpty(tx, "value"));
+      if (value.compareTo(targetSmallestUnit) < 0) {
         continue;
       }
       String txHash = textOrEmpty(tx, "transaction_id");
@@ -272,69 +383,181 @@ public class CryptoGateway implements PaymentGateway {
   }
 
   // ---------------------------------------------------------------------------
-  // BNB Smart Chain public JSON-RPC (ETH-BEP20) — eth_getLogs on the Transfer event.
-  // BSC is EVM-compatible (same JSON-RPC methods/log format as Ethereum), so this is the
-  // exact same technique, just pointed at BSC's RPC + the Binance-Peg ETH token contract.
+  // EVM ERC20/BEP20 token Transfer-event scan (ETH-BEP20, USDT-ERC20, USDC-ERC20) —
+  // generalizes the original BEP20-only logic to any (rpcUrl, contractAddress) pair.
   // ---------------------------------------------------------------------------
 
-  /**
-   * ⚠ VERIFY AT EXECUTION TIME (see class javadoc): decodes raw JSON-RPC {@code eth_getLogs}
-   * results by hand (no web3/ethers dependency) — topic0 is the fixed Transfer event
-   * signature, topic2 is the recipient address (32-byte, zero-left-padded), and {@code data}
-   * is the raw uint256 transfer amount as hex. Queries only the last ~1500 blocks (~75 min at
-   * BSC's ~3s/block — comfortably covers {@code chargeExpiryMinutes}) to keep the request cheap
-   * enough for a public, unauthenticated RPC endpoint.
-   */
-  private Optional<ChainMatch> bep20Transfers(String address, long targetSmallestUnit) {
-    Long latestBlock = evmBlockNumber(config.getBscRpcUrl());
-    if (latestBlock == null) {
+  private final class EvmErc20Verifier implements ChainVerifier {
+    private final String rpcUrl;
+    private final String contractAddress;
+    private final int confirmationsRequired;
+
+    EvmErc20Verifier(String rpcUrl, String contractAddress, int confirmationsRequired) {
+      this.rpcUrl = rpcUrl;
+      this.contractAddress = contractAddress;
+      this.confirmationsRequired = confirmationsRequired;
+    }
+
+    /**
+     * ⚠ VERIFY AT EXECUTION TIME (see class javadoc): decodes raw JSON-RPC {@code eth_getLogs}
+     * results by hand (no web3/ethers dependency) — topic0 is the fixed Transfer event
+     * signature, topic2 is the recipient address (32-byte, zero-left-padded), and {@code data}
+     * is the raw uint256 transfer amount as hex. Queries only the last ~1500 blocks to keep the
+     * request cheap enough for a public, unauthenticated RPC endpoint.
+     */
+    @Override
+    public Optional<ChainMatch> check(String address, java.math.BigInteger targetSmallestUnit, Instant since) {
+      Long latestBlock = evmBlockNumber(rpcUrl);
+      if (latestBlock == null) {
+        return Optional.empty();
+      }
+      long fromBlock = Math.max(0, latestBlock - 1500);
+      String paddedAddress = "0x" + "0".repeat(24) + address.toLowerCase(Locale.ROOT).replaceFirst("^0x", "");
+
+      Map<String, Object> filter = new LinkedHashMap<>();
+      filter.put("fromBlock", "0x" + Long.toHexString(fromBlock));
+      filter.put("toBlock", "latest");
+      filter.put("address", contractAddress);
+      // Arrays.asList (NOT List.of) — List.of throws NullPointerException on a null element, and
+      // the middle topic slot (topic1 = sender, unfiltered) must be null per eth_getLogs' convention.
+      filter.put("topics", java.util.Arrays.asList(TRANSFER_EVENT_TOPIC, null, paddedAddress));
+
+      JsonNode result = evmRpcCall(rpcUrl, "eth_getLogs", List.of(filter));
+      if (result == null) {
+        return Optional.empty();
+      }
+      for (JsonNode log0 : result) {
+        // "data" carries the raw uint256 transfer amount — MUST be parsed as BigInteger, not
+        // hexToLong: a large token amount at up to 18 decimals overflows a 64-bit long.
+        java.math.BigInteger value = hexToBigInteger(textOrEmpty(log0, "data"));
+        if (value.compareTo(targetSmallestUnit) < 0) {
+          continue;
+        }
+        long logBlock = hexToLong(textOrEmpty(log0, "blockNumber"));
+        int confirmations = (int) Math.max(0, latestBlock - logBlock + 1);
+        if (confirmations < confirmationsRequired) {
+          continue;
+        }
+        String txHash = textOrEmpty(log0, "transactionHash");
+        if (txHash.isEmpty()) {
+          continue;
+        }
+        return Optional.of(new ChainMatch(txHash, value, confirmations));
+      }
       return Optional.empty();
     }
-    long fromBlock = Math.max(0, latestBlock - 1500);
-    String paddedAddress = "0x" + "0".repeat(24) + address.toLowerCase(Locale.ROOT).replaceFirst("^0x", "");
-
-    Map<String, Object> filter = new LinkedHashMap<>();
-    filter.put("fromBlock", "0x" + Long.toHexString(fromBlock));
-    filter.put("toBlock", "latest");
-    filter.put("address", config.getEthBep20ContractAddress());
-    // Arrays.asList (NOT List.of) — List.of throws NullPointerException on a null element, and
-    // the middle topic slot (topic1 = sender, unfiltered) must be null per eth_getLogs' convention.
-    filter.put("topics", java.util.Arrays.asList(TRANSFER_EVENT_TOPIC, null, paddedAddress));
-
-    JsonNode result = evmRpcCall(config.getBscRpcUrl(), "eth_getLogs", java.util.List.of(filter));
-    if (result == null) {
-      return Optional.empty();
-    }
-    for (JsonNode log0 : result) {
-      long value = hexToLong(textOrEmpty(log0, "data"));
-      if (value < targetSmallestUnit) {
-        continue;
-      }
-      long logBlock = hexToLong(textOrEmpty(log0, "blockNumber"));
-      int confirmations = (int) Math.max(0, latestBlock - logBlock + 1);
-      if (confirmations < config.getBscConfirmationsRequired()) {
-        continue;
-      }
-      String txHash = textOrEmpty(log0, "transactionHash");
-      if (txHash.isEmpty()) {
-        continue;
-      }
-      return Optional.of(new ChainMatch(txHash, value, confirmations));
-    }
-    return Optional.empty();
   }
 
+  // ---------------------------------------------------------------------------
+  // Native EVM coin transfers (ETH, BNB) — an Etherscan/BscScan-compatible "account tx list"
+  // API, NOT eth_getLogs (native transfers emit no event log) and NOT raw block scanning (would
+  // be hundreds of eth_getBlockByNumber calls per poll tick — see class javadoc).
+  // ---------------------------------------------------------------------------
+
+  private final class EvmNativeVerifier implements ChainVerifier {
+    private final String rpcUrl;
+    private final String explorerApiBaseUrl;
+    private final String explorerApiKey;
+    private final int confirmationsRequired;
+
+    EvmNativeVerifier(String rpcUrl, String explorerApiBaseUrl, String explorerApiKey, int confirmationsRequired) {
+      this.rpcUrl = rpcUrl;
+      this.explorerApiBaseUrl = explorerApiBaseUrl;
+      this.explorerApiKey = explorerApiKey;
+      this.confirmationsRequired = confirmationsRequired;
+    }
+
+    /**
+     * ⚠ VERIFY AT EXECUTION TIME (see class javadoc): Etherscan/BscScan's {@code module=account
+     * &action=txlist} response shape — a JSON array of tx objects with {@code to}, {@code value}
+     * (decimal-string wei), {@code hash}, {@code blockNumber}, {@code isError}.
+     */
+    @Override
+    public Optional<ChainMatch> check(String address, java.math.BigInteger targetSmallestUnit, Instant since) {
+      if (explorerApiKey == null || explorerApiKey.isBlank()) {
+        log.warn("Native EVM verifier for {} has no explorer API key configured — skipping", sanitize(address));
+        return Optional.empty();
+      }
+      Long latestBlock = evmBlockNumber(rpcUrl);
+      if (latestBlock == null) {
+        return Optional.empty();
+      }
+      String url = explorerApiBaseUrl + "?module=account&action=txlist&address=" + address
+        + "&sort=desc&apikey=" + explorerApiKey;
+      String body;
+      try {
+        body = restClient.get().uri(url).retrieve().body(String.class);
+      } catch (RuntimeException ex) {
+        log.warn("Explorer txlist lookup failed for address={}: {}", sanitize(address), ex.getMessage());
+        return Optional.empty();
+      }
+      JsonNode root = readTree(body);
+      for (JsonNode tx : root.path("result")) {
+        if (!"0".equals(textOrEmpty(tx, "isError"))) {
+          continue; // failed transaction, no value actually moved
+        }
+        if (!address.equalsIgnoreCase(textOrEmpty(tx, "to"))) {
+          continue;
+        }
+        // wei-scale native amount — BigInteger, not long (see ChainMatch javadoc).
+        java.math.BigInteger value = parseBigIntegerSafe(textOrEmpty(tx, "value"));
+        if (value.compareTo(targetSmallestUnit) < 0) {
+          continue;
+        }
+        long txBlock = parseLongSafe(textOrEmpty(tx, "blockNumber"));
+        int confirmations = (int) Math.max(0, latestBlock - txBlock + 1);
+        if (confirmations < confirmationsRequired) {
+          continue;
+        }
+        String txHash = textOrEmpty(tx, "hash");
+        if (txHash.isEmpty()) {
+          continue;
+        }
+        return Optional.of(new ChainMatch(txHash, value, confirmations));
+      }
+      return Optional.empty();
+    }
+  }
+
+  private static long parseLongSafe(String value) {
+    if (value == null || value.isBlank()) {
+      return 0L;
+    }
+    try {
+      return Long.parseLong(value.trim());
+    } catch (NumberFormatException ex) {
+      return 0L;
+    }
+  }
+
+  /** Same contract as {@link #parseLongSafe} but for values that may exceed a 64-bit long
+   *  (native/wei-scale on-chain amounts) — see {@link ChainMatch}'s javadoc. */
+  private static java.math.BigInteger parseBigIntegerSafe(String value) {
+    if (value == null || value.isBlank()) {
+      return java.math.BigInteger.ZERO;
+    }
+    try {
+      return new java.math.BigInteger(value.trim());
+    } catch (NumberFormatException ex) {
+      return java.math.BigInteger.ZERO;
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Shared EVM JSON-RPC helper (used by EvmErc20Verifier and EvmNativeVerifier's block-number
+  // lookup) — works against any EVM-compatible chain given that chain's RPC URL.
+  // ---------------------------------------------------------------------------
+
   private Long evmBlockNumber(String rpcUrl) {
-    JsonNode result = evmRpcCall(rpcUrl, "eth_blockNumber", java.util.List.of());
+    JsonNode result = evmRpcCall(rpcUrl, "eth_blockNumber", List.of());
     if (result == null || !result.isTextual()) {
       return null;
     }
     return hexToLong(result.asText());
   }
 
-  /** Minimal JSON-RPC 2.0 client — no web3/ethers dependency, see method javadoc above. Works
-   *  against any EVM-compatible chain (Ethereum, BSC, …) given that chain's RPC URL. */
-  private JsonNode evmRpcCall(String rpcUrl, String method, java.util.List<Object> params) {
+  /** Minimal JSON-RPC 2.0 client — no web3/ethers dependency, see method javadoc above. */
+  private JsonNode evmRpcCall(String rpcUrl, String method, List<Object> params) {
     Map<String, Object> body = new LinkedHashMap<>();
     body.put("jsonrpc", "2.0");
     body.put("id", 1);
@@ -358,6 +581,9 @@ public class CryptoGateway implements PaymentGateway {
     }
   }
 
+  /** Block numbers only — always small, safely fits a long. For on-chain token/wei AMOUNTS use
+   *  {@link #hexToBigInteger} instead: a large token amount at up to 18 decimals overflows a
+   *  64-bit long (this was a real, caught bug — see {@link ChainMatch}'s javadoc). */
   private static long hexToLong(String hex) {
     if (hex == null || hex.isBlank()) {
       return 0L;
@@ -366,19 +592,34 @@ public class CryptoGateway implements PaymentGateway {
     if (h.isEmpty()) {
       return 0L;
     }
-    // Fits comfortably in a long for any realistic charge amount at THIS platform's price points
-    // ($100-$250 tiers): even 18-decimal ETH-BEP20 wei amounts stay well under long's ~9.22e18
-    // max for any plausible ETH/USD rate. Would need BigInteger instead if amounts/decimals ever
-    // grow enough to risk overflow. Long.parseUnsignedLong tolerates the full unsigned 64-bit
-    // range (this also parses block numbers, which are far smaller).
     return Long.parseUnsignedLong(h, 16);
   }
 
+  /** Hex (0x-prefixed or not) -> unsigned BigInteger — for on-chain token/wei AMOUNT fields,
+   *  which can exceed a 64-bit long at 18 decimals for a realistic dollar amount. */
+  private static java.math.BigInteger hexToBigInteger(String hex) {
+    if (hex == null || hex.isBlank()) {
+      return java.math.BigInteger.ZERO;
+    }
+    String h = hex.startsWith("0x") || hex.startsWith("0X") ? hex.substring(2) : hex;
+    if (h.isEmpty()) {
+      return java.math.BigInteger.ZERO;
+    }
+    return new java.math.BigInteger(h, 16);
+  }
+
   // ---------------------------------------------------------------------------
-  // mempool.space (BTC)
+  // mempool.space (BTC) — unchanged
   // ---------------------------------------------------------------------------
 
-  private Optional<ChainMatch> mempoolAddressTxs(String address, long targetSats) {
+  private final class BitcoinVerifier implements ChainVerifier {
+    @Override
+    public Optional<ChainMatch> check(String address, java.math.BigInteger targetSmallestUnit, Instant since) {
+      return mempoolAddressTxs(address, targetSmallestUnit);
+    }
+  }
+
+  private Optional<ChainMatch> mempoolAddressTxs(String address, java.math.BigInteger targetSats) {
     String body;
     try {
       body = restClient.get().uri(config.getMempoolBaseUrl() + "/address/" + address + "/txs")
@@ -403,15 +644,17 @@ public class CryptoGateway implements PaymentGateway {
         if (!address.equalsIgnoreCase(textOrEmpty(vout, "scriptpubkey_address"))) {
           continue;
         }
+        // BTC satoshi amounts always fit a long (21M BTC cap == ~2.1x10^15 sats, far under
+        // long's ~9.2x10^18 max) — safe here even though the interface is BigInteger-typed.
         long value = vout.path("value").asLong(-1);
-        if (value < targetSats) {
+        if (java.math.BigInteger.valueOf(value).compareTo(targetSats) < 0) {
           continue;
         }
         String txHash = textOrEmpty(tx, "txid");
         if (txHash.isEmpty()) {
           continue;
         }
-        return Optional.of(new ChainMatch(txHash, value, confirmations));
+        return Optional.of(new ChainMatch(txHash, java.math.BigInteger.valueOf(value), confirmations));
       }
     }
     return Optional.empty();
@@ -428,15 +671,19 @@ public class CryptoGateway implements PaymentGateway {
     }
   }
 
-  private BigDecimal btcUsdRate(boolean mock) {
-    return mock ? BigDecimal.valueOf(60000) : coinGeckoUsdRate("bitcoin");
-  }
+  // ---------------------------------------------------------------------------
+  // USD rate lookup (BTC, ETH, ETH-BEP20, BNB — anything non-stable)
+  // ---------------------------------------------------------------------------
 
-  private BigDecimal ethUsdRate(boolean mock) {
-    return mock ? BigDecimal.valueOf(3000) : coinGeckoUsdRate("ethereum");
-  }
-
-  private BigDecimal coinGeckoUsdRate(String coinGeckoId) {
+  private BigDecimal usdRate(String coinGeckoId, boolean mock) {
+    if (mock) {
+      return switch (coinGeckoId) {
+        case "bitcoin" -> BigDecimal.valueOf(60000);
+        case "ethereum" -> BigDecimal.valueOf(3000);
+        case "binancecoin" -> BigDecimal.valueOf(600);
+        default -> BigDecimal.valueOf(1);
+      };
+    }
     try {
       String body = restClient.get()
         .uri(config.getRateApiBaseUrl() + "/simple/price?ids=" + coinGeckoId + "&vs_currencies=usd")
@@ -452,11 +699,27 @@ public class CryptoGateway implements PaymentGateway {
     }
   }
 
-  /** USD (in cents) -> the asset's smallest unit, at the given USD rate, rounded to a whole unit. */
-  private static long usdToSmallestUnit(long amountCents, BigDecimal usdRate, int decimals) {
+  /** USD (in cents) -> the asset's smallest unit, at the given USD rate, rounded to a whole unit.
+   *  BigInteger result: a volatile 18-decimal asset (native ETH/BNB) stays well within long range
+   *  in practice (division by a rate keeps it small), but the return type is BigInteger for one
+   *  consistent representation across every asset — see {@link ChainMatch}'s javadoc for why that
+   *  matters for the STABLE 18-decimal case this feeds the same downstream math as. */
+  private static java.math.BigInteger usdToSmallestUnit(long amountCents, BigDecimal usdRate, int decimals) {
     BigDecimal usd = BigDecimal.valueOf(amountCents).movePointLeft(2);
     return usd.divide(usdRate, 24, RoundingMode.HALF_UP)
-      .movePointRight(decimals).setScale(0, RoundingMode.HALF_UP).longValueExact();
+      .movePointRight(decimals).setScale(0, RoundingMode.HALF_UP).toBigIntegerExact();
+  }
+
+  /** 1 whole stablecoin unit == 10^decimals smallest units; 1 USD cent == 1/100 of that whole
+   *  unit (stablecoins are 1:1 USD-pegged) == 10^(decimals-2) smallest units per cent. Exact
+   *  integer power — {@code Math.pow} (double-based) loses precision at this magnitude and was
+   *  the root cause of a real overflow bug for 18-decimal stablecoins (see ChainMatch javadoc). */
+  private static java.math.BigInteger stableSmallestUnitsPerCent(int decimals) {
+    return java.math.BigInteger.TEN.pow(decimals - 2);
+  }
+
+  private static java.math.BigInteger stableUnitsForCents(long amountCents, int decimals) {
+    return java.math.BigInteger.valueOf(amountCents).multiply(stableSmallestUnitsPerCent(decimals));
   }
 
   // ---------------------------------------------------------------------------
@@ -468,10 +731,26 @@ public class CryptoGateway implements PaymentGateway {
     return asset == null ? "" : asset.toUpperCase(Locale.ROOT);
   }
 
-  private static String requireAddress(String tenantOverride, String globalDefault, String label) {
+  /** The global-env-configured merchant address for {@code asset}, or null if unset — the
+   *  tenant CMS-vault override (checked first, by the caller) always wins when present. */
+  private String globalDefaultAddress(String asset) {
+    return switch (asset) {
+      case ASSET_USDT_TRC20 -> config.getUsdtTrc20Address();
+      case ASSET_ETH_BEP20 -> config.getEthBep20Address();
+      case ASSET_BTC -> config.getBtcAddress();
+      case ASSET_USDT_ERC20 -> config.getUsdtErc20Address();
+      case ASSET_USDC_ERC20 -> config.getUsdcErc20Address();
+      case ASSET_ETH -> config.getEthAddress();
+      case ASSET_BNB -> config.getBnbAddress();
+      case ASSET_USDT_BEP20 -> config.getUsdtBep20Address();
+      default -> null;
+    };
+  }
+
+  private static String requireAddress(String tenantOverride, String globalDefault, String asset) {
     String address = (tenantOverride != null && !tenantOverride.isBlank()) ? tenantOverride : globalDefault;
     if (address == null || address.isBlank()) {
-      throw new IllegalStateException("No merchant " + label + " receiving address configured");
+      throw new IllegalStateException("No merchant " + asset + " receiving address configured");
     }
     return address;
   }
@@ -487,33 +766,13 @@ public class CryptoGateway implements PaymentGateway {
     return Math.floorMod(v, TAG_MODULUS) + 1; // 1..TAG_MODULUS, never zero (always distinguishable from an untagged send)
   }
 
-  private static int decimalsOf(String asset) {
-    if (ASSET_USDT_TRC20.equals(asset)) return 6;
-    if (ASSET_ETH_BEP20.equals(asset)) return 18;
-    return 8; // BTC
+  private static String displayAmount(AssetSpec spec, java.math.BigInteger smallestUnit) {
+    return new BigDecimal(smallestUnit).movePointLeft(spec.decimals()).toPlainString() + " " + spec.unitSuffix();
   }
 
-  private static String unitSuffixOf(String asset) {
-    if (ASSET_USDT_TRC20.equals(asset)) return "USDT";
-    if (ASSET_ETH_BEP20.equals(asset)) return "ETH";
-    return "BTC";
-  }
-
-  private static String displayAmount(String asset, long smallestUnit) {
-    return BigDecimal.valueOf(smallestUnit).movePointLeft(decimalsOf(asset)).toPlainString() + " " + unitSuffixOf(asset);
-  }
-
-  /** Same value as {@link #displayAmount}, without the unit suffix — for BIP21 URI construction. */
-  private static String amountValue(String asset, long smallestUnit) {
-    return BigDecimal.valueOf(smallestUnit).movePointLeft(decimalsOf(asset)).toPlainString();
-  }
-
-  private static String networkOf(String asset) {
-    return switch (asset) {
-      case ASSET_USDT_TRC20 -> "TRC20";
-      case ASSET_ETH_BEP20 -> "BEP20";
-      default -> "BTC";
-    };
+  /** Same value as {@link #displayAmount}, without the unit suffix — for BIP21-style URI construction. */
+  private static String amountValue(AssetSpec spec, java.math.BigInteger smallestUnit) {
+    return new BigDecimal(smallestUnit).movePointLeft(spec.decimals()).toPlainString();
   }
 
   private String toJson(Map<String, Object> map) {

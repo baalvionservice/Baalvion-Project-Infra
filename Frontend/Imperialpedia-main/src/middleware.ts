@@ -120,39 +120,16 @@ const REMOVED_PATHS = new Set<string>([
   '/stocks/dollarcost-averaging-explained',
   '/investing/what-is-dollarcost-averaging',
   '/personal-finance/dollar-cost-averaging',
-  '/financial-intelligence/money-management-for-students',
-  '/financial-intelligence/best-money-habits-of-millionaires',
-  '/financial-intelligence/debt-snowball-vs-debt-avalanche',
-  '/financial-intelligence/smart-spending-habits',
-  '/financial-intelligence/passive-income-ideas',
-  '/financial-intelligence/side-hustles-for-beginners',
-  '/financial-intelligence/family-financial-planning',
-  '/financial-intelligence/how-inflation-affects-your-savings',
-  '/financial-intelligence/how-much-savings-should-you-have',
-  '/financial-intelligence/how-to-track-expenses',
-  '/financial-intelligence/best-personal-finance-apps',
-  '/financial-intelligence/financial-independence-guide',
-  '/financial-intelligence/what-is-market-capitalization',
-  '/financial-intelligence/what-is-dollar-cost-averaging',
-  '/financial-intelligence/personal-net-worth-calculator-guide',
-  '/financial-intelligence/how-to-start-investing-in-stocks',
-  '/financial-intelligence/how-to-invest-during-a-recession',
-  '/financial-intelligence/how-to-improve-financial-discipline',
-  '/financial-intelligence/how-to-create-a-monthly-budget',
-  '/financial-intelligence/how-to-buy-stocks-online',
-  '/financial-intelligence/how-to-build-wealth-from-scratch',
-  '/financial-intelligence/how-to-build-a-stock-portfolio',
-  '/financial-intelligence/how-to-analyze-a-stock',
-  '/financial-intelligence/how-often-should-you-rebalance-your-portfolio',
-  '/financial-intelligence/how-much-money-do-you-need-to-start-investing',
-  '/financial-intelligence/growth-stocks-vs-value-stocks',
+  // The 31 other /financial-intelligence/<slug> paths that used to live here were
+  // REMOVED from this set (2026-08-24 audit): each one is a real, live article
+  // today, just republished under its correct category (mostly /personal-finance/,
+  // some /stocks/, /investing/, /portfolio/) — this route's own page.tsx already
+  // does a category-agnostic slug lookup (resolveArticleForDetail) and 301s to
+  // the live copy when one exists, so forcing a 410 here was destroying live
+  // content's search equity instead of just letting that existing logic run.
+  // Only these 2 have no live equivalent anywhere on the site, so they stay:
   '/financial-intelligence/financial-goals-framework',
-  '/financial-intelligence/dividend-stocks-for-passive-income',
-  '/financial-intelligence/common-stock-investing-mistakes',
-  '/financial-intelligence/common-money-mistakes',
-  '/financial-intelligence/best-stocks-for-beginners',
-  '/financial-intelligence/best-long-term-stocks',
-  '/financial-intelligence/50-30-20-budget-rule-explained',
+  '/financial-intelligence/what-is-dollar-cost-averaging',
   '/best-robo-advisers',
   '/best-personal-loans',
   '/best-online-brokers',
@@ -162,7 +139,9 @@ const REMOVED_PATHS = new Set<string>([
   '/best-debt-relief-companies',
   '/best-crypto-exchanges',
   '/best-cd-rates',
-  '/financial-independence-guide',
+  // '/financial-independence-guide' (bare) removed from this set for the same
+  // reason as the /financial-intelligence/* slugs above — it's a live article
+  // (redirects to /personal-finance/financial-independence-guide, confirmed 200).
   '/personal-finance/financial-goals-framework',
   '/income',
   '/insurance',
@@ -184,10 +163,37 @@ const REMOVED_PATHS = new Set<string>([
   '/terms-beginning-with-num',
   '/terms-beginning-with-z',
   '/premium/subscribe',
+  // /research-ai used to 301 to /ai-analyst, but /ai-analyst is itself
+  // permanently killed above — that made the redirect a dead-end chain
+  // (301 → 410). 410 it directly instead (see next.config.ts, where the
+  // stale redirect rule was removed).
+  '/research-ai',
+  // The Knowledge Graph page only ever produced real connections through
+  // companies/industries/technologies — all three were removed site-wide, which
+  // left it rendering countries with zero edges (not a graph) while still
+  // linking out to the dead entity types via NodeDetailPanel. Not worth
+  // patching around; retired entirely (see knowledge-graph-service.ts removal).
+  '/knowledge-map',
 ]);
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Every real slug on this site is lowercase (CMS content, static routes, terms —
+  // none are cased), so an uppercase/mixed-case hit is always a typo (caps lock,
+  // mobile autocap, a pasted link), never a distinct real page. Redirecting it to
+  // the lowercase form first — ahead of every other rule below — means a mistyped
+  // path like /WORLD lands on the real page instead of falling into the catch-all
+  // route's "unknown slug" lookup, which otherwise risks a needless 404 (or, if the
+  // CMS is briefly unreachable, a 500 — see articles-service.ts's deliberate
+  // rethrow-on-transient-failure comment for why that particular case doesn't just
+  // quietly become a 404 either). 308 (not 301) preserves the original request
+  // method, matching how a case fix should behave for a POST/PUT hitting this path.
+  if (pathname !== pathname.toLowerCase()) {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname.toLowerCase();
+    return NextResponse.redirect(url, 308);
+  }
 
   // Permanently killed URLs — see REMOVED_PATHS above. Checked before every other
   // rule so a removed path never falls through to auth gates or legacy redirects.
@@ -195,10 +201,17 @@ export function middleware(request: NextRequest) {
     return goneResponse();
   }
 
-  // /companies and /technologies (list + every [slug] detail page) were removed
-  // site-wide — the whole prefix 410s rather than just the handful of individual
-  // paths Google had already indexed, since the route itself no longer exists.
-  if (pathname === '/companies' || pathname.startsWith('/companies/') || pathname === '/technologies' || pathname.startsWith('/technologies/')) {
+  // /companies, /technologies, and /industries (list + every [slug] detail page)
+  // were removed site-wide — the whole prefix 410s rather than just the handful
+  // of individual paths Google had already indexed, since the route itself no
+  // longer exists. (/industries/<slug> was previously left to fall through to
+  // the catch-all route's resolveArticleForDetail lookup, which just 404'd —
+  // still a dead end, but the wrong status code for a permanent removal.)
+  if (
+    pathname === '/companies' || pathname.startsWith('/companies/') ||
+    pathname === '/technologies' || pathname.startsWith('/technologies/') ||
+    pathname === '/industries' || pathname.startsWith('/industries/')
+  ) {
     return goneResponse();
   }
 
@@ -252,6 +265,12 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    // Case-normalization (see the top of middleware() above) needs to see every
+    // page route, not just the specific ones below -- excludes API routes (a
+    // redirect would break non-GET methods), _next internals, and any path with
+    // a file extension (sitemap.xml, robots.txt, ads.txt, /public assets, etc.,
+    // which are served case-sensitively by the filesystem/route handlers as-is).
+    '/((?!api|_next/static|_next/image|favicon\\.ico|.*\\..*).*)',
     '/terms/:path*',
     '/admin/:path*',
     '/creator/dashboard/:path*',
@@ -267,6 +286,8 @@ export const config = {
     '/technologies/:path*',
     '/companies',
     '/companies/:path*',
+    '/industries',
+    '/industries/:path*',
     '/countries',
     '/countries/:path*',
     '/stocks/:path*',
@@ -282,5 +303,30 @@ export const config = {
     '/best-debt-relief-companies',
     '/best-crypto-exchanges',
     '/best-cd-rates',
+    // Bare top-level entries in REMOVED_PATHS above with no matcher pattern of
+    // their own — middleware never ran for them, so they fell through to the
+    // generic [...slug] 404 instead of the intended 410 goneResponse(). A plain
+    // 404 reads to Google as "maybe temporary, keep re-checking" instead of
+    // "permanently gone, deindex now" — GSC showed several of these stuck in
+    // "Crawled - currently not indexed" for weeks/months because of it.
+    '/income',
+    '/insurance',
+    '/insurance-reviews',
+    '/ai-analyst',
+    '/robo-advisors',
+    '/topics',
+    '/search',
+    '/terms-beginning-with-c',
+    '/terms-beginning-with-num',
+    '/terms-beginning-with-z',
+    '/housing-market-cools-mortgage-rates',
+    '/fed-holds-rates-inflation-cooling',
+    '/bitcoin-surges-institutional-demand',
+    '/tech-stocks-ai-spending-boom',
+    '/etf-inflows-record-february',
+    '/sp500-record-high-earnings',
+    '/gold-hits-2400-safe-haven',
+    '/research-ai',
+    '/knowledge-map',
   ],
 };

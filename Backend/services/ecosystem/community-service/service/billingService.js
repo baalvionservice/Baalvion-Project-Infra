@@ -1,8 +1,8 @@
 'use strict';
 // Paid-tier community checkout: relays to payment-service's gateway-checkout vertical
-// (provider=crypto — USDT-TRC20 or BTC, see PaymentGateway/CryptoGateway on that side) the
-// same way insiders-service/billingRoutes.js does for its own paid tier. No payment logic or
-// keys live here — payment-service owns the merchant wallet config and chain polling.
+// (provider=crypto, see PaymentGateway/CryptoGateway on that side) the same way
+// insiders-service/billingRoutes.js does for its own paid tier. No payment logic or keys live
+// here — payment-service owns the merchant wallet config and chain polling.
 const crypto = require('crypto');
 const db = require('../models');
 const nodebb = require('./nodebbClient');
@@ -12,6 +12,14 @@ const { AppError } = require('../utils/errors');
 
 const PAYMENT_SERVICE_URL = process.env.PAYMENT_SERVICE_URL || 'http://app-payments:3015';
 
+// Must stay in sync with CryptoGateway's ASSET_SPECS keys on the payment-service side
+// (Backend/services/commerce/financial-services-java/payment-service/.../CryptoGateway.java) —
+// this is just the client-facing validation gate, not the source of truth for what's supported.
+const SUPPORTED_CRYPTO_ASSETS = [
+    'USDT_TRC20', 'ETH_BEP20', 'BTC',
+    'USDT_ERC20', 'USDC_ERC20', 'ETH', 'BNB', 'USDT_BEP20',
+];
+
 async function checkout(community, userId, email, asset) {
     if (community.access_model !== 'paid') {
         throw new AppError('NOT_PAID_COMMUNITY', 'This community does not have a paid tier', 400);
@@ -20,8 +28,8 @@ async function checkout(community, userId, email, asset) {
         throw new AppError('NOT_CONFIGURED', 'This community has no price configured yet', 503);
     }
     const normalizedAsset = String(asset || '').toUpperCase();
-    if (!['USDT_TRC20', 'ETH_BEP20', 'BTC'].includes(normalizedAsset)) {
-        throw new AppError('VALIDATION_ERROR', 'asset must be USDT_TRC20, ETH_BEP20, or BTC', 422);
+    if (!SUPPORTED_CRYPTO_ASSETS.includes(normalizedAsset)) {
+        throw new AppError('VALIDATION_ERROR', `asset must be one of: ${SUPPORTED_CRYPTO_ASSETS.join(', ')}`, 422);
     }
 
     const idempotencyKey = crypto.randomUUID();

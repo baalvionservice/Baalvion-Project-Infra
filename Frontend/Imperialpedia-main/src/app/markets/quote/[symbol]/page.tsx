@@ -158,8 +158,16 @@ export default async function QuotePage({ params, searchParams }: PageProps) {
   if (!detail) notFound();
 
   const company = await getCompanyCached(detail.symbol);
+  // /companies, /industries, and /technologies (list + [slug] detail pages) were
+  // removed site-wide — getRelatedEntities returns those types unfiltered (it's a
+  // generic cross-reference walk), so every one of them 410s on click/crawl unless
+  // filtered here. "country" is the only entity type left with a live route.
+  // This page is submitted to the sitemap for every tracked symbol, so an
+  // unfiltered list here was a live, sitemap-indexed source of dead internal links.
   const relatedEntities = company
-    ? await getRelatedEntities(company as unknown as Parameters<typeof getRelatedEntities>[0])
+    ? (await getRelatedEntities(company as unknown as Parameters<typeof getRelatedEntities>[0])).filter(
+        (e) => e.type === 'country',
+      )
     : [];
 
   const price = detail.current_price;

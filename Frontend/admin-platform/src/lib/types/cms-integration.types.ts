@@ -144,6 +144,23 @@ export const PROVIDER_CATALOG: ProviderDef[] = [
     ],
   },
   {
+    provider: 'crypto',
+    category: 'payment',
+    label: 'Crypto (BTC / ETH / BNB / USDT / USDC)',
+    description: 'Merchant receiving addresses for crypto deposits — read directly by payment-service\'s CryptoGateway (community/access-tier checkout). Field keys must match exactly: btcAddress, usdtTrc20Address, ethBep20Address, usdtErc20Address, usdcErc20Address, ethAddress, bnbAddress, usdtBep20Address.',
+    fields: [
+      { key: 'btcAddress', label: 'BTC receiving address', placeholder: 'bc1…' },
+      { key: 'usdtTrc20Address', label: 'USDT (TRC20 — Tron) receiving address', placeholder: 'T…' },
+      { key: 'ethBep20Address', label: 'ETH-BEP20 (Binance-Peg ETH on BSC) receiving address', placeholder: '0x…' },
+      { key: 'usdtErc20Address', label: 'USDT (ERC20 — Ethereum) receiving address', placeholder: '0x…' },
+      { key: 'usdcErc20Address', label: 'USDC (ERC20 — Ethereum) receiving address', placeholder: '0x…' },
+      { key: 'ethAddress', label: 'Native ETH (Ethereum mainnet) receiving address', placeholder: '0x…' },
+      { key: 'bnbAddress', label: 'Native BNB (BNB Smart Chain) receiving address', placeholder: '0x…' },
+      { key: 'usdtBep20Address', label: 'USDT (BEP20 — BSC) receiving address — a different contract from TRC20/ERC20 USDT', placeholder: '0x…' },
+    ],
+    secretFields: [],
+  },
+  {
     provider: 'twilio',
     category: 'sms',
     label: 'Twilio SMS',

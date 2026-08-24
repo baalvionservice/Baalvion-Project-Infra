@@ -30,7 +30,7 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-const LAST_UPDATED = 'August 17, 2026';
+const LAST_UPDATED = 'August 24, 2026';
 
 const TOC: Array<{ id: string; label: string }> = [
   { id: 'who-we-are', label: 'Who we are & how to reach us' },
@@ -99,7 +99,7 @@ export default function PrivacyPolicyPage() {
           </ol>
         </nav>
 
-        <Section spacing="sm" className="prose prose-invert max-w-none space-y-14 [&_h2]:scroll-mt-28">
+        <Section spacing="sm" className="prose dark:prose-invert max-w-none space-y-14 [&_h2]:scroll-mt-28">
 
           <Block id="who-we-are" title="1. Who we are & how to reach us">
             <P>
