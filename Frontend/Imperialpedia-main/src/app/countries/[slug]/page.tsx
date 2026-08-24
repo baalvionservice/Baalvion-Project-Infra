@@ -10,6 +10,7 @@ import { getCountryBySlug } from "@/lib/data/loaders";
 import { generateEntityMetadata } from "@/lib/utils/seo";
 import { structuredData } from "@/lib/seo/structuredData";
 import { JsonLd } from "@/modules/seo-engine/components/JsonLd";
+import { Breadcrumbs } from "@/modules/seo-engine/components/Breadcrumbs";
 import { breadcrumbService } from "@/modules/seo-engine/services/breadcrumb-service";
 import { QuickStats } from "@/components/entity/QuickStats";
 import { RelatedHighlights } from "@/components/entity/RelatedHighlights";
@@ -54,14 +55,16 @@ export default async function Page({ params }: PageProps) {
   ];
 
   const schema = structuredData.entity(country, "country");
+  // <Breadcrumbs> renders the visible trail AND injects its BreadcrumbList
+  // JSON-LD from this same object, so the two can never mismatch (a separate
+  // schema-only <JsonLd> here previously had no matching visible nav at all).
   const breadcrumb = breadcrumbService.generateBreadcrumbForEntity(country.name, country.slug, "countries", "Countries");
-  const breadcrumbSchema = breadcrumbService.generateBreadcrumbSchema(breadcrumb);
 
   return (
     <main className="min-h-screen bg-background pt-20 pb-32">
       <JsonLd data={schema} />
-      <JsonLd data={breadcrumbSchema} />
       <Container>
+        <Breadcrumbs breadcrumb={breadcrumb} />
         <EntityHeader name={country.name} type="Country" tags={country.tags} />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mt-12">

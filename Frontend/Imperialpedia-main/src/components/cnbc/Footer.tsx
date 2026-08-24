@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ImperialpediaMark } from "@/components/icons/ImperialpediaMark";
+import { PreferredSourceButton } from "@/components/common/PreferredSourceButton";
 
 /**
  * Shared dark footer for /world, /news, /market-news — promoted from
@@ -71,13 +72,16 @@ export default function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="border-t border-gray-800 pt-4 flex flex-wrap items-center justify-between gap-2">
-          <p className="text-[10px] text-gray-600">
-            © 2026 Imperialpedia. All Rights Reserved.
-          </p>
-          <p className="text-[10px] text-gray-600">
-            Market data may be delayed. For informational purposes only.
-          </p>
+        <div className="border-t border-gray-800 pt-4 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p className="text-[10px] text-gray-600">
+              © 2026 Imperialpedia. All Rights Reserved.
+            </p>
+            <p className="text-[10px] text-gray-600">
+              Market data may be delayed. For informational purposes only.
+            </p>
+          </div>
+          <PreferredSourceButton theme="dark" />
         </div>
       </div>
     </footer>

@@ -1,5 +1,5 @@
 import { Article } from '@/modules/content-engine/types';
-import { Breadcrumb } from '../types';
+import { Breadcrumb, BreadcrumbItem } from '../types';
 import { env } from '@/config/env';
 
 /**
@@ -55,6 +55,28 @@ export const breadcrumbService = {
       ],
     };
   },
+
+  /**
+   * Home / [Category]
+   */
+  generateBreadcrumbForCategory: (categoryName: string, categorySlug: string): Breadcrumb => {
+    return {
+      items: [
+        { name: 'Home', item: '/' },
+        { name: categoryName, item: `/category/${categorySlug}` },
+      ],
+    };
+  },
+
+  /**
+   * Generic builder for one-off trails that don't fit the standard
+   * article/author/entity/category shapes above (e.g. the CNBC-style
+   * World/Category/Title dated-news path). Routing a custom trail through
+   * this instead of a hand-rolled array means a page can derive both its
+   * visible <nav> and its BreadcrumbList schema from the exact same list,
+   * so the two can never drift apart.
+   */
+  build: (items: BreadcrumbItem[]): Breadcrumb => ({ items }),
 
   /**
    * Generates JSON-LD schema for a breadcrumb.

@@ -183,6 +183,16 @@ export default async function RootLayout({
         />
         <GoogleTagManagerScript />
 
+        {/* Google "Preferred Sources" widget loader (Top Stories / AI Overviews /
+            AI Mode "add as preferred source" button) -- a plain native <script>
+            tag, same reasoning as the AdSense loader below: next/script's
+            <Script> component never emits a literal synchronously-parsed tag,
+            it registers the URL in a bootstrap array instead, which is exactly
+            the pattern already ruled out here for the AdSense verification
+            script. See PreferredSourceButton for where the matching
+            [google-add-preferred-source-btn] element renders. */}
+        <script async src="https://news.google.com/swg/js/v1/publisher.js" />
+
         <meta
           name="viewport"
           content="width=device-width, initial-scale=1, viewport-fit=cover"
