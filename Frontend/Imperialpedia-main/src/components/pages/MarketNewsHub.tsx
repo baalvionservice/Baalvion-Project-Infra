@@ -484,7 +484,13 @@ export async function MarketNewsHub() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {topicRails[topic.slug].map((article) => (
-                <ArticleCard key={article.id} article={article} />
+                // categoryLabel override: this topic's real name (e.g. "Earnings",
+                // "Federal Reserve") almost never matches one of the 20 fixed
+                // NewsCategory values, so article.category silently coerces to
+                // the generic "Editorial" catch-all (see toNewsCategory in
+                // cms-public.ts) -- every card in this rail is confirmed to be
+                // about `topic`, so its badge should say so, not "Editorial".
+                <ArticleCard key={article.id} article={article} categoryLabel={topic.label} />
               ))}
             </div>
           </section>
