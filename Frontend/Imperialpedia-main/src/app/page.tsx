@@ -69,7 +69,7 @@ export default function Home() {
 
       {/* Top AdSense Unit - Display ad above main content */}
       <div className="my-8 px-4">
-        <AdSenseUnit slot="8362925887" format="auto" responsive={true} />
+        <AdSenseUnit slot="2039635661" format="auto" responsive={true} />
       </div>
 
       <Suspense fallback={<HomeSectionSkeleton cards={4} />}>
@@ -84,7 +84,7 @@ export default function Home() {
 
       {/* Mid-page AdSense Unit */}
       <div className="my-8 px-4">
-        <AdSenseUnit slot="8362925887" format="auto" responsive={true} />
+        <AdSenseUnit slot="1782439199" format="auto" responsive={true} />
       </div>
 
       <Suspense fallback={<HomeSectionSkeleton cards={4} />}>
@@ -97,7 +97,7 @@ export default function Home() {
 
       {/* Bottom AdSense Unit */}
       <div className="my-8 px-4">
-        <AdSenseUnit slot="8362925887" format="auto" responsive={true} />
+        <AdSenseUnit slot="6058771722" format="auto" responsive={true} />
       </div>
 
       <Suspense fallback={<HomeSectionSkeleton cards={6} />}>

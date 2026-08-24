@@ -1,6 +1,7 @@
 import React from "react";
 import "./globals.css";
 import { Metadata } from "next";
+import { cookies } from "next/headers";
 import { env } from "@/config/env";
 import { Source_Serif_4 } from "next/font/google";
 import { cn } from "@/lib/utils";
@@ -16,6 +17,15 @@ import { structuredData } from "@/lib/seo/structuredData";
 
 const CMS_SLUG =
   process.env.NEXT_PUBLIC_CMS_SITE_SLUG || "imperialpedia";
+
+// Same cookie name middleware.ts gates protected routes on. Read here (server-side,
+// where the httpOnly cookie is actually visible) so AuthProvider knows whether a
+// session refresh is even worth attempting, instead of firing one unconditionally
+// for every anonymous visitor and eating a guaranteed 401 -- which Chrome logs as a
+// console error ("Failed to load resource: 401") regardless of the app catching the
+// rejected promise, since that line comes from the network stack, not app code.
+const REFRESH_COOKIE_NAME =
+  process.env.NEXT_PUBLIC_REFRESH_COOKIE_NAME || "baalvion_refresh";
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.siteUrl),
@@ -141,6 +151,7 @@ export default async function RootLayout({
   // The ID is resolved server-side and cached by getSiteAdsenseClient().
   // This keeps the AdSense configuration out of client-side JavaScript.
   const adsenseClient = await getSiteAdsenseClient();
+  const hasSession = Boolean((await cookies()).get(REFRESH_COOKIE_NAME)?.value);
 
   return (
     <html
@@ -163,9 +174,19 @@ export default async function RootLayout({
             Previously this lived in Analytics.tsx gated on NEXT_PUBLIC_GA_ID
             (and rendered as a next/script Script in <body>), so a visitor got
             zero consent-default protection whenever GA_ID was unset, and even
-            when set, it landed after the AdSense/GA loaders in practice. */}
+            when set, it landed after the AdSense/GA loaders in practice.
+
+            suppressHydrationWarning: AdSense's own loader script (the very next
+            tag below) rewrites its own <script src> in place once it boots
+            (from the plain adsbygoogle.js URL to a "managed/js/adsense/.../
+            show_ads_impl..." URL) -- confirmed live via a headless-browser
+            hydration-warning sweep. That DOM mutation can land before React's
+            hydration pass reaches these sibling head scripts, which without
+            this prop trips a false-positive "hydration mismatch" on this node
+            even though nothing about our own markup is wrong. */}
         <script
           id="consent-default"
+          suppressHydrationWarning
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];
@@ -181,25 +202,15 @@ export default async function RootLayout({
             `,
           }}
         />
-        <GoogleTagManagerScript />
-
-        {/* Google "Preferred Sources" widget loader (Top Stories / AI Overviews /
-            AI Mode "add as preferred source" button) -- a plain native <script>
-            tag, same reasoning as the AdSense loader below: next/script's
-            <Script> component never emits a literal synchronously-parsed tag,
-            it registers the URL in a bootstrap array instead, which is exactly
-            the pattern already ruled out here for the AdSense verification
-            script. See PreferredSourceButton for where the matching
-            [google-add-preferred-source-btn] element renders. */}
-        <script async src="https://news.google.com/swg/js/v1/publisher.js" />
-
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1, viewport-fit=cover"
-        />
-
-        <meta name="theme-color" content="#ffffff" />
-
+        {/* Per Google's AdSense setup instructions
+            (support.google.com/adsense/answer/9274516), this snippet must sit
+            as close to the top of <head> as possible -- ideally the very
+            first tag. The one thing allowed to precede it is the Consent
+            Mode default above, which itself must run before any ad/analytics
+            script fires so no ads cookie is set pre-consent. Everything else
+            in <head> (GTM, the Preferred Sources widget, meta tags) moved
+            below this block; it was previously placed last in <head>, after
+            all of those, which is the opposite of Google's guidance. */}
         {adsenseClient && (
           <>
             <meta name="google-adsense-account" content={adsenseClient} />
@@ -213,11 +224,31 @@ export default async function RootLayout({
                 literal HTML text, which is what the crawler is regex-matching. */}
             <script
               async
+              suppressHydrationWarning
               src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`}
               crossOrigin="anonymous"
             />
           </>
         )}
+
+        <GoogleTagManagerScript />
+
+        {/* Google "Preferred Sources" widget loader (Top Stories / AI Overviews /
+            AI Mode "add as preferred source" button) -- a plain native <script>
+            tag, same reasoning as the AdSense loader above: next/script's
+            <Script> component never emits a literal synchronously-parsed tag,
+            it registers the URL in a bootstrap array instead, which is exactly
+            the pattern already ruled out here for the AdSense verification
+            script. See PreferredSourceButton for where the matching
+            [google-add-preferred-source-btn] element renders. */}
+        <script async src="https://news.google.com/swg/js/v1/publisher.js" />
+
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, viewport-fit=cover"
+        />
+
+        <meta name="theme-color" content="#ffffff" />
       </head>
 
       <body className="font-ui bg-background text-foreground antialiased min-h-screen flex flex-col">
@@ -237,7 +268,7 @@ export default async function RootLayout({
           Skip to main content
         </a>
 
-        <RootLayoutClient adsenseClient={adsenseClient}>
+        <RootLayoutClient adsenseClient={adsenseClient} hasSession={hasSession}>
           {children}
         </RootLayoutClient>
 

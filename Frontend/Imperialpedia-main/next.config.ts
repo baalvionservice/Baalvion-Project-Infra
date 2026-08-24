@@ -220,13 +220,22 @@ const nextConfig: NextConfig = {
               // a fetch/XHR ping) — it was only allow-listed under connect-src, so the script
               // load itself was still blocked and threw an uncaught error in AdSense's code on
               // every page load. Confirmed live via a headless-browser console-error sweep.
-              `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://adservice.google.com https://api.baalvion.com https://*.adtrafficquality.google`,
-              "script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://adservice.google.com https://api.baalvion.com https://*.adtrafficquality.google",
+              // news.google.com serves the Preferred Sources widget loader (see layout.tsx's
+              // literal <script src="https://news.google.com/swg/js/v1/publisher.js"> tag) —
+              // unlisted here it was blocked outright on every page. localhost:3018 (dev only)
+              // is cms-service's own /api/v1/collect.js analytics tag (UnifiedAnalytics.tsx);
+              // already allow-listed under connect-src but that doesn't cover loading the
+              // <script> tag itself, so every dev page load blocked the tracker script.
+              `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval' http://localhost:3018" : ''} https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://adservice.google.com https://api.baalvion.com https://*.adtrafficquality.google https://news.google.com`,
+              `script-src-elem 'self' 'unsafe-inline'${isDev ? ' http://localhost:3018' : ''} https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://adservice.google.com https://api.baalvion.com https://*.adtrafficquality.google https://news.google.com`,
               "style-src 'self' 'unsafe-inline'",
               // 'self' + data: (inline generated SVG artwork) + imperialpedia.com +
               // api.baalvion.com (cms-service-hosted generated artwork) are the only
               // image sources — no stock/placeholder/third-party image hosts.
-              "img-src 'self' data: https://imperialpedia.com https://api.baalvion.com https://www.google-analytics.com https://*.googlesyndication.com https://*.g.doubleclick.net",
+              // *.adtrafficquality.google also fires a 1x1 tracking-pixel `<img>` request
+              // (sodar) on top of the sodar2.js script load already allowed above -- distinct
+              // CSP directive (img-src, not script-src), so it needed its own entry.
+              "img-src 'self' data: https://imperialpedia.com https://api.baalvion.com https://www.google-analytics.com https://*.googlesyndication.com https://*.g.doubleclick.net https://*.adtrafficquality.google",
               "font-src 'self'",
               // Dev: allow the local imperialpedia-service (:3004) and cms-service (:3018)
               // that client components (Market Movers, community, search) fetch directly.
@@ -237,7 +246,11 @@ const nextConfig: NextConfig = {
               // console-error sweep (every page blocked the sodar connect-src call).
               "connect-src 'self' https://api.baalvion.com http://localhost:3004 http://localhost:3018 https://www.google-analytics.com https://*.google-analytics.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com https://*.adtrafficquality.google",
               // www.googletagmanager.com/ns.html is the GTM <noscript> fallback iframe.
-              "frame-src https://googleads.g.doubleclick.net https://*.googlesyndication.com https://www.googletagmanager.com",
+              // *.adtrafficquality.google and www.google.com are the ad-traffic-quality/fraud
+              // verification frames AdSense's own script embeds directly (distinct from the
+              // sodar2.js script load already allowed under script-src above) — unlisted here
+              // they were blocked outright on every page, confirmed via a console-error sweep.
+              "frame-src https://googleads.g.doubleclick.net https://*.googlesyndication.com https://www.googletagmanager.com https://*.adtrafficquality.google https://www.google.com https://news.google.com",
               "frame-ancestors 'self'",
             ].join('; '),
           },

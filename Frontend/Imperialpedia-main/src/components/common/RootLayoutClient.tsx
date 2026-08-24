@@ -17,7 +17,11 @@ import { AuthProvider } from "@/providers/AuthProvider";
 import { usePathname } from "next/navigation";
 import { AdSenseClientProvider } from "@/components/common/AdSenseClientContext";
 
-type RootLayoutClientProps = Readonly<{ children: React.ReactNode; adsenseClient: string | null }>;
+type RootLayoutClientProps = Readonly<{
+    children: React.ReactNode;
+    adsenseClient: string | null;
+    hasSession: boolean;
+}>;
 
 // Routes that ship their own CNBC-style masthead/footer (src/components/cnbc/*
 // via each route's own layout.tsx) and must not also get the sitewide
@@ -27,7 +31,7 @@ type RootLayoutClientProps = Readonly<{ children: React.ReactNode; adsenseClient
 // Footer) despite world/layout.tsx's comment claiming otherwise.
 const CNBC_ROUTES = ["/world", "/news", "/market-news"];
 
-export default function RootLayoutClient({ children, adsenseClient }: RootLayoutClientProps) {
+export default function RootLayoutClient({ children, adsenseClient, hasSession }: RootLayoutClientProps) {
     const pathname = usePathname();
     const suppressGlobalChrome =
         pathname?.startsWith("/admin") ||
@@ -40,7 +44,7 @@ export default function RootLayoutClient({ children, adsenseClient }: RootLayout
     return (
         <>
             <QueryClientProvider client={queryClient}>
-                <AuthProvider>
+                <AuthProvider hasSession={hasSession}>
                     <GlobalStoreProvider>
                         <ThemeProvider>
                             <ToastProvider>
