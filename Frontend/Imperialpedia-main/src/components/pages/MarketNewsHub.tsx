@@ -38,6 +38,7 @@ import HeadingSection from "@/components/layout/HeadingSection";
 import { NewsletterForm } from "@/components/landing/NewsletterForm";
 import FAQItem from "@/components/faq/FAQItem";
 import { env } from "@/config/env";
+import { AdSenseUnit } from "@/components/common/AdSense";
 
 const SLUG = "market-news";
 // The CMS's actual category slug is "markets" — "market-news" is only this
@@ -375,6 +376,8 @@ export async function MarketNewsHub() {
             </div>
           </section>
         )}
+
+        <AdSenseUnit slot="8362925887" format="auto" responsive={true} />
 
         {latestGrid.length > 0 && (
           <section>

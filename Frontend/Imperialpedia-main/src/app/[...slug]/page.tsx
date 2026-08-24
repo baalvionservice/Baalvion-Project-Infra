@@ -42,6 +42,7 @@ import {
 import { TrendingNowModule, MoreInCategoryModule } from "@/components/article/ArticleSidebarModules";
 import { ArticleByline } from "@/components/article/ArticleByline";
 import { PreferredSourceButton } from "@/components/common/PreferredSourceButton";
+import { AdSenseUnit } from "@/components/common/AdSense";
 import { SourcesCited } from "@/modules/content-engine/components/SourcesCited";
 import { ListenBar } from "@/components/article/ListenBar";
 
@@ -274,6 +275,12 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
   // rendered below, and the `mentions` JSON-LD entities here.
   const entityMentions = article.entityMentions ?? [];
   const linker = createEntityLinker(entityMentions);
+  // Split roughly in half so a mid-article AdSense unit can sit between the
+  // two halves without landing mid-paragraph or mid-heading.
+  const demotedBody = demoteExtraHeadings(article.body);
+  const bodySplitIndex = Math.ceil(demotedBody.length / 2);
+  const bodyBlocksTop = demotedBody.slice(0, bodySplitIndex);
+  const bodyBlocksBottom = demotedBody.slice(bodySplitIndex);
   const SCHEMA_TYPE_BY_ENTITY_TYPE: Record<string, string> = {
     company: "Corporation",
     country: "Country",
@@ -490,10 +497,34 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
               )}
             </figure>
 
+            {/* Top-of-article unit, right after the hero image — after the lede/key
+                points/byline so it never interrupts the opening read, same
+                "post-content" philosophy as the content-engine article template. */}
+            <div className="my-6">
+              <AdSenseUnit slot="8362925887" format="auto" responsive={true} />
+            </div>
+
             <div className="prose-none">
-              {demoteExtraHeadings(article.body).map((block, i) => (
+              {bodyBlocksTop.map((block, i) => (
                 <BodyBlock key={i} block={block} linker={linker} />
               ))}
+            </div>
+
+            {bodyBlocksBottom.length > 0 && (
+              <>
+                <div className="my-8">
+                  <AdSenseUnit slot="8362925887" format="auto" responsive={true} />
+                </div>
+                <div className="prose-none">
+                  {bodyBlocksBottom.map((block, i) => (
+                    <BodyBlock key={`bottom-${i}`} block={block} linker={linker} />
+                  ))}
+                </div>
+              </>
+            )}
+
+            <div className="my-8">
+              <AdSenseUnit slot="8362925887" format="auto" responsive={true} />
             </div>
 
             {article.galleryImages && article.galleryImages.length > 0 && (
@@ -778,6 +809,12 @@ async function BareSlugPage({ slug }: { slug: string }) {
               {demoteExtraHeadings(article.body).map((block, i) => (
                 <BodyBlock key={i} block={block} />
               ))}
+            </div>
+
+            {/* Post-content unit, same slot/placement pattern used sitewide —
+                never interrupts the primary reading flow. */}
+            <div className="my-8">
+              <AdSenseUnit slot="8362925887" format="auto" responsive={true} />
             </div>
 
             {article.galleryImages && article.galleryImages.length > 0 && (

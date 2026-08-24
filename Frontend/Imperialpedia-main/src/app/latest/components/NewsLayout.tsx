@@ -4,6 +4,7 @@ import { useState } from "react";
 import { CategoryFilter } from "./CategoryFilter";
 import { NewsGrid } from "./NewsGrid";
 import { TrendingNews } from "./TrendingNews";
+import { AdSenseUnit } from "@/components/common/AdSense";
 
 interface NewsLayoutProps {
   initialCategory?: string;
@@ -49,6 +50,9 @@ export function NewsLayout({
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-6 sm:py-8">
+        <div className="mb-6 sm:mb-8">
+          <AdSenseUnit slot="8362925887" format="auto" responsive={true} />
+        </div>
         <div
           className={`${
             showSidebar ? "flex flex-col lg:grid lg:grid-cols-4 lg:gap-8" : ""

@@ -14,6 +14,7 @@ import { LatestFeed } from "@/components/news/LatestFeed";
 import { NewsSidebar } from "@/components/news/NewsSidebar";
 import { NewsletterBand } from "@/components/landing/investopedia/NewsletterBand";
 import { newsArticleHref } from "@/lib/data/article-url";
+import { AdSenseUnit } from "@/components/common/AdSense";
 
 // Empty hubs read to Google as exactly the thin/low-value content pattern
 // that blocks AdSense approval (see GLOSSARY_LIVE in config/glossary.ts for
@@ -115,6 +116,8 @@ export default async function NewsPage() {
           </div>
           <TrendingRail articles={trending} />
         </section>
+
+        <AdSenseUnit slot="8362925887" format="auto" responsive={true} />
 
         {/* Niche category rails */}
         {NICHE_CATEGORIES.map((category) => (
