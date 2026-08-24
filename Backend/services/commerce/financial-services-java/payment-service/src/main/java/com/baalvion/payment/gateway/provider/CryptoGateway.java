@@ -185,12 +185,12 @@ public class CryptoGateway implements PaymentGateway {
     String address = requireAddress(cfg.configString(spec.addressConfigKey()), globalDefaultAddress(asset), asset);
 
     BigDecimal usdRateUsed = null;
-    long targetSmallestUnit;
+    java.math.BigInteger targetSmallestUnit;
     if (spec.stable()) {
-      targetSmallestUnit = stableUnitsForCents(amountCents, spec.decimals()) + tagSmallestUnit;
+      targetSmallestUnit = stableUnitsForCents(amountCents, spec.decimals()).add(java.math.BigInteger.valueOf(tagSmallestUnit));
     } else {
       usdRateUsed = usdRate(spec.rateCoinGeckoId(), cfg.mock());
-      targetSmallestUnit = usdToSmallestUnit(amountCents, usdRateUsed, spec.decimals()) + tagSmallestUnit;
+      targetSmallestUnit = usdToSmallestUnit(amountCents, usdRateUsed, spec.decimals()).add(java.math.BigInteger.valueOf(tagSmallestUnit));
     }
 
     String providerRef = "crypto_" + UUID.randomUUID();
@@ -268,13 +268,19 @@ public class CryptoGateway implements PaymentGateway {
   // Chain-watching (called by CryptoChainPoller, which owns persistence access)
   // ---------------------------------------------------------------------------
 
-  public record ChainMatch(String txHash, long confirmedSmallestUnit, int confirmations) {}
+  // BigInteger, not long: an 18-decimal-token smallest-unit amount for a realistic dollar charge
+  // ($250 of an 18-decimal STABLE token == 2.5x10^20) overflows long's ~9.22x10^18 max. This was
+  // a real bug caught by CryptoGatewayTest before it ever reached a live chain call — a stable,
+  // 18-decimal asset (USDT_BEP20) is the case that exposes it; volatile 18-decimal assets (ETH,
+  // ETH_BEP20, BNB) stay small because their smallest-unit amount is divided by a market rate in
+  // the thousands, not multiplied straight from cents.
+  public record ChainMatch(String txHash, java.math.BigInteger confirmedSmallestUnit, int confirmations) {}
 
   /** Strategy interface for "has this address received >= target since some time?" — one
    *  implementation per detection technique, not one per asset (several assets share an
    *  implementation, parameterized differently; see {@link #buildVerifiers}). */
   private interface ChainVerifier {
-    Optional<ChainMatch> check(String address, long targetSmallestUnit, Instant since);
+    Optional<ChainMatch> check(String address, java.math.BigInteger targetSmallestUnit, Instant since);
   }
 
   private Map<String, ChainVerifier> buildVerifiers() {
@@ -297,7 +303,7 @@ public class CryptoGateway implements PaymentGateway {
    * provider+eventId uniqueness, keyed by this method's returned {@code txHash}) — this method
    * only looks at the chain.
    */
-  public Optional<ChainMatch> checkForPayment(String asset, String address, long targetSmallestUnit, Instant since, ProviderConfig cfg) {
+  public Optional<ChainMatch> checkForPayment(String asset, String address, java.math.BigInteger targetSmallestUnit, Instant since, ProviderConfig cfg) {
     if (cfg.mock()) {
       // Deterministic mock "confirmation": once the charge is at least 5 seconds old, treat it
       // as paid — good enough for local/dev exercising of the full poller -> webhook -> fulfill
@@ -317,15 +323,15 @@ public class CryptoGateway implements PaymentGateway {
   }
 
   /** Converts a confirmed on-chain amount + this charge's stored tagging offset back to USD cents. */
-  public long confirmedAmountToCents(String asset, long confirmedSmallestUnit, long taggingOffsetSmallestUnit, BigDecimal usdRateUsed) {
+  public long confirmedAmountToCents(String asset, java.math.BigInteger confirmedSmallestUnit, java.math.BigInteger taggingOffsetSmallestUnit, BigDecimal usdRateUsed) {
     AssetSpec spec = ASSET_SPECS.get(asset);
     Objects.requireNonNull(spec, () -> "Unknown asset: " + asset);
-    long untagged = confirmedSmallestUnit - taggingOffsetSmallestUnit;
+    java.math.BigInteger untagged = confirmedSmallestUnit.subtract(taggingOffsetSmallestUnit);
     if (spec.stable()) {
-      return untagged / stableSmallestUnitsPerCent(spec.decimals());
+      return untagged.divide(stableSmallestUnitsPerCent(spec.decimals())).longValueExact();
     }
     Objects.requireNonNull(usdRateUsed, "usdRateUsed is required to convert a non-stable asset amount back to cents");
-    BigDecimal whole = BigDecimal.valueOf(untagged).movePointLeft(spec.decimals());
+    BigDecimal whole = new BigDecimal(untagged).movePointLeft(spec.decimals());
     return whole.multiply(usdRateUsed).movePointRight(2).setScale(0, RoundingMode.HALF_UP).longValueExact();
   }
 
@@ -341,12 +347,12 @@ public class CryptoGateway implements PaymentGateway {
     }
 
     @Override
-    public Optional<ChainMatch> check(String address, long targetSmallestUnit, Instant since) {
+    public Optional<ChainMatch> check(String address, java.math.BigInteger targetSmallestUnit, Instant since) {
       return tronGridTransfers(address, targetSmallestUnit, contractAddress);
     }
   }
 
-  private Optional<ChainMatch> tronGridTransfers(String address, long targetSmallestUnit, String contractAddress) {
+  private Optional<ChainMatch> tronGridTransfers(String address, java.math.BigInteger targetSmallestUnit, String contractAddress) {
     String url = config.getTronGridBaseUrl() + "/v1/accounts/" + address
       + "/transactions/trc20?limit=50&contract_address=" + contractAddress;
     String body;
@@ -361,8 +367,10 @@ public class CryptoGateway implements PaymentGateway {
       if (!address.equalsIgnoreCase(textOrEmpty(tx, "to"))) {
         continue;
       }
-      long value = tx.path("value").asLong(-1);
-      if (value < targetSmallestUnit) {
+      // TronGrid returns "value" as a decimal STRING specifically to avoid precision loss on
+      // large token amounts — parse it as such, never via asLong().
+      java.math.BigInteger value = parseBigIntegerSafe(textOrEmpty(tx, "value"));
+      if (value.compareTo(targetSmallestUnit) < 0) {
         continue;
       }
       String txHash = textOrEmpty(tx, "transaction_id");
@@ -398,7 +406,7 @@ public class CryptoGateway implements PaymentGateway {
      * request cheap enough for a public, unauthenticated RPC endpoint.
      */
     @Override
-    public Optional<ChainMatch> check(String address, long targetSmallestUnit, Instant since) {
+    public Optional<ChainMatch> check(String address, java.math.BigInteger targetSmallestUnit, Instant since) {
       Long latestBlock = evmBlockNumber(rpcUrl);
       if (latestBlock == null) {
         return Optional.empty();
@@ -419,8 +427,10 @@ public class CryptoGateway implements PaymentGateway {
         return Optional.empty();
       }
       for (JsonNode log0 : result) {
-        long value = hexToLong(textOrEmpty(log0, "data"));
-        if (value < targetSmallestUnit) {
+        // "data" carries the raw uint256 transfer amount — MUST be parsed as BigInteger, not
+        // hexToLong: a large token amount at up to 18 decimals overflows a 64-bit long.
+        java.math.BigInteger value = hexToBigInteger(textOrEmpty(log0, "data"));
+        if (value.compareTo(targetSmallestUnit) < 0) {
           continue;
         }
         long logBlock = hexToLong(textOrEmpty(log0, "blockNumber"));
@@ -463,7 +473,7 @@ public class CryptoGateway implements PaymentGateway {
      * (decimal-string wei), {@code hash}, {@code blockNumber}, {@code isError}.
      */
     @Override
-    public Optional<ChainMatch> check(String address, long targetSmallestUnit, Instant since) {
+    public Optional<ChainMatch> check(String address, java.math.BigInteger targetSmallestUnit, Instant since) {
       if (explorerApiKey == null || explorerApiKey.isBlank()) {
         log.warn("Native EVM verifier for {} has no explorer API key configured — skipping", sanitize(address));
         return Optional.empty();
@@ -489,8 +499,9 @@ public class CryptoGateway implements PaymentGateway {
         if (!address.equalsIgnoreCase(textOrEmpty(tx, "to"))) {
           continue;
         }
-        long value = parseLongSafe(textOrEmpty(tx, "value"));
-        if (value < targetSmallestUnit) {
+        // wei-scale native amount — BigInteger, not long (see ChainMatch javadoc).
+        java.math.BigInteger value = parseBigIntegerSafe(textOrEmpty(tx, "value"));
+        if (value.compareTo(targetSmallestUnit) < 0) {
           continue;
         }
         long txBlock = parseLongSafe(textOrEmpty(tx, "blockNumber"));
@@ -516,6 +527,19 @@ public class CryptoGateway implements PaymentGateway {
       return Long.parseLong(value.trim());
     } catch (NumberFormatException ex) {
       return 0L;
+    }
+  }
+
+  /** Same contract as {@link #parseLongSafe} but for values that may exceed a 64-bit long
+   *  (native/wei-scale on-chain amounts) — see {@link ChainMatch}'s javadoc. */
+  private static java.math.BigInteger parseBigIntegerSafe(String value) {
+    if (value == null || value.isBlank()) {
+      return java.math.BigInteger.ZERO;
+    }
+    try {
+      return new java.math.BigInteger(value.trim());
+    } catch (NumberFormatException ex) {
+      return java.math.BigInteger.ZERO;
     }
   }
 
@@ -557,6 +581,9 @@ public class CryptoGateway implements PaymentGateway {
     }
   }
 
+  /** Block numbers only — always small, safely fits a long. For on-chain token/wei AMOUNTS use
+   *  {@link #hexToBigInteger} instead: a large token amount at up to 18 decimals overflows a
+   *  64-bit long (this was a real, caught bug — see {@link ChainMatch}'s javadoc). */
   private static long hexToLong(String hex) {
     if (hex == null || hex.isBlank()) {
       return 0L;
@@ -565,12 +592,20 @@ public class CryptoGateway implements PaymentGateway {
     if (h.isEmpty()) {
       return 0L;
     }
-    // Fits comfortably in a long for any realistic charge amount at THIS platform's price points
-    // ($100-$1,000 tiers): even 18-decimal wei amounts stay well under long's ~9.22e18 max for
-    // any plausible ETH/BNB/USD rate. Would need BigInteger instead if amounts/decimals ever grow
-    // enough to risk overflow. Long.parseUnsignedLong tolerates the full unsigned 64-bit range
-    // (this also parses block numbers, which are far smaller).
     return Long.parseUnsignedLong(h, 16);
+  }
+
+  /** Hex (0x-prefixed or not) -> unsigned BigInteger — for on-chain token/wei AMOUNT fields,
+   *  which can exceed a 64-bit long at 18 decimals for a realistic dollar amount. */
+  private static java.math.BigInteger hexToBigInteger(String hex) {
+    if (hex == null || hex.isBlank()) {
+      return java.math.BigInteger.ZERO;
+    }
+    String h = hex.startsWith("0x") || hex.startsWith("0X") ? hex.substring(2) : hex;
+    if (h.isEmpty()) {
+      return java.math.BigInteger.ZERO;
+    }
+    return new java.math.BigInteger(h, 16);
   }
 
   // ---------------------------------------------------------------------------
@@ -579,12 +614,12 @@ public class CryptoGateway implements PaymentGateway {
 
   private final class BitcoinVerifier implements ChainVerifier {
     @Override
-    public Optional<ChainMatch> check(String address, long targetSmallestUnit, Instant since) {
+    public Optional<ChainMatch> check(String address, java.math.BigInteger targetSmallestUnit, Instant since) {
       return mempoolAddressTxs(address, targetSmallestUnit);
     }
   }
 
-  private Optional<ChainMatch> mempoolAddressTxs(String address, long targetSats) {
+  private Optional<ChainMatch> mempoolAddressTxs(String address, java.math.BigInteger targetSats) {
     String body;
     try {
       body = restClient.get().uri(config.getMempoolBaseUrl() + "/address/" + address + "/txs")
@@ -609,15 +644,17 @@ public class CryptoGateway implements PaymentGateway {
         if (!address.equalsIgnoreCase(textOrEmpty(vout, "scriptpubkey_address"))) {
           continue;
         }
+        // BTC satoshi amounts always fit a long (21M BTC cap == ~2.1x10^15 sats, far under
+        // long's ~9.2x10^18 max) — safe here even though the interface is BigInteger-typed.
         long value = vout.path("value").asLong(-1);
-        if (value < targetSats) {
+        if (java.math.BigInteger.valueOf(value).compareTo(targetSats) < 0) {
           continue;
         }
         String txHash = textOrEmpty(tx, "txid");
         if (txHash.isEmpty()) {
           continue;
         }
-        return Optional.of(new ChainMatch(txHash, value, confirmations));
+        return Optional.of(new ChainMatch(txHash, java.math.BigInteger.valueOf(value), confirmations));
       }
     }
     return Optional.empty();
@@ -662,21 +699,27 @@ public class CryptoGateway implements PaymentGateway {
     }
   }
 
-  /** USD (in cents) -> the asset's smallest unit, at the given USD rate, rounded to a whole unit. */
-  private static long usdToSmallestUnit(long amountCents, BigDecimal usdRate, int decimals) {
+  /** USD (in cents) -> the asset's smallest unit, at the given USD rate, rounded to a whole unit.
+   *  BigInteger result: a volatile 18-decimal asset (native ETH/BNB) stays well within long range
+   *  in practice (division by a rate keeps it small), but the return type is BigInteger for one
+   *  consistent representation across every asset — see {@link ChainMatch}'s javadoc for why that
+   *  matters for the STABLE 18-decimal case this feeds the same downstream math as. */
+  private static java.math.BigInteger usdToSmallestUnit(long amountCents, BigDecimal usdRate, int decimals) {
     BigDecimal usd = BigDecimal.valueOf(amountCents).movePointLeft(2);
     return usd.divide(usdRate, 24, RoundingMode.HALF_UP)
-      .movePointRight(decimals).setScale(0, RoundingMode.HALF_UP).longValueExact();
+      .movePointRight(decimals).setScale(0, RoundingMode.HALF_UP).toBigIntegerExact();
   }
 
   /** 1 whole stablecoin unit == 10^decimals smallest units; 1 USD cent == 1/100 of that whole
-   *  unit (stablecoins are 1:1 USD-pegged) == 10^(decimals-2) smallest units per cent. */
-  private static long stableSmallestUnitsPerCent(int decimals) {
-    return (long) Math.pow(10, decimals - 2);
+   *  unit (stablecoins are 1:1 USD-pegged) == 10^(decimals-2) smallest units per cent. Exact
+   *  integer power — {@code Math.pow} (double-based) loses precision at this magnitude and was
+   *  the root cause of a real overflow bug for 18-decimal stablecoins (see ChainMatch javadoc). */
+  private static java.math.BigInteger stableSmallestUnitsPerCent(int decimals) {
+    return java.math.BigInteger.TEN.pow(decimals - 2);
   }
 
-  private static long stableUnitsForCents(long amountCents, int decimals) {
-    return amountCents * stableSmallestUnitsPerCent(decimals);
+  private static java.math.BigInteger stableUnitsForCents(long amountCents, int decimals) {
+    return java.math.BigInteger.valueOf(amountCents).multiply(stableSmallestUnitsPerCent(decimals));
   }
 
   // ---------------------------------------------------------------------------
@@ -723,13 +766,13 @@ public class CryptoGateway implements PaymentGateway {
     return Math.floorMod(v, TAG_MODULUS) + 1; // 1..TAG_MODULUS, never zero (always distinguishable from an untagged send)
   }
 
-  private static String displayAmount(AssetSpec spec, long smallestUnit) {
-    return BigDecimal.valueOf(smallestUnit).movePointLeft(spec.decimals()).toPlainString() + " " + spec.unitSuffix();
+  private static String displayAmount(AssetSpec spec, java.math.BigInteger smallestUnit) {
+    return new BigDecimal(smallestUnit).movePointLeft(spec.decimals()).toPlainString() + " " + spec.unitSuffix();
   }
 
   /** Same value as {@link #displayAmount}, without the unit suffix — for BIP21-style URI construction. */
-  private static String amountValue(AssetSpec spec, long smallestUnit) {
-    return BigDecimal.valueOf(smallestUnit).movePointLeft(spec.decimals()).toPlainString();
+  private static String amountValue(AssetSpec spec, java.math.BigInteger smallestUnit) {
+    return new BigDecimal(smallestUnit).movePointLeft(spec.decimals()).toPlainString();
   }
 
   private String toJson(Map<String, Object> map) {
