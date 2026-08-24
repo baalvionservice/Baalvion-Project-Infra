@@ -179,6 +179,22 @@ const REMOVED_PATHS = new Set<string>([
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Every real slug on this site is lowercase (CMS content, static routes, terms —
+  // none are cased), so an uppercase/mixed-case hit is always a typo (caps lock,
+  // mobile autocap, a pasted link), never a distinct real page. Redirecting it to
+  // the lowercase form first — ahead of every other rule below — means a mistyped
+  // path like /WORLD lands on the real page instead of falling into the catch-all
+  // route's "unknown slug" lookup, which otherwise risks a needless 404 (or, if the
+  // CMS is briefly unreachable, a 500 — see articles-service.ts's deliberate
+  // rethrow-on-transient-failure comment for why that particular case doesn't just
+  // quietly become a 404 either). 308 (not 301) preserves the original request
+  // method, matching how a case fix should behave for a POST/PUT hitting this path.
+  if (pathname !== pathname.toLowerCase()) {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname.toLowerCase();
+    return NextResponse.redirect(url, 308);
+  }
+
   // Permanently killed URLs — see REMOVED_PATHS above. Checked before every other
   // rule so a removed path never falls through to auth gates or legacy redirects.
   if (REMOVED_PATHS.has(pathname)) {
@@ -249,6 +265,12 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    // Case-normalization (see the top of middleware() above) needs to see every
+    // page route, not just the specific ones below -- excludes API routes (a
+    // redirect would break non-GET methods), _next internals, and any path with
+    // a file extension (sitemap.xml, robots.txt, ads.txt, /public assets, etc.,
+    // which are served case-sensitively by the filesystem/route handlers as-is).
+    '/((?!api|_next/static|_next/image|favicon\\.ico|.*\\..*).*)',
     '/terms/:path*',
     '/admin/:path*',
     '/creator/dashboard/:path*',
