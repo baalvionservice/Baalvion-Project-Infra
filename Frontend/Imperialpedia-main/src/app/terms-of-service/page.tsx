@@ -41,7 +41,7 @@ export default function TermsOfServicePage() {
           </Text>
         </header>
 
-        <Section spacing="sm" className="prose prose-invert max-w-none space-y-12">
+        <Section spacing="sm" className="prose dark:prose-invert max-w-none space-y-12">
           <div className="space-y-4">
             <Text variant="h3" className="text-xl font-bold">
               1. Who may use the Services
