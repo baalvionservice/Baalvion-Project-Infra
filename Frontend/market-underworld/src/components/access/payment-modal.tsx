@@ -17,10 +17,15 @@ import { checkoutCommunity, getCommunity, type CryptoAsset, type CryptoCheckout 
 
 const POLL_MS = 7000;
 
+// Only list an asset here once its merchant receiving address is actually configured (CMS
+// Integrations & Keys vault, provider=crypto) — selecting an unconfigured asset fails checkout
+// with "no merchant receiving address configured" (see CryptoGateway#requireAddress).
 const ASSET_OPTIONS: { asset: CryptoAsset; label: string }[] = [
   { asset: "BTC", label: "Bitcoin (BTC)" },
   { asset: "USDT_TRC20", label: "USDT (TRC20)" },
-  { asset: "ETH_BEP20", label: "ETH (BEP20)" },
+  { asset: "ETH_BEP20", label: "ETH (BEP20 — Binance-Peg, BSC network)" },
+  { asset: "ETH", label: "ETH (Native — Ethereum mainnet)" },
+  { asset: "USDT_BEP20", label: "USDT (BEP20 — BSC network)" },
 ];
 
 export interface AccessTierPlan {

@@ -87,6 +87,16 @@ public class GatewayPayment {
   @Column(name = "raw_response", columnDefinition = "jsonb")
   private String rawResponse;
 
+  /** Crypto only: confirmations as of the last poll tick (transient on-chain state, re-derived
+   *  each tick — see CryptoChainPoller). NULL for every other provider. */
+  @Column(name = "confirmations")
+  private Integer confirmations;
+
+  /** Crypto only: the on-chain transaction hash once a matching transfer is observed (may be
+   *  set before the charge is fully confirmed/captured). NULL for every other provider. */
+  @Column(name = "transaction_hash", length = 255)
+  private String transactionHash;
+
   @CreationTimestamp
   @Column(name = "created_at", nullable = false, updatable = false)
   private LocalDateTime createdAt;

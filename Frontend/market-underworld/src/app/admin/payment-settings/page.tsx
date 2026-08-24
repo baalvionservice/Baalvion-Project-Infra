@@ -54,8 +54,12 @@ export default function PaymentSettingsPage() {
     <div className="p-10 space-y-10 max-w-3xl">
       <header>
         <h1 className="text-4xl font-bold tracking-tight mb-2 text-white">Payment Settings</h1>
-        <p className="text-text-muted font-medium">Controls checkout for this storefront only — no other Baalvion site is affected.</p>
+        <p className="text-text-muted font-medium">Controls checkout for this storefront's own product listings only — no other Baalvion site is affected.</p>
       </header>
+
+      <div className="p-4 bg-blue-500/5 border border-blue-500/20 rounded-xl text-xs text-text-secondary">
+        Looking to configure BTC / USDT / ETH addresses for <strong className="text-white">Access Tier deposits</strong> (the /access page)? Those are a separate, automated-confirmation gateway — set them under CMS → Website → Integrations &amp; Keys → <strong className="text-white">Crypto (BTC / USDT-TRC20 / ETH-BEP20)</strong> in admin-platform, not here.
+      </div>
 
       <ListingCard className="p-8 space-y-8 border-brand-border bg-brand-surface">
         <div className="space-y-4">

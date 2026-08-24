@@ -178,14 +178,34 @@ app:
       btc-address: ${BTC_ADDRESS:}
       usdt-trc20-address: ${USDT_TRC20_ADDRESS:}
       eth-bep20-address: ${ETH_BEP20_ADDRESS:}
+      usdt-erc20-address: ${USDT_ERC20_ADDRESS:}
+      usdc-erc20-address: ${USDC_ERC20_ADDRESS:}
+      eth-address: ${ETH_ADDRESS:}
+      bnb-address: ${BNB_ADDRESS:}
+      usdt-bep20-address: ${USDT_BEP20_ADDRESS:}
       tron-grid-base-url: ${TRONGRID_BASE_URL:https://api.trongrid.io}
       usdt-trc20-contract-address: ${USDT_TRC20_CONTRACT_ADDRESS:TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t}
       mempool-base-url: ${MEMPOOL_BASE_URL:https://mempool.space/api}
       rate-api-base-url: ${RATE_API_BASE_URL:https://api.coingecko.com/api/v3}
       bsc-rpc-url: ${BSC_RPC_URL:https://bsc-dataseed.binance.org}
       eth-bep20-contract-address: ${ETH_BEP20_CONTRACT_ADDRESS:0x2170Ed0880ac9A755fd29B2688956BD959F933F8}
+      usdt-bep20-contract-address: ${USDT_BEP20_CONTRACT_ADDRESS:0x55d398326f99059fF775485246999027B3197955}
+      # No safe public default — public Ethereum RPCs throttle hard under real traffic.
+      # Point this at a free-tier Alchemy/Infura/QuickNode endpoint before enabling ETH/
+      # USDT-ERC20/USDC-ERC20 in production (see PspProperties.Crypto#ethRpcUrl javadoc).
+      eth-rpc-url: ${ETH_RPC_URL:}
+      usdt-erc20-contract-address: ${USDT_ERC20_CONTRACT_ADDRESS:0xdAC17F958D2ee523a2206206994597C13D831ec7}
+      usdc-erc20-contract-address: ${USDC_ERC20_CONTRACT_ADDRESS:0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48}
+      # Native ETH/BNB detection uses an Etherscan/BscScan-compatible "account tx list" API
+      # rather than eth_getLogs (native transfers emit no event log) — see EvmNativeVerifier
+      # javadoc in CryptoGateway. Both need a free-tier API key to function.
+      etherscan-api-base-url: ${ETHERSCAN_API_BASE_URL:https://api.etherscan.io/api}
+      etherscan-api-key: ${ETHERSCAN_API_KEY:}
+      bscscan-api-base-url: ${BSCSCAN_API_BASE_URL:https://api.bscscan.com/api}
+      bscscan-api-key: ${BSCSCAN_API_KEY:}
       btc-confirmations-required: ${BTC_CONFIRMATIONS_REQUIRED:3}
       bsc-confirmations-required: ${BSC_CONFIRMATIONS_REQUIRED:15}
+      eth-confirmations-required: ${ETH_CONFIRMATIONS_REQUIRED:12}
       charge-expiry-minutes: ${CRYPTO_CHARGE_EXPIRY_MINUTES:60}
 
 # CMS "Integrations & Keys" vault — source of PER-TENANT PSP provider keys (per website slug).
