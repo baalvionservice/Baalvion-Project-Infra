@@ -18,13 +18,20 @@ interface EntityListItemProps {
   /** Verified brand logo (companies only). Falls back to the generic icon when absent or off-allowlist. */
   logo?: string;
   className?: string;
+  /**
+   * Overrides the default `/${entityRouteSegment(type)}/${slug}` destination. Required
+   * for entity types with no detail page of their own (e.g. "company" — /companies was
+   * removed site-wide) where the caller has a real alternative route (e.g. the matching
+   * /markets/quote/[symbol] page for a ticker).
+   */
+  href?: string;
 }
 
 /**
  * A refined list item component for knowledge entities.
  */
-export const EntityListItem = ({ name, type, category, description, slug, logo, className }: EntityListItemProps) => {
-  const route = `/${entityRouteSegment(type)}/${slug}`;
+export const EntityListItem = ({ name, type, category, description, slug, logo, className, href }: EntityListItemProps) => {
+  const route = href ?? `/${entityRouteSegment(type)}/${slug}`;
   const logoOk = isAllowedImageHost(logo);
 
   return (

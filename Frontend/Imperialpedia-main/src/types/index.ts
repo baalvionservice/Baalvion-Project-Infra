@@ -19,5 +19,4 @@ export * from "./system";
 export * from "./topics";
 export * from "./trust";
 export * from "./content-quality";
-export * from "./knowledge-graph";
 export * from "./version-control";

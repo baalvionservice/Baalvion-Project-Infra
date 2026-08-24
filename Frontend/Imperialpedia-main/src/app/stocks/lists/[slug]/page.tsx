@@ -10,6 +10,7 @@ import { buildMetadata } from '@/lib/seo';
 import { structuredData } from '@/lib/seo/structured-data';
 import { JsonLd } from '@/modules/seo-engine/components/JsonLd';
 import { loadCompanies } from '@/lib/data/loaders';
+import { ALL_TRACKED_SYMBOLS } from '@/lib/data/marketsLoader';
 import { EntityList } from '@/components/lists/EntityList';
 import { getSiteContent } from '@/lib/data/site-content';
 import stockLists from '@/data/stock-lists/stock-lists.json';
@@ -48,7 +49,15 @@ export default async function StockListDetailPage({ params }: PageProps) {
   if (!list) notFound();
 
   const companies = await loadCompanies();
-  const matched = companies.filter((c) => c.tags.some((t) => list.matchTags.includes(t)));
+  const trackedSymbols = new Set(ALL_TRACKED_SYMBOLS);
+  // /companies/[slug] was removed site-wide, so a company card can only link
+  // anywhere real via its /markets/quote/[symbol] page — which only exists for
+  // tickers this site actually tracks. Companies with no ticker (private, e.g.
+  // OpenAI) or an untracked one have no live destination and are dropped
+  // rather than rendered as a dead link on this SSG'd, sitemap-worthy page.
+  const matched = companies.filter(
+    (c) => c.tags.some((t) => list.matchTags.includes(t)) && c.ticker && trackedSymbols.has(c.ticker.toUpperCase()),
+  );
 
   // Admin-managed override (Imperialpedia > Site Content, type "stock-list")
   // takes precedence over the bundled default in stock-lists.json.
@@ -91,7 +100,12 @@ export default async function StockListDetailPage({ params }: PageProps) {
             )}
           </header>
 
-          <EntityList entities={matched} type="company" totalCount={matched.length} />
+          <EntityList
+            entities={matched}
+            type="company"
+            totalCount={matched.length}
+            hrefMap={Object.fromEntries(matched.map((c) => [c.slug, `/markets/quote/${c.ticker}`]))}
+          />
 
           {faq.length > 0 && (
             <div className="mt-12 pt-8 border-t border-border max-w-3xl">

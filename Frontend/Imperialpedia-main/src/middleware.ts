@@ -163,6 +163,17 @@ const REMOVED_PATHS = new Set<string>([
   '/terms-beginning-with-num',
   '/terms-beginning-with-z',
   '/premium/subscribe',
+  // /research-ai used to 301 to /ai-analyst, but /ai-analyst is itself
+  // permanently killed above — that made the redirect a dead-end chain
+  // (301 → 410). 410 it directly instead (see next.config.ts, where the
+  // stale redirect rule was removed).
+  '/research-ai',
+  // The Knowledge Graph page only ever produced real connections through
+  // companies/industries/technologies — all three were removed site-wide, which
+  // left it rendering countries with zero edges (not a graph) while still
+  // linking out to the dead entity types via NodeDetailPanel. Not worth
+  // patching around; retired entirely (see knowledge-graph-service.ts removal).
+  '/knowledge-map',
 ]);
 
 export function middleware(request: NextRequest) {
@@ -174,10 +185,17 @@ export function middleware(request: NextRequest) {
     return goneResponse();
   }
 
-  // /companies and /technologies (list + every [slug] detail page) were removed
-  // site-wide — the whole prefix 410s rather than just the handful of individual
-  // paths Google had already indexed, since the route itself no longer exists.
-  if (pathname === '/companies' || pathname.startsWith('/companies/') || pathname === '/technologies' || pathname.startsWith('/technologies/')) {
+  // /companies, /technologies, and /industries (list + every [slug] detail page)
+  // were removed site-wide — the whole prefix 410s rather than just the handful
+  // of individual paths Google had already indexed, since the route itself no
+  // longer exists. (/industries/<slug> was previously left to fall through to
+  // the catch-all route's resolveArticleForDetail lookup, which just 404'd —
+  // still a dead end, but the wrong status code for a permanent removal.)
+  if (
+    pathname === '/companies' || pathname.startsWith('/companies/') ||
+    pathname === '/technologies' || pathname.startsWith('/technologies/') ||
+    pathname === '/industries' || pathname.startsWith('/industries/')
+  ) {
     return goneResponse();
   }
 
@@ -246,6 +264,8 @@ export const config = {
     '/technologies/:path*',
     '/companies',
     '/companies/:path*',
+    '/industries',
+    '/industries/:path*',
     '/countries',
     '/countries/:path*',
     '/stocks/:path*',
@@ -284,5 +304,7 @@ export const config = {
     '/etf-inflows-record-february',
     '/sp500-record-high-earnings',
     '/gold-hits-2400-safe-haven',
+    '/research-ai',
+    '/knowledge-map',
   ],
 };

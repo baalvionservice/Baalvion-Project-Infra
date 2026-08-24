@@ -77,9 +77,11 @@ const nextConfig: NextConfig = {
       // /home was a duplicate second homepage implementation (retired) — the
       // canonical homepage is /.
       { source: '/home', destination: '/', permanent: true },
-      // /research-ai was a non-functional stub (noindex, placeholder input box,
-      // never shipped) — retired in favour of the real AI tool suite.
-      { source: '/research-ai', destination: '/ai-analyst', permanent: true },
+      // /research-ai used to redirect to /ai-analyst here, but /ai-analyst is
+      // itself permanently removed (see REMOVED_PATHS in middleware.ts) — that
+      // made this a 301 chaining straight into a 410, which Google flags as a
+      // broken redirect rather than a clean removal. /research-ai now 410s
+      // directly at the edge instead.
       // /market and /markets were both retired when the standalone markets page
       // was removed in favour of the dynamic /market-news hub (see commit
       // 7383eadc) — Search Console still has both indexed. /markets used to
@@ -87,9 +89,11 @@ const nextConfig: NextConfig = {
       // chain (308 → 404); both now resolve straight to the real hub.
       { source: '/market', destination: '/market-news', permanent: true },
       { source: '/markets', destination: '/market-news', permanent: true },
-      // Google is a subsidiary of Alphabet, which already has its own entity
-      // page — redirect instead of creating a near-duplicate second profile.
-      { source: '/companies/google', destination: '/companies/alphabet', permanent: true },
+      // /companies/google used to redirect to /companies/alphabet, but the
+      // entire /companies section (including /companies/alphabet) is now
+      // permanently 410'd (see REMOVED_PATHS in middleware.ts) — that made this
+      // a 301 chaining into a 410. Removed; middleware's blanket /companies/
+      // prefix rule now 410s it directly in one hop.
       // /financial-tools/portfolio and /financial-tools/retirement were the
       // old locations before the calculators hub was reorganized — the tools
       // now live at the top level.
@@ -165,11 +169,10 @@ const nextConfig: NextConfig = {
       { source: '/financial-intelligence/diversification', destination: '/financial-intelligence', permanent: true },
       // The entire /industries section (hub + every per-industry page) was retired —
       // only 3 industries were ever populated (finance/semiconductors/software), making
-      // the whole section thin/near-empty content that AdSense review flags. Every
-      // /industries/<slug> URL, old or current, 301s to /companies (the closest live
-      // equivalent — company profiles already surface their industry as plain text).
-      { source: '/industries', destination: '/companies', permanent: true },
-      { source: '/industries/:slug*', destination: '/companies', permanent: true },
+      // the whole section thin/near-empty content that AdSense review flags. This used
+      // to 301 to /companies, but /companies is now itself permanently 410'd (see
+      // REMOVED_PATHS in middleware.ts) — that made it a redirect chaining into a 410.
+      // /industries now 410s directly at the edge instead (removed here).
       // Back-compat: the old query-param World URLs now live at clean paths.
       // /world?region=us → /world/us, /world?region=world → /world.
       {

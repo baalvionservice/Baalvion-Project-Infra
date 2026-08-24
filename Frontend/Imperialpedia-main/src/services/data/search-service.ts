@@ -31,7 +31,7 @@ const CMS_PUBLIC =
 const SITE = process.env.NEXT_PUBLIC_CMS_SITE_SLUG || 'imperialpedia';
 
 const TYPE_MAP: Record<string, SearchResultType> = {
-  company: 'company', country: 'country', industry: 'industry', technology: 'technology',
+  country: 'country',
   article: 'article', author: 'author', term: 'glossary', review: 'article', asset: 'market',
   news: 'article', page: 'article',
 };
@@ -39,7 +39,6 @@ const TYPE_MAP: Record<string, SearchResultType> = {
 const routeFor = (type: string, slug: string, name: string): string => {
   switch (type) {
     case 'country': return `/countries/${slug}`;
-    case 'industry': return `/industries/${slug}`;
     case 'term': {
       const c = (name || slug).charAt(0).toLowerCase() || 'a';
       return `/terms/${/^[0-9]/.test(c) ? 'num' : c}/${slug}`;
@@ -78,9 +77,10 @@ export const searchService = {
           // Glossary is offline pending AdSense approval (src/config/glossary.ts) —
           // don't surface search results that would route to a 404'd term page.
           if (!GLOSSARY_LIVE && r.type === 'term') continue;
-          // /companies and /technologies (list + [slug] detail pages) were
-          // removed site-wide — neither type has a page to route search hits to.
-          if (r.type === 'company' || r.type === 'technology') continue;
+          // /companies, /technologies, and /industries (list + [slug] detail
+          // pages) were removed site-wide — none of these types has a page to
+          // route search hits to.
+          if (r.type === 'company' || r.type === 'technology' || r.type === 'industry') continue;
           out.push({
             id: `${r.type}-${r.slug}`,
             type: TYPE_MAP[r.type] || 'topic',

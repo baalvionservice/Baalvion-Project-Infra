@@ -6,7 +6,6 @@ import { EntityHeader } from "@/components/knowledge/EntityHeader";
 import { EntityOverview } from "@/components/knowledge/EntityOverview";
 import { EntityEditorialOverview } from "@/components/knowledge/EntityEditorialOverview";
 import { DataTable } from "@/components/knowledge/DataTable";
-import { RelatedEntities } from "@/components/knowledge/RelatedEntities";
 import { getCountryBySlug } from "@/lib/data/loaders";
 import { generateEntityMetadata } from "@/lib/utils/seo";
 import { structuredData } from "@/lib/seo/structuredData";
@@ -78,33 +77,6 @@ export default async function Page({ params }: PageProps) {
             />
 
             <EntityEditorialOverview entityName={country.name} overview={country.editorialOverview} />
-
-            <RelatedEntities
-              entities={[
-                ...country.industries.map((i: string) => ({
-                  id: `industry-${i}`,
-                  name: i.charAt(0).toUpperCase() + i.slice(1),
-                  slug: i,
-                  type: "industry" as const,
-                  description: `Industry: ${i}`,
-                  category: "industry",
-                  tags: [],
-                  created_at: new Date().toISOString(),
-                  updated_at: new Date().toISOString(),
-                })),
-                ...country.technologies.map((t: string) => ({
-                  id: `tech-${t}`,
-                  name: t.replace("-", " "),
-                  slug: t,
-                  type: "technology" as const,
-                  description: `Technology: ${t}`,
-                  category: "technology",
-                  tags: [],
-                  created_at: new Date().toISOString(),
-                  updated_at: new Date().toISOString(),
-                })),
-              ]}
-            />
           </div>
 
           <aside className="lg:col-span-4 space-y-10">
