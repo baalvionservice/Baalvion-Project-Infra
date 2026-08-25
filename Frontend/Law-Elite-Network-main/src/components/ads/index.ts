@@ -4,6 +4,7 @@
  */
 
 export { ResponsiveDisplayAd, type ResponsiveDisplayAdProps } from './ResponsiveDisplayAd';
+export { AdSlot } from './AdSlot';
 
 export { AD_PLACEMENTS, useAdManager, useAdConsent, adManager } from './AdManager';
 export type { AdPlacementKey } from './AdManager';

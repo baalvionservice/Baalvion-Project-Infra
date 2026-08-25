@@ -17,6 +17,13 @@ import { FrequentlyAskedQuestions } from '@/components/knowledge/FrequentlyAsked
 import { ReportAnError } from '@/components/knowledge/ReportAnError';
 import { ArticleFeedback } from '@/components/knowledge/ArticleFeedback';
 import { ArticleComments } from '@/components/knowledge/ArticleComments';
+import { ReadingProgressBar } from '@/components/knowledge/ReadingProgressBar';
+import { StickyShareBar } from '@/components/knowledge/StickyShareBar';
+import { ArticleShareBar } from '@/components/knowledge/ArticleShareBar';
+import { ArticleTrustBadge } from '@/components/knowledge/ArticleTrustBadge';
+import { ArticleTagPills } from '@/components/knowledge/ArticleTagPills';
+import { ArticleSidebar } from '@/components/knowledge/ArticleSidebar';
+import { AdSlot } from '@/components/ads/AdSlot';
 import { getMergedAuthorByName } from '@/lib/authors-server';
 import { resolveArticleImage } from '@/lib/article-art';
 import { formatArticleDate } from '@/lib/format-date';
@@ -27,6 +34,9 @@ import { cmsGetArticles } from '@/lib/cms';
 import type { SeriesInfo } from '@/components/knowledge/SeriesNotice';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+
+// Same literal-vs-import note as ArticleSidebar.tsx's SIDEBAR_AD_SLOT_ID.
+const AD_SLOT_ID = '4123514154';
 
 /**
  * Resolves this article's series siblings by matching `seriesSlug` (set via
@@ -172,9 +182,18 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
   const toc = extractToc(bodyHtml);
 
   const relatedArticles = await fetchRelatedArticles(slug, category?.slug, category?.name, article.subcategory?.slug);
+  const canonicalUrl = `${SITE}${articleUrl({ slug, category })}`;
+
+  const tagPills = [
+    category?.name ? { label: category.name, href: category.slug ? `/${category.slug}` : undefined } : null,
+    article.subcategory?.name ? { label: article.subcategory.name } : null,
+    article.country ? { label: article.country } : null,
+  ].filter((p): p is { label: string; href?: string } => !!p);
 
   return (
     <div className="min-h-screen bg-white selection:bg-blue-100 selection:text-blue-900">
+      <ReadingProgressBar />
+      <StickyShareBar url={canonicalUrl} title={article.title} />
       <main className="pt-32 pb-24">
         <div className="container mx-auto px-6 max-w-7xl">
 
@@ -185,18 +204,26 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
             articleTitle={article.title}
           />
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 xl:gap-20 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 xl:gap-14 items-start">
 
-            <aside className="hidden lg:block lg:col-span-3 sticky top-32 max-h-[calc(100vh-160px)] pr-8">
+            <aside className="hidden lg:block lg:col-span-2 sticky top-32 max-h-[calc(100vh-160px)] pr-4">
               <ArticleTOC items={toc} />
             </aside>
 
-            <article className="lg:col-span-9 space-y-8">
+            <article className="lg:col-span-7 space-y-8">
 
               <header className="space-y-6">
-                <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold text-slate-900 tracking-tighter leading-[0.95]">
+                <ArticleTagPills pills={tagPills} />
+
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tighter leading-[0.98]">
                   {article.title}
                 </h1>
+
+                {article.excerpt && (
+                  <p className="text-lg lg:text-xl text-slate-500 font-medium leading-relaxed">
+                    {article.excerpt}
+                  </p>
+                )}
 
                 <ArticleMetaHeader
                   jurisdiction={article.country}
@@ -206,20 +233,27 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
                   readingTimeMinutes={readingTimeMinutes}
                 />
 
-                <div className="space-y-1.5">
-                  <ArticleAuthorByline authorName={authorName} matchedAuthor={matchedAuthor} />
-                  {updatedAt && <p className="text-[12.5px] text-slate-400">Updated {updatedAt}</p>}
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div className="space-y-1.5">
+                    <ArticleAuthorByline authorName={authorName} matchedAuthor={matchedAuthor} />
+                    {updatedAt && <p className="text-[12.5px] text-slate-400">Updated {updatedAt}</p>}
+                  </div>
+                  <ArticleShareBar url={canonicalUrl} title={article.title} />
+                </div>
+
+                <div className="border-t border-slate-100 pt-4">
+                  <ArticleTrustBadge />
                 </div>
 
                 <SeriesNotice series={seriesInfo ?? null} />
 
                 <figure className="pt-6">
-                  <div className="aspect-[16/9] relative overflow-hidden bg-slate-50 rounded-lg">
+                  <div className="aspect-[16/9] relative overflow-hidden bg-slate-50 rounded-2xl border border-slate-100 shadow-xl group">
                     <Image
                       src={resolveArticleImage(article)}
                       alt={article.title}
                       fill
-                      className="object-cover"
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
                       priority
                     />
                   </div>
@@ -244,12 +278,29 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
               <ArticleFeedback slug={slug} />
 
               <ArticleComments slug={slug} />
-
-              <RelatedArticles articles={relatedArticles} />
-
-              <ReportAnError title={article.title} url={`${SITE}${articleUrl({ slug, category })}`} />
             </article>
 
+            <div className="hidden lg:block lg:col-span-3">
+              <ArticleSidebar categorySlug={category?.slug} categoryLabel={category?.name || 'Law Elite Network'} excludeSlug={slug} />
+            </div>
+
+          </div>
+
+          {/* Ad sits before Related Articles, not right above PublicFooter's
+              nav-heavy footer -- Google's placement guidance discourages an
+              ad immediately adjacent to a site's persistent navigation. */}
+          <div className="grid grid-cols-1 lg:grid-cols-12">
+            <div className="lg:col-start-3 lg:col-span-7 pt-8 border-t border-slate-100">
+              <AdSlot slotId={AD_SLOT_ID} format="horizontal" placement="article-footer" fullWidthResponsive minHeight="100px" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12">
+            <div className="lg:col-start-3 lg:col-span-7">
+              <RelatedArticles articles={relatedArticles} />
+
+              <ReportAnError title={article.title} url={canonicalUrl} />
+            </div>
           </div>
         </div>
       </main>
