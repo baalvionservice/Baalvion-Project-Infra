@@ -9,10 +9,11 @@ const checkout = async (req, res, next) => {
     try {
         const parsed = checkoutSchema.safeParse(req.body || {});
         if (!parsed.success) throw new AppError('VALIDATION_ERROR', parsed.error.issues[0].message, 422);
-        const email = decodeEmailFromRequest(req);
-        const result = await giftcardService.checkout(
-            req.params.slug, req.auth.userId, email, parsed.data.denomination, parsed.data.asset
-        );
+        const result = parsed.data.method === 'WALLET'
+            ? await giftcardService.checkoutWithWallet(req.params.slug, req.auth.userId, parsed.data.denomination)
+            : await giftcardService.checkout(
+                req.params.slug, req.auth.userId, decodeEmailFromRequest(req), parsed.data.denomination, parsed.data.asset
+            );
         return sendSuccess(req, res, result, 201);
     } catch (err) { return next(err); }
 };

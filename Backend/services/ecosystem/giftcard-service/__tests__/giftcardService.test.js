@@ -102,6 +102,64 @@ describe('giftcardService.checkout — denomination validation', () => {
     });
 });
 
+describe('giftcardService.checkoutWithWallet — pay from wallet balance', () => {
+    const originalFetch = global.fetch;
+    afterEach(() => { global.fetch = originalFetch; });
+
+    function mockWalletFetch({ holdStatus = 201, supplierFails = false, stubSupplier = true } = {}) {
+        if (stubSupplier) {
+            const supplierRegistry = require('../service/suppliers/supplierRegistry');
+            supplierRegistry.getSupplier.mockReturnValueOnce({
+                createOrder: jest.fn(async () => {
+                    if (supplierFails) throw new Error('supplier out of stock');
+                    return { transactionId: 'txn-wallet-1' };
+                }),
+                fetchRedeemCode: jest.fn(async () => ({ code: 'REDEEM-CODE', pin: null })),
+            });
+        }
+        global.fetch = jest.fn(async (url, opts = {}) => {
+            if (String(url).includes('/by-holder/')) {
+                return { ok: true, status: 200, json: async () => ({ id: 'wallet-1' }) };
+            }
+            if (String(url).endsWith('/holds')) {
+                if (holdStatus !== 201) return { ok: false, status: holdStatus, json: async () => ({}) };
+                return { ok: true, status: 201, json: async () => ({ id: 'hold-1', status: 'ACTIVE' }) };
+            }
+            if (String(url).includes('/holds/hold-1/capture') || String(url).includes('/holds/hold-1/release')) {
+                return { ok: true, status: 200, json: async () => ({ id: 'hold-1' }) };
+            }
+            throw new Error(`unexpected fetch: ${url}`);
+        });
+        return global.fetch;
+    }
+
+    test('happy path: hold placed, supplier succeeds, hold captured, order fulfilled', async () => {
+        const fetchMock = mockWalletFetch();
+        const result = await giftcardService.checkoutWithWallet('target-us', 'u1', 25);
+        expect(result.status).toBe('fulfilled');
+        expect(fetchMock.mock.calls.some(([url]) => String(url).includes('/holds/hold-1/capture'))).toBe(true);
+        expect(fetchMock.mock.calls.some(([url]) => String(url).includes('/holds/hold-1/release'))).toBe(false);
+    });
+
+    test('insufficient balance: no supplier call, order failed, no hold left active', async () => {
+        mockWalletFetch({ holdStatus: 422, stubSupplier: false });
+        const supplierRegistry = require('../service/suppliers/supplierRegistry');
+        const callsBefore = supplierRegistry.getSupplier.mock.calls.length;
+        await expect(giftcardService.checkoutWithWallet('target-us', 'u1', 25))
+            .rejects.toThrow(/insufficient/i);
+        // getSupplier() is only invoked inside purchaseFromSupplier — a 422 hold must short-circuit before it.
+        expect(supplierRegistry.getSupplier.mock.calls.length).toBe(callsBefore);
+    });
+
+    test('supplier failure: hold released (not captured), order failed with a real error', async () => {
+        const fetchMock = mockWalletFetch({ supplierFails: true });
+        const result = await giftcardService.checkoutWithWallet('target-us', 'u1', 25);
+        expect(result.status).toBe('failed');
+        expect(fetchMock.mock.calls.some(([url]) => String(url).includes('/holds/hold-1/release'))).toBe(true);
+        expect(fetchMock.mock.calls.some(([url]) => String(url).includes('/holds/hold-1/capture'))).toBe(false);
+    });
+});
+
 describe('giftcardService.fulfill — idempotency', () => {
     test('a duplicate eventId is applied only once', async () => {
         const db = require('../models');
