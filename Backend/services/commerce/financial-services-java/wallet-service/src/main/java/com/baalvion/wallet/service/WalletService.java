@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,13 +51,17 @@ public class WalletService {
   // ------------------------------------------------------------------- wallet lifecycle
 
   public WalletResponse open(UUID tenantId, OpenWalletRequest req) {
-    var existing = walletRepository.findByTenantIdAndHolderId(tenantId, req.getHolderId());
+    // A JWT-authenticated non-internal caller can only ever open a wallet under their OWN
+    // identity — never trust a client-supplied holderId in that case (would otherwise let a
+    // buyer open, and thereafter control, a wallet mapped to someone else's holder UUID).
+    UUID holderId = resolveHolderIdForOpen(req.getHolderId());
+    var existing = walletRepository.findByTenantIdAndHolderId(tenantId, holderId);
     if (existing.isPresent()) {
       return WalletResponse.from(existing.get(), balanceRepository.findByWalletId(existing.get().getId()));
     }
     Wallet wallet = Wallet.builder()
       .tenantId(tenantId)
-      .holderId(req.getHolderId())
+      .holderId(holderId)
       .holderType(req.getHolderType() != null ? parseHolderType(req.getHolderType()) : HolderType.USER)
       .status(WalletStatus.ACTIVE)
       .defaultCurrency(req.getDefaultCurrency() != null ? req.getDefaultCurrency().toUpperCase() : null)
@@ -65,7 +70,7 @@ public class WalletService {
       .metadata(req.getMetadata() != null ? req.getMetadata() : "{}")
       .build();
     Wallet saved = walletRepository.save(wallet);
-    log.info("Wallet opened: id={}, tenant={}, holder={}", saved.getId(), tenantId, req.getHolderId());
+    log.info("Wallet opened: id={}, tenant={}, holder={}", saved.getId(), tenantId, holderId);
     outbox.enqueue(tenantId, "wallet.opened", saved.getId().toString(), WalletResponse.from(saved, List.of()));
     return WalletResponse.from(saved, List.of());
   }
@@ -73,11 +78,13 @@ public class WalletService {
   @Transactional(readOnly = true)
   public WalletResponse get(UUID tenantId, UUID walletId) {
     Wallet w = loadWallet(tenantId, walletId);
+    requireOwnHolderOrInternal(w.getHolderId());
     return WalletResponse.from(w, balanceRepository.findByWalletId(walletId));
   }
 
   @Transactional(readOnly = true)
   public WalletResponse getByHolder(UUID tenantId, UUID holderId) {
+    requireOwnHolderOrInternal(holderId);
     Wallet w = walletRepository.findByTenantIdAndHolderId(tenantId, holderId)
       .orElseThrow(() -> new NotFoundException("Wallet not found for holder: " + holderId));
     return WalletResponse.from(w, balanceRepository.findByWalletId(w.getId()));
@@ -106,6 +113,7 @@ public class WalletService {
       return balanceResponse(walletId, req.getCurrency());
     }
     Wallet wallet = loadActiveWallet(tenantId, walletId);
+    requireOwnHolderOrInternal(wallet.getHolderId());
     String ccy = currency(req.getCurrency());
     BigDecimal amount = scale(req.getAmount());
 
@@ -127,6 +135,7 @@ public class WalletService {
       return balanceResponse(walletId, req.getCurrency());
     }
     Wallet wallet = loadActiveWallet(tenantId, walletId);
+    requireOwnHolderOrInternal(wallet.getHolderId());
     String ccy = currency(req.getCurrency());
     BigDecimal amount = scale(req.getAmount());
 
@@ -146,6 +155,7 @@ public class WalletService {
 
   public HoldResponse hold(UUID tenantId, UUID walletId, HoldRequest req) {
     Wallet wallet = loadActiveWallet(tenantId, walletId);
+    requireOwnHolderOrInternal(wallet.getHolderId());
     String ccy = currency(req.getCurrency());
     BigDecimal amount = scale(req.getAmount());
 
@@ -176,6 +186,7 @@ public class WalletService {
       throw new IllegalStateException("Only an ACTIVE hold can be released (" + hold.getStatus() + ")");
     }
     Wallet wallet = loadWallet(tenantId, hold.getWalletId());
+    requireOwnHolderOrInternal(wallet.getHolderId());
     WalletBalance balance = lockBalance(hold.getWalletId(), hold.getCurrency());
     balance.setHeld(balance.getHeld().subtract(hold.getAmount()));
     balance.setAvailable(balance.getAvailable().add(hold.getAmount()));
@@ -199,6 +210,7 @@ public class WalletService {
       throw new IllegalStateException("Only an ACTIVE hold can be captured (" + hold.getStatus() + ")");
     }
     Wallet wallet = loadWallet(tenantId, hold.getWalletId());
+    requireOwnHolderOrInternal(wallet.getHolderId());
     WalletBalance balance = lockBalance(hold.getWalletId(), hold.getCurrency());
     balance.setHeld(balance.getHeld().subtract(hold.getAmount()));
     balanceRepository.save(balance);
@@ -216,7 +228,8 @@ public class WalletService {
 
   @Transactional(readOnly = true)
   public List<HoldResponse> listHolds(UUID tenantId, UUID walletId) {
-    loadWallet(tenantId, walletId);
+    Wallet wallet = loadWallet(tenantId, walletId);
+    requireOwnHolderOrInternal(wallet.getHolderId());
     return holdRepository.findByWalletId(walletId).stream().map(HoldResponse::from).toList();
   }
 
@@ -232,6 +245,9 @@ public class WalletService {
       throw new IllegalArgumentException("source and destination wallets must differ");
     }
     Wallet source = loadActiveWallet(tenantId, walletId);
+    requireOwnHolderOrInternal(source.getHolderId());
+    // The destination wallet deliberately is NOT ownership-checked — transferring TO another
+    // holder's wallet is the whole point of a transfer; only the source funds must be the caller's own.
     Wallet dest = loadActiveWallet(tenantId, req.getDestinationWalletId());
     String ccy = currency(req.getCurrency());
     BigDecimal amount = scale(req.getAmount());
@@ -279,6 +295,7 @@ public class WalletService {
       throw new IllegalArgumentException("sell and buy currencies must differ");
     }
     Wallet wallet = loadActiveWallet(tenantId, walletId);
+    requireOwnHolderOrInternal(wallet.getHolderId());
     BigDecimal sellAmount = scale(req.getSellAmount());
     BigDecimal buyAmount = req.getSellAmount().multiply(req.getRate()).setScale(MONEY_SCALE, RoundingMode.HALF_UP);
 
@@ -313,7 +330,8 @@ public class WalletService {
 
   @Transactional(readOnly = true)
   public Page<WalletEntryResponse> statement(UUID tenantId, UUID walletId, String currency, int page, int size) {
-    loadWallet(tenantId, walletId);
+    Wallet wallet = loadWallet(tenantId, walletId);
+    requireOwnHolderOrInternal(wallet.getHolderId());
     var pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
     if (currency != null) {
       return entryRepository.findByWalletIdAndCurrency(walletId, currency.toUpperCase(), pageable).map(WalletEntryResponse::from);
@@ -408,6 +426,49 @@ public class WalletService {
 
   private BigDecimal scale(BigDecimal v) {
     return v.setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+  }
+
+  /**
+   * Ownership guard (fixes a real IDOR: previously no endpoint compared the caller's own JWT
+   * identity to the holder/wallet being read or mutated). Server-to-server callers
+   * (x-internal-secret, ROLE_INTERNAL) are trusted as-is — they act on behalf of a holder they
+   * already resolved. An unauthenticated caller (security disabled locally) has nothing to
+   * compare against and is allowed, matching the permissive dev filter chain. Otherwise the
+   * caller's own JWT subject must equal the holder being acted on.
+   */
+  private void requireOwnHolderOrInternal(UUID holderId) {
+    if (AuthContext.hasRole("INTERNAL")) return;
+    if (!AuthContext.isAuthenticated()) return;
+    UUID caller = currentUserIdAsUuid();
+    if (caller == null || !caller.equals(holderId)) {
+      throw new AccessDeniedException("Not authorized to act on this wallet");
+    }
+  }
+
+  /**
+   * For {@link #open}: a JWT-authenticated non-internal caller may only ever open a wallet under
+   * their own identity — the request body's holderId is ignored/overridden rather than merely
+   * validated, so a buyer can never even attempt to open a wallet under someone else's holder id.
+   */
+  private UUID resolveHolderIdForOpen(UUID requestedHolderId) {
+    if (AuthContext.hasRole("INTERNAL") || !AuthContext.isAuthenticated()) {
+      return requestedHolderId;
+    }
+    UUID caller = currentUserIdAsUuid();
+    if (caller == null) {
+      throw new AccessDeniedException("Authenticated request carries no usable user id");
+    }
+    return caller;
+  }
+
+  private UUID currentUserIdAsUuid() {
+    return AuthContext.currentUserId().map(id -> {
+      try {
+        return UUID.fromString(id);
+      } catch (IllegalArgumentException e) {
+        return null;
+      }
+    }).orElse(null);
   }
 
   private HolderType parseHolderType(String value) {

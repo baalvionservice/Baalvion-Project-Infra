@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-12T06:58:06.579Z",
+  "generatedAt": "2026-08-24T12:01:33.158Z",
   "services": [
     "about-service",
     "account-service",
@@ -245,7 +245,8 @@
     ],
     "wallet-service": [
       "auth-service",
-      "ledger-service"
+      "ledger-service",
+      "payment-service"
     ]
   },
   "eventConsumers": {
