@@ -21,7 +21,7 @@ export function TopicSection({ group }: { group: TopicGroup }) {
         >
           <Image
             src={group.categoryImage}
-            alt=""
+            alt={group.title}
             fill
             sizes="(max-width: 1024px) 100vw, 80vw"
             className="object-cover"

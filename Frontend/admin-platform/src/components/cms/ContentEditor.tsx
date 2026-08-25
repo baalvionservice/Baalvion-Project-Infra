@@ -24,6 +24,8 @@ import ReviewerPanel from './ReviewerPanel';
 import FactCheckerPanel from './FactCheckerPanel';
 import SeriesPanel from './SeriesPanel';
 import CitationsPanel from './CitationsPanel';
+import QuizPanel from './QuizPanel';
+import PollPanel from './PollPanel';
 import ContentWorkflowBadge from './ContentWorkflowBadge';
 import RelatedContentSuggestions from './newsroom/RelatedContentSuggestions';
 import { useUpdateContent, useAutosave } from '@/lib/queries/cms-content.queries';
@@ -424,6 +426,11 @@ export default function ContentEditor({ content, userRole, canPublish, websiteTi
                       scheduledAt={content.scheduledAt}
                     />
                   </div>
+                  <QuizPanel
+                    value={customFields}
+                    onChange={(v) => { setCustomFields(v); markUnsaved(); }}
+                  />
+                  <PollPanel contentId={content.id} />
                   <CustomFieldsPanel
                     value={customFields}
                     onChange={(v) => { setCustomFields(v); markUnsaved(); }}

@@ -1,6 +1,7 @@
 'use strict';
 const contentService = require('../service/contentService');
 const wireImportService = require('../service/wireImportService');
+const engagementService = require('../service/engagementService');
 const { sendSuccess, sendPaginated } = require('../utils/response');
 
 const list = async (req, res, next) => {
@@ -95,7 +96,29 @@ const dismissDeletionRequest = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
+const getPoll = async (req, res, next) => {
+    try {
+        const poll = await engagementService.getPollAdmin(req.params.websiteId, req.params.contentId);
+        return sendSuccess(req, res, poll);
+    } catch (err) { return next(err); }
+};
+
+const putPoll = async (req, res, next) => {
+    try {
+        const poll = await engagementService.upsertPoll(req.params.websiteId, req.params.contentId, req.validated);
+        return sendSuccess(req, res, poll);
+    } catch (err) { return next(err); }
+};
+
+const deletePoll = async (req, res, next) => {
+    try {
+        await engagementService.deletePoll(req.params.websiteId, req.params.contentId);
+        return sendSuccess(req, res, null);
+    } catch (err) { return next(err); }
+};
+
 module.exports = {
     list, create, getOne, getPreviewToken, update, autosave, duplicate, remove, bulk, importWire,
     listDeletionRequests, requestDeletion, dismissDeletionRequest,
+    getPoll, putPoll, deletePoll,
 };

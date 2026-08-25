@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { Wallet, LineChart, BarChart3, Globe2, Calculator, ArrowRight } from "lucide-react";
 import { HomeSectionHeading } from "./HomeSectionHeading";
+import { getTopicColor } from "@/lib/topic-colors";
 
 // Deliberately more granular than ExploreTopics' 4-group grid (Investing and
 // Markets split back into two here) — this section exists to give a longer,
@@ -50,20 +51,23 @@ export function WhatWeCover() {
     <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 border-t border-border">
       <HomeSectionHeading title="What We Cover" />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-        {COVERAGE.map(({ icon: Icon, title, href, body }) => (
-          <Link
-            key={href}
-            href={href}
-            className="group flex flex-col rounded-lg p-4 -m-4 transition-all duration-200 hover:-translate-y-0.5 hover:bg-background hover:shadow-md"
-          >
-            <Icon className="h-6 w-6 text-primary" aria-hidden />
-            <span className="mt-3 flex items-center gap-1 text-base font-bold text-foreground group-hover:text-primary transition-colors">
-              {title}
-              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-            </span>
-            <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">{body}</p>
-          </Link>
-        ))}
+        {COVERAGE.map(({ icon: Icon, title, href, body }) => {
+          const color = getTopicColor(href.replace("/", ""));
+          return (
+            <Link
+              key={href}
+              href={href}
+              className="group flex flex-col rounded-lg p-4 -m-4 transition-all duration-200 hover:-translate-y-0.5 hover:bg-background hover:shadow-md"
+            >
+              <Icon className="h-6 w-6" style={{ color }} aria-hidden />
+              <span className="mt-3 flex items-center gap-1 text-base font-bold text-foreground transition-colors">
+                {title}
+                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+              </span>
+              <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">{body}</p>
+            </Link>
+          );
+        })}
       </div>
     </section>
   );

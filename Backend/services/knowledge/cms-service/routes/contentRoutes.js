@@ -8,7 +8,7 @@ const { loadCmsRole, requireCmsRole } = require('../middleware/cmsAccess');
 const { validate } = require('../middleware/validate');
 const { createContentSchema, updateContentSchema, autosaveContentSchema, bulkUpdateSchema, requestDeletionSchema } = require('../validators/contentSchemas');
 const { transitionSchema } = require('../validators/workflowSchemas');
-const { moderateCommentSchema } = require('../validators/engagementSchemas');
+const { moderateCommentSchema, upsertPollSchema } = require('../validators/engagementSchemas');
 
 const router = Router({ mergeParams: true }); // receives websiteId from parent
 
@@ -43,6 +43,11 @@ router.post('/:contentId/dismiss-deletion-request', loadCmsRole, requireCmsRole(
 router.get('/:contentId/workflow', loadCmsRole, requireCmsRole('cms_viewer'), wfCtrl.getWorkflow);
 router.post('/:contentId/workflow/transition', loadCmsRole, requireCmsRole('cms_contributor'), validate(transitionSchema), wfCtrl.transition);
 router.get('/:contentId/workflow/log', loadCmsRole, requireCmsRole('cms_viewer'), wfCtrl.getLog);
+
+// Poll — /cms/websites/:websiteId/content/:contentId/poll (at most one per content item)
+router.get('/:contentId/poll', loadCmsRole, requireCmsRole('cms_viewer'), ctrl.getPoll);
+router.put('/:contentId/poll', loadCmsRole, requireCmsRole('cms_contributor'), validate(upsertPollSchema), ctrl.putPoll);
+router.delete('/:contentId/poll', loadCmsRole, requireCmsRole('cms_contributor'), ctrl.deletePoll);
 
 // Revisions — /cms/websites/:websiteId/content/:contentId/revisions
 router.get('/:contentId/revisions', loadCmsRole, requireCmsRole('cms_viewer'), revCtrl.list);

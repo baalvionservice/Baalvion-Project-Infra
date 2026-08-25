@@ -4,6 +4,7 @@ import Image from "next/image";
 import { ArticleCard } from "@/components/landing/investopedia/ArticleCard";
 import { HomeSectionHeading } from "./HomeSectionHeading";
 import type { PersonalFinanceSpotlight as PersonalFinanceSpotlightData } from "./getHomeEditorial";
+import { CategoryBadge } from "@/components/common/CategoryBadge";
 
 type Props = {
   spotlight: PersonalFinanceSpotlightData | null;
@@ -29,14 +30,14 @@ export function PersonalFinanceSpotlight({ spotlight }: Props) {
           <div className="relative aspect-[16/9] w-full overflow-hidden bg-muted">
             <Image
               src={spotlight.lead.image}
-              alt=""
+              alt={spotlight.lead.title}
               fill
               sizes="(max-width: 1024px) 100vw, 55vw"
               className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
             />
           </div>
           <div className="pt-4">
-            <span className="eyebrow">{spotlight.lead.category}</span>
+            <CategoryBadge category={spotlight.lead.category} />
             <h3 className="mt-1.5 text-xl sm:text-2xl font-black leading-tight text-foreground group-hover:text-primary">
               {spotlight.lead.title}
             </h3>

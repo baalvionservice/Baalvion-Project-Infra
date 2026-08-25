@@ -10,6 +10,9 @@ interface MetadataProps {
   ogImage?: string;
   ogType?: 'website' | 'article' | 'profile';
   noIndex?: boolean;
+  // Bypasses the root layout's `%s | Imperialpedia` template — for a title that
+  // already stands on its own (the homepage), the template would double the brand.
+  absoluteTitle?: boolean;
 }
 
 /**
@@ -24,6 +27,7 @@ export function buildMetadata({
   ogImage,
   ogType = 'website',
   noIndex = false,
+  absoluteTitle = false,
 }: MetadataProps = {}): Metadata {
   const siteName = 'Imperialpedia';
   // The root layout (src/app/layout.tsx) already sets `title.template = '%s | Imperialpedia'`,
@@ -42,7 +46,11 @@ export function buildMetadata({
   // titles aren't auto-templated by Next, so they need the full "<Title> | Imperialpedia"
   // form explicitly.
   const finalTitle = cleanTitle || seoConfig.defaultTitle;
-  const socialTitle = cleanTitle ? `${cleanTitle} | ${siteName}` : seoConfig.defaultTitle;
+  const socialTitle = !cleanTitle
+    ? seoConfig.defaultTitle
+    : absoluteTitle
+      ? cleanTitle
+      : `${cleanTitle} | ${siteName}`;
   const finalDescription = description || seoConfig.defaultDescription;
   const finalKeywords = keywords || seoConfig.defaultKeywords;
   
@@ -55,7 +63,7 @@ export function buildMetadata({
     : undefined;
 
   const metadata: Metadata = {
-    title: finalTitle,
+    title: absoluteTitle ? { absolute: finalTitle } : finalTitle,
     description: finalDescription,
     keywords: finalKeywords,
     metadataBase: new URL(baseUrl),

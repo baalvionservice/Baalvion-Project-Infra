@@ -14,9 +14,11 @@ const IMP_API =
 
 export async function POST(request: Request) {
   let email: string | undefined;
+  let source = 'website';
   try {
     const body = await request.json();
     email = typeof body?.email === 'string' ? body.email : undefined;
+    if (typeof body?.source === 'string' && body.source.trim()) source = body.source.trim();
 
     if (!email || !email.includes('@')) {
       return NextResponse.json(
@@ -35,7 +37,7 @@ export async function POST(request: Request) {
     const upstream = await fetch(`${IMP_API}/newsletter/subscribe`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, source: 'website' }),
+      body: JSON.stringify({ email, source }),
       signal: AbortSignal.timeout(8000),
     });
 

@@ -1,4 +1,5 @@
 import { ID, Slug, Timestamp } from '@/types/common';
+import type { EntityMention } from '@/lib/entityLinkInjector';
 
 /**
  * @fileOverview Comprehensive type definition for an Article in the Content Engine.
@@ -39,6 +40,12 @@ export interface Article {
   seoDescription?: string;
   seoKeywords?: string[];
   faq?: { question: string; answer: string }[]; // Drives FAQPage JSON-LD
+  /** Persisted entity mentions (companies/tickers etc.) detected at publish time —
+   *  drives the related-markets quote widget and inline chart. */
+  entityMentions?: EntityMention[];
+  /** Optional end-of-article knowledge check — CMS customFields.quiz. Opt-in per
+   *  article; the widget renders nothing when this is empty. */
+  quiz?: { question: string; options: string[]; correctIndex: number; explanation?: string }[];
 }
 
 /**

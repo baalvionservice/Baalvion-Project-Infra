@@ -3,7 +3,7 @@ const { Router } = require('express');
 const ctrl = require('../controller/publicController');
 const { optionalAuth } = require('../middleware/authMiddleware');
 const { validate } = require('../middleware/validate');
-const { submitCommentSchema, submitFeedbackSchema } = require('../validators/engagementSchemas');
+const { submitCommentSchema, submitFeedbackSchema, submitPollVoteSchema } = require('../validators/engagementSchemas');
 
 const router = Router();
 
@@ -27,5 +27,7 @@ router.get('/:websiteSlug/content/:slug/comments', ctrl.listComments);
 router.post('/:websiteSlug/content/:slug/comments', validate(submitCommentSchema), ctrl.submitComment);
 router.get('/:websiteSlug/content/:slug/feedback', ctrl.getFeedback);
 router.post('/:websiteSlug/content/:slug/feedback', validate(submitFeedbackSchema), ctrl.submitFeedback);
+router.get('/:websiteSlug/content/:slug/poll', ctrl.getPoll);
+router.post('/:websiteSlug/content/:slug/poll', validate(submitPollVoteSchema), ctrl.submitPollVote);
 
 module.exports = router;

@@ -1,5 +1,5 @@
 'use strict';
-const { CmsWebsite, CmsContent, CmsContentComment, CmsContentFeedback } = require('../models');
+const { CmsWebsite, CmsContent, CmsContentComment, CmsContentFeedback, CmsContentPoll, CmsPollVote } = require('../models');
 const { AppError } = require('../utils/errors');
 const { parsePagination, buildPaginated } = require('../utils/pagination');
 
@@ -56,6 +56,82 @@ async function submitFeedback(websiteSlug, slug, { vote, voterToken }) {
     return getFeedbackSummary(websiteSlug, slug);
 }
 
+async function _tallyPoll(poll) {
+    const rows = await CmsPollVote.findAll({
+        where: { pollId: poll.id },
+        attributes: ['optionIndex'],
+        raw: true,
+    });
+    const counts = (poll.options || []).map(() => 0);
+    for (const row of rows) {
+        if (counts[row.optionIndex] !== undefined) counts[row.optionIndex] += 1;
+    }
+    return {
+        id: poll.id,
+        question: poll.question,
+        options: poll.options,
+        counts,
+        total: rows.length,
+    };
+}
+
+// Returns null (not an error) when the article has no poll -- most articles won't.
+async function getPoll(websiteSlug, slug) {
+    const { contentId } = await _resolveContent(websiteSlug, slug);
+    const poll = await CmsContentPoll.findOne({ where: { contentId, status: 'active' } });
+    if (!poll) return null;
+    return _tallyPoll(poll);
+}
+
+async function submitPollVote(websiteSlug, slug, { optionIndex, voterToken }) {
+    const { contentId } = await _resolveContent(websiteSlug, slug);
+    const poll = await CmsContentPoll.findOne({ where: { contentId, status: 'active' } });
+    if (!poll) throw new AppError('NOT_FOUND', 'Poll not found', 404);
+    if (optionIndex < 0 || optionIndex >= (poll.options || []).length) {
+        throw new AppError('VALIDATION_ERROR', 'Invalid poll option', 400);
+    }
+    try {
+        await CmsPollVote.create({ pollId: poll.id, optionIndex, voterToken });
+    } catch (err) {
+        // Unique (poll_id, voter_token) violation -- this browser already voted.
+        if (err.name !== 'SequelizeUniqueConstraintError') throw err;
+    }
+    return _tallyPoll(poll);
+}
+
+// ── Admin poll authoring (cms_contributor+, website-scoped) ──────────────────
+// A content item has at most one poll (unique content_id — see migration
+// 20260033), so "create" and "edit" are the same upsert from the editor's
+// point of view: save whatever question/options are currently in the panel.
+
+async function getPollAdmin(websiteId, contentId) {
+    const content = await CmsContent.findOne({ where: { id: contentId, websiteId } });
+    if (!content) throw new AppError('NOT_FOUND', 'Content not found', 404);
+    const poll = await CmsContentPoll.findOne({ where: { contentId } });
+    return poll ? poll.toJSON() : null;
+}
+
+async function upsertPoll(websiteId, contentId, { question, options }) {
+    const content = await CmsContent.findOne({ where: { id: contentId, websiteId } });
+    if (!content) throw new AppError('NOT_FOUND', 'Content not found', 404);
+
+    const existing = await CmsContentPoll.findOne({ where: { contentId } });
+    if (existing) {
+        existing.question = question;
+        existing.options = options;
+        await existing.save();
+        return existing.toJSON();
+    }
+    const poll = await CmsContentPoll.create({ websiteId, contentId, question, options, status: 'active' });
+    return poll.toJSON();
+}
+
+async function deletePoll(websiteId, contentId) {
+    const content = await CmsContent.findOne({ where: { id: contentId, websiteId } });
+    if (!content) throw new AppError('NOT_FOUND', 'Content not found', 404);
+    await CmsContentPoll.destroy({ where: { contentId } });
+}
+
 // ── Admin moderation (cms_reviewer+, website-scoped) ─────────────────────────
 
 async function listPendingComments(websiteId, query = {}) {
@@ -86,4 +162,9 @@ module.exports = {
     submitFeedback,
     listPendingComments,
     moderateComment,
+    getPoll,
+    submitPollVote,
+    getPollAdmin,
+    upsertPoll,
+    deletePoll,
 };

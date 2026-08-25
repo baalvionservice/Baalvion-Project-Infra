@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import type { Article } from "./types";
+import { CategoryBadge } from "@/components/common/CategoryBadge";
 
 type Props = {
   article: Article;
@@ -20,14 +21,14 @@ export function ArticleCard({ article, variant = "card" }: Props) {
         <div className="relative h-16 w-24 flex-shrink-0 overflow-hidden bg-muted">
           <Image
             src={article.image}
-            alt=""
+            alt={article.title}
             fill
             sizes="96px"
             className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
         </div>
         <div className="min-w-0">
-          <span className="eyebrow">{article.category}</span>
+          <CategoryBadge category={article.category} />
           <h4 className="mt-0.5 text-sm font-bold leading-snug text-foreground group-hover:text-primary line-clamp-3">
             {article.title}
           </h4>
@@ -41,14 +42,14 @@ export function ArticleCard({ article, variant = "card" }: Props) {
       <div className="relative aspect-[16/9] w-full overflow-hidden bg-muted rounded-sm transition-shadow duration-300 group-hover:shadow-lg">
         <Image
           src={article.image}
-          alt=""
+          alt={article.title}
           fill
           sizes="(max-width: 768px) 100vw, 33vw"
           className="object-cover transition-transform duration-500 group-hover:scale-105"
         />
       </div>
       <div className="pt-3">
-        <span className="eyebrow">{article.category}</span>
+        <CategoryBadge category={article.category} />
         <h3 className="mt-1 text-lg font-bold leading-tight text-foreground group-hover:text-primary line-clamp-3">
           {article.title}
         </h3>
