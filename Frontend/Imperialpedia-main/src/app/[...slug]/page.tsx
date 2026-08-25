@@ -16,7 +16,7 @@ import { staticArticleBySlug, staticNewsBySlug } from "@/services/data/static-co
 import Link from "next/link";
 import { env } from "@/config/env";
 import { GLOSSARY_LIVE } from "@/config/glossary";
-import { articleUrl } from "@/lib/data/article-url";
+import { articleUrl, newsArticleHref } from "@/lib/data/article-url";
 import { ShareBar } from "@/components/article/ShareBar";
 import { articlesService } from "@/services/data";
 import { ArticleMarketWidget } from "@/components/markets/ArticleMarketWidget";
@@ -31,7 +31,6 @@ import {
 } from "@/modules/content-engine/render/article-detail";
 import {
   BodyBlock,
-  canonicalSegments,
   demoteExtraHeadings,
   extractFaqFromBlocks,
   formatDateTime,
@@ -160,7 +159,7 @@ export async function generateMetadata({ params }: { params: Promise<SlugParams>
       title: article.title,
       description: truncateForMeta(article.excerpt),
       keywords: article.tags && article.tags.length > 0 ? article.tags : undefined,
-      canonical: articleUrl(article.publishedAt, articleSlug),
+      canonical: newsArticleHref(article),
       // Some articles fall back to an inline `data:image/svg+xml,...` illustration
       // (see @baalvion/illustrations) when no hosted artwork exists yet — that's fine
       // for the on-page <Image>, but social unfurlers and crawlers fetch og:image as
@@ -236,10 +235,11 @@ export async function generateMetadata({ params }: { params: Promise<SlugParams>
   return buildMetadata({
     title: article.title,
     description: article.excerpt,
-    // News content's canonical home is the dated CNBC-style URL — this bare
-    // `/slug` route redirects there below; keep metadata pointed at the same
-    // destination.
-    canonical: articleUrl(article.publishedAt, slug),
+    // News content's canonical home is the dated CNBC-style URL (or, for
+    // world-tagged news, the nested /world/<region>/<country>/... permalink —
+    // see newsArticleHref) — this bare `/slug` route redirects there below;
+    // keep metadata pointed at the same destination.
+    canonical: newsArticleHref(article),
     noIndex: false,
   });
 }
@@ -251,15 +251,20 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
   const article = await findNewsArticle(slug);
   if (!article) notFound();
 
-  const canonical = canonicalSegments(article.publishedAt);
-  if (canonical.year !== year || canonical.month !== month || canonical.day !== day) {
-    permanentRedirect(articleUrl(article.publishedAt, slug));
+  // World-tagged news (worldRegion + worldCountry) canonically lives one level
+  // deeper at /world/<region>/<country>/YYYY/MM/DD/<slug> (see newsArticleHref)
+  // — this flat route must redirect there instead of also serving/indexing a
+  // second copy at the bare dated path, which previously left two pages each
+  // self-declaring their own URL as canonical for the same article.
+  const trueCanonical = newsArticleHref(article);
+  if (trueCanonical !== `/${year}/${month}/${day}/${slug}`) {
+    permanentRedirect(trueCanonical);
   }
 
   const readMoreLinks = (article.related ?? []).filter((r) => r.href && r.href !== "#");
 
   const baseUrl = (env.siteUrl || "https://imperialpedia.com").replace(/\/$/, "");
-  const canonicalPath = articleUrl(article.publishedAt, slug);
+  const canonicalPath = trueCanonical;
   const canonicalUrl = `${baseUrl}${canonicalPath}`;
 
   const authorProfile = await findAuthorProfileByName(article.author.name);
@@ -682,11 +687,12 @@ async function BareSlugPage({ slug }: { slug: string }) {
   }
 
   // ── 3. News articles (static set, CMS, or committed snapshot) canonically
-  // live at the dated CNBC-style URL — redirect old/bare `/<slug>` hits there
-  // instead of rendering a duplicate copy at this URL.
+  // live at the dated CNBC-style URL, or the nested /world/<region>/<country>
+  // permalink for world-tagged news (see newsArticleHref) — redirect old/bare
+  // `/<slug>` hits there instead of rendering a duplicate copy at this URL.
   const staticNewsMatch = newsArticles.find((a) => a.slug === slug);
   if (staticNewsMatch) {
-    permanentRedirect(articleUrl(staticNewsMatch.publishedAt, slug));
+    permanentRedirect(newsArticleHref(staticNewsMatch));
   }
 
   let article: ArticleType | undefined = brokerGuides.find((a) => a.slug === slug);
@@ -697,7 +703,7 @@ async function BareSlugPage({ slug }: { slug: string }) {
   if (!article) {
     const cmsMatch = await getPublishedNewsBySlug(slug);
     if (cmsMatch) {
-      permanentRedirect(articleUrl(cmsMatch.publishedAt, slug));
+      permanentRedirect(newsArticleHref(cmsMatch));
     }
   }
   if (!article) notFound();

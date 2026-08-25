@@ -6,13 +6,16 @@ import { loadCountries } from "@/lib/data/loaders";
 import { fetchAllTerms } from "@/lib/data/term-live";
 import { reviewSlugs } from "@/lib/data/review-live";
 import { getPublishedNews } from "@/services/data/cms-public";
-import { articleUrl } from "@/lib/data/article-url";
+import { newsArticleHref } from "@/lib/data/article-url";
 import { ALL_TRACKED_SYMBOLS } from "@/lib/data/marketsLoader";
 import { env } from "@/config/env";
 import { logger } from "@/lib/errors/logger";
 import { GLOSSARY_LIVE } from "@/config/glossary";
 import { categoryHasLiveContent } from "@/components/pages/CategoryFeed";
 import { REMOVED_ARTICLE_PATHS } from "@/lib/content/removed-article-paths";
+import { MARKET_QUOTES_LIVE } from "@/config/market-quotes";
+import stockIndexes from "@/data/indexes/indexes.json";
+import stockLists from "@/data/stock-lists/stock-lists.json";
 
 /**
  * @fileOverview Scalable XML sitemap system for 10k–1M+ URLs.
@@ -232,6 +235,15 @@ export const sitemapService = {
       entries.push({ loc: `${base}/financial-tools/${calc.slug}`, changefreq: "monthly", priority: 0.9 });
     });
 
+    // Hand-curated index/stock-list guides (data/indexes, data/stock-lists) —
+    // small, real editorial sets, not auto-generated per-symbol pages.
+    stockIndexes.forEach((idx) => {
+      entries.push({ loc: `${base}/stocks/indexes/${idx.slug}`, changefreq: "monthly", priority: 0.7 });
+    });
+    stockLists.forEach((list) => {
+      entries.push({ loc: `${base}/stocks/lists/${list.slug}`, changefreq: "monthly", priority: 0.7 });
+    });
+
     // 3. Structured entities + review guides + published news.
     const [countries, news] = await Promise.all([
       safe(loadCountries(), []),
@@ -269,18 +281,28 @@ export const sitemapService = {
     // sitemap crawl. They stay in MARKET_GROUPS/ALL_TRACKED_SYMBOLS for the
     // breakdown-panel and pre-render use cases; only sitemap submission
     // (i.e., what Google is told to index) excludes them.
-    const QUOTE_PAGE_UNSUPPORTED = new Set(["CHINA", "EM", "DGS2", "DGS30", "DGS3MO"]);
-    ALL_TRACKED_SYMBOLS.filter((symbol) => !QUOTE_PAGE_UNSUPPORTED.has(symbol)).forEach((symbol) => {
-      entries.push({ loc: `${base}/markets/quote/${symbol}`, changefreq: "hourly", priority: 0.7 });
-    });
+    // Held back from the sitemap entirely while MARKET_QUOTES_LIVE is false
+    // (pending AdSense approval — see config/market-quotes.ts): each page's
+    // own generateMetadata also self-noindexes via the same flag, so this is
+    // belt-and-suspenders, not a contradiction of what's actually indexable.
+    if (MARKET_QUOTES_LIVE) {
+      const QUOTE_PAGE_UNSUPPORTED = new Set(["CHINA", "EM", "DGS2", "DGS30", "DGS3MO"]);
+      ALL_TRACKED_SYMBOLS.filter((symbol) => !QUOTE_PAGE_UNSUPPORTED.has(symbol)).forEach((symbol) => {
+        entries.push({ loc: `${base}/markets/quote/${symbol}`, changefreq: "hourly", priority: 0.7 });
+      });
+    }
     (reviewSlugs || []).forEach((slug) =>
       entries.push({ loc: `${base}/${slug}`, changefreq: "weekly", priority: 0.8 }),
     );
     (news || []).forEach((n) => {
-      // Canonical is the dated /YYYY/MM/DD/slug path (see article-url.ts) — the
-      // bare-slug path used here previously just 301s there, so Google was being
-      // pointed at a URL that immediately redirects instead of the real one.
-      if (n?.slug) entries.push({ loc: `${base}${articleUrl(n.publishedAt, n.slug)}`, lastmod: n.publishedAt?.split("T")[0], changefreq: "daily", priority: 0.8 });
+      // Canonical is the dated /YYYY/MM/DD/slug path, or the nested
+      // /world/<region>/<country>/... permalink for world-tagged news (see
+      // newsArticleHref in article-url.ts) — the bare-slug path used here
+      // previously just 301s there, so Google was being pointed at a URL
+      // that immediately redirects instead of the real one. Submitting the
+      // flat path for a world-tagged article was the same problem one hop
+      // shorter: that page self-redirects to the nested one too.
+      if (n?.slug) entries.push({ loc: `${base}${newsArticleHref(n)}`, lastmod: n.publishedAt?.split("T")[0], changefreq: "daily", priority: 0.8 });
     });
 
     // Dedupe by URL.
