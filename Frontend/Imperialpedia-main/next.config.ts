@@ -116,21 +116,20 @@ const nextConfig: NextConfig = {
       { source: '/etfsETF', destination: '/etfs', permanent: true },
       { source: '/inflationInflation', destination: '/inflation', permanent: true },
       { source: '/cryptocurrencyBitcoin', destination: '/cryptocurrency', permanent: true },
-      // /markets/quote/<symbol> genuinely 404s for these 5 — no data source exists
-      // for them anywhere (not imperialpedia-service, not the Yahoo fallback map in
-      // worldFeed.ts) and building one is not worth the ongoing API/compute cost for
-      // symbols this obscure. CHINA/EM were never individual assets to begin with —
-      // they're the regional composite placeholders in MARKET_GROUPS — so they route
-      // to the matching /world region page instead. DGS2/DGS30/DGS3MO are Treasury
-      // yield curve points with no per-symbol page of their own; /bonds is the closest
-      // real destination. A redirect is also strictly cheaper than a 404: no render,
-      // no external API call, no compute — versus the 30s-revalidate quote page's
-      // renders it would otherwise trigger on every crawl/backlink hit.
-      { source: '/markets/quote/CHINA', destination: '/world/china', permanent: true },
-      { source: '/markets/quote/EM', destination: '/world/emerging', permanent: true },
+      // /markets/quote/DGS2 genuinely 404s — no data source exists for it anywhere
+      // (not imperialpedia-service, not the Yahoo fallback map in worldFeed.ts/
+      // marketsLoader.ts — no 2-year Treasury yield ticker exists on Yahoo under
+      // any name, verified live 2026-08-26) and building one is not worth the
+      // ongoing API/compute cost for a symbol this obscure. /bonds is the closest
+      // real destination. (CHINA/EM/APAC/DGS30/DGS3MO used to redirect here too,
+      // as regional-composite placeholders / yield tenors with no source — they
+      // now have real Yahoo-backed data: FXI/EEM/VPL as region-ETF proxies and
+      // ^TYX/^IRX for the two other yield tenors, same pattern EUROPE's ^STOXX
+      // mapping already used — see marketsLoader.ts's CANONICAL_TO_YAHOO.)
+      // A redirect is also strictly cheaper than a 404: no render, no external
+      // API call, no compute — versus the 30s-revalidate quote page's renders it
+      // would otherwise trigger on every crawl/backlink hit.
       { source: '/markets/quote/DGS2', destination: '/bonds', permanent: true },
-      { source: '/markets/quote/DGS30', destination: '/bonds', permanent: true },
-      { source: '/markets/quote/DGS3MO', destination: '/bonds', permanent: true },
       // These /categories/<slug> archives 404 because no article's category
       // taxonomy string slugifies to an exact match — but each has a real,
       // populated top-level hub page. Send crawlers/visitors there instead.

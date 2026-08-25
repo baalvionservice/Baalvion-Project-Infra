@@ -4,7 +4,7 @@ import NextImage from "next/image";
 import nextDynamic from "next/dynamic";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getAssetDetail, ALL_TRACKED_SYMBOLS } from "@/lib/data/marketsLoader";
+import { getAssetDetail, type AssetDetail } from "@/lib/data/marketsLoader";
 import { ASSET_EDITORIAL_CONTENT } from "@/lib/data/asset-editorial-content";
 import { getCompanyByTicker, getRelatedEntities } from "@/lib/data/loaders";
 import { buildOverviewParagraph, buildMarketMechanicsParagraph } from "@/lib/data/asset-overview-text";
@@ -56,17 +56,26 @@ interface PageProps {
 // Segment-level ISR: a live-quote page benefits from being cached and shared
 // across concurrent visitors far more than from `force-dynamic` (which the
 // previous implementation used) — force-dynamic also silently overrides the
-// `next: { revalidate: 30 }` option already set on the underlying fetch in
+// `next: { revalidate }` option already set on the underlying fetch in
 // marketsLoader.ts, so every request was doing an uncached round-trip to
-// imperialpedia-service for nothing. 30s matches that same fetch-level window.
-export const revalidate = 30;
+// imperialpedia-service for nothing. Must match worldFeed.ts's
+// MARKET_DATA_REVALIDATE_SECONDS (Next requires this segment export to be a
+// literal, so it can't just import the constant) — zero-traffic cost-saving
+// policy, once a day instead of every 30s. Bring both back down together once
+// real traffic / AdSense approval makes fresher data worth the API cost.
+export const revalidate = 86400;
 export const dynamicParams = true;
 
-// Pre-render every symbol this site actually tracks (see MARKET_GROUPS in
-// marketsLoader.ts) so the common pages are warm instead of cold on first hit;
-// any symbol outside this set (dynamicParams=true) still resolves on demand.
+// Zero-traffic cost-saving policy (2026-08-26): MARKET_QUOTES_LIVE is false —
+// these pages aren't indexed or in the sitemap right now (see
+// config/market-quotes.ts), so eagerly pre-rendering all ~57 tracked symbols
+// on every deploy was 57 real provider API calls nobody was going to see.
+// dynamicParams=true above still serves any of them on the rare direct hit —
+// first request compiles it, ISR (86400s) caches it from there. Restore the
+// full ALL_TRACKED_SYMBOLS.map(...) once MARKET_QUOTES_LIVE flips true and
+// real traffic/crawling resumes, so common pages are warm instead of cold.
 export async function generateStaticParams() {
-  return ALL_TRACKED_SYMBOLS.map((symbol) => ({ symbol }));
+  return [];
 }
 
 function resolveRange(range: string | undefined): (typeof RANGES)[number] {
@@ -136,6 +145,45 @@ const fmtMarketCap = (v: number | string | null | undefined) => {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
   return `$${n.toLocaleString()}`;
 };
+
+// Section headings phrased as the long-tail question investors actually type
+// ("intel current valuation", "is intel volatile") rather than a generic label —
+// same page, same data, just headings that match real search intent. Falls back
+// to a plain label when the underlying number that headline promises isn't
+// actually available, so the heading never claims data the section doesn't show.
+function buildValuationHeading(detail: AssetDetail): string {
+  const label = `${detail.name} (${detail.symbol})`;
+  if (detail.fundamentals?.peRatio != null) return `${label} Current Valuation & P/E Ratio Explained`;
+  if (detail.asset_type === "crypto") return `${label} Current Valuation & Market Cap`;
+  return `${label} Current Valuation & Key Statistics`;
+}
+
+function buildVolatilityHeading(detail: AssetDetail): string {
+  const label = `${detail.name} (${detail.symbol})`;
+  if (detail.fundamentals?.beta != null) return `Is ${label} Volatile? Current Beta Analysis`;
+  if (detail.indicators) return `Is ${label} Volatile? RSI & Technical Indicators`;
+  return "Technical Indicators";
+}
+
+// "Compare Intel with AMD or Nvidia" — natural-language cross-links to the peers
+// this page already has real data for (detail.relatedCompanies), not a guessed list.
+function CompareSentence({ detail, peers }: { detail: AssetDetail; peers: { symbol: string; name: string }[] }) {
+  if (peers.length === 0) return null;
+  return (
+    <p className="text-[13px] text-white/70 leading-relaxed mb-3">
+      Compare {detail.name} with{" "}
+      {peers.map((p, i) => (
+        <React.Fragment key={p.symbol}>
+          {i > 0 && (i === peers.length - 1 ? (peers.length > 2 ? ", or " : " or ") : ", ")}
+          <Link href={`/markets/quote/${p.symbol}`} className="text-white underline hover:no-underline">
+            {p.name}
+          </Link>
+        </React.Fragment>
+      ))}{" "}
+      to see how {detail.symbol} stacks up on price and performance.
+    </p>
+  );
+}
 
 function StatRow({ label, value }: { label: string; value: string }) {
   return (
@@ -454,7 +502,7 @@ export default async function QuotePage({ params, searchParams }: PageProps) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="bg-[#111] border border-white/15 rounded-sm p-4">
-            <h2 className="text-[11px] font-black uppercase tracking-widest text-white/70 mb-2">Key Statistics</h2>
+            <h2 className="text-[11px] font-black uppercase tracking-widest text-white/70 mb-2">{buildValuationHeading(detail)}</h2>
             <StatRow label="Market Cap" value={fmtMarketCap(detail.fundamentals?.marketCap ?? detail.market_cap)} />
             {detail.fundamentals && (
               <>
@@ -474,14 +522,19 @@ export default async function QuotePage({ params, searchParams }: PageProps) {
           </div>
 
           <div className="bg-[#111] border border-white/15 rounded-sm p-4">
-            <h2 className="text-[11px] font-black uppercase tracking-widest text-white/70 mb-2">Technical Indicators</h2>
-            {detail.indicators ? (
+            <h2 className="text-[11px] font-black uppercase tracking-widest text-white/70 mb-2">{buildVolatilityHeading(detail)}</h2>
+            {detail.fundamentals?.beta != null || detail.indicators ? (
               <>
-                <StatRow label="SMA 20" value={fmt(detail.indicators.sma20)} />
-                <StatRow label="SMA 50" value={fmt(detail.indicators.sma50)} />
-                <StatRow label="SMA 200" value={fmt(detail.indicators.sma200)} />
-                <StatRow label="RSI (14)" value={fmt(detail.indicators.rsi14)} />
-                {detail.indicators.macd && <StatRow label="MACD Histogram" value={fmt(detail.indicators.macd.histogram)} />}
+                {detail.fundamentals?.beta != null && <StatRow label="Beta (5Y Monthly)" value={fmt(detail.fundamentals.beta)} />}
+                {detail.indicators && (
+                  <>
+                    <StatRow label="SMA 20" value={fmt(detail.indicators.sma20)} />
+                    <StatRow label="SMA 50" value={fmt(detail.indicators.sma50)} />
+                    <StatRow label="SMA 200" value={fmt(detail.indicators.sma200)} />
+                    <StatRow label="RSI (14)" value={fmt(detail.indicators.rsi14)} />
+                    {detail.indicators.macd && <StatRow label="MACD Histogram" value={fmt(detail.indicators.macd.histogram)} />}
+                  </>
+                )}
               </>
             ) : (
               <p className="text-[12px] text-white/40 py-4 text-center">Not available for this asset type.</p>
@@ -560,7 +613,12 @@ export default async function QuotePage({ params, searchParams }: PageProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {(detail.relatedCompanies.length > 0 || relatedEntities.length > 0) && (
               <div className="bg-[#111] border border-white/15 rounded-sm p-4">
-                <h2 className="text-[11px] font-black uppercase tracking-widest text-white/70 mb-2">Related Companies &amp; Peers</h2>
+                <h2 className="text-[11px] font-black uppercase tracking-widest text-white/70 mb-2">
+                  {detail.relatedCompanies.length > 0
+                    ? `Compare ${detail.name} (${detail.symbol}) With Similar Companies`
+                    : "Related Companies & Peers"}
+                </h2>
+                <CompareSentence detail={detail} peers={detail.relatedCompanies} />
                 <div className="flex flex-wrap gap-2">
                   {detail.relatedCompanies.map((c) => (
                     <Link key={`sym-${c.symbol}`} href={`/markets/quote/${c.symbol}`} className="text-[11px] font-semibold text-white/80 border border-white/20 rounded-full px-2.5 py-1 hover:bg-white/10">

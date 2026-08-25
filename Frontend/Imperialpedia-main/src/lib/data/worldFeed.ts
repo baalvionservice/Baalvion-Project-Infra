@@ -134,9 +134,20 @@ const WATCHLIST_SYMBOLS: { symbol: string; name: string }[] = [
 // Editors control the markets, watchlist and feed settings from the admin
 // panel; this reads that config. Falls back to the shipped defaults above.
 
+// Zero-traffic cost-saving policy (2026-08-26): the site has no real visitors
+// right now, so there's no reason to re-hit paid market-data providers more
+// than once a day — ISR is lazy (only re-fetches on the next request *after*
+// this window elapses), so raising it doesn't change anything for an idle
+// page, but it caps cost the moment traffic does show up rather than the
+// previous 30s window re-fetching on nearly every visit. Bring this back down
+// once real traffic / AdSense approval makes fresher data worth the API cost.
+export const MARKET_DATA_REVALIDATE_SECONDS = 86400;
+
 const IMPERIALPEDIA_API =
   process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL ||
-  (process.env.NODE_ENV === "production" ? "" : "http://localhost:3004/api/v1");
+  (process.env.NODE_ENV === "production"
+    ? "https://api.baalvion.com/api/v1/knowledge/imperialpedia/api/v1"
+    : "http://localhost:3004/api/v1");
 
 interface WorldConfig {
   settings?: { newsFallback?: boolean; refreshSeconds?: number };
@@ -215,7 +226,7 @@ export const CANONICAL_SYMBOL_MAP: Record<string, string> = {
 
 async function fetchImperialpediaQuote(canonicalSymbol: string): Promise<Quote> {
   const res = await fetch(`${IMPERIALPEDIA_API}/assets/${encodeURIComponent(canonicalSymbol)}`, {
-    next: { revalidate: 30 },
+    next: { revalidate: MARKET_DATA_REVALIDATE_SECONDS },
     signal: AbortSignal.timeout(6000),
   });
   if (!res.ok) throw new Error(`assets ${res.status} ${canonicalSymbol}`);
@@ -248,7 +259,7 @@ export async function fetchYahooQuote(symbol: string): Promise<Quote> {
   )}?interval=1d&range=5d`;
   const res = await fetch(url, {
     headers: { "User-Agent": "Mozilla/5.0 (compatible; ImperialpediaBot/1.0)" },
-    next: { revalidate: 30 },
+    next: { revalidate: MARKET_DATA_REVALIDATE_SECONDS },
     signal: AbortSignal.timeout(6000),
   });
   if (!res.ok) throw new Error(`yahoo ${res.status} ${symbol}`);
@@ -269,6 +280,83 @@ export async function fetchYahooQuote(symbol: string): Promise<Quote> {
   if (!meta || price == null) throw new Error(`yahoo: no price for ${symbol}`);
   const prev = meta.chartPreviousClose ?? meta.previousClose ?? price;
   return { price, prev, volume: meta.regularMarketVolume };
+}
+
+export interface YahooChartPoint {
+  date: string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number | null;
+}
+
+// (range button on /markets/quote/:symbol) -> Yahoo's (range, interval) query params.
+// Same v8/finance/chart endpoint fetchYahooQuote already calls, just with the full
+// range requested and its OHLC series (fetchYahooQuote only reads `meta`, discarding
+// the `indicators.quote[0]` arrays this function parses) instead of always 5d/1d.
+const YAHOO_RANGE_CONFIG: Record<string, { range: string; interval: string }> = {
+  "1D": { range: "1d", interval: "5m" },
+  "5D": { range: "5d", interval: "15m" },
+  "1M": { range: "1mo", interval: "1d" },
+  "6M": { range: "6mo", interval: "1d" },
+  YTD: { range: "ytd", interval: "1d" },
+  "1Y": { range: "1y", interval: "1d" },
+  "5Y": { range: "5y", interval: "1wk" },
+  MAX: { range: "max", interval: "1mo" },
+};
+
+/** Yahoo's keyless chart series — used as marketsLoader.ts's getAssetDetail()
+ * chart/historical fallback when imperialpedia-service has no asset_summaries
+ * row for a symbol yet (currently true for every non-crypto tracked symbol —
+ * verified live 2026-08-26). Returns [] rather than throwing on a bad/empty
+ * response so the caller can render "no chart data" instead of erroring the page. */
+export async function fetchYahooChart(symbol: string, range: string): Promise<YahooChartPoint[]> {
+  const cfg = YAHOO_RANGE_CONFIG[range] ?? YAHOO_RANGE_CONFIG["1M"];
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=${cfg.interval}&range=${cfg.range}`;
+  try {
+    const res = await fetch(url, {
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; ImperialpediaBot/1.0)" },
+      next: { revalidate: MARKET_DATA_REVALIDATE_SECONDS },
+      signal: AbortSignal.timeout(6000),
+    });
+    if (!res.ok) return [];
+    const json = (await res.json()) as {
+      chart?: {
+        result?: Array<{
+          timestamp?: number[];
+          indicators?: {
+            quote?: Array<{
+              open?: (number | null)[];
+              high?: (number | null)[];
+              low?: (number | null)[];
+              close?: (number | null)[];
+              volume?: (number | null)[];
+            }>;
+          };
+        }>;
+      };
+    };
+    const result = json?.chart?.result?.[0];
+    const timestamps = result?.timestamp ?? [];
+    const q = result?.indicators?.quote?.[0];
+    if (!q) return [];
+    const intraday = cfg.interval.endsWith("m") || cfg.interval.endsWith("h");
+    const points: YahooChartPoint[] = [];
+    timestamps.forEach((ts, i) => {
+      const open = q.open?.[i], high = q.high?.[i], low = q.low?.[i], close = q.close?.[i];
+      if (open == null || high == null || low == null || close == null) return;
+      const d = new Date(ts * 1000);
+      points.push({
+        date: intraday ? d.toISOString().slice(0, 16).replace("T", " ") : d.toISOString().slice(0, 10),
+        open, high, low, close,
+        volume: q.volume?.[i] ?? null,
+      });
+    });
+    return points;
+  } catch {
+    return [];
+  }
 }
 
 const fmt = (n: number, dec: number) =>
@@ -649,10 +737,11 @@ async function buildWireNews(region: RegionId): Promise<NewsBundle | null> {
 // up immediately. The World pages render dynamically (force-dynamic), so this
 // fetch runs per-request rather than at build/ISR time.
 // Localhost is dev-only (port aligned with the rest of the app: 3018); production
-// resolves to '' so the per-request fetch fails closed rather than probing a dev box.
+// resolves to the public API gateway, same default cms-public.ts's own CMS_PUBLIC_URL
+// uses — an empty string here silently 500s every server-side fetch below.
 const CMS_PUBLIC_URL =
   process.env.NEXT_PUBLIC_CMS_PUBLIC_URL ||
-  (process.env.NODE_ENV === "production" ? "" : "http://localhost:3018/api/v1/public");
+  (process.env.NODE_ENV === "production" ? "https://api.baalvion.com/api/v1/public" : "http://localhost:3018/api/v1/public");
 const CMS_SITE = process.env.NEXT_PUBLIC_CMS_SITE_SLUG || "imperialpedia";
 
 async function cmsList(params: {
