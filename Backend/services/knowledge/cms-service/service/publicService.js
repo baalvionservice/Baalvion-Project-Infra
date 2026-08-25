@@ -140,6 +140,55 @@ function _isTruthyParam(v) {
     return v === 'true' || v === '1' || v === true;
 }
 
+// Fallback matching for listPublicContent's `search` param when the primary
+// ILIKE `%search%` query (fast, index-friendly, handles the common case) comes
+// back empty — a plain substring match never tolerates even one typo ("bods"
+// doesn't contain "bonds"), and readers mistype far more often than the site
+// has a matching pg_trgm/fuzzystrmatch extension installed to compensate for
+// at the DB layer. Runs entirely in JS against a capped candidate set instead,
+// so no schema/extension change is needed.
+function _levenshtein(a, b) {
+    if (a === b) return 0;
+    const m = a.length, n = b.length;
+    if (!m) return n;
+    if (!n) return m;
+    let prev = Array.from({ length: n + 1 }, (_, i) => i);
+    for (let i = 1; i <= m; i++) {
+        const cur = [i];
+        for (let j = 1; j <= n; j++) {
+            cur[j] = a[i - 1] === b[j - 1]
+                ? prev[j - 1]
+                : 1 + Math.min(prev[j - 1], prev[j], cur[j - 1]);
+        }
+        prev = cur;
+    }
+    return prev[n];
+}
+
+// Typo budget scales with word length (same idea as Algolia/Elasticsearch's
+// default) — 0 for very short words (too easy to false-positive on), 1 for
+// typical words, 2 for long ones where a single extra typo is still obviously
+// the same word.
+function _typoBudget(len) {
+    if (len <= 3) return 0;
+    if (len <= 7) return 1;
+    return 2;
+}
+
+const _WORD_RE = /[a-z0-9]+/g;
+function _words(text) {
+    return (text || '').toLowerCase().match(_WORD_RE) || [];
+}
+
+// True if every query word fuzzy-matches (prefix of, or within typo budget of)
+// some word in the candidate text — AND across query words, so a two-word
+// query still needs both represented, just not necessarily spelled exactly.
+function _fuzzyMatch(queryWords, textWords) {
+    return queryWords.every((qw) =>
+        textWords.some((tw) => tw.startsWith(qw) || qw.startsWith(tw) || _levenshtein(qw, tw) <= _typoBudget(qw.length)),
+    );
+}
+
 async function listPublicContent(websiteSlug, query = {}, { callerId } = {}) {
     const { page, limit, offset } = parsePagination(query);
     const {
@@ -198,7 +247,7 @@ async function listPublicContent(websiteSlug, query = {}, { callerId } = {}) {
     // of a curated flag; default stays recency (publishedAt DESC).
     const order = sort === 'views' ? [['viewCount', 'DESC']] : [['publishedAt', 'DESC']];
 
-    const { rows, count } = await CmsContent.findAndCountAll({
+    let { rows, count } = await CmsContent.findAndCountAll({
         where, include: includes,
         order,
         // Expose customFields so headless frontends can render list/card views
@@ -207,6 +256,46 @@ async function listPublicContent(websiteSlug, query = {}, { callerId } = {}) {
         attributes: { exclude: ['contentBlocks'] },
         limit, offset,
     });
+
+    // The exact ILIKE search above found nothing — try again tolerant of typos
+    // (see _fuzzyMatch above) before reporting a genuine zero-result search.
+    // Scoped to `search && count === 0` only: every other query keeps using
+    // the fast, index-backed exact match above untouched.
+    if (search && count === 0) {
+        const queryWords = _words(search);
+        if (queryWords.length) {
+            const fallbackWhere = { ...where };
+            delete fallbackWhere[Op.or];
+            // Capped candidate set, not the whole table — this runs the fuzzy
+            // comparison in JS, so it scans at most this many rows per search.
+            const candidates = await CmsContent.findAll({
+                where: fallbackWhere, include: includes, order,
+                attributes: { exclude: ['contentBlocks'] },
+                limit: 500,
+            });
+            // Tags are stored as tagIds (uuids) on content, not names, so a
+            // "bnaking" (typo of "banking") search can't match a tag by text
+            // without resolving names first — one lookup for every tag used
+            // across the candidate set, not one query per row.
+            const tagIdSet = new Set();
+            candidates.forEach((row) => (row.tagIds || []).forEach((id) => tagIdSet.add(id)));
+            const tagNameById = new Map();
+            if (tagIdSet.size) {
+                const tagRows = await CmsTag.findAll({
+                    where: { id: { [Op.in]: [...tagIdSet] } },
+                    attributes: ['id', 'name'],
+                });
+                tagRows.forEach((t) => tagNameById.set(t.id, t.name));
+            }
+            const matched = candidates.filter((row) => {
+                const tagNames = (row.tagIds || []).map((id) => tagNameById.get(id) || '').join(' ');
+                const haystack = `${row.title || ''} ${row.excerpt || ''} ${row.category?.name || ''} ${tagNames}`;
+                return _fuzzyMatch(queryWords, _words(haystack));
+            });
+            rows = matched.slice(offset, offset + limit);
+            count = matched.length;
+        }
+    }
 
     // contentBlocks is already excluded above, so there's no body to leak here — this is only
     // resolving `access` metadata for card-level paywall badges/CTAs. One subscription lookup

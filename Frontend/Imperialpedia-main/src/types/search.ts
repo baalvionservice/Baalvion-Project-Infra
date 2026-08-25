@@ -29,6 +29,8 @@ export interface SearchResult {
   author?: string;
   date?: string;
   views?: number;
+  /** Already validated against the allowed image-host list (see safe-image.ts) — safe to render directly, never a raw unchecked CMS URL. */
+  imageUrl?: string;
 }
 
 export interface SearchSuggestion {

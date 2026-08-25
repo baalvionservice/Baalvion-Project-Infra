@@ -139,6 +139,11 @@ const nextConfig: NextConfig = {
       { source: '/categories/options', destination: '/options', permanent: true },
       { source: '/categories/banking', destination: '/banking', permanent: true },
       { source: '/categories/personal-finance', destination: '/personal-finance', permanent: true },
+      // /category/<slug> was a second, older news-by-category page (NewsLayout,
+      // static placeholder market widget) rendering the same categories as the
+      // real live feed at /latest/<slug> — two indexable URLs for the same
+      // intent. Consolidated onto /latest, the one with real market data.
+      { source: '/category/:slug', destination: '/latest/:slug', permanent: true },
       // The entire articles section (hub + every individual article) moved to
       // /financial-intelligence. Old thin-topic consolidations below resolve
       // straight to their final destination in one hop; everything else under

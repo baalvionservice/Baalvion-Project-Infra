@@ -15,6 +15,7 @@ import { isAllowedImageHost } from "@/lib/safe-image";
 import { entityRouteSegment, humanizeSlug } from "@/lib/utils/seo";
 import { articleUrl } from "@/lib/data/article-url";
 import { env } from "@/config/env";
+import { MARKET_QUOTES_LIVE } from "@/config/market-quotes";
 
 const QuoteChart = nextDynamic(() =>
   import("@/components/markets/QuoteChart").then((m) => m.QuoteChart),
@@ -120,6 +121,7 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
     canonical: `/markets/quote/${detail.symbol}`,
     ogType: "website",
     ogImage,
+    noIndex: !MARKET_QUOTES_LIVE,
   });
 }
 

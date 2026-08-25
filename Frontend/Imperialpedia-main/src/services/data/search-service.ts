@@ -3,6 +3,7 @@ import type { SearchResultType } from '@/types/search';
 import { errorHandler } from '@/lib/errors/error-handler';
 import { sortByRelevance } from '@/lib/utils/search';
 import { GLOSSARY_LIVE } from '@/config/glossary';
+import { isAllowedImageHost } from '@/lib/safe-image';
 
 /**
  * @fileOverview Global Search — LIVE across imperialpedia-service (entities/creators/assets)
@@ -92,7 +93,7 @@ export const searchService = {
         }
       }
       const pushContent = (env: { data?: unknown[] } | undefined, kind: string) => {
-        for (const c of (env?.data ?? []) as Array<{ slug: string; title: string; excerpt?: string; category?: { name?: string; slug?: string }; publishedAt?: string }>) {
+        for (const c of (env?.data ?? []) as Array<{ slug: string; title: string; excerpt?: string; category?: { name?: string; slug?: string }; publishedAt?: string; featuredImage?: string | null }>) {
           const route =
             kind === 'article'
               ? c.category?.slug
@@ -107,6 +108,7 @@ export const searchService = {
             route,
             category: c.category?.name,
             date: c.publishedAt,
+            imageUrl: isAllowedImageHost(c.featuredImage) ? c.featuredImage! : undefined,
           });
         }
       };
