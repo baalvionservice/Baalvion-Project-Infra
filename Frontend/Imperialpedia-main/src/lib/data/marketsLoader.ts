@@ -11,11 +11,13 @@
  * reusing the same keyless fetch already proven live via worldFeed.ts rather
  * than inventing a second fallback mechanism.
  */
-import { fetchYahooQuote, CANONICAL_SYMBOL_MAP } from "./worldFeed";
+import { fetchYahooQuote, fetchYahooChart, CANONICAL_SYMBOL_MAP } from "./worldFeed";
 
 const IMP_API =
   process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL ||
-  (process.env.NODE_ENV === "production" ? "" : "http://localhost:3004/api/v1");
+  (process.env.NODE_ENV === "production"
+    ? "https://api.baalvion.com/api/v1/knowledge/imperialpedia/api/v1"
+    : "http://localhost:3004/api/v1");
 
 export interface MarketAssetRow {
   symbol: string;
@@ -203,15 +205,18 @@ export interface AssetDetail extends MarketAssetRow {
 }
 
 // Bare-bones AssetDetail built from the same Yahoo fallback row getAllMarketAssets()
-// already uses — no chart/indicators/fundamentals (Yahoo's meta payload doesn't carry
-// those), but enough (name/price/change) to render a real page instead of a 404.
-function toFallbackDetail(row: MarketAssetRow): AssetDetail {
+// already uses — no indicators/fundamentals/performance (Yahoo's keyless endpoints don't
+// carry those), but real price/change plus a real chart (via fetchYahooChart, same
+// v8/finance/chart endpoint) instead of the empty chart this used to hardcode, which
+// left every non-crypto quote page ("chart not coming") permanently chartless — verified
+// live 2026-08-26, since imperialpedia-service's asset_summaries only has crypto synced.
+function toFallbackDetail(row: MarketAssetRow, chart: QuoteChartPoint[]): AssetDetail {
   return {
     ...row,
     marketStatus: null,
     volume: row.volume_24h != null ? { volume: Number(row.volume_24h), averageVolume: null } : null,
-    chart: [],
-    historical: [],
+    chart,
+    historical: chart,
     performance: null,
     indicators: null,
     fundamentals: null,
@@ -239,7 +244,10 @@ export async function getAssetDetail(symbol: string, range: string): Promise<Ass
   // guards against (see file header). Without this, any hiccup in that one
   // upstream call 404s the entire quote page instead of degrading gracefully.
   const fallback = await fetchYahooAsMarketAssetRow(symbol);
-  return fallback ? toFallbackDetail(fallback) : null;
+  if (!fallback) return null;
+  const yahooSymbol = CANONICAL_TO_YAHOO[symbol] ?? symbol;
+  const chart = await fetchYahooChart(yahooSymbol, range);
+  return toFallbackDetail(fallback, chart);
 }
 
 export function computeMovers(stocks: MarketAssetRow[]) {
