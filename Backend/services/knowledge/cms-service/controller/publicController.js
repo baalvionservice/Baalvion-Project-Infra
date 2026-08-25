@@ -83,7 +83,21 @@ const submitFeedback = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
+const getPoll = async (req, res, next) => {
+    try {
+        const poll = await engagementService.getPoll(req.params.websiteSlug, req.params.slug);
+        return sendSuccess(req, res, poll);
+    } catch (err) { return next(err); }
+};
+
+const submitPollVote = async (req, res, next) => {
+    try {
+        const result = await engagementService.submitPollVote(req.params.websiteSlug, req.params.slug, req.validated);
+        return sendSuccess(req, res, result);
+    } catch (err) { return next(err); }
+};
+
 module.exports = {
     getWebsiteInfo, listContent, getContent, getPreviewContent, getCategory, listAuthors, getAuthor,
-    listComments, submitComment, getFeedback, submitFeedback,
+    listComments, submitComment, getFeedback, submitFeedback, getPoll, submitPollVote,
 };

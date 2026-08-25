@@ -17,4 +17,17 @@ const moderateCommentSchema = z.object({
     status: z.enum(['approved', 'rejected']),
 });
 
-module.exports = { submitCommentSchema, submitFeedbackSchema, moderateCommentSchema };
+const submitPollVoteSchema = z.object({
+    optionIndex: z.number().int().min(0),
+    // Client-generated (localStorage), same pattern as feedback's voterToken.
+    voterToken: z.string().trim().min(8).max(64),
+});
+
+const upsertPollSchema = z.object({
+    question: z.string().trim().min(1).max(500),
+    options: z.array(z.string().trim().min(1).max(200)).min(2).max(6),
+});
+
+module.exports = {
+    submitCommentSchema, submitFeedbackSchema, moderateCommentSchema, submitPollVoteSchema, upsertPollSchema,
+};
