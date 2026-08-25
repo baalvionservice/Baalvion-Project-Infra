@@ -7,6 +7,7 @@ const { SECRET: INTERNAL_SECRET } = require('./internalSecret');
 const { AppError } = require('../utils/errors');
 
 const PAYMENT_SERVICE_URL = process.env.PAYMENT_SERVICE_URL || 'http://app-payments:3015';
+const WALLET_SERVICE_URL = process.env.WALLET_SERVICE_URL || 'http://app-wallet:3039';
 
 async function listCatalog({ countryCode } = {}) {
     const where = { is_active: true };
@@ -30,15 +31,7 @@ function toPublicBrand(b) {
     };
 }
 
-/**
- * Checkout: creates a crypto payment-service charge for the chosen denomination, exactly
- * mirroring community-service's billingService.checkout — payment-service owns the wallet
- * config and chain polling, this service only relays and later fulfills.
- */
-async function checkout(brandSlug, userId, email, denominationValue, asset) {
-    const brand = await db.GiftCardBrand.findOne({ where: { slug: brandSlug, is_active: true } });
-    if (!brand) throw new AppError('NOT_FOUND', 'Gift card brand not found', 404);
-
+function validateDenomination(brand, denominationValue) {
     const denom = Number(denominationValue);
     if (brand.denomination_type === 'FIXED') {
         const allowed = (brand.fixed_denominations || []).map(Number);
@@ -50,6 +43,19 @@ async function checkout(brandSlug, userId, email, denominationValue, asset) {
             throw new AppError('VALIDATION_ERROR', `denomination must be between ${brand.min_denomination} and ${brand.max_denomination}`, 422);
         }
     }
+    return denom;
+}
+
+/**
+ * Checkout: creates a crypto payment-service charge for the chosen denomination, exactly
+ * mirroring community-service's billingService.checkout — payment-service owns the wallet
+ * config and chain polling, this service only relays and later fulfills.
+ */
+async function checkout(brandSlug, userId, email, denominationValue, asset) {
+    const brand = await db.GiftCardBrand.findOne({ where: { slug: brandSlug, is_active: true } });
+    if (!brand) throw new AppError('NOT_FOUND', 'Gift card brand not found', 404);
+
+    const denom = validateDenomination(brand, denominationValue);
 
     const normalizedAsset = String(asset || '').toUpperCase();
     if (!['USDT_TRC20', 'ETH_BEP20', 'BTC'].includes(normalizedAsset)) {
@@ -121,6 +127,37 @@ async function checkout(brandSlug, userId, email, denominationValue, asset) {
 }
 
 /**
+ * Purchases the real card from the supplier and stores the encrypted code. Shared by the crypto
+ * webhook path (fulfill(), below) and the wallet-pay path (checkoutWithWallet()) — the only
+ * difference between them is what confirms the payment (an on-chain webhook vs. an already-placed
+ * wallet hold), not what happens once it's confirmed.
+ */
+async function purchaseFromSupplier(order, metadata) {
+    const supplier = getSupplier(order.supplier);
+    try {
+        await order.update({ status: 'fulfilling' });
+        const { transactionId } = await supplier.createOrder({
+            productId: order.brand.supplier_product_id,
+            denomination: Number(order.denomination_value),
+            customIdentifier: order.id,
+            recipientEmail: (metadata && metadata.email) || undefined,
+        });
+        const { code, pin } = await supplier.fetchRedeemCode(transactionId);
+        await order.update({
+            status: 'fulfilled',
+            supplier_transaction_id: transactionId,
+            redeem_code_encrypted: code ? codeVault.encrypt(code) : null,
+            redeem_pin_encrypted: pin ? codeVault.encrypt(pin) : null,
+            fulfilled_at: new Date(),
+        });
+        return { ok: true };
+    } catch (err) {
+        await order.update({ status: 'failed', fulfillment_error: err.message });
+        return { ok: false, fulfillmentFailed: true, error: err };
+    }
+}
+
+/**
  * Fulfillment: called by payment-service's BillingFulfillmentClient after a CAPTURED +
  * amount-validated crypto webhook. Idempotent claim (mirrors community-service's fulfill),
  * then actually purchases the real card from the supplier and stores the encrypted code.
@@ -151,33 +188,119 @@ async function fulfill({ eventId, metadata, amountMinor, currency, providerRef }
 
     await order.update({ status: 'paid', payment_ref: providerRef || null });
 
-    const supplier = getSupplier(order.supplier);
+    const result = await purchaseFromSupplier(order, metadata);
+    // The payment WAS captured either way — never throw here (that would signal payment-service
+    // to treat this as retryable and re-deliver forever), even on a supplier failure.
+    await claim.update({ status: 'applied' });
+    return result.ok
+        ? { applied: true, duplicate: false }
+        : { applied: true, duplicate: false, fulfillmentFailed: true };
+}
+
+/**
+ * Checkout paid from the buyer's wallet balance instead of a fresh crypto charge. The balance
+ * check IS the payment confirmation (nothing on-chain to wait for), so this places a hold, runs
+ * fulfillment synchronously in-process, then captures the hold on success or releases it on
+ * failure — unlike the crypto path, a supplier failure here auto-returns the buyer's funds
+ * instead of leaving a captured-but-unfulfilled payment for manual reconciliation.
+ */
+async function checkoutWithWallet(brandSlug, userId, denominationValue) {
+    const brand = await db.GiftCardBrand.findOne({ where: { slug: brandSlug, is_active: true } });
+    if (!brand) throw new AppError('NOT_FOUND', 'Gift card brand not found', 404);
+
+    const denom = validateDenomination(brand, denominationValue);
+    const priceUsdCents = Math.round(denom * 100);
+    const priceUsd = priceUsdCents / 100;
+
+    const order = await db.GiftCardOrder.create({
+        user_id: userId,
+        brand_id: brand.id,
+        supplier: brand.supplier,
+        denomination_value: denom,
+        currency_code: brand.currency_code,
+        price_usd_cents: priceUsdCents,
+        status: 'pending_payment',
+        payment_method: 'WALLET',
+    });
+    // purchaseFromSupplier() reads order.brand.supplier_product_id (populated via the `brand`
+    // include when fulfill() loads a crypto order) — this order is freshly created, not re-fetched
+    // with that association, so it's attached directly from the brand already in scope.
+    order.brand = brand;
+
+    let wallet;
     try {
-        await order.update({ status: 'fulfilling' });
-        const { transactionId } = await supplier.createOrder({
-            productId: order.brand.supplier_product_id,
-            denomination: Number(order.denomination_value),
-            customIdentifier: order.id,
-            recipientEmail: metadata.email || undefined,
+        const walletRes = await fetch(`${WALLET_SERVICE_URL}/api/v1/wallets/by-holder/${userId}`, {
+            headers: { 'x-internal-secret': INTERNAL_SECRET, 'x-internal-service': 'giftcard-service' },
         });
-        const { code, pin } = await supplier.fetchRedeemCode(transactionId);
-        await order.update({
-            status: 'fulfilled',
-            supplier_transaction_id: transactionId,
-            redeem_code_encrypted: code ? codeVault.encrypt(code) : null,
-            redeem_pin_encrypted: pin ? codeVault.encrypt(pin) : null,
-            fulfilled_at: new Date(),
-        });
+        if (walletRes.status === 404) {
+            // No wallet yet means no deposit has ever been made — that's just $0 available, not
+            // an upstream failure.
+            await order.update({ status: 'failed', fulfillment_error: 'Insufficient wallet balance' });
+            throw new AppError('INSUFFICIENT_BALANCE', 'Insufficient wallet balance', 422);
+        }
+        if (!walletRes.ok) {
+            throw new Error(`wallet-service returned HTTP ${walletRes.status}`);
+        }
+        wallet = await walletRes.json();
     } catch (err) {
+        if (err instanceof AppError) throw err;
         await order.update({ status: 'failed', fulfillment_error: err.message });
-        // The payment WAS captured — do not throw here (that would signal payment-service to
-        // treat this as retryable and re-deliver forever). Log loudly for manual reconciliation.
-        await claim.update({ status: 'applied' });
-        return { applied: true, duplicate: false, fulfillmentFailed: true };
+        throw new AppError('WALLET_UPSTREAM', 'Could not reach your wallet', 502);
     }
 
-    await claim.update({ status: 'applied' });
-    return { applied: true, duplicate: false };
+    let hold;
+    try {
+        const holdRes = await fetch(`${WALLET_SERVICE_URL}/api/v1/wallets/${wallet.id}/holds`, {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json',
+                'x-internal-secret': INTERNAL_SECRET,
+                'x-internal-service': 'giftcard-service',
+            },
+            body: JSON.stringify({ currency: 'USD', amount: priceUsd, reference: `giftcard-order:${order.id}`, ttlMinutes: 30 }),
+        });
+        if (holdRes.status === 422) {
+            await order.update({ status: 'failed', fulfillment_error: 'Insufficient wallet balance' });
+            throw new AppError('INSUFFICIENT_BALANCE', 'Insufficient wallet balance', 422);
+        }
+        if (!holdRes.ok) {
+            throw new Error(`wallet-service returned HTTP ${holdRes.status}`);
+        }
+        hold = await holdRes.json();
+    } catch (err) {
+        if (err instanceof AppError) throw err;
+        await order.update({ status: 'failed', fulfillment_error: err.message });
+        throw new AppError('WALLET_UPSTREAM', 'Could not reserve funds from your wallet', 502);
+    }
+
+    await order.update({ status: 'paid', wallet_hold_id: hold.id });
+
+    const result = await purchaseFromSupplier(order, {});
+
+    if (result.ok) {
+        await fetch(`${WALLET_SERVICE_URL}/api/v1/wallets/holds/${hold.id}/capture`, {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json',
+                'x-internal-secret': INTERNAL_SECRET,
+                'x-internal-service': 'giftcard-service',
+            },
+            body: JSON.stringify({ reference: `giftcard-order:${order.id}` }),
+        }).catch((err) => {
+            // Fulfillment already succeeded and was recorded — a capture-call failure here is a
+            // wallet-side bookkeeping issue, not a fulfillment issue. Log loudly, don't fail the order.
+            console.error(`[giftcard-service] hold capture failed for order ${order.id}, hold ${hold.id}:`, err.message);
+        });
+    } else {
+        await fetch(`${WALLET_SERVICE_URL}/api/v1/wallets/holds/${hold.id}/release`, {
+            method: 'POST',
+            headers: { 'x-internal-secret': INTERNAL_SECRET, 'x-internal-service': 'giftcard-service' },
+        }).catch((err) => {
+            console.error(`[giftcard-service] hold release failed for order ${order.id}, hold ${hold.id}:`, err.message);
+        });
+    }
+
+    return { orderId: order.id, status: order.status };
 }
 
 async function listMyOrders(userId) {
@@ -262,6 +385,6 @@ async function listCatalogAdmin() {
 }
 
 module.exports = {
-    listCatalog, checkout, fulfill, listMyOrders,
+    listCatalog, checkout, checkoutWithWallet, fulfill, listMyOrders,
     listOrdersAdmin, getMerchantStats, listCatalogAdmin,
 };
