@@ -1,9 +1,12 @@
 import { CategoryFeed, categoryHasLiveContent } from "@/components/pages/CategoryFeed";
+import { ArticleSidebar } from "@/components/article/ArticleSidebar";
+import { ValuePropsCard } from "@/components/pages/ValuePropsCard";
 import { topicMeta } from "@/lib/topic-config";
 import { buildMetadata } from "@/lib/seo";
 import { Metadata } from "next";
 
 const SLUG = "monthly-budget";
+const LABEL = "Monthly Budget";
 
 // Empty category hubs read to Google as exactly the thin/low-value content
 // pattern that blocks AdSense approval (see GLOSSARY_LIVE in config/glossary.ts
@@ -25,5 +28,13 @@ export async function generateMetadata(): Promise<Metadata> {
 export const revalidate = 3600;
 
 export default function Page() {
-  return <CategoryFeed slug={SLUG} />;
+  return (
+    <CategoryFeed
+      slug={SLUG}
+      sidebar={<ArticleSidebar categorySlug={SLUG} categoryLabel={LABEL} excludeSlug="" />}
+      rightRail={<ValuePropsCard categoryLabel={LABEL} />}
+      trustBar
+      newsletter
+    />
+  );
 }

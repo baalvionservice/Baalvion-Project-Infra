@@ -1,7 +1,6 @@
 import Link from "next/link";
 import {
   TrendingUp,
-  Building2,
   BarChart3,
   Globe,
   Banknote,
@@ -55,7 +54,6 @@ const CMS_CATEGORY_SLUG = "markets";
 const MARKET_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
   { slug: "stocks", label: "Stocks", icon: TrendingUp },
   { slug: "earnings", label: "Earnings", icon: BarChart3 },
-  { slug: "company-news", label: "Companies", icon: Building2 },
   { slug: "economy", label: "Economy", icon: Globe },
   { slug: "fed", label: "Federal Reserve", icon: Banknote },
   { slug: "inflation", label: "Inflation", icon: Percent },

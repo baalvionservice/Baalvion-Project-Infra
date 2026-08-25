@@ -24,7 +24,11 @@ export async function TrendingNowModule({ color = "#1d4fc4" }: { color?: string 
       </h2>
       <ol className="space-y-3">
         {items.map((item, i) => (
-          <li key={item.id}>
+          // id alone isn't guaranteed unique here: topUpNews (worldFeed.ts) assigns
+          // wire/Google News items a synthetic id via a fixed offset that can collide
+          // with a real CMS content row id already in the list — different stories,
+          // coincidentally equal ids. Index keeps the key unique regardless.
+          <li key={`${item.id}-${i}`}>
             <StoryLink item={item} className="group flex items-start gap-3">
               <span className="w-4 shrink-0 text-lg font-black leading-none" style={{ color: `${color}4d` }}>
                 {i + 1}

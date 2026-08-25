@@ -1,4 +1,6 @@
 import { CategoryFeed, categoryHasLiveContent } from "@/components/pages/CategoryFeed";
+import { ArticleSidebar } from "@/components/article/ArticleSidebar";
+import { ValuePropsCard } from "@/components/pages/ValuePropsCard";
 import { topicMeta } from "@/lib/topic-config";
 import { buildMetadata } from "@/lib/seo";
 import { Metadata } from "next";
@@ -25,5 +27,13 @@ export async function generateMetadata(): Promise<Metadata> {
 export const revalidate = 3600;
 
 export default function Page() {
-  return <CategoryFeed slug={SLUG} />;
+  return (
+    <CategoryFeed
+      slug={SLUG}
+      sidebar={<ArticleSidebar categorySlug={SLUG} categoryLabel="Savings" excludeSlug="" />}
+      rightRail={<ValuePropsCard categoryLabel="Savings" />}
+      trustBar
+      newsletter
+    />
+  );
 }

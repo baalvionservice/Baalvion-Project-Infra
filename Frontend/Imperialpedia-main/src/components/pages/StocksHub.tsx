@@ -22,6 +22,7 @@ import { FeaturedArticleCard } from "@/components/pages/FeaturedArticleCard";
 import { HorizontalArticleCard } from "@/components/pages/HorizontalArticleCard";
 import { InvestingTopicExplorer, type InvestingTopic } from "@/components/pages/InvestingTopicExplorer";
 import HeadingSection from "@/components/layout/HeadingSection";
+import { TrustBar } from "@/components/pages/TrustBar";
 import { NewsletterForm } from "@/components/landing/NewsletterForm";
 import FAQItem from "@/components/faq/FAQItem";
 import { env } from "@/config/env";
@@ -227,6 +228,7 @@ export async function StocksHub() {
         title={copy.title}
         description={copy.description}
       />
+      <TrustBar />
       <p className="text-center text-xs font-semibold uppercase tracking-widest text-muted-foreground -mt-2 pb-6">
         {articles.length}+ Stock Market Guides
         {lastUpdated && (

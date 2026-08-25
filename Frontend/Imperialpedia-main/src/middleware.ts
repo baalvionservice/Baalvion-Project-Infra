@@ -248,8 +248,12 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(`/terms/${letter}/${slug}`, request.url), 301);
   }
 
-  // 2) Coarse auth gate on protected areas
-  const isProtected = PROTECTED_PREFIXES.some((p) => pathname.startsWith(p));
+  // 2) Coarse auth gate on protected areas. Exact-match-or-slash-boundary, not a
+  // bare startsWith: that previously caught /editorial-policy under the /editor
+  // prefix (both real pages sharing the same literal characters) and sent every
+  // visitor clicking "Editorial Standards" — linked from TrustBar on every topic
+  // hub page and the sitewide footer — to a login wall instead of the page.
+  const isProtected = PROTECTED_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
   if (isProtected) {
     const hasSession = Boolean(request.cookies.get(REFRESH_COOKIE)?.value);
     if (!hasSession) {
