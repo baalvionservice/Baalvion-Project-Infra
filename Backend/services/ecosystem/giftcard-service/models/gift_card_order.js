@@ -16,6 +16,8 @@ module.exports = (sequelize) => sequelize.define('GiftCardOrder', {
         allowNull: false,
         defaultValue: 'pending_payment',
     },
+    payment_method: { type: DataTypes.STRING(10), allowNull: false, defaultValue: 'CRYPTO' },
+    wallet_hold_id: { type: DataTypes.UUID, allowNull: true },
     payment_ref: { type: DataTypes.STRING(160), allowNull: true },
     supplier_transaction_id: { type: DataTypes.STRING(160), allowNull: true },
     // Encrypted at rest via service/codeVault.js — never stored or logged in plaintext.
