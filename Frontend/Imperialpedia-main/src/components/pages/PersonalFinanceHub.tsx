@@ -17,6 +17,7 @@ import {
 
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listCmsContent, cmsContentToArticle } from "@/services/data/cms-public";
+import { isRemovedArticlePath } from "@/lib/content/removed-article-paths";
 import { staticCategoryNews, staticArticleList } from "@/services/data/static-content";
 import { topicCopy, staticCategoryFor } from "@/lib/topic-config";
 import { FeaturedArticleCard } from "@/components/pages/FeaturedArticleCard";
@@ -138,13 +139,15 @@ function makeClaimer() {
 /** CMS-first fetch for a single topic slug, same fallback chain used site-wide. */
 async function fetchTopicArticles(slug: string, limit: number): Promise<NewsArticle[]> {
   let items = await getCategoryArticles(slug, limit);
-  if (items.length) return items;
+  if (items.length) return items.filter((a) => !isRemovedArticlePath(a));
 
   items = staticCategoryNews(slug).slice(0, limit);
-  if (items.length) return items;
+  if (items.length) return items.filter((a) => !isRemovedArticlePath(a));
 
   const cat = staticCategoryFor(slug);
-  return (cat ? newsArticles.filter((a) => a.category === cat) : []).slice(0, limit);
+  return (cat ? newsArticles.filter((a) => a.category === cat) : [])
+    .filter((a) => !isRemovedArticlePath(a))
+    .slice(0, limit);
 }
 
 /**
@@ -174,6 +177,10 @@ export async function PersonalFinanceHub() {
     const cat = staticCategoryFor(SLUG);
     articles = cat ? newsArticles.filter((a) => a.category === cat) : [];
   }
+  // A still-published CMS row for a permanently-retired duplicate (e.g. the old
+  // dollar-cost-averaging article, now 410'd — see removed-article-paths.ts) must
+  // never resurface as the featured pillar card or anywhere else on this page.
+  articles = articles.filter((a) => !isRemovedArticlePath(a));
 
   const claim = makeClaimer();
 
