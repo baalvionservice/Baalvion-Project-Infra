@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import Link from "next/link";
 import {
   BarChart3,
@@ -29,6 +30,7 @@ import { ArticleCard } from "@/app/news/NewsArticleCard";
 import HeadingSection from "@/components/layout/HeadingSection";
 import { NewsletterForm } from "@/components/landing/NewsletterForm";
 import FAQAccordionSection from "@/components/faq/FAQAccordionSection";
+import { LabeledAdSlot } from "@/components/common/LabeledAdSlot";
 import { env } from "@/config/env";
 import { newsArticleHref } from "@/lib/data/article-url";
 
@@ -321,6 +323,8 @@ export async function EconomyHub() {
           </section>
         )}
 
+        <LabeledAdSlot slot="8362925887" />
+
         {/* Start Here — concept tiles, not article stand-ins */}
         <section>
           <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
@@ -354,15 +358,19 @@ export async function EconomyHub() {
           </section>
         )}
 
+        <LabeledAdSlot slot="8362925887" />
+
         {/* Explore Topics — pillar + supporting guides, one section per subcategory */}
-        {topicSections.map((section) => (
-          <ProductSection
-            key={section.slug}
-            slug={section.slug}
-            label={section.label}
-            icon={section.icon}
-            articles={section.articles}
-          />
+        {topicSections.map((section, i) => (
+          <Fragment key={section.slug}>
+            <ProductSection
+              slug={section.slug}
+              label={section.label}
+              icon={section.icon}
+              articles={section.articles}
+            />
+            {i === 4 && <LabeledAdSlot slot="8362925887" />}
+          </Fragment>
         ))}
 
         {latestArticles.length > 0 && (
@@ -377,6 +385,8 @@ export async function EconomyHub() {
             </div>
           </section>
         )}
+
+        <LabeledAdSlot slot="8362925887" />
 
         {calendarRows.length > 0 && (
           <section>
