@@ -21,6 +21,10 @@ import { useAuth } from "@/context/auth-context"
 import { listMyOrders, getMyWishlist, type Order } from "@/lib/api/orders"
 import { MARKET_UNDERWORLD_STORE_ID } from "@/lib/api/commerce"
 import { getMyOrders as getMyGiftCardOrders, type GiftCardOrder } from "@/lib/api/giftcards"
+import { getMyWallet, usdAvailable, type Wallet as WalletAccount } from "@/lib/api/wallet"
+import { WalletBalanceCard } from "@/components/wallet/wallet-balance-card"
+import { DepositModal } from "@/components/wallet/deposit-modal"
+import { DashboardGiftCardGrid } from "@/components/marketplace/dashboard-giftcard-grid"
 
 const STATUS_VARIANT: Record<Order["paymentStatus"], "success" | "warning" | "default"> = {
   paid: "success",
@@ -47,7 +51,11 @@ export default function DashboardPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [wishlistCount, setWishlistCount] = useState(0)
   const [giftCardOrders, setGiftCardOrders] = useState<GiftCardOrder[]>([])
+  const [wallet, setWallet] = useState<WalletAccount | null>(null)
+  const [depositModalOpen, setDepositModalOpen] = useState(false)
   const [loading, setLoading] = useState(true)
+
+  const refreshWallet = () => { getMyWallet().then(setWallet) }
 
   useEffect(() => {
     if (authLoading) return
@@ -59,10 +67,12 @@ export default function DashboardPage() {
       listMyOrders(MARKET_UNDERWORLD_STORE_ID).catch(() => []),
       getMyWishlist(MARKET_UNDERWORLD_STORE_ID).catch(() => ({ items: [] as { id: string }[] })),
       getMyGiftCardOrders().catch(() => []),
-    ]).then(([o, w, g]) => {
+      getMyWallet(),
+    ]).then(([o, w, g, wal]) => {
       setOrders(o)
       setWishlistCount(w.items.length)
       setGiftCardOrders(g)
+      setWallet(wal)
       setLoading(false)
     })
   }, [authLoading, isAuthenticated, router])
@@ -100,6 +110,10 @@ export default function DashboardPage() {
           <h1 className="text-4xl font-bold tracking-tight mb-2">Welcome back{user?.email ? `, ${user.email.split("@")[0]}` : ""}</h1>
           <p className="text-gray-500 font-medium text-lg">Your orders, wishlist, and gift cards in one place.</p>
         </header>
+
+        <div className="max-w-sm">
+          <WalletBalanceCard balance={usdAvailable(wallet)} onDeposit={() => setDepositModalOpen(true)} />
+        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
@@ -139,6 +153,8 @@ export default function DashboardPage() {
             ))}
           </div>
         </section>
+
+        <DashboardGiftCardGrid walletBalance={usdAvailable(wallet)} />
 
         <section className="space-y-6">
           <div className="flex items-center justify-between">
@@ -216,6 +232,8 @@ export default function DashboardPage() {
           </section>
         )}
       </div>
+
+      <DepositModal open={depositModalOpen} onOpenChange={setDepositModalOpen} onCredited={refreshWallet} />
     </div>
   )
 }

@@ -82,7 +82,20 @@ export async function getCatalog(countryCode?: string): Promise<GiftCardBrand[]>
 export async function checkoutGiftCard(brandSlug: string, denomination: number, asset: CryptoAsset): Promise<GiftCardCheckout> {
     return giftcardFetch<GiftCardCheckout>(`/brands/${brandSlug}/checkout`, {
         method: 'POST',
-        body: JSON.stringify({ denomination, asset }),
+        body: JSON.stringify({ method: 'CRYPTO', denomination, asset }),
+    });
+}
+
+export interface WalletCheckoutResult {
+    orderId: string;
+    status: OrderStatus;
+}
+
+/** Pays instantly from the buyer's wallet-service balance — no address/QR, no polling. */
+export async function checkoutGiftCardWithWallet(brandSlug: string, denomination: number): Promise<WalletCheckoutResult> {
+    return giftcardFetch<WalletCheckoutResult>(`/brands/${brandSlug}/checkout`, {
+        method: 'POST',
+        body: JSON.stringify({ method: 'WALLET', denomination }),
     });
 }
 
