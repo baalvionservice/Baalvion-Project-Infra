@@ -11,7 +11,7 @@
  * reusing the same keyless fetch already proven live via worldFeed.ts rather
  * than inventing a second fallback mechanism.
  */
-import { fetchYahooQuote, fetchYahooChart, CANONICAL_SYMBOL_MAP } from "./worldFeed";
+import { fetchYahooQuote, fetchYahooChart, CANONICAL_SYMBOL_MAP, MARKET_DATA_REVALIDATE_SECONDS } from "./worldFeed";
 
 const IMP_API =
   process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL ||
@@ -36,7 +36,7 @@ export interface MarketAssetRow {
 async function fetchPrimaryAssets(): Promise<MarketAssetRow[]> {
   try {
     const res = await fetch(`${IMP_API}/assets?limit=100`, {
-      next: { revalidate: 30 },
+      next: { revalidate: MARKET_DATA_REVALIDATE_SECONDS },
       signal: AbortSignal.timeout(8000),
     });
     if (!res.ok) return [];
@@ -86,6 +86,19 @@ Object.assign(CANONICAL_TO_YAHOO, {
   COPPER: "HG=F",
   GBPUSD: "GBPUSD=X",
   BRKB: "BRK-B",
+  // Real Treasury-yield tickers Yahoo does carry (unlike DGS2 — no 2-year yield
+  // series exists on Yahoo under any ticker, verified live 2026-08-26; that one
+  // stays on the /bonds redirect in next.config.ts, nothing fabricated for it).
+  DGS30: "^TYX", // Treasury Yield 30 Years
+  DGS3MO: "^IRX", // 13-Week Treasury Bill (Yahoo's closest tracked equivalent to the 3-month CMT rate)
+  // CHINA/EM/APAC (MARKET_GROUPS regional composites) were never individual
+  // instruments — no single "the Asia-Pacific stock" exists to quote. These map
+  // to real, widely-tracked ETF proxies for each region, same pattern EUROPE
+  // already uses (^STOXX, via CANONICAL_SYMBOL_MAP above) — a genuine tradable
+  // instrument that tracks the region, not a guess.
+  CHINA: "FXI", // iShares China Large-Cap ETF
+  EM: "EEM", // iShares MSCI Emerging Markets ETF
+  APAC: "VPL", // Vanguard FTSE Pacific ETF
 });
 
 const FALLBACK_NAMES: Record<string, string> = {
@@ -94,29 +107,28 @@ const FALLBACK_NAMES: Record<string, string> = {
   NIKKEI: "Nikkei 225", KOSPI: "Kospi", ASX200: "ASX 200",
   HANGSENG: "Hang Seng", SHANGHAI: "Shanghai Composite",
   BOVESPA: "Bovespa", SENSEX: "Sensex",
+  CHINA: "China Large-Cap (FXI)", EM: "Emerging Markets (EEM)", APAC: "Asia-Pacific (VPL)",
   BTC: "Bitcoin", ETH: "Ethereum", SOL: "Solana",
   XAUUSD: "Gold", WTI: "Crude Oil (WTI)", BRENT: "Brent Crude", NATGAS: "Natural Gas", COPPER: "Copper",
   EURUSD: "EUR/USD", GBPUSD: "GBP/USD", USDJPY: "USD/JPY", USDINR: "USD/INR", USDCNY: "USD/CNY", USDBRL: "USD/BRL",
   XLK: "Technology Sector", XLE: "Energy Sector", XLV: "Health Care Sector", XLF: "Financials Sector", XLY: "Consumer Discretionary Sector",
   AAPL: "Apple", MSFT: "Microsoft", GOOGL: "Alphabet", AMZN: "Amazon", TSLA: "Tesla", NVDA: "Nvidia",
   AMD: "AMD", META: "Meta", NFLX: "Netflix", JPM: "JPMorgan Chase", BRKB: "Berkshire Hathaway", INTC: "Intel", TSM: "Taiwan Semiconductor",
-  DGS10: "10-Year Treasury Yield",
+  DGS10: "10-Year Treasury Yield", DGS30: "30-Year Treasury Yield", DGS3MO: "3-Month Treasury Yield",
 };
 
 /** Shapes a Yahoo quote into a MarketAssetRow — same price/change math as
  * worldFeed.ts's toIndicator(), so fallback rows read identically to primary
  * ones. Sector/stock tickers pass straight through (bare US ticker == Yahoo
- * symbol); everything else goes through CANONICAL_TO_YAHOO. Of the 4 FRED
- * bond-yield series, only DGS10 has a real Yahoo equivalent (^TNX, mapped via
- * worldFeed.ts's CANONICAL_SYMBOL_MAP) — DGS2/DGS30/DGS3MO have neither an
- * imperialpedia-service row nor a Yahoo mapping and are never attempted.
- * (This used to block all 4 unconditionally, which silently broke DGS10's
- * working fallback and made /markets/quote/DGS10 a permanent 404 despite
- * sitemap-service.ts explicitly keeping it in the sitemap on the assumption
- * this fallback existed — verified live 2026-07-29.) */
+ * symbol); everything else goes through CANONICAL_TO_YAHOO, including DGS30
+ * (^TYX), DGS3MO (^IRX), and the CHINA/EM/APAC region-composite ETF proxies
+ * (FXI/EEM/VPL) added above. DGS2 is the one symbol genuinely left out: no
+ * 2-year Treasury yield ticker exists on Yahoo under any name (verified live
+ * 2026-08-26) — it stays on the /bonds redirect in next.config.ts rather than
+ * getting a fabricated proxy. */
 async function fetchYahooAsMarketAssetRow(canonicalSymbol: string): Promise<MarketAssetRow | null> {
-  const UNSUPPORTED_BONDS: readonly string[] = ["DGS2", "DGS30", "DGS3MO"];
-  if (UNSUPPORTED_BONDS.includes(canonicalSymbol)) return null;
+  const UNSUPPORTED: readonly string[] = ["DGS2"];
+  if (UNSUPPORTED.includes(canonicalSymbol)) return null;
   const yahooSymbol = CANONICAL_TO_YAHOO[canonicalSymbol] ?? canonicalSymbol;
   try {
     const q = await fetchYahooQuote(yahooSymbol);
@@ -199,6 +211,7 @@ export interface AssetDetail extends MarketAssetRow {
   fundamentals: {
     marketCap: number | null; peRatio: number | null; week52High: number | null;
     week52Low: number | null; dividendYield: number | null; industry: string | null;
+    beta: number | null;
   } | null;
   relatedCompanies: { symbol: string; name: string }[];
   relatedArticles: { id: number; title: string; slug: string; published_at: string | null }[];
@@ -228,13 +241,26 @@ function toFallbackDetail(row: MarketAssetRow, chart: QuoteChartPoint[]): AssetD
 export async function getAssetDetail(symbol: string, range: string): Promise<AssetDetail | null> {
   try {
     const res = await fetch(`${IMP_API}/assets/${encodeURIComponent(symbol)}/detail?range=${encodeURIComponent(range)}`, {
-      next: { revalidate: 30 },
+      next: { revalidate: MARKET_DATA_REVALIDATE_SECONDS },
       signal: AbortSignal.timeout(8000),
     });
     if (res.ok) {
       const json = await res.json();
       const detail = (json?.data ?? null) as AssetDetail | null;
-      if (detail) return detail;
+      if (detail) {
+        // cms-service only builds intraday chart/indicator series for
+        // asset.type stock|index (see getQuote's hasIntradayChart gate) — crypto
+        // rows come back OK with real price/quote but chart: [] always, which
+        // used to render "No chart data" even though the primary call succeeded
+        // (verified live for BTC/ETH/SOL 2026-08-26). Same Yahoo backfill as the
+        // full-fallback path below, just layered on top of an otherwise-good response.
+        if (detail.chart.length === 0) {
+          const yahooSymbol = CANONICAL_TO_YAHOO[symbol] ?? symbol;
+          const chart = await fetchYahooChart(yahooSymbol, range);
+          if (chart.length > 0) return { ...detail, chart, historical: chart };
+        }
+        return detail;
+      }
     }
   } catch {
     // fall through to Yahoo below

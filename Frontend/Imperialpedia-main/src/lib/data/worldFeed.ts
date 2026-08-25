@@ -134,6 +134,15 @@ const WATCHLIST_SYMBOLS: { symbol: string; name: string }[] = [
 // Editors control the markets, watchlist and feed settings from the admin
 // panel; this reads that config. Falls back to the shipped defaults above.
 
+// Zero-traffic cost-saving policy (2026-08-26): the site has no real visitors
+// right now, so there's no reason to re-hit paid market-data providers more
+// than once a day — ISR is lazy (only re-fetches on the next request *after*
+// this window elapses), so raising it doesn't change anything for an idle
+// page, but it caps cost the moment traffic does show up rather than the
+// previous 30s window re-fetching on nearly every visit. Bring this back down
+// once real traffic / AdSense approval makes fresher data worth the API cost.
+export const MARKET_DATA_REVALIDATE_SECONDS = 86400;
+
 const IMPERIALPEDIA_API =
   process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL ||
   (process.env.NODE_ENV === "production"
@@ -217,7 +226,7 @@ export const CANONICAL_SYMBOL_MAP: Record<string, string> = {
 
 async function fetchImperialpediaQuote(canonicalSymbol: string): Promise<Quote> {
   const res = await fetch(`${IMPERIALPEDIA_API}/assets/${encodeURIComponent(canonicalSymbol)}`, {
-    next: { revalidate: 30 },
+    next: { revalidate: MARKET_DATA_REVALIDATE_SECONDS },
     signal: AbortSignal.timeout(6000),
   });
   if (!res.ok) throw new Error(`assets ${res.status} ${canonicalSymbol}`);
@@ -250,7 +259,7 @@ export async function fetchYahooQuote(symbol: string): Promise<Quote> {
   )}?interval=1d&range=5d`;
   const res = await fetch(url, {
     headers: { "User-Agent": "Mozilla/5.0 (compatible; ImperialpediaBot/1.0)" },
-    next: { revalidate: 30 },
+    next: { revalidate: MARKET_DATA_REVALIDATE_SECONDS },
     signal: AbortSignal.timeout(6000),
   });
   if (!res.ok) throw new Error(`yahoo ${res.status} ${symbol}`);
@@ -308,7 +317,7 @@ export async function fetchYahooChart(symbol: string, range: string): Promise<Ya
   try {
     const res = await fetch(url, {
       headers: { "User-Agent": "Mozilla/5.0 (compatible; ImperialpediaBot/1.0)" },
-      next: { revalidate: 30 },
+      next: { revalidate: MARKET_DATA_REVALIDATE_SECONDS },
       signal: AbortSignal.timeout(6000),
     });
     if (!res.ok) return [];

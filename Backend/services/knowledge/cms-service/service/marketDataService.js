@@ -6,13 +6,15 @@
 // marketFeedService). Each fetch also records provider health (ok/rate_limited/error)
 // so the dashboard's "Market Data Health" panel reflects reality, not just "has a key".
 //
-// Provider assignment is split to stay inside each free tier's daily request budget
-// while refreshing as close to "live" as that budget allows:
-//   Finnhub       — indices/stocks quotes (60 req/min free tier)          → 60s cache
-//   Binance       — crypto, keyless, one batched call for all coins       → 60s cache
-//   Twelve Data   — forex + gold (800 req/day, 8 req/min free tier)       → 30min cache
-//   Alpha Vantage — oil/gas/copper (25 req/DAY free tier — very tight)    → 6h cache
-//   FRED          — treasury bond yields (generous free tier, EOD data)  → 1h cache
+// Provider assignment is split to stay inside each free tier's daily request budget.
+// Zero-traffic cost-saving policy (2026-08-26): the newsroom dashboard is the only
+// live consumer right now (Imperialpedia has no public traffic and these pages
+// aren't even indexed yet — see Frontend/Imperialpedia-main/config/market-quotes.ts),
+// so every TTL below is stretched to once a day (DAY_TTL) instead of the previous
+// per-provider tuning (Finnhub/Binance 60s, Twelve Data 30min, Alpha Vantage 6h,
+// FRED 1h) — that means the dashboard can show up to a day-old price while someone
+// has it open. Bring the old per-provider values back once real traffic or active
+// newsroom monitoring makes fresher-than-daily data worth the request budget again.
 const cacheService = require('./cacheService');
 const contentService = require('./contentService');
 const marketHours = require('./marketHours');
@@ -26,13 +28,15 @@ const TWELVE_DATA_KEY = process.env.TWELVE_DATA_API_KEY || '';
 const ALPHA_VANTAGE_KEY = process.env.ALPHA_VANTAGE_API_KEY || '';
 const FRED_KEY = process.env.FRED_API_KEY || '';
 
+const DAY_TTL = 24 * 60 * 60;
+
 const TTL = {
-    quote: 60,
-    crypto: 60,
-    forex: 30 * 60,
-    commodity: 6 * 60 * 60,
-    bond: 60 * 60,
-    news: 5 * 60,
+    quote: DAY_TTL,
+    crypto: DAY_TTL,
+    forex: DAY_TTL,
+    commodity: DAY_TTL,
+    bond: DAY_TTL,
+    news: DAY_TTL,
 };
 
 // `canonicalSymbol` is the DB (market_assets) symbol — the one /quote/:symbol
@@ -406,24 +410,27 @@ const PROVIDER_LABEL = {
     finnhub: 'Finnhub', twelvedata: 'Twelve Data', alphavantage: 'Alpha Vantage', fred: 'FRED', binance: 'Binance',
 };
 
+// TTLs all stretched to DAY_TTL under the zero-traffic cost-saving policy above —
+// interval/outputsize (the actual bar resolution per range) are unchanged, only
+// how often each range's series gets re-fetched from Twelve Data.
 const RANGE_CONFIG = {
-    '1D': { interval: '5min', outputsize: 78, ttl: 5 * 60 },
-    '5D': { interval: '30min', outputsize: 65, ttl: 15 * 60 },
-    '1M': { interval: '1day', outputsize: 22, ttl: 60 * 60 },
-    '6M': { interval: '1day', outputsize: 130, ttl: 3 * 60 * 60 },
-    'YTD': { interval: '1day', outputsize: 260, ttl: 3 * 60 * 60 }, // fetched then date-filtered to Jan 1
-    '1Y': { interval: '1day', outputsize: 260, ttl: 6 * 60 * 60 },
-    '5Y': { interval: '1week', outputsize: 260, ttl: 24 * 60 * 60 }, // verified live: 260wk = ~5Y history
-    'MAX': { interval: '1month', outputsize: 300, ttl: 24 * 60 * 60 }, // verified live: 300mo reaches ~2001
+    '1D': { interval: '5min', outputsize: 78, ttl: DAY_TTL },
+    '5D': { interval: '30min', outputsize: 65, ttl: DAY_TTL },
+    '1M': { interval: '1day', outputsize: 22, ttl: DAY_TTL },
+    '6M': { interval: '1day', outputsize: 130, ttl: DAY_TTL },
+    'YTD': { interval: '1day', outputsize: 260, ttl: DAY_TTL }, // fetched then date-filtered to Jan 1
+    '1Y': { interval: '1day', outputsize: 260, ttl: DAY_TTL },
+    '5Y': { interval: '1week', outputsize: 260, ttl: DAY_TTL }, // verified live: 260wk = ~5Y history
+    'MAX': { interval: '1month', outputsize: 300, ttl: DAY_TTL }, // verified live: 300mo reaches ~2001
 };
 
 // A fixed daily-260 series (independent of the user's selected chart range) used
 // for technical indicators — SMA200 needs 200+ daily points, which YTD/5D/etc.
 // ranges often don't have.
-const INDICATOR_SERIES_CONFIG = { interval: '1day', outputsize: 260, ttl: 6 * 60 * 60 };
+const INDICATOR_SERIES_CONFIG = { interval: '1day', outputsize: 260, ttl: DAY_TTL };
 // A fixed weekly-260 (~5Y) series used for the Performance Summary, independent of
 // the chart range selector, so switching chart ranges never changes these numbers.
-const PERFORMANCE_SERIES_CONFIG = { interval: '1week', outputsize: 260, ttl: 24 * 60 * 60 };
+const PERFORMANCE_SERIES_CONFIG = { interval: '1week', outputsize: 260, ttl: DAY_TTL };
 
 async function fetchTwelveDataOhlcv(symbol, interval, outputsize) {
     const url = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(symbol)}&interval=${interval}&outputsize=${outputsize}&apikey=${TWELVE_DATA_KEY}`;
@@ -514,13 +521,16 @@ async function fetchFinnhubFundamentals(symbol) {
         week52Low: m['52WeekLow'] ?? null,
         dividendYield: m.currentDividendYieldTTM ?? null,
         industry: profileJson.finnhubIndustry ?? null,
+        // Finnhub's basic-financials `metric` payload already carries this
+        // (5Y monthly beta vs. the index) — was being fetched and discarded.
+        beta: m.beta ?? null,
     };
 }
 
 async function getFundamentals(providerSymbol) {
     if (!isConfigured(FINNHUB_KEY)) return null;
     const key = `cms:market-data:fundamentals:${providerSymbol}`;
-    return cachedList(key, 60 * 60, () => safeFetch(`${providerSymbol}-fundamentals`, () => fetchFinnhubFundamentals(providerSymbol)));
+    return cachedList(key, DAY_TTL, () => safeFetch(`${providerSymbol}-fundamentals`, () => fetchFinnhubFundamentals(providerSymbol)));
 }
 
 // Volume/average volume/live session flag — Finnhub's free /quote omits volume
@@ -543,7 +553,7 @@ async function fetchTwelveDataVolumeDetail(symbol) {
 async function getVolumeDetail(providerSymbol) {
     if (!isConfigured(TWELVE_DATA_KEY)) return null;
     const key = `cms:market-data:volume:${providerSymbol}`;
-    return cachedList(key, 15 * 60, () => safeFetch(`${providerSymbol}-volume`, () => fetchTwelveDataVolumeDetail(providerSymbol)));
+    return cachedList(key, DAY_TTL, () => safeFetch(`${providerSymbol}-volume`, () => fetchTwelveDataVolumeDetail(providerSymbol)));
 }
 
 // Related companies — Finnhub's free /stock/peers, filtered down to symbols we
@@ -560,7 +570,7 @@ async function fetchFinnhubPeers(symbol) {
 async function getRelatedCompanies(asset) {
     if (asset.type !== 'stock' || asset.provider !== 'finnhub' || !isConfigured(FINNHUB_KEY)) return [];
     const key = `cms:market-data:peers:${asset.providerSymbol}`;
-    const peers = await cachedList(key, 24 * 60 * 60, () => safeFetch(`${asset.providerSymbol}-peers`, () => fetchFinnhubPeers(asset.providerSymbol)));
+    const peers = await cachedList(key, DAY_TTL, () => safeFetch(`${asset.providerSymbol}-peers`, () => fetchFinnhubPeers(asset.providerSymbol)));
     if (!peers || peers.length === 0) return [];
     const db = require('../models');
     const known = await db.MarketAsset.findAll({

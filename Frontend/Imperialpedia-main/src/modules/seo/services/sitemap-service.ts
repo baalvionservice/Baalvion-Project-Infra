@@ -273,20 +273,19 @@ export const sitemapService = {
     // `/markets/quote/[symbol]` page for (same tracked list the markets
     // breakdown panels and quote page itself use), so these financial entity
     // pages are discoverable rather than relying on internal links alone.
-    // Excluded: regional composite placeholders (CHINA, EM) and Treasury
-    // yield series with no individual quote source (only DGS10 has a Yahoo
-    // fallback via ^TNX in worldFeed.ts's CANONICAL_SYMBOL_MAP — DGS2/DGS30/
-    // DGS3MO have neither an imperialpedia-service row nor a Yahoo mapping)
-    // — verified live as the only 6 real, reproducible 404s in a 386-URL
-    // sitemap crawl. They stay in MARKET_GROUPS/ALL_TRACKED_SYMBOLS for the
-    // breakdown-panel and pre-render use cases; only sitemap submission
-    // (i.e., what Google is told to index) excludes them.
+    // Excluded: DGS2 (2-year Treasury yield) has no individual quote source —
+    // not an imperialpedia-service row, not a Yahoo ticker under any name
+    // (verified live 2026-08-26). Redirects to /bonds instead (next.config.ts).
+    // Every other tracked symbol, including the regional composites (CHINA, EM,
+    // APAC → real ETF proxies FXI/EEM/VPL) and the other two yield tenors
+    // (DGS30 → ^TYX, DGS3MO → ^IRX), now has real Yahoo-backed data — see
+    // marketsLoader.ts's CANONICAL_TO_YAHOO.
     // Held back from the sitemap entirely while MARKET_QUOTES_LIVE is false
     // (pending AdSense approval — see config/market-quotes.ts): each page's
     // own generateMetadata also self-noindexes via the same flag, so this is
     // belt-and-suspenders, not a contradiction of what's actually indexable.
     if (MARKET_QUOTES_LIVE) {
-      const QUOTE_PAGE_UNSUPPORTED = new Set(["CHINA", "EM", "DGS2", "DGS30", "DGS3MO"]);
+      const QUOTE_PAGE_UNSUPPORTED = new Set(["DGS2"]);
       ALL_TRACKED_SYMBOLS.filter((symbol) => !QUOTE_PAGE_UNSUPPORTED.has(symbol)).forEach((symbol) => {
         entries.push({ loc: `${base}/markets/quote/${symbol}`, changefreq: "hourly", priority: 0.7 });
       });
