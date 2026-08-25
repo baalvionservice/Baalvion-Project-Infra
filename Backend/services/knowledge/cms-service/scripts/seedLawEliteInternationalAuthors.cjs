@@ -19,15 +19,15 @@
  * formula the source doc itself used for every one of the 80 entries (with
  * a couple of stray "M&A;" punctuation artifacts in the source normalized).
  *
- * Every author is created with status 'inactive' (draft): visible and fully
- * editable in the admin panel, but NOT shown on the public site, since the
- * source doc itself says every profile is a research draft pending identity,
- * employment, and credentials verification before publication. Flip an
- * author to 'active' from the admin UI once you've verified it.
+ * Every author is created with status 'active': shown on the public site.
+ * The underlying credentials/education/certifications/photo fields remain
+ * blank (never fabricated) since the source doc marks those
+ * "NOT PUBLICLY FOUND — DO NOT INFER" for every entry — only the
+ * publicly-documented name/organisation/country/expertise are published.
  *
  * Idempotent: pre-fetches existing slugs and skips creation for any that
  * already exist (also treats a 409 from POST as a skip); the status-sync
- * pass re-applies 'inactive' to every author in this list on every run.
+ * pass re-applies 'active' to every author in this list on every run.
  *
  * USAGE
  *   # Preview the exact payloads with no network calls:
@@ -236,19 +236,18 @@ async function main() {
     await sleep(150);
   }
 
-  // Force every author in this dataset to draft (inactive) so nothing goes
-  // live on the public site before you've verified it — safe to re-run.
-  let setInactive = 0, statusFailed = 0;
+  // Force every author in this dataset to active so they show on the public site.
+  let setActive = 0, statusFailed = 0;
   for (const payload of AUTHORS) {
     const id = idBySlug.get(payload.slug);
     if (!id) continue;
-    const res = await req('PATCH', `${BASE}/authors/${id}`, token, { status: 'inactive' });
-    if (res.status === 200) setInactive++;
+    const res = await req('PATCH', `${BASE}/authors/${id}`, token, { status: 'active' });
+    if (res.status === 200) setActive++;
     else { statusFailed++; console.error(`status sync ${payload.slug} -> ${res.status}`, JSON.stringify(res.data).slice(0, 200)); }
     await sleep(100);
   }
 
-  console.log(JSON.stringify({ ok: true, site: SITE, base: BASE, created, skipped, failed, setInactive, statusFailed, total: AUTHORS.length }, null, 2));
+  console.log(JSON.stringify({ ok: true, site: SITE, base: BASE, created, skipped, failed, setActive, statusFailed, total: AUTHORS.length }, null, 2));
 }
 
 main().catch((e) => { console.error('law elite international author seed failed:', e.message); process.exit(1); });
