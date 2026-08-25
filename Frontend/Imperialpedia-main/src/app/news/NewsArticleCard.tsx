@@ -11,7 +11,7 @@ import { newsArticleHref } from "@/lib/data/article-url";
 export function CategoryBadge({ category, label }: { category: NewsCategory; label?: string }) {
   return (
     <span
-      className={`inline-block w-fit text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded ${CATEGORY_COLORS[category]}`}
+      className={`inline-block w-fit text-sm font-bold uppercase tracking-wide px-2.5 py-1 rounded ${CATEGORY_COLORS[category]}`}
     >
       {label ?? category}
     </span>
