@@ -6,10 +6,9 @@ import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { ArticleCard } from '@/components/knowledge/ArticleCard';
 import SearchBar from '@/components/search/SearchBar';
 import {
-  Sparkles,
-  TrendingUp,
+  Search,
   ShieldCheck,
-  FilterX
+  SearchX
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -47,11 +46,11 @@ function SearchContent() {
               <div className="flex justify-center">
                 <span className="px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-[10px] font-bold uppercase tracking-[0.3em] flex items-center gap-2">
                   <ShieldCheck className="w-3.5 h-3.5" />
-                  Network Discovery Protocol
+                  Search Results
                 </span>
               </div>
               <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 font-serif">
-                Intelligence Audit: <span className="text-blue-600 italic">"{rawQuery}"</span>
+                Results for <span className="text-blue-600 italic">"{rawQuery}"</span>
               </h1>
               <div className="pt-4">
                 <SearchBar initialValue={rawQuery} variant="navbar" />
@@ -62,12 +61,9 @@ function SearchContent() {
           <div className="space-y-12">
             <div className="flex items-center justify-between border-b border-slate-100 pb-6">
               <h2 className="text-xl font-bold text-slate-900 font-serif flex items-center gap-3">
-                <Sparkles className="w-5 h-5 text-blue-600" />
-                {results.length} Intelligence Matches Identified
+                <Search className="w-5 h-5 text-blue-600" />
+                {loading ? 'Searching…' : `${results.length} ${results.length === 1 ? 'result' : 'results'} found`}
               </h2>
-              <div className="flex items-center gap-4 text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em]">
-                <TrendingUp className="w-4 h-4 text-blue-500" /> Rank Optimized
-              </div>
             </div>
 
             {loading ? (
@@ -84,20 +80,17 @@ function SearchContent() {
               </div>
             ) : (
               <div className="py-32 text-center space-y-8 px-8 border-2 border-dashed border-slate-100 rounded-[3rem] bg-slate-50/30">
-                <div className="relative inline-block">
-                  <FilterX className="w-16 h-16 text-slate-200 mx-auto" />
-                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-400 rounded-full animate-ping" />
-                </div>
+                <SearchX className="w-16 h-16 text-slate-200 mx-auto" />
                 <div className="space-y-2">
-                  <h4 className="text-2xl font-bold text-slate-900">Intelligence Not Located</h4>
-                  <p className="text-slate-500 italic max-w-sm mx-auto leading-relaxed">
-                    Platform intelligence could not locate dossiers matching <span className="text-slate-900 font-bold">"{rawQuery}"</span>. Try refining your search parameters or explore trending domains.
+                  <h4 className="text-2xl font-bold text-slate-900">No results found</h4>
+                  <p className="text-slate-500 max-w-sm mx-auto leading-relaxed">
+                    We couldn't find any guides matching <span className="text-slate-900 font-bold">"{rawQuery}"</span>. Try a different term or browse our legal guides instead.
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
                   <Link href="/">
                     <button className="bg-slate-900 text-white px-8 h-12 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl shadow-slate-200">
-                      Return to Discovery
+                      Browse Legal Guides
                     </button>
                   </Link>
                 </div>

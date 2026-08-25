@@ -14,6 +14,7 @@ export default function SearchBar({ initialValue = "", variant = 'hero' }: Searc
   const [queryText, setQueryText] = useState(initialValue);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const router = useRouter();
@@ -22,8 +23,10 @@ export default function SearchBar({ initialValue = "", variant = 'hero' }: Searc
     if (queryText.trim().length < 2) {
       setSuggestions([]);
       setShowSuggestions(false);
+      setIsSearching(false);
       return;
     }
+    setIsSearching(true);
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       fetch(`/api/search?q=${encodeURIComponent(queryText)}&limit=6`)
@@ -31,9 +34,10 @@ export default function SearchBar({ initialValue = "", variant = 'hero' }: Searc
         .then(json => {
           const items = json?.data?.items || [];
           setSuggestions(items);
-          setShowSuggestions(items.length > 0);
+          setShowSuggestions(true);
         })
-        .catch(() => setSuggestions([]));
+        .catch(() => setSuggestions([]))
+        .finally(() => setIsSearching(false));
     }, 300);
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [queryText]);
@@ -82,10 +86,11 @@ export default function SearchBar({ initialValue = "", variant = 'hero' }: Searc
           )}
         </form>
 
-        {showSuggestions && suggestions.length > 0 && (
+        {showSuggestions && queryText.trim().length > 1 && (
           <SearchSuggestions
             suggestions={suggestions}
             query={queryText}
+            isSearching={isSearching}
             onSelect={(slug) => {
               setShowSuggestions(false);
               router.push(`/article/${slug}`);
@@ -106,7 +111,7 @@ export default function SearchBar({ initialValue = "", variant = 'hero' }: Searc
             value={queryText}
             onChange={(e) => setQueryText(e.target.value)}
             onFocus={() => queryText.length > 1 && setShowSuggestions(true)}
-            placeholder="Search legal topics, guides, or tactical terms..."
+            placeholder="Search legal topics and guides..."
             className="w-full bg-white border border-gray-100 rounded-[2.5rem] h-20 pl-16 pr-8 text-xl font-medium shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)] focus:outline-none focus:border-blue-400 focus:ring-8 focus:ring-blue-50/30 transition-all placeholder:text-gray-300"
           />
           {queryText && (
@@ -121,10 +126,11 @@ export default function SearchBar({ initialValue = "", variant = 'hero' }: Searc
         </div>
       </form>
 
-      {showSuggestions && suggestions.length > 0 && (
+      {showSuggestions && queryText.trim().length > 1 && (
         <SearchSuggestions
           suggestions={suggestions}
           query={queryText}
+          isSearching={isSearching}
           onSelect={(slug) => {
             setShowSuggestions(false);
             router.push(`/article/${slug}`);
