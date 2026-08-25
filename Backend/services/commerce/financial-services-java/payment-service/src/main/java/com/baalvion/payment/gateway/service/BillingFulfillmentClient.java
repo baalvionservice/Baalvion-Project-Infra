@@ -45,6 +45,7 @@ public class BillingFulfillmentClient {
   private final String fulfillUrl;
   private final String communityFulfillUrl;
   private final String giftcardFulfillUrl;
+  private final String walletFulfillUrl;
   private final String internalSecret;
   private final boolean enabled;
 
@@ -53,18 +54,21 @@ public class BillingFulfillmentClient {
       @Value("${app.billing.fulfill-url:http://app-edge-realtime:4000/v1/billing/fulfill}") String fulfillUrl,
       @Value("${app.billing.community-fulfill-url:http://app-community:3064/v1/community/billing/fulfill}") String communityFulfillUrl,
       @Value("${app.billing.giftcard-fulfill-url:http://app-giftcard:3065/v1/giftcards/billing/fulfill}") String giftcardFulfillUrl,
+      @Value("${app.billing.wallet-fulfill-url:http://app-wallet:3039/api/v1/wallets/billing/fulfill}") String walletFulfillUrl,
       @Value("${app.billing.fulfill-enabled:true}") boolean enabled,
       @Value("${app.internal-secret:${INTERNAL_SERVICE_SECRET:}}") String internalSecret) {
     this.objectMapper = objectMapper;
     this.fulfillUrl = fulfillUrl;
     this.communityFulfillUrl = communityFulfillUrl;
     this.giftcardFulfillUrl = giftcardFulfillUrl;
+    this.walletFulfillUrl = walletFulfillUrl;
     this.enabled = enabled;
     this.internalSecret = internalSecret;
     if (enabled) {
       validateFulfillUrl(fulfillUrl);
       validateFulfillUrl(communityFulfillUrl);
       validateFulfillUrl(giftcardFulfillUrl);
+      validateFulfillUrl(walletFulfillUrl);
       if (internalSecret == null || internalSecret.isBlank()) {
         log.warn("Billing fulfillment is enabled but app.internal-secret/INTERNAL_SERVICE_SECRET is blank "
             + "— every CAPTURED webhook dispatch will fail until it is configured.");
@@ -104,6 +108,8 @@ public class BillingFulfillmentClient {
       targetUrl = communityFulfillUrl;
     } else if ("giftcard".equals(fulfillTarget)) {
       targetUrl = giftcardFulfillUrl;
+    } else if ("wallet".equals(fulfillTarget)) {
+      targetUrl = walletFulfillUrl;
     } else {
       Object orgId = metadata.get("orgId");
       if (orgId == null || String.valueOf(orgId).isBlank()) {
