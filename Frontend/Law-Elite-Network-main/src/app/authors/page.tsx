@@ -1,13 +1,12 @@
 import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Navbar } from '@/components/navbar';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
-import { authorNameToSlug, isEditorRole, type LawAuthor } from '@/data/authors';
+import { AuthorsDirectory } from '@/components/knowledge/AuthorsDirectory';
+import { authorNameToSlug } from '@/data/authors';
 import { getMergedAuthors } from '@/lib/authors-server';
 import { mergeArticles } from '@/data/law-content';
 import { cmsGetArticles } from '@/lib/cms';
-import { resolvePersonImage } from '@/lib/article-art';
 
 // Serve a cached page and refresh it in the background every 5 minutes,
 // instead of re-rendering (and re-fetching from the CMS) on every single
@@ -25,11 +24,13 @@ export default async function AuthorsIndexPage() {
   // same CMS-wins-by-slug pool the homepage already uses.
   const articles = mergeArticles(cmsArticles);
 
-  const countFor = (slug: string) =>
-    articles.filter((a) => authorNameToSlug(a.author) === slug).length;
-
-  const editors = authors.filter((a) => isEditorRole(a.title));
-  const contributors = authors.filter((a) => !isEditorRole(a.title));
+  // A plain slug -> count map, not a closure -- functions can't cross the
+  // server/client component boundary as props.
+  const counts: Record<string, number> = {};
+  for (const a of articles) {
+    const slug = authorNameToSlug(a.author);
+    if (slug) counts[slug] = (counts[slug] || 0) + 1;
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -59,67 +60,12 @@ export default async function AuthorsIndexPage() {
             </p>
           </header>
 
-          {editors.length > 0 && (
-            <section className="mb-16">
-              <h2 className="text-sm font-extrabold uppercase tracking-[0.14em] text-slate-900 border-b-2 border-slate-900 pb-2 mb-8">
-                Editors
-              </h2>
-              <AuthorGrid authors={editors} countFor={countFor} />
-            </section>
-          )}
-
-          {contributors.length > 0 && (
-            <section>
-              <h2 className="text-sm font-extrabold uppercase tracking-[0.14em] text-slate-900 border-b-2 border-slate-900 pb-2 mb-8">
-                Contributors
-              </h2>
-              <AuthorGrid authors={contributors} countFor={countFor} />
-            </section>
-          )}
+          <AuthorsDirectory authors={authors} counts={counts} />
 
         </div>
       </main>
 
       <PublicFooter />
-    </div>
-  );
-}
-
-function AuthorGrid({ authors, countFor }: { authors: LawAuthor[]; countFor: (slug: string) => number }) {
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-      {authors.map((author) => {
-        const count = countFor(author.slug);
-        return (
-          <Link key={author.slug} href={`/author/${author.slug}`} className="group block h-full">
-            <article className="p-7 border border-slate-100 rounded-[2rem] bg-slate-50/50 hover:shadow-xl transition-all h-full flex flex-col">
-              <div className="flex items-center gap-4 mb-5">
-                <div className="relative w-16 h-16 shrink-0 rounded-2xl overflow-hidden bg-slate-100 shadow-sm">
-                  <Image
-                    src={resolvePersonImage({ avatarUrl: author.avatarUrl, name: author.name, avatarSeed: author.avatarSeed })}
-                    alt={author.name}
-                    fill
-                    className="object-cover"
-                    data-ai-hint="professional portrait"
-                  />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-slate-900 group-hover:text-blue-700 transition-colors">
-                    {author.name}
-                  </h3>
-                  <p className="text-[13px] font-semibold text-blue-600">{author.title}</p>
-                </div>
-              </div>
-              <p className="text-sm text-slate-500 leading-relaxed line-clamp-4 mb-5 flex-1">
-                {author.bio.split('\n')[0]}
-              </p>
-              <p className="text-[12px] font-medium text-slate-400 mt-auto">
-                {author.credentials} · {count} {count === 1 ? 'guide' : 'guides'}
-              </p>
-            </article>
-          </Link>
-        );
-      })}
     </div>
   );
 }

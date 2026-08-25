@@ -336,3 +336,58 @@ export function getAuthorByName(name: string): LawAuthor | null {
 export function isEditorRole(title: string | null | undefined): boolean {
   return /editor$/i.test((title || '').trim());
 }
+
+// Order matters -- first match wins, so specific areas (injury/maritime,
+// family, criminal) are checked before broad ones sharing words like "commercial".
+export const PRACTICE_AREAS = [
+  'Personal Injury & Maritime',
+  'Family & Personal',
+  'Criminal Law',
+  'Employment & Labor',
+  'Technology & IP',
+  'Dispute Resolution',
+  'Tax & Finance',
+  'Business & Corporate',
+  'Constitutional & Legal Education',
+  'General Practice',
+] as const;
+
+export type PracticeArea = (typeof PRACTICE_AREAS)[number];
+
+const PRACTICE_AREA_RULES: [PracticeArea, RegExp][] = [
+  // "maritime|cruise|boating" only -- deliberately excludes the bare phrase
+  // "personal injury" here, since several international contributors carry
+  // a title like "Personal Injury & Clinical Negligence" that is UK tort/
+  // negligence litigation, not the maritime/injury desk this bucket names
+  // (see Dispute Resolution's "negligence" match below for that title).
+  ['Personal Injury & Maritime', /maritime|cruise|boating/],
+  // Specific family-law phrases only -- a bare "family" or "estate" match
+  // false-positives on real, unrelated expertise text ("family businesses"
+  // in an M&A profile, "real estate" in a disputes profile).
+  ['Family & Personal', /family law|child custody|matrimonial|divorce|estate planning|probate|inheritance|children.s law/],
+  ['Criminal Law', /criminal|white-collar|fraud/],
+  ['Employment & Labor', /employ|labour|labor/],
+  ['Technology & IP', /intellectual property|\bip\b|technology|data protection|privacy|trademark|copyright|it law|entertainment/],
+  ['Dispute Resolution', /litigation|arbitration|dispute|mediation|insurance|negligence|construction/],
+  ['Tax & Finance', /\btax\b|banking|finance|insolvency|restructuring/],
+  ['Business & Corporate', /merger|acquisition|corporate|commercial|m&a/],
+  ['Constitutional & Legal Education', /constitutional|legal education|administrative|legal research|legal system/],
+];
+
+function matchPracticeArea(text: string): PracticeArea | null {
+  const haystack = text.toLowerCase();
+  for (const [area, pattern] of PRACTICE_AREA_RULES) {
+    if (pattern.test(haystack)) return area;
+  }
+  return null;
+}
+
+// `title` is checked first (it *is* the assigned desk for the international
+// roster); `expertise` is a fallback for generic titles like "Contributor".
+export function classifyPracticeArea(author: Pick<LawAuthor, 'title' | 'expertise'>): PracticeArea {
+  return (
+    matchPracticeArea(author.title || '') ??
+    matchPracticeArea((author.expertise || []).join(' ')) ??
+    'General Practice'
+  );
+}
