@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -52,6 +53,7 @@ public class WalletController {
   }
 
   @GetMapping
+  @PreAuthorize("hasAnyRole('INTERNAL','ADMIN')")
   public ResponseEntity<Page<WalletResponse>> list(
     @RequestHeader(value = "X-Tenant-ID", required = false) String tenantHeader,
     @RequestParam(defaultValue = "0") int page,
@@ -61,6 +63,7 @@ public class WalletController {
   }
 
   @PostMapping("/{id}/freeze")
+  @PreAuthorize("hasAnyRole('INTERNAL','ADMIN')")
   public ResponseEntity<WalletResponse> freeze(
     @RequestHeader(value = "X-Tenant-ID", required = false) String tenantHeader,
     @PathVariable UUID id
@@ -69,6 +72,7 @@ public class WalletController {
   }
 
   @PostMapping("/{id}/unfreeze")
+  @PreAuthorize("hasAnyRole('INTERNAL','ADMIN')")
   public ResponseEntity<WalletResponse> unfreeze(
     @RequestHeader(value = "X-Tenant-ID", required = false) String tenantHeader,
     @PathVariable UUID id
@@ -77,6 +81,7 @@ public class WalletController {
   }
 
   @PostMapping("/{id}/close")
+  @PreAuthorize("hasAnyRole('INTERNAL','ADMIN')")
   public ResponseEntity<WalletResponse> close(
     @RequestHeader(value = "X-Tenant-ID", required = false) String tenantHeader,
     @PathVariable UUID id

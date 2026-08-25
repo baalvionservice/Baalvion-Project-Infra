@@ -97,3 +97,7 @@ app:
     allow-overdraft: false
     # Default hold validity in minutes before a scheduled sweep auto-releases it.
     hold-ttl-minutes: 1440
+  payment:
+    # payment-service's generic PSP gateway — used to create the crypto charge for a wallet
+    # top-up (same endpoint giftcard-service already uses for gift-card checkout).
+    gateway-url: http://${PAYMENT_SERVICE_HOST:app-payments}:${PAYMENT_SERVICE_PORT:3015}/v1/gateway/payments

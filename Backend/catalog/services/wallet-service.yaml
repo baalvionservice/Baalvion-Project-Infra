@@ -14,7 +14,7 @@ spec:
   lifecycle: beta
   language: java
   datastores: [postgres, kafka]
-  dependsOn: [auth-service, ledger-service]
+  dependsOn: [auth-service, ledger-service, payment-service]
   consumesEvents: []
   producesEvents: []
   apis: ["/api/v1/wallets"]
