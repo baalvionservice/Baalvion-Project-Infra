@@ -1,9 +1,8 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react";
-import QRCode from "qrcode";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Copy, Check, ShieldCheck, Loader2, CheckCircle2, XCircle } from "lucide-react";
+import { ShieldCheck, Loader2, CheckCircle2, XCircle, Wallet } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -14,11 +13,13 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import {
   checkoutGiftCard,
+  checkoutGiftCardWithWallet,
   getMyOrder,
   type CryptoAsset,
   type GiftCardBrand,
   type GiftCardCheckout,
 } from "@/lib/api/giftcards";
+import { CryptoPaymentPanel } from "@/components/shared/crypto-payment-panel";
 
 const POLL_MS = 7000;
 
@@ -34,34 +35,30 @@ export function GiftCardCheckoutModal({
   brand,
   open,
   onOpenChange,
+  walletBalance,
 }: {
   brand: GiftCardBrand | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Real available USD balance from wallet-service, if known — enables "Pay with Wallet Balance". */
+  walletBalance?: number;
 }) {
   const { toast } = useToast();
   const [stage, setStage] = useState<Stage>("select-denomination");
   const [denomination, setDenomination] = useState<number | null>(null);
   const [customDenomination, setCustomDenomination] = useState("");
   const [checkout, setCheckout] = useState<GiftCardCheckout | null>(null);
-  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
   const [fulfillmentError, setFulfillmentError] = useState<string | null>(null);
-  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     if (!open) {
-      if (pollRef.current) clearInterval(pollRef.current);
       setStage("select-denomination");
       setDenomination(null);
       setCustomDenomination("");
       setCheckout(null);
-      setQrDataUrl(null);
       setFulfillmentError(null);
     }
   }, [open]);
-
-  useEffect(() => () => { if (pollRef.current) clearInterval(pollRef.current); }, []);
 
   if (!brand) return null;
 
@@ -76,41 +73,63 @@ export function GiftCardCheckoutModal({
     try {
       const result = await checkoutGiftCard(brand.slug, denomination, asset);
       setCheckout(result);
-      const qrPayload = result.asset === "BTC" ? `bitcoin:${result.address}?amount=${result.amountValue}` : result.address;
-      QRCode.toDataURL(qrPayload, { margin: 1, width: 220, color: { dark: "#f472b6", light: "#00000000" } })
-        .then(setQrDataUrl)
-        .catch(() => setQrDataUrl(null));
       setStage("awaiting-payment");
-
-      pollRef.current = setInterval(async () => {
-        const order = await getMyOrder(result.orderId);
-        if (!order) return;
-        if (order.status === "fulfilling" && stage !== "fulfilling") setStage("fulfilling");
-        if (order.status === "fulfilled") {
-          if (pollRef.current) clearInterval(pollRef.current);
-          setStage("fulfilled");
-        }
-        if (order.status === "failed") {
-          if (pollRef.current) clearInterval(pollRef.current);
-          setFulfillmentError(order.fulfillmentError || "Fulfillment failed — your payment was received, support has been notified.");
-          setStage("failed");
-        }
-      }, POLL_MS);
     } catch (err) {
       toast({ variant: "destructive", title: "Couldn't start checkout", description: err instanceof Error ? err.message : "Please try again." });
       setStage("select-asset");
     }
   };
 
-  const copyAddress = () => {
-    if (!checkout) return;
-    navigator.clipboard.writeText(checkout.address).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
+  const payWithWallet = async () => {
+    if (!denomination) return;
+    setStage("creating");
+    try {
+      const result = await checkoutGiftCardWithWallet(brand.slug, denomination);
+      if (result.status === "fulfilled") {
+        setStage("fulfilled");
+      } else if (result.status === "failed") {
+        const order = await getMyOrder(result.orderId);
+        setFulfillmentError(order?.fulfillmentError || "Delivery failed. Support has been notified.");
+        setStage("failed");
+      } else {
+        // Still fulfilling at the moment the request returned (slow supplier call) — the order
+        // is real and paid; give it a moment and check once more rather than leaving the modal stuck.
+        setStage("fulfilling");
+        const order = await getMyOrder(result.orderId);
+        if (order?.status === "fulfilled") setStage("fulfilled");
+        else if (order?.status === "failed") {
+          setFulfillmentError(order.fulfillmentError || "Delivery failed. Support has been notified.");
+          setStage("failed");
+        }
+      }
+    } catch (err) {
+      toast({ variant: "destructive", title: "Couldn't complete checkout", description: err instanceof Error ? err.message : "Please try again." });
+      setStage("select-asset");
+    }
+  };
+
+  const pollOrder = async (): Promise<boolean> => {
+    if (!checkout) return false;
+    const order = await getMyOrder(checkout.orderId);
+    if (!order) return false;
+    if (order.status === "fulfilling") {
+      setStage("fulfilling");
+      return false;
+    }
+    if (order.status === "fulfilled") {
+      setStage("fulfilled");
+      return true;
+    }
+    if (order.status === "failed") {
+      setFulfillmentError(order.fulfillmentError || "Fulfillment failed — your payment was received, support has been notified.");
+      setStage("failed");
+      return true;
+    }
+    return false;
   };
 
   const denominationOptions = brand.denominationType === "FIXED" ? brand.fixedDenominations : null;
+  const canPayWithWallet = denomination != null && walletBalance != null && walletBalance >= denomination;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -168,6 +187,17 @@ export function GiftCardCheckoutModal({
           {stage === "select-asset" && (
             <motion.div key="select" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-3 pt-2">
               <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest">Payment Method</p>
+              {canPayWithWallet && (
+                <button
+                  onClick={payWithWallet}
+                  className="w-full h-14 rounded-xl border border-emerald-500/30 bg-emerald-500/[0.06] hover:bg-emerald-500/15 transition-all flex items-center justify-between px-5 text-sm font-bold"
+                >
+                  <span className="flex items-center gap-2">
+                    <Wallet className="w-4 h-4 text-emerald-400" /> Wallet Balance
+                  </span>
+                  <span className="text-emerald-400 text-xs">INSTANT →</span>
+                </button>
+              )}
               {ASSET_OPTIONS.map((opt) => (
                 <button
                   key={opt.asset}
@@ -184,48 +214,21 @@ export function GiftCardCheckoutModal({
           {stage === "creating" && (
             <motion.div key="creating" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="py-16 flex flex-col items-center gap-4">
               <Loader2 className="w-8 h-8 text-fuchsia-400 animate-spin" />
-              <p className="text-xs text-gray-500 uppercase tracking-widest">Generating deposit address…</p>
+              <p className="text-xs text-gray-500 uppercase tracking-widest">Starting checkout…</p>
             </motion.div>
           )}
 
           {stage === "awaiting-payment" && checkout && (
-            <motion.div key="awaiting" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-5 pt-2">
-              <div className="flex justify-center">
-                {qrDataUrl ? (
-                  <img src={qrDataUrl} alt="Payment QR code" className="rounded-lg border border-fuchsia-500/20" width={180} height={180} />
-                ) : (
-                  <div className="w-[180px] h-[180px] rounded-lg border border-fuchsia-500/20 bg-black/40 animate-pulse" />
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 text-xs">
-                <div className="space-y-1">
-                  <p className="text-gray-600 uppercase tracking-widest text-[10px]">Amount</p>
-                  <p className="font-bold text-white">{checkout.amountDisplay}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-gray-600 uppercase tracking-widest text-[10px]">Network</p>
-                  <p className="font-bold text-white">{checkout.network}</p>
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <p className="text-gray-600 uppercase tracking-widest text-[10px]">Address</p>
-                <div className="flex items-center gap-2 bg-black/50 border border-fuchsia-500/20 rounded-lg p-3">
-                  <code className="text-[11px] text-fuchsia-300 break-all flex-1">{checkout.address}</code>
-                  <button onClick={copyAddress} className="shrink-0 text-gray-500 hover:text-fuchsia-400 transition-colors">
-                    {copied ? <Check className="w-4 h-4 text-fuchsia-400" /> : <Copy className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
-
-              <div className="border-t border-white/5 pt-4 space-y-2">
-                <div className="flex items-center gap-2 text-fuchsia-400">
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <p className="text-[11px] uppercase tracking-widest">Waiting for blockchain confirmation…</p>
-                </div>
-                <p className="text-[10px] text-gray-600">This updates automatically — no need to refresh.</p>
-              </div>
+            <motion.div key="awaiting" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <CryptoPaymentPanel
+                address={checkout.address}
+                amountValue={checkout.amountValue}
+                amountDisplay={checkout.amountDisplay}
+                network={checkout.network}
+                asset={checkout.asset}
+                onPoll={pollOrder}
+                pollMs={POLL_MS}
+              />
             </motion.div>
           )}
 
