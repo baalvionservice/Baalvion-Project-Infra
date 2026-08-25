@@ -6,7 +6,8 @@ import { Navbar } from "@/components/layout/navbar"
 import { Footer } from "@/components/layout/footer"
 import { NexusCard, NexusBadge } from "@/components/ui/nexus-card"
 import { NexusButton } from "@/components/ui/nexus-button"
-import { Globe, Check, Info, Layout, MessageSquare, Languages } from 'lucide-react'
+import Link from 'next/link'
+import { Globe, Check, Info, Layout, MessageSquare, Languages, ArrowLeft, Bell } from 'lucide-react'
 import { useLanguage } from '@/context/language-context'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
@@ -37,13 +38,31 @@ export default function LanguageSettingsPage() {
       <Navbar />
 
       <main className="container mx-auto pt-44 pb-32 px-8 max-w-5xl space-y-20">
+        <div>
+          <Link href="/dashboard">
+            <NexusButton variant="ghost" className="text-gray-500 hover:text-white gap-2 -ml-4">
+              <ArrowLeft className="w-4 h-4" /> Back to Dashboard
+            </NexusButton>
+          </Link>
+        </div>
+
         <header className="space-y-4">
-          <div className="flex items-center gap-3 text-cyan-400 font-bold text-sm uppercase tracking-widest">
-            <Globe className="w-4 h-4" /> Localization Settings
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-3 text-cyan-400 font-bold text-sm uppercase tracking-widest">
+              <Globe className="w-4 h-4" /> Localization Settings
+            </div>
+            <div className="flex gap-2 text-xs font-bold uppercase tracking-widest">
+              <Link href="/settings/notifications">
+                <span className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-gray-500 border border-white/10 hover:text-white hover:border-white/20 transition-colors">
+                  <Bell className="w-3.5 h-3.5" /> Notifications
+                </span>
+              </Link>
+              <span className="px-4 py-2 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">Language</span>
+            </div>
           </div>
           <h1 className="text-5xl font-bold tracking-tight">Language & Region</h1>
           <p className="text-gray-500 text-lg font-medium max-w-2xl">
-            Customize how NEXUS appears for your location and language. We support 7 global languages with full RTL layout capabilities.
+            Customize how the site appears for your location and language. We support 7 global languages with full RTL layout capabilities.
           </p>
         </header>
 
@@ -51,7 +70,7 @@ export default function LanguageSettingsPage() {
         <section className="space-y-10">
           <div>
             <h2 className="text-2xl font-bold mb-2">Display Language</h2>
-            <p className="text-gray-500 text-sm">The language used throughout the NEXUS platform interface.</p>
+            <p className="text-gray-500 text-sm">The language used throughout the site interface.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -106,7 +125,7 @@ export default function LanguageSettingsPage() {
             <div className="space-y-4">
               <h3 className="font-bold text-amber-500">RTL Layout Support</h3>
               <p className="text-sm text-gray-400 leading-relaxed">
-                NEXUS fully supports Right-to-Left (RTL) reading directions. Selecting Arabic will automatically mirror the navigation, sidebars, and data visualizations for an authentic native experience.
+                The site fully supports Right-to-Left (RTL) reading directions. Selecting Arabic will automatically mirror the navigation, sidebars, and data visualizations for an authentic native experience.
               </p>
               <div className="flex gap-4">
                 <div className="p-4 bg-black/40 rounded-2xl border border-white/5 flex-1">
@@ -135,9 +154,9 @@ export default function LanguageSettingsPage() {
               <Languages className="w-10 h-10" />
             </div>
             <div className="flex-1 space-y-4">
-              <h3 className="text-2xl font-bold">Help Translate NEXUS</h3>
+              <h3 className="text-2xl font-bold">Help Translate Market Underworld</h3>
               <p className="text-gray-400 leading-relaxed font-medium">
-                NEXUS is translated by our global community. Help us make the platform accessible to everyone in their native tongue.
+                Market Underworld is translated by our global community. Help us make the platform accessible to everyone in their native tongue.
               </p>
               <div className="flex items-center gap-8">
                 <div className="text-center">

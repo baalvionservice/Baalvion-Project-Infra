@@ -3,27 +3,30 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
 import { NexusCard, NexusBadge } from '@/components/ui/nexus-card';
 import { NexusButton } from '@/components/ui/nexus-button';
 import { Switch } from '@/components/ui/switch';
-import { 
-  Bell, 
-  Mail, 
-  Smartphone, 
-  ShieldCheck, 
-  Volume2, 
-  Clock, 
-  ChevronDown, 
-  Save, 
+import {
+  Bell,
+  Mail,
+  Smartphone,
+  ShieldCheck,
+  Volume2,
+  Clock,
+  ChevronDown,
+  Save,
   Check,
   Video,
   Wallet,
   Package,
   MessageSquare,
   Trophy,
-  Info
+  Info,
+  ArrowLeft,
+  Languages
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNotifications } from '@/context/notification-context';
@@ -60,12 +63,30 @@ export default function NotificationSettings() {
       <Navbar />
 
       <main className="container mx-auto pt-44 pb-32 px-8 max-w-4xl space-y-16">
+        <div>
+          <Link href="/dashboard">
+            <NexusButton variant="ghost" className="text-gray-500 hover:text-white gap-2 -ml-4">
+              <ArrowLeft className="w-4 h-4" /> Back to Dashboard
+            </NexusButton>
+          </Link>
+        </div>
+
         <header className="space-y-4">
-          <div className="flex items-center gap-3 text-blue-400 font-bold text-sm uppercase tracking-widest">
-            <Bell className="w-4 h-4" /> Global Settings
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-3 text-blue-400 font-bold text-sm uppercase tracking-widest">
+              <Bell className="w-4 h-4" /> Global Settings
+            </div>
+            <div className="flex gap-2 text-xs font-bold uppercase tracking-widest">
+              <span className="px-4 py-2 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">Notifications</span>
+              <Link href="/settings/language">
+                <span className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-gray-500 border border-white/10 hover:text-white hover:border-white/20 transition-colors">
+                  <Languages className="w-3.5 h-3.5" /> Language
+                </span>
+              </Link>
+            </div>
           </div>
           <h1 className="text-5xl font-bold tracking-tight">Notification Preferences</h1>
-          <p className="text-gray-500 text-lg">Control exactly how and when you hear from NEXUS.</p>
+          <p className="text-gray-500 text-lg">Control exactly how and when you hear from us.</p>
         </header>
 
         {/* Delivery Channels */}
