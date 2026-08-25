@@ -205,17 +205,22 @@
 .prose-legal details ul { @apply mt-5 mb-0 pl-5 space-y-3; }
 .prose-legal details li { @apply text-[1rem] leading-relaxed text-slate-600 font-serif; }
 
-/* Always-visible, categorized "Sources" section -- rendered as its own
-   section before the article body rather than inside prose-legal HTML, and
-   deliberately not collapsed behind a <details> disclosure the way the old
-   flat "Article Sources" panel was, since the whole point of moving it above
-   the body is to show real citations before the claims they back. See
-   src/components/knowledge/PrimarySources.tsx. */
+/* Categorized "Sources" section -- rendered as its own section before the
+   article body rather than inside prose-legal HTML, collapsed by default
+   behind a <details> disclosure (same chevron pattern as .prose-legal
+   details above). See src/components/knowledge/PrimarySources.tsx. */
 .article-sources {
   @apply border border-slate-200 rounded-lg px-6 py-6;
 }
-.article-sources h2 {
-  @apply text-[13px] font-bold uppercase tracking-wide text-slate-900 m-0;
+.article-sources summary {
+  @apply cursor-pointer select-none text-[13px] font-bold uppercase tracking-wide text-slate-900 list-none flex items-center justify-between;
 }
+.article-sources summary::-webkit-details-marker { display: none; }
+.article-sources summary::after {
+  content: '▾';
+  color: #94a3b8;
+  transition: transform 0.2s ease;
+}
+.article-sources details[open] summary::after { transform: rotate(180deg); }
 .article-sources-intro { @apply mt-3 text-[14px] leading-relaxed text-slate-600; }
 .article-sources ol { @apply list-decimal pl-5 marker:text-slate-400 marker:font-normal; }

@@ -113,6 +113,15 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
   // was unreachable (empty in production) the 45 bundled guides had zero <url>
   // entries, AND the ~74 real CMS-authored articles were never included at
   // all -- most of the site's actual content had no sitemap entry.
+  // Slugs that next.config.ts permanently redirects away from -- their CMS
+  // rows are still `published` (real, unmerged content), so they'd otherwise
+  // resurface here as a submitted URL that immediately 308s, which Search
+  // Console flags. Keep in sync with next.config.ts's redirects() sources.
+  const REDIRECTED_ARTICLE_SLUGS = new Set([
+    'cruise-ship-accident-lawyer-florida',
+    'navigating-the-divorce-process',
+  ]);
+
   const articleEntries = new Map<string, { url: string; lastModified: Date }>();
   getAllArticles().forEach((a) => {
     articleEntries.set(a.slug, {
@@ -132,6 +141,8 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(a.updatedAt || Date.now()),
     });
   });
+
+  REDIRECTED_ARTICLE_SLUGS.forEach((slug) => articleEntries.delete(slug));
 
   const articleRoutes: MetadataRoute.Sitemap = Array.from(articleEntries.values()).map((entry) => ({
     url: entry.url,

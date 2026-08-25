@@ -55,6 +55,21 @@ const PUBLIC_BASE = process.env.PUBLIC_CMS_BASE || 'https://api.baalvion.com/api
 // "Religion, Law & Weird Laws" and "Personal Injury Lawyer" even though his CMS
 // record's expertise strings are phrased slightly differently), the mapping
 // reflects the actual editorial desk, not a rigid string match.
+//
+// 2026-08-25: the roster grew from 20 to 83 profiles with the addition of 63
+// international "Legal Professional" contributors (real named practitioners
+// at real firms, seeded by seedLawEliteInternationalAuthors.cjs and activated
+// per site-owner decision). Each new name is folded into a category here only
+// where their own `title`/`expertise` on /authors is a genuine, on-file match
+// -- e.g. the 25 "Legal Professional — Mergers & Acquisitions" contributors
+// into Business & Corporate, the 11 "— Arbitration" + 7 "— Commercial
+// Litigation" contributors into Dispute Resolution. None of the 63 has any
+// family-law, real-estate, or personal-injury/maritime expertise on file, so
+// those categories are untouched -- still routed to the existing desk. Where
+// a category now has more qualified candidates than articles (e.g. 30+
+// dispute-resolution specialists for 14 articles), the round-robin below
+// simply uses as many as there are articles -- it does not force every
+// specialist onto a byline just to use their name.
 const CATEGORY_TO_AUTHORS = {
   'Maritime & Offshore Injury Law': ['deepak-kumar-kuldeep'],
   'Cruise Ship & Passenger Vessel Accidents': ['deepak-kumar-kuldeep'],
@@ -62,20 +77,51 @@ const CATEGORY_TO_AUTHORS = {
   'Car Accidents': ['deepak-kumar-kuldeep'],
   'Personal Injury Lawyer': ['deepak-kumar-kuldeep'],
   'Religion, Law & Weird Laws': ['deepak-kumar-kuldeep'],
-  'U.S. Law & Constitution': ['yessica-ruiz'],
+  'U.S. Law & Constitution': ['yessica-ruiz', 'ritwika-sharma'],
   'Legal Education & History': ['yessica-ruiz'],
-  'Dispute Resolution': ['marcus-whitfield', 'waki-malik'],
+  'Dispute Resolution': [
+    'marcus-whitfield', 'waki-malik',
+    // Arbitration desk
+    'iris-antonios', 'angus-m-gunn-kc', 'stephen-drymer', 'rachel-howie', 'craig-chiasson',
+    'robert-wisner', 'rajendra-barot', 'daryl-chew', 'lawrence-boo', 'daniel-gaw', 'nicholas-sharratt',
+    // Commercial litigation desk
+    'ross-mcinnes', 'damian-grave', 'steve-j-tenai', 'scott-kugler', 'amar-gupta', 'sherif-hikal', 'keith-hutchison',
+    // Dispute resolution (explicit title)
+    'rajat-taimni', 'ritu-bhalla', 'daryll-ng', 'oommen-mathew', 'zarghona-fazal',
+    // Insurance, mediation, professional-negligence, constitutional/human-rights,
+    // construction, and personal-injury/clinical-negligence disputes desks
+    'robin-l-cohen', 'keith-moskowitz', 'ari-n-kaplan', 'alan-d-silva', 'ruby-singh-ahuja',
+    'hasan-el-shafiey', 'colin-loveday',
+  ],
   'Family & Personal': ['sofia-almeida', 'rajesh-iyer', 'eleanor-whitfield', 'aman-thakur'],
   'Family Law': ['sofia-almeida', 'rajesh-iyer', 'eleanor-whitfield', 'aman-thakur'],
-  'Tax & Finance': ['elena-rossi', 'priya-nair', 'daniel-okafor', 'claire-hannon', 'hemangi-bhuva'],
-  'Employment & Labor': ['daniel-okoro', 'priya-nair', 'maria-harizanova', 'waki-malik'],
-  'Criminal Law': ['aisha-rahman', 'daniel-okafor'],
-  'Business & Corporate': ['elena-rossi', 'marcus-hale', 'priya-menon', 'maria-harizanova', 'waki-malik'],
-  'Technology & IP': ['marcus-hale', 'eira-mishra', 'waki-malik'],
+  'Tax & Finance': [
+    'elena-rossi', 'priya-nair', 'daniel-okafor', 'claire-hannon', 'hemangi-bhuva',
+    // Banking & finance / financial-services-regulation desk
+    'ari-b-blaut', 'edwin-e-smith', 'jeffrey-ross', 'jeffrey-nagle', 'andrew-maynes', 'mark-c-kanaly',
+    // Tax desk
+    'ajay-bahl', 'aseem-chawla', 'rohit-jain',
+    // Insolvency & restructuring desk
+    'dennis-dunne', 'richard-m-pachulski',
+  ],
+  'Employment & Labor': ['daniel-okoro', 'priya-nair', 'maria-harizanova', 'waki-malik', 'anthea-christie', 'kathleen-healy'],
+  'Criminal Law': ['aisha-rahman', 'daniel-okafor', 'constantin-lauterwein', 'markus-adick'],
+  'Business & Corporate': [
+    'elena-rossi', 'marcus-hale', 'priya-menon', 'maria-harizanova', 'waki-malik',
+    // Mergers & Acquisitions desk
+    'edward-barnett', 'claire-wills', 'keith-syson', 'david-kendall', 'robert-buckley', 'guy-alexander',
+    'tom-story', 'costas-condoleon', 'karen-evans-cullen', 'vijay-cugati', 'sandy-foo', 'perry-yuen',
+    'terence-foo', 'andrew-m-lim', 'eng-leng-ng', 'lynn-ammar', 'naji-hawayek', 'zeid-hanania',
+    'norbert-rieger', 'rainer-traugott', 'stephan-waldhausen', 'christoph-seibt', 'sonja-ruttmann',
+    'annika-clauss', 'stephanie-hundertmark',
+    // Corporate & commercial desk
+    'christopher-blane', 'abeer-jarrar', 'dirk-besse',
+  ],
+  'Technology & IP': ['marcus-hale', 'eira-mishra', 'waki-malik', 'eric-dittmann', 'simon-clark', 'saikrishna-rajagopal', 'shailendra-bhandare', 'mark-shillito', 'giles-pratt'],
   'Property & Real Estate': ['daniel-okafor', 'priya-nair', 'waki-malik'],
   'Child Custody': ['sofia-almeida', 'rajesh-iyer', 'eleanor-whitfield', 'aman-thakur'],
   'Leasing': ['daniel-okafor', 'priya-nair', 'waki-malik'],
-  'Trademarks': ['marcus-hale', 'eira-mishra', 'waki-malik'],
+  'Trademarks': ['marcus-hale', 'eira-mishra', 'waki-malik', 'eric-dittmann', 'simon-clark', 'saikrishna-rajagopal', 'shailendra-bhandare'],
   'Contracts': ['elena-rossi', 'marcus-hale', 'priya-menon', 'maria-harizanova', 'waki-malik'],
   'DUI Defense': ['aisha-rahman', 'daniel-okafor'],
   // 'Visas' (work-visa/immigration law): no one on the roster has immigration
@@ -158,12 +204,45 @@ async function allPublished() {
   return items;
 }
 
+// The original ~20 "desk" contributors (Deepak Kumar Kuldeep, Waki Malik, Elena
+// Rossi, ...) were never created as `cms_authors` rows -- they live only in the
+// frontend's bundled fallback (Frontend/Law-Elite-Network-main/src/data/authors.ts)
+// and the live site's getMergedAuthors() unions that file with the CMS table (CMS
+// wins by slug). The public /authors endpoint below is CMS-only, so without this
+// fallback map roster() silently drops all 20 and the missing-roster-slug check
+// throws. Name only -- that's all `chosen.name` needs (see main()).
+const BUNDLED_AUTHOR_NAMES = {
+  'elena-rossi': 'Elena Rossi',
+  'marcus-hale': 'Marcus Hale',
+  'priya-menon': 'Priya Menon',
+  'sofia-almeida': 'Sofia Almeida',
+  'rajesh-iyer': 'Rajesh Iyer',
+  'eleanor-whitfield': 'Eleanor Whitfield',
+  'priya-nair': 'Priya Nair',
+  'daniel-okafor': 'Daniel Okafor',
+  'daniel-okoro': 'Daniel Okoro',
+  'aisha-rahman': 'Aisha Rahman',
+  'marcus-whitfield': 'Marcus Whitfield',
+  'deepak-kumar-kuldeep': 'Deepak Kumar Kuldeep',
+  'waki-malik': 'Waki Malik',
+  'aman-thakur': 'Aman Thakur',
+  'maria-harizanova': 'Maria Harizanova',
+  'claire-hannon': 'Claire Hannon',
+  'yessica-ruiz': 'Yessica Ruiz',
+  'abinesh-raj': 'Abinesh Raj',
+  'aishwarya-gorak': 'Aishwarya Gorak',
+  'diksha-singhal': 'Diksha Singhal',
+  'anna-solovieva': 'Anna Solovieva',
+};
+
 async function roster() {
   // Public endpoint -- no auth needed. Gives the real display name written into
-  // customFields.author (see file header) for each roster slug.
+  // customFields.author (see file header) for each roster slug. CMS-managed
+  // profiles win over the bundled fallback by slug, mirroring getMergedAuthors().
   const res = await fetch(`${PUBLIC_BASE.replace(/\/+$/, '')}/${encodeURIComponent(SITE)}/authors`);
   const json = await res.json();
   const bySlug = new Map();
+  for (const [slug, name] of Object.entries(BUNDLED_AUTHOR_NAMES)) bySlug.set(slug, { slug, name });
   for (const a of json?.data ?? []) bySlug.set(a.slug, a);
   return bySlug;
 }

@@ -89,7 +89,9 @@ interface CmsContent {
   categories?: Array<{ id: string; name: string; slug: string; parentId: string | null }> | null;
   status: string;
   publishedAt?: string | null;
-  viewCount?: number;
+  // BIGINT column -- the API actually returns this as a numeric string (see
+  // toArticle()'s `views` mapping below), not a number.
+  viewCount?: number | string;
 }
 
 export interface CmsSitePage {
@@ -380,7 +382,9 @@ function toArticle(c: CmsContent): CmsArticle {
     updatedAt: c.publishedAt ?? undefined,
     contentType: c.contentType,
     featuredImage: c.featuredImage ?? undefined,
-    views: typeof c.viewCount === 'number' ? c.viewCount : undefined,
+    // BIGINT column -- pg serializes it as a string ("58"), so the old strict
+    // `typeof === 'number'` check here silently nulled out every view count.
+    views: c.viewCount != null ? Number(c.viewCount) : undefined,
     customFields: c.customFields ?? undefined,
     country: typeof cf.country === 'string' ? cf.country : undefined,
     primarySources: readPrimarySources(cf.citations),

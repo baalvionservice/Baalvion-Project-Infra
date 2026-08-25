@@ -22,12 +22,16 @@ import { WhatYouCanFind } from '@/components/knowledge/WhatYouCanFind';
 import { WhoIsThisFor } from '@/components/knowledge/WhoIsThisFor';
 import { HomepageDisclaimer } from '@/components/knowledge/HomepageDisclaimer';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
+import { AdSlot } from '@/components/ads/AdSlot';
 import { ShieldCheck, ArrowRight, Globe2 } from 'lucide-react';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+
+// Same literal-vs-import note as ArticleSidebar.tsx's SIDEBAR_AD_SLOT_ID.
+const AD_SLOT_ID = '4123514154';
 
 // Serve a cached page and refresh it in the background every 5 minutes,
 // instead of re-rendering (and re-fetching from the CMS/law-service) on
@@ -270,6 +274,10 @@ export default async function KnowledgeHomePage() {
           </div>
         </section>
 
+        <div className="py-6">
+          <AdSlot slotId={AD_SLOT_ID} format="horizontal" placement="homepage-mid-feed" fullWidthResponsive minHeight="100px" />
+        </div>
+
         {/* Latest Guides grid */}
         <LatestGuidesGrid articles={latestGuides} />
 
@@ -296,6 +304,10 @@ export default async function KnowledgeHomePage() {
 
         <ForProfessionalsSection />
         <MissionAndBoardSection stats={homeStats} authors={editorialBoardPreview} />
+
+        <div className="py-8">
+          <AdSlot slotId={AD_SLOT_ID} format="horizontal" placement="homepage-footer" fullWidthResponsive minHeight="100px" />
+        </div>
       </main>
 
       <section className="border-t border-slate-100">
