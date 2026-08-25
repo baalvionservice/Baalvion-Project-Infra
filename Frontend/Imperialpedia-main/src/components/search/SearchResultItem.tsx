@@ -1,8 +1,10 @@
 import React from "react";
 import Link from "next/link";
+import NextImage from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Text } from "@/design-system/typography/text";
 import { SearchResult } from "@/types/search";
+import { formatDate } from "@/services/format-date";
 import {
   ArrowRight,
   Globe,
@@ -42,11 +44,19 @@ export const SearchResultItem = ({
   title,
   snippet,
   route,
+  category,
+  date,
+  imageUrl,
   onClick,
   className,
 }: SearchResultItemProps) => {
   const config = typeConfig[type];
   const Icon = config.icon;
+  // A generic "ARTICLE" badge on every row (the common case — most results
+  // are articles) tells the reader nothing they can't already see from the
+  // icon; the real category ("Bonds", "Personal Finance", ...) is what
+  // actually differentiates one result from the next.
+  const badgeLabel = category || type;
 
   return (
     <Link
@@ -57,29 +67,35 @@ export const SearchResultItem = ({
         className
       )}
     >
-      <div className="flex items-center gap-4">
-        <div
-          className={cn(
-            "w-12 h-12 rounded-xl flex items-center justify-center shrink-0",
-            config.color
-          )}
-        >
-          <Icon size={20} />
-        </div>
-        <div className="space-y-1">
+      <div className="flex items-center gap-4 min-w-0">
+        {imageUrl ? (
+          <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0 bg-muted">
+            <NextImage src={imageUrl} alt="" fill sizes="48px" className="object-cover" />
+          </div>
+        ) : (
+          <div
+            className={cn(
+              "w-12 h-12 rounded-xl flex items-center justify-center shrink-0",
+              config.color
+            )}
+          >
+            <Icon size={20} />
+          </div>
+        )}
+        <div className="space-y-1 min-w-0">
           <div className="flex items-center gap-2">
             <Text
               variant="bodySmall"
               weight="bold"
-              className="group-hover:text-primary transition-colors"
+              className="group-hover:text-primary transition-colors truncate"
             >
               {title}
             </Text>
             <Badge
               variant="outline"
-              className="text-[8px] font-bold uppercase tracking-widest h-4 px-1.5 opacity-60"
+              className="text-[8px] font-bold uppercase tracking-widest h-4 px-1.5 opacity-60 shrink-0"
             >
-              {type}
+              {badgeLabel}
             </Badge>
           </div>
           <Text
@@ -87,12 +103,15 @@ export const SearchResultItem = ({
             className="text-muted-foreground line-clamp-1 max-w-sm"
           >
             {snippet}
+            {date && (
+              <span className="text-muted-foreground/60"> &middot; {formatDate(date, { year: undefined, month: "short", day: "numeric" })}</span>
+            )}
           </Text>
         </div>
       </div>
       <ArrowRight
         size={16}
-        className="text-primary opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0"
+        className="text-primary opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0 shrink-0"
       />
     </Link>
   );
