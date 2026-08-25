@@ -4,10 +4,11 @@ import React from 'react';
 import Image from 'next/image';
 import { Text } from '@/design-system/typography/text';
 import { Article } from '../types';
-import { Badge } from '@/components/ui/badge';
 import { TagList } from './TagList';
 import { ContributorByline } from './ContributorByline';
 import type { ResolvedAuthor } from '@/services/data/cms-public';
+import { ShareBar } from '@/components/article/ShareBar';
+import { TrustBadge } from '@/components/article/TrustBadge';
 
 interface ArticleHeaderProps {
   article: Article;
@@ -15,6 +16,7 @@ interface ArticleHeaderProps {
   author?: ResolvedAuthor | null;
   reviewer?: ResolvedAuthor | null;
   factChecker?: ResolvedAuthor | null;
+  canonicalUrl?: string;
 }
 
 // Pinned to UTC so the formatted string is identical on the server (SSR) and
@@ -30,16 +32,15 @@ const updatedDateFormatter = new Intl.DateTimeFormat('en-US', {
 /**
  * Renders the top portion of an article, including metadata and featured image.
  */
-export const ArticleHeader = ({ article, author, reviewer, factChecker }: ArticleHeaderProps) => {
+export const ArticleHeader = ({ article, author, reviewer, factChecker, canonicalUrl }: ArticleHeaderProps) => {
   return (
     <header className="mb-12">
       <div className="space-y-4 mb-8">
-        <div className="flex flex-wrap gap-4 items-center mb-6">
-          <Badge variant="secondary" className="bg-primary/20 text-primary hover:bg-primary/30 font-bold uppercase tracking-widest text-[10px] py-1">
-            {article.category}
-          </Badge>
-          <TagList tags={article.tags} />
-        </div>
+        {article.tags?.length ? (
+          <div className="flex flex-wrap gap-4 items-center mb-6">
+            <TagList tags={article.tags} />
+          </div>
+        ) : null}
 
         <Text variant="h1" as="h1" className="text-4xl lg:text-6xl font-bold tracking-tight">
           {article.title}
@@ -50,16 +51,23 @@ export const ArticleHeader = ({ article, author, reviewer, factChecker }: Articl
         </Text>
 
         {author ? (
-          <div className="space-y-1 pt-2 pb-2">
-            <ContributorByline
-              label="By"
-              person={author}
-              meta={article.updatedAt ? `Updated ${updatedDateFormatter.format(new Date(article.updatedAt))}` : undefined}
-            />
-            <ContributorByline label="Reviewed by" person={reviewer} />
-            <ContributorByline label="Fact checked by" person={factChecker} />
+          <div className="flex flex-wrap items-center justify-between gap-4 pt-2 pb-2">
+            <div className="space-y-1">
+              <ContributorByline
+                label="By"
+                person={author}
+                meta={article.updatedAt ? `Updated ${updatedDateFormatter.format(new Date(article.updatedAt))}` : undefined}
+              />
+              <ContributorByline label="Reviewed by" person={reviewer} />
+              <ContributorByline label="Fact checked by" person={factChecker} />
+            </div>
+            {canonicalUrl && <ShareBar url={canonicalUrl} title={article.title} />}
           </div>
         ) : null}
+
+        <div className="border-t border-border pt-4">
+          <TrustBadge />
+        </div>
       </div>
 
       {article.featuredImage && (

@@ -16,7 +16,7 @@
     --secondary: 0 0% 96%; /* light gray surfaces */
     --secondary-foreground: 0 0% 18%;
     --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 40%; /* secondary gray text */
+    --muted-foreground: 0 0% 32%; /* secondary gray text, WCAG AAA against white */
     --accent: 45 100% 51%; /* signature gold/yellow #ffc107 */
     --accent-foreground: 0 0% 12%;
     --destructive: 4 74% 49%; /* editorial red for losses */

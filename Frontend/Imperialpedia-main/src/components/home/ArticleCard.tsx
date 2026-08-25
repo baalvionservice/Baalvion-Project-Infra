@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Clock, User, Calendar } from "lucide-react";
+import { getTopicColor } from "@/lib/topic-colors";
 
 interface ArticleCardProps {
   id: string;
@@ -43,6 +44,7 @@ export function ArticleCard({
   readingTimeMinutes,
 }: ArticleCardProps) {
   const isRecent = new Date().getTime() - updatedAt.getTime() < 7 * 24 * 60 * 60 * 1000;
+  const topicColor = getTopicColor(category);
 
   return (
     <article
@@ -66,7 +68,10 @@ export function ArticleCard({
       <div className="flex flex-col flex-grow p-4">
         {/* Category & Badge */}
         <div className="flex items-center gap-2 mb-2">
-          <span className="inline-block px-2.5 py-1 text-xs font-semibold uppercase tracking-widest rounded-full bg-primary/10 text-primary">
+          <span
+            className="inline-block px-2.5 py-1 text-xs font-semibold uppercase tracking-widest rounded-full"
+            style={{ backgroundColor: `${topicColor}1a`, color: topicColor }}
+          >
             {category}
           </span>
           {isRecent && (

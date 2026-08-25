@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { Wallet, LineChart, Globe2, Calculator, ArrowRight } from "lucide-react";
 import { topicCopy } from "@/lib/topic-config";
+import { getTopicColor } from "@/lib/topic-colors";
 import { HomeSectionHeading } from "./HomeSectionHeading";
 
 // Four top-level groups instead of six competing categories — Personal
@@ -69,20 +70,24 @@ export function ExploreTopics() {
     <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 border-t border-border">
       <HomeSectionHeading title="Explore by Topic" />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {TOPICS.map(({ slug, href, icon: Icon, title, subtitle }) => (
-          <Link
-            key={slug}
-            href={href}
-            className="group flex flex-col rounded-lg border border-border p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary hover:shadow-md"
-          >
-            <Icon className="h-6 w-6 text-primary" aria-hidden />
-            <span className="mt-4 flex items-center gap-1 text-base font-bold text-foreground group-hover:text-primary transition-colors">
-              {title}
-              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-            </span>
-            <p className="mt-1.5 text-sm text-muted-foreground">{subtitle}</p>
-          </Link>
-        ))}
+        {TOPICS.map(({ slug, href, icon: Icon, title, subtitle }) => {
+          const color = getTopicColor(slug);
+          return (
+            <Link
+              key={slug}
+              href={href}
+              className="group flex flex-col rounded-lg border border-border border-t-4 p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+              style={{ borderTopColor: color }}
+            >
+              <Icon className="h-6 w-6" style={{ color }} aria-hidden />
+              <span className="mt-4 flex items-center gap-1 text-base font-bold text-foreground transition-colors">
+                {title}
+                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+              </span>
+              <p className="mt-1.5 text-sm text-muted-foreground">{subtitle}</p>
+            </Link>
+          );
+        })}
       </div>
 
       <div className="mt-8 pt-6 border-t border-dashed border-border">

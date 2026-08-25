@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Article as LandingArticle } from "@/components/landing/investopedia/types";
 import { HomeSectionHeading } from "./HomeSectionHeading";
+import { CategoryBadge } from "@/components/common/CategoryBadge";
 
 interface LatestArticlesProps {
   articles: LandingArticle[];
@@ -25,14 +26,14 @@ export function LatestArticles({ articles }: LatestArticlesProps) {
             <div className="relative aspect-[16/9] w-full overflow-hidden bg-muted">
               <Image
                 src={article.image}
-                alt=""
+                alt={article.title}
                 fill
                 sizes="(max-width: 768px) 100vw, 33vw"
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
               />
             </div>
             <div className="pt-3">
-              <span className="eyebrow">{article.category}</span>
+              <CategoryBadge category={article.category} />
               <h3 className="mt-1 text-lg font-bold leading-tight text-foreground group-hover:text-primary line-clamp-3">
                 {article.title}
               </h3>
