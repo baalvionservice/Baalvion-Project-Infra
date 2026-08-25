@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAllArticles, type LawArticle } from '@/data/law-content';
 import { cmsGetArticles } from '@/lib/cms';
+import { scoreArticle } from '@/lib/search-score';
 
 export const dynamic = 'force-dynamic';
 
@@ -42,22 +43,6 @@ async function getSearchableArticles(): Promise<LawArticle[]> {
   return Array.from(bySlug.values());
 }
 
-function score(article: LawArticle, q: string): number {
-  const title = article.title.toLowerCase();
-  const summary = (article.summary || '').toLowerCase();
-  let s = 0;
-  if (title === q) s += 100;
-  else if (title.startsWith(q)) s += 80;
-  else if (title.includes(q)) s += 60;
-  if (summary.includes(q)) s += 10;
-  // Only use popularity as a tie-breaker among actual text matches — applying it
-  // unconditionally (regardless of match) meant every query scored > 0 for any
-  // article with views, so unrelated queries never returned "no results" and
-  // instead silently surfaced the site's most-viewed articles as fake matches.
-  if (s > 0) s += (article.views || 0) / 1000;
-  return s;
-}
-
 export async function GET(req: NextRequest) {
   const q = (req.nextUrl.searchParams.get('q') || '').trim().toLowerCase();
   const limit = Number(req.nextUrl.searchParams.get('limit')) || 100;
@@ -65,7 +50,7 @@ export async function GET(req: NextRequest) {
 
   const articles = await getSearchableArticles();
   const items = articles
-    .map((a) => ({ ...a, score: score(a, q) }))
+    .map((a) => ({ ...a, score: scoreArticle(a.title, a.summary, a.views || 0, q) }))
     .filter((a) => a.score > 0)
     .sort((a, b) => b.score - a.score)
     .slice(0, limit);
