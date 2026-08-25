@@ -4,7 +4,6 @@ const express = require('express');
 const path = require('path');
 const helmet = require('helmet');
 const cors = require('cors');
-const cookieParser = require('cookie-parser');
 const config = require('./config/appConfig');
 const { connectDB, sequelize } = require('./models');
 const v1Router = require('./routes/v1');
@@ -36,10 +35,6 @@ app.use('/uploads', express.static(path.resolve(__dirname, 'uploads'), {
 }));
 
 app.use(express.json({ limit: '10mb' }));
-// Sign cookies so their integrity can be validated server-side (req.signedCookies).
-// Reuses the env-backed service secret, which is enforced to a non-default value
-// outside development by config/appConfig.js.
-app.use(cookieParser(config.internalSecret));
 app.use(requestContext);
 // SDK trace context: binds a traceId (+ tenant) to the request before any route,
 // so all logging / events / outbound HTTP downstream are correlated.
