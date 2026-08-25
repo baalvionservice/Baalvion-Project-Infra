@@ -24,7 +24,7 @@ const TRACKED_COMPANIES = (companiesData as TrackedCompany[]).filter((c) => c.ti
  * of re-scanning title/tags/excerpt itself — this used to be a second,
  * divergent detector.
  */
-function trackedCompaniesFromMentions(mentions: EntityMention[] | undefined, max = MAX_QUOTE_CHIPS): TrackedCompany[] {
+export function trackedCompaniesFromMentions(mentions: EntityMention[] | undefined, max = MAX_QUOTE_CHIPS): TrackedCompany[] {
   if (!mentions?.length) return [];
   const companySlugs = new Set(mentions.filter((m) => m.entityType === "company").map((m) => m.entitySlug));
   return TRACKED_COMPANIES.filter((c) => companySlugs.has(c.slug)).slice(0, max);

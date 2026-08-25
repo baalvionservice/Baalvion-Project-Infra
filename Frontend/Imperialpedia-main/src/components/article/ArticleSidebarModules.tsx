@@ -3,16 +3,41 @@ import Link from "next/link";
 import { getCategoryArticles } from "@/services/data/cms-public";
 import { getWorldDataLive } from "@/lib/data/worldFeed";
 import { newsArticleHref } from "@/lib/data/article-url";
-import TrendingNow from "@/components/world/TrendingNow";
+import { StoryLink } from "@/components/common/StoryLink";
+import { getTopicColor } from "@/lib/topic-colors";
 
 // Reuses the exact same live pipeline as imperialpedia.com/world (real wire
-// news + admin-published CMS content, blended by getWorldDataLive) and the
-// same <TrendingNow> component that renders it there — so an article's
-// sidebar and /world always show one real, live-fetched ranking, never a
-// second static or CMS-only version that could drift from it.
-export async function TrendingNowModule() {
+// news + admin-published CMS content, blended by getWorldDataLive). Renders
+// with this article template's own light card styling rather than the
+// <TrendingNow> component /world uses — that one's built for the dark
+// ".world-shell" CNBC theme (text-white/20 numbers, --cnbc-red hover), both
+// invisible/wrong on a plain white sidebar card outside that shell.
+export async function TrendingNowModule({ color = "#1d4fc4" }: { color?: string }) {
   const data = await getWorldDataLive("world");
-  return <TrendingNow latest={data.latest} />;
+  const items = data.latest.slice(0, 5);
+  if (items.length === 0) return null;
+
+  return (
+    <div className="rounded-lg border border-border border-t-4 p-5" style={{ borderTopColor: color }}>
+      <h2 className="mb-3 text-xs font-black uppercase tracking-widest" style={{ color }}>
+        Trending Now
+      </h2>
+      <ol className="space-y-3">
+        {items.map((item, i) => (
+          <li key={item.id}>
+            <StoryLink item={item} className="group flex items-start gap-3">
+              <span className="w-4 shrink-0 text-lg font-black leading-none" style={{ color: `${color}4d` }}>
+                {i + 1}
+              </span>
+              <span className="text-sm font-semibold leading-snug text-foreground group-hover:text-primary transition-colors line-clamp-2">
+                {item.headline}
+              </span>
+            </StoryLink>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
 }
 
 // "More in <Category>" — live CMS query scoped to any category slug (a topic
@@ -30,10 +55,11 @@ export async function MoreInCategoryModule({
   if (!categorySlug) return null;
   const items = (await getCategoryArticles(categorySlug, 6)).filter((a) => a.slug !== excludeSlug).slice(0, 4);
   if (!items.length) return null;
+  const color = getTopicColor(categoryLabel);
 
   return (
-    <div>
-      <h2 className="text-xs font-black tracking-widest text-foreground uppercase border-b-2 border-border pb-2 mb-4">
+    <div className="rounded-lg border border-border border-t-4 p-5" style={{ borderTopColor: color }}>
+      <h2 className="mb-3 text-xs font-black uppercase tracking-widest" style={{ color }}>
         More in {categoryLabel}
       </h2>
       <ul className="space-y-4">
@@ -43,7 +69,7 @@ export async function MoreInCategoryModule({
               <div className="relative w-16 h-16 flex-shrink-0 overflow-hidden rounded-sm">
                 <Image src={a.imageUrl} alt={a.title} fill className="object-cover" sizes="64px" />
               </div>
-              <span className="text-sm font-semibold text-foreground leading-snug group-hover:text-[#CC0000] transition-colors line-clamp-3">
+              <span className="text-sm font-semibold text-foreground leading-snug group-hover:text-primary transition-colors line-clamp-3">
                 {a.title}
               </span>
             </Link>

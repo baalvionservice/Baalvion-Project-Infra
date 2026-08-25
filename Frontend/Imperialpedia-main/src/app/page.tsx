@@ -3,7 +3,7 @@ import { Metadata } from "next";
 import { JsonLd } from "@/modules/seo-engine/components/JsonLd";
 import { buildMetadata } from "@/lib/seo/metadata-builder";
 import { structuredData } from "@/lib/seo/structuredData";
-import { AdSenseUnit } from "@/components/common/AdSense";
+import { LabeledAdSlot } from "@/components/common/LabeledAdSlot";
 
 import { TrendingBar } from "@/components/landing/investopedia/TrendingBar";
 import { TermOfDay } from "@/components/landing/investopedia/TermOfDay";
@@ -38,6 +38,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "Explore countries and industries alongside live market data and reviewed articles on investing, the economy, and personal finance.",
     canonical: "/",
     ogType: "website",
+    absoluteTitle: true,
   });
 }
 
@@ -68,8 +69,8 @@ export default function Home() {
       </Suspense>
 
       {/* Top AdSense Unit - Display ad above main content */}
-      <div className="my-8 px-4">
-        <AdSenseUnit slot="2039635661" format="auto" responsive={true} />
+      <div className="mx-auto my-8 w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+        <LabeledAdSlot slot="2039635661" />
       </div>
 
       <Suspense fallback={<HomeSectionSkeleton cards={4} />}>
@@ -83,8 +84,8 @@ export default function Home() {
       />
 
       {/* Mid-page AdSense Unit */}
-      <div className="my-8 px-4">
-        <AdSenseUnit slot="1782439199" format="auto" responsive={true} />
+      <div className="mx-auto my-8 w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+        <LabeledAdSlot slot="1782439199" />
       </div>
 
       <Suspense fallback={<HomeSectionSkeleton cards={4} />}>
@@ -96,8 +97,8 @@ export default function Home() {
       </Suspense>
 
       {/* Bottom AdSense Unit */}
-      <div className="my-8 px-4">
-        <AdSenseUnit slot="6058771722" format="auto" responsive={true} />
+      <div className="mx-auto my-8 w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+        <LabeledAdSlot slot="6058771722" />
       </div>
 
       <Suspense fallback={<HomeSectionSkeleton cards={6} />}>

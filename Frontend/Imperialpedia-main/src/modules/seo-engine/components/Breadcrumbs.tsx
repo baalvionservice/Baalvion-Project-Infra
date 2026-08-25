@@ -7,6 +7,7 @@ import { Breadcrumb } from '../types';
 import { cn } from '@/lib/utils';
 import { JsonLd } from './JsonLd';
 import { breadcrumbService } from '../services/breadcrumb-service';
+import { getTopicColor } from '@/lib/topic-colors';
 
 interface BreadcrumbsProps {
   breadcrumb: Breadcrumb;
@@ -22,31 +23,39 @@ export const Breadcrumbs = ({ breadcrumb, className }: BreadcrumbsProps) => {
   const breadcrumbSchema = breadcrumbService.generateBreadcrumbSchema(breadcrumb);
 
   return (
-    <nav 
-      aria-label="Breadcrumb" 
-      className={cn("flex items-center space-x-2 text-xs text-muted-foreground mb-8 overflow-x-auto whitespace-nowrap pb-2 md:pb-0", className)}
+    <nav
+      aria-label="Breadcrumb"
+      className={cn("flex items-center gap-2 text-sm mb-8 overflow-x-auto pb-2 md:pb-0", className)}
     >
       {/* Inject JSON-LD Schema */}
       <JsonLd data={breadcrumbSchema} />
-      
+
       {breadcrumb.items.map((item, index) => {
         const isLast = index === breadcrumb.items.length - 1;
         const isFirst = index === 0;
+        const color = !isFirst && !isLast ? getTopicColor(item.name) : undefined;
 
         return (
           <React.Fragment key={item.item + index}>
-            {index > 0 && <ChevronRight className="h-3 w-3 shrink-0 opacity-40" />}
-            
+            {index > 0 && <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/50" />}
+
             {isLast ? (
-              <span className="font-bold text-foreground truncate max-w-[200px]" aria-current="page">
+              <span
+                className="font-bold text-foreground max-w-[70vw] sm:max-w-[420px] truncate"
+                aria-current="page"
+              >
                 {item.name}
               </span>
             ) : (
-              <Link 
+              <Link
                 href={item.item}
-                className="hover:text-primary transition-colors flex items-center gap-1 shrink-0"
+                className={cn(
+                  "flex items-center gap-1.5 shrink-0 font-semibold transition-colors hover:underline",
+                  isFirst ? "text-muted-foreground hover:text-primary" : "text-muted-foreground",
+                )}
+                style={color ? { color } : undefined}
               >
-                {isFirst && <Home className="h-3 w-3" />}
+                {isFirst ? <Home className="h-3.5 w-3.5" /> : null}
                 {item.name}
               </Link>
             )}

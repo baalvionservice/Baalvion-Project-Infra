@@ -27,6 +27,16 @@ export const structuredData = {
       email: env.supportEmail,
       contactType: 'customer support',
     },
+    // Registered office of Baalvion Industries Private Limited (CIN
+    // U43121OD2025PTC048479), the legal entity operating Imperialpedia.
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: 'Upper Mania, PO Pakjhola, Semiliguda',
+      addressLocality: 'Koraput',
+      addressRegion: 'Odisha',
+      postalCode: '764036',
+      addressCountry: 'IN',
+    },
     sameAs: [
       'https://twitter.com/imperialpedia',
       'https://linkedin.com/company/imperialpedia',

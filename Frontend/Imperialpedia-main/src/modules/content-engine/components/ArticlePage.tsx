@@ -13,8 +13,15 @@ import { Loader2, AlertCircle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import type { ResolvedAuthor } from "@/services/data/cms-public";
-import { AdSenseUnit } from "@/components/common/AdSense";
+import type { ResolvedAuthor, ArticleFeedbackSummary, ArticleComment, ArticlePoll as ArticlePollData } from "@/services/data/cms-public";
+import { HelpfulVote } from "@/components/article/HelpfulVote";
+import { CommentsSection } from "@/components/article/CommentsSection";
+import { RelatedCalculators } from "@/components/article/RelatedCalculators";
+import { WeeklyDigestSignup } from "@/components/article/WeeklyDigestSignup";
+import { ArticleQuiz } from "@/components/article/ArticleQuiz";
+import { ArticlePoll } from "@/components/article/ArticlePoll";
+import { ReadingProgressBar } from "@/components/article/ReadingProgressBar";
+import { StickyShareBar } from "@/components/article/StickyShareBar";
 
 interface ArticlePageProps {
   slug: string;
@@ -26,6 +33,16 @@ interface ArticlePageProps {
   author?: ResolvedAuthor | null;
   reviewer?: ResolvedAuthor | null;
   factChecker?: ResolvedAuthor | null;
+  /** Absolute canonical URL, for the share-bar links. */
+  canonicalUrl?: string;
+  feedback?: ArticleFeedbackSummary;
+  comments?: ArticleComment[];
+  poll?: ArticlePollData | null;
+  /** Server-rendered (async) market widgets — passed as pre-rendered nodes since
+   *  this component is a client component and can't await a server component itself. */
+  marketWidget?: React.ReactNode;
+  inlineChart?: React.ReactNode;
+  sidebar?: React.ReactNode;
 }
 
 /**
@@ -38,6 +55,13 @@ export const ArticlePage = ({
   author,
   reviewer,
   factChecker,
+  canonicalUrl,
+  feedback,
+  comments,
+  poll,
+  marketWidget,
+  inlineChart,
+  sidebar,
 }: ArticlePageProps) => {
   const [article, setArticle] = useState<Article | null>(
     initialArticle || null
@@ -111,9 +135,19 @@ export const ArticlePage = ({
 
   return (
     <article className="py-12 lg:py-20">
+      <ReadingProgressBar categoryName={article.category} />
+      {canonicalUrl && <StickyShareBar url={canonicalUrl} title={article.title} />}
       <Container>
-        <div className="max-w-3xl mx-auto">
-          <ArticleHeader article={article} author={author} reviewer={reviewer} factChecker={factChecker} />
+        <div className={sidebar ? "grid grid-cols-1 gap-10 lg:grid-cols-[1fr_320px] xl:gap-14" : undefined}>
+        <div className="w-full min-w-0 max-w-3xl lg:mx-auto">
+          <ArticleHeader article={article} author={author} reviewer={reviewer} factChecker={factChecker} canonicalUrl={canonicalUrl} />
+
+          {(marketWidget || inlineChart) && (
+            <div className="mb-8 space-y-4">
+              {inlineChart}
+              {marketWidget}
+            </div>
+          )}
 
           {article.body ? (
             <div
@@ -138,11 +172,19 @@ export const ArticlePage = ({
           {/* "Explore Full Glossary" CTA omitted — /terms is offline pending
               AdSense approval, see src/config/glossary.ts. */}
 
-          {/* Post-article AdSense unit — after the primary content so it never
-              interrupts reading, same slot/pattern as the homepage units. */}
-          <div className="my-8">
-            <AdSenseUnit slot="8362925887" format="auto" responsive={true} />
+          <div className="mb-8 space-y-4">
+            <RelatedCalculators categorySlug={article.categorySlug} />
+            {poll && <ArticlePoll slug={article.slug} initialPoll={poll} categoryName={article.category} />}
+            <ArticleQuiz quiz={article.quiz} categoryName={article.category} />
           </div>
+
+          <HelpfulVote slug={article.slug} initialSummary={feedback ?? { helpful: 0, notHelpful: 0 }} categoryName={article.category} />
+
+          <div className="mt-12">
+            <CommentsSection slug={article.slug} initialComments={comments ?? []} />
+          </div>
+        </div>
+        {sidebar}
         </div>
 
         <RelatedArticles
@@ -151,6 +193,10 @@ export const ArticlePage = ({
           tags={article.tags}
           categorySlug={article.categorySlug}
         />
+
+        <div className="mt-12">
+          <WeeklyDigestSignup categoryName={article.category} />
+        </div>
       </Container>
     </article>
   );

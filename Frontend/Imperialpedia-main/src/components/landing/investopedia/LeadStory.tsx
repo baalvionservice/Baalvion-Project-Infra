@@ -4,6 +4,7 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import type { Article } from "./types";
 import { ArticleCard } from "./ArticleCard";
+import { CategoryBadge } from "@/components/common/CategoryBadge";
 
 type Props = {
   lead: Article;
@@ -20,7 +21,7 @@ function HeroStory({ article, related, priority }: { article: Article; related: 
         <div className="relative aspect-[16/10] w-full overflow-hidden bg-muted">
           <Image
             src={article.image}
-            alt=""
+            alt={article.title}
             fill
             priority={priority}
             sizes="(max-width: 1024px) 100vw, 50vw"
@@ -28,7 +29,7 @@ function HeroStory({ article, related, priority }: { article: Article; related: 
           />
         </div>
         <div className="pt-4">
-          <span className="eyebrow">{article.category}</span>
+          <CategoryBadge category={article.category} />
           <h2 className="mt-1.5 text-2xl sm:text-3xl font-black leading-[1.1] text-foreground group-hover:text-primary">
             {article.title}
           </h2>

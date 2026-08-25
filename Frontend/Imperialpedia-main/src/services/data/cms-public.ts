@@ -25,12 +25,12 @@ import { REGIONS } from '@/lib/data/worldRegions';
 // In production default to the API gateway's public delivery host (not localhost,
 // and not an empty string that silently forced the built-in fallback). A deploy
 // can still override via NEXT_PUBLIC_CMS_PUBLIC_URL.
-const CMS_PUBLIC_URL =
+export const CMS_PUBLIC_URL =
   process.env.NEXT_PUBLIC_CMS_PUBLIC_URL ||
   (process.env.NODE_ENV === 'production'
     ? 'https://api.baalvion.com/api/v1/public'
     : 'http://localhost:3018/api/v1/public');
-const SITE_SLUG = process.env.NEXT_PUBLIC_CMS_SITE_SLUG || 'imperialpedia';
+export const CMS_SITE_SLUG = process.env.NEXT_PUBLIC_CMS_SITE_SLUG || 'imperialpedia';
 
 // Validates Google's publisher-ID shape ("ca-pub-" + 10–20 digits). Anything else
 // (placeholder text, a stray paste) is treated as "no ad client" so we never emit a
@@ -58,7 +58,7 @@ const DEFAULT_ADSENSE_CLIENT = 'ca-pub-8968452296456450';
 export async function getSiteAdsenseClient(): Promise<string | null> {
   const envFallback = process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim();
   try {
-    const res = await fetch(`${CMS_PUBLIC_URL}/${SITE_SLUG}`, {
+    const res = await fetch(`${CMS_PUBLIC_URL}/${CMS_SITE_SLUG}`, {
       headers: { Accept: 'application/json' },
       next: { revalidate: 3600 },
       signal: AbortSignal.timeout(6000),
@@ -205,7 +205,7 @@ const TRANSIENT_RETRY_DELAYS_MS = [400, 1200];
 const CMS_FETCH_REVALIDATE_SECONDS = 300;
 
 async function cmsFetchOnce<T>(path: string): Promise<T> {
-  const res = await fetch(`${CMS_PUBLIC_URL}/${SITE_SLUG}${path}`, {
+  const res = await fetch(`${CMS_PUBLIC_URL}/${CMS_SITE_SLUG}${path}`, {
     headers: { Accept: 'application/json' },
     next: { revalidate: CMS_FETCH_REVALIDATE_SECONDS },
     // Without a bound, a hung cms-service connection hangs every page that
@@ -313,6 +313,57 @@ export async function listAllCmsContent(params: CmsListParams = {}): Promise<Cms
 export async function getCmsContentBySlug(slug: string): Promise<CmsContent> {
   const env = await cmsFetch<CmsItemEnvelope>(`/content/${encodeURIComponent(slug)}`);
   return env.data;
+}
+
+export interface ArticleFeedbackSummary {
+  helpful: number;
+  notHelpful: number;
+}
+
+export interface ArticleComment {
+  id: string;
+  authorName: string;
+  body: string;
+  createdAt: string;
+}
+
+/** "Was this helpful?" tally for an article — never throws, a missing/unreachable
+ *  summary just renders the widget at 0/0 rather than failing the page. */
+export async function getArticleFeedback(slug: string): Promise<ArticleFeedbackSummary> {
+  try {
+    const env = await cmsFetch<{ data: ArticleFeedbackSummary }>(`/content/${encodeURIComponent(slug)}/feedback`);
+    return env.data;
+  } catch {
+    return { helpful: 0, notHelpful: 0 };
+  }
+}
+
+/** Approved reader comments for an article, newest first. Never throws. */
+export async function listArticleComments(slug: string): Promise<ArticleComment[]> {
+  try {
+    const env = await cmsFetch<{ data: ArticleComment[] }>(`/content/${encodeURIComponent(slug)}/comments`);
+    return env.data;
+  } catch {
+    return [];
+  }
+}
+
+export interface ArticlePoll {
+  id: string;
+  question: string;
+  options: string[];
+  counts: number[];
+  total: number;
+}
+
+/** An article's reader poll, or null when it has none. Never throws. */
+export async function getArticlePoll(slug: string): Promise<ArticlePoll | null> {
+  try {
+    const env = await cmsFetch<{ data: ArticlePoll | null }>(`/content/${encodeURIComponent(slug)}/poll`);
+    return env.data;
+  } catch {
+    return null;
+  }
 }
 
 interface CmsCategoryEnvelope {
@@ -748,6 +799,16 @@ export function cmsContentToArticle(raw: CmsContent, categoryMap?: ReadonlyMap<s
   const factCheckerSlug = typeof cf.factCheckerSlug === 'string' ? cf.factCheckerSlug : undefined;
   const factCheckedAt = typeof cf.factCheckedAt === 'string' ? cf.factCheckedAt : undefined;
   const citations = extractCitations(cf);
+  const rawQuiz = Array.isArray(cf.quiz) ? (cf.quiz as unknown[]) : [];
+  const quiz = rawQuiz
+    .map((q) => q as { question?: unknown; options?: unknown; correctIndex?: unknown; explanation?: unknown })
+    .filter((q) => q && typeof q.question === 'string' && Array.isArray(q.options) && typeof q.correctIndex === 'number')
+    .map((q) => ({
+      question: String(q.question),
+      options: (q.options as unknown[]).map(String),
+      correctIndex: Number(q.correctIndex),
+      explanation: typeof q.explanation === 'string' ? q.explanation : undefined,
+    }));
   return {
     id: raw.id,
     slug: raw.slug,
@@ -781,6 +842,8 @@ export function cmsContentToArticle(raw: CmsContent, categoryMap?: ReadonlyMap<s
     seoDescription: raw.seoMetadata?.description || raw.excerpt || '',
     seoKeywords: raw.seoMetadata?.keywords || raw.tagIds || [],
     faq: faq.length ? faq : undefined,
+    entityMentions: raw.entityMentions?.length ? raw.entityMentions : undefined,
+    quiz: quiz.length ? quiz : undefined,
   };
 }
 
