@@ -109,7 +109,6 @@ const NAV: NavCategory[] = [
     links: [
       { label: "Loan Reviews", href: "/loan-reviews" },
       { label: "App Reviews", href: "/app-reviews" },
-      { label: "Tax Software", href: "/tax-software" },
     ],
   },
 ];

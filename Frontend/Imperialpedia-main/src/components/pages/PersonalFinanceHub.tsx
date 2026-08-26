@@ -55,11 +55,11 @@ const TOPICS: Array<{
  * "robo-advisors", and "insurance-reviews" previously listed here don't exist as CMS
  * categories or page routes (verified: 0 published articles under any of the three,
  * and none has a src/app route) — every card rendered from them linked to a permanent
- * 404 with a "0 reviews" count. "loan-reviews" and "tax-software" are the real,
- * populated categories most relevant to personal-finance decisions (borrowing, taxes). */
+ * 404 with a "0 reviews" count. "tax-software" was removed 2026-08-26 (hub page
+ * permanently killed, see REMOVED_PATHS in middleware.ts). "loan-reviews" is the
+ * one real, populated category left that's most relevant here. */
 const RELATED_REVIEWS: Array<{ slug: string; label: string }> = [
   { slug: "loan-reviews", label: "Loan Reviews" },
-  { slug: "tax-software", label: "Tax Software" },
 ];
 
 /** Real calculator pages that exist today (see src/services/mock-api/calculators.ts). */

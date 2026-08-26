@@ -2,7 +2,6 @@ import Link from "next/link";
 import {
   HandCoins,
   Smartphone,
-  Receipt,
   ArrowRight,
   BookOpen,
 } from "lucide-react";
@@ -37,7 +36,6 @@ const TOPICS: Array<{
 }> = [
   { slug: "loan-reviews", label: "Loan Reviews", icon: HandCoins },
   { slug: "app-reviews", label: "Finance App Reviews", icon: Smartphone },
-  { slug: "tax-software", label: "Tax Software Reviews", icon: Receipt },
 ];
 
 /** "Find The Right Product" concept tiles — each links to a real, live category page. */
