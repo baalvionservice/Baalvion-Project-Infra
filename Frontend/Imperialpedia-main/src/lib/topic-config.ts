@@ -503,6 +503,15 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaDescription:
       'Independent reviews and comparisons of banks, brokers, credit cards, loans, robo-advisors, and financial apps to help you choose with confidence.',
   },
+  'tax-software': {
+    tag: 'TAX SOFTWARE REVIEWS',
+    title: 'Tax Software Reviews',
+    description:
+      'Independent reviews of tax filing software, comparing pricing, ease of use, and support for complex tax situations.',
+    metaTitle: 'Tax Software Reviews — Pricing & Features Compared',
+    metaDescription:
+      'Independent tax software reviews comparing pricing tiers, ease of use, and support for itemized deductions and self-employment income.',
+  },
   investing: {
     tag: 'INVESTING',
     title: 'Investing & Markets',
@@ -1250,6 +1259,7 @@ export const STATIC_CATEGORY_MAP: Record<string, NewsCategory> = {
   'app-reviews': 'Guides',
   'banking-reviews': 'Guides',
   'loan-reviews': 'Guides',
+  'tax-software': 'Guides',
   'financial-calculators': 'Guides',
   calendar: 'Guides',
 };
@@ -1337,7 +1347,7 @@ const CATEGORY_GROUPS: CategoryGroup[] = [
   {
     label: 'REVIEWS',
     href: '/reviews',
-    children: ['loan-reviews', 'app-reviews'],
+    children: ['loan-reviews', 'app-reviews', 'tax-software'],
   },
   {
     label: 'BUDGETING',
