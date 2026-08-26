@@ -186,17 +186,35 @@ const REMOVED_PATHS = new Set<string>([
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Every real slug on this site is lowercase (CMS content, static routes, terms —
-  // none are cased), so an uppercase/mixed-case hit is always a typo (caps lock,
-  // mobile autocap, a pasted link), never a distinct real page. Redirecting it to
-  // the lowercase form first — ahead of every other rule below — means a mistyped
-  // path like /WORLD lands on the real page instead of falling into the catch-all
-  // route's "unknown slug" lookup, which otherwise risks a needless 404 (or, if the
-  // CMS is briefly unreachable, a 500 — see articles-service.ts's deliberate
-  // rethrow-on-transient-failure comment for why that particular case doesn't just
-  // quietly become a 404 either). 308 (not 301) preserves the original request
-  // method, matching how a case fix should behave for a POST/PUT hitting this path.
-  if (pathname !== pathname.toLowerCase()) {
+  // /markets/quote/:symbol is the one route where uppercase is the CANONICAL form,
+  // not a typo — tickers are conventionally written AAPL/BTC/XAUUSD, and every
+  // internal link (market-quotes.ts, MarketHighlights, MarketRow, ...) generates
+  // hrefs in that case. The page itself upper-cases the param before lookup either
+  // way (see page.tsx), so a lowercase URL already works — but the blanket
+  // lowercase rule below was 308-redirecting literally every quote link on the
+  // site (confirmed live 2026-08-26, a CheckMyLinks crawl flagged all ~50). Only
+  // the static "/markets/quote/" prefix gets case-normalized here (so a caps-lock
+  // typo like "/MARKETS/QUOTE/aapl" still resolves); the symbol segment is left
+  // exactly as requested.
+  const quoteMatch = pathname.match(/^(\/markets\/quote\/)(.+)$/i);
+  if (quoteMatch) {
+    const [, prefix, symbol] = quoteMatch;
+    if (prefix !== '/markets/quote/') {
+      const url = request.nextUrl.clone();
+      url.pathname = `/markets/quote/${symbol}`;
+      return NextResponse.redirect(url, 308);
+    }
+  } else if (pathname !== pathname.toLowerCase()) {
+    // Every real slug on this site is lowercase (CMS content, static routes, terms —
+    // none are cased), so an uppercase/mixed-case hit is always a typo (caps lock,
+    // mobile autocap, a pasted link), never a distinct real page. Redirecting it to
+    // the lowercase form first — ahead of every other rule below — means a mistyped
+    // path like /WORLD lands on the real page instead of falling into the catch-all
+    // route's "unknown slug" lookup, which otherwise risks a needless 404 (or, if the
+    // CMS is briefly unreachable, a 500 — see articles-service.ts's deliberate
+    // rethrow-on-transient-failure comment for why that particular case doesn't just
+    // quietly become a 404 either). 308 (not 301) preserves the original request
+    // method, matching how a case fix should behave for a POST/PUT hitting this path.
     const url = request.nextUrl.clone();
     url.pathname = pathname.toLowerCase();
     return NextResponse.redirect(url, 308);
@@ -256,7 +274,11 @@ export function middleware(request: NextRequest) {
   }
 
   // 2) Coarse auth gate on protected areas
-  const isProtected = PROTECTED_PREFIXES.some((p) => pathname.startsWith(p));
+  // Boundary-checked (exact match or followed by "/"), not a bare startsWith: a plain
+  // startsWith('/editor') also matched the public /editorial-policy page, 307-redirecting
+  // every visitor there to /auth/sign-in?redirect=%2Feditorial-policy (confirmed live,
+  // 2026-08-26). Same class of bug would hit e.g. a future /admins or /writers page.
+  const isProtected = PROTECTED_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
   if (isProtected) {
     const hasSession = Boolean(request.cookies.get(REFRESH_COOKIE)?.value);
     if (!hasSession) {
