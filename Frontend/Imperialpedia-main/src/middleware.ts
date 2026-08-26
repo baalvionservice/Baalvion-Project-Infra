@@ -130,6 +130,13 @@ const REMOVED_PATHS = new Set<string>([
   // Only these 2 have no live equivalent anywhere on the site, so they stay:
   '/financial-intelligence/financial-goals-framework',
   '/financial-intelligence/what-is-dollar-cost-averaging',
+  // /taxes hub page permanently killed (2026-08-26): thin, empty category hub,
+  // same call as /income and /insurance above. Bare path only — any individual
+  // /taxes/<slug> article still resolves through the [...slug] catch-all's
+  // categorySlug lookup, this just kills the hub. (/tax-software was
+  // considered too but reverted — unlike /taxes it has 6 real, live,
+  // internally-linked review articles, not an empty hub.)
+  '/taxes',
   '/best-robo-advisers',
   '/best-personal-loans',
   '/best-online-brokers',
@@ -316,6 +323,7 @@ export const config = {
     '/robo-advisors',
     '/topics',
     '/search',
+    '/taxes',
     '/terms-beginning-with-c',
     '/terms-beginning-with-num',
     '/terms-beginning-with-z',

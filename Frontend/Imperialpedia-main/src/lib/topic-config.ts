@@ -824,13 +824,6 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaDescription:
       'Retirement planning guides — 401(k)s, IRAs, contribution limits, and withdrawal strategy for building and protecting a nest egg.',
   },
-  taxes: {
-    tag: 'TAXES',
-    title: 'Taxes',
-    description:
-      'Tax planning, brackets, deductions, and filing strategy to keep more of what you earn.',
-    metaTitle: 'Tax News, Planning & Filing Guides',
-  },
   budgeting: {
     tag: 'BUDGETING',
     title: 'Budgeting',
@@ -1255,7 +1248,6 @@ export const STATIC_CATEGORY_MAP: Record<string, NewsCategory> = {
   'financial-independence': 'PersonalFinance',
   'money-management': 'PersonalFinance',
   income: 'PersonalFinance',
-  taxes: 'PersonalFinance',
   planning: 'PersonalFinance',
   retirement: 'PersonalFinance',
   loans: 'PersonalFinance',

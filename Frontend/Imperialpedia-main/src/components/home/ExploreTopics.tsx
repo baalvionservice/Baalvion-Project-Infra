@@ -55,7 +55,6 @@ const GUIDE_SLUGS = [
   "student-loans",
   "cryptocurrency",
   "debt",
-  "taxes",
 ] as const;
 
 /**

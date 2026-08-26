@@ -198,8 +198,8 @@ export const sitemapService = {
       "cd-rates", "checking", "commodities", "credit", "credit-cards", "crypto",
       "cryptocurrency", "debt", "earnings", "emergency-fund", "etfs",
       "family-budget", "fed", "financial-calculators", "financial-independence",
-      // "income" and "insurance" removed — neither has a live route (both
-      // permanently 410 in middleware.ts REMOVED_PATHS), so checking
+      // "income", "insurance", and "taxes" removed — none has a live route
+      // (all permanently 410 in middleware.ts REMOVED_PATHS), so checking
       // categoryHasLiveContent for them could submit URLs to the sitemap that
       // 410 the moment Google fetches them.
       "fiscal-policy", "gdp", "global", "government", "indicators",
@@ -208,7 +208,7 @@ export const sitemapService = {
       "money-market", "monthly-budget", "mortgages", "mutual-funds", "options",
       "planning", "politics", "portfolio", "real-estate", "retirement",
       "saving-money", "savings", "student-budget", "student-loans",
-      "tax-software", "taxes", "unemployment",
+      "tax-software", "unemployment",
     ] as const;
     const topicHubResults = await Promise.all(
       TOPIC_HUB_SLUGS.map(async (slug) => ({ slug, hasContent: await safe(categoryHasLiveContent(slug), false) })),

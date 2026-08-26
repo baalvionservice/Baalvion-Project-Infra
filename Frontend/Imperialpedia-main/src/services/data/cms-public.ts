@@ -21,6 +21,7 @@ import { isAllowedImageHost, safeImageUrl } from '@/lib/safe-image';
 import { getAuthorBySlug as getStaticAuthorBySlug, getAllAuthors as getStaticAuthors } from '@/config/authors';
 import type { EntityMention } from '@/lib/entityLinkInjector';
 import { REGIONS } from '@/lib/data/worldRegions';
+import { isRemovedArticlePath } from '@/lib/content/removed-article-paths';
 
 // In production default to the API gateway's public delivery host (not localhost,
 // and not an empty string that silently forced the built-in fallback). A deploy
@@ -1031,7 +1032,13 @@ export async function getCategoryArticles(
 ): Promise<NewsArticle[]> {
   try {
     const { items } = await listCmsContent({ categorySlug, limit });
-    return items.map(cmsContentToNews);
+    // Every category hub (CategoryFeed + the dedicated Investing/Reviews/etc.
+    // hubs) reads its feed and featured card through this one function, so
+    // filtering permanently-removed duplicates here — instead of in each of
+    // those ~10 callers — is what actually keeps a 410'd article from getting
+    // picked as a hub's "featured" card (see removed-article-paths.ts; this
+    // was previously only enforced for the sitemap and homepage editorial).
+    return items.map(cmsContentToNews).filter((a) => !isRemovedArticlePath(a));
   } catch {
     return [];
   }
