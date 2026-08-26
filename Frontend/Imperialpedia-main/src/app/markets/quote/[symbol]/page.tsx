@@ -53,30 +53,30 @@ interface PageProps {
   searchParams: Promise<{ range?: string }>;
 }
 
-// Segment-level ISR: a live-quote page benefits from being cached and shared
-// across concurrent visitors far more than from `force-dynamic` (which the
-// previous implementation used) — force-dynamic also silently overrides the
-// `next: { revalidate }` option already set on the underlying fetch in
-// marketsLoader.ts, so every request was doing an uncached round-trip to
-// imperialpedia-service for nothing. Must match worldFeed.ts's
-// MARKET_DATA_REVALIDATE_SECONDS (Next requires this segment export to be a
-// literal, so it can't just import the constant) — zero-traffic cost-saving
-// policy, once a day instead of every 30s. Bring both back down together once
-// real traffic / AdSense approval makes fresher data worth the API cost.
-export const revalidate = 86400;
-export const dynamicParams = true;
-
-// Zero-traffic cost-saving policy (2026-08-26): MARKET_QUOTES_LIVE is false —
-// these pages aren't indexed or in the sitemap right now (see
-// config/market-quotes.ts), so eagerly pre-rendering all ~57 tracked symbols
-// on every deploy was 57 real provider API calls nobody was going to see.
-// dynamicParams=true above still serves any of them on the rare direct hit —
-// first request compiles it, ISR (86400s) caches it from there. Restore the
-// full ALL_TRACKED_SYMBOLS.map(...) once MARKET_QUOTES_LIVE flips true and
-// real traffic/crawling resumes, so common pages are warm instead of cold.
-export async function generateStaticParams() {
-  return [];
-}
+// NOT a segment-level ISR page, deliberately — this page reads `searchParams`
+// (the `range` query param, below), and Next.js's App Router cannot combine a
+// fixed `revalidate`/`generateStaticParams` static-generation contract with a
+// route that also reads searchParams: any request that falls through to
+// on-demand rendering (any symbol not covered by generateStaticParams, or any
+// ISR revalidation after the window elapses) throws `DYNAMIC_SERVER_USAGE`
+// and 500s. Verified live 2026-08-26 — this crashed the *entire*
+// /markets/quote/[symbol] route in production; a prior `revalidate = 30` +
+// `generateStaticParams` version merely masked it behind the initial
+// build-time static cache, until that cache's 30s window expired. Reproduced
+// locally with a production build + the actual standalone server (not `next
+// dev`, which doesn't enforce this) by isolating the exact failing
+// combination — removing the searchParams read fixed it; removing
+// generateStaticParams+revalidate (this version) also fixed it, and is the
+// one that keeps the range selector working.
+//
+// The underlying provider calls are still cached — marketsLoader.ts/
+// worldFeed.ts's fetches use `next: { revalidate: MARKET_DATA_REVALIDATE_SECONDS }`
+// (currently 86400s under the zero-traffic cost-saving policy), so Next's
+// fetch-level Data Cache still avoids re-hitting the API on every request;
+// only the page's own HTML render (cheap, no external calls) happens fresh
+// each time. Do not reintroduce generateStaticParams/dynamicParams/revalidate
+// on this route without also removing the searchParams read, or moving it
+// behind a Suspense boundary (PPR) instead.
 
 function resolveRange(range: string | undefined): (typeof RANGES)[number] {
   return (RANGES as readonly string[]).includes(range ?? "") ? (range as (typeof RANGES)[number]) : "1M";
