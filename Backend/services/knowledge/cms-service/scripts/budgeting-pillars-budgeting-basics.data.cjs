@@ -111,7 +111,7 @@ However you build it — app, spreadsheet, notebook — every workable budget tr
 - **Variable costs** — groceries, gas, entertainment, dining out — necessary spending that shifts in amount, even if the category stays the same.
 - **Savings and goals** — whatever is left, directed on purpose toward an emergency fund, debt payoff, or a specific target instead of just absorbing into the next month's spending.
 
-On a $3,800 take-home month, that might look like $1,450 in fixed costs, $1,600 in variable spending, and $750 sent to savings and extra debt payments. The exact split is less important than the fact that all four numbers exist somewhere on paper before the month starts.
+On a $3,800 take-home month, that might look like $1,450 in fixed costs, $1,010 in planned variable spending, a $590 unassigned buffer, and $750 sent to savings and extra debt payments. The exact split is less important than the fact that all four numbers exist somewhere on paper before the month starts.
 
 ## Fixed Costs vs. Variable Costs — and the Gray Area Between
 
@@ -139,7 +139,7 @@ Once the four numbers are clear, a method just decides how to organize them. Non
 | Pay-yourself-first | Savings is automated before anything else is spent | People who keep "forgetting" to save |
 | Reverse budgeting | Automate savings and bills, spend the rest freely | People who dislike tracking every category |
 
-Our full breakdown of [budgeting methods compared](/financial-intelligence/budget-methods-compared) walks through each in more depth, including [zero-based budgeting](/financial-intelligence/zero-based-budgeting) and [the envelope method](/financial-intelligence/envelope-budgeting) specifically. If you want the simplest possible starting point, [the 50/30/20 rule](/financial-intelligence/50-30-20-budget-rule-explained) is usually where beginners land first.
+Our full breakdown of [budgeting methods compared](/budget-rules/budget-methods-compared) walks through each in more depth, including [zero-based budgeting](/budget-rules/zero-based-budgeting) and [the envelope method](/budget-rules/envelope-budgeting) specifically. If you want the simplest possible starting point, [the 50/30/20 rule](/personal-finance/50-30-20-budget-rule-explained) is usually where beginners land first.
 
 > [!INFO] You don't have to pick a method before you start. Track a normal month first, then choose the method that matches what you actually spend on — not the one that sounds the most disciplined.
 
@@ -151,23 +151,23 @@ Our full breakdown of [budgeting methods compared](/financial-intelligence/budge
 4. **Assign what's left.** Whatever remains after fixed and variable costs is your savings and goals number — even if it's small the first month. If the number comes out negative, that's the most useful information a first budget can produce: it tells you exactly which fixed or variable category needs attention before anything else.
 5. **Write it down somewhere you'll actually see again.** A note, an app, a spreadsheet — the format matters far less than whether you'll open it in three weeks. The IRS-style discipline of checking withholding once a year is a decent analogy: a budget doesn't need daily attention to work, but it does need a standing appointment with itself.
 
-This process is the exact starting point covered step-by-step in [your first 30 days of budgeting](/financial-intelligence/budgeting-for-beginners), including what to do when the numbers don't balance on the first try.
+This process is the exact starting point covered step-by-step in [your first 30 days of budgeting](/budgeting-basics/budgeting-for-beginners), including what to do when the numbers don't balance on the first try.
 
 ## How Often to Revisit and Adjust It
 
 A budget built once and never opened again isn't really a budget — it's a document. Plan on a short monthly check-in: compare what you planned against what actually happened, and adjust categories that were consistently off rather than treating one bad month as failure.
 
-Our [monthly budget blueprint](/financial-intelligence/monthly-budget-blueprint) covers a repeatable structure for this review, and pairing it with a simple [budget review checklist](/financial-intelligence/budget-review-checklist) keeps the check-in from becoming its own chore.
+Our [monthly budget blueprint](/monthly-budget/monthly-budget-blueprint) covers a repeatable structure for this review, and pairing it with a simple [budget review checklist](/monthly-budget/budget-review-checklist) keeps the check-in from becoming its own chore.
 
 ## Common Mistakes That Undercut a New Budget
 
-New budgets tend to fail for a small, predictable set of reasons rather than bad math. Underestimating variable costs, forgetting irregular annual expenses like car registration, and setting savings goals so aggressive they collapse by week two are the most common. Our full rundown of [common budgeting mistakes](/financial-intelligence/common-budgeting-mistakes) goes through ten of them in detail, along with the fix for each.
+New budgets tend to fail for a small, predictable set of reasons rather than bad math. Underestimating variable costs, forgetting irregular annual expenses like car registration, and setting savings goals so aggressive they collapse by week two are the most common. Our full rundown of [common budgeting mistakes](/budgeting-basics/common-budgeting-mistakes) goes through ten of them in detail, along with the fix for each.
 
 ## The Bottom Line: What Is a Budget For?
 
 A budget is not a moral report card and it isn't proof of financial failure if it takes a few tries to get right. What it actually is: a plan, written down before the month starts, that turns vague intentions about money into four visible numbers you can check yourself against. Start rough, revise monthly, and treat the first version as a draft rather than a verdict.
 
-This article is educational and general in nature — it isn't personalized financial advice, and your own numbers, obligations, and goals may call for a different approach than the examples above. Once your first draft exists, [why budgeting matters](/financial-intelligence/why-budgeting-matters) and [your first 30 days of budgeting](/financial-intelligence/budgeting-for-beginners) are the natural next stops, or head back to the [Budgeting Basics hub](/budgeting-basics) for the full series.`,
+This article is educational and general in nature — it isn't personalized financial advice, and your own numbers, obligations, and goals may call for a different approach than the examples above. Once your first draft exists, [why budgeting matters](/budgeting-basics/why-budgeting-matters) and [your first 30 days of budgeting](/budgeting-basics/budgeting-for-beginners) are the natural next stops, or head back to the [Budgeting Basics hub](/budgeting-basics) for the full series.`,
     futureArticleIdeas: [
       'Budget vs financial plan: what’s the actual difference',
       'How to budget with an irregular or freelance income',
@@ -231,7 +231,7 @@ This article is educational and general in nature — it isn't personalized fina
 
 Money gets spent whether or not you decide where it goes. Without a budget, that decision doesn't disappear — it just shifts to whoever sends you a bill first, or whatever purchase happens to be in front of you on a Tuesday. On a paycheck with real slack, that's an inefficiency. On a tight paycheck, it's how a $40 shortfall turns into an overdraft fee, and an overdraft fee turns into a smaller grocery budget for the rest of the month.
 
-This is the core argument for [what a budget actually is](/financial-intelligence/what-is-a-budget): a plan made in advance, when you can see the whole month, instead of reactive decisions made under pressure one bill at a time.
+This is the core argument for [what a budget actually is](/budgeting-basics/what-is-a-budget): a plan made in advance, when you can see the whole month, instead of reactive decisions made under pressure one bill at a time.
 
 Picture two versions of the same $2,600 take-home month. In the first, nothing is written down — bills get paid as they arrive, groceries happen as needed, and by the 24th there's $38 left for six days. In the second, the same $2,600 was mapped out on the 1st: $1,050 for rent, $180 for utilities, $310 for groceries, $140 for transportation, and the rest split between a small debt payment and a $60 buffer. Nothing about the actual spending changed — the total is identical. What changed is whether the person found out about the shortfall on the 1st, when there was still time to adjust, or on the 24th, when there wasn't.
 
@@ -251,20 +251,20 @@ None of this is just an opinion about willpower. The Bureau of Labor Statistics'
 
 It's a common instinct to assume budgeting is worth the effort only once there's meaningful surplus to manage. In reality, a tight income has the least room for waste, which makes a plan more valuable, not less. Someone with $4,000 of slack in their monthly income can absorb a planning mistake without much consequence. Someone with $60 of slack cannot.
 
-That doesn't mean budgeting on a low income is easy — it's genuinely harder, because every category matters more and there's less flexibility to fix a bad estimate. But it's exactly why the plan matters. See [your first 30 days of budgeting](/financial-intelligence/budgeting-for-beginners) for a realistic starting process built for this situation specifically.
+That doesn't mean budgeting on a low income is easy — it's genuinely harder, because every category matters more and there's less flexibility to fix a bad estimate. But it's exactly why the plan matters. See [your first 30 days of budgeting](/budgeting-basics/budgeting-for-beginners) for a realistic starting process built for this situation specifically.
 
 ## What Changes Once You Actually Have a Plan
 
 - **Bills stop being a surprise.** You know what's due and when, instead of discovering it in real time, which on its own removes a surprising amount of the low-grade anxiety that comes with checking a bank balance.
 - **Small savings become possible.** Even $20 a month, redirected on purpose, is $240 over a year that wouldn't have existed otherwise — not because the budget conjured new money, but because it caught an amount that would have quietly disappeared into nothing in particular.
 - **Debt decisions get clearer.** A budget shows exactly how much can realistically go toward a credit card balance each month, rather than a vague "whatever's left," which is usually less than people assume until they see the real number.
-- **Emergencies become survivable instead of catastrophic.** Even a partial cushion, built through a budget, changes what a car repair means for your month. See [building an emergency fund into your budget](/financial-intelligence/building-emergency-fund-into-your-budget) for how that fits alongside everyday expenses.
+- **Emergencies become survivable instead of catastrophic.** Even a partial cushion, built through a budget, changes what a car repair means for your month. See [building an emergency fund into your budget](/emergency-fund/building-emergency-fund-into-your-budget) for how that fits alongside everyday expenses.
 - **Goals stop being abstract.** "Save more" becomes a specific dollar amount tied to a specific month, which is the difference explored in [setting real financial goals](/financial-intelligence/financial-goals-framework).
 - **Arguments about money get shorter.** Whether it's a partner, a roommate, or just the version of yourself deciding whether to order takeout, a written number ends a debate that would otherwise run in circles.
 
 ## Why It Still Feels Hard the First Few Months
 
-Budgeting matters, but that doesn't make it painless right away. The first month or two usually involves discovering that a category — groceries, gas, subscriptions — costs more than you assumed. That's not a sign the budget is failing; it's the plan doing its job by surfacing something that was already true but invisible before. Our guide to [common budgeting mistakes](/financial-intelligence/common-budgeting-mistakes) covers the specific missteps that make this early period harder than it needs to be.
+Budgeting matters, but that doesn't make it painless right away. The first month or two usually involves discovering that a category — groceries, gas, subscriptions — costs more than you assumed. That's not a sign the budget is failing; it's the plan doing its job by surfacing something that was already true but invisible before. Our guide to [common budgeting mistakes](/budgeting-basics/common-budgeting-mistakes) covers the specific missteps that make this early period harder than it needs to be.
 
 ## Common Objections, Addressed
 
@@ -277,9 +277,9 @@ Budgeting matters, but that doesn't make it painless right away. The first month
 
 Consider a household bringing home $2,900 a month with $1,900 in genuinely fixed costs — rent, a car payment, insurance, minimum debt payments. That leaves $1,000 for everything else, which sounds thin until it's actually planned: $420 for groceries and household basics, $150 for transportation and gas, $80 for a phone bill, and $350 remaining. Without a plan, that $350 tends to evaporate across small, forgettable purchases over the month. With one, even splitting it as $250 toward a starter emergency fund and $100 toward genuine discretionary spending turns an invisible amount into $3,000 saved over a year — money that, without a written plan, would very likely not exist at all, not because the household didn't have it, but because nothing was directing it anywhere on purpose.
 
-## Conclusion
+## What This Comes Down To
 
-Budgeting matters most exactly where it feels least worth the effort — on a tight income, where there's no room for a mistake to quietly correct itself. The payoff isn't dramatic in the first week; it shows up as fewer surprises, a little breathing room, and decisions made on your own terms instead of a bill's. This is general educational information, not personalized financial advice — but the underlying logic holds regardless of income level: a plan beats no plan. From here, [your first 30 days of budgeting](/financial-intelligence/budgeting-for-beginners) is the practical next step, or explore the full [Budgeting Basics hub](/budgeting-basics).`,
+Budgeting matters most exactly where it feels least worth the effort — on a tight income, where there's no room for a mistake to quietly correct itself. The payoff isn't dramatic in the first week; it shows up as fewer surprises, a little breathing room, and decisions made on your own terms instead of a bill's. This is general educational information, not personalized financial advice — but the underlying logic holds regardless of income level: a plan beats no plan. From here, [your first 30 days of budgeting](/budgeting-basics/budgeting-for-beginners) is the practical next step, or explore the full [Budgeting Basics hub](/budgeting-basics).`,
       futureArticleIdeas: [
         'The real cost of not having a budget over one year',
         'How budgeting reduces financial anxiety, explained',
@@ -352,13 +352,13 @@ Sort transactions into three rough buckets:
 - **Variable costs** — groceries, gas, dining, entertainment.
 - **Everything else** — irregular purchases that don't fit neatly, which is useful information on its own.
 
-Our guide to [tracking your expenses](/financial-intelligence/how-to-track-expenses) covers this step in more depth if a full month of statements feels overwhelming to sort manually.
+Our guide to [tracking your expenses](/personal-finance/how-to-track-expenses) covers this step in more depth if a full month of statements feels overwhelming to sort manually.
 
 ## Week Two: Build the First Draft
 
 With real numbers in hand, build the actual budget. Add fixed costs together first — they're the least negotiable and the easiest to get right. Then set variable category limits based on your real averages from week one, not a number that sounds responsible. Whatever remains becomes your savings or debt-payoff amount, even if it starts small.
 
-If picking a structure feels paralyzing, default to something simple like [what a budget actually is](/financial-intelligence/what-is-a-budget) describes — needs, wants, and savings — rather than a complicated system you're unlikely to maintain in week three.
+If picking a structure feels paralyzing, default to something simple like [what a budget actually is](/budgeting-basics/what-is-a-budget) describes — needs, wants, and savings — rather than a complicated system you're unlikely to maintain in week three.
 
 | Week | Focus | Output |
 | --- | --- | --- |
@@ -369,7 +369,7 @@ If picking a structure feels paralyzing, default to something simple like [what 
 
 ## Week Three: Track Against the Plan
 
-This is where most beginner budgets meet resistance. A category — usually groceries or dining out — will run over. Log spending as it happens rather than waiting until the end of the week; a short daily glance takes under a minute and prevents a small overage from becoming an unpleasant surprise later. A [budgeting app](/financial-intelligence/best-budget-apps) can automate part of this if manual logging isn't sustainable for you.
+This is where most beginner budgets meet resistance. A category — usually groceries or dining out — will run over. Log spending as it happens rather than waiting until the end of the week; a short daily glance takes under a minute and prevents a small overage from becoming an unpleasant surprise later. A [budgeting app](/budgeting-apps/best-budget-apps) can automate part of this if manual logging isn't sustainable for you.
 
 Say the plan set $400 for groceries and, by day 18, $340 is already spent. That's useful information two ways: it flags the category as running hot before the month ends, and it gives you a concrete number — roughly $8 a day for the remaining twelve days — to work with instead of a vague sense of "watch spending." Reacting to a specific number is a much easier task than reacting to a general feeling that things are getting tight.
 
@@ -379,7 +379,7 @@ Say the plan set $400 for groceries and, by day 18, $340 is already spent. That'
 
 At the end of the month, compare what you planned against what actually happened, category by category. Some will match closely. At least one probably won't — that's not a failed budget, it's exactly the information month one exists to produce. Carry the corrected numbers into month two rather than starting from scratch.
 
-This is also the point where [why budgeting matters](/financial-intelligence/why-budgeting-matters) tends to become concrete rather than theoretical — you'll likely notice at least one place money was quietly leaking that a real look at the numbers caught.
+This is also the point where [why budgeting matters](/budgeting-basics/why-budgeting-matters) tends to become concrete rather than theoretical — you'll likely notice at least one place money was quietly leaking that a real look at the numbers caught.
 
 ## A Note on Perfectionism
 
@@ -389,17 +389,17 @@ It also helps to separate two very different feelings that show up around week t
 
 ## What to Do If Nothing Is Left Over
 
-If fixed and variable costs consume the entire month's income with nothing for savings, that's a useful, specific finding — not a personal failing. It tells you precisely where to focus: either a fixed cost that needs renegotiating (insurance, a subscription audit) or a variable category running higher than expected. Our guide to [common budgeting mistakes](/financial-intelligence/common-budgeting-mistakes) covers the specific errors that make this outcome look worse than it actually is.
+If fixed and variable costs consume the entire month's income with nothing for savings, that's a useful, specific finding — not a personal failing. It tells you precisely where to focus: either a fixed cost that needs renegotiating (insurance, a subscription audit) or a variable category running higher than expected. Our guide to [common budgeting mistakes](/budgeting-basics/common-budgeting-mistakes) covers the specific errors that make this outcome look worse than it actually is.
 
 Start with the fixed costs, since a permanent reduction there compounds every month going forward, unlike a one-time cut to a variable category. A lower insurance premium after shopping around, or one fewer subscription, is worth more over a year than trimming a single week of groceries — even though the grocery cut feels like the more obvious lever in the moment.
 
 ## Choosing Your First Method
 
-Beginners often stall trying to pick the "right" budgeting system before starting at all. For a first month, that decision matters far less than actually gathering real numbers. A simple needs-versus-wants split, close to [what a budget actually is](/financial-intelligence/what-is-a-budget) describes, is usually enough to get through 30 days. Once you have a real month of data behind you, revisiting a more structured method — zero-based, envelope, or otherwise — becomes a much easier decision, because it's grounded in your actual numbers instead of a guess about which system sounds most disciplined.
+Beginners often stall trying to pick the "right" budgeting system before starting at all. For a first month, that decision matters far less than actually gathering real numbers. A simple needs-versus-wants split, close to [what a budget actually is](/budgeting-basics/what-is-a-budget) describes, is usually enough to get through 30 days. Once you have a real month of data behind you, revisiting a more structured method — zero-based, envelope, or otherwise — becomes a much easier decision, because it's grounded in your actual numbers instead of a guess about which system sounds most disciplined.
 
-## Conclusion
+## Thirty Days In
 
-Thirty days is enough time to go from no budget to a realistic, data-backed one — not a perfect one, but a working draft built from your actual numbers instead of guesses. Expect friction in weeks three and four; that's the plan doing its job, not evidence it isn't working. This guide is educational and general — your specific numbers and priorities may call for adjustments the examples here don't cover. From here, revisit [what a budget actually is](/financial-intelligence/what-is-a-budget) for the underlying framework, or browse the [Budgeting Basics hub](/budgeting-basics) for what comes next.`,
+Thirty days is enough time to go from no budget to a realistic, data-backed one — not a perfect one, but a working draft built from your actual numbers instead of guesses. Expect friction in weeks three and four; that's the plan doing its job, not evidence it isn't working. This guide is educational and general — your specific numbers and priorities may call for adjustments the examples here don't cover. From here, revisit [what a budget actually is](/budgeting-basics/what-is-a-budget) for the underlying framework, or browse the [Budgeting Basics hub](/budgeting-basics) for what comes next.`,
       futureArticleIdeas: [
         'What to do when your first budget completely falls apart',
         'How to budget your very first paycheck out of school',
@@ -457,7 +457,7 @@ Thirty days is enough time to go from no budget to a realistic, data-backed one 
 
 ## 1. Underestimating Variable Costs
 
-Groceries, gas, and dining out are the categories people guess wrong most often, usually on the low side. It's easy to remember the $80 grocery run and forget the four smaller $25 ones that happened the same week — the total quietly adds up to $180, not the $80 that stuck in memory. The Bureau of Labor Statistics' Consumer Expenditure Surveys consistently show food and discretionary spending as some of the most variable line items in a typical household budget, which is exactly why a memory-based estimate tends to miss by a wide margin. The fix: pull an actual total from a recent bank statement instead of estimating, as covered in [your first 30 days of budgeting](/financial-intelligence/budgeting-for-beginners).
+Groceries, gas, and dining out are the categories people guess wrong most often, usually on the low side. It's easy to remember the $80 grocery run and forget the four smaller $25 ones that happened the same week — the total quietly adds up to $180, not the $80 that stuck in memory. The Bureau of Labor Statistics' Consumer Expenditure Surveys consistently show food and discretionary spending as some of the most variable line items in a typical household budget, which is exactly why a memory-based estimate tends to miss by a wide margin. The fix: pull an actual total from a recent bank statement instead of estimating, as covered in [your first 30 days of budgeting](/budgeting-basics/budgeting-for-beginners).
 
 ## 2. Forgetting Irregular Annual Expenses
 
@@ -469,7 +469,7 @@ Committing to save 30% of income in month one, when nothing has been tested yet,
 
 ## 4. Copying Someone Else's Percentages
 
-A savings rate or spending split that works for a coworker or an influencer may not reflect your rent, your city, or your obligations. Borrowed numbers without your own data behind them tend to feel wrong quickly, and that friction is often what causes people to quit. [What a budget actually is](/financial-intelligence/what-is-a-budget) is built from your real income and expenses — not someone else's.
+A savings rate or spending split that works for a coworker or an influencer may not reflect your rent, your city, or your obligations. Borrowed numbers without your own data behind them tend to feel wrong quickly, and that friction is often what causes people to quit. [What a budget actually is](/budgeting-basics/what-is-a-budget) is built from your real income and expenses — not someone else's.
 
 ## 5. Leaving No Room for Discretionary Spending
 
@@ -479,7 +479,7 @@ A budget with zero planned spending on wants doesn't eliminate the desire to spe
 
 ## 6. Tracking Once and Never Reviewing Again
 
-A budget built in January and never opened again isn't tracking anything by June — rent went up, a subscription got added, income changed. Fix: a short monthly review, using a [budget review checklist](/financial-intelligence/budget-review-checklist), catches drift before it becomes a real gap between plan and reality.
+A budget built in January and never opened again isn't tracking anything by June — rent went up, a subscription got added, income changed. Fix: a short monthly review, using a [budget review checklist](/monthly-budget/budget-review-checklist), catches drift before it becomes a real gap between plan and reality.
 
 ## 7. Treating One Bad Month as Total Failure
 
@@ -509,11 +509,11 @@ If there's a single pattern underneath most of the mistakes above, it's this: tr
 | No discretionary spending category | Add a small, intentional fun budget |
 | No monthly review | Use a short recurring checklist |
 
-## Conclusion
+## Small Fixes, Not a Restart
 
 None of these ten mistakes require starting over — each has a specific, small fix, and most budgets that "don't work" are one or two adjustments away from working fine. Review what actually happened last month, correct the categories that were off, and keep the plan running rather than treating a rough month as proof the whole idea failed. Most people who eventually stick with budgeting long-term didn't get it right the first time; they just kept correcting the same handful of categories until the plan finally matched their real life.
 
-This is general educational guidance, not personalized advice — your own numbers may point to a different priority order than the one above. For the full framework, revisit [what a budget actually is](/financial-intelligence/what-is-a-budget), work through [your first 30 days of budgeting](/financial-intelligence/budgeting-for-beginners) if you're starting fresh, or explore the [Budgeting Basics hub](/budgeting-basics) for the rest of the series.`,
+This is general educational guidance, not personalized advice — your own numbers may point to a different priority order than the one above. For the full framework, revisit [what a budget actually is](/budgeting-basics/what-is-a-budget), work through [your first 30 days of budgeting](/budgeting-basics/budgeting-for-beginners) if you're starting fresh, or explore the [Budgeting Basics hub](/budgeting-basics) for the rest of the series.`,
       futureArticleIdeas: [
         'What to do when you overspend in the same category every month',
         'How to budget for irregular annual expenses without a sinking fund',
@@ -524,6 +524,96 @@ This is general educational guidance, not personalized advice — your own numbe
         'Why comparing your budget to other people’s numbers backfires',
         'How to build a more forgiving budget that survives real life',
       ],
+    },
+    {
+      // Recategorized from the legacy 'budgeting' category (personal-finance-pillars-budgeting.data.cjs)
+      // — unique content (no equivalent anywhere in the Budgeting Hub), moved here rather than
+      // retired along with the rest of that category. Old URL 301s to this one.
+      slug: 'budgeting-after-a-major-life-change',
+      title: 'How to Rebuild Your Budget After a Major Life Change',
+      metaTitle: 'How to Rebuild Your Budget After a Major Life Change',
+      metaDescription: 'A step-by-step approach to rebuilding a budget after a job loss, a new child, a divorce, or another major life change.',
+      excerpt: 'A major life change can make an existing budget obsolete overnight. Here is how to rebuild one from the ground up.',
+      focusKeyword: 'budgeting after a major life change',
+      secondaryKeywords: ['rebuild budget after job loss', 'budgeting after divorce', 'budgeting for a new baby'],
+      longTailKeywords: ['how do I budget after losing my job', 'how does having a baby change your budget', 'how to separate finances after a divorce'],
+      searchIntent: 'Informational/how-to — readers facing a major life event needing to restructure their budget quickly.',
+      audience: ['Beginner', 'Intermediate'],
+      subcategory: 'Budgeting Fundamentals',
+      tags: ['life changes', 'job loss budgeting', 'budgeting basics'],
+      heroImagePrompt: 'Realistic photograph of a person starting a fresh budget notebook page at a home desk, calm and organized tone, natural lighting, editorial personal-finance photography, no text overlays, no logos, 16:9',
+      socialImagePrompt: 'Realistic photo of a blank notebook page and pen on a desk, symbolizing a fresh start, editorial style, no readable text, no logos, 16:9',
+      coverImageAlt: 'Person starting a new budget after a major life change',
+      thumbnailAlt: 'Blank notebook page representing a rebuilt budget',
+      imageFileName: 'budgeting-after-a-major-life-change.jpg',
+      keyTakeaways: [
+        'A major life change usually invalidates the assumptions behind an existing budget, which is why rebuilding from scratch is often more effective than adjusting the old one.',
+        'The first step after a job loss is separating essential expenses from everything else, since income has changed suddenly and significantly.',
+        'A new dependent adds new recurring categories and often changes existing ones, like housing or transportation, over time.',
+        'Separating finances after a divorce typically requires new individual accounts, updated beneficiaries, and a full expense recalculation.',
+        'Rebuilding a budget after a life change is a process, not a single afternoon task, and often needs revisiting again within a few months.',
+      ],
+      internalLinks: [
+        { slug: 'what-is-a-budget', anchor: 'what a budget actually is' },
+        { slug: 'why-budgeting-matters', anchor: 'why budgeting matters' },
+        { slug: 'budgeting-for-beginners', anchor: 'your first 30 days of budgeting' },
+        { slug: 'common-budgeting-mistakes', anchor: 'common budgeting mistakes' },
+      ],
+      faq: [
+        { question: 'Why does a major life change usually require a new budget instead of adjusting the old one?', answer: 'A major life change typically breaks the underlying assumptions of an existing budget, such as income level or household size, making a full rebuild more accurate than a partial adjustment.' },
+        { question: 'What should be the first step after a job loss?', answer: 'Separate essential expenses from non-essential ones, reduce or pause discretionary spending, and evaluate whether drawing on an emergency fund is appropriate.' },
+        { question: 'How does a new baby typically change a household budget?', answer: 'It adds new recurring categories like childcare and medical costs, and can affect existing categories such as housing or transportation over time.' },
+        { question: 'What financial steps come with separating finances after a divorce?', answer: 'Common steps include opening individual accounts, removing joint account access where appropriate, updating beneficiaries, and recalculating a budget based on a single income.' },
+        { question: 'Should an emergency fund be used during a major life change?', answer: 'It can be, particularly after a job loss. An emergency fund exists for exactly this kind of disruption, with a plan to rebuild it once income stabilizes.' },
+        { question: 'How long does it typically take to stabilize a new budget after a big change?', answer: 'It varies, but revisiting the budget again after a month or two, once real costs and income are clearer, is a normal part of the process rather than a sign of failure.' },
+        { question: 'Should insurance coverage be reviewed after a major life change?', answer: 'Yes. Dependents, beneficiaries, and coverage needs often change alongside major life events, making it a natural time to review existing policies.' },
+        { question: 'Is it normal for a rebuilt budget to need further adjustment later?', answer: 'Yes. A rebuilt budget rarely gets every number right immediately, especially when some costs are still uncertain in the first few months.' },
+        { question: 'What budgeting method works best right after a major life change?', answer: 'A simpler structure with a small number of essential categories is often easier to maintain during a disruptive period than a highly detailed method, with more granularity reintroduced later.' },
+      ],
+      markdown: `Some life events are disruptive enough that an existing budget stops reflecting reality almost overnight, whether that is a job loss, a new child, a divorce, or another major transition. In these situations, adjusting the old budget slightly is often less effective than rebuilding it from the ground up, using the same [core budgeting principles](/budgeting-basics/what-is-a-budget) but starting from a fresh set of assumptions.
+
+## Why the Old Budget No Longer Applies
+
+A budget is built on assumptions about income, expenses, and priorities. A major life change typically breaks one or more of those assumptions completely: income may drop suddenly, a new recurring expense may appear, or financial responsibilities may need to be divided between two households instead of one. Trying to patch an old budget around a changed foundation tends to leave gaps; starting over captures the new reality more accurately.
+
+## After a Job Loss
+
+The immediate priority after a job loss is separating essential expenses, such as housing, utilities, food, insurance, and minimum debt payments, from everything else, and reducing or pausing non-essential spending until income stabilizes. An emergency fund, if one exists, is intended for exactly this kind of situation. Drawing on it deliberately, with a plan to rebuild it once income resumes, is a reasonable use rather than a failure of the original savings plan.
+
+## After a New Baby
+
+A new dependent adds new recurring categories, such as childcare, medical costs, and supplies, and can also change existing categories over time, such as housing needs or transportation. Because many of these costs are not fully known in advance, building in a wider margin than usual for the first few months, then tightening the budget once actual costs are clearer, tends to work better than trying to predict every expense precisely up front.
+
+## After a Divorce
+
+Separating finances after a divorce typically involves several concrete steps: opening individual accounts, removing joint account access where appropriate, updating beneficiaries on insurance and retirement accounts, and recalculating a full budget based on a single income and a new set of living expenses rather than a shared household's numbers. This is also a common point to reassess insurance coverage directly, since dependents, beneficiaries, and coverage needs may all be changing at once.
+
+| Life event | Immediate budgeting priority |
+| --- | --- |
+| Job loss | Separate essential from non-essential expenses; consider emergency fund use |
+| New baby | Build in a wider margin for new and uncertain costs |
+| Divorce | Separate accounts, update beneficiaries, recalculate on a single income |
+
+## Give the New Budget Time to Stabilize
+
+A rebuilt budget after a major life change rarely gets everything right on the first attempt, particularly when some costs are still unknown or income is not yet stable. Revisiting the new budget after a month or two, once real numbers are available, is a normal part of the process rather than a sign the initial rebuild failed.
+
+> [!INFO] A budget rebuilt during a major life change does not need to be perfect immediately. It needs to cover essentials and be revisited again once the new normal becomes clearer.
+
+## Choosing a Method During Rebuilding
+
+A simpler structure, such as a basic [envelope system](/budget-rules/envelope-budgeting) for a small number of essential categories, is often easier to maintain during a disruptive period than a highly detailed [zero-based budget](/budget-rules/zero-based-budgeting). A more granular method can be reintroduced later, once the situation stabilizes.
+
+## Where Rebuilds Go Wrong
+
+- Trying to patch the old budget instead of rebuilding it around new assumptions.
+- Underestimating how much a new dependent's costs will fluctuate in the first few months.
+- Delaying account separation or beneficiary updates after a divorce.
+- Expecting a rebuilt budget to be final rather than revisiting it after a few months.
+
+## Rebuild First, Perfect It Later
+
+A major life change often means an existing budget no longer reflects reality, which is why rebuilding it, rather than adjusting it piecemeal, tends to work better. Start with essentials, give the new numbers time to stabilize, and revisit the plan again once the immediate disruption settles, using whichever [budgeting method](/budgeting-basics/what-is-a-budget) fits the simpler, more urgent phase you are in.`,
     },
   ],
 };

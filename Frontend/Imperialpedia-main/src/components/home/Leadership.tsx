@@ -1,5 +1,5 @@
 import React from "react";
-import { loadCompanies, loadCountries, loadTechnologies } from "@/lib/data/loaders";
+import { getCategoryDirectory, getPublicAuthors } from "@/services/data/cms-public";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface Leader {
@@ -51,25 +51,27 @@ const EXECUTIVE_COMMITTEE: Leader[] = [
 /**
  * "Our Mission" + "Leadership" — the closing trust section, mirroring how
  * reference editorial sites pair a mission statement and real stats with a
- * leadership/advisor list near the bottom of the homepage. The stats reuse
- * the same live loaders KnowledgeCategories draws from (never a separate,
- * driftable number) rather than the kind of round, unverifiable claims
- * ("30+ Million Readers") this codebase has deliberately stripped out of
- * other properties' homepages elsewhere -- see the Law Elite Network and
- * Imperialpedia "remove unverifiable stats" history.
+ * leadership/advisor list near the bottom of the homepage. The stats are
+ * live counts of what this site actually publishes (categories, articles,
+ * contributors) via the same CMS service AllCategories/EditorialTeam draw
+ * from -- not the Companies/Countries/Technologies-tracked figures this used
+ * to show, which described a different Baalvion property's market-data
+ * breadth, not Imperialpedia's own editorial output. Never a separate,
+ * driftable, or unverifiable number ("30+ Million Readers") -- see the Law
+ * Elite Network and Imperialpedia "remove unverifiable stats" history.
  */
 export async function Leadership() {
-  const [companies, countries, technologies] = await Promise.all([
-    loadCompanies(),
-    loadCountries(),
-    loadTechnologies(),
+  const [categories, authors] = await Promise.all([
+    getCategoryDirectory(),
+    getPublicAuthors(),
   ]);
+  const articleCount = categories.reduce((sum, c) => sum + c.articleCount, 0);
 
   const stats = [
     { value: "2022", label: "Founded" },
-    { value: `${companies.length}+`, label: "Companies Tracked" },
-    { value: `${countries.length}+`, label: "Countries Covered" },
-    { value: `${technologies.length}+`, label: "Technologies Explained" },
+    { value: `${articleCount}+`, label: "Articles Published" },
+    { value: `${categories.length}+`, label: "Topics Covered" },
+    { value: `${authors.length}+`, label: "Contributors" },
   ];
 
   return (

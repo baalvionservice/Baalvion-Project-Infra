@@ -77,7 +77,7 @@ Contrast two people making $3,800 in take-home pay a month. One keeps a loose me
 
 ## Find Out Where Your Money Actually Goes First
 
-You cannot cut what you haven’t measured. Before changing anything, spend a full billing cycle — ideally a full month — tracking every dollar that leaves your accounts. Our guide on [how to track your expenses](/financial-intelligence/how-to-track-expenses) walks through several ways to do this without a spreadsheet degree.
+You cannot cut what you haven’t measured. Before changing anything, spend a full billing cycle — ideally a full month — tracking every dollar that leaves your accounts. Our guide on [how to track your expenses](/personal-finance/how-to-track-expenses) walks through several ways to do this without a spreadsheet degree.
 
 Most people find the exercise humbling in a specific way: not because of one big irresponsible purchase, but because of a dozen small ones that individually felt harmless. A $14 streaming service here, a $9 delivery fee there, a subscription box nobody remembers signing up for. None of it feels like much in the moment. Added up over a month, it’s often the difference between saving nothing and saving a few hundred dollars.
 
@@ -87,7 +87,7 @@ Once you can see the full picture, sort spending into three buckets:
 - **Flexible but necessary** — groceries, gas, utilities, amounts that change but can’t go to zero.
 - **Discretionary** — dining out, entertainment, shopping, anything you’re choosing rather than required to pay.
 
-The [50/30/20 budget rule](/financial-intelligence/50-30-20-budget-rule-explained) is a useful starting frame for how these three buckets are supposed to balance against savings, even if your actual percentages end up different.
+The [50/30/20 budget rule](/personal-finance/50-30-20-budget-rule-explained) is a useful starting frame for how these three buckets are supposed to balance against savings, even if your actual percentages end up different.
 
 ## The Big Three: Housing, Transportation, and Food
 
@@ -96,9 +96,9 @@ The Bureau of Labor Statistics’ Consumer Expenditure Survey has found, year af
 That doesn’t mean uprooting your life every time you want to save more. It means checking, on a regular cadence, whether your biggest fixed and semi-fixed costs still reflect the best available option:
 
 - Shop your auto and home or renters insurance every 12–18 months — rates shift, and loyalty rarely gets rewarded with the best price.
-- Reassess whether a second car, a larger vehicle than you need, or a longer commute is quietly costing you in gas, maintenance, and time. Our guide on [the best ways to cut expenses](/financial-intelligence/best-ways-to-cut-expenses) includes a full section on trimming transportation costs specifically.
-- Review grocery spending against a plan rather than a habit — see [how to reduce grocery costs](/financial-intelligence/reduce-grocery-costs) for a full breakdown.
-- Check your utility setup for free or low-cost efficiency wins; our guide to [lowering utility bills](/financial-intelligence/lower-utility-bills) covers this room by room.
+- Reassess whether a second car, a larger vehicle than you need, or a longer commute is quietly costing you in gas, maintenance, and time. Our guide on [the best ways to cut expenses](/saving-money/best-ways-to-cut-expenses) includes a full section on trimming transportation costs specifically.
+- Review grocery spending against a plan rather than a habit — see [how to reduce grocery costs](/saving-money/reduce-grocery-costs) for a full breakdown.
+- Check your utility setup for free or low-cost efficiency wins; our guide to [lowering utility bills](/saving-money/lower-utility-bills) covers this room by room.
 
 Put real numbers next to this. A household paying $180 a month for auto insurance that shops around and lands on $150 has freed up $30 every single month without changing a single daily habit. Trim $40 off a phone-and-internet bundle, $25 off a grocery routine that was running on autopilot, and $15 in forgotten subscriptions, and that same household has found $110 a month — over $1,300 a year — before touching a single dinner out or weekend plan. The math works because these are the categories with the most room, not because any one cut is dramatic on its own.
 
@@ -121,7 +121,7 @@ The Federal Trade Commission has published guidance reminding consumers that can
 
 The single most reliable lever in saving more money every month isn’t a specific cut — it’s removing your own future self from the decision. Set up an automatic transfer to a separate account on the day you’re paid, before the money has a chance to blend into everyday spending. This is often called “paying yourself first,” and it works precisely because it doesn’t rely on discipline at the moment of spending.
 
-Start with an amount that won’t immediately trigger overdraft anxiety — even $50 a paycheck is a real habit forming — and increase it gradually, especially every time you get a raise or pay off a debt that freed up room in your budget. Keeping this money in a [high-yield savings account](/financial-intelligence/high-yield-savings-accounts) rather than a checking account also means it quietly earns more while it sits there.
+Start with an amount that won’t immediately trigger overdraft anxiety — even $50 a paycheck is a real habit forming — and increase it gradually, especially every time you get a raise or pay off a debt that freed up room in your budget. Keeping this money in a [high-yield savings account](/savings/high-yield-savings-accounts) rather than a checking account also means it quietly earns more while it sits there.
 
 ## Small Habits That Compound Over a Year
 
@@ -133,13 +133,13 @@ None of the following moves feels dramatic on its own, which is exactly why peop
 4. **Redirect windfalls** — tax refunds, rebates, cashback — straight to savings instead of letting them absorb into spending.
 5. **Round up or automate spare change** from purchases into a savings account if your bank offers it.
 
-For a longer list of these small-but-real habits, see our guide to [frugal living tips](/financial-intelligence/frugal-living-tips) that go beyond the obvious advice.
+For a longer list of these small-but-real habits, see our guide to [frugal living tips](/saving-money/frugal-living-tips) that go beyond the obvious advice.
 
 ## How Much More Should You Actually Be Saving?
 
 There’s no single right number, and anyone promising one is oversimplifying. A more useful question is: what’s the next realistic increase from where you are right now? If you’re saving nothing, the win is starting with even 2–3% of take-home pay. If you’re already saving 10%, the next milestone might be 15%. The goal in any given month isn’t to hit a textbook percentage — it’s to save more this month than last month, consistently, in a way you can actually sustain.
 
-If you haven’t built a true safety net yet, that should typically come before increasing savings elsewhere. Our [emergency fund guide](/financial-intelligence/emergency-fund-guide) explains how to size and prioritize that first layer of security.
+If you haven’t built a true safety net yet, that should typically come before increasing savings elsewhere. Our [emergency fund guide](/personal-finance/emergency-fund-guide) explains how to size and prioritize that first layer of security.
 
 It also helps to separate “save more” from “save perfectly.” A month where you save $150 instead of your usual $100 is real progress, even if it isn’t the $300 a finance article somewhere told you to aim for. Progress that survives a bad month — a car repair, a slow work week, an unplanned expense — is worth more over a year than an aggressive target that gets abandoned the first time life gets in the way.
 
@@ -166,7 +166,7 @@ Repeating this four-week cycle even a couple of times a year — not every singl
 
 ## The Bottom Line
 
-Saving more money every month rarely comes down to one dramatic change. It comes from seeing where money actually goes, trimming the costs that don’t cost you much real quality of life, and automating the transfer so the saving happens whether or not you’re paying close attention that week. Start with [the best ways to cut expenses](/financial-intelligence/best-ways-to-cut-expenses) that fit your life, and browse the rest of our [Saving Money hub](/saving-money) for the full cluster of guides.
+Saving more money every month rarely comes down to one dramatic change. It comes from seeing where money actually goes, trimming the costs that don’t cost you much real quality of life, and automating the transfer so the saving happens whether or not you’re paying close attention that week. Start with [the best ways to cut expenses](/saving-money/best-ways-to-cut-expenses) that fit your life, and browse the rest of our [Saving Money hub](/saving-money) for the full cluster of guides.
 
 This article is educational and general in nature — it isn’t personalized financial advice, and your specific situation may call for different priorities.`,
     futureArticleIdeas: [
@@ -281,7 +281,7 @@ Once the big, boring costs are handled, flexible spending — dining out, entert
 - **Use the 24-hour rule** on non-essential purchases above a threshold that matters to your budget, to separate impulse from intention.
 - **Swap, don’t just cut** — a cheaper night out instead of no night out, a home-cooked version of a favorite restaurant dish instead of skipping it entirely.
 
-For the specific case of groceries, which sit at the intersection of “necessary” and “full of room to cut,” see our dedicated guide on [reducing grocery costs](/financial-intelligence/reduce-grocery-costs).
+For the specific case of groceries, which sit at the intersection of “necessary” and “full of room to cut,” see our dedicated guide on [reducing grocery costs](/saving-money/reduce-grocery-costs).
 
 ## Putting the Cuts in Order
 
@@ -305,7 +305,7 @@ Working in this order means the largest, lowest-effort wins happen first, and by
 
 ## The Bottom Line
 
-The best ways to cut expenses rarely involve giving up the things that make daily life enjoyable. They start with the large, recurring, mostly invisible costs — insurance, financing, transportation — and only then move to lighter rules around discretionary spending. Once your biggest costs are trimmed, redirect the difference using the strategies in our guide on [how to save more money every month](/financial-intelligence/how-to-save-more-every-month), and keep the momentum going with [frugal living tips](/financial-intelligence/frugal-living-tips) that don’t feel like sacrifice.
+The best ways to cut expenses rarely involve giving up the things that make daily life enjoyable. They start with the large, recurring, mostly invisible costs — insurance, financing, transportation — and only then move to lighter rules around discretionary spending. Once your biggest costs are trimmed, redirect the difference using the strategies in our guide on [how to save more money every month](/saving-money/how-to-save-more-every-month), and keep the momentum going with [frugal living tips](/saving-money/frugal-living-tips) that don’t feel like sacrifice.
 
 This article provides general, educational information and isn’t a substitute for personalized financial advice.`,
       futureArticleIdeas: [
@@ -433,7 +433,7 @@ A meaningful share of household food spending is effectively thrown away — foo
 
 ## The Bottom Line
 
-Reducing grocery costs without extreme couponing comes down to three habits: plan around what’s already discounted, default to store brands where the difference is negligible, and waste less of what you buy. Combined with the broader strategies in our guide to [cutting expenses](/financial-intelligence/best-ways-to-cut-expenses), grocery savings are one of the fastest ways to free up real money for the goals covered in [how to save more money every month](/financial-intelligence/how-to-save-more-every-month).
+Reducing grocery costs without extreme couponing comes down to three habits: plan around what’s already discounted, default to store brands where the difference is negligible, and waste less of what you buy. Combined with the broader strategies in our guide to [cutting expenses](/saving-money/best-ways-to-cut-expenses), grocery savings are one of the fastest ways to free up real money for the goals covered in [how to save more money every month](/saving-money/how-to-save-more-every-month).
 
 This article offers general, educational guidance rather than personalized financial advice.`,
       futureArticleIdeas: [
@@ -569,7 +569,7 @@ Most of these habits don’t require owning the property. Adjusting a thermostat
 
 ## The Bottom Line
 
-Lowering your utility bills year-round comes down to targeting the categories that actually drive the cost — heating, cooling, and water — with a mix of habit changes and low-cost upgrades, then using tools like budget billing to smooth out the rest. Combined with the tactics in our guide to [cutting expenses](/financial-intelligence/best-ways-to-cut-expenses), these savings free up real room in a monthly budget for the goals covered in [how to save more money every month](/financial-intelligence/how-to-save-more-every-month).
+Lowering your utility bills year-round comes down to targeting the categories that actually drive the cost — heating, cooling, and water — with a mix of habit changes and low-cost upgrades, then using tools like budget billing to smooth out the rest. Combined with the tactics in our guide to [cutting expenses](/saving-money/best-ways-to-cut-expenses), these savings free up real room in a monthly budget for the goals covered in [how to save more money every month](/saving-money/how-to-save-more-every-month).
 
 This article is intended for general education and is not personalized financial or utility advice.`,
       futureArticleIdeas: [
@@ -632,7 +632,7 @@ The households that sustain frugal habits for years, not weeks, tend to share on
 
 ## Redesign Your Defaults, Not Just Your Willpower
 
-- **Default to a grocery list and a rough meal plan** every week, rather than deciding what to eat once you’re already hungry and in the store. See our full breakdown on [reducing grocery costs](/financial-intelligence/reduce-grocery-costs) for specifics.
+- **Default to a grocery list and a rough meal plan** every week, rather than deciding what to eat once you’re already hungry and in the store. See our full breakdown on [reducing grocery costs](/saving-money/reduce-grocery-costs) for specifics.
 - **Default to checking secondhand or discount options first** for anything beyond a small purchase — furniture, electronics, clothing, tools — before buying new.
 - **Default to a “sleep on it” rule** for purchases above a threshold that matters in your budget, so intention replaces impulse.
 - **Default to canceling free trials on the day you sign up**, by setting a calendar reminder immediately, rather than trusting yourself to remember weeks later.
@@ -664,16 +664,16 @@ The point of a routine like this isn’t rigidity — it’s taking the decision
 
 ## Frugal Living in the Categories That Matter Most
 
-- **Housing and utilities** — small efficiency upgrades and a habit of shopping insurance annually do more than most day-to-day frugal habits combined. See our guide to [lowering utility bills](/financial-intelligence/lower-utility-bills) for specifics.
-- **Transportation** — maintaining a car well, shopping insurance, and reducing unnecessary trips adds up meaningfully over a year; covered in more depth in our guide to [cutting expenses](/financial-intelligence/best-ways-to-cut-expenses).
+- **Housing and utilities** — small efficiency upgrades and a habit of shopping insurance annually do more than most day-to-day frugal habits combined. See our guide to [lowering utility bills](/saving-money/lower-utility-bills) for specifics.
+- **Transportation** — maintaining a car well, shopping insurance, and reducing unnecessary trips adds up meaningfully over a year; covered in more depth in our guide to [cutting expenses](/saving-money/best-ways-to-cut-expenses).
 - **Food** — cooking at home more often than not, planning around sales, and reducing waste is consistently one of the highest-leverage frugal habits available to almost any household.
 - **Entertainment and subscriptions** — rotating streaming services instead of paying for all of them simultaneously, and using library or free community resources where available.
 
-Each of these categories has a dedicated deeper guide if you want to go further: [cutting expenses](/financial-intelligence/best-ways-to-cut-expenses) covers the full framework for fixed and transportation costs, [reducing grocery costs](/financial-intelligence/reduce-grocery-costs) breaks down food spending specifically, and [lowering utility bills](/financial-intelligence/lower-utility-bills) walks through home efficiency room by room.
+Each of these categories has a dedicated deeper guide if you want to go further: [cutting expenses](/saving-money/best-ways-to-cut-expenses) covers the full framework for fixed and transportation costs, [reducing grocery costs](/saving-money/reduce-grocery-costs) breaks down food spending specifically, and [lowering utility bills](/saving-money/lower-utility-bills) walks through home efficiency room by room.
 
 ## Frugal Living for a Household, Not Just an Individual
 
-Frugal defaults tend to work even better across a household than for one person alone, simply because the same habit applies to more spending at once. A shared grocery list and meal plan cuts food costs for everyone under the same roof. A single household rule about waiting 24 hours on non-essential purchases prevents several small impulse buys a month, not just one person’s. Getting everyone in a household aligned on a small number of shared defaults — rather than one person trying to enforce frugality on everyone else — tends to be the difference between habits that last and ones that create quiet resentment. Our guide to [family budgeting](/financial-intelligence/family-budget-guide) covers how to build this kind of shared plan.
+Frugal defaults tend to work even better across a household than for one person alone, simply because the same habit applies to more spending at once. A shared grocery list and meal plan cuts food costs for everyone under the same roof. A single household rule about waiting 24 hours on non-essential purchases prevents several small impulse buys a month, not just one person’s. Getting everyone in a household aligned on a small number of shared defaults — rather than one person trying to enforce frugality on everyone else — tends to be the difference between habits that last and ones that create quiet resentment. Our guide to [family budgeting](/family-budget/family-budget-guide) covers how to build this kind of shared plan.
 
 ## Frugal Doesn’t Mean Cheap: Where to Spend Instead
 
@@ -689,7 +689,7 @@ Genuinely frugal households often spend more, not less, in a small number of cat
 
 ## The Bottom Line
 
-Frugal living tips that actually make a difference aren’t about extreme sacrifice — they’re quiet, repeatable defaults around the categories that matter most, paired with guilt-free room to spend on what you genuinely value. Start with [the best ways to cut expenses](/financial-intelligence/best-ways-to-cut-expenses) that fit your life, build the habit into your [monthly savings plan](/financial-intelligence/how-to-save-more-every-month), and adjust as your circumstances change.
+Frugal living tips that actually make a difference aren’t about extreme sacrifice — they’re quiet, repeatable defaults around the categories that matter most, paired with guilt-free room to spend on what you genuinely value. Start with [the best ways to cut expenses](/saving-money/best-ways-to-cut-expenses) that fit your life, build the habit into your [monthly savings plan](/saving-money/how-to-save-more-every-month), and adjust as your circumstances change.
 
 Frugal living tips that actually make a difference are, in the end, less about any single tip and more about which few you choose to keep. Pick the defaults that fit your actual life, give them a few months before judging whether they’re working, and adjust the ones that don’t.
 

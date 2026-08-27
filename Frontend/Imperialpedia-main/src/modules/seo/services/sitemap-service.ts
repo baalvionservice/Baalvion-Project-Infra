@@ -97,7 +97,11 @@ export const sitemapService = {
     // removed site-wide; without them it was countries with zero edges (not a graph)
     // while still linking out to those dead entity types. Retired entirely rather than
     // patched (see middleware.ts REMOVED_PATHS and knowledge-graph-service.ts removal).
-    const corePages = ["","/about","/financial-intelligence","/banking","/budgeting","/contact","/economy","/explore","/financial-tools","/financial-tools/compound-interest","/financial-tools/inflation","/financial-tools/investment","/financial-tools/loan","/investing","/market-news","/personal-finance","/privacy-policy","/reviews","/stocks","/terms-of-service","/transparency","/world","/world/us","/world/europe","/world/asia","/world/china","/world/emerging"];
+    // "/explore" removed (2026-08-27) for the same reason — a country-discovery entry
+    // point built around /countries and /technologies, both already gone. Route deleted
+    // and permanently 410'd (see middleware.ts REMOVED_PATHS); submitting it here would
+    // contradict that.
+    const corePages = ["","/about","/financial-intelligence","/banking","/bonds","/budgeting","/commodities","/credit","/contact","/economy","/etfs","/financial-tools","/financial-tools/compound-interest","/financial-tools/inflation","/financial-tools/investment","/financial-tools/loan","/investing","/market-news","/mutual-funds","/options","/personal-finance","/privacy-policy","/reviews","/stocks","/terms-of-service","/transparency","/world","/world/us","/world/europe","/world/asia","/world/china","/world/emerging"];
     corePages.forEach((path) => {
       entries.push({
         loc: `${base}${path}`,
@@ -192,11 +196,17 @@ export const sitemapService = {
     // uses to decide noindex, so the sitemap and each page's own robots meta can
     // never disagree with each other. Picks up new content the moment it's
     // published in the CMS — no code change or redeploy.
+    // "bonds", "commodities", "etfs", "mutual-funds", and "options" removed —
+    // each is now a flagship dedicated hub (BondsHub/ETFsHub/MutualFundsHub/
+    // OptionsHub/CommoditiesHub) with substantial unique keyTakeaways/sections
+    // content from topic-config.ts, the same as banking/budgeting/credit/
+    // investing/stocks, so they're submitted unconditionally via corePages
+    // above instead of gated behind live CMS content.
     const TOPIC_HUB_SLUGS = [
-      "advanced-budgeting", "app-reviews", "auto-loans", "banking-reviews", "bonds",
+      "advanced-budgeting", "app-reviews", "auto-loans", "banking-reviews",
       "brokers", "budget-rules", "budgeting-apps", "budgeting-basics", "calendar",
-      "cd-rates", "checking", "commodities", "credit", "credit-cards", "crypto",
-      "cryptocurrency", "debt", "earnings", "emergency-fund", "etfs",
+      "cd-rates", "checking", "credit-cards", "crypto",
+      "cryptocurrency", "debt", "earnings", "emergency-fund",
       "family-budget", "fed", "financial-calculators", "financial-independence",
       // "income", "insurance", and "taxes" removed — none has a live route
       // (all permanently 410 in middleware.ts REMOVED_PATHS), so checking
@@ -205,7 +215,7 @@ export const sitemapService = {
       "fiscal-policy", "gdp", "global", "government", "indicators",
       "inflation", "interest-rates", "live-market-news",
       "loan-reviews", "loans", "monetary-policy", "money-management",
-      "money-market", "monthly-budget", "mortgages", "mutual-funds", "options",
+      "money-market", "monthly-budget", "mortgages",
       "planning", "politics", "portfolio", "real-estate", "retirement",
       "saving-money", "savings", "student-budget", "student-loans",
       "tax-software", "unemployment",

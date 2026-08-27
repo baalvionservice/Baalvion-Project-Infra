@@ -98,8 +98,8 @@ The point of laying it out this way is that a semester bill and a monthly budget
 1. **List every real source of money** — financial aid refunds, a part-time job, family contributions, scholarship stipends, and savings you're drawing down. Be specific about *when* each one arrives, not just how much.
 2. **Separate semester-level costs from monthly costs.** Tuition, housing deposits, and a big textbook haul belong in one list; groceries, phone bills, and gas belong in another.
 3. **Divide any lump-sum aid refund by the number of months it needs to cover**, not the number of things you'd like to buy with it right now.
-4. **Assign every dollar a job.** A simple framework like the [50/30/20 budgeting rule](/financial-intelligence/50-30-20-budget-rule-explained) can work even on a smaller student income — the ratios matter more than the dollar amounts.
-5. **Track actual spending weekly**, not just at the end of the month. Our guide on [how to track your expenses](/financial-intelligence/how-to-track-expenses) covers simple systems that don't require much upkeep.
+4. **Assign every dollar a job.** A simple framework like the [50/30/20 budgeting rule](/personal-finance/50-30-20-budget-rule-explained) can work even on a smaller student income — the ratios matter more than the dollar amounts.
+5. **Track actual spending weekly**, not just at the end of the month. Our guide on [how to track your expenses](/personal-finance/how-to-track-expenses) covers simple systems that don't require much upkeep.
 6. **Rebuild the budget every semester.** Your class schedule, housing situation, and income can all shift, and a budget built in August rarely still fits by January.
 
 ## Setting a Weekly Spending Number You Can Actually Stick To
@@ -144,13 +144,13 @@ The point isn't to treat a credit card as extra spending money on top of your bu
 
 ## Tools That Make This Easier
 
-You don't need anything complicated to run a student budget — a notebook, a spreadsheet, or a simple app all work, as long as you actually use it. Our [Budgeting Apps](/budgeting-apps) hub compares the main options if you'd rather track spending automatically than log it by hand, and our broader guide to [smart spending habits](/financial-intelligence/smart-spending-habits) covers the behavioral side that any tool alone can't fix. It's also worth checking for student pricing on any subscription or software you'd be paying for anyway — many services quietly offer a discounted student tier that never shows up unless you ask or verify enrollment directly.
+You don't need anything complicated to run a student budget — a notebook, a spreadsheet, or a simple app all work, as long as you actually use it. Our [Budgeting Apps](/budgeting-apps) hub compares the main options if you'd rather track spending automatically than log it by hand, and our broader guide to [smart spending habits](/personal-finance/smart-spending-habits) covers the behavioral side that any tool alone can't fix. It's also worth checking for student pricing on any subscription or software you'd be paying for anyway — many services quietly offer a discounted student tier that never shows up unless you ask or verify enrollment directly.
 
 > [!INFO] The best budgeting tool for a college student is whichever one survives finals week. A perfect system you abandon in October is worth less than a simple one you keep using in April.
 
 ## When Money Gets Genuinely Tight
 
-Every student budget gets stress-tested eventually — a canceled shift, an unexpected fee, a friend's trip you weren't planning for. Before assuming a credit card or a payday loan is the only option, most colleges have resources built for exactly this: a financial aid office that can review your aid package mid-semester, emergency micro-grants many schools quietly offer, and, increasingly, on-campus food pantries for students facing a genuine gap. If your income is the real problem rather than a one-time expense, our guide to [budgeting on a part-time income](/financial-intelligence/budgeting-on-a-part-time-income) walks through building a plan around inconsistent paychecks specifically.
+Every student budget gets stress-tested eventually — a canceled shift, an unexpected fee, a friend's trip you weren't planning for. Before assuming a credit card or a payday loan is the only option, most colleges have resources built for exactly this: a financial aid office that can review your aid package mid-semester, emergency micro-grants many schools quietly offer, and, increasingly, on-campus food pantries for students facing a genuine gap. If your income is the real problem rather than a one-time expense, our guide to [budgeting on a part-time income](/student-budget/budgeting-on-a-part-time-income) walks through building a plan around inconsistent paychecks specifically.
 
 > A budget doesn't have to be perfect to be useful — it just has to be honest about where the money is actually going.
 
@@ -158,11 +158,11 @@ That's worth remembering the first time your numbers don't add up the way you ho
 
 ## Preparing Your Budget for Next Semester
 
-A budget built in your first week of freshman year usually needs real revisions by sophomore year, and that's normal, not a failure. Before each new semester, revisit three things: whether your income sources have changed (a new job, a lost work-study award, a bigger aid package), whether your fixed costs have changed (new housing, a longer commute, a meal plan swap), and whether last semester's numbers were actually realistic or just optimistic guesses. Comparing what you planned to spend against what you actually tracked, using the habit from [how to track your expenses](/financial-intelligence/how-to-track-expenses), is the fastest way to catch categories that were consistently wrong.
+A budget built in your first week of freshman year usually needs real revisions by sophomore year, and that's normal, not a failure. Before each new semester, revisit three things: whether your income sources have changed (a new job, a lost work-study award, a bigger aid package), whether your fixed costs have changed (new housing, a longer commute, a meal plan swap), and whether last semester's numbers were actually realistic or just optimistic guesses. Comparing what you planned to spend against what you actually tracked, using the habit from [how to track your expenses](/personal-finance/how-to-track-expenses), is the fastest way to catch categories that were consistently wrong.
 
 ## Conclusion
 
-A college student budget succeeds or fails less on the exact numbers you write down and more on whether the plan matches how money actually arrives and gets spent during a semester. Separate the lump sums from the monthly costs, treat borrowed money with extra care, and rebuild the plan each term instead of expecting one budget to last four years unchanged. For the deeper pieces — stretching a part-time paycheck and handling the specific costs of textbooks, housing, and everyday student life — see our companion guides on [budgeting on a part-time income](/financial-intelligence/budgeting-on-a-part-time-income) and [managing student expenses](/financial-intelligence/managing-student-expenses), or start with the broader picture in our guide to [money management for students](/financial-intelligence/money-management-for-students).`,
+A college student budget succeeds or fails less on the exact numbers you write down and more on whether the plan matches how money actually arrives and gets spent during a semester. Separate the lump sums from the monthly costs, treat borrowed money with extra care, and rebuild the plan each term instead of expecting one budget to last four years unchanged. For the deeper pieces — stretching a part-time paycheck and handling the specific costs of textbooks, housing, and everyday student life — see our companion guides on [budgeting on a part-time income](/student-budget/budgeting-on-a-part-time-income) and [managing student expenses](/student-budget/managing-student-expenses), or start with the broader picture in our guide to [money management for students](/financial-intelligence/money-management-for-students).`,
     futureArticleIdeas: [
       'How to build a student budget spreadsheet from scratch',
       'Work-study vs a regular part-time job: which fits a student budget better',
@@ -247,7 +247,7 @@ When a paycheck lands above your floor, the extra doesn't have to be spent just 
 
 The single most useful tool for irregular income is a small buffer account, separate from your regular checking, that absorbs the difference between your best and worst pay periods. In a strong week, extra income goes into the buffer instead of your regular spending. In a lean week, you draw the difference back out. Over a few months, this effectively turns a bumpy income into something that behaves like a steady one from your budget's perspective.
 
-> [!INFO] A buffer account is not the same as an emergency fund. The buffer smooths week-to-week income swings; an [emergency fund](/financial-intelligence/emergency-fund-guide) protects against genuine one-time shocks like a medical bill or a lost job. Ideally, you build both.
+> [!INFO] A buffer account is not the same as an emergency fund. The buffer smooths week-to-week income swings; an [emergency fund](/personal-finance/emergency-fund-guide) protects against genuine one-time shocks like a medical bill or a lost job. Ideally, you build both.
 
 ## How Your Class Schedule Changes Your Income, Season to Season
 
@@ -263,7 +263,7 @@ Before assuming your schedule is fixed and unchangeable, it's worth having a dir
 
 ## Tracking What You Actually Earn and Spend
 
-Because both income and spending move around more than a salaried budget, tracking matters more here, not less. A simple weekly check-in, comparing what actually landed in your account against your bare-bones and full budget numbers, catches a slipping pattern before it becomes a real shortfall. Our guide to [how to track your expenses](/financial-intelligence/how-to-track-expenses) covers lightweight systems that don't require daily logging to stay useful.
+Because both income and spending move around more than a salaried budget, tracking matters more here, not less. A simple weekly check-in, comparing what actually landed in your account against your bare-bones and full budget numbers, catches a slipping pattern before it becomes a real shortfall. Our guide to [how to track your expenses](/personal-finance/how-to-track-expenses) covers lightweight systems that don't require daily logging to stay useful.
 
 It also helps to track hours alongside dollars. A schedule that quietly drops from fifteen hours a week to nine over a month is far easier to spot, and address with a manager or a revised budget, if you're glancing at both numbers weekly rather than only noticing once a deposit comes in noticeably smaller than expected.
 
@@ -276,9 +276,7 @@ It also helps to track hours alongside dollars. A schedule that quietly drops fr
 - **Never discussing scheduling consistency with an employer**, even when a more predictable shift pattern is genuinely available for the asking.
 - **Losing track of hours worked**, so a gradual cut in shifts goes unnoticed until a paycheck is already smaller than the budget assumes.
 
-## Conclusion
-
-Budgeting on a part-time income isn't about finding a clever hack — it's about planning around your lowest realistic paycheck, using a buffer to absorb the gap between good and bad pay periods, and checking in often enough to catch problems early. Paired with the fuller picture in our [college budget guide](/financial-intelligence/college-budget-guide) and [managing student expenses](/financial-intelligence/managing-student-expenses), this approach turns an unpredictable paycheck into something you can actually plan a semester around.`,
+Budgeting on a part-time income isn't about finding a clever hack — it's about planning around your lowest realistic paycheck, using a buffer to absorb the gap between good and bad pay periods, and checking in often enough to catch problems early. Paired with the fuller picture in our [college budget guide](/student-budget/college-budget-guide) and [managing student expenses](/student-budget/managing-student-expenses), this approach turns an unpredictable paycheck into something you can actually plan a semester around.`,
       futureArticleIdeas: [
         'How many hours should a full-time student realistically work',
         'Work-study explained: how it affects your budget and aid',
@@ -371,7 +369,7 @@ Meal plans rarely cover everything, and the gap between "swipes used" and "actua
 
 ## Everyday Costs That Quietly Add Up
 
-A $6 coffee three times a week is roughly $70 a month, not dramatic on its own, but easy to lose track of against a tight student budget. The point isn't to eliminate every small purchase; it's to actually see the total, since these costs rarely show up as a single alarming charge the way tuition does. Our guide to [smart spending habits](/financial-intelligence/smart-spending-habits) covers ways to trim this category without turning every purchase into a guilt trip.
+A $6 coffee three times a week is roughly $70 a month, not dramatic on its own, but easy to lose track of against a tight student budget. The point isn't to eliminate every small purchase; it's to actually see the total, since these costs rarely show up as a single alarming charge the way tuition does. Our guide to [smart spending habits](/personal-finance/smart-spending-habits) covers ways to trim this category without turning every purchase into a guilt trip.
 
 > [!INFO] Everyday spending is hardest to control precisely because no single purchase feels significant. Tracking a week's worth of small purchases, once, is often more eye-opening than any budgeting app notification.
 
@@ -380,7 +378,7 @@ A $6 coffee three times a week is roughly $70 a month, not dramatic on its own, 
 1. **List semester-level costs before the term starts**, so they're never a surprise mid-semester.
 2. **Set a fixed monthly amount for recurring costs** and review it once a semester for changes.
 3. **Give everyday spending an actual weekly number**, not an open-ended "try not to overspend" intention.
-4. **Track spending against all three**, using a simple system from our guide on [how to track your expenses](/financial-intelligence/how-to-track-expenses).
+4. **Track spending against all three**, using a simple system from our guide on [how to track your expenses](/personal-finance/how-to-track-expenses).
 5. **Revisit textbook and housing choices each semester** — what worked for one term might not fit the next.
 
 ## Common Mistakes in Managing Student Expenses
@@ -390,9 +388,9 @@ A $6 coffee three times a week is roughly $70 a month, not dramatic on its own, 
 - Letting everyday spending go untracked because no individual purchase feels large.
 - Treating semester-level costs as a monthly problem instead of planning for them separately.
 
-## Conclusion
+## Bringing the Three Buckets Together
 
-Managing student expenses comes down to treating semester-level costs, monthly bills, and everyday spending as three separate problems instead of one blurry budget. Shop textbooks before the bookstore becomes your only option, run the full math on housing before assuming off-campus is automatically cheaper, and give everyday spending a real number instead of an open-ended hope. Paired with our [college budget guide](/financial-intelligence/college-budget-guide) and [budgeting on a part-time income](/financial-intelligence/budgeting-on-a-part-time-income), this gives you a full system for handling the actual costs of college life.`,
+Managing student expenses comes down to treating semester-level costs, monthly bills, and everyday spending as three separate problems instead of one blurry budget. Shop textbooks before the bookstore becomes your only option, run the full math on housing before assuming off-campus is automatically cheaper, and give everyday spending a real number instead of an open-ended hope. Paired with our [college budget guide](/student-budget/college-budget-guide) and [budgeting on a part-time income](/student-budget/budgeting-on-a-part-time-income), this gives you a full system for handling the actual costs of college life.`,
       futureArticleIdeas: [
         'Cheapest ways to buy or rent college textbooks compared',
         'On-campus vs off-campus housing: a full cost comparison',

@@ -78,7 +78,7 @@ const NAV: NavCategory[] = [
       { label: "Budgeting", href: "/budgeting" },
       { label: "Saving", href: "/savings" },
       { label: "Debt Management", href: "/debt" },
-      { label: "Credit Scores", href: "/credit" },
+      { label: "Credit", href: "/credit" },
       { label: "Financial Planning", href: "/planning" },
       { label: "Retirement Planning", href: "/retirement" },
       { label: "Financial Independence", href: "/financial-independence" },

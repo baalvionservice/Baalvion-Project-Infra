@@ -93,7 +93,7 @@ These apps connect directly to your bank and card accounts and automatically pul
 
 ## Envelope-Style and Zero-Based Apps
 
-Apps like YNAB (You Need A Budget) and EveryDollar follow a **zero-based budgeting** philosophy — every dollar of income gets assigned a job before you spend it, echoing the classic envelope method in digital form. Our deeper comparison of [zero-based budgeting](/financial-intelligence/zero-based-budgeting) and the [envelope method](/financial-intelligence/envelope-budgeting) covers the underlying strategy these apps digitize.
+Apps like YNAB (You Need A Budget) and EveryDollar follow a **zero-based budgeting** philosophy — every dollar of income gets assigned a job before you spend it, echoing the classic envelope method in digital form. Our deeper comparison of [zero-based budgeting](/budget-rules/zero-based-budgeting) and the [envelope method](/budget-rules/envelope-budgeting) covers the underlying strategy these apps digitize.
 
 **Pros:** forces intentional decisions about every dollar, tends to build stronger budgeting habits over time, works well for people actively trying to change spending patterns.
 
@@ -128,9 +128,9 @@ Many budgeting apps offer a free tier with real limitations — fewer linked acc
 
 ## Choosing an App for Your Specific Situation
 
-- **Households and couples** often do better with an app that supports shared access and multiple logins cleanly, rather than one person manually relaying numbers to a partner. Our guide to [couples budgeting](/financial-intelligence/couples-budgeting) covers the coordination side beyond the tool itself.
-- **Freelancers and variable-income earners** may get more value from an envelope-style app that handles irregular deposits well, since automatic categorization built for salaried income can misfire on inconsistent freelance payments. See our guide to [budgeting for freelancers](/financial-intelligence/budgeting-for-freelancers) for the income side of this.
-- **Families** juggling multiple kids' activities and shared accounts often benefit from a linked tracker's automatic categorization simply to reduce manual entry across a busier household — our [family budget guide](/financial-intelligence/family-budget-guide) covers the broader planning layer.
+- **Households and couples** often do better with an app that supports shared access and multiple logins cleanly, rather than one person manually relaying numbers to a partner. Our guide to [couples budgeting](/family-budget/couples-budgeting) covers the coordination side beyond the tool itself.
+- **Freelancers and variable-income earners** may get more value from an envelope-style app that handles irregular deposits well, since automatic categorization built for salaried income can misfire on inconsistent freelance payments. See our guide to [budgeting for freelancers](/advanced-budgeting/budgeting-for-freelancers) for the income side of this.
+- **Families** juggling multiple kids' activities and shared accounts often benefit from a linked tracker's automatic categorization simply to reduce manual entry across a busier household — our [family budget guide](/family-budget/family-budget-guide) covers the broader planning layer.
 
 ## How to Actually Pick One
 
@@ -138,11 +138,11 @@ Many budgeting apps offer a free tier with real limitations — fewer linked acc
 2. **Trial the free tier or free trial period** of two or three apps in your chosen category before committing to a subscription.
 3. **Check the security and privacy basics** above for any app you're seriously considering.
 4. **Give it a real month**, not a single week, before judging whether it fits — most budgeting tools feel unfamiliar at first regardless of quality.
-5. **Compare against a spreadsheet**, covered in our full breakdown of [budget spreadsheet vs. budgeting app](/financial-intelligence/budget-spreadsheet-vs-apps), since a free spreadsheet remains a completely valid alternative to any paid app.
+5. **Compare against a spreadsheet**, covered in our full breakdown of [budget spreadsheet vs. budgeting app](/budgeting-apps/budget-spreadsheet-vs-apps), since a free spreadsheet remains a completely valid alternative to any paid app.
 
 ## Conclusion
 
-There's no single best budgeting app — there's a best category for how you actually think about money, and a specific app within that category that fits your accounts and habits. Start with the style, not the brand name, check the security basics before linking anything, and give whatever you choose a real month before deciding it's not working. If you're weighing whether an app is worth it at all, our comparison of [budget spreadsheets vs. budgeting apps](/financial-intelligence/budget-spreadsheet-vs-apps) and our guide to [budgeting manually without an app](/financial-intelligence/manual-budgeting-without-apps) cover the no-subscription alternatives in full.`,
+There's no single best budgeting app — there's a best category for how you actually think about money, and a specific app within that category that fits your accounts and habits. Start with the style, not the brand name, check the security basics before linking anything, and give whatever you choose a real month before deciding it's not working. If you're weighing whether an app is worth it at all, our comparison of [budget spreadsheets vs. budgeting apps](/budgeting-apps/budget-spreadsheet-vs-apps) and our guide to [budgeting manually without an app](/budgeting-apps/manual-budgeting-without-apps) cover the no-subscription alternatives in full.`,
     futureArticleIdeas: [
       'YNAB vs EveryDollar: how the two approaches actually differ',
       'What to look for in a budgeting app’s privacy policy',
@@ -207,7 +207,7 @@ A spreadsheet gives you complete control over categories, formulas, and layout, 
 ## What a Spreadsheet Does Well
 
 - **Total customization** — categories, formulas, and layout match your exact situation instead of a generic template.
-- **No subscription cost**, and no risk of losing access if a company changes its pricing or shuts down, similar to what happened with [Mint's 2024 discontinuation](/financial-intelligence/best-budget-apps), which affected linked-app users.
+- **No subscription cost**, and no risk of losing access if a company changes its pricing or shuts down, similar to what happened with [Mint's 2024 discontinuation](/budgeting-apps/best-budget-apps), which affected linked-app users.
 - **No linked bank credentials** — a spreadsheet only knows what you type into it.
 - **Works identically across devices** as long as it's stored somewhere you can access, like a shared cloud drive.
 
@@ -220,7 +220,7 @@ The trade-off is entirely manual entry: nothing populates automatically, and a s
 - **Built-in categorization and reports**, though these need periodic correction for accuracy.
 - **Lower setup effort** for someone who doesn't want to build formulas from scratch.
 
-The trade-off is a recurring cost for many apps, a dependency on the app staying available and secure, and the need to share account access with a third party. Our [comparison of budgeting app categories](/financial-intelligence/best-budget-apps) covers the specific options in more depth.
+The trade-off is a recurring cost for many apps, a dependency on the app staying available and secure, and the need to share account access with a third party. Our [comparison of budgeting app categories](/budgeting-apps/best-budget-apps) covers the specific options in more depth.
 
 ## Cost, Privacy, and Time: A Side-by-Side Look
 
@@ -247,9 +247,9 @@ Plenty of people don't pick purely one or the other. A common hybrid is using an
 
 > [!INFO] There is no prize for using the more "serious-looking" tool. A spreadsheet you update every Sunday beats an app you stopped opening in March.
 
-## Conclusion
+## So Which One Should You Actually Use
 
-A spreadsheet and a budgeting app solve the same underlying problem — knowing where your money is going — with different trade-offs between control and convenience. If you want full customization, zero recurring cost, and no linked accounts, a spreadsheet fits. If automatic tracking and less manual effort matter more than perfect customization, an app fits better. For a completely tool-free approach that avoids both a spreadsheet and an app subscription, see our guide to [budgeting manually without an app](/financial-intelligence/manual-budgeting-without-apps).`,
+A spreadsheet and a budgeting app solve the same underlying problem — knowing where your money is going — with different trade-offs between control and convenience. If you want full customization, zero recurring cost, and no linked accounts, a spreadsheet fits. If automatic tracking and less manual effort matter more than perfect customization, an app fits better. For a completely tool-free approach that avoids both a spreadsheet and an app subscription, see our guide to [budgeting manually without an app](/budgeting-apps/manual-budgeting-without-apps).`,
       futureArticleIdeas: [
         'Free budget spreadsheet templates worth using',
         'How to build your own budget spreadsheet from scratch',
@@ -321,7 +321,7 @@ You don't need much to run a fully manual budget:
 
 1. **List your income for the month** on one line, all sources combined.
 2. **List your fixed monthly costs** — rent, utilities, minimum debt payments — as a single subtracted total.
-3. **Divide what's left into a handful of categories** — food, transportation, personal spending, savings — using a simple framework like the [50/30/20 rule](/financial-intelligence/50-30-20-budget-rule-explained) if you want a starting ratio rather than building categories from scratch.
+3. **Divide what's left into a handful of categories** — food, transportation, personal spending, savings — using a simple framework like the [50/30/20 rule](/personal-finance/50-30-20-budget-rule-explained) if you want a starting ratio rather than building categories from scratch.
 4. **Write down every purchase as it happens**, or at minimum, once daily from memory and receipts.
 5. **Total each category weekly**, comparing what you've spent against what you allotted.
 6. **Carry lessons into next month** — a category that consistently runs short needs either more money allotted or a real look at why it's running over.
@@ -335,7 +335,7 @@ The cash envelope method is one of the oldest manual budgeting systems, and it s
 3. Spend only from the relevant envelope for that category.
 4. When an envelope is empty, spending in that category stops until the next pay period.
 
-> [!INFO] The envelope method works especially well for categories where overspending is easy to rationalize in the moment, like dining out or entertainment — a tangible, shrinking stack of cash is harder to argue with than a budget line you can't see while you're standing at the register. Our full guide to [envelope budgeting](/financial-intelligence/envelope-budgeting) covers digital adaptations of this same idea for people who don't want to carry cash.
+> [!INFO] The envelope method works especially well for categories where overspending is easy to rationalize in the moment, like dining out or entertainment — a tangible, shrinking stack of cash is harder to argue with than a budget line you can't see while you're standing at the register. Our full guide to [envelope budgeting](/budget-rules/envelope-budgeting) covers digital adaptations of this same idea for people who don't want to carry cash.
 
 ## Handling Irregular and Annual Expenses Manually
 
@@ -357,9 +357,7 @@ Manual budgets fail most often from one specific cause: missing a single update 
 - Abandoning the system after one missed week instead of just restarting it.
 - Using cash envelopes for fixed bills that are better handled through automatic payments instead.
 
-## Conclusion
-
-Manual budgeting without an app isn't a step backward — it's a genuinely effective system for anyone who values privacy, wants a closer relationship with their own spending, or simply doesn't want another subscription. A notebook, a fixed weekly check-in, and a method like cash envelopes for the categories that need the most discipline can do everything a paid app does, minus the linked accounts. If you'd rather split the difference, our comparison of [budget spreadsheets vs. budgeting apps](/financial-intelligence/budget-spreadsheet-vs-apps) and our broader [budgeting app comparison](/financial-intelligence/best-budget-apps) cover the digital middle ground.`,
+Manual budgeting without an app isn't a step backward — it's a genuinely effective system for anyone who values privacy, wants a closer relationship with their own spending, or simply doesn't want another subscription. A notebook, a fixed weekly check-in, and a method like cash envelopes for the categories that need the most discipline can do everything a paid app does, minus the linked accounts. If you'd rather split the difference, our comparison of [budget spreadsheets vs. budgeting apps](/budgeting-apps/budget-spreadsheet-vs-apps) and our broader [budgeting app comparison](/budgeting-apps/best-budget-apps) cover the digital middle ground.`,
       futureArticleIdeas: [
         'Digital cash envelope systems for people who do not carry cash',
         'How to build a sinking fund by hand for annual expenses',

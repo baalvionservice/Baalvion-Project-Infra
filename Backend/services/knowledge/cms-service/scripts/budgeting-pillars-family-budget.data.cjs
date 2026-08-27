@@ -91,7 +91,7 @@ The fix isn't complicated, just deliberate: assign specific bills to specific pa
 
 Before assigning numbers to categories, most families are better off tracking actual spending for one full pay cycle, ideally two, before finalizing anything. Pull the last two months of bank and card statements and sort every transaction into rough buckets: housing, transportation, food, kids, debt, everything else. The point isn't precision on the first pass — it's discovering where the money is actually going, which is almost always different from where a household assumes it's going. Groceries in particular tend to run 15–25% higher than people estimate once takeout, school lunches, and weekend "quick trips" to the store get counted honestly.
 
-Our guide on [how to create a monthly budget](/financial-intelligence/how-to-create-a-monthly-budget) walks through this tracking step in more depth if you're starting from a blank slate.
+Our guide on [how to create a monthly budget](/personal-finance/how-to-create-a-monthly-budget) walks through this tracking step in more depth if you're starting from a blank slate.
 
 ## The Real Cost of Running a Household
 
@@ -109,7 +109,7 @@ Raising kids and running a household costs more than most families expect, and t
 6. **Assign the leftover** to savings, debt payoff acceleration, or discretionary spending, in that order of priority if the household has a savings or debt goal.
 7. **Put a number next to every category** and compare the total against actual take-home income — if it doesn't balance, the categories need to shrink, not the plan itself.
 
-Households that prefer a specific method rather than building categories from scratch can adapt the [50/30/20 rule](/financial-intelligence/50-30-20-budget-rule-explained) or a stricter [zero-based budget](/financial-intelligence/zero-based-budgeting) to this same framework — the categories above simply map onto whichever structure you choose.
+Households that prefer a specific method rather than building categories from scratch can adapt the [50/30/20 rule](/personal-finance/50-30-20-budget-rule-explained) or a stricter [zero-based budget](/budget-rules/zero-based-budgeting) to this same framework — the categories above simply map onto whichever structure you choose.
 
 ## The Categories a Family Budget Cannot Skip
 
@@ -128,9 +128,9 @@ On a $6,200 take-home month for a two-income household with two school-age kids,
 
 ## Getting Everyone on the Same Page
 
-A budget that lives in one partner's head, or one partner's spreadsheet that the other never opens, tends to fail quietly. It's not usually a dramatic blowup — it's smaller things, like one partner not knowing there's no room in the budget for an unplanned purchase, or resentment building because one person feels like the household's unpaid accountant. A short, recurring money conversation — fifteen minutes, once a month, calendar or app open — does more to keep a family budget alive than any specific tool or method. Our guide to [budgeting as a couple](/financial-intelligence/couples-budgeting) covers the joint-versus-separate-accounts question and how to structure these conversations so they don't turn into arguments.
+A budget that lives in one partner's head, or one partner's spreadsheet that the other never opens, tends to fail quietly. It's not usually a dramatic blowup — it's smaller things, like one partner not knowing there's no room in the budget for an unplanned purchase, or resentment building because one person feels like the household's unpaid accountant. A short, recurring money conversation — fifteen minutes, once a month, calendar or app open — does more to keep a family budget alive than any specific tool or method. Our guide to [budgeting as a couple](/family-budget/couples-budgeting) covers the joint-versus-separate-accounts question and how to structure these conversations so they don't turn into arguments.
 
-Single-parent households face a related but distinct version of this challenge — no partner to split categories with, but still real tradeoffs to track solo. See our [single-parent budget framework](/financial-intelligence/single-parent-budget) for that specific version of this plan.
+Single-parent households face a related but distinct version of this challenge — no partner to split categories with, but still real tradeoffs to track solo. See our [single-parent budget framework](/family-budget/single-parent-budget) for that specific version of this plan.
 
 What actually derails these conversations, more often than the numbers themselves, is timing. Bringing up a budget concern in the middle of an already stressful evening — after a long commute, mid-dinner, right as a kid starts a meltdown — turns a routine check-in into a fight almost by default. Scheduling the conversation, even loosely ("let's look at the budget Sunday after the kids are down"), removes most of that friction before it starts.
 
@@ -142,7 +142,7 @@ The practical habit worth building is a twice-a-year "does this still reflect re
 
 ## Building In Room for the Unexpected
 
-The single most common reason a family budget falls apart mid-month isn't overspending on groceries — it's an expense nobody planned for that technically wasn't unpredictable at all. School picture day, a friend's birthday party, a field trip fee, a flat tire. None of these are true emergencies in the way an [emergency fund](/financial-intelligence/emergency-fund-guide) is meant to cover, but they hit often enough that a family without a buffer line ends up either pulling from savings or reaching for a credit card every few weeks.
+The single most common reason a family budget falls apart mid-month isn't overspending on groceries — it's an expense nobody planned for that technically wasn't unpredictable at all. School picture day, a friend's birthday party, a field trip fee, a flat tire. None of these are true emergencies in the way an [emergency fund](/personal-finance/emergency-fund-guide) is meant to cover, but they hit often enough that a family without a buffer line ends up either pulling from savings or reaching for a credit card every few weeks.
 
 A simple fix: build a monthly buffer category worth roughly 3–5% of take-home pay, and treat it as spent by default rather than a bonus if it goes unused — roll leftover buffer money into savings at month's end instead of letting it quietly disappear into discretionary spending.
 
@@ -154,9 +154,9 @@ A simple fix: build a monthly buffer category worth roughly 3–5% of take-home 
 - **Only one partner engaging with the budget**, leaving the other unaware of real limits or priorities.
 - **Reviewing the budget once a year instead of monthly**, so it stops reflecting a household that is constantly changing.
 
-## Conclusion
+## The Same Principles, More Moving Parts
 
-A family budget works the same way a personal one does in principle — track what comes in, plan what goes out, leave room for savings — but it carries more categories, more people, and more irregular costs than a solo plan ever has to absorb. Build it from real tracked spending, give kids' costs their own line, keep a buffer for the predictable surprises, and check in as a household at least once a month. From here, our guides on [budgeting with kids](/financial-intelligence/budgeting-with-kids), the [single-parent budget](/financial-intelligence/single-parent-budget), and [budgeting as a couple](/financial-intelligence/couples-budgeting) go deeper into the specific version of this plan that matches your household.`,
+A family budget works the same way a personal one does in principle — track what comes in, plan what goes out, leave room for savings — but it carries more categories, more people, and more irregular costs than a solo plan ever has to absorb. Build it from real tracked spending, give kids' costs their own line, keep a buffer for the predictable surprises, and check in as a household at least once a month. From here, our guides on [budgeting with kids](/family-budget/budgeting-with-kids), the [single-parent budget](/family-budget/single-parent-budget), and [budgeting as a couple](/family-budget/couples-budgeting) go deeper into the specific version of this plan that matches your household.`,
     futureArticleIdeas: [
       'How to budget for back-to-school costs without going into debt',
       'Family budgeting during a job loss or income gap',
@@ -219,7 +219,7 @@ A family budget works the same way a personal one does in principle — track wh
 
 Most generic budget templates lump "kids" into groceries, misc, or a single catch-all line, which hides the real shape of the spending. Childcare, school fees, activities, clothing, and healthcare each behave differently — some are fixed and contractual, others are seasonal, and a few show up once and never again (a car seat, a crib). Treating all of it as one blurry category makes it nearly impossible to spot which piece is actually driving a budget over.
 
-For the full household framework this fits into, see our [family budget guide](/financial-intelligence/family-budget-guide).
+For the full household framework this fits into, see our [family budget guide](/family-budget/family-budget-guide).
 
 ## Costs by Age Stage
 
@@ -266,7 +266,7 @@ The Child Tax Credit and dependent-care benefits can meaningfully reduce a famil
 
 ## Building In a Small Kids-Specific Buffer
 
-Beyond the household's general buffer category covered in our [family budget guide](/financial-intelligence/family-budget-guide), a smaller kids-specific buffer — even $50 to $100 a month — absorbs the constant stream of minor, kid-driven costs that don't fit neatly anywhere else: a last-minute costume, a class gift collection, a forgotten permission-slip fee. None of these individually justify their own budget line, but together they add up to real money if there's no dedicated space for them.
+Beyond the household's general buffer category covered in our [family budget guide](/family-budget/family-budget-guide), a smaller kids-specific buffer — even $50 to $100 a month — absorbs the constant stream of minor, kid-driven costs that don't fit neatly anywhere else: a last-minute costume, a class gift collection, a forgotten permission-slip fee. None of these individually justify their own budget line, but together they add up to real money if there's no dedicated space for them.
 
 ## Common Mistakes
 
@@ -277,9 +277,9 @@ Beyond the household's general buffer category covered in our [family budget gui
 - Counting on a tax credit as available spending money before it's actually received.
 - Assuming a second child's costs simply double the first child's category instead of re-costing each line individually.
 
-## Conclusion
+## The Budget That Grows With Them
 
-Budgeting with kids works best as an ongoing adjustment, not a one-time calculation — the categories that matter most shift as children move from diapers to daycare to cleats and school fundraisers. Give kids' costs their own dedicated line, plan activities against the school-year calendar, and revisit the numbers as they age. For the household-wide version of this plan, return to our [family budget guide](/financial-intelligence/family-budget-guide), and for solo-parent households managing this without a second income to split it with, see our [single-parent budget framework](/financial-intelligence/single-parent-budget).`,
+Budgeting with kids works best as an ongoing adjustment, not a one-time calculation — the categories that matter most shift as children move from diapers to daycare to cleats and school fundraisers. Give kids' costs their own dedicated line, plan activities against the school-year calendar, and revisit the numbers as they age. For the household-wide version of this plan, return to our [family budget guide](/family-budget/family-budget-guide), and for solo-parent households managing this without a second income to split it with, see our [single-parent budget framework](/family-budget/single-parent-budget).`,
       futureArticleIdeas: [
         'How to compare daycare, nanny share, and in-home care costs',
         'Budgeting for a new baby: the real first-year cost breakdown',
@@ -336,7 +336,7 @@ Budgeting with kids works best as an ongoing adjustment, not a one-time calculat
 
 ## The Same Categories, a Different Math
 
-A single-parent household still needs to cover housing, food, transportation, childcare, and healthcare — the categories aren't unique. What changes is the share of take-home pay each one has to represent. On a $3,800 take-home month, housing at $1,150 (30%) already leaves less room than the same percentage would on a two-income household's larger total, and childcare alone can easily consume another 20–25% if a child isn't yet school-age. The framework in our [family budget guide](/financial-intelligence/family-budget-guide) still applies — the percentages within it just need more deliberate trade-offs.
+A single-parent household still needs to cover housing, food, transportation, childcare, and healthcare — the categories aren't unique. What changes is the share of take-home pay each one has to represent. On a $3,800 take-home month, housing at $1,150 (30%) already leaves less room than the same percentage would on a two-income household's larger total, and childcare alone can easily consume another 20–25% if a child isn't yet school-age. The framework in our [family budget guide](/family-budget/family-budget-guide) still applies — the percentages within it just need more deliberate trade-offs.
 
 ## Handling Child Support and Variable Income
 
@@ -346,7 +346,7 @@ If child support or alimony is part of the household's income, how reliably it s
 
 ## Childcare: The Toughest Line Item
 
-For most single parents with young children, childcare isn't just expensive — it's logistically harder to solve, since there's no second adult to split the schedule with when a provider is closed or a child is sick. It's worth treating childcare as a non-negotiable fixed cost in the budget rather than something to trim, and worth actively checking for subsidized or income-based programs, which many single parents qualify for but don't always know to look up. Our guide to [budgeting with kids](/financial-intelligence/budgeting-with-kids) breaks down childcare costs by age in more depth.
+For most single parents with young children, childcare isn't just expensive — it's logistically harder to solve, since there's no second adult to split the schedule with when a provider is closed or a child is sick. It's worth treating childcare as a non-negotiable fixed cost in the budget rather than something to trim, and worth actively checking for subsidized or income-based programs, which many single parents qualify for but don't always know to look up. Our guide to [budgeting with kids](/family-budget/budgeting-with-kids) breaks down childcare costs by age in more depth.
 
 ## A Sample Month, Broken Down
 
@@ -358,7 +358,7 @@ A budget line item doesn't capture everything that makes single-parent finances 
 
 ## Building a Bigger Safety Margin
 
-With no second income to fall back on if a job is disrupted, many financial educators suggest single-income households — single-parent or otherwise — aim toward the higher end of the standard 3–6 month emergency fund range, and consider extending beyond it if income is variable or a specific job market is uncertain. See our full [emergency fund guide](/financial-intelligence/emergency-fund-guide) for how to size and build that fund in stages.
+With no second income to fall back on if a job is disrupted, many financial educators suggest single-income households — single-parent or otherwise — aim toward the higher end of the standard 3–6 month emergency fund range, and consider extending beyond it if income is variable or a specific job market is uncertain. See our full [emergency fund guide](/personal-finance/emergency-fund-guide) for how to size and build that fund in stages.
 
 ## Resources Worth Checking, Not a Last Resort
 
@@ -368,7 +368,7 @@ Filing status also matters more than many single parents realize. Filing as Head
 
 ## Debt and Savings Priorities
 
-Standard guidance — a small starter emergency fund, then high-interest debt, then a full emergency fund, then other savings goals — generally still applies, but the sequence deserves extra scrutiny on a single income, since there's less room to run two priorities at once. If debt is part of the picture, our comparison of [debt payoff strategies](/financial-intelligence/debt-snowball-vs-debt-avalanche) can help decide which approach fits your specific situation. On a genuinely tight single income, even a modest, automated amount — $25 or $50 a paycheck — toward both the emergency fund and debt simultaneously can outperform waiting for enough breathing room to fully fund one before starting the other, since that breathing room can take a long time to arrive on its own.
+Standard guidance — a small starter emergency fund, then high-interest debt, then a full emergency fund, then other savings goals — generally still applies, but the sequence deserves extra scrutiny on a single income, since there's less room to run two priorities at once. If debt is part of the picture, our comparison of [debt payoff strategies](/debt/debt-snowball-vs-debt-avalanche) can help decide which approach fits your specific situation. On a genuinely tight single income, even a modest, automated amount — $25 or $50 a paycheck — toward both the emergency fund and debt simultaneously can outperform waiting for enough breathing room to fully fund one before starting the other, since that breathing room can take a long time to arrive on its own.
 
 ## Income Growth as Part of the Plan
 
@@ -382,9 +382,9 @@ Budgeting well matters, but on a single income, the ceiling on how much a tighte
 - Keeping the emergency fund target the same as a two-income household's, despite having no second earner as backup.
 - Not writing the budget down anywhere, relying on memory when there's no second person to catch an error.
 
-## Conclusion
+## Same Ground, One Income
 
-A single-parent budget covers the same ground as any family budget, just with one income carrying the full weight and less room for a miscalculation to go unnoticed. Build it around income you can actually count on, treat childcare as a fixed priority rather than a flexible one, aim for a slightly larger safety margin, and use the tax credits and local resources built for exactly this situation. For the broader household framework this sits inside, revisit our [family budget guide](/financial-intelligence/family-budget-guide).`,
+A single-parent budget covers the same ground as any family budget, just with one income carrying the full weight and less room for a miscalculation to go unnoticed. Build it around income you can actually count on, treat childcare as a fixed priority rather than a flexible one, aim for a slightly larger safety margin, and use the tax credits and local resources built for exactly this situation. For the broader household framework this sits inside, revisit our [family budget guide](/family-budget/family-budget-guide).`,
       futureArticleIdeas: [
         'How single parents can budget for childcare emergencies and backup care',
         'Child support and taxes: what single parents need to know',
@@ -494,7 +494,7 @@ Couples don't need to be married, engaged, or even living together to benefit fr
 
 ## When Kids Enter the Picture
 
-Once shared expenses expand to include children, most couples route those costs through the joint or hybrid shared account regardless of how the rest of their money is structured, simply because kid-related costs are unambiguously shared. See our [family budget guide](/financial-intelligence/family-budget-guide) and our detailed breakdown of [budgeting with kids](/financial-intelligence/budgeting-with-kids) for how those categories fit into the household plan.
+Once shared expenses expand to include children, most couples route those costs through the joint or hybrid shared account regardless of how the rest of their money is structured, simply because kid-related costs are unambiguously shared. See our [family budget guide](/family-budget/family-budget-guide) and our detailed breakdown of [budgeting with kids](/family-budget/budgeting-with-kids) for how those categories fit into the household plan.
 
 ## Common Mistakes
 
@@ -504,9 +504,9 @@ Once shared expenses expand to include children, most couples route those costs 
 - Skipping regular money conversations until a large bill forces one.
 - Removing all individual discretionary spending, creating unnecessary day-to-day friction.
 
-## Conclusion
+## Choose Deliberately, Revisit Often
 
-There's no universally correct way for couples to structure their money — joint, separate, and hybrid setups can all work, provided both partners chose it deliberately and keep talking about it as life changes. Build in a fair way to split shared costs, protect a little individual autonomy, and revisit the structure openly rather than letting it calcify. From here, our [family budget guide](/financial-intelligence/family-budget-guide) covers how this fits into the household's full spending plan once kids or other shared obligations enter the picture.`,
+There's no universally correct way for couples to structure their money — joint, separate, and hybrid setups can all work, provided both partners chose it deliberately and keep talking about it as life changes. Build in a fair way to split shared costs, protect a little individual autonomy, and revisit the structure openly rather than letting it calcify. From here, our [family budget guide](/family-budget/family-budget-guide) covers how this fits into the household's full spending plan once kids or other shared obligations enter the picture.`,
       futureArticleIdeas: [
         'How newly married couples should structure their first joint budget',
         'Renegotiating a couple’s budget after a job loss or income change',

@@ -286,6 +286,48 @@ export async function BudgetingHub() {
         {Math.max(articles.length, 20)}+ Budgeting Articles &middot; Updated Daily
       </p>
 
+      {/* Pillar primer — same keyTakeaways/sections pattern CategoryFeed renders for
+          sibling hubs (banking, investing), so /budgeting is a real resource in its
+          own right rather than a page of links pointing at where the content lives. */}
+      {(copy.keyTakeaways?.length || copy.sections?.length) ? (
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="max-w-3xl pb-12">
+            {copy.keyTakeaways && copy.keyTakeaways.length > 0 && (
+              <div className="mb-8 rounded-lg border border-border bg-muted/30 p-5">
+                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">
+                  Key Takeaways
+                </p>
+                <ul className="space-y-2">
+                  {copy.keyTakeaways.map((point, i) => (
+                    <li key={i} className="flex gap-2 text-sm leading-relaxed text-foreground">
+                      <span aria-hidden="true" className="text-primary">&bull;</span>
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {copy.sections && copy.sections.length > 0 && (
+              <div className="space-y-8">
+                {copy.sections.map((section, i) => (
+                  <div key={i}>
+                    <h2 className="text-lg font-bold text-foreground mb-3">{section.heading}</h2>
+                    <div className="space-y-3">
+                      {section.body.map((paragraph, j) => (
+                        <p key={j} className="text-sm leading-relaxed text-muted-foreground">
+                          {paragraph}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      ) : null}
+
       <div className="max-w-7xl mx-auto px-4 py-4 space-y-16">
         {/* Browse Budgeting Topics */}
         <section>

@@ -235,40 +235,45 @@ export async function StocksHub() {
       </p>
 
       <div className="max-w-7xl mx-auto px-4 py-4 space-y-16">
-        {/* Expanded hero intro: what stocks are, why people invest, how they work, benefits/risks */}
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm leading-relaxed text-muted-foreground max-w-5xl mx-auto">
-          <div>
-            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">What Are Stocks?</h2>
-            <p>
-              A stock is a share of ownership in a company. Buying one makes you a part-owner of that
-              business, with a claim on its future profits and, in many cases, a vote on how it&apos;s run.
-            </p>
-          </div>
-          <div>
-            <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Why People Invest in Stocks</h3>
-            <p>
-              Stocks have historically offered some of the strongest long-run returns of any widely
-              available asset class, making them a core building block for retirement savings, education
-              funds, and long-term wealth building.
-            </p>
-          </div>
-          <div>
-            <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">How Stocks Work</h3>
-            <p>
-              Shares trade on exchanges like the NYSE and Nasdaq, where prices move constantly based on
-              supply, demand, company performance, and the broader economy. You can buy or sell through a
-              brokerage account, typically in seconds.
-            </p>
-          </div>
-          <div>
-            <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Benefits and Risks</h3>
-            <p>
-              Stocks can appreciate in price and pay dividends, but their value can also fall sharply and
-              quickly. Diversification, time horizon, and risk tolerance all shape how much of a portfolio
-              belongs in individual stocks versus funds.
-            </p>
-          </div>
-        </section>
+        {/* Long-form educational pillar content — Key Takeaways + named H2 sections,
+            sourced from topic-config.ts (same TopicCopy shape CategoryFeed renders
+            for other flagship hubs) so this stays a real guide, not a thin SEO shell. */}
+        {(copy.keyTakeaways?.length || copy.sections?.length) ? (
+          <section className="max-w-3xl mx-auto">
+            {copy.keyTakeaways && copy.keyTakeaways.length > 0 && (
+              <div className="mb-10 rounded-lg border border-border bg-muted/30 p-5">
+                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">
+                  Key Takeaways
+                </p>
+                <ul className="space-y-2">
+                  {copy.keyTakeaways.map((point, i) => (
+                    <li key={i} className="flex gap-2 text-sm leading-relaxed text-foreground">
+                      <span aria-hidden="true" className="text-primary">&bull;</span>
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {copy.sections && copy.sections.length > 0 && (
+              <div className="space-y-8">
+                {copy.sections.map((section, i) => (
+                  <div key={i}>
+                    <h2 className="text-lg font-bold text-foreground mb-3">{section.heading}</h2>
+                    <div className="space-y-3">
+                      {section.body.map((paragraph, j) => (
+                        <p key={j} className="text-sm leading-relaxed text-muted-foreground">
+                          {paragraph}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        ) : null}
 
         {beginnerGuide && (
           <section className="max-w-3xl mx-auto text-center">
