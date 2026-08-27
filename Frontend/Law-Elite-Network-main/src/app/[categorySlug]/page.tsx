@@ -14,8 +14,13 @@ import seedData from '../../../docs/seed-data.json';
 import { CMS_ONLY_CATEGORIES } from '@/lib/cms-only-categories';
 import { CategoryContent } from './CategoryContent';
 import { CURRENT_CATEGORY_SLUGS } from '@/lib/category-slugs';
+import { AdSlot } from '@/components/ads/AdSlot';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+// Same AdSense slot as AD_PLACEMENTS.CATEGORY_HERO (AdManager.tsx) -- literal
+// because that file is 'use client' and its export doesn't survive an import
+// into this server component (resolved to a client-ref stub with no keys).
+const CATEGORY_AD_SLOT_ID = '4123514154';
 
 // Serve a cached page and refresh it in the background every 5 minutes,
 // instead of re-rendering (and re-fetching from the CMS/law-service) on
@@ -163,6 +168,10 @@ export default async function CategoryPage(
             </div>
           )}
         </section>
+
+        <div className="container mx-auto px-4 sm:px-6 max-w-7xl py-6">
+          <AdSlot slotId={CATEGORY_AD_SLOT_ID} format="horizontal" placement="category-hero" fullWidthResponsive minHeight="100px" />
+        </div>
 
         <CategoryContent categorySlug={categorySlug} categoryId={category.id} cmsArticles={cmsArticles} />
       </main>

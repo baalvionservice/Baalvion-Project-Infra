@@ -14,6 +14,7 @@ import { cmsGetAdsenseClient } from '@/lib/cms';
 import UnifiedAnalytics from '@/components/UnifiedAnalytics';
 import { GoogleAnalytics } from '@/components/GoogleAnalytics';
 import { CookieConsentBanner } from '@/components/CookieConsentBanner';
+import { MobileAnchorAd } from '@/components/ads/MobileAnchorAd';
 import { cn } from '@/lib/utils';
 import './globals.css';
 
@@ -276,6 +277,7 @@ export default async function RootLayout({
         </ThemeProvider>
         <UnifiedAnalytics slug={CMS_SLUG} />
         <CookieConsentBanner />
+        <MobileAnchorAd />
       </body>
     </html>
   );
