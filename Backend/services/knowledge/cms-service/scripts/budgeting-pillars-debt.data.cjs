@@ -66,15 +66,15 @@ module.exports = {
     ],
     faq: [
       { question: 'How much of my budget should go toward debt payoff?', answer: 'There is no universal number, but many budgeting frameworks suggest directing 15–20% or more of take-home pay toward combined savings and debt repayment. The right figure depends on your interest rates, minimum payments, and other fixed obligations, so start with what your budget can sustain consistently rather than an aggressive borrowed target.' },
-      { question: 'Should I use the debt snowball or debt avalanche method?', answer: 'Both work inside any budget — the snowball pays smallest balances first for motivation, the avalanche targets the highest interest rate first to save money on interest over time. See our full comparison in [debt snowball vs debt avalanche](/financial-intelligence/debt-snowball-vs-debt-avalanche) for the complete tradeoffs before deciding.' },
+      { question: 'Should I use the debt snowball or debt avalanche method?', answer: 'Both work inside any budget — the snowball pays smallest balances first for motivation, the avalanche targets the highest interest rate first to save money on interest over time. See our full comparison in [debt snowball vs debt avalanche](/debt/debt-snowball-vs-debt-avalanche) for the complete tradeoffs before deciding.' },
       { question: 'What if I cannot afford more than minimum payments right now?', answer: 'Paying only minimums is still a valid, temporary stage of a debt payoff budget — it keeps accounts current and protects your credit while you stabilize income or expenses. Redirect any extra as soon as it becomes available, even in small, inconsistent increments at first.' },
       { question: 'Should debt payoff come before building an emergency fund?', answer: 'Most financial educators suggest a small starter emergency fund first, so an unplanned expense does not create new debt, then an aggressive focus on high-interest debt, followed by building the emergency fund the rest of the way to its full target.' },
-      { question: 'How do I fit debt payments into a zero-based budget?', answer: 'Treat the debt payment like any other required expense — give it its own line and specific dollar amount so every dollar of income is assigned a job before the month begins. Our [zero-based budgeting](/financial-intelligence/zero-based-budgeting) guide walks through the full method step by step.' },
+      { question: 'How do I fit debt payments into a zero-based budget?', answer: 'Treat the debt payment like any other required expense — give it its own line and specific dollar amount so every dollar of income is assigned a job before the month begins. Our [zero-based budgeting](/budget-rules/zero-based-budgeting) guide walks through the full method step by step.' },
       { question: 'What should I do if an emergency forces me to skip a debt payment?', answer: 'Contact the lender before you miss the payment if at all possible, since many offer short-term hardship options for account holders in good standing. Then rebuild the budget around minimums temporarily and resume extra payments as soon as the emergency has genuinely passed.' },
       { question: 'Is it worth using a windfall like a tax refund on debt?', answer: 'For most households carrying high-interest debt, yes — a lump-sum payment reduces the balance faster than a monthly budget line item alone could manage, and it does not require any permanent change to your ongoing budget or spending habits.' },
       { question: 'How often should I revisit my debt payoff budget?', answer: 'A monthly check-in is typical — confirming the payment still fits your income, updating balances after each statement, and noting progress. Revisit sooner than that after any major change in income, expenses, or an unplanned financial disruption.' },
     ],
-    markdown: `Budgeting while paying off debt sounds simple in theory: spend less than you earn, send the difference toward what you owe, repeat until it is gone. In practice it is one of the harder budgeting problems there is, because a debt payment has to compete every single month against rent, groceries, insurance, and the dozens of smaller line items that make up a real life. This is not a guide to which payoff method is fastest — that comparison lives in our [debt snowball vs debt avalanche](/financial-intelligence/debt-snowball-vs-debt-avalanche) breakdown. This is about the budgeting mechanics underneath any method: where a debt payment actually lives inside a monthly budget, how to size it honestly, and what to do when the plan and real life disagree.
+    markdown: `Budgeting while paying off debt sounds simple in theory: spend less than you earn, send the difference toward what you owe, repeat until it is gone. In practice it is one of the harder budgeting problems there is, because a debt payment has to compete every single month against rent, groceries, insurance, and the dozens of smaller line items that make up a real life. This is not a guide to which payoff method is fastest — that comparison lives in our [debt snowball vs debt avalanche](/debt/debt-snowball-vs-debt-avalanche) breakdown. This is about the budgeting mechanics underneath any method: where a debt payment actually lives inside a monthly budget, how to size it honestly, and what to do when the plan and real life disagree.
 
 ## Why Debt Payoff Belongs Inside the Budget, Not Beside It
 
@@ -108,7 +108,7 @@ It's worth sitting with that $604 figure for a moment, because it's easy to unde
 
 ## Where Debt Payments Fit in a Monthly Budget
 
-Most popular budgeting frameworks were not built with heavy debt loads in mind, and that's fine — they flex. In a standard [50/30/20 budget](/financial-intelligence/50-30-20-budget-rule-explained), for example, debt minimums usually count as needs, while any extra payment beyond the minimum is typically carved out of the 20% normally split between savings and debt.
+Most popular budgeting frameworks were not built with heavy debt loads in mind, and that's fine — they flex. In a standard [50/30/20 budget](/personal-finance/50-30-20-budget-rule-explained), for example, debt minimums usually count as needs, while any extra payment beyond the minimum is typically carved out of the 20% normally split between savings and debt.
 
 | Budget category | Standard split | Adjusted for active debt payoff |
 | --- | --- | --- |
@@ -116,7 +116,7 @@ Most popular budgeting frameworks were not built with heavy debt loads in mind, 
 | Wants (discretionary spending) | 30% | 15–25% |
 | Savings and extra debt payoff | 20% | 25–30% |
 
-If you're following a different framework — [zero-based budgeting](/financial-intelligence/zero-based-budgeting), the envelope method, or a simple spreadsheet — the principle is the same: minimum payments are fixed, non-negotiable expenses, and extra payoff dollars come from wherever your budget currently allows the most flexibility, usually discretionary spending.
+If you're following a different framework — [zero-based budgeting](/budget-rules/zero-based-budgeting), the envelope method, or a simple spreadsheet — the principle is the same: minimum payments are fixed, non-negotiable expenses, and extra payoff dollars come from wherever your budget currently allows the most flexibility, usually discretionary spending.
 
 > [!INFO] If minimum payments alone already consume more than half your take-home pay, that's worth flagging to a nonprofit credit counselor (organizations like the National Foundation for Credit Counseling offer free or low-cost sessions) before building the rest of the budget around them.
 
@@ -124,7 +124,7 @@ If you're following a different framework — [zero-based budgeting](/financial-
 
 Once minimums are covered, the extra amount you've carved out needs somewhere to go. The two best-known approaches are the debt snowball (smallest balance first, for momentum) and the debt avalanche (highest interest rate first, for math efficiency). Both are compatible with any budget structure described above — the method changes which balance gets the extra payment, not how the extra payment gets funded in the first place.
 
-We cover the full mechanics, tradeoffs, and a side-by-side comparison in [debt snowball vs debt avalanche](/financial-intelligence/debt-snowball-vs-debt-avalanche). The short version: pick whichever one you'll actually stick with for the next twelve to twenty-four months, because consistency beats theoretical optimization almost every time.
+We cover the full mechanics, tradeoffs, and a side-by-side comparison in [debt snowball vs debt avalanche](/debt/debt-snowball-vs-debt-avalanche). The short version: pick whichever one you'll actually stick with for the next twelve to twenty-four months, because consistency beats theoretical optimization almost every time.
 
 ## A Full Month, Worked Through With Real Numbers
 
@@ -163,7 +163,7 @@ A workable approach when money tightens:
 - **Drop the extra payment temporarily**, but keep every minimum current.
 - **Contact lenders proactively** if even minimums are at risk — many offer short-term hardship arrangements.
 - **Resume the extra payment the moment the emergency has passed**, rather than letting "a little more time" quietly become permanent.
-- **Lean on an emergency fund if one exists** — our [emergency fund guide](/financial-intelligence/emergency-fund-guide) covers how that reserve is meant to absorb exactly this kind of shock so debt payoff doesn't have to.
+- **Lean on an emergency fund if one exists** — our [emergency fund guide](/personal-finance/emergency-fund-guide) covers how that reserve is meant to absorb exactly this kind of shock so debt payoff doesn't have to.
 
 None of this means the payoff plan failed. A budget that bends under a real disruption and recovers afterward is doing exactly what it's supposed to do. The plans that actually fail are the ones with no adjustment mechanism at all — where a single bad month either derails the entire effort or quietly gets ignored until minimum payments themselves are at risk.
 
@@ -180,7 +180,7 @@ Most debt payoff budgets don't fail in one dramatic month. They fail slowly, thr
 
 ## Conclusion
 
-Budgeting while paying off debt isn't about finding a smarter formula — the math behind the snowball and avalanche methods is well established and covered in our [dedicated comparison](/financial-intelligence/debt-snowball-vs-debt-avalanche). The part that actually determines whether a plan survives is the budgeting mechanics: an honest list of what's owed, a fixed and automated line item for the extra payment, and a clear plan for what happens when a real month doesn't go as planned. Get those three things right, and the payoff method you choose matters far less than showing up, month after month, until the balances are gone.
+Budgeting while paying off debt isn't about finding a smarter formula — the math behind the snowball and avalanche methods is well established and covered in our [dedicated comparison](/debt/debt-snowball-vs-debt-avalanche). The part that actually determines whether a plan survives is the budgeting mechanics: an honest list of what's owed, a fixed and automated line item for the extra payment, and a clear plan for what happens when a real month doesn't go as planned. Get those three things right, and the payoff method you choose matters far less than showing up, month after month, until the balances are gone.
 
 This article is educational and general in nature, not personalized financial or credit counseling advice — a nonprofit credit counselor or financial advisor can review numbers specific to your situation.`,
     futureArticleIdeas: [
@@ -233,7 +233,7 @@ This article is educational and general in nature, not personalized financial or
       faq: [
         { question: 'What is the first step in a debt payoff budget strategy?', answer: 'List every debt with its current balance, interest rate, and minimum payment in one place. Without this complete picture, any budget built on top of it is a guess rather than a plan, and tends to fall apart the first time real statement numbers turn out different than assumed.' },
         { question: 'How much extra should I try to pay toward debt each month?', answer: 'Whatever your budget can consistently sustain after minimum payments and essential expenses, even if that starting amount feels small. A smaller, reliable extra payment made every single month beats a large one you can only manage once or twice before abandoning it.' },
-        { question: 'Should I pick the snowball or avalanche method for my strategy?', answer: 'Either fits into this same budgeting process — the snowball targets the smallest balance first for motivation, while the avalanche targets the highest interest rate first to save more on interest. See our [comparison](/financial-intelligence/debt-snowball-vs-debt-avalanche) to decide which approach fits your personality.' },
+        { question: 'Should I pick the snowball or avalanche method for my strategy?', answer: 'Either fits into this same budgeting process — the snowball targets the smallest balance first for motivation, while the avalanche targets the highest interest rate first to save more on interest. See our [comparison](/debt/debt-snowball-vs-debt-avalanche) to decide which approach fits your personality.' },
         { question: 'How do I handle multiple debts with different due dates?', answer: 'Keep minimum payments on autopay tied to each account’s individual due date, so nothing is ever late, and schedule the single extra payment for right after payday, directed at whichever balance your chosen method currently targets that month.' },
         { question: 'What if my income is irregular month to month?', answer: 'Set the extra payment as a percentage of income rather than a fixed dollar amount, or build a conservative baseline from your lowest typical month and add more whenever a higher-income month allows extra room in the budget to work with.' },
         { question: 'How do I know if my strategy is actually working?', answer: 'Total debt balance should trend consistently downward month over month, even with normal fluctuation between statements. If it stalls or grows despite following the plan, revisit whether new charges are being added faster than the strategy accounts for.' },
@@ -265,7 +265,7 @@ A useful gut check: if the extra amount would require a perfect month with zero 
 
 ## Step 3: Choose Snowball, Avalanche, or a Hybrid
 
-With an extra payment amount set, decide which balance it targets first. The debt snowball directs it at the smallest balance for early wins and momentum; the debt avalanche directs it at the highest APR to minimize total interest paid. Our full [debt snowball vs debt avalanche](/financial-intelligence/debt-snowball-vs-debt-avalanche) comparison breaks down the math and psychology behind each.
+With an extra payment amount set, decide which balance it targets first. The debt snowball directs it at the smallest balance for early wins and momentum; the debt avalanche directs it at the highest APR to minimize total interest paid. Our full [debt snowball vs debt avalanche](/debt/debt-snowball-vs-debt-avalanche) comparison breaks down the math and psychology behind each.
 
 Either integrates identically into the budget strategy described here — this step only changes which line on your debt list gets the extra dollars first.
 
@@ -280,7 +280,7 @@ This is the step that separates a strategy on paper from one that survives conta
 3. **Name it clearly in your budget** — “Extra payment: Store Card” — rather than folding it into a vague savings category.
 4. **Recalculate after each balance hits zero**, rolling its former minimum and extra payment into the next target on your list. This rolling effect is what makes both the snowball and avalanche methods accelerate over time.
 
-If you budget using the [zero-based method](/financial-intelligence/zero-based-budgeting), this line item is simply one more dollar assignment inside a budget where every dollar already has a job. If you use a different system, the same principle of "assign it, automate it, don't leave it to chance" still applies.
+If you budget using the [zero-based method](/budget-rules/zero-based-budgeting), this line item is simply one more dollar assignment inside a budget where every dollar already has a job. If you use a different system, the same principle of "assign it, automate it, don't leave it to chance" still applies.
 
 ## Step 5: Build In an Adjustment Plan for Bad Months
 
@@ -290,7 +290,7 @@ No twelve-month strategy survives twelve perfect months. Decide now, before it h
 - The extra payment is the first thing to shrink or pause temporarily.
 - Resume the extra payment at full size as soon as the disruption passes, rather than letting it quietly stay reduced.
 
-For a deeper look at protecting this plan from disruption in the first place, see our guide to [budgeting while paying off debt](/financial-intelligence/budgeting-while-paying-off-debt).
+For a deeper look at protecting this plan from disruption in the first place, see our guide to [budgeting while paying off debt](/debt/budgeting-while-paying-off-debt).
 
 ## Watching the Strategy Compound Over Time
 
@@ -306,7 +306,7 @@ The part of this process that's easy to underestimate is how much the "rolling" 
 
 ## Conclusion
 
-A debt payoff budget strategy isn't complicated in concept — list what you owe, decide what your budget can sustain, automate the payment, and adjust when life happens. What makes it work is discipline in the execution: funding the extra payment first, not last, and treating it with the same seriousness as rent. For the specific mechanics of credit card debt, which behaves a little differently from installment loans, see our [credit card budget strategy](/financial-intelligence/credit-card-budget-strategy) guide next.
+A debt payoff budget strategy isn't complicated in concept — list what you owe, decide what your budget can sustain, automate the payment, and adjust when life happens. What makes it work is discipline in the execution: funding the extra payment first, not last, and treating it with the same seriousness as rent. For the specific mechanics of credit card debt, which behaves a little differently from installment loans, see our [credit card budget strategy](/debt/credit-card-budget-strategy) guide next.
 
 This article provides general, educational information and is not personalized financial advice for your specific situation.`,
       futureArticleIdeas: [
@@ -388,7 +388,7 @@ For each card, write down the balance, APR, minimum payment, and credit limit.
 | Card B | $650 | $2,000 | 33% | 21.9% | $30 |
 | Card C | $4,100 | $8,000 | 51% | 18.9% | $135 |
 
-From here, order the cards using either the debt snowball (smallest balance first) or debt avalanche (highest APR first) method — both are explained in full, with the tradeoffs between them, in our [debt snowball vs debt avalanche](/financial-intelligence/debt-snowball-vs-debt-avalanche) guide. What matters for this strategy is picking one consistent order and directing every extra dollar there, rather than splitting it evenly across all three cards.
+From here, order the cards using either the debt snowball (smallest balance first) or debt avalanche (highest APR first) method — both are explained in full, with the tradeoffs between them, in our [debt snowball vs debt avalanche](/debt/debt-snowball-vs-debt-avalanche) guide. What matters for this strategy is picking one consistent order and directing every extra dollar there, rather than splitting it evenly across all three cards.
 
 ## Step 3: Pay More Than the Minimum, Even by a Small Amount
 
@@ -404,7 +404,7 @@ It's worth checking utilization per card as well as across all cards combined. A
 
 ## Step 5: Build the Payment Into Your Full Monthly Budget
 
-A credit card budget strategy shouldn't be managed as a side project separate from everything else you're spending. It belongs inside your regular monthly budget, alongside rent, groceries, and other required expenses — see our guide to [budgeting while paying off debt](/financial-intelligence/budgeting-while-paying-off-debt) for how to size and automate that line item, and [debt payoff budget strategy](/financial-intelligence/debt-payoff-budget-strategy) for the full step-by-step process across all debt types, not just cards.
+A credit card budget strategy shouldn't be managed as a side project separate from everything else you're spending. It belongs inside your regular monthly budget, alongside rent, groceries, and other required expenses — see our guide to [budgeting while paying off debt](/debt/budgeting-while-paying-off-debt) for how to size and automate that line item, and [debt payoff budget strategy](/debt/debt-payoff-budget-strategy) for the full step-by-step process across all debt types, not just cards.
 
 Once the strategy is written into the budget as a named, automated line item, the day-to-day decision-making mostly disappears. The budget already decided how much goes where; all that's left is letting it run.
 

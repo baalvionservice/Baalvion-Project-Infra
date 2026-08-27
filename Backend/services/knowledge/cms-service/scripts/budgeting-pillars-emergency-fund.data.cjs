@@ -69,7 +69,7 @@ module.exports = {
       { question: 'Should I use my full income or just essential expenses?', answer: 'Use essential expenses, not income. The fund needs to cover what you must spend to keep the household running during a disruption, which is usually meaningfully lower than your total monthly income once discretionary spending is set aside.' },
       { question: 'Why do some households need 6+ months instead of 3?', answer: 'Variable or freelance income, being the sole earner in a household, or having dependents all increase the risk that a disruption lasts longer or costs more, which is exactly why the multiplier should shift upward in those specific situations.' },
       { question: 'Is there an actual online calculator I should use instead?', answer: 'Interactive calculators can be convenient for a quick estimate, but they run the same three-step math described here. Understanding the manual calculation makes it easier to sanity-check any tool and adjust the result for your specific situation.' },
-      { question: 'Where should this money actually be kept?', answer: 'Our [emergency fund guide](/financial-intelligence/emergency-fund-guide) covers where to hold the money and why liquidity and safety matter more than chasing yield for this particular pool of savings, once you know the target amount.' },
+      { question: 'Where should this money actually be kept?', answer: 'Our [emergency fund guide](/personal-finance/emergency-fund-guide) covers where to hold the money and why liquidity and safety matter more than chasing yield for this particular pool of savings, once you know the target amount.' },
       { question: 'Does this calculation account for irregular expenses like car repairs?', answer: 'Not directly — those are better handled through a separate sinking fund built specifically for predictable irregular costs. The emergency fund target here is about surviving a loss of income or a major unplanned cost, not routine irregular bills.' },
       { question: 'How often should I recalculate my emergency fund target?', answer: 'Revisit it whenever your essential expenses change meaningfully — a rent increase, a new dependent, a change in income stability — and otherwise recalculate it at least once a year even without an obvious trigger prompting the review.' },
     ],
@@ -125,15 +125,15 @@ Take a hypothetical single-income household with two dependents and a mix of sal
 
 $3,400 × 6 = **$20,400** emergency fund target.
 
-That's a specific, fundable number — one that can now be broken into a monthly savings plan, which we cover in [building your emergency fund into your budget](/financial-intelligence/building-emergency-fund-into-your-budget), rather than an abstract goal that never quite gets funded.
+That's a specific, fundable number — one that can now be broken into a monthly savings plan, which we cover in [building your emergency fund into your budget](/emergency-fund/building-emergency-fund-into-your-budget), rather than an abstract goal that never quite gets funded.
 
 ## What This Calculation Leaves Out
 
-This walkthrough gets you to a target dollar amount — it doesn't cover where that money should actually live once you start saving it, or the tradeoffs between account types. Our [emergency fund guide](/financial-intelligence/emergency-fund-guide) covers those fundamentals directly, including why liquidity and safety matter more than chasing yield for this particular pool of money, and how [high-yield savings accounts](/financial-intelligence/high-yield-savings-accounts) typically fit the job.
+This walkthrough gets you to a target dollar amount — it doesn't cover where that money should actually live once you start saving it, or the tradeoffs between account types. Our [emergency fund guide](/personal-finance/emergency-fund-guide) covers those fundamentals directly, including why liquidity and safety matter more than chasing yield for this particular pool of money, and how [high-yield savings accounts](/savings/high-yield-savings-accounts) typically fit the job.
 
 ## Turning the Number Into a Plan
 
-A $17,000 or $20,000 target can feel abstract, even discouraging, as a single number. It becomes workable once broken into stages — a small starter goal first, then a monthly contribution toward the full target. See [building your emergency fund into your budget](/financial-intelligence/building-emergency-fund-into-your-budget) for exactly how to stage that inside a real monthly budget, and [when to use your emergency fund](/financial-intelligence/when-to-use-emergency-savings) for what actually qualifies once the fund exists.
+A $17,000 or $20,000 target can feel abstract, even discouraging, as a single number. It becomes workable once broken into stages — a small starter goal first, then a monthly contribution toward the full target. See [building your emergency fund into your budget](/emergency-fund/building-emergency-fund-into-your-budget) for exactly how to stage that inside a real monthly budget, and [when to use your emergency fund](/emergency-fund/when-to-use-emergency-savings) for what actually qualifies once the fund exists.
 
 ## Common Mistakes When Calculating Your Target
 
@@ -244,18 +244,16 @@ A withdrawal doesn't have to mean draining the whole account. If a repair costs 
 
 ## What to Do Immediately After
 
-Rebuilding should start right away, even if it means resuming automated transfers at a smaller amount than before the withdrawal. Treating the fund as "used up, deal with it later" is how a household ends up without coverage the next time something unplanned happens — and unplanned expenses, by definition, don't wait for a convenient rebuilding period. Our guide to [building your emergency fund into your budget](/financial-intelligence/building-emergency-fund-into-your-budget) covers exactly how to make that automatic.
+Rebuilding should start right away, even if it means resuming automated transfers at a smaller amount than before the withdrawal. Treating the fund as "used up, deal with it later" is how a household ends up without coverage the next time something unplanned happens — and unplanned expenses, by definition, don't wait for a convenient rebuilding period. Our guide to [building your emergency fund into your budget](/emergency-fund/building-emergency-fund-into-your-budget) covers exactly how to make that automatic.
 
-## Common Mistakes
+## Ways People Get This Wrong
 
 - **Treating the fund as untouchable** and going into credit card debt instead, even during a genuine emergency.
 - **Using it for predictable annual costs** that a sinking fund would have handled more efficiently.
 - **Draining the entire fund** for a moderate expense instead of withdrawing only what's needed.
 - **Delaying the rebuild** after a legitimate withdrawal, leaving the household exposed to the next disruption.
 
-## Conclusion
-
-An emergency fund only does its job if you actually use it for what it was built for — and leave it alone for everything else. The three-question test (unplanned, necessary, urgent) settles most situations quickly, and the rest come down to being honest about the difference between a real emergency and a moment that simply felt urgent. For how much to actually keep in the fund in the first place, see our [emergency fund calculator guide](/financial-intelligence/emergency-fund-calculator-guide).
+An emergency fund only does its job if you actually use it for what it was built for — and leave it alone for everything else. The three-question test (unplanned, necessary, urgent) settles most situations quickly, and the rest come down to being honest about the difference between a real emergency and a moment that simply felt urgent. For how much to actually keep in the fund in the first place, see our [emergency fund calculator guide](/emergency-fund/emergency-fund-calculator-guide).
 
 This article is educational in nature and not personalized financial advice — your own situation may call for judgment beyond these general guidelines.`,
       futureArticleIdeas: [
@@ -303,13 +301,13 @@ This article is educational in nature and not personalized financial advice — 
       ],
       faq: [
         { question: 'How much should I budget for my emergency fund each month?', answer: 'A common starting point is a fixed amount you can sustain consistently, even if modest, rather than an aggressive figure you can only manage occasionally. Consistency in the budget line item matters more than the size of any single contribution.' },
-        { question: 'Where should the emergency fund line item go in my budget?', answer: 'Treat it as a required expense, similar to a bill, funded right after payday before discretionary spending. In a [zero-based budget](/financial-intelligence/zero-based-budgeting), it is simply one more dollar assignment with its own explicit amount.' },
+        { question: 'Where should the emergency fund line item go in my budget?', answer: 'Treat it as a required expense, similar to a bill, funded right after payday before discretionary spending. In a [zero-based budget](/budget-rules/zero-based-budgeting), it is simply one more dollar assignment with its own explicit amount.' },
         { question: 'What is a staged emergency fund goal?', answer: 'Instead of budgeting toward the full 3–6 month target all at once, a staged goal starts with a smaller, faster milestone — often a starter fund of a few hundred to a thousand dollars — before continuing toward the full amount.' },
         { question: 'How do I budget for an emergency fund with irregular income?', answer: 'Use a percentage of each payment rather than a fixed dollar amount, so the contribution scales naturally with whatever comes in, and consider directing a larger share of higher-income months toward the fund.' },
         { question: 'Should I automate my emergency fund contributions?', answer: 'Yes, if your bank or budgeting app allows it. Automating the transfer on payday removes the need to make a fresh decision every pay period, which is where most emergency fund plans quietly stall out.' },
         { question: 'What happens to the budget line item once my emergency fund is fully funded?', answer: 'Once the target is reached, that monthly amount can be redirected toward other goals — debt payoff, retirement, or a different savings target — rather than continuing to accumulate beyond what the fund needs.' },
         { question: 'Should I reduce my emergency fund contribution during a tight month?', answer: 'Reducing it temporarily is reasonable and often necessary; eliminating it entirely for months at a time tends to stall progress indefinitely. Even a small, reduced contribution keeps the habit and the balance moving in the right direction.' },
-        { question: 'Can I build my emergency fund and pay off debt in the same budget?', answer: 'Yes — many households fund a small starter emergency fund first, then prioritize high-interest debt, then return to building the emergency fund the rest of the way. Our guide to [budgeting while paying off debt](/financial-intelligence/budgeting-while-paying-off-debt) covers that sequencing in more depth.' },
+        { question: 'Can I build my emergency fund and pay off debt in the same budget?', answer: 'Yes — many households fund a small starter emergency fund first, then prioritize high-interest debt, then return to building the emergency fund the rest of the way. Our guide to [budgeting while paying off debt](/debt/budgeting-while-paying-off-debt) covers that sequencing in more depth.' },
       ],
       markdown: `An emergency fund target is only a number until your budget actually funds it. Plenty of people know they should have three to six months of expenses saved, without ever building the monthly habit that gets them there. This guide covers exactly how to give **building your emergency fund into your budget** a real, working line item — not a vague intention to "save more when possible."
 
@@ -321,7 +319,7 @@ Give the line item a specific name and amount in your budget — "Emergency fund
 
 ## Stage the Goal So It Doesn't Feel Impossible
 
-A full emergency fund target, once calculated (see our [emergency fund calculator guide](/financial-intelligence/emergency-fund-calculator-guide) for the math), can be a genuinely large number — $15,000 or $20,000 isn't unusual for a household with significant essential expenses. Budgeting toward that entire figure from month one, with no intermediate milestones, tends to feel discouraging fast.
+A full emergency fund target, once calculated (see our [emergency fund calculator guide](/emergency-fund/emergency-fund-calculator-guide) for the math), can be a genuinely large number — $15,000 or $20,000 isn't unusual for a household with significant essential expenses. Budgeting toward that entire figure from month one, with no intermediate milestones, tends to feel discouraging fast.
 
 | Stage | Typical target | Purpose |
 | --- | --- | --- |
@@ -343,9 +341,9 @@ A fixed dollar contribution doesn't always fit variable or freelance income clea
 
 ## Where This Fits Alongside Other Budget Priorities
 
-For households also carrying debt, a common and reasonable sequence is: a small emergency fund starter first, then a concentrated push on high-interest debt, then finishing the emergency fund the rest of the way. Our guide to [budgeting while paying off debt](/financial-intelligence/budgeting-while-paying-off-debt) covers how to sequence and size both priorities inside the same monthly budget without either one stalling the other.
+For households also carrying debt, a common and reasonable sequence is: a small emergency fund starter first, then a concentrated push on high-interest debt, then finishing the emergency fund the rest of the way. Our guide to [budgeting while paying off debt](/debt/budgeting-while-paying-off-debt) covers how to sequence and size both priorities inside the same monthly budget without either one stalling the other.
 
-If you use a [zero-based budgeting](/financial-intelligence/zero-based-budgeting) approach, the emergency fund contribution is simply one more explicit dollar assignment — every dollar of income gets a job, and this is one of them, before the month even starts.
+If you use a [zero-based budgeting](/budget-rules/zero-based-budgeting) approach, the emergency fund contribution is simply one more explicit dollar assignment — every dollar of income gets a job, and this is one of them, before the month even starts.
 
 ## Adjusting When the Budget Gets Tight
 
@@ -367,9 +365,9 @@ Reaching the full target is worth pausing on. Once you're there, that monthly li
 - **Abandoning the contribution entirely during a tight month**, instead of simply reducing it temporarily.
 - **Leaving the contribution running unchanged for years** after the full target has already been reached.
 
-## Conclusion
+## The Habit Matters More Than the Number
 
-Building your emergency fund into your budget comes down to treating it like a real, required expense: named, sized, automated, and staged so the goal never feels out of reach. Get that structure in place, and the number from your [emergency fund calculator guide](/financial-intelligence/emergency-fund-calculator-guide) stops being a distant target and starts becoming a balance that grows every single month, whether or not you remember to think about it.
+Building your emergency fund into your budget comes down to treating it like a real, required expense: named, sized, automated, and staged so the goal never feels out of reach. Get that structure in place, and the number from your [emergency fund calculator guide](/emergency-fund/emergency-fund-calculator-guide) stops being a distant target and starts becoming a balance that grows every single month, whether or not you remember to think about it.
 
 This article offers general educational guidance and is not personalized financial advice for your specific budget or circumstances.`,
       futureArticleIdeas: [

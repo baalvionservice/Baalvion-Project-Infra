@@ -832,6 +832,68 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaTitle: 'Budgeting Tips, Templates & Strategies',
     metaDescription:
       'Learn practical budgeting methods, from the 50/30/20 rule to zero-based budgeting, and build a spending plan that actually sticks.',
+    keyTakeaways: [
+      'A budget is a plan for money made before you spend it, built from four numbers: income, fixed costs, variable costs, and what’s left for savings or debt.',
+      'No single method is objectively best — 50/30/20, zero-based, envelope, and pay-yourself-first all track the same four numbers differently, and the right pick depends on how much manual control you want.',
+      'Most first budgets fail because they’re built from a guess instead of 2–3 months of real bank and card statements.',
+      'Irregular, once-a-year costs — insurance premiums, car registration, holidays — are the most common blind spot; they need their own line item, not a hope that spare cash shows up when the bill does.',
+      'Debt minimums and a starter emergency fund both belong inside the budget itself, not treated as side goals competing against it.',
+      'A budget only keeps working if it’s reviewed on a set cadence and adjusted as real income or expenses change — the first draft is a starting point, not a final answer.',
+    ],
+    sections: [
+      {
+        heading: 'What a Budget Actually Does',
+        body: [
+          'A budget is a plan for income and expenses, written before the money moves — not a record of where it went afterward. Its job is to answer one question in advance: is there enough for what matters, in the order it matters, before a bill or a bounced payment answers it for you.',
+          'Every budget that works, regardless of method, tracks the same four numbers: income (what actually lands, after tax), fixed costs (the bills that don’t change month to month, like rent and a car payment), variable costs (groceries, gas, everyday spending), and what’s left over for savings, investing, or paying down debt beyond the minimum. The methods below arrange those four numbers differently; none of them change what the numbers are. New to this? Start with what a budget is and how to build your first one.',
+        ],
+      },
+      {
+        heading: 'How to Build One: Five Steps',
+        body: [
+          '1. Pull your real numbers first. Two to three months of actual bank and card statements, not a guess from memory — memory-based budgets consistently underestimate discretionary spending, which is the single biggest reason first budgets fail.',
+          '2. List fixed costs separately from variable ones. Rent, insurance, loan payments, and subscriptions rarely move; groceries, gas, and everyday spending do. Keeping them apart shows you which category actually has room to adjust.',
+          '3. Set a realistic number for variable spending. Base it on what you actually spent last month, not an aspirational cut — you can trim it gradually once the budget is running, not before it exists.',
+          '4. Assign what’s left. Savings, extra debt payments, and specific goals each get a deliberate amount, rather than whatever happens to remain at the end of the month.',
+          '5. Review it on a fixed schedule. A monthly check against what actually happened is what turns a first draft into a system — see the monthly budget checklist for a repeatable version of this step.',
+        ],
+      },
+      {
+        heading: 'Fixed and Variable Costs — and the Expenses People Forget',
+        body: [
+          'Fixed costs (rent, insurance, minimum debt payments) and variable costs (food, gas, everyday spending) are the two categories most budgets get right. The one that gets missed is irregular expenses — costs that are entirely predictable but don’t hit every month: an annual insurance premium, car registration, holiday spending, a biannual dentist visit. These are what typically wreck an otherwise sound budget, because they show up as a surprise even though the calendar could have told you they were coming.',
+          'The fix is a dedicated line for them, not a hope that a lighter month will absorb the cost. Setting aside a fixed amount every month toward a known annual bill — sometimes called a sinking fund — turns a $1,200 annual premium into a $100 monthly line item instead of a once-a-year emergency. See the budget calendar guide for mapping these against the months they actually land in.',
+        ],
+      },
+      {
+        heading: 'Where Debt Payments and Emergency Savings Fit',
+        body: [
+          'Minimum debt payments count as a fixed cost — they’re non-negotiable, the same as rent. Anything beyond the minimum comes out of the same leftover category as savings, which means the two are competing for the same dollars unless the budget is explicit about how to split them.',
+          'A common, defensible sequence: build a small starter cushion — often around $1,000 — before directing every spare dollar at extra debt payments, so an unplanned car repair doesn’t undo a payoff plan by forcing new borrowing. From there, the split between extra debt payoff and a fuller 3–6 month emergency fund depends on the interest rate on the debt versus the value of a larger cash buffer. See the emergency fund hub and debt management for the fuller version of each side of that decision.',
+        ],
+      },
+      {
+        heading: 'Choosing a Budgeting Method',
+        body: [
+          'The methods below all use the same four numbers above — they differ in how much manual upkeep they require and how much control they give you over individual categories.',
+          'The 50/30/20 rule splits after-tax income into needs, wants, and savings — the simplest starting ratio, and a reasonable default if you haven’t budgeted before. Zero-based budgeting assigns every dollar a specific job before the month starts — more precise, more maintenance. Envelope budgeting (cash or digital) caps specific categories with a hard limit, which works well for anyone who tends to overspend in one or two areas specifically. Pay-yourself-first and reverse budgeting both automate savings the moment income arrives and let the rest flow to spending — effective once fixed costs are already predictable. See budget methods compared for a full side-by-side, including which situations each one fits best.',
+        ],
+      },
+      {
+        heading: 'A Realistic Example',
+        body: [
+          'Example (illustrative numbers, not a recommendation): a single earner brings home $4,200 a month after tax. Fixed costs — rent, insurance, a car payment, minimum card payment — total $2,300. Groceries, gas, and everyday variable spending run about $900. That leaves $1,000. Using a rough 50/30/20 shape adjusted to this budget, $200 goes to a sinking fund for irregular annual costs (insurance renewal, holidays), $300 to extra debt payoff above the minimum, and $500 to savings — split between a starter emergency fund until it reaches $1,000, then redirected toward a fuller 3–6 month fund.',
+          'The specific split isn’t the point — it’s that every dollar of the $1,000 leftover has an assigned job before the month starts, instead of being decided informally as spending happens.',
+        ],
+      },
+      {
+        heading: 'Common Mistakes, and When to Rebuild the Budget',
+        body: [
+          'The most common budgeting mistakes: building categories from memory instead of statements, forgetting irregular annual costs entirely, treating the first month’s numbers as final instead of a draft, and abandoning the whole budget after one category runs over instead of just adjusting it. See common budgeting mistakes for the full list and fixes.',
+          'A budget needs a real rebuild — not just a monthly tweak — after an income change, a move, a new dependent, paying off a major debt, or any shift that changes your fixed costs by more than a small amount. Everything else is a normal monthly adjustment; see the monthly budget review checklist for that recurring process.',
+        ],
+      },
+    ],
   },
   'budgeting-basics': {
     tag: 'BUDGETING BASICS',
