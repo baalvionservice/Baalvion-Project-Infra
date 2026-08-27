@@ -2,88 +2,63 @@ import Link from "next/link";
 import {
   TrendingUp,
   Landmark,
-  PieChart,
-  PiggyBank,
-  Scale,
-  Wheat,
-  Bitcoin,
-  Home,
   Umbrella,
   Briefcase,
-  Building2,
-  Flame,
-  Calculator,
   ArrowRight,
+  Flame,
+  PiggyBank,
 } from "lucide-react";
 
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
-import { getCategoryArticles, listCmsContent, cmsContentToArticle } from "@/services/data/cms-public";
+import { getCategoryArticles, listAllCmsContent, cmsContentToArticle } from "@/services/data/cms-public";
 import { staticCategoryNews, staticArticleList } from "@/services/data/static-content";
 import { topicCopy, staticCategoryFor, parentFor } from "@/lib/topic-config";
 import { FeaturedArticleCard } from "@/components/pages/FeaturedArticleCard";
 import { HorizontalArticleCard } from "@/components/pages/HorizontalArticleCard";
-import { InvestingTopicExplorer, type InvestingTopic } from "@/components/pages/InvestingTopicExplorer";
 import HeadingSection from "@/components/layout/HeadingSection";
 import { NewsletterForm } from "@/components/landing/NewsletterForm";
-import FAQAccordionSection from "@/components/faq/FAQAccordionSection";
+import FAQItem from "@/components/faq/FAQItem";
 import { env } from "@/config/env";
 import { newsArticleHref } from "@/lib/data/article-url";
 
-const SLUG = "investing";
+const SLUG = "mutual-funds";
 
-/** Investing sub-topics, in the same order as the site nav (Navbar.tsx "Investing" menu). */
-const INVESTING_TOPICS: Array<InvestingTopic & { icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "stocks", label: "Stocks", icon: TrendingUp },
-  { slug: "bonds", label: "Bonds", icon: Landmark },
-  { slug: "etfs", label: "ETFs", icon: PieChart },
-  { slug: "mutual-funds", label: "Mutual Funds", icon: PiggyBank },
-  { slug: "options", label: "Options", icon: Scale },
-  { slug: "commodities", label: "Commodities", icon: Wheat },
-  { slug: "cryptocurrency", label: "Cryptocurrency", icon: Bitcoin },
-  { slug: "real-estate", label: "Real Estate", icon: Home },
-  { slug: "retirement", label: "Retirement", icon: Umbrella },
-  { slug: "portfolio", label: "Portfolio", icon: Briefcase },
-  { slug: "brokers", label: "Brokers", icon: Building2 },
-];
-
-/** Real, functional calculator tools (product features, not editorial content). */
-const INVESTING_TOOLS = [
-  { href: "/financial-tools/investment", label: "Investment Calculator" },
-  { href: "/financial-tools/compound-interest", label: "Compound Interest Calculator" },
-  { href: "/financial-tools", label: "All Financial Tools" },
+/** Real sibling pillars within the Investing nav group this page links down to
+ *  — every slug already has its own route and topic-config entry. Kept as
+ *  plain nav cards rather than a fabricated per-topic article feed, since
+ *  mutual funds has no CMS sub-categories of its own. */
+const EXPLORE_INVESTING: Array<{
+  slug: string;
+  label: string;
+  description: string;
+  icon: React.ComponentType<{ className?: string }>;
+}> = [
+  { slug: "etfs", label: "ETFs", description: "How ETFs trade continuously instead of once-a-day at NAV", icon: PiggyBank },
+  { slug: "bonds", label: "Bonds", description: "What a bond fund actually holds and how bond risk works", icon: Landmark },
+  { slug: "stocks", label: "Stocks", description: "The individual companies many equity funds invest in", icon: TrendingUp },
+  { slug: "retirement", label: "Retirement Investing", description: "How mutual funds are commonly used inside 401(k)s and IRAs", icon: Umbrella },
+  { slug: "portfolio", label: "Portfolio Management", description: "Building a diversified allocation with a handful of funds", icon: Briefcase },
 ];
 
 const EXPLORE_MORE = [
-  { href: "/market-news", label: "Markets" },
+  { href: "/investing", label: "Investing" },
+  { href: "/market-news", label: "Market News" },
+  { href: "/brokers", label: "Brokers" },
   { href: "/economy", label: "Economy" },
-  { href: "/banking", label: "Banking" },
-  { href: "/personal-finance", label: "Personal Finance" },
   { href: "/reviews", label: "Reviews" },
 ];
 
-/** CMS-first fetch for a single topic slug, same fallback chain as CategoryFeed. */
-async function fetchTopicArticles(slug: string, limit: number): Promise<NewsArticle[]> {
-  let items = await getCategoryArticles(slug, limit);
-  if (items.length) return items;
-
-  items = staticCategoryNews(slug).slice(0, limit);
-  if (items.length) return items;
-
-  const cat = staticCategoryFor(slug);
-  return (cat ? newsArticles.filter((a) => a.category === cat) : []).slice(0, limit);
-}
-
 /**
- * Dedicated Investing hub — CMS-driven topic browser, trending list, and a
- * "Start Investing" path, all sourced live from cms-service (admin panel)
- * rather than any hardcoded article list. Falls back to the baked snapshot,
- * then bundled demo content, exactly like the shared CategoryFeed template.
+ * Dedicated Mutual Funds hub — the Mutual Funds educational pillar, following
+ * the same rendering pattern as CreditHub/StocksHub (long-form keyTakeaways +
+ * named sections sourced from topic-config.ts, single CMS-first article feed,
+ * aggregated FAQ, sibling-pillar nav cards) rather than the generic
+ * CategoryFeed this route previously used.
  */
-export async function InvestingHub() {
+export async function MutualFundsHub() {
   const copy = topicCopy(SLUG);
 
-  // 1) Main investing feed — same CMS-first fallback chain as every other topic page.
-  let articles: NewsArticle[] = await getCategoryArticles(SLUG, 30);
+  let articles: NewsArticle[] = await getCategoryArticles(SLUG, 40);
   let isLive = articles.length > 0;
   if (!isLive) {
     const baked = staticCategoryNews(SLUG);
@@ -100,17 +75,7 @@ export async function InvestingHub() {
   const featured = articles.find((a) => a.featured) ?? articles[0];
   const rest = articles.filter((a) => a !== featured);
   const sidebarArticles = rest.slice(0, 3);
-  const gridArticles = rest.slice(3);
 
-  // 2) Per-topic live sets — fetched from the CMS in parallel. Powers both the
-  //    topic explorer tabs and the "Start Investing" path below.
-  const topicEntries = await Promise.all(
-    INVESTING_TOPICS.map(async (t) => [t.slug, await fetchTopicArticles(t.slug, 6)] as const)
-  );
-  const articlesByTopic: Record<string, NewsArticle[]> = Object.fromEntries(topicEntries);
-
-  // 3) "Popular this week" — ranked from the live feed by tracked view count,
-  //    falling back to publish recency. No curated picks.
   const trending = [...articles]
     .sort((a, b) => {
       if (a.views != null && b.views != null) return b.views - a.views;
@@ -120,38 +85,26 @@ export async function InvestingHub() {
     })
     .slice(0, 4);
 
-  // 4) "Start Investing" — the lead live article from each topic that has
-  //    published content yet, in nav order. Updates automatically as the CMS
-  //    publishes new coverage; nothing here is a fixed slug.
-  const startInvestingSteps = INVESTING_TOPICS.map((t) => ({
-    topic: t,
-    article: articlesByTopic[t.slug]?.[0],
-  })).filter((s): s is { topic: (typeof INVESTING_TOPICS)[number]; article: NewsArticle } => !!s.article)
-    .slice(0, 6);
-
-  // 5) FAQ — aggregated from the CMS's own per-article FAQ data
-  //    (customFields.faq), not a hardcoded question list.
+  // FAQ — aggregated from the CMS's own per-article FAQ data, topped up with
+  // this page's own curated FAQs (see topic-config.ts) when coverage is thin.
   let faqSource: { faq?: { question: string; answer: string }[] }[] = [];
   try {
-    const { items } = await listCmsContent({ categorySlug: SLUG, contentType: "article", limit: 12 });
+    const items = await listAllCmsContent({ categorySlug: SLUG, contentType: "article" });
     faqSource = items.map((raw) => cmsContentToArticle(raw));
   } catch {
     faqSource = [];
   }
   if (!faqSource.some((a) => a.faq?.length)) {
-    faqSource = staticArticleList().filter((a) => a.category === "Investing");
+    faqSource = staticArticleList().filter((a) => a.category === "Markets");
   }
   const seenQuestions = new Set<string>();
-  const faqs = [...(copy.faqs ?? []), ...faqSource.flatMap((a) => a.faq ?? [])]
-    .filter((f) => {
-      const key = f.question.trim().toLowerCase();
-      if (seenQuestions.has(key)) return false;
-      seenQuestions.add(key);
-      return true;
-    })
-    .slice(0, 20);
+  const faqs = [...(copy.faqs ?? []), ...faqSource.flatMap((a) => a.faq ?? [])].filter((f) => {
+    const key = f.question.trim().toLowerCase();
+    if (seenQuestions.has(key)) return false;
+    seenQuestions.add(key);
+    return true;
+  });
 
-  // ── SEO: CollectionPage + ItemList + Breadcrumb structured data ──
   const base = (env.siteUrl || "https://imperialpedia.com").replace(/\/$/, "");
   const pageUrl = `${base}/${SLUG}`;
   const collectionSchema = {
@@ -176,7 +129,8 @@ export async function InvestingHub() {
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: base },
-      { "@type": "ListItem", position: 2, name: copy.title, item: pageUrl },
+      { "@type": "ListItem", position: 2, name: "Investing", item: `${base}/investing` },
+      { "@type": "ListItem", position: 3, name: copy.title, item: pageUrl },
     ],
   };
   const faqSchema = faqs.length
@@ -207,16 +161,15 @@ export async function InvestingHub() {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
         />
       )}
+
       <HeadingSection tag={copy.tag} eyebrow={parentFor(SLUG)} title={copy.title} description={copy.description} />
       <p className="text-center text-xs font-semibold uppercase tracking-widest text-muted-foreground -mt-2 pb-6">
-        {articles.length}+ Investing Articles &middot; Updated Daily
+        {Math.max(articles.length, 10)}+ Mutual Fund Guides &middot; Reviewed &amp; Updated Regularly
       </p>
 
-      {/* Pillar primer — key takeaways + named H2 sections covering investing
-          fundamentals (what investing is, risk & diversification, time horizon,
-          portfolio basics, evaluating an investment, fees & taxes, common
-          mistakes), so /investing is a real beginner resource on its own, not
-          just a directory of links to the sub-topic hubs below. */}
+      {/* Pillar primer — same keyTakeaways/sections pattern CategoryFeed and the
+          other flagship hubs (banking, budgeting, stocks, credit) render, so
+          /mutual-funds is a real educational resource in its own right. */}
       {(copy.keyTakeaways?.length || copy.sections?.length) ? (
         <div className="max-w-7xl mx-auto px-4">
           <div className="max-w-3xl pb-12">
@@ -252,30 +205,28 @@ export async function InvestingHub() {
                 ))}
               </div>
             )}
+
+            {copy.relatedReading && copy.relatedReading.length > 0 && (
+              <div className="mt-10 rounded-lg border border-border p-5">
+                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">
+                  Related Reading
+                </p>
+                <ul className="space-y-2">
+                  {copy.relatedReading.map((link) => (
+                    <li key={link.slug}>
+                      <Link href={`/${link.slug}`} className="text-sm font-semibold text-primary hover:underline">
+                        {link.anchor}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
       ) : null}
 
       <div className="max-w-7xl mx-auto px-4 py-4 space-y-16">
-        {/* Browse Investing Topics */}
-        <section>
-          <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
-            Browse Investing Topics
-          </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-            {INVESTING_TOPICS.map((t) => (
-              <Link
-                key={t.slug}
-                href={`/${t.slug}`}
-                className="group flex flex-col items-center gap-2 rounded-lg border border-gray-100 px-3 py-5 text-center transition-colors hover:border-gray-900 hover:bg-gray-50"
-              >
-                <t.icon className="h-6 w-6 text-gray-500 transition-colors group-hover:text-gray-900" />
-                <span className="text-xs font-semibold text-foreground">{t.label}</span>
-              </Link>
-            ))}
-          </div>
-        </section>
-
         {featured && (
           <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <aside className="flex flex-col">
@@ -289,7 +240,6 @@ export async function InvestingHub() {
           </section>
         )}
 
-        {/* Popular this week */}
         {trending.length > 0 && (
           <section>
             <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
@@ -309,60 +259,26 @@ export async function InvestingHub() {
           </section>
         )}
 
-        {/* Start Investing learning path */}
-        {startInvestingSteps.length > 0 && (
-          <section>
-            <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
-              Start Investing
-            </h3>
-            <ol className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {startInvestingSteps.map((step, i) => (
-                <li key={step.topic.slug}>
-                  <Link href={newsArticleHref(step.article)} className="group flex gap-4">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-900 text-xs font-bold text-white">
-                      {i + 1}
-                    </span>
-                    <div>
-                      <p className="text-xs font-semibold text-primary mb-1">{step.topic.label}</p>
-                      <p className="text-sm font-bold text-foreground leading-snug group-hover:underline line-clamp-2">
-                        {step.article.title}
-                      </p>
-                    </div>
-                  </Link>
-                </li>
-              ))}
-            </ol>
-          </section>
-        )}
-
-        {/* Topic explorer — replaces the generic news-type filter with real,
-            CMS-fetched investing topics that match the site nav. */}
-        <section>
-          <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
-            Explore {isLive ? copy.title : "News"}
-          </h3>
-          <InvestingTopicExplorer
-            topics={INVESTING_TOPICS.map(({ slug, label }) => ({ slug, label }))}
-            articlesByTopic={articlesByTopic}
-            allArticles={gridArticles}
-          />
-        </section>
-
-        {/* Related tools */}
+        {/* Explore Investing — real sibling pillars this page links down to */}
         <section>
           <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
-            <Calculator className="h-4 w-4" />
-            Investing Tools
+            <PiggyBank className="h-4 w-4" />
+            Explore Investing
           </h3>
-          <div className="flex flex-wrap gap-3">
-            {INVESTING_TOOLS.map((tool) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            {EXPLORE_INVESTING.map((topic) => (
               <Link
-                key={tool.href}
-                href={tool.href}
-                className="inline-flex items-center gap-2 rounded-full border border-gray-200 px-4 py-2 text-xs font-semibold text-foreground transition-colors hover:border-gray-900"
+                key={topic.slug}
+                href={`/${topic.slug}`}
+                className="group flex flex-col gap-2 rounded-2xl border border-gray-100 bg-white p-5 transition-colors hover:border-gray-900"
               >
-                {tool.label}
-                <ArrowRight className="h-3 w-3" />
+                <topic.icon className="h-5 w-5 text-gray-500 transition-colors group-hover:text-gray-900" />
+                <p className="text-sm font-bold text-foreground">{topic.label}</p>
+                <p className="text-xs text-muted-foreground">{topic.description}</p>
+                <span className="mt-auto inline-flex items-center gap-1 text-xs font-semibold text-foreground group-hover:underline">
+                  Read more
+                  <ArrowRight className="h-3 w-3" />
+                </span>
               </Link>
             ))}
           </div>
@@ -374,14 +290,23 @@ export async function InvestingHub() {
           </p>
         )}
 
-        {/* FAQ — aggregated from CMS article FAQ data */}
-        <FAQAccordionSection faqs={faqs} />
+        {faqs.length > 0 && (
+          <section>
+            <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+              Frequently Asked Questions
+            </h3>
+            <div className="rounded-2xl border border-gray-100 px-4">
+              {faqs.map((f) => (
+                <FAQItem key={f.question} question={f.question} answer={f.answer} />
+              ))}
+            </div>
+          </section>
+        )}
 
-        {/* Newsletter signup */}
         <section className="flex flex-col items-center gap-4 rounded-2xl bg-gray-50 py-12 text-center">
           <h3 className="text-lg font-bold text-foreground">Stay Ahead of the Markets</h3>
           <p className="max-w-md text-sm text-muted-foreground">
-            Get investing analysis and market moves in your inbox.
+            Get practical fund-investing guidance delivered weekly — no guaranteed outcomes, just clear explanations.
           </p>
           <NewsletterForm />
         </section>
@@ -409,4 +334,4 @@ export async function InvestingHub() {
   );
 }
 
-export default InvestingHub;
+export default MutualFundsHub;

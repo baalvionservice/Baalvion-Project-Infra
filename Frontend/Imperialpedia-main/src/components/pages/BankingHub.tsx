@@ -307,6 +307,17 @@ export async function BankingHub() {
       { "@type": "ListItem", position: 2, name: copy.title, item: pageUrl },
     ],
   };
+  const faqSchema = faqs.length
+    ? {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: faqs.map((f) => ({
+          "@type": "Question",
+          name: f.question,
+          acceptedAnswer: { "@type": "Answer", text: f.answer },
+        })),
+      }
+    : null;
 
   return (
     <div className="min-h-screen">
@@ -318,11 +329,60 @@ export async function BankingHub() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
+      {faqSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+        />
+      )}
 
       <HeadingSection tag={copy.tag} title={copy.title} description={copy.description} />
       <p className="text-center text-xs font-semibold uppercase tracking-widest text-muted-foreground -mt-2 pb-4">
         {totalGuides}+ Banking Guides &middot; Reviewed &amp; Updated Regularly
       </p>
+
+      {/* Pillar primer — same keyTakeaways/sections pattern CategoryFeed and
+          BudgetingHub render for sibling hubs, so /banking is a real
+          educational resource in its own right, not just a page of links. */}
+      {(copy.keyTakeaways?.length || copy.sections?.length) ? (
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="max-w-3xl pb-12">
+            {copy.keyTakeaways && copy.keyTakeaways.length > 0 && (
+              <div className="mb-8 rounded-lg border border-border bg-muted/30 p-5">
+                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">
+                  Key Takeaways
+                </p>
+                <ul className="space-y-2">
+                  {copy.keyTakeaways.map((point, i) => (
+                    <li key={i} className="flex gap-2 text-sm leading-relaxed text-foreground">
+                      <span aria-hidden="true" className="text-primary">&bull;</span>
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {copy.sections && copy.sections.length > 0 && (
+              <div className="space-y-8">
+                {copy.sections.map((section, i) => (
+                  <div key={i}>
+                    <h2 className="text-lg font-bold text-foreground mb-3">{section.heading}</h2>
+                    <div className="space-y-3">
+                      {section.body.map((paragraph, j) => (
+                        <p key={j} className="text-sm leading-relaxed text-muted-foreground">
+                          {paragraph}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      ) : null}
+
       <TrustBar />
 
       <div className="max-w-7xl mx-auto px-4 py-4 space-y-16">

@@ -68,10 +68,110 @@ const OVERRIDES: Record<string, TopicCopy> = {
     tag: 'BANKING',
     title: 'Banking',
     description:
-      'Understand savings, checking accounts, credit cards, loans, mortgages, and banking products with clear explanations, comparisons, and practical financial guidance.',
-    metaTitle: 'Banking Guide | Savings Accounts, Credit Cards, Loans & More',
+      'A plain-English guide to how banks and bank accounts work — deposits, interest, fees, and how to compare checking, savings, and other accounts.',
+    keyTakeaways: [
+      "A bank or credit union holds your money, keeps it insured up to a set limit, and gives you tools to spend, save, and move it — a checking account is built for everyday transactions, a savings account for holding money you're not spending immediately.",
+      "APY (annual percentage yield) is what an account actually pays over a year including compounding — it's the number to compare across accounts, not a bank's headline \"interest rate.\"",
+      "At an FDIC-insured bank or NCUA-insured credit union, deposits are protected up to $250,000 per depositor, per ownership category, per institution — that protects the cash itself, not investment losses or fraud that falls outside a bank's own policies.",
+      "The fee that costs people the most is usually overdraft, not the monthly maintenance fee — compare a bank's real overdraft policy, not just its advertised rate.",
+      "Online banks tend to win on rates and fees; branch banks tend to win on in-person service and cash handling — the right account depends on how you actually bank, not a single ranked list.",
+      "No account, rate, or bank can guarantee earnings or promise to be the objectively best choice for everyone — compare real terms against your own needs.",
+    ],
+    sections: [
+      {
+        heading: 'What Is Banking?',
+        body: [
+          "Banking, at its core, is the business of holding other people's money safely and putting it to work. When you deposit money at a bank or credit union, you're not just storing it in a vault — you're placing it with an institution that, in turn, lends a portion of those deposits to other customers as mortgages, auto loans, and business loans, and generally invests some of it elsewhere. That's the basic way most banks make money: they pay depositors a relatively modest interest rate for the use of their money, then lend it out or invest it at a higher rate, keeping the difference (often called the interest rate spread). Banks also earn revenue from account fees, card transaction fees, and other services.",
+          "In the U.S., banks are regulated financial institutions, and most are members of the FDIC (Federal Deposit Insurance Corporation), while credit unions — member-owned, not-for-profit institutions that offer similar accounts — are typically insured through the NCUA (National Credit Union Administration) instead. Both provide essentially equivalent deposit protection, covered in more detail below. Understanding this basic mechanism — deposits in, loans and investments out, a spread in between — helps explain why banks offer interest on some accounts, charge fees on others, and why the specific terms can vary meaningfully from one institution to the next.",
+        ],
+      },
+      {
+        heading: 'How Bank Accounts Work',
+        body: [
+          "A bank account is fundamentally a record of money you've entrusted to a bank, along with the bank's promise to give it back to you (or move it where you direct) on demand. Opening one typically means providing identification and some initial deposit, after which the bank issues account numbers, often a debit card, and access through a branch, ATM network, and online or mobile banking.",
+          "From there, four basic actions cover most of what happens in an account: a deposit adds money in (a paycheck via direct deposit, a check, or cash), a withdrawal takes money out (at an ATM, a branch, or by check), a transfer moves money between accounts — your own or someone else's, often via ACH transfer, a common electronic method banks use to move money between U.S. bank accounts, usually taking one to three business days — and a payment sends money to a merchant or a bill, often through a linked debit card. A wire transfer is a faster, more expensive alternative to ACH, typically used for larger or time-sensitive transfers, and often completes the same day. Most banks also let you set up direct deposit, so a paycheck lands automatically without a physical check.",
+        ],
+      },
+      {
+        heading: 'Checking vs. Savings Accounts',
+        body: [
+          "The two accounts most people open first are a checking account and a savings account, and the difference between them comes down to purpose rather than which is objectively better. A checking account is built for frequent activity — debit card purchases, bill payments, direct deposit, ATM withdrawals — and typically pays little to no interest, since its job is liquidity and transaction volume rather than growth. A savings account is designed to hold money you're not spending right away and generally pays a higher interest rate in exchange for fewer, less frequent transactions.",
+          "Most people use both together: a checking account for day-to-day spending and bill payments, and a savings account — sometimes at the same bank, sometimes at a different one entirely — to hold an emergency fund or money earmarked for a specific goal. See checking accounts and savings accounts for a deeper look at each.",
+        ],
+      },
+      {
+        heading: 'Understanding Interest and APY',
+        body: [
+          "Interest is what a bank pays you for keeping your money on deposit (or what you pay a lender for borrowing money). On a savings-type account, the interest rate is typically expressed as APY — annual percentage yield — which reflects not just the stated rate but also how often interest compounds, or gets added back to the balance so future interest is calculated on a slightly larger amount. Because compounding varies by bank (daily, monthly, or quarterly), APY is the number that makes different accounts genuinely comparable, rather than the simple interest rate alone.",
+          "Interest rates on deposit accounts are variable in most cases, meaning they can rise or fall over time as broader interest-rate conditions change — an account paying a given APY today isn't guaranteed to pay the same rate a year from now. A certificate of deposit, or CD, is the main exception: it locks in a fixed rate for a fixed term in exchange for a penalty if you withdraw the money early. See interest rates for how these broader rate movements happen and what drives them.",
+        ],
+      },
+      {
+        heading: 'Common Types of Bank Accounts',
+        body: [
+          "Beyond standard checking and savings, several other deposit account types show up regularly, and it's worth knowing what distinguishes each rather than treating them as interchangeable. A high-yield savings account is a savings account, usually offered by an online bank with lower overhead, that pays a meaningfully higher APY than a traditional bank's standard savings rate — the tradeoff is typically no physical branch access. A certificate of deposit (CD) locks a deposit in for a fixed term — anywhere from a few months to several years — at a fixed rate, generally higher than a standard savings rate, in exchange for an early-withdrawal penalty if you need the money before the term ends. A money market account blends savings-account interest with some checking-like features, such as check-writing or debit access, and often (though not always) carries a higher minimum balance requirement than a savings account.",
+          "Each of these serves a different purpose depending on how soon you'll need the money and how much flexibility you're willing to trade for a potentially higher rate. See CDs and money market accounts for a fuller comparison of each against standard savings.",
+        ],
+      },
+      {
+        heading: 'Bank Fees and Account Costs',
+        body: [
+          "The advertised interest rate is only part of what determines whether an account is a good deal — fees can meaningfully offset any interest earned, and the fee that actually costs the average person the most is usually overdraft, not the monthly maintenance fee most people focus on. A monthly maintenance fee is common but frequently waivable, through a minimum balance, a recurring direct deposit, or enrollment in paperless statements, so the advertised fee often isn't what most account holders actually pay. An overdraft fee is charged when a transaction is processed against insufficient funds; many banks now offer a small cushion or grace period before it applies, and some have eliminated overdraft fees entirely as a competitive feature.",
+          "Other costs worth checking before opening an account: ATM fees for using a machine outside the bank's own network (sometimes charged by both your bank and the ATM's operator), any account minimum balance requirement and what happens if the balance falls below it, and transfer limitations — some savings and money market accounts still cap certain types of withdrawals or transfers per statement cycle, a legacy of a federal rule (Regulation D) that was suspended in 2020 but that some banks still enforce as an internal policy.",
+        ],
+      },
+      {
+        heading: 'How to Choose a Bank Account',
+        body: [
+          "There's no single best bank account — the right one depends on how you actually bank, not a ranked list. A few practical questions narrow it down: How often do you deposit or need cash? If regularly, branch access and ATM network matter more than the best possible rate. Do you carry a low balance some months? Look closely at minimum balance requirements and how a fee is waived, not just whether one exists. Do you want your savings to earn a competitive rate? Compare APY at online banks, which often lead on rate because of lower overhead, against the convenience of keeping everything at one branch-based bank.",
+          "It's also worth comparing more than one bank directly rather than opening whatever account is most convenient in the moment — the differences in fees, APY, and overdraft policy between two banks can be substantial even when both look similar on the surface. See banking reviews for real, editorially compared terms across banks, cards, and apps.",
+        ],
+      },
+      {
+        heading: 'Online Banks vs. Traditional Banks',
+        body: [
+          "Online-only banks and neobanks generally compete on fewer fees and often stronger APYs on savings, funded by lower overhead from not maintaining physical branches, and many partner with large ATM networks to offer fee-reimbursed cash access despite having no branches of their own. The tradeoff is no in-person service — a real consideration for anyone who deposits cash regularly, needs to resolve an account issue face-to-face, or simply prefers speaking with someone directly.",
+          "Traditional banks and credit unions, by contrast, generally offer in-person support, easier cash deposits, and often a wider range of integrated products — a mortgage, a checking account, and an investment account all under one login, for instance — typically at the cost of lower interest rates on deposits and, in some cases, higher fees. Neither type is universally better; it depends on how much you value in-person access versus rate and fee savings.",
+        ],
+      },
+      {
+        heading: 'Deposit Insurance and Account Safety',
+        body: [
+          "Deposit insurance is one of the more concrete, checkable protections in personal finance rather than a marketing claim. At FDIC-member banks, deposits are insured up to $250,000 per depositor, per ownership category (individual, joint, certain retirement accounts, and so on), per institution; credit unions carry equivalent protection through the NCUA at the same coverage limit. You can confirm a specific bank's FDIC status directly through the FDIC's BankFind tool before opening an account, which is more reliable than trusting a badge on a website.",
+          "It's important to be clear about what this protects and what it doesn't. Deposit insurance covers the cash in an insured deposit account (checking, savings, money market accounts, and CDs) if the bank itself fails — it does not cover investment losses in a brokerage or retirement account held through the bank, and it does not automatically reimburse fraud or unauthorized transactions, which are instead handled through the bank's own fraud protections and applicable consumer banking regulations, discussed next.",
+        ],
+      },
+      {
+        heading: 'Banking Security and Fraud Prevention',
+        body: [
+          "Most banks offer a baseline set of security tools worth actually using: two-factor authentication for online and mobile banking logins, real-time transaction alerts sent by text or app notification, and the ability to instantly freeze a lost or stolen debit card from a phone rather than waiting on hold. Zero-liability policies, which most major banks and card networks offer, generally protect you from unauthorized charges reported promptly — but the burden is on the account holder to notice and report suspicious activity quickly, since delayed reporting can affect how much protection applies.",
+          "A few habits reduce risk meaningfully: reviewing account activity regularly rather than only when something feels wrong, never sharing a one-time passcode or full account number over the phone or via text with someone who contacted you first, and using a bank's official app or website rather than a link in an unsolicited email or message. Fraud protection is a shared responsibility between the bank's systems and the account holder's own vigilance — neither one alone is sufficient.",
+        ],
+      },
+      {
+        heading: 'A Simple Banking Example',
+        body: [
+          "Say a hypothetical person — call them Jordan, who does not represent any real account holder — opens a checking account for daily spending and a separate high-yield savings account for an emergency fund. Jordan's paycheck is direct-deposited into checking, where it covers rent, groceries, and a debit card for everyday purchases. Each month, Jordan sets up an automatic transfer of $200 from checking into the savings account, which — in this illustrative, non-guaranteed example — carries a 4% APY.",
+          "Over a year, Jordan deposits $2,400 into savings from those transfers alone, and if the balance earns interest at that hypothetical rate the whole time, it would add roughly $50–$60 more, depending on the starting balance and exactly when each deposit lands. This is an illustrative example only — it doesn't reflect any specific bank's current rate, and actual APYs change over time and vary by institution.",
+        ],
+      },
+      {
+        heading: 'Common Banking Mistakes',
+        body: [
+          "A handful of mistakes show up repeatedly. Leaving a large emergency fund in a checking account or a low-rate savings account, where it earns negligible interest, when a high-yield savings account or money market account would pay meaningfully more for the same liquidity and insurance. Not knowing the actual overdraft policy until after paying an overdraft fee, rather than checking it when opening the account. Overlooking a monthly maintenance fee that could have been waived with a simple direct deposit or minimum balance. Choosing a bank purely on brand recognition rather than comparing real rates, fees, and account terms across a few options.",
+          "Also common: keeping all of a household's money in a single account with no separation between spending and savings, which makes it harder to track progress toward any specific goal; and assuming online banking is inherently less safe than a physical branch, when in practice both are equally protected by deposit insurance and are subject to the same core banking regulations.",
+        ],
+      },
+      {
+        heading: 'When to Learn More',
+        body: [
+          "This page is meant as a starting point — the dedicated guides below go deeper into each topic introduced here. Checking accounts and savings accounts cover the two core account types in more detail; CDs and money market accounts explain the higher-yield alternatives for money you don't need immediately; credit cards and personal loans cover the borrowing side of banking; and mortgages covers home financing specifically. Banking reviews compares real terms across banks, cards, and apps if you're ready to open an account or switch banks.",
+        ],
+      },
+    ],
+    metaTitle: 'How Banking Works — Bank Accounts, Interest & Fees Explained',
     metaDescription:
-      'Learn how banking products work, compare savings accounts, credit cards, loans, mortgages, and find smarter ways to manage your money.',
+      'A clear, practical guide to how banks and bank accounts work — checking vs. savings, APY, fees, deposit insurance, and how to choose an account.',
   },
   checking: {
     tag: 'CHECKING ACCOUNTS',
@@ -83,36 +183,97 @@ const OVERRIDES: Record<string, TopicCopy> = {
       "FDIC (or NCUA) insurance covers up to $250,000 per depositor, per ownership category, per institution — verify a bank's status directly via FDIC BankFind rather than trusting a website badge.",
       "The monthly fee that matters most is rarely the advertised one — check how it's waived and what the real overdraft policy is.",
       "Online banks generally win on fees and ATM reimbursement; branch banks win on in-person service and cash handling.",
+      "Regulation requires opt-in consent for debit card and ATM overdraft coverage, but checks and automatic payments can still overdraw an account without that same opt-in.",
     ],
     sections: [
       {
-        heading: "What a Checking Account Is For",
+        heading: "What Is a Checking Account?",
         body: [
-          "A checking account is the deposit account built for frequent, everyday transactions — debit card purchases, bill payments, direct deposit, and ATM withdrawals — as opposed to a savings account, which is designed to hold money and earn interest with fewer transactions. Nearly all checking accounts pay little to no interest, since their core function is liquidity and transaction volume rather than growth, though a smaller category of high-yield or interest-bearing checking accounts exists, usually at online banks with lower overhead, sometimes requiring a minimum balance or a set number of monthly debit transactions to earn the advertised rate.",
+          "A checking account is the deposit account built for frequent, everyday transactions — debit card purchases, bill payments, direct deposit, and ATM withdrawals — as opposed to a savings account, which is designed to hold money and earn interest with fewer transactions. It's typically the first account someone opens, and often the hub the rest of a person's banking connects to.",
         ],
       },
       {
-        heading: "Fees: Where Accounts Actually Differ",
+        heading: "How Checking Accounts Work",
         body: [
-          "Monthly maintenance fees are common but frequently waivable — through a minimum balance, a recurring direct deposit, or enrollment in paperless statements — so the advertised fee on an account isn't necessarily what most account holders actually pay. Overdraft fees are the more consequential cost to watch: they're charged when a transaction is processed against insufficient funds, and while regulation requires opt-in consent for debit card and ATM overdraft coverage specifically, checks and automatic payments can still overdraw an account without that same opt-in requirement. Many banks now offer a small overdraft cushion or a grace period before the fee applies, and some have eliminated overdraft fees entirely as a competitive feature, which is worth comparing directly rather than assuming all banks handle it the same way.",
+          "Money moves in through direct deposit, mobile check deposit, transfers, or cash deposits at a branch or ATM, and moves out through debit card purchases, checks, automatic bill payments, and withdrawals. Nearly all checking accounts pay little to no interest, since their core function is liquidity and transaction volume rather than growth, though a smaller category of high-yield or interest-bearing checking accounts exists, usually at online banks with lower overhead, sometimes requiring a minimum balance or a set number of monthly debit transactions to earn the advertised rate.",
         ],
       },
       {
-        heading: "How Your Deposits Are Protected",
+        heading: "Deposits and Withdrawals",
         body: [
-          "Account protection is a genuine, checkable fact rather than a marketing claim: deposits at FDIC-member banks are insured up to $250,000 per depositor, per ownership category, per bank, and the equivalent protection at credit unions comes from the NCUA under the same coverage limit. Any account holder can confirm a bank's FDIC status directly through the FDIC's BankFind tool before opening an account, which is a more reliable check than a badge on a bank's website.",
+          "Deposits can generally be made by direct deposit from an employer, mobile check deposit through a bank's app, a transfer from another account, or in person at a branch or ATM — with mobile and ATM deposits sometimes subject to a temporary hold before the full amount is available. Withdrawals work through an ATM, a teller, a debit card purchase, or a linked transfer, and most banks cap how much cash can be withdrawn from an ATM in a single day, a limit worth checking before relying on it for a large purchase.",
         ],
       },
       {
-        heading: "Online Banks vs. Traditional Banks",
+        heading: "Debit Cards and Everyday Payments",
+        body: [
+          "A debit card linked to a checking account draws directly from the available balance rather than borrowing, which means there's no interest to pay but also none of the purchase protections or credit-building benefit that come with a credit card. Regulation requires opt-in consent before a bank can charge a fee for a debit card purchase that overdraws the account — without that opt-in, the transaction is simply declined instead. Many debit cards also support contactless and mobile-wallet payments, functioning the same way as a physical swipe or chip transaction.",
+        ],
+      },
+      {
+        heading: "Checking vs. Savings",
+        body: [
+          "A checking account is designed for volume and access — frequent transactions, no meaningful limit on how often money moves — while a savings account is designed to hold money with fewer transactions in exchange for a higher interest rate. Keeping day-to-day spending in checking and everything else in savings is a common, simple structure, since it keeps a spending buffer separate from money that's meant to sit and grow.",
+        ],
+      },
+      {
+        heading: "Online vs. Traditional Checking",
         body: [
           "Online-only banks and neobanks have pushed the checking account market toward fewer fees and often better ATM network access through fee-reimbursement partnerships, in exchange for no physical branch access — a real tradeoff for anyone who deposits cash regularly or prefers in-person service for account issues. Traditional banks and credit unions, by contrast, generally offer more account types, in-person support, and integrated product bundles (checking tied to a mortgage or investment account, for instance) at the cost of typically lower interest rates and, in some cases, higher fees.",
         ],
       },
       {
-        heading: "What to Compare Beyond the Interest Rate",
+        heading: "Fees and Minimum Balances",
         body: [
-          "The details that matter more than the marketing headline are: the monthly fee and how it's waived, the overdraft policy and whether a cushion exists, ATM access and reimbursement terms if the bank has a limited branch footprint, and how quickly direct deposits post — some banks now advertise early direct deposit, posting funds up to a day or two before the official pay date. None of these show up in a simple interest-rate comparison, which is why the \"best\" checking account genuinely depends on how an individual actually banks day to day rather than a single ranked list.",
+          "Monthly maintenance fees are common but frequently waivable — through a minimum balance, a recurring direct deposit, or enrollment in paperless statements — so the advertised fee on an account isn't necessarily what most account holders actually pay. Other fees to check for include out-of-network ATM fees, paper statement fees, and charges for a physical wire transfer, none of which show up in a simple rate comparison but can add up for a specific banking pattern.",
+        ],
+      },
+      {
+        heading: "Overdrafts and Overdraft Protection",
+        body: [
+          "An overdraft happens when a transaction is processed against insufficient funds, and while regulation requires opt-in consent for debit card and ATM overdraft coverage specifically, checks and automatic payments can still overdraw an account without that same opt-in requirement. Many banks now offer a small overdraft cushion or a grace period before the fee applies, a linked-account transfer that pulls from savings automatically, or have eliminated overdraft fees entirely as a competitive feature — details worth comparing directly rather than assuming all banks handle it the same way.",
+        ],
+      },
+      {
+        heading: "ATM Access",
+        body: [
+          "ATM access matters most for anyone who relies on cash, and it's one of the clearer differences between online and traditional banks: a bank with few or no branches often reimburses out-of-network ATM fees or participates in a large fee-free network to compensate, while a traditional bank's own ATM network may cover the need without any reimbursement policy at all. Daily withdrawal limits and any fee for using an out-of-network machine are both worth checking before assuming an account covers a particular need.",
+        ],
+      },
+      {
+        heading: "Direct Deposit and Bill Pay",
+        body: [
+          "Direct deposit routes a paycheck or benefit payment straight into a checking account, and some banks now advertise early direct deposit, posting funds up to a day or two before the official pay date. Bill pay, built into most banking apps, schedules recurring or one-time payments to a payee directly from the account, which can reduce the chance of a missed payment compared with tracking due dates manually across several accounts.",
+        ],
+      },
+      {
+        heading: "How to Compare Checking Accounts",
+        body: [
+          "The details that matter more than the marketing headline are: the monthly fee and how it's waived, the overdraft policy and whether a cushion exists, ATM access and reimbursement terms if the bank has a limited branch footprint, and how quickly direct deposits post. None of these show up in a simple interest-rate comparison, which is why the \"best\" checking account genuinely depends on how an individual actually banks day to day rather than a single ranked list.",
+        ],
+      },
+      {
+        heading: "Account Security and Fraud",
+        body: [
+          "Federal protections under Regulation E limit a customer's liability for unauthorized electronic transfers and debit card charges, provided the loss or theft is reported within the required timeframe — the sooner it's reported, the stronger the protection, which is why most banks recommend reporting a lost card or suspicious activity immediately rather than waiting to see if a charge resolves itself. Setting up real-time transaction alerts and reviewing statements regularly are simple habits that catch unauthorized activity faster than a monthly glance at a balance.",
+        ],
+      },
+      {
+        heading: "Common Checking Account Mistakes",
+        body: [
+          "Common missteps include not setting up the direct deposit or minimum balance needed to waive a monthly fee that would otherwise apply, keeping too little cushion and risking an overdraft on a routine bill, ignoring out-of-network ATM fees that quietly add up, and treating a checking account as a place to also hold long-term savings, where it earns negligible interest compared with a dedicated savings account.",
+        ],
+      },
+      {
+        heading: "A Simple Illustrative Example",
+        body: [
+          "As a purely illustrative, non-guaranteed example: someone who sets up direct deposit and a small recurring transfer to savings on the same account might avoid a monthly maintenance fee entirely while still keeping a spending cushion — versus someone with the same income who doesn't set up direct deposit, pays a recurring monthly fee, and occasionally incurs an overdraft charge on a bill that lands before payday. The gap between the two isn't about income at all — it's entirely about how the account is set up and used.",
+        ],
+      },
+      {
+        heading: "When to Learn More",
+        body: [
+          "From here, it's worth comparing checking against savings directly for how the two should split your day-to-day money, reading up on overdraft protection specifics before it becomes relevant, and checking independent bank reviews for real fee and feature comparisons rather than relying on a single bank's own marketing.",
         ],
       },
     ],
@@ -139,6 +300,7 @@ const OVERRIDES: Record<string, TopicCopy> = {
       },
     ],
     relatedReading: [
+      { slug: "savings", anchor: "How to split day-to-day spending money from savings" },
       { slug: "money-market", anchor: "A higher-yield alternative for balances you don't need daily" },
       { slug: "banking-reviews", anchor: "Independent comparisons of bank fees and features" },
       { slug: "credit-cards", anchor: "How a linked credit card's grace period differs from a debit card's" },
@@ -231,36 +393,127 @@ const OVERRIDES: Record<string, TopicCopy> = {
       "Rates are driven almost entirely by credit score, debt-to-income ratio, and credit history, since most personal loans are unsecured.",
       "Debt consolidation only saves money if the new rate beats your current average rate and you don't run the paid-off cards back up.",
       "A soft-pull prequalification lets you compare offers from multiple lenders without hurting your credit score.",
+      "Auto loans, student loans, and mortgages are each priced and underwritten differently from a general-purpose personal loan — see their dedicated guides for the specifics.",
     ],
     sections: [
       {
-        heading: "How Personal Loans Work",
+        heading: "What Is a Loan?",
         body: [
-          "A personal loan is a lump-sum installment loan, typically unsecured, that's repaid in fixed monthly payments over a set term — usually two to seven years — rather than drawn down and repaid on a revolving basis like a credit card. Because most personal loans aren't backed by collateral, lenders price the risk almost entirely off the borrower's credit profile: credit score, length of credit history, existing debt-to-income ratio, and verified income all factor into both approval and the interest rate offered, which is why the same loan amount can carry very different rates from one applicant to the next. A smaller category of secured personal loans exists too, usually backed by a savings account or certificate of deposit, and these generally carry lower rates in exchange for the lender having an asset to claim if payments stop.",
+          "A loan is money borrowed from a lender with an agreement to pay it back, generally with interest added as the cost of using someone else's money in the meantime. Loans come in many forms — a personal loan, an auto loan, a student loan, a mortgage — each built around a different purpose, but all sharing the same basic structure: an amount borrowed, a rate charged, and a schedule for paying it back.",
         ],
       },
       {
-        heading: "What Determines Your Rate",
+        heading: "How Loans Work",
         body: [
-          "The number that matters most when comparing offers is the annual percentage rate (APR), not the headline interest rate — APR folds in the origination fee that many lenders deduct from the loan proceeds before disbursing them, so a loan advertised at a lower rate but a higher origination fee can end up costing more than one with a slightly higher rate and no fee. Most lenders let borrowers check their likely rate through a soft credit pull that doesn't affect their score, with a hard inquiry only occurring once an application is formally submitted; comparing several prequalified offers within a short window is standard practice and, for scoring purposes, multiple hard pulls for the same loan type within about two weeks are typically treated as a single inquiry.",
+          "Most loans work the same way at a high level: a lender evaluates an applicant's creditworthiness and ability to repay, extends an agreed amount, and the borrower repays it over time according to a set schedule. Some loans are disbursed as a single lump sum (a personal loan or auto loan), while others draw down in stages (a mortgage during a home purchase, or student loan disbursements each semester).",
         ],
       },
       {
-        heading: "Common Uses — And the Debt Consolidation Math",
+        heading: "Principal and Interest",
         body: [
-          "Personal loans are most commonly used for debt consolidation, medical expenses, home improvement projects too small to justify a home equity loan, or major one-time purchases. Debt consolidation is worth a specific caveat: rolling several credit card balances into one fixed-rate personal loan can lower the total interest paid and simplify payments, but only if the new loan's rate is meaningfully lower than the average rate on the debt being consolidated, and only if the freed-up card limits don't get run back up afterward — a pattern that turns a debt-reduction move into additional debt.",
+          "Principal is the amount actually borrowed; interest is the cost charged for borrowing it, generally expressed as an annual rate. Each payment on an installment loan typically covers a mix of both, with the exact split shifting over the life of the loan — early payments on a longer-term loan often go disproportionately toward interest before principal, which is part of why paying extra toward principal early can meaningfully reduce total interest paid.",
         ],
       },
       {
-        heading: "Personal Loans vs. Other Borrowing Options",
+        heading: "Loan Terms and Monthly Payments",
         body: [
-          "A home equity line of credit or loan is typically cheaper for large expenses but requires home equity and puts the house up as collateral; a 401(k) loan avoids a credit check and interest paid effectively goes back to the borrower's own account, but leaving the job before it's repaid can trigger the remaining balance coming due; and credit cards offer more flexibility for smaller, revolving needs but carry substantially higher average interest rates for anyone who carries a balance. Buy-now-pay-later products are a newer, generally shorter-term alternative for point-of-sale purchases specifically, with their own separate underwriting and repayment structure.",
+          "The term is how long a borrower has to repay the loan — commonly two to seven years for a personal loan, and longer for a mortgage or many student loans. A longer term generally lowers the monthly payment but increases total interest paid over the life of the loan, while a shorter term does the reverse; the right tradeoff depends on what monthly payment is actually manageable versus minimizing total cost.",
         ],
       },
       {
-        heading: "Before You Sign",
+        heading: "Fixed vs. Variable Rates",
         body: [
-          "It's worth checking a lender's registration and complaint history — the Consumer Financial Protection Bureau maintains a public complaint database — and reading the full repayment schedule for prepayment penalties, which aren't universal but do exist on some loans and can erase the benefit of paying a loan off early. A loan that's difficult to explain simply, or that pressures a fast decision, is a common early signal worth slowing down for regardless of the advertised rate.",
+          "A fixed-rate loan keeps the same interest rate for its entire term, so the payment amount doesn't change — most personal loans are fixed-rate. A variable-rate loan's rate can move with a benchmark index over time, which means the payment can rise or fall — this is more common with certain private student loans and some lines of credit than with standard personal loans. A fixed rate offers payment predictability; a variable rate can start lower but carries the risk of rising later.",
+        ],
+      },
+      {
+        heading: "Secured vs. Unsecured Loans",
+        body: [
+          "Secured debt is backed by collateral the lender can claim if payments stop — a mortgage (the home) and an auto loan (the vehicle) are the most common examples — and generally carries a lower interest rate than unsecured debt for the same borrower, since the lender has recourse beyond just the borrower's promise to pay. Unsecured debt, like most personal loans and credit cards, isn't backed by a specific asset and is priced mainly off creditworthiness, which is why rates tend to run higher. A smaller category of secured personal loans exists too, usually backed by a savings account or CD, generally at a lower rate in exchange.",
+        ],
+      },
+      {
+        heading: "Major Types of Loans",
+        body: [
+          "The most common consumer loan types are personal loans (general-purpose, usually unsecured), auto loans (secured by the vehicle), student loans (federal or private, for education costs), and mortgages (secured by real estate). Each is underwritten differently, carries its own typical rate range and term length, and — for auto loans, student loans, and mortgages specifically — has its own dedicated guide, since the details that matter (loan-to-value for a car, subsidized vs. unsubsidized for federal student loans, fixed vs. adjustable for a mortgage) are specific to that loan type rather than general borrowing concepts.",
+        ],
+      },
+      {
+        heading: "Personal Loans",
+        body: [
+          "A personal loan is a lump-sum installment loan, typically unsecured, repaid in fixed monthly payments over a set term. Because most personal loans aren't backed by collateral, lenders price the risk almost entirely off the borrower's credit profile — credit score, length of credit history, existing debt-to-income ratio, and verified income all factor into both approval and the interest rate offered. Personal loans are most commonly used for debt consolidation, medical expenses, home improvement projects too small to justify a home equity loan, or major one-time purchases.",
+        ],
+      },
+      {
+        heading: "Auto Loans",
+        body: [
+          "An auto loan is secured by the vehicle being financed, which generally means a lower rate than an unsecured personal loan of the same size, since the lender can repossess the car if payments stop. Rates and terms differ meaningfully between new and used vehicles, and between financing through a dealer versus a bank or credit union — worth comparing directly rather than accepting the first offer at the dealership. See the dedicated auto loans guide for the specifics.",
+        ],
+      },
+      {
+        heading: "Student Loans",
+        body: [
+          "Student loans fall into two broad categories: federal loans, which come with standardized terms, fixed rates set by law, and borrower protections like income-driven repayment plans; and private loans, issued by banks or other lenders with rates and terms that vary by lender and creditworthiness. Federal loans are generally considered first before private borrowing, given the built-in repayment flexibility. See the dedicated student loans guide for repayment plan details.",
+        ],
+      },
+      {
+        heading: "Mortgages at a High Level",
+        body: [
+          "A mortgage is a loan secured by real estate, generally the largest and longest-term loan most borrowers ever take on, commonly repaid over 15 to 30 years. Mortgages can carry a fixed rate for the full term or an adjustable rate that can change after an initial fixed period — a decision with significant long-term cost implications covered in more depth in the dedicated mortgages guide.",
+        ],
+      },
+      {
+        heading: "Loan Eligibility and Approval",
+        body: [
+          "Approval for most loan types weighs credit score, credit history, income, existing debt, and — for secured loans — the value of the collateral being financed. There's no universal minimum score across lenders; a given applicant might be approved by one lender and declined by another for the exact same loan amount, which is part of why comparing multiple offers matters more than assuming a single \"no\" reflects every lender's decision.",
+        ],
+      },
+      {
+        heading: "Credit and Borrowing Costs",
+        body: [
+          "A stronger credit profile — higher score, longer history, lower existing debt relative to income — generally unlocks both easier approval and a lower rate, since lenders price risk directly into the rate they offer. This is why building and maintaining credit has a direct, compounding effect on the real cost of every loan taken out afterward, not just approval odds.",
+        ],
+      },
+      {
+        heading: "Fees and Total Cost",
+        body: [
+          "Beyond the interest rate, loans can carry an origination fee (often deducted from the amount disbursed), late fees, and in some cases a prepayment penalty for paying the loan off early. The annual percentage rate (APR) folds the origination fee into a single comparable figure, which is why APR — not the headline interest rate — is the number to compare across offers.",
+        ],
+      },
+      {
+        heading: "Comparing Loan Offers",
+        body: [
+          "Most lenders let borrowers check a likely rate through a soft credit pull that doesn't affect their score, with a hard inquiry only occurring once an application is formally submitted. Comparing several prequalified offers within a short window is standard practice, and for scoring purposes, multiple hard pulls for the same loan type within about two weeks are typically treated as a single inquiry — worth knowing so rate-shopping doesn't feel like it's penalizing your credit more than it actually does.",
+        ],
+      },
+      {
+        heading: "Repayment Strategies",
+        body: [
+          "Paying more than the minimum scheduled payment, when the budget allows, generally reduces total interest paid over an installment loan's life by cutting into principal faster — worth confirming the loan has no prepayment penalty first. For borrowers juggling several debts at once, the debt snowball (smallest balance first) and debt avalanche (highest rate first) are two common, legitimate approaches to prioritizing which gets extra payments.",
+        ],
+      },
+      {
+        heading: "Debt-to-Income Ratio",
+        body: [
+          "Debt-to-income ratio (DTI) compares total monthly debt payments to gross monthly income, and it's one of the factors lenders weigh most heavily for larger loans like mortgages, alongside credit score. A lower DTI generally signals more room in a budget to take on a new payment, which is why paying down existing debt can improve loan eligibility even without any change to a credit score.",
+        ],
+      },
+      {
+        heading: "Common Borrowing Mistakes",
+        body: [
+          "Common missteps include accepting the first loan offer without comparing APR across lenders, focusing on the interest rate while overlooking an origination fee that raises the real cost, borrowing more than genuinely needed simply because it was approved, and not checking for a prepayment penalty before planning to pay a loan off early. On the other side, avoiding all borrowing even when a lower-cost loan would clearly beat the alternative — like carrying a high-rate credit card balance instead of consolidating it — is its own kind of costly mistake.",
+        ],
+      },
+      {
+        heading: "A Simple Illustrative Example",
+        body: [
+          "As a purely illustrative, non-guaranteed example: two borrowers each take out a $10,000 loan, one from a lender advertising a lower rate but a meaningful origination fee deducted from the proceeds, the other from a lender with a slightly higher rate and no fee — depending on the exact numbers, the second loan can end up costing less overall despite the higher advertised rate, which is exactly what comparing APR rather than the headline rate is meant to catch.",
+        ],
+      },
+      {
+        heading: "When to Learn More",
+        body: [
+          "From here, it's worth reading the dedicated guides for the loan type that's actually relevant — auto loans, student loans, or mortgages each have their own underwriting and repayment specifics — alongside how personal loan rates and eligibility work in more depth, and how credit score and debt more broadly affect the terms you'll be offered.",
         ],
       },
     ],
@@ -287,8 +540,12 @@ const OVERRIDES: Record<string, TopicCopy> = {
       },
     ],
     relatedReading: [
+      { slug: "credit", anchor: "How your credit score shapes the rate you're actually offered" },
+      { slug: "debt", anchor: "Whether consolidating with a loan actually saves money" },
+      { slug: "auto-loans", anchor: "Rate and term specifics for financing a vehicle" },
+      { slug: "student-loans", anchor: "Federal vs. private loans and repayment plans" },
+      { slug: "mortgages", anchor: "Fixed vs. adjustable rates for financing a home" },
       { slug: "credit-cards", anchor: "How credit card interest actually compounds" },
-      { slug: "money-market", anchor: "Where to park savings while you pay down debt" },
       { slug: "banking-reviews", anchor: "Independent lender and rate reviews" },
     ],
     metaTitle: 'Personal Loans — Rates, Fees & Guides',
@@ -517,7 +774,153 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'Investing & Markets',
     description:
       'Build long-term wealth with research-backed coverage of stocks, funds, asset allocation, and the strategies that move portfolios.',
+    keyTakeaways: [
+      "Investing means putting money into an asset with the expectation of future value or income, while accepting the risk that it can also lose value — it isn't the same as saving.",
+      "Higher potential returns are generally associated with greater uncertainty, not a guarantee of a better outcome — every investment carries some risk of loss, including the possibility of losing the amount invested.",
+      "Diversification — spreading money across different assets — can reduce the impact of any single holding performing poorly, but it doesn't eliminate the possibility of loss.",
+      "Time horizon matters because short-term price swings can look very different from how the same investment performs over many years; money needed soon and money invested for decades generally call for different approaches.",
+      "Fees and taxes reduce what an investor actually keeps, so they're worth understanding before investing, not just the potential return.",
+      "A sound investing decision starts with understanding what's actually being bought and why it fits your own goals and time horizon — not with chasing whatever has recently gone up.",
+    ],
+    sections: [
+      {
+        heading: 'What Is Investing?',
+        body: [
+          "Investing means putting money into something — a company's stock, a bond, a fund, property — with the expectation that it will grow in value or generate income over time. In exchange for that potential, an investor accepts uncertainty: an investment's value can rise, and it can also fall, including below what was originally put in. That uncertainty is what separates investing from saving. Saving generally means setting money aside in a stable, easily accessible form, like a bank savings account, where the balance doesn't fluctuate day to day and is typically protected up to federal deposit insurance limits — the tradeoff is that savings typically earn a modest, relatively predictable return. Investing exchanges that stability for the possibility of higher long-term growth, along with real risk of loss.",
+          "It's also worth separating investing from speculation, even though both involve buying and selling assets. Investing generally means making a decision based on the underlying value or income-generating potential of an asset, with a time horizon long enough to let that thesis play out. Speculation generally means betting on short-term price movement itself, often with less regard for the underlying asset's fundamentals. Neither is inherently right or wrong, but they carry different risk profiles and call for different expectations — and mixing them up is a common source of unpleasant surprises for beginners.",
+        ],
+      },
+      {
+        heading: 'How Investing Works',
+        body: [
+          "A few roles show up in almost every investment: the investor (the person or institution putting money in), the asset (what's actually being bought — a share of a company, a loan to a government, a basket of securities), and the market or exchange (where buyers and sellers meet to trade that asset at an agreed price). A company that wants to raise money can sell shares to investors, who then become partial owners; a government or company that wants to borrow can issue a bond, promising to repay the investor with interest. A broker is the intermediary — typically an online brokerage today — through which an individual investor actually places an order to buy or sell. A fund pools money from many investors into one basket of holdings, managed either actively by a fund manager or passively to track an index, giving an investor exposure to many assets through a single purchase.",
+          "In practice, an investor generally opens a brokerage account, deposits money, and uses it to buy an asset at its current market price. From there, an investment can generate a return in one of two broad ways: the asset's price can rise, letting the investor sell it for more than they paid (a capital gain), or the asset can pay income along the way — a dividend from a stock, interest from a bond — that the investor can either take as cash or reinvest. Nothing about this process guarantees a positive outcome; the price paid can also turn out to be higher than what the asset is later worth.",
+        ],
+      },
+      {
+        heading: 'Why Investments Change in Value',
+        body: [
+          "An investment's price moves for a mix of reasons, and rarely just one. For an individual company's stock, earnings results, changes in the outlook for its industry, and shifts in how much investors are willing to pay for its future profits can all move the price. Economy-wide forces matter too: interest rates affect how attractive bonds are relative to stocks and how expensive it is for companies to borrow, inflation affects both costs and the purchasing power of future returns, and broader economic conditions shape expectations for corporate profits generally. Supply and demand for the asset itself — how many buyers versus sellers there are at a given price — and shifts in overall investor sentiment (optimism or fear about the future) also play a real role, sometimes moving prices in ways that don't obviously track any single piece of news.",
+          "It's worth being clear-eyed about one thing: a market price reflects what investors are currently willing to pay, not a guaranteed measure of what an asset will be worth in the future. Prices can move well ahead of, or well behind, the fundamentals they're supposedly based on, and there's no formula that reliably predicts short-term price movement.",
+        ],
+      },
+      {
+        heading: 'Major Types of Investments',
+        body: [
+          "Most portfolios are built from a handful of broad investment categories, each with a different risk and return profile. Stocks represent partial ownership in a company, with returns coming from price appreciation and, for some companies, dividends. Bonds are effectively a loan to a government or company in exchange for regular interest payments and return of principal at maturity, generally considered lower-risk than stocks but not risk-free. ETFs and mutual funds are baskets of many underlying securities — stocks, bonds, or a mix — bought as a single fund, giving instant diversification rather than requiring an investor to pick individual securities one at a time. Cash and cash equivalents, like a savings account, money market fund, or short-term Treasury bill, offer the most stability and easiest access to money, generally in exchange for lower long-term growth potential than stocks or funds.",
+          "Beyond these core categories, this site covers several other established investment areas in more depth, including real estate, commodities, options, cryptocurrency, and retirement accounts — each with its own mechanics and risk profile worth understanding on its own terms rather than treating as a variation on stocks.",
+        ],
+      },
+      {
+        heading: 'Stocks, Bonds, ETFs and Funds',
+        body: [
+          "These are the building blocks most beginner portfolios are made of, and it's worth being clear on what each one actually is. Buying a stock means owning a small piece of one specific company — your outcome is tied to that company's performance, which means higher potential growth but also concentrated, company-specific risk. Buying a bond means lending money to a government or company for a set period in exchange for interest payments — generally more predictable income and typically lower volatility than stocks, though bond prices can still fall, particularly when interest rates rise. An ETF or mutual fund holds many underlying securities at once, so a single purchase spreads exposure across dozens or hundreds of holdings — diversification that a single stock or bond can't offer on its own, generally in exchange for a management fee and less control over the specific holdings.",
+          "None of these is universally 'better' — a diversified fund reduces single-company risk that an individual stock carries, but it also means giving up the (also two-sided) chance of concentrated upside if one company in that fund performs exceptionally well. Which mix makes sense depends on an investor's own goals, risk tolerance, and time horizon, not a one-size-fits-all ranking.",
+        ],
+      },
+      {
+        heading: 'Risk and Diversification',
+        body: [
+          "Investment risk shows up in several distinct forms worth telling apart. Market risk is the chance that broad market conditions push most investments down together, regardless of how sound any individual holding is. Company-specific risk is tied to one company's own performance or problems. Interest-rate risk affects bond prices in particular, which tend to fall when rates rise. Inflation risk is the possibility that returns don't keep pace with rising prices, quietly eroding purchasing power even if the account balance looks stable. Concentration risk comes from having too much invested in one company, sector, or asset type, so that a single bad outcome does outsized damage. Volatility refers to how much and how often an investment's price swings, and liquidity refers to how easily an asset can be sold for cash without a significant loss of value — some investments, like real estate, are considerably less liquid than a publicly traded stock.",
+          "Diversification — spreading money across different companies, sectors, asset types, or geographies — is one of the main tools investors use to manage risk, because different holdings don't all react the same way to the same event. A downturn concentrated in one industry, for example, affects a diversified portfolio far less than one where every dollar is invested in that same industry. It's important to be precise about what diversification actually does: it can reduce the impact of any single holding or sector performing poorly, but it cannot eliminate investment losses altogether, since broad market-wide downturns can still affect a well-diversified portfolio.",
+        ],
+      },
+      {
+        heading: 'Time Horizon and Compounding',
+        body: [
+          "Time horizon — how long money will realistically stay invested before it's needed — shapes how much short-term volatility actually matters. A drop in value is a very different experience for money that won't be touched for twenty years, which has time to potentially recover and grow, than it is for money that will be needed next year, where a downturn at the wrong moment can mean a real, locked-in loss. This is part of why longer time horizons are generally associated with a greater capacity to hold more volatile investments like stocks, while money needed sooner is generally kept in more stable assets.",
+          "Compounding refers to growth building on growth — income or gains that are reinvested can themselves go on to generate further returns over time, rather than sitting idle. Reinvesting dividends or interest, for example, means future returns are calculated on a growing base rather than the original amount alone. Compounding is a real mathematical mechanism, but it isn't a guarantee: it requires an underlying investment that actually holds or grows in value over the relevant period, and no specific compound growth rate can be promised in advance. Illustrations of compounding using a hypothetical rate are useful for understanding the concept, but a hypothetical rate is not a projection of what any real investment will actually return.",
+        ],
+      },
+      {
+        heading: 'Long-Term Investing vs. Trading',
+        body: [
+          "Long-term investing generally means buying an asset with the intention of holding it for years, based on a view about its underlying value or income potential, and riding out short-term price swings along the way. Active trading means buying and selling more frequently, often based on short-term price movement, technical patterns, or news — a fundamentally different activity with a different risk profile, different time commitment, and generally higher transaction and tax costs from more frequent buying and selling. Speculation, discussed earlier, overlaps with trading in that it often prioritizes short-term price movement over underlying value.",
+          "None of these approaches comes with a guaranteed edge, and frequent trading in particular is difficult to do consistently well — transaction costs, taxes on short-term gains, and the emotional pull of reacting to daily price moves all work against it. This page focuses on the fundamentals of long-term investing rather than trading strategy, and nothing here should be read as encouragement to trade more actively.",
+        ],
+      },
+      {
+        heading: 'How to Think About a Portfolio',
+        body: [
+          "A portfolio is simply the full collection of investments someone holds, and how it's put together generally matters more than any single pick within it. Asset allocation — the overall mix between stocks, bonds, cash, and other categories — is the starting decision, generally guided by time horizon, risk tolerance (how much volatility an investor can tolerate, both financially and emotionally), and specific goals like retirement, a home purchase, or a child's education. Diversification then applies within that allocation, spreading each category across many individual holdings rather than concentrating in just a few. Over time, as some holdings grow faster than others, a portfolio's actual mix can drift from its original target — rebalancing means periodically buying or selling to bring it back in line with the intended allocation.",
+          "This page keeps portfolio construction introductory on purpose — the right allocation for any individual depends on personal circumstances this page can't know, and nothing here should be read as a specific recommendation. See Portfolio Management for a deeper look at asset allocation, diversification, and rebalancing in practice.",
+        ],
+      },
+      {
+        heading: 'How to Evaluate an Investment',
+        body: [
+          "Before putting money into anything, it's worth working through a consistent set of questions: What am I actually buying — a share of one company, a loan to an issuer, a basket of many holdings? How is it supposed to generate value or income? What are the specific risks, and what could make this investment perform badly? What does it cost, in fees or in the price paid relative to what's being received? How diversified is it on its own? What's my time horizon for this money? And what assumptions is the investment's case built on — what would have to be true for it to work out, and what would prove that thesis wrong?",
+          "For an individual company or fund, a few concepts come up repeatedly in deeper analysis: revenue and earnings (how much a company brings in and keeps), cash flow (cash actually generated by the business), debt (what a company owes and its ability to service it), valuation (what price is being paid relative to earnings or assets), and, for a fund, its underlying holdings, fees, and historical performance — kept in mind that past performance doesn't guarantee future results. This page introduces these ideas at a beginner level; Stock Analysis and Market Metrics go into evaluating individual companies in more depth.",
+        ],
+      },
+      {
+        heading: 'Fees and Taxes',
+        body: [
+          "Fees reduce what an investor actually keeps, even when they look small in isolation. A fund's expense ratio, a broker's trading commission or account fee, and an advisor's management fee all compound over time the same way returns do — a seemingly small annual percentage can add up to a meaningful amount over a long holding period, which is part of why comparing costs across similar investment options is worth the effort.",
+          "Tax treatment depends on the specific account, the type of investment, and the investor's jurisdiction, and it can meaningfully affect what's actually kept from a given return — this page won't state specific rates, since they vary and change. In general terms, gains and income can be taxed differently depending on how long an asset was held and what kind of account it's held in, which is part of why account type (a taxable brokerage account versus a tax-advantaged retirement account, for example) is worth understanding before investing, not just the investment itself. None of this is personalized tax advice, and a tax professional is the right resource for an individual's specific situation.",
+        ],
+      },
+      {
+        heading: 'A Simple Illustrative Example',
+        body: [
+          "Consider a purely fictional investor, deciding what to do with money they don't need for several years. One option is a single company's stock — full exposure to that one company's performance, for better or worse, with the potential for larger gains if it does well and larger losses if it doesn't. A second option is a diversified fund holding many companies — exposure spread across an entire market or sector, which smooths out the impact of any single company struggling, though the fund can still lose value if the broader market declines. A third option is keeping the money in a savings account — the most stable of the three and the easiest to access, generally with a lower long-term growth ceiling than either stock option.",
+          "There's no universally correct choice among these three — the right one depends on this fictional investor's own risk tolerance, how soon the money might actually be needed, and how much volatility they can sit through without needing to sell at a bad time. This example is illustrative only, uses no real companies or figures, and is not a projection of what any of these choices would actually return.",
+        ],
+      },
+      {
+        heading: 'Common Investing Mistakes',
+        body: [
+          "A handful of mistakes show up repeatedly across new and experienced investors alike: chasing whatever has recently performed well rather than evaluating it on its own merits, concentrating too much money in one company or sector, ignoring how fees quietly reduce returns over time, overlooking the tax consequences of buying and selling, and confusing short-term trading with long-term investing and applying the wrong mindset to each.",
+          "Others are more behavioral than mechanical: reacting emotionally to normal volatility by selling during a downturn and buying back in after the recovery has already happened, buying something without understanding what it actually is or how it makes money, assuming a strategy's or an asset's past performance guarantees similar results going forward, investing money without considering when it will actually be needed, failing to diversify at all, and making decisions based on headlines rather than the underlying investment thesis. Avoiding these isn't a guarantee of a good outcome, but it removes some of the most common, entirely avoidable ways an otherwise reasonable investing plan goes wrong.",
+        ],
+      },
+      {
+        heading: 'When to Learn More',
+        body: [
+          "This page is meant as a starting point — the sections and articles it links to go deeper into each topic introduced here. Stocks covers how stock investing actually works and what to understand before buying a first share; Bonds explains fixed income, yields, and interest-rate sensitivity; ETFs and Mutual Funds cover fund investing, costs, and how the two compare; Portfolio Management goes further into asset allocation, diversification, and rebalancing; and Brokers explains how to evaluate a brokerage account before opening one. Retirement, Real Estate, Commodities, Options, and Cryptocurrency each cover a more specific investment category in its own dedicated section. The topic browser and trending coverage below are a practical way to see these concepts applied to real, currently published analysis.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "What's the difference between saving and investing?",
+        answer:
+          "Saving generally means keeping money in a stable, easily accessible form like a bank savings account, with a relatively predictable balance. Investing means putting money into an asset that can rise or fall in value, in exchange for the potential for greater long-term growth.",
+      },
+      {
+        question: "Can I lose money investing?",
+        answer:
+          "Yes. Every investment carries some risk of loss, including the possibility of losing the amount originally invested. Diversification and a longer time horizon can help manage risk, but neither eliminates it.",
+      },
+      {
+        question: "Does diversification guarantee I won't lose money?",
+        answer:
+          "No. Diversification can reduce the impact of any single holding or sector performing poorly, but it cannot eliminate investment losses — a broad, market-wide downturn can still affect a well-diversified portfolio.",
+      },
+      {
+        question: "How much money do I need to start investing?",
+        answer:
+          "This varies by broker and investment type — many online brokers today support fractional shares and have no or low account minimums, though specific minimums and costs are worth checking directly with the broker or fund before investing.",
+      },
+      {
+        question: "What's the difference between investing and trading?",
+        answer:
+          "Investing generally means holding an asset for years based on its underlying value or income potential. Trading means buying and selling more frequently, often based on short-term price movement, and carries a different risk profile, cost structure, and time commitment.",
+      },
+      {
+        question: "Does past performance predict future returns?",
+        answer:
+          "No. Past performance of a stock, fund, or strategy does not guarantee similar results going forward — it's one data point among many, not a projection.",
+      },
+    ],
+    relatedReading: [
+      { slug: "stocks", anchor: "How stock investing actually works before you buy your first share" },
+      { slug: "portfolio", anchor: "Asset allocation, diversification, and rebalancing in more depth" },
+      { slug: "brokers", anchor: "How to evaluate a brokerage account before opening one" },
+    ],
     metaTitle: 'Investing News, Strategy & Market Analysis',
+    metaDescription:
+      'A plain-English guide to what investing is, how it works, and the fundamentals — risk, diversification, time horizon, and portfolio basics — every beginner should understand.',
   },
   economy: {
     tag: 'ECONOMY',
@@ -751,34 +1154,353 @@ const OVERRIDES: Record<string, TopicCopy> = {
     tag: 'STOCKS',
     title: 'Stocks',
     description:
-      'Equity research, earnings, sector moves, and the company news that drives share prices.',
-    intro:
-      "A stock represents fractional ownership in a company, and its price reflects what investors are collectively willing to pay for a claim on that company's future earnings — moving on everything from quarterly results to shifts in interest rates and investor sentiment. Common metrics like market capitalization (share price times shares outstanding), the price-to-earnings ratio, and dividend yield help compare companies of different sizes and business models on a similar footing, though no single metric tells the whole story on its own. Individual stocks carry company-specific risk that a diversified fund doesn't, which is why most long-term investing guidance treats single-stock picking and broad index exposure as different tools for different goals rather than substitutes for each other.",
-    metaTitle: 'Stock Market News & Equity Analysis',
+      'A plain-English guide to what stocks are, how stock investing actually works, and what to understand before you buy your first share.',
+    keyTakeaways: [
+      "A share of stock is a unit of ownership in a company — its value depends on what investors collectively expect that company to earn in the future, not a price the company sets itself.",
+      "Prices move on a mix of company performance, interest rates, economic conditions, and investor sentiment — a falling price doesn't always mean the business got worse, and a rising one doesn't always mean it got better.",
+      "Spreading money across many companies, through a fund or ETF, reduces the damage any single company's bad year can do to a portfolio, but it doesn't remove market-wide risk.",
+      "Dividends are payments a company chooses to make to shareholders — they're never guaranteed, and a company can reduce or cancel them at any time.",
+      "How much of a portfolio belongs in individual stocks versus diversified funds should depend on time horizon and risk tolerance, not on a hot tip or a recent winner.",
+      "No stock, strategy, or amount of research can guarantee a profit — investing in stocks always carries the risk of loss, including the possibility of losing the amount invested.",
+    ],
+    sections: [
+      {
+        heading: 'What Is a Stock?',
+        body: [
+          "A stock (also called a share or equity) is a unit of ownership in a company. When a company sells shares — most visibly through an initial public offering, or IPO — it's raising money from investors in exchange for a piece of the business, instead of borrowing that money as debt. Anyone who buys a share becomes a part-owner of that company, however small: owning 10 shares of a company with 10 billion shares outstanding is a tiny sliver of ownership, but it's ownership all the same, with a claim on the company's future profits and assets.",
+          "Common stock, the type most individual investors buy, typically comes with a vote on major corporate matters like electing the board of directors, usually one vote per share. A smaller category, preferred stock, generally gives up that vote in exchange for a fixed dividend and a higher claim than common shareholders if the company is liquidated. For a company, issuing shares is a way to fund growth — new products, hiring, expansion — without taking on interest-bearing debt; for an investor, buying shares is a way to participate in that growth, for better or worse, without having to start or run the business.",
+        ],
+      },
+      {
+        heading: 'How Stock Investing Works',
+        body: [
+          "The basic mechanics are straightforward, even if the details take longer to master. A company issues shares, either at its IPO or in a later offering. Investors buy those shares — most often through a brokerage account, which is the intermediary that gives individuals access to buy and sell on public exchanges like the NYSE or Nasdaq. Once purchased, an investor holds an ownership stake and economic exposure to the company: if the business does well and investors expect it to keep doing well, the shares tend to become more valuable; if it struggles, they tend to become less valuable.",
+          "The exchange is where buyers and sellers actually meet, continuously, during market hours — the price you see quoted is simply the most recent price at which a buyer and a seller agreed to trade. Some companies pay part of their profits back to shareholders as dividends, though most don't and none are obligated to. An investor can sell their shares at any time the market is open, at whatever price the market is currently offering, which may be higher or lower than what they originally paid.",
+        ],
+      },
+      {
+        heading: 'Why Stock Prices Move',
+        body: [
+          "A stock's price, at any moment, reflects supply and demand — how many people want to buy at a given price versus how many want to sell. What shifts that balance is investors continuously updating their expectations about a company's future. Company earnings and revenue, and whether they beat or miss what investors expected, are among the biggest drivers, but they're far from the only ones. Broader interest rates and economic conditions matter too: higher rates tend to make future company profits worth less in today's terms, which can pressure prices even for companies whose own business hasn't changed at all.",
+          "Industry developments, competitive news, regulatory changes, and company-specific headlines can move a stock independent of the wider market, while broad market swings and shifts in investor sentiment — optimism or fear that isn't really about any one company — can move nearly everything at once, in either direction. It's worth being direct about what this means: a stock's price moving up or down doesn't automatically mean the underlying business changed by the same amount, or changed at all, and no one can reliably predict these movements in advance, in either direction.",
+        ],
+      },
+      {
+        heading: 'Ways to Invest in Stocks',
+        body: [
+          "Buying individual stocks means picking specific companies to own — it gives an investor direct, concentrated exposure to whatever that business does, for better or worse, and requires researching each company on its own. Diversified funds and exchange-traded funds (ETFs) take the opposite approach: a single fund purchase can spread money across dozens, hundreds, or thousands of companies at once, which reduces how much any one company's performance can affect the overall investment.",
+          "Investors also differ in time horizon and approach. Long-term investing generally means holding positions for years, riding out short-term price swings on the view that a company's or the market's value tends to reflect underlying business performance over longer stretches. Active trading and speculation — buying and selling more frequently based on short-term price movement — is a fundamentally different activity with a different risk profile, and it's not the same thing as long-term investing even though both involve buying and selling stocks.",
+        ],
+      },
+      {
+        heading: 'Risk and Diversification',
+        body: [
+          "Every stock investment carries the risk that its price can fall, sometimes sharply, over periods ranging from a single day to several years — this is generally called volatility. Beyond that broad market risk, an individual company carries company-specific risk: a product failure, a leadership change, a lawsuit, or a competitor's breakthrough can hurt one company's stock without affecting the wider market at all. Concentration risk is what happens when too much of a portfolio sits in one company, one sector, or one type of investment — it magnifies both the upside and the downside of whatever that concentrated bet does.",
+          "Diversification — spreading investments across many companies, sectors, and sometimes asset types — is the primary tool investors use to reduce company-specific and concentration risk, since it's unlikely that many unrelated companies all have a bad year at the same time. It's important to be clear about its limits, though: diversification can't eliminate market-wide risk, the kind that affects nearly all stocks together during a broad downturn. How much risk makes sense for a given investor depends on their time horizon — how long the money can stay invested — and their personal risk tolerance, not on what worked for someone else.",
+        ],
+      },
+      {
+        heading: 'Dividends and Capital Appreciation',
+        body: [
+          "There are two ways a stock investment can generate a return. A dividend is a cash payment a company chooses to distribute to shareholders, typically out of its profits, usually on a quarterly basis. Companies are under no obligation to pay dividends, many don't pay one at all — often because they're reinvesting profits into growth instead — and any company that does pay one can reduce or cancel it at any time, so a dividend should never be treated as guaranteed income.",
+          "The second way is capital appreciation: if a stock's price rises above what an investor paid for it, selling those shares can produce a capital gain. The reverse is equally true — if the price falls below the purchase price, selling produces a capital loss. Both outcomes are genuinely possible for any stock investment, and neither can be predicted with certainty in advance.",
+        ],
+      },
+      {
+        heading: 'How to Evaluate a Stock',
+        body: [
+          "Evaluating a company usually starts with its financials: revenue (how much money the business brings in), earnings (what's left after expenses), and profitability (how efficiently it turns revenue into earnings) are the basic building blocks. Debt levels matter because a heavily indebted company has less flexibility during a downturn, and cash flow — the actual cash moving in and out of the business — can tell a different story than reported earnings alone.",
+          "Valuation is the question of whether a stock's current price is reasonable relative to its financials, commonly assessed with ratios like price-to-earnings, though no single ratio tells the whole story on its own. Beyond the numbers, it's worth considering a company's competitive position within its industry, the track record and incentives of its management team, and realistic expectations for future growth. This is meant as a starting checklist, not a complete framework — deeper fundamental and technical analysis, covered in the stock analysis and market metrics sections below, goes considerably further into how these pieces fit together.",
+        ],
+      },
+      {
+        heading: 'A Simple Illustrative Example',
+        body: [
+          "Say a hypothetical company — call it \"Acme Robotics,\" which does not exist — has 10 million shares outstanding, and its stock trades at $20 per share. An investor who buys 100 shares spends $2,000 and owns a very small fraction of the company: 100 out of 10 million shares, or 0.001%. If Acme later reports strong earnings and investors become more optimistic about its future, the price might rise to $25 per share — the investor's 100 shares would then be worth $2,500, an unrealized gain of $500 if sold at that price. If instead Acme's business struggles and the price falls to $15, that same position would be worth $1,500, a loss of $500 if sold.",
+          "If Acme also pays a dividend of $0.10 per share per quarter, the investor's 100 shares would generate $10 per quarter in dividend income, separate from any change in the share price. This example is entirely hypothetical, used only to illustrate how ownership, price movement, and dividends connect — it is not a prediction, and it does not reflect any real company's stock or historical performance.",
+        ],
+      },
+      {
+        heading: 'Common Mistakes',
+        body: [
+          "A few patterns show up repeatedly among new stock investors. Chasing a stock that has already risen sharply, on the assumption the trend will continue, often means buying in after most of the gain has already happened. Putting too much money into one company — even one an investor feels strongly about — creates concentration risk that a more diversified approach would avoid. Buying a stock without understanding what the company actually does, how it makes money, or why its price might be high or low relative to its financials, is a common way to end up holding a position with a very different risk than intended.",
+          "Other frequent mistakes include confusing short-term trading with long-term investing and applying the wrong mindset to each, reacting emotionally to normal volatility by selling during a downturn and buying back in after prices recover, ignoring fees and taxes that quietly erode returns over time, and assuming that a strategy or a stock's past performance guarantees similar results going forward — it doesn't.",
+        ],
+      },
+      {
+        heading: 'When to Learn More',
+        body: [
+          "This page is meant as a starting point, not the full picture — the sections and articles below go deeper into each topic introduced here. Stock Basics and How the Stock Market Works cover the foundational mechanics in more depth; Beginner Investing walks through the practical steps of opening an account and making a first purchase; Types of Stocks explains how companies and shares differ from one another; Market Metrics and Stock Analysis go further into the numbers and frameworks used to evaluate a company; and Investing Strategies covers the different approaches investors take once they understand the basics. The market indexes and stock lists further down this page are a practical way to see these concepts applied to real, currently trading companies.",
+        ],
+      },
+    ],
+    metaTitle: 'What Is a Stock? Stock Investing Explained for Beginners',
     metaDescription:
-      'Stock market news, earnings coverage, and equity analysis — sector moves, company fundamentals, and the stories driving share prices.',
+      "A clear, practical guide to what stocks are, how stock investing works, why prices move, and how to think about risk before you buy your first share.",
   },
   bonds: {
     tag: 'BONDS',
     title: 'Bonds & Fixed Income',
     description:
-      'Yields, duration, credit, and the fixed-income markets that anchor diversified portfolios.',
-    intro:
-      "A bond is a loan an investor makes to a government or company in exchange for regular interest payments and the return of principal at maturity. Bond prices move inversely to interest rates — when rates rise, existing bonds with lower fixed payments become less attractive and their prices fall, and the size of that swing is measured by duration, with longer-maturity bonds generally more rate-sensitive than shorter ones. Credit ratings from agencies like Moody's and S&P gauge the issuer's ability to repay, separating investment-grade debt from higher-yielding, higher-risk 'junk' bonds. Because bonds typically move differently than stocks, especially during equity downturns, they're commonly used to reduce overall portfolio volatility rather than purely to maximize returns.",
-    metaTitle: 'Bond Market News & Fixed Income Analysis',
+      'A beginner-friendly guide to how bonds work — issuers, coupons, yields, credit risk, and how fixed income fits in a portfolio.',
+    metaTitle: 'Bonds Explained — Fixed Income for Beginners',
     metaDescription:
-      'Bond market news and fixed-income analysis — yields, duration, credit ratings, and how interest rate moves affect bond prices.',
+      'What a bond is, how coupons and maturity work, why bond prices move opposite interest rates, and how investors use fixed income.',
+    keyTakeaways: [
+      "A bond is essentially a loan: an investor lends money to a government or company in exchange for regular interest payments and the return of the original principal at maturity.",
+      "Bond prices and interest rates generally move in opposite directions — when rates rise, existing bonds paying a lower fixed rate typically become less attractive and their market price falls, and vice versa.",
+      "Credit ratings from agencies like Moody's, S&P, and Fitch estimate how likely an issuer is to repay, separating investment-grade debt from higher-yielding, higher-risk \"junk\" or high-yield bonds.",
+      "Government bonds (like U.S. Treasuries) are generally considered lower credit risk than corporate bonds, which typically pay a higher yield to compensate investors for taking on more default risk.",
+      "Bonds aren't risk-free — interest rate risk, credit risk, inflation risk, and call risk can all affect returns, even on bonds widely considered \"safe.\"",
+      "Because bonds often behave differently than stocks, especially in a downturn, they're commonly used to reduce overall portfolio volatility rather than purely to chase returns.",
+    ],
+    sections: [
+      {
+        heading: 'What Is a Bond?',
+        body: [
+          "A bond is a debt security — in plain terms, an IOU. When an investor buys a bond, they're lending money to whoever issued it, whether that's a national government, a city or state, or a corporation. In exchange, the issuer generally agrees to pay the lender periodic interest over the life of the bond and to return the original amount borrowed (the principal, or \"face value\") when the bond matures. This is fundamentally different from buying a stock: a bondholder is a creditor of the issuer, not a part-owner, and typically has no claim on the issuer's future profits beyond the interest and principal they were promised.",
+        ],
+      },
+      {
+        heading: 'How Bonds Work',
+        body: [
+          "Every bond has a few core features worth knowing: face value (the amount repaid at maturity, often $1,000 for a single bond), coupon rate (the stated annual interest rate, generally paid in fixed installments), and maturity date (when the principal is due back). Bonds are typically issued at face value, but once they start trading in the secondary market, their price can move above or below that value depending on prevailing interest rates, the issuer's perceived creditworthiness, and how much time remains until maturity. A bond bought below face value and held to maturity generally returns more than its coupon payments alone, since the investor also collects the difference between what they paid and the face value received back.",
+        ],
+      },
+      {
+        heading: 'Bond Issuers and Why They Borrow',
+        body: [
+          "Governments issue bonds to fund public spending — infrastructure, deficits, or general operations — without raising taxes immediately; in the U.S., these range from short-term Treasury bills to longer-term Treasury notes and bonds. Municipalities issue bonds to fund local projects like schools or roads, and some carry tax advantages depending on the investor's situation. Corporations issue bonds to raise capital for operations, expansion, or refinancing existing debt, generally as an alternative to issuing more stock (which would dilute existing shareholders) or borrowing directly from a bank.",
+        ],
+      },
+      {
+        heading: 'Coupon Payments, Maturity, and Principal',
+        body: [
+          "The coupon is the bond's stated interest payment, usually distributed on a fixed schedule (commonly semiannually for U.S. bonds) and calculated as a percentage of face value, not of whatever price the investor actually paid. Maturity is simply the date the issuer is due to repay the principal in full — bonds are often grouped by how far out that date is, with short-term generally meaning under a few years, intermediate covering the middle range, and long-term extending out a decade or more. Longer maturities typically carry more interest rate risk, since there's more time for rates to move before the bond comes due.",
+        ],
+      },
+      {
+        heading: 'Bond Prices and Yields',
+        body: [
+          "A bond's yield is the return an investor actually earns, and it isn't always the same as the coupon rate. When a bond trades below face value, its yield is higher than its coupon, because the investor is getting the same fixed interest payments on a smaller purchase price; when it trades above face value, the opposite applies. This relationship — yield moving opposite to price — is one of the more counterintuitive parts of bond investing for beginners, but it follows directly from the fact that the coupon payments themselves don't change once a bond is issued.",
+        ],
+      },
+      {
+        heading: 'Why Interest Rates Affect Bond Prices',
+        body: [
+          "When market interest rates rise, newly issued bonds start paying more, which makes existing bonds with lower fixed coupons less attractive by comparison — their price in the secondary market generally falls to compensate, pushing their effective yield up to stay competitive. When rates fall, the reverse tends to happen. This sensitivity is often described using duration, a measure of how much a bond's price is expected to move for a given change in interest rates; longer-maturity bonds generally carry higher duration and are more rate-sensitive than shorter ones. See interest rates and the Federal Reserve for how U.S. rate policy is actually set and why it moves markets.",
+        ],
+      },
+      {
+        heading: 'Government vs Corporate Bonds',
+        body: [
+          "Government bonds from stable, developed economies — U.S. Treasuries in particular — are widely treated as a benchmark for low credit risk, since the issuing government controls its own currency and taxing authority. Corporate bonds are issued by companies and generally carry more credit risk than government debt from the same country, since a company can face financial distress or default in ways a government generally doesn't in the same way; corporate bonds typically pay a higher yield to compensate for that added risk. The gap between a corporate bond's yield and a comparable government bond's yield is often called the credit spread, and it tends to widen when investors grow more worried about defaults.",
+        ],
+      },
+      {
+        heading: 'Bond Ratings and Credit Risk',
+        body: [
+          "Credit rating agencies — Moody's, S&P Global, and Fitch are the major ones — assign letter-grade ratings that estimate how likely an issuer is to make its interest and principal payments on time. Investment-grade ratings (generally BBB-/Baa3 and above) indicate relatively lower perceived default risk; below that threshold, bonds are typically called high-yield or \"junk\" bonds, and they generally pay a higher yield specifically because investors are taking on more credit risk. A rating is an opinion from the agency at a point in time, not a guarantee — ratings can and do change, and even investment-grade issuers can occasionally default.",
+        ],
+      },
+      {
+        heading: 'Major Bond Risks',
+        body: [
+          "Interest rate risk is the risk that rising rates reduce a bond's market value before maturity, which mainly matters if the bond needs to be sold before then. Credit (default) risk is the risk the issuer fails to make payments, generally a bigger concern for corporate and lower-rated bonds than for stable governments. Inflation risk is the risk that a bond's fixed payments lose purchasing power if inflation runs higher than expected over the bond's life. Call risk applies to bonds the issuer can redeem early, which can cut off an investor's income stream sooner than planned, typically when rates have fallen and the issuer can refinance more cheaply. Liquidity risk — how easily a bond can be sold before maturity without a meaningful price concession — also varies significantly by issuer and bond type.",
+        ],
+      },
+      {
+        heading: 'How Investors Can Use Bonds',
+        body: [
+          "Bonds are commonly used for income, since they generally provide a predictable stream of interest payments, and for diversification, since bond and stock returns don't always move in the same direction, which can help smooth out overall portfolio swings. Some investors also use short-term, high-quality bonds as a place to hold cash that's earmarked for a near-term goal, since they can offer more yield than a typical savings option while still carrying relatively low risk. How much of a portfolio should sit in bonds versus stocks generally depends on an investor's time horizon, risk tolerance, and goals — there's no single allocation that fits everyone, and that decision is worth thinking through carefully rather than following a fixed rule.",
+        ],
+      },
+      {
+        heading: 'Bond Funds and ETFs at a High Level',
+        body: [
+          "Most individual investors access bonds through a bond mutual fund or bond ETF rather than buying single bonds directly, since a fund can hold many bonds at once and offers built-in diversification without requiring a large amount of capital per issue. Bond funds don't have a single fixed maturity date the way an individual bond does — they continuously buy and sell bonds to maintain a target maturity or strategy — which changes how interest rate risk plays out compared with holding one bond to maturity. See ETFs and Mutual Funds for how each fund structure works, their costs, and how to evaluate one.",
+        ],
+      },
+      {
+        heading: 'A Simple Illustrative Example',
+        body: [
+          "Illustrative example only, not a real product or recommendation: suppose a company issues a 10-year bond with a $1,000 face value and a 5% annual coupon. The investor generally collects $50 a year in interest (often split into two $25 payments) and gets the $1,000 back at the end of year 10, assuming the company doesn't default. If interest rates rise significantly the year after issuance, a new, otherwise similar bond might offer 6% instead — making the 5% bond less attractive, so its price in the secondary market would typically need to fall for its yield to become competitive with newer bonds. The coupon payments themselves don't change; only what someone would pay to buy the bond from the original investor changes.",
+        ],
+      },
+      {
+        heading: 'Common Bond-Investing Mistakes',
+        body: [
+          "Frequent mistakes include assuming all bonds are equally \"safe\" regardless of issuer or rating, not accounting for interest rate risk when buying long-maturity bonds, chasing yield on lower-rated debt without weighing the added credit risk, and not understanding that a bond fund's value can still decline even though it holds \"fixed income\" securities. Another common mix-up is holding an individual bond to maturity (where price swings along the way generally don't affect the amount ultimately received, absent a default) versus holding a bond fund, which doesn't have a maturity date and can show sustained losses if rates rise for an extended period.",
+        ],
+      },
+      {
+        heading: 'When to Learn More',
+        body: [
+          "This page is meant as a starting point. For how rate decisions actually get made and why they move bond markets, see interest rates and the Federal Reserve. For how bonds fit inside a fund structure, see ETFs and Mutual Funds. For how bonds fit alongside other investments in a broader plan, see Investing and Portfolio Management.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "Are bonds safer than stocks?",
+        answer:
+          "Generally, high-quality bonds are considered lower risk than stocks, but \"safer\" depends on the specific bond — a low-rated corporate bond can carry meaningful risk, and even government bonds can lose value if interest rates rise and the bond is sold before maturity.",
+      },
+      {
+        question: "Why do bond prices fall when interest rates rise?",
+        answer:
+          "A bond's coupon payments are fixed once it's issued. When new bonds start offering higher rates, existing lower-coupon bonds become less attractive by comparison, so their market price generally falls to bring their effective yield in line with what's currently available.",
+      },
+      {
+        question: "What does a bond's credit rating actually tell me?",
+        answer:
+          "It's a rating agency's opinion, at a point in time, of how likely the issuer is to make its interest and principal payments. Higher (investment-grade) ratings generally indicate lower perceived default risk; lower ratings indicate higher risk and typically come with a higher yield to compensate.",
+      },
+      {
+        question: "Should I buy individual bonds or a bond fund?",
+        answer:
+          "It depends on goals and amount of capital. An individual bond held to maturity has a known payoff (absent default), while a bond fund offers built-in diversification and daily liquidity but has no fixed maturity date, so its value can fluctuate with interest rates indefinitely.",
+      },
+    ],
+    relatedReading: [
+      { slug: 'interest-rates', anchor: 'How rate moves ripple through bond prices, loans, and savings yields' },
+      { slug: 'fed', anchor: 'How the Federal Reserve actually sets policy rates' },
+      { slug: 'etfs', anchor: 'How a bond ETF packages many bonds into one tradable fund' },
+      { slug: 'mutual-funds', anchor: 'How an actively managed bond fund differs from an index approach' },
+      { slug: 'portfolio', anchor: 'How bonds fit alongside stocks in a diversified allocation' },
+    ],
   },
   etfs: {
     tag: 'ETFS',
     title: 'ETFs',
     description:
-      'Exchange-traded funds explained — strategies, flows, costs, and how to use them in a portfolio.',
-    intro:
-      "An exchange-traded fund (ETF) is a basket of securities — stocks, bonds, commodities, or a mix — that trades on an exchange throughout the day like an individual stock, combining the diversification of a mutual fund with intraday liquidity. Most ETFs are passively managed, tracking an index like the S&P 500 at a low annual expense ratio, though actively managed and leveraged or inverse ETFs also exist with different risk profiles and costs. Because ETF shares are created and redeemed by authorized participants rather than the fund buying and selling securities directly for each investor, they're also generally more tax-efficient than traditional mutual funds in a taxable account.",
-    metaTitle: 'ETF News & Fund Analysis',
+      'A beginner-friendly guide to exchange-traded funds — how they work, what they cost, and how to research one before buying.',
+    metaTitle: 'ETFs Explained — A Beginner’s Guide to Exchange-Traded Funds',
     metaDescription:
-      'ETF news, fund flows, and expense-ratio comparisons — how exchange-traded funds work and how to use them in a portfolio.',
+      'What an ETF is, how it differs from a mutual fund, how expense ratios and NAV work, and how beginners can research an ETF before buying.',
+    keyTakeaways: [
+      "An ETF (exchange-traded fund) holds a basket of securities — stocks, bonds, commodities, or a mix — and trades on an exchange throughout the day like an individual stock.",
+      "Most ETFs are passively managed, tracking an index like the S&P 500 at a low annual expense ratio, though actively managed, sector, and leveraged or inverse ETFs also exist with different risk profiles and costs.",
+      "An ETF's market price can drift slightly from its net asset value (NAV), but an arbitrage mechanism involving authorized participants generally keeps the two closely aligned in normal market conditions.",
+      "ETFs and mutual funds both offer diversification, but ETFs trade continuously during market hours while mutual fund shares are priced and traded once per day at NAV.",
+      "Cost matters over time — a fund's expense ratio is deducted continuously from returns, so two funds tracking the same index can produce meaningfully different long-run results purely because of fees.",
+      "Diversification through an ETF reduces single-stock risk but doesn't eliminate market risk — a broad-market ETF can still lose significant value in a downturn.",
+    ],
+    sections: [
+      {
+        heading: 'What Is an ETF?',
+        body: [
+          "An exchange-traded fund is a pooled investment vehicle that holds a collection of underlying assets — often stocks or bonds, sometimes commodities or a mix — and issues shares that trade on a stock exchange throughout the trading day. Buying one ETF share generally gives an investor proportional exposure to everything the fund holds, which is what makes ETFs a common tool for getting diversified exposure without having to buy dozens or hundreds of individual securities directly.",
+        ],
+      },
+      {
+        heading: 'How ETFs Work',
+        body: [
+          "Behind the scenes, large institutional entities called authorized participants can create new ETF shares (by delivering a basket of the underlying securities to the fund in exchange for shares) or redeem existing shares (the reverse process). This creation/redemption mechanism is what generally keeps an ETF's market price closely tied to the value of what it actually holds — if the ETF's price drifts too far from that underlying value, an arbitrage opportunity exists that authorized participants are generally financially motivated to close. Ordinary investors don't interact with this process directly; they simply buy and sell ETF shares through a brokerage account like any other exchange-listed security.",
+        ],
+      },
+      {
+        heading: 'What an ETF Can Own',
+        body: [
+          "ETFs can hold nearly any asset class that can be pooled: domestic or international stocks, government or corporate bonds, physical commodities like gold, or a mix designed to track a specific index, sector, or strategy. Some ETFs are broad (tracking an entire market, like a total U.S. stock market fund), while others are narrow (tracking a single sector, country, or theme). What an ETF actually holds — and how concentrated or diversified that makes it — is disclosed in its prospectus and fact sheet, both worth reviewing before investing.",
+        ],
+      },
+      {
+        heading: 'Index ETFs vs Active ETFs',
+        body: [
+          "Most ETFs are index funds — they aim to track the performance of a specific benchmark, like the S&P 500, as closely as possible, with a fund manager's role largely limited to matching the index rather than trying to beat it. This passive approach generally allows for a lower expense ratio, since it requires less ongoing research and trading. Actively managed ETFs also exist, where a manager selects holdings in an attempt to outperform a benchmark; they typically charge higher fees, and — the same as with actively managed mutual funds — a majority of active strategies tend to underperform their benchmark over long periods once fees are accounted for, though outcomes vary by fund and time period.",
+        ],
+      },
+      {
+        heading: 'Diversification',
+        body: [
+          "Buying a single ETF that tracks a broad index can spread an investor's exposure across hundreds or thousands of underlying securities, which generally reduces the impact of any one company performing poorly compared with holding just a handful of individual stocks. Diversification through an ETF doesn't eliminate risk — a broad-market ETF still moves with the overall market and can decline significantly during a downturn — but it does generally reduce the specific risk tied to any single company or issuer.",
+        ],
+      },
+      {
+        heading: 'ETF Prices, NAV, and Trading',
+        body: [
+          "Net asset value (NAV) is the per-share value of everything the fund holds, calculated once per day after markets close. An ETF's market price, by contrast, can fluctuate throughout the trading day based on supply and demand, though the creation/redemption mechanism generally keeps it close to NAV. Because ETFs trade like stocks, investors can place the same order types — market orders, limit orders, and so on — and, like stocks, ETF trades can involve a bid-ask spread, which tends to be tighter for heavily traded ETFs and wider for thinly traded ones.",
+        ],
+      },
+      {
+        heading: 'Costs and Expense Ratios',
+        body: [
+          "An ETF's expense ratio is the annual fee, expressed as a percentage of assets, that covers the fund's operating costs and is deducted automatically from the fund's returns rather than billed separately. Even a seemingly small difference in expense ratio can compound into a meaningful gap in returns over a long holding period, which is why cost is generally one of the first things worth comparing between two ETFs that track a similar index. Some brokers also charge trading commissions on ETF purchases, though commission-free trading on many ETFs has become common at major brokerages.",
+        ],
+      },
+      {
+        heading: 'ETFs vs Mutual Funds',
+        body: [
+          "ETFs and mutual funds both pool investor money into a diversified basket, but they differ in a few consistent ways: ETFs trade continuously during market hours at a fluctuating price, while mutual fund shares are bought and sold once per day at NAV; ETFs are often, though not always, more tax-efficient in a taxable account because of how the creation/redemption process handles the underlying securities; and mutual funds sometimes carry minimum investment requirements or sales loads that most ETFs don't. Neither structure is universally better — the right choice generally depends on the specific funds being compared and how an investor plans to use the account. See Mutual Funds for a fuller comparison.",
+        ],
+      },
+      {
+        heading: 'Common Types of ETFs',
+        body: [
+          "Broad-market ETFs track an entire index, like the total U.S. or international stock market. Sector ETFs focus on one industry, like technology or energy. Bond ETFs hold a basket of fixed-income securities. Dividend ETFs focus on stocks with a history of paying dividends. Commodity ETFs offer exposure to a physical asset like gold, generally without requiring an investor to hold the physical commodity themselves — see Commodities for how that exposure actually works. Leveraged and inverse ETFs aim to amplify or invert daily index returns using derivatives; these are generally considered more advanced tools designed for short holding periods, since their performance can diverge significantly from a simple multiple of the underlying index over longer periods.",
+        ],
+      },
+      {
+        heading: 'Risks and Limitations',
+        body: [
+          "An ETF is only as diversified as what it holds — a narrow sector or thematic ETF can be just as volatile as a handful of individual stocks in that sector. Thinly traded ETFs can have wider bid-ask spreads, which adds a real cost to trading in and out of a position. Leveraged and inverse ETFs carry compounding risk that can make their long-term performance diverge sharply from what a simple index multiple would suggest. And, like any fund tied to the market, an ETF's value can decline meaningfully during a broad downturn regardless of how diversified it is internally.",
+        ],
+      },
+      {
+        heading: 'How Beginners Can Research an ETF',
+        body: [
+          "A reasonable starting checklist: what index or strategy does the ETF track, and does that match the intended exposure; what is the expense ratio, and how does it compare with similar funds; how large and how frequently traded is the fund (very small or thinly traded ETFs can carry added liquidity risk); and how has the fund tracked its benchmark historically (a persistent gap between fund performance and its stated index, sometimes called tracking error, is worth understanding before investing). A fund's prospectus and fact sheet, both publicly available, are the primary sources for this information rather than a headline return figure alone.",
+        ],
+      },
+      {
+        heading: 'A Simple Illustrative Example',
+        body: [
+          "Illustrative example only, not investment advice: an investor buys shares of a hypothetical broad-market index ETF with a 0.05% expense ratio. On a $10,000 investment, that's roughly $5 a year in fund costs, deducted automatically from returns rather than billed directly. Compare that with a hypothetical actively managed fund charging a 0.75% expense ratio — roughly $75 a year on the same $10,000 — and the cost difference alone, compounded over a long holding period, can meaningfully affect ending returns, independent of which fund actually performs better in a given year.",
+        ],
+      },
+      {
+        heading: 'Common ETF Mistakes',
+        body: [
+          "Common mistakes include buying an ETF without checking what it actually holds (a name can suggest broad exposure while the fund is fairly concentrated), ignoring the expense ratio when comparing similar funds, using leveraged or inverse ETFs as a long-term holding rather than the short-term tactical tool they're generally designed to be, and trading thinly traded ETFs without checking the bid-ask spread first. Overlapping holdings across several ETFs — unintentionally owning the same large companies multiple times through different funds — is another common oversight that can undercut the diversification an investor thought they had.",
+        ],
+      },
+      {
+        heading: 'When to Learn More',
+        body: [
+          "This page is meant as a starting point. For how mutual funds compare in more depth, see Mutual Funds. For the individual securities many ETFs hold, see Stocks and Bonds. For how ETFs fit into a broader portfolio, see Portfolio Management and Investing.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "What's the difference between an ETF and a mutual fund?",
+        answer:
+          "ETFs trade throughout the day on an exchange at a fluctuating price, while mutual fund shares are priced and traded once per day at net asset value (NAV). ETFs are also often more tax-efficient in a taxable account, though this varies by fund.",
+      },
+      {
+        question: "Can an ETF lose money?",
+        answer:
+          "Yes. An ETF's value moves with whatever it holds — a broad-market ETF can decline significantly during a market downturn, and a narrow sector or leveraged ETF can be considerably more volatile.",
+      },
+      {
+        question: "What does an ETF's expense ratio actually cost me?",
+        answer:
+          "The expense ratio is an annual percentage of assets deducted automatically from the fund's returns, not billed as a separate charge. A 0.50% expense ratio costs roughly $5 a year for every $1,000 invested, and small differences compound meaningfully over long holding periods.",
+      },
+      {
+        question: "Are leveraged ETFs a good long-term investment?",
+        answer:
+          "Generally not — leveraged and inverse ETFs are designed to track a multiple of daily index returns, and compounding effects can cause their long-term performance to diverge significantly from a simple multiple of the underlying index. They're generally considered a more advanced, short-term tool.",
+      },
+    ],
+    relatedReading: [
+      { slug: 'mutual-funds', anchor: 'How daily-priced fund shares differ from an ETF’s intraday trading' },
+      { slug: 'stocks', anchor: 'The individual securities many equity ETFs are built from' },
+      { slug: 'bonds', anchor: 'How a bond ETF packages many bonds into one tradable fund' },
+      { slug: 'commodities', anchor: 'How a commodity ETF offers exposure without holding the physical asset' },
+      { slug: 'portfolio', anchor: 'Building a diversified allocation with a handful of low-cost funds' },
+    ],
   },
   'mutual-funds': {
     tag: 'MUTUAL FUNDS',
@@ -806,12 +1528,133 @@ const OVERRIDES: Record<string, TopicCopy> = {
     tag: 'COMMODITIES',
     title: 'Commodities',
     description:
-      'Oil, gold, natural gas, and the raw-material markets that move with global supply, demand, and the dollar.',
-    intro:
-      "Commodities are raw or primary economic goods — energy products like crude oil and natural gas, metals like gold and copper, and agricultural products — that trade in standardized units on global exchanges, largely interchangeable regardless of producer. Commodity prices are driven primarily by global supply and demand balances, geopolitical events affecting production regions, and currency moves, since most commodities are priced in U.S. dollars, so a weaker dollar tends to support commodity prices and vice versa. Because commodity price swings often show up in headline inflation data before they filter through to other parts of the economy, commodities coverage is closely tied to the broader inflation and monetary-policy conversation.",
-    metaTitle: 'Commodities News & Analysis',
+      'A beginner-friendly guide to commodities — what they are, how prices move, and how investors gain exposure.',
+    metaTitle: 'Commodities Explained — A Beginner’s Guide',
     metaDescription:
-      'Track oil, gold, natural gas, and other commodity prices, and understand what drives supply, demand, and the raw-material markets.',
+      'What a commodity is, the major categories, how supply and demand drive prices, and how investors gain exposure through futures and ETFs.',
+    keyTakeaways: [
+      "Commodities are raw or primary economic goods — energy products like crude oil and natural gas, metals like gold and copper, and agricultural products — that are largely interchangeable regardless of producer.",
+      "Commodity prices are driven primarily by global supply and demand, geopolitical events affecting production regions, and currency moves, since most commodities are priced in U.S. dollars.",
+      "Most individual investors gain commodity exposure through futures contracts, commodity ETFs, or shares of companies that produce commodities, rather than holding the physical goods themselves.",
+      "Different commodities behave differently — gold is often discussed as a potential inflation hedge or safe-haven asset, while energy and agricultural prices tend to be more directly tied to physical supply disruptions and seasonal demand.",
+      "Commodities can add diversification to a portfolio since their prices don't always move with stocks and bonds, but they can also be highly volatile and don't generate income the way a dividend stock or bond coupon does.",
+      "Futures-based commodity exposure carries mechanics — like contract rolling — that can meaningfully affect returns beyond simple spot-price moves, which is worth understanding before investing.",
+    ],
+    sections: [
+      {
+        heading: 'What Is a Commodity?',
+        body: [
+          "A commodity is a basic, raw economic good that's largely interchangeable no matter who produced it — a barrel of a given crude oil grade or an ounce of gold is generally treated as equivalent regardless of its specific source, which is what allows commodities to be traded on standardized exchanges in the first place. This interchangeability, sometimes called fungibility, is what distinguishes a commodity from a finished, branded product, where the specific maker matters to the buyer.",
+        ],
+      },
+      {
+        heading: 'Major Commodity Categories',
+        body: [
+          "Commodities are generally grouped into a few broad categories: energy (crude oil, natural gas, gasoline), metals (gold, silver, copper, and other industrial metals), agricultural products (wheat, corn, soybeans, coffee, cotton), and livestock (cattle, hogs). Each category responds to different supply and demand drivers — energy prices are heavily influenced by production decisions and geopolitical events, agricultural prices by weather and growing seasons, and metals by a mix of industrial demand and, for gold and silver specifically, investment demand.",
+        ],
+      },
+      {
+        heading: 'How Commodity Markets Work',
+        body: [
+          "Commodities trade on organized exchanges, largely through standardized futures contracts — agreements to buy or sell a set quantity of a commodity at a specified price on a future date. These exchanges bring together producers looking to lock in a price for what they'll sell, buyers looking to lock in a price for what they'll need, and speculators and investors looking to profit from price moves without any intention of delivering or receiving the physical commodity.",
+        ],
+      },
+      {
+        heading: 'Physical Commodities vs Financial Exposure',
+        body: [
+          "Very few individual investors take physical delivery of a commodity — storing barrels of oil or bushels of wheat isn't practical for most people. Instead, financial exposure is generally gained through futures contracts, commodity ETFs that hold futures or, for some funds, the physical metal itself, or shares of companies whose business is tied to a commodity's price (an energy producer or a mining company, for example). Each route carries a different risk and cost profile, and a commodity-linked stock's price is also affected by that company's own business performance, not commodity prices alone.",
+        ],
+      },
+      {
+        heading: 'Supply and Demand',
+        body: [
+          "Commodity prices are fundamentally driven by the balance between how much is being produced and how much is being consumed at a given time. A supply disruption — a weather event affecting a crop, a geopolitical conflict affecting an oil-producing region, a mine closure — can push prices higher if demand doesn't fall proportionally. Conversely, a slowdown in demand, such as reduced industrial activity, can push prices lower even if supply stays constant. Because production of many commodities can't be adjusted quickly, prices can be more volatile than for goods where supply responds faster to demand changes.",
+        ],
+      },
+      {
+        heading: 'Why Commodity Prices Move',
+        body: [
+          "Beyond raw supply and demand, commodity prices are also influenced by currency moves — most global commodities are priced in U.S. dollars, so a weaker dollar tends to make commodities cheaper for buyers using other currencies, which can support demand and prices, and a stronger dollar tends to have the opposite effect. Geopolitical events, government policy (tariffs, export restrictions, subsidies), and broader macroeconomic conditions like economic growth or inflation expectations can all move commodity prices as well, sometimes quickly and significantly.",
+        ],
+      },
+      {
+        heading: 'Futures and Commodity Exposure at a High Level',
+        body: [
+          "A futures contract obligates the parties to exchange a commodity at a set price on a future date, and most financial commodity products are built on these contracts rather than the physical good itself. Because futures contracts expire, funds and traders that maintain ongoing exposure generally need to \"roll\" from an expiring contract into a later-dated one, and the cost or benefit of doing so (depending on the shape of the futures price curve) can cause a fund's returns to diverge from simply tracking the spot price of the underlying commodity over time — a mechanic worth understanding before investing in a futures-based commodity product.",
+        ],
+      },
+      {
+        heading: 'Commodity ETFs',
+        body: [
+          "Commodity ETFs offer a way to gain commodity exposure through a standard brokerage account without directly trading futures contracts. Some commodity ETFs hold futures contracts and roll them according to a stated strategy; others, mainly certain gold and silver funds, hold the physical metal itself in vaults on behalf of shareholders. These structures can behave differently from one another and can carry different tax treatment, so it's worth checking exactly what a specific commodity ETF holds and how it's structured rather than assuming from its name. See ETFs for how the fund structure works more broadly.",
+        ],
+      },
+      {
+        heading: 'Gold, Silver, Energy, and Agricultural Commodities',
+        body: [
+          "Gold and silver are often discussed as potential stores of value or portfolio diversifiers, and gold in particular is sometimes framed as a hedge against inflation or a safe-haven asset during periods of market stress — though neither outcome is guaranteed, and both metals can still be volatile. Energy commodities like crude oil and natural gas are closely tied to global production levels, geopolitical developments, and seasonal demand (heating and cooling needs, for example). Agricultural commodities are heavily influenced by weather, growing seasons, and global trade patterns, which can make them some of the more seasonally volatile commodities to track.",
+        ],
+      },
+      {
+        heading: 'Commodity Investment Risks',
+        body: [
+          "Commodities can be highly volatile, sometimes moving sharply on a single geopolitical or weather event. They generate no income on their own — no dividend or coupon — so returns depend entirely on price appreciation (or, for futures-based products, the combined effect of price moves and contract-roll mechanics). Futures-based exposure adds complexity, including the potential for roll costs to erode returns even when the spot price is stable or rising. And commodity prices can remain depressed or elevated for extended periods based on structural supply and demand shifts, not just short-term news.",
+        ],
+      },
+      {
+        heading: 'Commodities and Portfolio Diversification',
+        body: [
+          "Commodities are sometimes added to a portfolio because their prices don't always move in the same direction as stocks and bonds, which can help diversify overall portfolio risk. That relationship isn't fixed or guaranteed, though — correlations between asset classes can shift, especially during periods of broad market stress. How much, if any, commodity exposure makes sense for a given portfolio depends on an investor's goals, risk tolerance, and overall asset allocation, and is worth thinking through rather than adding as a reflexive hedge. See Portfolio Management for how diversification works more broadly.",
+        ],
+      },
+      {
+        heading: 'A Simple Illustrative Example',
+        body: [
+          "Illustrative example only, not investment advice: an investor buys shares of a hypothetical gold ETF that holds physical gold in a vault, aiming to track the price of gold per ounce. If the price of gold rises 10% over a year, the ETF's shares would generally be expected to rise by a similar amount, minus the fund's expense ratio. This is a simplified illustration — a futures-based commodity ETF (for oil, say, rather than physically-held gold) can behave differently from the simple spot-price move, due to the contract-rolling mechanics described above.",
+        ],
+      },
+      {
+        heading: 'Common Commodity-Investing Mistakes',
+        body: [
+          "Common mistakes include treating all commodities as behaving the same way (gold, oil, and wheat respond to very different drivers), not understanding that a futures-based commodity fund can underperform the simple spot-price move due to roll costs, expecting commodities to generate income the way dividend stocks or bonds do, and allocating a large share of a portfolio to commodities without accounting for their volatility. Assuming gold or another commodity will reliably rise during every market downturn is another common misconception — historical relationships between asset classes aren't guarantees of future behavior.",
+        ],
+      },
+      {
+        heading: 'When to Learn More',
+        body: [
+          "This page is meant as a starting point. For how a commodity ETF is structured and priced, see ETFs. For how commodity exposure fits within a broader plan, see Portfolio Management and Investing. For how commodity price swings relate to broader inflation trends, see Inflation.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "What's the difference between a commodity and a stock?",
+        answer:
+          "A stock represents partial ownership in a company; a commodity is a raw physical good, like oil or wheat, that's largely interchangeable regardless of producer. Commodities generate no income on their own — returns depend entirely on price moves.",
+      },
+      {
+        question: "Do I have to take physical delivery of a commodity if I invest in it?",
+        answer:
+          "No — most individual investors gain exposure through futures contracts, commodity ETFs, or shares of commodity-linked companies rather than taking physical delivery, which isn't practical for most people.",
+      },
+      {
+        question: "Is gold a good hedge against inflation?",
+        answer:
+          "Gold is sometimes discussed as a potential inflation hedge or safe-haven asset, but this isn't guaranteed — gold's price can still be volatile and doesn't move in lockstep with inflation over every period.",
+      },
+      {
+        question: "Why can a commodity ETF underperform the actual commodity price?",
+        answer:
+          "Futures-based commodity ETFs need to roll expiring contracts into later-dated ones, and depending on the shape of the futures curve, that process can add a cost that causes the fund's returns to diverge from a simple spot-price move over time.",
+      },
+    ],
+    relatedReading: [
+      { slug: 'etfs', anchor: 'How a commodity ETF is structured and what it actually holds' },
+      { slug: 'inflation', anchor: 'How commodity price swings feed into broader inflation data' },
+      { slug: 'portfolio', anchor: 'How commodities can fit into a diversified allocation' },
+      { slug: 'stocks', anchor: 'Investing in commodity-linked companies instead of the raw commodity' },
+      { slug: 'real-estate', anchor: 'Another tangible-asset category with its own supply and demand dynamics' },
+    ],
   },
   retirement: {
     tag: 'RETIREMENT',
@@ -1051,6 +1894,133 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'Savings',
     description:
       'Savings accounts, CDs, and strategies to grow your emergency fund and short-term cash while keeping pace with inflation.',
+    keyTakeaways: [
+      "Saving means setting money aside in a stable, easily accessible form rather than risking it for growth — that's the core difference between saving and investing.",
+      "A savings account's annual percentage yield (APY) reflects compounding, so it's the number to compare, not a bank's advertised \"interest rate\" alone.",
+      "High-yield savings accounts, usually at online banks, can pay meaningfully more than the national average — but the rate is variable and can change at any time.",
+      "Money needed within the next few years generally belongs in savings, not investments, since a market downturn could coincide with exactly when it's needed.",
+      "Automating a transfer on payday tends to build a savings habit more reliably than saving whatever happens to be left over at the end of the month.",
+    ],
+    sections: [
+      {
+        heading: "What Is Saving Money?",
+        body: [
+          "Saving means setting money aside instead of spending it now, generally in a stable, low-risk account where the balance doesn't fluctuate with market conditions. It's the financial foundation most other goals sit on top of: without savings, an unexpected expense or a paused paycheck often has to be covered with debt instead of cash already on hand.",
+        ],
+      },
+      {
+        heading: "Why Saving Matters",
+        body: [
+          "Savings provide a buffer against the unpredictable — a car repair, a medical bill, a gap between jobs — without needing to sell an investment at a bad time or reach for a credit card. Beyond emergencies, savings are also how most near-term goals get funded: a vacation, a security deposit, a wedding, or a down payment, each on a timeline too short for the ups and downs of investing to reliably work out in your favor.",
+        ],
+      },
+      {
+        heading: "How Savings Accounts Work",
+        body: [
+          "A savings account is a deposit account held at a bank or credit union that generally pays interest on the balance in exchange for holding the money for you. At FDIC-member banks and NCUA-insured credit unions, savings balances are protected up to $250,000 per depositor, per ownership category, per institution — a real, checkable fact rather than a marketing claim, verifiable directly through the FDIC's BankFind tool. Most savings accounts also limit certain types of transfers and withdrawals compared with a checking account, reflecting their purpose as a place to hold money rather than spend it directly.",
+        ],
+      },
+      {
+        heading: "Savings vs. Investing",
+        body: [
+          "Saving and investing solve different problems. Saving keeps money stable and accessible, generally earning a modest, relatively predictable return; investing accepts the possibility that an asset's value can rise or fall, including below what was originally put in, in exchange for potentially higher long-term growth. Money that might be needed within the next couple of years is generally better suited to savings, since a market downturn could coincide with exactly the moment it's needed — while money with a longer time horizon has more room to ride out volatility.",
+        ],
+      },
+      {
+        heading: "Short-Term vs. Long-Term Savings Goals",
+        body: [
+          "Short-term goals — a vacation, a holiday budget, a car repair fund — are usually best kept in a highly liquid account since the money may be needed on short notice. Longer-term savings goals that are still too near-term for investing, like a home down payment a few years out, can often tolerate a slightly less liquid option, such as a certificate of deposit, in exchange for a fixed, sometimes higher rate — as long as the money genuinely won't be needed before the term ends.",
+        ],
+      },
+      {
+        heading: "Building an Emergency Fund",
+        body: [
+          "An emergency fund is savings set aside specifically for unplanned expenses, kept separate from everyday spending so it isn't gradually absorbed into regular budgeting. Common guidance suggests three to six months of essential expenses, though the right target varies with job stability, whether a household relies on one income or two, and existing insurance coverage. Because its job is availability rather than growth, an emergency fund is generally better held in a high-yield savings account than invested in the market.",
+        ],
+      },
+      {
+        heading: "High-Yield Savings Accounts",
+        body: [
+          "A high-yield savings account pays a meaningfully higher APY than a traditional bank's standard savings account, typically at an online bank with lower overhead than a branch network. The tradeoff is usually no physical branch access, though many online banks offer full digital deposit, transfer, and customer service functionality in exchange. Rates on high-yield accounts are variable, meaning they can rise or fall with broader interest-rate conditions rather than staying fixed — worth keeping in mind when comparing today's advertised rate against what an account might pay a year from now.",
+        ],
+      },
+      {
+        heading: "Understanding Interest and APY",
+        body: [
+          "Annual percentage yield (APY) reflects both the stated interest rate and how often that interest compounds — daily, monthly, or quarterly — so it's a more complete number to compare across accounts than a bare interest rate. Compounding means interest earned is added to the balance and then itself earns interest going forward, which is why more frequent compounding at the same stated rate produces a slightly higher effective yield over a year.",
+        ],
+      },
+      {
+        heading: "Building a Consistent Savings Habit",
+        body: [
+          "A savings habit tends to hold up better when it doesn't depend on remembering to do it manually. Setting up an automatic transfer for the day after a paycheck lands — even a modest, fixed amount — treats savings more like a recurring bill than a leftover, and tends to be more consistent than saving whatever happens to remain at the end of the month. Many banks and apps also support rounding up purchases to the nearest dollar and sweeping the difference into savings, a smaller-scale way to build the same habit passively.",
+        ],
+      },
+      {
+        heading: "Saving for Specific Goals",
+        body: [
+          "Naming a savings goal and tracking it separately — many banks support labeled sub-accounts or \"buckets\" within a single savings account — can make progress more visible than lumping every dollar into one undifferentiated balance. Assigning a rough timeline to each goal also helps decide where the money should sit: a goal a few months away calls for something highly liquid, while a goal a few years out has more room to consider a CD or a similar fixed-term option.",
+        ],
+      },
+      {
+        heading: "How to Compare Savings Options",
+        body: [
+          "The details worth comparing across savings accounts are the APY, any minimum balance required to open the account or earn the advertised rate, monthly maintenance fees and how they're waived, withdrawal or transfer limits, and how easily the account connects to an existing checking account for transfers. A high advertised rate that comes with a minimum balance most savers won't maintain, or fees that quietly erode the return, can make an account less useful in practice than a slightly lower rate with no such conditions.",
+        ],
+      },
+      {
+        heading: "Common Savings Mistakes",
+        body: [
+          "Common missteps include keeping an emergency fund in a checking account earning negligible interest, chasing a top advertised rate without checking for a minimum balance or fee that offsets it, treating savings as optional and only contributing whatever is left at month's end, and — on the other side — over-saving in low-yield cash while carrying high-interest debt that costs more than the savings account earns. None of these are dramatic errors, but each can meaningfully reduce how far the same saved dollars actually go.",
+        ],
+      },
+      {
+        heading: "A Simple Illustrative Example",
+        body: [
+          "As a purely illustrative, non-guaranteed example: someone who automatically transfers a fixed amount into a savings account every payday, and leaves it to compound at whatever APY the account currently pays, tends to build a larger balance over a year than someone saving the same total amount but only when they happen to remember — not because of the rate itself, but because consistent contributions compound for longer on average. The actual outcome in any real case depends entirely on the amount saved, the account's real APY, and how consistently the saving actually happens.",
+        ],
+      },
+      {
+        heading: "When to Learn More",
+        body: [
+          "Once the basics feel familiar, it's worth going deeper on the accounts and strategies that fit your specific situation — comparing high-yield savings options directly, weighing a CD against a savings account for money with a fixed timeline, or working savings goals into a broader budget. The guides linked throughout this page and in Related Reading below cover each of those in more depth.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "How much money should I keep in savings?",
+        answer:
+          "A common starting point is three to six months of essential expenses for an emergency fund, plus whatever is earmarked for specific near-term goals — the right amount varies with job stability, household income sources, and existing insurance coverage.",
+      },
+      {
+        question: "Is a savings account better than investing?",
+        answer:
+          "They serve different purposes rather than one being universally better. Savings suit money you may need soon and want to keep stable; investing suits money with a longer time horizon where you can accept the possibility of short-term losses in exchange for potential long-term growth.",
+      },
+      {
+        question: "What's a good APY for a savings account?",
+        answer:
+          "There's no fixed number since rates move with broader interest-rate conditions, but high-yield savings accounts, usually at online banks, generally pay meaningfully more than the national average for standard savings accounts — worth comparing current rates directly rather than relying on a fixed benchmark.",
+      },
+      {
+        question: "Is my money safe in a savings account?",
+        answer:
+          "Yes, at an FDIC-member bank or NCUA-insured credit union, savings deposits are insured up to $250,000 per depositor, per ownership category, per institution — confirm a bank's status directly through the FDIC's BankFind tool.",
+      },
+      {
+        question: "How is savings account interest calculated?",
+        answer:
+          "Interest is generally based on the account's annual percentage yield (APY), which reflects both the stated rate and how often interest compounds — daily, monthly, or quarterly. More frequent compounding at the same stated rate produces a slightly higher effective return over a year.",
+      },
+    ],
+    relatedReading: [
+      { slug: "checking", anchor: "How an everyday transaction account differs from savings" },
+      { slug: "cd-rates", anchor: "Locking in a fixed rate for money you won't need for a while" },
+      { slug: "money-market", anchor: "A savings alternative that can add check-writing or debit access" },
+      { slug: "emergency-fund", anchor: "How much to keep set aside and where to hold it" },
+      { slug: "budgeting", anchor: "Working savings goals into a broader monthly budget" },
+    ],
     metaTitle: 'Savings Accounts, Rates & Strategy',
     metaDescription:
       'Compare savings account types and APYs, and learn how to build an emergency fund that keeps pace with inflation.',
@@ -1125,13 +2095,124 @@ const OVERRIDES: Record<string, TopicCopy> = {
       'Learn how much to keep in an emergency fund, how to build one into your budget, and when it makes sense to use it.',
   },
   credit: {
-    tag: 'CREDIT SCORES',
-    title: 'Credit Scores',
+    tag: 'CREDIT',
+    title: 'Credit',
     description:
-      'How credit scores are calculated, what moves them up or down, and how to build and protect your credit over time.',
-    metaTitle: 'Credit Scores — How They Work & How to Improve Them',
+      'A plain-English guide to how credit actually works — borrowing, credit cards, credit reports and scores, and how to build credit responsibly.',
+    keyTakeaways: [
+      "Credit is access to borrow; debt is what you actually owe once you use that access — the two aren't the same thing, even though the words often get used interchangeably.",
+      "A credit report is a factual record of your borrowing history; a credit score is a number a scoring model generates from that report to summarize risk for a lender — no single company publishes the full formula behind every score.",
+      "Payment history and credit utilization (balance relative to limit) are the two most consistently cited factors across major scoring models, but no single action guarantees a specific point change.",
+      "Revolving credit (like a credit card) and installment credit (like a personal, auto, or student loan) behave differently — a revolving balance can be carried indefinitely, while an installment loan has a fixed payoff date.",
+      "Building or rebuilding credit is generally about consistent behavior over time — on-time payments and manageable balances — not a shortcut, and there's no guaranteed timeline.",
+      "A hard inquiry from a new application typically causes a small, temporary dip; rate-shopping for the same type of loan within a short window is usually treated as a single inquiry by most scoring models.",
+    ],
+    sections: [
+      {
+        heading: 'What Credit Is',
+        body: [
+          "Credit is permission to borrow — access a lender extends to you based on some assessment of how likely you are to pay it back, whether that's a bank, a credit card issuer, or a store offering financing. Having credit available isn't the same as owing anything: a credit card with a $5,000 limit and a $0 balance means you have access to borrow $5,000, not that you owe it. Debt only exists once you actually use that access — you borrow, and now you owe. Repayment is the process of clearing what you borrowed, generally with interest added for the privilege of using someone else's money in the meantime.",
+        ],
+      },
+      {
+        heading: 'How Credit Works',
+        body: [
+          "A basic credit relationship has a few consistent parts regardless of the product: a borrower and a lender, a principal (the amount actually borrowed), interest (the cost of borrowing, usually expressed as an annual rate), sometimes additional fees, a term (how long you have to repay, if there is a fixed one), and default (what happens if repayment stops — generally reported to credit bureaus and, depending on the debt, potentially followed by collections or legal action).",
+          "As a simple, illustrative example: borrowing $1,000 at a hypothetical 10% annual interest rate means that if none of it were repaid for a year, roughly $100 in interest would accrue on top of the original $1,000 — the actual amount depends on the real rate, how often interest compounds, and how much is repaid along the way. This is a simplified example only, not a quote for any real product.",
+        ],
+      },
+      {
+        heading: 'Credit Cards and Revolving Credit',
+        body: [
+          "A credit card is the most common form of revolving credit: you can borrow up to a credit limit, repay any portion of it, and borrow again as the balance comes down, with no fixed end date on the account itself. A few terms matter here — available credit (limit minus current balance), statement balance (what you owed at the last billing cycle's close), and minimum payment (the smallest amount due to stay current, which is not the same as paying off the balance). Interest generally only applies to a balance carried past the due date; paying the statement balance in full each cycle typically avoids it on purchases entirely.",
+          "This page covers the fundamentals only — see Credit Cards for how card APR actually compounds, how rewards and fees factor into whether a card is worth carrying, and card-specific legal protections.",
+        ],
+      },
+      {
+        heading: 'Credit Reports: What They Contain',
+        body: [
+          "A credit report is generally a record of open and closed credit accounts, payment history, current balances, credit inquiries, and certain public records, compiled by a credit reporting agency. Not every lender reports to every agency, so your file can look somewhat different from one report to another. Reviewing your own credit report is typically a soft inquiry and doesn't affect your score — it's worth doing periodically to catch errors or unfamiliar accounts early, since reports can and do contain mistakes.",
+        ],
+      },
+      {
+        heading: "Credit Scores: How They're Calculated",
+        body: [
+          "A credit score is generated from the information in a credit report by a scoring model, most commonly FICO or VantageScore in the U.S., and is meant to give lenders a quick, standardized read on lending risk. The most widely cited model generally weights payment history most heavily, followed by amounts owed (including utilization), length of credit history, new credit, and credit mix — the exact weighting can vary by model and version, and no scoring company publishes the complete formula behind a specific score.",
+        ],
+      },
+      {
+        heading: 'Payment History: The Single Biggest Factor',
+        body: [
+          "Paying on time, every time, is the single factor most consistently cited as carrying the most weight in credit scoring — a missed payment can affect a score more than nearly any other single factor. Negative marks like a late payment or collection account typically remain on a credit report for a period of years (commonly cited as around seven for most items, though it varies by the type of negative mark), which is part of why consistent on-time payment matters more over the long run than any single corrective action after the fact.",
+        ],
+      },
+      {
+        heading: 'Credit Utilization Explained',
+        body: [
+          "Utilization is the balance carried relative to the credit limit, measured both per card and across all revolving accounts combined — it's one of the more heavily weighted factors after payment history in most scoring models. Commonly cited guidance suggests keeping utilization under roughly 30%, with the strongest scores often associated with utilization in the single digits, though the exact effect varies by scoring model and individual credit history. What typically gets reported to the bureaus is the balance at your statement closing date, not what's owed by the due date — a detail that surprises people who assume paying in full before the due date is enough to show as $0 utilization.",
+        ],
+      },
+      {
+        heading: 'Applying for Credit and Hard Inquiries',
+        body: [
+          "Checking your own score or getting prequalified generally involves a soft inquiry, which doesn't affect your credit. Formally applying for new credit triggers a hard inquiry, which typically causes a small, temporary score dip. Most scoring models treat multiple hard inquiries for the same type of loan (a mortgage or an auto loan, for example) within a short window — often around two weeks — as a single inquiry, which is what makes rate-shopping across a few lenders reasonable without repeatedly penalizing your score. Applying for many different types of credit in a short period, on the other hand, can read as higher risk to lenders.",
+        ],
+      },
+      {
+        heading: 'Building and Maintaining Good Credit',
+        body: [
+          "Building or rebuilding credit responsibly generally comes down to a small set of consistent behaviors rather than a shortcut: paying on time every cycle (autopay for at least the minimum is a common safeguard), keeping utilization manageable relative to your limits, avoiding unnecessary new applications in a short window, keeping older accounts open when it makes sense since account age factors into credit history length, and reviewing your credit report periodically to catch and dispute errors. None of this comes with a guaranteed timeline — how quickly a score responds depends on your starting point, the rest of your credit history, and which scoring model is being used.",
+        ],
+      },
+      {
+        heading: 'Credit Risk and Common Mistakes',
+        body: [
+          "A handful of mistakes show up repeatedly: missing a payment, running balances close to the limit on one or more cards, applying for several new accounts in a short period, closing your oldest account without considering the effect on credit history length, and treating a single credit-score number as the whole picture rather than understanding what's actually driving it. Cosigning a loan or being added as an authorized user on someone else's card is worth understanding fully before agreeing — both can affect your own credit, for better or worse, based on someone else's repayment behavior. If you notice unfamiliar accounts or inquiries on your report, that can be a sign of identity theft worth investigating directly with the credit bureaus.",
+        ],
+      },
+      {
+        heading: "Credit vs. Debt: Why They're Not the Same Thing",
+        body: [
+          "It's worth restating plainly: someone with a $10,000 credit limit and a $0 balance has access to credit but no debt at all; someone who has borrowed $8,000 against a $10,000 limit has debt, regardless of how much unused limit remains. Debt itself isn't inherently good or bad — its cost (the interest rate), its purpose, and whether the repayment is genuinely manageable for your situation are what determine whether a given debt is a reasonable tool or a problem. See Debt Management for how to evaluate and pay down debt you've already taken on.",
+        ],
+      },
+      {
+        heading: 'When to Learn More',
+        body: [
+          "This page is meant as a starting point — the pages below go deeper into each topic introduced here. Credit Cards explains card-specific mechanics like how APR compounds and when rewards are actually worth it; Debt Management covers strategies for paying down what you owe, including the snowball and avalanche methods and when consolidation might help; and Personal Loans, Auto Loans, and Student Loans each cover installment borrowing for a specific purpose in more depth.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "What's the difference between credit and debt?",
+        answer:
+          "Credit is access to borrow — having a credit limit available doesn't mean you owe anything. Debt is what you actually owe once you use that access. A card with a high limit and a $0 balance means credit with no debt.",
+      },
+      {
+        question: "Does checking my own credit report or score hurt it?",
+        answer:
+          "No — checking your own credit report or score is a soft inquiry and doesn't affect your score. Only a hard inquiry, triggered by formally applying for new credit, causes a small, typically temporary dip.",
+      },
+      {
+        question: "How long do late payments stay on a credit report?",
+        answer:
+          "Most negative marks, including late payments, are commonly cited as remaining on a credit report for around seven years, though the exact period can vary by the type of item — a bankruptcy, for example, can stay longer.",
+      },
+      {
+        question: "Can I improve my credit score quickly?",
+        answer:
+          "Some factors can move faster than others — paying down a high balance can lower utilization within a billing cycle or two, for instance — but there's no guaranteed timeline or amount, since it depends on your full credit history and the scoring model used. Be cautious of any service that promises a specific score increase.",
+      },
+    ],
+    relatedReading: [
+      { slug: "debt", anchor: "How to evaluate and pay down debt you've already taken on" },
+      { slug: "credit-cards", anchor: "How card APR, rewards, and utilization actually work" },
+      { slug: "loans", anchor: "How installment borrowing differs from revolving credit" },
+    ],
+    metaTitle: 'How Credit Works — Credit Scores, Reports & Cards Explained',
     metaDescription:
-      'Learn how credit scores are calculated, what factors help or hurt your score, and practical steps to build and protect your credit.',
+      'A clear, practical guide to how credit works — credit cards, credit reports, how scores are calculated, and how to build credit responsibly.',
   },
   gdp: {
     tag: 'GDP',
@@ -1157,14 +2238,134 @@ const OVERRIDES: Record<string, TopicCopy> = {
   },
   options: {
     tag: 'OPTIONS',
-    title: 'Options Trading',
+    title: 'Options',
     description:
-      'Calls, puts, and strategy basics for investors using options to hedge risk or generate income.',
-    intro:
-      "An option is a contract that gives the buyer the right, but not the obligation, to buy (a call) or sell (a put) an underlying asset at a set strike price before a specific expiration date, in exchange for an upfront premium paid to the seller. Options can be used to hedge an existing position against a decline, generate income by selling contracts against shares already owned (covered calls), or speculate on a price move with less capital than buying the underlying asset outright — each use case carries a very different risk profile. Because an option's value depends on the underlying price, time remaining until expiration, and implied volatility, its price can move sharply even when the underlying barely does, which is why options are generally considered a more advanced tool than buying stocks or funds directly.",
-    metaTitle: 'Options Trading News & Strategy Guides',
+      'A cautious, beginner-friendly introduction to options — what they are, how they work, and the risks worth understanding first.',
+    metaTitle: 'Options Explained — A Beginner’s Guide to Calls and Puts',
     metaDescription:
-      'Options trading explained — calls, puts, spreads, and how investors use options to hedge risk or generate income.',
+      'What an option is, how calls and puts work, why options are considered complex, and the main risks beginners should understand first.',
+    keyTakeaways: [
+      "An option is a contract that gives the buyer the right, but not the obligation, to buy (a call) or sell (a put) an underlying asset at a set strike price before a specific expiration date, in exchange for an upfront premium.",
+      "Options can be used to hedge an existing position, generate income against shares already owned, or speculate on a price move — each use case carries a very different risk profile, and none of them is a reliable or easy way to make money.",
+      "An option's price depends on the underlying asset's price, the strike price, time remaining until expiration, and implied volatility — it can move sharply even when the underlying barely moves.",
+      "Selling (\"writing\") an uncovered option generally carries meaningfully more risk than buying one, since a bought option's maximum loss is limited to the premium paid, while an uncovered seller's potential loss can be much larger.",
+      "Options are widely considered a more advanced, higher-risk tool than buying stocks or funds directly, and it's common for an options position to expire worthless, resulting in a total loss of the premium paid.",
+      "This page explains the mechanics at a high level for educational purposes only — it is not trading instruction, and it does not suggest options trading is appropriate for any particular investor.",
+    ],
+    sections: [
+      {
+        heading: 'What Is an Option?',
+        body: [
+          "An option is a financial contract, not a stock or a fund — it gives the holder a right tied to an underlying asset, most commonly a stock, without requiring the holder to actually own that asset. The buyer of an option pays an upfront premium to the seller for that right, and the option itself has an expiration date, after which it becomes worthless if not exercised or sold. Options are generally considered a more advanced and higher-risk instrument than buying stocks or funds outright, and this page is an educational overview, not a suggestion that options trading suits any particular reader.",
+        ],
+      },
+      {
+        heading: 'Calls and Puts',
+        body: [
+          "A call option gives its buyer the right, but not the obligation, to buy the underlying asset at a specified strike price before expiration — generally purchased by someone who expects the underlying price to rise. A put option gives its buyer the right to sell the underlying asset at the strike price before expiration — generally purchased by someone who expects the underlying price to fall, or who wants to protect an existing holding against a decline. On the other side of every contract is a seller (sometimes called a \"writer\"), who takes on the corresponding obligation in exchange for the premium.",
+        ],
+      },
+      {
+        heading: 'How an Options Contract Works',
+        body: [
+          "A standard U.S. equity option contract generally represents 100 shares of the underlying stock. The buyer pays the premium upfront; the seller receives it. If the buyer chooses to exercise the option before or at expiration, the seller is obligated to fulfill the contract — deliver shares (for a call) or buy shares (for a put) — at the strike price, regardless of where the market price has moved. Many option holders never exercise the contract at all; instead, they can sell the option itself before expiration to close the position, since the option's own market price generally reflects the value of that right.",
+        ],
+      },
+      {
+        heading: 'Strike Price, Expiration, and Premium',
+        body: [
+          "The strike price is the fixed price at which the underlying asset can be bought (call) or sold (put) if the option is exercised. Expiration is the date the contract ends — after which an unexercised, unsold option expires worthless. The premium is the price paid by the buyer to the seller for the contract, and it's influenced by how far the strike price is from the current underlying price, how much time remains until expiration, and the underlying's implied volatility (roughly, how much price movement the market is pricing in). All three factors interact, which is part of why options pricing is considered more complex than pricing a stock.",
+        ],
+      },
+      {
+        heading: 'Buying vs Selling Options at a High Level',
+        body: [
+          "Buying an option generally has a defined, limited risk: the most a buyer can lose is the premium paid, no matter how far the underlying moves against them, though that entire premium can be lost if the option expires worthless — which happens often. Selling an option is structurally different: a seller collects the premium upfront, but if the contract moves against them, their potential loss can be substantially larger than the premium received, particularly when selling an uncovered (\"naked\") option not backed by an offsetting position in the underlying asset. This asymmetry is a core reason options are generally considered higher-risk than simply buying a stock.",
+        ],
+      },
+      {
+        heading: 'Why Options Can Be Complex',
+        body: [
+          "Unlike a stock, whose price generally reflects a company's business prospects in a relatively straightforward way, an option's price is a function of several interacting variables — the underlying price, strike price, time to expiration, implied volatility, and interest rates — that can move independently of each other. An option's value can decline even while the underlying stock's price is unchanged, simply because time has passed and less time remains until expiration. This is one of the main reasons options require a different, more technical understanding than buying stocks or index funds directly.",
+        ],
+      },
+      {
+        heading: 'Main Sources of Options Risk',
+        body: [
+          "Time decay means an option generally loses value as expiration approaches, all else being equal, which works against option buyers and in favor of sellers. Volatility risk means an option's price can move significantly based on changing expectations about future price swings, independent of the underlying's actual price move. Leverage risk means options can control a relatively large amount of underlying exposure for a smaller upfront cost, which can magnify both gains and losses relative to the capital involved. Assignment risk applies to sellers, who can be required to fulfill the contract at any time before expiration for American-style options. And liquidity risk means some option contracts trade infrequently, which can make it harder to exit a position at a reasonable price.",
+        ],
+      },
+      {
+        heading: 'Option Greeks at a High Level',
+        body: [
+          "\"The Greeks\" are a set of measures used to describe how sensitive an option's price is to different factors: delta (sensitivity to the underlying's price), theta (sensitivity to time passing, generally working against the option's value as expiration nears), vega (sensitivity to changes in implied volatility), and gamma (how much delta itself changes as the underlying price moves). These are introduced here only at a conceptual level — using the Greeks in practice generally requires a deeper, more technical understanding than this overview provides.",
+        ],
+      },
+      {
+        heading: 'Common Options Strategies at a High Level',
+        body: [
+          "A covered call involves selling a call option against shares an investor already owns, generally used to generate additional income from a holding in exchange for capping potential upside if the stock rises above the strike price. A protective put involves buying a put option against shares already owned, generally used to limit downside risk on that holding, in exchange for the cost of the premium. More advanced strategies — spreads, straddles, and others — combine multiple options and carry their own distinct risk and reward profiles. These are described here only at a high level; the mechanics and risks of any specific strategy are worth understanding in full detail, ideally beyond a single overview page, before considering it.",
+        ],
+      },
+      {
+        heading: 'Hedging vs Speculation',
+        body: [
+          "Hedging with options generally means using a contract to reduce risk on an existing position — a protective put is a common example, functioning somewhat like insurance against a decline in a stock already owned. Speculation generally means using options to try to profit from an anticipated price move, often with less upfront capital than buying the underlying asset outright, which is also what makes speculative options positions capable of producing outsized losses relative to the capital involved. The same instrument can serve either purpose depending entirely on how it's used — the option contract itself doesn't determine whether its use is conservative or speculative.",
+        ],
+      },
+      {
+        heading: 'Why Options Can Produce Large Gains or Losses',
+        body: [
+          "Because an option can control a relatively large amount of underlying exposure for a fraction of the cost of buying the asset outright, percentage gains and losses on the option itself can be far larger than the equivalent move in the underlying asset — this is generally described as leverage. A relatively small move in the underlying price can translate into a much larger percentage move in the option's value, in either direction. This is a structural feature of how options work, not a special strategy or trick, and it's why options are widely described as capable of large, fast losses as well as large, fast gains.",
+        ],
+      },
+      {
+        heading: 'A Clearly Labeled Illustrative Example',
+        body: [
+          "Illustrative example only, not a trade recommendation or a suggestion that any outcome is likely: an investor buys one call option contract for a hypothetical stock, with a strike price of $50 and a premium of $2 per share (so $200 total, since one contract generally represents 100 shares), expiring in one month. If the stock stays at or below $50 through expiration, the option can expire worthless, and the buyer's loss is limited to the $200 premium paid. If the stock instead rises to $55 by expiration, the option may be worth roughly $5 per share ($500 total) — a gain on the option of about 150%, compared with a roughly 10% move in the underlying stock over the same period. This example ignores factors like time decay and implied volatility for simplicity and is not representative of any real position.",
+        ],
+      },
+      {
+        heading: 'Common Options Trading Mistakes',
+        body: [
+          "Common mistakes include treating options as a quick or easy way to generate returns rather than a complex instrument with real risk of total loss, selling uncovered options without fully understanding the potentially large and open-ended risk involved, underestimating how quickly time decay erodes an option's value, trading options without a clear understanding of how implied volatility affects pricing, and using leverage from options to take on a position size that would be considered excessive if using the underlying stock directly. Options are not inherently a shortcut to outsized returns, and it's common, even for a reasoned position, for the option to expire worthless.",
+        ],
+      },
+      {
+        heading: 'When to Learn More',
+        body: [
+          "This page is a high-level, educational overview only — it is not trading instruction, does not recommend any specific strategy, and does not suggest options trading is suitable for any particular investor. For the underlying securities options are written on, see Stocks and ETFs. For how options might fit, cautiously, into a broader portfolio context, see Portfolio Management and Investing. Anyone considering trading options should understand that meaningful losses, including total loss of premium paid, are a normal and expected outcome, not just a downside case.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "What's the difference between a call option and a put option?",
+        answer:
+          "A call option gives the buyer the right to buy the underlying asset at a set strike price before expiration; a put option gives the buyer the right to sell it. Buyers generally use calls when expecting a price increase and puts when expecting a decrease or wanting to hedge a decline.",
+      },
+      {
+        question: "How much can I lose buying an option?",
+        answer:
+          "Buying an option generally limits the maximum loss to the premium paid, since the buyer isn't obligated to exercise it. That said, losing the entire premium is a common outcome when an option expires worthless.",
+      },
+      {
+        question: "Is selling options riskier than buying them?",
+        answer:
+          "Generally, yes, particularly for uncovered (\"naked\") positions. A seller collects the premium upfront but can face a potential loss substantially larger than that premium if the position moves against them, unlike a buyer whose loss is capped at the premium paid.",
+      },
+      {
+        question: "Are options a good way for beginners to make money?",
+        answer:
+          "Options are widely considered a more advanced, higher-risk instrument than buying stocks or funds directly. They aren't a reliable or easy way to generate returns, and options frequently expire worthless — beginners should understand the mechanics and risks thoroughly before considering them.",
+      },
+    ],
+    relatedReading: [
+      { slug: 'stocks', anchor: 'The underlying shares most equity options are written on' },
+      { slug: 'etfs', anchor: 'How ETF options work similarly to single-stock options' },
+      { slug: 'portfolio', anchor: 'How hedging fits into broader portfolio risk management' },
+      { slug: 'brokers', anchor: 'What to check before a brokerage account can trade options' },
+    ],
   },
   'company-news': {
     tag: 'COMPANY NEWS',
