@@ -14,16 +14,13 @@ import { HomeIntro, homeFaqItems } from "@/components/home/HomeIntro";
 import { HomeEditorial } from "@/components/home/HomeEditorial";
 import { ExploreTopics } from "@/components/home/ExploreTopics";
 import { MarketHighlights } from "@/components/home/MarketHighlights";
-import { TrendingTopics } from "@/components/home/TrendingTopics";
 import { HomeSectionSkeleton } from "@/components/home/HomeSectionSkeleton";
 import { Leadership } from "@/components/home/Leadership";
 import { ImperialpediaTalks } from "@/components/home/ImperialpediaTalks";
-import { HowWeWork } from "@/components/home/HowWeWork";
+import { HowItWorks } from "@/components/home/HowItWorks";
 import { EditorialStandards } from "@/components/home/EditorialStandards";
 import { EditorialTeam } from "@/components/home/EditorialTeam";
 import { SourcesMethodology } from "@/components/home/SourcesMethodology";
-import { WhatWeCover } from "@/components/home/WhatWeCover";
-import { HowToUse } from "@/components/home/HowToUse";
 import { FeaturedKnowledge } from "@/components/home/FeaturedKnowledge";
 import { AllCategories } from "@/components/home/AllCategories";
 
@@ -48,9 +45,11 @@ export async function generateMetadata(): Promise<Metadata> {
  * navigation (ExploreTopics — doesn't depend on the CMS having published
  * anything, so the page never collapses down to just Term of Day + newsletter)
  * → CMS-backed editorial layer (real lead story / topic rows, grouped from
- * whatever categories are actually published) → live discovery rails, each in
- * its own Suspense boundary so a slow data source (market feed, CMS, live
- * entity service) never blocks the rest of the page from rendering.
+ * whatever categories are actually published), so a visitor hits real content
+ * before the first ad instead of just nav chrome → live discovery rails, each
+ * in its own Suspense boundary so a slow data source (market feed, CMS, live
+ * entity service) never blocks the rest of the page from rendering. Ad slots
+ * are spaced across that content layer rather than front-loaded.
  */
 export default function Home() {
   return (
@@ -68,25 +67,20 @@ export default function Home() {
         <AllCategories />
       </Suspense>
 
-      {/* Top AdSense Unit - Display ad above main content */}
-      <div className="mx-auto my-8 w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        <LabeledAdSlot slot="2039635661" />
-      </div>
-
       <Suspense fallback={<HomeSectionSkeleton cards={4} />}>
         <HomeEditorial />
       </Suspense>
+
+      {/* Top AdSense Unit — after the lead editorial content instead of before it */}
+      <div className="mx-auto my-8 w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+        <LabeledAdSlot slot="2039635661" />
+      </div>
 
       <TermOfDay
         term={TERM_OF_DAY.term}
         definition={TERM_OF_DAY.definition}
         href={TERM_OF_DAY.href}
       />
-
-      {/* Mid-page AdSense Unit */}
-      <div className="mx-auto my-8 w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        <LabeledAdSlot slot="1782439199" />
-      </div>
 
       <Suspense fallback={<HomeSectionSkeleton cards={4} />}>
         <ImperialpediaTalks />
@@ -96,27 +90,24 @@ export default function Home() {
         <MarketHighlights />
       </Suspense>
 
+      {/* Mid-page AdSense Unit */}
+      <div className="mx-auto my-8 w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+        <LabeledAdSlot slot="1782439199" />
+      </div>
+
+      <FeaturedKnowledge />
+
       {/* Bottom AdSense Unit */}
       <div className="mx-auto my-8 w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <LabeledAdSlot slot="6058771722" />
       </div>
 
-      <Suspense fallback={<HomeSectionSkeleton cards={6} />}>
-        <TrendingTopics />
-      </Suspense>
-
-      <WhatWeCover />
-
-      <HowToUse />
-
-      <FeaturedKnowledge />
-
-      {/* Trust chapter — how content gets made, what we stand for, who makes
-          it, and what we cite — grouped under one tinted band (mirrors
-          Leadership's own band below) so it reads as one distinct section of
-          the page instead of four more white rails continuing the scroll. */}
+      {/* Trust chapter — how it works, what we stand for, who makes it, and
+          what we cite — grouped under one tinted band (mirrors Leadership's
+          own band below) so it reads as one distinct section of the page
+          instead of more white rails continuing the scroll. */}
       <div className="bg-muted/30 border-t border-border">
-        <HowWeWork />
+        <HowItWorks />
         <EditorialStandards />
         <Suspense fallback={<HomeSectionSkeleton cards={6} />}>
           <EditorialTeam />
