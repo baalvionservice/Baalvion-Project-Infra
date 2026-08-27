@@ -237,27 +237,15 @@ const nextConfig: NextConfig = {
   },
   compress: true,
   poweredByHeader: false,
-  webpack: (config, { dev, isServer }) => {
-    if (!dev && !isServer) {
-      config.optimization.splitChunks = {
-        chunks: 'all',
-        cacheGroups: {
-          default: {
-            minChunks: 2,
-            priority: -20,
-            reuseExistingChunk: true,
-          },
-          vendor: {
-            test: /[\\/]node_modules[\\/]/,
-            name: 'vendors',
-            priority: -10,
-            chunks: 'all',
-          },
-        },
-      };
-    }
-    return config;
-  },
+  // No custom webpack splitChunks config here on purpose. A prior version
+  // forced every node_modules dependency -- including ones only reachable
+  // through a dynamic import, like recharts on the admin-only /admin/insights
+  // page -- into one "vendors" cache group with chunks:'all'. That merges
+  // async-only chunks back into the shared bundle every route (including
+  // anonymous homepage traffic) has to download, which is strictly worse
+  // than Next's own default splitting (framework/lib/commons, with real
+  // route- and dynamic-import-based separation). Removing it dropped the
+  // homepage's First Load JS from 709KB to 363KB (measured via `next build`).
 };
 
 export default nextConfig;
