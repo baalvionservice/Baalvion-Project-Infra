@@ -152,5 +152,3 @@ export async function Leadership() {
     </section>
   );
 }
-
-export default Leadership;

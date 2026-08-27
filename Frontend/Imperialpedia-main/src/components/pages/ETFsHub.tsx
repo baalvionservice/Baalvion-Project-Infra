@@ -334,5 +334,3 @@ export async function ETFsHub() {
     </div>
   );
 }
-
-export default ETFsHub;

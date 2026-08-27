@@ -21,5 +21,3 @@ export function HomeSectionSkeleton({ cards = 4 }: { cards?: number }) {
     </section>
   );
 }
-
-export default HomeSectionSkeleton;

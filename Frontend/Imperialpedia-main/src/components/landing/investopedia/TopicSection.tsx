@@ -55,5 +55,3 @@ export function TopicSection({ group }: { group: TopicGroup }) {
     </section>
   );
 }
-
-export default TopicSection;

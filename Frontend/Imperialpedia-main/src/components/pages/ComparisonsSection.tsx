@@ -52,5 +52,3 @@ export function ComparisonsSection({ articles, heading = "Comparisons" }: Props)
     </section>
   );
 }
-
-export default ComparisonsSection;

@@ -43,5 +43,3 @@ export function TrendingBar({ terms = DEFAULT_TERMS }: { terms?: Term[] }) {
     </div>
   );
 }
-
-export default TrendingBar;

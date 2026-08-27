@@ -375,6 +375,8 @@ const OVERRIDES: Record<string, TopicCopy> = {
       },
     ],
     relatedReading: [
+      { slug: "credit", anchor: "How your credit report and score actually work" },
+      { slug: "debt", anchor: "Strategies for paying down a carried balance faster" },
       { slug: "loans", anchor: "When a personal loan beats revolving credit for a larger expense" },
       { slug: "banking-reviews", anchor: "Independent card comparisons by rewards vs. APR" },
       { slug: "checking", anchor: "Why debit cards don't carry the same legal protections" },
@@ -575,6 +577,138 @@ const OVERRIDES: Record<string, TopicCopy> = {
     title: 'Certificates of Deposit (CDs)',
     description:
       'How CDs work, current rate trends, and CD ladder strategies for growing savings safely.',
+    keyTakeaways: [
+      "A CD locks a fixed rate for a fixed term in exchange for a real cost if you withdraw early — the early withdrawal penalty is the tradeoff for the fixed rate.",
+      "Unlike a savings or money market account, a CD's rate doesn't change once opened, whether broader rates rise or fall over the term.",
+      "A CD ladder — splitting money across several CDs with staggered maturity dates — can balance a fixed rate against the need for periodic access to cash.",
+      "A CD is generally a poor fit for money you might need before the term ends; a savings account remains better for anything that needs to stay fully liquid.",
+      "\"Jumbo\" CDs require a much larger minimum deposit and sometimes, but not always, pay a modestly better rate in exchange.",
+    ],
+    sections: [
+      {
+        heading: "What Is a Certificate of Deposit?",
+        body: [
+          "A certificate of deposit (CD) is a type of deposit account that holds a fixed amount of money for a fixed term — commonly anywhere from a few months to several years — in exchange for a fixed interest rate for that entire term. In exchange for that fixed rate, a CD is less liquid than a savings account: withdrawing the money before the term ends generally triggers an early withdrawal penalty.",
+        ],
+      },
+      {
+        heading: "How CDs Work",
+        body: [
+          "Opening a CD generally means choosing a term and depositing a lump sum upfront — most CDs don't accept additional deposits after opening, unlike a savings account. Interest accrues over the term at the fixed rate locked in at opening, and at maturity the account holder can withdraw the full balance plus interest, or in many cases let it automatically roll into a new CD of a similar term if no action is taken, which is worth watching for since the new rate may differ from the one that just matured.",
+        ],
+      },
+      {
+        heading: "CD Terms and Maturity",
+        body: [
+          "CD terms typically range from as short as one month to five years or more, and the term chosen determines both the maturity date and, generally, the rate — though the relationship between term length and rate isn't always straightforward, since it depends on where broader interest rates are expected to move. Maturity is the date the term ends and the funds become accessible without penalty; most banks send a notice ahead of maturity with instructions for withdrawing, renewing, or choosing a different term.",
+        ],
+      },
+      {
+        heading: "APY and Interest on CDs",
+        body: [
+          "As with savings accounts, a CD's annual percentage yield (APY) reflects both the stated rate and how often interest compounds, making it the more complete figure to compare across offers rather than a bare interest rate. Interest can typically be paid out periodically or left to compound within the CD until maturity — some CDs allow monthly interest withdrawals for savers who want a income stream without breaking the term, though this varies by bank and CD type.",
+        ],
+      },
+      {
+        heading: "Fixed Rates and Rate Risk",
+        body: [
+          "A CD's defining feature is that the rate is fixed for the full term once opened — it will neither rise nor fall with broader interest-rate conditions the way a savings or money market account's rate can. That cuts both ways: if rates rise after a CD is opened, the CD keeps paying its original, now-lower rate until maturity; if rates fall, the CD keeps paying its original, now-comparatively-higher rate. This tradeoff, sometimes called rate risk, is part of why CD terms and timing are worth thinking through rather than just choosing the option with the highest advertised rate today.",
+        ],
+      },
+      {
+        heading: "Early Withdrawal Penalties",
+        body: [
+          "Withdrawing money from a CD before its term ends generally triggers an early withdrawal penalty, commonly calculated as a set number of months' worth of interest — the exact formula and amount vary by bank and by term length, and it's worth reading before opening a CD rather than assuming it'll never matter. In some cases the penalty can exceed the interest actually earned, meaning an early withdrawal could reduce the original principal, not just forfeit the return — a real risk to weigh against the fixed rate's benefit.",
+        ],
+      },
+      {
+        heading: "CD vs. Savings Account",
+        body: [
+          "A savings account keeps money fully liquid with a variable rate that can move with broader conditions; a CD trades that liquidity for a fixed rate over a fixed term, with a penalty for early access. Neither is universally better — a savings account suits money that might be needed at any time, like an emergency fund, while a CD suits money with a known, fixed timeline that won't be needed before the term ends.",
+        ],
+      },
+      {
+        heading: "CD Laddering",
+        body: [
+          "A CD ladder splits a total amount across several CDs with staggered maturity dates instead of putting it all into one term — for example, dividing savings across one-, two-, three-, four-, and five-year CDs so that one matures every year. As each CD matures, the saver can either withdraw that portion or reinvest it into a new long-term CD, which keeps a portion of the money periodically accessible without fully sacrificing the higher rates that longer terms sometimes offer, and reduces the risk of locking the entire balance into a single rate at a single moment in time.",
+        ],
+      },
+      {
+        heading: "Jumbo CDs",
+        body: [
+          "A jumbo CD generally requires a much larger minimum deposit than a standard CD — commonly cited thresholds are in the tens of thousands of dollars — and sometimes, though not always, pays a modestly higher rate in exchange for the larger deposit. Whether a jumbo CD is worth it depends entirely on comparing its actual advertised rate against a standard CD or a high-yield savings account at the same bank, since the higher minimum alone doesn't guarantee a meaningfully better return.",
+        ],
+      },
+      {
+        heading: "How CD Rates Are Determined",
+        body: [
+          "CD rates are influenced by broader interest-rate conditions, a bank's own funding needs, and competition among banks and credit unions for deposits — banks generally adjust CD rates more slowly than fully variable products like savings accounts, since a new CD rate only applies to newly opened CDs, not to ones already locked in. Longer terms don't automatically mean higher rates; the relationship between term length and rate shifts depending on where rates are broadly expected to move over time.",
+        ],
+      },
+      {
+        heading: "How to Compare CDs",
+        body: [
+          "Worth comparing across CD offers: the APY, the exact term length, the early withdrawal penalty and how it's calculated, the minimum deposit required, and whether the CD automatically renews at maturity if no action is taken. A slightly higher advertised rate paired with a harsher early withdrawal penalty or a much longer minimum term isn't automatically the better choice for every saver.",
+        ],
+      },
+      {
+        heading: "When CDs May or May Not Fit a Savings Goal",
+        body: [
+          "A CD can be a reasonable fit for money set aside for a specific, dated goal — funds for a wedding a year out, or a portion of an emergency fund beyond the immediately liquid tier — where the term lines up with when the money will actually be needed. It's generally a weaker fit for money that might be needed on short notice, or for a goal with an uncertain timeline, since the early withdrawal penalty can offset or exceed the benefit of the fixed rate in either case.",
+        ],
+      },
+      {
+        heading: "Common CD Mistakes",
+        body: [
+          "Common missteps include locking up money that turns out to be needed before maturity, letting a CD auto-renew without checking whether the new rate is still competitive, choosing a CD term based purely on the highest advertised rate without considering when the money is actually needed, and treating a CD as a substitute for an easily accessible emergency fund rather than a complement to one.",
+        ],
+      },
+      {
+        heading: "A Simple Illustrative Example",
+        body: [
+          "As a purely illustrative, non-guaranteed example: a saver who splits $10,000 evenly across a one-, two-, and three-year CD ladder has a third of that money becoming accessible every year, versus locking the entire $10,000 into a single three-year CD, which would earn interest at one rate for the full period but leave nothing accessible without an early withdrawal penalty until the full term ends. Which approach earns more in total interest depends entirely on the actual rates available on each term when each CD is opened or renewed.",
+        ],
+      },
+      {
+        heading: "When to Learn More",
+        body: [
+          "From here, it's worth comparing a specific CD term against a high-yield savings account for your actual timeline, reading the exact early withdrawal penalty on any CD before opening it, and, if longer-term growth is the goal instead of a fixed near-term need, looking at how CDs compare with investing more broadly.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "What happens if I withdraw money from a CD early?",
+        answer:
+          "Most CDs charge an early withdrawal penalty, commonly a set number of months' worth of interest — the exact formula varies by bank and term. In some cases the penalty can exceed the interest earned, reducing the original principal, so it's worth reading the specific terms before opening a CD.",
+      },
+      {
+        question: "Is a CD better than a savings account?",
+        answer:
+          "It depends on the money's timeline. A CD trades liquidity for a fixed rate over a fixed term and works well for money with a known, fixed date it'll be needed. A savings account keeps money fully accessible with a variable rate, which suits money that might be needed at any time, like an emergency fund.",
+      },
+      {
+        question: "What is a CD ladder?",
+        answer:
+          "A CD ladder splits money across several CDs with staggered maturity dates — for example, one maturing each year for five years — so a portion becomes accessible periodically rather than locking the entire amount into a single term and rate.",
+      },
+      {
+        question: "Do CD rates change after I open the CD?",
+        answer:
+          "No — a CD's rate is fixed for the full term once opened, regardless of whether broader interest rates rise or fall afterward. A new rate only applies to newly opened CDs, not ones already locked in.",
+      },
+      {
+        question: "What is a jumbo CD?",
+        answer:
+          "A jumbo CD requires a much larger minimum deposit than a standard CD, commonly in the tens of thousands of dollars, and sometimes — though not always — pays a modestly higher rate in exchange. It's worth comparing the actual rate against a standard CD before assuming the higher minimum pays off.",
+      },
+    ],
+    relatedReading: [
+      { slug: "savings", anchor: "Why a savings account still matters for money you might need sooner" },
+      { slug: "money-market", anchor: "A more liquid alternative that still beats standard savings rates" },
+      { slug: "interest-rates", anchor: "How broader rate conditions shape what CDs pay" },
+      { slug: "banking-reviews", anchor: "Independent comparisons of current CD rates by bank" },
+    ],
     metaTitle: 'CD Rates — Certificates of Deposit Explained',
     metaDescription:
       'Learn how certificates of deposit work, compare CD rates, and explore CD ladder strategies for steady, low-risk returns.',
@@ -589,36 +723,91 @@ const OVERRIDES: Record<string, TopicCopy> = {
       "Rates are variable and move with broader interest-rate conditions, unlike a CD's fixed rate for a fixed term.",
       "Many banks still enforce their own version of the old federal 6-per-cycle withdrawal limit even though the federal rule was suspended in 2020 — check the specific bank's policy.",
       "Best suited for money that needs to stay liquid and insured but isn't for daily spending, like an emergency fund or a near-term savings goal.",
+      "Some money market accounts require a higher minimum balance than a comparable high-yield savings account, so it's worth comparing the two directly rather than assuming one is always better.",
     ],
     sections: [
       {
-        heading: "What a Money Market Account Actually Is",
+        heading: "What Is a Money Market Account?",
         body: [
-          "A money market account is a deposit account, held at a bank or credit union, that combines features of a savings account with limited transaction access more typical of checking — many money market accounts come with check-writing privileges or a debit card, something standard savings accounts usually don't offer, while still paying a rate closer to a savings or high-yield savings account. This should not be confused with a money market mutual fund, a separate investment product that holds short-term, high-quality debt instruments and is not FDIC-insured — the naming overlap is one of the more common sources of confusion in personal banking, and the two products carry meaningfully different protections.",
+          "A money market account is a deposit account, held at a bank or credit union, that combines features of a savings account with limited transaction access more typical of checking — many money market accounts come with check-writing privileges or a debit card, something standard savings accounts usually don't offer, while still paying a rate closer to a savings or high-yield savings account.",
         ],
       },
       {
-        heading: "How Your Money Is Protected — and What Isn't Insured",
+        heading: "How Money Market Accounts Work",
         body: [
-          "Because money market accounts are deposit accounts rather than investment products, they carry the same FDIC insurance (or NCUA insurance at credit unions) up to $250,000 per depositor, per ownership category, per institution as a standard checking or savings account — the tradeoff for that safety and liquidity is a rate that, while typically higher than a standard savings account, still generally trails what could be earned in longer-duration investments over time. Rates on money market accounts are variable and move with broader interest-rate conditions, so the rate advertised at account opening isn't fixed for any set period, unlike a certificate of deposit.",
+          "Money moves in and out of a money market account much like a hybrid of savings and checking: deposits can be made by transfer, direct deposit, or in person, and access typically includes some combination of checks, a debit card, and standard electronic transfers, alongside the interest-earning balance itself. Interest is generally calculated similarly to a savings account, with a variable annual percentage yield that can change over time rather than staying fixed.",
         ],
       },
       {
-        heading: "Minimum Balances, Fees, and Tiered Rates",
+        heading: "Money Market Account vs. Savings Account",
+        body: [
+          "A money market account and a savings account are both deposit accounts with variable rates and similar deposit insurance, but a money market account often adds check-writing or debit card access that a standard savings account doesn't offer, and has historically required a higher minimum balance in exchange. Which pays more at any given time varies by bank — it's worth comparing actual current rates rather than assuming one account type is inherently better than the other.",
+        ],
+      },
+      {
+        heading: "Money Market Account vs. Money Market Fund",
+        body: [
+          "This is the single most important distinction to get right: a money market account is a bank or credit union deposit account, protected by FDIC or NCUA insurance up to the standard limit. A money market fund (or money market mutual fund) is a separate investment product, offered through a brokerage, that holds short-term, high-quality debt instruments like Treasury bills — it is not FDIC-insured, and while it's designed to maintain a stable value, that stability is not government-guaranteed the way deposit insurance is. The similar name is one of the most common sources of confusion in personal finance, and the two products carry meaningfully different protections and risk profiles.",
+        ],
+      },
+      {
+        heading: "Interest and APY",
+        body: [
+          "As with a savings account, a money market account's annual percentage yield (APY) reflects both the stated rate and how often interest compounds, making it the more complete number to compare across offers than a bare interest rate. Rates are variable and move with broader interest-rate conditions, so the rate advertised at account opening isn't fixed for any set period, unlike a certificate of deposit.",
+        ],
+      },
+      {
+        heading: "Access to Money",
+        body: [
+          "One of the practical advantages of a money market account over a CD is same-day or near-same-day access to funds — through a linked transfer, an ATM or debit card if the account includes one, or by writing a check directly against the balance. That said, it's still generally less transaction-friendly than a checking account, since most money market accounts limit how many withdrawals or transfers can be made per statement cycle.",
+        ],
+      },
+      {
+        heading: "Minimum Balances and Fees",
         body: [
           "Many money market accounts historically required a higher minimum balance to open or to earn the advertised rate, and some still charge a monthly fee or reduce the rate if the balance falls below a set threshold — a structural difference from many high-yield savings accounts, particularly at online banks, which have increasingly dropped minimum balance requirements entirely to compete for deposits. Some accounts also apply tiered rates, where a higher balance earns a better rate on the full balance or on the portion above a threshold, which is worth checking directly since the marketed \"up to\" rate often only applies at the top tier.",
         ],
       },
       {
-        heading: "Withdrawal Limits: What Regulation D Still Means Today",
+        heading: "FDIC and NCUA Deposit Insurance Concepts",
         body: [
-          "Regulation D historically limited certain types of withdrawals and transfers from savings and money market accounts to six per statement cycle; that federal rule was suspended in 2020, though many banks still enforce their own version of the limit as an internal account term, so it's worth confirming a given bank's actual policy rather than assuming the old federal limit still applies uniformly.",
+          "Because money market accounts are deposit accounts rather than investment products, they carry the same FDIC insurance (or NCUA insurance at credit unions) up to $250,000 per depositor, per ownership category, per institution as a standard checking or savings account — a real, checkable protection, verifiable directly through the FDIC's BankFind tool, rather than a marketing claim. A money market fund, by contrast, carries no such deposit insurance, which is the core reason the two products aren't interchangeable despite the similar name.",
         ],
       },
       {
-        heading: "When a Money Market Account Makes Sense",
+        heading: "When a Money Market Account May Be Useful",
         body: [
           "Money market accounts tend to make the most sense for money that needs to stay liquid and insured but isn't needed for day-to-day spending — an emergency fund, or savings earmarked for a near-term goal like a home down payment — where a CD's fixed term and early-withdrawal penalty would be too restrictive, and a standard checking account's typically negligible interest rate would leave meaningful yield on the table for no added benefit.",
+        ],
+      },
+      {
+        heading: "Comparing Money Market Accounts",
+        body: [
+          "Worth comparing across offers: the current APY, any minimum balance to open or to earn the advertised rate, monthly fees and how they're waived, whether checks or a debit card are included, and the bank's specific withdrawal or transfer limit per statement cycle. A high advertised rate paired with a minimum balance that's out of reach, or fees that offset the higher rate, can make an account less useful in practice than a simpler high-yield savings account.",
+        ],
+      },
+      {
+        heading: "Liquidity and Tradeoffs",
+        body: [
+          "Compared with a CD, a money market account trades a typically lower — though variable rather than fixed — rate for meaningfully better access to the money. Compared with investing the same funds, it trades potential long-term growth for FDIC or NCUA-insured stability and immediate access, which is generally the more appropriate tradeoff for money that might be needed on short notice.",
+        ],
+      },
+      {
+        heading: "Common Money Market Mistakes",
+        body: [
+          "Common missteps include confusing a money market account with a money market fund and assuming deposit-insurance-level protection where none exists, letting a balance fall below the minimum needed to earn the advertised rate without noticing, and treating a money market account's check-writing or debit access as a reason to use it for frequent daily spending, which usually still runs into the account's per-cycle transaction limit.",
+        ],
+      },
+      {
+        heading: "A Simple Illustrative Example",
+        body: [
+          "As a purely illustrative, non-guaranteed example: someone keeping an emergency fund in a money market account gets same-day access if a real emergency comes up, plus a variable rate that can rise if broader interest rates rise — compared with the same money in a CD, which might pay a fixed rate but would require paying an early withdrawal penalty to access before maturity. The better choice in any specific case depends on the actual rates on offer and how likely the money is to be needed on short notice.",
+        ],
+      },
+      {
+        heading: "When to Learn More",
+        body: [
+          "From here, it's worth comparing a specific money market account's rate directly against a high-yield savings account at the same bank, confirming the exact withdrawal limit and any minimum balance before opening one, and, if the goal is longer-term growth rather than a liquid, insured place to hold cash, looking into investing more broadly instead.",
         ],
       },
     ],
@@ -645,6 +834,8 @@ const OVERRIDES: Record<string, TopicCopy> = {
       },
     ],
     relatedReading: [
+      { slug: "savings", anchor: "How a money market account compares with a high-yield savings account" },
+      { slug: "cd-rates", anchor: "Trading liquidity for a fixed rate over a fixed term" },
       { slug: "checking", anchor: "How everyday transaction accounts differ from savings-oriented ones" },
       { slug: "loans", anchor: "If you're weighing dipping into savings vs. borrowing" },
       { slug: "banking-reviews", anchor: "Current rate and fee comparisons across banks" },
@@ -1040,73 +1231,179 @@ const OVERRIDES: Record<string, TopicCopy> = {
     tag: 'CRYPTO',
     title: 'Cryptocurrency & Digital Assets',
     description:
-      'Bitcoin, Ethereum, DeFi, and the infrastructure of digital money — coverage that separates signal from hype.',
+      'A plain-English guide to what cryptocurrency is, how it works, and what to understand about risk, custody, and volatility before considering ownership.',
     keyTakeaways: [
-      "Crypto trades continuously across fragmented global exchanges — there's no single official closing price, and liquidity is thinner than large-cap equities.",
-      "Spot Bitcoin and Ethereum ETFs gave traditional brokerage accounts direct exposure, and their daily fund-flow data is now itself a market-moving signal.",
-      "Custody matters as much as price: exchange-held assets carry exchange counterparty risk, self-custody carries key-security risk — neither has an FDIC/SIPC-style backstop.",
-      "With no earnings reports or dividends to anchor valuation, coverage leans on on-chain data, exchange flows, and macro correlation instead of fundamentals-driven analysis.",
+      "Crypto assets are digital assets that use cryptographic systems and, in many cases, blockchain networks — \"crypto\" is a broad category, not a single investment.",
+      "Crypto prices can be highly volatile and can fall substantially as well as rise; nothing about a crypto asset makes it safe or risk-free.",
+      "Owning crypto means managing two separate kinds of risk: market risk (the price can fall) and custody/security risk (access to the asset itself can be lost).",
+      "A wallet does not work like a bank account — depending on how it's set up, control of the private keys can determine who can actually access the assets, and there is typically no deposit-insurance equivalent.",
+      "Different crypto assets can have very different purposes, designs, issuance models, and risks; treating them as interchangeable is a common mistake.",
+      "Understanding what an asset does, how it's secured, how it's issued, and what could go wrong matters more than a price chart before considering ownership.",
     ],
     sections: [
       {
-        heading: "How Crypto Markets Actually Trade",
+        heading: "What Is Cryptocurrency?",
         body: [
-          "Crypto markets trade differently from traditional equity markets in ways that shape both price behavior and how coverage of them should be read. There's no single central exchange or closing bell — spot trading runs continuously across a fragmented set of global exchanges, each with its own order book, liquidity, and, at times, its own price for the same asset, so a headline price is really an aggregate or a reference from one major venue rather than a single official quote the way a stock's closing price is. That fragmentation, combined with generally thinner liquidity than large-cap equities, is a major reason crypto assets tend to move in sharper, faster swings on comparable news or macro shifts.",
+          "Cryptocurrency is a broad term for digital assets that rely on cryptography — the branch of math used to secure information — to record ownership and verify transactions. Most, though not all, crypto assets run on a blockchain: a distributed ledger maintained across many independent computers rather than a single central database controlled by one bank or company. Ownership of a crypto asset is really ownership of an entry on that ledger, verified through cryptographic signatures rather than a bank vouching for the balance in an account.",
+          "It's worth being precise about what \"crypto\" actually means, because the category covers a lot of ground. Bitcoin, a stablecoin, and a small governance token for an obscure project are all technically \"crypto,\" but they can differ enormously in purpose, design, and risk. Treating crypto as a single monolithic investment — as if buying any of them is functionally the same decision — is one of the most common ways people misjudge what they actually own.",
         ],
       },
       {
-        heading: "What Actually Moves Crypto Prices",
+        heading: "How Cryptocurrency Works",
         body: [
-          "Price action in crypto is unusually sensitive to a narrow set of drivers: broad risk sentiment and dollar strength (crypto has increasingly traded in step with high-growth tech equities during periods of macro stress), regulatory developments in major jurisdictions, exchange-specific events like large withdrawals or solvency concerns, and, for Bitcoin specifically, periodic supply-side events like the roughly four-year halving that cuts new-issuance rewards to miners. Futures and options markets on major exchanges, along with the funding rates on perpetual futures contracts, are also closely watched as a read on whether leveraged positioning is skewed long or short — a supplementary signal with no real equivalent most retail equity investors track day to day.",
+          "At a high level, a crypto network lets participants send value to one another without a bank or payment processor sitting in the middle of every transaction. When someone initiates a transaction, it's broadcast to the network, and participants who help operate the network — commonly called validators or, on some networks, miners — check that it's valid (for example, that the sender actually controls the funds being sent) before it's added to the ledger. Once enough of the network agrees a transaction is valid, it becomes part of the permanent record.",
+          "Access to crypto holdings is controlled through a wallet, which manages a pair of cryptographic keys: a public address, which functions something like an account number that can be shared to receive funds, and a private key, which functions like a password that authorizes spending. The blockchain itself is simply the shared ledger recording which addresses hold which balances and how those balances have moved over time. None of this requires understanding the underlying cryptography in detail — the practical point is that the network, not a bank, verifies and records the transaction.",
         ],
       },
       {
-        heading: "How Spot ETFs Changed Market Structure",
+        heading: "Blockchain and Crypto",
         body: [
-          "The approval of U.S. spot Bitcoin ETFs, followed by spot Ethereum ETFs, materially changed market structure by giving traditional brokerage accounts direct exposure without self-custody, and the resulting fund flows — inflows and outflows reported daily — are now themselves a market-moving data point that didn't exist as a coverage category before. Institutional participation more broadly has grown alongside this, though it remains a smaller share of overall volume than retail and algorithmic trading, both of which tend to amplify volatility rather than dampen it.",
+          "Blockchain is the underlying technology that many — not all — crypto assets are built on: a ledger structured as a chain of linked \"blocks,\" each containing a batch of verified transactions and a cryptographic reference to the block before it, which makes altering past records difficult without the change being detectable across the network. That structure is what lets a blockchain-based crypto network maintain a shared, tamper-resistant record without a single central authority.",
+          "It's worth resisting the temptation to treat blockchain as inherently transformative or risk-free. Not every blockchain network has the same design, governance, security assumptions, or real-world use — some are built for payments, some for running software (smart contracts), some for specific applications, and quality and security vary meaningfully between them. Blockchain is a tool with real tradeoffs, not a guarantee that whatever is built on top of it will work as intended or hold value.",
         ],
       },
       {
-        heading: "Custody: The Risk That Isn't About Price",
+        heading: "Wallets, Private Keys and Custody",
         body: [
-          "Custody is a market-structure detail worth understanding distinctly from price: assets held on an exchange are subject to that exchange's solvency and security, while self-custody in a personal wallet removes exchange counterparty risk but shifts full responsibility for key security to the holder, with no FDIC- or SIPC-equivalent backstop in either case. Several major exchange failures have made this distinction a genuinely material part of risk assessment rather than a technical footnote.",
+          "A wallet is the tool used to hold, send, and receive crypto — it doesn't actually store the assets themselves so much as store the private keys that prove control over them on the underlying blockchain. Losing a private key, or the seed/recovery phrase used to regenerate it, can mean permanently losing access to the associated assets; unlike a bank, there is generally no customer service line that can reset it.",
+          "Custody comes in two basic forms. Self-custody means the individual holds their own private keys directly, in a software or hardware wallet — this removes reliance on a third party but places full responsibility for security on the holder. Third-party or exchange custody means a platform holds the private keys on the user's behalf, which is more convenient but introduces reliance on that platform's own security and solvency. Neither option is risk-free, and this guide will not walk through operational steps for bypassing wallet security — the practical takeaway is simply that losing access credentials, or having them compromised, can create serious and sometimes permanent access problems.",
         ],
       },
       {
-        heading: "Why Crypto Coverage Reads Differently Than Stock Coverage",
+        heading: "Exchanges and Buying Crypto",
         body: [
-          "Because the asset class trades continuously, carries no earnings reports or dividends to anchor valuation the way equities do, and remains subject to evolving and jurisdiction-specific regulation, crypto market coverage tends to weight on-chain data, exchange flows, and macro correlation more heavily than the fundamentals-driven analysis used for stocks — a different toolkit for a market that behaves differently, not simply a riskier version of the same one.",
+          "People typically obtain crypto through a crypto exchange — a platform that matches buyers and sellers — or, increasingly, through a traditional broker or investment product that offers exposure to crypto without the holder personally managing a wallet. Using an exchange generally involves creating an account, funding it, and placing an order to buy or sell at the current market price or a specified limit price; the exchange usually holds the resulting assets in custody unless the holder withdraws them to a personal wallet.",
+          "Costs can include trading fees, a bid-ask spread built into the execution price, and separate network fees when moving assets on-chain. This page does not recommend a specific exchange, broker, or platform, and no purchase, execution price, or investment return can be promised or guaranteed — an order fills at whatever the market price is at the time, which can differ from the price quoted moments earlier.",
+        ],
+      },
+      {
+        heading: "Major Types of Crypto Assets",
+        body: [
+          "Crypto assets are not one thing, and the differences between categories matter more than most headlines suggest. Bitcoin was designed primarily as a decentralized store of value and medium of exchange, with a fixed, pre-programmed issuance schedule. Smart-contract or platform tokens, such as Ethereum, power networks that run programmable applications — lending protocols, decentralized exchanges, and other software built on top of the blockchain — and their tokens are often used to pay for computation on the network as well as traded as assets in their own right. Stablecoins are designed to track the value of a reference asset, most commonly the U.S. dollar (covered in more detail below). Utility and governance tokens are tied to a specific project or protocol, sometimes granting holders a vote on how it's run or access to a particular service.",
+          "Each category carries a different mix of purpose, issuance model, and risk. A fixed-supply store-of-value asset, a platform token whose value is tied to how much activity runs on its network, and a governance token for a single small project are not interchangeable investments just because all three are called \"crypto.\"",
+        ],
+      },
+      {
+        heading: "Bitcoin and Other Crypto Assets",
+        body: [
+          "Bitcoin is the first and largest cryptocurrency by history and, typically, by market value, and it's often used as a reference point for the broader crypto market — but that doesn't make it representative of every other crypto asset, and it shouldn't be treated as interchangeable with them. Bitcoin's issuance is capped and released on a fixed, publicly known schedule, including periodic \"halving\" events roughly every four years that cut the pace of new supply entering circulation; this is a design detail of Bitcoin specifically, not a feature every crypto asset shares.",
+          "Other established categories — smart-contract platforms, stablecoins, and various utility tokens — have their own separate designs, governance structures, and risk profiles, discussed in the dedicated sections above and below. Deeper coverage of Bitcoin, Ethereum, and the broader digital-asset market continues in the Cryptocurrency hub linked below.",
+        ],
+      },
+      {
+        heading: "Stablecoins",
+        body: [
+          "A stablecoin is a crypto asset designed to maintain a stable value relative to a reference asset, most commonly the U.S. dollar, typically by holding reserves intended to back each unit issued or through an algorithmic mechanism that adjusts supply. \"Stable\" describes the design objective, not a guarantee — a stablecoin is only as reliable as the reserves, issuer, and mechanism behind it.",
+          "Stablecoins carry their own distinct set of risks: reserve or collateral risk (whether the backing assets are what the issuer claims and are actually sufficient), issuer risk (whether the entity behind the coin is solvent and trustworthy), counterparty and liquidity risk (whether holders can actually redeem at the stated value when they want to), and regulatory risk, since oversight of stablecoin issuers continues to evolve. \"Depegging\" — trading below the intended reference value — has happened to real stablecoins in the past and is a risk worth understanding rather than assuming away. None of this means every stablecoin is unsafe; it means the word \"stable\" describes an intention, not a guarantee.",
+        ],
+      },
+      {
+        heading: "Why Crypto Prices Move",
+        body: [
+          "Crypto prices are shaped by the same basic force as most tradable assets — supply and demand — but expressed through a specific set of drivers: shifting market expectations, adoption and real-world use of a network, liquidity conditions, broader macroeconomic conditions and interest rates, regulatory developments in major jurisdictions, technology and protocol developments, on-chain network activity, and investor sentiment. Leverage and speculative trading can amplify moves in either direction, since positioning built on borrowed money tends to unwind quickly when prices move against it.",
+          "No single factor reliably predicts where a price is headed, and price action is often driven as much by shifting expectations and sentiment as by any underlying change in what a network actually does. This page does not attempt to forecast crypto prices, and no legitimate source can guarantee what a crypto asset will be worth in the future.",
+        ],
+      },
+      {
+        heading: "Crypto Risk and Volatility",
+        body: [
+          "Crypto assets have historically shown substantially larger price swings than most traditional asset classes, and that volatility cuts in both directions — sharp gains and sharp losses can both happen over short periods. Beyond price (market) risk, crypto ownership carries several distinct categories of risk worth understanding separately: liquidity risk (an asset may be difficult to sell at a fair price when needed), technology and protocol risk (a network or the software built on it can have bugs, exploits, or design flaws), smart-contract risk for assets built on programmable platforms, custody/security risk (covered above), fraud and scam risk, regulatory risk (rules can change and affect how an asset can be used, held, or taxed), and concentration risk (holding too much in too few assets).",
+          "Diversification — spreading exposure across different assets — can reduce the damage any single holding does to an overall position, but it does not eliminate crypto risk, and it does not make the asset class itself safe. Large, well-established crypto assets are not automatically safe simply because of their size or track record; they remain subject to the same categories of risk described above, even if some risks are less pronounced than for a smaller or newer asset.",
+        ],
+      },
+      {
+        heading: "Investing vs. Trading vs. Speculation",
+        body: [
+          "Longer-term ownership, active trading, and short-term speculation are different activities with different behaviors, time horizons, and risks, even though all three can involve the same underlying assets. Longer-term ownership generally means holding an asset through price swings based on a view about its longer-run role or utility. Active trading means buying and selling more frequently in an attempt to profit from shorter-term price movements, which requires more attention, typically incurs more fees, and carries its own distinct risks. Speculation — often short-term and sometimes leveraged — accepts a higher chance of loss in pursuit of a larger potential gain over a short window.",
+          "None of these approaches offers a guaranteed outcome, and this page does not provide trading signals, encourage the use of leverage, or suggest that any particular approach will be profitable. Understanding which of these activities is actually being undertaken — rather than drifting from one to another without deciding — is itself a useful piece of self-awareness before committing money.",
+        ],
+      },
+      {
+        heading: "Fees and Transaction Costs",
+        body: [
+          "Crypto activity can involve several layers of cost: exchange trading fees, the bid-ask spread built into an execution price, network transaction fees paid to process a transaction on-chain (which can vary based on network congestion), withdrawal fees, and other platform-specific costs. This page does not list current fee amounts, since they vary by platform, network, and market conditions and change over time — but costs are a real drag on outcomes, particularly for anyone trading frequently, and are worth checking directly on whatever platform is being used before transacting.",
+        ],
+      },
+      {
+        heading: "How to Research a Crypto Asset",
+        body: [
+          "Before considering ownership of any specific crypto asset, it can help to work through a consistent set of questions rather than relying on price momentum or hype: What problem is the project trying to solve, and does the token actually play a necessary role in solving it? How does the underlying network function, and how are new tokens issued? Who controls or governs the protocol, and how concentrated is ownership among a small number of holders? How is the network secured, and what are its main technical risks? What are the incentives for the people running and using the network? What fees are involved? What does the competitive landscape look like? And, critically, what would have to be true for the investment thesis to fail?",
+          "There is no formula that reliably calculates what a crypto asset should be worth — unlike a stock, most crypto assets have no earnings or cash flows to anchor a valuation. Answering these questions won't produce a guaranteed answer, but it separates a considered decision from one made on hype or a recent price chart alone. This section is meant as a starting framework, not a substitute for deeper, asset-specific research.",
+        ],
+      },
+      {
+        heading: "A Simple Illustrative Example",
+        body: [
+          "The following is a purely illustrative, fictional example meant to show how different crypto-adjacent assets can serve different purposes — not a recommendation, prediction, or real product. Consider three hypothetical holdings: a large, established crypto asset intended as a long-term store of value; a stablecoin intended to hold cash-like value inside a crypto ecosystem; and a traditional diversified index fund. The established crypto asset carries meaningful price volatility and custody responsibility in exchange for potential long-term appreciation with no guarantee. The stablecoin aims to hold a steady value but still carries reserve, issuer, and counterparty risk rather than being risk-free cash. The diversified index fund spreads exposure across many companies and generally carries lower volatility than a single crypto asset, though it is not risk-free either. Each serves a different purpose and carries a different risk profile — the point of the example is that \"crypto\" is not one decision, and no fictional return figures are implied by any of the three.",
+        ],
+      },
+      {
+        heading: "Common Crypto Mistakes",
+        body: [
+          "Frequent, avoidable mistakes include: buying an asset because of hype or a trending headline rather than understanding what it does; chasing an asset after a large recent price increase; concentrating too much money in a single asset; using money that can't tolerate a substantial or total loss; ignoring custody and security until after a problem occurs; sharing a private key or seed/recovery phrase with anyone, including someone claiming to offer help or support; assuming a stablecoin is automatically risk-free because of its name; confusing an asset's popularity or social-media attention with its underlying fundamentals; ignoring the cumulative effect of fees; using leverage without fully understanding how it can amplify losses; conflating investing with active trading and switching between the two without a plan; believing any claim of a guaranteed return, since no legitimate crypto investment can promise one; falling for scams or fraudulent \"opportunities\" that promise outsized, risk-free gains; and, generally, acquiring an asset without understanding what it actually is or does.",
+        ],
+      },
+      {
+        heading: "When to Learn More",
+        body: [
+          "This page is meant as a starting point, not the final word on any specific crypto asset. Deeper coverage of Bitcoin, Ethereum, DeFi, and the blockchain infrastructure behind digital assets continues in the Cryptocurrency hub linked below, and the broader context of how crypto fits alongside stocks, bonds, and other investment categories is covered on the Investing hub. The trending coverage and published articles below are a practical way to see these concepts applied to current, real developments.",
         ],
       },
     ],
     faqs: [
       {
-        question: "Why does crypto move so much more than stocks?",
+        question: "Is cryptocurrency a good investment?",
         answer:
-          "Thinner liquidity spread across many fragmented exchanges, continuous 24/7 trading with no closing bell to let information settle, and heavy participation from leveraged and algorithmic traders all amplify moves that would be smaller in a deeper, single-venue market.",
+          "That depends on individual circumstances, risk tolerance, and goals, which this page can't assess. What can be said generally: crypto assets can be highly volatile, aren't backed by a government or deposit insurance, and carry real risk of loss — no source can honestly promise a crypto investment will be profitable.",
+      },
+      {
+        question: "What is the difference between a coin and a token?",
+        answer:
+          "A coin generally refers to the native asset of its own blockchain (Bitcoin on the Bitcoin network, Ether on Ethereum), while a token is typically issued on top of an existing blockchain (such as Ethereum) using that network's smart-contract standards, rather than having its own independent chain.",
+      },
+      {
+        question: "What happens if I lose my private key or seed phrase?",
+        answer:
+          "Depending on the wallet setup, losing a private key or seed/recovery phrase without a backup can mean permanently losing access to the associated crypto — there is typically no central authority that can reset it or restore access, which is why secure backup of this information matters as much as securing the assets themselves.",
       },
       {
         question: "Is it safer to hold crypto on an exchange or in my own wallet?",
         answer:
-          "Each shifts the risk rather than eliminating it — an exchange holding carries that exchange's solvency and security risk, while self-custody removes that but makes the holder fully responsible for key security, with no deposit-insurance equivalent either way.",
+          "Each shifts the risk rather than eliminating it — holding assets on an exchange carries that exchange's solvency and security risk, while self-custody removes that but makes the holder fully responsible for key security, with no deposit-insurance equivalent either way.",
+      },
+      {
+        question: "Are stablecoins risk-free?",
+        answer:
+          "No. \"Stable\" refers to the design goal of tracking a reference asset like the U.S. dollar, not a guarantee. Stablecoins carry reserve, issuer, counterparty, liquidity, and regulatory risk, and some have traded below their intended value (\"depegged\") in the past.",
+      },
+      {
+        question: "Why is crypto so volatile?",
+        answer:
+          "Thinner liquidity spread across fragmented exchanges, continuous trading with no closing bell to let information settle, and significant participation from leveraged and short-term traders all tend to amplify price moves compared with more established asset classes.",
       },
       {
         question: "What is Bitcoin halving?",
         answer:
-          "A pre-programmed event roughly every four years that cuts the reward miners receive for confirming new blocks in half, reducing the pace of new Bitcoin supply entering circulation.",
+          "A pre-programmed event roughly every four years that cuts the reward miners receive for confirming new blocks in half, reducing the pace of new Bitcoin supply entering circulation — a design detail specific to Bitcoin's issuance schedule.",
       },
       {
-        question: "Do spot Bitcoin ETFs actually hold Bitcoin?",
+        question: "Can crypto prices go to zero?",
         answer:
-          "Yes — unlike earlier futures-based crypto ETFs, spot Bitcoin and Ethereum ETFs hold the underlying asset directly, which is why their daily net inflows and outflows are watched as a real demand signal.",
+          "Yes — an individual crypto asset can lose all or substantially all of its value, particularly smaller or less established ones, if the project fails, the network is abandoned, or it turns out to have been fraudulent. This is a real possibility to weigh, not a scare tactic.",
+      },
+      {
+        question: "Does diversification protect against crypto risk?",
+        answer:
+          "Spreading exposure across different assets can reduce the damage any single holding does to an overall position, but it doesn't eliminate market-wide crypto risk, custody risk, or the volatility inherent to the asset class as a whole.",
       },
     ],
     relatedReading: [
-      { slug: "cryptocurrency", anchor: "The fundamentals — blockchain, DeFi, and how digital assets actually work" },
-      { slug: "indicators", anchor: "The macro data that moves risk sentiment across markets" },
-      { slug: "banking-reviews", anchor: "Independent app and platform reviews" },
+      { slug: "cryptocurrency", anchor: "Bitcoin, Ethereum, DeFi, and the blockchain infrastructure behind digital assets" },
+      { slug: "investing", anchor: "How crypto fits alongside stocks, bonds, and other investment categories" },
     ],
-    metaTitle: 'Crypto News & Digital Asset Analysis',
+    metaTitle: 'Cryptocurrency Explained — A Beginner\'s Guide to Crypto & Digital Assets',
+    metaDescription:
+      'What cryptocurrency is, how blockchain and wallets work, the major types of crypto assets, and the market, custody, and fraud risks to understand before considering ownership.',
   },
   cryptocurrency: {
     tag: 'CRYPTO',
@@ -1115,6 +1412,9 @@ const OVERRIDES: Record<string, TopicCopy> = {
       'The latest on digital assets, blockchain protocols, tokens, and the markets that trade them.',
     intro:
       "Cryptocurrency refers to digital assets secured by blockchain technology — a distributed, cryptographically verified ledger that records ownership and transactions without relying on a central bank or clearinghouse. Bitcoin, the first and largest cryptocurrency, was designed primarily as a store of value and medium of exchange; Ethereum and other smart-contract platforms extended the technology to support decentralized applications, lending protocols, and tokenized assets. The asset class remains considerably more volatile than traditional equities or bonds, trades continuously across a fragmented set of exchanges, and its regulatory treatment still varies significantly by country — all factors worth understanding before treating price moves in isolation.",
+    relatedReading: [
+      { slug: "crypto", anchor: "Start here — what cryptocurrency is, how it works, and the risks to understand before buying" },
+    ],
     metaTitle: 'Cryptocurrency News & Analysis',
     metaDescription:
       'Cryptocurrency news and market analysis — Bitcoin, Ethereum, DeFi, and the blockchain infrastructure behind digital assets.',
@@ -1506,12 +1806,133 @@ const OVERRIDES: Record<string, TopicCopy> = {
     tag: 'MUTUAL FUNDS',
     title: 'Mutual Funds',
     description:
-      'How mutual funds work, active vs. passive management, fees, and how they compare to ETFs for long-term investing.',
-    intro:
-      "A mutual fund pools money from many investors to buy a diversified basket of stocks, bonds, or other securities, managed by a professional fund manager on behalf of shareholders. Actively managed funds aim to beat a benchmark index through security selection and typically charge higher expense ratios to cover that research and trading; passively managed index funds instead track a benchmark at a much lower cost, and the majority of active funds underperform their benchmark over long periods once fees are counted. Unlike ETFs, mutual fund shares are priced and traded once per day at the fund's net asset value rather than continuously throughout the trading session, and some funds carry minimum investment requirements or sales loads worth checking before buying in.",
-    metaTitle: 'Mutual Fund News & Fund Analysis',
+      'A beginner-friendly guide to mutual funds — how they work, fund types, fees, and how they compare to ETFs.',
+    metaTitle: 'Mutual Funds Explained — A Beginner’s Guide',
     metaDescription:
-      'Mutual fund guides and analysis — active vs. passive management, expense ratios, and how mutual funds compare to ETFs.',
+      'What a mutual fund is, how NAV and fund types work, what active management costs, and how mutual funds compare to ETFs.',
+    keyTakeaways: [
+      "A mutual fund pools money from many investors to buy a diversified basket of stocks, bonds, or other securities, managed by a professional fund manager on shareholders' behalf.",
+      "Actively managed funds aim to beat a benchmark index through security selection and typically charge higher fees; passively managed index funds instead track a benchmark at lower cost, and a majority of active funds tend to underperform their benchmark over long periods once fees are counted.",
+      "Mutual fund shares are priced and traded once per day at the fund's net asset value (NAV), unlike an ETF, which trades continuously during market hours.",
+      "Fund costs go beyond the headline expense ratio — some funds also carry a sales load (a commission paid on buying or selling shares) or a minimum initial investment worth checking before buying in.",
+      "Equity, debt (bond), and hybrid funds carry different risk and return profiles, and matching that profile to an investor's own goals and time horizon matters more than chasing a fund's recent performance.",
+      "Diversification through a mutual fund reduces single-security risk but doesn't eliminate market risk — a fund can still lose value along with the market it's invested in.",
+    ],
+    sections: [
+      {
+        heading: 'What Is a Mutual Fund?',
+        body: [
+          "A mutual fund is a pooled investment: many investors contribute money into a single fund, and a professional fund manager (or management team) invests that combined pool according to the fund's stated objective — growth, income, a specific sector, or tracking a benchmark index, among others. Each investor owns shares of the fund itself, proportional to how much they've invested, rather than owning the underlying securities directly.",
+        ],
+      },
+      {
+        heading: 'How Mutual Funds Work',
+        body: [
+          "When an investor buys into a mutual fund, their money is combined with other investors' contributions and used to purchase the fund's underlying holdings according to its strategy. The fund issues or redeems shares directly with investors — unlike an ETF, there's no exchange trading involved — and every order placed during the day is executed at the same end-of-day price, calculated after markets close.",
+        ],
+      },
+      {
+        heading: 'How Investors Buy and Sell Fund Shares',
+        body: [
+          "Mutual fund shares are typically bought and sold directly through the fund company, a brokerage, or a retirement account, rather than on a stock exchange. Orders placed at any point during the trading day are generally filled at the fund's NAV calculated after the market closes that day, not at the price visible when the order was placed — a meaningful difference from how stocks and ETFs trade. Some funds require a minimum initial investment, which can range from relatively small amounts to several thousand dollars depending on the fund.",
+        ],
+      },
+      {
+        heading: 'NAV Explained at a Beginner Level',
+        body: [
+          "Net asset value (NAV) is the per-share value of a mutual fund, calculated once per trading day by taking the total value of everything the fund holds, subtracting any liabilities, and dividing by the number of outstanding shares. NAV is the price at which mutual fund shares are bought and sold that day — there's no intraday price fluctuation the way there is with a stock or an ETF, since the fund doesn't trade on an exchange.",
+        ],
+      },
+      {
+        heading: 'Major Types of Mutual Funds',
+        body: [
+          "Equity funds invest primarily in stocks and are generally oriented toward growth, though they carry more volatility than bond-focused funds. Bond (debt) funds invest in fixed-income securities and are generally oriented toward income and relative stability, though they're not risk-free — see Bonds for the risks that apply. Hybrid (balanced) funds hold a mix of stocks and bonds in a single fund, aiming for some combination of growth and stability. Index funds track a specific benchmark passively, while sector and thematic funds focus on a narrower slice of the market — each type carries a different risk and return profile.",
+        ],
+      },
+      {
+        heading: 'Equity, Debt, and Hybrid Funds',
+        body: [
+          "The equity/debt/hybrid split is really about risk tolerance and time horizon. Equity funds generally carry the most volatility but have historically offered higher long-term growth potential compared with bond funds, though past performance doesn't guarantee future results. Debt funds generally carry less volatility and are often used for income or capital preservation, though bond funds can still lose value, particularly when interest rates rise. Hybrid funds sit between the two, and the specific mix of stocks and bonds a hybrid fund holds should be checked directly rather than assumed from the fund's name alone.",
+        ],
+      },
+      {
+        heading: 'Active Management and Fund Strategy',
+        body: [
+          "An actively managed fund's manager selects individual securities in an attempt to outperform a stated benchmark, using research, analysis, and judgment about which holdings to buy, hold, or sell. This requires ongoing work, which is reflected in a generally higher expense ratio than a passive fund. Over long periods, a majority of actively managed funds have tended to underperform their benchmark once fees are factored in, though individual funds and time periods vary, and some active managers have outperformed over specific stretches — there's no way to know in advance which fund, if any, will be one of them.",
+        ],
+      },
+      {
+        heading: 'Mutual Fund Costs and Fees',
+        body: [
+          "The expense ratio is the fund's annual operating cost, expressed as a percentage of assets and deducted automatically from returns. Some funds also charge a sales load — a front-end load charged when buying shares, or a back-end load charged when selling — which is separate from the ongoing expense ratio and worth checking, since \"no-load\" funds that skip this charge are widely available. Other fees to watch for include redemption fees for selling shares held less than a specified period, and account maintenance fees on smaller balances. All of these are disclosed in a fund's prospectus.",
+        ],
+      },
+      {
+        heading: 'Mutual Funds vs ETFs',
+        body: [
+          "Mutual funds and ETFs both offer diversified, professionally assembled exposure, but they differ in trading mechanics: mutual funds price and trade once per day at NAV, while ETFs trade continuously during market hours at a fluctuating market price. Mutual funds sometimes carry minimum investments or sales loads that most ETFs don't, while ETFs are often, though not always, more tax-efficient in a taxable account. Neither is universally better — the right choice generally depends on the specific funds being compared, the account type involved, and how actively an investor wants to trade. See ETFs for the fuller comparison.",
+        ],
+      },
+      {
+        heading: 'Diversification and Risk',
+        body: [
+          "A single mutual fund can spread an investor's money across dozens or hundreds of underlying securities, which generally reduces the impact of any one holding performing poorly. That diversification doesn't eliminate market risk, though — an equity fund still moves with the broader stock market, and a bond fund's value can still decline, particularly when interest rates rise. A fund's stated objective and holdings, not its name alone, determine how diversified and how risky it actually is.",
+        ],
+      },
+      {
+        heading: 'How Beginners Can Evaluate a Mutual Fund',
+        body: [
+          "A reasonable starting checklist: what is the fund's stated objective and does it match the investor's own goals; what is the expense ratio, and are there any sales loads; is the fund actively or passively managed, and how has it tracked its benchmark or peer group over time (rather than judging on a single strong year); and how volatile has the fund historically been relative to its category. This information is available in a fund's prospectus and fact sheet, which are generally more reliable starting points than a fund's short-term performance alone.",
+        ],
+      },
+      {
+        heading: 'A Simple Illustrative Example',
+        body: [
+          "Illustrative example only, not investment advice: an investor puts $5,000 into a hypothetical actively managed equity fund with a 1% expense ratio and a 5% front-end sales load. The load means roughly $50 is deducted before the money is even invested, leaving about $4,950 invested, and the 1% expense ratio is deducted from returns every year after that. Compare that with a hypothetical no-load index fund charging a 0.10% expense ratio, where the full $5,000 is invested and the annual cost is roughly $5 instead. Over a long holding period, that cost difference compounds and can meaningfully affect ending returns, independent of which fund's underlying holdings perform better.",
+        ],
+      },
+      {
+        heading: 'Common Mutual Fund Mistakes',
+        body: [
+          "Common mistakes include chasing a fund's recent strong performance without checking whether its strategy and risk level still fit the investor's goals, overlooking sales loads and other fees baked into the total cost, not reading the prospectus to understand what the fund actually holds, and holding several funds that unintentionally overlap in their underlying securities, which can undercut the diversification an investor thought they had. Comparing a fund only to its own past returns, rather than to its benchmark or peer group over the same period, is another common way to misjudge how well a fund has actually performed.",
+        ],
+      },
+      {
+        heading: 'When to Learn More',
+        body: [
+          "This page is meant as a starting point. For how the ETF structure compares in more depth, see ETFs. For the underlying equity and bond securities many funds hold, see Stocks and Bonds. For how mutual funds fit into a broader plan, see Portfolio Management, Retirement Planning, and Investing.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "What's the difference between a mutual fund and an ETF?",
+        answer:
+          "Mutual funds are priced and traded once per day at net asset value (NAV); ETFs trade continuously during market hours like a stock. Mutual funds sometimes carry minimum investments or sales loads that most ETFs don't.",
+      },
+      {
+        question: "What does NAV mean for a mutual fund?",
+        answer:
+          "Net asset value is the fund's per-share value, calculated once per day after markets close by dividing the total value of the fund's holdings (minus liabilities) by its number of shares outstanding. Orders placed during the day are filled at that day's NAV.",
+      },
+      {
+        question: "Do actively managed mutual funds outperform index funds?",
+        answer:
+          "Over long periods, a majority of actively managed funds have tended to underperform their benchmark once fees are counted, though results vary by fund and time period, and there's no way to know in advance which active funds will outperform.",
+      },
+      {
+        question: "What is a sales load on a mutual fund?",
+        answer:
+          "A sales load is a commission charged when buying (front-end) or selling (back-end) fund shares, separate from the fund's ongoing expense ratio. Many mutual funds are \"no-load\" and don't charge this fee — it's worth checking a fund's prospectus before investing.",
+      },
+    ],
+    relatedReading: [
+      { slug: 'etfs', anchor: 'How ETFs trade continuously instead of once-a-day at NAV' },
+      { slug: 'bonds', anchor: 'What a bond fund actually holds and how bond risk works' },
+      { slug: 'stocks', anchor: 'The individual companies many equity funds invest in' },
+      { slug: 'retirement', anchor: 'How mutual funds are commonly used inside 401(k)s and IRAs' },
+      { slug: 'portfolio', anchor: 'Building a diversified allocation with a handful of funds' },
+    ],
   },
   'real-estate': {
     tag: 'REAL ESTATE',

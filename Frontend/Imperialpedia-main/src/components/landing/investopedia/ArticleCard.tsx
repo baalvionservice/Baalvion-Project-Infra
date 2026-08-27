@@ -60,5 +60,3 @@ export function ArticleCard({ article, variant = "card" }: Props) {
     </Link>
   );
 }
-
-export default ArticleCard;

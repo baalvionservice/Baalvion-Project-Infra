@@ -490,5 +490,3 @@ export async function BudgetingHub() {
     </div>
   );
 }
-
-export default BudgetingHub;

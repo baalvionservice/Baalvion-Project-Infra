@@ -290,5 +290,3 @@ export async function DebtHub() {
     </div>
   );
 }
-
-export default DebtHub;

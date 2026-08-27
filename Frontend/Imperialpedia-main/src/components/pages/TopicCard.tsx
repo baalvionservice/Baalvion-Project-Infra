@@ -39,5 +39,3 @@ export function TopicCard({ href, label, description, count, icon: Icon }: Props
     </Link>
   );
 }
-
-export default TopicCard;

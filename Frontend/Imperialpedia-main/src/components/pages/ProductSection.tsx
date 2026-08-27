@@ -71,5 +71,3 @@ export function ProductSection({ slug, label, icon: Icon, articles }: Props) {
     </section>
   );
 }
-
-export default ProductSection;

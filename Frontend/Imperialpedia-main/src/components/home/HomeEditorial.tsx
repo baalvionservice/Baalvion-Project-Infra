@@ -35,5 +35,3 @@ export async function HomeEditorial() {
     </>
   );
 }
-
-export default HomeEditorial;

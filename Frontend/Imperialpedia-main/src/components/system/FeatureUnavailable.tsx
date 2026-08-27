@@ -48,5 +48,3 @@ export function FeatureUnavailable({
     </Container>
   );
 }
-
-export default FeatureUnavailable;

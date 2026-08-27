@@ -30,5 +30,3 @@ export function BuyingGuideCard({ review }: Props) {
     </Link>
   );
 }
-
-export default BuyingGuideCard;

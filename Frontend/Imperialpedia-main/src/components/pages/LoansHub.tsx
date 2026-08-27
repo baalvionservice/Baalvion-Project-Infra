@@ -334,5 +334,3 @@ export async function LoansHub() {
     </div>
   );
 }
-
-export default LoansHub;

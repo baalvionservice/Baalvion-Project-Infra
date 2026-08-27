@@ -65,5 +65,3 @@ export function EconomicSnapshot({ indicators }: Props) {
     </section>
   );
 }
-
-export default EconomicSnapshot;

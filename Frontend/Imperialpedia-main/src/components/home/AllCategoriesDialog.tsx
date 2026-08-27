@@ -76,5 +76,3 @@ export function AllCategoriesDialog({ groups, totalCount }: Props) {
     </Dialog>
   );
 }
-
-export default AllCategoriesDialog;

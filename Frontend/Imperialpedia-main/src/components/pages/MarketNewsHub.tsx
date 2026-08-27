@@ -606,5 +606,3 @@ export async function MarketNewsHub() {
     </div>
   );
 }
-
-export default MarketNewsHub;

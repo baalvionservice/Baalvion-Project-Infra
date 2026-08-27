@@ -92,5 +92,3 @@ export function LeadStory({ lead, leadRelated, secondaryLead, secondaryLeadRelat
     </section>
   );
 }
-
-export default LeadStory;

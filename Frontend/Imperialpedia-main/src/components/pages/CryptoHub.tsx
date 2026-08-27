@@ -1,14 +1,5 @@
 import Link from "next/link";
-import {
-  BadgeCheck,
-  CreditCard,
-  HandCoins,
-  Car,
-  GraduationCap,
-  Wallet,
-  ArrowRight,
-  Flame,
-} from "lucide-react";
+import { Bitcoin, LineChart, TrendingUp, ArrowRight, Flame } from "lucide-react";
 
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listAllCmsContent, cmsContentToArticle } from "@/services/data/cms-public";
@@ -18,45 +9,59 @@ import { FeaturedArticleCard } from "@/components/pages/FeaturedArticleCard";
 import { HorizontalArticleCard } from "@/components/pages/HorizontalArticleCard";
 import HeadingSection from "@/components/layout/HeadingSection";
 import { NewsletterForm } from "@/components/landing/NewsletterForm";
-import FAQItem from "@/components/faq/FAQItem";
+import FAQAccordionSection from "@/components/faq/FAQAccordionSection";
 import { env } from "@/config/env";
 import { newsArticleHref } from "@/lib/data/article-url";
 
-const SLUG = "credit";
+const SLUG = "crypto";
 
-/** Real Credit/Debt specialist pages this pillar links down to — every slug
- *  already has its own route and topic-config entry (debt is the sibling
- *  Debt Management hub; the other three are Banking's existing borrowing
- *  specialists). Kept as plain nav cards rather than a fabricated per-topic
- *  article feed, since none of these are sub-categories of "credit" in the CMS. */
-const EXPLORE_CREDIT_DEBT: Array<{
+/** Real, existing routes this pillar links out to — the sibling Cryptocurrency
+ *  fundamentals hub, plus the two parent verticals crypto sits under in the
+ *  nav (Markets and Investing). No invented sub-category pages: the repo has
+ *  no dedicated bitcoin/defi/stablecoin routes today, so this stays a short,
+ *  honest list rather than a fabricated grid of cards. */
+const EXPLORE_CRYPTO: Array<{
   slug: string;
   label: string;
   description: string;
   icon: React.ComponentType<{ className?: string }>;
 }> = [
-  { slug: "debt", label: "Debt Management", description: "Payoff strategies, snowball vs. avalanche, and consolidation", icon: BadgeCheck },
-  { slug: "credit-cards", label: "Credit Cards", description: "APR, rewards, and how revolving credit actually works", icon: CreditCard },
-  { slug: "loans", label: "Personal Loans", description: "Fixed-rate installment borrowing and debt consolidation", icon: HandCoins },
-  { slug: "auto-loans", label: "Auto Loans", description: "Car financing rates and new-vs-used terms", icon: Car },
-  { slug: "student-loans", label: "Student Loans", description: "Federal and private repayment plans", icon: GraduationCap },
+  {
+    slug: "cryptocurrency",
+    label: "Cryptocurrency",
+    description: "Bitcoin, Ethereum, DeFi, and the blockchain infrastructure behind digital assets",
+    icon: Bitcoin,
+  },
+  {
+    slug: "market-news",
+    label: "Markets",
+    description: "Live market news, earnings, and the economic calendar",
+    icon: LineChart,
+  },
+  {
+    slug: "investing",
+    label: "Investing",
+    description: "How crypto fits alongside stocks, bonds, and other investment categories",
+    icon: TrendingUp,
+  },
 ];
 
 const EXPLORE_MORE = [
   { href: "/banking", label: "Banking" },
-  { href: "/budgeting", label: "Budgeting" },
   { href: "/personal-finance", label: "Personal Finance" },
+  { href: "/economy", label: "Economy" },
   { href: "/reviews", label: "Reviews" },
 ];
 
 /**
- * Dedicated Credit hub — the main Credit/Debt educational pillar, following the
- * same rendering pattern as BudgetingHub/StocksHub (long-form keyTakeaways +
- * named sections sourced from topic-config.ts, single CMS-first article feed,
- * aggregated FAQ). /debt remains the sibling Debt Management topic hub this
- * page links down to, rather than being folded into a single mega-page.
+ * Dedicated Crypto hub — the primary /crypto educational pillar, following the
+ * same rendering pattern as CreditHub/BankingHub/InvestingHub (long-form
+ * keyTakeaways + named sections sourced from topic-config.ts, single
+ * CMS-first article feed, aggregated FAQ). /cryptocurrency remains the
+ * sibling Bitcoin/Ethereum/DeFi fundamentals hub this page links down to,
+ * rather than being folded into a single mega-page.
  */
-export async function CreditHub() {
+export async function CryptoHub() {
   const copy = topicCopy(SLUG);
 
   let articles: NewsArticle[] = await getCategoryArticles(SLUG, 40);
@@ -96,7 +101,7 @@ export async function CreditHub() {
     faqSource = [];
   }
   if (!faqSource.some((a) => a.faq?.length)) {
-    faqSource = staticArticleList().filter((a) => a.category === "PersonalFinance");
+    faqSource = staticArticleList().filter((a) => a.category === "Crypto");
   }
   const seenQuestions = new Set<string>();
   const faqs = [...(copy.faqs ?? []), ...faqSource.flatMap((a) => a.faq ?? [])].filter((f) => {
@@ -164,12 +169,13 @@ export async function CreditHub() {
 
       <HeadingSection tag={copy.tag} eyebrow={parentFor(SLUG)} title={copy.title} description={copy.description} />
       <p className="text-center text-xs font-semibold uppercase tracking-widest text-muted-foreground -mt-2 pb-6">
-        {Math.max(articles.length, 10)}+ Credit Guides &middot; Reviewed &amp; Updated Regularly
+        {Math.max(articles.length, 10)}+ Crypto Guides &middot; Reviewed &amp; Updated Regularly
       </p>
 
       {/* Pillar primer — same keyTakeaways/sections pattern CategoryFeed and the
-          other flagship hubs (banking, budgeting, stocks) render, so /credit is a
-          real educational resource in its own right, not just a page of links. */}
+          other flagship hubs (banking, credit, investing) render, so /crypto is a
+          real beginner educational resource in its own right, not just a page of
+          links or market-mechanics trivia. */}
       {(copy.keyTakeaways?.length || copy.sections?.length) ? (
         <div className="max-w-7xl mx-auto px-4">
           <div className="max-w-3xl pb-12">
@@ -242,14 +248,14 @@ export async function CreditHub() {
           </section>
         )}
 
-        {/* Explore Credit & Debt — real specialist pages this pillar links down to */}
+        {/* Explore Crypto — real sibling/parent hubs this pillar links down to */}
         <section>
           <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
-            <Wallet className="h-4 w-4" />
-            Explore Credit &amp; Debt
+            <Bitcoin className="h-4 w-4" />
+            Explore Crypto
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-            {EXPLORE_CREDIT_DEBT.map((topic) => (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {EXPLORE_CRYPTO.map((topic) => (
               <Link
                 key={topic.slug}
                 href={`/${topic.slug}`}
@@ -273,23 +279,13 @@ export async function CreditHub() {
           </p>
         )}
 
-        {faqs.length > 0 && (
-          <section>
-            <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
-              Frequently Asked Questions
-            </h3>
-            <div className="rounded-2xl border border-gray-100 px-4">
-              {faqs.map((f) => (
-                <FAQItem key={f.question} question={f.question} answer={f.answer} />
-              ))}
-            </div>
-          </section>
-        )}
+        {/* FAQ */}
+        <FAQAccordionSection faqs={faqs} />
 
         <section className="flex flex-col items-center gap-4 rounded-2xl bg-gray-50 py-12 text-center">
-          <h3 className="text-lg font-bold text-foreground">Stay on Top of Your Credit</h3>
+          <h3 className="text-lg font-bold text-foreground">Stay Ahead of the Markets</h3>
           <p className="max-w-md text-sm text-muted-foreground">
-            Get practical credit and debt guidance delivered weekly — no guaranteed outcomes, just clear explanations.
+            Get practical crypto and market guidance delivered weekly — no guaranteed outcomes, just clear explanations.
           </p>
           <NewsletterForm />
         </section>
@@ -316,3 +312,5 @@ export async function CreditHub() {
     </div>
   );
 }
+
+export default CryptoHub;

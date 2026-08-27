@@ -280,5 +280,3 @@ export async function FinancialIndependenceHub() {
     </div>
   );
 }
-
-export default FinancialIndependenceHub;

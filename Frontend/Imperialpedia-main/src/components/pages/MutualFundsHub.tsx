@@ -333,5 +333,3 @@ export async function MutualFundsHub() {
     </div>
   );
 }
-
-export default MutualFundsHub;

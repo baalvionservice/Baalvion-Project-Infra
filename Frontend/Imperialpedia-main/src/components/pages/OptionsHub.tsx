@@ -334,5 +334,3 @@ export async function OptionsHub() {
     </div>
   );
 }
-
-export default OptionsHub;

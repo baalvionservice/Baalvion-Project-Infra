@@ -448,5 +448,3 @@ export async function EconomyHub() {
     </div>
   );
 }
-
-export default EconomyHub;

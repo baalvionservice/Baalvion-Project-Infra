@@ -332,5 +332,3 @@ export async function CommoditiesHub() {
     </div>
   );
 }
-
-export default CommoditiesHub;

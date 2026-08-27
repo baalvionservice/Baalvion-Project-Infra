@@ -131,5 +131,3 @@ export function SearchDefaultPanel({ data, onItemClick }: { data: SearchDefaultD
     </div>
   );
 }
-
-export default SearchDefaultPanel;

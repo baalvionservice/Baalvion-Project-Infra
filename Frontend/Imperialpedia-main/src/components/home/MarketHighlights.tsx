@@ -78,5 +78,3 @@ export async function MarketHighlights() {
     </section>
   );
 }
-
-export default MarketHighlights;

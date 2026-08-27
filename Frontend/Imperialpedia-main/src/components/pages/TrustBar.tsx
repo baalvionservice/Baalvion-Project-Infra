@@ -26,5 +26,3 @@ export function TrustBar() {
     </div>
   );
 }
-
-export default TrustBar;

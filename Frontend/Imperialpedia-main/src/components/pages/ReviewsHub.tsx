@@ -362,5 +362,3 @@ export async function ReviewsHub() {
     </div>
   );
 }
-
-export default ReviewsHub;

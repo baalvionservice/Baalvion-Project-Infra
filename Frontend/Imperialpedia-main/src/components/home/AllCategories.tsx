@@ -40,5 +40,3 @@ function groupAlphabetically(directory: CategoryDirectoryEntry[]): [string, Cate
   }
   return [...byLetter.entries()];
 }
-
-export default AllCategories;

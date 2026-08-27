@@ -68,5 +68,3 @@ export function RoleGate({ allow, children }: RoleGateProps) {
 
   return <>{children}</>;
 }
-
-export default RoleGate;
