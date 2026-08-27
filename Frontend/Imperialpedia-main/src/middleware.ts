@@ -181,6 +181,13 @@ const REMOVED_PATHS = new Set<string>([
   // linking out to the dead entity types via NodeDetailPanel. Not worth
   // patching around; retired entirely (see knowledge-graph-service.ts removal).
   '/knowledge-map',
+  // /explore ("Explore Global Knowledge") permanently killed (2026-08-27): a
+  // country-discovery entry point built entirely around /countries and
+  // /technologies — both already 410'd above — leaving it a dead end pointing
+  // at removed sections (its own search placeholder text even referenced
+  // "Japan" and "Generative AI"). Route + its dedicated components
+  // (src/components/explore/) removed outright, same as /taxes and /income.
+  '/explore',
 ]);
 
 export function middleware(request: NextRequest) {
@@ -358,5 +365,6 @@ export const config = {
     '/gold-hits-2400-safe-haven',
     '/research-ai',
     '/knowledge-map',
+    '/explore',
   ],
 };

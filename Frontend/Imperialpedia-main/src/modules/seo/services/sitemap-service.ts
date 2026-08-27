@@ -97,7 +97,11 @@ export const sitemapService = {
     // removed site-wide; without them it was countries with zero edges (not a graph)
     // while still linking out to those dead entity types. Retired entirely rather than
     // patched (see middleware.ts REMOVED_PATHS and knowledge-graph-service.ts removal).
-    const corePages = ["","/about","/financial-intelligence","/banking","/bonds","/budgeting","/commodities","/credit","/contact","/economy","/explore","/etfs","/financial-tools","/financial-tools/compound-interest","/financial-tools/inflation","/financial-tools/investment","/financial-tools/loan","/investing","/market-news","/mutual-funds","/options","/personal-finance","/privacy-policy","/reviews","/stocks","/terms-of-service","/transparency","/world","/world/us","/world/europe","/world/asia","/world/china","/world/emerging"];
+    // "/explore" removed (2026-08-27) for the same reason — a country-discovery entry
+    // point built around /countries and /technologies, both already gone. Route deleted
+    // and permanently 410'd (see middleware.ts REMOVED_PATHS); submitting it here would
+    // contradict that.
+    const corePages = ["","/about","/financial-intelligence","/banking","/bonds","/budgeting","/commodities","/credit","/contact","/economy","/etfs","/financial-tools","/financial-tools/compound-interest","/financial-tools/inflation","/financial-tools/investment","/financial-tools/loan","/investing","/market-news","/mutual-funds","/options","/personal-finance","/privacy-policy","/reviews","/stocks","/terms-of-service","/transparency","/world","/world/us","/world/europe","/world/asia","/world/china","/world/emerging"];
     corePages.forEach((path) => {
       entries.push({
         loc: `${base}${path}`,

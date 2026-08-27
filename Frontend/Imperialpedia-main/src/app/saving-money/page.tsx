@@ -1,4 +1,5 @@
-import { CategoryFeed, categoryHasLiveContent } from "@/components/pages/CategoryFeed";
+import { categoryHasLiveContent } from "@/components/pages/CategoryFeed";
+import { SavingMoneyHub } from "@/components/pages/SavingMoneyHub";
 import { topicMeta } from "@/lib/topic-config";
 import { buildMetadata } from "@/lib/seo";
 import { Metadata } from "next";
@@ -25,5 +26,5 @@ export async function generateMetadata(): Promise<Metadata> {
 export const revalidate = 3600;
 
 export default function Page() {
-  return <CategoryFeed slug={SLUG} />;
+  return <SavingMoneyHub />;
 }
