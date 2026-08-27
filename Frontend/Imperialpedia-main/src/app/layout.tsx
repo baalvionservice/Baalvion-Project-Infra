@@ -163,9 +163,21 @@ export default async function RootLayout({
             Previously this lived in Analytics.tsx gated on NEXT_PUBLIC_GA_ID
             (and rendered as a next/script Script in <body>), so a visitor got
             zero consent-default protection whenever GA_ID was unset, and even
-            when set, it landed after the AdSense/GA loaders in practice. */}
+            when set, it landed after the AdSense/GA loaders in practice.
+
+            suppressHydrationWarning: AdSense's own adsbygoogle.js injects a
+            managed show_ads_impl script into <head> as soon as it loads,
+            which on a fast connection can land before React hydrates and
+            shifts this node's position -- React then diffs this script
+            against AdSense's injected one and logs a "tree hydrated but
+            didn't match" error. The script's own content already ran
+            correctly from the raw SSR HTML by the time hydration happens
+            (hydration doesn't re-execute it), so the warning is cosmetic;
+            confirmed the exact AdSense-injected node via a headless-browser
+            console-error sweep. */}
         <script
           id="consent-default"
+          suppressHydrationWarning
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];
@@ -181,25 +193,15 @@ export default async function RootLayout({
             `,
           }}
         />
-        <GoogleTagManagerScript />
-
-        {/* Google "Preferred Sources" widget loader (Top Stories / AI Overviews /
-            AI Mode "add as preferred source" button) -- a plain native <script>
-            tag, same reasoning as the AdSense loader below: next/script's
-            <Script> component never emits a literal synchronously-parsed tag,
-            it registers the URL in a bootstrap array instead, which is exactly
-            the pattern already ruled out here for the AdSense verification
-            script. See PreferredSourceButton for where the matching
-            [google-add-preferred-source-btn] element renders. */}
-        <script async src="https://news.google.com/swg/js/v1/publisher.js" />
-
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1, viewport-fit=cover"
-        />
-
-        <meta name="theme-color" content="#ffffff" />
-
+        {/* AdSense verification block -- placed as the first thing after the consent
+            default above (which must stay first: it's synchronous and has to finish
+            setting ad_storage/ad_user_data to 'denied' before this async script even
+            starts fetching, or a fast network can race the ad script's execution ahead
+            of the consent call and fire ad cookies pre-consent). Everything else in
+            <head> -- GTM, the news.google.com widget -- now loads after this, which is
+            also why AdSense's crawler had trouble confirming the snippet: Google's own
+            guidance is to paste the code as high in <head> as possible, and it was
+            previously sandwiched after GTM and the widget loader instead. */}
         {adsenseClient && (
           <>
             <meta name="google-adsense-account" content={adsenseClient} />
@@ -218,6 +220,25 @@ export default async function RootLayout({
             />
           </>
         )}
+
+        <GoogleTagManagerScript />
+
+        {/* Google "Preferred Sources" widget loader (Top Stories / AI Overviews /
+            AI Mode "add as preferred source" button) -- a plain native <script>
+            tag, same reasoning as the AdSense loader above: next/script's
+            <Script> component never emits a literal synchronously-parsed tag,
+            it registers the URL in a bootstrap array instead, which is exactly
+            the pattern already ruled out here for the AdSense verification
+            script. See PreferredSourceButton for where the matching
+            [google-add-preferred-source-btn] element renders. */}
+        <script async src="https://news.google.com/swg/js/v1/publisher.js" />
+
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, viewport-fit=cover"
+        />
+
+        <meta name="theme-color" content="#ffffff" />
       </head>
 
       <body className="font-ui bg-background text-foreground antialiased min-h-screen flex flex-col">

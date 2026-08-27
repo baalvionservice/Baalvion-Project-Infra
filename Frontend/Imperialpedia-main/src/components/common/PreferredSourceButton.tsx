@@ -13,11 +13,19 @@ interface PreferredSourceButtonProps {
  * camelCase and has no typed React prop -- this guarantees the literal
  * markup Google's script matches, rather than whatever React would do with
  * an unrecognized custom attribute name.
+ *
+ * suppressHydrationWarning: the loader script rewrites this div's inner
+ * markup in place (adding its own data-init* attributes) as soon as it scans
+ * the page, which on a fast load can happen before React hydrates -- without
+ * this, that expected rewrite surfaces as a "tree hydrated but ... didn't
+ * match" console error on every page. Confirmed via a headless-browser
+ * console-error sweep.
  */
 export function PreferredSourceButton({ theme = "dark", className }: PreferredSourceButtonProps) {
   return (
     <div
       className={className}
+      suppressHydrationWarning
       dangerouslySetInnerHTML={{
         __html: `<div google-add-preferred-source-btn data-theme="${theme}"></div>`,
       }}

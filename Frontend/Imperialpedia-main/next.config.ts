@@ -224,13 +224,19 @@ const nextConfig: NextConfig = {
               // a fetch/XHR ping) — it was only allow-listed under connect-src, so the script
               // load itself was still blocked and threw an uncaught error in AdSense's code on
               // every page load. Confirmed live via a headless-browser console-error sweep.
-              `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://adservice.google.com https://api.baalvion.com https://*.adtrafficquality.google`,
-              "script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://adservice.google.com https://api.baalvion.com https://*.adtrafficquality.google",
+              // news.google.com serves the "Preferred Sources" widget loader (see layout.tsx's
+              // literal <script> tag and PreferredSourceButton) -- it was never allow-listed here,
+              // so the browser blocked the load on every single page, confirmed the same way.
+              `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://adservice.google.com https://api.baalvion.com https://*.adtrafficquality.google https://news.google.com`,
+              "script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://adservice.google.com https://api.baalvion.com https://*.adtrafficquality.google https://news.google.com",
               "style-src 'self' 'unsafe-inline'",
               // 'self' + data: (inline generated SVG artwork) + imperialpedia.com +
               // api.baalvion.com (cms-service-hosted generated artwork) are the only
               // image sources — no stock/placeholder/third-party image hosts.
-              "img-src 'self' data: https://imperialpedia.com https://api.baalvion.com https://www.google-analytics.com https://*.googlesyndication.com https://*.g.doubleclick.net",
+              // *.adtrafficquality.google also serves the sodar2 fraud-check tracking pixel
+              // (an <img>, not just the script above) -- unlisted here it 400'd/CSP-blocked
+              // on every page once the script itself was allowed to run.
+              "img-src 'self' data: https://imperialpedia.com https://api.baalvion.com https://www.google-analytics.com https://*.googlesyndication.com https://*.g.doubleclick.net https://*.adtrafficquality.google",
               "font-src 'self'",
               // Dev: allow the local imperialpedia-service (:3004) and cms-service (:3018)
               // that client components (Market Movers, community, search) fetch directly.
@@ -239,9 +245,18 @@ const nextConfig: NextConfig = {
               // + measurement calls. All three were unlisted, so once ads go live they'd fail
               // silently in the console instead of actually loading — confirmed live via a
               // console-error sweep (every page blocked the sodar connect-src call).
-              "connect-src 'self' https://api.baalvion.com http://localhost:3004 http://localhost:3018 https://www.google-analytics.com https://*.google-analytics.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com https://*.adtrafficquality.google",
+              // csi.gstatic.com is Google's client-side instrumentation ping that
+              // show_ads_impl.js fires once the ad script actually runs -- unlisted here it
+              // CSP-blocked on every page once script-src let the ad script itself load.
+              "connect-src 'self' https://api.baalvion.com http://localhost:3004 http://localhost:3018 https://www.google-analytics.com https://*.google-analytics.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com https://*.adtrafficquality.google https://csi.gstatic.com",
               // www.googletagmanager.com/ns.html is the GTM <noscript> fallback iframe.
-              "frame-src https://googleads.g.doubleclick.net https://*.googlesyndication.com https://www.googletagmanager.com",
+              // ep2.adtrafficquality.google + www.google.com are AdSense's own ad-quality
+              // confirmation/verification iframes (loaded by show_ads_impl.js); news.google.com
+              // is the "Preferred Sources" widget's own dialog iframe. All three were unlisted,
+              // so every page blocked them with a "Framing ... violates CSP" console error,
+              // which is exactly the kind of failure that gets AdSense's own crawler to report
+              // it can't verify/detect the ad code on the page. Confirmed via console-error sweep.
+              "frame-src https://googleads.g.doubleclick.net https://*.googlesyndication.com https://www.googletagmanager.com https://*.adtrafficquality.google https://www.google.com https://news.google.com",
               "frame-ancestors 'self'",
             ].join('; '),
           },
