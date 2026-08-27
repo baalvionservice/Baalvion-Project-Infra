@@ -47,5 +47,3 @@ export function LatestArticles({ articles }: LatestArticlesProps) {
     </section>
   );
 }
-
-export default LatestArticles;

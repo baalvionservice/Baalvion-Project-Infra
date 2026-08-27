@@ -50,5 +50,3 @@ export function EarningsCalendarTable({ articles, ctaHref = "/earnings" }: Props
     </div>
   );
 }
-
-export default EarningsCalendarTable;

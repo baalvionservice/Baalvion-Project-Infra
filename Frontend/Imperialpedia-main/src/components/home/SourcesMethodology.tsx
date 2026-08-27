@@ -54,5 +54,3 @@ export function SourcesMethodology() {
     </section>
   );
 }
-
-export default SourcesMethodology;

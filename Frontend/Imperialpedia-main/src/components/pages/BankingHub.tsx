@@ -572,5 +572,3 @@ export async function BankingHub() {
     </div>
   );
 }
-
-export default BankingHub;

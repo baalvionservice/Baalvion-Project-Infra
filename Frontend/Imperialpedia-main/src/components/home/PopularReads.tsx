@@ -40,5 +40,3 @@ export function PopularReads({ articles }: Props) {
     </section>
   );
 }
-
-export default PopularReads;

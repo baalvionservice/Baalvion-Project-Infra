@@ -335,5 +335,3 @@ export async function CdRatesHub() {
     </div>
   );
 }
-
-export default CdRatesHub;

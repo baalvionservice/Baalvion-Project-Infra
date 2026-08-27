@@ -32,5 +32,3 @@ export function StarRating({ score, max = 5, size = "sm" }: Props) {
     </span>
   );
 }
-
-export default StarRating;

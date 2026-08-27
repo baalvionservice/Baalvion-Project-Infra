@@ -46,5 +46,3 @@ export function FeaturedKnowledge() {
     </section>
   );
 }
-
-export default FeaturedKnowledge;

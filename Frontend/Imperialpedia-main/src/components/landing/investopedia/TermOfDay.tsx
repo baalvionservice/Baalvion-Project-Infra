@@ -41,5 +41,3 @@ export function TermOfDay({ term, definition, href }: Props) {
     </section>
   );
 }
-
-export default TermOfDay;

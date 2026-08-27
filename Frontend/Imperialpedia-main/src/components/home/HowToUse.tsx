@@ -64,5 +64,3 @@ export function HowToUse() {
     </div>
   );
 }
-
-export default HowToUse;

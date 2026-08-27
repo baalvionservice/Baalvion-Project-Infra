@@ -60,5 +60,3 @@ export async function CmsPage({ slug, eyebrow, fallback, children }: CmsPageProp
     </main>
   );
 }
-
-export default CmsPage;

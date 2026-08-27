@@ -50,5 +50,3 @@ export function HomeIntro() {
     </section>
   );
 }
-
-export default HomeIntro;

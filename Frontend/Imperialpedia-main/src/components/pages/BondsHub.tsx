@@ -334,5 +334,3 @@ export async function BondsHub() {
     </div>
   );
 }
-
-export default BondsHub;

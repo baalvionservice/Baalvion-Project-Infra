@@ -80,5 +80,3 @@ export function PersonalFinanceSpotlight({ spotlight }: Props) {
     </section>
   );
 }
-
-export default PersonalFinanceSpotlight;

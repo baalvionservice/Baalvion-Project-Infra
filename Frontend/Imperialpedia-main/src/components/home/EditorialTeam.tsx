@@ -74,5 +74,3 @@ export async function EditorialTeam() {
     </section>
   );
 }
-
-export default EditorialTeam;

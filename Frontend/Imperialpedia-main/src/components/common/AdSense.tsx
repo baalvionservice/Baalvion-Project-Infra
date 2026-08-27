@@ -89,26 +89,3 @@ export function AdSenseUnit({
     </div>
   );
 }
-
-interface AdSenseContainerProps {
-  slot: string;
-  className?: string;
-  children?: React.ReactNode;
-}
-
-/**
- * Container wrapper for AdSense with optional children
- * Useful for layouts that need spacing or styling around the ad
- */
-export function AdSenseContainer({
-  slot,
-  className = '',
-  children,
-}: AdSenseContainerProps) {
-  return (
-    <div className={`adsense-container ${className}`}>
-      <AdSenseUnit slot={slot} />
-      {children}
-    </div>
-  );
-}

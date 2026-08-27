@@ -408,5 +408,3 @@ export async function InvestingHub() {
     </div>
   );
 }
-
-export default InvestingHub;

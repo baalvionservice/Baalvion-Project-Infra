@@ -110,5 +110,3 @@ export function ExploreTopics() {
     </section>
   );
 }
-
-export default ExploreTopics;

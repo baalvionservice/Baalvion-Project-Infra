@@ -332,5 +332,3 @@ export async function SavingsHub() {
     </div>
   );
 }
-
-export default SavingsHub;

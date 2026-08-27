@@ -43,5 +43,3 @@ export function SubtopicTabs({ current, siblings }: SubtopicTabsProps) {
     </nav>
   );
 }
-
-export default SubtopicTabs;

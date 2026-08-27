@@ -333,5 +333,3 @@ export async function CheckingHub() {
     </div>
   );
 }
-
-export default CheckingHub;

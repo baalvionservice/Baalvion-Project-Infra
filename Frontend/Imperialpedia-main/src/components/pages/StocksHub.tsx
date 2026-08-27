@@ -485,5 +485,3 @@ export async function StocksHub() {
     </div>
   );
 }
-
-export default StocksHub;

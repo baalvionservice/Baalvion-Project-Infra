@@ -66,5 +66,3 @@ export async function ImperialpediaTalks() {
     </section>
   );
 }
-
-export default ImperialpediaTalks;

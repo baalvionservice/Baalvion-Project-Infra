@@ -85,5 +85,3 @@ export function MarketSnapshot({ indicators }: Props) {
     </section>
   );
 }
-
-export default MarketSnapshot;

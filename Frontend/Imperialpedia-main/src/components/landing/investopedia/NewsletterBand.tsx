@@ -101,5 +101,3 @@ export function NewsletterBand() {
     </section>
   );
 }
-
-export default NewsletterBand;

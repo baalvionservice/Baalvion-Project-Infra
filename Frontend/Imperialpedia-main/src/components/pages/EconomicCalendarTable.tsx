@@ -54,5 +54,3 @@ export function EconomicCalendarTable({ rows, ctaHref = "/calendar" }: Props) {
     </div>
   );
 }
-
-export default EconomicCalendarTable;

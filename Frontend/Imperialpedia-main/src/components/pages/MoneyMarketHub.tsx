@@ -334,5 +334,3 @@ export async function MoneyMarketHub() {
     </div>
   );
 }
-
-export default MoneyMarketHub;

@@ -499,5 +499,3 @@ export async function PersonalFinanceHub() {
     </div>
   );
 }
-
-export default PersonalFinanceHub;

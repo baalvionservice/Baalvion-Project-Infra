@@ -280,5 +280,3 @@ export async function PlanningHub() {
     </div>
   );
 }
-
-export default PlanningHub;

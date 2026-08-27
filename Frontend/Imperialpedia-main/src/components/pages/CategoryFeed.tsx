@@ -255,5 +255,3 @@ export async function CategoryFeed({ slug }: Props) {
     </div>
   );
 }
-
-export default CategoryFeed;

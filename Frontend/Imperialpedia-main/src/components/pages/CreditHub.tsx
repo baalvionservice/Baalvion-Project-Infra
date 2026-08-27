@@ -316,5 +316,3 @@ export async function CreditHub() {
     </div>
   );
 }
-
-export default CreditHub;

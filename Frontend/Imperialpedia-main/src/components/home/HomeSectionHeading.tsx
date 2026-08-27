@@ -32,5 +32,3 @@ export function HomeSectionHeading({ title, href, hrefLabel = "More" }: Props) {
     </div>
   );
 }
-
-export default HomeSectionHeading;

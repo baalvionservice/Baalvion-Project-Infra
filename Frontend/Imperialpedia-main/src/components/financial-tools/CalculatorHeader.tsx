@@ -46,5 +46,3 @@ export function CalculatorHeader({ category, title, description, icon: Icon }: P
     </header>
   );
 }
-
-export default CalculatorHeader;
