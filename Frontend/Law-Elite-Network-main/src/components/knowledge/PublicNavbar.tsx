@@ -303,7 +303,7 @@ export function PublicNavbar() {
                         </Link>
                       ))
                     ) : (
-                      <p className="col-span-3 py-8 text-sm text-slate-400">
+                      <p className="col-span-3 py-8 text-sm text-slate-500">
                         Guides for this topic are being added.
                       </p>
                     )}

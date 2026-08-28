@@ -12,6 +12,8 @@ export type { AdPlacementKey } from './AdManager';
 export { AdPlacementStrategy, SimpleMidArticleAd } from './AdPlacementStrategy';
 export type { AdPlacementStrategyProps } from './AdPlacementStrategy';
 
+export { MobileAnchorAd } from './MobileAnchorAd';
+
 export {
   AMPAdSupport,
   generateAMPAdCode,

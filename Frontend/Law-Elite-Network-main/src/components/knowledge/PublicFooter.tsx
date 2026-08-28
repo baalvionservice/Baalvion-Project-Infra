@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { Linkedin } from 'lucide-react';
 import { LawEliteMark } from '@/components/icons/LawEliteMark';
 import { FooterNewsletterForm } from '@/components/knowledge/FooterNewsletterForm';
+import { AdSlot } from '@/components/ads/AdSlot';
+import { AD_PLACEMENTS } from '@/components/ads/AdManager';
 
 /**
  * @fileOverview High-Fidelity Editorial Footer
@@ -114,11 +116,26 @@ export function PublicFooter() {
         </div>
       </div>
 
+      {/* Footer Ad -- one site-wide slot rendered here so every page that
+          includes PublicFooter gets it, instead of each page hand-rolling
+          its own footer placement. */}
+      <div className="bg-slate-50 py-6">
+        <div className="container mx-auto px-6 max-w-7xl">
+          <AdSlot
+            slotId={AD_PLACEMENTS.FOOTER.slotId}
+            format="horizontal"
+            placement="footer"
+            fullWidthResponsive
+            minHeight="100px"
+          />
+        </div>
+      </div>
+
       {/* Bottom Network Strip */}
       <div className="bg-white py-6">
         <div className="container mx-auto px-6 max-w-7xl flex flex-col md:flex-row items-center gap-4">
           <span className="font-serif text-xl font-bold text-slate-900 flex items-center gap-1">
-            Law Elite <span className="text-slate-400">Network.</span>
+            Law Elite <span className="text-slate-500">Network.</span>
           </span>
           <p className="text-[11px] font-medium text-slate-500">
             Law Elite Network is operated by Baalvion Industries Private Limited, part of the Baalvion Group.

@@ -15,7 +15,7 @@ function Stat({ value, label }: { value: string; label: string }) {
   return (
     <div>
       <p className="font-headline text-2xl font-extrabold text-slate-900">{value}</p>
-      <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-1">{label}</p>
+      <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mt-1">{label}</p>
     </div>
   );
 }

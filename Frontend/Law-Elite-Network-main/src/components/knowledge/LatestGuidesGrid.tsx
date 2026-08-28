@@ -26,6 +26,11 @@ function GuideCard({ article }: { article: any }) {
         <h3 className="font-headline text-[15px] font-bold leading-snug text-slate-900 group-hover:text-news-600 transition-colors line-clamp-3">
           {article.title}
         </h3>
+        {article.author && (
+          <p className="mt-1.5 text-[11.5px] text-slate-500">
+            By <span className="text-slate-700 font-semibold">{article.author}</span>
+          </p>
+        )}
       </div>
     </Link>
   );
@@ -33,9 +38,11 @@ function GuideCard({ article }: { article: any }) {
 
 /**
  * Investopedia-style "Latest Articles" grid -- a lean, image-led 4-up row
- * (tag + title, no summary/byline/date) pulling the network's most recently
- * published guides, distinct from the fuller StoryCard used in the hero and
- * category sections below it.
+ * (tag + title + byline, no summary/date) pulling the network's most
+ * recently published guides, distinct from the fuller StoryCard used in the
+ * hero and category sections below it. Byline kept -- an image with no named
+ * author reads as unattributed/AI-generated, which is exactly what an
+ * editorial trust signal needs to counter.
  */
 export function LatestGuidesGrid({ articles }: { articles: any[] }) {
   if (!articles || articles.length === 0) return null;

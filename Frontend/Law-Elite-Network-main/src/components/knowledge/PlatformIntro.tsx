@@ -25,7 +25,7 @@ export function PlatformIntro() {
             Law Elite Network provides general legal information for educational and research
             purposes. It is <strong className="text-slate-800">not a law firm</strong> and does not
             provide individualized legal advice or legal representation — see our full{' '}
-            <Link href="/terms-of-service#disclaimers" className="text-blue-600 hover:underline">
+            <Link href="/terms-of-service#disclaimers" className="text-blue-600 underline hover:text-blue-800">
               Legal Disclaimer
             </Link>
             . Our guides help you recognize what applies to your situation and prepare better

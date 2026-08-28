@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { Navbar } from "@/components/navbar";
 import { adminApi, type DashboardStats, type Analytics } from "@/lib/api/admin";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import RoleGuard from "@/components/auth/RoleGuard";
-import Charts from "@/components/admin/Charts";
 import {
   TrendingUp,
   Users,
@@ -17,6 +17,16 @@ import {
   Activity
 } from "lucide-react";
 import Link from "next/link";
+
+// recharts (~100KB+) was previously a static import here, which pulled it
+// into the shared vendor chunk sent to every visitor -- including anonymous
+// homepage traffic that never touches this admin-only page. Dynamic with
+// ssr:false keeps it out of that chunk and only fetched when an admin
+// actually opens this page.
+const Charts = dynamic(() => import("@/components/admin/Charts"), {
+  ssr: false,
+  loading: () => <div className="h-64 animate-pulse rounded-2xl bg-white/5" />,
+});
 
 /**
  * @fileOverview InsightsPage

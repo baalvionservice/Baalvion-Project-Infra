@@ -304,10 +304,6 @@ export default async function KnowledgeHomePage() {
 
         <ForProfessionalsSection />
         <MissionAndBoardSection stats={homeStats} authors={editorialBoardPreview} />
-
-        <div className="py-8">
-          <AdSlot slotId={AD_SLOT_ID} format="horizontal" placement="homepage-footer" fullWidthResponsive minHeight="100px" />
-        </div>
       </main>
 
       <section className="border-t border-slate-100">

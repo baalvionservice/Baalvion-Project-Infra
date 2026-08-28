@@ -18,6 +18,15 @@ const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com
 // ranking signal instead of transferring it.
 const ALLOW = [
   '/',
+  // Every image on the site is served through this resize proxy (see
+  // next.config.ts images.loader: 'custom' -> src/lib/image-loader.ts and
+  // src/app/api/image/route.ts) -- it's the actual image URL a crawler
+  // fetches, not just an internal API call. The blanket '/api/' disallow
+  // below was blocking every one of those URLs, which is why no site image
+  // could be indexed (Screaming Frog / Search Console flagged all ~118 as
+  // "blocked by robots.txt"). More specific Allow wins over the shorter
+  // Disallow regardless of list order, per the robots.txt spec Google follows.
+  '/api/image',
   '/news',
   '/search',
   '/plans',
@@ -70,7 +79,7 @@ const DISALLOW = [
   // Individual lawyer profile pages remain reachable; the /lawyers directory
   // page itself was removed from the frontend, so it needs no disallow entry.
   '/lawyer/',
-  '/api/',
+  '/api/', // carved back open for /api/image above -- keep that Allow entry if this ever changes
   // Auth-gated, not linked from the sitemap, but not previously disallowed --
   // add explicitly so no crawl path (internal link, external backlink) can
   // reach them and find only an auth wall.
