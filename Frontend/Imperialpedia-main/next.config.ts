@@ -77,6 +77,8 @@ const nextConfig: NextConfig = {
       // /home was a duplicate second homepage implementation (retired) — the
       // canonical homepage is /.
       { source: '/home', destination: '/', permanent: true },
+      // /privacy canonical redirect to /privacy-policy
+      { source: '/privacy', destination: '/privacy-policy', permanent: true },
       // /research-ai used to redirect to /ai-analyst here, but /ai-analyst is
       // itself permanently removed (see REMOVED_PATHS in middleware.ts) — that
       // made this a 301 chaining straight into a 410, which Google flags as a
