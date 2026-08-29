@@ -9,6 +9,29 @@
  */
 
 const AUTH_URL = '/auth-bff';
+const SESSION_HINT_KEY = 'baalvion_has_session';
+
+function hasSessionHint(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    return localStorage.getItem(SESSION_HINT_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function setSessionHint(active: boolean): void {
+  if (typeof window === 'undefined') return;
+  try {
+    if (active) {
+      localStorage.setItem(SESSION_HINT_KEY, '1');
+    } else {
+      localStorage.removeItem(SESSION_HINT_KEY);
+    }
+  } catch {
+    // Ignore storage errors (e.g. private browsing or quota limits)
+  }
+}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -80,6 +103,9 @@ export const authClient = {
     const json = await res.json();
     const data = json.data ?? json;
     _accessToken = data.accessToken ?? data.token ?? null;
+    if (_accessToken) {
+      setSessionHint(true);
+    }
     const claims = _accessToken ? decodeJwtPayload(_accessToken) : null;
     return (
       data.user ?? {
@@ -105,11 +131,16 @@ export const authClient = {
       /* always clear locally */
     } finally {
       _accessToken = null;
+      setSessionHint(false);
     }
   },
 
   /** POST /refresh — rotate via the httpOnly cookie (single-flight). Returns null if no session. */
   async refreshToken(): Promise<string | null> {
+    if (!hasSessionHint()) {
+      _accessToken = null;
+      return null;
+    }
     if (!_refreshPromise) {
       _refreshPromise = (async () => {
         try {
@@ -120,11 +151,17 @@ export const authClient = {
           });
           if (!res.ok) {
             _accessToken = null;
+            setSessionHint(false);
             return null;
           }
           const json = await res.json().catch(() => ({}));
           const data = json.data ?? json;
           _accessToken = data.accessToken ?? data.token ?? null;
+          if (_accessToken) {
+            setSessionHint(true);
+          } else {
+            setSessionHint(false);
+          }
           return _accessToken;
         } catch {
           return null;
@@ -152,6 +189,10 @@ export const authClient = {
 
   isAuthenticated(): boolean {
     return !!_accessToken && !isTokenExpired(_accessToken);
+  },
+
+  hasSessionHint(): boolean {
+    return hasSessionHint();
   },
 
   getToken(): string | null {
