@@ -96,9 +96,15 @@ function CareersFallback() {
             </Text>
             <Text variant="body" className="text-muted-foreground leading-relaxed">
               To apply or ask about upcoming openings, reach out to{' '}
-              <strong>[PLACEHOLDER: careers contact email]</strong>. Include a short note about the
-              kind of role you are interested in and, where relevant, writing samples or links to
-              past work.
+              <a href="mailto:careers@baalvion.com" className="text-primary hover:underline font-semibold">
+                careers@baalvion.com
+              </a>{' '}
+              or{' '}
+              <a href={`mailto:${env.contactEmail}`} className="text-primary hover:underline font-semibold">
+                {env.contactEmail}
+              </a>
+              . Include a short note about the kind of role you are interested in and, where relevant,
+              writing samples or links to past work.
             </Text>
           </div>
 

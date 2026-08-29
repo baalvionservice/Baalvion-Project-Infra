@@ -96,8 +96,14 @@ function DmcaPolicyFallback() {
             </Text>
             <Text variant="body" className="text-muted-foreground leading-relaxed">
               Our designated agent for DMCA notices is{' '}
-              <strong>[PLACEHOLDER: DMCA agent name and email/address]</strong>. Notices sent
-              elsewhere may not be processed as quickly.
+              <strong>DMCA Compliance Department, Baalvion Industries Private Limited</strong>. Notices can be
+              submitted by email to{' '}
+              <a href="mailto:legal@baalvion.com" className="text-primary hover:underline font-semibold">
+                legal@baalvion.com
+              </a>{' '}
+              (with subject line "DMCA Takedown Notice") or by postal mail to: Baalvion Industries Private Limited,
+              Upper Mania, PO Pakjhola, Semiliguda, Koraput, Odisha 764036, India. Notices sent elsewhere may
+              not be processed as quickly.
             </Text>
           </div>
 
