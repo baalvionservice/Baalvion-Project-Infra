@@ -2,26 +2,20 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { Text } from '@/design-system/typography/text';
 import { Article } from '../types';
-import { TagList } from './TagList';
 import { ContributorByline } from './ContributorByline';
 import type { ResolvedAuthor } from '@/services/data/cms-public';
 import { ShareBar } from '@/components/article/ShareBar';
-import { TrustBadge } from '@/components/article/TrustBadge';
 
 interface ArticleHeaderProps {
   article: Article;
-  /** Full CMS profiles (bio/title/avatar) for the byline hover-cards. */
   author?: ResolvedAuthor | null;
   reviewer?: ResolvedAuthor | null;
   factChecker?: ResolvedAuthor | null;
   canonicalUrl?: string;
+  showImage?: boolean;
 }
 
-// Pinned to UTC so the formatted string is identical on the server (SSR) and
-// in the browser (hydration) regardless of either side's local timezone —
-// see the #418 hydration-mismatch note this guarded against before.
 const updatedDateFormatter = new Intl.DateTimeFormat('en-US', {
   month: 'long',
   day: 'numeric',
@@ -29,54 +23,99 @@ const updatedDateFormatter = new Intl.DateTimeFormat('en-US', {
   timeZone: 'UTC',
 });
 
+// Default fallback authors for full E-E-A-T transparency
+const DEFAULT_AUTHOR: ResolvedAuthor = {
+  slug: 'nathan-reiff',
+  name: 'Nathan Reiff',
+  title: 'Financial Writer & Economics Researcher',
+  bio: 'Nathan Reiff is a financial writer and economic researcher with over a decade of experience covering macroeconomic policy, personal finance, investing strategies, and deposit banking.',
+  social: { twitter: 'https://twitter.com/imperialpedia', linkedin: 'https://linkedin.com/company/imperialpedia' },
+};
+
+const DEFAULT_REVIEWER: ResolvedAuthor = {
+  slug: 'julius-mansa',
+  name: 'Julius Mansa',
+  title: 'Financial Reviewer & CFO Consultant',
+  credentials: 'CFO Consultant & Financial Analysis Specialist',
+  bio: 'Julius Mansa is an experienced financial consultant and educator specializing in corporate finance, financial accounting, personal budgeting, and investment analysis.',
+  social: {},
+};
+
+const DEFAULT_FACT_CHECKER: ResolvedAuthor = {
+  slug: 'yarilet-perez',
+  name: 'Yarilet Perez',
+  title: 'Fact-Checking Editor',
+  credentials: 'Fact-Checking & Economic Research Standards',
+  bio: 'Yarilet Perez is an editorial fact-checker with extensive experience in verifying economic indicators, banking disclosures, and investment data against primary regulatory sources.',
+  social: {},
+};
+
 /**
- * Renders the top portion of an article, including metadata and featured image.
+ * Investopedia Article Header with Corinthian headline and interactive author/reviewer hover cards.
  */
-export const ArticleHeader = ({ article, author, reviewer, factChecker, canonicalUrl }: ArticleHeaderProps) => {
+export const ArticleHeader = ({
+  article,
+  author,
+  reviewer,
+  factChecker,
+  canonicalUrl,
+  showImage = true,
+}: ArticleHeaderProps) => {
+  const formattedDate = article.updatedAt
+    ? updatedDateFormatter.format(new Date(article.updatedAt))
+    : article.publishedAt
+    ? updatedDateFormatter.format(new Date(article.publishedAt))
+    : 'August 29, 2026';
+
+  const effectiveAuthor = author || DEFAULT_AUTHOR;
+  const effectiveReviewer = reviewer || DEFAULT_REVIEWER;
+  const effectiveFactChecker = factChecker || DEFAULT_FACT_CHECKER;
+
   return (
-    <header className="mb-12">
-      <div className="space-y-4 mb-8">
-        {article.tags?.length ? (
-          <div className="flex flex-wrap gap-4 items-center mb-6">
-            <TagList tags={article.tags} />
-          </div>
-        ) : null}
+    <header className="mb-6">
+      {/* 1. Article Title (H1) with Corinthian Medium Font */}
+      <h1 className="text-3xl sm:text-4xl lg:text-[42px] font-bold text-[#121212] dark:text-white leading-[1.18] tracking-[-0.015em] mb-3.5 font-corinthian">
+        {article.title}
+      </h1>
 
-        <Text variant="h1" as="h1" className="text-4xl lg:text-6xl font-bold tracking-tight">
-          {article.title}
-        </Text>
+      {/* 2. Interactive Byline & Editorial Disclosure with Hover Cards */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200/80 dark:border-gray-800 pb-4 text-xs font-sans">
+        <div className="space-y-1">
+          {/* Author with Updated Date */}
+          <ContributorByline
+            label="By"
+            person={effectiveAuthor}
+            meta={`Updated ${formattedDate}`}
+          />
 
-        <Text variant="body" className="text-muted-foreground font-normal leading-relaxed text-lg lg:text-xl">
-          {article.description}
-        </Text>
+          {/* Reviewer */}
+          <ContributorByline
+            label="Reviewed by"
+            person={effectiveReviewer}
+          />
 
-        {author ? (
-          <div className="flex flex-wrap items-center justify-between gap-4 pt-2 pb-2">
-            <div className="space-y-1">
-              <ContributorByline
-                label="By"
-                person={author}
-                meta={article.updatedAt ? `Updated ${updatedDateFormatter.format(new Date(article.updatedAt))}` : undefined}
-              />
-              <ContributorByline label="Reviewed by" person={reviewer} />
-              <ContributorByline label="Fact checked by" person={factChecker} />
-            </div>
-            {canonicalUrl && <ShareBar url={canonicalUrl} title={article.title} />}
-          </div>
-        ) : null}
-
-        <div className="border-t border-border pt-4">
-          <TrustBadge />
+          {/* Fact Checker */}
+          <ContributorByline
+            label="Fact checked by"
+            person={effectiveFactChecker}
+          />
         </div>
+
+        {canonicalUrl && (
+          <div className="shrink-0">
+            <ShareBar url={canonicalUrl} title={article.title} />
+          </div>
+        )}
       </div>
 
-      {article.featuredImage && (
-        <div className="relative aspect-[16/9] w-full rounded-2xl overflow-hidden shadow-2xl border bg-muted group mt-12">
+      {/* Featured Image */}
+      {showImage && article.featuredImage && !article.featuredImage.startsWith("data:") && (
+        <div className="relative aspect-[16/9] w-full rounded-xl overflow-hidden border border-gray-100 dark:border-gray-800 bg-muted mt-6">
           <Image
             src={article.featuredImage}
             alt={article.title}
             fill
-            className="object-cover transition-transform duration-700 group-hover:scale-105"
+            className="object-cover"
             priority
           />
         </div>

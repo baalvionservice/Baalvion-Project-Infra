@@ -1,6 +1,29 @@
 import Link from "next/link";
 import { ArrowRight, BookOpen, Flame } from "lucide-react";
 
+const DEBT_KEY_TERMS: KeyTermItem[] = [
+  { term: "Debt Basics", definition: "An overview of debt fundamentals, covering core concepts and why they matter.", href: "/debt" },
+  { term: "Advanced Debt", definition: "Deep dive into advanced aspects of debt, including strategies and best practices.", href: "/debt" },
+  { term: "Debt Fees", definition: "Explanation of typical fees associated with debt and how to minimize them.", href: "/debt" },
+  { term: "Debt Benefits", definition: "Key advantages of using debt for personal finance management.", href: "/debt" },
+  { term: "Debt Risks", definition: "Potential risks and pitfalls to watch out for when dealing with debt.", href: "/debt" },
+];
+
+const DEBT_FAQS: FaqItem[] = [
+  { question: "What is Debt?", answer: "Debt is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about Debt", href: "/debt" } },
+  { question: "How does Debt work?", answer: "Debt works by providing features such as ... (brief description).", link: { label: "Learn more about Debt", href: "/debt" } },
+  { question: "Who should consider Debt?", answer: "Anyone looking to improve their debt situation can benefit.", link: { label: "Learn more about Debt", href: "/debt" } },
+  { question: "What are common fees for Debt?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about Debt", href: "/debt" } },
+  { question: "How to compare Debt options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about Debt", href: "/debt" } },
+];
+
+const DEBT_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
+  { slug: "debt", label: "Debt Overview", icon: Star },
+  { slug: "debt-tips", label: "Debt Tips", icon: Star },
+  { slug: "debt-reviews", label: "Debt Reviews", icon: Star },
+];
+
+
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listAllCmsContent, cmsContentToArticle } from "@/services/data/cms-public";
 import { staticCategoryNews, staticArticleList } from "@/services/data/static-content";

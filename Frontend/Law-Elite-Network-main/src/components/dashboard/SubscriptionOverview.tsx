@@ -3,11 +3,9 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Award, ShieldCheck, Calendar, Zap, Loader2, ArrowUpRight } from 'lucide-react';
+import { Award, ShieldCheck, Calendar, Zap, Loader2 } from 'lucide-react';
 import { getUserSubscription } from '@/services/subscriptions/subscriptionService';
 import { useAuth } from '@/hooks/useAuth';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
 import { format } from 'date-fns';
 
 /**
@@ -81,15 +79,10 @@ export default function SubscriptionOverview() {
             </div>
           </div>
         ) : (
-          <div className="pt-4 space-y-4">
+          <div className="pt-4">
             <p className="text-[11px] text-slate-500 font-medium italic">
-              "Upgrade to Professional or Elite to unlock advanced network intelligence."
+              No active membership tier.
             </p>
-            <Button asChild variant="outline" className="w-full h-9 text-[10px] font-bold uppercase tracking-widest border-blue-100 text-blue-600 hover:bg-blue-50">
-              <Link href="/plans">
-                Explore Tiers <ArrowUpRight className="ml-1.5 w-3 h-3" />
-              </Link>
-            </Button>
           </div>
         )}
       </CardContent>

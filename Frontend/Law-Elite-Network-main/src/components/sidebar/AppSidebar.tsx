@@ -18,7 +18,6 @@ import {
   Gavel,
   ShieldCheck,
   IndianRupee,
-  Award,
   FileText,
   Bell,
   Inbox,
@@ -58,7 +57,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       { title: "Notifications", url: "/notifications", icon: Bell },
       { title: "Billing Hub", url: "/billing", icon: FileText },
       { title: "Settlements", url: "/transactions", icon: IndianRupee },
-      { title: "Membership", url: "/plans", icon: Award },
       { title: "Settings", url: "/profile", icon: Settings2 },
     ],
     lawyer: [
@@ -71,7 +69,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       { title: "Secure Uplink", url: "/chat", icon: MessageSquare },
       { title: "Vault", url: "/vault", icon: ShieldCheck },
       { title: "Earnings", url: "/lawyer/earnings", icon: IndianRupee },
-      { title: "Standing", url: "/plans", icon: Award },
       { title: "Availability", url: "/lawyer/availability", icon: Clock },
       { title: "Chambers Profile", url: "/lawyer/profile", icon: Settings2 },
     ],

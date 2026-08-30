@@ -39,6 +39,7 @@ export interface Article {
   seoTitle?: string;
   seoDescription?: string;
   seoKeywords?: string[];
+  keyTakeaways?: string[];
   faq?: { question: string; answer: string }[]; // Drives FAQPage JSON-LD
   /** Persisted entity mentions (companies/tickers etc.) detected at publish time —
    *  drives the related-markets quote widget and inline chart. */
