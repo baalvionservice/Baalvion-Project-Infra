@@ -1,29 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, BookOpen, Flame } from "lucide-react";
 
-const FINANCIALINDEPENDENCE_KEY_TERMS: KeyTermItem[] = [
-  { term: "FinancialIndependence Basics", definition: "An overview of financialindependence fundamentals, covering core concepts and why they matter.", href: "/financialindependence" },
-  { term: "Advanced FinancialIndependence", definition: "Deep dive into advanced aspects of financialindependence, including strategies and best practices.", href: "/financialindependence" },
-  { term: "FinancialIndependence Fees", definition: "Explanation of typical fees associated with financialindependence and how to minimize them.", href: "/financialindependence" },
-  { term: "FinancialIndependence Benefits", definition: "Key advantages of using financialindependence for personal finance management.", href: "/financialindependence" },
-  { term: "FinancialIndependence Risks", definition: "Potential risks and pitfalls to watch out for when dealing with financialindependence.", href: "/financialindependence" },
-];
-
-const FINANCIALINDEPENDENCE_FAQS: FaqItem[] = [
-  { question: "What is FinancialIndependence?", answer: "FinancialIndependence is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about FinancialIndependence", href: "/financialindependence" } },
-  { question: "How does FinancialIndependence work?", answer: "FinancialIndependence works by providing features such as ... (brief description).", link: { label: "Learn more about FinancialIndependence", href: "/financialindependence" } },
-  { question: "Who should consider FinancialIndependence?", answer: "Anyone looking to improve their financialindependence situation can benefit.", link: { label: "Learn more about FinancialIndependence", href: "/financialindependence" } },
-  { question: "What are common fees for FinancialIndependence?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about FinancialIndependence", href: "/financialindependence" } },
-  { question: "How to compare FinancialIndependence options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about FinancialIndependence", href: "/financialindependence" } },
-];
-
-const FINANCIALINDEPENDENCE_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "financialindependence", label: "FinancialIndependence Overview", icon: Star },
-  { slug: "financialindependence-tips", label: "FinancialIndependence Tips", icon: Star },
-  { slug: "financialindependence-reviews", label: "FinancialIndependence Reviews", icon: Star },
-];
-
-
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listAllCmsContent, cmsContentToArticle } from "@/services/data/cms-public";
 import { staticCategoryNews, staticArticleList } from "@/services/data/static-content";

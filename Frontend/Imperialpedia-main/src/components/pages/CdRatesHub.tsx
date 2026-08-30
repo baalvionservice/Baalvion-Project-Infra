@@ -1,28 +1,5 @@
 import Link from "next/link";
 import {
-
-const CDRATES_KEY_TERMS: KeyTermItem[] = [
-  { term: "CdRates Basics", definition: "An overview of cdrates fundamentals, covering core concepts and why they matter.", href: "/cdrates" },
-  { term: "Advanced CdRates", definition: "Deep dive into advanced aspects of cdrates, including strategies and best practices.", href: "/cdrates" },
-  { term: "CdRates Fees", definition: "Explanation of typical fees associated with cdrates and how to minimize them.", href: "/cdrates" },
-  { term: "CdRates Benefits", definition: "Key advantages of using cdrates for personal finance management.", href: "/cdrates" },
-  { term: "CdRates Risks", definition: "Potential risks and pitfalls to watch out for when dealing with cdrates.", href: "/cdrates" },
-];
-
-const CDRATES_FAQS: FaqItem[] = [
-  { question: "What is CdRates?", answer: "CdRates is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about CdRates", href: "/cdrates" } },
-  { question: "How does CdRates work?", answer: "CdRates works by providing features such as ... (brief description).", link: { label: "Learn more about CdRates", href: "/cdrates" } },
-  { question: "Who should consider CdRates?", answer: "Anyone looking to improve their cdrates situation can benefit.", link: { label: "Learn more about CdRates", href: "/cdrates" } },
-  { question: "What are common fees for CdRates?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about CdRates", href: "/cdrates" } },
-  { question: "How to compare CdRates options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about CdRates", href: "/cdrates" } },
-];
-
-const CDRATES_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "cdrates", label: "CdRates Overview", icon: Star },
-  { slug: "cdrates-tips", label: "CdRates Tips", icon: Star },
-  { slug: "cdrates-reviews", label: "CdRates Reviews", icon: Star },
-];
-
   PiggyBank,
   Landmark,
   Wallet,

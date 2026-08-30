@@ -1,28 +1,5 @@
 import Link from "next/link";
 import {
-
-const COMMODITIES_KEY_TERMS: KeyTermItem[] = [
-  { term: "Commodities Basics", definition: "An overview of commodities fundamentals, covering core concepts and why they matter.", href: "/commodities" },
-  { term: "Advanced Commodities", definition: "Deep dive into advanced aspects of commodities, including strategies and best practices.", href: "/commodities" },
-  { term: "Commodities Fees", definition: "Explanation of typical fees associated with commodities and how to minimize them.", href: "/commodities" },
-  { term: "Commodities Benefits", definition: "Key advantages of using commodities for personal finance management.", href: "/commodities" },
-  { term: "Commodities Risks", definition: "Potential risks and pitfalls to watch out for when dealing with commodities.", href: "/commodities" },
-];
-
-const COMMODITIES_FAQS: FaqItem[] = [
-  { question: "What is Commodities?", answer: "Commodities is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about Commodities", href: "/commodities" } },
-  { question: "How does Commodities work?", answer: "Commodities works by providing features such as ... (brief description).", link: { label: "Learn more about Commodities", href: "/commodities" } },
-  { question: "Who should consider Commodities?", answer: "Anyone looking to improve their commodities situation can benefit.", link: { label: "Learn more about Commodities", href: "/commodities" } },
-  { question: "What are common fees for Commodities?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about Commodities", href: "/commodities" } },
-  { question: "How to compare Commodities options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about Commodities", href: "/commodities" } },
-];
-
-const COMMODITIES_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "commodities", label: "Commodities Overview", icon: Star },
-  { slug: "commodities-tips", label: "Commodities Tips", icon: Star },
-  { slug: "commodities-reviews", label: "Commodities Reviews", icon: Star },
-];
-
   TrendingUp,
   PieChart,
   Briefcase,

@@ -1,28 +1,5 @@
 import Link from "next/link";
 import {
-
-const SAVINGS_KEY_TERMS: KeyTermItem[] = [
-  { term: "Savings Basics", definition: "An overview of savings fundamentals, covering core concepts and why they matter.", href: "/savings" },
-  { term: "Advanced Savings", definition: "Deep dive into advanced aspects of savings, including strategies and best practices.", href: "/savings" },
-  { term: "Savings Fees", definition: "Explanation of typical fees associated with savings and how to minimize them.", href: "/savings" },
-  { term: "Savings Benefits", definition: "Key advantages of using savings for personal finance management.", href: "/savings" },
-  { term: "Savings Risks", definition: "Potential risks and pitfalls to watch out for when dealing with savings.", href: "/savings" },
-];
-
-const SAVINGS_FAQS: FaqItem[] = [
-  { question: "What is Savings?", answer: "Savings is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about Savings", href: "/savings" } },
-  { question: "How does Savings work?", answer: "Savings works by providing features such as ... (brief description).", link: { label: "Learn more about Savings", href: "/savings" } },
-  { question: "Who should consider Savings?", answer: "Anyone looking to improve their savings situation can benefit.", link: { label: "Learn more about Savings", href: "/savings" } },
-  { question: "What are common fees for Savings?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about Savings", href: "/savings" } },
-  { question: "How to compare Savings options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about Savings", href: "/savings" } },
-];
-
-const SAVINGS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "savings", label: "Savings Overview", icon: Star },
-  { slug: "savings-tips", label: "Savings Tips", icon: Star },
-  { slug: "savings-reviews", label: "Savings Reviews", icon: Star },
-];
-
   Wallet,
   Calendar,
   Landmark,

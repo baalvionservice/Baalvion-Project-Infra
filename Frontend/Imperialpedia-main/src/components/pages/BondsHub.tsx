@@ -1,28 +1,5 @@
 import Link from "next/link";
 import {
-
-const BONDS_KEY_TERMS: KeyTermItem[] = [
-  { term: "Bonds Basics", definition: "An overview of bonds fundamentals, covering core concepts and why they matter.", href: "/bonds" },
-  { term: "Advanced Bonds", definition: "Deep dive into advanced aspects of bonds, including strategies and best practices.", href: "/bonds" },
-  { term: "Bonds Fees", definition: "Explanation of typical fees associated with bonds and how to minimize them.", href: "/bonds" },
-  { term: "Bonds Benefits", definition: "Key advantages of using bonds for personal finance management.", href: "/bonds" },
-  { term: "Bonds Risks", definition: "Potential risks and pitfalls to watch out for when dealing with bonds.", href: "/bonds" },
-];
-
-const BONDS_FAQS: FaqItem[] = [
-  { question: "What is Bonds?", answer: "Bonds is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about Bonds", href: "/bonds" } },
-  { question: "How does Bonds work?", answer: "Bonds works by providing features such as ... (brief description).", link: { label: "Learn more about Bonds", href: "/bonds" } },
-  { question: "Who should consider Bonds?", answer: "Anyone looking to improve their bonds situation can benefit.", link: { label: "Learn more about Bonds", href: "/bonds" } },
-  { question: "What are common fees for Bonds?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about Bonds", href: "/bonds" } },
-  { question: "How to compare Bonds options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about Bonds", href: "/bonds" } },
-];
-
-const BONDS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "bonds", label: "Bonds Overview", icon: Star },
-  { slug: "bonds-tips", label: "Bonds Tips", icon: Star },
-  { slug: "bonds-reviews", label: "Bonds Reviews", icon: Star },
-];
-
   TrendingUp,
   PieChart,
   PiggyBank,

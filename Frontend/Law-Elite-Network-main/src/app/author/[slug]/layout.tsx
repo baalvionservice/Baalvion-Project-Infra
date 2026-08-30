@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
-import { getAuthorBySlug, authorNameToSlug } from '@/data/authors';
-import { cmsGetAuthorBySlug, cmsGetArticles } from '@/lib/cms';
-import { mergeArticles } from '@/data/law-content';
+import { getAuthorBySlug } from '@/data/authors';
+import { cmsGetAuthorBySlug } from '@/lib/cms';
 import { resolvePersonImage } from '@/lib/article-art';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
@@ -36,14 +35,6 @@ export async function generateMetadata(
   // falls back to) only for the share-preview tags; the on-page avatar keeps
   // using the silhouette via resolvePersonImage() in the page component below.
   const image = personImage.startsWith('data:') ? `${SITE}/opengraph-image` : personImage;
-  // noindex a contributor with zero attributed articles: with just a name,
-  // title, and one templated sentence, the page has no unique content for
-  // Google to rank -- a thin-content/doorway-page pattern, same reasoning
-  // src/app/sitemap.ts uses to exclude these from the sitemap. Still fully
-  // viewable (and still followed, so any real article they later get stays
-  // discoverable) -- only the index signal changes once they publish.
-  const cmsArticles = await cmsGetArticles().catch(() => []);
-  const hasArticles = mergeArticles(cmsArticles).some((art) => authorNameToSlug(art.author) === slug);
   return {
     title,
     description,
@@ -51,7 +42,7 @@ export async function generateMetadata(
       (x): x is string => Boolean(x),
     ),
     alternates: { canonical: url },
-    robots: { index: hasArticles, follow: true },
+    robots: { index: true, follow: true },
     openGraph: { type: 'profile', url, title, description, images: [{ url: image, alt: a.name }] },
     twitter: { card: 'summary', title, description, images: [image] },
   };

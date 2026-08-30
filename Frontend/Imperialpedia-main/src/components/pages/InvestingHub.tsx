@@ -1,28 +1,5 @@
 import Link from "next/link";
 import {
-
-const INVESTING_KEY_TERMS: KeyTermItem[] = [
-  { term: "Investing Basics", definition: "An overview of investing fundamentals, covering core concepts and why they matter.", href: "/investing" },
-  { term: "Advanced Investing", definition: "Deep dive into advanced aspects of investing, including strategies and best practices.", href: "/investing" },
-  { term: "Investing Fees", definition: "Explanation of typical fees associated with investing and how to minimize them.", href: "/investing" },
-  { term: "Investing Benefits", definition: "Key advantages of using investing for personal finance management.", href: "/investing" },
-  { term: "Investing Risks", definition: "Potential risks and pitfalls to watch out for when dealing with investing.", href: "/investing" },
-];
-
-const INVESTING_FAQS: FaqItem[] = [
-  { question: "What is Investing?", answer: "Investing is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about Investing", href: "/investing" } },
-  { question: "How does Investing work?", answer: "Investing works by providing features such as ... (brief description).", link: { label: "Learn more about Investing", href: "/investing" } },
-  { question: "Who should consider Investing?", answer: "Anyone looking to improve their investing situation can benefit.", link: { label: "Learn more about Investing", href: "/investing" } },
-  { question: "What are common fees for Investing?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about Investing", href: "/investing" } },
-  { question: "How to compare Investing options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about Investing", href: "/investing" } },
-];
-
-const INVESTING_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "investing", label: "Investing Overview", icon: Star },
-  { slug: "investing-tips", label: "Investing Tips", icon: Star },
-  { slug: "investing-reviews", label: "Investing Reviews", icon: Star },
-];
-
   TrendingUp,
   Landmark,
   PieChart,

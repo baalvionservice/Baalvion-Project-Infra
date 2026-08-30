@@ -17,7 +17,6 @@ export default {
         // editorial transitional serif for headlines.
         body: ["-apple-system", "BlinkMacSystemFont", "Segoe UI", "Helvetica Neue", "Helvetica", "Arial", "sans-serif"],
         headline: ["var(--font-headline)", "Georgia", "Times New Roman", "serif"],
-        corinthian: ["var(--font-corinthian)", "Georgia", "Times New Roman", "serif"],
         ui: ["-apple-system", "BlinkMacSystemFont", "Segoe UI", "Helvetica Neue", "Helvetica", "Arial", "sans-serif"],
         code: ["monospace"],
       },

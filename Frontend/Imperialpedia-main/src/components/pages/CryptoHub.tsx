@@ -1,29 +1,6 @@
 import Link from "next/link";
 import { Bitcoin, LineChart, TrendingUp, ArrowRight, Flame } from "lucide-react";
 
-const CRYPTO_KEY_TERMS: KeyTermItem[] = [
-  { term: "Crypto Basics", definition: "An overview of crypto fundamentals, covering core concepts and why they matter.", href: "/crypto" },
-  { term: "Advanced Crypto", definition: "Deep dive into advanced aspects of crypto, including strategies and best practices.", href: "/crypto" },
-  { term: "Crypto Fees", definition: "Explanation of typical fees associated with crypto and how to minimize them.", href: "/crypto" },
-  { term: "Crypto Benefits", definition: "Key advantages of using crypto for personal finance management.", href: "/crypto" },
-  { term: "Crypto Risks", definition: "Potential risks and pitfalls to watch out for when dealing with crypto.", href: "/crypto" },
-];
-
-const CRYPTO_FAQS: FaqItem[] = [
-  { question: "What is Crypto?", answer: "Crypto is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about Crypto", href: "/crypto" } },
-  { question: "How does Crypto work?", answer: "Crypto works by providing features such as ... (brief description).", link: { label: "Learn more about Crypto", href: "/crypto" } },
-  { question: "Who should consider Crypto?", answer: "Anyone looking to improve their crypto situation can benefit.", link: { label: "Learn more about Crypto", href: "/crypto" } },
-  { question: "What are common fees for Crypto?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about Crypto", href: "/crypto" } },
-  { question: "How to compare Crypto options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about Crypto", href: "/crypto" } },
-];
-
-const CRYPTO_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "crypto", label: "Crypto Overview", icon: Star },
-  { slug: "crypto-tips", label: "Crypto Tips", icon: Star },
-  { slug: "crypto-reviews", label: "Crypto Reviews", icon: Star },
-];
-
-
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listAllCmsContent, cmsContentToArticle } from "@/services/data/cms-public";
 import { staticCategoryNews, staticArticleList } from "@/services/data/static-content";

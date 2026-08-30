@@ -1,8 +1,7 @@
 import { MetadataRoute } from 'next';
 import { unstable_cache } from 'next/cache';
-import { getAllArticles, mergeArticles } from '@/data/law-content';
+import { getAllArticles } from '@/data/law-content';
 import { getMergedAuthors } from '@/lib/authors-server';
-import { authorNameToSlug } from '@/data/authors';
 import { articleUrl } from '@/lib/article-url';
 import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
 import { cmsGetArticles } from '@/lib/cms';
@@ -63,12 +62,6 @@ async function safeFetch<T>(url: string): Promise<T[]> {
  * window, unstable_cache serves the last successfully cached result instead
  * of re-running this, so a transient upstream outage can't intermittently
  * drop CMS/live-API routes from what Googlebot sees.
- *
- * No changeFrequency/priority anywhere in this file: Google has stated for
- * years it ignores both, and Bing mostly does too -- they added file weight
- * and a false sense of per-page precision without affecting crawl behavior.
- * lastModified is the only sitemap hint worth emitting, and only where a real
- * date is known (see the omission comments below).
  */
 async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
   // No localhost fallback in production: an unset build arg yields '' so safeFetch
@@ -83,38 +76,32 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
     cmsGetArticles().catch(() => []),
   ]);
 
-  // No lastModified on these: they're hardcoded marketing/policy routes with
-  // no CMS-tracked edit timestamp anywhere in the data model (CmsSitePage has
-  // no updatedAt field) -- stamping `new Date()` here would report "changed
-  // right now" on every cache rebuild regardless of whether the page content
-  // actually changed, which is a fabricated signal, not a real one. Omitting
-  // lastModified is valid per the sitemap spec and honest given what we
-  // actually know. /search is excluded entirely: it's a utility/results page,
-  // not indexable content.
   const staticRoutes: MetadataRoute.Sitemap = [
-    { url: `${BASE_URL}/` },
-    { url: `${BASE_URL}/news` },
-    { url: `${BASE_URL}/case-law` },
-    { url: `${BASE_URL}/legislation` },
-    { url: `${BASE_URL}/law-changes` },
-    { url: `${BASE_URL}/about-us` },
-    { url: `${BASE_URL}/authors` },
-    { url: `${BASE_URL}/editorial-standards` },
-    { url: `${BASE_URL}/corrections` },
-    { url: `${BASE_URL}/contact-us` },
-    { url: `${BASE_URL}/careers` },
-    { url: `${BASE_URL}/advertise` },
-    { url: `${BASE_URL}/editorial-process` },
-    { url: `${BASE_URL}/policies` },
-    { url: `${BASE_URL}/privacy-policy` },
-    { url: `${BASE_URL}/terms-of-service` },
-    { url: `${BASE_URL}/editorial-disclosure-policy` },
-    { url: `${BASE_URL}/cookie-policy` },
-    { url: `${BASE_URL}/diversity-policy` },
-    { url: `${BASE_URL}/accessibility` },
-    { url: `${BASE_URL}/conflict-of-interest-policy` },
-    { url: `${BASE_URL}/sponsored-content-policy` },
-    { url: `${BASE_URL}/comment-policy` },
+    { url: `${BASE_URL}/`, lastModified: new Date(), changeFrequency: 'daily', priority: 1.0 },
+    { url: `${BASE_URL}/news`, lastModified: new Date(), changeFrequency: 'hourly', priority: 0.85 },
+    { url: `${BASE_URL}/search`, lastModified: new Date(), changeFrequency: 'hourly', priority: 0.9 },
+    { url: `${BASE_URL}/plans`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${BASE_URL}/case-law`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${BASE_URL}/legislation`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${BASE_URL}/law-changes`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 },
+    { url: `${BASE_URL}/about-us`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${BASE_URL}/authors`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 },
+    { url: `${BASE_URL}/editorial-standards`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4 },
+    { url: `${BASE_URL}/corrections`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${BASE_URL}/contact-us`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${BASE_URL}/careers`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.5 },
+    { url: `${BASE_URL}/advertise`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4 },
+    { url: `${BASE_URL}/editorial-process`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
+    { url: `${BASE_URL}/policies`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
+    { url: `${BASE_URL}/privacy-policy`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.2 },
+    { url: `${BASE_URL}/terms-of-service`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.2 },
+    { url: `${BASE_URL}/editorial-disclosure-policy`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.2 },
+    { url: `${BASE_URL}/cookie-policy`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.2 },
+    { url: `${BASE_URL}/diversity-policy`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.15 },
+    { url: `${BASE_URL}/accessibility`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.15 },
+    { url: `${BASE_URL}/conflict-of-interest-policy`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.15 },
+    { url: `${BASE_URL}/sponsored-content-policy`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.15 },
+    { url: `${BASE_URL}/comment-policy`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.15 },
   ];
 
   // Bundled articles (always present) unioned with live-API results and CMS
@@ -160,6 +147,8 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
   const articleRoutes: MetadataRoute.Sitemap = Array.from(articleEntries.values()).map((entry) => ({
     url: entry.url,
     lastModified: entry.lastModified,
+    changeFrequency: 'weekly',
+    priority: 0.65,
   }));
 
   // Subcategories no longer have a dedicated URL -- they're a filter chip on
@@ -185,32 +174,20 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
       .map((c) => ({
         url: `${BASE_URL}/${toNewCategorySlug(c.slug)}`,
         lastModified: new Date(c.updated_at || c.updatedAt || Date.now()),
+        changeFrequency: 'weekly' as const,
+        priority: 0.6,
       })),
-    // No lastModified here: the API didn't return this slug, so there's no
-    // real updated_at to report -- omit rather than fabricate "now".
     ...CURRENT_CATEGORY_SLUGS.filter((slug) => !apiCategorySlugs.has(slug)).map((slug) => ({
       url: `${BASE_URL}/${slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.6,
     })),
   ];
 
-  // Author profile pages — one per contributor for E-E-A-T discoverability,
-  // but only once they actually have at least one attributed article. A
-  // zero-article author page is a near-empty doorway page (photo + one
-  // templated sentence + no content) -- same reasoning as the empty-country-hub
-  // filter below. Confirmed live: 56 of 103 merged authors (mostly the bulk-
-  // seeded international profiles) currently have zero articles and were
-  // being actively submitted to Google. Article-per-author matching mirrors
-  // src/app/author/[slug]/page.tsx exactly (mergeArticles + authorNameToSlug)
-  // so this filter agrees with what the page itself would render.
-  const mergedArticlesForCount = mergeArticles(cmsArticles);
-  const articleCountByAuthorSlug = new Map<string, number>();
-  mergedArticlesForCount.forEach((a) => {
-    const slug = authorNameToSlug(a.author);
-    articleCountByAuthorSlug.set(slug, (articleCountByAuthorSlug.get(slug) || 0) + 1);
-  });
-
-  // lastModified tracks the author's most recently updated bundled article
-  // (authors have no timestamp of their own) rather than the request time.
+  // Author profile pages — one per contributor for E-E-A-T discoverability.
+  // lastModified tracks the author's most recently updated bundled article (authors
+  // have no timestamp of their own) rather than the request time.
   const latestByAuthor = new Map<string, Date>();
   getAllArticles().forEach((a) => {
     const parsed = new Date(a.updatedAt);
@@ -222,31 +199,28 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
   // Merged (bundled + CMS-added) authors -- CMS-only authors were previously
   // dropped from the sitemap because this used the bundled-only getAllAuthors(),
   // even though their /author/[slug] pages render fine and are linked from /authors.
-  // CMS-only authors (no bundled article) have no entry in latestByAuthor --
-  // omit lastModified for those rather than fabricate "now" as a stand-in.
   const mergedAuthors = await getMergedAuthors();
-  const authorRoutes: MetadataRoute.Sitemap = mergedAuthors
-    .filter((a) => (articleCountByAuthorSlug.get(a.slug) || 0) > 0)
-    .map((a) => {
-      const lastModified = latestByAuthor.get(a.name);
-      return {
-        url: `${BASE_URL}/author/${a.slug}`,
-        ...(lastModified && { lastModified }),
-      };
-    });
+  const authorRoutes: MetadataRoute.Sitemap = mergedAuthors.map((a) => ({
+    url: `${BASE_URL}/author/${a.slug}`,
+    lastModified: latestByAuthor.get(a.name) || new Date(),
+    changeFrequency: 'monthly',
+    priority: 0.45,
+  }));
 
   // Country hubs: only index /countries/[country] once it actually has at
   // least one jurisdiction-specific article. An empty hub is a thin/duplicate
   // page for crawlers, not a real destination -- see Phase N of the SEO plan.
-  // No lastModified: country hubs have no per-hub updated_at signal (article
-  // counts, not dates, are all getCountryArticleCounts() tracks) -- omit
-  // rather than fabricate "now".
   const countryCounts = await getCountryArticleCounts();
   const populatedCountries = COUNTRIES.filter((c) => (countryCounts[c.slug] || 0) > 0);
   const countryRoutes: MetadataRoute.Sitemap = populatedCountries.length
     ? [
-        { url: `${BASE_URL}/countries` },
-        ...populatedCountries.map((c) => ({ url: `${BASE_URL}/countries/${c.slug}` })),
+        { url: `${BASE_URL}/countries`, lastModified: new Date(), changeFrequency: 'weekly' as const, priority: 0.6 },
+        ...populatedCountries.map((c) => ({
+          url: `${BASE_URL}/countries/${c.slug}`,
+          lastModified: new Date(),
+          changeFrequency: 'weekly' as const,
+          priority: 0.55,
+        })),
       ]
     : [];
 

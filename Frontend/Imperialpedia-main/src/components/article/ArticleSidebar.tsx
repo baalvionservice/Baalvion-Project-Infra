@@ -44,7 +44,7 @@ export function ArticleSidebar({
   const color = getTopicColor(categoryLabel);
 
   return (
-    <aside className="min-w-0 space-y-8 pt-[210px] lg:pt-[230px] xl:pt-[250px] -mr-4 xl:-mr-10">
+    <aside className="min-w-0 space-y-8 lg:sticky lg:top-24 lg:self-start">
       <div className="rounded-lg border border-border border-t-4 p-5" style={{ borderTopColor: color }}>
         <h2 className="mb-3 text-xs font-black uppercase tracking-widest" style={{ color }}>
           Community

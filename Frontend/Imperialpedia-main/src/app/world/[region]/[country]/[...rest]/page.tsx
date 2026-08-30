@@ -19,10 +19,9 @@ import { createEntityLinker } from "@/lib/entityLinkInjector";
 import { CategoryBadge } from "@/app/news/NewsArticleCard";
 import { ShareBar } from "@/components/article/ShareBar";
 import { ArticleMarketWidget } from "@/components/markets/ArticleMarketWidget";
-import { ArticleByline } from "@/components/article/ArticleByline";
 import { TrendingNowModule, MoreInCategoryModule } from "@/components/article/ArticleSidebarModules";
+import { ArticleByline } from "@/components/article/ArticleByline";
 import { ListenBar } from "@/components/article/ListenBar";
-import { KeyTakeawaysBox } from "@/components/pages/KeyTakeawaysBox";
 import {
   BodyBlock,
   demoteExtraHeadings,
@@ -288,7 +287,19 @@ export default async function WorldCountryArticlePage({ params }: { params: Para
             </p>
 
             {article.keyTakeaways && article.keyTakeaways.length > 0 && (
-              <KeyTakeawaysBox items={article.keyTakeaways} />
+              <div className="key-points mt-6 border border-border bg-muted rounded-sm p-5">
+                <h2 className="text-xs font-black tracking-widest text-foreground uppercase mb-3">
+                  Key Points
+                </h2>
+                <ul className="space-y-2">
+                  {article.keyTakeaways.map((point, i) => (
+                    <li key={i} className="flex gap-2.5 text-sm text-muted-foreground leading-relaxed">
+                      <span className="mt-1.5 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-[#CC0000]" />
+                      {point}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
 
             <div className="flex flex-wrap items-center justify-between gap-4 py-5 mt-5 border-y border-border">

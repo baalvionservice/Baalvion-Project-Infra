@@ -1,29 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, BookOpen, Flame } from "lucide-react";
 
-const SAVINGMONEY_KEY_TERMS: KeyTermItem[] = [
-  { term: "SavingMoney Basics", definition: "An overview of savingmoney fundamentals, covering core concepts and why they matter.", href: "/savingmoney" },
-  { term: "Advanced SavingMoney", definition: "Deep dive into advanced aspects of savingmoney, including strategies and best practices.", href: "/savingmoney" },
-  { term: "SavingMoney Fees", definition: "Explanation of typical fees associated with savingmoney and how to minimize them.", href: "/savingmoney" },
-  { term: "SavingMoney Benefits", definition: "Key advantages of using savingmoney for personal finance management.", href: "/savingmoney" },
-  { term: "SavingMoney Risks", definition: "Potential risks and pitfalls to watch out for when dealing with savingmoney.", href: "/savingmoney" },
-];
-
-const SAVINGMONEY_FAQS: FaqItem[] = [
-  { question: "What is SavingMoney?", answer: "SavingMoney is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about SavingMoney", href: "/savingmoney" } },
-  { question: "How does SavingMoney work?", answer: "SavingMoney works by providing features such as ... (brief description).", link: { label: "Learn more about SavingMoney", href: "/savingmoney" } },
-  { question: "Who should consider SavingMoney?", answer: "Anyone looking to improve their savingmoney situation can benefit.", link: { label: "Learn more about SavingMoney", href: "/savingmoney" } },
-  { question: "What are common fees for SavingMoney?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about SavingMoney", href: "/savingmoney" } },
-  { question: "How to compare SavingMoney options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about SavingMoney", href: "/savingmoney" } },
-];
-
-const SAVINGMONEY_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "savingmoney", label: "SavingMoney Overview", icon: Star },
-  { slug: "savingmoney-tips", label: "SavingMoney Tips", icon: Star },
-  { slug: "savingmoney-reviews", label: "SavingMoney Reviews", icon: Star },
-];
-
-
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listAllCmsContent, cmsContentToArticle } from "@/services/data/cms-public";
 import { staticCategoryNews, staticArticleList } from "@/services/data/static-content";

@@ -2,26 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@font-face {
-  font-family: 'Corinthian';
-  src: url('/fonts/Corinthian-Medium.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-/* ── Direct Corinthian font application — bypasses CSS variable chain ── */
-/* Applied to article H1 title and TOC header */
-.font-corinthian,
-article h1,
-header h1 {
-  font-family: 'Corinthian', Georgia, 'Times New Roman', serif !important;
-}
-
-.toc-heading {
-  font-family: 'Corinthian', Georgia, 'Times New Roman', serif !important;
-}
-
 @layer base {
   /* ── Investopedia-style editorial palette: clean white, royal blue, gold accent ── */
   :root {
@@ -92,14 +72,12 @@ header h1 {
   }
   html {
     @apply scroll-smooth;
-    overflow-x: clip;
     /* Improve mobile performance */
     -webkit-text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent;
   }
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/30;
-    overflow-x: clip;
     /* Investopedia-style body: neutral Helvetica/Arial sans (no webfont) */
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
     /* Mobile performance optimizations */

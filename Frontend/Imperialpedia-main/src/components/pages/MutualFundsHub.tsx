@@ -1,28 +1,5 @@
 import Link from "next/link";
 import {
-
-const MUTUALFUNDS_KEY_TERMS: KeyTermItem[] = [
-  { term: "MutualFunds Basics", definition: "An overview of mutualfunds fundamentals, covering core concepts and why they matter.", href: "/mutualfunds" },
-  { term: "Advanced MutualFunds", definition: "Deep dive into advanced aspects of mutualfunds, including strategies and best practices.", href: "/mutualfunds" },
-  { term: "MutualFunds Fees", definition: "Explanation of typical fees associated with mutualfunds and how to minimize them.", href: "/mutualfunds" },
-  { term: "MutualFunds Benefits", definition: "Key advantages of using mutualfunds for personal finance management.", href: "/mutualfunds" },
-  { term: "MutualFunds Risks", definition: "Potential risks and pitfalls to watch out for when dealing with mutualfunds.", href: "/mutualfunds" },
-];
-
-const MUTUALFUNDS_FAQS: FaqItem[] = [
-  { question: "What is MutualFunds?", answer: "MutualFunds is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about MutualFunds", href: "/mutualfunds" } },
-  { question: "How does MutualFunds work?", answer: "MutualFunds works by providing features such as ... (brief description).", link: { label: "Learn more about MutualFunds", href: "/mutualfunds" } },
-  { question: "Who should consider MutualFunds?", answer: "Anyone looking to improve their mutualfunds situation can benefit.", link: { label: "Learn more about MutualFunds", href: "/mutualfunds" } },
-  { question: "What are common fees for MutualFunds?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about MutualFunds", href: "/mutualfunds" } },
-  { question: "How to compare MutualFunds options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about MutualFunds", href: "/mutualfunds" } },
-];
-
-const MUTUALFUNDS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "mutualfunds", label: "MutualFunds Overview", icon: Star },
-  { slug: "mutualfunds-tips", label: "MutualFunds Tips", icon: Star },
-  { slug: "mutualfunds-reviews", label: "MutualFunds Reviews", icon: Star },
-];
-
   TrendingUp,
   Landmark,
   Umbrella,

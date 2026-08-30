@@ -1,28 +1,5 @@
 import Link from "next/link";
 import {
-
-const STOCKS_KEY_TERMS: KeyTermItem[] = [
-  { term: "Stocks Basics", definition: "An overview of stocks fundamentals, covering core concepts and why they matter.", href: "/stocks" },
-  { term: "Advanced Stocks", definition: "Deep dive into advanced aspects of stocks, including strategies and best practices.", href: "/stocks" },
-  { term: "Stocks Fees", definition: "Explanation of typical fees associated with stocks and how to minimize them.", href: "/stocks" },
-  { term: "Stocks Benefits", definition: "Key advantages of using stocks for personal finance management.", href: "/stocks" },
-  { term: "Stocks Risks", definition: "Potential risks and pitfalls to watch out for when dealing with stocks.", href: "/stocks" },
-];
-
-const STOCKS_FAQS: FaqItem[] = [
-  { question: "What is Stocks?", answer: "Stocks is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about Stocks", href: "/stocks" } },
-  { question: "How does Stocks work?", answer: "Stocks works by providing features such as ... (brief description).", link: { label: "Learn more about Stocks", href: "/stocks" } },
-  { question: "Who should consider Stocks?", answer: "Anyone looking to improve their stocks situation can benefit.", link: { label: "Learn more about Stocks", href: "/stocks" } },
-  { question: "What are common fees for Stocks?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about Stocks", href: "/stocks" } },
-  { question: "How to compare Stocks options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about Stocks", href: "/stocks" } },
-];
-
-const STOCKS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "stocks", label: "Stocks Overview", icon: Star },
-  { slug: "stocks-tips", label: "Stocks Tips", icon: Star },
-  { slug: "stocks-reviews", label: "Stocks Reviews", icon: Star },
-];
-
   BookOpen,
   Landmark,
   Rocket,

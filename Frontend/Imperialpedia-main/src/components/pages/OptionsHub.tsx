@@ -1,28 +1,5 @@
 import Link from "next/link";
 import {
-
-const OPTIONS_KEY_TERMS: KeyTermItem[] = [
-  { term: "Options Basics", definition: "An overview of options fundamentals, covering core concepts and why they matter.", href: "/options" },
-  { term: "Advanced Options", definition: "Deep dive into advanced aspects of options, including strategies and best practices.", href: "/options" },
-  { term: "Options Fees", definition: "Explanation of typical fees associated with options and how to minimize them.", href: "/options" },
-  { term: "Options Benefits", definition: "Key advantages of using options for personal finance management.", href: "/options" },
-  { term: "Options Risks", definition: "Potential risks and pitfalls to watch out for when dealing with options.", href: "/options" },
-];
-
-const OPTIONS_FAQS: FaqItem[] = [
-  { question: "What is Options?", answer: "Options is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about Options", href: "/options" } },
-  { question: "How does Options work?", answer: "Options works by providing features such as ... (brief description).", link: { label: "Learn more about Options", href: "/options" } },
-  { question: "Who should consider Options?", answer: "Anyone looking to improve their options situation can benefit.", link: { label: "Learn more about Options", href: "/options" } },
-  { question: "What are common fees for Options?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about Options", href: "/options" } },
-  { question: "How to compare Options options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about Options", href: "/options" } },
-];
-
-const OPTIONS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "options", label: "Options Overview", icon: Star },
-  { slug: "options-tips", label: "Options Tips", icon: Star },
-  { slug: "options-reviews", label: "Options Reviews", icon: Star },
-];
-
   TrendingUp,
   PieChart,
   Briefcase,
