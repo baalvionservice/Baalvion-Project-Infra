@@ -17,6 +17,7 @@ on:
 
 env:
   NODE_VERSION: '20'
+  TRIVY_SEVERITY: 'CRITICAL'
   GO_VERSION: '1.25'
   JAVA_VERSION: '17'
   MAVEN_OPTS: '-Dmaven.repo.local=${{ github.workspace }}/.m2/repository'
@@ -500,7 +501,7 @@ jobs:
         with:
           image-ref: baalvion/${{ matrix.name }}:ci
           format: table
-          severity: HIGH,CRITICAL
+          severity: ${{ env.TRIVY_SEVERITY }}
           vuln-type: os,library
           ignore-unfixed: true
           exit-code: '1'

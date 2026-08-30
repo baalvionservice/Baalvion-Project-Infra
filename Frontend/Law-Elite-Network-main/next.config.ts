@@ -158,6 +158,14 @@ const nextConfig: NextConfig = {
       // backed by any actual filtering) -- a near-duplicate competing for the
       // same search intent, consolidated the same way as the redirects above.
       { source: '/world', destination: '/news', permanent: true },
+      // /plans advertised paid tiers with feature claims (AI case summaries,
+      // predictive insights, document auditing, priority matching, etc.) that
+      // don't exist anywhere in the backend, alongside false "PCI-DSS
+      // compliant" / "settlement verification" copy -- no payment is actually
+      // processed on upgrade. Removed rather than rewritten; see the lawyer
+      // registration wizard's inline subscription step for the same catalog
+      // used elsewhere.
+      { source: '/plans', destination: '/', permanent: true },
       // Trailing-slash duplicates of root-flat article/category URLs -- the
       // canonical form (articleUrl() in src/lib/article-url.ts and the
       // category-hub routes) never has a trailing slash, but these specific

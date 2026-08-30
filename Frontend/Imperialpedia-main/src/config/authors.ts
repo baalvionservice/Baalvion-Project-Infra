@@ -37,6 +37,33 @@ export interface AuthorProfile {
 
 export const authors: AuthorProfile[] = [
   {
+    slug: 'nathan-reiff',
+    name: 'Nathan Reiff',
+    title: 'Financial Writer & Economics Researcher',
+    role: 'writer',
+    bio: 'Nathan Reiff is a financial writer and economic researcher with over a decade of experience covering macroeconomic policy, personal finance, investing strategies, and deposit banking.',
+    social: {
+      twitter: 'https://twitter.com/imperialpedia',
+      linkedin: 'https://linkedin.com/company/imperialpedia',
+    },
+  },
+  {
+    slug: 'julius-mansa',
+    name: 'Julius Mansa',
+    title: 'Financial Reviewer & CFO Consultant',
+    role: 'reviewer',
+    credentials: 'CFO Consultant & Financial Analysis Specialist',
+    bio: 'Julius Mansa is an experienced financial consultant and educator specializing in corporate finance, financial accounting, personal budgeting, and investment analysis.',
+  },
+  {
+    slug: 'yarilet-perez',
+    name: 'Yarilet Perez',
+    title: 'Fact-Checking Editor',
+    role: 'fact-checker',
+    credentials: 'Fact-Checking & Economic Research Standards',
+    bio: 'Yarilet Perez is an editorial fact-checker with extensive experience in verifying economic indicators, banking disclosures, and investment data against primary regulatory sources.',
+  },
+  {
     slug: 'allen-krewzz',
     name: 'Allen Krewzz',
     title: 'Financial Writer & Analyst',

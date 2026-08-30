@@ -1,7 +1,7 @@
 # Monorepo-aware build for the pnpm workspace (build model: Option A).
 # BUILD CONTEXT MUST BE THE REPO ROOT:
 #   docker build -f Backend/services/ecosystem/giftcard-service/Dockerfile -t giftcard-service .
-FROM node:20-alpine AS base
+FROM node:20.12-alpine AS base
 RUN corepack enable
 WORKDIR /repo
 
@@ -17,7 +17,7 @@ RUN pnpm install --no-frozen-lockfile --filter giftcard-service...
 COPY --from=pruner /repo/out/full/ ./
 RUN pnpm deploy --filter=giftcard-service --prod /out
 
-FROM node:20-alpine AS final
+FROM node:20.12-alpine AS final
 # Patch OS packages (e.g. openssl) and drop the runtime-unused npm/corepack shipped in the
 # node base image (its bundled deps are the source of the image-layer CVE findings).
 RUN apk upgrade --no-cache \

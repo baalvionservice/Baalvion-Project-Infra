@@ -40,9 +40,10 @@ import {
 } from "@/lib/article/render-helpers";
 import { TrendingNowModule, MoreInCategoryModule } from "@/components/article/ArticleSidebarModules";
 import { ArticleByline } from "@/components/article/ArticleByline";
-import { PreferredSourceButton } from "@/components/common/PreferredSourceButton";
 import { AdSenseUnit } from "@/components/common/AdSense";
+import { PreferredSourceButton } from "@/components/common/PreferredSourceButton";
 import { SourcesCited } from "@/modules/content-engine/components/SourcesCited";
+import { KeyTakeawaysBox } from "@/components/pages/KeyTakeawaysBox";
 import { ListenBar } from "@/components/article/ListenBar";
 
 type ArticleType = NewsArticle;
@@ -418,28 +419,15 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
               ))}
             </div>
 
-            <h1 className="text-foreground text-3xl md:text-[2.75rem] font-extrabold leading-[1.1] tracking-tight mt-3">
-              {article.title}
-            </h1>
+            {/* Article Title */}
+            <Heading level={1}>{article.title}</Heading>
 
             <p className="article-excerpt text-lg text-gray-600 leading-relaxed mt-4 max-w-2xl">
               {article.excerpt}
             </p>
 
             {article.keyTakeaways && article.keyTakeaways.length > 0 && (
-              <div className="key-points mt-6 border border-gray-200 bg-gray-50 rounded-sm p-5">
-                <h2 className="text-xs font-black tracking-widest text-gray-900 uppercase mb-3">
-                  Key Points
-                </h2>
-                <ul className="space-y-2">
-                  {article.keyTakeaways.map((point, i) => (
-                    <li key={i} className="flex gap-2.5 text-sm text-gray-700 leading-relaxed">
-                      <span className="mt-1.5 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-[#CC0000]" />
-                      {point}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <KeyTakeawaysBox items={article.keyTakeaways} />
             )}
 
             <div className="flex flex-wrap items-center justify-between gap-4 py-5 mt-5 border-y border-gray-200">

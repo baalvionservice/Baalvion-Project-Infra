@@ -22,15 +22,14 @@ import { getAuthorBySlug as getStaticAuthorBySlug, getAllAuthors as getStaticAut
 import type { EntityMention } from '@/lib/entityLinkInjector';
 import { REGIONS } from '@/lib/data/worldRegions';
 import { isRemovedArticlePath } from '@/lib/content/removed-article-paths';
+import { getEditorialGuide } from '@/lib/articles/editorial-guides';
 
 // In production default to the API gateway's public delivery host (not localhost,
 // and not an empty string that silently forced the built-in fallback). A deploy
 // can still override via NEXT_PUBLIC_CMS_PUBLIC_URL.
 export const CMS_PUBLIC_URL =
   process.env.NEXT_PUBLIC_CMS_PUBLIC_URL ||
-  (process.env.NODE_ENV === 'production'
-    ? 'https://api.baalvion.com/api/v1/public'
-    : 'http://localhost:3018/api/v1/public');
+  'https://api.baalvion.com/api/v1/public';
 export const CMS_SITE_SLUG = process.env.NEXT_PUBLIC_CMS_SITE_SLUG || 'imperialpedia';
 
 // Validates Google's publisher-ID shape ("ca-pub-" + 10–20 digits). Anything else
@@ -810,12 +809,16 @@ export function cmsContentToArticle(raw: CmsContent, categoryMap?: ReadonlyMap<s
       correctIndex: Number(q.correctIndex),
       explanation: typeof q.explanation === 'string' ? q.explanation : undefined,
     }));
+  const guide = getEditorialGuide(raw.slug);
+  const body = guide?.bodyHtml || blocksToHtml(raw.contentBlocks, categoryMap) || undefined;
+  const guideWords = guide ? guide.bodyHtml.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length : words;
+
   return {
     id: raw.id,
     slug: raw.slug,
-    title: raw.title,
-    description: raw.excerpt ?? '',
-    body: blocksToHtml(raw.contentBlocks, categoryMap) || undefined,
+    title: guide?.title || raw.title,
+    description: guide?.description || raw.excerpt || '',
+    body,
     authorId: String(raw.authorId ?? 'imperialpedia'),
     authorName,
     authorSlug,
@@ -823,7 +826,7 @@ export function cmsContentToArticle(raw: CmsContent, categoryMap?: ReadonlyMap<s
     reviewedAt,
     factCheckerSlug,
     factCheckedAt,
-    citations: citations.length ? citations : undefined,
+    citations: guide?.citations || (citations.length ? citations : undefined),
     publishedAt: raw.publishedAt ?? undefined,
     updatedAt: raw.updatedAt ?? raw.publishedAt ?? new Date().toISOString(),
     category: raw.category?.name ?? 'General',
@@ -831,7 +834,7 @@ export function cmsContentToArticle(raw: CmsContent, categoryMap?: ReadonlyMap<s
     tags: raw.tagIds ?? [],
     status: 'published' as ArticleStatus,
     contentType: raw.contentType,
-    readingTime: Math.max(1, Math.round(words / 200)),
+    readingTime: Math.max(1, Math.round(guideWords / 200)),
     // The CMS never falls back to stock/placeholder imagery — cms-service generates
     // real original artwork on create/update (@baalvion/illustrations); this inline
     // data-URI is only a safety net for rows that somehow still have none.
@@ -839,9 +842,14 @@ export function cmsContentToArticle(raw: CmsContent, categoryMap?: ReadonlyMap<s
       raw.featuredImage,
       articleArtDataUri({ title: raw.title, category: raw.category?.name, tags: raw.tagIds, excerpt: raw.excerpt, seed: raw.id }),
     ),
-    seoTitle: raw.seoMetadata?.title || raw.title,
-    seoDescription: raw.seoMetadata?.description || raw.excerpt || '',
+    seoTitle: raw.seoMetadata?.title || guide?.title || raw.title,
+    seoDescription: raw.seoMetadata?.description || guide?.description || raw.excerpt || '',
     seoKeywords: raw.seoMetadata?.keywords || raw.tagIds || [],
+    keyTakeaways: guide?.keyTakeaways || (Array.isArray(cf.keyTakeaways)
+      ? (cf.keyTakeaways as unknown[]).map(String)
+      : Array.isArray(cf.takeaways)
+      ? (cf.takeaways as unknown[]).map(String)
+      : undefined),
     faq: faq.length ? faq : undefined,
     entityMentions: raw.entityMentions?.length ? raw.entityMentions : undefined,
     quiz: quiz.length ? quiz : undefined,
