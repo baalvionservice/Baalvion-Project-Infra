@@ -3,6 +3,7 @@ import "./globals.css";
 import { Metadata } from "next";
 import { env } from "@/config/env";
 import { Source_Serif_4 } from "next/font/google";
+import localFont from "next/font/local";
 import { cn } from "@/lib/utils";
 import RootLayoutClient from "@/components/common/RootLayoutClient";
 import { Analytics } from "@/components/common/Analytics";
@@ -116,10 +117,12 @@ export const metadata: Metadata = {
 
 // Client-side layout content is now in RootLayoutClient
 
-// Investopedia-style typography: a readable transitional serif for editorial
-// headlines, paired with a neutral Helvetica/Arial system sans for body + UI
-// (the body/UI stack lives in globals.css + tailwind.config — no webfont needed,
-// matching Investopedia's native Helvetica Neue / Arial rendering).
+const corinthian = localFont({
+  src: "../fonts/Corinthian-Medium.ttf",
+  variable: "--font-corinthian",
+  display: "swap",
+});
+
 const sourceSerif = Source_Serif_4({
   subsets: ["latin"],
   weight: ["400", "600", "700", "900"],
@@ -146,7 +149,7 @@ export default async function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn(sourceSerif.variable)}
+      className={cn(sourceSerif.variable, corinthian.variable)}
     >
       <head>
         {/* Google Consent Mode v2 -- must run BEFORE the GTM/GA loaders and the

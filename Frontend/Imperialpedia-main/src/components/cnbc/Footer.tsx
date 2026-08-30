@@ -41,11 +41,11 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="bg-black text-gray-400 mt-8">
+    <footer className="bg-[#0B1528] text-gray-300 mt-8 border-t border-[#16284A]">
       <div className="max-w-screen-xl mx-auto px-4 py-10">
         {/* Logo */}
         <div className="flex items-center gap-3 mb-8">
-          <div className="world-kicker flex items-center gap-2 bg-[hsl(var(--cnbc-red))] text-white font-black text-xl px-3 py-1 tracking-tight">
+          <div className="world-kicker flex items-center gap-2 bg-[#122344] text-white font-black text-xl px-3 py-1 tracking-tight rounded">
             <ImperialpediaMark className="h-5 w-5 text-white" />
             IMPERIALPEDIA
           </div>

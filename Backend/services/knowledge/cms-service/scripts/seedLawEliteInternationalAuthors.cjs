@@ -54,6 +54,7 @@ const SITE = process.env.WEBSITE_SLUG || 'law-elite-network';
 
 const ARGS = process.argv.slice(2);
 const DRY_RUN = ARGS.includes('--dry-run');
+const PATCH_BIOS = ARGS.includes('--patch-bios');
 
 const CMS_BASE = TARGET_CMS_BASE || CMS;
 const BASE = `${CMS_BASE.replace(/\/+$/, '')}/cms/websites/${encodeURIComponent(SITE)}`;
@@ -156,12 +157,12 @@ function toPayload([slug, name, country, org, category, expertise], index) {
     slug,
     title: `Legal Professional — ${category}`,
     credentials: `${org} · ${country}`,
-    bio: `${name} is a publicly documented legal professional associated with ${org} in ${country}, with a professional profile centred on ${expertiseJoined}.`,
+    bio: `${name} is a legal professional at ${org} in ${country}, with a professional focus on ${expertiseJoined}.`,
     expertise,
     editorialRole: 'contributor',
     seoMetadata: {
       title: `${name} | ${category} | Law Elite Network`,
-      description: `Professional profile of ${name}, associated with ${org}, with publicly documented expertise in ${expertiseJoined}.`,
+      description: `Professional profile of ${name}, associated with ${org}, with expertise in ${expertiseJoined}.`,
       keywords: [name, org, country, category, 'lawyer', 'legal professional', 'Law Elite Network'],
     },
     sortOrder: index + 1,
@@ -218,6 +219,29 @@ async function main() {
   const existingRes = await req('GET', `${BASE}/authors`, token);
   const existingList = existingRes.data?.data || [];
   const idBySlug = new Map(existingList.map((a) => [a.slug, a.id]));
+
+  // One-off correction for the 80 profiles already live with the earlier
+  // bio/description wording ("publicly documented legal professional" /
+  // "publicly documented expertise") -- an overreaching claim for people
+  // whose credentials the source doc marks as unverified. This only PATCHes
+  // bio/seoMetadata.description on authors that already exist; it never
+  // creates or changes status. Safe to re-run.
+  if (PATCH_BIOS) {
+    let patched = 0, missing = 0, failed = 0;
+    for (const payload of AUTHORS) {
+      const id = idBySlug.get(payload.slug);
+      if (!id) { missing++; continue; }
+      const res = await req('PATCH', `${BASE}/authors/${id}`, token, {
+        bio: payload.bio,
+        seoMetadata: payload.seoMetadata,
+      });
+      if (res.status === 200) patched++;
+      else { failed++; console.error(`bio patch ${payload.slug} -> ${res.status}`, JSON.stringify(res.data).slice(0, 200)); }
+      await sleep(100);
+    }
+    console.log(JSON.stringify({ ok: true, mode: 'patch-bios', site: SITE, base: BASE, patched, missing, failed, total: AUTHORS.length }, null, 2));
+    return;
+  }
 
   let created = 0, skipped = 0, failed = 0;
   for (const payload of AUTHORS) {

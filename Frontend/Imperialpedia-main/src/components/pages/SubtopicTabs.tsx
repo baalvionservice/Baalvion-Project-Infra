@@ -20,25 +20,27 @@ export function SubtopicTabs({ current, siblings }: SubtopicTabsProps) {
       aria-label="Related topics"
       className="border-b border-gray-100 -mx-4 px-4 sm:mx-0 sm:px-0"
     >
-      <div className="flex gap-1 overflow-x-auto no-scrollbar">
-        {siblings.map((s) => {
-          const isCurrent = s.slug === current;
-          return (
-            <Link
-              key={s.slug}
-              href={`/${s.slug}`}
-              aria-current={isCurrent ? "page" : undefined}
-              className={cn(
-                "shrink-0 whitespace-nowrap border-b-2 px-3 py-3 text-sm font-semibold transition-colors",
-                isCurrent
-                  ? "border-gray-900 text-foreground"
-                  : "border-transparent text-muted-foreground hover:text-foreground hover:border-gray-300"
-              )}
-            >
-              {s.label}
-            </Link>
-          );
-        })}
+      <div className="relative">
+        <div className="flex gap-1 overflow-x-auto scrollbar-none [mask-image:linear-gradient(to_right,white_85%,transparent_100%)]">
+          {siblings.map((s) => {
+            const isCurrent = s.slug === current;
+            return (
+              <Link
+                key={s.slug}
+                href={`/${s.slug}`}
+                aria-current={isCurrent ? "page" : undefined}
+                className={cn(
+                  "shrink-0 whitespace-nowrap border-b-2 px-3 py-3 text-sm font-semibold transition-colors",
+                  isCurrent
+                    ? "border-primary text-foreground"
+                    : "border-transparent text-muted-foreground hover:text-foreground hover:border-gray-300"
+                )}
+              >
+                {s.label}
+              </Link>
+            );
+          })}
+        </div>
       </div>
     </nav>
   );
