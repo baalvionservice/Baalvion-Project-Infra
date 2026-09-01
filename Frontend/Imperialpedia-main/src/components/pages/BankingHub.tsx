@@ -1,5 +1,21 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
+
+const BANKING_FAQS: FaqItem[] = [
+  { question: "What is Banking?", answer: "Banking is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about Banking", href: "/banking" } },
+  { question: "How does Banking work?", answer: "Banking works by providing features such as ... (brief description).", link: { label: "Learn more about Banking", href: "/banking" } },
+  { question: "Who should consider Banking?", answer: "Anyone looking to improve their banking situation can benefit.", link: { label: "Learn more about Banking", href: "/banking" } },
+  { question: "What are common fees for Banking?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about Banking", href: "/banking" } },
+  { question: "How to compare Banking options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about Banking", href: "/banking" } },
+];
+
+const BANKING_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
+  { slug: "banking", label: "Banking Overview", icon: Star },
+  { slug: "banking-tips", label: "Banking Tips", icon: Star },
+  { slug: "banking-reviews", label: "Banking Reviews", icon: Star },
+];
+
   PiggyBank,
   Wallet,
   CreditCard,
@@ -19,14 +35,16 @@ import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listCmsContent, cmsContentToArticle } from "@/services/data/cms-public";
 import { staticCategoryNews, staticArticleList } from "@/services/data/static-content";
 import { topicCopy, staticCategoryFor } from "@/lib/topic-config";
-import { FeaturedArticleCard } from "@/components/pages/FeaturedArticleCard";
-import { HorizontalArticleCard } from "@/components/pages/HorizontalArticleCard";
 import { TrustBar } from "@/components/pages/TrustBar";
 import { TopicCard } from "@/components/pages/TopicCard";
 import { ProductSection } from "@/components/pages/ProductSection";
 import { ComparisonsSection, findComparisons } from "@/components/pages/ComparisonsSection";
 import { ArticleCard } from "@/app/news/NewsArticleCard";
-import HeadingSection from "@/components/layout/HeadingSection";
+import EditorialHeader from "@/components/pages/EditorialHeader";
+import { EditorialSpotlight } from "@/components/pages/EditorialSpotlight";
+import { InvestopediaKeyTerms, type KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
+import { InvestopediaFaqBox, type FaqItem } from "@/components/pages/InvestopediaFaqBox";
+import { EditorialArticleGuide } from "@/components/pages/EditorialArticleGuide";
 import { NewsletterForm } from "@/components/landing/NewsletterForm";
 import FAQAccordionSection from "@/components/faq/FAQAccordionSection";
 import { env } from "@/config/env";
@@ -84,6 +102,80 @@ const EXPLORE_MORE = [
   { href: "/economy", label: "Economy" },
   { href: "/personal-finance", label: "Personal Finance" },
   { href: "/reviews", label: "Reviews" },
+];
+
+/** Core financial terms matching Investopedia's taxonomy pattern and screenshots. */
+const BANKING_KEY_TERMS: KeyTermItem[] = [
+  {
+    term: "Deposit",
+    definition:
+      "A deposit with a bank refers to money held by the financial institution in a customer account. Deposits are held by banks for safekeeping and typically earn interest depending on the type of account.",
+    href: "/savings",
+  },
+  {
+    term: "Checking Account",
+    definition:
+      "A checking account is a type of bank account held at a financial institution that permits withdrawals and deposits on a daily transactional basis. Checking accounts are highly liquid and accessible via debit cards, ATMs, and online transfers.",
+    href: "/checking",
+  },
+  {
+    term: "Federal Deposit Insurance Corporation (FDIC)",
+    definition:
+      "The Federal Deposit Insurance Corporation (FDIC) is an independent federal agency insuring deposits in U.S. banks to protect customers from bank failures, providing up to $250,000 per depositor per institution.",
+    href: "/banking",
+  },
+  {
+    term: "Bank Statement",
+    definition:
+      "A bank statement is an official summary of financial transactions occurring within a given monthly cycle for a bank account, detailing deposits, withdrawals, and ending balance.",
+    href: "/banking",
+  },
+  {
+    term: "Underbanked",
+    definition:
+      "Underbanked refers to individuals or families who have a bank account but often rely on alternative financial services like money orders, check-cashing outlets, and payday lenders.",
+    href: "/banking",
+  },
+];
+
+/** Investopedia curated FAQ items matching screenshot 1. */
+const INVESTOPEDIA_FAQS: FaqItem[] = [
+  {
+    question: "How does banking in the 21st century work?",
+    answer:
+      "Banking in the 21st century means being able to conduct all transactions digitally without needing to physically visit a branch location. Deposits, withdrawals, payments, and transfers can be conducted online or by phone app as well as applications for credit cards and loans.",
+    link: { label: "Learn More: Digital & Mobile Banking Guide", href: "/banking" },
+  },
+  {
+    question: "How does banking work?",
+    answer:
+      "Banks are a vital part of the economy because they provide secure custody for deposits, issue loans, and facilitate payments. Consumers can deposit funds, earn interest in savings accounts, and conduct everyday transactions using checking accounts and digital apps.",
+    link: { label: "Bank Definition: How Does Banking Work?", href: "/banking" },
+  },
+  {
+    question: "What is the history of deposit insurance?",
+    answer:
+      "The federal government began offering insurance on bank deposits in 1933 through the creation of the FDIC after thousands of banks failed during the Great Depression. The FDIC protects consumers up to $250,000 per account.",
+    link: { label: "The History of the FDIC", href: "/banking" },
+  },
+  {
+    question: "Are big banks a safer option for deposits?",
+    answer:
+      "Larger banks typically provide significant stability and extensive branch/ATM networks. Any FDIC-insured institution—large or community-based—guarantees protection up to $250,000 per depositor.",
+    link: { label: "Reasons Why Big Banks May Be a Wise Option", href: "/banking" },
+  },
+  {
+    question: "What is a national bank?",
+    answer:
+      "A national bank is a commercial bank chartered by the U.S. Comptroller of the Currency that operates as a member of the Federal Reserve System and participates in mandatory FDIC deposit insurance.",
+    link: { label: "National Bank Definition", href: "/banking" },
+  },
+  {
+    question: "What are bank fees?",
+    answer:
+      "Bank fees are charges levied for account maintenance, out-of-network ATM use, overdrafts, wire transfers, and paper statements. Many modern accounts waive these fees with direct deposit.",
+    link: { label: "Bank Fees Definition", href: "/banking" },
+  },
 ];
 
 /** Evergreen conceptual FAQs — general finance education, not time-bound facts —
@@ -336,61 +428,63 @@ export async function BankingHub() {
         />
       )}
 
-      <HeadingSection tag={copy.tag} title={copy.title} description={copy.description} />
-      <p className="text-center text-xs font-semibold uppercase tracking-widest text-muted-foreground -mt-2 pb-4">
-        {totalGuides}+ Banking Guides &middot; Reviewed &amp; Updated Regularly
-      </p>
-
-      {/* Pillar primer — same keyTakeaways/sections pattern CategoryFeed and
-          BudgetingHub render for sibling hubs, so /banking is a real
-          educational resource in its own right, not just a page of links. */}
-      {(copy.keyTakeaways?.length || copy.sections?.length) ? (
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="max-w-3xl pb-12">
-            {copy.keyTakeaways && copy.keyTakeaways.length > 0 && (
-              <div className="mb-8 rounded-lg border border-border bg-muted/30 p-5">
-                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">
-                  Key Takeaways
-                </p>
-                <ul className="space-y-2">
-                  {copy.keyTakeaways.map((point, i) => (
-                    <li key={i} className="flex gap-2 text-sm leading-relaxed text-foreground">
-                      <span aria-hidden="true" className="text-primary">&bull;</span>
-                      <span>{point}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {copy.sections && copy.sections.length > 0 && (
-              <div className="space-y-8">
-                {copy.sections.map((section, i) => (
-                  <div key={i}>
-                    <h2 className="text-lg font-bold text-foreground mb-3">{section.heading}</h2>
-                    <div className="space-y-3">
-                      {section.body.map((paragraph, j) => (
-                        <p key={j} className="text-sm leading-relaxed text-muted-foreground">
-                          {paragraph}
-                        </p>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      ) : null}
+      {/* Investopedia Editorial Header (Centered) */}
+      <EditorialHeader
+        eyebrow={{ label: "Personal Finance", href: "/personal-finance" }}
+        title={copy.title}
+        description="Banking in the 21st century means being able to conduct all transactions digitally without needing to physically visit a branch location. Deposits, withdrawals, payments, and transfers can be conducted online or by phone app as well as applications for credit cards and loans."
+      />
 
       <TrustBar />
 
-      <div className="max-w-7xl mx-auto px-4 py-4 space-y-16">
-        {/* Banking Topics dashboard */}
-        <section>
-          <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
-            Banking Topics
-          </h2>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-16">
+        {/* Investopedia 5-Post Lead Spotlight (Lead on Left - Screenshot 4) */}
+        <EditorialSpotlight
+          badgeLabel="ALL ABOUT BANKING"
+          featured={featured ?? undefined}
+          sidebarArticles={sidebarArticles.slice(0, 4)}
+          categoryLabel={copy.title}
+          layout="left"
+        />
+
+        {/* Investopedia Blue-Bordered FAQ Box (Screenshot 1 & 3) */}
+        <InvestopediaFaqBox
+          title="Frequently Asked Questions"
+          faqs={INVESTOPEDIA_FAQS}
+        />
+
+        {/* Investopedia Dark Navy Key Terms Widget (Screenshot 2) */}
+        <InvestopediaKeyTerms
+          title="Key Terms"
+          terms={BANKING_KEY_TERMS}
+        />
+
+        {/* Investopedia 5-Post Spotlight 2 (Reversed: 4 stories Left, Lead Right - Screenshot 2 & 5) */}
+        {startHere.length > 0 && (
+          <EditorialSpotlight
+            badgeLabel="FEATURED GUIDES"
+            featured={startHere[0]}
+            sidebarArticles={sidebarArticles.slice(2, 6).concat(startHere.slice(1, 4))}
+            categoryLabel={copy.title}
+            layout="right"
+          />
+        )}
+
+        {/* In-Depth Newspaper Editorial Guide & Key Takeaways */}
+        <EditorialArticleGuide
+          title={`Essential ${copy.title} Guide: Principles & Practical Rules`}
+          categoryName={copy.title}
+          keyTakeaways={copy.keyTakeaways}
+          sections={copy.sections}
+        />
+
+        {/* Banking Topics Shelf */}
+        <section className="space-y-6">
+          <div className="border-b border-border pb-3">
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+              Explore Banking Topics
+            </h2>
+          </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             {dashboardCards.map((card) => (
               <TopicCard
@@ -405,24 +499,12 @@ export async function BankingHub() {
           </div>
         </section>
 
-        {featured && (
-          <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <aside className="flex flex-col">
-              {sidebarArticles.map((article) => (
-                <HorizontalArticleCard key={article.id} article={article} />
-              ))}
-            </aside>
-            <div className="lg:col-span-2">
-              <FeaturedArticleCard article={featured} />
-            </div>
-          </section>
-        )}
-
         {startHere.length > 0 && (
           <section>
-            <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+            <h2 className="flex items-center gap-3 text-sm font-bold uppercase tracking-widest text-foreground mb-6">
+              <span className="h-4 w-1 rounded-full bg-emerald-500" />
               Start Here
-            </h3>
+            </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {startHere.map((article) => (
                 <ArticleCard key={article.id} article={article} />
@@ -444,10 +526,10 @@ export async function BankingHub() {
 
         {/* Banking Reviews — a dedicated area, never mixed with the guides above */}
         <section>
-          <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
-            <Star className="h-4 w-4" />
+          <h2 className="flex items-center gap-3 text-sm font-bold uppercase tracking-widest text-foreground mb-6">
+            <span className="h-4 w-1 rounded-full bg-yellow-400" />
             Banking Reviews
-          </h3>
+          </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {reviewCards.map((r) => (
               <Link
@@ -456,10 +538,12 @@ export async function BankingHub() {
                 className="group flex flex-col gap-2 rounded-2xl border border-gray-100 bg-white p-5 transition-colors hover:border-gray-900"
               >
                 <p className="text-sm font-bold text-foreground">{r.label}</p>
-                {r.count > 0 && (
+                {r.count > 0 ? (
                   <p className="text-xs text-gray-400">
                     {r.count} review{r.count === 1 ? "" : "s"}
                   </p>
+                ) : (
+                  <p className="text-xs text-muted-foreground/60">No reviews yet</p>
                 )}
                 <span className="mt-auto inline-flex items-center gap-1 text-xs font-semibold text-foreground group-hover:underline">
                   Compare
@@ -474,10 +558,9 @@ export async function BankingHub() {
 
         {/* Banking Calculators — real, working tools only */}
         <section>
-          <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
-            <Calculator className="h-4 w-4" />
+          <h2 className="flex items-center gap-3 text-sm font-bold uppercase tracking-widest text-foreground mb-6 border-l-4 border-primary pl-4">
             Banking Calculators
-          </h3>
+          </h2>
           <div className="flex flex-wrap gap-3">
             {CALCULATORS.map((tool) => (
               <Link
@@ -495,11 +578,40 @@ export async function BankingHub() {
         {/* Banking News — recency-sorted, deliberately separate from the evergreen guides below */}
         {bankingNews.length > 0 && (
           <section>
-            <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
-              <Newspaper className="h-4 w-4" />
+            <h2 className="flex items-center gap-3 text-sm font-bold uppercase tracking-widest text-foreground mb-6 border-l-4 border-primary pl-4">
               Banking News
-            </h3>
+            </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {bankingNews.map((article) => (
+                <Link key={article.id} href={newsArticleHref(article)} className="group flex flex-col rounded-xl border border-border overflow-hidden transition-all hover:shadow-md hover:-translate-y-0.5">
+                  <div className="relative w-full aspect-[16/9] overflow-hidden">
+                    <Image
+                      src={article.imageUrl}
+                      alt={article.title}
+                      fill
+                      className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      sizes="(max-width: 640px) 100vw, 25vw"
+                    />
+                  </div>
+                  <div className="p-3 space-y-1">
+                    <p className="text-xs font-semibold text-primary">{article.category}</p>
+                    <h3 className="text-sm font-bold text-foreground leading-snug group-hover:underline line-clamp-3">
+                      {article.title}
+                    </h3>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Banking Guides — evergreen education, never mixed with news */}
+        <section>
+          <h2 className="flex items-center gap-3 text-sm font-bold uppercase tracking-widest text-foreground mb-6 border-l-4 border-accent pl-4">
+            Banking Guides
+          </h2>
+          {bankingNews.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
               {bankingNews.map((article) => (
                 <Link key={article.id} href={newsArticleHref(article)} className="group block">
                   <p className="text-xs font-semibold text-primary mb-1">{article.category}</p>
@@ -509,16 +621,9 @@ export async function BankingHub() {
                 </Link>
               ))}
             </div>
-          </section>
-        )}
-
-        {/* Banking Guides — evergreen education, never mixed with news */}
-        <section>
-          <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
-            <BookOpen className="h-4 w-4" />
-            Banking Guides
-          </h3>
+          )}
           <div className="flex flex-wrap gap-3">
+            <p className="w-full text-xs text-muted-foreground mb-1">Also explore:</p>
             {BANKING_GUIDES.map((guide) => (
               <Link
                 key={guide.href}
@@ -552,9 +657,9 @@ export async function BankingHub() {
 
         {/* Explore More — internal cross-links to the other mega-menu categories */}
         <section>
-          <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+          <h2 className="flex items-center gap-3 text-sm font-bold uppercase tracking-widest text-foreground mb-6 border-l-4 border-muted-foreground pl-4">
             Explore More
-          </h3>
+          </h2>
           <div className="flex flex-wrap gap-x-8 gap-y-3">
             {EXPLORE_MORE.map((link) => (
               <Link

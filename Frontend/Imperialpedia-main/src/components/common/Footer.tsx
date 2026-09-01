@@ -181,7 +181,7 @@ function PromoBox({
 export default function Footer() {
   return (
     <footer
-      className="bg-[#2d3a4f] text-slate-300 pt-14 pb-8"
+      className="bg-[#0B1528] text-white pt-14 pb-8 border-t border-[#16284A]"
       role="contentinfo"
     >
       <Container>

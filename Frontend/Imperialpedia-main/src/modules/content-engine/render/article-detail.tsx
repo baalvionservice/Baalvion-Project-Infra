@@ -27,11 +27,39 @@ import { resolveAuthor, getContentRedirectSlug, getArticleFeedback, listArticleC
  * regardless of which URL resolved it.
  */
 
+import { getEditorialGuide } from "@/lib/articles/editorial-guides";
+
 export async function resolveArticleForDetail(slug: string): Promise<Article | null> {
   const response = await articlesService.getArticleBySlug(slug);
   // Live CMS first; baked snapshot keeps the article available when the CMS is offline.
   const article = (response.data ?? staticArticleBySlug(slug)) as unknown as Article | null;
   if (article) return article;
+
+  // Check editorial masterclass guides
+  const editorial = getEditorialGuide(slug);
+  if (editorial) {
+    return {
+      id: slug,
+      slug: editorial.slug,
+      title: editorial.title,
+      description: editorial.description,
+      body: editorial.bodyHtml,
+      category: "Savings & Budgeting",
+      categorySlug: "savings",
+      tags: ["Savings", "Budgeting", "Emergency Fund", "Personal Finance"],
+      readTime: "8 min read",
+      publishedAt: "2026-08-29T10:00:00Z",
+      updatedAt: "2026-08-29T14:30:00Z",
+      featuredImage: "/images/editorial/savings-budgeting.jpg",
+      imageCaption: "Financial planning, emergency reserves, and deposit safety.",
+      keyTakeaways: editorial.keyTakeaways,
+      citations: editorial.citations,
+      authorSlug: "nathan-reiff",
+      reviewerSlug: "julius-mansa",
+      factCheckerSlug: "yarilet-perez",
+      faq: [],
+    } as unknown as Article;
+  }
 
   // Not found under this slug — it may have been renamed. Follow the recorded
   // redirect (one hop only; cms-service already collapses rename chains) rather

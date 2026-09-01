@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import type { NewsArticle } from "@/lib/data.news";
 import { ArticleCard } from "@/app/news/NewsArticleCard";
@@ -14,54 +15,65 @@ type Props = {
 };
 
 /**
- * One topic section shared by the Banking and Personal Finance hubs — a
- * pillar-guide highlight (the topic's strongest real, live article) plus a
- * supporting-articles grid. The pillar slot is a content-strategy label, not
- * a stand-in for an article that doesn't exist yet — it always points at
- * whatever real piece currently leads that category, so nothing here is a
- * fabricated link.
+ * Investopedia-style topic product section:
+ * Header with "See all ->", 1 large lead guide on left, and 4 supporting article cards on right.
  */
 export function ProductSection({ slug, label, icon: Icon, articles }: Props) {
   if (!articles.length) return null;
   const [pillar, ...supporting] = articles;
 
   return (
-    <section>
-      <div className="flex items-center justify-between mb-6 pb-2">
-        <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400">
-          <Icon className="h-4 w-4" />
+    <section className="space-y-6">
+      <div className="flex items-center justify-between border-b border-border pb-3">
+        <h2 className="flex items-center gap-2.5 text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+          <Icon className="h-5 w-5 text-primary" />
           {label}
         </h2>
         <Link
           href={`/${slug}`}
-          className="inline-flex items-center gap-1 text-xs font-semibold text-foreground hover:text-primary"
+          className="inline-flex items-center gap-1 text-xs sm:text-sm font-bold text-primary hover:underline"
         >
-          See all
-          <ArrowRight className="h-3 w-3" />
+          See all in {label}
+          <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Pillar / Lead Guide */}
         <Link
           href={newsArticleHref(pillar)}
-          className="group flex flex-col justify-between rounded-2xl border border-gray-100 bg-gray-50 p-6 lg:col-span-1"
+          className="group block space-y-3.5 lg:col-span-4 rounded-xl border border-border bg-card p-5 shadow-sm transition-all hover:shadow-md hover:border-primary/40"
         >
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-widest text-primary mb-2">Pillar Guide</p>
-            <h3 className="text-lg font-bold text-foreground leading-snug group-hover:underline">
+          <div className="relative aspect-[16/10] w-full overflow-hidden rounded-lg bg-muted">
+            <Image
+              src={pillar.imageUrl}
+              alt={pillar.title}
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              sizes="(max-width: 1024px) 100vw, 33vw"
+            />
+          </div>
+          <div className="space-y-2">
+            <span className="inline-block text-[10px] font-extrabold uppercase tracking-widest text-primary bg-primary/10 px-2 py-0.5 rounded">
+              Lead Guide
+            </span>
+            <h3 className="text-lg font-bold text-foreground leading-snug group-hover:text-primary transition-colors line-clamp-2">
               {pillar.title}
             </h3>
             {pillar.excerpt && (
-              <p className="mt-2 text-xs text-gray-500 leading-relaxed line-clamp-3">{pillar.excerpt}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed line-clamp-3">
+                {pillar.excerpt}
+              </p>
             )}
+            <p className="text-xs text-muted-foreground pt-1">
+              By {pillar.author.name} &middot; {formatDate(pillar.publishedAt)}
+            </p>
           </div>
-          <p className="mt-4 text-xs text-gray-400">
-            {formatDate(pillar.publishedAt)}
-          </p>
         </Link>
 
+        {/* Supporting articles (2x2 grid) */}
         {supporting.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 lg:col-span-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 lg:col-span-8">
             {supporting.slice(0, 4).map((article) => (
               <ArticleCard key={article.id} article={article} categoryLabel={label} />
             ))}
