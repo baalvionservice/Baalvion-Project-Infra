@@ -16,28 +16,6 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-const AUTOLOANS_FAQS: FaqItem[] = [
-  { question: "What is AutoLoans?", answer: "AutoLoans is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about AutoLoans", href: "/autoloans" } },
-  { question: "How does AutoLoans work?", answer: "AutoLoans works by providing features such as ... (brief description).", link: { label: "Learn more about AutoLoans", href: "/autoloans" } },
-  { question: "Who should consider AutoLoans?", answer: "Anyone looking to improve their autoloans situation can benefit.", link: { label: "Learn more about AutoLoans", href: "/autoloans" } },
-  { question: "What are common fees for AutoLoans?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about AutoLoans", href: "/autoloans" } },
-  { question: "How to compare AutoLoans options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about AutoLoans", href: "/autoloans" } },
-];
-
-const AUTOLOANS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "autoloans", label: "AutoLoans Overview", icon: Star },
-  { slug: "autoloans-tips", label: "AutoLoans Tips", icon: Star },
-  { slug: "autoloans-reviews", label: "AutoLoans Reviews", icon: Star },
-];
-
-const AUTOLOANS_KEY_TERMS: KeyTermItem[] = [
-  { term: "AutoLoans Basics", definition: "An overview of autoloans fundamentals, covering core concepts and why they matter.", href: "/autoloans" },
-  { term: "Advanced AutoLoans", definition: "Deep dive into advanced aspects of autoloans, including strategies and best practices.", href: "/autoloans" },
-  { term: "AutoLoans Fees", definition: "Explanation of typical fees associated with autoloans and how to minimize them.", href: "/autoloans" },
-  { term: "AutoLoans Benefits", definition: "Key advantages of using autoloans for personal finance management.", href: "/autoloans" },
-  { term: "AutoLoans Risks", definition: "Potential risks and pitfalls to watch out for when dealing with autoloans.", href: "/autoloans" },
-];
-
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listCmsContent, cmsContentToArticle } from "@/services/data/cms-public";
 import { staticCategoryNews, staticArticleList } from "@/services/data/static-content";

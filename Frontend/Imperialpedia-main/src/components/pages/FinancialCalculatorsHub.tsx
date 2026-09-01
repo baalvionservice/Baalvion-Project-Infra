@@ -16,28 +16,6 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-const FINANCIALCALCULATORS_FAQS: FaqItem[] = [
-  { question: "What is FinancialCalculators?", answer: "FinancialCalculators is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about FinancialCalculators", href: "/financialcalculators" } },
-  { question: "How does FinancialCalculators work?", answer: "FinancialCalculators works by providing features such as ... (brief description).", link: { label: "Learn more about FinancialCalculators", href: "/financialcalculators" } },
-  { question: "Who should consider FinancialCalculators?", answer: "Anyone looking to improve their financialcalculators situation can benefit.", link: { label: "Learn more about FinancialCalculators", href: "/financialcalculators" } },
-  { question: "What are common fees for FinancialCalculators?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about FinancialCalculators", href: "/financialcalculators" } },
-  { question: "How to compare FinancialCalculators options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about FinancialCalculators", href: "/financialcalculators" } },
-];
-
-const FINANCIALCALCULATORS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "financialcalculators", label: "FinancialCalculators Overview", icon: Star },
-  { slug: "financialcalculators-tips", label: "FinancialCalculators Tips", icon: Star },
-  { slug: "financialcalculators-reviews", label: "FinancialCalculators Reviews", icon: Star },
-];
-
-const FINANCIALCALCULATORS_KEY_TERMS: KeyTermItem[] = [
-  { term: "FinancialCalculators Basics", definition: "An overview of financialcalculators fundamentals, covering core concepts and why they matter.", href: "/financialcalculators" },
-  { term: "Advanced FinancialCalculators", definition: "Deep dive into advanced aspects of financialcalculators, including strategies and best practices.", href: "/financialcalculators" },
-  { term: "FinancialCalculators Fees", definition: "Explanation of typical fees associated with financialcalculators and how to minimize them.", href: "/financialcalculators" },
-  { term: "FinancialCalculators Benefits", definition: "Key advantages of using financialcalculators for personal finance management.", href: "/financialcalculators" },
-  { term: "FinancialCalculators Risks", definition: "Potential risks and pitfalls to watch out for when dealing with financialcalculators.", href: "/financialcalculators" },
-];
-
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listCmsContent, cmsContentToArticle } from "@/services/data/cms-public";
 import { staticCategoryNews, staticArticleList } from "@/services/data/static-content";
