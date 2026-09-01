@@ -51,7 +51,6 @@ const LEARNING_PATH_SLUGS = [
   "fundamental-analysis-explained",
 ];
 
-
 const MARKET_INDEXES = [
   { slug: "sp-500", name: "S&P 500" },
   { slug: "nasdaq-composite", name: "Nasdaq" },

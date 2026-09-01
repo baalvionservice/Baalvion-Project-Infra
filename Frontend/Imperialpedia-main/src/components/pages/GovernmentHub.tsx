@@ -16,28 +16,6 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-const GOVERNMENT_FAQS: FaqItem[] = [
-  { question: "What is Government?", answer: "Government is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about Government", href: "/government" } },
-  { question: "How does Government work?", answer: "Government works by providing features such as ... (brief description).", link: { label: "Learn more about Government", href: "/government" } },
-  { question: "Who should consider Government?", answer: "Anyone looking to improve their government situation can benefit.", link: { label: "Learn more about Government", href: "/government" } },
-  { question: "What are common fees for Government?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about Government", href: "/government" } },
-  { question: "How to compare Government options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about Government", href: "/government" } },
-];
-
-const GOVERNMENT_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "government", label: "Government Overview", icon: Star },
-  { slug: "government-tips", label: "Government Tips", icon: Star },
-  { slug: "government-reviews", label: "Government Reviews", icon: Star },
-];
-
-const GOVERNMENT_KEY_TERMS: KeyTermItem[] = [
-  { term: "Government Basics", definition: "An overview of government fundamentals, covering core concepts and why they matter.", href: "/government" },
-  { term: "Advanced Government", definition: "Deep dive into advanced aspects of government, including strategies and best practices.", href: "/government" },
-  { term: "Government Fees", definition: "Explanation of typical fees associated with government and how to minimize them.", href: "/government" },
-  { term: "Government Benefits", definition: "Key advantages of using government for personal finance management.", href: "/government" },
-  { term: "Government Risks", definition: "Potential risks and pitfalls to watch out for when dealing with government.", href: "/government" },
-];
-
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listCmsContent, cmsContentToArticle } from "@/services/data/cms-public";
 import { staticCategoryNews, staticArticleList } from "@/services/data/static-content";

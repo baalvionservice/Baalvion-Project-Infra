@@ -16,28 +16,6 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-const GDP_FAQS: FaqItem[] = [
-  { question: "What is Gdp?", answer: "Gdp is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about Gdp", href: "/gdp" } },
-  { question: "How does Gdp work?", answer: "Gdp works by providing features such as ... (brief description).", link: { label: "Learn more about Gdp", href: "/gdp" } },
-  { question: "Who should consider Gdp?", answer: "Anyone looking to improve their gdp situation can benefit.", link: { label: "Learn more about Gdp", href: "/gdp" } },
-  { question: "What are common fees for Gdp?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about Gdp", href: "/gdp" } },
-  { question: "How to compare Gdp options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about Gdp", href: "/gdp" } },
-];
-
-const GDP_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "gdp", label: "Gdp Overview", icon: Star },
-  { slug: "gdp-tips", label: "Gdp Tips", icon: Star },
-  { slug: "gdp-reviews", label: "Gdp Reviews", icon: Star },
-];
-
-const GDP_KEY_TERMS: KeyTermItem[] = [
-  { term: "Gdp Basics", definition: "An overview of gdp fundamentals, covering core concepts and why they matter.", href: "/gdp" },
-  { term: "Advanced Gdp", definition: "Deep dive into advanced aspects of gdp, including strategies and best practices.", href: "/gdp" },
-  { term: "Gdp Fees", definition: "Explanation of typical fees associated with gdp and how to minimize them.", href: "/gdp" },
-  { term: "Gdp Benefits", definition: "Key advantages of using gdp for personal finance management.", href: "/gdp" },
-  { term: "Gdp Risks", definition: "Potential risks and pitfalls to watch out for when dealing with gdp.", href: "/gdp" },
-];
-
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listCmsContent, cmsContentToArticle } from "@/services/data/cms-public";
 import { staticCategoryNews, staticArticleList } from "@/services/data/static-content";

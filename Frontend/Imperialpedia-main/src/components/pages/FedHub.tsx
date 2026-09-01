@@ -16,28 +16,6 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-const FED_FAQS: FaqItem[] = [
-  { question: "What is Fed?", answer: "Fed is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about Fed", href: "/fed" } },
-  { question: "How does Fed work?", answer: "Fed works by providing features such as ... (brief description).", link: { label: "Learn more about Fed", href: "/fed" } },
-  { question: "Who should consider Fed?", answer: "Anyone looking to improve their fed situation can benefit.", link: { label: "Learn more about Fed", href: "/fed" } },
-  { question: "What are common fees for Fed?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about Fed", href: "/fed" } },
-  { question: "How to compare Fed options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about Fed", href: "/fed" } },
-];
-
-const FED_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "fed", label: "Fed Overview", icon: Star },
-  { slug: "fed-tips", label: "Fed Tips", icon: Star },
-  { slug: "fed-reviews", label: "Fed Reviews", icon: Star },
-];
-
-const FED_KEY_TERMS: KeyTermItem[] = [
-  { term: "Fed Basics", definition: "An overview of fed fundamentals, covering core concepts and why they matter.", href: "/fed" },
-  { term: "Advanced Fed", definition: "Deep dive into advanced aspects of fed, including strategies and best practices.", href: "/fed" },
-  { term: "Fed Fees", definition: "Explanation of typical fees associated with fed and how to minimize them.", href: "/fed" },
-  { term: "Fed Benefits", definition: "Key advantages of using fed for personal finance management.", href: "/fed" },
-  { term: "Fed Risks", definition: "Potential risks and pitfalls to watch out for when dealing with fed.", href: "/fed" },
-];
-
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listCmsContent, cmsContentToArticle } from "@/services/data/cms-public";
 import { staticCategoryNews, staticArticleList } from "@/services/data/static-content";

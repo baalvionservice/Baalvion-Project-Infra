@@ -16,28 +16,6 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-const CREDITCARDS_FAQS: FaqItem[] = [
-  { question: "What is CreditCards?", answer: "CreditCards is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about CreditCards", href: "/creditcards" } },
-  { question: "How does CreditCards work?", answer: "CreditCards works by providing features such as ... (brief description).", link: { label: "Learn more about CreditCards", href: "/creditcards" } },
-  { question: "Who should consider CreditCards?", answer: "Anyone looking to improve their creditcards situation can benefit.", link: { label: "Learn more about CreditCards", href: "/creditcards" } },
-  { question: "What are common fees for CreditCards?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about CreditCards", href: "/creditcards" } },
-  { question: "How to compare CreditCards options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about CreditCards", href: "/creditcards" } },
-];
-
-const CREDITCARDS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "creditcards", label: "CreditCards Overview", icon: Star },
-  { slug: "creditcards-tips", label: "CreditCards Tips", icon: Star },
-  { slug: "creditcards-reviews", label: "CreditCards Reviews", icon: Star },
-];
-
-const CREDITCARDS_KEY_TERMS: KeyTermItem[] = [
-  { term: "CreditCards Basics", definition: "An overview of creditcards fundamentals, covering core concepts and why they matter.", href: "/creditcards" },
-  { term: "Advanced CreditCards", definition: "Deep dive into advanced aspects of creditcards, including strategies and best practices.", href: "/creditcards" },
-  { term: "CreditCards Fees", definition: "Explanation of typical fees associated with creditcards and how to minimize them.", href: "/creditcards" },
-  { term: "CreditCards Benefits", definition: "Key advantages of using creditcards for personal finance management.", href: "/creditcards" },
-  { term: "CreditCards Risks", definition: "Potential risks and pitfalls to watch out for when dealing with creditcards.", href: "/creditcards" },
-];
-
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listCmsContent, cmsContentToArticle } from "@/services/data/cms-public";
 import { staticCategoryNews, staticArticleList } from "@/services/data/static-content";

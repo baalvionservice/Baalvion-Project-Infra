@@ -16,28 +16,6 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-const FISCALPOLICY_FAQS: FaqItem[] = [
-  { question: "What is FiscalPolicy?", answer: "FiscalPolicy is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about FiscalPolicy", href: "/fiscalpolicy" } },
-  { question: "How does FiscalPolicy work?", answer: "FiscalPolicy works by providing features such as ... (brief description).", link: { label: "Learn more about FiscalPolicy", href: "/fiscalpolicy" } },
-  { question: "Who should consider FiscalPolicy?", answer: "Anyone looking to improve their fiscalpolicy situation can benefit.", link: { label: "Learn more about FiscalPolicy", href: "/fiscalpolicy" } },
-  { question: "What are common fees for FiscalPolicy?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about FiscalPolicy", href: "/fiscalpolicy" } },
-  { question: "How to compare FiscalPolicy options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about FiscalPolicy", href: "/fiscalpolicy" } },
-];
-
-const FISCALPOLICY_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "fiscalpolicy", label: "FiscalPolicy Overview", icon: Star },
-  { slug: "fiscalpolicy-tips", label: "FiscalPolicy Tips", icon: Star },
-  { slug: "fiscalpolicy-reviews", label: "FiscalPolicy Reviews", icon: Star },
-];
-
-const FISCALPOLICY_KEY_TERMS: KeyTermItem[] = [
-  { term: "FiscalPolicy Basics", definition: "An overview of fiscalpolicy fundamentals, covering core concepts and why they matter.", href: "/fiscalpolicy" },
-  { term: "Advanced FiscalPolicy", definition: "Deep dive into advanced aspects of fiscalpolicy, including strategies and best practices.", href: "/fiscalpolicy" },
-  { term: "FiscalPolicy Fees", definition: "Explanation of typical fees associated with fiscalpolicy and how to minimize them.", href: "/fiscalpolicy" },
-  { term: "FiscalPolicy Benefits", definition: "Key advantages of using fiscalpolicy for personal finance management.", href: "/fiscalpolicy" },
-  { term: "FiscalPolicy Risks", definition: "Potential risks and pitfalls to watch out for when dealing with fiscalpolicy.", href: "/fiscalpolicy" },
-];
-
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listCmsContent, cmsContentToArticle } from "@/services/data/cms-public";
 import { staticCategoryNews, staticArticleList } from "@/services/data/static-content";
