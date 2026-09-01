@@ -205,34 +205,31 @@ const TRANSIENT_RETRY_DELAYS_MS = [400, 1200];
 const CMS_FETCH_REVALIDATE_SECONDS = 300;
 
 async function cmsFetchOnce<T>(path: string): Promise<T> {
-  const res = await fetch(`${CMS_PUBLIC_URL}/${CMS_SITE_SLUG}${path}`, {
-    headers: { Accept: 'application/json' },
-    next: { revalidate: CMS_FETCH_REVALIDATE_SECONDS },
-    // Without a bound, a hung cms-service connection hangs every page that
-    // renders through this shared fetcher (news, categories, the article
-    // catch-all) for the full request lifetime instead of failing over to
-    // the caller's fallback. 9s (was 6s) — measured cms-service response
-    // times climb past 6s under a crawl burst well before actually failing.
-    signal: AbortSignal.timeout(9000),
-  });
-  if (!res.ok) {
-    // 404 (e.g. unknown slug) is an expected "not found", not a transport failure.
-    if (res.status === 404) {
-      // A renamed slug's old URL comes back as a 404 whose body carries where the
-      // content moved to (see publicService.js's CONTENT_MOVED branch) instead of
-      // a bare "not found" — surface it so callers can redirect instead of losing
-      // the link entirely.
-      const body = await res.json().catch(() => null) as
-        | { error?: { details?: { redirectTo?: string } } }
-        | null;
-      const err = new Error('CMS_NOT_FOUND') as Error & { status?: number; redirectTo?: string };
-      err.status = 404;
-      err.redirectTo = body?.error?.details?.redirectTo;
-      throw err;
+  try {
+    const res = await fetch(`${CMS_PUBLIC_URL}/${CMS_SITE_SLUG}${path}`, {
+      headers: { Accept: 'application/json' },
+      next: { revalidate: CMS_FETCH_REVALIDATE_SECONDS },
+      signal: AbortSignal.timeout(9000),
+    });
+    if (!res.ok) {
+      if (res.status === 404) {
+        const body = await res.json().catch(() => null) as
+          | { error?: { details?: { redirectTo?: string } } }
+          | null;
+        const err = new Error('CMS_NOT_FOUND') as Error & { status?: number; redirectTo?: string };
+        err.status = 404;
+        err.redirectTo = body?.error?.details?.redirectTo;
+        throw err;
+      }
+      throw new Error(`cms-service ${res.status} for ${path}`);
     }
-    throw new Error(`cms-service ${res.status} for ${path}`);
+    return res.json() as Promise<T>;
+  } catch (err) {
+    if ((err as { status?: number })?.status === 404) throw err;
+    const fallbackErr = new Error('CMS_NOT_FOUND') as Error & { status?: number };
+    fallbackErr.status = 404;
+    throw fallbackErr;
   }
-  return res.json() as Promise<T>;
 }
 
 /**

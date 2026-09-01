@@ -1,21 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import {
-
-const BANKING_FAQS: FaqItem[] = [
-  { question: "What is Banking?", answer: "Banking is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about Banking", href: "/banking" } },
-  { question: "How does Banking work?", answer: "Banking works by providing features such as ... (brief description).", link: { label: "Learn more about Banking", href: "/banking" } },
-  { question: "Who should consider Banking?", answer: "Anyone looking to improve their banking situation can benefit.", link: { label: "Learn more about Banking", href: "/banking" } },
-  { question: "What are common fees for Banking?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about Banking", href: "/banking" } },
-  { question: "How to compare Banking options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about Banking", href: "/banking" } },
-];
-
-const BANKING_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "banking", label: "Banking Overview", icon: Star },
-  { slug: "banking-tips", label: "Banking Tips", icon: Star },
-  { slug: "banking-reviews", label: "Banking Reviews", icon: Star },
-];
-
   PiggyBank,
   Wallet,
   CreditCard,
@@ -30,6 +15,20 @@ const BANKING_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.C
   Newspaper,
   ArrowRight,
 } from "lucide-react";
+
+import { type FaqItem } from "@/components/pages/InvestopediaFaqBox";
+
+const BANKING_FAQS: FaqItem[] = [
+  { question: "What is Banking?", answer: "Banking is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about Banking", href: "/banking" } },
+  { question: "How does Banking work?", answer: "Banking works by providing features such as deposits, interest, and payments.", link: { label: "Learn more about Banking", href: "/banking" } },
+  { question: "Who should consider Banking?", answer: "Anyone looking to manage personal or business funds securely can benefit.", link: { label: "Learn more about Banking", href: "/banking" } },
+];
+
+const BANKING_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
+  { slug: "banking", label: "Banking Overview", icon: Star },
+  { slug: "banking-tips", label: "Banking Tips", icon: Star },
+  { slug: "banking-reviews", label: "Banking Reviews", icon: Star },
+];
 
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listCmsContent, cmsContentToArticle } from "@/services/data/cms-public";
