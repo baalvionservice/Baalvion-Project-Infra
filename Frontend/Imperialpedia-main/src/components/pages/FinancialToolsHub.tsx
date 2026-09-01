@@ -29,8 +29,6 @@ const FINANCIALTOOLS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: 
   { slug: "financialtools-tips", label: "FinancialTools Tips", icon: Star },
   { slug: "financialtools-reviews", label: "FinancialTools Reviews", icon: Star },
 ];
-import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
-import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
 
 const FINANCIALTOOLS_KEY_TERMS: KeyTermItem[] = [
   { term: "FinancialTools Basics", definition: "An overview of financialtools fundamentals, covering core concepts and why they matter.", href: "/financialtools" },

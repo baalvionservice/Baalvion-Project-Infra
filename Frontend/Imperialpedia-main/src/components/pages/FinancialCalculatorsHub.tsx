@@ -29,8 +29,6 @@ const FINANCIALCALCULATORS_PRODUCT_TOPICS: Array<{ slug: string; label: string; 
   { slug: "financialcalculators-tips", label: "FinancialCalculators Tips", icon: Star },
   { slug: "financialcalculators-reviews", label: "FinancialCalculators Reviews", icon: Star },
 ];
-import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
-import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
 
 const FINANCIALCALCULATORS_KEY_TERMS: KeyTermItem[] = [
   { term: "FinancialCalculators Basics", definition: "An overview of financialcalculators fundamentals, covering core concepts and why they matter.", href: "/financialcalculators" },

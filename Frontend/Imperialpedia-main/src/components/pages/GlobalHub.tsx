@@ -29,8 +29,6 @@ const GLOBAL_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.Co
   { slug: "global-tips", label: "Global Tips", icon: Star },
   { slug: "global-reviews", label: "Global Reviews", icon: Star },
 ];
-import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
-import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
 
 const GLOBAL_KEY_TERMS: KeyTermItem[] = [
   { term: "Global Basics", definition: "An overview of global fundamentals, covering core concepts and why they matter.", href: "/global" },

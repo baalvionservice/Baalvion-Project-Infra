@@ -29,8 +29,6 @@ const BUDGETRULES_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: Rea
   { slug: "budgetrules-tips", label: "BudgetRules Tips", icon: Star },
   { slug: "budgetrules-reviews", label: "BudgetRules Reviews", icon: Star },
 ];
-import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
-import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
 
 const BUDGETRULES_KEY_TERMS: KeyTermItem[] = [
   { term: "BudgetRules Basics", definition: "An overview of budgetrules fundamentals, covering core concepts and why they matter.", href: "/budgetrules" },

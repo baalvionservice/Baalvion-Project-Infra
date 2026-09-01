@@ -29,8 +29,6 @@ const AFFILIATEDISCLOSURE_PRODUCT_TOPICS: Array<{ slug: string; label: string; i
   { slug: "affiliatedisclosure-tips", label: "AffiliateDisclosure Tips", icon: Star },
   { slug: "affiliatedisclosure-reviews", label: "AffiliateDisclosure Reviews", icon: Star },
 ];
-import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
-import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
 
 const AFFILIATEDISCLOSURE_KEY_TERMS: KeyTermItem[] = [
   { term: "AffiliateDisclosure Basics", definition: "An overview of affiliatedisclosure fundamentals, covering core concepts and why they matter.", href: "/affiliatedisclosure" },

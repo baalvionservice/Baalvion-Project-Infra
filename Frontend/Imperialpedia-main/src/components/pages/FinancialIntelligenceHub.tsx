@@ -29,8 +29,6 @@ const FINANCIALINTELLIGENCE_PRODUCT_TOPICS: Array<{ slug: string; label: string;
   { slug: "financialintelligence-tips", label: "FinancialIntelligence Tips", icon: Star },
   { slug: "financialintelligence-reviews", label: "FinancialIntelligence Reviews", icon: Star },
 ];
-import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
-import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
 
 const FINANCIALINTELLIGENCE_KEY_TERMS: KeyTermItem[] = [
   { term: "FinancialIntelligence Basics", definition: "An overview of financialintelligence fundamentals, covering core concepts and why they matter.", href: "/financialintelligence" },

@@ -29,8 +29,6 @@ const AUTHORS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.C
   { slug: "authors-tips", label: "Authors Tips", icon: Star },
   { slug: "authors-reviews", label: "Authors Reviews", icon: Star },
 ];
-import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
-import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
 
 const AUTHORS_KEY_TERMS: KeyTermItem[] = [
   { term: "Authors Basics", definition: "An overview of authors fundamentals, covering core concepts and why they matter.", href: "/authors" },

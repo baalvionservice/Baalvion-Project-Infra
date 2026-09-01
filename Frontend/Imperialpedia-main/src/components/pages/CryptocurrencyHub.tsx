@@ -29,8 +29,6 @@ const CRYPTOCURRENCY_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: 
   { slug: "cryptocurrency-tips", label: "Cryptocurrency Tips", icon: Star },
   { slug: "cryptocurrency-reviews", label: "Cryptocurrency Reviews", icon: Star },
 ];
-import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
-import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
 
 const CRYPTOCURRENCY_KEY_TERMS: KeyTermItem[] = [
   { term: "Cryptocurrency Basics", definition: "An overview of cryptocurrency fundamentals, covering core concepts and why they matter.", href: "/cryptocurrency" },

@@ -29,8 +29,6 @@ const AUTOLOANS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React
   { slug: "autoloans-tips", label: "AutoLoans Tips", icon: Star },
   { slug: "autoloans-reviews", label: "AutoLoans Reviews", icon: Star },
 ];
-import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
-import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
 
 const AUTOLOANS_KEY_TERMS: KeyTermItem[] = [
   { term: "AutoLoans Basics", definition: "An overview of autoloans fundamentals, covering core concepts and why they matter.", href: "/autoloans" },

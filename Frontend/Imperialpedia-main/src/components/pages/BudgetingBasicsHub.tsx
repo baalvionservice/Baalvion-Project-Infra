@@ -29,8 +29,6 @@ const BUDGETINGBASICS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon:
   { slug: "budgetingbasics-tips", label: "BudgetingBasics Tips", icon: Star },
   { slug: "budgetingbasics-reviews", label: "BudgetingBasics Reviews", icon: Star },
 ];
-import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
-import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
 
 const BUDGETINGBASICS_KEY_TERMS: KeyTermItem[] = [
   { term: "BudgetingBasics Basics", definition: "An overview of budgetingbasics fundamentals, covering core concepts and why they matter.", href: "/budgetingbasics" },

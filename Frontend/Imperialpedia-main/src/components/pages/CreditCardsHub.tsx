@@ -29,8 +29,6 @@ const CREDITCARDS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: Rea
   { slug: "creditcards-tips", label: "CreditCards Tips", icon: Star },
   { slug: "creditcards-reviews", label: "CreditCards Reviews", icon: Star },
 ];
-import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
-import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
 
 const CREDITCARDS_KEY_TERMS: KeyTermItem[] = [
   { term: "CreditCards Basics", definition: "An overview of creditcards fundamentals, covering core concepts and why they matter.", href: "/creditcards" },

@@ -29,8 +29,6 @@ const FISCALPOLICY_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: Re
   { slug: "fiscalpolicy-tips", label: "FiscalPolicy Tips", icon: Star },
   { slug: "fiscalpolicy-reviews", label: "FiscalPolicy Reviews", icon: Star },
 ];
-import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
-import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
 
 const FISCALPOLICY_KEY_TERMS: KeyTermItem[] = [
   { term: "FiscalPolicy Basics", definition: "An overview of fiscalpolicy fundamentals, covering core concepts and why they matter.", href: "/fiscalpolicy" },

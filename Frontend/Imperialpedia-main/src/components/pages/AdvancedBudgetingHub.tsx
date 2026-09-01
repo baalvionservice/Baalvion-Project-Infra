@@ -29,8 +29,6 @@ const ADVANCEDBUDGETING_PRODUCT_TOPICS: Array<{ slug: string; label: string; ico
   { slug: "advancedbudgeting-tips", label: "AdvancedBudgeting Tips", icon: Star },
   { slug: "advancedbudgeting-reviews", label: "AdvancedBudgeting Reviews", icon: Star },
 ];
-import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
-import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
 
 const ADVANCEDBUDGETING_KEY_TERMS: KeyTermItem[] = [
   { term: "AdvancedBudgeting Basics", definition: "An overview of advancedbudgeting fundamentals, covering core concepts and why they matter.", href: "/advancedbudgeting" },

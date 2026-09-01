@@ -29,8 +29,6 @@ const FED_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.Compo
   { slug: "fed-tips", label: "Fed Tips", icon: Star },
   { slug: "fed-reviews", label: "Fed Reviews", icon: Star },
 ];
-import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
-import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
 
 const FED_KEY_TERMS: KeyTermItem[] = [
   { term: "Fed Basics", definition: "An overview of fed fundamentals, covering core concepts and why they matter.", href: "/fed" },

@@ -29,8 +29,6 @@ const BUDGETINGAPPS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: R
   { slug: "budgetingapps-tips", label: "BudgetingApps Tips", icon: Star },
   { slug: "budgetingapps-reviews", label: "BudgetingApps Reviews", icon: Star },
 ];
-import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
-import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
 
 const BUDGETINGAPPS_KEY_TERMS: KeyTermItem[] = [
   { term: "BudgetingApps Basics", definition: "An overview of budgetingapps fundamentals, covering core concepts and why they matter.", href: "/budgetingapps" },

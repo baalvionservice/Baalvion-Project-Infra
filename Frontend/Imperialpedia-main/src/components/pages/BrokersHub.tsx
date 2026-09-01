@@ -29,8 +29,6 @@ const BROKERS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.C
   { slug: "brokers-tips", label: "Brokers Tips", icon: Star },
   { slug: "brokers-reviews", label: "Brokers Reviews", icon: Star },
 ];
-import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
-import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
 
 const BROKERS_KEY_TERMS: KeyTermItem[] = [
   { term: "Brokers Basics", definition: "An overview of brokers fundamentals, covering core concepts and why they matter.", href: "/brokers" },

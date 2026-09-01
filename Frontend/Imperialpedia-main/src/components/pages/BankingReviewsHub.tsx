@@ -29,8 +29,6 @@ const BANKINGREVIEWS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: 
   { slug: "bankingreviews-tips", label: "BankingReviews Tips", icon: Star },
   { slug: "bankingreviews-reviews", label: "BankingReviews Reviews", icon: Star },
 ];
-import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
-import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
 
 const BANKINGREVIEWS_KEY_TERMS: KeyTermItem[] = [
   { term: "BankingReviews Basics", definition: "An overview of bankingreviews fundamentals, covering core concepts and why they matter.", href: "/bankingreviews" },

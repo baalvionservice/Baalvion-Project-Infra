@@ -29,8 +29,6 @@ const APPREVIEWS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: Reac
   { slug: "appreviews-tips", label: "AppReviews Tips", icon: Star },
   { slug: "appreviews-reviews", label: "AppReviews Reviews", icon: Star },
 ];
-import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
-import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
 
 const APPREVIEWS_KEY_TERMS: KeyTermItem[] = [
   { term: "AppReviews Basics", definition: "An overview of appreviews fundamentals, covering core concepts and why they matter.", href: "/appreviews" },

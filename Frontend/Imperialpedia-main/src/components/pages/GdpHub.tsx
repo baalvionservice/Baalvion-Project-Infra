@@ -29,8 +29,6 @@ const GDP_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.Compo
   { slug: "gdp-tips", label: "Gdp Tips", icon: Star },
   { slug: "gdp-reviews", label: "Gdp Reviews", icon: Star },
 ];
-import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
-import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
 
 const GDP_KEY_TERMS: KeyTermItem[] = [
   { term: "Gdp Basics", definition: "An overview of gdp fundamentals, covering core concepts and why they matter.", href: "/gdp" },

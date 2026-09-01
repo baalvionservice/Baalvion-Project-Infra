@@ -29,8 +29,6 @@ const FAMILYBUDGET_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: Re
   { slug: "familybudget-tips", label: "FamilyBudget Tips", icon: Star },
   { slug: "familybudget-reviews", label: "FamilyBudget Reviews", icon: Star },
 ];
-import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
-import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
 
 const FAMILYBUDGET_KEY_TERMS: KeyTermItem[] = [
   { term: "FamilyBudget Basics", definition: "An overview of familybudget fundamentals, covering core concepts and why they matter.", href: "/familybudget" },

@@ -29,8 +29,6 @@ const GOVERNMENT_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: Reac
   { slug: "government-tips", label: "Government Tips", icon: Star },
   { slug: "government-reviews", label: "Government Reviews", icon: Star },
 ];
-import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
-import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
 
 const GOVERNMENT_KEY_TERMS: KeyTermItem[] = [
   { term: "Government Basics", definition: "An overview of government fundamentals, covering core concepts and why they matter.", href: "/government" },
