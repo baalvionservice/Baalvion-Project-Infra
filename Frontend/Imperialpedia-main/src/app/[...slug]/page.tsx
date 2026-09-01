@@ -420,7 +420,7 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
             </div>
 
             {/* Article Title */}
-            <Heading level={1}>{article.title}</Heading>
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 font-headline">{article.title}</h1>
 
             <p className="article-excerpt text-lg text-gray-600 leading-relaxed mt-4 max-w-2xl">
               {article.excerpt}
