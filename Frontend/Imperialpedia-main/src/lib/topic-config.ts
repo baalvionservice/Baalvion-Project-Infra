@@ -936,6 +936,84 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaTitle: 'Loan Reviews — Lenders Compared',
     metaDescription:
       'Independent lender reviews comparing rates, fees, and eligibility across personal, auto, and mortgage loans.',
+    keyTakeaways: [
+      "The APR is the comparison figure that matters, because it folds fees into the interest rate — a lower headline rate with high origination fees can cost more overall.",
+      "Prequalification usually uses a soft credit check that does not affect your score; a formal application triggers a hard inquiry that does.",
+      "Origination fees are commonly deducted from the amount advanced, so you must borrow more than you need to receive the sum you wanted.",
+      "Loan term drives a direct trade-off: longer terms lower the monthly payment while increasing total interest paid.",
+      "Any lender demanding an upfront payment before releasing funds is exhibiting a classic advance-fee fraud pattern.",
+    ],
+    sections: [
+      {
+        heading: "Compare APR, Not the Advertised Rate",
+        body: [
+          "Lenders advertise interest rates, but the annual percentage rate is the figure that permits genuine comparison, because it incorporates the interest rate together with required fees expressed as an annualised cost.",
+          "The difference is not academic. A loan advertising a lower interest rate but charging a substantial origination fee can carry a higher APR — and cost more in total — than one advertising a higher rate with no fees.",
+          "Advertised rates also typically represent the best tier available to the most creditworthy applicants. The rate you are actually offered depends on your credit profile, income and the term selected, and may sit well above the marketing figure. Only a personalised quote tells you anything reliable.",
+        ],
+      },
+      {
+        heading: "Protecting Your Credit While Shopping",
+        body: [
+          "Prequalification produces an estimated rate using a soft credit inquiry, which does not affect your credit score. This allows comparison across several lenders at no cost.",
+          "A formal application triggers a hard inquiry, which can reduce a score slightly. Credit scoring models generally treat multiple inquiries for the same loan type within a short window as a single event, recognising that rate shopping is rational behaviour, though the length of that window varies by model.",
+          "The practical approach is to prequalify broadly, narrow to the best one or two offers, and submit formal applications within a concentrated period rather than spread across months.",
+        ],
+      },
+      {
+        heading: "The Fees That Change the Arithmetic",
+        body: [
+          "Origination fees are charged for processing and are frequently deducted from the disbursement rather than billed separately. A borrower requesting a given amount receives less than requested and repays interest on the full figure, which means you must gross up the request to receive what you actually need.",
+          "Prepayment penalties charge for repaying early. They are prohibited on many consumer loan types and absent from most reputable personal loans, but the loan agreement should be checked directly rather than assumed.",
+          "Late fees, returned payment fees and any charge for paper statements or phone payments complete the picture. None is individually large, but they indicate how a lender treats its customers.",
+          "Some lenders offer a small rate reduction for automatic payment enrolment. It is genuine, though it is worth confirming whether it can be withdrawn and what happens if a payment is returned.",
+        ],
+      },
+      {
+        heading: "Term Length and What It Costs",
+        body: [
+          "Extending a loan term reduces the monthly payment and increases the total interest paid, because the balance is outstanding for longer. Both effects are substantial, and lenders naturally lead with the first.",
+          "The right choice depends on the purpose. For debt consolidation aimed at reducing total cost, the shortest term with an affordable payment is usually correct. For a loan taken to manage cash flow through a specific period, a longer term with lower payments may be the point.",
+          "Run the total repayment figure, not just the monthly payment, before deciding. A payment that appears comfortably affordable can conceal a total cost far above the amount borrowed, and the total is the number that reflects what the loan actually costs.",
+        ],
+      },
+      {
+        heading: "Recognising Predatory Offers",
+        body: [
+          "Any lender requiring a payment before releasing funds is exhibiting the defining pattern of advance-fee fraud. Legitimate lenders deduct fees from the disbursement or add them to the balance; they do not ask borrowers to send money first.",
+          "Guaranteed approval regardless of credit history is not a service any regulated lender can offer, since lending decisions require assessing ability to repay. Pressure to decide immediately, unsolicited contact, and reluctance to provide written terms before application are all warning signs.",
+          "Verify registration before providing personal information. In the United States, lenders are licensed at state level and the Nationwide Multistate Licensing System registry allows verification. The Consumer Financial Protection Bureau maintains a public complaint database, and searching a lender's name there is a fast and informative check.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "What is the difference between interest rate and APR?",
+        answer:
+          "The interest rate is the cost of borrowing the principal. The APR additionally includes required fees such as origination charges, expressed as an annualised percentage. Because it captures the full cost, APR is the correct figure for comparing offers, and a loan with a lower interest rate can have a higher APR once fees are counted.",
+      },
+      {
+        question: "Does shopping for a loan hurt my credit score?",
+        answer:
+          "Prequalification uses a soft inquiry and has no effect. Formal applications create hard inquiries, which can lower a score slightly. Scoring models generally count multiple inquiries for the same loan type within a short window as one event, so concentrating your applications limits the impact.",
+      },
+      {
+        question: "What is an origination fee?",
+        answer:
+          "It is a charge for processing the loan, usually a percentage of the amount borrowed and typically deducted from the funds you receive. If you need a specific sum, you must borrow enough to cover the fee as well, and interest is charged on the full borrowed amount rather than the net amount received.",
+      },
+      {
+        question: "How can I tell whether a lender is legitimate?",
+        answer:
+          "Confirm the lender is licensed to operate in your state, which can be checked through the Nationwide Multistate Licensing System registry, and search the Consumer Financial Protection Bureau complaint database. Treat any request for payment before funds are released as fraud, along with guaranteed approval claims and pressure to commit immediately.",
+      },
+    ],
+    relatedReading: [
+      { slug: "loans", anchor: "How Personal Loans Work" },
+      { slug: "credit", anchor: "How Your Credit Score Affects the Rate You Are Offered" },
+      { slug: "debt", anchor: "Debt Consolidation: When It Helps and When It Does Not" },
+      { slug: "auto-loans", anchor: "Auto Financing and APR Comparison" },
+    ],
   },
   'app-reviews': {
     tag: 'APP REVIEWS',
@@ -945,6 +1023,88 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaTitle: 'Banking App Reviews — Features & Security Compared',
     metaDescription:
       'Independent reviews of banking and budgeting apps, covering features, security, fees, and usability.',
+    keyTakeaways: [
+      "How a financial app makes money determines whose interests it serves, and this is disclosed but rarely prominent.",
+      "Most budgeting and investing apps connect to your bank through a third-party data aggregator rather than directly.",
+      "Read-only access is materially safer than an integration authorised to move money.",
+      "Free apps frequently monetise through product referrals, so recommendations may reflect referral economics rather than suitability.",
+      "Check where an app is regulated and what protection applies to any money it holds — a budgeting tool and a brokerage carry entirely different protections.",
+    ],
+    sections: [
+      {
+        heading: "Start With the Business Model",
+        body: [
+          "Before assessing features, establish how the app earns revenue. The answer explains most of its design decisions.",
+          "Subscription apps charge users directly, which aligns the product with user interests fairly straightforwardly — it must remain useful enough to justify renewal.",
+          "Referral-funded apps are free because they receive payment when users open recommended accounts. The recommendations may still be sound, but the ranking reflects which providers pay, and a superior product that pays nothing may simply not appear.",
+          "Data-monetising apps sell anonymised or aggregated information about spending behaviour. This is disclosed in the privacy policy, and reading what is shared and with whom is worth the few minutes it takes.",
+        ],
+      },
+      {
+        heading: "How Bank Connections Actually Work",
+        body: [
+          "Most apps do not connect to your bank directly. They use a data aggregator that sits between the app and financial institutions and maintains the connections.",
+          "Modern connections use a token-based authorisation flow where you authenticate with your bank and the app receives a revocable token, never your credentials. Older screen-scraping methods require handing over your actual username and password, which is substantially riskier and is being phased out but has not disappeared.",
+          "Two questions are worth answering before connecting: which aggregator does the app use, and does the connection request read-only access or permission to initiate transfers. Read-only access limits the worst case to data exposure; payment initiation authority raises the stakes considerably.",
+          "Most banks allow you to review and revoke third-party connections from within your own online banking, and it is worth knowing where that setting lives before you need it.",
+        ],
+      },
+      {
+        heading: "What Protection Applies to Your Money",
+        body: [
+          "Apps differ enormously in their regulatory status, and the interface rarely makes this obvious.",
+          "A budgeting app that only reads transaction data holds no money and requires no financial licence, so no deposit or investor protection applies — nor is any needed.",
+          "An app offering a savings or spending account is usually not a bank itself. It typically partners with one or more licensed banks that actually hold the deposits, and insurance protection flows through those partner banks rather than the app. The identity of the partner bank should be clearly stated.",
+          "An investing app should be a registered broker-dealer or work through one, bringing investor protection within statutory limits for custody failure — though never against investment losses. Apps offering crypto services frequently fall outside both frameworks, and that gap deserves explicit attention rather than assumption.",
+        ],
+      },
+      {
+        heading: "Evaluating Features Against Your Actual Problem",
+        body: [
+          "Feature lists are easy to compare and largely beside the point. The useful question is which specific difficulty the app is meant to solve for you.",
+          "If the difficulty is not knowing where money goes, automatic categorisation accuracy matters more than anything else, and categorisation quality varies significantly between products.",
+          "If the difficulty is overspending, look for tools that constrain in advance — envelope allocation, spending limits, alerts before rather than after — rather than reporting that describes the problem afterwards.",
+          "If the difficulty is failing to save, prioritise automation: scheduled transfers, round-ups, direct deposit splitting. If the goal is coordinating household finances, shared access and permissions are the differentiator, and many otherwise strong apps handle multiple users poorly.",
+        ],
+      },
+      {
+        heading: "Practical Checks Before Committing",
+        body: [
+          "Test data export early. An app holding years of categorised history that cannot export it in a usable format creates lock-in that becomes costly to escape.",
+          "Read recent reviews rather than aggregate ratings. A high average can conceal a recent decline following an acquisition, a pricing change or a shift in business model, and recency is far more informative than the overall score.",
+          "Check the cancellation path before subscribing, particularly whether it can be completed in-app.",
+          "Finally, confirm what happens to your data on account closure. Reputable providers describe their deletion policy in the privacy policy; if the answer cannot be found, that is itself informative.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "Is it safe to link my bank account to a budgeting app?",
+        answer:
+          "It depends on the connection method and permissions. Token-based authorisation, where you authenticate with your bank and the app never receives your credentials, is considerably safer than older approaches requiring your username and password. Read-only access is safer than permission to move money. Most banks let you review and revoke these connections from your own online banking.",
+      },
+      {
+        question: "How do free financial apps make money?",
+        answer:
+          "Most commonly through referral fees when users open recommended products, through premium subscription tiers, through interest earned on cash balances, or by monetising aggregated spending data. Because referral revenue depends on which providers pay, recommendations may not represent the full market.",
+      },
+      {
+        question: "Is my money insured in a fintech app?",
+        answer:
+          "Only if the app partners with a licensed bank that actually holds the deposits, in which case protection flows through that bank within applicable limits. Budgeting apps that only read data hold no money at all. Investing apps should be registered broker-dealers, carrying investor protection against custody failure but never against investment losses. Crypto services often fall outside both frameworks.",
+      },
+      {
+        question: "What should I check before subscribing to a paid finance app?",
+        answer:
+          "Confirm you can export your data in a usable format, read recent rather than aggregate reviews to catch any decline following an acquisition or pricing change, verify how to cancel and whether it can be done in-app, and check the privacy policy for what happens to your data when you close the account.",
+      },
+    ],
+    relatedReading: [
+      { slug: "budgeting-apps", anchor: "Budgeting Apps and How They Compare" },
+      { slug: "budgeting", anchor: "Building a Budget That Works" },
+      { slug: "brokers", anchor: "Choosing an Investment Platform" },
+      { slug: "banking", anchor: "Digital Banking and Account Protection" },
+    ],
   },
   reviews: {
     tag: 'REVIEWS',
@@ -963,6 +1123,88 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaTitle: 'Tax Software Reviews — Pricing & Features Compared',
     metaDescription:
       'Independent tax software reviews comparing pricing tiers, ease of use, and support for itemized deductions and self-employment income.',
+    keyTakeaways: [
+      "The right product depends on the complexity of your return, and complexity is driven by income sources rather than income size.",
+      "Free filing options exist for straightforward returns, but eligibility rules differ between commercial free tiers and government-supported programmes.",
+      "Advertised pricing typically covers the federal return only; state filing is commonly charged separately per state.",
+      "Upgrade prompts frequently appear mid-process after your data is entered, so confirm which forms a tier supports before starting.",
+      "Software handles calculation and filing; it does not replace professional advice for genuinely complex situations.",
+    ],
+    sections: [
+      {
+        heading: "Complexity Is About Income Type, Not Income Size",
+        body: [
+          "The most common mistake in choosing tax software is assuming a higher income requires a more expensive product. What actually drives complexity is the variety of income sources and the deductions claimed.",
+          "A straightforward return typically involves employment income reported on a standard form, bank interest, and the standard deduction. Most products handle this well, and several handle it free.",
+          "Complexity increases with self-employment or contractor income, rental property, investment sales requiring cost-basis reporting, equity compensation, multi-state filing, foreign income, or itemised deductions. Each pulls in additional forms and schedules that lower-priced tiers may not support.",
+          "Establish which forms your situation requires before selecting a product, not after entering your data.",
+        ],
+      },
+      {
+        heading: "Free Filing: The Options and Their Limits",
+        body: [
+          "Two distinct things are described as free filing and conflating them causes considerable frustration.",
+          "Commercial free tiers are offered by software companies for simple returns. Eligibility is set by the company and varies, and returns that exceed the tier's scope prompt an upgrade — frequently after substantial data entry.",
+          "Government-supported free filing programmes operate under agreements with the IRS and have their own eligibility criteria, typically income-based. These must generally be accessed through the IRS website rather than by going directly to a company's site, because entering through the commercial front door can land you on a paid product instead.",
+          "The IRS also provides free fillable forms with no income restriction. These perform basic calculation but no guidance, and suit filers who already understand their return.",
+        ],
+      },
+      {
+        heading: "Where the Real Costs Appear",
+        body: [
+          "The advertised price almost always refers to the federal return alone. State returns are typically charged separately, and filers owing returns in more than one state pay per state.",
+          "Mid-process upgrades are the most common source of unexpected cost. A tier may support your situation until a particular form is required, at which point continuing means upgrading — with your data already entered, which is precisely when switching feels most expensive.",
+          "Add-on services carry their own charges: expert review, audit support, and the option to have fees deducted from your refund, which typically carries a processing charge notably higher than paying by card.",
+          "Deadline pricing is also common, with some products raising prices as the filing deadline approaches. Filing earlier can cost less for identical work.",
+        ],
+      },
+      {
+        heading: "What to Look For Beyond Price",
+        body: [
+          "Direct import of tax forms from employers and financial institutions saves substantial time and reduces transcription errors, particularly for investment accounts with many transactions.",
+          "Prior-year import matters if you are switching products, since it carries forward information such as carryover losses and depreciation schedules that are laborious to re-enter and easy to get wrong.",
+          "Accuracy guarantees typically cover penalties and interest resulting from calculation errors by the software, not from information you entered incorrectly. Read what is actually covered.",
+          "Audit support varies from guidance documents to actual representation, and the two are very different services often marketed with similar language. Check which is included.",
+        ],
+      },
+      {
+        heading: "When Software Is Not Enough",
+        body: [
+          "Tax software performs calculation and filing well. It does not provide planning, and it cannot exercise judgement where rules are genuinely ambiguous.",
+          "Situations that generally warrant a professional include owning a business with employees, significant rental portfolios, equity compensation with complex vesting, foreign accounts and income with their reporting obligations, estate and trust matters, or any year involving a major transaction such as selling a business or property.",
+          "The cost comparison should account for what a professional may identify. A preparer who spots a planning opportunity or prevents a filing error can be cheaper than software that filed a technically valid but suboptimal return.",
+          "If using a paid preparer, confirm they hold a preparer tax identification number and understand their availability if questions arise after filing. Whichever route you choose, you remain responsible for the accuracy of your return.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "Can I file my taxes for free?",
+        answer:
+          "Often yes. Commercial free tiers cover simple returns with eligibility set by each company. Government-supported free filing programmes have their own income-based criteria and should be accessed through the IRS website rather than a company's own site. The IRS also offers free fillable forms with no income limit, which calculate but do not guide.",
+      },
+      {
+        question: "Why does the price increase partway through filing?",
+        answer:
+          "Because tiers are defined by which forms they support. When your return requires a form outside the current tier, the product prompts an upgrade — usually after your data is entered. Checking which forms your situation needs before starting avoids this, and state filing is normally charged separately from the advertised federal price.",
+      },
+      {
+        question: "Is tax software accurate enough to rely on?",
+        answer:
+          "For straightforward returns, generally yes — the calculation engines are well tested and most products offer guarantees covering penalties and interest from their own calculation errors. Those guarantees do not cover errors in the information you supply, and software cannot exercise judgement where tax treatment is genuinely ambiguous.",
+      },
+      {
+        question: "When should I use a tax professional instead of software?",
+        answer:
+          "Consider one if you own a business with employees, hold significant rental property, have complex equity compensation, have foreign accounts or income, face estate or trust matters, or completed a major transaction such as selling a business or property. A professional may also identify planning opportunities that software, which only reports what happened, cannot.",
+      },
+    ],
+    relatedReading: [
+      { slug: "financial-calculators", anchor: "Tax and Financial Calculators" },
+      { slug: "planning", anchor: "Year-Round Tax Planning" },
+      { slug: "money-management", anchor: "Organising Financial Records" },
+      { slug: "app-reviews", anchor: "Evaluating Financial Apps and Tools" },
+    ],
   },
   investing: {
     tag: 'INVESTING',
@@ -1125,6 +1367,83 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaTitle: 'Economy News & Macroeconomic Analysis',
     metaDescription:
       'Understand GDP, inflation, unemployment, interest rates, central banks, and global economic trends — explained clearly for beginners and investors alike.',
+    keyTakeaways: [
+      "Macroeconomics has four moving parts that constantly feed back into each other: output (GDP), prices (inflation), labour (employment), and the price of money (interest rates).",
+      "No single indicator describes the economy. Readings conflict routinely, and the disagreements between them are usually more informative than any one number.",
+      "US recessions are dated by the National Bureau of Economic Research using depth, diffusion and duration across several series — not by the popular 'two consecutive negative quarters' shorthand.",
+      "Monetary policy (the Federal Reserve) and fiscal policy (Congress and the President) are separate levers controlled by separate institutions, and they frequently pull in opposite directions.",
+      "Almost every headline economic statistic is an estimate that gets revised, sometimes substantially, after its first release.",
+    ],
+    sections: [
+      {
+        heading: "How the Four Pieces Fit Together",
+        body: [
+          "Most economic news is easier to read once you see it as four interacting quantities rather than a stream of unrelated releases. Output is what the country produces, measured as gross domestic product. Prices are what that output costs, measured by the Consumer Price Index and the Personal Consumption Expenditures index. Labour is who is producing it, measured by the unemployment rate and payroll growth. And the price of money — interest rates — is the lever that policymakers use to speed the whole system up or slow it down.",
+          "The connections run in loops, not straight lines. Strong demand tends to raise output and employment, which can push prices up. Rising prices invite higher interest rates. Higher rates make borrowing more expensive, which cools demand, which slows output and employment again. Each step takes months to work through, which is why policy decisions made today are aimed at conditions expected a year or more out.",
+          "This lag is the single most important thing to understand about macroeconomic commentary. When you read that a rate decision was made 'because of' last month's inflation print, the causation is looser than it sounds — the decision is a forecast about a future the committee cannot observe yet.",
+        ],
+      },
+      {
+        heading: "Who Actually Produces the Numbers",
+        body: [
+          "Knowing the source of a statistic tells you a great deal about how much weight it carries and how much it may move later.",
+          "The Bureau of Labor Statistics publishes the Consumer Price Index and the monthly employment report. The Bureau of Economic Analysis publishes GDP and the PCE price index. The Federal Reserve publishes industrial production and a range of financial data. The Census Bureau publishes retail sales, housing starts and trade figures.",
+          "These are statistical agencies, not forecasting shops. They measure what happened; they do not predict what happens next. Forecasts attached to their releases come from banks, academics and the Fed's own staff, and should be read as opinion rather than data.",
+        ],
+      },
+      {
+        heading: "Why Revisions Matter More Than First Prints",
+        body: [
+          "Initial estimates are built from incomplete survey responses. As more responses arrive, the figures are restated. GDP is published in successive estimates for each quarter, and the difference between the first and later readings can be large enough to change the story the number appeared to tell.",
+          "Payroll figures are revised for the two prior months with every new release, and undergo an annual benchmark revision against unemployment insurance tax records. A monthly payroll number is therefore best read together with what it did to the previous two months.",
+          "The practical discipline: treat a single release as one noisy observation, and pay attention to three- and six-month averages instead. Commentary that pivots on a single print is usually describing sampling noise.",
+        ],
+      },
+      {
+        heading: "Real Versus Nominal — The Distinction That Trips Everyone",
+        body: [
+          "A nominal figure is measured in current dollars. A real figure has had inflation stripped out. Confusing the two produces most of the bad reasoning in economic conversation.",
+          "Nominal wage growth of four percent alongside three percent inflation is a one percent real raise. Nominal GDP growth includes both genuine increases in output and mere increases in prices; real GDP separates them. When a headline does not say which it means, assume the more flattering interpretation was chosen and check the source.",
+          "The same logic applies to your own finances. A savings account paying less than the inflation rate is losing purchasing power even though the balance rises.",
+        ],
+      },
+      {
+        heading: "How to Follow the Economy Without Drowning in It",
+        body: [
+          "A workable routine is to track a small, stable set of series rather than reacting to every release. Output, prices, jobs and rates — one indicator each — will explain the majority of market commentary you encounter.",
+          "Watch the direction and the rate of change rather than the level. An unemployment rate rising from a low base is often more consequential than a higher rate that has been flat for a year.",
+          "Finally, separate the economy from the market. Equities price expectations about the future, so they routinely fall on good news that implies tighter policy, and rise on weak news that implies easier policy. The two are related but they are not the same thing.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "Is the economy the same thing as the stock market?",
+        answer:
+          "No. The stock market prices the expected future earnings of listed companies, while the economy measures current production, employment and prices across all activity, including the large private and public sectors that are not listed anywhere. The two can move in opposite directions for extended periods.",
+      },
+      {
+        question: "What officially defines a recession in the United States?",
+        answer:
+          "The National Bureau of Economic Research's Business Cycle Dating Committee declares recessions based on a significant decline in activity spread across the economy and lasting more than a few months, judged on depth, diffusion and duration. The common 'two consecutive quarters of falling GDP' rule is a rough heuristic, not the official definition, and the committee has diverged from it.",
+      },
+      {
+        question: "Which economic indicator should a beginner follow first?",
+        answer:
+          "The monthly employment report from the Bureau of Labor Statistics is the most useful single starting point. It arrives early in the month, covers both households and employers, and moves markets more reliably than most other releases because employment sits upstream of both spending and inflation.",
+      },
+      {
+        question: "Why do official economic figures get revised so often?",
+        answer:
+          "They are estimates drawn from surveys with incomplete initial response rates. As late responses and administrative records arrive, the agencies restate the figures to reflect the fuller sample. Revision is a sign the process is working as designed, not an error.",
+      },
+    ],
+    relatedReading: [
+      { slug: "gdp", anchor: "GDP Explained: What the Components Actually Measure" },
+      { slug: "inflation", anchor: "How Inflation Is Measured: CPI Versus PCE" },
+      { slug: "fed", anchor: "Inside the Federal Reserve: Structure, Mandate and Decisions" },
+      { slug: "indicators", anchor: "Leading, Lagging and Coincident Economic Indicators" },
+    ],
   },
   indicators: {
     tag: 'ECONOMIC INDICATORS',
@@ -1210,6 +1529,83 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaTitle: 'Fiscal Policy Explained',
     metaDescription:
       'Understand government spending, taxation, budget deficits, and national debt, and how fiscal policy decisions affect growth and inflation.',
+    keyTakeaways: [
+      "Fiscal policy is the use of government taxation and spending to influence the economy, decided by Congress and the President rather than the central bank.",
+      "The deficit is the annual shortfall between revenue and spending; the debt is the accumulated stock of past borrowing.",
+      "Automatic stabilisers — progressive taxes and benefits that adjust with the cycle — act without any new legislation and account for a large share of fiscal support during a downturn.",
+      "The fiscal multiplier measures how much output changes per dollar of fiscal action, and it varies substantially with economic conditions.",
+      "Debt sustainability depends less on the absolute figure than on the relationship between borrowing costs and the growth rate of the economy.",
+    ],
+    sections: [
+      {
+        heading: "The Two Levers, and Who Pulls Them",
+        body: [
+          "Fiscal policy operates through taxation and spending. Cutting taxes leaves more income in private hands; increasing spending injects demand directly. Both are expansionary; the reverse is contractionary.",
+          "In the United States these decisions belong to Congress and the President through the appropriations and tax legislation process — not to the Federal Reserve. This institutional separation matters, because it means the two arms of macroeconomic policy answer to different incentives and timetables.",
+          "Fiscal policy is consequently slower to deploy. Legislation must be drafted, negotiated and passed before any money moves, and the political process rarely aligns with the economic cycle. Monetary policy can change at a scheduled meeting; fiscal policy may take a year or fail entirely.",
+        ],
+      },
+      {
+        heading: "Discretionary Action Versus Automatic Stabilisers",
+        body: [
+          "Discretionary fiscal policy is deliberate: a stimulus package, an infrastructure programme, a tax reform. It is visible, debated, and slow.",
+          "Automatic stabilisers work without anyone deciding anything. When incomes fall, a progressive tax system collects proportionally less, cushioning the fall in disposable income. Unemployment insurance and income-linked benefits rise as more people qualify. Both happen immediately and reverse automatically as conditions improve.",
+          "Because they require no legislation, stabilisers avoid the timing problem entirely, and they are a substantial part of how modern economies absorb shocks. They are also politically invisible, which is why public debate concentrates almost exclusively on discretionary packages.",
+        ],
+      },
+      {
+        heading: "Deficits, Debt, and the Distinction People Blur",
+        body: [
+          "The deficit is a flow: the gap between what the government collects and spends in a single year. The debt is a stock: the accumulated total of all past deficits, less any surpluses.",
+          "A falling deficit still adds to the debt — it simply adds less than the year before. Coverage that treats deficit reduction as debt reduction is describing something that is not happening.",
+          "The debt itself divides into debt held by the public — securities sold to investors, other governments and the central bank — and intragovernmental holdings, which are obligations between government accounts such as trust funds. Economists generally treat debt held by the public as the more meaningful measure of the burden on financial markets.",
+        ],
+      },
+      {
+        heading: "Multipliers: Why the Same Dollar Does Different Work",
+        body: [
+          "The fiscal multiplier is the change in output produced by a unit of fiscal action. A multiplier above one means the action generated more output than it cost; below one means part of the effect leaked away.",
+          "The conditions matter enormously. When the economy has substantial idle capacity and interest rates are at their floor, multipliers tend to be larger, because the spending draws unused resources into production and does not push rates higher. When the economy is at capacity, additional spending tends to displace private activity and can be partly offset by the central bank tightening in response.",
+          "Composition matters too. Transfers to households likely to spend rather than save typically produce a larger immediate effect than tax reductions accruing to those who will save the proceeds.",
+        ],
+      },
+      {
+        heading: "What Makes Debt Sustainable",
+        body: [
+          "Sustainability is a relationship rather than a threshold. The critical comparison is between the interest rate paid on debt and the growth rate of the economy. When growth exceeds the effective interest rate, the debt-to-GDP ratio can decline even with continued deficits, because the denominator grows faster than the numerator.",
+          "When the interest rate exceeds growth, the arithmetic reverses and stabilising the ratio requires running primary surpluses — collecting more than is spent before interest costs.",
+          "Currency also matters. A government borrowing in a currency it issues faces a materially different constraint from one borrowing in a foreign currency, since it cannot be forced into default by an inability to obtain the currency of repayment. That distinction does not eliminate the constraint, which reappears as inflation and exchange rate pressure, but it changes its nature fundamentally.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "What is the difference between the deficit and the national debt?",
+        answer:
+          "The deficit is the annual gap between government revenue and spending. The debt is the accumulated total of every past deficit less any surpluses. A shrinking deficit still increases the debt — it just increases it more slowly than the previous year did.",
+      },
+      {
+        question: "What are automatic stabilisers?",
+        answer:
+          "They are features of the tax and benefit system that cushion the economy without new legislation. Progressive taxation collects less as incomes fall, while unemployment insurance and income-linked benefits pay out more as more people qualify. Both respond immediately to a downturn and unwind automatically in a recovery.",
+      },
+      {
+        question: "Does government borrowing always crowd out private investment?",
+        answer:
+          "Not necessarily. Crowding out is most plausible when the economy is operating at capacity and borrowing pushes interest rates higher. When substantial resources are idle and rates are near their floor, government borrowing can draw unused capacity into production without displacing private activity.",
+      },
+      {
+        question: "How much national debt is too much?",
+        answer:
+          "There is no established universal threshold. What matters is the relationship between the interest rate on the debt and the economy's growth rate, whether borrowing is in the government's own currency, and what the borrowing financed. Debt funding productive investment behaves differently from debt funding current consumption.",
+      },
+    ],
+    relatedReading: [
+      { slug: "monetary-policy", anchor: "The Monetary Policy Toolkit Explained" },
+      { slug: "gdp", anchor: "GDP Explained: What the Components Actually Measure" },
+      { slug: "economy", anchor: "How the Major Economic Indicators Fit Together" },
+      { slug: "bonds", anchor: "How Government Bonds Are Issued and Priced" },
+    ],
   },
   'monetary-policy': {
     tag: 'MONETARY POLICY',
@@ -1221,6 +1617,84 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaTitle: 'Monetary Policy Explained',
     metaDescription:
       'Learn how central banks use interest rates, quantitative easing, and inflation targeting to manage the money supply and the broader economy.',
+    keyTakeaways: [
+      "Monetary policy manages the availability and cost of money and credit; it is conducted by the central bank, separately from government tax and spending decisions.",
+      "The policy rate is the headline instrument, but administered rates, balance sheet operations and communication all form part of the toolkit.",
+      "Policy works through several transmission channels — borrowing costs, asset prices, exchange rates, bank lending and expectations — each operating on a different timescale.",
+      "The effects arrive with long and variable lags, which forces central banks to act on forecasts rather than current readings.",
+      "The zero lower bound constrains conventional policy, which is why unconventional tools were developed after the 2008 financial crisis.",
+    ],
+    sections: [
+      {
+        heading: "Conventional Policy: Setting the Price of Overnight Money",
+        body: [
+          "In normal conditions a central bank conducts policy by targeting a very short-term interest rate — in the United States, the federal funds rate at which banks lend reserves to each other overnight.",
+          "Modern implementation relies less on adjusting the quantity of reserves than on administered rates. By paying interest on reserve balances, the central bank sets a floor beneath which banks have little reason to lend, since they can earn that rate risklessly. A standing facility for a broader set of counterparties reinforces the floor.",
+          "From that anchor, the influence radiates outward. Short-term lending reprices quickly and closely; long-term rates respond mainly to expectations about the average policy rate over the life of the instrument, which is why they can move independently of any single decision.",
+        ],
+      },
+      {
+        heading: "The Transmission Channels",
+        body: [
+          "The interest rate channel is the most direct: higher rates raise the cost of borrowing, discouraging business investment and household purchases of homes and vehicles.",
+          "The asset price channel works through wealth and valuation. Higher rates lower the present value of future cash flows, pressuring equity and property prices; households that feel less wealthy tend to spend less.",
+          "The exchange rate channel operates through capital flows. Higher domestic rates tend to attract foreign capital, strengthening the currency, which lowers import prices and makes exports less competitive.",
+          "The bank lending and expectations channels complete the picture. Tighter policy can reduce banks' willingness to extend credit independently of price, while credible communication shifts household and business behaviour before any rate has actually changed.",
+        ],
+      },
+      {
+        heading: "Unconventional Tools and the Lower Bound",
+        body: [
+          "Nominal interest rates cannot fall far below zero, because holders of deposits would eventually prefer physical currency. When the policy rate reaches that floor and the economy still needs support, conventional policy is exhausted.",
+          "Large-scale asset purchases were the principal response after 2008. By buying longer-dated government and mortgage securities, the central bank bids up their prices and pushes down their yields, easing financial conditions further out the curve than the policy rate reaches.",
+          "Forward guidance is the second unconventional tool, and it is essentially free. Committing publicly to keep rates low until specified conditions are met lowers expected future rates, which lowers long-term rates today. Its effectiveness depends entirely on credibility — guidance that markets do not believe accomplishes nothing.",
+        ],
+      },
+      {
+        heading: "Why Lags Make This Difficult",
+        body: [
+          "A rate change does not reach the real economy immediately. Businesses revisit investment plans over quarters; households refinance or move house on their own schedules; hiring decisions follow demand with a delay.",
+          "The conventional estimate is that the bulk of the effect on output and inflation arrives over roughly one to two years, and the exact timing varies with conditions. A committee acting on this month's inflation reading is therefore acting too late by construction.",
+          "This is the fundamental difficulty of the job. Policy must be set on a forecast, forecasts are unreliable, and the consequences of error in either direction are serious. It also explains why officials often continue tightening while data is already softening — they are responding to where they expect conditions to be when the policy actually bites.",
+        ],
+      },
+      {
+        heading: "Rules Versus Discretion",
+        body: [
+          "One school argues policy should follow a published rule linking the interest rate to inflation and the output gap. Rules are predictable, resistant to political pressure, and make the central bank's reaction function legible to markets.",
+          "The competing view holds that no rule can anticipate every circumstance, and that a pandemic, a financial crisis or a supply shock requires judgement a formula cannot supply.",
+          "In practice most central banks land in between: rule-based frameworks used as reference points and cross-checks, with explicit discretion to depart from them when conditions warrant, and an obligation to explain the departure.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "What is the difference between monetary and fiscal policy?",
+        answer:
+          "Monetary policy is conducted by the central bank and works through the cost and availability of money and credit. Fiscal policy is conducted by the legislature and executive and works through taxation and government spending. They are controlled by different institutions on different timescales and can pull in opposite directions.",
+      },
+      {
+        question: "What is quantitative easing?",
+        answer:
+          "It is the large-scale purchase of longer-dated securities by a central bank, used when the policy rate is already near zero. The purchases raise the prices of those securities and lower their yields, easing financial conditions further along the maturity curve than the short-term policy rate can reach.",
+      },
+      {
+        question: "Why does monetary policy take so long to work?",
+        answer:
+          "Borrowing, investment and hiring decisions respond to rate changes gradually, over quarters rather than weeks. The bulk of the effect on output and inflation is generally estimated to arrive over one to two years, which forces central banks to set policy against a forecast rather than current data.",
+      },
+      {
+        question: "What is the zero lower bound?",
+        answer:
+          "It is the constraint that nominal interest rates cannot be pushed far below zero, because savers would switch to holding physical cash rather than accept a negative return. Once the policy rate approaches this floor, conventional easing is exhausted and central banks turn to asset purchases and forward guidance.",
+      },
+    ],
+    relatedReading: [
+      { slug: "fed", anchor: "Inside the Federal Reserve: Structure, Mandate and Decisions" },
+      { slug: "fiscal-policy", anchor: "Fiscal Policy: Taxation, Spending and Deficits" },
+      { slug: "interest-rates", anchor: "How Rate Changes Reach Your Accounts" },
+      { slug: "inflation", anchor: "Where Inflation Comes From" },
+    ],
   },
   global: {
     tag: 'GLOBAL ECONOMY',
@@ -1230,6 +1704,83 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaTitle: 'Global Economy News & Analysis',
     metaDescription:
       'Coverage of international trade, currency exchange rates, global supply chains, and emerging markets shaping the world economy.',
+    keyTakeaways: [
+      "National economies are linked through trade in goods and services, cross-border capital flows, and the exchange rates that price one currency against another.",
+      "The balance of payments records every transaction between residents of a country and the rest of the world, and always balances by construction.",
+      "Exchange rate regimes range from freely floating to hard pegs, and the choice determines which shocks a country absorbs through prices and which through output.",
+      "The US dollar's role as the dominant reserve and invoicing currency means US monetary policy transmits well beyond US borders.",
+      "The International Monetary Fund, World Bank and World Trade Organization each address a distinct problem and are frequently confused with one another.",
+    ],
+    sections: [
+      {
+        heading: "The Balance of Payments, Read Correctly",
+        body: [
+          "The balance of payments is the complete record of transactions between a country's residents and the rest of the world. It divides into the current account — trade in goods and services, income from investments, and transfers — and the financial account, which records purchases and sales of assets.",
+          "The two are mirror images. A country running a current account deficit is necessarily receiving a matching net inflow on the financial account: if it buys more goods from abroad than it sells, it must be selling assets or borrowing to fund the difference. The accounts balance by construction, not by coincidence.",
+          "This is why describing a trade deficit as money simply leaving the country is incomplete. The funds return as investment in domestic assets — government securities, corporate equity, real estate, direct investment in productive capacity. Whether that is favourable depends on what the inflow finances.",
+        ],
+      },
+      {
+        heading: "Exchange Rate Regimes and the Trade-off They Encode",
+        body: [
+          "A floating exchange rate is set by market supply and demand. It adjusts continuously and acts as a shock absorber: a country hit by falling export demand sees its currency weaken, which restores competitiveness without requiring wages or prices to fall.",
+          "A fixed or pegged rate commits the central bank to maintaining a set value, usually against a major currency. Pegs deliver predictability for trade and investment and can import the credibility of the anchor currency's central bank, but they surrender monetary independence — defending the peg means matching the anchor country's policy regardless of domestic conditions.",
+          "The underlying constraint is often called the impossible trinity: a country may choose at most two of a fixed exchange rate, free capital movement, and an independent monetary policy. Every regime is a decision about which one to give up.",
+        ],
+      },
+      {
+        heading: "Why the Dollar Matters Everywhere",
+        body: [
+          "The US dollar occupies a position no other currency does. It is the dominant reserve asset held by central banks, the currency in which a large share of international trade is invoiced regardless of whether the United States is party to the transaction, and the denomination of a substantial share of cross-border debt.",
+          "The practical consequence is that Federal Reserve decisions transmit globally. When US rates rise, dollar-denominated debt becomes more expensive for foreign borrowers who earn revenue in other currencies, and capital tends to flow toward dollar assets, weakening other currencies and importing inflation into those economies.",
+          "This is why finance ministers in countries with no direct relationship to the US economy follow FOMC meetings closely. Their domestic conditions may argue for one policy while dollar dynamics force another.",
+        ],
+      },
+      {
+        heading: "The Institutions, and What Each Actually Does",
+        body: [
+          "The International Monetary Fund provides balance of payments support to member countries facing external financing crises, typically conditional on policy adjustments. Its concern is macroeconomic and financial stability.",
+          "The World Bank lends for development projects and long-term poverty reduction. Its horizon is structural rather than crisis-driven, and the two institutions are routinely conflated despite addressing different problems.",
+          "The World Trade Organization administers trade agreements and provides a forum for negotiating and adjudicating disputes between members. It sets rules for how countries trade; it does not lend money.",
+        ],
+      },
+      {
+        heading: "Comparing Economies Without Being Misled",
+        body: [
+          "Converting output at market exchange rates understates the living standards of countries where non-traded goods and services are inexpensive. Purchasing power parity conversion adjusts for these price level differences and is generally the better basis for comparing living standards, while market rates remain appropriate for comparing financial magnitudes.",
+          "Aggregate size and per-capita figures answer different questions. A populous country can have a large total economy and modest individual incomes; the two facts are entirely compatible and are often deployed selectively to support opposing arguments.",
+          "Data quality also varies. Statistical capacity, the size of the informal economy, and the independence of statistical agencies differ substantially across countries, and cross-country comparisons carry more uncertainty than the precision of the published figures implies.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "Is a trade deficit bad for an economy?",
+        answer:
+          "Not inherently. A current account deficit is matched by a net inflow on the financial account, meaning the country is receiving foreign investment or borrowing. Whether that is a problem depends on what the inflow funds — investment in productive capacity behaves very differently from financing current consumption — and on whether the borrowing is sustainable.",
+      },
+      {
+        question: "What is the impossible trinity?",
+        answer:
+          "It is the constraint that a country can maintain at most two of the following three: a fixed exchange rate, free movement of capital across its borders, and an independent monetary policy. Pursuing all three simultaneously is not sustainable, so every exchange rate regime represents a choice about which to forgo.",
+      },
+      {
+        question: "Why do US interest rate decisions affect other countries?",
+        answer:
+          "Because the dollar is the dominant currency for reserves, trade invoicing and cross-border debt. Higher US rates make dollar debt more costly for foreign borrowers earning in other currencies and draw capital toward dollar assets, weakening other currencies and raising their import prices — regardless of local economic conditions.",
+      },
+      {
+        question: "What is the difference between the IMF and the World Bank?",
+        answer:
+          "The IMF provides short-term financing and policy advice to countries facing balance of payments and macroeconomic stability crises. The World Bank funds longer-term development projects aimed at reducing poverty and building infrastructure. They were founded together but address fundamentally different problems.",
+      },
+    ],
+    relatedReading: [
+      { slug: "economy", anchor: "How the Major Economic Indicators Fit Together" },
+      { slug: "fed", anchor: "Inside the Federal Reserve: Structure, Mandate and Decisions" },
+      { slug: "commodities", anchor: "Commodities, Currencies and Global Trade" },
+      { slug: "investing", anchor: "International Diversification in a Portfolio" },
+    ],
   },
   crypto: {
     tag: 'CRYPTO',
@@ -1422,6 +1973,77 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaTitle: 'Cryptocurrency News & Analysis',
     metaDescription:
       'Cryptocurrency news and market analysis — Bitcoin, Ethereum, DeFi, and the blockchain infrastructure behind digital assets.',
+    keyTakeaways: [
+      "Cryptocurrencies are digital assets recorded on distributed ledgers maintained by networks of participants rather than by a central institution.",
+      "Ownership is controlled by private keys; whoever holds the keys controls the asset, and losing them typically means permanent loss with no recovery process.",
+      "Custody is the central practical decision — holding assets on an exchange means relying on that company, while self-custody transfers full responsibility to you.",
+      "The consumer protections that surround bank deposits and brokerage accounts largely do not apply, and regulatory treatment continues to differ by jurisdiction.",
+      "Volatility is substantially higher than mainstream asset classes, which should inform position sizing rather than being treated as an incidental detail.",
+    ],
+    sections: [
+      {
+        heading: "What a Blockchain Actually Is",
+        body: [
+          "A blockchain is a shared ledger replicated across many independent computers. Transactions are grouped into blocks, each cryptographically linked to its predecessor, so that altering an earlier record would require redoing all subsequent work and outpacing the rest of the network.",
+          "The purpose of this design is to allow parties who do not trust one another to agree on a common record without a trusted intermediary. Traditional payment systems solve the same problem by appointing an authority — a bank, a card network — whose books are definitive. Distributed ledgers replace that authority with a consensus procedure.",
+          "The two dominant consensus mechanisms are proof of work, which requires participants to expend computation to propose blocks, and proof of stake, which requires them to commit assets as collateral that can be forfeited for misbehaviour. They differ enormously in energy consumption and in the structure of their security assumptions.",
+        ],
+      },
+      {
+        heading: "Keys, Wallets and What Ownership Means",
+        body: [
+          "Ownership rests on a private key — a secret number that authorises transactions from a particular address. The blockchain records addresses and balances; it has no concept of a person, an account holder or an identity.",
+          "A wallet stores keys; it does not store coins. This distinction explains most of the confusion newcomers experience. Moving assets between wallets changes which key can authorise transfers, not the location of anything.",
+          "The consequences are unforgiving. Anyone obtaining your private key can move your assets irreversibly. Losing the key means the assets remain visible on the ledger forever and permanently inaccessible. There is no institution empowered to verify your identity and restore access, because the system was specifically designed to have no such institution.",
+        ],
+      },
+      {
+        heading: "Custody: The Decision That Matters Most",
+        body: [
+          "Custodial holding means an exchange or platform controls the keys on your behalf. It is convenient, supports password recovery, and integrates with familiar trading interfaces. It also means your holding is a claim against that company, and the history of the sector includes failures where customer assets were lost, misappropriated or frozen in insolvency proceedings.",
+          "Self-custody means you hold the keys, usually in a hardware device or a carefully secured software wallet. No company can freeze, lend or lose your assets. The corresponding burden is that key management, backup and inheritance planning become entirely your responsibility, with no recourse for mistakes.",
+          "The phrase commonly used in the sector — not your keys, not your coins — compresses this trade-off accurately. Neither choice is universally correct, but the decision should be deliberate rather than a default arrived at by never considering it.",
+        ],
+      },
+      {
+        heading: "Categories Worth Distinguishing",
+        body: [
+          "Treating all crypto assets as one category obscures large differences. Payment-oriented assets aim to function as money or a store of value. Smart contract platforms are general-purpose networks on which applications run, and their tokens pay for computation on the network.",
+          "Stablecoins aim to maintain a fixed value against a reference currency, typically by holding reserves. Their reliability depends entirely on what backs them and whether that backing can be verified — a question of the issuer's disclosures rather than of the blockchain itself.",
+          "Tokens issued by individual applications represent a further category, and many function closer to venture-stage equity in risk terms. Utility, governance and speculative tokens differ enough from one another that a single risk assessment applied to all of them is not meaningful.",
+        ],
+      },
+      {
+        heading: "Risks That Are Structural Rather Than Incidental",
+        body: [
+          "Volatility is the visible risk. Drawdowns of a magnitude that would be considered a crisis in equity markets have occurred repeatedly, which is a reason to size positions such that the worst plausible outcome remains survivable.",
+          "Custodial and counterparty risk is less visible and has historically produced larger permanent losses. Platform failures, frozen withdrawals and misuse of customer assets have all occurred at significant scale.",
+          "Regulatory treatment continues to develop and differs between jurisdictions, which affects tax reporting, which platforms may serve you, and what protections exist if something goes wrong. Meanwhile the irreversibility that makes the technology work also makes fraud unusually damaging: a mistaken or coerced transfer cannot be reversed, which is precisely why the sector attracts a persistent volume of scams. Any offer of guaranteed returns in this asset class should be treated as fraudulent until proven otherwise.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "What does it mean to hold your own private keys?",
+        answer:
+          "It means you control the secret value that authorises transactions from your addresses, rather than an exchange controlling it for you. You gain independence from any company's solvency or policies, and you accept full responsibility for securing and backing up those keys, since no one can restore access if they are lost.",
+      },
+      {
+        question: "Is cryptocurrency covered by deposit insurance?",
+        answer:
+          "Generally no. Deposit insurance schemes such as FDIC coverage apply to deposits at insured banks, not to crypto assets. Some platforms hold customer cash at insured banks, which covers that cash but not the crypto holdings themselves. Protections vary by platform and jurisdiction and should be verified rather than assumed.",
+      },
+      {
+        question: "What is the difference between a coin and a token?",
+        answer:
+          "A coin is native to its own blockchain and typically pays for transactions on that network. A token is issued on top of an existing blockchain using its smart contract functionality. Tokens inherit the security of the underlying chain but carry the separate risks of whatever project issued them.",
+      },
+      {
+        question: "Can a cryptocurrency transaction be reversed?",
+        answer:
+          "Generally not. Once confirmed, transactions on major blockchains are designed to be final, with no administrator able to undo them. This irreversibility is central to how the systems work and is also why sending funds to a wrong address, or being deceived into sending them, usually results in permanent loss.",
+      },
+    ],
   },
   portfolio: {
     tag: 'PORTFOLIO',
@@ -1433,6 +2055,84 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaTitle: 'Portfolio Management Guides & Strategy',
     metaDescription:
       'Learn how to allocate assets, diversify, assess risk tolerance, and manage a portfolio for the long term.',
+    keyTakeaways: [
+      "Asset allocation — the split between broad asset classes — explains far more of a portfolio's return variability over time than individual security selection.",
+      "Diversification reduces risk only to the extent holdings behave differently from one another; owning many similar assets provides little protection.",
+      "Rebalancing restores a portfolio to its intended allocation and enforces the discipline of selling what has risen and buying what has lagged.",
+      "Your time horizon and your capacity to tolerate a decline without selling should drive the allocation, not forecasts about markets.",
+      "Where you hold an asset matters alongside what you hold, because account type determines how the returns are taxed.",
+    ],
+    sections: [
+      {
+        heading: "Allocation Before Selection",
+        body: [
+          "A portfolio's behaviour is dominated by its mix of asset classes — equities, fixed income, cash, and any real assets — rather than by which specific securities occupy each slot. A portfolio of ninety percent equities will behave like an equity portfolio regardless of which companies it holds.",
+          "This has a practical implication that runs against instinct. The time most people spend choosing individual holdings would produce a greater effect on outcomes if spent deciding the allocation and then leaving it alone.",
+          "Allocation should follow from circumstances rather than forecasts. How long until the money is needed, how much variability can be tolerated without abandoning the plan, and what other resources and obligations exist — these determine an appropriate mix. A market outlook does not, because the outlook will change and the allocation should not change with it.",
+        ],
+      },
+      {
+        heading: "What Diversification Can and Cannot Do",
+        body: [
+          "Diversification works through correlation. Combining assets that do not move together produces a portfolio whose variability is lower than the average variability of its parts. This is the closest thing to a free lunch in investing.",
+          "Its limits are equally important. Holding thirty technology stocks is not meaningfully diversified, because they share the sector, factor and macroeconomic exposures that drive most of their movement. Correlations also tend to converge toward one during severe market stress — precisely when protection is most wanted, diversification delivers least.",
+          "The useful distinction is between idiosyncratic risk, specific to one company and largely eliminable through diversification, and systematic risk, which affects the whole market and cannot be diversified away. Diversification addresses the first entirely and the second not at all.",
+        ],
+      },
+      {
+        heading: "Rebalancing as Enforced Discipline",
+        body: [
+          "Left alone, a portfolio drifts. Assets that perform well grow as a share of the total, so a portfolio that began at sixty percent equities can become considerably more aggressive after a strong run — increasing risk exactly when valuations are highest.",
+          "Rebalancing sells a portion of what has appreciated and buys what has lagged, returning to target weights. Its real value is behavioural: it institutionalises selling into strength and buying into weakness, which is difficult to do on judgement alone.",
+          "Two approaches are common. Calendar rebalancing reviews on a fixed schedule such as annually. Threshold rebalancing acts whenever an allocation drifts beyond a set band, for example five percentage points from target. Threshold approaches respond to market movement rather than the calendar; both work, and consistency matters more than the choice between them. In taxable accounts, directing new contributions toward underweight positions rebalances without triggering a taxable sale.",
+        ],
+      },
+      {
+        heading: "Asset Location: The Overlooked Half",
+        body: [
+          "Asset location concerns which account holds which asset, and it can matter materially over long horizons because different accounts are taxed differently.",
+          "Tax-inefficient assets — those generating income taxed at ordinary rates, such as taxable bonds and funds distributing significant income — are generally better held in tax-advantaged accounts where that income is sheltered.",
+          "Assets with favourable tax treatment, such as broad equity index funds with low turnover and qualified dividends, sit more comfortably in taxable accounts. Holding them there also preserves access to tax-loss harvesting and, in some jurisdictions, a step-up in basis at inheritance.",
+          "This is a refinement rather than a foundation. Get the allocation right first; asset location adds incremental benefit on top of a sound allocation, and cannot rescue a poor one.",
+        ],
+      },
+      {
+        heading: "Measuring Whether It Is Working",
+        body: [
+          "Compare against a benchmark that matches your allocation. Judging a balanced portfolio against a pure equity index guarantees it will look disappointing in rising markets and reassuring in falling ones, and tells you nothing useful in either case.",
+          "Use a return measure that accounts for the timing of your contributions. Money-weighted return reflects what you actually earned given when you added and withdrew funds; time-weighted return measures the underlying strategy independent of cash flow timing. They answer different questions.",
+          "Assess risk alongside return. A portfolio that outperformed by taking substantially more risk has not necessarily performed better — it has simply been paid for risk that could equally have gone the other way. Reviewing annually is sufficient for most long-term investors; more frequent examination tends to prompt activity that erodes returns rather than improving them.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "How many holdings do I need to be diversified?",
+        answer:
+          "The count matters less than the variety of exposures. Thirty companies drawn from one sector remain concentrated, while a single broad index fund can provide exposure to thousands of companies across sectors and countries. Focus on whether your holdings share common risk drivers rather than on how many line items appear.",
+      },
+      {
+        question: "How often should I rebalance?",
+        answer:
+          "Annually is sufficient for most investors, or whenever an allocation drifts beyond a predefined band such as five percentage points from target. More frequent rebalancing increases costs and taxes without materially improving outcomes. Consistency matters more than the specific rule chosen.",
+      },
+      {
+        question: "What is the difference between asset allocation and diversification?",
+        answer:
+          "Asset allocation is the division of a portfolio across broad asset classes such as equities, bonds and cash. Diversification is the spreading of holdings within and across those classes so that no single company, sector or country dominates. Allocation determines the portfolio's overall risk profile; diversification determines how much avoidable specific risk remains inside it.",
+      },
+      {
+        question: "Should my allocation change as I get older?",
+        answer:
+          "Generally yes, because the relevant variable is time horizon and the capacity to recover from a decline. As the date approaches when the money will be spent, there is less time to recover from a large fall, which usually argues for shifting toward more stable assets. The appropriate pace depends on your circumstances rather than any fixed formula.",
+      },
+    ],
+    relatedReading: [
+      { slug: "investing", anchor: "Getting Started: Building Your First Portfolio" },
+      { slug: "etfs", anchor: "How ETFs Work and What They Cost" },
+      { slug: "bonds", anchor: "The Role of Bonds in a Portfolio" },
+      { slug: "retirement", anchor: "Allocating a Portfolio Toward Retirement" },
+    ],
   },
   brokers: {
     tag: 'BROKERS',
@@ -1444,6 +2144,84 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaTitle: 'Broker Guides — Fees, Regulation & Account Types',
     metaDescription:
       'Independent guides to choosing a stock broker — fee structures, regulation, account types, and what beginners should look for.',
+    keyTakeaways: [
+      "A broker is the intermediary that holds your account and routes your orders; the choice determines costs, available assets, and the protections around your holdings.",
+      "Commission-free equity trading is standard, so the meaningful cost comparison has moved to spreads, margin rates, fund expense ratios and fees for specific services.",
+      "SIPC protection covers the failure of the brokerage itself within statutory limits — it does not compensate for investments that lose value.",
+      "Payment for order flow means your order routing may be sold to market makers, which is legal and disclosed but creates an interest worth understanding.",
+      "Account type matters as much as broker choice, because the tax treatment of a taxable account and a retirement account differ fundamentally.",
+    ],
+    sections: [
+      {
+        heading: "What a Broker Actually Does",
+        body: [
+          "A brokerage performs three distinct functions that are easy to conflate. It executes orders, sending your instruction to a venue where it can be filled. It provides custody, holding your securities and cash. And it handles the administrative layer — tax reporting, corporate actions, dividend processing, account transfers.",
+          "Some firms perform all three. Others execute while a separate clearing firm holds the assets, an arrangement disclosed in the account agreement. It rarely affects day-to-day experience but is relevant to understanding who actually holds your property.",
+          "Securities are typically held in street name, meaning registered to the broker while you retain beneficial ownership. This is what makes rapid electronic settlement possible, and it is why the financial health of the custodian is a genuine consideration rather than a theoretical one.",
+        ],
+      },
+      {
+        heading: "Where the Costs Actually Sit Now",
+        body: [
+          "Headline commissions on US-listed stocks and ETFs have largely gone to zero, which has moved the real cost comparison elsewhere.",
+          "The bid-ask spread is a cost on every trade regardless of commission — you buy at the ask and sell at the bid, and the gap is a real expense that widens in thinly traded securities. Execution quality determines how much of that spread you absorb, and brokers publish order routing and execution statistics that most customers never read.",
+          "Margin interest is often the largest recurring cost for anyone borrowing, and rates vary widely between firms. Beyond that, look for fees on account transfers out, wire transfers, paper statements, options contracts, broker-assisted trades, and currency conversion for international holdings. For funds held on the platform, the expense ratio is charged by the fund rather than the broker but comes out of your return just the same.",
+        ],
+      },
+      {
+        heading: "What SIPC Does and Does Not Cover",
+        body: [
+          "The Securities Investor Protection Corporation protects customers if a member brokerage fails and customer assets are missing. It restores securities and cash up to statutory limits, with a sublimit applying to cash claims.",
+          "The protection is frequently misunderstood. SIPC does not insure against investment losses. If a holding falls in value, that is the risk you accepted, and no protection scheme addresses it. SIPC addresses the separate risk that the custodian fails and your property cannot be located.",
+          "Coverage limits apply per customer per separate capacity, so individual and retirement accounts at the same firm are generally treated as distinct. Many brokers carry supplemental private insurance above SIPC limits, which is worth confirming for larger balances. Assets held outside the brokerage relationship, such as cryptocurrency on some platforms, may fall outside this framework entirely.",
+        ],
+      },
+      {
+        heading: "Payment for Order Flow, Explained Plainly",
+        body: [
+          "When a retail order is placed, many brokers route it to a wholesale market maker rather than a public exchange, and receive a payment for doing so. This practice funds much of the commission-free model.",
+          "The market maker fills the order, often at a price marginally better than the best public quote, and profits from the spread across enormous volume. The broker's revenue therefore rises with the number of trades customers place.",
+          "The arrangement is legal and disclosed, and the price improvement is real. The reasonable concern is the incentive: a business model whose revenue scales with trading frequency has an interest in encouraging activity, and frequent trading has a well-documented tendency to reduce returns for individual investors. Knowing how your broker earns money helps you read its product design accurately.",
+        ],
+      },
+      {
+        heading: "Choosing a Broker: A Practical Sequence",
+        body: [
+          "Begin with what you intend to hold. If you need international equities, bonds, futures or options, the field narrows immediately, since many popular platforms handle US-listed stocks and funds well and other asset classes poorly.",
+          "Then consider account types. If a tax-advantaged retirement account is part of the plan, confirm the firm supports the specific type you need and check whether it charges account maintenance or closure fees.",
+          "Next, weigh the costs relevant to how you will actually behave. An investor making a few purchases a year should weight fund expense ratios and transfer fees heavily and ignore margin rates entirely; someone trading options frequently should weight per-contract pricing and execution quality above everything else.",
+          "Finally, verify registration. In the United States, brokers and their representatives can be checked through FINRA's BrokerCheck and the SEC's public databases, which show registration status and disciplinary history. This takes a few minutes and is the single highest-value check available.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "Does SIPC insurance protect me from losing money on investments?",
+        answer:
+          "No. SIPC protects customers when a member brokerage fails and customer assets are missing, restoring securities and cash within statutory limits. It offers no compensation for investments that decline in value — market risk is not insurable and remains entirely with the investor.",
+      },
+      {
+        question: "How do commission-free brokers make money?",
+        answer:
+          "Through several channels: payment for order flow from market makers, interest earned on uninvested customer cash balances, margin lending, securities lending, premium subscription tiers, and fees on specific services such as wire transfers and account transfers. Zero commission refers to the equity trade itself, not to the relationship overall.",
+      },
+      {
+        question: "Should I use more than one broker?",
+        answer:
+          "It can make sense for redundancy, for accessing asset classes one firm does not support, or for keeping balances within protection limits. The trade-off is administrative: multiple tax documents, fragmented performance tracking, and more accounts to secure and monitor.",
+      },
+      {
+        question: "How do I check whether a broker is legitimate?",
+        answer:
+          "In the United States, use FINRA's BrokerCheck and the SEC's public databases to confirm registration and review any disciplinary history for both the firm and individual representatives. Any platform that cannot be located in these registries warrants serious caution.",
+      },
+    ],
+    relatedReading: [
+      { slug: "investing", anchor: "Getting Started: Building Your First Portfolio" },
+      { slug: "etfs", anchor: "How ETFs Work and What They Cost" },
+      { slug: "portfolio", anchor: "Asset Allocation and Rebalancing" },
+      { slug: "stocks", anchor: "How Stock Orders Are Executed" },
+    ],
   },
   'personal-finance': {
     tag: 'PERSONAL FINANCE',
@@ -1948,6 +2726,84 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaTitle: 'Real Estate News & Property Investing',
     metaDescription:
       'Real estate news, mortgage rate trends, and REIT analysis — how property markets, financing, and interest rates connect.',
+    keyTakeaways: [
+      "Property can be held directly as physical assets or indirectly through REITs and funds, and the two routes differ in liquidity, effort and diversification.",
+      "Real estate investment trusts trade like shares and are required to distribute the large majority of taxable income to shareholders as dividends.",
+      "Direct ownership returns come from rental income and price appreciation, less the operating costs that first-time landlords consistently underestimate.",
+      "Leverage magnifies outcomes in both directions, which is why property is often described as high-return without the corresponding risk being stated.",
+      "Property is illiquid and transaction costs are substantial, so it suits long holding periods and sits poorly with money that may be needed quickly.",
+    ],
+    sections: [
+      {
+        heading: "Two Routes Into the Same Asset Class",
+        body: [
+          "Direct ownership means holding physical property — a rental home, a commercial unit, land. You control decisions, capture rental income, and bear every responsibility from tenant selection to roof repairs.",
+          "Indirect ownership means holding securities backed by property. Real estate investment trusts own portfolios of income-producing property and trade on exchanges like ordinary shares. Property funds and ETFs hold baskets of REITs, adding a further layer of diversification.",
+          "The trade-off is straightforward. Direct ownership offers control, the ability to use leverage on favourable terms, and tax treatments unavailable to securities holders. Indirect ownership offers liquidity, minimal effort, low minimum investment, and instant diversification across dozens or hundreds of properties. Neither is superior in general; they suit different circumstances and different appetites for involvement.",
+        ],
+      },
+      {
+        heading: "How REITs Work",
+        body: [
+          "A real estate investment trust is a company owning or financing income-producing property, structured so that it avoids corporate-level tax provided it distributes the large majority of its taxable income to shareholders. This is why REITs are characteristically high-yield instruments.",
+          "Equity REITs own physical property and earn rent — the most common form. Mortgage REITs hold property debt rather than property and earn interest, which makes them behave far more like leveraged bond portfolios and considerably more sensitive to interest rate movements. The distinction is frequently missed by investors buying on yield alone.",
+          "REITs are typically analysed using funds from operations rather than standard earnings, because large non-cash depreciation charges understate the cash a property business actually generates. Note also that REIT dividends often do not qualify for the reduced tax rates applying to qualified dividends, which makes tax-advantaged accounts a natural home for them.",
+        ],
+      },
+      {
+        heading: "The Costs Direct Investors Underestimate",
+        body: [
+          "Gross rental yield — annual rent divided by purchase price — is the figure quoted in marketing material and it materially overstates the return.",
+          "Recurring costs include property taxes, insurance, maintenance, and management fees if you are not managing the property yourself. Vacancy is a certainty rather than a risk: properties sit empty between tenants, and a realistic projection assumes some portion of the year produces no income.",
+          "Capital expenditure is the item most often omitted. Roofs, boilers, windows and appliances have finite lives and their replacement is not optional. Prudent practice sets aside a reserve annually rather than treating these as surprises when they arrive.",
+          "Transaction costs bracket the whole investment. Purchase involves legal fees, surveys, taxes and financing costs; sale involves agent commission and further legal fees. Together these can consume a meaningful share of the total, which is why property rewards long holding periods and punishes short ones.",
+        ],
+      },
+      {
+        heading: "Leverage, Honestly Described",
+        body: [
+          "Property is unusual in that lenders will readily finance a large share of the purchase price at rates unavailable for other assets. This is the source of much of its reputation for high returns.",
+          "The mechanism is simple. If a property is bought with substantial borrowing and its value rises, the gain accrues to the small portion of equity you contributed, producing a return on that equity far larger than the underlying price movement.",
+          "The symmetry is what marketing omits. The same leverage magnifies losses, and a modest decline in value can eliminate the equity entirely while the mortgage remains payable in full. Meanwhile the debt service continues whether or not the property is tenanted, which converts a vacancy from an income problem into a solvency problem. Leverage does not increase the quality of an investment; it increases the size of the position.",
+        ],
+      },
+      {
+        heading: "Where Property Fits in a Portfolio",
+        body: [
+          "Property has historically offered returns with imperfect correlation to equities, which is the diversification argument for including it. Rental income also tends to adjust with inflation over time, giving some protection to purchasing power.",
+          "Against that, most households are already heavily exposed to property through the home they live in, often with substantial leverage attached. Adding concentrated direct property exposure on top can produce a level of concentration in a single asset class and frequently a single local market that would be considered imprudent in any other context.",
+          "For investors seeking exposure without that concentration, listed REITs and property funds provide it at low cost and with daily liquidity. For those seeking control and willing to accept the workload, direct ownership offers advantages securities cannot replicate. The decision should turn on which of those you actually want.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "What is a REIT and how does it differ from owning property?",
+        answer:
+          "A real estate investment trust is a company owning income-producing property whose shares trade on an exchange. It must distribute most of its taxable income to shareholders. Compared with direct ownership it offers liquidity, small minimum investment and diversification across many properties, but no control over individual assets and no access to the mortgage leverage available to direct owners.",
+      },
+      {
+        question: "Is rental property genuinely passive income?",
+        answer:
+          "Rarely. Direct ownership involves tenant screening, rent collection, maintenance, regulatory compliance and periodic vacancy. Engaging a property manager reduces the workload in exchange for a share of the rent. Investors seeking genuinely passive property exposure are usually better served by REITs or property funds.",
+      },
+      {
+        question: "How do I calculate a realistic return on a rental property?",
+        answer:
+          "Start from gross annual rent, then subtract property taxes, insurance, maintenance, management fees, a realistic vacancy allowance and an annual reserve for capital replacement. Divide the remaining net income by total invested capital including purchase costs. The resulting figure is typically well below the gross yield quoted in listings.",
+      },
+      {
+        question: "Does property always rise in value?",
+        answer:
+          "No. Property markets experience sustained declines, and because purchases are usually leveraged, a modest fall in price can eliminate a large share of the owner's equity. Property is also highly local, so national averages can conceal very different outcomes in individual markets.",
+      },
+    ],
+    relatedReading: [
+      { slug: "mortgages", anchor: "How Mortgages Are Priced and Structured" },
+      { slug: "portfolio", anchor: "Asset Allocation and Diversification" },
+      { slug: "etfs", anchor: "Property Exposure Through Funds and ETFs" },
+      { slug: "investing", anchor: "Building a Diversified Portfolio" },
+    ],
   },
   commodities: {
     tag: 'COMMODITIES',
@@ -2091,6 +2947,87 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaTitle: 'Retirement Planning News & Strategy',
     metaDescription:
       'Retirement planning guides — 401(k)s, IRAs, contribution limits, and withdrawal strategy for building and protecting a nest egg.',
+    keyTakeaways: [
+      "The core decision in retirement accounts is when you pay tax: traditional accounts defer it to withdrawal, Roth accounts settle it upfront and grow tax-free.",
+      "An employer match is part of your compensation, and contributing too little to capture it in full forfeits money outright.",
+      "Contribution limits are set annually and generally do not carry forward, so an unused year cannot be recovered later.",
+      "The savings rate and the length of the investment period matter far more to the outcome than the specific funds selected.",
+      "Withdrawal sequencing and required minimum distributions make the drawdown phase a planning problem in its own right, not merely the end of the saving phase.",
+    ],
+    sections: [
+      {
+        heading: "Traditional Versus Roth: A Question of Timing",
+        body: [
+          "Retirement accounts come in two broad tax treatments. Traditional accounts give a deduction now, grow without annual tax, and are taxed as income on withdrawal. Roth accounts are funded with money already taxed, grow without tax, and qualified withdrawals are untaxed.",
+          "The decision therefore turns on a comparison between your tax rate now and your expected rate in retirement. If your rate will be lower later, deferring is advantageous. If it will be higher — common for people early in a career, or expecting substantial retirement income — paying now is preferable.",
+          "Because that comparison rests on a forecast decades out, and because tax law changes, many people hold both. Having balances in each creates genuine flexibility to manage taxable income year by year in retirement, which is worth something independent of which turns out to have been mathematically optimal.",
+        ],
+      },
+      {
+        heading: "Employer Plans and the Match",
+        body: [
+          "Workplace plans allow contributions directly from salary, often with an employer match up to a specified share of pay. The match is compensation conditional on your participation. Contributing less than the amount required to capture it in full means declining part of your pay.",
+          "Matches often carry a vesting schedule, meaning employer contributions become fully yours only after a period of service. Your own contributions are always immediately yours. Vesting terms are worth knowing before any decision about changing jobs.",
+          "Plan investment menus are limited, and the expense ratios of the available funds vary widely. Since fees compound against you over decades, the cheapest broadly diversified option in a menu is frequently the most consequential choice available inside the plan.",
+          "On leaving an employer, balances can usually stay in the plan, transfer to a new employer's plan, or roll into an individual account. Direct transfers between institutions avoid the withholding and deadline complications that arise when funds pass through your hands.",
+        ],
+      },
+      {
+        heading: "Individual Accounts and Their Rules",
+        body: [
+          "Individual retirement accounts are opened independently of an employer and offer a far wider investment selection than most workplace plans, with contribution limits set annually.",
+          "Eligibility rules differ between the two types. The deductibility of traditional contributions can be limited when you or a spouse are covered by a workplace plan, and direct Roth contributions phase out above certain income levels. Both sets of thresholds are adjusted periodically, so they should be checked against current published figures for the year in question rather than assumed.",
+          "Self-employed people have access to additional account types that permit substantially larger contributions, which is one of the more valuable and least used features available to contractors and business owners.",
+          "Limits generally apply per person across accounts of the same type rather than per account, so opening several accounts does not increase how much can be contributed.",
+        ],
+      },
+      {
+        heading: "What Actually Determines the Outcome",
+        body: [
+          "Three variables dominate: how much you contribute, how long it compounds, and what you pay in fees. Fund selection matters far less than any of them, though it attracts most of the attention.",
+          "Time is the most powerful and the least recoverable. Contributions made early compound over the longest period, which is why starting modestly in your twenties can outperform contributing far more heavily beginning in your forties.",
+          "Fees compound in reverse. A difference of a fraction of a percentage point in annual costs becomes substantial across a working life, which is the practical argument for low-cost broad market funds as a default rather than a preference.",
+          "Increasing the contribution rate alongside pay rises is the most reliable mechanism for raising the savings rate, because it avoids any reduction in current living standards. Many plans automate this.",
+        ],
+      },
+      {
+        heading: "The Drawdown Phase",
+        body: [
+          "Accumulating is only half the exercise. Converting a balance into income introduces distinct problems that require their own planning.",
+          "Withdrawal sequencing determines how long the money lasts after tax. Drawing from taxable, tax-deferred and tax-free accounts in different orders produces materially different lifetime tax outcomes, and the optimal order depends on your bracket in each year.",
+          "Traditional accounts are subject to required minimum distributions beginning at an age set by statute, which has been changed by legislation more than once. These are mandatory regardless of whether the income is needed, and failing to take them carries a penalty. Roth accounts are treated differently in this respect during the owner's lifetime.",
+          "Sequence-of-returns risk is the drawdown-specific hazard: poor market performance in the early years of retirement, while withdrawals are being taken, damages a portfolio far more than the same returns occurring later. Holding a cash or short-duration buffer to avoid selling into a fall is the common mitigation.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "Should I choose a traditional or Roth retirement account?",
+        answer:
+          "It depends on whether your tax rate is likely to be higher now or in retirement. Traditional accounts suit those expecting a lower rate later, since the deduction is taken at today's higher rate. Roth accounts suit those expecting a higher rate later, including many people early in their careers. Holding both provides flexibility to manage taxable income in retirement.",
+      },
+      {
+        question: "How much should I contribute to my employer plan?",
+        answer:
+          "At minimum, enough to capture the full employer match, since anything less forfeits compensation you are entitled to. Beyond that, the appropriate rate depends on your age, existing savings and target retirement date. Raising the contribution rate alongside pay increases is an effective way to build the rate without reducing current living standards.",
+      },
+      {
+        question: "What happens to my retirement account when I change jobs?",
+        answer:
+          "You can generally leave it in the former employer's plan, transfer it to a new employer's plan, or roll it into an individual retirement account. A direct transfer between institutions avoids mandatory withholding and the deadline that applies when funds are paid to you first. Employer contributions may be subject to a vesting schedule.",
+      },
+      {
+        question: "What are required minimum distributions?",
+        answer:
+          "They are mandatory annual withdrawals from traditional retirement accounts beginning at an age set by statute, which legislation has revised more than once. They apply whether or not the income is needed, and there is a penalty for failing to take them. Roth accounts are treated differently during the original owner's lifetime.",
+      },
+    ],
+    relatedReading: [
+      { slug: "planning", anchor: "Long-Term Financial Planning" },
+      { slug: "portfolio", anchor: "Asset Allocation as Retirement Approaches" },
+      { slug: "financial-independence", anchor: "Savings Rate and Financial Independence" },
+      { slug: "investing", anchor: "Low-Cost Investing Fundamentals" },
+    ],
   },
   budgeting: {
     tag: 'BUDGETING',
@@ -2214,6 +3151,23 @@ const OVERRIDES: Record<string, TopicCopy> = {
           "Conduct a 10-minute weekly check-in to reconcile transactions and make minor course corrections before small spending leaks derail the monthly plan.",
         ],
       },
+      {
+        heading: "Common Reasons First Budgets Fail",
+        body: [
+          "Most first budgets fail for predictable reasons, and knowing them in advance is more useful than any template.",
+          "The commonest is setting figures from aspiration rather than history. A grocery number chosen because it sounds reasonable, rather than derived from what you actually spent over the past three months, will be wrong in the first week.",
+          "The second is omitting irregular costs. A budget covering only monthly bills breaks the moment an annual premium or a car repair arrives, and the failure feels like proof the whole exercise does not work.",
+          "The third is excessive granularity. Twenty-five categories require constant classification decisions and are abandoned within weeks. Six to ten categories capture nearly all the useful information with a fraction of the effort.",
+        ],
+      },
+      {
+        heading: "What to Do With a Surplus",
+        body: [
+          "A budget that produces a surplus is working, but an unassigned surplus tends to be absorbed by drift rather than converted into progress.",
+          "Assign it before the month begins. Whether it goes to an emergency fund, debt repayment or a specific savings goal matters less than that it has a destination — unallocated money reliably disappears.",
+          "Automating the transfer on payday is more effective than intending to move it later. The decision is made once rather than renewed monthly against competing temptations.",
+        ],
+      },
     ],
     faqs: [
       {
@@ -2282,6 +3236,49 @@ const OVERRIDES: Record<string, TopicCopy> = {
           "In high-earning months, deposit all excess funds into a 'holding account.' In lean months, draw the necessary deficit from the holding account to maintain steady living standards.",
         ],
       },
+      {
+        heading: "Handling the Months That Break the Pattern",
+        body: [
+          "Every annual budget contains months that do not resemble the others. Insurance premiums, vehicle registration, school costs, holidays and gift-heavy periods arrive on their own schedule and wreck an otherwise functioning plan.",
+          "The fix is to identify these in advance and divide each by the number of months until it falls due, saving that amount monthly. A large annual premium becomes a modest monthly line item, and the month it is actually paid becomes uneventful.",
+          "Budgets are most often abandoned not because the ordinary months fail but because an irregular one blows a hole in the plan and the whole system feels pointless. Pre-funding removes that failure mode entirely.",
+        ],
+      },
+      {
+        heading: "Building In Flexibility So the Plan Survives",
+        body: [
+          "A budget with no slack fails on contact with reality. Prices change, plans change, and a plan that requires perfect adherence will break in its first month.",
+          "Include a miscellaneous category sized at a few percent of monthly spending. Its purpose is to absorb the small unclassifiable things that otherwise force you to either overspend a category or abandon tracking.",
+          "Include a genuinely unrestricted personal allowance for each adult in the household, spent without justification or discussion. Budgets that eliminate all discretion produce resentment, and resentment ends budgets faster than arithmetic ever does.",
+        ],
+      },
+      {
+        heading: "The Monthly Review That Makes It Work",
+        body: [
+          "Set aside twenty minutes at the end of each month. Compare what you planned against what actually happened, category by category.",
+          "Look for patterns rather than judging individual months. A category that overruns consistently is not a discipline problem; it is a budgeting error, and the correct response is to raise that category and reduce another rather than resolving to try harder.",
+          "Then set the coming month deliberately, adjusting for anything known in advance — a birthday, a trip, an annual bill. A budget rolled forward unchanged month after month gradually loses contact with reality and stops being used.",
+        ],
+      },
+      {
+        heading: "Choosing Between Paper, Spreadsheet and App",
+        body: [
+          "The medium matters less than consistency, but each suits a different temperament and the mismatch is a common reason budgets are abandoned.",
+          "A spreadsheet offers complete control over categories and calculations, costs nothing, and keeps your financial data entirely in your own hands. It requires manual entry, which some people find valuable as a form of attention and others find intolerable.",
+          "An app automates the tedious part by importing transactions and categorising them, which lowers the effort of maintenance considerably. The trade-offs are a subscription cost in many cases, and granting a third party access to your account data.",
+          "Paper suits people who find that writing by hand produces engagement that screens do not. It handles small numbers of categories well and scales poorly beyond that.",
+          "Start with whichever you will actually open each week. A spreadsheet maintained consistently beats a sophisticated app that stops being checked after a fortnight.",
+        ],
+      },
+      {
+        heading: "Making the First Three Months Realistic",
+        body: [
+          "Treat the first three months as measurement rather than control. Most people set their opening figures too low, discover they cannot hold them, and conclude that budgeting does not work for them.",
+          "In month one, record what you actually spend without attempting to change it. The purpose is an accurate baseline, and the exercise usually surfaces at least one category that is substantially larger than expected.",
+          "In month two, set targets close to those actual figures, trimming only where you genuinely intend to change behaviour. A target five percent below reality is achievable; one thirty percent below is not, and failing it undermines the whole system.",
+          "By month three the figures should be close enough that the budget becomes a tool for decisions rather than a source of monthly disappointment. Real reductions come after this point, once you know which categories are worth attacking.",
+        ],
+      },
     ],
     faqs: [
       {
@@ -2293,6 +3290,16 @@ const OVERRIDES: Record<string, TopicCopy> = {
         question: "What is the best way to track monthly cash flow?",
         answer:
           "Use a combination of automated banking alerts, a dedicated budgeting app (or Google Sheet), and a weekly 10-minute transaction audit.",
+      },
+      {
+        question: "What should I do when I overspend a category?",
+        answer:
+          "Move the difference from another category rather than ignoring it, so the monthly total still balances. If the same category overruns repeatedly, treat that as a sign the original figure was unrealistic and raise it permanently, reducing a lower-priority category to compensate.",
+      },
+      {
+        question: "How do I budget for expenses that only occur once a year?",
+        answer:
+          "Divide the annual cost by twelve and save that amount monthly in a dedicated sinking fund. Insurance premiums, vehicle registration and holiday spending then arrive already funded, which prevents the single most common cause of an otherwise working budget collapsing.",
       },
     ],
     relatedReading: [
@@ -2443,6 +3450,22 @@ const OVERRIDES: Record<string, TopicCopy> = {
           "Additionally, parents should ensure adequate term life insurance and disability coverage are in place to safeguard the family's financial future against unexpected loss of income.",
         ],
       },
+      {
+        heading: "Running a Budget Across Two Adults",
+        body: [
+          "The hardest part of household budgeting is rarely arithmetic. It is coordinating two people with different instincts about money, and systems that ignore this fail regardless of how well constructed they are.",
+          "Three structures are common. Fully combined finances pool everything, which is simplest to administer and requires the most alignment. Fully separate finances split bills proportionally and keep the rest independent, preserving autonomy at the cost of coordination on shared goals. A hybrid — a joint account for shared costs, funded proportionally to income, with individual accounts retained — is the most common arrangement in practice.",
+          "Whichever structure you choose, both adults need visibility of the whole picture. Arrangements where one person manages everything and the other has no view create genuine vulnerability if circumstances change unexpectedly.",
+        ],
+      },
+      {
+        heading: "The Regular Money Conversation",
+        body: [
+          "Schedule a short recurring conversation rather than discussing money only when something has gone wrong. Money discussions that occur exclusively in response to a problem become associated with conflict, and both parties start avoiding them.",
+          "Keep it brief and structured: what came in, what went out, what is coming up, and whether anything needs to change. Twenty minutes monthly is sufficient once the system is running.",
+          "Separate the review of what happened from decisions about what to change. Trying to do both at once turns a factual review into a negotiation, which is what makes these conversations difficult.",
+        ],
+      },
     ],
     faqs: [
       {
@@ -2517,6 +3540,31 @@ const OVERRIDES: Record<string, TopicCopy> = {
           "Students should apply for a dedicated student credit card or secured card, set up automatic recurring bill payments (such as a phone bill or streaming service), and enable automatic full-balance payoff each month to never incur interest charges.",
         ],
       },
+      {
+        heading: "Aligning a Budget With the Academic Year",
+        body: [
+          "Student finances do not follow a monthly cycle. Money often arrives in large disbursements at the start of each term while expenses continue steadily throughout, which makes a standard monthly budget a poor fit.",
+          "The workable approach is to budget by term rather than by month. Take the total funds available for the term, subtract fixed costs such as rent and known fees, and divide what remains by the number of weeks. That weekly figure is the number that actually governs day-to-day decisions.",
+          "Treat a disbursement as a term's income rather than as available money. The most common student budgeting failure is spending freely in the weeks after funds arrive and running short before the next disbursement.",
+        ],
+      },
+      {
+        heading: "Borrowing Only What You Need",
+        body: [
+          "Student loan offers frequently exceed what is required, and accepting the full amount because it is available is expensive in a way that is easy to miss during study.",
+          "Interest accrues on the amount borrowed, not the amount needed, and on many loan types it accrues while enrolled. Money borrowed and left unspent still costs money.",
+          "Calculate your actual shortfall — costs minus grants, scholarships, earnings and family contribution — and accept only that. If you later find you accepted more than needed, returning the surplus within the permitted window generally reduces both the balance and the interest charged.",
+        ],
+      },
+      {
+        heading: "Cutting the Costs That Are Actually Large",
+        body: [
+          "Student budgeting advice tends to focus on small recurring purchases, but the large costs are where the meaningful savings sit.",
+          "Housing is usually the biggest line. Sharing with more people, living slightly further from campus, or taking a resident assistant role where available changes the figure by more than any amount of everyday economising.",
+          "Textbooks are the second. Renting, buying earlier editions where the content is materially unchanged, using library reserves and comparing international editions can reduce this cost substantially, and the difference between the campus store price and the alternatives is often large.",
+          "Transport and food follow. A student transit pass, cooking rather than meal plans where the numbers favour it, and avoiding running a car when campus transport exists are each worth more than tracking coffee purchases.",
+        ],
+      },
     ],
     faqs: [
       {
@@ -2533,6 +3581,16 @@ const OVERRIDES: Record<string, TopicCopy> = {
         question: "Should college students get a part-time job or work-study?",
         answer:
           "Yes. Federal Work-Study (FWS) jobs are ideal because earnings are often exempt from FAFSA financial aid calculations for subsequent years, and on-campus employers typically provide flexible schedules around exam periods.",
+      },
+      {
+        question: "Should I accept the full student loan amount I am offered?",
+        answer:
+          "Only borrow what you actually need after grants, scholarships, earnings and family support. Interest is charged on the amount borrowed regardless of whether it is spent, and on many loan types it accrues while you are still enrolled. If you accepted too much, returning the surplus within the permitted window usually reduces both the balance and the interest.",
+      },
+      {
+        question: "How do I budget when my money arrives once a term?",
+        answer:
+          "Budget by term rather than by month. Subtract fixed costs such as rent and fees from the total available, then divide the remainder by the number of weeks in the term to get a weekly spending figure. This prevents the common pattern of spending freely after a disbursement and running short before the next one.",
       },
     ],
     relatedReading: [
@@ -2629,6 +3687,88 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaTitle: 'Advanced Budgeting Strategies',
     metaDescription:
       'Advanced budgeting guidance for freelancers and small business owners, plus how to budget through inflation, recessions, and annual planning.',
+    keyTakeaways: [
+      "Advanced budgeting addresses problems basic methods handle poorly: irregular income, large periodic costs, and coordinating multiple goals at once.",
+      "Sinking funds convert unpredictable lump-sum expenses into predictable monthly contributions, which removes most so-called emergencies from the emergency fund.",
+      "Variable income is best budgeted from a baseline drawn from your lowest earning months, with surplus routed to a buffer that smooths the gaps.",
+      "A one-month buffer — living this month on last month's income — eliminates the timing mismatch between when bills arrive and when pay lands.",
+      "Tracking net worth alongside cash flow shows whether the budget is actually building wealth or merely balancing.",
+    ],
+    sections: [
+      {
+        heading: "Sinking Funds: Removing Surprises From the Calendar",
+        body: [
+          "Most expenses described as emergencies are not unexpected at all. Car servicing, insurance premiums, property taxes, holiday spending, replacing a laptop — these are predictable in nature even when the exact timing is uncertain.",
+          "A sinking fund divides an anticipated cost by the months until it falls due and saves that amount monthly. An annual insurance premium becomes a monthly line item rather than a shock.",
+          "The effect on the emergency fund is significant. Once foreseeable costs have their own funding, the emergency fund stops being raided for things that were never emergencies, and it remains intact for genuine income interruption.",
+          "Practically, sinking funds can be separate savings sub-accounts or simply tracked categories within a single account. What matters is that the money is committed in advance rather than notionally available.",
+        ],
+      },
+      {
+        heading: "Budgeting on Irregular Income",
+        body: [
+          "Freelancers, commission earners, seasonal workers and business owners cannot budget from a fixed monthly figure, and applying standard methods to a fluctuating income produces a plan that fails in lean months.",
+          "The workable approach sets a baseline from the lowest earning months of the previous year and builds the essential budget against that figure. Living at the level of your worst month means the budget always holds.",
+          "Income above the baseline flows to an income-smoothing account rather than into spending. That account funds the shortfall in months that come in below baseline, converting an erratic income into a stable one.",
+          "Two additions are important for the self-employed. Tax should be set aside from every payment received rather than reckoned with at year end, and a larger emergency fund is warranted because income interruption is both more likely and less cushioned than in employment.",
+        ],
+      },
+      {
+        heading: "The One-Month Buffer",
+        body: [
+          "Ordinary budgeting spends income in the month it arrives, which creates a persistent timing problem: bills fall due on their own schedule, not on payday, and any disruption to that alignment causes trouble.",
+          "The buffer resolves it. Accumulate one full month of expenses, then begin funding each month entirely from the previous month's income. Money earned in one month is not spent until the next.",
+          "The result is that you always begin a month knowing exactly what is available, because it has already been earned. Pay date changes, a delayed invoice or an extra pay period stop mattering.",
+          "Building it requires temporarily saving beyond normal contributions, which typically takes several months. It is one of the highest-value structural changes available in personal finance, and it is invisible from the outside because nothing about lifestyle changes.",
+        ],
+      },
+      {
+        heading: "Coordinating Competing Goals",
+        body: [
+          "Most people pursue several goals at once — retirement, a house deposit, debt repayment, children's education — and the difficulty is allocating between them rather than budgeting for any one.",
+          "Order goals by the cost of delay rather than by emotional urgency. An employer retirement match forgone is lost permanently. High-interest debt compounds against you daily. A house deposit, by contrast, can usually absorb a delay without permanent loss.",
+          "Consider the tax treatment attached to each. Contributions to tax-advantaged accounts often carry annual limits that do not carry forward, so an unused year is unrecoverable — an argument for funding them earlier than a purely rate-of-return comparison would suggest.",
+          "Then split contributions explicitly by percentage rather than funding goals sequentially. Sequential funding means slow goals receive nothing for years, and the resulting sense of no progress is a common reason plans are abandoned.",
+        ],
+      },
+      {
+        heading: "Measuring the Right Thing",
+        body: [
+          "A balanced budget is not the objective. It is possible to balance every month, service debts on schedule, and end the year no better off than you began.",
+          "Net worth — assets minus liabilities — measures whether the budget is actually accumulating anything. Recorded monthly or quarterly, it captures progress that cash-flow tracking alone conceals, since repaying principal on a mortgage or student loan increases net worth without appearing as savings.",
+          "The savings rate, expressed as the share of take-home pay directed to savings, investments and debt principal, is the second useful measure. It correlates far more strongly with long-term outcomes than income does, and unlike income it is largely within your control.",
+          "Reviewing these two figures a few times a year answers the question a monthly budget cannot: is this system working?",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "What is a sinking fund and how is it different from an emergency fund?",
+        answer:
+          "A sinking fund saves incrementally toward a known future expense such as an insurance premium, car service or holiday. An emergency fund covers genuinely unforeseen events such as job loss or urgent repairs. Running sinking funds keeps predictable costs from draining the emergency fund, which is the most common reason emergency reserves are never fully rebuilt.",
+      },
+      {
+        question: "How do I budget when my income varies every month?",
+        answer:
+          "Build the essential budget from your lowest-earning months over the past year, so the plan holds even in a weak month. Route income above that baseline into a smoothing account that covers shortfalls when they occur. If self-employed, set tax aside from each payment as it arrives rather than at year end.",
+      },
+      {
+        question: "What does living on last month's income mean?",
+        answer:
+          "It means accumulating a one-month buffer so that each month's spending is funded entirely by the previous month's earnings. You begin every month knowing exactly what is available because it has already been received, which removes the timing mismatch between pay dates and bill dates.",
+      },
+      {
+        question: "Should I fund several financial goals at once or one at a time?",
+        answer:
+          "Splitting contributions across goals by percentage generally works better than funding them sequentially, because slow-moving goals otherwise receive nothing for years and the absence of visible progress causes plans to be abandoned. Prioritise by the cost of delay — employer matches and high-interest debt first, since both impose permanent or compounding losses.",
+      },
+    ],
+    relatedReading: [
+      { slug: "budget-rules", anchor: "Comparing Budgeting Frameworks" },
+      { slug: "emergency-fund", anchor: "Sizing and Building an Emergency Fund" },
+      { slug: "financial-independence", anchor: "Savings Rate and Long-Term Independence" },
+      { slug: "money-management", anchor: "Coordinating Multiple Financial Goals" },
+    ],
   },
   fed: {
     tag: 'FEDERAL RESERVE',
@@ -2640,6 +3780,83 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaTitle: 'Federal Reserve News & Interest Rate Policy',
     metaDescription:
       'Track Federal Reserve interest-rate decisions, FOMC statements, and analysis of how monetary policy affects loans, savings, and markets.',
+    keyTakeaways: [
+      "The Federal Reserve System combines a Board of Governors in Washington with twelve regional Reserve Banks, a structure designed to spread authority across the country.",
+      "Congress assigned the Fed a dual mandate — maximum employment and stable prices — which is unusual; many central banks target inflation alone.",
+      "The Federal Open Market Committee has twelve voting members: the seven governors, the president of the New York Fed, and four regional presidents who rotate annually.",
+      "The Fed is independent in its policy decisions but accountable to Congress, which created it and can amend its statutory mandate.",
+      "Beyond interest rates, the Fed supervises banks, operates core payment infrastructure, and acts as lender of last resort in a crisis.",
+    ],
+    sections: [
+      {
+        heading: "An Institution Built to Divide Power",
+        body: [
+          "The Federal Reserve was established by the Federal Reserve Act of 1913, after a sequence of banking panics demonstrated that the United States needed an institution capable of supplying liquidity when credit markets froze. Its design reflects a deep political compromise: rather than a single central bank in one financial capital, Congress created a system.",
+          "The Board of Governors is a federal agency in Washington. Its seven members are nominated by the President and confirmed by the Senate, serving long staggered terms specifically so that no single administration can remake the board quickly.",
+          "The twelve regional Reserve Banks are separate entities headquartered across the country, each with its own president, research staff and board of directors drawn from local business and community backgrounds. They gather regional intelligence, supervise banks in their districts, and participate in policy debate — the mechanism by which conditions outside New York and Washington reach the decision table.",
+        ],
+      },
+      {
+        heading: "The Dual Mandate",
+        body: [
+          "Congress directs the Fed to pursue maximum employment, stable prices, and moderate long-term interest rates. The third is generally understood to follow from the first two, so the objective is usually described as a dual mandate.",
+          "This is genuinely distinctive. Many central banks operate under a single inflation target, on the theory that price stability is the best contribution monetary policy can make to employment. The Fed is required to weigh both directly, which means that when inflation and employment point in opposite directions, the committee must make an explicit trade-off rather than deferring to a rule.",
+          "Maximum employment is not defined as a fixed number. Because the sustainable level of employment shifts with demographics, technology and labour market structure, the committee treats it as something to be assessed continuously from a range of indicators rather than a target to be hit.",
+        ],
+      },
+      {
+        heading: "How the FOMC Actually Decides",
+        body: [
+          "The Federal Open Market Committee meets on a scheduled basis through the year, with the ability to convene between meetings if conditions demand it. Voting membership comprises the seven governors, the president of the Federal Reserve Bank of New York — permanent because that bank executes market operations — and four of the remaining eleven regional presidents on an annual rotation.",
+          "All twelve regional presidents attend and participate in discussion regardless of whether they hold a vote that year, so the deliberation is broader than the voting arithmetic suggests.",
+          "Each meeting produces a statement explaining the decision. Minutes follow after a delay and reveal the texture of the debate. Full transcripts are released only after several years, which allows participants to speak candidly at the time.",
+        ],
+      },
+      {
+        heading: "The Toolkit Beyond the Headline Rate",
+        body: [
+          "The primary instrument is the target range for the federal funds rate. The Fed keeps the effective rate within that range using administered rates — chiefly the interest it pays on reserve balances held by banks, and an overnight reverse repurchase facility available to a wider set of counterparties.",
+          "The balance sheet is the second major tool. Large-scale asset purchases, commonly called quantitative easing, add reserves and push down longer-term yields when the policy rate is already near zero and cannot fall further. Allowing holdings to mature without reinvestment reverses the process.",
+          "The discount window provides direct lending to banks against collateral, functioning as the lender-of-last-resort facility the Fed was created to supply. Forward guidance — explicit communication about the likely path of policy — is a tool in its own right, because expectations about future rates influence long-term borrowing costs today.",
+        ],
+      },
+      {
+        heading: "Independence, and Its Limits",
+        body: [
+          "Operational independence means the Fed sets policy without requiring approval from the executive branch. The rationale is that elected officials face short electoral horizons, while the effects of monetary policy arrive with long lags — a combination that historically produced a bias toward easy money and higher inflation.",
+          "Independence is not sovereignty. Congress created the Fed by statute and can amend that statute. The Chair testifies before Congress regularly, the accounts are audited, and the Board is subject to federal transparency requirements.",
+          "The Fed also funds itself from interest on its holdings and fees for services rather than congressional appropriation, remitting surplus earnings to the Treasury. That arrangement removes budget leverage as a channel of political pressure — an often-overlooked structural detail that does much of the practical work of preserving independence.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "Is the Federal Reserve a government agency or a private bank?",
+        answer:
+          "It is both public and private by design. The Board of Governors is a federal agency whose members are presidentially nominated and Senate-confirmed. The twelve regional Reserve Banks are separately incorporated with member commercial banks holding stock, though that stock carries none of the control rights of ordinary shareholding. Policy authority rests with the public component.",
+      },
+      {
+        question: "What is the Fed's dual mandate?",
+        answer:
+          "Congress directs the Federal Reserve to pursue maximum employment and stable prices, alongside moderate long-term interest rates. When the two principal goals conflict — for instance when reducing inflation requires accepting weaker employment — the committee must weigh them explicitly rather than follow a fixed rule.",
+      },
+      {
+        question: "Who votes on interest rate decisions?",
+        answer:
+          "The Federal Open Market Committee has twelve voting members: the seven members of the Board of Governors, the president of the Federal Reserve Bank of New York, and four other regional Reserve Bank presidents serving on a yearly rotation. All twelve regional presidents join the discussion whether or not they currently vote.",
+      },
+      {
+        question: "Can the President fire the Federal Reserve Chair over policy?",
+        answer:
+          "Governors, including the Chair, serve fixed terms and statutory protections are understood to prevent removal over policy disagreement. The independence is a matter of law and long-standing convention, and Congress retains the ultimate authority to amend the Federal Reserve Act.",
+      },
+    ],
+    relatedReading: [
+      { slug: "monetary-policy", anchor: "The Monetary Policy Toolkit Explained" },
+      { slug: "interest-rates", anchor: "How Rate Decisions Reach Your Mortgage and Savings" },
+      { slug: "inflation", anchor: "How Inflation Is Measured: CPI Versus PCE" },
+      { slug: "unemployment", anchor: "Reading the Monthly Employment Report" },
+    ],
   },
   savings: {
     tag: 'SAVINGS',
@@ -2938,6 +4155,22 @@ const OVERRIDES: Record<string, TopicCopy> = {
           "Putting down at least 10% to 20% in cash or trade-in equity acts as a financial buffer against immediate vehicle depreciation. If you finance with less than 20% down, purchasing Guaranteed Asset Protection (GAP) insurance is highly advisable to cover potential insurance shortfalls in a total-loss event.",
         ],
       },
+      {
+        heading: "Arranging Financing Before You Shop",
+        body: [
+          "Securing a loan approval from a bank or credit union before visiting a dealership changes the nature of the transaction. You arrive as a cash buyer negotiating a single number — the price of the vehicle.",
+          "Dealer-arranged financing is a legitimate and sometimes competitive option, particularly manufacturer-subsidised promotional rates on new vehicles. The difficulty is that it allows price, trade-in value, financing and any add-ons to be negotiated simultaneously, and a concession on one can be recovered on another without it being obvious.",
+          "With outside financing in hand you can still accept a dealer offer if it genuinely beats your approval. You simply have a verified benchmark, which is the whole point.",
+        ],
+      },
+      {
+        heading: "Negative Equity and Long Loan Terms",
+        body: [
+          "Vehicles depreciate quickly, and on longer terms the balance owed can exceed the vehicle's value for a substantial portion of the loan. This is negative equity, and it constrains your options in ways that only become apparent when something goes wrong.",
+          "If the vehicle is written off in an accident, standard insurance pays its market value, which may be less than the outstanding balance — leaving you owing money on a vehicle you no longer have. Guaranteed asset protection cover addresses this specific gap and is worth evaluating on longer terms.",
+          "Rolling negative equity from one vehicle into the next loan compounds the problem, since the new loan then starts further underwater. A larger deposit and a shorter term are the direct remedies, and both reduce total interest as well.",
+        ],
+      },
     ],
     faqs: [
       {
@@ -3024,6 +4257,24 @@ const OVERRIDES: Record<string, TopicCopy> = {
           "Student loan refinancing allows borrowers with established credit and steady income to consolidate existing loans into a single private loan with a lower interest rate. While beneficial for high-interest private debt, refinancing federal loans with a private lender permanently strips away federal forgiveness and income-driven repayment benefits.",
         ],
       },
+      {
+        heading: "Federal and Private Loans Are Not Interchangeable",
+        body: [
+          "The distinction between federal and private student loans is the most consequential one in this area, and it is frequently blurred in general discussion of student debt.",
+          "Federal loans carry protections written into statute: income-driven repayment plans that adjust to earnings, deferment and forbearance provisions, and eligibility for cancellation programmes tied to particular careers or repayment histories. Rates are set legislatively rather than by credit assessment.",
+          "Private loans are ordinary consumer credit. Rates depend on credit profile, a co-signer is often required, and none of the statutory protections apply. Some lenders offer their own hardship provisions, but these are contractual and can be changed.",
+          "This is why the standard sequence is to exhaust grants, scholarships and federal loan eligibility before considering private borrowing. It is also why refinancing federal loans privately is a decision to weigh carefully, since it permanently surrenders the federal protections in exchange for a rate.",
+        ],
+      },
+      {
+        heading: "Choosing a Repayment Approach",
+        body: [
+          "Standard repayment fixes payments across a set term and generally produces the lowest total interest, because the balance is cleared fastest.",
+          "Income-driven plans set payments as a share of discretionary income, which protects affordability when earnings are low or uncertain. The trade-off is a longer term and more interest paid overall, though remaining balances may be cancelled after the qualifying period.",
+          "Extended and graduated plans reduce early payments in exchange for a longer term and higher total cost.",
+          "The right choice depends on the relationship between your balance and your income. A balance small relative to earnings is usually best cleared quickly. A balance large relative to earnings, particularly in a field with modest pay, is where income-driven plans do their intended work. Programme rules and eligibility change through legislation and regulation, so verify current terms with your loan servicer rather than relying on general summaries.",
+        ],
+      },
     ],
     faqs: [
       {
@@ -3072,6 +4323,83 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaTitle: 'Interest Rate News & Analysis',
     metaDescription:
       'Understand how interest rate changes affect mortgages, credit cards, savings yields, and investment returns.',
+    keyTakeaways: [
+      "The Federal Reserve sets a target range for the federal funds rate — the overnight rate banks charge each other — and influences everything else indirectly from there.",
+      "Longer-term rates such as mortgage rates are set by bond markets pricing expectations for years ahead, which is why they can move opposite to a Fed decision.",
+      "The transmission from a policy decision to household borrowing costs is uneven: some products reprice within days, others over months or not at all.",
+      "The yield curve plots yields against maturity, and its shape encodes the market's collective expectation about future rates and growth.",
+      "For personal decisions, what matters is the rate on your specific product and whether it is fixed or variable — not the policy rate itself.",
+    ],
+    sections: [
+      {
+        heading: "The Rate the Fed Actually Sets",
+        body: [
+          "The Federal Open Market Committee does not set mortgage rates, credit card rates or savings yields. It sets a target range for the federal funds rate, at which banks lend reserve balances to one another overnight, and uses administered rates and open market operations to keep the effective rate inside that range.",
+          "Everything else follows from arbitrage and expectation. If overnight money costs more, short-term lending costs more, and the effect propagates outward through the structure of interest rates — but the further out along the maturity spectrum, the weaker the direct link.",
+          "This is why a rate cut sometimes coincides with mortgage rates rising. Long-term rates reflect what markets expect over the whole life of the loan, including inflation. A cut interpreted as a sign of inflation tolerance can raise long-term yields even as the policy rate falls.",
+        ],
+      },
+      {
+        heading: "How a Decision Reaches Your Accounts",
+        body: [
+          "Credit card rates move fastest and most reliably. Most are variable and defined as the prime rate plus a margin, and prime tracks the federal funds target almost mechanically. A policy change typically appears on a statement within one or two billing cycles.",
+          "Home equity lines of credit and variable-rate private student loans follow the same prime-linked pattern. Adjustable-rate mortgages reprice only at their scheduled reset dates, which may be months or years away.",
+          "Savings and deposit rates are the least predictable. Banks are under no obligation to pass increases through, and institutions with ample deposits often decline to. This asymmetry — loan rates rising promptly while deposit rates lag — is a persistent and well-documented pattern, and it is the reason comparing savings yields periodically is worth the effort.",
+        ],
+      },
+      {
+        heading: "Reading the Yield Curve",
+        body: [
+          "The yield curve plots the yields of bonds of identical credit quality across different maturities. Its normal shape slopes upward, because lenders demand additional compensation for committing money for longer.",
+          "A flat curve indicates markets expect little change in rates. An inverted curve, where short-term yields exceed long-term ones, indicates markets expect rates to be lower in future — typically because they expect economic weakness to force cuts. Inversion has preceded US recessions with enough regularity to be closely watched, though the lead time has varied widely and it is a signal rather than a mechanism.",
+          "For a household, the curve's practical use is in choosing between fixed and variable products. A steeply inverted curve means short-term borrowing is unusually expensive relative to long-term, which shifts the calculus toward locking in longer fixed terms.",
+        ],
+      },
+      {
+        heading: "Fixed Versus Variable: A Decision Framework",
+        body: [
+          "Ask first how long the obligation lasts. For debt you expect to repay within a year or two, the variable-versus-fixed question matters far less than the margin you are charged, and chasing rate forecasts is rarely worth it.",
+          "Ask next whether you could absorb the worst case. A variable rate is a transfer of risk from the lender to you. If a two- or three-point rise would make the payment unaffordable, the fixed rate is buying genuine protection and the premium is the price of that insurance.",
+          "Ask finally what the market has already priced in. Forward rates embedded in the curve represent the collective expectation, and a variable rate only outperforms if rates come in below that path — not merely if they fall. Beating a fixed rate requires the consensus to be wrong in your favour.",
+        ],
+      },
+      {
+        heading: "Nominal Rates, Real Rates and What You Actually Earn",
+        body: [
+          "The advertised rate is nominal. Subtract expected inflation and you have the approximate real rate, which is what determines whether purchasing power grows.",
+          "A savings account paying below the inflation rate delivers a negative real return, however positive the nominal figure appears. Conversely, borrowing at a fixed rate below inflation means the real cost of the debt is negative — the balance erodes in real terms while you repay it.",
+          "Tax makes the picture stricter still. Interest income is generally taxable, so the after-tax real return is lower again. Comparing a taxable account against a tax-advantaged one requires putting both on an after-tax basis before the comparison means anything.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "Why did my mortgage rate rise after the Fed cut rates?",
+        answer:
+          "Fixed mortgage rates track long-term bond yields, not the overnight policy rate. Those yields reflect expectations for inflation and growth over many years. If markets read a cut as increasing future inflation risk, long-term yields can rise even as the short-term policy rate falls.",
+      },
+      {
+        question: "Why do savings rates rise more slowly than loan rates?",
+        answer:
+          "Loan rates linked to prime adjust almost automatically, while deposit rates are set at each bank's discretion. Institutions holding sufficient deposits have little competitive pressure to raise what they pay. The lag is a business decision rather than a mechanical delay, which is why shopping between institutions can make a substantial difference.",
+      },
+      {
+        question: "What does an inverted yield curve mean?",
+        answer:
+          "It means short-term yields exceed long-term yields, indicating markets expect interest rates to be lower in the future — usually because they anticipate economic weakness prompting cuts. It has preceded past US recessions frequently enough to attract attention, but the lead time has varied considerably and it is not a mechanism that causes downturns.",
+      },
+      {
+        question: "Should I choose a fixed or variable rate?",
+        answer:
+          "Weigh the duration of the debt, whether your budget could absorb a substantial rate rise, and what the market has already priced in. A variable rate only wins if rates come in below the path already embedded in forward pricing. If a significant increase would create genuine hardship, the fixed rate is buying insurance rather than losing a bet.",
+      },
+    ],
+    relatedReading: [
+      { slug: "fed", anchor: "Inside the Federal Reserve: Structure, Mandate and Decisions" },
+      { slug: "mortgages", anchor: "Fixed and Adjustable Mortgages Compared" },
+      { slug: "savings", anchor: "Finding a Savings Yield That Beats Inflation" },
+      { slug: "bonds", anchor: "Why Bond Prices Fall When Rates Rise" },
+    ],
   },
   debt: {
     tag: 'DEBT',
@@ -3163,6 +4491,86 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaTitle: 'Emergency Fund Guides — How Much to Save & Where',
     metaDescription:
       'Learn how much to keep in an emergency fund, how to build one into your budget, and when it makes sense to use it.',
+    keyTakeaways: [
+      "An emergency fund covers genuine unplanned expenses and income interruption, which is a narrower definition than most people apply in practice.",
+      "Three to six months of essential expenses is the common guideline, but the right figure depends on income stability, dependants and available fallbacks.",
+      "Size the fund against essential monthly outgoings, not total income or total spending — the target is survival, not maintaining full lifestyle.",
+      "The money should be liquid and stable, which rules out investing it in assets that could fall precisely when you need to draw on it.",
+      "Building the fund generally takes priority over investing but not over capturing an employer retirement match or servicing very high-interest debt.",
+    ],
+    sections: [
+      {
+        heading: "Defining an Emergency Honestly",
+        body: [
+          "An emergency has three characteristics: it is unexpected, it is necessary, and it is urgent. A failed boiler in winter qualifies. A holiday, however deserved, does not — it is foreseeable and can be planned for separately.",
+          "The distinction matters because the most common way emergency funds fail is not through insufficient contribution but through gradual redefinition. Once the fund becomes a general reserve for anything inconvenient, it stops being available for the situation it exists to handle.",
+          "A useful safeguard is to hold the money somewhere deliberately slightly inconvenient — a separate institution, not linked to a debit card — so that using it requires a conscious decision rather than a tap.",
+        ],
+      },
+      {
+        heading: "Sizing It for Your Actual Circumstances",
+        body: [
+          "The standard guidance of three to six months of expenses is a reasonable starting point rather than a rule, and the appropriate figure varies considerably.",
+          "Circumstances arguing for a larger fund include irregular or commission-based income, self-employment, being the sole earner for a household, working in an industry with long rehiring cycles, having dependants, or carrying a health condition that could interrupt work.",
+          "Circumstances arguing for a smaller fund include stable employment in a field with strong demand, a dual-income household where one salary covers essentials, meaningful disability or income protection insurance, and access to other genuine liquidity.",
+          "Crucially, size the fund against essential expenses — housing, utilities, food, transport, insurance, minimum debt payments, childcare — rather than total spending. Discretionary spending is the first thing that stops in a genuine emergency, so including it inflates the target and makes the goal feel unreachable.",
+        ],
+      },
+      {
+        heading: "Where to Keep It",
+        body: [
+          "Two requirements govern the choice: the money must be available quickly, and its value must not fall. That combination points to insured deposit accounts rather than to investments.",
+          "High-yield savings accounts are the common choice, offering same-day or next-day access with deposit insurance protection within applicable limits. Money market deposit accounts serve similarly.",
+          "Certificates of deposit pay more but lock the money for a term, with a penalty for early withdrawal. A laddered structure — several certificates maturing at staggered intervals — is sometimes used for the portion of a fund beyond the immediately needed layer.",
+          "Investing an emergency fund in equities defeats its purpose. Market declines correlate with recessions, and recessions cause job losses, so the fund would most likely have fallen in value at exactly the moment it is needed. The point of this money is reliability, and accepting a lower return is the price of that reliability.",
+        ],
+      },
+      {
+        heading: "Where It Sits in the Order of Priorities",
+        body: [
+          "A common sequence begins with a small starter buffer — enough to absorb a modest unexpected bill without reaching for a credit card. This alone breaks the cycle in which every surprise adds to debt.",
+          "Next comes any employer retirement match, which is compensation contingent on contributing and is forfeited entirely if not claimed. Passing it up to build cash faster is usually a poor trade.",
+          "Then high-interest debt, particularly credit card balances. Paying down a balance charging a high rate is a guaranteed return equal to that rate, which is difficult to match anywhere else.",
+          "The full emergency fund is built after those steps, and investing beyond retirement contributions generally follows it. The sequence is not rigid, and someone with precarious employment may reasonably prioritise a larger buffer earlier.",
+        ],
+      },
+      {
+        heading: "Rebuilding, and Keeping It Current",
+        body: [
+          "Using the fund is not a failure — it is the fund working. The failure would have been meeting the same expense with high-interest credit.",
+          "After a withdrawal, treat replenishment as a temporary budget line with the same priority contributions had originally, and stop once the target is restored rather than letting it drift.",
+          "Review the target roughly annually and after any significant change in circumstances. Rent increases, a new dependant, a move to self-employment or a larger mortgage all raise the essential expense base the fund is meant to cover, and a target set years ago may now be substantially short.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "How much should I keep in an emergency fund?",
+        answer:
+          "Three to six months of essential expenses is the usual guideline. Weight toward the higher end if your income is irregular, you are the sole earner, you have dependants, or your industry has long rehiring cycles. Base the calculation on essential outgoings rather than total spending, since discretionary costs stop first in a genuine emergency.",
+      },
+      {
+        question: "Should I pay off debt or build an emergency fund first?",
+        answer:
+          "Most approaches build a small starter buffer first, so that unexpected costs do not immediately return to the credit card, then attack high-interest debt aggressively, then complete the full fund. Capturing any employer retirement match usually comes before both, since forgoing it means declining compensation outright.",
+      },
+      {
+        question: "Can I invest my emergency fund to earn a better return?",
+        answer:
+          "It is generally unwise. Investment values fall during recessions, which is when job losses cluster, so the fund would likely be depleted precisely when needed. Emergency money should sit in insured, liquid deposit accounts, accepting a lower return in exchange for certainty of value and access.",
+      },
+      {
+        question: "What actually counts as an emergency?",
+        answer:
+          "An expense that is unexpected, necessary and urgent — an urgent medical cost, an essential home or car repair, or income loss. Predictable costs such as holidays, annual insurance premiums or replacing an ageing appliance are better handled through separate sinking funds, so the emergency fund stays available for genuine surprises.",
+      },
+    ],
+    relatedReading: [
+      { slug: "savings", anchor: "Choosing a High-Yield Savings Account" },
+      { slug: "budgeting", anchor: "Building a Budget That Funds Your Goals" },
+      { slug: "debt", anchor: "Prioritising High-Interest Debt Repayment" },
+      { slug: "cd-rates", anchor: "Using CD Ladders for Longer-Term Reserves" },
+    ],
   },
   credit: {
     tag: 'CREDIT',
@@ -3294,6 +4702,83 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaTitle: 'GDP News & Economic Growth Analysis',
     metaDescription:
       'Track GDP growth data and understand what quarterly economic output figures mean for jobs, inflation, and markets.',
+    keyTakeaways: [
+      "GDP measures the market value of final goods and services produced inside a country's borders over a set period, and deliberately excludes intermediate inputs to avoid double counting.",
+      "The expenditure approach breaks output into consumption, investment, government spending and net exports — the familiar C + I + G + (X − M).",
+      "Consumption is by far the largest component of US GDP, which is why consumer behaviour dominates growth forecasts.",
+      "Imports are subtracted only to cancel out foreign-produced goods already counted elsewhere; a rising trade deficit is not straightforwardly a subtraction from prosperity.",
+      "GDP counts market transactions, so it omits unpaid household work, volunteering and the informal economy, and says nothing about distribution.",
+    ],
+    sections: [
+      {
+        heading: "The Four Components, and What Each One Captures",
+        body: [
+          "Consumption (C) covers household spending on durable goods, non-durable goods and services. Services — healthcare, housing, financial services, education — make up the majority of it in developed economies, which surprises people expecting retail goods to dominate.",
+          "Investment (I) means gross private domestic investment: business spending on equipment, structures and intellectual property, residential construction, and the change in private inventories. It is the smallest major component and by far the most volatile, which makes it the usual driver of swings between quarters.",
+          "Government (G) counts consumption and investment expenditure by federal, state and local government. Critically, it excludes transfer payments such as Social Security and unemployment benefits, because those are not payments for newly produced output — they are counted later when the recipient spends them.",
+          "Net exports (X − M) is exports minus imports. The subtraction of imports is an accounting correction rather than a judgement: imported goods already appear inside the consumption, investment and government figures, so they must be removed to leave only domestic production.",
+        ],
+      },
+      {
+        heading: "Three Approaches That Should Agree",
+        body: [
+          "Output can be measured by what is spent, what is earned, or what is produced. In principle the expenditure approach, the income approach and the production approach all arrive at the same total, because one participant's spending is another's income.",
+          "In practice the measured figures differ, and the gap is published as the statistical discrepancy. Gross domestic income — the income-side counterpart — is sometimes watched as a cross-check, and persistent divergence between GDP and GDI is itself treated as a signal worth investigating.",
+        ],
+      },
+      {
+        heading: "Real, Nominal and the Deflator",
+        body: [
+          "Nominal GDP is measured in the prices of the period being reported, so it rises when output grows and also when prices rise. Real GDP holds prices constant against a reference period, isolating genuine changes in the volume of production. Growth headlines almost always refer to real GDP.",
+          "The ratio between them is the GDP deflator, a broad price measure covering everything produced domestically. It differs from the Consumer Price Index in scope: the deflator excludes imports and includes business and government purchases, while CPI tracks a fixed consumer basket including imported goods.",
+          "GDP per capita divides output by population and is the more meaningful figure when comparing countries or long time spans, since a larger population mechanically produces a larger total.",
+        ],
+      },
+      {
+        heading: "The Release Schedule and Why the First Number Moves",
+        body: [
+          "The Bureau of Economic Analysis publishes quarterly GDP in a sequence of estimates, each incorporating more complete source data than the last. The earliest estimate rests heavily on assumptions for months where data has not yet arrived, and later estimates can revise it meaningfully.",
+          "Annual and comprehensive revisions go further, restating multiple prior years as new benchmark sources become available and as methodology changes. Historical growth rates in current publications may not match what was reported at the time.",
+          "For anyone using GDP to make decisions, this argues for reading it as a trend across several quarters rather than as a verdict delivered each quarter.",
+        ],
+      },
+      {
+        heading: "What GDP Deliberately Leaves Out",
+        body: [
+          "GDP is a measure of market production, and it was never designed as a measure of welfare. Unpaid caregiving, household labour and volunteering produce enormous value that never appears. Environmental degradation is not deducted, while the spending required to clean it up is added.",
+          "It is also silent on distribution. An economy where gains accrue narrowly and one where they are spread broadly can post identical GDP growth. Median household income, labour share of income, and poverty measures answer questions GDP cannot.",
+          "None of this makes GDP a poor statistic — it is precise about what it claims to measure. The error is asking it a question it was not built to answer.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "Why are imports subtracted when calculating GDP?",
+        answer:
+          "Because they have already been added elsewhere. When a household buys an imported item, that purchase is recorded in consumption; since GDP measures domestic production only, the import must be subtracted to cancel it out. The subtraction is bookkeeping, not a statement that imports reduce national wealth.",
+      },
+      {
+        question: "What is the difference between GDP and GNP?",
+        answer:
+          "GDP counts production located inside a country's borders regardless of who owns the productive assets. Gross national product counts production by a country's residents and firms regardless of where it takes place. The two diverge most for economies with large cross-border ownership or workforces.",
+      },
+      {
+        question: "Does government spending really add to GDP?",
+        answer:
+          "Government consumption and investment expenditure does, because it purchases newly produced goods and services. Transfer payments such as pensions and benefits do not count at the point of transfer, since no output is bought; they enter GDP only when the recipient spends the money.",
+      },
+      {
+        question: "Why does real GDP matter more than nominal GDP?",
+        answer:
+          "Nominal GDP rises with inflation even when no additional goods or services are produced. Real GDP removes price changes, so it isolates whether the economy actually produced more. Comparisons across time are meaningless without that adjustment.",
+      },
+    ],
+    relatedReading: [
+      { slug: "economy", anchor: "How the Major Economic Indicators Fit Together" },
+      { slug: "inflation", anchor: "CPI, PCE and the GDP Deflator Compared" },
+      { slug: "unemployment", anchor: "Reading the Monthly Employment Report" },
+      { slug: "indicators", anchor: "Leading, Lagging and Coincident Economic Indicators" },
+    ],
   },
   unemployment: {
     tag: 'UNEMPLOYMENT',
@@ -3305,6 +4790,83 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaTitle: 'Unemployment & Jobs Market News',
     metaDescription:
       'Labor market coverage including unemployment claims, payroll data, and what hiring trends mean for the broader economy.',
+    keyTakeaways: [
+      "The unemployment rate counts people without a job who are available for work and have actively searched recently — availability and active search are both required.",
+      "The Bureau of Labor Statistics runs two separate monthly surveys: a household survey producing the unemployment rate, and an establishment survey producing nonfarm payrolls.",
+      "The two surveys measure different things and regularly disagree in any given month, which is a feature of their design rather than a contradiction.",
+      "Six measures, U-1 through U-6, describe progressively broader definitions of underuse of labour; the widely quoted headline rate is U-3.",
+      "The labour force participation rate is essential context, because the unemployment rate can fall simply because people stopped looking for work.",
+    ],
+    sections: [
+      {
+        heading: "Who Counts as Unemployed",
+        body: [
+          "To be classified as unemployed, a person must be without a job, currently available for work, and have actively looked for work within the previous four weeks. Someone who wants a job but has given up searching is not counted as unemployed — they are outside the labour force entirely.",
+          "This is the source of most confusion about the statistic. The unemployment rate is a ratio of unemployed people to the labour force, and the labour force excludes anyone not searching. A person leaving the labour force therefore reduces both the numerator and the denominator, and can lower the rate without anyone finding work.",
+          "The definition is not an American idiosyncrasy. It follows international standards set by the International Labour Organization, which is what makes cross-country comparison possible.",
+        ],
+      },
+      {
+        heading: "Two Surveys, Two Different Questions",
+        body: [
+          "The household survey contacts a sample of households and asks about the employment status of the people living there. It produces the unemployment rate, the participation rate and the employment-to-population ratio. Because it asks people directly, it captures the self-employed, agricultural workers and unpaid family workers.",
+          "The establishment survey contacts employers and asks how many people were on their payrolls. It produces nonfarm payroll employment, average hourly earnings and average weekly hours. Its sample is far larger, so its month-to-month movements are statistically steadier, but it counts jobs rather than people — someone holding two jobs appears twice.",
+          "When commentary notes that 'the household survey and the payroll survey are telling different stories', this structural difference is usually the explanation. Neither is the corrected version of the other.",
+        ],
+      },
+      {
+        heading: "U-1 Through U-6: The Six Measures",
+        body: [
+          "U-1 counts only those unemployed for fifteen weeks or longer, isolating long-term joblessness. U-2 counts those who lost jobs or completed temporary work, excluding voluntary leavers.",
+          "U-3 is the official headline rate, covering all unemployed persons by the standard definition. U-4 adds discouraged workers who have stopped searching because they believe no jobs are available. U-5 further adds others marginally attached to the labour force.",
+          "U-6 is the broadest, adding people working part time for economic reasons — those who want full-time hours but cannot obtain them. The gap between U-3 and U-6 is a useful gauge of hidden slack: a low headline rate alongside a wide gap suggests an economy where jobs exist but are not delivering the hours people want.",
+        ],
+      },
+      {
+        heading: "Types of Unemployment, and Why Zero Is Not the Goal",
+        body: [
+          "Frictional unemployment is the short-term joblessness of people moving between positions. It exists in every healthy economy and is arguably a sign of a functioning labour market where people can afford to search for a good match.",
+          "Structural unemployment arises when workers' skills or locations no longer match available jobs, often following technological or trade shifts. It is more persistent and less responsive to demand stimulus.",
+          "Cyclical unemployment rises and falls with the business cycle and is the component monetary and fiscal policy can most plausibly address. Because frictional and structural unemployment never disappear, policymakers aim for maximum sustainable employment rather than zero unemployment.",
+        ],
+      },
+      {
+        heading: "Reading the Monthly Report Without Being Misled",
+        body: [
+          "Start with the participation rate. A falling unemployment rate accompanied by a falling participation rate is a weaker result than the headline suggests, because it points to people exiting rather than finding work.",
+          "Check the revisions. Each report restates the previous two months, and a strong headline paired with large downward revisions can leave the three-month average lower than before the release.",
+          "Look at hours and wages alongside the count. Employers typically cut hours before cutting staff, so a decline in average weekly hours often precedes weakness in the headline number. Together these give a far more reliable picture than the single rate that leads the coverage.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "Why can the unemployment rate fall while the job market weakens?",
+        answer:
+          "Because the rate is calculated against the labour force, which excludes anyone not actively searching. If discouraged workers stop looking, they leave the labour force and are no longer counted as unemployed, mechanically lowering the rate even though no one gained employment. Checking the participation rate alongside it prevents this misreading.",
+      },
+      {
+        question: "What is the difference between U-3 and U-6?",
+        answer:
+          "U-3 is the headline rate covering people who are jobless, available and actively searching. U-6 additionally includes discouraged and marginally attached workers plus those working part time because full-time work is unavailable. U-6 is always higher, and the size of the gap indicates how much labour market slack the headline figure misses.",
+      },
+      {
+        question: "Why do payrolls and the unemployment rate sometimes contradict each other?",
+        answer:
+          "They come from two separate surveys measuring different units. The establishment survey counts jobs reported by employers; the household survey counts employed people and includes the self-employed and agricultural workers that payrolls omit. Divergence in a single month is common and usually resolves over a quarter.",
+      },
+      {
+        question: "Is full employment the same as zero unemployment?",
+        answer:
+          "No. Frictional unemployment from normal job switching and some structural unemployment persist even in a strong economy. Full employment refers to the maximum level of employment sustainable without generating accelerating inflation, which corresponds to a positive unemployment rate rather than zero.",
+      },
+    ],
+    relatedReading: [
+      { slug: "economy", anchor: "How the Major Economic Indicators Fit Together" },
+      { slug: "fed", anchor: "The Federal Reserve's Employment Mandate" },
+      { slug: "gdp", anchor: "GDP Explained: What the Components Actually Measure" },
+      { slug: "indicators", anchor: "Leading, Lagging and Coincident Economic Indicators" },
+    ],
   },
   options: {
     tag: 'OPTIONS',
@@ -3465,6 +5027,83 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaTitle: 'Inflation News & Analysis',
     metaDescription:
       'Understand what drives inflation, how CPI and PCE are measured, and what rising or falling prices mean for your money.',
+    keyTakeaways: [
+      "Inflation is a sustained rise in the general price level, which reduces what each unit of currency buys — it is a rate of change, not a price.",
+      "The Consumer Price Index comes from the Bureau of Labor Statistics; the Personal Consumption Expenditures price index comes from the Bureau of Economic Analysis, and the Federal Reserve targets the latter.",
+      "Core inflation strips out food and energy, not because those costs are unimportant but because their volatility obscures the underlying trend policymakers are trying to read.",
+      "The two indexes differ in weighting, scope and formula, so they routinely print different numbers for the same month without either being wrong.",
+      "What matters for your finances is inflation relative to your income and your savings yield, not the headline rate in isolation.",
+    ],
+    sections: [
+      {
+        heading: "Two Indexes, Measuring Slightly Different Things",
+        body: [
+          "The Consumer Price Index tracks the cost of a basket of goods and services bought by urban consumers, using expenditure weights from a consumer survey. It is the index that governs Social Security cost-of-living adjustments, many wage agreements and inflation-protected Treasury securities.",
+          "The Personal Consumption Expenditures price index draws its weights from business survey data on what was actually sold, and covers a broader scope — including spending made on consumers' behalf, most notably employer-paid and government-paid healthcare, which CPI largely excludes.",
+          "The two also handle substitution differently. PCE weights update more frequently, capturing consumers switching between goods as relative prices change; CPI's fixed-basket approach updates weights less often. Because substitution generally dampens measured price increases, PCE tends to run slightly below CPI over long periods.",
+        ],
+      },
+      {
+        heading: "Headline, Core, and Why Economists Prefer the Latter",
+        body: [
+          "Headline inflation includes everything in the basket. Core inflation excludes food and energy prices, which respond sharply to weather, harvests and geopolitics and can swing hard in both directions within a single quarter.",
+          "The exclusion is often misread as policymakers ignoring the prices people notice most. The actual reasoning is signal extraction: monetary policy operates with long lags and cannot influence an oil price shock, so reacting to one risks tightening into a disturbance that would have reversed on its own.",
+          "Analysts increasingly supplement core with trimmed-mean and median measures, which discard the most extreme price moves in either direction each month rather than always removing the same two categories.",
+        ],
+      },
+      {
+        heading: "Where Inflation Comes From",
+        body: [
+          "Demand-pull inflation occurs when spending outruns the economy's capacity to produce, bidding up prices for a limited supply of goods, labour and materials.",
+          "Cost-push inflation originates on the supply side — a jump in energy costs, a disrupted supply chain, a crop failure — raising production costs that are passed through to prices even without any increase in demand.",
+          "Expectations form a third channel, and central bankers treat it as the most dangerous. If households and firms come to expect continued high inflation, they build it into wage demands and price-setting, which makes the expectation self-fulfilling. This is why officials speak so insistently about keeping expectations 'anchored': the credibility itself does part of the work.",
+        ],
+      },
+      {
+        heading: "What Inflation Does to Your Money",
+        body: [
+          "The effect on savings is direct. If a deposit pays less than the inflation rate, the balance grows while purchasing power shrinks. Comparing a savings yield against current inflation is the only way to know whether the account is genuinely gaining ground.",
+          "For borrowers the effect runs the other way. Fixed-rate debt is repaid in currency worth less than when it was borrowed, which quietly benefits anyone holding a long fixed-rate mortgage during an inflationary period. Variable-rate debt offers no such protection, since rates typically rise in response.",
+          "For investors, inflation compresses the real return on nominal bonds and raises the discount rate applied to future company earnings, which weighs particularly on valuations that depend on profits far in the future. Treasury Inflation-Protected Securities are the direct hedge, adjusting principal in line with CPI.",
+        ],
+      },
+      {
+        heading: "Reading an Inflation Release Properly",
+        body: [
+          "Two figures accompany every release: the month-over-month change and the year-over-year change. The annual figure is smoother but backward-looking, and it can fall purely because a large increase twelve months ago has dropped out of the window — an arithmetic effect known as base effects rather than any improvement in current conditions.",
+          "The monthly figure is timelier but noisier. Annualising a single month is a common error; three-month and six-month annualised rates strike a more useful balance.",
+          "Finally, look underneath the aggregate. A print driven by one category behaves very differently from one where increases are broad-based, and the breadth of price increases is often the more informative number.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "What is the difference between CPI and PCE inflation?",
+        answer:
+          "CPI, published by the Bureau of Labor Statistics, tracks a basket of goods and services purchased directly by urban consumers. PCE, published by the Bureau of Economic Analysis, covers a broader set of spending including healthcare paid on consumers' behalf, and updates its weights more frequently to reflect substitution. The Federal Reserve frames its inflation objective in PCE terms.",
+      },
+      {
+        question: "Why does core inflation exclude food and energy?",
+        answer:
+          "Food and energy prices are unusually volatile and are driven largely by supply shocks that monetary policy cannot influence. Removing them produces a clearer view of the persistent underlying trend, which is what policy is able to act on. It is a measurement choice, not a claim that those costs do not matter to households.",
+      },
+      {
+        question: "Is deflation better than inflation?",
+        answer:
+          "Generally no. Falling prices encourage households and firms to postpone purchases in anticipation of lower prices later, which weakens demand and can become self-reinforcing. Deflation also raises the real burden of existing debt, since loans are repaid in currency that has become more valuable.",
+      },
+      {
+        question: "How can I protect savings from inflation?",
+        answer:
+          "Compare any account's yield against the current inflation rate to establish whether the real return is positive. Treasury Inflation-Protected Securities adjust their principal with CPI and are the most direct instrument. Over long horizons, diversified equity exposure has historically outpaced inflation, though with materially higher short-term volatility.",
+      },
+    ],
+    relatedReading: [
+      { slug: "fed", anchor: "How the Federal Reserve Responds to Inflation" },
+      { slug: "interest-rates", anchor: "How Rate Changes Reach Your Mortgage and Savings" },
+      { slug: "savings", anchor: "Comparing Savings Yields Against Inflation" },
+      { slug: "bonds", anchor: "Bonds, Duration and Inflation Risk" },
+    ],
   },
   earnings: {
     tag: 'EARNINGS',
@@ -3474,6 +5113,85 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaTitle: 'Earnings News & Quarterly Reports',
     metaDescription:
       'Quarterly earnings coverage — revenue, profit, and guidance from the companies that move the stock market.',
+    keyTakeaways: [
+      "Public companies report results quarterly, and share prices respond to the gap between reported figures and expectations rather than to the figures themselves.",
+      "Consensus estimates aggregate analyst forecasts, and the whisper number — the market's unofficial expectation — can differ from published consensus.",
+      "Guidance about future quarters often moves the share price more than the results being reported.",
+      "Adjusted or non-GAAP earnings exclude items management considers unrepresentative, and the exclusions deserve scrutiny rather than acceptance.",
+      "Earnings season clusters within a few weeks each quarter, producing concentrated periods of single-stock volatility.",
+    ],
+    sections: [
+      {
+        heading: "Why the Reaction Rarely Matches the Result",
+        body: [
+          "A company can report record profit and see its shares fall sharply. This appears irrational until you recognise that the current price already reflects expectations. Markets price anticipated performance in advance, so the reported figure only moves the price to the extent it differs from what was assumed.",
+          "The relevant comparison is therefore the surprise — the gap between reported and expected — rather than the level or the growth rate. A modest profit that exceeds low expectations can produce a rally, while spectacular growth that falls short of extraordinary expectations produces a decline.",
+          "This is the single most useful idea for interpreting earnings coverage, and headlines routinely obscure it by reporting the absolute figure without the expectation it is being measured against.",
+        ],
+      },
+      {
+        heading: "Consensus, Whisper Numbers and Guidance",
+        body: [
+          "Consensus estimates are compiled from analysts covering the stock, most visibly for revenue and earnings per share. They provide the formal benchmark against which results are judged.",
+          "The whisper number is the market's unofficial expectation, which can drift away from published consensus as recent information circulates. When a company beats consensus but misses the whisper, the shares can fall despite a nominal beat — the source of much apparent inconsistency in earnings-day moves.",
+          "Guidance is management's own forecast for coming periods. Because equity value derives from future cash flows rather than past ones, guidance frequently dominates the reaction. Strong results paired with reduced guidance is a common recipe for a sharp fall, and the reverse is equally common.",
+        ],
+      },
+      {
+        heading: "Reading the Report Itself",
+        body: [
+          "Revenue shows whether the business is growing, and its composition matters: growth from raising prices differs materially from growth in volume or in customer count.",
+          "Margins show whether growth is profitable. Gross margin reflects the economics of the product; operating margin reflects how efficiently the business is run. Margin direction over several quarters is usually more informative than any single reading.",
+          "Cash flow is the discipline check. Accounting profit involves judgement in areas like revenue recognition and depreciation, while cash is harder to present favourably. Profit rising while operating cash flow stagnates is a pattern that warrants closer examination.",
+          "The balance sheet completes the picture — debt levels, maturity schedule and liquidity determine how much room the company has if conditions deteriorate.",
+        ],
+      },
+      {
+        heading: "Adjusted Earnings and What Gets Excluded",
+        body: [
+          "Companies report under formal accounting standards and often present an adjusted figure alongside, excluding items management regards as unrepresentative of ongoing operations.",
+          "Some adjustments are reasonable. A genuinely one-off legal settlement or the cost of an acquisition does obscure underlying trends, and removing it can aid comparison.",
+          "Others deserve challenge. Restructuring charges appearing every year are not one-off. Excluding share-based compensation removes a real cost of employing people, paid in shares rather than cash but dilutive to existing owners all the same.",
+          "The practical test is to look at what the adjustments consist of and how consistently they recur. A widening gap between reported and adjusted earnings over several years is a signal worth investigating rather than a technicality.",
+        ],
+      },
+      {
+        heading: "Earnings Season and Its Rhythm",
+        body: [
+          "Reporting clusters in the weeks following each quarter end, beginning conventionally with large banks and moving through sectors over several weeks. This concentration produces stretches where single-stock volatility rises noticeably.",
+          "Companies typically hold a call alongside the release in which management presents results and answers analyst questions. The question segment is often more revealing than the prepared remarks, and transcripts are usually published afterwards.",
+          "For long-term investors, the most useful posture during earnings season is restraint. A quarter is a short window in the life of a business, and the volatility around it reflects expectation adjustment rather than durable change in value. Reading the report carefully is worthwhile; trading the reaction is a different activity with a different risk profile.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "Why did a stock fall after beating earnings expectations?",
+        answer:
+          "Several explanations are common: the company reduced guidance for coming quarters, the result missed the unofficial whisper number even while beating published consensus, the beat came from one-off items rather than operations, or the price had already risen in anticipation. Markets price expectations, so exceeding a formal estimate does not guarantee a positive reaction.",
+      },
+      {
+        question: "What is the difference between GAAP and adjusted earnings?",
+        answer:
+          "GAAP earnings follow standardised accounting rules. Adjusted or non-GAAP earnings exclude items management considers unrepresentative, such as restructuring costs, acquisition expenses or share-based compensation. Adjustments can genuinely clarify underlying performance, but they are chosen by the company, so recurring exclusions warrant scrutiny.",
+      },
+      {
+        question: "What is earnings per share?",
+        answer:
+          "It is net income divided by the number of shares outstanding, expressing profit on a per-share basis. Diluted EPS additionally accounts for options and convertible securities that could increase the share count. Because it is affected by share buybacks and issuance, EPS can move without any change in the underlying business.",
+      },
+      {
+        question: "How much attention should a long-term investor pay to quarterly results?",
+        answer:
+          "Enough to track whether the business is developing as expected — revenue trend, margin direction, cash generation and debt — but not enough to trade on individual quarters. A three-month window is short relative to the horizon over which a business creates value, and earnings-day price moves largely reflect expectation adjustment rather than lasting change.",
+      },
+    ],
+    relatedReading: [
+      { slug: "stocks", anchor: "How to Analyse a Company's Fundamentals" },
+      { slug: "market-news", anchor: "Market News and Analysis" },
+      { slug: "investing", anchor: "Long-Term Investing Principles" },
+      { slug: "calendar", anchor: "Economic and Earnings Calendar" },
+    ],
   },
   'budget-rules': {
     tag: 'BUDGET RULES',
@@ -3485,6 +5203,83 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaTitle: 'Budget Rules & Frameworks Explained',
     metaDescription:
       'Compare proven budget rules and frameworks, including the 50/30/20 rule and zero-based budgeting, to find the system that fits your income.',
+    keyTakeaways: [
+      "Budgeting rules are simplifying heuristics that reduce dozens of decisions to a handful, trading precision for the consistency that makes a budget survive.",
+      "The 50/30/20 rule splits take-home pay across needs, wants and savings or debt repayment.",
+      "Zero-based budgeting assigns every unit of income a job until nothing is unallocated, offering the tightest control at the cost of the most effort.",
+      "Pay-yourself-first inverts the sequence by routing savings automatically before spending begins.",
+      "The best rule is the one you will still be following in a year; a slightly suboptimal system applied consistently beats an optimal one abandoned in March.",
+    ],
+    sections: [
+      {
+        heading: "Why Rules Beat Optimisation",
+        body: [
+          "In principle the ideal budget allocates each unit of money to its highest-value use. In practice that requires continuous deliberation, and decision fatigue causes people to abandon the exercise entirely.",
+          "Budgeting rules trade precision for durability. By fixing broad proportions in advance, they remove the need to relitigate the same decisions monthly and reduce a complex allocation problem to a few simple checks.",
+          "This is why comparisons between rules on mathematical grounds tend to miss the point. The relevant question is not which produces the theoretically best allocation, but which one you will still be operating a year from now.",
+        ],
+      },
+      {
+        heading: "The 50/30/20 Rule",
+        body: [
+          "Allocate fifty percent of take-home pay to needs, thirty percent to wants, and twenty percent to savings and debt repayment beyond minimums.",
+          "Needs are obligations you cannot readily avoid: housing, utilities, groceries, transport to work, insurance, minimum debt payments. Wants are everything discretionary — dining out, subscriptions, travel, hobbies. The final portion covers saving, investing and accelerated debt repayment.",
+          "Its strength is simplicity: three categories, one calculation, immediately actionable. Its weakness is that the proportions assume housing costs that are not universal. In expensive housing markets, needs alone can consume well beyond fifty percent, which does not invalidate the framework but does require adjusting the ratios rather than concluding the budget has failed.",
+        ],
+      },
+      {
+        heading: "Zero-Based Budgeting",
+        body: [
+          "Every unit of income receives an assignment until nothing remains unallocated. Income minus allocations equals zero — not because everything is spent, but because savings and investments are themselves allocations.",
+          "This is the most rigorous common method and delivers the clearest visibility, since every category has a deliberate number attached. It is particularly effective for aggressive debt repayment, where the discipline of assigning every spare unit produces faster progress than a percentage-based approach.",
+          "The cost is effort. Zero-based budgeting requires setting up categories each period and reconciling transactions regularly. It suits detail-oriented people and those with a specific pressing goal; it tends to be abandoned by those who find administrative routines draining.",
+        ],
+      },
+      {
+        heading: "Pay Yourself First, and the Envelope System",
+        body: [
+          "Pay-yourself-first inverts the usual order. Rather than spending and saving whatever remains, savings transfers execute automatically on payday and spending happens from what is left.",
+          "The insight is behavioural. Saving what remains at month end reliably produces very little, because spending expands to fill available funds. Removing the money first makes the saving automatic and the constraint self-enforcing.",
+          "The envelope system allocates fixed amounts to spending categories, historically as physical cash in labelled envelopes and now typically through app-based virtual envelopes. When a category is exhausted, spending in it stops until the next period. It provides an unusually concrete feedback loop and works well for people whose difficulty is variable discretionary spending rather than large fixed costs.",
+        ],
+      },
+      {
+        heading: "Choosing and Adapting a Rule",
+        body: [
+          "Match the method to the problem. If the difficulty is having no idea where money goes, start with 50/30/20 for its simplicity. If the difficulty is a specific debt or savings target, zero-based budgeting provides the control to hit it. If the difficulty is that saving never happens, pay-yourself-first addresses that directly. If the difficulty is overspending in particular categories, envelopes create the constraint.",
+          "Adapt the numbers rather than abandoning the framework. A 60/20/20 split in a high-cost housing market is still a functioning budget; the ratios were always illustrative rather than prescriptive.",
+          "Combining methods is normal and often superior. Automating savings on payday while operating envelopes for discretionary categories takes the strongest element of each, and most durable budgets end up as hybrids shaped by their owner's specific friction points.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "What is the 50/30/20 budgeting rule?",
+        answer:
+          "It allocates fifty percent of take-home pay to needs, thirty percent to wants, and twenty percent to savings and debt repayment above minimum payments. It is designed as a simple starting framework, and the proportions are meant to be adjusted where local housing costs or income levels make the original split unworkable.",
+      },
+      {
+        question: "What does zero-based budgeting mean?",
+        answer:
+          "It means assigning every unit of income a specific purpose until none is left unassigned. The total does not represent money spent — savings and investment contributions are assignments too. It offers the tightest control and the clearest visibility, at the cost of requiring more ongoing administration than percentage-based methods.",
+      },
+      {
+        question: "Which budgeting method is best?",
+        answer:
+          "The one you will continue using. Simple percentage rules suit people who want minimal administration; zero-based budgeting suits detail-oriented people pursuing a specific goal; envelope systems suit those whose difficulty is discretionary overspending. Consistency matters far more than the theoretical precision of the method.",
+      },
+      {
+        question: "What if my essential expenses exceed 50% of my income?",
+        answer:
+          "That is common in expensive housing markets and does not mean the framework has failed. Adjust the ratios to reflect reality — a 60/20/20 or 70/10/20 split is still a working budget. The value lies in having deliberate proportions and tracking against them, not in matching the specific numbers.",
+      },
+    ],
+    relatedReading: [
+      { slug: "budgeting-basics", anchor: "Budgeting Basics: Building Your First Plan" },
+      { slug: "monthly-budget", anchor: "Monthly Budget Templates and Worked Examples" },
+      { slug: "emergency-fund", anchor: "How Much Emergency Fund Do You Need?" },
+      { slug: "saving-money", anchor: "Cutting Costs Without Cutting Quality of Life" },
+    ],
   },
   planning: {
     tag: 'FINANCIAL PLANNING',
