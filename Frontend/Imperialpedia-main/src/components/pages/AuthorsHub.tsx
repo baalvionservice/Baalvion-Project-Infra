@@ -1,29 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import {
-
-const AUTHORS_KEY_TERMS: KeyTermItem[] = [
-  { term: "Authors Basics", definition: "An overview of authors fundamentals, covering core concepts and why they matter.", href: "/authors" },
-  { term: "Advanced Authors", definition: "Deep dive into advanced aspects of authors, including strategies and best practices.", href: "/authors" },
-  { term: "Authors Fees", definition: "Explanation of typical fees associated with authors and how to minimize them.", href: "/authors" },
-  { term: "Authors Benefits", definition: "Key advantages of using authors for personal finance management.", href: "/authors" },
-  { term: "Authors Risks", definition: "Potential risks and pitfalls to watch out for when dealing with authors.", href: "/authors" },
-];
-
-const AUTHORS_FAQS: FaqItem[] = [
-  { question: "What is Authors?", answer: "Authors is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about Authors", href: "/authors" } },
-  { question: "How does Authors work?", answer: "Authors works by providing features such as ... (brief description).", link: { label: "Learn more about Authors", href: "/authors" } },
-  { question: "Who should consider Authors?", answer: "Anyone looking to improve their authors situation can benefit.", link: { label: "Learn more about Authors", href: "/authors" } },
-  { question: "What are common fees for Authors?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about Authors", href: "/authors" } },
-  { question: "How to compare Authors options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about Authors", href: "/authors" } },
-];
-
-const AUTHORS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "authors", label: "Authors Overview", icon: Star },
-  { slug: "authors-tips", label: "Authors Tips", icon: Star },
-  { slug: "authors-reviews", label: "Authors Reviews", icon: Star },
-];
-
   PiggyBank,
   Wallet,
   CreditCard,
@@ -38,6 +15,30 @@ const AUTHORS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.C
   Newspaper,
   ArrowRight,
 } from "lucide-react";
+
+const AUTHORS_FAQS: FaqItem[] = [
+  { question: "What is Authors?", answer: "Authors is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about Authors", href: "/authors" } },
+  { question: "How does Authors work?", answer: "Authors works by providing features such as ... (brief description).", link: { label: "Learn more about Authors", href: "/authors" } },
+  { question: "Who should consider Authors?", answer: "Anyone looking to improve their authors situation can benefit.", link: { label: "Learn more about Authors", href: "/authors" } },
+  { question: "What are common fees for Authors?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about Authors", href: "/authors" } },
+  { question: "How to compare Authors options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about Authors", href: "/authors" } },
+];
+
+const AUTHORS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
+  { slug: "authors", label: "Authors Overview", icon: Star },
+  { slug: "authors-tips", label: "Authors Tips", icon: Star },
+  { slug: "authors-reviews", label: "Authors Reviews", icon: Star },
+];
+import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
+import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
+
+const AUTHORS_KEY_TERMS: KeyTermItem[] = [
+  { term: "Authors Basics", definition: "An overview of authors fundamentals, covering core concepts and why they matter.", href: "/authors" },
+  { term: "Advanced Authors", definition: "Deep dive into advanced aspects of authors, including strategies and best practices.", href: "/authors" },
+  { term: "Authors Fees", definition: "Explanation of typical fees associated with authors and how to minimize them.", href: "/authors" },
+  { term: "Authors Benefits", definition: "Key advantages of using authors for personal finance management.", href: "/authors" },
+  { term: "Authors Risks", definition: "Potential risks and pitfalls to watch out for when dealing with authors.", href: "/authors" },
+];
 
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listCmsContent, cmsContentToArticle } from "@/services/data/cms-public";

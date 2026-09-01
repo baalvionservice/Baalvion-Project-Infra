@@ -1,13 +1,18 @@
 import Link from "next/link";
 import {
-
-const STOCKS_KEY_TERMS: KeyTermItem[] = [
-  { term: "Stocks Basics", definition: "An overview of stocks fundamentals, covering core concepts and why they matter.", href: "/stocks" },
-  { term: "Advanced Stocks", definition: "Deep dive into advanced aspects of stocks, including strategies and best practices.", href: "/stocks" },
-  { term: "Stocks Fees", definition: "Explanation of typical fees associated with stocks and how to minimize them.", href: "/stocks" },
-  { term: "Stocks Benefits", definition: "Key advantages of using stocks for personal finance management.", href: "/stocks" },
-  { term: "Stocks Risks", definition: "Potential risks and pitfalls to watch out for when dealing with stocks.", href: "/stocks" },
-];
+  BookOpen,
+  Landmark,
+  Rocket,
+  Shapes,
+  Ruler,
+  Compass,
+  LineChart,
+  Calculator,
+  ArrowRight,
+  Flame,
+  BarChart3,
+  ListChecks,
+} from "lucide-react";
 
 const STOCKS_FAQS: FaqItem[] = [
   { question: "What is Stocks?", answer: "Stocks is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about Stocks", href: "/stocks" } },
@@ -22,20 +27,16 @@ const STOCKS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.Co
   { slug: "stocks-tips", label: "Stocks Tips", icon: Star },
   { slug: "stocks-reviews", label: "Stocks Reviews", icon: Star },
 ];
+import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
+import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
 
-  BookOpen,
-  Landmark,
-  Rocket,
-  Shapes,
-  Ruler,
-  Compass,
-  LineChart,
-  Calculator,
-  ArrowRight,
-  Flame,
-  BarChart3,
-  ListChecks,
-} from "lucide-react";
+const STOCKS_KEY_TERMS: KeyTermItem[] = [
+  { term: "Stocks Basics", definition: "An overview of stocks fundamentals, covering core concepts and why they matter.", href: "/stocks" },
+  { term: "Advanced Stocks", definition: "Deep dive into advanced aspects of stocks, including strategies and best practices.", href: "/stocks" },
+  { term: "Stocks Fees", definition: "Explanation of typical fees associated with stocks and how to minimize them.", href: "/stocks" },
+  { term: "Stocks Benefits", definition: "Key advantages of using stocks for personal finance management.", href: "/stocks" },
+  { term: "Stocks Risks", definition: "Potential risks and pitfalls to watch out for when dealing with stocks.", href: "/stocks" },
+];
 
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listAllCmsContent, cmsContentToArticle } from "@/services/data/cms-public";

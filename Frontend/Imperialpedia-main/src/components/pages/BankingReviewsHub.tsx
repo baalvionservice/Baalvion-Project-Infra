@@ -1,29 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import {
-
-const BANKINGREVIEWS_KEY_TERMS: KeyTermItem[] = [
-  { term: "BankingReviews Basics", definition: "An overview of bankingreviews fundamentals, covering core concepts and why they matter.", href: "/bankingreviews" },
-  { term: "Advanced BankingReviews", definition: "Deep dive into advanced aspects of bankingreviews, including strategies and best practices.", href: "/bankingreviews" },
-  { term: "BankingReviews Fees", definition: "Explanation of typical fees associated with bankingreviews and how to minimize them.", href: "/bankingreviews" },
-  { term: "BankingReviews Benefits", definition: "Key advantages of using bankingreviews for personal finance management.", href: "/bankingreviews" },
-  { term: "BankingReviews Risks", definition: "Potential risks and pitfalls to watch out for when dealing with bankingreviews.", href: "/bankingreviews" },
-];
-
-const BANKINGREVIEWS_FAQS: FaqItem[] = [
-  { question: "What is BankingReviews?", answer: "BankingReviews is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about BankingReviews", href: "/bankingreviews" } },
-  { question: "How does BankingReviews work?", answer: "BankingReviews works by providing features such as ... (brief description).", link: { label: "Learn more about BankingReviews", href: "/bankingreviews" } },
-  { question: "Who should consider BankingReviews?", answer: "Anyone looking to improve their bankingreviews situation can benefit.", link: { label: "Learn more about BankingReviews", href: "/bankingreviews" } },
-  { question: "What are common fees for BankingReviews?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about BankingReviews", href: "/bankingreviews" } },
-  { question: "How to compare BankingReviews options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about BankingReviews", href: "/bankingreviews" } },
-];
-
-const BANKINGREVIEWS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "bankingreviews", label: "BankingReviews Overview", icon: Star },
-  { slug: "bankingreviews-tips", label: "BankingReviews Tips", icon: Star },
-  { slug: "bankingreviews-reviews", label: "BankingReviews Reviews", icon: Star },
-];
-
   PiggyBank,
   Wallet,
   CreditCard,
@@ -38,6 +15,30 @@ const BANKINGREVIEWS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: 
   Newspaper,
   ArrowRight,
 } from "lucide-react";
+
+const BANKINGREVIEWS_FAQS: FaqItem[] = [
+  { question: "What is BankingReviews?", answer: "BankingReviews is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about BankingReviews", href: "/bankingreviews" } },
+  { question: "How does BankingReviews work?", answer: "BankingReviews works by providing features such as ... (brief description).", link: { label: "Learn more about BankingReviews", href: "/bankingreviews" } },
+  { question: "Who should consider BankingReviews?", answer: "Anyone looking to improve their bankingreviews situation can benefit.", link: { label: "Learn more about BankingReviews", href: "/bankingreviews" } },
+  { question: "What are common fees for BankingReviews?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about BankingReviews", href: "/bankingreviews" } },
+  { question: "How to compare BankingReviews options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about BankingReviews", href: "/bankingreviews" } },
+];
+
+const BANKINGREVIEWS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
+  { slug: "bankingreviews", label: "BankingReviews Overview", icon: Star },
+  { slug: "bankingreviews-tips", label: "BankingReviews Tips", icon: Star },
+  { slug: "bankingreviews-reviews", label: "BankingReviews Reviews", icon: Star },
+];
+import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
+import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
+
+const BANKINGREVIEWS_KEY_TERMS: KeyTermItem[] = [
+  { term: "BankingReviews Basics", definition: "An overview of bankingreviews fundamentals, covering core concepts and why they matter.", href: "/bankingreviews" },
+  { term: "Advanced BankingReviews", definition: "Deep dive into advanced aspects of bankingreviews, including strategies and best practices.", href: "/bankingreviews" },
+  { term: "BankingReviews Fees", definition: "Explanation of typical fees associated with bankingreviews and how to minimize them.", href: "/bankingreviews" },
+  { term: "BankingReviews Benefits", definition: "Key advantages of using bankingreviews for personal finance management.", href: "/bankingreviews" },
+  { term: "BankingReviews Risks", definition: "Potential risks and pitfalls to watch out for when dealing with bankingreviews.", href: "/bankingreviews" },
+];
 
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listCmsContent, cmsContentToArticle } from "@/services/data/cms-public";

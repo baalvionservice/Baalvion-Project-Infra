@@ -1,13 +1,18 @@
 import Link from "next/link";
 import {
-
-const ECONOMY_KEY_TERMS: KeyTermItem[] = [
-  { term: "Economy Basics", definition: "An overview of economy fundamentals, covering core concepts and why they matter.", href: "/economy" },
-  { term: "Advanced Economy", definition: "Deep dive into advanced aspects of economy, including strategies and best practices.", href: "/economy" },
-  { term: "Economy Fees", definition: "Explanation of typical fees associated with economy and how to minimize them.", href: "/economy" },
-  { term: "Economy Benefits", definition: "Key advantages of using economy for personal finance management.", href: "/economy" },
-  { term: "Economy Risks", definition: "Potential risks and pitfalls to watch out for when dealing with economy.", href: "/economy" },
-];
+  BarChart3,
+  Banknote,
+  Percent,
+  TrendingUp,
+  Briefcase,
+  Landmark,
+  Scale,
+  Coins,
+  Globe,
+  ArrowRight,
+  BookOpen,
+  CalendarClock,
+} from "lucide-react";
 
 const ECONOMY_FAQS: FaqItem[] = [
   { question: "What is Economy?", answer: "Economy is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about Economy", href: "/economy" } },
@@ -22,20 +27,16 @@ const ECONOMY_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.C
   { slug: "economy-tips", label: "Economy Tips", icon: Star },
   { slug: "economy-reviews", label: "Economy Reviews", icon: Star },
 ];
+import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
+import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
 
-  BarChart3,
-  Banknote,
-  Percent,
-  TrendingUp,
-  Briefcase,
-  Landmark,
-  Scale,
-  Coins,
-  Globe,
-  ArrowRight,
-  BookOpen,
-  CalendarClock,
-} from "lucide-react";
+const ECONOMY_KEY_TERMS: KeyTermItem[] = [
+  { term: "Economy Basics", definition: "An overview of economy fundamentals, covering core concepts and why they matter.", href: "/economy" },
+  { term: "Advanced Economy", definition: "Deep dive into advanced aspects of economy, including strategies and best practices.", href: "/economy" },
+  { term: "Economy Fees", definition: "Explanation of typical fees associated with economy and how to minimize them.", href: "/economy" },
+  { term: "Economy Benefits", definition: "Key advantages of using economy for personal finance management.", href: "/economy" },
+  { term: "Economy Risks", definition: "Potential risks and pitfalls to watch out for when dealing with economy.", href: "/economy" },
+];
 
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listCmsContent, cmsContentToArticle } from "@/services/data/cms-public";

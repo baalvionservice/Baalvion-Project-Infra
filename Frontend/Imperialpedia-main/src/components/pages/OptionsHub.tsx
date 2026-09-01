@@ -1,13 +1,13 @@
 import Link from "next/link";
 import {
-
-const OPTIONS_KEY_TERMS: KeyTermItem[] = [
-  { term: "Options Basics", definition: "An overview of options fundamentals, covering core concepts and why they matter.", href: "/options" },
-  { term: "Advanced Options", definition: "Deep dive into advanced aspects of options, including strategies and best practices.", href: "/options" },
-  { term: "Options Fees", definition: "Explanation of typical fees associated with options and how to minimize them.", href: "/options" },
-  { term: "Options Benefits", definition: "Key advantages of using options for personal finance management.", href: "/options" },
-  { term: "Options Risks", definition: "Potential risks and pitfalls to watch out for when dealing with options.", href: "/options" },
-];
+  TrendingUp,
+  PieChart,
+  Briefcase,
+  Building2,
+  ArrowRight,
+  Flame,
+  Scale,
+} from "lucide-react";
 
 const OPTIONS_FAQS: FaqItem[] = [
   { question: "What is Options?", answer: "Options is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about Options", href: "/options" } },
@@ -22,15 +22,16 @@ const OPTIONS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.C
   { slug: "options-tips", label: "Options Tips", icon: Star },
   { slug: "options-reviews", label: "Options Reviews", icon: Star },
 ];
+import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
+import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
 
-  TrendingUp,
-  PieChart,
-  Briefcase,
-  Building2,
-  ArrowRight,
-  Flame,
-  Scale,
-} from "lucide-react";
+const OPTIONS_KEY_TERMS: KeyTermItem[] = [
+  { term: "Options Basics", definition: "An overview of options fundamentals, covering core concepts and why they matter.", href: "/options" },
+  { term: "Advanced Options", definition: "Deep dive into advanced aspects of options, including strategies and best practices.", href: "/options" },
+  { term: "Options Fees", definition: "Explanation of typical fees associated with options and how to minimize them.", href: "/options" },
+  { term: "Options Benefits", definition: "Key advantages of using options for personal finance management.", href: "/options" },
+  { term: "Options Risks", definition: "Potential risks and pitfalls to watch out for when dealing with options.", href: "/options" },
+];
 
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listAllCmsContent, cmsContentToArticle } from "@/services/data/cms-public";

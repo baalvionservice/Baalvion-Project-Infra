@@ -1,7 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import {
-  PiggyBank,
   Wallet,
   CreditCard,
   HandCoins,
@@ -15,6 +14,8 @@ import {
   Newspaper,
   ArrowRight,
 } from "lucide-react";
+
+PiggyBank,
 
 import { type FaqItem } from "@/components/pages/InvestopediaFaqBox";
 

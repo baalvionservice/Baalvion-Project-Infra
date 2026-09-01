@@ -1,13 +1,13 @@
 import Link from "next/link";
 import {
-
-const SAVINGS_KEY_TERMS: KeyTermItem[] = [
-  { term: "Savings Basics", definition: "An overview of savings fundamentals, covering core concepts and why they matter.", href: "/savings" },
-  { term: "Advanced Savings", definition: "Deep dive into advanced aspects of savings, including strategies and best practices.", href: "/savings" },
-  { term: "Savings Fees", definition: "Explanation of typical fees associated with savings and how to minimize them.", href: "/savings" },
-  { term: "Savings Benefits", definition: "Key advantages of using savings for personal finance management.", href: "/savings" },
-  { term: "Savings Risks", definition: "Potential risks and pitfalls to watch out for when dealing with savings.", href: "/savings" },
-];
+  Wallet,
+  Calendar,
+  Landmark,
+  Umbrella,
+  PiggyBank,
+  ArrowRight,
+  Flame,
+} from "lucide-react";
 
 const SAVINGS_FAQS: FaqItem[] = [
   { question: "What is Savings?", answer: "Savings is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about Savings", href: "/savings" } },
@@ -22,15 +22,16 @@ const SAVINGS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.C
   { slug: "savings-tips", label: "Savings Tips", icon: Star },
   { slug: "savings-reviews", label: "Savings Reviews", icon: Star },
 ];
+import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
+import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
 
-  Wallet,
-  Calendar,
-  Landmark,
-  Umbrella,
-  PiggyBank,
-  ArrowRight,
-  Flame,
-} from "lucide-react";
+const SAVINGS_KEY_TERMS: KeyTermItem[] = [
+  { term: "Savings Basics", definition: "An overview of savings fundamentals, covering core concepts and why they matter.", href: "/savings" },
+  { term: "Advanced Savings", definition: "Deep dive into advanced aspects of savings, including strategies and best practices.", href: "/savings" },
+  { term: "Savings Fees", definition: "Explanation of typical fees associated with savings and how to minimize them.", href: "/savings" },
+  { term: "Savings Benefits", definition: "Key advantages of using savings for personal finance management.", href: "/savings" },
+  { term: "Savings Risks", definition: "Potential risks and pitfalls to watch out for when dealing with savings.", href: "/savings" },
+];
 
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listAllCmsContent, cmsContentToArticle } from "@/services/data/cms-public";

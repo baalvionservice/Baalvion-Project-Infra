@@ -1,13 +1,11 @@
 import Link from "next/link";
 import {
-
-const REVIEWS_KEY_TERMS: KeyTermItem[] = [
-  { term: "Reviews Basics", definition: "An overview of reviews fundamentals, covering core concepts and why they matter.", href: "/reviews" },
-  { term: "Advanced Reviews", definition: "Deep dive into advanced aspects of reviews, including strategies and best practices.", href: "/reviews" },
-  { term: "Reviews Fees", definition: "Explanation of typical fees associated with reviews and how to minimize them.", href: "/reviews" },
-  { term: "Reviews Benefits", definition: "Key advantages of using reviews for personal finance management.", href: "/reviews" },
-  { term: "Reviews Risks", definition: "Potential risks and pitfalls to watch out for when dealing with reviews.", href: "/reviews" },
-];
+  HandCoins,
+  Smartphone,
+  Receipt,
+  ArrowRight,
+  BookOpen,
+} from "lucide-react";
 
 const REVIEWS_FAQS: FaqItem[] = [
   { question: "What is Reviews?", answer: "Reviews is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about Reviews", href: "/reviews" } },
@@ -22,13 +20,16 @@ const REVIEWS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.C
   { slug: "reviews-tips", label: "Reviews Tips", icon: Star },
   { slug: "reviews-reviews", label: "Reviews Reviews", icon: Star },
 ];
+import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
+import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
 
-  HandCoins,
-  Smartphone,
-  Receipt,
-  ArrowRight,
-  BookOpen,
-} from "lucide-react";
+const REVIEWS_KEY_TERMS: KeyTermItem[] = [
+  { term: "Reviews Basics", definition: "An overview of reviews fundamentals, covering core concepts and why they matter.", href: "/reviews" },
+  { term: "Advanced Reviews", definition: "Deep dive into advanced aspects of reviews, including strategies and best practices.", href: "/reviews" },
+  { term: "Reviews Fees", definition: "Explanation of typical fees associated with reviews and how to minimize them.", href: "/reviews" },
+  { term: "Reviews Benefits", definition: "Key advantages of using reviews for personal finance management.", href: "/reviews" },
+  { term: "Reviews Risks", definition: "Potential risks and pitfalls to watch out for when dealing with reviews.", href: "/reviews" },
+];
 
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listCmsContent, cmsContentToArticle } from "@/services/data/cms-public";

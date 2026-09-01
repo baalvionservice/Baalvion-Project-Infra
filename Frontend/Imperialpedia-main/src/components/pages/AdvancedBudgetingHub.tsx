@@ -1,29 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import {
-
-const ADVANCEDBUDGETING_KEY_TERMS: KeyTermItem[] = [
-  { term: "AdvancedBudgeting Basics", definition: "An overview of advancedbudgeting fundamentals, covering core concepts and why they matter.", href: "/advancedbudgeting" },
-  { term: "Advanced AdvancedBudgeting", definition: "Deep dive into advanced aspects of advancedbudgeting, including strategies and best practices.", href: "/advancedbudgeting" },
-  { term: "AdvancedBudgeting Fees", definition: "Explanation of typical fees associated with advancedbudgeting and how to minimize them.", href: "/advancedbudgeting" },
-  { term: "AdvancedBudgeting Benefits", definition: "Key advantages of using advancedbudgeting for personal finance management.", href: "/advancedbudgeting" },
-  { term: "AdvancedBudgeting Risks", definition: "Potential risks and pitfalls to watch out for when dealing with advancedbudgeting.", href: "/advancedbudgeting" },
-];
-
-const ADVANCEDBUDGETING_FAQS: FaqItem[] = [
-  { question: "What is AdvancedBudgeting?", answer: "AdvancedBudgeting is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about AdvancedBudgeting", href: "/advancedbudgeting" } },
-  { question: "How does AdvancedBudgeting work?", answer: "AdvancedBudgeting works by providing features such as ... (brief description).", link: { label: "Learn more about AdvancedBudgeting", href: "/advancedbudgeting" } },
-  { question: "Who should consider AdvancedBudgeting?", answer: "Anyone looking to improve their advancedbudgeting situation can benefit.", link: { label: "Learn more about AdvancedBudgeting", href: "/advancedbudgeting" } },
-  { question: "What are common fees for AdvancedBudgeting?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about AdvancedBudgeting", href: "/advancedbudgeting" } },
-  { question: "How to compare AdvancedBudgeting options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about AdvancedBudgeting", href: "/advancedbudgeting" } },
-];
-
-const ADVANCEDBUDGETING_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "advancedbudgeting", label: "AdvancedBudgeting Overview", icon: Star },
-  { slug: "advancedbudgeting-tips", label: "AdvancedBudgeting Tips", icon: Star },
-  { slug: "advancedbudgeting-reviews", label: "AdvancedBudgeting Reviews", icon: Star },
-];
-
   PiggyBank,
   Wallet,
   CreditCard,
@@ -38,6 +15,30 @@ const ADVANCEDBUDGETING_PRODUCT_TOPICS: Array<{ slug: string; label: string; ico
   Newspaper,
   ArrowRight,
 } from "lucide-react";
+
+const ADVANCEDBUDGETING_FAQS: FaqItem[] = [
+  { question: "What is AdvancedBudgeting?", answer: "AdvancedBudgeting is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about AdvancedBudgeting", href: "/advancedbudgeting" } },
+  { question: "How does AdvancedBudgeting work?", answer: "AdvancedBudgeting works by providing features such as ... (brief description).", link: { label: "Learn more about AdvancedBudgeting", href: "/advancedbudgeting" } },
+  { question: "Who should consider AdvancedBudgeting?", answer: "Anyone looking to improve their advancedbudgeting situation can benefit.", link: { label: "Learn more about AdvancedBudgeting", href: "/advancedbudgeting" } },
+  { question: "What are common fees for AdvancedBudgeting?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about AdvancedBudgeting", href: "/advancedbudgeting" } },
+  { question: "How to compare AdvancedBudgeting options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about AdvancedBudgeting", href: "/advancedbudgeting" } },
+];
+
+const ADVANCEDBUDGETING_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
+  { slug: "advancedbudgeting", label: "AdvancedBudgeting Overview", icon: Star },
+  { slug: "advancedbudgeting-tips", label: "AdvancedBudgeting Tips", icon: Star },
+  { slug: "advancedbudgeting-reviews", label: "AdvancedBudgeting Reviews", icon: Star },
+];
+import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
+import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
+
+const ADVANCEDBUDGETING_KEY_TERMS: KeyTermItem[] = [
+  { term: "AdvancedBudgeting Basics", definition: "An overview of advancedbudgeting fundamentals, covering core concepts and why they matter.", href: "/advancedbudgeting" },
+  { term: "Advanced AdvancedBudgeting", definition: "Deep dive into advanced aspects of advancedbudgeting, including strategies and best practices.", href: "/advancedbudgeting" },
+  { term: "AdvancedBudgeting Fees", definition: "Explanation of typical fees associated with advancedbudgeting and how to minimize them.", href: "/advancedbudgeting" },
+  { term: "AdvancedBudgeting Benefits", definition: "Key advantages of using advancedbudgeting for personal finance management.", href: "/advancedbudgeting" },
+  { term: "AdvancedBudgeting Risks", definition: "Potential risks and pitfalls to watch out for when dealing with advancedbudgeting.", href: "/advancedbudgeting" },
+];
 
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listCmsContent, cmsContentToArticle } from "@/services/data/cms-public";

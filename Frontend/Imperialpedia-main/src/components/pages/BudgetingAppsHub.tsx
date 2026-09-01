@@ -1,29 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import {
-
-const BUDGETINGAPPS_KEY_TERMS: KeyTermItem[] = [
-  { term: "BudgetingApps Basics", definition: "An overview of budgetingapps fundamentals, covering core concepts and why they matter.", href: "/budgetingapps" },
-  { term: "Advanced BudgetingApps", definition: "Deep dive into advanced aspects of budgetingapps, including strategies and best practices.", href: "/budgetingapps" },
-  { term: "BudgetingApps Fees", definition: "Explanation of typical fees associated with budgetingapps and how to minimize them.", href: "/budgetingapps" },
-  { term: "BudgetingApps Benefits", definition: "Key advantages of using budgetingapps for personal finance management.", href: "/budgetingapps" },
-  { term: "BudgetingApps Risks", definition: "Potential risks and pitfalls to watch out for when dealing with budgetingapps.", href: "/budgetingapps" },
-];
-
-const BUDGETINGAPPS_FAQS: FaqItem[] = [
-  { question: "What is BudgetingApps?", answer: "BudgetingApps is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about BudgetingApps", href: "/budgetingapps" } },
-  { question: "How does BudgetingApps work?", answer: "BudgetingApps works by providing features such as ... (brief description).", link: { label: "Learn more about BudgetingApps", href: "/budgetingapps" } },
-  { question: "Who should consider BudgetingApps?", answer: "Anyone looking to improve their budgetingapps situation can benefit.", link: { label: "Learn more about BudgetingApps", href: "/budgetingapps" } },
-  { question: "What are common fees for BudgetingApps?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about BudgetingApps", href: "/budgetingapps" } },
-  { question: "How to compare BudgetingApps options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about BudgetingApps", href: "/budgetingapps" } },
-];
-
-const BUDGETINGAPPS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "budgetingapps", label: "BudgetingApps Overview", icon: Star },
-  { slug: "budgetingapps-tips", label: "BudgetingApps Tips", icon: Star },
-  { slug: "budgetingapps-reviews", label: "BudgetingApps Reviews", icon: Star },
-];
-
   PiggyBank,
   Wallet,
   CreditCard,
@@ -38,6 +15,30 @@ const BUDGETINGAPPS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: R
   Newspaper,
   ArrowRight,
 } from "lucide-react";
+
+const BUDGETINGAPPS_FAQS: FaqItem[] = [
+  { question: "What is BudgetingApps?", answer: "BudgetingApps is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about BudgetingApps", href: "/budgetingapps" } },
+  { question: "How does BudgetingApps work?", answer: "BudgetingApps works by providing features such as ... (brief description).", link: { label: "Learn more about BudgetingApps", href: "/budgetingapps" } },
+  { question: "Who should consider BudgetingApps?", answer: "Anyone looking to improve their budgetingapps situation can benefit.", link: { label: "Learn more about BudgetingApps", href: "/budgetingapps" } },
+  { question: "What are common fees for BudgetingApps?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about BudgetingApps", href: "/budgetingapps" } },
+  { question: "How to compare BudgetingApps options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about BudgetingApps", href: "/budgetingapps" } },
+];
+
+const BUDGETINGAPPS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
+  { slug: "budgetingapps", label: "BudgetingApps Overview", icon: Star },
+  { slug: "budgetingapps-tips", label: "BudgetingApps Tips", icon: Star },
+  { slug: "budgetingapps-reviews", label: "BudgetingApps Reviews", icon: Star },
+];
+import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
+import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
+
+const BUDGETINGAPPS_KEY_TERMS: KeyTermItem[] = [
+  { term: "BudgetingApps Basics", definition: "An overview of budgetingapps fundamentals, covering core concepts and why they matter.", href: "/budgetingapps" },
+  { term: "Advanced BudgetingApps", definition: "Deep dive into advanced aspects of budgetingapps, including strategies and best practices.", href: "/budgetingapps" },
+  { term: "BudgetingApps Fees", definition: "Explanation of typical fees associated with budgetingapps and how to minimize them.", href: "/budgetingapps" },
+  { term: "BudgetingApps Benefits", definition: "Key advantages of using budgetingapps for personal finance management.", href: "/budgetingapps" },
+  { term: "BudgetingApps Risks", definition: "Potential risks and pitfalls to watch out for when dealing with budgetingapps.", href: "/budgetingapps" },
+];
 
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listCmsContent, cmsContentToArticle } from "@/services/data/cms-public";

@@ -1,13 +1,14 @@
 import Link from "next/link";
 import {
-
-const CHECKING_KEY_TERMS: KeyTermItem[] = [
-  { term: "Checking Basics", definition: "An overview of checking fundamentals, covering core concepts and why they matter.", href: "/checking" },
-  { term: "Advanced Checking", definition: "Deep dive into advanced aspects of checking, including strategies and best practices.", href: "/checking" },
-  { term: "Checking Fees", definition: "Explanation of typical fees associated with checking and how to minimize them.", href: "/checking" },
-  { term: "Checking Benefits", definition: "Key advantages of using checking for personal finance management.", href: "/checking" },
-  { term: "Checking Risks", definition: "Potential risks and pitfalls to watch out for when dealing with checking.", href: "/checking" },
-];
+  PiggyBank,
+  Landmark,
+  Calendar,
+  CreditCard,
+  Star,
+  ArrowRight,
+  Flame,
+  Wallet,
+} from "lucide-react";
 
 const CHECKING_FAQS: FaqItem[] = [
   { question: "What is Checking?", answer: "Checking is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about Checking", href: "/checking" } },
@@ -22,16 +23,16 @@ const CHECKING_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.
   { slug: "checking-tips", label: "Checking Tips", icon: Star },
   { slug: "checking-reviews", label: "Checking Reviews", icon: Star },
 ];
+import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
+import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
 
-  PiggyBank,
-  Landmark,
-  Calendar,
-  CreditCard,
-  Star,
-  ArrowRight,
-  Flame,
-  Wallet,
-} from "lucide-react";
+const CHECKING_KEY_TERMS: KeyTermItem[] = [
+  { term: "Checking Basics", definition: "An overview of checking fundamentals, covering core concepts and why they matter.", href: "/checking" },
+  { term: "Advanced Checking", definition: "Deep dive into advanced aspects of checking, including strategies and best practices.", href: "/checking" },
+  { term: "Checking Fees", definition: "Explanation of typical fees associated with checking and how to minimize them.", href: "/checking" },
+  { term: "Checking Benefits", definition: "Key advantages of using checking for personal finance management.", href: "/checking" },
+  { term: "Checking Risks", definition: "Potential risks and pitfalls to watch out for when dealing with checking.", href: "/checking" },
+];
 
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listAllCmsContent, cmsContentToArticle } from "@/services/data/cms-public";

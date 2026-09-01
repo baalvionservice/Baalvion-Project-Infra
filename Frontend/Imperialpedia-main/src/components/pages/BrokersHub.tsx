@@ -1,29 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import {
-
-const BROKERS_KEY_TERMS: KeyTermItem[] = [
-  { term: "Brokers Basics", definition: "An overview of brokers fundamentals, covering core concepts and why they matter.", href: "/brokers" },
-  { term: "Advanced Brokers", definition: "Deep dive into advanced aspects of brokers, including strategies and best practices.", href: "/brokers" },
-  { term: "Brokers Fees", definition: "Explanation of typical fees associated with brokers and how to minimize them.", href: "/brokers" },
-  { term: "Brokers Benefits", definition: "Key advantages of using brokers for personal finance management.", href: "/brokers" },
-  { term: "Brokers Risks", definition: "Potential risks and pitfalls to watch out for when dealing with brokers.", href: "/brokers" },
-];
-
-const BROKERS_FAQS: FaqItem[] = [
-  { question: "What is Brokers?", answer: "Brokers is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about Brokers", href: "/brokers" } },
-  { question: "How does Brokers work?", answer: "Brokers works by providing features such as ... (brief description).", link: { label: "Learn more about Brokers", href: "/brokers" } },
-  { question: "Who should consider Brokers?", answer: "Anyone looking to improve their brokers situation can benefit.", link: { label: "Learn more about Brokers", href: "/brokers" } },
-  { question: "What are common fees for Brokers?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about Brokers", href: "/brokers" } },
-  { question: "How to compare Brokers options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about Brokers", href: "/brokers" } },
-];
-
-const BROKERS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "brokers", label: "Brokers Overview", icon: Star },
-  { slug: "brokers-tips", label: "Brokers Tips", icon: Star },
-  { slug: "brokers-reviews", label: "Brokers Reviews", icon: Star },
-];
-
   PiggyBank,
   Wallet,
   CreditCard,
@@ -38,6 +15,30 @@ const BROKERS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.C
   Newspaper,
   ArrowRight,
 } from "lucide-react";
+
+const BROKERS_FAQS: FaqItem[] = [
+  { question: "What is Brokers?", answer: "Brokers is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about Brokers", href: "/brokers" } },
+  { question: "How does Brokers work?", answer: "Brokers works by providing features such as ... (brief description).", link: { label: "Learn more about Brokers", href: "/brokers" } },
+  { question: "Who should consider Brokers?", answer: "Anyone looking to improve their brokers situation can benefit.", link: { label: "Learn more about Brokers", href: "/brokers" } },
+  { question: "What are common fees for Brokers?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about Brokers", href: "/brokers" } },
+  { question: "How to compare Brokers options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about Brokers", href: "/brokers" } },
+];
+
+const BROKERS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
+  { slug: "brokers", label: "Brokers Overview", icon: Star },
+  { slug: "brokers-tips", label: "Brokers Tips", icon: Star },
+  { slug: "brokers-reviews", label: "Brokers Reviews", icon: Star },
+];
+import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
+import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
+
+const BROKERS_KEY_TERMS: KeyTermItem[] = [
+  { term: "Brokers Basics", definition: "An overview of brokers fundamentals, covering core concepts and why they matter.", href: "/brokers" },
+  { term: "Advanced Brokers", definition: "Deep dive into advanced aspects of brokers, including strategies and best practices.", href: "/brokers" },
+  { term: "Brokers Fees", definition: "Explanation of typical fees associated with brokers and how to minimize them.", href: "/brokers" },
+  { term: "Brokers Benefits", definition: "Key advantages of using brokers for personal finance management.", href: "/brokers" },
+  { term: "Brokers Risks", definition: "Potential risks and pitfalls to watch out for when dealing with brokers.", href: "/brokers" },
+];
 
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listCmsContent, cmsContentToArticle } from "@/services/data/cms-public";

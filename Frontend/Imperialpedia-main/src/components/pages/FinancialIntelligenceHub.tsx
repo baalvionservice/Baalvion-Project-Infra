@@ -1,29 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import {
-
-const FINANCIALINTELLIGENCE_KEY_TERMS: KeyTermItem[] = [
-  { term: "FinancialIntelligence Basics", definition: "An overview of financialintelligence fundamentals, covering core concepts and why they matter.", href: "/financialintelligence" },
-  { term: "Advanced FinancialIntelligence", definition: "Deep dive into advanced aspects of financialintelligence, including strategies and best practices.", href: "/financialintelligence" },
-  { term: "FinancialIntelligence Fees", definition: "Explanation of typical fees associated with financialintelligence and how to minimize them.", href: "/financialintelligence" },
-  { term: "FinancialIntelligence Benefits", definition: "Key advantages of using financialintelligence for personal finance management.", href: "/financialintelligence" },
-  { term: "FinancialIntelligence Risks", definition: "Potential risks and pitfalls to watch out for when dealing with financialintelligence.", href: "/financialintelligence" },
-];
-
-const FINANCIALINTELLIGENCE_FAQS: FaqItem[] = [
-  { question: "What is FinancialIntelligence?", answer: "FinancialIntelligence is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about FinancialIntelligence", href: "/financialintelligence" } },
-  { question: "How does FinancialIntelligence work?", answer: "FinancialIntelligence works by providing features such as ... (brief description).", link: { label: "Learn more about FinancialIntelligence", href: "/financialintelligence" } },
-  { question: "Who should consider FinancialIntelligence?", answer: "Anyone looking to improve their financialintelligence situation can benefit.", link: { label: "Learn more about FinancialIntelligence", href: "/financialintelligence" } },
-  { question: "What are common fees for FinancialIntelligence?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about FinancialIntelligence", href: "/financialintelligence" } },
-  { question: "How to compare FinancialIntelligence options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about FinancialIntelligence", href: "/financialintelligence" } },
-];
-
-const FINANCIALINTELLIGENCE_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "financialintelligence", label: "FinancialIntelligence Overview", icon: Star },
-  { slug: "financialintelligence-tips", label: "FinancialIntelligence Tips", icon: Star },
-  { slug: "financialintelligence-reviews", label: "FinancialIntelligence Reviews", icon: Star },
-];
-
   PiggyBank,
   Wallet,
   CreditCard,
@@ -38,6 +15,30 @@ const FINANCIALINTELLIGENCE_PRODUCT_TOPICS: Array<{ slug: string; label: string;
   Newspaper,
   ArrowRight,
 } from "lucide-react";
+
+const FINANCIALINTELLIGENCE_FAQS: FaqItem[] = [
+  { question: "What is FinancialIntelligence?", answer: "FinancialIntelligence is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about FinancialIntelligence", href: "/financialintelligence" } },
+  { question: "How does FinancialIntelligence work?", answer: "FinancialIntelligence works by providing features such as ... (brief description).", link: { label: "Learn more about FinancialIntelligence", href: "/financialintelligence" } },
+  { question: "Who should consider FinancialIntelligence?", answer: "Anyone looking to improve their financialintelligence situation can benefit.", link: { label: "Learn more about FinancialIntelligence", href: "/financialintelligence" } },
+  { question: "What are common fees for FinancialIntelligence?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about FinancialIntelligence", href: "/financialintelligence" } },
+  { question: "How to compare FinancialIntelligence options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about FinancialIntelligence", href: "/financialintelligence" } },
+];
+
+const FINANCIALINTELLIGENCE_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
+  { slug: "financialintelligence", label: "FinancialIntelligence Overview", icon: Star },
+  { slug: "financialintelligence-tips", label: "FinancialIntelligence Tips", icon: Star },
+  { slug: "financialintelligence-reviews", label: "FinancialIntelligence Reviews", icon: Star },
+];
+import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
+import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
+
+const FINANCIALINTELLIGENCE_KEY_TERMS: KeyTermItem[] = [
+  { term: "FinancialIntelligence Basics", definition: "An overview of financialintelligence fundamentals, covering core concepts and why they matter.", href: "/financialintelligence" },
+  { term: "Advanced FinancialIntelligence", definition: "Deep dive into advanced aspects of financialintelligence, including strategies and best practices.", href: "/financialintelligence" },
+  { term: "FinancialIntelligence Fees", definition: "Explanation of typical fees associated with financialintelligence and how to minimize them.", href: "/financialintelligence" },
+  { term: "FinancialIntelligence Benefits", definition: "Key advantages of using financialintelligence for personal finance management.", href: "/financialintelligence" },
+  { term: "FinancialIntelligence Risks", definition: "Potential risks and pitfalls to watch out for when dealing with financialintelligence.", href: "/financialintelligence" },
+];
 
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listCmsContent, cmsContentToArticle } from "@/services/data/cms-public";

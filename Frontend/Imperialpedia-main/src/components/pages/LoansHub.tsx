@@ -1,13 +1,13 @@
 import Link from "next/link";
 import {
-
-const LOANS_KEY_TERMS: KeyTermItem[] = [
-  { term: "Loans Basics", definition: "An overview of loans fundamentals, covering core concepts and why they matter.", href: "/loans" },
-  { term: "Advanced Loans", definition: "Deep dive into advanced aspects of loans, including strategies and best practices.", href: "/loans" },
-  { term: "Loans Fees", definition: "Explanation of typical fees associated with loans and how to minimize them.", href: "/loans" },
-  { term: "Loans Benefits", definition: "Key advantages of using loans for personal finance management.", href: "/loans" },
-  { term: "Loans Risks", definition: "Potential risks and pitfalls to watch out for when dealing with loans.", href: "/loans" },
-];
+  BadgeCheck,
+  HandCoins,
+  Car,
+  GraduationCap,
+  Home,
+  ArrowRight,
+  Flame,
+} from "lucide-react";
 
 const LOANS_FAQS: FaqItem[] = [
   { question: "What is Loans?", answer: "Loans is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about Loans", href: "/loans" } },
@@ -22,15 +22,16 @@ const LOANS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.Com
   { slug: "loans-tips", label: "Loans Tips", icon: Star },
   { slug: "loans-reviews", label: "Loans Reviews", icon: Star },
 ];
+import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
+import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
 
-  BadgeCheck,
-  HandCoins,
-  Car,
-  GraduationCap,
-  Home,
-  ArrowRight,
-  Flame,
-} from "lucide-react";
+const LOANS_KEY_TERMS: KeyTermItem[] = [
+  { term: "Loans Basics", definition: "An overview of loans fundamentals, covering core concepts and why they matter.", href: "/loans" },
+  { term: "Advanced Loans", definition: "Deep dive into advanced aspects of loans, including strategies and best practices.", href: "/loans" },
+  { term: "Loans Fees", definition: "Explanation of typical fees associated with loans and how to minimize them.", href: "/loans" },
+  { term: "Loans Benefits", definition: "Key advantages of using loans for personal finance management.", href: "/loans" },
+  { term: "Loans Risks", definition: "Potential risks and pitfalls to watch out for when dealing with loans.", href: "/loans" },
+];
 
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listAllCmsContent, cmsContentToArticle } from "@/services/data/cms-public";

@@ -1,28 +1,5 @@
 import Link from "next/link";
 import {
-
-const BUDGETING_KEY_TERMS: KeyTermItem[] = [
-  { term: "Budgeting Basics", definition: "An overview of budgeting fundamentals, covering core concepts and why they matter.", href: "/budgeting" },
-  { term: "Advanced Budgeting", definition: "Deep dive into advanced aspects of budgeting, including strategies and best practices.", href: "/budgeting" },
-  { term: "Budgeting Fees", definition: "Explanation of typical fees associated with budgeting and how to minimize them.", href: "/budgeting" },
-  { term: "Budgeting Benefits", definition: "Key advantages of using budgeting for personal finance management.", href: "/budgeting" },
-  { term: "Budgeting Risks", definition: "Potential risks and pitfalls to watch out for when dealing with budgeting.", href: "/budgeting" },
-];
-
-const BUDGETING_FAQS: FaqItem[] = [
-  { question: "What is Budgeting?", answer: "Budgeting is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about Budgeting", href: "/budgeting" } },
-  { question: "How does Budgeting work?", answer: "Budgeting works by providing features such as ... (brief description).", link: { label: "Learn more about Budgeting", href: "/budgeting" } },
-  { question: "Who should consider Budgeting?", answer: "Anyone looking to improve their budgeting situation can benefit.", link: { label: "Learn more about Budgeting", href: "/budgeting" } },
-  { question: "What are common fees for Budgeting?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about Budgeting", href: "/budgeting" } },
-  { question: "How to compare Budgeting options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about Budgeting", href: "/budgeting" } },
-];
-
-const BUDGETING_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "budgeting", label: "Budgeting Overview", icon: Star },
-  { slug: "budgeting-tips", label: "Budgeting Tips", icon: Star },
-  { slug: "budgeting-reviews", label: "Budgeting Reviews", icon: Star },
-];
-
   Wallet,
   FileSpreadsheet,
   PiggyBank,
@@ -41,6 +18,30 @@ const BUDGETING_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React
   Calculator,
   ArrowRight,
 } from "lucide-react";
+
+const BUDGETING_FAQS: FaqItem[] = [
+  { question: "What is Budgeting?", answer: "Budgeting is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about Budgeting", href: "/budgeting" } },
+  { question: "How does Budgeting work?", answer: "Budgeting works by providing features such as ... (brief description).", link: { label: "Learn more about Budgeting", href: "/budgeting" } },
+  { question: "Who should consider Budgeting?", answer: "Anyone looking to improve their budgeting situation can benefit.", link: { label: "Learn more about Budgeting", href: "/budgeting" } },
+  { question: "What are common fees for Budgeting?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about Budgeting", href: "/budgeting" } },
+  { question: "How to compare Budgeting options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about Budgeting", href: "/budgeting" } },
+];
+
+const BUDGETING_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
+  { slug: "budgeting", label: "Budgeting Overview", icon: Star },
+  { slug: "budgeting-tips", label: "Budgeting Tips", icon: Star },
+  { slug: "budgeting-reviews", label: "Budgeting Reviews", icon: Star },
+];
+import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
+import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
+
+const BUDGETING_KEY_TERMS: KeyTermItem[] = [
+  { term: "Budgeting Basics", definition: "An overview of budgeting fundamentals, covering core concepts and why they matter.", href: "/budgeting" },
+  { term: "Advanced Budgeting", definition: "Deep dive into advanced aspects of budgeting, including strategies and best practices.", href: "/budgeting" },
+  { term: "Budgeting Fees", definition: "Explanation of typical fees associated with budgeting and how to minimize them.", href: "/budgeting" },
+  { term: "Budgeting Benefits", definition: "Key advantages of using budgeting for personal finance management.", href: "/budgeting" },
+  { term: "Budgeting Risks", definition: "Potential risks and pitfalls to watch out for when dealing with budgeting.", href: "/budgeting" },
+];
 
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listCmsContent, cmsContentToArticle } from "@/services/data/cms-public";

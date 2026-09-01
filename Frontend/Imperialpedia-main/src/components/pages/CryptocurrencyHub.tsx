@@ -1,29 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import {
-
-const CRYPTOCURRENCY_KEY_TERMS: KeyTermItem[] = [
-  { term: "Cryptocurrency Basics", definition: "An overview of cryptocurrency fundamentals, covering core concepts and why they matter.", href: "/cryptocurrency" },
-  { term: "Advanced Cryptocurrency", definition: "Deep dive into advanced aspects of cryptocurrency, including strategies and best practices.", href: "/cryptocurrency" },
-  { term: "Cryptocurrency Fees", definition: "Explanation of typical fees associated with cryptocurrency and how to minimize them.", href: "/cryptocurrency" },
-  { term: "Cryptocurrency Benefits", definition: "Key advantages of using cryptocurrency for personal finance management.", href: "/cryptocurrency" },
-  { term: "Cryptocurrency Risks", definition: "Potential risks and pitfalls to watch out for when dealing with cryptocurrency.", href: "/cryptocurrency" },
-];
-
-const CRYPTOCURRENCY_FAQS: FaqItem[] = [
-  { question: "What is Cryptocurrency?", answer: "Cryptocurrency is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about Cryptocurrency", href: "/cryptocurrency" } },
-  { question: "How does Cryptocurrency work?", answer: "Cryptocurrency works by providing features such as ... (brief description).", link: { label: "Learn more about Cryptocurrency", href: "/cryptocurrency" } },
-  { question: "Who should consider Cryptocurrency?", answer: "Anyone looking to improve their cryptocurrency situation can benefit.", link: { label: "Learn more about Cryptocurrency", href: "/cryptocurrency" } },
-  { question: "What are common fees for Cryptocurrency?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about Cryptocurrency", href: "/cryptocurrency" } },
-  { question: "How to compare Cryptocurrency options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about Cryptocurrency", href: "/cryptocurrency" } },
-];
-
-const CRYPTOCURRENCY_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "cryptocurrency", label: "Cryptocurrency Overview", icon: Star },
-  { slug: "cryptocurrency-tips", label: "Cryptocurrency Tips", icon: Star },
-  { slug: "cryptocurrency-reviews", label: "Cryptocurrency Reviews", icon: Star },
-];
-
   PiggyBank,
   Wallet,
   CreditCard,
@@ -38,6 +15,30 @@ const CRYPTOCURRENCY_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: 
   Newspaper,
   ArrowRight,
 } from "lucide-react";
+
+const CRYPTOCURRENCY_FAQS: FaqItem[] = [
+  { question: "What is Cryptocurrency?", answer: "Cryptocurrency is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about Cryptocurrency", href: "/cryptocurrency" } },
+  { question: "How does Cryptocurrency work?", answer: "Cryptocurrency works by providing features such as ... (brief description).", link: { label: "Learn more about Cryptocurrency", href: "/cryptocurrency" } },
+  { question: "Who should consider Cryptocurrency?", answer: "Anyone looking to improve their cryptocurrency situation can benefit.", link: { label: "Learn more about Cryptocurrency", href: "/cryptocurrency" } },
+  { question: "What are common fees for Cryptocurrency?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about Cryptocurrency", href: "/cryptocurrency" } },
+  { question: "How to compare Cryptocurrency options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about Cryptocurrency", href: "/cryptocurrency" } },
+];
+
+const CRYPTOCURRENCY_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
+  { slug: "cryptocurrency", label: "Cryptocurrency Overview", icon: Star },
+  { slug: "cryptocurrency-tips", label: "Cryptocurrency Tips", icon: Star },
+  { slug: "cryptocurrency-reviews", label: "Cryptocurrency Reviews", icon: Star },
+];
+import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
+import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
+
+const CRYPTOCURRENCY_KEY_TERMS: KeyTermItem[] = [
+  { term: "Cryptocurrency Basics", definition: "An overview of cryptocurrency fundamentals, covering core concepts and why they matter.", href: "/cryptocurrency" },
+  { term: "Advanced Cryptocurrency", definition: "Deep dive into advanced aspects of cryptocurrency, including strategies and best practices.", href: "/cryptocurrency" },
+  { term: "Cryptocurrency Fees", definition: "Explanation of typical fees associated with cryptocurrency and how to minimize them.", href: "/cryptocurrency" },
+  { term: "Cryptocurrency Benefits", definition: "Key advantages of using cryptocurrency for personal finance management.", href: "/cryptocurrency" },
+  { term: "Cryptocurrency Risks", definition: "Potential risks and pitfalls to watch out for when dealing with cryptocurrency.", href: "/cryptocurrency" },
+];
 
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listCmsContent, cmsContentToArticle } from "@/services/data/cms-public";

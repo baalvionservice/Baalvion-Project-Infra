@@ -1,28 +1,5 @@
 import Link from "next/link";
 import {
-
-const PERSONALFINANCE_KEY_TERMS: KeyTermItem[] = [
-  { term: "PersonalFinance Basics", definition: "An overview of personalfinance fundamentals, covering core concepts and why they matter.", href: "/personalfinance" },
-  { term: "Advanced PersonalFinance", definition: "Deep dive into advanced aspects of personalfinance, including strategies and best practices.", href: "/personalfinance" },
-  { term: "PersonalFinance Fees", definition: "Explanation of typical fees associated with personalfinance and how to minimize them.", href: "/personalfinance" },
-  { term: "PersonalFinance Benefits", definition: "Key advantages of using personalfinance for personal finance management.", href: "/personalfinance" },
-  { term: "PersonalFinance Risks", definition: "Potential risks and pitfalls to watch out for when dealing with personalfinance.", href: "/personalfinance" },
-];
-
-const PERSONALFINANCE_FAQS: FaqItem[] = [
-  { question: "What is PersonalFinance?", answer: "PersonalFinance is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about PersonalFinance", href: "/personalfinance" } },
-  { question: "How does PersonalFinance work?", answer: "PersonalFinance works by providing features such as ... (brief description).", link: { label: "Learn more about PersonalFinance", href: "/personalfinance" } },
-  { question: "Who should consider PersonalFinance?", answer: "Anyone looking to improve their personalfinance situation can benefit.", link: { label: "Learn more about PersonalFinance", href: "/personalfinance" } },
-  { question: "What are common fees for PersonalFinance?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about PersonalFinance", href: "/personalfinance" } },
-  { question: "How to compare PersonalFinance options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about PersonalFinance", href: "/personalfinance" } },
-];
-
-const PERSONALFINANCE_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "personalfinance", label: "PersonalFinance Overview", icon: Star },
-  { slug: "personalfinance-tips", label: "PersonalFinance Tips", icon: Star },
-  { slug: "personalfinance-reviews", label: "PersonalFinance Reviews", icon: Star },
-];
-
   PieChart,
   PiggyBank,
   TrendingDown,
@@ -37,6 +14,30 @@ const PERSONALFINANCE_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon:
   Newspaper,
   ArrowRight,
 } from "lucide-react";
+
+const PERSONALFINANCE_FAQS: FaqItem[] = [
+  { question: "What is PersonalFinance?", answer: "PersonalFinance is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about PersonalFinance", href: "/personalfinance" } },
+  { question: "How does PersonalFinance work?", answer: "PersonalFinance works by providing features such as ... (brief description).", link: { label: "Learn more about PersonalFinance", href: "/personalfinance" } },
+  { question: "Who should consider PersonalFinance?", answer: "Anyone looking to improve their personalfinance situation can benefit.", link: { label: "Learn more about PersonalFinance", href: "/personalfinance" } },
+  { question: "What are common fees for PersonalFinance?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about PersonalFinance", href: "/personalfinance" } },
+  { question: "How to compare PersonalFinance options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about PersonalFinance", href: "/personalfinance" } },
+];
+
+const PERSONALFINANCE_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
+  { slug: "personalfinance", label: "PersonalFinance Overview", icon: Star },
+  { slug: "personalfinance-tips", label: "PersonalFinance Tips", icon: Star },
+  { slug: "personalfinance-reviews", label: "PersonalFinance Reviews", icon: Star },
+];
+import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
+import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
+
+const PERSONALFINANCE_KEY_TERMS: KeyTermItem[] = [
+  { term: "PersonalFinance Basics", definition: "An overview of personalfinance fundamentals, covering core concepts and why they matter.", href: "/personalfinance" },
+  { term: "Advanced PersonalFinance", definition: "Deep dive into advanced aspects of personalfinance, including strategies and best practices.", href: "/personalfinance" },
+  { term: "PersonalFinance Fees", definition: "Explanation of typical fees associated with personalfinance and how to minimize them.", href: "/personalfinance" },
+  { term: "PersonalFinance Benefits", definition: "Key advantages of using personalfinance for personal finance management.", href: "/personalfinance" },
+  { term: "PersonalFinance Risks", definition: "Potential risks and pitfalls to watch out for when dealing with personalfinance.", href: "/personalfinance" },
+];
 
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listCmsContent, cmsContentToArticle } from "@/services/data/cms-public";

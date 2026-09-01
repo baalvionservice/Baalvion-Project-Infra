@@ -1,13 +1,14 @@
 import Link from "next/link";
 import {
-
-const BONDS_KEY_TERMS: KeyTermItem[] = [
-  { term: "Bonds Basics", definition: "An overview of bonds fundamentals, covering core concepts and why they matter.", href: "/bonds" },
-  { term: "Advanced Bonds", definition: "Deep dive into advanced aspects of bonds, including strategies and best practices.", href: "/bonds" },
-  { term: "Bonds Fees", definition: "Explanation of typical fees associated with bonds and how to minimize them.", href: "/bonds" },
-  { term: "Bonds Benefits", definition: "Key advantages of using bonds for personal finance management.", href: "/bonds" },
-  { term: "Bonds Risks", definition: "Potential risks and pitfalls to watch out for when dealing with bonds.", href: "/bonds" },
-];
+  TrendingUp,
+  PieChart,
+  PiggyBank,
+  Umbrella,
+  Briefcase,
+  ArrowRight,
+  Flame,
+  Landmark,
+} from "lucide-react";
 
 const BONDS_FAQS: FaqItem[] = [
   { question: "What is Bonds?", answer: "Bonds is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about Bonds", href: "/bonds" } },
@@ -22,16 +23,16 @@ const BONDS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.Com
   { slug: "bonds-tips", label: "Bonds Tips", icon: Star },
   { slug: "bonds-reviews", label: "Bonds Reviews", icon: Star },
 ];
+import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
+import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
 
-  TrendingUp,
-  PieChart,
-  PiggyBank,
-  Umbrella,
-  Briefcase,
-  ArrowRight,
-  Flame,
-  Landmark,
-} from "lucide-react";
+const BONDS_KEY_TERMS: KeyTermItem[] = [
+  { term: "Bonds Basics", definition: "An overview of bonds fundamentals, covering core concepts and why they matter.", href: "/bonds" },
+  { term: "Advanced Bonds", definition: "Deep dive into advanced aspects of bonds, including strategies and best practices.", href: "/bonds" },
+  { term: "Bonds Fees", definition: "Explanation of typical fees associated with bonds and how to minimize them.", href: "/bonds" },
+  { term: "Bonds Benefits", definition: "Key advantages of using bonds for personal finance management.", href: "/bonds" },
+  { term: "Bonds Risks", definition: "Potential risks and pitfalls to watch out for when dealing with bonds.", href: "/bonds" },
+];
 
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listAllCmsContent, cmsContentToArticle } from "@/services/data/cms-public";

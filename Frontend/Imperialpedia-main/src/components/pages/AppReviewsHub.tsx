@@ -1,29 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import {
-
-const APPREVIEWS_KEY_TERMS: KeyTermItem[] = [
-  { term: "AppReviews Basics", definition: "An overview of appreviews fundamentals, covering core concepts and why they matter.", href: "/appreviews" },
-  { term: "Advanced AppReviews", definition: "Deep dive into advanced aspects of appreviews, including strategies and best practices.", href: "/appreviews" },
-  { term: "AppReviews Fees", definition: "Explanation of typical fees associated with appreviews and how to minimize them.", href: "/appreviews" },
-  { term: "AppReviews Benefits", definition: "Key advantages of using appreviews for personal finance management.", href: "/appreviews" },
-  { term: "AppReviews Risks", definition: "Potential risks and pitfalls to watch out for when dealing with appreviews.", href: "/appreviews" },
-];
-
-const APPREVIEWS_FAQS: FaqItem[] = [
-  { question: "What is AppReviews?", answer: "AppReviews is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about AppReviews", href: "/appreviews" } },
-  { question: "How does AppReviews work?", answer: "AppReviews works by providing features such as ... (brief description).", link: { label: "Learn more about AppReviews", href: "/appreviews" } },
-  { question: "Who should consider AppReviews?", answer: "Anyone looking to improve their appreviews situation can benefit.", link: { label: "Learn more about AppReviews", href: "/appreviews" } },
-  { question: "What are common fees for AppReviews?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about AppReviews", href: "/appreviews" } },
-  { question: "How to compare AppReviews options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about AppReviews", href: "/appreviews" } },
-];
-
-const APPREVIEWS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "appreviews", label: "AppReviews Overview", icon: Star },
-  { slug: "appreviews-tips", label: "AppReviews Tips", icon: Star },
-  { slug: "appreviews-reviews", label: "AppReviews Reviews", icon: Star },
-];
-
   PiggyBank,
   Wallet,
   CreditCard,
@@ -38,6 +15,30 @@ const APPREVIEWS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: Reac
   Newspaper,
   ArrowRight,
 } from "lucide-react";
+
+const APPREVIEWS_FAQS: FaqItem[] = [
+  { question: "What is AppReviews?", answer: "AppReviews is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about AppReviews", href: "/appreviews" } },
+  { question: "How does AppReviews work?", answer: "AppReviews works by providing features such as ... (brief description).", link: { label: "Learn more about AppReviews", href: "/appreviews" } },
+  { question: "Who should consider AppReviews?", answer: "Anyone looking to improve their appreviews situation can benefit.", link: { label: "Learn more about AppReviews", href: "/appreviews" } },
+  { question: "What are common fees for AppReviews?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about AppReviews", href: "/appreviews" } },
+  { question: "How to compare AppReviews options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about AppReviews", href: "/appreviews" } },
+];
+
+const APPREVIEWS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
+  { slug: "appreviews", label: "AppReviews Overview", icon: Star },
+  { slug: "appreviews-tips", label: "AppReviews Tips", icon: Star },
+  { slug: "appreviews-reviews", label: "AppReviews Reviews", icon: Star },
+];
+import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
+import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
+
+const APPREVIEWS_KEY_TERMS: KeyTermItem[] = [
+  { term: "AppReviews Basics", definition: "An overview of appreviews fundamentals, covering core concepts and why they matter.", href: "/appreviews" },
+  { term: "Advanced AppReviews", definition: "Deep dive into advanced aspects of appreviews, including strategies and best practices.", href: "/appreviews" },
+  { term: "AppReviews Fees", definition: "Explanation of typical fees associated with appreviews and how to minimize them.", href: "/appreviews" },
+  { term: "AppReviews Benefits", definition: "Key advantages of using appreviews for personal finance management.", href: "/appreviews" },
+  { term: "AppReviews Risks", definition: "Potential risks and pitfalls to watch out for when dealing with appreviews.", href: "/appreviews" },
+];
 
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listCmsContent, cmsContentToArticle } from "@/services/data/cms-public";

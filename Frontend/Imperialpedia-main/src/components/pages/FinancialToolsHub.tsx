@@ -1,29 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import {
-
-const FINANCIALTOOLS_KEY_TERMS: KeyTermItem[] = [
-  { term: "FinancialTools Basics", definition: "An overview of financialtools fundamentals, covering core concepts and why they matter.", href: "/financialtools" },
-  { term: "Advanced FinancialTools", definition: "Deep dive into advanced aspects of financialtools, including strategies and best practices.", href: "/financialtools" },
-  { term: "FinancialTools Fees", definition: "Explanation of typical fees associated with financialtools and how to minimize them.", href: "/financialtools" },
-  { term: "FinancialTools Benefits", definition: "Key advantages of using financialtools for personal finance management.", href: "/financialtools" },
-  { term: "FinancialTools Risks", definition: "Potential risks and pitfalls to watch out for when dealing with financialtools.", href: "/financialtools" },
-];
-
-const FINANCIALTOOLS_FAQS: FaqItem[] = [
-  { question: "What is FinancialTools?", answer: "FinancialTools is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about FinancialTools", href: "/financialtools" } },
-  { question: "How does FinancialTools work?", answer: "FinancialTools works by providing features such as ... (brief description).", link: { label: "Learn more about FinancialTools", href: "/financialtools" } },
-  { question: "Who should consider FinancialTools?", answer: "Anyone looking to improve their financialtools situation can benefit.", link: { label: "Learn more about FinancialTools", href: "/financialtools" } },
-  { question: "What are common fees for FinancialTools?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about FinancialTools", href: "/financialtools" } },
-  { question: "How to compare FinancialTools options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about FinancialTools", href: "/financialtools" } },
-];
-
-const FINANCIALTOOLS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "financialtools", label: "FinancialTools Overview", icon: Star },
-  { slug: "financialtools-tips", label: "FinancialTools Tips", icon: Star },
-  { slug: "financialtools-reviews", label: "FinancialTools Reviews", icon: Star },
-];
-
   PiggyBank,
   Wallet,
   CreditCard,
@@ -38,6 +15,30 @@ const FINANCIALTOOLS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: 
   Newspaper,
   ArrowRight,
 } from "lucide-react";
+
+const FINANCIALTOOLS_FAQS: FaqItem[] = [
+  { question: "What is FinancialTools?", answer: "FinancialTools is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about FinancialTools", href: "/financialtools" } },
+  { question: "How does FinancialTools work?", answer: "FinancialTools works by providing features such as ... (brief description).", link: { label: "Learn more about FinancialTools", href: "/financialtools" } },
+  { question: "Who should consider FinancialTools?", answer: "Anyone looking to improve their financialtools situation can benefit.", link: { label: "Learn more about FinancialTools", href: "/financialtools" } },
+  { question: "What are common fees for FinancialTools?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about FinancialTools", href: "/financialtools" } },
+  { question: "How to compare FinancialTools options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about FinancialTools", href: "/financialtools" } },
+];
+
+const FINANCIALTOOLS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
+  { slug: "financialtools", label: "FinancialTools Overview", icon: Star },
+  { slug: "financialtools-tips", label: "FinancialTools Tips", icon: Star },
+  { slug: "financialtools-reviews", label: "FinancialTools Reviews", icon: Star },
+];
+import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
+import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
+
+const FINANCIALTOOLS_KEY_TERMS: KeyTermItem[] = [
+  { term: "FinancialTools Basics", definition: "An overview of financialtools fundamentals, covering core concepts and why they matter.", href: "/financialtools" },
+  { term: "Advanced FinancialTools", definition: "Deep dive into advanced aspects of financialtools, including strategies and best practices.", href: "/financialtools" },
+  { term: "FinancialTools Fees", definition: "Explanation of typical fees associated with financialtools and how to minimize them.", href: "/financialtools" },
+  { term: "FinancialTools Benefits", definition: "Key advantages of using financialtools for personal finance management.", href: "/financialtools" },
+  { term: "FinancialTools Risks", definition: "Potential risks and pitfalls to watch out for when dealing with financialtools.", href: "/financialtools" },
+];
 
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listCmsContent, cmsContentToArticle } from "@/services/data/cms-public";

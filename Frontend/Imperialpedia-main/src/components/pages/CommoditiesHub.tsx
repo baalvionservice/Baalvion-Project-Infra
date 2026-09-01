@@ -1,13 +1,13 @@
 import Link from "next/link";
 import {
-
-const COMMODITIES_KEY_TERMS: KeyTermItem[] = [
-  { term: "Commodities Basics", definition: "An overview of commodities fundamentals, covering core concepts and why they matter.", href: "/commodities" },
-  { term: "Advanced Commodities", definition: "Deep dive into advanced aspects of commodities, including strategies and best practices.", href: "/commodities" },
-  { term: "Commodities Fees", definition: "Explanation of typical fees associated with commodities and how to minimize them.", href: "/commodities" },
-  { term: "Commodities Benefits", definition: "Key advantages of using commodities for personal finance management.", href: "/commodities" },
-  { term: "Commodities Risks", definition: "Potential risks and pitfalls to watch out for when dealing with commodities.", href: "/commodities" },
-];
+  TrendingUp,
+  PieChart,
+  Briefcase,
+  Home,
+  ArrowRight,
+  Flame,
+  Wheat,
+} from "lucide-react";
 
 const COMMODITIES_FAQS: FaqItem[] = [
   { question: "What is Commodities?", answer: "Commodities is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about Commodities", href: "/commodities" } },
@@ -22,15 +22,16 @@ const COMMODITIES_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: Rea
   { slug: "commodities-tips", label: "Commodities Tips", icon: Star },
   { slug: "commodities-reviews", label: "Commodities Reviews", icon: Star },
 ];
+import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
+import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
 
-  TrendingUp,
-  PieChart,
-  Briefcase,
-  Home,
-  ArrowRight,
-  Flame,
-  Wheat,
-} from "lucide-react";
+const COMMODITIES_KEY_TERMS: KeyTermItem[] = [
+  { term: "Commodities Basics", definition: "An overview of commodities fundamentals, covering core concepts and why they matter.", href: "/commodities" },
+  { term: "Advanced Commodities", definition: "Deep dive into advanced aspects of commodities, including strategies and best practices.", href: "/commodities" },
+  { term: "Commodities Fees", definition: "Explanation of typical fees associated with commodities and how to minimize them.", href: "/commodities" },
+  { term: "Commodities Benefits", definition: "Key advantages of using commodities for personal finance management.", href: "/commodities" },
+  { term: "Commodities Risks", definition: "Potential risks and pitfalls to watch out for when dealing with commodities.", href: "/commodities" },
+];
 
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listAllCmsContent, cmsContentToArticle } from "@/services/data/cms-public";

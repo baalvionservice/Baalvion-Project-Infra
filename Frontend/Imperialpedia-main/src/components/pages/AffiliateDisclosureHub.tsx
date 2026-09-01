@@ -1,29 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import {
-
-const AFFILIATEDISCLOSURE_KEY_TERMS: KeyTermItem[] = [
-  { term: "AffiliateDisclosure Basics", definition: "An overview of affiliatedisclosure fundamentals, covering core concepts and why they matter.", href: "/affiliatedisclosure" },
-  { term: "Advanced AffiliateDisclosure", definition: "Deep dive into advanced aspects of affiliatedisclosure, including strategies and best practices.", href: "/affiliatedisclosure" },
-  { term: "AffiliateDisclosure Fees", definition: "Explanation of typical fees associated with affiliatedisclosure and how to minimize them.", href: "/affiliatedisclosure" },
-  { term: "AffiliateDisclosure Benefits", definition: "Key advantages of using affiliatedisclosure for personal finance management.", href: "/affiliatedisclosure" },
-  { term: "AffiliateDisclosure Risks", definition: "Potential risks and pitfalls to watch out for when dealing with affiliatedisclosure.", href: "/affiliatedisclosure" },
-];
-
-const AFFILIATEDISCLOSURE_FAQS: FaqItem[] = [
-  { question: "What is AffiliateDisclosure?", answer: "AffiliateDisclosure is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about AffiliateDisclosure", href: "/affiliatedisclosure" } },
-  { question: "How does AffiliateDisclosure work?", answer: "AffiliateDisclosure works by providing features such as ... (brief description).", link: { label: "Learn more about AffiliateDisclosure", href: "/affiliatedisclosure" } },
-  { question: "Who should consider AffiliateDisclosure?", answer: "Anyone looking to improve their affiliatedisclosure situation can benefit.", link: { label: "Learn more about AffiliateDisclosure", href: "/affiliatedisclosure" } },
-  { question: "What are common fees for AffiliateDisclosure?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about AffiliateDisclosure", href: "/affiliatedisclosure" } },
-  { question: "How to compare AffiliateDisclosure options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about AffiliateDisclosure", href: "/affiliatedisclosure" } },
-];
-
-const AFFILIATEDISCLOSURE_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "affiliatedisclosure", label: "AffiliateDisclosure Overview", icon: Star },
-  { slug: "affiliatedisclosure-tips", label: "AffiliateDisclosure Tips", icon: Star },
-  { slug: "affiliatedisclosure-reviews", label: "AffiliateDisclosure Reviews", icon: Star },
-];
-
   PiggyBank,
   Wallet,
   CreditCard,
@@ -38,6 +15,30 @@ const AFFILIATEDISCLOSURE_PRODUCT_TOPICS: Array<{ slug: string; label: string; i
   Newspaper,
   ArrowRight,
 } from "lucide-react";
+
+const AFFILIATEDISCLOSURE_FAQS: FaqItem[] = [
+  { question: "What is AffiliateDisclosure?", answer: "AffiliateDisclosure is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about AffiliateDisclosure", href: "/affiliatedisclosure" } },
+  { question: "How does AffiliateDisclosure work?", answer: "AffiliateDisclosure works by providing features such as ... (brief description).", link: { label: "Learn more about AffiliateDisclosure", href: "/affiliatedisclosure" } },
+  { question: "Who should consider AffiliateDisclosure?", answer: "Anyone looking to improve their affiliatedisclosure situation can benefit.", link: { label: "Learn more about AffiliateDisclosure", href: "/affiliatedisclosure" } },
+  { question: "What are common fees for AffiliateDisclosure?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about AffiliateDisclosure", href: "/affiliatedisclosure" } },
+  { question: "How to compare AffiliateDisclosure options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about AffiliateDisclosure", href: "/affiliatedisclosure" } },
+];
+
+const AFFILIATEDISCLOSURE_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
+  { slug: "affiliatedisclosure", label: "AffiliateDisclosure Overview", icon: Star },
+  { slug: "affiliatedisclosure-tips", label: "AffiliateDisclosure Tips", icon: Star },
+  { slug: "affiliatedisclosure-reviews", label: "AffiliateDisclosure Reviews", icon: Star },
+];
+import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
+import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
+
+const AFFILIATEDISCLOSURE_KEY_TERMS: KeyTermItem[] = [
+  { term: "AffiliateDisclosure Basics", definition: "An overview of affiliatedisclosure fundamentals, covering core concepts and why they matter.", href: "/affiliatedisclosure" },
+  { term: "Advanced AffiliateDisclosure", definition: "Deep dive into advanced aspects of affiliatedisclosure, including strategies and best practices.", href: "/affiliatedisclosure" },
+  { term: "AffiliateDisclosure Fees", definition: "Explanation of typical fees associated with affiliatedisclosure and how to minimize them.", href: "/affiliatedisclosure" },
+  { term: "AffiliateDisclosure Benefits", definition: "Key advantages of using affiliatedisclosure for personal finance management.", href: "/affiliatedisclosure" },
+  { term: "AffiliateDisclosure Risks", definition: "Potential risks and pitfalls to watch out for when dealing with affiliatedisclosure.", href: "/affiliatedisclosure" },
+];
 
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listCmsContent, cmsContentToArticle } from "@/services/data/cms-public";

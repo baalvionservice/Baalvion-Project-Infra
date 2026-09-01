@@ -1,29 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import {
-
-const FAMILYBUDGET_KEY_TERMS: KeyTermItem[] = [
-  { term: "FamilyBudget Basics", definition: "An overview of familybudget fundamentals, covering core concepts and why they matter.", href: "/familybudget" },
-  { term: "Advanced FamilyBudget", definition: "Deep dive into advanced aspects of familybudget, including strategies and best practices.", href: "/familybudget" },
-  { term: "FamilyBudget Fees", definition: "Explanation of typical fees associated with familybudget and how to minimize them.", href: "/familybudget" },
-  { term: "FamilyBudget Benefits", definition: "Key advantages of using familybudget for personal finance management.", href: "/familybudget" },
-  { term: "FamilyBudget Risks", definition: "Potential risks and pitfalls to watch out for when dealing with familybudget.", href: "/familybudget" },
-];
-
-const FAMILYBUDGET_FAQS: FaqItem[] = [
-  { question: "What is FamilyBudget?", answer: "FamilyBudget is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about FamilyBudget", href: "/familybudget" } },
-  { question: "How does FamilyBudget work?", answer: "FamilyBudget works by providing features such as ... (brief description).", link: { label: "Learn more about FamilyBudget", href: "/familybudget" } },
-  { question: "Who should consider FamilyBudget?", answer: "Anyone looking to improve their familybudget situation can benefit.", link: { label: "Learn more about FamilyBudget", href: "/familybudget" } },
-  { question: "What are common fees for FamilyBudget?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about FamilyBudget", href: "/familybudget" } },
-  { question: "How to compare FamilyBudget options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about FamilyBudget", href: "/familybudget" } },
-];
-
-const FAMILYBUDGET_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "familybudget", label: "FamilyBudget Overview", icon: Star },
-  { slug: "familybudget-tips", label: "FamilyBudget Tips", icon: Star },
-  { slug: "familybudget-reviews", label: "FamilyBudget Reviews", icon: Star },
-];
-
   PiggyBank,
   Wallet,
   CreditCard,
@@ -38,6 +15,30 @@ const FAMILYBUDGET_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: Re
   Newspaper,
   ArrowRight,
 } from "lucide-react";
+
+const FAMILYBUDGET_FAQS: FaqItem[] = [
+  { question: "What is FamilyBudget?", answer: "FamilyBudget is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about FamilyBudget", href: "/familybudget" } },
+  { question: "How does FamilyBudget work?", answer: "FamilyBudget works by providing features such as ... (brief description).", link: { label: "Learn more about FamilyBudget", href: "/familybudget" } },
+  { question: "Who should consider FamilyBudget?", answer: "Anyone looking to improve their familybudget situation can benefit.", link: { label: "Learn more about FamilyBudget", href: "/familybudget" } },
+  { question: "What are common fees for FamilyBudget?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about FamilyBudget", href: "/familybudget" } },
+  { question: "How to compare FamilyBudget options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about FamilyBudget", href: "/familybudget" } },
+];
+
+const FAMILYBUDGET_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
+  { slug: "familybudget", label: "FamilyBudget Overview", icon: Star },
+  { slug: "familybudget-tips", label: "FamilyBudget Tips", icon: Star },
+  { slug: "familybudget-reviews", label: "FamilyBudget Reviews", icon: Star },
+];
+import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
+import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
+
+const FAMILYBUDGET_KEY_TERMS: KeyTermItem[] = [
+  { term: "FamilyBudget Basics", definition: "An overview of familybudget fundamentals, covering core concepts and why they matter.", href: "/familybudget" },
+  { term: "Advanced FamilyBudget", definition: "Deep dive into advanced aspects of familybudget, including strategies and best practices.", href: "/familybudget" },
+  { term: "FamilyBudget Fees", definition: "Explanation of typical fees associated with familybudget and how to minimize them.", href: "/familybudget" },
+  { term: "FamilyBudget Benefits", definition: "Key advantages of using familybudget for personal finance management.", href: "/familybudget" },
+  { term: "FamilyBudget Risks", definition: "Potential risks and pitfalls to watch out for when dealing with familybudget.", href: "/familybudget" },
+];
 
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listCmsContent, cmsContentToArticle } from "@/services/data/cms-public";
