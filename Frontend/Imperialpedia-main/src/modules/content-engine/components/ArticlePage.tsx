@@ -303,27 +303,27 @@ export const ArticlePage = ({
             ) : null}
 
             {/* KEY FINANCIAL TERMS DEFINED */}
-            <KeyTermsCallout categorySlug={article.categorySlug || "savings"} />
+            <KeyTermsCallout categorySlug={effectiveArticle.categorySlug || "savings"} />
 
             {/* SOURCES CITED */}
-            {article.citations?.length ? <SourcesCited citations={article.citations} /> : null}
+            {effectiveArticle.citations?.length ? <SourcesCited citations={effectiveArticle.citations} /> : null}
 
             {/* TOOLS & QUIZZES */}
             <div className="mb-8 space-y-4">
-              <RelatedCalculators categorySlug={article.categorySlug} />
-              {poll && <ArticlePoll slug={article.slug} initialPoll={poll} categoryName={article.category} />}
-              <ArticleQuiz quiz={article.quiz} categoryName={article.category} />
+              <RelatedCalculators categorySlug={effectiveArticle.categorySlug} />
+              {poll && <ArticlePoll slug={effectiveArticle.slug} initialPoll={poll} categoryName={effectiveArticle.category} />}
+              <ArticleQuiz quiz={effectiveArticle.quiz} categoryName={effectiveArticle.category} />
             </div>
 
             {/* HELPFUL VOTE & COMMENTS */}
             <HelpfulVote
-              slug={article.slug}
+              slug={effectiveArticle.slug}
               initialSummary={feedback ?? { helpful: 0, notHelpful: 0 }}
-              categoryName={article.category}
+              categoryName={effectiveArticle.category}
             />
 
             <div className="mt-16 ml-4 lg:ml-8 xl:ml-12">
-              <CommentsSection slug={article.slug} initialComments={comments ?? []} />
+              <CommentsSection slug={effectiveArticle.slug} initialComments={comments ?? []} />
             </div>
           </div>
 
@@ -336,14 +336,14 @@ export const ArticlePage = ({
         </div>
 
         <RelatedArticles
-          currentArticleId={article.id}
-          category={article.category}
-          tags={article.tags}
-          categorySlug={article.categorySlug}
+          currentArticleId={effectiveArticle.id}
+          category={effectiveArticle.category}
+          tags={effectiveArticle.tags}
+          categorySlug={effectiveArticle.categorySlug}
         />
 
         <div className="mt-12">
-          <WeeklyDigestSignup categoryName={article.category} />
+          <WeeklyDigestSignup categoryName={effectiveArticle.category} />
         </div>
       </Container>
     </article>
