@@ -1,29 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, BookOpen, Flame } from "lucide-react";
 
-const MONEYMANAGEMENT_KEY_TERMS: KeyTermItem[] = [
-  { term: "MoneyManagement Basics", definition: "An overview of moneymanagement fundamentals, covering core concepts and why they matter.", href: "/moneymanagement" },
-  { term: "Advanced MoneyManagement", definition: "Deep dive into advanced aspects of moneymanagement, including strategies and best practices.", href: "/moneymanagement" },
-  { term: "MoneyManagement Fees", definition: "Explanation of typical fees associated with moneymanagement and how to minimize them.", href: "/moneymanagement" },
-  { term: "MoneyManagement Benefits", definition: "Key advantages of using moneymanagement for personal finance management.", href: "/moneymanagement" },
-  { term: "MoneyManagement Risks", definition: "Potential risks and pitfalls to watch out for when dealing with moneymanagement.", href: "/moneymanagement" },
-];
-
-const MONEYMANAGEMENT_FAQS: FaqItem[] = [
-  { question: "What is MoneyManagement?", answer: "MoneyManagement is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about MoneyManagement", href: "/moneymanagement" } },
-  { question: "How does MoneyManagement work?", answer: "MoneyManagement works by providing features such as ... (brief description).", link: { label: "Learn more about MoneyManagement", href: "/moneymanagement" } },
-  { question: "Who should consider MoneyManagement?", answer: "Anyone looking to improve their moneymanagement situation can benefit.", link: { label: "Learn more about MoneyManagement", href: "/moneymanagement" } },
-  { question: "What are common fees for MoneyManagement?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about MoneyManagement", href: "/moneymanagement" } },
-  { question: "How to compare MoneyManagement options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about MoneyManagement", href: "/moneymanagement" } },
-];
-
-const MONEYMANAGEMENT_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "moneymanagement", label: "MoneyManagement Overview", icon: Star },
-  { slug: "moneymanagement-tips", label: "MoneyManagement Tips", icon: Star },
-  { slug: "moneymanagement-reviews", label: "MoneyManagement Reviews", icon: Star },
-];
-
-
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listAllCmsContent, cmsContentToArticle } from "@/services/data/cms-public";
 import { staticCategoryNews, staticArticleList } from "@/services/data/static-content";

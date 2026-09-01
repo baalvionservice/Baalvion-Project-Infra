@@ -10,30 +10,6 @@ import {
   PieChart,
 } from "lucide-react";
 
-const ETFS_FAQS: FaqItem[] = [
-  { question: "What is Etfs?", answer: "Etfs is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about Etfs", href: "/etfs" } },
-  { question: "How does Etfs work?", answer: "Etfs works by providing features such as ... (brief description).", link: { label: "Learn more about Etfs", href: "/etfs" } },
-  { question: "Who should consider Etfs?", answer: "Anyone looking to improve their etfs situation can benefit.", link: { label: "Learn more about Etfs", href: "/etfs" } },
-  { question: "What are common fees for Etfs?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about Etfs", href: "/etfs" } },
-  { question: "How to compare Etfs options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about Etfs", href: "/etfs" } },
-];
-
-const ETFS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "etfs", label: "Etfs Overview", icon: Star },
-  { slug: "etfs-tips", label: "Etfs Tips", icon: Star },
-  { slug: "etfs-reviews", label: "Etfs Reviews", icon: Star },
-];
-import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
-import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
-
-const ETFS_KEY_TERMS: KeyTermItem[] = [
-  { term: "Etfs Basics", definition: "An overview of etfs fundamentals, covering core concepts and why they matter.", href: "/etfs" },
-  { term: "Advanced Etfs", definition: "Deep dive into advanced aspects of etfs, including strategies and best practices.", href: "/etfs" },
-  { term: "Etfs Fees", definition: "Explanation of typical fees associated with etfs and how to minimize them.", href: "/etfs" },
-  { term: "Etfs Benefits", definition: "Key advantages of using etfs for personal finance management.", href: "/etfs" },
-  { term: "Etfs Risks", definition: "Potential risks and pitfalls to watch out for when dealing with etfs.", href: "/etfs" },
-];
-
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listAllCmsContent, cmsContentToArticle } from "@/services/data/cms-public";
 import { staticCategoryNews, staticArticleList } from "@/services/data/static-content";

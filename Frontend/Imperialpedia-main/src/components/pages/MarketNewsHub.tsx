@@ -17,30 +17,6 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-const MARKETNEWS_FAQS: FaqItem[] = [
-  { question: "What is MarketNews?", answer: "MarketNews is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about MarketNews", href: "/marketnews" } },
-  { question: "How does MarketNews work?", answer: "MarketNews works by providing features such as ... (brief description).", link: { label: "Learn more about MarketNews", href: "/marketnews" } },
-  { question: "Who should consider MarketNews?", answer: "Anyone looking to improve their marketnews situation can benefit.", link: { label: "Learn more about MarketNews", href: "/marketnews" } },
-  { question: "What are common fees for MarketNews?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about MarketNews", href: "/marketnews" } },
-  { question: "How to compare MarketNews options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about MarketNews", href: "/marketnews" } },
-];
-
-const MARKETNEWS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "marketnews", label: "MarketNews Overview", icon: Star },
-  { slug: "marketnews-tips", label: "MarketNews Tips", icon: Star },
-  { slug: "marketnews-reviews", label: "MarketNews Reviews", icon: Star },
-];
-import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
-import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
-
-const MARKETNEWS_KEY_TERMS: KeyTermItem[] = [
-  { term: "MarketNews Basics", definition: "An overview of marketnews fundamentals, covering core concepts and why they matter.", href: "/marketnews" },
-  { term: "Advanced MarketNews", definition: "Deep dive into advanced aspects of marketnews, including strategies and best practices.", href: "/marketnews" },
-  { term: "MarketNews Fees", definition: "Explanation of typical fees associated with marketnews and how to minimize them.", href: "/marketnews" },
-  { term: "MarketNews Benefits", definition: "Key advantages of using marketnews for personal finance management.", href: "/marketnews" },
-  { term: "MarketNews Risks", definition: "Potential risks and pitfalls to watch out for when dealing with marketnews.", href: "/marketnews" },
-];
-
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listCmsContent, cmsContentToArticle } from "@/services/data/cms-public";
 import { staticCategoryNews, staticArticleList } from "@/services/data/static-content";

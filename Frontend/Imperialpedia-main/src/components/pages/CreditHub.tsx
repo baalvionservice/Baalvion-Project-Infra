@@ -10,30 +10,6 @@ import {
   Flame,
 } from "lucide-react";
 
-const CREDIT_FAQS: FaqItem[] = [
-  { question: "What is Credit?", answer: "Credit is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about Credit", href: "/credit" } },
-  { question: "How does Credit work?", answer: "Credit works by providing features such as ... (brief description).", link: { label: "Learn more about Credit", href: "/credit" } },
-  { question: "Who should consider Credit?", answer: "Anyone looking to improve their credit situation can benefit.", link: { label: "Learn more about Credit", href: "/credit" } },
-  { question: "What are common fees for Credit?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about Credit", href: "/credit" } },
-  { question: "How to compare Credit options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about Credit", href: "/credit" } },
-];
-
-const CREDIT_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "credit", label: "Credit Overview", icon: Star },
-  { slug: "credit-tips", label: "Credit Tips", icon: Star },
-  { slug: "credit-reviews", label: "Credit Reviews", icon: Star },
-];
-import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
-import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
-
-const CREDIT_KEY_TERMS: KeyTermItem[] = [
-  { term: "Credit Basics", definition: "An overview of credit fundamentals, covering core concepts and why they matter.", href: "/credit" },
-  { term: "Advanced Credit", definition: "Deep dive into advanced aspects of credit, including strategies and best practices.", href: "/credit" },
-  { term: "Credit Fees", definition: "Explanation of typical fees associated with credit and how to minimize them.", href: "/credit" },
-  { term: "Credit Benefits", definition: "Key advantages of using credit for personal finance management.", href: "/credit" },
-  { term: "Credit Risks", definition: "Potential risks and pitfalls to watch out for when dealing with credit.", href: "/credit" },
-];
-
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listAllCmsContent, cmsContentToArticle } from "@/services/data/cms-public";
 import { staticCategoryNews, staticArticleList } from "@/services/data/static-content";

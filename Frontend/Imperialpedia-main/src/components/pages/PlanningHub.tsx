@@ -1,29 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, BookOpen, Flame } from "lucide-react";
 
-const PLANNING_KEY_TERMS: KeyTermItem[] = [
-  { term: "Planning Basics", definition: "An overview of planning fundamentals, covering core concepts and why they matter.", href: "/planning" },
-  { term: "Advanced Planning", definition: "Deep dive into advanced aspects of planning, including strategies and best practices.", href: "/planning" },
-  { term: "Planning Fees", definition: "Explanation of typical fees associated with planning and how to minimize them.", href: "/planning" },
-  { term: "Planning Benefits", definition: "Key advantages of using planning for personal finance management.", href: "/planning" },
-  { term: "Planning Risks", definition: "Potential risks and pitfalls to watch out for when dealing with planning.", href: "/planning" },
-];
-
-const PLANNING_FAQS: FaqItem[] = [
-  { question: "What is Planning?", answer: "Planning is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about Planning", href: "/planning" } },
-  { question: "How does Planning work?", answer: "Planning works by providing features such as ... (brief description).", link: { label: "Learn more about Planning", href: "/planning" } },
-  { question: "Who should consider Planning?", answer: "Anyone looking to improve their planning situation can benefit.", link: { label: "Learn more about Planning", href: "/planning" } },
-  { question: "What are common fees for Planning?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about Planning", href: "/planning" } },
-  { question: "How to compare Planning options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about Planning", href: "/planning" } },
-];
-
-const PLANNING_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "planning", label: "Planning Overview", icon: Star },
-  { slug: "planning-tips", label: "Planning Tips", icon: Star },
-  { slug: "planning-reviews", label: "Planning Reviews", icon: Star },
-];
-
-
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listAllCmsContent, cmsContentToArticle } from "@/services/data/cms-public";
 import { staticCategoryNews, staticArticleList } from "@/services/data/static-content";

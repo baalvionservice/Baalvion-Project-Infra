@@ -9,30 +9,6 @@ import {
   Flame,
 } from "lucide-react";
 
-const LOANS_FAQS: FaqItem[] = [
-  { question: "What is Loans?", answer: "Loans is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about Loans", href: "/loans" } },
-  { question: "How does Loans work?", answer: "Loans works by providing features such as ... (brief description).", link: { label: "Learn more about Loans", href: "/loans" } },
-  { question: "Who should consider Loans?", answer: "Anyone looking to improve their loans situation can benefit.", link: { label: "Learn more about Loans", href: "/loans" } },
-  { question: "What are common fees for Loans?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about Loans", href: "/loans" } },
-  { question: "How to compare Loans options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about Loans", href: "/loans" } },
-];
-
-const LOANS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "loans", label: "Loans Overview", icon: Star },
-  { slug: "loans-tips", label: "Loans Tips", icon: Star },
-  { slug: "loans-reviews", label: "Loans Reviews", icon: Star },
-];
-import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
-import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
-
-const LOANS_KEY_TERMS: KeyTermItem[] = [
-  { term: "Loans Basics", definition: "An overview of loans fundamentals, covering core concepts and why they matter.", href: "/loans" },
-  { term: "Advanced Loans", definition: "Deep dive into advanced aspects of loans, including strategies and best practices.", href: "/loans" },
-  { term: "Loans Fees", definition: "Explanation of typical fees associated with loans and how to minimize them.", href: "/loans" },
-  { term: "Loans Benefits", definition: "Key advantages of using loans for personal finance management.", href: "/loans" },
-  { term: "Loans Risks", definition: "Potential risks and pitfalls to watch out for when dealing with loans.", href: "/loans" },
-];
-
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listAllCmsContent, cmsContentToArticle } from "@/services/data/cms-public";
 import { staticCategoryNews, staticArticleList } from "@/services/data/static-content";

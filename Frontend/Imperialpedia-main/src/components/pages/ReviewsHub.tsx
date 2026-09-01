@@ -7,30 +7,6 @@ import {
   BookOpen,
 } from "lucide-react";
 
-const REVIEWS_FAQS: FaqItem[] = [
-  { question: "What is Reviews?", answer: "Reviews is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about Reviews", href: "/reviews" } },
-  { question: "How does Reviews work?", answer: "Reviews works by providing features such as ... (brief description).", link: { label: "Learn more about Reviews", href: "/reviews" } },
-  { question: "Who should consider Reviews?", answer: "Anyone looking to improve their reviews situation can benefit.", link: { label: "Learn more about Reviews", href: "/reviews" } },
-  { question: "What are common fees for Reviews?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about Reviews", href: "/reviews" } },
-  { question: "How to compare Reviews options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about Reviews", href: "/reviews" } },
-];
-
-const REVIEWS_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "reviews", label: "Reviews Overview", icon: Star },
-  { slug: "reviews-tips", label: "Reviews Tips", icon: Star },
-  { slug: "reviews-reviews", label: "Reviews Reviews", icon: Star },
-];
-import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
-import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
-
-const REVIEWS_KEY_TERMS: KeyTermItem[] = [
-  { term: "Reviews Basics", definition: "An overview of reviews fundamentals, covering core concepts and why they matter.", href: "/reviews" },
-  { term: "Advanced Reviews", definition: "Deep dive into advanced aspects of reviews, including strategies and best practices.", href: "/reviews" },
-  { term: "Reviews Fees", definition: "Explanation of typical fees associated with reviews and how to minimize them.", href: "/reviews" },
-  { term: "Reviews Benefits", definition: "Key advantages of using reviews for personal finance management.", href: "/reviews" },
-  { term: "Reviews Risks", definition: "Potential risks and pitfalls to watch out for when dealing with reviews.", href: "/reviews" },
-];
-
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listCmsContent, cmsContentToArticle } from "@/services/data/cms-public";
 import { staticCategoryNews, staticArticleList } from "@/services/data/static-content";

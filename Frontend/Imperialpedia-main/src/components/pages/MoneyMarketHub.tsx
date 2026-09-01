@@ -10,30 +10,6 @@ import {
   Landmark,
 } from "lucide-react";
 
-const MONEYMARKET_FAQS: FaqItem[] = [
-  { question: "What is MoneyMarket?", answer: "MoneyMarket is a financial product/service that helps you manage your money effectively.", link: { label: "Learn more about MoneyMarket", href: "/moneymarket" } },
-  { question: "How does MoneyMarket work?", answer: "MoneyMarket works by providing features such as ... (brief description).", link: { label: "Learn more about MoneyMarket", href: "/moneymarket" } },
-  { question: "Who should consider MoneyMarket?", answer: "Anyone looking to improve their moneymarket situation can benefit.", link: { label: "Learn more about MoneyMarket", href: "/moneymarket" } },
-  { question: "What are common fees for MoneyMarket?", answer: "Typical fees include ... and can often be avoided with ...", link: { label: "Learn more about MoneyMarket", href: "/moneymarket" } },
-  { question: "How to compare MoneyMarket options?", answer: "Look at interest rates, fees, features, and user reviews to decide.", link: { label: "Learn more about MoneyMarket", href: "/moneymarket" } },
-];
-
-const MONEYMARKET_PRODUCT_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { slug: "moneymarket", label: "MoneyMarket Overview", icon: Star },
-  { slug: "moneymarket-tips", label: "MoneyMarket Tips", icon: Star },
-  { slug: "moneymarket-reviews", label: "MoneyMarket Reviews", icon: Star },
-];
-import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
-import type { FaqItem } from "@/components/pages/InvestopediaFaqBox";
-
-const MONEYMARKET_KEY_TERMS: KeyTermItem[] = [
-  { term: "MoneyMarket Basics", definition: "An overview of moneymarket fundamentals, covering core concepts and why they matter.", href: "/moneymarket" },
-  { term: "Advanced MoneyMarket", definition: "Deep dive into advanced aspects of moneymarket, including strategies and best practices.", href: "/moneymarket" },
-  { term: "MoneyMarket Fees", definition: "Explanation of typical fees associated with moneymarket and how to minimize them.", href: "/moneymarket" },
-  { term: "MoneyMarket Benefits", definition: "Key advantages of using moneymarket for personal finance management.", href: "/moneymarket" },
-  { term: "MoneyMarket Risks", definition: "Potential risks and pitfalls to watch out for when dealing with moneymarket.", href: "/moneymarket" },
-];
-
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles, listAllCmsContent, cmsContentToArticle } from "@/services/data/cms-public";
 import { staticCategoryNews, staticArticleList } from "@/services/data/static-content";
