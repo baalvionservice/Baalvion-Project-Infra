@@ -8,8 +8,8 @@
     "start": "next start -p 3043",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "deploy": "next build && npx wrangler deploy",
-    "preview": "next build && npx wrangler dev"
+    "deploy": "npx wrangler deploy",
+    "preview": "npx wrangler dev"
   },
   "dependencies": {
     "next": "15.5.21",

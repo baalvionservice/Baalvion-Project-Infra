@@ -2,11 +2,24 @@
   // Cloudflare Workers Static Assets — serves the Next.js static export in `out/`, with a thin
   // Worker (worker.ts) in front that proxies `/auth-bff/*` to the central auth-service so the
   // embedded /signin form is first-party. Everything else is served straight from `out/`.
-  // Deploy:  npx wrangler deploy   (after `next build` produces `out/`)
+  // Deploy:  npx wrangler deploy
   // Preview: npx wrangler dev
   "name": "baalvion",
   "compatibility_date": "2024-11-01",
   "main": "worker.ts",
+  // `out/` is a build artifact and is gitignored, so it does NOT exist in a fresh clone.
+  // Cloudflare Workers Builds deploys from a fresh clone, so without this the deploy failed
+  // on every push with:
+  //   X [ERROR] The directory specified by the "assets.directory" field in your
+  //             configuration file does not exist:  .../baalvion-com-main/out
+  // Declaring the build here (rather than relying on the Workers Builds dashboard's build
+  // command) keeps it version-controlled and makes `wrangler deploy` self-contained
+  // everywhere — CI, the dashboard, and a developer's laptop behave identically.
+  // wrangler runs this before both `deploy` and `dev`, so package.json's deploy/preview
+  // scripts must NOT also run `next build` or the site would be built twice.
+  "build": {
+    "command": "npm run build"
+  },
   "assets": {
     "directory": "./out",
     "binding": "ASSETS",
