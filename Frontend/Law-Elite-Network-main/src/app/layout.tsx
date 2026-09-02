@@ -1,7 +1,6 @@
 
 import React from "react";
 import type { Metadata } from "next";
-import Script from "next/script";
 import localFont from "next/font/local";
 import { AuthProvider } from '@/context/AuthContext';
 import { ThemeProvider } from '@/context/ThemeContext';
@@ -201,45 +200,72 @@ export default async function RootLayout({
             on top of download time. */}
         <link rel="preconnect" href="https://api.baalvion.com" />
         <link rel="preconnect" href="https://firebasestorage.googleapis.com" crossOrigin="anonymous" />
-        {/* Google Consent Mode v2 -- must be pushed to dataLayer BEFORE gtag('js', ...)
-            and gtag('config', ...) run (in GoogleAnalytics below) and before the AdSense
-            loader below, so no GA/ads cookie is set for a visitor who hasn't chosen yet.
-            CookieConsentBanner updates these to 'granted' on accept; until then every
-            visitor (EEA or not) defaults to denied, satisfying Google's EU User Consent
-            Policy requirement for AdSense/Analytics. */}
-        <Script id="consent-default" strategy="beforeInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            window.gtag = gtag;
-            gtag('consent', 'default', {
-              ad_storage: 'denied',
-              ad_user_data: 'denied',
-              ad_personalization: 'denied',
-              analytics_storage: 'denied',
-              wait_for_update: 500,
-            });
-          `}
-        </Script>
+        {/* Google Consent Mode v2 -- must run BEFORE gtag('js', ...)/gtag('config', ...)
+            (in GoogleAnalytics below) and before the AdSense loader, so no GA/ads cookie
+            is set for a visitor who hasn't chosen yet. CookieConsentBanner updates these
+            to 'granted' on accept; until then every visitor (EEA or not) defaults to
+            denied, satisfying Google's EU User Consent Policy for AdSense/Analytics.
+
+            This is a plain literal <script>, not next/script's <Script> component --
+            confirmed live that next/script (including strategy="beforeInteractive")
+            does not reliably execute before a hoisted <script async src> AdSense
+            loader: it registers the code in a self.__next_s.push([...]) bootstrap
+            array rather than emitting a literal synchronously-executing tag in place.
+
+            IMPORTANT: positioning this script earlier than other <head> children does
+            NOT by itself guarantee it runs first either. React 19 hoists any
+            <script async src="..."> (and every <meta>/<link>) to <head> ahead of
+            ordinary content regardless of JSX order -- confirmed live: this script was
+            rendering dead last in the actual HTML despite being declared first. And
+            even fixing position wouldn't be a hard guarantee: `+ "`async`" + ` scripts
+            have no cross-script execution-order guarantee at all -- that's what async
+            means, in any browser, React or not. So instead of racing the AdSense
+            loader against this script, this script now creates the AdSense loader
+            itself (see below) -- same-script sequencing instead of a document-order
+            bet. */}
+        <script
+          id="consent-default"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              window.gtag = gtag;
+              gtag('consent', 'default', {
+                ad_storage: 'denied',
+                ad_user_data: 'denied',
+                ad_personalization: 'denied',
+                analytics_storage: 'denied',
+                wait_for_update: 500,
+              });
+              ${
+                ADSENSE_CLIENT
+                  ? `
+              // Only created AFTER the consent default above has run -- same script,
+              // sequential statements, so this is a real guarantee, not a document-order
+              // bet. document.createElement bypasses React's render tree entirely, so
+              // this script is never a candidate for React's async+src hoisting.
+              (function() {
+                var s = document.createElement('script');
+                s.async = true;
+                s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + ${JSON.stringify(ADSENSE_CLIENT)};
+                s.crossOrigin = 'anonymous';
+                document.head.appendChild(s);
+              })();
+              `
+                  : ''
+              }
+            `,
+          }}
+        />
         <GoogleAnalytics />
         <meta name="theme-color" content="#1e3a5f" />
+        {/* The <meta name="google-adsense-account"> tag alone satisfies Google's site-
+            ownership verification (it's a documented alternative to the script tag for
+            that specific check), so it stays a plain literal tag here. The actual
+            adsbygoogle.js loader is now created from inside the consent-default script
+            above instead of being a static tag here -- see the comment there for why. */}
         {ADSENSE_CLIENT && (
-          <>
-            <meta name="google-adsense-account" content={ADSENSE_CLIENT} />
-            {/* AdSense's site-verification check regex-matches the raw HTML for a
-                literal <script async src="...adsbygoogle.js...crossorigin...">
-                tag. next/script's <Script> component -- for every strategy,
-                including beforeInteractive -- never emits that literal tag; it
-                registers the URL in a self.__next_s.push([...]) bootstrap array
-                instead, so the crawler never finds a match. A plain native
-                <script> element renders as literal HTML text, which is what
-                the crawler is regex-matching. */}
-            <script
-              async
-              src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
-              crossOrigin="anonymous"
-            />
-          </>
+          <meta name="google-adsense-account" content={ADSENSE_CLIENT} />
         )}
         <script
           type="application/ld+json"

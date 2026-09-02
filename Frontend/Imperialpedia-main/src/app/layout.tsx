@@ -152,21 +152,28 @@ export default async function RootLayout({
       className={cn(sourceSerif.variable, corinthian.variable)}
     >
       <head>
-        {/* Google Consent Mode v2 -- must run BEFORE the GTM/GA loaders and the
-            AdSense loader below, so no GA/ads cookie is set for a visitor who
-            hasn't chosen yet. CookieConsentBanner updates this to 'granted' on
-            accept; until then every visitor (EEA or not) defaults to denied,
-            satisfying Google's EU User Consent Policy for AdSense/Analytics.
-            This must be a literal <script> tag, not next/script's <Script>
-            component -- per the same reasoning as the AdSense script below,
-            next/script (any strategy, including beforeInteractive) doesn't
-            emit a literal synchronously-executing tag in place; it registers
-            the code in a self.__next_s.push([...]) bootstrap array that can
-            run after later async scripts have already fetched and executed.
-            Previously this lived in Analytics.tsx gated on NEXT_PUBLIC_GA_ID
-            (and rendered as a next/script Script in <body>), so a visitor got
-            zero consent-default protection whenever GA_ID was unset, and even
-            when set, it landed after the AdSense/GA loaders in practice.
+        {/* Google Consent Mode v2 -- must run BEFORE any ad/analytics script, so no
+            GA/ads cookie is set for a visitor who hasn't chosen yet. CookieConsentBanner
+            updates this to 'granted' on accept; until then every visitor (EEA or not)
+            defaults to denied, satisfying Google's EU User Consent Policy.
+            This must be a literal <script> tag, not next/script's <Script> component --
+            next/script (any strategy, including beforeInteractive) doesn't emit a
+            literal synchronously-executing tag in place; it registers the code in a
+            self.__next_s.push([...]) bootstrap array that can run after later scripts
+            have already fetched and executed.
+
+            IMPORTANT: positioning this script earlier than other <head> children does
+            NOT guarantee it runs first. React 19 hoists any <script async src="...">
+            (and every <meta>/<link>) to <head> ahead of ordinary content regardless of
+            JSX order -- confirmed live: this script was rendering dead last in the
+            actual HTML despite being first in the JSX, because the AdSense loader
+            below (async+src) and the meta/icon tags around it all get pulled into that
+            hoisted batch first. And even fixing position wouldn't be a hard guarantee:
+            `+ "`async`" + ` scripts have no cross-script execution-order guarantee at
+            all -- that's what async means, in any browser, React or not.
+            So instead of racing the AdSense loader against this script, this script
+            NOW creates the AdSense loader itself (see below) -- same-script sequencing
+            instead of a document-order bet.
 
             suppressHydrationWarning: AdSense's own adsbygoogle.js injects a
             managed show_ads_impl script into <head> as soon as it loads,
@@ -193,35 +200,33 @@ export default async function RootLayout({
                 analytics_storage: 'denied',
                 wait_for_update: 500,
               });
+              ${
+                adsenseClient
+                  ? `
+              // Only created AFTER the consent default above has run -- same script,
+              // sequential statements, so this is a real guarantee, not a document-order
+              // bet. document.createElement bypasses React's render tree entirely, so
+              // this script is never a candidate for React's async+src hoisting.
+              (function() {
+                var s = document.createElement('script');
+                s.async = true;
+                s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + ${JSON.stringify(adsenseClient)};
+                s.crossOrigin = 'anonymous';
+                document.head.appendChild(s);
+              })();
+              `
+                  : ''
+              }
             `,
           }}
         />
-        {/* AdSense verification block -- placed as the first thing after the consent
-            default above (which must stay first: it's synchronous and has to finish
-            setting ad_storage/ad_user_data to 'denied' before this async script even
-            starts fetching, or a fast network can race the ad script's execution ahead
-            of the consent call and fire ad cookies pre-consent). Everything else in
-            <head> -- GTM, the news.google.com widget -- now loads after this, which is
-            also why AdSense's crawler had trouble confirming the snippet: Google's own
-            guidance is to paste the code as high in <head> as possible, and it was
-            previously sandwiched after GTM and the widget loader instead. */}
+        {/* The <meta name="google-adsense-account"> tag alone satisfies Google's site-
+            ownership verification (it's a documented alternative to the script tag for
+            that specific check), so it stays a plain literal tag here. The actual
+            adsbygoogle.js loader is now created from inside the consent-default script
+            above instead of being a static tag here -- see the comment there for why. */}
         {adsenseClient && (
-          <>
-            <meta name="google-adsense-account" content={adsenseClient} />
-            {/* AdSense's site-verification check regex-matches the raw HTML for a
-                literal <script async src="...adsbygoogle.js...crossorigin...">
-                tag. next/script's <Script> component -- for every strategy,
-                including beforeInteractive -- never emits that literal tag; it
-                registers the URL in a self.__next_s.push([...]) bootstrap array
-                instead, so the crawler never finds a match. A plain native
-                <script> element (same as the ld+json tag below) renders as
-                literal HTML text, which is what the crawler is regex-matching. */}
-            <script
-              async
-              src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`}
-              crossOrigin="anonymous"
-            />
-          </>
+          <meta name="google-adsense-account" content={adsenseClient} />
         )}
 
         <GoogleTagManagerScript />
