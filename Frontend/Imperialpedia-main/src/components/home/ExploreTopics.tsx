@@ -1,74 +1,54 @@
-import React from "react";
 import Link from "next/link";
-import { Wallet, LineChart, Globe2, Calculator, ArrowRight } from "lucide-react";
-import { topicCopy } from "@/lib/topic-config";
+import { Wallet, LineChart, Calculator, ArrowRight } from "lucide-react";
 import { getTopicColor } from "@/lib/topic-colors";
 import { HomeSectionHeading } from "./HomeSectionHeading";
 
-// Four top-level groups instead of six competing categories — Personal
-// Finance, Budgeting, and Banking previously stood as separate top-level
-// concepts even though budgeting and banking are naturally sub-topics of
-// personal finance. Each group's subtitle names the concepts it actually
-// covers so the grid stays useful without needing a link per concept.
+// 2026-09-04: was 4 tiles (Personal Finance, Investing & Markets, Economics,
+// Financial Tools) plus a 9-link "Popular Guides" row. 46+8 categories were
+// retired pending AdSense review (see next.config.ts) and every one of those
+// tiles/links pointed at a category that now 301s to / — including "Popular
+// Guides", which has been dropped rather than refilled, since a curated list
+// of category-hub links doesn't fit a 2-category site without padding it back
+// out with the same dead links. Down to the 3 destinations that are actually
+// live: Stocks, Budgeting, and the Financial Tools calculators (never a
+// category, unaffected by any of this). Add tiles back as categories are
+// rewritten and republished, not before.
 const TOPICS = [
   {
-    slug: "personal-finance",
-    href: "/personal-finance",
-    icon: Wallet,
-    title: "Personal Finance",
-    subtitle: "Budgeting · Saving · Credit · Debt · Loans · Banking · Retirement · Taxes",
-  },
-  {
-    slug: "investing",
-    href: "/investing",
+    slug: "stocks",
+    href: "/stocks",
     icon: LineChart,
-    title: "Investing & Markets",
-    subtitle: "Stocks · ETFs · Bonds · Mutual Funds · Portfolio Management · Options · Market Data",
+    title: "Stocks",
+    subtitle: "How stocks work, valuation ratios, trading mechanics, and reading a market move.",
   },
   {
-    slug: "economy",
-    href: "/economy",
-    icon: Globe2,
-    title: "Economics",
-    subtitle: "Inflation · GDP · Employment · Interest Rates · Federal Reserve · Fiscal Policy · Monetary Policy",
+    slug: "budgeting-basics",
+    href: "/budgeting-basics",
+    icon: Wallet,
+    title: "Budgeting",
+    subtitle: "Budgeting methods, saving strategies, and money management for real life.",
   },
   {
     slug: "financial-tools",
     href: "/financial-tools",
     icon: Calculator,
     title: "Financial Tools",
-    subtitle: "Calculators and educational tools",
+    subtitle: "Calculators and educational tools.",
   },
 ] as const;
 
-// A cross-section of evergreen guide hubs (not the top-level categories above)
-// surfaced as quick links, the same way TrendingTopics links out to glossary
-// terms — except these routes always have real fallback content (see
-// CategoryFeed's baked-snapshot/demo-content chain) regardless of CMS state.
-const GUIDE_SLUGS = [
-  "retirement",
-  "emergency-fund",
-  "budget-rules",
-  "credit",
-  "credit-cards",
-  "mortgages",
-  "student-loans",
-  "cryptocurrency",
-  "debt",
-] as const;
-
 /**
- * "Explore by Topic" — clear, always-rendering topic sections plus a row of
- * popular guide links. Unlike HomeEditorial/LatestArticles (which render
- * nothing until the CMS has published articles), this section links to hub
- * pages that already have real content through their own fallback chain, so
- * the homepage never collapses down to just Term of Day + newsletter.
+ * "Explore by Topic" — clear, always-rendering topic sections. Unlike
+ * HomeEditorial/LatestArticles (which render nothing until the CMS has
+ * published articles), this section links to hub pages that already have
+ * real content, so the homepage never collapses down to just Term of Day +
+ * newsletter.
  */
 export function ExploreTopics() {
   return (
     <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 border-t border-border">
       <HomeSectionHeading title="Explore by Topic" />
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {TOPICS.map(({ slug, href, icon: Icon, title, subtitle }) => {
           const color = getTopicColor(slug);
           return (
@@ -87,25 +67,6 @@ export function ExploreTopics() {
             </Link>
           );
         })}
-      </div>
-
-      <div className="mt-8 pt-6 border-t border-dashed border-border">
-        <h3 className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-          Popular Guides
-        </h3>
-        <div className="flex flex-wrap gap-x-1 gap-y-2 text-sm">
-          {GUIDE_SLUGS.map((slug, i) => (
-            <React.Fragment key={slug}>
-              {i > 0 && <span className="text-muted-foreground px-1" aria-hidden>·</span>}
-              <Link
-                href={`/${slug}`}
-                className="font-semibold text-foreground hover:text-primary transition-colors"
-              >
-                {topicCopy(slug).title}
-              </Link>
-            </React.Fragment>
-          ))}
-        </div>
       </div>
     </section>
   );

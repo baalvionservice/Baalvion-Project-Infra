@@ -110,7 +110,9 @@ export const sitemapService = {
       "",
       "/about",
       "/financial-intelligence",
-      "/budgeting",
+      // /budgeting removed 2026-09-04: not a real category (0 articles, was
+      // serving bundled demo content), now redirects to /budgeting-basics,
+      // which is already submitted below via TOPIC_HUB_SLUGS.
       "/contact",
       "/financial-tools",
       "/financial-tools/compound-interest",

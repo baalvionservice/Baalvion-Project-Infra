@@ -5700,7 +5700,11 @@ interface CategoryGroup {
 const CATEGORY_GROUPS: CategoryGroup[] = [
   {
     label: 'INVESTING',
-    href: '/investing',
+    // /investing is one of the categories retired pending AdSense review (see
+    // next.config.ts) — it 301s to /, so the eyebrow points at /stocks instead,
+    // the only child of this group still live. Revert once /investing itself
+    // is republished.
+    href: '/stocks',
     children: ['stocks', 'bonds', 'etfs', 'mutual-funds', 'options', 'commodities', 'cryptocurrency', 'real-estate', 'retirement', 'portfolio', 'brokers'],
   },
   {
@@ -5730,7 +5734,10 @@ const CATEGORY_GROUPS: CategoryGroup[] = [
   },
   {
     label: 'BUDGETING',
-    href: '/budgeting',
+    // /budgeting isn't a real CMS category — see the RETIRED_TOPIC_SLUGS note
+    // above and its next.config.ts redirect (added 2026-09-04). budgeting-basics
+    // is the real, live category all the others were merged into.
+    href: '/budgeting-basics',
     children: ['budgeting-basics', 'monthly-budget', 'saving-money', 'family-budget', 'student-budget', 'budgeting-apps', 'advanced-budgeting', 'budget-rules', 'emergency-fund'],
   },
 ];
@@ -5755,17 +5762,45 @@ export interface SiblingTopic {
   label: string;
 }
 
+// Categories retired pending AdSense review (2026-09-03/04) — every one of these
+// routes 301s away (see next.config.ts's two "TEMPORARY" redirect blocks), so a
+// sibling tab pointing at one would dead-end a reader on the homepage instead of
+// the related topic they clicked. Kept as its own list here (not imported — this
+// is a frontend-only lib file with no access to next.config.ts) mirroring the same
+// 54 slugs; keep in sync if the retirement list changes.
+const RETIRED_TOPIC_SLUGS = new Set<string>([
+  'app-reviews', 'auto-loans', 'banking', 'banking-reviews', 'bonds', 'brokers',
+  'calendar', 'cd-rates', 'checking', 'commodities', 'credit', 'credit-cards',
+  'crypto', 'cryptocurrency', 'debt', 'earnings', 'economy', 'etfs', 'fed',
+  'financial-calculators', 'financial-independence', 'fiscal-policy', 'gdp',
+  'global', 'indicators', 'inflation', 'interest-rates', 'investing',
+  'live-market-news', 'loan-reviews', 'loans', 'monetary-policy',
+  'money-management', 'money-market', 'mortgages', 'mutual-funds', 'options',
+  'personal-finance', 'planning', 'portfolio', 'real-estate', 'retirement',
+  'savings', 'student-loans', 'tax-software', 'unemployment',
+  'advanced-budgeting', 'budget-rules', 'budgeting-apps', 'emergency-fund',
+  'family-budget', 'monthly-budget', 'saving-money', 'student-budget',
+  // Not a category retirement — 'budgeting' was never a real CMS category (0
+  // articles) and is redirected for an unrelated reason (see next.config.ts).
+  // Listed here too so it's excluded from sibling tabs the same way.
+  'budgeting',
+]);
+
 /**
  * Sibling sub-topics within the same nav group as `slug` (including `slug` itself),
- * e.g. on /bonds this returns Stocks, Bonds, ETFs, Mutual Funds, Options, Commodities,
- * Cryptocurrency, Real Estate, Retirement, Portfolio, Brokers. Powers a tab strip so a
- * reader who lands on one sub-topic page can jump directly to a related one instead of
- * dead-ending on a single-topic silo — without collapsing these into fewer routes (each
- * keeps its own indexable URL). Returns undefined for a page with no group (e.g. a
- * top-level parent hub like /investing, which already has its own topic browser).
+ * filtered to ones that are actually live — e.g. on /stocks this used to return
+ * Stocks, Bonds, ETFs, Mutual Funds, Options, Commodities, Cryptocurrency, Real
+ * Estate, Retirement, Portfolio, Brokers; with 10 of those 11 retired, it now
+ * returns undefined (nothing to tab to yet) rather than a strip of dead links.
+ * Powers a tab strip so a reader who lands on one sub-topic page can jump directly
+ * to a related one instead of dead-ending on a single-topic silo — without
+ * collapsing these into fewer routes (each keeps its own indexable URL). Returns
+ * undefined for a page with no group, or a group with fewer than 2 live children.
  */
 export function siblingsFor(slug: string): SiblingTopic[] | undefined {
   const group = CATEGORY_GROUPS.find((g) => g.children.includes(slug));
-  if (!group || group.children.length < 2) return undefined;
-  return group.children.map((child) => ({ slug: child, label: topicCopy(child).title }));
+  if (!group) return undefined;
+  const live = group.children.filter((child) => !RETIRED_TOPIC_SLUGS.has(child));
+  if (live.length < 2) return undefined;
+  return live.map((child) => ({ slug: child, label: topicCopy(child).title }));
 }

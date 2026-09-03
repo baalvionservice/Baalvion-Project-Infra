@@ -262,6 +262,14 @@ const nextConfig: NextConfig = {
       { source: '/stocks/what-is-a-shareholder', destination: '/stocks', permanent: true },
       // ── end temporary thin-stocks block ──
 
+      // 2026-09-04: /budgeting was never a real CMS category (0 articles) — it
+      // was silently serving CategoryFeed's bundled demo-content fallback under
+      // a "Fact-Checked & Expert Reviewed" badge, discovered while auditing the
+      // retirement changes above. Not temporary — /budgeting-basics (the real,
+      // live category) is the permanent home for this content.
+      { source: '/budgeting', destination: '/budgeting-basics', permanent: true },
+      { source: '/budgeting/:path*', destination: '/budgeting-basics', permanent: true },
+
       { source: '/admin', destination: `${admin}/dashboard`, permanent: false },
       { source: '/admin/:path*', destination: `${admin}/dashboard`, permanent: false },
       { source: '/editor', destination: `${admin}/cms/workflows`, permanent: false },

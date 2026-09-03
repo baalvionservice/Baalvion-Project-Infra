@@ -43,7 +43,11 @@ const NAV: NavCategory[] = [
     label: "Personal Finance",
     href: "/personal-finance",
     links: [
-      { label: "Budgeting", href: "/budgeting" },
+      // /budgeting isn't a real CMS category (0 articles) — it was silently
+      // serving bundled demo content under a "Fact-Checked & Expert Reviewed"
+      // badge (see next.config.ts's /budgeting redirect, added 2026-09-04).
+      // budgeting-basics is the real, live category.
+      { label: "Budgeting", href: "/budgeting-basics" },
     ],
   },
 ];

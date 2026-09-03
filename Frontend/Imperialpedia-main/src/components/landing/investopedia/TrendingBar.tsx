@@ -4,15 +4,16 @@ import { TrendingUp } from "lucide-react";
 
 type Term = { label: string; href: string };
 
+// 2026-09-04: 7 of these 8 used to point at categories retired pending
+// AdSense review (see next.config.ts) — Inflation, Roth IRA, ETF, Interest
+// Rates, Bitcoin, Recession, and Federal Reserve all 301 to / now. Trimmed to
+// terms that actually resolve to live content; expand again as categories are
+// rewritten and republished, not before.
 const DEFAULT_TERMS: Term[] = [
-  { label: "Inflation", href: "/inflation" },
-  { label: "S&P 500", href: "/stocks" },
-  { label: "Roth IRA", href: "/retirement" },
-  { label: "ETF", href: "/etfs" },
-  { label: "Interest Rates", href: "/interest-rates" },
-  { label: "Bitcoin", href: "/cryptocurrency" },
-  { label: "Recession", href: "/economy" },
-  { label: "Federal Reserve", href: "/fed" },
+  { label: "Stocks", href: "/stocks" },
+  { label: "Dividend Yield", href: "/stocks/dividend-yield-explained" },
+  { label: "Budgeting", href: "/budgeting-basics" },
+  { label: "Compound Interest", href: "/financial-tools/compound-interest" },
 ];
 
 /**
