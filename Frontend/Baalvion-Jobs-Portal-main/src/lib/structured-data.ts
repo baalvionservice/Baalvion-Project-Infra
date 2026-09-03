@@ -140,6 +140,30 @@ export function generateJobPostingStructuredData(
     };
   }
 
+  // Salary — expose whenever it is meant to be shown publicly. Accepts the
+  // canonical values ("Public" / "RangeOnly") and the live backend-mapped
+  // value ("range"); never exposes "Hidden" / "hidden".
+  const salaryVisibility = String(job.salaryVisibility || '').toLowerCase();
+  const salaryIsPublic =
+    salaryVisibility === 'public' ||
+    salaryVisibility === 'rangeonly' ||
+    salaryVisibility === 'range';
+  if (salaryIsPublic && job.salaryBand) {
+    const [minSalary, maxSalary] = parseSalaryBand(job.salaryBand);
+    if (minSalary && maxSalary) {
+      structuredData['baseSalary'] = {
+        '@type': 'MonetaryAmount',
+        currency: job.currency || 'USD',
+        value: {
+          '@type': 'QuantitativeValue',
+          minValue: minSalary,
+          maxValue: maxSalary,
+          unitText: 'YEAR',
+        },
+      };
+    }
+  }
+
   // Experience level
   if (job.experienceBand && job.experienceBand in experienceMonthsMap) {
     structuredData['experienceRequirements'] = {
@@ -202,6 +226,22 @@ function resolveCountry(
   };
 }
 
+/**
+ * Parse salary band string into [min, max]. Handles "120000-150000", "120k-150k", "15-25 LPA".
+ */
+function parseSalaryBand(salaryBand: string): [number | null, number | null] {
+  const cleanBand = salaryBand.replace(/[k,\s]/gi, '').replace('LPA', '00000');
+  const match = cleanBand.match(/(\d+)-(\d+)/);
+
+  if (match) {
+    const min = parseInt(match[1]);
+    const max = parseInt(match[2]);
+    const multiplier = salaryBand.toLowerCase().includes('k') ? 1000 : 1;
+    return [min * multiplier, max * multiplier];
+  }
+
+  return [null, null];
+}
 
 /**
  * Generate structured data script tag for embedding in HTML
