@@ -1,5 +1,6 @@
 'use server';
 
+import { Suspense } from 'react';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { ArrowRight, GraduationCap, Briefcase, HeartHandshake, TrendingUp, ShieldAlert } from 'lucide-react';
@@ -105,7 +106,17 @@ export async function CareersLanding() {
           </p>
 
           <div className="mt-10 max-w-4xl bg-background p-5 text-foreground shadow-[6px_6px_0_0_rgba(0,0,0,0.9)]">
-            <JobSearchBar destination="/careers/open-positions" />
+            {/*
+              JobSearchBar reads useSearchParams(), which forces a page out of static
+              rendering unless it sits behind a Suspense boundary — and this landing
+              page is statically prerendered at `/`. Without the boundary the export
+              of `/` fails outright, which `next dev` never surfaces because it does
+              not statically export. The fallback holds the same height so the hero
+              does not jump when the form hydrates.
+            */}
+            <Suspense fallback={<div className="h-[74px]" aria-hidden />}>
+              <JobSearchBar destination="/careers/open-positions" />
+            </Suspense>
           </div>
 
           <div className="mt-8 flex flex-wrap gap-3">
