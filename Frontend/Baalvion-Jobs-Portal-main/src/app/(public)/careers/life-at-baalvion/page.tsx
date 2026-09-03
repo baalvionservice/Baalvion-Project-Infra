@@ -29,9 +29,9 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Life at Baalvion | Careers',
+  title: 'Life at Baalvion',
   description:
-    'Discover the culture, values, and people behind Baalvion. We build the intelligent infrastructure for global talent — remote-first, merit-driven, and obsessed with craft. See how we work, what we believe, and the benefits we offer.',
+    'How we work at Baalvion: remote-first, merit-driven, craft-obsessed. Our values, our teams, and what we actually offer the people who join.',
   alternates: { canonical: '/careers/life-at-baalvion' },
   openGraph: {
     title: 'Life at Baalvion | TalentOS by Baalvion',

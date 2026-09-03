@@ -16,7 +16,9 @@ export const jobCreationSchema = z.object({
     employmentType: z.enum(employmentTypes),
     workforceType: z.enum(workforceTypes),
     countryId: z.string().min(1, "Country is required."),
-    city: z.string().min(2, "City is required."),
+    // Free text, and optional: fully-remote roles legitimately have no town.
+    city: z.string().optional(),
+    region: z.string().optional(),
     slug: z.string().min(3, "Slug is required.").regex(/^[a-z0-9-]+$/, "Slug can only contain lowercase letters, numbers, and hyphens."),
     summary: z.string().max(200, "Summary cannot exceed 200 characters.").optional(),
   }),
@@ -83,19 +85,59 @@ export const jobCreationSchema = z.object({
 
 export type JobCreationData = z.infer<typeof jobCreationSchema>;
 
-// Helper function to map form data to the final API payload structure.
-export const transformToApiPayload = (data: JobCreationData): Partial<Job> => {
+const EMPLOYMENT_TYPE_TO_API: Record<string, string> = {
+  'Full-time': 'full_time',
+  'Part-time': 'part_time',
+  'Contract': 'contract',
+  'Internship': 'internship',
+  'Temporary': 'contract',
+};
+
+const EXPERIENCE_BAND_TO_API: Record<string, string> = {
+  'Intern': 'entry',
+  'Entry': 'entry',
+  'Mid': 'mid',
+  'Senior': 'senior',
+  'Lead': 'lead',
+  'Principal': 'lead',
+};
+
+/**
+ * Form shape → jobs-service payload.
+ *
+ * The backend takes snake_case and its own enum vocabulary; responsibilities and
+ * qualifications have no columns of their own, so they're folded into the requirements
+ * text rather than dropped on the floor.
+ */
+export const transformToApiPayload = (data: JobCreationData) => {
+  const { basicInfo, roleDetails, compensation, workflow } = data;
+
+  const requirements = [
+    roleDetails.requiredQualifications.length
+      ? `Requirements:\n${roleDetails.requiredQualifications.map(q => `• ${q.value}`).join('\n')}`
+      : '',
+    roleDetails.responsibilities.length
+      ? `Responsibilities:\n${roleDetails.responsibilities.map(r => `• ${r.value}`).join('\n')}`
+      : '',
+    roleDetails.preferredQualifications?.filter(q => q.value).length
+      ? `Nice to have:\n${roleDetails.preferredQualifications.filter(q => q.value).map(q => `• ${q.value}`).join('\n')}`
+      : '',
+  ].filter(Boolean).join('\n\n');
+
   return {
-    title: data.basicInfo.title,
-    departmentId: data.basicInfo.departmentId,
-    employmentType: data.basicInfo.employmentType,
-    workforceType: data.basicInfo.workforceType,
-    countryId: data.basicInfo.countryId,
-    city: data.basicInfo.city,
-    description: data.roleDetails.description,
-    responsibilities: data.roleDetails.responsibilities.map(r => r.value),
-    qualifications: data.roleDetails.requiredQualifications.map(q => q.value),
-    experienceBand: data.roleDetails.experienceBand,
-    // ... map other fields as necessary
+    title: basicInfo.title,
+    description: roleDetails.description,
+    requirements: requirements || undefined,
+    country_id: basicInfo.countryId,
+    department_id: basicInfo.departmentId,
+    city: basicInfo.city || undefined,
+    region: basicInfo.region || undefined,
+    job_type: EMPLOYMENT_TYPE_TO_API[basicInfo.employmentType] ?? 'full_time',
+    experience_level: EXPERIENCE_BAND_TO_API[roleDetails.experienceBand] ?? 'mid',
+    currency: compensation.currency,
+    salary_min: compensation.minSalary || undefined,
+    salary_max: compensation.maxSalary || undefined,
+    remote_allowed: basicInfo.workforceType === 'Remote' || basicInfo.workforceType === 'Hybrid',
+    deadline: workflow.expiryDate ? workflow.expiryDate.toISOString().slice(0, 10) : undefined,
   };
 };

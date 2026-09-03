@@ -47,19 +47,39 @@ export function convertToUSD(amountLocal: number, sourceCurrency: string): numbe
  * @param amount - The numerical amount.
  * @param currency - The currency code.
  * @param locale - Optional locale for formatting conventions (e.g., 'en-US', 'de-DE').
- * @returns A formatted currency string (e.g., "$1,234.56", "₹1,03,000.00").
+ * @returns A formatted currency string (e.g., "$180,000", "₹28,00,000").
  */
-export function formatCurrency(amount: number, currency: string, locale: string = 'en-US'): string {
+// Salaries are quoted in whole units and grouped the way the currency's own market
+// writes them: ₹28,00,000 in India, $180,000 in the US. Formatting an annual salary as
+// "₹2,800,000.00" is both wrong for the reader and two characters of noise per figure.
+const LOCALE_FOR_CURRENCY: Record<string, string> = {
+  INR: 'en-IN',
+  GBP: 'en-GB',
+  EUR: 'de-DE',
+  JPY: 'ja-JP',
+  PLN: 'pl-PL',
+  AUD: 'en-AU',
+  CAD: 'en-CA',
+  VND: 'vi-VN',
+  PHP: 'en-PH',
+  UAH: 'uk-UA',
+  NGN: 'en-NG',
+};
+
+export function formatCurrency(amount: number, currency: string, locale?: string): string {
   const symbol = CURRENCY_SYMBOLS[currency] || currency;
+  const resolved = locale ?? LOCALE_FOR_CURRENCY[currency] ?? 'en-US';
 
   try {
-    // Using Intl.NumberFormat for robust, locale-aware currency formatting.
-    return new Intl.NumberFormat(locale, {
+    return new Intl.NumberFormat(resolved, {
       style: 'currency',
-      currency: currency,
+      currency,
+      // Whole units: nobody negotiates a salary to the paisa.
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     }).format(amount);
-  } catch (e) {
+  } catch {
     // Fallback for unsupported currency codes in Intl
-    return `${symbol}${amount.toFixed(2)}`;
+    return `${symbol}${Math.round(amount).toLocaleString(resolved)}`;
   }
 }

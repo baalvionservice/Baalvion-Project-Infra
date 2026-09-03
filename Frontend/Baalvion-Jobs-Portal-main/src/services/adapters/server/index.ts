@@ -65,36 +65,76 @@ async function normalizePaginated<T>(
   };
 }
 
+/** A bulleted text blob → one string per bullet, markers removed. */
+function parseBulletedText(text?: string | null): string[] {
+  if (!text) return [];
+  return String(text)
+    .split(/\r?\n/)
+    .map((line) => line.replace(/^\s*[•\-*\u2022]\s*/, '').trim())
+    .filter(Boolean);
+}
+
+/** "Kochi, Kerala, India" → { city: "Kochi", region: "Kerala" }. */
+function splitLocation(location?: string | null): { city?: string; region?: string } {
+  if (!location) return {};
+  const parts = location.split(',').map((p) => p.trim()).filter(Boolean);
+  if (parts.length === 0) return {};
+  // Two parts is "City, Country" — a middle segment only exists with three or more.
+  return { city: parts[0], region: parts.length >= 3 ? parts[1] : undefined };
+}
+
 function mapBackendJob(j: any) {
+  // Sequelize serialises its own timestamps as camelCase even with `underscored: true`,
+  // so the snake_case reads below always missed and every job fell back to `new Date()`.
+  // That put "posted today" on every role in the JobPosting structured data and a
+  // just-now `lastmod` on every sitemap entry — a freshness signal that wasn't true.
+  const createdAt = j.created_at ?? j.createdAt ?? undefined;
+  const updatedAt = j.updated_at ?? j.updatedAt ?? undefined;
+
   return {
     id: String(j.id),
     requisitionCode: `JOB-${String(j.id).padStart(4, '0')}`,
     title: j.title ?? '',
     countryId: j.country_id ?? j.countryId ?? 'country_in',
-    city: j.location ?? 'Remote',
-    state: undefined,
+    // city/region are the structured parts. Rows created before those columns existed
+    // only have the composed `location` string ("Bengaluru, India"), so split it: the
+    // first segment is the town, and anything between it and the country is the region.
+    city: j.city ?? splitLocation(j.location).city ?? 'Remote',
+    state: j.region ?? splitLocation(j.location).region,
     departmentId: j.department_id ?? j.departmentId ?? 'dept_eng_it',
     employmentType: JOB_TYPE_MAP[j.job_type] ?? 'Full-Time',
     experienceBand: EXP_BAND_MAP[j.experience_level] ?? '2-5 Years',
     workforceType: 'Employee',
     salaryBand: j.salary_min && j.salary_max ? `${j.salary_min}-${j.salary_max}` : undefined,
     currency: j.currency ?? 'INR',
-    salaryVisibility: (j.salary_min ? 'range' : 'hidden') as any,
+    // These values feed a switch that tests 'Public' | 'RangeOnly' | 'Hidden'. The old
+    // lowercase 'range' matched none of them, so every job with a published salary fell
+    // through to "compensation will be discussed" and the real range was never shown.
+    salaryVisibility: (j.salary_min || j.salary_max ? 'Public' : 'Hidden') as any,
+    salaryPeriod: (j.salary_period ?? j.salaryPeriod ?? 'year') as any,
     equityEligible: false,
     relocationSupport: false,
     visaSponsorship: false,
     status: (STATUS_MAP[j.status] ?? 'draft') as any,
     visibility: (j.status === 'published' ? 'public' : 'internal') as any,
     description: j.description ?? '',
-    responsibilities: [],
-    qualifications: j.requirements ? [j.requirements] : [],
+    responsibilities: parseBulletedText(j.responsibilities),
+    // `requirements` is one text blob with a bullet per line. Splitting it into real
+    // list items — and dropping the literal "•" the list already draws — stops every
+    // qualification rendering as a single paragraph with doubled bullets.
+    qualifications: parseBulletedText(j.requirements),
+    preferredQualifications: parseBulletedText(j.preferred_qualifications ?? j.preferredQualifications),
     remoteAllowed: j.remote_allowed ?? false,
     requiredSkills: (j.skills ?? []).map((s: any) => s.name ?? s),
-    publishStartDate: j.published_at ?? j.created_at,
-    publishEndDate: j.closes_at ?? j.deadline,
+    // When it actually went live — this is what `datePosted` must reflect.
+    publishStartDate: j.published_at ?? j.publishedAt ?? createdAt,
+    publishEndDate: j.closes_at ?? j.closesAt ?? j.deadline,
+    // Gazetteer resolution, so a job page can link to its own town's landing page.
+    placeSlug: j.place_slug ?? j.placeSlug ?? null,
+    metroSlug: j.metro_slug ?? j.metroSlug ?? null,
     tenantId: j.org_id ? String(j.org_id) : undefined,
-    createdAt: j.created_at ?? new Date().toISOString(),
-    updatedAt: j.updated_at ?? new Date().toISOString(),
+    createdAt,
+    updatedAt,
   };
 }
 
@@ -328,7 +368,12 @@ const rawServerAdapter = ({
   rejectPayment:  (id) => apiClient.patch(`/payments/${id}`, { status: 'rejected' }),
 
   // ── Notifications ───────────────────────────────────────────────────────────
-  getNotificationsForCandidate: (candidateId) => apiClient.get(`/notifications?candidateId=${candidateId}`),
+  // Always an array: a failed call unwraps to null, and the dashboard renders
+  // `notifications.length` straight out of this.
+  getNotificationsForCandidate: async (candidateId) => {
+    const res = await apiClient.get(`/notifications?candidateId=${candidateId}`);
+    return res.success && Array.isArray(res.data) ? res.data : [];
+  },
   sendNotification:             (userId, notification) => apiClient.post('/notifications', { userId, ...notification }),
   markAsRead:                   (id) => apiClient.patch(`/notifications/${id}/read`, {}),
   markAllAsRead:                (tenantId) => apiClient.patch(`/notifications/read-all`, { tenantId }),

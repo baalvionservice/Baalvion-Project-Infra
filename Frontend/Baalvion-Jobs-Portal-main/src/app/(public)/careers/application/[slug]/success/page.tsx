@@ -14,6 +14,7 @@ import { CheckCircle, Loader2 } from 'lucide-react';
 import { applicationService } from '@/services/application.service';
 import { MultiPhaseApplicationData } from '@/types';
 import { useApplicationStore } from '@/store/application.store';
+import { useAuth } from '@/hooks/useAuth';
 
 function DetailItem({
   label,
@@ -34,32 +35,64 @@ function DetailItem({
   );
 }
 
+/** The reference the applicant should keep — the first thing they see after submitting. */
+function ReferenceCard({ referenceCode, appId }: { referenceCode: string | null; appId: string | null }) {
+  if (!referenceCode && !appId) return null;
+  return (
+    <div className="mx-auto mt-6 grid max-w-md gap-3 sm:grid-cols-2">
+      {referenceCode && (
+        <div className="rounded-lg border bg-muted/40 px-4 py-3 text-left">
+          <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+            Candidate ID
+          </p>
+          <p className="font-mono text-base font-semibold">{referenceCode}</p>
+        </div>
+      )}
+      {appId && (
+        <div className="rounded-lg border bg-muted/40 px-4 py-3 text-left">
+          <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+            Application
+          </p>
+          <p className="font-mono text-base font-semibold">#{appId}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ProfileSummary() {
   const searchParams = useSearchParams();
   const appId = searchParams.get('appId');
+  const referenceCode = searchParams.get('ref');
+  const { user } = useAuth();
   const { resetApplicationData } = useApplicationStore();
   const [application, setApplication] =
     useState<MultiPhaseApplicationData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (appId) {
-      applicationService
-        .getDetailedApplication(appId)
-        .then((data) => {
-          setApplication(data);
-          setIsLoading(false);
-          // Clear the form state now that submission is confirmed and data is displayed
-          resetApplicationData();
-        })
-        .catch((err) => {
-          console.error('Failed to fetch application summary:', err);
-          setIsLoading(false);
-        });
-    } else {
+    // /applications/:id is org-scoped and staff-only: anonymous applicants 401 on it and
+    // signed-in candidates 404 (their own org isn't the employer's). Only staff reviewing a
+    // submission can read it — everyone else gets the confirmation card, which is the one
+    // that carries their Candidate ID anyway.
+    if (!appId || !user || user.role === 'CANDIDATE') {
       setIsLoading(false);
+      resetApplicationData();
+      return;
     }
-  }, [appId, resetApplicationData]);
+    applicationService
+      .getDetailedApplication(appId)
+      .then((data) => {
+        setApplication(data);
+        setIsLoading(false);
+        // Clear the form state now that submission is confirmed and data is displayed
+        resetApplicationData();
+      })
+      .catch((err) => {
+        console.error('Failed to fetch application summary:', err);
+        setIsLoading(false);
+      });
+  }, [appId, user, resetApplicationData]);
 
   if (isLoading) {
     return (
@@ -83,8 +116,12 @@ function ProfileSummary() {
           <CardContent>
             <p>
               We have received your application and our talent team will review
-              it shortly. You will receive an email confirmation, and you can
-              track the status of your application in your candidate dashboard.
+              it shortly. A confirmation email is on its way, and you can track
+              every stage — and message the hiring team — from your dashboard.
+            </p>
+            <ReferenceCard referenceCode={referenceCode} appId={appId} />
+            <p className="mt-4 text-sm text-muted-foreground">
+              Keep your Candidate ID — quote it whenever you contact us about this application.
             </p>
             <div className="mt-8 flex justify-center gap-4">
               <Button asChild>
@@ -114,6 +151,7 @@ function ProfileSummary() {
             This is a summary of the information you provided for the role:{' '}
             <span className="font-bold">{application.jobTitle}</span>
           </CardDescription>
+          <ReferenceCard referenceCode={referenceCode} appId={appId} />
         </CardHeader>
         <CardContent className="space-y-8">
           <div>

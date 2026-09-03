@@ -11,10 +11,24 @@ const DATA_BASE = process.env.NEXT_PUBLIC_JOBS_SERVICE_URL || 'https://api.baalv
 export async function getPortalProfile(): Promise<{
   role: string; email: string; name: string; userId: string;
   candidateId: string | null; systemUserId: string | null; employerOrgId: string | null;
+  referenceCode: string | null; employeeCode: string | null;
 } | null> {
   try {
     const res = await apiClient.get('/me/profile');
     return res.success ? (res.data as any) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Writes the candidate's own editable profile fields. Returns the refreshed profile. */
+export async function updatePortalProfile(patch: Record<string, unknown>) {
+  try {
+    const res = await apiClient.patch('/me/profile', patch);
+    if (!res.success) return null;
+    // PATCH returns the candidate row; re-read the profile so the caller gets the same
+    // shape (role, codes, ids) that getPortalProfile hands back everywhere else.
+    return await getPortalProfile();
   } catch {
     return null;
   }

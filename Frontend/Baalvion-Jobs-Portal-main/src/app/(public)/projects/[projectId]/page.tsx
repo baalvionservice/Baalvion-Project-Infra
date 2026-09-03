@@ -1,289 +1,185 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import { notFound, useParams } from 'next/navigation';
-import { useAuthStore } from '@/store/auth.store';
-import { projectService } from '@/services/service';
-import {
-  Project,
-  ProjectMilestone,
-  ProjectTeamMember,
-  User,
-} from '@/types/contracts';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Metadata } from 'next';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/utils/currency';
-import { ApplyDialog } from '@/modules/applications/components/ApplyDialog';
-import { CreateTeamDialog } from '@/modules/teams/components/CreateTeamDialog';
-import { Check, Clock, DollarSign, Users, UserPlus } from 'lucide-react';
+import { AppConfig } from '@/config/app.config';
+import { marketplaceService } from '@/services/marketplace.service';
+import { ProjectApplyForm } from '@/modules/projects/components/ProjectApplyForm';
+import { MarketplaceProjectCard } from '@/modules/projects/components/MarketplaceProjectCard';
+import { generateBreadcrumbStructuredData } from '@/lib/structured-data';
 
-function ProjectDetailSkeleton() {
-  return (
-    <div className="container mx-auto py-12">
-      <header className="mb-12 space-y-4">
-        <Skeleton className="h-6 w-24" />
-        <Skeleton className="h-12 w-3/4" />
-        <Skeleton className="h-6 w-full max-w-2xl" />
-        <div className="flex items-center gap-6">
-          <Skeleton className="h-5 w-32" />
-          <Skeleton className="h-5 w-24" />
-        </div>
-      </header>
-      <div className="grid lg:grid-cols-3 gap-8 items-start">
-        <div className="lg:col-span-2 space-y-8">
-          <Skeleton className="h-48 w-full" />
-          <Skeleton className="h-48 w-full" />
-        </div>
-        <aside className="lg:col-span-1 space-y-6">
-          <Skeleton className="h-56 w-full" />
-        </aside>
-      </div>
-    </div>
-  );
+type Props = { params: Promise<{ projectId: string }> };
+
+export const dynamic = 'force-dynamic';
+
+const MODE_TEXT: Record<string, string> = {
+  solo: 'One person',
+  team: 'A team',
+  either: 'Solo or a team',
+};
+
+const formatDate = (value: string | null) => {
+  if (!value) return null;
+  const d = new Date(value);
+  return Number.isNaN(d.getTime())
+    ? null
+    : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+};
+
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const { projectId } = await props.params;
+  const project = await marketplaceService.getProject(projectId).catch(() => null);
+  if (!project) return { title: 'Project not found', robots: { index: false, follow: false } };
+
+  const url = `${AppConfig.baseUrl}/projects/${project.slug ?? project.id}`;
+  const description =
+    project.summary ??
+    (project.description ? `${project.description.slice(0, 150).replace(/\s+\S*$/, '')}…` : project.title);
+
+  return {
+    title: project.title,
+    description,
+    alternates: { canonical: url },
+    openGraph: { title: project.title, description, url, type: 'article' },
+  };
 }
 
-export default function ProjectDetailPage() {
-  const params = useParams();
-  const projectId = params.projectId as string;
+export default async function ProjectDetailPage(props: Props) {
+  const { projectId } = await props.params;
+  const project = await marketplaceService.getProject(projectId);
+  if (!project) notFound();
 
-  const { user: currentUser } = useAuthStore();
-  const [project, setProject] = useState<Project | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // A few other live briefs, so the page isn't a dead end if this one isn't a fit.
+  const related = await marketplaceService
+    .listProjects({ limit: 4, category: project.category ?? undefined })
+    .then((r) => r.items.filter((p) => p.id !== project.id).slice(0, 3))
+    .catch(() => []);
 
-  const [isApplyOpen, setIsApplyOpen] = useState(false);
-  const [isCreateTeamOpen, setIsCreateTeamOpen] = useState(false);
-
-  useEffect(() => {
-    setIsLoading(true);
-    projectService.getById(projectId).then((response) => {
-      if (response.success && response.data) {
-        setProject(response.data);
-      } else {
-        setProject(null);
-      }
-      setIsLoading(false);
-    });
-  }, [projectId]);
-
-  const toggleMilestone = (milestoneId: string) => {
-    setProject((prevProject) => {
-      if (!prevProject || !prevProject.milestones) return prevProject;
-      const updatedMilestones = prevProject.milestones.map((ms) =>
-        ms.id === milestoneId
-          ? {
-              ...ms,
-              status: (ms.status === 'completed' ? 'pending' : 'completed') as
-                | 'pending'
-                | 'completed',
-            }
-          : ms,
-      );
-      return { ...prevProject, milestones: updatedMilestones };
-    });
-  };
-
-  const assignRole = (roleToAssign: string) => {
-    setProject((prevProject) => {
-      if (!prevProject || !prevProject.teams || !currentUser)
-        return prevProject;
-      const teamIndex = prevProject.teams.findIndex(
-        (t) => t.role === roleToAssign && t.member === null,
-      );
-      if (teamIndex === -1) return prevProject;
-
-      const updatedTeams = [...prevProject.teams];
-      updatedTeams[teamIndex] = {
-        ...updatedTeams[teamIndex],
-        member: currentUser.fullName || null,
-      };
-
-      return { ...prevProject, teams: updatedTeams };
-    });
-  };
-
-  if (isLoading) return <ProjectDetailSkeleton />;
-  if (!project) return notFound();
-
-  const completedMilestones =
-    project.milestones?.filter((m) => m.status === 'completed').length || 0;
-  const totalMilestones = project.milestones?.length || 1;
-  const progressPercent = Math.round(
-    (completedMilestones / totalMilestones) * 100,
+  const breadcrumbs = generateBreadcrumbStructuredData(
+    [
+      { name: 'Home', path: '/' },
+      { name: 'Project Marketplace', path: '/projects' },
+      { name: project.title, path: `/projects/${project.slug ?? project.id}` },
+    ],
+    AppConfig.baseUrl,
   );
-  const mockPayoutPerMilestone = project.budget / totalMilestones;
-  const earnedPayout = completedMilestones * mockPayoutPerMilestone;
+
+  const deadline = formatDate(project.deadline);
+  const posted = formatDate(project.publishedAt ?? project.createdAt);
 
   return (
-    <>
-      <div className="bg-muted/40">
-        <div className="container mx-auto py-12">
-          <header className="mb-12">
-            <Badge variant="outline" className="mb-2">
-              {project.category}
-            </Badge>
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-              {project.title}
-            </h1>
-            <p className="mt-4 text-lg text-muted-foreground max-w-3xl">
-              {project.description}
-            </p>
-            <div className="mt-6 flex items-center gap-6 text-sm">
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4" /> Ends on{' '}
-                {new Date(project.endDate).toLocaleDateString()}
+    <main className="bg-background text-foreground">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }} />
+
+      <section className="border-b bg-muted/30">
+        <div className="container mx-auto max-w-5xl px-4 py-12 lg:py-16">
+          <nav aria-label="Breadcrumb" className="mb-6 text-sm text-muted-foreground">
+            <Link href="/projects" className="hover:text-foreground hover:underline">Project marketplace</Link>
+            {' / '}
+            <span className="text-foreground">{project.title}</span>
+          </nav>
+
+          <h1 className="max-w-4xl text-3xl font-bold tracking-tight md:text-4xl">{project.title}</h1>
+          {project.summary && (
+            <p className="mt-4 max-w-3xl text-lg text-muted-foreground">{project.summary}</p>
+          )}
+
+          <dl className="mt-8 grid max-w-3xl grid-cols-2 gap-x-8 gap-y-6 sm:grid-cols-4">
+            {project.budget !== null && (
+              <div>
+                <dt className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Budget</dt>
+                <dd className="mt-1 text-[15px] font-medium">
+                  {formatCurrency(project.budget, project.currency || 'INR')}
+                </dd>
               </div>
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4" /> Up to {project.maxTeamSize}{' '}
-                members
+            )}
+            <div>
+              <dt className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Who it&apos;s for</dt>
+              <dd className="mt-1 text-[15px] font-medium">
+                {MODE_TEXT[project.collaborationMode] ?? MODE_TEXT.either}
+                {project.collaborationMode !== 'solo' && project.maxTeamSize
+                  ? ` (up to ${project.maxTeamSize})`
+                  : ''}
+              </dd>
+            </div>
+            {project.category && (
+              <div>
+                <dt className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Category</dt>
+                <dd className="mt-1 text-[15px] font-medium">{project.category}</dd>
               </div>
-              <Badge variant="secondary">{project.status}</Badge>
-            </div>
-          </header>
+            )}
+            {deadline ? (
+              <div>
+                <dt className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Closes</dt>
+                <dd className="mt-1 text-[15px] font-medium">{deadline}</dd>
+              </div>
+            ) : posted ? (
+              <div>
+                <dt className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Posted</dt>
+                <dd className="mt-1 text-[15px] font-medium">{posted}</dd>
+              </div>
+            ) : null}
+          </dl>
+        </div>
+      </section>
 
-          <div className="grid lg:grid-cols-3 gap-8 items-start">
-            <div className="lg:col-span-2 space-y-8">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Project Milestones</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {project.milestones?.map((ms) => (
-                    <div
-                      key={ms.id}
-                      className="flex items-center space-x-3 p-3 rounded-md bg-muted/50"
-                    >
-                      <Checkbox
-                        id={`ms-${ms.id}`}
-                        checked={ms.status === 'completed'}
-                        onCheckedChange={() => toggleMilestone(ms.id)}
-                      />
-                      <label
-                        htmlFor={`ms-${ms.id}`}
-                        className={`text-sm font-medium leading-none ${
-                          ms.status === 'completed'
-                            ? 'line-through text-muted-foreground'
-                            : ''
-                        }`}
-                      >
-                        {ms.title}
-                      </label>
-                    </div>
+      <div className="container mx-auto max-w-5xl px-4 py-12 lg:py-16">
+        <div className="grid gap-12 lg:grid-cols-3">
+          <div className="space-y-10 lg:col-span-2">
+            <section>
+              <h2 className="text-2xl font-bold tracking-tight">The brief</h2>
+              <div className="mt-4 whitespace-pre-line leading-relaxed text-muted-foreground">
+                {project.description}
+              </div>
+            </section>
+
+            {project.requiredSkills.length > 0 && (
+              <section>
+                <h2 className="text-2xl font-bold tracking-tight">What it needs</h2>
+                <ul className="mt-4 flex flex-wrap gap-2">
+                  {project.requiredSkills.map((skill) => (
+                    <li key={skill}><Badge variant="secondary" className="font-normal">{skill}</Badge></li>
                   ))}
-                </CardContent>
-              </Card>
+                </ul>
+              </section>
+            )}
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Team Roles</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {project.teams?.map((teamMember) => (
-                    <div
-                      key={teamMember.role}
-                      className="flex items-center justify-between p-3 rounded-md border"
-                    >
-                      <p className="font-semibold">{teamMember.role}</p>
-                      {teamMember.member ? (
-                        <Badge
-                          variant="secondary"
-                          className="flex items-center gap-2"
-                        >
-                          <Check className="h-4 w-4" /> {teamMember.member}
-                        </Badge>
-                      ) : (
-                        <Button
-                          size="sm"
-                          onClick={() => assignRole(teamMember.role)}
-                        >
-                          <UserPlus className="mr-2 h-4 w-4" />
-                          Assign Me
-                        </Button>
-                      )}
-                    </div>
+            {project.roles.length > 0 && (
+              <section>
+                <h2 className="text-2xl font-bold tracking-tight">Roles on this project</h2>
+                <ul className="mt-4 space-y-2 text-muted-foreground">
+                  {project.roles.map((role, i) => (
+                    <li key={i}>
+                      {role.title}
+                      {role.count && role.count > 1 ? ` × ${role.count}` : ''}
+                    </li>
                   ))}
-                </CardContent>
-              </Card>
-            </div>
+                </ul>
+              </section>
+            )}
 
-            <aside className="lg:col-span-1 space-y-6 lg:sticky top-24">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Project Progress</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Progress value={progressPercent} className="mb-2" />
-                  <p className="text-sm text-center font-semibold">
-                    {progressPercent}% Completed
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Mock Payout</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="h-6 w-6 text-green-500" />
-                    <p className="text-2xl font-bold">
-                      {formatCurrency(earnedPayout, 'USD')}
-                    </p>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Earned from {completedMilestones} completed milestones.
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Actions</CardTitle>
-                </CardHeader>
-                <CardContent className="flex flex-col gap-3">
-                  <Button
-                    size="lg"
-                    className="w-full"
-                    onClick={() => setIsApplyOpen(true)}
-                  >
-                    Apply for Role
-                  </Button>
-                  <Button
-                    size="lg"
-                    variant="secondary"
-                    className="w-full"
-                    onClick={() => setIsCreateTeamOpen(true)}
-                  >
-                    Create a Team
-                  </Button>
-                </CardContent>
-              </Card>
-            </aside>
+            <section id="apply">
+              <ProjectApplyForm project={project} />
+            </section>
           </div>
+
+          <aside className="lg:col-span-1">
+            {related.length > 0 && (
+              <div className="lg:sticky lg:top-24">
+                <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                  Other open briefs
+                </h2>
+                <div className="mt-4 space-y-3">
+                  {related.map((p) => (
+                    <MarketplaceProjectCard key={p.id} project={p} />
+                  ))}
+                </div>
+              </div>
+            )}
+          </aside>
         </div>
       </div>
-      {isApplyOpen && project && (
-        <ApplyDialog
-          isOpen={isApplyOpen}
-          onClose={() => setIsApplyOpen(false)}
-          project={project}
-        />
-      )}
-      {isCreateTeamOpen && project && (
-        <CreateTeamDialog
-          isOpen={isCreateTeamOpen}
-          onClose={() => setIsCreateTeamOpen(false)}
-          project={project}
-        />
-      )}
-    </>
+    </main>
   );
 }

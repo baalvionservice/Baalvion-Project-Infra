@@ -22,4 +22,17 @@ module.exports = (sequelize) => sequelize.define('Project', {
     end_date:        { type: DataTypes.DATEONLY, allowNull: true },
     max_team_size:   { type: DataTypes.INTEGER, allowNull: true },
     roles:           { type: DataTypes.JSONB, defaultValue: [] },
+    // Marketplace fields. `is_public` is opt-in: a project is org-private until
+    // someone publishes it, so enabling the marketplace never exposes existing work.
+    is_public:       { type: DataTypes.BOOLEAN, defaultValue: false },
+    published_at:    { type: DataTypes.DATE, allowNull: true },
+    slug:            { type: DataTypes.STRING(180), allowNull: true, unique: true },
+    summary:         { type: DataTypes.TEXT, allowNull: true },
+    // Whether the poster wants one person, an assembled team, or doesn't mind.
+    collaboration_mode: {
+        type: DataTypes.STRING(16), defaultValue: 'either',
+        validate: { isIn: [['solo', 'team', 'either']] },
+    },
+    applications_count: { type: DataTypes.INTEGER, defaultValue: 0 },
+    deadline:        { type: DataTypes.DATEONLY, allowNull: true },
 }, { schema: 'jobs', tableName: 'projects', underscored: true, timestamps: true });

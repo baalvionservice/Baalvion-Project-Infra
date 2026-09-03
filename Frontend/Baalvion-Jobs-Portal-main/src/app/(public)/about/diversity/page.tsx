@@ -24,9 +24,9 @@ import {
 } from "@/components/ui/accordion";
 
 export const metadata: Metadata = {
-  title: "Diversity, Equity & Inclusion | TalentOS by Baalvion",
+  title: "Diversity, Equity & Inclusion",
   description:
-    "Baalvion's DEI commitment: bias-reduced AI hiring, global access, pay equity, and inclusive product design. Building technology that widens opportunity for every candidate.",
+    "Our DEI commitment: bias-reduced hiring, global access, pay equity and inclusive design — technology that widens who gets a fair shot.",
   keywords: [
     "diversity equity inclusion hiring",
     "bias-reduced recruitment",

@@ -10,6 +10,7 @@ import { useToast } from '@/components/system/Toast/useToast';
 import { Loader2 } from 'lucide-react';
 import { jobCreationSchema, JobCreationData, transformToApiPayload } from './creation/schema';
 import { getInitialValues } from './creation/data';
+import { talentService } from '@/services/talent.service';
 
 import { BasicInfoTab } from './creation/tabs/BasicInfoTab';
 import { RoleDetailsTab } from './creation/tabs/RoleDetailsTab';
@@ -58,16 +59,32 @@ export function JobForm({ user, existingJob, onSaveSuccess }: JobFormProps) {
         setIsSubmitting(true);
         const apiPayload = transformToApiPayload(values);
 
-        // Mock API call
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        setIsSubmitting(false);
-        showToast({
-            type: 'success',
-            title: isEditMode ? "Job Updated" : "Job Created",
-            description: `The job "${values.basicInfo.title}" has been successfully saved.`
-        });
-        if(onSaveSuccess) onSaveSuccess();
+        try {
+            const saved: any = isEditMode
+                ? await talentService.updateJob(existingJob!.id, apiPayload)
+                : await talentService.createJob(apiPayload);
+
+            // Jobs are created as drafts. "Published" in the workflow tab means the
+            // recruiter wants it live now — otherwise it waits in the drafts list.
+            if (values.workflow.status === 'published' && saved?.id && saved?.status !== 'published') {
+                await talentService.publishJob(String(saved.id));
+            }
+
+            showToast({
+                type: 'success',
+                title: isEditMode ? 'Job updated' : 'Job created',
+                description: `"${values.basicInfo.title}" has been saved.`,
+            });
+            if (onSaveSuccess) onSaveSuccess();
+        } catch (err) {
+            showToast({
+                type: 'error',
+                title: isEditMode ? 'Could not update the job' : 'Could not create the job',
+                description: err instanceof Error ? err.message : 'Please try again.',
+            });
+        } finally {
+            setIsSubmitting(false);
+        }
     }
     
     return (

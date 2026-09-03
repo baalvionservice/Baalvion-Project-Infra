@@ -37,6 +37,8 @@ db.Note = require('./notes')(sequelize);
 db.AuditLog = require('./audit_logs')(sequelize);
 db.Project = require('./projects')(sequelize);
 db.Milestone = require('./milestones')(sequelize);
+db.ApplicationMessage = require('./application_messages')(sequelize);
+db.ProjectApplication = require('./project_applications')(sequelize);
 
 // Associations
 db.JobListing.belongsToMany(db.Skill, {
@@ -61,6 +63,9 @@ db.Application.belongsTo(db.Candidate, { foreignKey: 'candidate_id', as: 'candid
 db.Application.hasMany(db.Interview, { foreignKey: 'application_id', as: 'interviews' });
 db.Interview.belongsTo(db.Application, { foreignKey: 'application_id', as: 'application' });
 
+db.Application.hasMany(db.ApplicationMessage, { foreignKey: 'application_id', as: 'messages' });
+db.ApplicationMessage.belongsTo(db.Application, { foreignKey: 'application_id', as: 'application' });
+
 db.College.hasMany(db.Student, { foreignKey: 'college_id', as: 'students' });
 db.Student.belongsTo(db.College, { foreignKey: 'college_id', as: 'college' });
 
@@ -81,6 +86,10 @@ db.Candidate.hasMany(db.Document, { foreignKey: 'candidate_id', as: 'documents' 
 db.Document.belongsTo(db.Candidate, { foreignKey: 'candidate_id', as: 'candidate' });
 
 // Projects ↔ Milestones
+db.Project.hasMany(db.ProjectApplication, { foreignKey: 'project_id', as: 'applications' });
+db.ProjectApplication.belongsTo(db.Project, { foreignKey: 'project_id', as: 'project' });
+db.ProjectApplication.belongsTo(db.Candidate, { foreignKey: 'lead_candidate_id', as: 'lead' });
+
 db.Project.hasMany(db.Milestone, { foreignKey: 'project_id', as: 'milestones' });
 db.Milestone.belongsTo(db.Project, { foreignKey: 'project_id', as: 'project' });
 

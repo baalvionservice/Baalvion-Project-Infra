@@ -30,6 +30,36 @@ const config: Config = {
         primary: {
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))',
+          soft: 'hsl(var(--primary-soft))',
+        },
+        // The reference site's own four accents, used as solid blocks.
+        brand: {
+          orange: 'hsl(var(--brand-orange))',
+          yellow: 'hsl(var(--brand-yellow))',
+          pink: 'hsl(var(--brand-pink))',
+          purple: 'hsl(var(--brand-purple))',
+          blue: 'hsl(var(--brand-blue))',
+        },
+        // One hue per business unit, so a 350-role list can be grouped by eye. `-bar`
+        // keeps full brightness for the colour rule; the plain name is darkened enough
+        // to stay legible as 14px text.
+        unit: {
+          technology: 'hsl(var(--unit-technology))',
+          mining: 'hsl(var(--unit-mining))',
+          media: 'hsl(var(--unit-media))',
+          growth: 'hsl(var(--unit-growth))',
+          customer: 'hsl(var(--unit-customer))',
+          operations: 'hsl(var(--unit-operations))',
+          corporate: 'hsl(var(--unit-corporate))',
+          people: 'hsl(var(--unit-people))',
+          'technology-bar': 'hsl(var(--unit-technology-bar))',
+          'mining-bar': 'hsl(var(--unit-mining-bar))',
+          'media-bar': 'hsl(var(--unit-media-bar))',
+          'growth-bar': 'hsl(var(--unit-growth-bar))',
+          'customer-bar': 'hsl(var(--unit-customer-bar))',
+          'operations-bar': 'hsl(var(--unit-operations-bar))',
+          'corporate-bar': 'hsl(var(--unit-corporate-bar))',
+          'people-bar': 'hsl(var(--unit-people-bar))',
         },
         secondary: {
           DEFAULT: 'hsl(var(--secondary))',
@@ -74,14 +104,21 @@ const config: Config = {
         'body-small': ['14px', { lineHeight: '20px', fontWeight: '400' }],
       },
       borderRadius: {
-        small: "4px",
-        medium: "8px",
-        large: "16px",
+        /* shadcn's primitives all use rounded-lg / -md / -sm, which were falling through
+           to Tailwind's 8px default and giving every card and button consumer-app
+           corners. Bind them to the token so the whole UI tightens at once. */
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 1px)",
+        sm: "calc(var(--radius) - 2px)",
+        small: "2px",
+        medium: "3px",
+        large: "6px",
       },
-       boxShadow: {
-        'level-1': '0 1px 3px rgba(0,0,0,0.1)',
-        'level-2': '0 4px 6px rgba(0,0,0,0.1)',
-        'level-3': '0 8px 16px rgba(0,0,0,0.15)',
+      /* Borders do the separating; shadows are a whisper, not a lift. */
+      boxShadow: {
+        'level-1': '0 1px 2px rgba(0,0,0,0.04)',
+        'level-2': '0 2px 6px rgba(0,0,0,0.06)',
+        'level-3': '0 8px 24px rgba(0,0,0,0.08)',
       },
       keyframes: {
         'accordion-down': {

@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Meet the Team | Baalvion Industries — TalentOS Leadership',
+  title: 'Meet the Team & Leadership',
   description:
     'Meet the engineers, strategists, and operators building TalentOS — the intelligent hiring infrastructure connecting exceptional talent with borderless opportunity.',
   keywords: [

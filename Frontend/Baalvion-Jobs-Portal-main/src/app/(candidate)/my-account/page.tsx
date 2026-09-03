@@ -8,21 +8,29 @@ import { Card, CardContent } from '@/components/ui/card';
 import { AlertTriangle } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DashboardTabs } from '@/modules/candidates/components/dashboard/DashboardTabs';
+import { IdentityCodes } from '@/modules/candidates/components/dashboard/IdentityCodes';
 
 function CandidateProfileHeader({ user }: { user: User }) {
+    // The name can still be an email address for accounts created before the profile
+    // existed — greet by first name only when there's a real one to use.
+    const displayName = user.name?.includes('@') ? user.name.split('@')[0] : user.name;
+
     return (
-        <div className="flex items-center gap-4 mb-8">
-            <Avatar className="h-16 w-16 border-2 border-primary">
-                {user.avatarUrl ? (
-                    <AvatarImage src={user.avatarUrl} alt={user.name} />
-                ) : (
-                    <AvatarFallback className="text-2xl">{user.name.charAt(0)}</AvatarFallback>
-                )}
-            </Avatar>
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">Welcome back, {user.name}!</h1>
-                <p className="text-muted-foreground">Track your application status and manage your profile.</p>
+        <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-4">
+                <Avatar className="h-16 w-16 border-2 border-primary">
+                    {user.avatarUrl ? (
+                        <AvatarImage src={user.avatarUrl} alt={user.name} />
+                    ) : (
+                        <AvatarFallback className="text-2xl">{displayName.charAt(0).toUpperCase()}</AvatarFallback>
+                    )}
+                </Avatar>
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">Welcome back, {displayName}!</h1>
+                    <p className="text-muted-foreground">Track your application status and manage your profile.</p>
+                </div>
             </div>
+            <IdentityCodes referenceCode={user.referenceCode} employeeCode={user.employeeCode} />
         </div>
     );
 }

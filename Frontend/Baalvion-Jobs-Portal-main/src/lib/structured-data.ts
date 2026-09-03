@@ -1,3 +1,4 @@
+import { jobPath } from '@/lib/job-url';
 import { Job } from '@/lib/talent-acquisition';
 
 /**
@@ -13,6 +14,8 @@ export interface JobPostingCountryContext {
 
 export interface JobPostingOptions {
   country?: JobPostingCountryContext;
+  /** Canonical URL for the posting. Pass it so this never re-derives a stale path. */
+  url?: string;
 }
 
 /**
@@ -84,7 +87,10 @@ export function generateJobPostingStructuredData(
     },
     title: job.title,
     description: job.description,
-    datePosted: job.createdAt,
+    // The date the role went live, not the date the draft was created — and never a
+    // synthesised "now": Google Jobs ranks on datePosted, so an invented one is both a
+    // false signal and a demotion risk once it's contradicted.
+    datePosted: job.publishStartDate ?? job.createdAt,
     employmentType: employmentTypeMap[job.employmentType] || job.employmentType,
     hiringOrganization: {
       '@type': 'Organization',
@@ -92,8 +98,12 @@ export function generateJobPostingStructuredData(
       sameAs: 'https://www.baalvion.com',
       logo: `${baseUrl}/logo.png`,
     },
-    url: `${baseUrl}/careers/countries/${country.slug}/jobs/${job.id}`,
-    directApply: false,
+    // The canonical URL, supplied by the page that knows it. Falls back to composing
+    // the same shape, so this stays correct even for callers that don't pass one.
+    url: options.url ?? `${baseUrl}${jobPath(job as any, [{ id: job.countryId, slug: country.slug }])}`,
+    // Applications are taken on this site, start to finish — no hand-off to a third
+    // party. Google surfaces directApply postings ahead of ones that bounce the seeker on.
+    directApply: true,
     applicationContact: {
       '@type': 'ContactPoint',
       contactType: 'HR',
@@ -128,30 +138,6 @@ export function generateJobPostingStructuredData(
       '@type': 'Country',
       name: country.name,
     };
-  }
-
-  // Salary — expose whenever it is meant to be shown publicly. Accepts the
-  // canonical values ("Public" / "RangeOnly") and the live backend-mapped
-  // value ("range"); never exposes "Hidden" / "hidden".
-  const salaryVisibility = String(job.salaryVisibility || '').toLowerCase();
-  const salaryIsPublic =
-    salaryVisibility === 'public' ||
-    salaryVisibility === 'rangeonly' ||
-    salaryVisibility === 'range';
-  if (salaryIsPublic && job.salaryBand) {
-    const [minSalary, maxSalary] = parseSalaryBand(job.salaryBand);
-    if (minSalary && maxSalary) {
-      structuredData['baseSalary'] = {
-        '@type': 'MonetaryAmount',
-        currency: job.currency || 'USD',
-        value: {
-          '@type': 'QuantitativeValue',
-          minValue: minSalary,
-          maxValue: maxSalary,
-          unitText: 'YEAR',
-        },
-      };
-    }
   }
 
   // Experience level
@@ -216,26 +202,6 @@ function resolveCountry(
   };
 }
 
-/**
- * Helper function to parse salary band string
- */
-function parseSalaryBand(salaryBand: string): [number | null, number | null] {
-  // Handle various formats: "120000-150000", "120k-150k", "15-25 LPA"
-  const cleanBand = salaryBand.replace(/[k,\s]/gi, '').replace('LPA', '00000');
-  const match = cleanBand.match(/(\d+)-(\d+)/);
-
-  if (match) {
-    const min = parseInt(match[1]);
-    const max = parseInt(match[2]);
-
-    // Handle 'k' notation
-    const multiplier = salaryBand.toLowerCase().includes('k') ? 1000 : 1;
-
-    return [min * multiplier, max * multiplier];
-  }
-
-  return [null, null];
-}
 
 /**
  * Generate structured data script tag for embedding in HTML
@@ -250,4 +216,63 @@ export function generateStructuredDataScript(
   return `<script type="application/ld+json">
 ${JSON.stringify(structuredData, null, 2)}
 </script>`;
+}
+
+/**
+ * ItemList for a page of roles.
+ *
+ * A job board's listing pages are how a crawler discovers the individual postings.
+ * Marking the list up tells Google what the page IS — an ordered index of specific
+ * roles — rather than leaving it to infer that from a wall of cards, and the entries
+ * point at the canonical country-scoped job URLs so discovery lands in the right place.
+ *
+ * Only real, currently-listed roles go in: the list must match what the page shows.
+ */
+export function generateJobListStructuredData(
+  jobs: { id: string; title: string; countryId: string }[],
+  countries: { id: string; slug: string }[],
+  baseUrl: string,
+  listName: string,
+) {
+  const slugFor = (countryId: string) => countries.find((c) => c.id === countryId)?.slug;
+
+  const itemListElement = jobs
+    .map((job, index) => {
+      const slug = slugFor(job.countryId);
+      if (!slug) return null;
+      return {
+        '@type': 'ListItem',
+        position: index + 1,
+        url: `${baseUrl}${jobPath(job as any, countries as any)}`,
+        name: job.title,
+      };
+    })
+    .filter(Boolean);
+
+  if (itemListElement.length === 0) return null;
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: listName,
+    numberOfItems: itemListElement.length,
+    itemListElement,
+  };
+}
+
+/** BreadcrumbList from an ordered list of {name, path} crumbs. */
+export function generateBreadcrumbStructuredData(
+  crumbs: { name: string; path: string }[],
+  baseUrl: string,
+) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: crumbs.map((crumb, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: crumb.name,
+      item: `${baseUrl}${crumb.path}`,
+    })),
+  };
 }

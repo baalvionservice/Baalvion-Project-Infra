@@ -232,7 +232,62 @@ const getAIMatches = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
+// ════════════════════════════════════════════════════════════════════════════
+// Public placement showcase
+// ════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Approved placements, shaped for the public /placement page.
+ *
+ * That page used to build its showcase by pulling the ENTIRE student and college
+ * tables from the admin endpoints — which 401s for a visitor, and would have exposed
+ * every student's email and documents if it hadn't. This returns only what a public
+ * page should ever show: a first name, the college, the company and the role.
+ */
+const listPublicPlacements = async (req, res, next) => {
+    try {
+        const limit = Math.min(Number(req.query.limit) || 24, 100);
+        const rows = await db.Placement.findAll({
+            where: { approved: true },
+            include: [
+                { model: db.Student, as: 'student', attributes: ['id', 'name', 'college_id'] },
+                { model: db.College, as: 'college', attributes: ['id', 'name', 'city', 'state'] },
+            ],
+            order: [['joining_date', 'DESC']],
+            limit,
+        });
+
+        // First name only — a public showcase does not need to identify anyone fully.
+        const firstName = (name) => String(name || '').trim().split(/\s+/)[0] || 'Student';
+
+        const items = rows.map((p) => ({
+            id: String(p.id),
+            studentName: firstName(p.student && p.student.name),
+            collegeName: (p.college && p.college.name) || null,
+            collegeCity: (p.college && p.college.city) || null,
+            companyName: p.company_name,
+            role: p.role,
+            packageLpa: p.package_lpa !== null && p.package_lpa !== undefined ? Number(p.package_lpa) : null,
+            joiningDate: p.joining_date,
+        }));
+
+        const companies = new Set(items.map((i) => i.companyName).filter(Boolean));
+        const colleges = new Set(items.map((i) => i.collegeName).filter(Boolean));
+
+        return sendSuccess(req, res, {
+            items,
+            // Counts of what is actually in this response — no invented success rate.
+            stats: {
+                placements: items.length,
+                companies: companies.size,
+                colleges: colleges.size,
+            },
+        });
+    } catch (err) { return next(err); }
+};
+
 module.exports = {
+    listPublicPlacements,
     listColleges, getCollege, createCollege, updateCollege, deleteCollege,
     listStudents, getStudent, createStudent, updateStudent, deleteStudent,
     listPlacements, createPlacement, updatePlacement,

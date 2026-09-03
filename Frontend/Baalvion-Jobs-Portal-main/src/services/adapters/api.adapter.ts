@@ -199,7 +199,7 @@ export interface ApiAdapter {
   // deleteTeamMember(id: string): Promise<{ success: boolean }>;
 
   // Talent (Public)
-  getTalentCountries(filters: { isActive?: boolean }): Promise<Country[]>;
+  getTalentCountries(filters: { isActive?: boolean; hub?: boolean }): Promise<Country[]>;
   getTalentCountryBySlug(slug: string): Promise<Country | undefined>;
   getTalentCountryById(id: string): Promise<Country | undefined>;
   getTalentDepartments(filters: {

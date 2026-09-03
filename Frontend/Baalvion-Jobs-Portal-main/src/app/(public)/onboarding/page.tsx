@@ -20,9 +20,9 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Join Baalvion — College & Student Onboarding',
+  title: 'College & Student Onboarding',
   description:
-    'Onboard your college or join as a student in minutes. Baalvion connects verified institutions and students with a global network of recruiters through a transparent, merit-based placement platform.',
+    'Onboard your college or join as a student in minutes, and reach a global recruiter network through a transparent, merit-based placement platform.',
   alternates: { canonical: '/onboarding' },
   openGraph: {
     title: 'Join Baalvion — College & Student Onboarding | TalentOS',

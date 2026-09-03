@@ -51,7 +51,9 @@ export async function login(email: string, password: string): Promise<{ access_t
 
 /** Candidate self-registration against auth-service. Returns an access token (auto-login). */
 export async function register(email: string, password: string, fullName?: string): Promise<{ access_token: string; user: ReturnType<typeof userFromToken> }> {
-  const data = await postJson('/register', { email, password, full_name: fullName });
+  // auth-service's register schema is camelCase — `full_name` was silently dropped by
+  // zod, which is why new accounts showed their email address instead of their name.
+  const data = await postJson('/register', { email, password, fullName });
   const access = data.accessToken ?? data.access_token;
   return { access_token: access, user: userFromToken(access) };
 }

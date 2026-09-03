@@ -33,10 +33,16 @@ function renderField(fieldConfig: FormFieldConfig, country: Country) {
             case 'textarea':
                 return <Textarea placeholder={fieldConfig.placeholder} {...field} />;
             case 'checkbox':
+                // htmlFor/id pair: without it the consent text is dead to a mouse and
+                // silent to a screen reader, on a field the applicant must tick to proceed.
                 return (
                     <div className="flex items-start space-x-3 rounded-md border p-4">
-                        <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                        <div className="space-y-1 leading-none"><FormLabel className="text-sm">{fieldConfig.description}</FormLabel></div>
+                        <Checkbox id={fieldConfig.name} checked={field.value} onCheckedChange={field.onChange} />
+                        <div className="space-y-1 leading-none">
+                            <FormLabel htmlFor={fieldConfig.name} className="text-sm cursor-pointer">
+                                {fieldConfig.description}
+                            </FormLabel>
+                        </div>
                     </div>
                 );
             case 'file':
@@ -62,6 +68,7 @@ function renderField(fieldConfig: FormFieldConfig, country: Country) {
                                             <FormItem key={option.value} className="flex items-center space-x-2 space-y-0">
                                                 <FormControl>
                                                     <Checkbox
+                                                        id={`${fieldConfig.name}-${option.value}`}
                                                         checked={fieldValue?.includes(option.value)}
                                                         onCheckedChange={checked => {
                                                             const currentValue = fieldValue || [];
@@ -72,7 +79,12 @@ function renderField(fieldConfig: FormFieldConfig, country: Country) {
                                                         }}
                                                     />
                                                 </FormControl>
-                                                <FormLabel className="text-sm font-normal">{option.label}</FormLabel>
+                                                <FormLabel
+                                                    htmlFor={`${fieldConfig.name}-${option.value}`}
+                                                    className="text-sm font-normal cursor-pointer"
+                                                >
+                                                    {option.label}
+                                                </FormLabel>
                                             </FormItem>
                                         ))}
                                     </div>

@@ -1,82 +1,94 @@
 'use strict';
+/**
+ * Every country on earth, so a recruiter can post a role anywhere and a candidate can
+ * apply from anywhere.
+ *
+ * Names are resolved from ISO 3166-1 alpha-2 through Intl.DisplayNames — no 249-row
+ * table to maintain by hand, and the names track the platform's CLDR data. The nine
+ * editorial "hub" countries in hubCountries.js are merged over the top, keeping their
+ * overview copy, compliance profile, state list and display order.
+ *
+ * Anything not a hub is still fully usable — it just has no marketing page, so it
+ * carries `isHub: false` and no `overview`.
+ */
+const hubs = require('./hubCountries');
 
-module.exports = [
-  {
-    id: 'country_in', isoCode: 'IN', name: 'India', slug: 'india',
-    region: 'APAC', type: 'headquarters', hiringModel: 'full-scale',
-    stateFilterEnabled: true,
-    states: [
-      'Andhra Pradesh','Arunachal Pradesh','Assam','Bihar','Chhattisgarh','Goa','Gujarat','Haryana',
-      'Himachal Pradesh','Jharkhand','Karnataka','Kerala','Madhya Pradesh','Maharashtra','Manipur',
-      'Meghalaya','Mizoram','Nagaland','Odisha','Punjab','Rajasthan','Sikkim','Tamil Nadu',
-      'Telangana','Tripura','Uttar Pradesh','Uttarakhand','West Bengal','Delhi (NCT)',
-    ],
-    overview: "India serves as the nerve center for Baalvion. It's home to our primary Engineering and R&D hubs, driving the innovation for our global platform. We offer extensive opportunities, including our flagship performance-based internship program and roles that build the leadership pipeline for the entire organization. We are hiring extensively across all major cities and states.",
-    timezone: 'Asia/Kolkata', currency: 'INR', complianceProfileId: 'compliance_in',
-    isActive: true, displayOrder: 1,
-  },
-  {
-    id: 'country_us', isoCode: 'US', name: 'United States', slug: 'united-states',
-    region: 'North America', type: 'strategic-hub', hiringModel: 'selective',
-    stateFilterEnabled: false,
-    overview: 'Our presence in the United States is focused on strategic roles in product, marketing, and enterprise sales that support our global expansion. We operate on a remote-first basis in this region, seeking exceptional talent in key areas to join our globally distributed workforce.',
-    timezone: 'America/New_York', currency: 'USD', complianceProfileId: 'compliance_us',
-    isActive: true, displayOrder: 2,
-  },
-  {
-    id: 'country_gb', isoCode: 'GB', name: 'United Kingdom', slug: 'united-kingdom',
-    region: 'Europe', type: 'distributed', hiringModel: 'remote-first',
-    stateFilterEnabled: false,
-    overview: 'Our presence in the United Kingdom is focused on strategic roles that support our global expansion, particularly in finance and regulatory affairs. We operate on a remote-first basis in this region, seeking exceptional talent in key departments to join our globally distributed workforce.',
-    timezone: 'Europe/London', currency: 'GBP', complianceProfileId: 'compliance_uk',
-    isActive: true, displayOrder: 3,
-  },
-  {
-    id: 'country_ca', isoCode: 'CA', name: 'Canada', slug: 'canada',
-    region: 'North America', type: 'distributed', hiringModel: 'remote-first',
-    stateFilterEnabled: false,
-    overview: 'Canada is a key market for our engineering and IT talent. We operate on a remote-first basis in this region, seeking exceptional technical talent to join our globally distributed workforce.',
-    timezone: 'America/Toronto', currency: 'CAD', complianceProfileId: 'compliance_ca',
-    isActive: true, displayOrder: 6,
-  },
-  {
-    id: 'country_pl', isoCode: 'PL', name: 'Poland', slug: 'poland',
-    region: 'Europe', type: 'strategic-hub', hiringModel: 'selective',
-    stateFilterEnabled: false,
-    overview: 'Poland is a major European engineering hub for Baalvion. We are building a strong team of software developers and R&D professionals in this region.',
-    timezone: 'Europe/Warsaw', currency: 'PLN', complianceProfileId: 'compliance_eu',
-    isActive: true, displayOrder: 7,
-  },
-  {
-    id: 'country_au', isoCode: 'AU', name: 'Australia', slug: 'australia',
-    region: 'APAC', type: 'distributed', hiringModel: 'remote-first',
-    stateFilterEnabled: false,
-    overview: 'Our presence in Australia focuses on sales, marketing, and customer success for the APAC region. We are looking for experienced professionals to help grow our footprint in this key market.',
-    timezone: 'Australia/Sydney', currency: 'AUD', complianceProfileId: 'compliance_au',
-    isActive: true, displayOrder: 8,
-  },
-  {
-    id: 'country_vn', isoCode: 'VN', name: 'Vietnam', slug: 'vietnam',
-    region: 'APAC', type: 'distributed', hiringModel: 'selective',
-    stateFilterEnabled: false,
-    overview: 'Vietnam is an emerging talent market for Baalvion. We are selectively hiring for roles in software engineering and customer support to bolster our APAC operations.',
-    timezone: 'Asia/Ho_Chi_Minh', currency: 'VND', complianceProfileId: 'compliance_vn',
-    isActive: true, displayOrder: 9,
-  },
-  {
-    id: 'country_ph', isoCode: 'PH', name: 'Philippines', slug: 'philippines',
-    region: 'APAC', type: 'strategic-hub', hiringModel: 'selective',
-    stateFilterEnabled: false,
-    overview: 'The Philippines is a strategic hub for our customer success and back-office operations. We are looking for talented individuals to provide world-class support to our global user base.',
-    timezone: 'Asia/Manila', currency: 'PHP', complianceProfileId: 'compliance_ph',
-    isActive: true, displayOrder: 10,
-  },
-  {
-    id: 'country_ua', isoCode: 'UA', name: 'Ukraine', slug: 'ukraine',
-    region: 'Europe', type: 'distributed', hiringModel: 'remote-first',
-    stateFilterEnabled: false,
-    overview: 'Ukraine is home to a world-class pool of technical talent. We are hiring remote engineers and designers to contribute to our core product development.',
-    timezone: 'Europe/Kyiv', currency: 'UAH', complianceProfileId: 'compliance_ua',
-    isActive: true, displayOrder: 11,
-  },
+// ISO 3166-1 alpha-2, current as of the 2026 list.
+const ISO_ALPHA2 = [
+    'AD', 'AE', 'AF', 'AG', 'AI', 'AL', 'AM', 'AO', 'AQ', 'AR', 'AS', 'AT', 'AU', 'AW', 'AX', 'AZ',
+    'BA', 'BB', 'BD', 'BE', 'BF', 'BG', 'BH', 'BI', 'BJ', 'BL', 'BM', 'BN', 'BO', 'BQ', 'BR', 'BS',
+    'BT', 'BV', 'BW', 'BY', 'BZ', 'CA', 'CC', 'CD', 'CF', 'CG', 'CH', 'CI', 'CK', 'CL', 'CM', 'CN',
+    'CO', 'CR', 'CU', 'CV', 'CW', 'CX', 'CY', 'CZ', 'DE', 'DJ', 'DK', 'DM', 'DO', 'DZ', 'EC', 'EE',
+    'EG', 'EH', 'ER', 'ES', 'ET', 'FI', 'FJ', 'FK', 'FM', 'FO', 'FR', 'GA', 'GB', 'GD', 'GE', 'GF',
+    'GG', 'GH', 'GI', 'GL', 'GM', 'GN', 'GP', 'GQ', 'GR', 'GS', 'GT', 'GU', 'GW', 'GY', 'HK', 'HM',
+    'HN', 'HR', 'HT', 'HU', 'ID', 'IE', 'IL', 'IM', 'IN', 'IO', 'IQ', 'IR', 'IS', 'IT', 'JE', 'JM',
+    'JO', 'JP', 'KE', 'KG', 'KH', 'KI', 'KM', 'KN', 'KP', 'KR', 'KW', 'KY', 'KZ', 'LA', 'LB', 'LC',
+    'LI', 'LK', 'LR', 'LS', 'LT', 'LU', 'LV', 'LY', 'MA', 'MC', 'MD', 'ME', 'MF', 'MG', 'MH', 'MK',
+    'ML', 'MM', 'MN', 'MO', 'MP', 'MQ', 'MR', 'MS', 'MT', 'MU', 'MV', 'MW', 'MX', 'MY', 'MZ', 'NA',
+    'NC', 'NE', 'NF', 'NG', 'NI', 'NL', 'NO', 'NP', 'NR', 'NU', 'NZ', 'OM', 'PA', 'PE', 'PF', 'PG',
+    'PH', 'PK', 'PL', 'PM', 'PN', 'PR', 'PS', 'PT', 'PW', 'PY', 'QA', 'RE', 'RO', 'RS', 'RU', 'RW',
+    'SA', 'SB', 'SC', 'SD', 'SE', 'SG', 'SH', 'SI', 'SJ', 'SK', 'SL', 'SM', 'SN', 'SO', 'SR', 'SS',
+    'ST', 'SV', 'SX', 'SY', 'SZ', 'TC', 'TD', 'TF', 'TG', 'TH', 'TJ', 'TK', 'TL', 'TM', 'TN', 'TO',
+    'TR', 'TT', 'TV', 'TW', 'TZ', 'UA', 'UG', 'UM', 'US', 'UY', 'UZ', 'VA', 'VC', 'VE', 'VG', 'VI',
+    'VN', 'VU', 'WF', 'WS', 'YE', 'YT', 'ZA', 'ZM', 'ZW',
 ];
+
+// Coarse UN-style grouping, used only for the region filter on the jobs list.
+const REGION_BY_CODE = {
+    APAC: ['AF', 'AU', 'BD', 'BN', 'BT', 'CC', 'CK', 'CN', 'CX', 'FJ', 'FM', 'HK', 'ID', 'IN', 'JP', 'KH', 'KI', 'KP', 'KR', 'LA', 'LK', 'MH', 'MM', 'MN', 'MO', 'MP', 'MV', 'MY', 'NC', 'NF', 'NP', 'NR', 'NU', 'NZ', 'PF', 'PG', 'PH', 'PK', 'PN', 'PW', 'SB', 'SG', 'TH', 'TK', 'TL', 'TO', 'TV', 'TW', 'VN', 'VU', 'WF', 'WS', 'AS', 'GU', 'HM', 'IO', 'NC'],
+    Europe: ['AD', 'AL', 'AT', 'AX', 'BA', 'BE', 'BG', 'BY', 'CH', 'CY', 'CZ', 'DE', 'DK', 'EE', 'ES', 'FI', 'FO', 'FR', 'GB', 'GG', 'GI', 'GR', 'HR', 'HU', 'IE', 'IM', 'IS', 'IT', 'JE', 'LI', 'LT', 'LU', 'LV', 'MC', 'MD', 'ME', 'MK', 'MT', 'NL', 'NO', 'PL', 'PT', 'RO', 'RS', 'RU', 'SE', 'SI', 'SJ', 'SK', 'SM', 'UA', 'VA'],
+    'North America': ['AG', 'AI', 'AW', 'BB', 'BL', 'BM', 'BQ', 'BS', 'BZ', 'CA', 'CR', 'CU', 'CW', 'DM', 'DO', 'GD', 'GL', 'GP', 'GT', 'HN', 'HT', 'JM', 'KN', 'KY', 'LC', 'MF', 'MQ', 'MS', 'MX', 'NI', 'PA', 'PM', 'PR', 'SV', 'SX', 'TC', 'TT', 'US', 'VC', 'VG', 'VI', 'UM'],
+    'South America': ['AR', 'BO', 'BR', 'CL', 'CO', 'EC', 'FK', 'GF', 'GS', 'GY', 'PE', 'PY', 'SR', 'UY', 'VE'],
+    'Middle East': ['AE', 'AM', 'AZ', 'BH', 'GE', 'IL', 'IQ', 'IR', 'JO', 'KW', 'LB', 'OM', 'PS', 'QA', 'SA', 'SY', 'TR', 'YE'],
+    Africa: ['AO', 'BF', 'BI', 'BJ', 'BW', 'CD', 'CF', 'CG', 'CI', 'CM', 'CV', 'DJ', 'DZ', 'EG', 'EH', 'ER', 'ET', 'GA', 'GH', 'GM', 'GN', 'GQ', 'GW', 'KE', 'KM', 'LR', 'LS', 'LY', 'MA', 'MG', 'ML', 'MR', 'MU', 'MW', 'MZ', 'NA', 'NE', 'NG', 'RE', 'RW', 'SC', 'SD', 'SH', 'SL', 'SN', 'SO', 'SS', 'ST', 'SZ', 'TD', 'TF', 'TG', 'TN', 'TZ', 'UG', 'YT', 'ZA', 'ZM', 'ZW'],
+    'Central Asia': ['KG', 'KZ', 'TJ', 'TM', 'UZ'],
+};
+
+const regionOf = (() => {
+    const map = {};
+    for (const [region, codes] of Object.entries(REGION_BY_CODE)) {
+        for (const c of codes) map[c] = region;
+    }
+    return (code) => map[code] || 'Other';
+})();
+
+const displayNames = new Intl.DisplayNames(['en'], { type: 'region' });
+
+const slugify = (name) =>
+    name
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '');
+
+const hubByCode = new Map(hubs.map((h) => [h.isoCode, h]));
+
+const countries = ISO_ALPHA2.map((isoCode) => {
+    const hub = hubByCode.get(isoCode);
+    if (hub) return hub;
+
+    const name = displayNames.of(isoCode) || isoCode;
+    return {
+        id: `country_${isoCode.toLowerCase()}`,
+        isoCode,
+        name,
+        slug: slugify(name),
+        region: regionOf(isoCode),
+        type: 'open',
+        hiringModel: 'remote-first',
+        stateFilterEnabled: false,
+        // No editorial overview — non-hub countries have no marketing page, and inventing
+        // one would put words in the company's mouth.
+        overview: null,
+        timezone: null,
+        currency: null,
+        complianceProfileId: null,
+        isHub: false,
+        isActive: true,
+        displayOrder: 1000,
+    };
+}).sort((a, b) => (a.displayOrder - b.displayOrder) || a.name.localeCompare(b.name));
+
+module.exports = countries;
+module.exports.hubs = hubs;

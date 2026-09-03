@@ -29,9 +29,9 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Baalvion Studio — Where Students Build Real Things',
+  title: 'Studio — Students Build Real Things',
   description:
-    'Baalvion Studio is our talent incubator: a hands-on program where students and new graduates ship real, production-grade work alongside mentors — and earn a direct pathway into internships and full-time roles.',
+    'Students and new graduates ship real production work alongside mentors, and earn a direct pathway into internships and full-time roles.',
   alternates: { canonical: '/studio' },
   openGraph: {
     title: 'Baalvion Studio | TalentOS by Baalvion',

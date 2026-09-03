@@ -82,6 +82,23 @@ module.exports = (sequelize) => {
             type: DataTypes.DECIMAL(4, 1),
             allowNull: true,
         },
+        // Quotable IDs the candidate sees on their dashboard and in every email.
+        // Issued by utils/referenceCodes — reference_code on first sight of the person,
+        // employee_code only once an application reaches `hired`.
+        reference_code: {
+            type: DataTypes.STRING(32),
+            allowNull: true,
+            unique: true,
+        },
+        employee_code: {
+            type: DataTypes.STRING(32),
+            allowNull: true,
+            unique: true,
+        },
+        employee_code_issued_at: {
+            type: DataTypes.DATE,
+            allowNull: true,
+        },
     }, {
         tableName: 'candidates',
         schema: 'jobs',

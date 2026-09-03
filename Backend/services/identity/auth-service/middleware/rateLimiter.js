@@ -41,7 +41,10 @@ function createRateLimiter({ max, window: windowSecs, prefix, keyFn, message }) 
 }
 
 // Pre-configured limiters
-const registerLimiter     = createRateLimiter({ max: 5,  window: 3600,  prefix: 'auth:rl:reg',   keyFn: (req) => req.ip, message: 'Too many registrations from this IP. Try again in an hour.' });
+// Registration is capped per IP. Overridable so a local dev box (where every signup
+// comes from the same 127.0.0.1) can raise it without loosening the production default.
+const REGISTER_MAX = Number(process.env.RATE_LIMIT_REGISTER_MAX || 5);
+const registerLimiter     = createRateLimiter({ max: REGISTER_MAX, window: 3600, prefix: 'auth:rl:reg', keyFn: (req) => req.ip, message: 'Too many registrations from this IP. Try again in an hour.' });
 const forgotPwLimiter     = createRateLimiter({ max: 5,  window: 3600,  prefix: 'auth:rl:fp',    keyFn: (req) => req.ip, message: 'Too many password reset requests. Try again in an hour.' });
 const verifyEmailLimiter  = createRateLimiter({ max: 10, window: 3600,  prefix: 'auth:rl:ve',    keyFn: (req) => req.ip });
 const mfaChallengeLimiter = createRateLimiter({ max: 10, window: 300,   prefix: 'auth:rl:mfa',   keyFn: (req) => req.ip, message: 'Too many MFA attempts. Try again in 5 minutes.' });

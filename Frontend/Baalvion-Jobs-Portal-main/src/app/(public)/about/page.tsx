@@ -21,9 +21,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
 export const metadata: Metadata = {
-  title: "About Us | TalentOS by Baalvion — Intelligent Global Hiring Infrastructure",
+  title: "About Us — Global Hiring",
   description:
-    "Baalvion Industries builds TalentOS: AI-driven, compliant global hiring infrastructure that connects exceptional talent with borderless opportunity. Skill over geography.",
+    "Baalvion Industries builds TalentOS — compliant global hiring infrastructure that judges people on skill rather than geography.",
   keywords: [
     "Baalvion Industries",
     "TalentOS",

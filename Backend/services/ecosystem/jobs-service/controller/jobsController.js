@@ -36,10 +36,17 @@ const getPagination = (query) => {
 const listJobs = async (req, res, next) => {
     try {
         const { page, limit } = getPagination(req.query);
-        const { status, job_type, experience_level, remote_allowed, search } = req.query;
+        const { status, job_type, experience_level, remote_allowed, search, city, region, exactCity, sort } = req.query;
+        // The public jobs list is filtered by country/department too — the frontend has
+        // always sent these; they were being dropped here.
+        const country_id = req.query.country_id || req.query.countryId;
+        const department_id = req.query.department_id || req.query.departmentId;
         // Public endpoint — orgId optional
         const orgId = req.auth?.orgId || req.query.org_id || null;
-        const result = await jobsService.listJobs({ orgId, status, job_type, experience_level, remote_allowed, search, page, limit });
+        const result = await jobsService.listJobs({
+            orgId, status, job_type, experience_level, remote_allowed, search,
+            country_id, department_id, city, region, exactCity, sort, page, limit,
+        });
         return sendPaginated(req, res, result);
     } catch (err) { return next(err); }
 };

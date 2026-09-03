@@ -10,6 +10,7 @@ import { JobComplianceSection } from '@/modules/talent-acquisition/components/jo
 import { Separator } from '@/components/ui/separator';
 import { TrackViewedJob } from '@/modules/jobs/components/TrackViewedJob';
 import { generateJobPostingStructuredData } from '@/lib/structured-data';
+import { jobPath } from '@/lib/job-url';
 
 type Props = {
   params: Promise<{ slug: string; jobId: string }>;
@@ -49,9 +50,26 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     return { title: 'Job Not Found' };
   }
 
-  const canonicalUrl = `${AppConfig.baseUrl}/careers/countries/${country.slug}/jobs/${job.id}`;
-  const title = `${job.title} in ${country.name} | Baalvion Careers`;
-  const description = job.description.substring(0, 160);
+  // This route is superseded by /careers/jobs/<place>/<role-slug>-<id>, which middleware
+  // 308s to. It stays as a fallback for when the backend is unreachable and middleware
+  // can't resolve the redirect — but it points its canonical at the new URL, so the two
+  // never compete for the same role.
+  const canonicalUrl = `${AppConfig.baseUrl}${jobPath(job as any, [country as any])}`;
+
+  // The root layout appends "| TalentOS by Baalvion", so "| Baalvion Careers" here made
+  // every job title run past the ~60 characters a SERP shows — cutting off the very words
+  // (the role and the place) someone searched for. City first, since that's what people
+  // type: "product designer bengaluru".
+  const place = job.city && job.city !== 'Remote' ? job.city : country.name;
+  const title = `${job.title} — ${place}`;
+
+  // Cut on a word boundary rather than mid-word, and only add the ellipsis when text was
+  // actually dropped.
+  const description = (() => {
+    const text = (job.description ?? '').replace(/\s+/g, ' ').trim();
+    if (text.length <= 155) return text;
+    return `${text.slice(0, 155).replace(/\s+\S*$/, '')}…`;
+  })();
 
   return {
     title,
@@ -147,28 +165,39 @@ export default async function JobDetailPage(props: Props) {
           country={country}
           departmentName={department?.name}
           applyUrl={applyUrl}
+          placeSlug={(job as any).placeSlug ?? null}
         />
 
         <div className="container mx-auto py-16 lg:py-24 max-w-6xl">
           <div className="grid lg:grid-cols-4 gap-12 items-start">
             <div className="lg:col-span-3 space-y-12">
-              <JobSection title="Job Overview">
-                <p className="text-muted-foreground">{job.description}</p>
+              <JobSection title="About this role">
+                <div className="space-y-4 whitespace-pre-line text-muted-foreground">
+                  {job.description}
+                </div>
               </JobSection>
-              <JobSection title="Responsibilities">
-                <ul className="list-disc space-y-2 pl-5 text-muted-foreground">
-                  {job.responsibilities.map((item, i) => (
-                    <li key={i}>{item}</li>
-                  ))}
-                </ul>
-              </JobSection>
-              <JobSection title="Qualifications">
-                <ul className="list-disc space-y-2 pl-5 text-muted-foreground">
-                  {job.qualifications.map((item, i) => (
-                    <li key={i}>{item}</li>
-                  ))}
-                </ul>
-              </JobSection>
+
+              {/* A heading with an empty list under it reads as a broken page. Sections
+                  render only when the posting actually has that content. */}
+              {job.responsibilities.length > 0 && (
+                <JobSection title="Key responsibilities">
+                  <ul className="list-disc space-y-2 pl-5 text-muted-foreground">
+                    {job.responsibilities.map((item, i) => (
+                      <li key={i}>{item}</li>
+                    ))}
+                  </ul>
+                </JobSection>
+              )}
+
+              {job.qualifications.length > 0 && (
+                <JobSection title="Qualifications">
+                  <ul className="list-disc space-y-2 pl-5 text-muted-foreground">
+                    {job.qualifications.map((item, i) => (
+                      <li key={i} className="whitespace-pre-line">{item}</li>
+                    ))}
+                  </ul>
+                </JobSection>
+              )}
 
               <Separator />
 

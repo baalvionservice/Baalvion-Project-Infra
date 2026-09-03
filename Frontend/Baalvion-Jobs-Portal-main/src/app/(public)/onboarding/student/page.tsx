@@ -6,7 +6,7 @@ import { StudentOnboardingForm } from './student-onboarding-form';
 export const metadata: Metadata = {
   title: 'Join as a Student — Internships & Graduate Roles',
   description:
-    'Join Baalvion as a student. Build a verified profile, get AI-matched to internships and graduate roles, and receive real offers judged on your skills — always free for students.',
+    'Build a verified student profile, get matched to internships and graduate roles, and be judged on your skills. Always free for students.',
   alternates: { canonical: '/onboarding/student' },
   openGraph: {
     title: 'Join as a Student | Baalvion TalentOS',

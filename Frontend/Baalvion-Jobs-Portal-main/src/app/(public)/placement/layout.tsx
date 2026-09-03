@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import React from "react";
 
 export const metadata: Metadata = {
-  title: "Verified Campus Placements | TalentOS by Baalvion",
+  title: "Verified Campus Placements",
   description:
-    "TalentOS by Baalvion Industries Pvt Ltd connects colleges, students, and recruiters through a document-verified, merit-based campus placement program across Type 1, Type 2, and Type 3 institutions. Zero fraud. 100% verified records.",
+    "Document-verified campus placements connecting colleges, students and recruiters across Type 1, 2 and 3 institutions — merit-based, no fraud.",
   keywords: [
     "campus placement",
     "verified placement",
