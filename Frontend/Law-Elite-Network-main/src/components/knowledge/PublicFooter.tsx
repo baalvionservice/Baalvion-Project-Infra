@@ -20,15 +20,16 @@ const EXPLORE_LINKS = [
   { href: '/countries', label: 'Browse by Country' },
 ];
 
+// AdSense-readiness retirement (see category-slugs.ts's CURRENT_CATEGORY_SLUGS
+// comment): shrunk to the 5 live practice areas -- the other 8 are retired
+// (301 to / via next.config.ts), so linking them here would send readers
+// straight into a redirect instead of a page.
 const PRACTICE_AREA_LINKS = [
-  { href: '/business', label: 'Business & Corporate' },
-  { href: '/criminal-law', label: 'Criminal Law' },
-  { href: '/family-law', label: 'Family & Personal' },
-  { href: '/real-estate-law', label: 'Property & Real Estate' },
-  { href: '/tax-finance', label: 'Tax & Finance' },
-  { href: '/employment-law', label: 'Employment & Labor' },
-  { href: '/tech-ip', label: 'Technology & IP' },
-  { href: '/disputes', label: 'Dispute Resolution' },
+  { href: '/maritime-offshore-injury-law', label: 'Maritime & Offshore Injury' },
+  { href: '/cruise-ship-passenger-vessel-accidents', label: 'Cruise Ship & Vessel Accidents' },
+  { href: '/personal-injury-lawyer', label: 'Personal Injury Law' },
+  { href: '/boating-accidents', label: 'Boating Accidents' },
+  { href: '/car-accidents', label: 'Car Accidents' },
 ];
 
 const ABOUT_LINKS = [

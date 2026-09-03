@@ -27,16 +27,32 @@ import { sharedSignInUrl } from '@/lib/shared-auth';
 // & Labor") don't fit there even at wide viewports -- the row would need ~1400px of
 // text alone -- so they wrapped to two cramped lines. Short labels here are for this
 // bar ONLY; the mega-menu heading, page H1, and breadcrumbs still use the full name.
+// AdSense-readiness retirement (see category-slugs.ts's CURRENT_CATEGORY_SLUGS
+// comment): shrunk to the 5 live practice areas -- `categories` below is
+// already filtered to CURRENT_CATEGORY_SLUGS, so the retired 8 never reach
+// this map, but their entries were removed rather than left as dead weight.
 const NAV_SHORT_LABEL: Record<string, string> = {
-  business: 'Business',
-  'criminal-law': 'Criminal Law',
-  'family-law': 'Family',
-  'real-estate-law': 'Real Estate',
-  'tax-finance': 'Tax & Finance',
-  'employment-law': 'Employment',
-  'tech-ip': 'Tech & IP',
-  disputes: 'Disputes',
+  'maritime-offshore-injury-law': 'Maritime Injury',
+  'cruise-ship-passenger-vessel-accidents': 'Cruise Ship Accidents',
+  'personal-injury-lawyer': 'Personal Injury',
+  'boating-accidents': 'Boating Accidents',
+  'car-accidents': 'Car Accidents',
 };
+
+/**
+ * seed-data.json's `categories` array predates the AdSense-readiness
+ * retirement and still lists all 8 now-retired practice areas (with none of
+ * the 5 kept ones, which were created directly in the CMS -- see
+ * cms-only-categories.ts) -- an unfiltered fallback to it would put 8 dead
+ * links (301 to / via next.config.ts) in the nav the moment law-service's
+ * /categories API has a hiccup. Filtered the same way the live-API branch
+ * above already is, so a hiccup degrades to no topic links rather than
+ * retired ones.
+ */
+function seedCategories(): any[] {
+  const currentSlugSet = new Set<string>(CURRENT_CATEGORY_SLUGS);
+  return ((seedData as any).categories || []).filter((c: any) => currentSlugSet.has(c.slug));
+}
 
 /**
  * @fileOverview Public masthead — editorial newsroom navigation.
@@ -94,11 +110,11 @@ export function PublicNavbar() {
           setCategories(cats);
           setSubcategories(subs);
         } else {
-          setCategories((seedData as any).categories || []);
+          setCategories(seedCategories());
           setSubcategories((seedData as any).subcategories || []);
         }
       } catch {
-        setCategories((seedData as any).categories || []);
+        setCategories(seedCategories());
         setSubcategories((seedData as any).subcategories || []);
       }
     };

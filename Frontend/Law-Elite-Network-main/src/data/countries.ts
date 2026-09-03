@@ -1,5 +1,6 @@
 import { getAllArticles, type LawArticle } from './law-content';
 import { cmsGetArticles, type CmsArticle } from '@/lib/cms';
+import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
 
 export interface Country {
   name: string;
@@ -57,9 +58,20 @@ export async function getArticlesByCountrySlug(countrySlug: string): Promise<Arr
   const isCountryMatch = (a: { country?: string | null } | undefined) =>
     !!a?.country && countryNameToSlug(a.country) === countrySlug;
 
+  // AdSense-readiness retirement (see category-slugs.ts's CURRENT_CATEGORY_SLUGS
+  // comment): a jurisdiction-tagged article in a now-retired practice area must
+  // not surface on a country hub -- this page links every match via
+  // articleUrl(), which would otherwise point straight into the retired
+  // category's /article/{slug} gap from a still-live, indexed page.
+  const currentSlugSet = new Set<string>(CURRENT_CATEGORY_SLUGS);
+  const isKeptCategory = (a: { category?: { slug?: string } } | undefined) => {
+    const rawSlug = a?.category?.slug;
+    return !rawSlug || currentSlugSet.has(toNewCategorySlug(rawSlug));
+  };
+
   const slugs = new Set([
-    ...bundled.filter(isCountryMatch).map((a) => a.slug),
-    ...cms.filter(isCountryMatch).map((a) => a.slug),
+    ...bundled.filter((a) => isCountryMatch(a) && isKeptCategory(a)).map((a) => a.slug),
+    ...cms.filter((a) => isCountryMatch(a) && isKeptCategory(a)).map((a) => a.slug),
   ]);
 
   return Array.from(slugs)
