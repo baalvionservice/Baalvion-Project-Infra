@@ -194,6 +194,74 @@ const nextConfig: NextConfig = {
       { source: '/unemployment/:path*', destination: '/', permanent: true },
       // ── end temporary retirement block ──
 
+      // ── TEMPORARY: thin Stocks articles archived pending rewrite (2026-09-04) ──
+      // 55 of the 83 Stocks articles are still the original ~250-word versions (the
+      // other 28 are research-grade rewrites and stay live). Archived in the CMS and
+      // redirected here for the same reason as the category block above: the article
+      // route ([...slug]/page.tsx) falls back to a bundled demo article when the CMS
+      // lookup for a slug comes back empty, so simply archiving one of these without a
+      // redirect risks serving fabricated content on a URL Google may already have
+      // indexed. Destination is /stocks (the live hub), not / — these are Stocks
+      // content, and a topically-relevant redirect target doesn't read as a soft-404
+      // the way a mass redirect to the homepage would. Remove each entry as its
+      // article gets rewritten and republished.
+      { source: '/stocks/active-investing-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/best-long-term-stocks', destination: '/stocks', permanent: true },
+      { source: '/stocks/best-stocks-for-beginners', destination: '/stocks', permanent: true },
+      { source: '/stocks/beta-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/blue-chip-stocks-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/buy-and-hold-strategy', destination: '/stocks', permanent: true },
+      { source: '/stocks/candlestick-charts-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/common-stock-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/common-stock-investing-mistakes', destination: '/stocks', permanent: true },
+      { source: '/stocks/contrarian-investing-strategy', destination: '/stocks', permanent: true },
+      { source: '/stocks/cyclical-stocks-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/defensive-stocks-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/diversification-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/dividend-investing-strategy', destination: '/stocks', permanent: true },
+      { source: '/stocks/dividend-stocks-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/dividend-stocks-for-passive-income', destination: '/stocks', permanent: true },
+      { source: '/stocks/dollarcost-averaging-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/first-stock-purchase-guide', destination: '/stocks', permanent: true },
+      { source: '/stocks/floating-shares-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/fractional-shares-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/fundamental-analysis-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/growth-investing-strategy', destination: '/stocks', permanent: true },
+      { source: '/stocks/growth-stocks-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/growth-stocks-vs-value-stocks', destination: '/stocks', permanent: true },
+      { source: '/stocks/high-risk-vs-low-risk-stock', destination: '/stocks', permanent: true },
+      { source: '/stocks/how-much-money-to-start-investing', destination: '/stocks', permanent: true },
+      { source: '/stocks/how-stock-prices-change', destination: '/stocks', permanent: true },
+      { source: '/stocks/how-to-analyze-a-stock', destination: '/stocks', permanent: true },
+      { source: '/stocks/how-to-build-a-stock-portfolio', destination: '/stocks', permanent: true },
+      { source: '/stocks/how-to-buy-stocks-online', destination: '/stocks', permanent: true },
+      { source: '/stocks/how-to-start-investing-in-stocks', destination: '/stocks', permanent: true },
+      { source: '/stocks/index-investing-strategy', destination: '/stocks', permanent: true },
+      { source: '/stocks/international-stocks-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/large-cap-stocks-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/long-term-investing-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/meme-stocks-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/mid-cap-stocks-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/momentum-investing-strategy', destination: '/stocks', permanent: true },
+      { source: '/stocks/moving-averages-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/opening-a-brokerage-account', destination: '/stocks', permanent: true },
+      { source: '/stocks/passive-investing-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/portfolio-allocation-basics', destination: '/stocks', permanent: true },
+      { source: '/stocks/preferred-stock-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/risk-management-for-stock-investors', destination: '/stocks', permanent: true },
+      { source: '/stocks/shareholder-voting-rights', destination: '/stocks', permanent: true },
+      { source: '/stocks/stock-certificates-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/supply-and-demand-in-stocks', destination: '/stocks', permanent: true },
+      { source: '/stocks/support-and-resistance-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/technical-analysis-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/treasury-shares-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/trend-lines-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/value-investing-strategy', destination: '/stocks', permanent: true },
+      { source: '/stocks/value-stocks-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/volume-analysis-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/what-is-a-shareholder', destination: '/stocks', permanent: true },
+      // ── end temporary thin-stocks block ──
+
       { source: '/admin', destination: `${admin}/dashboard`, permanent: false },
       { source: '/admin/:path*', destination: `${admin}/dashboard`, permanent: false },
       { source: '/editor', destination: `${admin}/cms/workflows`, permanent: false },
