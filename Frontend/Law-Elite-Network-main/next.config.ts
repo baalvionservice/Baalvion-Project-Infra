@@ -211,6 +211,11 @@ const nextConfig: NextConfig = {
       { source: '/us-law-and-constitution/:path*', destination: '/', permanent: true },
       { source: '/religion-law-and-weird-laws/:path*', destination: '/', permanent: true },
       { source: '/legal-education-and-history/:path*', destination: '/', permanent: true },
+      // Second retirement pass: 5 categories narrowed to 3 -- Boating
+      // Accidents and Car Accidents were the shallowest of the 5 (4 and 2
+      // articles), retired alongside the other 11 above.
+      { source: '/boating-accidents/:path*', destination: '/', permanent: true },
+      { source: '/car-accidents/:path*', destination: '/', permanent: true },
       // The 10 standalone guides below used to live in ROOT_FLAT_ARTICLE_SLUGS
       // (src/lib/article-url.ts), which made their canonical URL a bare root
       // slug -- no category prefix for a wildcard rule above to catch. Removed
@@ -227,6 +232,15 @@ const nextConfig: NextConfig = {
       { source: '/weird-silly-crazy-laws-in-the-usa', destination: '/', permanent: true },
       { source: '/best-law-schools-in-the-usa', destination: '/', permanent: true },
       { source: '/law-enforcement-in-1900s-america', destination: '/', permanent: true },
+      // Same reasoning, second pass: these 6 used to live in
+      // ROOT_FLAT_ARTICLE_SLUGS (src/lib/article-url.ts) as bare-root guides
+      // for the now-retired Boating Accidents / Car Accidents categories.
+      { source: '/boating-accident-lawyer', destination: '/', permanent: true },
+      { source: '/what-to-do-after-a-boating-accident', destination: '/', permanent: true },
+      { source: '/boating-accident-statute-of-limitations', destination: '/', permanent: true },
+      { source: '/boating-accident-liability-and-fault', destination: '/', permanent: true },
+      { source: '/best-car-accident-lawyer', destination: '/', permanent: true },
+      { source: '/what-does-a-car-accident-lawyer-do', destination: '/', permanent: true },
     ];
   },
 

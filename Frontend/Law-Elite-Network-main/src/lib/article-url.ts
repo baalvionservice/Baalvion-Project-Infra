@@ -11,12 +11,16 @@ import { CURRENT_CATEGORY_SLUGS } from '@/lib/category-slugs';
  * article instead of 404ing as an unknown category.
  */
 export const ROOT_FLAT_ARTICLE_SLUGS = new Set([
-  'boating-accident-lawyer',
-  'what-to-do-after-a-boating-accident',
-  'boating-accident-statute-of-limitations',
-  'boating-accident-liability-and-fault',
-  'best-car-accident-lawyer',
-  'what-does-a-car-accident-lawyer-do',
+  // AdSense-readiness retirement: boating-accident-lawyer/what-to-do-after-a-
+  // boating-accident/boating-accident-statute-of-limitations/boating-accident-
+  // liability-and-fault (boating-accidents) and best-car-accident-lawyer/
+  // what-does-a-car-accident-lawyer-do (car-accidents) were removed from here
+  // for the same reason as the batch below: this set makes articleUrl()
+  // return a bare root URL unconditionally, bypassing the CURRENT_CATEGORY_SLUGS
+  // check -- keeping them would have left 6 retired-category articles
+  // permanently "canonical" at an unprefixed, unredirectable URL even after
+  // their category was retired. See next.config.ts's redirects() for the
+  // explicit 301s on their old bare-root URLs.
   // AdSense-readiness retirement: divorce-law-in-maryland/how-divorce-works-in-the-us
   // (family-law), us-constitution-how-laws-are-made/how-the-us-legal-system-works/
   // how-many-laws-are-there-in-the-us (us-law-and-constitution),

@@ -101,11 +101,13 @@ function toNewCategorySlug(oldSlug) {
   return CATEGORY_SLUG_RENAME[oldSlug] || oldSlug;
 }
 
-// The 11 categories retired from the live site (see category-slugs.ts's
-// CURRENT_CATEGORY_SLUGS comment) plus the 2 orphan CMS categories that were
-// never wired to a category-page route at all (legal-guides, 15 articles;
-// immigration-law-visas, 1 article) -- both already only ever reachable via
-// the /article/{slug} fallback, and treated as retired the same way.
+// The 13 categories retired from the live site (see category-slugs.ts's
+// CURRENT_CATEGORY_SLUGS comment -- second pass narrowed the original 5 kept
+// categories down to 3, adding boating-accidents/car-accidents to this set)
+// plus the 2 orphan CMS categories that were never wired to a category-page
+// route at all (legal-guides, 15 articles; immigration-law-visas, 1 article)
+// -- both already only ever reachable via the /article/{slug} fallback, and
+// treated as retired the same way.
 const RETIRED_CATEGORY_SLUGS = new Set([
   'business',
   'criminal-law',
@@ -118,6 +120,8 @@ const RETIRED_CATEGORY_SLUGS = new Set([
   'us-law-and-constitution',
   'religion-law-and-weird-laws',
   'legal-education-and-history',
+  'boating-accidents',
+  'car-accidents',
   'legal-guides',
   'immigration-law-visas',
 ]);

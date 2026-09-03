@@ -28,15 +28,13 @@ import { sharedSignInUrl } from '@/lib/shared-auth';
 // text alone -- so they wrapped to two cramped lines. Short labels here are for this
 // bar ONLY; the mega-menu heading, page H1, and breadcrumbs still use the full name.
 // AdSense-readiness retirement (see category-slugs.ts's CURRENT_CATEGORY_SLUGS
-// comment): shrunk to the 5 live practice areas -- `categories` below is
-// already filtered to CURRENT_CATEGORY_SLUGS, so the retired 8 never reach
+// comment): shrunk to the 3 live practice areas -- `categories` below is
+// already filtered to CURRENT_CATEGORY_SLUGS, so the retired 13 never reach
 // this map, but their entries were removed rather than left as dead weight.
 const NAV_SHORT_LABEL: Record<string, string> = {
   'maritime-offshore-injury-law': 'Maritime Injury',
   'cruise-ship-passenger-vessel-accidents': 'Cruise Ship Accidents',
   'personal-injury-lawyer': 'Personal Injury',
-  'boating-accidents': 'Boating Accidents',
-  'car-accidents': 'Car Accidents',
 };
 
 /**
