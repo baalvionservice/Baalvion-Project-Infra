@@ -191,6 +191,42 @@ const nextConfig: NextConfig = {
       // already covers in full (2,700+ words, explicit state-by-state framing).
       // Redirected rather than rewritten into a third competing divorce-process page.
       { source: '/article/navigating-the-divorce-process', destination: '/family-law/how-divorce-works-in-the-us', permanent: true },
+      // AdSense-readiness retirement (see src/lib/category-slugs.ts's
+      // CURRENT_CATEGORY_SLUGS comment): shrunk the live site to the 5
+      // personal-injury/maritime-injury categories and retired these 11. Their
+      // CMS content isn't deleted -- these are 301s so an already-indexed URL
+      // doesn't 404, not a takedown -- and this whole block gets removed once
+      // the categories are restored post-resubmission. Wildcard on each new
+      // slug also catches the corresponding /law/{old-slug} legacy path: that
+      // shim (src/app/law/[categorySlug]/page.tsx) 308s to /{new-slug} first,
+      // which then hits the matching rule below on the follow-up request.
+      { source: '/business/:path*', destination: '/', permanent: true },
+      { source: '/criminal-law/:path*', destination: '/', permanent: true },
+      { source: '/family-law/:path*', destination: '/', permanent: true },
+      { source: '/real-estate-law/:path*', destination: '/', permanent: true },
+      { source: '/tax-finance/:path*', destination: '/', permanent: true },
+      { source: '/employment-law/:path*', destination: '/', permanent: true },
+      { source: '/tech-ip/:path*', destination: '/', permanent: true },
+      { source: '/disputes/:path*', destination: '/', permanent: true },
+      { source: '/us-law-and-constitution/:path*', destination: '/', permanent: true },
+      { source: '/religion-law-and-weird-laws/:path*', destination: '/', permanent: true },
+      { source: '/legal-education-and-history/:path*', destination: '/', permanent: true },
+      // The 10 standalone guides below used to live in ROOT_FLAT_ARTICLE_SLUGS
+      // (src/lib/article-url.ts), which made their canonical URL a bare root
+      // slug -- no category prefix for a wildcard rule above to catch. Removed
+      // from that set as part of the same retirement (their real CMS category
+      // is one of the 11 retired ones), so each needs its own explicit 301
+      // rather than falling through to a 404 for a URL that was previously live.
+      { source: '/divorce-law-in-maryland', destination: '/', permanent: true },
+      { source: '/how-divorce-works-in-the-us', destination: '/', permanent: true },
+      { source: '/us-constitution-how-laws-are-made', destination: '/', permanent: true },
+      { source: '/how-the-us-legal-system-works', destination: '/', permanent: true },
+      { source: '/how-many-laws-are-there-in-the-us', destination: '/', permanent: true },
+      { source: '/is-sharia-law-legal-in-the-united-states', destination: '/', permanent: true },
+      { source: '/muslim-law-and-legal-practices-in-the-us', destination: '/', permanent: true },
+      { source: '/weird-silly-crazy-laws-in-the-usa', destination: '/', permanent: true },
+      { source: '/best-law-schools-in-the-usa', destination: '/', permanent: true },
+      { source: '/law-enforcement-in-1900s-america', destination: '/', permanent: true },
     ];
   },
 

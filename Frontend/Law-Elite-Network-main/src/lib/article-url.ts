@@ -17,16 +17,19 @@ export const ROOT_FLAT_ARTICLE_SLUGS = new Set([
   'boating-accident-liability-and-fault',
   'best-car-accident-lawyer',
   'what-does-a-car-accident-lawyer-do',
-  'divorce-law-in-maryland',
-  'how-divorce-works-in-the-us',
-  'us-constitution-how-laws-are-made',
-  'how-the-us-legal-system-works',
-  'how-many-laws-are-there-in-the-us',
-  'is-sharia-law-legal-in-the-united-states',
-  'muslim-law-and-legal-practices-in-the-us',
-  'weird-silly-crazy-laws-in-the-usa',
-  'best-law-schools-in-the-usa',
-  'law-enforcement-in-1900s-america',
+  // AdSense-readiness retirement: divorce-law-in-maryland/how-divorce-works-in-the-us
+  // (family-law), us-constitution-how-laws-are-made/how-the-us-legal-system-works/
+  // how-many-laws-are-there-in-the-us (us-law-and-constitution),
+  // is-sharia-law-legal-in-the-united-states/muslim-law-and-legal-practices-in-the-us/
+  // weird-silly-crazy-laws-in-the-usa (religion-law-and-weird-laws), and
+  // best-law-schools-in-the-usa/law-enforcement-in-1900s-america
+  // (legal-education-and-history) were removed from here on purpose: this set
+  // makes articleUrl() return a bare root URL unconditionally, bypassing the
+  // CURRENT_CATEGORY_SLUGS check entirely -- keeping them here would have left
+  // 10 retired-category articles permanently "canonical" at an unprefixed,
+  // unredirectable URL even after their category was retired. Removed, they
+  // fall through to the normal /article/{slug} fallback (see next.config.ts's
+  // redirects() for the explicit 301s on their old bare-root URLs).
   'what-is-a-personal-injury-lawyer',
   'contingency-fee-agreements-explained',
   'how-to-choose-a-personal-injury-lawyer',
@@ -64,7 +67,7 @@ export const ROOT_FLAT_ARTICLE_SLUGS = new Set([
  * Canonical article URL: /{category}/{article-slug}. Subcategory is metadata
  * only (a filter chip on the category page via ?sub=, see CategoryContent.tsx)
  * and never appears in the URL. An article with no category at all, or whose
- * category slug isn't one of the site's 8 real category pages (the CMS lets
+ * category slug isn't one of the site's real category pages (the CMS lets
  * an article be tagged with an arbitrary/legacy category string that has no
  * route -- e.g. a narrow one-off like `criminal-law-dui-defense` instead of
  * `criminal-law`), falls back to the flat /article/{slug} URL via the redirect

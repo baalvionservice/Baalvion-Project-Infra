@@ -65,15 +65,19 @@ function bundledCategory(slug: string) {
  * blank out editorial copy that only exists locally -- e.g. tech-ip's.
  */
 async function fetchCategory(slug: string): Promise<any | null> {
+  // AdSense-readiness retirement (see category-slugs.ts's CURRENT_CATEGORY_SLUGS
+  // comment): bundledCategory() below still has real, non-fabricated entries
+  // for all 11 retired categories (seed-data.json + cms-only-categories.ts
+  // were left untouched -- retiring a category means unlisting it, not
+  // deleting its data). The next.config.ts redirects() list is what actually
+  // keeps a retired category's URL from reaching this function today, but
+  // this route must not depend solely on that external list staying in sync
+  // -- fail closed here too, before even computing `local`, so a
+  // slug that isn't (or is no longer) one of the 5 live categories can never
+  // render a full category page through this fallback regardless of what
+  // next.config.ts does or doesn't redirect.
+  if (!(CURRENT_CATEGORY_SLUGS as readonly string[]).includes(slug)) return null;
   const local = bundledCategory(slug);
-  // Only trust a live law-service category if the slug is one of the site's
-  // curated practice-area hubs. law-service's DB can contain stray/legacy/
-  // subcategory rows (e.g. `family-law-child-custody`, `legal-guides`) that
-  // were never meant to be standalone pages -- trusting any live "found"
-  // result unconditionally let those render as real (but empty, zero-article)
-  // 200 pages instead of 404ing, which is exactly the kind of thin/orphan
-  // content Google flags and that can jeopardize AdSense approval.
-  if (!(CURRENT_CATEGORY_SLUGS as readonly string[]).includes(slug)) return local;
   const j = await fetchPublicApi(`/categories/${encodeURIComponent(slug)}`);
   const live = j?.data;
   if (!live) return local;
