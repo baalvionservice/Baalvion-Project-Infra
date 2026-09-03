@@ -68,6 +68,108 @@ const nextConfig: NextConfig = {
       process.env.NEXT_PUBLIC_ADMIN_PLATFORM_URL ||
       (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3030');
     return [
+      // ── TEMPORARY: categories retired pending AdSense review (2026-09-03) ──
+      // These 46 categories don't yet meet the content depth bar. Unpublished in the
+      // CMS AND redirected here, because CategoryFeed falls back to bundled demo
+      // articles when a category has zero live posts — an empty category page would
+      // silently show placeholder content dressed as real, which is worse than 404.
+      // Remove this block (and re-add the category to the nav) once its articles are
+      // republished. Wildcard covers both the hub page and any individual article
+      // URL under it, so nothing 404s in the meantime.
+      { source: '/app-reviews', destination: '/', permanent: true },
+      { source: '/app-reviews/:path*', destination: '/', permanent: true },
+      { source: '/auto-loans', destination: '/', permanent: true },
+      { source: '/auto-loans/:path*', destination: '/', permanent: true },
+      { source: '/banking', destination: '/', permanent: true },
+      { source: '/banking/:path*', destination: '/', permanent: true },
+      { source: '/banking-reviews', destination: '/', permanent: true },
+      { source: '/banking-reviews/:path*', destination: '/', permanent: true },
+      { source: '/bonds', destination: '/', permanent: true },
+      { source: '/bonds/:path*', destination: '/', permanent: true },
+      { source: '/brokers', destination: '/', permanent: true },
+      { source: '/brokers/:path*', destination: '/', permanent: true },
+      { source: '/calendar', destination: '/', permanent: true },
+      { source: '/calendar/:path*', destination: '/', permanent: true },
+      { source: '/cd-rates', destination: '/', permanent: true },
+      { source: '/cd-rates/:path*', destination: '/', permanent: true },
+      { source: '/checking', destination: '/', permanent: true },
+      { source: '/checking/:path*', destination: '/', permanent: true },
+      { source: '/commodities', destination: '/', permanent: true },
+      { source: '/commodities/:path*', destination: '/', permanent: true },
+      { source: '/credit', destination: '/', permanent: true },
+      { source: '/credit/:path*', destination: '/', permanent: true },
+      { source: '/credit-cards', destination: '/', permanent: true },
+      { source: '/credit-cards/:path*', destination: '/', permanent: true },
+      { source: '/crypto', destination: '/', permanent: true },
+      { source: '/crypto/:path*', destination: '/', permanent: true },
+      { source: '/cryptocurrency', destination: '/', permanent: true },
+      { source: '/cryptocurrency/:path*', destination: '/', permanent: true },
+      { source: '/debt', destination: '/', permanent: true },
+      { source: '/debt/:path*', destination: '/', permanent: true },
+      { source: '/earnings', destination: '/', permanent: true },
+      { source: '/earnings/:path*', destination: '/', permanent: true },
+      { source: '/economy', destination: '/', permanent: true },
+      { source: '/economy/:path*', destination: '/', permanent: true },
+      { source: '/etfs', destination: '/', permanent: true },
+      { source: '/etfs/:path*', destination: '/', permanent: true },
+      { source: '/fed', destination: '/', permanent: true },
+      { source: '/fed/:path*', destination: '/', permanent: true },
+      { source: '/financial-calculators', destination: '/', permanent: true },
+      { source: '/financial-calculators/:path*', destination: '/', permanent: true },
+      { source: '/financial-independence', destination: '/', permanent: true },
+      { source: '/financial-independence/:path*', destination: '/', permanent: true },
+      { source: '/fiscal-policy', destination: '/', permanent: true },
+      { source: '/fiscal-policy/:path*', destination: '/', permanent: true },
+      { source: '/gdp', destination: '/', permanent: true },
+      { source: '/gdp/:path*', destination: '/', permanent: true },
+      { source: '/global', destination: '/', permanent: true },
+      { source: '/global/:path*', destination: '/', permanent: true },
+      { source: '/indicators', destination: '/', permanent: true },
+      { source: '/indicators/:path*', destination: '/', permanent: true },
+      { source: '/inflation', destination: '/', permanent: true },
+      { source: '/inflation/:path*', destination: '/', permanent: true },
+      { source: '/interest-rates', destination: '/', permanent: true },
+      { source: '/interest-rates/:path*', destination: '/', permanent: true },
+      { source: '/investing', destination: '/', permanent: true },
+      { source: '/investing/:path*', destination: '/', permanent: true },
+      { source: '/live-market-news', destination: '/', permanent: true },
+      { source: '/live-market-news/:path*', destination: '/', permanent: true },
+      { source: '/loan-reviews', destination: '/', permanent: true },
+      { source: '/loan-reviews/:path*', destination: '/', permanent: true },
+      { source: '/loans', destination: '/', permanent: true },
+      { source: '/loans/:path*', destination: '/', permanent: true },
+      { source: '/monetary-policy', destination: '/', permanent: true },
+      { source: '/monetary-policy/:path*', destination: '/', permanent: true },
+      { source: '/money-management', destination: '/', permanent: true },
+      { source: '/money-management/:path*', destination: '/', permanent: true },
+      { source: '/money-market', destination: '/', permanent: true },
+      { source: '/money-market/:path*', destination: '/', permanent: true },
+      { source: '/mortgages', destination: '/', permanent: true },
+      { source: '/mortgages/:path*', destination: '/', permanent: true },
+      { source: '/mutual-funds', destination: '/', permanent: true },
+      { source: '/mutual-funds/:path*', destination: '/', permanent: true },
+      { source: '/options', destination: '/', permanent: true },
+      { source: '/options/:path*', destination: '/', permanent: true },
+      { source: '/personal-finance', destination: '/', permanent: true },
+      { source: '/personal-finance/:path*', destination: '/', permanent: true },
+      { source: '/planning', destination: '/', permanent: true },
+      { source: '/planning/:path*', destination: '/', permanent: true },
+      { source: '/portfolio', destination: '/', permanent: true },
+      { source: '/portfolio/:path*', destination: '/', permanent: true },
+      { source: '/real-estate', destination: '/', permanent: true },
+      { source: '/real-estate/:path*', destination: '/', permanent: true },
+      { source: '/retirement', destination: '/', permanent: true },
+      { source: '/retirement/:path*', destination: '/', permanent: true },
+      { source: '/savings', destination: '/', permanent: true },
+      { source: '/savings/:path*', destination: '/', permanent: true },
+      { source: '/student-loans', destination: '/', permanent: true },
+      { source: '/student-loans/:path*', destination: '/', permanent: true },
+      { source: '/tax-software', destination: '/', permanent: true },
+      { source: '/tax-software/:path*', destination: '/', permanent: true },
+      { source: '/unemployment', destination: '/', permanent: true },
+      { source: '/unemployment/:path*', destination: '/', permanent: true },
+      // ── end temporary retirement block ──
+
       { source: '/admin', destination: `${admin}/dashboard`, permanent: false },
       { source: '/admin/:path*', destination: `${admin}/dashboard`, permanent: false },
       { source: '/editor', destination: `${admin}/cms/workflows`, permanent: false },
@@ -101,8 +203,8 @@ const nextConfig: NextConfig = {
       // /financial-tools/portfolio and /financial-tools/retirement were the
       // old locations before the calculators hub was reorganized — the tools
       // now live at the top level.
-      { source: '/financial-tools/portfolio', destination: '/portfolio', permanent: true },
-      { source: '/financial-tools/retirement', destination: '/retirement', permanent: true },
+      { source: '/financial-tools/portfolio', destination: '/', permanent: true },
+      { source: '/financial-tools/retirement', destination: '/', permanent: true },
       // The old /glossary section (letter index + term-detail pages) was
       // removed in favour of /terms/[letter]/[slug] — still indexed and
       // linked externally. /glossary/letter/k → /terms/k covers the old
@@ -117,9 +219,9 @@ const nextConfig: NextConfig = {
       // together with an adjacent term/entity name when the report was copied.
       // Defensive redirects in case the concatenated form is genuinely being
       // requested from somewhere outside this repo (old sitemap, third-party link).
-      { source: '/etfsETF', destination: '/etfs', permanent: true },
-      { source: '/inflationInflation', destination: '/inflation', permanent: true },
-      { source: '/cryptocurrencyBitcoin', destination: '/cryptocurrency', permanent: true },
+      { source: '/etfsETF', destination: '/', permanent: true },
+      { source: '/inflationInflation', destination: '/', permanent: true },
+      { source: '/cryptocurrencyBitcoin', destination: '/', permanent: true },
       // /markets/quote/DGS2 genuinely 404s — no data source exists for it anywhere
       // (not imperialpedia-service, not the Yahoo fallback map in worldFeed.ts/
       // marketsLoader.ts — no 2-year Treasury yield ticker exists on Yahoo under
@@ -133,15 +235,15 @@ const nextConfig: NextConfig = {
       // A redirect is also strictly cheaper than a 404: no render, no external
       // API call, no compute — versus the 30s-revalidate quote page's renders it
       // would otherwise trigger on every crawl/backlink hit.
-      { source: '/markets/quote/DGS2', destination: '/bonds', permanent: true },
+      { source: '/markets/quote/DGS2', destination: '/', permanent: true },
       // These /categories/<slug> archives 404 because no article's category
       // taxonomy string slugifies to an exact match — but each has a real,
       // populated top-level hub page. Send crawlers/visitors there instead.
-      { source: '/categories/bonds', destination: '/bonds', permanent: true },
-      { source: '/categories/etfs', destination: '/etfs', permanent: true },
-      { source: '/categories/options', destination: '/options', permanent: true },
-      { source: '/categories/banking', destination: '/banking', permanent: true },
-      { source: '/categories/personal-finance', destination: '/personal-finance', permanent: true },
+      { source: '/categories/bonds', destination: '/', permanent: true },
+      { source: '/categories/etfs', destination: '/', permanent: true },
+      { source: '/categories/options', destination: '/', permanent: true },
+      { source: '/categories/banking', destination: '/', permanent: true },
+      { source: '/categories/personal-finance', destination: '/', permanent: true },
       // /category/<slug> was a second, older news-by-category page (NewsLayout,
       // static placeholder market widget) rendering the same categories as the
       // real live feed at /latest/<slug> — two indexable URLs for the same
