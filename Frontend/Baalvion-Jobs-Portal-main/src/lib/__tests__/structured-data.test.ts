@@ -172,7 +172,9 @@ describe('generateJobPostingStructuredData', () => {
     expect(result.applicantLocationRequirements.name).toBe(
       'United Arab Emirates',
     );
-    expect(result.url).toContain('/careers/countries/uae/jobs/');
+    // Canonical shape is /careers/jobs/<place>/<role-slug>-<id> (src/lib/job-url.ts) —
+    // no placeSlug on mockJob, so it falls back to the resolved country slug.
+    expect(result.url).toContain('/careers/jobs/uae/senior-frontend-engineer-job-1');
   });
 
   test('maps Principal experience band to months of experience', () => {

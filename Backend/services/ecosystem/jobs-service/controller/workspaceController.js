@@ -3,7 +3,7 @@ const { Op } = require('sequelize');
 const db = require('../models');
 const { AppError } = require('../utils/errors');
 const { sendSuccess, sendPaginated } = require('../utils/response');
-const { sendMail, companyNameFor } = require('../service/candidateLifecycle');
+const { sendMail, companyNameFor, issueEmployeeCodeOnHire } = require('../service/candidateLifecycle');
 
 let _queues;
 const getQueues = () => { if (!_queues) { try { _queues = require('../queues'); } catch { _queues = null; } } return _queues; };
@@ -108,7 +108,12 @@ const respondToOffer = async (req, res, next) => {
         if (!['ACCEPTED', 'REJECTED'].includes(response)) throw new AppError('VALIDATION_ERROR', 'response must be ACCEPTED or REJECTED', 422);
         await offer.update({ status: response });
         // Reflect on the application
-        if (offer.application) await offer.application.update({ status: response === 'ACCEPTED' ? 'hired' : 'rejected', hired_at: response === 'ACCEPTED' ? new Date() : null });
+        if (offer.application) {
+            await offer.application.update({ status: response === 'ACCEPTED' ? 'hired' : 'rejected', hired_at: response === 'ACCEPTED' ? new Date() : null });
+            // A staff-recorded offer response is a hire like any other — same Employee ID path
+            // as the candidate's own accept (meController.respondToMyOffer) and a status-change hire.
+            if (response === 'ACCEPTED') await issueEmployeeCodeOnHire(offer.application);
+        }
         return sendSuccess(req, res, serializeOffer(await db.Offer.findByPk(offer.id, { include: offerInclude })));
     } catch (err) { return next(err); }
 };

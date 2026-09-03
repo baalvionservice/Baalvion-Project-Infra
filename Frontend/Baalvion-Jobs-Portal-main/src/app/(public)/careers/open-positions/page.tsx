@@ -24,7 +24,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   // canonicalise to the clean listing and are kept out of the index.
   const filtered = Boolean(
     params.q || params.where || params.department || params.country ||
-    params.employmentType || params.level || params.remote,
+    params.employmentType || params.level || params.remote || params.metro,
   );
   const base = `${AppConfig.baseUrl}/careers/open-positions`;
   const canonical = filtered ? base : page > 1 ? `${base}?page=${page}` : base;
@@ -70,6 +70,7 @@ export default async function OpenPositionsPage(props: Props) {
         limit: PUBLIC_PAGE_SIZE,
         search: params.q,
         city: params.where,
+        metro: params.metro,
         departmentId: params.department,
         countryId: params.country,
         job_type: params.employmentType,
@@ -118,7 +119,7 @@ export default async function OpenPositionsPage(props: Props) {
 
   const isFiltered = Boolean(
     params.q || params.where || params.department || params.country ||
-    params.employmentType || params.level || params.remote,
+    params.employmentType || params.level || params.remote || params.metro,
   );
 
   return (

@@ -4,4 +4,4 @@
 -- the candidates worth attracting. Keeping them apart lets the required list stay honest
 -- about what we would actually turn somebody down for.
 
-ALTER TABLE job_listings ADD COLUMN IF NOT EXISTS preferred_qualifications TEXT;
+ALTER TABLE jobs.job_listings ADD COLUMN IF NOT EXISTS preferred_qualifications TEXT;
