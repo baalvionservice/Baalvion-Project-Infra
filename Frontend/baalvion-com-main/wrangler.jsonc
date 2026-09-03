@@ -17,6 +17,16 @@
   // everywhere — CI, the dashboard, and a developer's laptop behave identically.
   // wrangler runs this before both `deploy` and `dev`, so package.json's deploy/preview
   // scripts must NOT also run `next build` or the site would be built twice.
+  //
+  // ⚠️  The "Build command" field in the Workers Builds dashboard
+  //     (Settings → Build) MUST STAY EMPTY. It is passed straight to /bin/sh, so a
+  //     human-readable note in that field is executed as a command. It previously held:
+  //         npm run build (runs next build, static export to out/)
+  //     which failed EVERY build across at least seven PRs with:
+  //         /bin/sh: 1: Syntax error: "(" unexpected
+  //     Nothing about the site was broken — baalvion.com kept serving the last good
+  //     deploy — so it read as harmless red CI while shipping was silently frozen.
+  //     Keep the build step here in version control, where review can catch a typo.
   "build": {
     "command": "npm run build"
   },
