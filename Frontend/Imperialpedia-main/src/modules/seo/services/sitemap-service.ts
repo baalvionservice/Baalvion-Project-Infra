@@ -238,6 +238,10 @@ export const sitemapService = {
       "cd-rates", "checking", "credit-cards", "crypto",
       "cryptocurrency", "debt", "earnings", "emergency-fund",
       "family-budget", "fed", "financial-calculators", "financial-independence",
+      // New category (2026-09-04), no articles published yet — gated the same
+      // way as every other non-corePages hub, so it starts appearing in the
+      // sitemap automatically the moment the first article goes live.
+      "fraud-protection",
       // "income", "insurance", and "taxes" removed — none has a live route
       // (all permanently 410 in middleware.ts REMOVED_PATHS), so checking
       // categoryHasLiveContent for them could submit URLs to the sitemap that

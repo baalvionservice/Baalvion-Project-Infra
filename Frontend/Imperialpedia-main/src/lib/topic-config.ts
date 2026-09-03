@@ -3100,6 +3100,28 @@ const OVERRIDES: Record<string, TopicCopy> = {
       },
     ],
   },
+  // 2026-09-04: new category, staged ahead of its articles. Deliberately NOT
+  // added to CATEGORY_GROUPS (no parent eyebrow — it isn't a sub-topic of
+  // anything else on this site) and NOT linked from Navbar yet — CategoryFeed
+  // falls back to unrelated bundled demo content for any category with 0 live
+  // articles (see the /budgeting fix above), so this stays unlinked/unindexed
+  // until real articles are published under it. Safe to keep here meanwhile:
+  // topicCopy is just page chrome, inert with no traffic reaching it.
+  'fraud-protection': {
+    tag: 'FRAUD PROTECTION',
+    title: 'Scams & Fraud Protection',
+    description:
+      'How scammers actually operate — the tools, platforms, and tricks they exploit to steal money — and the concrete steps that stop them, explained in plain English.',
+    intro:
+      'Fraud has moved online, and the tools that make legitimate digital life easier — targeted ads, free design software, browser tracking, instant messaging, SMS-based login codes — are the same tools scammers exploit to make fraud more convincing. This section explains how specific scam types actually work, mechanism by mechanism, using real regulatory data and documented cases rather than generic warnings, so the red flags are recognizable before money moves.',
+    keyTakeaways: [
+      'Scammers exploit trust, urgency, and unfamiliar technology — not a victim\'s intelligence. Anyone can be targeted with a convincing enough setup.',
+      'Legitimate banks, government agencies, and companies will never ask for payment via gift cards, cryptocurrency transfers, or wire transfers to "verify" your identity.',
+      'Fraud increasingly uses the same tools as legitimate business — ad platforms, design software, data brokers — which is why it looks more convincing than it used to.',
+      'Verifying independently (calling a bank\'s official number, checking a domain directly rather than clicking a link) defeats nearly every scam type covered here.',
+      'If money has already moved, speed matters: contact your bank\'s fraud department immediately and file a report with the FTC (reportfraud.ftc.gov) or FBI IC3 (ic3.gov).',
+    ],
+  },
   'budgeting-basics': {
     tag: 'BUDGETING BASICS',
     title: 'Budgeting Basics',
