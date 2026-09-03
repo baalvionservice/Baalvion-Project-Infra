@@ -69,13 +69,23 @@ const nextConfig: NextConfig = {
       (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3030');
     return [
       // ── TEMPORARY: categories retired pending AdSense review (2026-09-03) ──
-      // These 46 categories don't yet meet the content depth bar. Unpublished in the
+      // These 54 categories don't yet meet the content depth bar. Unpublished in the
       // CMS AND redirected here, because CategoryFeed falls back to bundled demo
       // articles when a category has zero live posts — an empty category page would
       // silently show placeholder content dressed as real, which is worse than 404.
       // Remove this block (and re-add the category to the nav) once its articles are
       // republished. Wildcard covers both the hub page and any individual article
       // URL under it, so nothing 404s in the meantime.
+      //
+      // 2026-09-04: 8 of the 54 (advanced-budgeting, budget-rules, budgeting-apps,
+      // emergency-fund, family-budget, monthly-budget, saving-money, student-budget)
+      // aren't thin — they're a consolidation. Each had only 3-5 articles, so as
+      // standalone category pages they read as the same thin-content pattern as the
+      // other 46. Their articles were recategorized into budgeting-basics (37 total
+      // now), not archived — see recategorize-and-archive.cjs. budgeting-basics
+      // itself stays live and out of this block.
+      { source: '/advanced-budgeting', destination: '/', permanent: true },
+      { source: '/advanced-budgeting/:path*', destination: '/', permanent: true },
       { source: '/app-reviews', destination: '/', permanent: true },
       { source: '/app-reviews/:path*', destination: '/', permanent: true },
       { source: '/auto-loans', destination: '/', permanent: true },
@@ -88,6 +98,10 @@ const nextConfig: NextConfig = {
       { source: '/bonds/:path*', destination: '/', permanent: true },
       { source: '/brokers', destination: '/', permanent: true },
       { source: '/brokers/:path*', destination: '/', permanent: true },
+      { source: '/budget-rules', destination: '/', permanent: true },
+      { source: '/budget-rules/:path*', destination: '/', permanent: true },
+      { source: '/budgeting-apps', destination: '/', permanent: true },
+      { source: '/budgeting-apps/:path*', destination: '/', permanent: true },
       { source: '/calendar', destination: '/', permanent: true },
       { source: '/calendar/:path*', destination: '/', permanent: true },
       { source: '/cd-rates', destination: '/', permanent: true },
@@ -110,8 +124,12 @@ const nextConfig: NextConfig = {
       { source: '/earnings/:path*', destination: '/', permanent: true },
       { source: '/economy', destination: '/', permanent: true },
       { source: '/economy/:path*', destination: '/', permanent: true },
+      { source: '/emergency-fund', destination: '/', permanent: true },
+      { source: '/emergency-fund/:path*', destination: '/', permanent: true },
       { source: '/etfs', destination: '/', permanent: true },
       { source: '/etfs/:path*', destination: '/', permanent: true },
+      { source: '/family-budget', destination: '/', permanent: true },
+      { source: '/family-budget/:path*', destination: '/', permanent: true },
       { source: '/fed', destination: '/', permanent: true },
       { source: '/fed/:path*', destination: '/', permanent: true },
       { source: '/financial-calculators', destination: '/', permanent: true },
@@ -144,6 +162,8 @@ const nextConfig: NextConfig = {
       { source: '/money-management/:path*', destination: '/', permanent: true },
       { source: '/money-market', destination: '/', permanent: true },
       { source: '/money-market/:path*', destination: '/', permanent: true },
+      { source: '/monthly-budget', destination: '/', permanent: true },
+      { source: '/monthly-budget/:path*', destination: '/', permanent: true },
       { source: '/mortgages', destination: '/', permanent: true },
       { source: '/mortgages/:path*', destination: '/', permanent: true },
       { source: '/mutual-funds', destination: '/', permanent: true },
@@ -160,8 +180,12 @@ const nextConfig: NextConfig = {
       { source: '/real-estate/:path*', destination: '/', permanent: true },
       { source: '/retirement', destination: '/', permanent: true },
       { source: '/retirement/:path*', destination: '/', permanent: true },
+      { source: '/saving-money', destination: '/', permanent: true },
+      { source: '/saving-money/:path*', destination: '/', permanent: true },
       { source: '/savings', destination: '/', permanent: true },
       { source: '/savings/:path*', destination: '/', permanent: true },
+      { source: '/student-budget', destination: '/', permanent: true },
+      { source: '/student-budget/:path*', destination: '/', permanent: true },
       { source: '/student-loans', destination: '/', permanent: true },
       { source: '/student-loans/:path*', destination: '/', permanent: true },
       { source: '/tax-software', destination: '/', permanent: true },
