@@ -101,7 +101,35 @@ export const sitemapService = {
     // point built around /countries and /technologies, both already gone. Route deleted
     // and permanently 410'd (see middleware.ts REMOVED_PATHS); submitting it here would
     // contradict that.
-    const corePages = ["","/about","/financial-intelligence","/banking","/bonds","/budgeting","/commodities","/credit","/contact","/economy","/etfs","/financial-tools","/financial-tools/compound-interest","/financial-tools/inflation","/financial-tools/investment","/financial-tools/loan","/investing","/market-news","/mutual-funds","/options","/personal-finance","/privacy-policy","/reviews","/stocks","/terms-of-service","/transparency","/world","/world/us","/world/europe","/world/asia","/world/china","/world/emerging"];
+    // 2026-09-03: banking/bonds/commodities/credit/economy/etfs/investing/
+    // mutual-funds/options/personal-finance removed — retired pending AdSense
+    // review (see the redirect block in next.config.ts and Navbar.tsx), so
+    // submitting them here would list URLs that now just 301 to /. Restore
+    // once each category's articles are republished.
+    const corePages = [
+      "",
+      "/about",
+      "/financial-intelligence",
+      "/budgeting",
+      "/contact",
+      "/financial-tools",
+      "/financial-tools/compound-interest",
+      "/financial-tools/inflation",
+      "/financial-tools/investment",
+      "/financial-tools/loan",
+      "/market-news",
+      "/privacy-policy",
+      "/reviews",
+      "/stocks",
+      "/terms-of-service",
+      "/transparency",
+      "/world",
+      "/world/us",
+      "/world/europe",
+      "/world/asia",
+      "/world/china",
+      "/world/emerging",
+    ];
     corePages.forEach((path) => {
       entries.push({
         loc: `${base}${path}`,
