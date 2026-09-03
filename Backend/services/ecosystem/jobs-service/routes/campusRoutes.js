@@ -5,6 +5,11 @@ const { authMiddleware } = require('../middleware/authMiddleware');
 
 const router = Router();
 
+// ─── Public ──────────────────────────────────────────────────────────────────
+// The only campus route without auth: an approved-placements showcase, already
+// stripped to non-identifying fields by the controller.
+router.get('/placements/public', ctrl.listPublicPlacements);
+
 // ─── Colleges ────────────────────────────────────────────────────────────────
 router.get('/colleges', authMiddleware, ctrl.listColleges);
 router.post('/colleges', authMiddleware, ctrl.createCollege);

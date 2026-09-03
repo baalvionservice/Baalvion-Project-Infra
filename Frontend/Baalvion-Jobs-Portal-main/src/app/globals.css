@@ -3,46 +3,89 @@
 @tailwind utilities;
 
 @layer base {
+  /*
+   * Palette, taken from the reference site's own stylesheet rather than guessed at.
+   *
+   * careers.blackrock.com declares --base-color:#6F00EF and leans on four bright
+   * accents used as solid BLOCKS — #ff4713 orange-red (its most-used colour), #ffce00
+   * yellow, #fc9bb3 pink and that purple — over a strict black-on-white base, with
+   * plain black buttons. The colour lives in whole panels, not in tinted text.
+   *
+   * Two earlier attempts missed this: one went monochrome, the next used a blue primary
+   * with an amber accent. Neither was their palette. These are.
+   */
   :root {
-    --background: 220 14% 96%;
-    --foreground: 224 39% 11%;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
 
     --card: 0 0% 100%;
-    --card-foreground: 224 39% 11%;
+    --card-foreground: 0 0% 0%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 224 39% 11%;
+    --popover-foreground: 0 0% 0%;
 
-    --primary: 221 83% 47%;
+    /* Buttons are black. The reference's own .btn is background #000, colour #fff. */
+    --primary: 0 0% 0%;
     --primary-foreground: 0 0% 100%;
-    --primary-soft: 220 87% 93%;
+    --primary-soft: 0 0% 95%;
 
-    --secondary: 158 83% 36%;
+    --secondary: 0 0% 14%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 9% 46%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 32%;
 
-    --accent: 38 92% 50%;
-    --accent-foreground: 224 39% 11%;
+    /* The four brand blocks. Used as panel and badge backgrounds, never as body text. */
+    --brand-orange: 13 100% 54%;
+    --brand-yellow: 48 100% 50%;
+    --brand-pink: 345 94% 80%;
+    --brand-purple: 268 100% 47%;
+    --brand-blue: 203 96% 29%;
 
-    --destructive: 0 84% 60%;
+    --accent: 13 100% 54%;
+    --accent-foreground: 0 0% 0%;
+    --accent-soft: 13 100% 96%;
+    --link: 268 100% 47%;
+
+    --destructive: 0 72% 45%;
     --destructive-foreground: 0 0% 100%;
-    --destructive-soft: 0 94% 95%;
+    --destructive-soft: 0 80% 96%;
 
-    --success: 145 63% 44%;
+    --success: 158 64% 28%;
     --success-foreground: 0 0% 100%;
-    --success-soft: 145 86% 96%;
-    
-    --warning: 38 92% 50%;
-    --warning-foreground: 224 39% 11%;
-    --warning-soft: 45 93% 90%;
+    --success-soft: 158 50% 95%;
 
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 221 83% 47%;
-    
-    --radius: 8px;
+    --warning: 48 100% 50%;
+    --warning-foreground: 0 0% 0%;
+    --warning-soft: 48 100% 94%;
+
+    --border: 0 0% 84%;
+    --input: 0 0% 76%;
+    --ring: 268 100% 47%;
+
+    /* Business-unit hues, drawn from the same five brand colours so the site reads as
+       one palette. The bar is the brand colour; the label text uses a darker cast of it
+       where the bright version would not be legible at 14px. */
+    --unit-technology: 268 100% 47%;
+    --unit-mining: 13 100% 45%;
+    --unit-media: 345 80% 52%;
+    --unit-growth: 48 100% 34%;
+    --unit-customer: 203 96% 29%;
+    --unit-operations: 190 70% 26%;
+    --unit-corporate: 330 70% 40%;
+    --unit-people: 268 70% 40%;
+
+    /* Bar colours keep the full brightness the panels use. */
+    --unit-technology-bar: 268 100% 47%;
+    --unit-mining-bar: 13 100% 54%;
+    --unit-media-bar: 345 94% 80%;
+    --unit-growth-bar: 48 100% 50%;
+    --unit-customer-bar: 203 96% 29%;
+    --unit-operations-bar: 190 70% 34%;
+    --unit-corporate-bar: 330 80% 60%;
+    --unit-people-bar: 268 80% 65%;
+
+    --radius: 4px;
   }
 
   .dark {
@@ -56,6 +99,14 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-inter), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    /* Corporate sans set slightly tight; the default tracking reads loose at these sizes. */
+    letter-spacing: -0.006em;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Headings carry the hierarchy through weight and tracking, not colour. */
+  h1, h2, h3, h4 {
+    letter-spacing: -0.02em;
   }
 }

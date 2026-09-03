@@ -20,8 +20,9 @@ function getNotificationIcon(type: NotificationType) {
     }
 }
 
-export function Notifications({ notifications, isLoading }: { notifications: Notification[], isLoading: boolean }) {
+export function Notifications({ notifications, isLoading }: { notifications: Notification[] | null, isLoading: boolean }) {
     const { toLocalTime } = useTimezone();
+    const items = Array.isArray(notifications) ? notifications : [];
 
     return (
         <Card>
@@ -35,11 +36,11 @@ export function Notifications({ notifications, isLoading }: { notifications: Not
                         <Skeleton className="h-12 w-full" />
                         <Skeleton className="h-12 w-full" />
                     </div>
-                ) : notifications.length === 0 ? (
+                ) : items.length === 0 ? (
                     <p className="text-sm text-muted-foreground">No new notifications.</p>
                 ) : (
                     <ul className="space-y-4">
-                        {notifications.map((notif) => (
+                        {items.map((notif) => (
                             <li key={notif.id} className="flex items-start gap-4">
                                 <div className={cn(
                                     "mt-1 rounded-full p-2",

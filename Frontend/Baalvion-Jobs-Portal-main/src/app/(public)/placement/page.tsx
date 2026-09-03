@@ -27,8 +27,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { placementService } from "@/services/placement.service";
-import { collegeService } from "@/services/college.service";
-import { studentService } from "@/services/student.service";
 import type { Placement, Student, College } from "@/types/placement.types";
 import {
   Building2,
@@ -52,19 +50,26 @@ import {
   Lock,
 } from "lucide-react";
 
-interface EnrichedPlacement extends Placement {
-  studentName?: string;
-  collegeType?: "1" | "2" | "3";
-  documents?: {
-    offerLetterUrl?: string;
-    idProofUrl?: string;
-  };
+/**
+ * What a public showcase is allowed to know about a placement: a first name, the
+ * institution, and where they went. No email, no offer letter, no ID proof — those were
+ * previously linked straight from this page.
+ */
+interface PublicPlacement {
+  id: string;
+  studentName: string;
+  collegeName: string | null;
+  collegeCity: string | null;
+  companyName: string;
+  role: string;
+  packageLpa: number | null;
+  joiningDate: string | null;
 }
 
 interface Stats {
-  totalStudents: number;
-  totalCompanies: number;
-  successRate: string;
+  placements: number;
+  companies: number;
+  colleges: number;
 }
 
 const faqJsonLd = {
@@ -123,11 +128,11 @@ const faqJsonLd = {
 };
 
 export default function PlacementPage() {
-  const [placements, setPlacements] = useState<EnrichedPlacement[]>([]);
+  const [placements, setPlacements] = useState<PublicPlacement[]>([]);
   const [stats, setStats] = useState<Stats>({
-    totalStudents: 0,
-    totalCompanies: 0,
-    successRate: "0%",
+    placements: 0,
+    companies: 0,
+    colleges: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -135,34 +140,13 @@ export default function PlacementPage() {
     async function fetchData() {
       setIsLoading(true);
       try {
-        const [approvedPlacements, allStudents, allColleges] = await Promise.all([
-          placementService.getApprovedPlacements(),
-          studentService.getAllStudents(),
-          collegeService.getAllColleges(),
-        ]);
-
-        const studentsMap = new Map(allStudents.map((s) => [s.id, s]));
-        const collegesMap = new Map(allColleges.map((c: any) => [c.id, c]));
-
-        const enrichedPlacements = approvedPlacements.map((p) => {
-          const student = studentsMap.get(p.studentId);
-          const college = student ? collegesMap.get(student.collegeId) : undefined;
-          return {
-            ...p,
-            studentName: student?.name || "Unknown Student",
-            collegeType: college?.type || "3",
-            documents: student?.documents,
-          };
-        });
-
-        setPlacements(enrichedPlacements);
-
-        const uniqueCompanies = new Set(enrichedPlacements.map((p) => p.companyName)).size;
-        setStats({
-          totalStudents: enrichedPlacements.length,
-          totalCompanies: uniqueCompanies,
-          successRate: "100%",
-        });
+        // One public endpoint. This page used to fetch the entire student and college
+        // tables from admin-only routes and join them in the browser — which 401s for a
+        // visitor, and would have shipped every student's email and documents to anyone
+        // who opened the page if it hadn't.
+        const res = await placementService.getPublicPlacements();
+        setPlacements(res.items);
+        setStats(res.stats);
       } catch (error) {
         console.error("Failed to fetch placement data:", error);
       } finally {
@@ -215,22 +199,24 @@ export default function PlacementPage() {
       {/* ─── Stats Section ────────────────────────────────────────── */}
       <section className="py-12 px-8">
         <div className="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Counts of verified placements actually in the record — the third tile used to
+              read a hardcoded "100%" success rate that nothing measured. */}
           <Card>
             <CardContent className="p-6 text-center">
-              <h2 className="text-4xl font-bold text-primary">{stats.totalStudents}+</h2>
-              <p className="text-muted-foreground mt-2">Students Placed</p>
+              <h2 className="text-4xl font-bold text-primary">{stats.placements}</h2>
+              <p className="text-muted-foreground mt-2">Verified placements</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-6 text-center">
-              <h2 className="text-4xl font-bold text-primary">{stats.totalCompanies}+</h2>
-              <p className="text-muted-foreground mt-2">Partner Companies</p>
+              <h2 className="text-4xl font-bold text-primary">{stats.companies}</h2>
+              <p className="text-muted-foreground mt-2">Hiring companies</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-6 text-center">
-              <h2 className="text-4xl font-bold text-primary">{stats.successRate}</h2>
-              <p className="text-muted-foreground mt-2">Placement Success Rate</p>
+              <h2 className="text-4xl font-bold text-primary">{stats.colleges}</h2>
+              <p className="text-muted-foreground mt-2">Partner institutions</p>
             </CardContent>
           </Card>
         </div>
@@ -544,15 +530,14 @@ export default function PlacementPage() {
                 <TableHead>Student Name</TableHead>
                 <TableHead>Company</TableHead>
                 <TableHead>Role</TableHead>
-                <TableHead>College Type</TableHead>
-                <TableHead>Documents</TableHead>
+                <TableHead>Institution</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={i}>
-                    <TableCell colSpan={5} className="h-12 text-center">
+                    <TableCell colSpan={4} className="h-12 text-center">
                       Loading...
                     </TableCell>
                   </TableRow>
@@ -563,34 +548,14 @@ export default function PlacementPage() {
                     <TableCell className="font-medium">{p.studentName}</TableCell>
                     <TableCell>{p.companyName}</TableCell>
                     <TableCell>{p.role}</TableCell>
-                    <TableCell>Type {p.collegeType}</TableCell>
-                    <TableCell>
-                      {p.documents?.offerLetterUrl && (
-                        <Link
-                          href={p.documents.offerLetterUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-primary hover:underline text-sm mr-2"
-                        >
-                          Offer Letter
-                        </Link>
-                      )}
-                      {p.documents?.idProofUrl && (
-                        <Link
-                          href={p.documents.idProofUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-primary hover:underline text-sm"
-                        >
-                          ID Proof
-                        </Link>
-                      )}
+                    <TableCell className="text-muted-foreground">
+                      {p.collegeName ?? "—"}
                     </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-24 text-center">
+                  <TableCell colSpan={4} className="h-24 text-center">
                     No approved placements to show.
                   </TableCell>
                 </TableRow>

@@ -21,8 +21,22 @@ const AUTH_UPSTREAM =
 
 const IS_HTTPS = (process.env.NEXT_PUBLIC_APP_URL || '').startsWith('https://');
 
+const REFRESH_COOKIE = process.env.NEXT_PUBLIC_REFRESH_COOKIE_NAME || 'baalvion_refresh';
+
 async function proxy(req: NextRequest, path: string[]) {
   const suffix = path.join('/');
+
+  // A visitor who has never signed in has no refresh cookie, so the bootstrap refresh
+  // was guaranteed to 401 — putting a red error in the console on every public page and
+  // spending a round-trip to learn nothing. Not being logged in isn't an error state:
+  // answer it here, without calling upstream.
+  if (suffix === 'refresh' && !req.cookies.get(REFRESH_COOKIE)?.value) {
+    // 200 with no token, not 204: a 204 may carry no body, and the client parses one.
+    // `refresh()` reads accessToken, finds none, and reports "no session" — correctly,
+    // and without an error in the console.
+    return NextResponse.json({ success: true, data: { accessToken: null }, error: null });
+  }
+
   const search = req.nextUrl.search || '';
   const url = `${AUTH_UPSTREAM}/${suffix}${search}`;
 

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Briefcase, MapPin, ChevronsRight } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
+import { jobPath } from '@/lib/job-url';
 
 type JobCardProps = {
     job: Job;
@@ -17,7 +18,9 @@ const JobCardComponent = ({ job, departments, countries }: JobCardProps) => {
     const department = departments.find(d => d.id === job.departmentId)?.name || 'Unknown Department';
     const country = countries.find(c => c.id === job.countryId);
     const location = job.workforceType === 'Remote' ? 'Remote' : `${job.city}, ${country?.name || 'Unknown'}`;
-    const jobUrl = country ? `/careers/countries/${country.slug}/jobs/${job.id}` : `/careers/open-positions`;
+    // One helper builds every job link, so a card can never point somewhere the sitemap
+    // and the structured data don't agree with.
+    const jobUrl = jobPath(job as any, countries as any);
     const applyUrl = country ? `/careers/application/${country.slug}?jobId=${job.id}` : `/careers/open-positions`;
 
     return (

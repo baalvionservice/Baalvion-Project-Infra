@@ -8,7 +8,21 @@ import { PaginatedResponse, TableQuery } from '@/components/system/DataTable';
 
 export const projectServerService: ProjectService = {
   async getProjects(query: TableQuery): Promise<PaginatedResponse<Project>> {
-    const params = new URLSearchParams(query as any).toString();
+    // URLSearchParams stringifies a nested object to the literal "[object Object]",
+    // which the backend then tried to parse as a filter. Flatten the nested `filters`
+    // bag into real query params instead.
+    const flat: Record<string, string> = {};
+    for (const [key, value] of Object.entries(query ?? {})) {
+      if (value === undefined || value === null || value === '') continue;
+      if (key === 'filters' && typeof value === 'object') {
+        for (const [fk, fv] of Object.entries(value as Record<string, unknown>)) {
+          if (fv !== undefined && fv !== null && fv !== '') flat[fk] = String(fv);
+        }
+        continue;
+      }
+      flat[key] = String(value);
+    }
+    const params = new URLSearchParams(flat).toString();
     const response = await apiClient.get<PaginatedResponse<Project>>(
       `/projects?${params}`,
     );

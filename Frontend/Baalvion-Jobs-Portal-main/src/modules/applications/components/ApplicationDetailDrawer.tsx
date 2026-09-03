@@ -12,6 +12,7 @@ import { Loader2 } from 'lucide-react';
 import { MultiPhaseApplicationData } from '@/types';
 import { applicationService } from '@/services/application.service';
 import { Badge } from '@/components/ui/badge';
+import { MessageThread } from './MessageThread';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 function DetailSection({ title, children }: { title: string, children: React.ReactNode }) {
@@ -98,6 +99,12 @@ export function ApplicationDetailDrawer({ applicationId, isOpen, onClose }: Appl
                                         {application.photoId && <Badge variant="outline">Has Photo ID</Badge>}
                                     </div>
                                 </DetailSection>
+                                <MessageThread
+                                    applicationId={applicationId!}
+                                    side="staff"
+                                    title="Conversation with the candidate"
+                                    description="The candidate sees these on their dashboard and gets an email for each one."
+                                />
                             </div>
                         )}
                     </div>

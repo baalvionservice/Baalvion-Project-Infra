@@ -3,7 +3,7 @@
 
 import { useAuthStore } from '@/store/auth.store';
 import { useRouter } from 'next/navigation';
-import { authServerService, getPortalProfile } from '@/services/adapters/server/auth.server';
+import { authServerService, getPortalProfile, updatePortalProfile } from '@/services/adapters/server/auth.server';
 // Single source of truth for backend-role → portal-role mapping (shared with the
 // server-side admin guard in lib/server/onboarding-auth.ts).
 import { normalizeRole } from '@/lib/access/roles';
@@ -37,6 +37,8 @@ export const useAuth = () => {
         avatarUrl: (backendUser.avatarUrl ?? '') as string,
         role:      normalizeRole(String(profile?.role ?? backendUser.role ?? 'CANDIDATE')),
         candidateId: profile?.candidateId ?? null,
+        referenceCode: profile?.referenceCode ?? null,
+        employeeCode:  profile?.employeeCode ?? null,
         isActive:  true,
         createdAt: (backendUser.createdAt ?? new Date().toISOString()) as string,
         updatedAt: (backendUser.updatedAt ?? new Date().toISOString()) as string,
@@ -56,15 +58,23 @@ export const useAuth = () => {
       const res = await authServerService.register(email, password, fullName);
       if (!res.success || !res.data) throw new Error(res.error ?? 'Registration failed');
       const token = (res.data as Record<string, unknown>).token as string;
-      const profile = await getPortalProfile();
+      // The first /me/profile call is what mints the Candidate ID, and the name lives in
+      // auth-service — push it onto the portal profile so the dashboard greets a person,
+      // not an email address.
+      let profile = await getPortalProfile();
+      if (fullName && profile && !profile.name?.includes(' ')) {
+        profile = (await updatePortalProfile({ full_name: fullName })) ?? profile;
+      }
       const portalUser = {
         id:        String(profile?.userId ?? ''),
-        name:      (profile?.name ?? fullName ?? email) as string,
-        fullName:  (profile?.name ?? fullName ?? email) as string,
+        name:      (fullName ?? profile?.name ?? email) as string,
+        fullName:  (fullName ?? profile?.name ?? email) as string,
         email:     (profile?.email ?? email) as string,
         avatarUrl: '',
         role:      normalizeRole(String(profile?.role ?? 'CANDIDATE')),
         candidateId: profile?.candidateId ?? null,
+        referenceCode: profile?.referenceCode ?? null,
+        employeeCode:  profile?.employeeCode ?? null,
         isActive:  true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),

@@ -1,24 +1,24 @@
-
-import { redirect, notFound } from 'next/navigation';
+import { permanentRedirect, notFound } from 'next/navigation';
 import { talentService } from '@/services/talent.service';
+import { jobPath } from '@/lib/job-url';
 
-// This page now serves as a permanent redirect to the new SEO-friendly URL structure.
-export default async function LegacyJobRedirectPage(props: { params: Promise<{ id: string }>}) {
+/**
+ * Legacy job URL → the canonical /careers/jobs/<place>/<role-slug>-<id>.
+ *
+ * `force-dynamic` matters here: on a prerendered route Next cannot send a redirect
+ * status, so it falls back to a 200 page carrying a 1-second `<meta http-equiv=refresh>`.
+ * Search engines treat that as a thin duplicate rather than a consolidation, leaving two
+ * URLs competing for the same job. Rendering per request makes this a real HTTP 308.
+ */
+export const dynamic = 'force-dynamic';
+
+export default async function LegacyJobRedirectPage(props: { params: Promise<{ id: string }> }) {
     const params = await props.params;
     const job = await talentService.getJobById(params.id);
-
-    if (!job) {
-        notFound();
-    }
+    if (!job) notFound();
 
     const country = await talentService.getCountryById(job.countryId);
+    if (!country) permanentRedirect('/careers/open-positions');
 
-    if (!country) {
-        // This could happen if the job's country is no longer active.
-        // Redirecting to a generic open positions page is a safe fallback.
-        redirect(`/careers/open-positions`);
-    }
-
-    // Perform a permanent redirect (HTTP 308) to the new URL structure.
-    redirect(`/careers/countries/${country.slug}/jobs/${job.id}`);
+    permanentRedirect(jobPath(job as any, [country as any]));
 }

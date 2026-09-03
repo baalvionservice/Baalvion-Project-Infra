@@ -6,7 +6,7 @@ import { TableQuery, PaginatedResponse } from '@/components/system/DataTable';
 import { adapter } from './adapter';
 
 export const applicationService = {
-  async submitMultiPhaseApplication(countrySlug: string, data: MultiPhaseApplicationData): Promise<{ success: boolean; applicationId: string; }> {
+  async submitMultiPhaseApplication(countrySlug: string, data: MultiPhaseApplicationData): Promise<{ success: boolean; applicationId: string; referenceCode: string | null; }> {
       // The form carries real File objects (resume, certifications, photoId, …). Upload each to
       // MinIO first (public, anonymous applicant) and replace it with a `<field>Url` string so the
       // payload is JSON-serializable and the backend stores the resume URL on the application.
@@ -35,7 +35,7 @@ export const applicationService = {
       if (!res.ok || !json.success) {
         throw new Error(json?.error || 'Multi-phase application submission failed');
       }
-      return { success: true, applicationId: json.data.applicationId };
+      return { success: true, applicationId: json.data.applicationId, referenceCode: json.data.referenceCode ?? null };
   },
 
   async getApplications(query: TableQuery): Promise<PaginatedResponse<ApplicationWithCandidate>> {

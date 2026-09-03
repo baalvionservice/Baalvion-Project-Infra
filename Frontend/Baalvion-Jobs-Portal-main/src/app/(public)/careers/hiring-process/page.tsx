@@ -2,7 +2,7 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "Our Hiring Process | Baalvion Careers",
+    title: "Our Hiring Process",
     description: "Learn about Baalvion's transparent, four-step hiring process designed to identify the best talent.",
     alternates: {
         canonical: '/careers/hiring-process',

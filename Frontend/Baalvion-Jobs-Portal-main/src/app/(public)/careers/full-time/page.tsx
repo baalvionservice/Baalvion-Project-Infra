@@ -24,9 +24,9 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Full-Time Careers at Baalvion | TalentOS Global Hiring',
+  title: 'Full-Time Roles, Hiring Worldwide',
   description:
-    'Join Baalvion full-time and build the future of global hiring with TalentOS. Remote-first, mission-driven roles with competitive compensation, learning budgets, and real ownership.',
+    'Full-time roles at Baalvion: remote-first, real ownership, competitive pay and a learning budget. Engineering, design, product and operations.',
   keywords: [
     'full-time jobs',
     'Baalvion careers',

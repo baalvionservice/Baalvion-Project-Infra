@@ -14,10 +14,17 @@ import { Job, Country, Department } from '@/lib/talent-acquisition';
 import { talentService } from '@/services/talent.service';
 import { JobCard } from './JobCard';
 import { PaginationControls } from '@/modules/jobs/components/PaginationControls';
+import { PUBLIC_PAGE_SIZE } from '@/config/listing';
 
 type GlobalJobListingProps = {
     countries: Country[];
     departments: Department[];
+    /**
+     * First page of published roles, fetched on the server. Without this the listing
+     * shipped an empty shell and only filled in after a client fetch — so a crawler saw
+     * a job board with no jobs on it, and a visitor saw skeletons on every cold load.
+     */
+    initialJobs?: { data: Job[]; total: number; page: number; limit: number; totalPages: number };
 };
 
 function LoadingSkeleton() {
@@ -85,13 +92,13 @@ function JobFilters({ countries, departments }: { countries: Country[], departme
     );
 }
 
-function JobListings({ countries, departments }: { countries: Country[], departments: Department[] }) {
+function JobListings({ countries, departments, initialJobs }: GlobalJobListingProps) {
     const searchParams = useSearchParams();
     const router = useRouter();
     const pathname = usePathname();
 
     const page = Number(searchParams.get('page')) || 1;
-    const limit = 5; // Set a limit for public pagination
+    const limit = PUBLIC_PAGE_SIZE;
 
     const filters: any = {
         status: 'published',
@@ -106,9 +113,16 @@ function JobListings({ countries, departments }: { countries: Country[], departm
     // Remove undefined filters before stringifying
     Object.keys(filters).forEach(key => filters[key] === undefined && delete filters[key]);
     
+    // The server already rendered the unfiltered first page; hand it to SWR as fallback
+    // data for exactly that key so the first paint has real roles in it and no refetch
+    // happens until the visitor actually filters.
+    const isDefaultView = page === 1 && !searchParams.get('q') && !searchParams.get('countryId')
+        && !searchParams.get('departmentId') && !searchParams.get('employmentType');
+
     const { data: jobsResponse, error, isLoading } = useSWR(
         ['public-jobs', JSON.stringify(filters)],
-        () => talentService.getJobs(filters)
+        () => talentService.getJobs(filters),
+        { fallbackData: isDefaultView ? initialJobs : undefined, revalidateOnMount: !isDefaultView },
     );
 
     const setPage = (newPage: number) => {
@@ -158,7 +172,7 @@ export function GlobalJobListing(props: GlobalJobListingProps) {
     return (
         <Suspense fallback={<LoadingSkeleton />}>
              <div className="space-y-8">
-                <JobFilters {...props} />
+                <JobFilters countries={props.countries} departments={props.departments} />
                 <JobListings {...props} />
             </div>
         </Suspense>

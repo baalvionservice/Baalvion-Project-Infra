@@ -23,10 +23,15 @@ const disallow: string[] = [
   '/login',
   '/register',
   '/careers/application/', // multi-step application flow — not content
-  // Query-string facet/sort/pagination states → keep them out of the index
+  // Sort and view are true duplicates — the same results in a different order — so they
+  // stay out of the index.
+  //
+  // `page=` is deliberately NOT here. Blocking it walled off every result page after the
+  // first, and with twelve roles to a page that left roughly four hundred jobs with no
+  // crawlable internal link anywhere on the site. Pagination is how a crawler walks a
+  // listing; Google's own guidance is to let it, and to self-canonicalise each page.
   '/*?*sort=',
   '/*?*order=',
-  '/*?*page=',
   '/*?*view=',
 ];
 

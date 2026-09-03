@@ -79,7 +79,10 @@ const start = async () => {
         await db.sequelize.authenticate();
         await db.sequelize.query('CREATE SCHEMA IF NOT EXISTS jobs');
         await db.sequelize.sync({ alter: false });
-        console.log('[DB] Connected and synced');
+        // sync() never adds columns to an existing table — the idempotent SQL in migrations/
+        // owns everything sync can't reach (new columns, sequences, check constraints).
+        const applied = await require('./scripts/migrate').runMigrations(db.sequelize);
+        console.log(`[DB] Connected and synced (${applied.length} migrations)`);
         startWorkers();
         require('./service/searchService').ensureIndex().catch(() => {});
     } catch (err) {

@@ -13,6 +13,7 @@ import { ApplicationDetails } from '@/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { useAuth } from '@/hooks/useAuth';
+import { MessageThread } from '@/modules/applications/components/MessageThread';
 
 
 export default function ApplicationDetailPage() {
@@ -77,10 +78,19 @@ export default function ApplicationDetailPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
                 <div className="md:col-span-2 space-y-8">
                     <UpcomingInterviews interviews={interviews} isLoading={isLoading} />
+                    <MessageThread
+                        applicationId={id}
+                        side="candidate"
+                        description="Ask the hiring team anything about this application. They are notified by email, and their reply lands here."
+                    />
                     <DocumentManager documents={documents} />
                 </div>
                 <div className="md:col-span-1">
-                    <ApplicationTimeline stageHistory={stageHistory} currentStage={application.status} />
+                    <ApplicationTimeline
+                        stageHistory={stageHistory}
+                        currentStage={application.status}
+                        appliedAt={application.createdAt}
+                    />
                 </div>
             </div>
         </div>

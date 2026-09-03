@@ -31,12 +31,16 @@ export function OverviewTab({ user }: OverviewTabProps) {
                 const [userApplications, userInterviews, userNotifications] = await Promise.all([
                     applicationService.getApplicationsForUser(user.id),
                     interviewService.getInterviewsForCandidate(user.id),
-                    notificationService.getNotificationsForCandidate(user.id),
+                    // `user.id` is the auth user id; notifications are keyed by the
+                    // jobs-service candidate row. Skip the call until we have one.
+                    user.candidateId
+                        ? notificationService.getNotificationsForCandidate(user.candidateId)
+                        : Promise.resolve([]),
                 ]);
 
                 setApplications(userApplications);
                 setInterviews(userInterviews);
-                setNotifications(userNotifications as Notification[]);
+                setNotifications((userNotifications ?? []) as Notification[]);
             } catch (err) {
                 console.error("Failed to fetch dashboard data:", err);
             } finally {
@@ -45,7 +49,7 @@ export function OverviewTab({ user }: OverviewTabProps) {
         };
         
         fetchData();
-    }, [user.id]);
+    }, [user.id, user.candidateId]);
 
     return (
         <div className="space-y-8">

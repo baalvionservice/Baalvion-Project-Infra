@@ -1,5 +1,11 @@
 export const PIPELINE_STAGES = {
   APPLIED: "Application Submitted",
+  // jobs-service statuses. These were missing, so every application past `applied`
+  // rendered as "Unknown Stage" on the candidate's own dashboard.
+  SCREENING: "Screening",
+  INTERVIEW: "Interview",
+  WITHDRAWN: "Withdrawn",
+  // Legacy/finer-grained stages used by the ATS pipeline board.
   SCREENED: "Screening",
   TECHNICAL_ROUND: "Technical Round",
   HR_ROUND: "HR Round",
@@ -8,6 +14,12 @@ export const PIPELINE_STAGES = {
   HIRED: "Hired",
   REJECTED: "Application Rejected",
 } as const;
+
+/**
+ * The stages an application actually passes through, in order. `rejected` and
+ * `withdrawn` are terminal and sit outside this track.
+ */
+export const CANDIDATE_JOURNEY = ["APPLIED", "SCREENING", "INTERVIEW", "OFFER", "HIRED"] as const;
 
 export type PipelineStage = keyof typeof PIPELINE_STAGES;
 
@@ -19,7 +31,9 @@ export function getStageColor(stage: PipelineStage | string) {
   switch (stage) {
     case "APPLIED":
     case "SCREENED":
+    case "SCREENING":
       return "bg-blue-500";
+    case "INTERVIEW":
     case "TECHNICAL_ROUND":
     case "HR_ROUND":
     case "FINAL_ROUND":
@@ -36,5 +50,5 @@ export function getStageColor(stage: PipelineStage | string) {
 }
 
 export function isApplicationActive(stage: PipelineStage | string): boolean {
-  return !["HIRED", "REJECTED"].includes(stage);
+  return !["HIRED", "REJECTED", "WITHDRAWN"].includes(stage);
 }

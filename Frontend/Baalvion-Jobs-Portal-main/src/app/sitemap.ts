@@ -1,6 +1,10 @@
 import { MetadataRoute } from 'next';
 import { AppConfig } from '@/config/app.config';
 import { talentService } from '@/services/talent.service';
+import { jobPath } from '@/lib/job-url';
+
+// Evaluated once when the module is first loaded — i.e. at build/boot, not per request.
+const BUILD_TIME = Date.now();
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = AppConfig.baseUrl;
@@ -12,7 +16,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: number;
   }[] = [
     { path: '', changeFrequency: 'daily', priority: 1.0 }, // Homepage
-    { path: '/careers', changeFrequency: 'daily', priority: 0.9 },
+    // `/careers` is intentionally absent: it renders the same landing page as `/` and
+    // canonicalises there, so submitting it would ask Google to index a URL we've
+    // already told it not to.
     { path: '/careers/open-positions', changeFrequency: 'daily', priority: 0.9 },
     { path: '/careers/full-time', changeFrequency: 'daily', priority: 0.8 },
     { path: '/careers/part-time', changeFrequency: 'daily', priority: 0.8 },
@@ -37,23 +43,46 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/faqs', changeFrequency: 'monthly', priority: 0.5 },
   ];
 
+  // Static pages change when the site is deployed, not when a crawler asks. Stamping
+  // them with `new Date()` told Google every page had just changed on every fetch —
+  // a freshness claim that is never true, and one crawlers learn to discount.
+  const buildDate = new Date(
+    process.env.VERCEL_GIT_COMMIT_SHA && process.env.BUILD_TIMESTAMP
+      ? Number(process.env.BUILD_TIMESTAMP)
+      : BUILD_TIME,
+  );
+
   const staticUrls: MetadataRoute.Sitemap = staticRoutes.map((route) => ({
     url: `${baseUrl}${route.path}`,
-    lastModified: new Date(),
+    lastModified: buildDate,
     changeFrequency: route.changeFrequency,
     priority: route.priority,
   }));
 
   // Dynamically fetch published jobs and active countries
   let countryUrls: MetadataRoute.Sitemap = [];
+  let placeUrls: MetadataRoute.Sitemap = [];
   let jobUrls: MetadataRoute.Sitemap = [];
 
   try {
-    const allCountries = await talentService.getCountries({ isActive: true });
+    // Two different lists on purpose:
+    //  • hubCountries — the only countries with an editorial page worth submitting.
+    //  • allCountries — needed to resolve EVERY job's URL, because roles are posted
+    //    anywhere. Resolving job URLs against the hub list alone would silently drop
+    //    every job outside those nine from the sitemap.
+    const [hubCountries, allCountries] = await Promise.all([
+      talentService.getCountries({ isActive: true, hub: true }),
+      talentService.getCountries({ isActive: true }),
+    ]);
 
-    countryUrls = allCountries.map((country) => ({
+    // Hub countries carry editorial copy, but any country with live roles is a real,
+    // indexable page and belongs here too. Submitting only the hubs left Dubai,
+    // Singapore, Rotterdam and Lagos out of the sitemap while their jobs were in it.
+    // The countries with no roles are deliberately excluded — they render noindex.
+    const hubSlugs = new Set(hubCountries.map((c) => c.slug));
+    countryUrls = hubCountries.map((country) => ({
       url: `${baseUrl}/careers/countries/${country.slug}`,
-      lastModified: new Date(),
+      lastModified: buildDate,
       changeFrequency: 'weekly' as const,
       priority: 0.7,
     }));
@@ -95,14 +124,50 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       return true;
     };
 
-    jobUrls = allJobsData
-      .filter(isIndexable)
+    const liveJobs = allJobsData.filter(isIndexable);
+
+    // Countries with live roles that are not editorial hubs.
+    const extraCountrySlugs = new Set<string>();
+    for (const job of liveJobs) {
+      const country = allCountries.find((c) => c.id === job.countryId);
+      if (country && !hubSlugs.has(country.slug)) extraCountrySlugs.add(country.slug);
+    }
+    countryUrls.push(
+      ...[...extraCountrySlugs].map((slug) => ({
+        url: `${baseUrl}/careers/countries/${slug}`,
+        lastModified: buildDate,
+        changeFrequency: 'weekly' as const,
+        priority: 0.6,
+      })),
+    );
+
+    // The town and city landing pages. These were missing from the sitemap entirely,
+    // which is the worst omission on it: "jobs in Barbil" or "jobs in Damanjodi" is
+    // exactly the search these pages are written to answer, and every one of them was
+    // left to be discovered by internal links alone. Only places with live roles are
+    // submitted — an empty one renders noindex and would be a wasted crawl.
+    const placeSlugs = new Set<string>();
+    for (const job of liveJobs) {
+      const slug = job.placeSlug ?? job.metroSlug;
+      if (slug) placeSlugs.add(slug);
+    }
+    placeUrls = [...placeSlugs].map((slug) => ({
+      url: `${baseUrl}/careers/jobs/${slug}`,
+      lastModified: buildDate,
+      changeFrequency: 'daily' as const,
+      priority: 0.7,
+    }));
+
+    jobUrls = liveJobs
       .map((job: any) => {
         const country = allCountries.find((c) => c.id === job.countryId);
         if (!country) return null;
+        // The role's own last edit — the one lastmod on this sitemap that is a real
+        // signal. Falls back to the publish date rather than to "now".
+        const changed = job.updatedAt ?? job.publishStartDate ?? job.createdAt;
         return {
-          url: `${baseUrl}/careers/countries/${country.slug}/jobs/${job.id}`,
-          lastModified: new Date(job.updatedAt),
+          url: `${baseUrl}${jobPath(job as any, allCountries as any)}`,
+          lastModified: changed ? new Date(changed) : buildDate,
           changeFrequency: 'weekly' as const,
           priority: 0.8,
         };
@@ -113,5 +178,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error('Error generating dynamic sitemap entries:', error);
   }
 
-  return [...staticUrls, ...countryUrls, ...jobUrls];
+  return [...staticUrls, ...countryUrls, ...placeUrls, ...jobUrls];
 }

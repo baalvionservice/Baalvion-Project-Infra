@@ -3,6 +3,7 @@ const { Op } = require('sequelize');
 const db = require('../models');
 const { AppError } = require('../utils/errors');
 const { sendSuccess, sendPaginated } = require('../utils/response');
+const { sendMail, companyNameFor } = require('../service/candidateLifecycle');
 
 let _queues;
 const getQueues = () => { if (!_queues) { try { _queues = require('../queues'); } catch { _queues = null; } } return _queues; };
@@ -405,6 +406,13 @@ const createProject = async (req, res, next) => {
             client_id: b.clientId || b.client_id, contractor_id: b.contractorId || b.contractor_id,
             start_date: b.startDate || b.start_date, end_date: b.endDate || b.end_date,
             max_team_size: b.maxTeamSize || b.max_team_size, roles: b.roles || [],
+            // Marketplace fields. is_public stays false: listing is a separate, deliberate
+            // step (POST /projects/:id/publish), so nothing goes public by accident.
+            summary: b.summary || null,
+            collaboration_mode: ['solo', 'team', 'either'].includes(b.collaborationMode || b.collaboration_mode)
+                ? (b.collaborationMode || b.collaboration_mode)
+                : 'either',
+            deadline: b.deadline || null,
         });
         return sendSuccess(req, res, p, 201);
     } catch (err) { return next(err); }
@@ -414,7 +422,11 @@ const updateProjectStatus = async (req, res, next) => {
         const p = await db.Project.findOne({ where: { id: req.params.id, org_id: orgOf(req) } });
         if (!p) throw new AppError('NOT_FOUND', 'Project not found', 404);
         if (req.body.status) p.status = req.body.status;
-        ['title', 'description', 'category', 'budget', 'owner'].forEach(f => { if (req.body[f] !== undefined) p[f] = req.body[f]; });
+        ['title', 'description', 'category', 'budget', 'owner', 'summary', 'deadline'].forEach(f => { if (req.body[f] !== undefined) p[f] = req.body[f]; });
+        const mode = req.body.collaborationMode || req.body.collaboration_mode;
+        if (['solo', 'team', 'either'].includes(mode)) p.collaboration_mode = mode;
+        if (req.body.maxTeamSize !== undefined) p.max_team_size = req.body.maxTeamSize;
+        if (req.body.requiredSkills !== undefined) p.required_skills = req.body.requiredSkills;
         await p.save();
         return sendSuccess(req, res, p);
     } catch (err) { return next(err); }
@@ -447,7 +459,72 @@ const updateMilestone = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
+// ════════════════════════════════════════════════════════════════════════════
+// Application messages (staff side of the candidate thread)
+// ════════════════════════════════════════════════════════════════════════════
+const listApplicationMessages = async (req, res, next) => {
+    try {
+        const app = await db.Application.findOne({ where: { id: req.params.id, org_id: orgOf(req) } });
+        if (!app) throw new AppError('NOT_FOUND', 'Application not found', 404);
+        const rows = await db.ApplicationMessage.findAll({
+            where: { application_id: app.id },
+            order: [['created_at', 'ASC']],
+        });
+        await db.ApplicationMessage.update(
+            { read_at: new Date() },
+            { where: { application_id: app.id, sender_type: 'candidate', read_at: null } },
+        );
+        return sendSuccess(req, res, rows);
+    } catch (err) { return next(err); }
+};
+
+const createApplicationMessage = async (req, res, next) => {
+    try {
+        const body = String(req.body.body || '').trim();
+        if (!body) throw new AppError('VALIDATION_ERROR', 'body is required', 422);
+        if (body.length > 5000) throw new AppError('VALIDATION_ERROR', 'Message is too long (max 5000 characters)', 422);
+
+        const app = await db.Application.findOne({
+            where: { id: req.params.id, org_id: orgOf(req) },
+            include: [
+                { model: db.Candidate, as: 'candidate', attributes: ['id', 'full_name', 'email', 'reference_code'] },
+                { model: db.JobListing, as: 'job', attributes: ['id', 'title'] },
+            ],
+        });
+        if (!app) throw new AppError('NOT_FOUND', 'Application not found', 404);
+
+        const sender = req.portal && req.portal.systemUserId
+            ? await db.SystemUser.findByPk(req.portal.systemUserId, { attributes: ['name', 'email'] })
+            : null;
+
+        const message = await db.ApplicationMessage.create({
+            application_id: app.id,
+            org_id: app.org_id,
+            sender_type: 'staff',
+            sender_name: (sender && sender.name) || 'Talent Team',
+            sender_email: (sender && sender.email) || (req.portal && req.portal.email) || null,
+            body,
+        });
+
+        const cand = app.candidate;
+        if (cand && cand.email) {
+            sendMail('message.received', cand.email, {
+                candidateName: cand.full_name || cand.email,
+                referenceCode: cand.reference_code || '',
+                jobTitle: app.job ? app.job.title : 'your application',
+                companyName: await companyNameFor(app.org_id),
+                body,
+                applicationId: String(app.id),
+                fromTeam: true,
+            });
+        }
+
+        return sendSuccess(req, res, message, 201);
+    } catch (err) { return next(err); }
+};
+
 module.exports = {
+    listApplicationMessages, createApplicationMessage,
     // offers
     listOffers, getOffer, getOfferForApplication, createOffer, updateOfferStatus, respondToOffer, deleteOffer, sendOfferForApplication,
     // users

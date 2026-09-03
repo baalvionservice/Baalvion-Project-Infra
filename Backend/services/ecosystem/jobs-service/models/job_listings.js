@@ -28,12 +28,46 @@ module.exports = (sequelize) => {
             type: DataTypes.TEXT,
             allowNull: true,
         },
+        // What the job involves, as against what the candidate needs. One bullet per
+        // line, same as requirements.
+        responsibilities: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+        },
+        // Genuinely optional. Kept apart from requirements so the required list can stay
+        // honest about what we would actually turn somebody down for.
+        preferred_qualifications: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+        },
         location: {
             type: DataTypes.STRING(255),
             allowNull: true,
         },
         country_id: {
             type: DataTypes.STRING(20),
+            allowNull: true,
+        },
+        // Free-text so a role can be posted in any town or state — there is no
+        // canonical list of the world's cities to pick from. `location` stays the
+        // display string; these two are what filtering and SEO use.
+        city: {
+            type: DataTypes.STRING(120),
+            allowNull: true,
+        },
+        region: {
+            type: DataTypes.STRING(120),
+            allowNull: true,
+        },
+        // The gazetteer's resolution of `city` — see data/locations.js. place_slug is the
+        // town itself ("virar"), metro_slug the region it belongs to ("mumbai"), so a
+        // search around Mumbai reaches a role posted in a suburb that never says "Mumbai".
+        place_slug: {
+            type: DataTypes.STRING(80),
+            allowNull: true,
+        },
+        metro_slug: {
+            type: DataTypes.STRING(80),
             allowNull: true,
         },
         department_id: {
@@ -53,6 +87,13 @@ module.exports = (sequelize) => {
             validate: {
                 isIn: [['entry', 'mid', 'senior', 'lead']],
             },
+        },
+        // 'year' for salaried roles, 'month' for internship stipends and hourly-ish
+        // contracts. Without it every figure was rendered as an annual salary.
+        salary_period: {
+            type: DataTypes.STRING(10),
+            defaultValue: 'year',
+            validate: { isIn: [['year', 'month', 'day', 'hour']] },
         },
         salary_min: {
             type: DataTypes.BIGINT,

@@ -22,9 +22,9 @@ import {
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Performance-Based Tech Internship in India | Paid Internship with Stipend | Baalvion',
+  title: 'Paid Tech Internships in India',
   description:
-    'Apply to Baalvion\'s paid tech internship in India — ₹40,000–₹90,000/month stipend, 6 tracks, PPO pathway. Software, data, design, and product roles for students and recent grads.',
+    'Paid tech internships in India: ₹15,000–₹25,000/month, six tracks, and a pre-placement offer pathway for students and recent graduates.',
   keywords: [
     'tech internship India',
     'paid internship India',
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Paid Tech Internship in India | Baalvion TalentOS',
     description:
-      'Merit-driven internship with ₹40,000–₹90,000/month stipend, 6 specialization tracks, and a direct PPO pathway to a full-time role.',
+      'Merit-driven internship with a ₹15,000–₹25,000/month stipend, 6 specialization tracks, and a direct PPO pathway to a full-time role.',
     url: '/careers/internship-program',
     type: 'website',
   },
@@ -177,7 +177,7 @@ const faqs = [
   {
     question: 'What is the stipend and how is it determined?',
     answer:
-      'The monthly stipend ranges from ₹40,000 to ₹90,000, determined by your performance tier. At the end of each month, your mentor and team lead assess your output against the core competency framework. Strong performers move up; there is no ceiling if you are consistently at the top.',
+      'The monthly stipend ranges from ₹15,000 to ₹25,000, set by your track and your assessed level at the start. At the end of each month your mentor and team lead review your output against the competency framework, and the stipend moves with it. The stronger reason to do this well is the pre-placement offer at the end.',
   },
   {
     question: 'How long is the internship program?',
@@ -289,7 +289,7 @@ export default function InternshipProgramPage() {
           </div>
           <div className="mt-10 flex flex-wrap gap-6 justify-center text-sm text-muted-foreground">
             <span className="font-semibold text-foreground text-base">
-              ₹40,000 – ₹90,000 / month
+              ₹15,000 – ₹25,000 / month
             </span>
             <span>6 Specialization Tracks</span>
             <span>3 – 6 Month Duration</span>
@@ -406,7 +406,7 @@ export default function InternshipProgramPage() {
               <div className="text-center p-6 border rounded-lg bg-background">
                 <p className="text-sm text-muted-foreground">Stipend Range</p>
                 <p className="text-3xl font-bold mt-1">
-                  ₹40,000 – ₹90,000 / month
+                  ₹15,000 – ₹25,000 / month
                 </p>
                 <p className="text-xs text-muted-foreground mt-2">
                   Based on monthly performance review · India headquarters

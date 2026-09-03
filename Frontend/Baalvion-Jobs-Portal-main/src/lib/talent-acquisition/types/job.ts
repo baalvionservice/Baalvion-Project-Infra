@@ -30,6 +30,11 @@ export interface Job {
   countryId: string;
   city: string;
   state?: string;
+  /** Gazetteer resolution of `city` — the town slug, and the metro it belongs to. */
+  placeSlug?: string | null;
+  metroSlug?: string | null;
+  /** 'year' for salaries, 'month' for internship stipends. */
+  salaryPeriod?: 'year' | 'month' | 'day' | 'hour';
   departmentId: string;
   reportingTo?: string;
   employmentType: EmploymentType;

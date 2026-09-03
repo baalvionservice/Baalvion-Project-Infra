@@ -6,7 +6,7 @@ import { CollegeOnboardingForm } from './college-onboarding-form';
 export const metadata: Metadata = {
   title: 'Onboard Your College — Campus Placement Partner',
   description:
-    'Onboard your college or university to Baalvion. Submit your placement cell details and get a verified, analytics-ready placement system with direct access to a national recruiter network.',
+    'Onboard your placement cell to Baalvion: a verified, analytics-ready placement system with direct access to a national recruiter network.',
   alternates: { canonical: '/onboarding/college' },
   openGraph: {
     title: 'Onboard Your College | Baalvion TalentOS',

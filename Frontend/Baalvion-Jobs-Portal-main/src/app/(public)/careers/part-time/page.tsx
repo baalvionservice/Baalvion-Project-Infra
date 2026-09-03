@@ -26,9 +26,9 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Part-Time Jobs at Baalvion | Flexible Remote Work | TalentOS',
+  title: 'Part-Time & Flexible Remote Jobs',
   description:
-    'Explore flexible part-time roles at Baalvion Industries. Work on meaningful global projects, grow your skills, and choose hours that fit your life — remote-first, globally accessible.',
+    'Part-time and flexible roles at Baalvion. Remote-first, open worldwide, and built around hours that fit the rest of your life.',
   keywords: [
     'part-time remote jobs',
     'flexible work Baalvion',

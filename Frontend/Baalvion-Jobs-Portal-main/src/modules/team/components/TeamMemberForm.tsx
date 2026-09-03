@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, PlusCircle, Trash2 } from "lucide-react";
 import { useAsyncAction } from "@/hooks/useAsyncAction";
+import { uploadFile } from '@/lib/fileUpload';
 import { TeamMember } from "@/lib/team.data";
 // import { teamService } from "@/services/team.service";
 
@@ -72,13 +73,15 @@ export function TeamMemberForm({ existingMember, onSaveSuccess }: TeamMemberForm
             linkedin: values.linkedin,
             portfolio: values.portfolio,
           },
-          image: existingMember?.image || `https://picsum.photos/seed/${Date.now()}/400/500`,
-          imageHint: existingMember?.imageHint || 'person portrait',
+          // Never a stock photo. This used to assign a random picsum portrait to a named
+          // person — a stranger's face under a real colleague's name. No upload means no
+          // image, and the profile falls back to initials.
+          image: existingMember?.image || '',
+          imageHint: existingMember?.imageHint || '',
         };
-        
-        // If a new image is uploaded, generate a new placeholder.
+
         if (values.image) {
-            payload.image = `https://picsum.photos/seed/${values.image.name}/400/500`;
+            payload.image = await uploadFile(values.image, { folder: 'team', public: true });
         }
 
         // if (isEditMode) {

@@ -9,6 +9,7 @@ import { UserRole } from '@/lib/access/access.types';
 import { employmentTypes, workforceTypes } from '@/types/workflow.types';
 import { mockDepartments } from '../data';
 import { generateSlug } from '@/utils/slug.util';
+import { CountryCombobox } from '../CountryCombobox';
 
 interface BasicInfoTabProps {
     userRole: UserRole;
@@ -88,14 +89,30 @@ export function BasicInfoTab({ userRole }: BasicInfoTabProps) {
                  <FormField control={control} name="basicInfo.countryId" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Country</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
-                            <SelectContent>
-                               <SelectItem value="country_in">India</SelectItem>
-                               <SelectItem value="country_us">United States</SelectItem>
-                               <SelectItem value="country_gb">United Kingdom</SelectItem>
-                            </SelectContent>
-                        </Select>
+                        <FormControl>
+                            <CountryCombobox value={field.value} onChange={field.onChange} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )} />
+            </div>
+            {/* City and state are free text: roles get posted in towns no fixed list
+                would ever contain. Together with the country they compose the location
+                shown on the job card and used for search. */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField control={control} name="basicInfo.city" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>City / Town</FormLabel>
+                        <FormControl><Input placeholder="e.g. Nsukka, Coimbatore, Tartu" {...field} /></FormControl>
+                        <FormDescription>Any town or city — type it as you'd write it on the posting.</FormDescription>
+                        <FormMessage />
+                    </FormItem>
+                )} />
+                <FormField control={control} name="basicInfo.region" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>State / Province / Region</FormLabel>
+                        <FormControl><Input placeholder="e.g. Enugu State, Tamil Nadu, Tartu County" {...field} /></FormControl>
+                        <FormDescription>Optional.</FormDescription>
                         <FormMessage />
                     </FormItem>
                 )} />

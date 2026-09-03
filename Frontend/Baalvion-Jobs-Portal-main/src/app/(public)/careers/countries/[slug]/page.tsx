@@ -14,7 +14,9 @@ type Props = {
 
 export async function generateStaticParams() {
   try {
-    const countries = await talentService.getCountries({ isActive: true });
+    // Prerender the editorial hubs. Roles can be posted in any of the ~250 countries and
+    // those pages still render on demand — they just aren't worth building ahead of time.
+    const countries = await talentService.getCountries({ isActive: true, hub: true });
     return countries.map((country) => ({
       slug: country.slug,
     }));
@@ -39,9 +41,21 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const title = `Careers in ${country.name}`;
   const description = `Explore job opportunities and learn about Baalvion's presence in ${country.name}. Join our globally distributed team.`;
 
+  // Roles can be posted in any of the ~250 active countries, so a page exists for every
+  // one of them — but only a handful have any roles at a given moment. Without this
+  // check every empty country was served as index,follow: 236 near-identical pages
+  // carrying nothing but the nav and the footer, Antarctica and Bouvet Island included.
+  // That is textbook thin content, and it drags down the pages that do have something.
+  // The same rule already governs the location pages.
+  const openRoles = await talentService
+    .getJobs({ countryId: country.id, status: 'published', limit: 1 })
+    .then((r: any) => r.total ?? (r.data?.length ?? 0))
+    .catch(() => 0);
+
   return {
     title,
     description,
+    robots: openRoles > 0 ? undefined : { index: false, follow: true },
     alternates: {
       canonical: canonicalUrl,
     },
@@ -71,9 +85,10 @@ export default async function CountryPage(props: Props) {
     ]);
 
     jobsInCountry = allJobs;
-    complianceProfile = await talentService.getComplianceProfile(
-      country.complianceProfileId,
-    );
+    // Only the hub countries carry a compliance profile; asking for a null id 404s.
+    complianceProfile = country.complianceProfileId
+      ? await talentService.getComplianceProfile(country.complianceProfileId)
+      : undefined;
 
     return (
       <main className="bg-background text-foreground">
@@ -91,16 +106,20 @@ export default async function CountryPage(props: Props) {
         </section>
 
         <div className="container mx-auto py-16 lg:py-24 space-y-16">
-          <Card className="bg-primary/5 border-primary/20">
-            <CardContent className="p-8">
-              <h2 className="text-2xl font-bold tracking-tight mb-4">
-                Hiring in {country.name}
-              </h2>
-              <div className="prose prose-lg dark:prose-invert max-w-none text-muted-foreground">
-                {country.overview}
-              </div>
-            </CardContent>
-          </Card>
+          {/* Only hub countries have written overview copy. Elsewhere the open roles
+              speak for themselves — an empty "Hiring in X" panel says nothing. */}
+          {country.overview && (
+            <Card className="bg-primary/5 border-primary/20">
+              <CardContent className="p-8">
+                <h2 className="text-2xl font-bold tracking-tight mb-4">
+                  Hiring in {country.name}
+                </h2>
+                <div className="prose prose-lg dark:prose-invert max-w-none text-muted-foreground">
+                  {country.overview}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <section id="open-positions">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-center mb-12">

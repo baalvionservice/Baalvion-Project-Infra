@@ -65,6 +65,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           email:     String(profile.email ?? restoredUser.email),
           role:      normRole(String(profile.role ?? restoredUser.role)),
           candidateId: profile.candidateId ?? null,
+          referenceCode: profile.referenceCode ?? null,
+          employeeCode:  profile.employeeCode ?? null,
           isActive:  true,
         }, token);
       } catch {

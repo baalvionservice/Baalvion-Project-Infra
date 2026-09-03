@@ -14,7 +14,9 @@ const cspHeader = [
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "img-src 'self' data: blob: https:",
   "font-src 'self' https://fonts.gstatic.com data:",
-  "connect-src 'self' https: wss:",
+  // Dev also allows plain-http localhost: the jobs-service runs on :3002 over http, so
+  // without this every client fetch from the candidate dashboard is CSP-blocked locally.
+  `connect-src 'self' https: wss:${isDev ? ' http://localhost:* ws://localhost:*' : ''}`,
   "frame-ancestors 'none'",
   "object-src 'none'",
   "base-uri 'self'",

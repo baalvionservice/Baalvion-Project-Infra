@@ -36,8 +36,12 @@ export async function POST(request: NextRequest, props: { params: Promise<{ coun
         }
 
         const applicationId = String(json?.data?.id ?? json?.id ?? '');
+        // The Candidate ID is minted server-side on this call. Hand it straight back so
+        // the success page can show the applicant the reference they'll be quoted in
+        // every email from here on — they may never have registered an account.
+        const referenceCode = json?.data?.candidate?.reference_code ?? null;
         return Response.json(
-            { success: true, data: { applicationId }, error: null },
+            { success: true, data: { applicationId, referenceCode }, error: null },
             { status: 201 },
         );
 

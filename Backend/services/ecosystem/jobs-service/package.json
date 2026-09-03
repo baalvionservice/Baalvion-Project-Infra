@@ -8,7 +8,9 @@
     "dev": "nodemon index.js",
     "seed": "node scripts/seed.js",
     "test": "jest --testEnvironment node --forceExit",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "migrate": "node scripts/migrate.js",
+    "seed:roles": "node scripts/seedRoles.js"
   },
   "jest": {
     "testEnvironment": "node",

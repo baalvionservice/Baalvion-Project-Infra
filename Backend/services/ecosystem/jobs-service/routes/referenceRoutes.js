@@ -7,6 +7,9 @@ const router = Router();
 router.get('/countries',                    ctrl.listCountries);
 router.get('/countries/:slug',              ctrl.getCountryBySlug);
 router.get('/departments',                  ctrl.listDepartments);
+router.get('/locations',                    ctrl.listJobLocations);
+router.get('/job-facets',                   ctrl.listJobFacets);
+router.get('/locations/:slug',              ctrl.getJobLocation);
 router.get('/compliance-profiles/:id',      ctrl.getComplianceProfile);
 router.get('/roles/:countrySlug',           ctrl.listRolesByCountry);
 

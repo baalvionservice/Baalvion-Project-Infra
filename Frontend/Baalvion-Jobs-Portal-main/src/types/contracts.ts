@@ -38,6 +38,10 @@ export interface User {
   reputationSummary?: ReputationSummary;
   /** jobs-service candidate row id for the logged-in candidate (portal identity). */
   candidateId?: string | null;
+  /** Candidate ID shown on the dashboard and quoted in every email (BAAL-C-YYYY-NNNNNN). */
+  referenceCode?: string | null;
+  /** Employee ID — only present once an application has reached `hired`. */
+  employeeCode?: string | null;
 }
 
 export interface Role {

@@ -13,6 +13,8 @@ router.get('/offers/:id', ctrl.getOffer);
 router.patch('/offers/:id', ctrl.updateOfferStatus);
 router.patch('/offers/:id/response', ctrl.respondToOffer);
 router.delete('/offers/:id', ctrl.deleteOffer);
+router.get('/applications/:id/messages', ctrl.listApplicationMessages);
+router.post('/applications/:id/messages', ctrl.createApplicationMessage);
 router.get('/applications/:id/offer', ctrl.getOfferForApplication);
 router.post('/applications/:id/offer', ctrl.sendOfferForApplication);
 

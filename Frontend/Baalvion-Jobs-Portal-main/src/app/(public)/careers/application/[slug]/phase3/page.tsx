@@ -69,7 +69,8 @@ function Phase3Form() {
             // Don't reset data yet, so success page can use it.
             // resetApplicationData();
             
-            router.push(`/careers/application/${slug}/success?jobId=${jobId}&appId=${result.applicationId}`);
+            const ref = result.referenceCode ? `&ref=${encodeURIComponent(result.referenceCode)}` : '';
+            router.push(`/careers/application/${slug}/success?jobId=${jobId}&appId=${result.applicationId}${ref}`);
         } catch (err: any) {
             setError(err.message || "An unexpected error occurred.");
              showToast({ type: 'error', title: 'Submission Failed', description: err.message || "An unexpected error occurred." });

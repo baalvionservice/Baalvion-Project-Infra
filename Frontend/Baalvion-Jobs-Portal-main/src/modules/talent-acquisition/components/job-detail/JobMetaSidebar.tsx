@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Job } from "@/lib/talent-acquisition";
-import { Briefcase, Building, ChevronsRight, Clock, Globe, Zap } from "lucide-react";
+import { ChevronsRight, Clock, Globe, Zap } from "lucide-react";
 import { ApplyCTA } from "./ApplyCTA";
 
 interface JobMetaSidebarProps {
@@ -29,13 +29,16 @@ export function JobMetaSidebar({ job, departmentName, countryName, applyUrl }: J
         <div className="space-y-6">
             <ApplyCTA applyUrl={applyUrl} className="w-full" />
             <Card>
-                <CardHeader><CardTitle>Job Overview</CardTitle></CardHeader>
+                <CardHeader><CardTitle className="text-lg">At a glance</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
-                    <MetaRow icon={<Building className="h-4 w-4"/>} label="Department" value={departmentName} />
+                    {/* Department, location and the posted date live in the header now.
+                        Repeating them here — and in a different date format — made the two
+                        blocks look like they disagreed. This keeps only what the header
+                        doesn't already say. */}
                     <MetaRow icon={<ChevronsRight className="h-4 w-4"/>} label="Experience Level" value={job.experienceBand} />
                     <MetaRow icon={<Zap className="h-4 w-4"/>} label="Employment Type" value={job.employmentType} />
                     <MetaRow icon={<Globe className="h-4 w-4"/>} label="Workforce Model" value={job.workforceType} />
-                    <MetaRow icon={<Clock className="h-4 w-4"/>} label="Posted On" value={new Date(job.createdAt).toLocaleDateString()} />
+                    <MetaRow icon={<Clock className="h-4 w-4"/>} label="Applications" value={job.remoteAllowed ? 'Open to remote candidates' : undefined} />
                 </CardContent>
             </Card>
         </div>
