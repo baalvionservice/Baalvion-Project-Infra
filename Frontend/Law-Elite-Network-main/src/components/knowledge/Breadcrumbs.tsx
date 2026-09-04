@@ -11,6 +11,19 @@ interface BreadcrumbsProps {
   /** article.subcategory -- links to the real ?sub= deep link the mega-menu already uses, not a fabricated URL. */
   subcategory?: { name: string; slug: string };
   articleTitle?: string;
+  /**
+   * True when `category` IS the page currently being viewed (a category hub
+   * rendering its own trail) rather than an article's parent category --
+   * renders it as the non-clickable current-page crumb instead of a link
+   * back to a page the reader is already on.
+   */
+  categoryIsCurrentPage?: boolean;
+  /**
+   * Suppresses the "<- Back to X" link above the trail, for a page (like a
+   * category hub) that already has its own dedicated back-to-home link
+   * elsewhere on the page, so the two don't duplicate.
+   */
+  hideBackLink?: boolean;
 }
 
 /**
@@ -20,7 +33,7 @@ interface BreadcrumbsProps {
  * Subcategory is optional and only renders when the article actually
  * carries real data for it -- never fabricated.
  */
-export function Breadcrumbs({ category, subcategory, articleTitle }: BreadcrumbsProps) {
+export function Breadcrumbs({ category, subcategory, articleTitle, categoryIsCurrentPage, hideBackLink }: BreadcrumbsProps) {
   // A CMS article's category slug isn't guaranteed to be one of the site's 8
   // real category pages (e.g. a narrow one-off like `criminal-law-dui-defense`
   // instead of `criminal-law`) -- articleUrl() already falls back to the flat
@@ -40,12 +53,14 @@ export function Breadcrumbs({ category, subcategory, articleTitle }: Breadcrumbs
 
   return (
     <div className="mb-8 animate-in fade-in slide-in-from-left-2 duration-700">
-      <Link
-        href={backHref}
-        className="flex w-fit items-center gap-2 text-[12px] font-bold uppercase tracking-wider text-slate-400 hover:text-blue-600 transition-colors group mb-3"
-      >
-        <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" /> Back to {backLabel}
-      </Link>
+      {!hideBackLink && (
+        <Link
+          href={backHref}
+          className="flex w-fit items-center gap-2 text-[12px] font-bold uppercase tracking-wider text-slate-400 hover:text-blue-600 transition-colors group mb-3"
+        >
+          <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" /> Back to {backLabel}
+        </Link>
+      )}
 
       <nav className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400 flex-wrap">
         <Link href="/" className="hover:text-blue-600 transition-colors flex items-center gap-1.5">
@@ -55,9 +70,13 @@ export function Breadcrumbs({ category, subcategory, articleTitle }: Breadcrumbs
         {hasRealCategory && category && (
           <>
             <ChevronRight className="w-3 h-3 text-slate-200" />
-            <Link href={`/${category.slug}`} className="hover:text-blue-600 transition-colors">
-              {category.name}
-            </Link>
+            {categoryIsCurrentPage ? (
+              <span className="text-slate-900" aria-current="page">{category.name}</span>
+            ) : (
+              <Link href={`/${category.slug}`} className="hover:text-blue-600 transition-colors">
+                {category.name}
+              </Link>
+            )}
           </>
         )}
 

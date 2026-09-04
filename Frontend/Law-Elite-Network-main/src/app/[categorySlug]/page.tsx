@@ -19,6 +19,7 @@ import { KeyLegalTerms } from '@/components/knowledge/KeyLegalTerms';
 import { getKeyLegalTermsForCategory } from '@/lib/category-key-terms';
 import { StoryCard } from '@/components/knowledge/news/StoryCard';
 import { LatestRail } from '@/components/knowledge/news/LatestRail';
+import { Breadcrumbs } from '@/components/knowledge/Breadcrumbs';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 // Same AdSense slot as AD_PLACEMENTS.CATEGORY_HERO (AdManager.tsx) -- literal
@@ -178,10 +179,19 @@ export default async function CategoryPage(
           <div className="container mx-auto px-4 sm:px-6 max-w-7xl py-12 md:py-16">
             <Link
               href="/"
-              className="flex w-fit items-center gap-2 text-[12px] font-bold uppercase tracking-wider text-slate-400 hover:text-news-600 transition-colors group mb-6"
+              className="flex w-fit items-center gap-2 text-[12px] font-bold uppercase tracking-wider text-slate-400 hover:text-news-600 transition-colors group mb-4"
             >
               <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" /> All Topics
             </Link>
+            {/* Orientation trail (Home > current practice area) -- the "All
+                Topics" link above already covers "how do I go back," this
+                covers "where am I right now," the same pairing article pages
+                already give readers via this same component. */}
+            <Breadcrumbs
+              category={{ name: category.name, slug: categorySlug }}
+              categoryIsCurrentPage
+              hideBackLink
+            />
             <span className="kicker">Practice Area</span>
             <h1 className="font-headline text-4xl md:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.02] mt-3">
               {category.pillarTitle || category.name}
