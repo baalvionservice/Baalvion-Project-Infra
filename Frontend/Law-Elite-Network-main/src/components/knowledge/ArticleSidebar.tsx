@@ -5,7 +5,20 @@ import { cmsGetArticles } from '@/lib/cms';
 import { getArticlesByCategorySlug } from '@/data/law-content';
 import { resolveArticleImage } from '@/lib/article-art';
 import { articleUrl } from '@/lib/article-url';
+import { CURRENT_CATEGORY_SLUGS } from '@/lib/category-slugs';
 import { AdSlot } from '@/components/ads/AdSlot';
+
+// AdSense-readiness retirement (see category-slugs.ts's CURRENT_CATEGORY_SLUGS
+// comment): "Trending Now" below is sourced site-wide (not scoped to the
+// current article's own category, unlike "More in Category"), so without this
+// it would render on a KEPT-category article page while linking to a
+// retired-category one via articleUrl()'s /article/{slug} fallback -- a live,
+// indexed page pointing straight into the gap. cms.ts already normalizes
+// category.slug via toNewCategorySlug, so no renormalization needed here.
+const currentSlugSet = new Set<string>(CURRENT_CATEGORY_SLUGS);
+function isKeptCategory(categorySlug: string | undefined): boolean {
+  return !categorySlug || currentSlugSet.has(categorySlug);
+}
 
 // Same AdSense slot as AD_PLACEMENTS.SIDEBAR_TOP (AdManager.tsx) -- literal
 // because that file is 'use client' and its export doesn't survive an import
@@ -59,7 +72,7 @@ async function trending(excludeSlug: string): Promise<SidebarArticle[]> {
   try {
     const cms = await cmsGetArticles();
     return cms
-      .filter((a) => a.slug && a.slug !== excludeSlug && (a.views ?? 0) > 0)
+      .filter((a) => a.slug && a.slug !== excludeSlug && (a.views ?? 0) > 0 && isKeptCategory(a.category?.slug))
       .sort((a, b) => (b.views ?? 0) - (a.views ?? 0))
       .slice(0, 5)
       .map((a) => ({ id: a.id!, slug: a.slug!, title: a.title, categorySlug: a.category?.slug, categoryName: a.category?.name, views: a.views }));

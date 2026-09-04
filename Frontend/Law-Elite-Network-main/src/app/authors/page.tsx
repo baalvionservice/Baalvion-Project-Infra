@@ -7,6 +7,19 @@ import { authorNameToSlug } from '@/data/authors';
 import { getMergedAuthors } from '@/lib/authors-server';
 import { mergeArticles } from '@/data/law-content';
 import { cmsGetArticles } from '@/lib/cms';
+import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
+
+// AdSense-readiness retirement (see category-slugs.ts's CURRENT_CATEGORY_SLUGS
+// comment): the per-author "N guides" count below feeds directly into the
+// same directory that links to each author's profile, so it must match what
+// that profile now actually shows (see author/[slug]/page.tsx's matching
+// filter) rather than counting retired-category work nobody can click
+// through to from here.
+const currentSlugSet = new Set<string>(CURRENT_CATEGORY_SLUGS);
+function isKeptCategoryArticle(a: { category?: { slug?: string } }): boolean {
+  const rawSlug = a.category?.slug;
+  return !rawSlug || currentSlugSet.has(toNewCategorySlug(rawSlug));
+}
 
 // Serve a cached page and refresh it in the background every 5 minutes,
 // instead of re-rendering (and re-fetching from the CMS) on every single
@@ -22,7 +35,7 @@ export default async function AuthorsIndexPage() {
   // bundled array, so counting bundled-only silently showed "0 guides" for
   // any contributor whose real work is CMS-sourced. mergeArticles() is the
   // same CMS-wins-by-slug pool the homepage already uses.
-  const articles = mergeArticles(cmsArticles);
+  const articles = mergeArticles(cmsArticles).filter(isKeptCategoryArticle);
 
   // A plain slug -> count map, not a closure -- functions can't cross the
   // server/client component boundary as props.

@@ -3,7 +3,7 @@ import { unstable_cache } from 'next/cache';
 import { getAllArticles, mergeArticles } from '@/data/law-content';
 import { getMergedAuthors } from '@/lib/authors-server';
 import { authorNameToSlug } from '@/data/authors';
-import { articleUrl } from '@/lib/article-url';
+import { articleUrl, ROOT_FLAT_ARTICLE_SLUGS } from '@/lib/article-url';
 import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
 import { cmsGetArticles } from '@/lib/cms';
 import { COUNTRIES, getCountryArticleCounts } from '@/data/countries';
@@ -135,20 +135,42 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
     'navigating-the-divorce-process',
   ]);
 
+  // AdSense-readiness retirement: CURRENT_CATEGORY_SLUGS shrank from 16 to 5
+  // (see category-slugs.ts), but articleUrl() doesn't stop resolving a
+  // retired-category article -- it just falls back to the still-live
+  // /article/{slug} URL (or, for a handful of ex-ROOT_FLAT_ARTICLE_SLUGS
+  // entries, would have stayed at an unprefixed root URL). Unfiltered, this
+  // map would keep submitting every one of those to Google. An article is
+  // sitemap-eligible only if its category (after the same old->new
+  // normalization every other route applies) is still current, or it never
+  // had a category at all and is one of the small, explicit standalone pages
+  // in ROOT_FLAT_ARTICLE_SLUGS -- everything else is a retired-category
+  // article temporarily reachable only at /article/{slug}, not something to
+  // actively resubmit to Google.
+  const currentSlugSetForArticles = new Set<string>(CURRENT_CATEGORY_SLUGS);
+  const isSitemapEligible = (a: ArticleEntry): boolean => {
+    const rawSlug = a.category?.slug;
+    if (rawSlug) return currentSlugSetForArticles.has(toNewCategorySlug(rawSlug));
+    return !!a.slug && ROOT_FLAT_ARTICLE_SLUGS.has(a.slug);
+  };
+
   const articleEntries = new Map<string, { url: string; lastModified: Date }>();
   getAllArticles().forEach((a) => {
+    if (!isSitemapEligible(a)) return;
     articleEntries.set(a.slug, {
       url: `${BASE_URL}${articleUrl(a)}`,
       lastModified: new Date(a.updatedAt || Date.now()),
     });
   });
   articles.forEach((a) => {
+    if (!isSitemapEligible(a)) return;
     articleEntries.set(a.slug, {
       url: `${BASE_URL}${articleUrl(a)}`,
       lastModified: new Date(a.updated_at || a.updatedAt || Date.now()),
     });
   });
   cmsArticles.forEach((a) => {
+    if (!isSitemapEligible(a)) return;
     articleEntries.set(a.slug, {
       url: `${BASE_URL}${articleUrl(a)}`,
       lastModified: new Date(a.updatedAt || Date.now()),
@@ -200,9 +222,16 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
   // filter below. Confirmed live: 56 of 103 merged authors (mostly the bulk-
   // seeded international profiles) currently have zero articles and were
   // being actively submitted to Google. Article-per-author matching mirrors
-  // src/app/author/[slug]/page.tsx exactly (mergeArticles + authorNameToSlug)
-  // so this filter agrees with what the page itself would render.
-  const mergedArticlesForCount = mergeArticles(cmsArticles);
+  // src/app/author/[slug]/page.tsx exactly (mergeArticles + authorNameToSlug,
+  // both also excluding retired-category articles the same way) so this
+  // filter agrees with what the page itself would render -- otherwise an
+  // author whose only work is in a retired category would still get a
+  // sitemap entry for a page that now shows "No published guides yet".
+  const isKeptCategoryArticle = (a: { category?: { slug?: string } }): boolean => {
+    const rawSlug = a.category?.slug;
+    return !rawSlug || currentSlugSetForArticles.has(toNewCategorySlug(rawSlug));
+  };
+  const mergedArticlesForCount = mergeArticles(cmsArticles).filter(isKeptCategoryArticle);
   const articleCountByAuthorSlug = new Map<string, number>();
   mergedArticlesForCount.forEach((a) => {
     const slug = authorNameToSlug(a.author);
@@ -212,7 +241,7 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
   // lastModified tracks the author's most recently updated bundled article
   // (authors have no timestamp of their own) rather than the request time.
   const latestByAuthor = new Map<string, Date>();
-  getAllArticles().forEach((a) => {
+  getAllArticles().filter(isKeptCategoryArticle).forEach((a) => {
     const parsed = new Date(a.updatedAt);
     if (Number.isNaN(parsed.getTime())) return;
     const existing = latestByAuthor.get(a.author);

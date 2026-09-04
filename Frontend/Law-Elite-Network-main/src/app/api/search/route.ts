@@ -2,8 +2,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAllArticles, type LawArticle } from '@/data/law-content';
 import { cmsGetArticles } from '@/lib/cms';
 import { scoreArticle } from '@/lib/search-score';
+import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
 
 export const dynamic = 'force-dynamic';
+
+// AdSense-readiness retirement (see category-slugs.ts's CURRENT_CATEGORY_SLUGS
+// comment): search results link out via articleUrl() elsewhere on the site,
+// so a retired-category article surfacing here would put a search result on
+// a still-live, indexed page pointing straight into that category's
+// /article/{slug} gap. Same rule sitemap.ts / the homepage apply.
+const currentSlugSet = new Set<string>(CURRENT_CATEGORY_SLUGS);
+function isKeptCategoryArticle(a: { category?: { slug?: string } }): boolean {
+  const rawSlug = a.category?.slug;
+  return !rawSlug || currentSlugSet.has(toNewCategorySlug(rawSlug));
+}
 
 /**
  * Site search. Previously SearchBar/the /search page queried law-service's
@@ -40,7 +52,7 @@ async function getSearchableArticles(): Promise<LawArticle[]> {
       featuredImage: c.featuredImage,
     });
   });
-  return Array.from(bySlug.values());
+  return Array.from(bySlug.values()).filter(isKeptCategoryArticle);
 }
 
 export async function GET(req: NextRequest) {

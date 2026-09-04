@@ -3,8 +3,22 @@ import { getAuthorBySlug, authorNameToSlug } from '@/data/authors';
 import { cmsGetAuthorBySlug, cmsGetArticles } from '@/lib/cms';
 import { mergeArticles } from '@/data/law-content';
 import { resolvePersonImage } from '@/lib/article-art';
+import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+
+// AdSense-readiness retirement (see category-slugs.ts's CURRENT_CATEGORY_SLUGS
+// comment): mirrors page.tsx's isKeptCategoryArticle. `hasArticles` below
+// gates the noindex decision, so a contributor whose only work is now in a
+// retired category must count as zero real articles here too -- otherwise
+// this page stays indexed while page.tsx (fixed separately) renders "No
+// published guides yet" for the same profile, the exact thin-content/
+// doorway-page pattern this file's own noindex logic exists to prevent.
+const currentSlugSet = new Set<string>(CURRENT_CATEGORY_SLUGS);
+function isKeptCategoryArticle(a: { category?: { slug?: string } }): boolean {
+  const rawSlug = a.category?.slug;
+  return !rawSlug || currentSlugSet.has(toNewCategorySlug(rawSlug));
+}
 
 const titleCase = (s: string) => s.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
@@ -43,7 +57,9 @@ export async function generateMetadata(
   // viewable (and still followed, so any real article they later get stays
   // discoverable) -- only the index signal changes once they publish.
   const cmsArticles = await cmsGetArticles().catch(() => []);
-  const hasArticles = mergeArticles(cmsArticles).some((art) => authorNameToSlug(art.author) === slug);
+  const hasArticles = mergeArticles(cmsArticles).some(
+    (art) => authorNameToSlug(art.author) === slug && isKeptCategoryArticle(art),
+  );
   return {
     title,
     description,
