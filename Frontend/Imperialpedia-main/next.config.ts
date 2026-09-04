@@ -68,6 +68,208 @@ const nextConfig: NextConfig = {
       process.env.NEXT_PUBLIC_ADMIN_PLATFORM_URL ||
       (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3030');
     return [
+      // ── TEMPORARY: categories retired pending AdSense review (2026-09-03) ──
+      // These 54 categories don't yet meet the content depth bar. Unpublished in the
+      // CMS AND redirected here, because CategoryFeed falls back to bundled demo
+      // articles when a category has zero live posts — an empty category page would
+      // silently show placeholder content dressed as real, which is worse than 404.
+      // Remove this block (and re-add the category to the nav) once its articles are
+      // republished. Wildcard covers both the hub page and any individual article
+      // URL under it, so nothing 404s in the meantime.
+      //
+      // 2026-09-04: 8 of the 54 (advanced-budgeting, budget-rules, budgeting-apps,
+      // emergency-fund, family-budget, monthly-budget, saving-money, student-budget)
+      // aren't thin — they're a consolidation. Each had only 3-5 articles, so as
+      // standalone category pages they read as the same thin-content pattern as the
+      // other 46. Their articles were recategorized into budgeting-basics (37 total
+      // now), not archived — see recategorize-and-archive.cjs. budgeting-basics
+      // itself stays live and out of this block.
+      { source: '/advanced-budgeting', destination: '/', permanent: true },
+      { source: '/advanced-budgeting/:path*', destination: '/', permanent: true },
+      { source: '/app-reviews', destination: '/', permanent: true },
+      { source: '/app-reviews/:path*', destination: '/', permanent: true },
+      { source: '/auto-loans', destination: '/', permanent: true },
+      { source: '/auto-loans/:path*', destination: '/', permanent: true },
+      { source: '/banking', destination: '/', permanent: true },
+      { source: '/banking/:path*', destination: '/', permanent: true },
+      { source: '/banking-reviews', destination: '/', permanent: true },
+      { source: '/banking-reviews/:path*', destination: '/', permanent: true },
+      { source: '/bonds', destination: '/', permanent: true },
+      { source: '/bonds/:path*', destination: '/', permanent: true },
+      { source: '/brokers', destination: '/', permanent: true },
+      { source: '/brokers/:path*', destination: '/', permanent: true },
+      { source: '/budget-rules', destination: '/', permanent: true },
+      { source: '/budget-rules/:path*', destination: '/', permanent: true },
+      { source: '/budgeting-apps', destination: '/', permanent: true },
+      { source: '/budgeting-apps/:path*', destination: '/', permanent: true },
+      { source: '/calendar', destination: '/', permanent: true },
+      { source: '/calendar/:path*', destination: '/', permanent: true },
+      { source: '/cd-rates', destination: '/', permanent: true },
+      { source: '/cd-rates/:path*', destination: '/', permanent: true },
+      { source: '/checking', destination: '/', permanent: true },
+      { source: '/checking/:path*', destination: '/', permanent: true },
+      { source: '/commodities', destination: '/', permanent: true },
+      { source: '/commodities/:path*', destination: '/', permanent: true },
+      { source: '/credit', destination: '/', permanent: true },
+      { source: '/credit/:path*', destination: '/', permanent: true },
+      { source: '/credit-cards', destination: '/', permanent: true },
+      { source: '/credit-cards/:path*', destination: '/', permanent: true },
+      { source: '/crypto', destination: '/', permanent: true },
+      { source: '/crypto/:path*', destination: '/', permanent: true },
+      { source: '/cryptocurrency', destination: '/', permanent: true },
+      { source: '/cryptocurrency/:path*', destination: '/', permanent: true },
+      { source: '/debt', destination: '/', permanent: true },
+      { source: '/debt/:path*', destination: '/', permanent: true },
+      { source: '/earnings', destination: '/', permanent: true },
+      { source: '/earnings/:path*', destination: '/', permanent: true },
+      { source: '/economy', destination: '/', permanent: true },
+      { source: '/economy/:path*', destination: '/', permanent: true },
+      { source: '/emergency-fund', destination: '/', permanent: true },
+      { source: '/emergency-fund/:path*', destination: '/', permanent: true },
+      { source: '/etfs', destination: '/', permanent: true },
+      { source: '/etfs/:path*', destination: '/', permanent: true },
+      { source: '/family-budget', destination: '/', permanent: true },
+      { source: '/family-budget/:path*', destination: '/', permanent: true },
+      { source: '/fed', destination: '/', permanent: true },
+      { source: '/fed/:path*', destination: '/', permanent: true },
+      { source: '/financial-calculators', destination: '/', permanent: true },
+      { source: '/financial-calculators/:path*', destination: '/', permanent: true },
+      { source: '/financial-independence', destination: '/', permanent: true },
+      { source: '/financial-independence/:path*', destination: '/', permanent: true },
+      { source: '/fiscal-policy', destination: '/', permanent: true },
+      { source: '/fiscal-policy/:path*', destination: '/', permanent: true },
+      { source: '/gdp', destination: '/', permanent: true },
+      { source: '/gdp/:path*', destination: '/', permanent: true },
+      { source: '/global', destination: '/', permanent: true },
+      { source: '/global/:path*', destination: '/', permanent: true },
+      { source: '/indicators', destination: '/', permanent: true },
+      { source: '/indicators/:path*', destination: '/', permanent: true },
+      { source: '/inflation', destination: '/', permanent: true },
+      { source: '/inflation/:path*', destination: '/', permanent: true },
+      { source: '/interest-rates', destination: '/', permanent: true },
+      { source: '/interest-rates/:path*', destination: '/', permanent: true },
+      { source: '/investing', destination: '/', permanent: true },
+      { source: '/investing/:path*', destination: '/', permanent: true },
+      { source: '/live-market-news', destination: '/', permanent: true },
+      { source: '/live-market-news/:path*', destination: '/', permanent: true },
+      { source: '/loan-reviews', destination: '/', permanent: true },
+      { source: '/loan-reviews/:path*', destination: '/', permanent: true },
+      { source: '/loans', destination: '/', permanent: true },
+      { source: '/loans/:path*', destination: '/', permanent: true },
+      { source: '/monetary-policy', destination: '/', permanent: true },
+      { source: '/monetary-policy/:path*', destination: '/', permanent: true },
+      { source: '/money-management', destination: '/', permanent: true },
+      { source: '/money-management/:path*', destination: '/', permanent: true },
+      { source: '/money-market', destination: '/', permanent: true },
+      { source: '/money-market/:path*', destination: '/', permanent: true },
+      { source: '/monthly-budget', destination: '/', permanent: true },
+      { source: '/monthly-budget/:path*', destination: '/', permanent: true },
+      { source: '/mortgages', destination: '/', permanent: true },
+      { source: '/mortgages/:path*', destination: '/', permanent: true },
+      { source: '/mutual-funds', destination: '/', permanent: true },
+      { source: '/mutual-funds/:path*', destination: '/', permanent: true },
+      { source: '/options', destination: '/', permanent: true },
+      { source: '/options/:path*', destination: '/', permanent: true },
+      { source: '/personal-finance', destination: '/', permanent: true },
+      { source: '/personal-finance/:path*', destination: '/', permanent: true },
+      { source: '/planning', destination: '/', permanent: true },
+      { source: '/planning/:path*', destination: '/', permanent: true },
+      { source: '/portfolio', destination: '/', permanent: true },
+      { source: '/portfolio/:path*', destination: '/', permanent: true },
+      { source: '/real-estate', destination: '/', permanent: true },
+      { source: '/real-estate/:path*', destination: '/', permanent: true },
+      { source: '/retirement', destination: '/', permanent: true },
+      { source: '/retirement/:path*', destination: '/', permanent: true },
+      { source: '/saving-money', destination: '/', permanent: true },
+      { source: '/saving-money/:path*', destination: '/', permanent: true },
+      { source: '/savings', destination: '/', permanent: true },
+      { source: '/savings/:path*', destination: '/', permanent: true },
+      { source: '/student-budget', destination: '/', permanent: true },
+      { source: '/student-budget/:path*', destination: '/', permanent: true },
+      { source: '/student-loans', destination: '/', permanent: true },
+      { source: '/student-loans/:path*', destination: '/', permanent: true },
+      { source: '/tax-software', destination: '/', permanent: true },
+      { source: '/tax-software/:path*', destination: '/', permanent: true },
+      { source: '/unemployment', destination: '/', permanent: true },
+      { source: '/unemployment/:path*', destination: '/', permanent: true },
+      // ── end temporary retirement block ──
+
+      // ── TEMPORARY: thin Stocks articles archived pending rewrite (2026-09-04) ──
+      // 55 of the 83 Stocks articles are still the original ~250-word versions (the
+      // other 28 are research-grade rewrites and stay live). Archived in the CMS and
+      // redirected here for the same reason as the category block above: the article
+      // route ([...slug]/page.tsx) falls back to a bundled demo article when the CMS
+      // lookup for a slug comes back empty, so simply archiving one of these without a
+      // redirect risks serving fabricated content on a URL Google may already have
+      // indexed. Destination is /stocks (the live hub), not / — these are Stocks
+      // content, and a topically-relevant redirect target doesn't read as a soft-404
+      // the way a mass redirect to the homepage would. Remove each entry as its
+      // article gets rewritten and republished.
+      { source: '/stocks/active-investing-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/best-long-term-stocks', destination: '/stocks', permanent: true },
+      { source: '/stocks/best-stocks-for-beginners', destination: '/stocks', permanent: true },
+      { source: '/stocks/beta-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/blue-chip-stocks-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/buy-and-hold-strategy', destination: '/stocks', permanent: true },
+      { source: '/stocks/candlestick-charts-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/common-stock-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/common-stock-investing-mistakes', destination: '/stocks', permanent: true },
+      { source: '/stocks/contrarian-investing-strategy', destination: '/stocks', permanent: true },
+      { source: '/stocks/cyclical-stocks-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/defensive-stocks-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/diversification-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/dividend-investing-strategy', destination: '/stocks', permanent: true },
+      { source: '/stocks/dividend-stocks-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/dividend-stocks-for-passive-income', destination: '/stocks', permanent: true },
+      { source: '/stocks/dollarcost-averaging-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/first-stock-purchase-guide', destination: '/stocks', permanent: true },
+      { source: '/stocks/floating-shares-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/fractional-shares-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/fundamental-analysis-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/growth-investing-strategy', destination: '/stocks', permanent: true },
+      { source: '/stocks/growth-stocks-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/growth-stocks-vs-value-stocks', destination: '/stocks', permanent: true },
+      { source: '/stocks/high-risk-vs-low-risk-stock', destination: '/stocks', permanent: true },
+      { source: '/stocks/how-much-money-to-start-investing', destination: '/stocks', permanent: true },
+      { source: '/stocks/how-stock-prices-change', destination: '/stocks', permanent: true },
+      { source: '/stocks/how-to-analyze-a-stock', destination: '/stocks', permanent: true },
+      { source: '/stocks/how-to-build-a-stock-portfolio', destination: '/stocks', permanent: true },
+      { source: '/stocks/how-to-buy-stocks-online', destination: '/stocks', permanent: true },
+      { source: '/stocks/how-to-start-investing-in-stocks', destination: '/stocks', permanent: true },
+      { source: '/stocks/index-investing-strategy', destination: '/stocks', permanent: true },
+      { source: '/stocks/international-stocks-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/large-cap-stocks-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/long-term-investing-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/meme-stocks-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/mid-cap-stocks-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/momentum-investing-strategy', destination: '/stocks', permanent: true },
+      { source: '/stocks/moving-averages-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/opening-a-brokerage-account', destination: '/stocks', permanent: true },
+      { source: '/stocks/passive-investing-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/portfolio-allocation-basics', destination: '/stocks', permanent: true },
+      { source: '/stocks/preferred-stock-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/risk-management-for-stock-investors', destination: '/stocks', permanent: true },
+      { source: '/stocks/shareholder-voting-rights', destination: '/stocks', permanent: true },
+      { source: '/stocks/stock-certificates-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/supply-and-demand-in-stocks', destination: '/stocks', permanent: true },
+      { source: '/stocks/support-and-resistance-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/technical-analysis-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/treasury-shares-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/trend-lines-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/value-investing-strategy', destination: '/stocks', permanent: true },
+      { source: '/stocks/value-stocks-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/volume-analysis-explained', destination: '/stocks', permanent: true },
+      { source: '/stocks/what-is-a-shareholder', destination: '/stocks', permanent: true },
+      // ── end temporary thin-stocks block ──
+
+      // 2026-09-04: /budgeting was never a real CMS category (0 articles) — it
+      // was silently serving CategoryFeed's bundled demo-content fallback under
+      // a "Fact-Checked & Expert Reviewed" badge, discovered while auditing the
+      // retirement changes above. Not temporary — /budgeting-basics (the real,
+      // live category) is the permanent home for this content.
+      { source: '/budgeting', destination: '/budgeting-basics', permanent: true },
+      { source: '/budgeting/:path*', destination: '/budgeting-basics', permanent: true },
+
       { source: '/admin', destination: `${admin}/dashboard`, permanent: false },
       { source: '/admin/:path*', destination: `${admin}/dashboard`, permanent: false },
       { source: '/editor', destination: `${admin}/cms/workflows`, permanent: false },
@@ -101,8 +303,8 @@ const nextConfig: NextConfig = {
       // /financial-tools/portfolio and /financial-tools/retirement were the
       // old locations before the calculators hub was reorganized — the tools
       // now live at the top level.
-      { source: '/financial-tools/portfolio', destination: '/portfolio', permanent: true },
-      { source: '/financial-tools/retirement', destination: '/retirement', permanent: true },
+      { source: '/financial-tools/portfolio', destination: '/', permanent: true },
+      { source: '/financial-tools/retirement', destination: '/', permanent: true },
       // The old /glossary section (letter index + term-detail pages) was
       // removed in favour of /terms/[letter]/[slug] — still indexed and
       // linked externally. /glossary/letter/k → /terms/k covers the old
@@ -117,9 +319,9 @@ const nextConfig: NextConfig = {
       // together with an adjacent term/entity name when the report was copied.
       // Defensive redirects in case the concatenated form is genuinely being
       // requested from somewhere outside this repo (old sitemap, third-party link).
-      { source: '/etfsETF', destination: '/etfs', permanent: true },
-      { source: '/inflationInflation', destination: '/inflation', permanent: true },
-      { source: '/cryptocurrencyBitcoin', destination: '/cryptocurrency', permanent: true },
+      { source: '/etfsETF', destination: '/', permanent: true },
+      { source: '/inflationInflation', destination: '/', permanent: true },
+      { source: '/cryptocurrencyBitcoin', destination: '/', permanent: true },
       // /markets/quote/DGS2 genuinely 404s — no data source exists for it anywhere
       // (not imperialpedia-service, not the Yahoo fallback map in worldFeed.ts/
       // marketsLoader.ts — no 2-year Treasury yield ticker exists on Yahoo under
@@ -133,15 +335,15 @@ const nextConfig: NextConfig = {
       // A redirect is also strictly cheaper than a 404: no render, no external
       // API call, no compute — versus the 30s-revalidate quote page's renders it
       // would otherwise trigger on every crawl/backlink hit.
-      { source: '/markets/quote/DGS2', destination: '/bonds', permanent: true },
+      { source: '/markets/quote/DGS2', destination: '/', permanent: true },
       // These /categories/<slug> archives 404 because no article's category
       // taxonomy string slugifies to an exact match — but each has a real,
       // populated top-level hub page. Send crawlers/visitors there instead.
-      { source: '/categories/bonds', destination: '/bonds', permanent: true },
-      { source: '/categories/etfs', destination: '/etfs', permanent: true },
-      { source: '/categories/options', destination: '/options', permanent: true },
-      { source: '/categories/banking', destination: '/banking', permanent: true },
-      { source: '/categories/personal-finance', destination: '/personal-finance', permanent: true },
+      { source: '/categories/bonds', destination: '/', permanent: true },
+      { source: '/categories/etfs', destination: '/', permanent: true },
+      { source: '/categories/options', destination: '/', permanent: true },
+      { source: '/categories/banking', destination: '/', permanent: true },
+      { source: '/categories/personal-finance', destination: '/', permanent: true },
       // /category/<slug> was a second, older news-by-category page (NewsLayout,
       // static placeholder market widget) rendering the same categories as the
       // real live feed at /latest/<slug> — two indexable URLs for the same

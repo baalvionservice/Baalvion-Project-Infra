@@ -25,19 +25,12 @@ const NAV: NavCategory[] = [
   {
     id: "investing",
     label: "Investing",
-    href: "/investing",
+    // /investing is one of the categories retired pending AdSense review
+    // (see next.config.ts) — it 301s to /. Points at /stocks, the only real
+    // destination in this menu, so the label itself is never a dead click.
+    href: "/stocks",
     links: [
       { label: "Stocks", href: "/stocks" },
-      { label: "Bonds", href: "/bonds" },
-      { label: "ETFs", href: "/etfs" },
-      { label: "Mutual Funds", href: "/mutual-funds" },
-      { label: "Options", href: "/options" },
-      { label: "Commodities", href: "/commodities" },
-      { label: "Cryptocurrency", href: "/cryptocurrency" },
-      { label: "Real Estate", href: "/real-estate" },
-      { label: "Retirement", href: "/retirement" },
-      { label: "Portfolio", href: "/portfolio" },
-      { label: "Brokers", href: "/brokers" },
     ],
   },
   {
@@ -46,70 +39,24 @@ const NAV: NavCategory[] = [
     href: "/market-news",
     links: [
       { label: "Market News", href: "/market-news" },
-      { label: "Live Market News", href: "/live-market-news" },
-      { label: "Earnings", href: "/earnings" },
-      { label: "Crypto", href: "/crypto" },
-      { label: "Economic Calendar", href: "/calendar" },
-      { label: "Indicators", href: "/indicators" },
-    ],
-  },
-  {
-    id: "banking",
-    label: "Banking",
-    href: "/banking",
-    links: [
-      { label: "Savings Accounts", href: "/savings" },
-      { label: "Checking Accounts", href: "/checking" },
-      { label: "CD Rates", href: "/cd-rates" },
-      { label: "Money Market", href: "/money-market" },
-      { label: "Credit Cards", href: "/credit-cards" },
-      { label: "Personal Loans", href: "/loans" },
-      { label: "Mortgages", href: "/mortgages" },
-      { label: "Auto Loans", href: "/auto-loans" },
-      { label: "Student Loans", href: "/student-loans" },
-      { label: "Banking Reviews", href: "/banking-reviews" },
     ],
   },
   {
     id: "personal-finance",
     label: "Personal Finance",
-    href: "/personal-finance",
+    // /personal-finance is also retired (301s to /) — points at /budgeting-basics,
+    // the larger of this menu's two real destinations, so the label is never a
+    // dead click.
+    href: "/budgeting-basics",
     links: [
-      { label: "Budgeting", href: "/budgeting" },
-      { label: "Saving", href: "/savings" },
-      { label: "Debt Management", href: "/debt" },
-      { label: "Credit", href: "/credit" },
-      { label: "Financial Planning", href: "/planning" },
-      { label: "Retirement Planning", href: "/retirement" },
-      { label: "Financial Independence", href: "/financial-independence" },
-      { label: "Money Management", href: "/money-management" },
-      { label: "Calculators", href: "/financial-calculators" },
-    ],
-  },
-  {
-    id: "economy",
-    label: "Economy",
-    href: "/economy",
-    links: [
-      { label: "Economic Indicators", href: "/indicators" },
-      { label: "Federal Reserve", href: "/fed" },
-      { label: "Inflation", href: "/inflation" },
-      { label: "GDP", href: "/gdp" },
-      { label: "Unemployment", href: "/unemployment" },
-      { label: "Interest Rates", href: "/interest-rates" },
-      { label: "Fiscal Policy", href: "/fiscal-policy" },
-      { label: "Monetary Policy", href: "/monetary-policy" },
-      { label: "Global Economy", href: "/global" },
-    ],
-  },
-  {
-    id: "reviews",
-    label: "Reviews",
-    href: "/reviews",
-    links: [
-      { label: "Loan Reviews", href: "/loan-reviews" },
-      { label: "App Reviews", href: "/app-reviews" },
-      { label: "Tax Software", href: "/tax-software" },
+      // /budgeting isn't a real CMS category (0 articles) — it was silently
+      // serving bundled demo content under a "Fact-Checked & Expert Reviewed"
+      // badge (see next.config.ts's /budgeting redirect, added 2026-09-04).
+      // budgeting-basics is the real, live category.
+      { label: "Budgeting", href: "/budgeting-basics" },
+      // Published to the CMS 2026-09-04 (category + all 5 articles are real,
+      // live content now — this is no longer a local-only draft link).
+      { label: "Scams & Fraud Protection", href: "/fraud-protection" },
     ],
   },
 ];

@@ -909,6 +909,29 @@ export const TOPIC_KEY_TERMS: Record<string, KeyTermItem[]> = {
       href: "/indicators",
     },
   ],
+
+  "fraud-protection": [
+    {
+      term: "Pig Butchering",
+      definition: "A long-con scam that combines a fabricated romantic or friendly relationship with a fake investment platform, gradually escalating deposits over weeks or months before the scammer disappears with the funds.",
+      href: "/fraud-protection/pig-butchering-scam-explained",
+    },
+    {
+      term: "Business Email Compromise (BEC)",
+      definition: "A scam in which a criminal gains access to, or convincingly spoofs, a real business email account to redirect a legitimate payment or invoice to a fraudulent account.",
+      href: "/fraud-protection/fake-bank-documents-canva-scams",
+    },
+    {
+      term: "SIM Swap",
+      definition: "A fraud technique where a criminal convinces or bribes a mobile carrier employee to transfer a victim's phone number onto a SIM card the criminal controls, intercepting SMS-based verification codes.",
+      href: "/fraud-protection/sim-swap-fraud-explained",
+    },
+    {
+      term: "Data Broker",
+      definition: "A company that collects personal information — often from browser cookies, tracking pixels, and app permissions — and sells or licenses it to advertisers, lead generators, or other third parties.",
+      href: "/fraud-protection/tracking-cookies-scam-targeting",
+    },
+  ],
 };
 
 /** Retrieves curated key terms for a slug, falling back to general banking terms if not defined. */

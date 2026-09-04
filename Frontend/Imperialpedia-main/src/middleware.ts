@@ -146,6 +146,9 @@ const REMOVED_PATHS = new Set<string>([
   '/best-debt-relief-companies',
   '/best-crypto-exchanges',
   '/best-cd-rates',
+  // Indexed by Google (site:imperialpedia.com) but returning a bare 404 —
+  // never migrated into this list when its siblings above were, 2026-09-04.
+  '/best-high-yield-savings-accounts-2026',
   // '/financial-independence-guide' (bare) removed from this set for the same
   // reason as the /financial-intelligence/* slugs above — it's a live article
   // (redirects to /personal-finance/financial-independence-guide, confirmed 200).
@@ -339,6 +342,7 @@ export const config = {
     '/best-debt-relief-companies',
     '/best-crypto-exchanges',
     '/best-cd-rates',
+    '/best-high-yield-savings-accounts-2026',
     // Bare top-level entries in REMOVED_PATHS above with no matcher pattern of
     // their own — middleware never ran for them, so they fell through to the
     // generic [...slug] 404 instead of the intended 410 goneResponse(). A plain

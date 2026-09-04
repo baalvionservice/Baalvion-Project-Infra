@@ -5,14 +5,12 @@ import { buildMetadata } from "@/lib/seo/metadata-builder";
 import { structuredData } from "@/lib/seo/structuredData";
 import { LabeledAdSlot } from "@/components/common/LabeledAdSlot";
 
-import { TrendingBar } from "@/components/landing/investopedia/TrendingBar";
 import { TermOfDay } from "@/components/landing/investopedia/TermOfDay";
 import { NewsletterBand } from "@/components/landing/investopedia/NewsletterBand";
 import { TERM_OF_DAY } from "@/components/landing/investopedia/content";
 
 import { HomeIntro, homeFaqItems } from "@/components/home/HomeIntro";
 import { HomeEditorial } from "@/components/home/HomeEditorial";
-import { ExploreTopics } from "@/components/home/ExploreTopics";
 import { MarketHighlights } from "@/components/home/MarketHighlights";
 import { HomeSectionSkeleton } from "@/components/home/HomeSectionSkeleton";
 import { Leadership } from "@/components/home/Leadership";
@@ -22,7 +20,6 @@ import { EditorialStandards } from "@/components/home/EditorialStandards";
 import { EditorialTeam } from "@/components/home/EditorialTeam";
 import { SourcesMethodology } from "@/components/home/SourcesMethodology";
 import { FeaturedKnowledge } from "@/components/home/FeaturedKnowledge";
-import { AllCategories } from "@/components/home/AllCategories";
 
 // The homepage previously inherited the root layout's generic metadata verbatim
 // (no page-level `generateMetadata`) — every list/detail page in the app calls
@@ -58,14 +55,6 @@ export default function Home() {
       <JsonLd data={structuredData.faqPage(homeFaqItems)} />
 
       <HomeIntro />
-
-      <TrendingBar />
-
-      <ExploreTopics />
-
-      <Suspense fallback={<HomeSectionSkeleton cards={4} />}>
-        <AllCategories />
-      </Suspense>
 
       <Suspense fallback={<HomeSectionSkeleton cards={4} />}>
         <HomeEditorial />

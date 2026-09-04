@@ -4,7 +4,6 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import type { Article } from "./types";
 import { ArticleCard } from "./ArticleCard";
-import { CategoryBadge } from "@/components/common/CategoryBadge";
 
 type Props = {
   lead: Article;
@@ -29,8 +28,7 @@ function HeroStory({ article, related, priority }: { article: Article; related: 
           />
         </div>
         <div className="pt-4">
-          <CategoryBadge category={article.category} />
-          <h2 className="mt-1.5 text-2xl sm:text-3xl font-black leading-[1.1] text-foreground group-hover:text-primary">
+          <h2 className="text-2xl sm:text-3xl font-black leading-[1.1] text-foreground group-hover:text-primary">
             {article.title}
           </h2>
           {article.dek && (

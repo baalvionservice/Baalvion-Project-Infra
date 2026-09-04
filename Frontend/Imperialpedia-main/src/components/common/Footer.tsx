@@ -20,14 +20,20 @@ const Container = ({ children }: { children: React.ReactNode }) => (
 // columns below, which are policy & about-the-company links, not site nav.
 // "Dictionary" (/terms) intentionally omitted — glossary is offline pending
 // AdSense approval, see src/config/glossary.ts.
+// 2026-09-04: was News/Investing/Banking/Personal Finance/Economy/Reviews —
+// four of those six (Investing, Banking, Personal Finance, Economy) are
+// retired categories that 301 to / (see next.config.ts). This footer column
+// was never updated when the Navbar was fixed for the same issue. Replaced
+// with the site's actual live sections.
 const EXPLORE_COLUMN = {
   label: 'Explore',
   links: [
+    { label: 'Stocks', href: '/stocks' },
+    { label: 'Budgeting', href: '/budgeting-basics' },
+    { label: 'Scams & Fraud Protection', href: '/fraud-protection' },
+    { label: 'Market News', href: '/market-news' },
+    { label: 'Financial Tools', href: '/financial-tools' },
     { label: 'News', href: '/news' },
-    { label: 'Investing', href: '/investing' },
-    { label: 'Banking', href: '/banking' },
-    { label: 'Personal Finance', href: '/personal-finance' },
-    { label: 'Economy', href: '/economy' },
     { label: 'Reviews', href: '/reviews' },
   ],
 };

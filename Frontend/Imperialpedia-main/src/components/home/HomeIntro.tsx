@@ -35,12 +35,13 @@ export const homeFaqItems: { question: string; answer: string }[] = [
 
 export function HomeIntro() {
   return (
-    <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-10 pb-2">
+    <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-12 pb-4">
       <div className="max-w-3xl">
-        <h1 className="text-2xl sm:text-3xl font-black leading-tight text-foreground">
+        <span className="block h-1 w-14 bg-primary mb-5" aria-hidden />
+        <h1 className="font-headline text-3xl sm:text-4xl lg:text-[42px] font-black leading-[1.1] tracking-tight text-foreground text-balance">
           Financial Knowledge, Markets &amp; Economics — Explained Clearly
         </h1>
-        <p className="mt-3 text-base text-muted-foreground leading-relaxed">
+        <p className="mt-4 text-base sm:text-lg text-muted-foreground leading-relaxed">
           Imperialpedia is an independent financial education and market information platform
           covering personal finance, investing, financial markets, and economics. We explain
           complex financial topics clearly, connect related concepts, and provide practical
