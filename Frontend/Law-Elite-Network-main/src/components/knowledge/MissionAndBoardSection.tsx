@@ -70,7 +70,7 @@ export function MissionAndBoardSection({ stats, authors }: { stats: HomeStats; a
             {authors.map((a) => (
               <Link key={a.slug} href={`/author/${a.slug}`} className="group flex items-center gap-3">
                 <div className="relative w-11 h-11 rounded-full overflow-hidden bg-slate-100 shrink-0">
-                  <Image src={resolvePersonImage(a)} alt={a.name} fill className="object-cover" />
+                  <Image src={resolvePersonImage(a)} alt={a.name} fill className="object-cover grayscale" />
                 </div>
                 <div className="min-w-0">
                   <p className="text-[13.5px] font-bold text-slate-900 group-hover:text-news-600 transition-colors">
