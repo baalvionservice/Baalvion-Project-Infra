@@ -5,12 +5,9 @@ import React from 'react';
 import Link from 'next/link';
 import { ChevronRight, Home, ArrowLeft } from 'lucide-react';
 import { CURRENT_CATEGORY_SLUGS } from '@/lib/category-slugs';
-import { countryNameToSlug } from '@/data/countries';
 
 interface BreadcrumbsProps {
   category?: { name: string; slug: string };
-  /** article.country -- omitted entirely when absent (worldwide-general guides) or when it isn't one of the curated /countries hubs. */
-  country?: string;
   /** article.subcategory -- links to the real ?sub= deep link the mega-menu already uses, not a fabricated URL. */
   subcategory?: { name: string; slug: string };
   articleTitle?: string;
@@ -19,11 +16,11 @@ interface BreadcrumbsProps {
 /**
  * @fileOverview Breadcrumbs
  * Precision SEO navigation component for the Law Elite Network:
- * Home -> Jurisdiction -> Practice Area -> Subcategory -> Article title.
- * Jurisdiction and Subcategory are both optional and only render when the
- * article actually carries real data for them -- never fabricated.
+ * Home -> Practice Area -> Subcategory -> Article title.
+ * Subcategory is optional and only renders when the article actually
+ * carries real data for it -- never fabricated.
  */
-export function Breadcrumbs({ category, country, subcategory, articleTitle }: BreadcrumbsProps) {
+export function Breadcrumbs({ category, subcategory, articleTitle }: BreadcrumbsProps) {
   // A CMS article's category slug isn't guaranteed to be one of the site's 8
   // real category pages (e.g. a narrow one-off like `criminal-law-dui-defense`
   // instead of `criminal-law`) -- articleUrl() already falls back to the flat
@@ -31,7 +28,6 @@ export function Breadcrumbs({ category, country, subcategory, articleTitle }: Br
   // apply the same check or it links straight into a 404.
   const hasRealCategory =
     !!category && (CURRENT_CATEGORY_SLUGS as readonly string[]).includes(category.slug);
-  const countrySlug = country ? countryNameToSlug(country) : null;
   // The 10px trail below stays as SEO/orientation, but it's too low-contrast
   // to be the ONLY way back once a reader has scrolled past a long article --
   // this is the same high-visibility "go up one level" link every category
@@ -55,15 +51,6 @@ export function Breadcrumbs({ category, country, subcategory, articleTitle }: Br
         <Link href="/" className="hover:text-blue-600 transition-colors flex items-center gap-1.5">
           <Home className="w-3 h-3" /> Home
         </Link>
-
-        {countrySlug && country && (
-          <>
-            <ChevronRight className="w-3 h-3 text-slate-200" />
-            <Link href={`/countries/${countrySlug}`} className="hover:text-blue-600 transition-colors">
-              {country}
-            </Link>
-          </>
-        )}
 
         {hasRealCategory && category && (
           <>

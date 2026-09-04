@@ -4,7 +4,6 @@ import { mergeArticles } from '@/data/law-content';
 import { cmsGetArticles, cmsGetNews } from '@/lib/cms';
 import { getMergedAuthors } from '@/lib/authors-server';
 import { authorNameToSlug, isEditorRole } from '@/data/authors';
-import { COUNTRIES } from '@/data/countries';
 import { TopicTicker } from '@/components/knowledge/news/TopicTicker';
 import { StoryCard } from '@/components/knowledge/news/StoryCard';
 import { LatestRail } from '@/components/knowledge/news/LatestRail';
@@ -16,14 +15,13 @@ import { FeaturedGuideSpotlight } from '@/components/knowledge/FeaturedGuideSpot
 import { ForProfessionalsSection } from '@/components/knowledge/ForProfessionalsSection';
 import { MissionAndBoardSection } from '@/components/knowledge/MissionAndBoardSection';
 import { TrustSection } from '@/components/knowledge/TrustSection';
-import { JurisdictionSection } from '@/components/knowledge/JurisdictionSection';
 import { PlatformIntro } from '@/components/knowledge/PlatformIntro';
 import { WhatYouCanFind } from '@/components/knowledge/WhatYouCanFind';
 import { WhoIsThisFor } from '@/components/knowledge/WhoIsThisFor';
 import { HomepageDisclaimer } from '@/components/knowledge/HomepageDisclaimer';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { AdSlot } from '@/components/ads/AdSlot';
-import { ShieldCheck, ArrowRight, Globe2 } from 'lucide-react';
+import { ShieldCheck, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
@@ -211,7 +209,6 @@ export default async function KnowledgeHomePage() {
   const homeStats = {
     guides: pool.length,
     practiceAreas: categories.length,
-    jurisdictions: COUNTRIES.length,
   };
   // "Editorial Board" means desk editors specifically (the real "...Editor"
   // vs. "...Contributor" role already encoded in each profile's `title`, see
@@ -256,12 +253,6 @@ export default async function KnowledgeHomePage() {
             >
               Explore Legal Guides <ArrowRight className="w-4 h-4" />
             </a>
-            <Link
-              href="/countries"
-              className="inline-flex items-center gap-2 px-5 h-11 rounded-md border border-slate-200 text-slate-700 text-[13px] font-bold tracking-wide hover:border-news-600 hover:text-news-600 transition-colors"
-            >
-              <Globe2 className="w-4 h-4" /> Browse by Jurisdiction
-            </Link>
           </div>
         </div>
       </section>
@@ -314,7 +305,6 @@ export default async function KnowledgeHomePage() {
         </div>
 
         <WhatYouCanFind />
-        <JurisdictionSection />
         <PlatformIntro />
         <WhoIsThisFor />
 

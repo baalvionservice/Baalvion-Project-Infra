@@ -8,7 +8,6 @@ import type { LawAuthor } from '@/data/authors';
 interface HomeStats {
   guides: number;
   practiceAreas: number;
-  jurisdictions: number;
 }
 
 function Stat({ value, label }: { value: string; label: string }) {
@@ -52,10 +51,9 @@ export function MissionAndBoardSection({ stats, authors }: { stats: HomeStats; a
               </Link>
             </p>
           </div>
-          <div className="grid grid-cols-3 gap-6 max-w-md">
+          <div className="grid grid-cols-2 gap-6 max-w-md">
             <Stat value={`${stats.guides}+`} label="Published Guides" />
             <Stat value={String(stats.practiceAreas)} label="Practice Areas" />
-            <Stat value={String(stats.jurisdictions)} label="Jurisdictions Covered" />
           </div>
         </div>
         <div className="lg:col-span-5">
