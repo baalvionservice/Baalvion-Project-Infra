@@ -237,33 +237,31 @@ export default async function RootLayout({
                 analytics_storage: 'denied',
                 wait_for_update: 500,
               });
-              ${
-                ADSENSE_CLIENT
-                  ? `
-              // Only created AFTER the consent default above has run -- same script,
-              // sequential statements, so this is a real guarantee, not a document-order
-              // bet. document.createElement bypasses React's render tree entirely, so
-              // this script is never a candidate for React's async+src hoisting.
-              (function() {
-                var s = document.createElement('script');
-                s.async = true;
-                s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + ${JSON.stringify(ADSENSE_CLIENT)};
-                s.crossOrigin = 'anonymous';
-                document.head.appendChild(s);
-              })();
-              `
-                  : ''
-              }
             `,
           }}
         />
+        {/* Google's AdSense "code snippet" site-verification method does a raw-HTML
+            fetch looking for this exact literal tag -- it does not execute the page's
+            JS, so the previous document.createElement-based loader (which satisfied
+            the *consent-ordering* requirement but never appears in server-rendered
+            HTML) failed that check with "Couldn't verify your site". `defer` (not
+            Google's own `async`) is what makes both requirements satisfiable by one
+            tag: unlike async, defer is NOT part of React 19's async+src hoisting (see
+            the removed comment above this used to carry) -- a deferred script keeps
+            its authored document position and, per the HTML spec, always executes
+            after every earlier synchronous script has already run, so this still
+            loads strictly after the consent-default script above sets denied
+            defaults. Confirm this ordering with a live view-source check after any
+            future edit near here, the same way the original bug was found. */}
+        {ADSENSE_CLIENT && (
+          <script
+            defer
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
+            crossOrigin="anonymous"
+          />
+        )}
         <GoogleAnalytics />
         <meta name="theme-color" content="#1e3a5f" />
-        {/* The <meta name="google-adsense-account"> tag alone satisfies Google's site-
-            ownership verification (it's a documented alternative to the script tag for
-            that specific check), so it stays a plain literal tag here. The actual
-            adsbygoogle.js loader is now created from inside the consent-default script
-            above instead of being a static tag here -- see the comment there for why. */}
         {ADSENSE_CLIENT && (
           <meta name="google-adsense-account" content={ADSENSE_CLIENT} />
         )}
