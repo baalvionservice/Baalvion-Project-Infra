@@ -11,6 +11,21 @@ import { mergeArticles, type LawArticle } from '@/data/law-content';
 import { cmsGetArticles } from '@/lib/cms';
 import { resolveArticleImage, resolvePersonImage } from '@/lib/article-art';
 import { articleUrl } from '@/lib/article-url';
+import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
+
+// AdSense-readiness retirement (see category-slugs.ts's CURRENT_CATEGORY_SLUGS
+// comment): an author's article list here is exactly the kind of surface the
+// retirement plan calls out -- a retired-category guide must stop being
+// linked from a live, indexed page even though it still resolves at
+// /article/{slug} until the CMS-side archive runs. sitemap.ts's
+// isKeptCategoryArticle mirrors this filter (see its own comment) so a
+// contributor whose only work is retired doesn't get a sitemap entry for a
+// page that would now show "No published guides yet".
+const currentSlugSet = new Set<string>(CURRENT_CATEGORY_SLUGS);
+function isKeptCategoryArticle(a: { category?: { slug?: string } }): boolean {
+  const rawSlug = a.category?.slug;
+  return !rawSlug || currentSlugSet.has(toNewCategorySlug(rawSlug));
+}
 
 // Serve a cached page and refresh it in the background every 5 minutes,
 // instead of re-rendering (and re-fetching from the CMS) on every single
@@ -43,7 +58,7 @@ export default async function AuthorProfilePage(
   // contributor whose work lives only in the CMS isn't shown as having
   // published nothing.
   const articles: LawArticle[] = mergeArticles(cmsArticles)
-    .filter((a) => authorNameToSlug(a.author) === author.slug)
+    .filter((a) => authorNameToSlug(a.author) === author.slug && isKeptCategoryArticle(a))
     .sort((a, b) => (b.views ?? 0) - (a.views ?? 0));
 
   const avatar = resolvePersonImage({ avatarUrl: author.avatarUrl, name: author.name, avatarSeed: author.avatarSeed });

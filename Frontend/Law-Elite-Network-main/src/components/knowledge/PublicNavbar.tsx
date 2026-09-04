@@ -18,7 +18,7 @@ import SearchBar from '../search/SearchBar';
 import { cn } from '@/lib/utils';
 import { isSubcategoryPopulated } from '@/lib/subcategory-or-article';
 import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
-import seedData from '../../../docs/seed-data.json';
+import { CMS_ONLY_CATEGORIES } from '@/lib/cms-only-categories';
 import { useAuth } from '@/hooks/useAuth';
 import { sharedSignInUrl } from '@/lib/shared-auth';
 
@@ -27,16 +27,41 @@ import { sharedSignInUrl } from '@/lib/shared-auth';
 // & Labor") don't fit there even at wide viewports -- the row would need ~1400px of
 // text alone -- so they wrapped to two cramped lines. Short labels here are for this
 // bar ONLY; the mega-menu heading, page H1, and breadcrumbs still use the full name.
+// AdSense-readiness retirement (see category-slugs.ts's CURRENT_CATEGORY_SLUGS
+// comment): shrunk to the 3 live practice areas -- `categories` below is
+// already filtered to CURRENT_CATEGORY_SLUGS, so the retired 13 never reach
+// this map, but their entries were removed rather than left as dead weight.
 const NAV_SHORT_LABEL: Record<string, string> = {
-  business: 'Business',
-  'criminal-law': 'Criminal Law',
-  'family-law': 'Family',
-  'real-estate-law': 'Real Estate',
-  'tax-finance': 'Tax & Finance',
-  'employment-law': 'Employment',
-  'tech-ip': 'Tech & IP',
-  disputes: 'Disputes',
+  'maritime-offshore-injury-law': 'Maritime Injury',
+  'cruise-ship-passenger-vessel-accidents': 'Cruise Ship Accidents',
+  'personal-injury-lawyer': 'Personal Injury',
 };
+
+/**
+ * seed-data.json's `categories` array predates the AdSense-readiness
+ * retirement and still lists all 8 now-retired practice areas -- none of the
+ * 3 currently-live ones, which were created directly in the CMS (see
+ * cms-only-categories.ts) and were never in law-service's /categories API or
+ * this bundled seed file to begin with. That's not just an outage fallback
+ * gap: law-service's live /categories response ALSO never contains these 3
+ * (they don't exist there, hiccup or not), so the old "live API -> else
+ * seedCategories()" logic left the desktop topic bar and mobile drawer
+ * permanently empty -- every path converged on zero categories, which is
+ * what made the nav look broken/under-construction after the retirement
+ * narrowed the live set down to only CMS-only categories.
+ *
+ * localCategories() is the guaranteed-non-empty baseline now: every entry
+ * CURRENT_CATEGORY_SLUGS lists that has a CMS_ONLY_CATEGORIES record (today,
+ * all 3 do). Real law-service categories (if the live set ever includes one
+ * again) still load and merge in via the effect below -- this baseline is
+ * what renders immediately and what a live-API failure/empty-response
+ * degrades to, replacing the old, permanently-empty seedCategories() path.
+ */
+function localCategories(): any[] {
+  return CURRENT_CATEGORY_SLUGS
+    .map((slug) => CMS_ONLY_CATEGORIES[slug])
+    .filter((c): c is NonNullable<typeof c> => Boolean(c));
+}
 
 /**
  * @fileOverview Public masthead — editorial newsroom navigation.
@@ -46,7 +71,7 @@ const NAV_SHORT_LABEL: Record<string, string> = {
  */
 export function PublicNavbar() {
   const { isAuthenticated, role } = useAuth();
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>(localCategories());
   const [subcategories, setSubcategories] = useState<any[]>([]);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -87,19 +112,25 @@ export function PublicNavbar() {
         // link site-wide, so restrict to the curated practice-area hubs and
         // normalize old slugs the same way sitemap.ts/article-url.ts already do.
         const currentSlugSet = new Set<string>(CURRENT_CATEGORY_SLUGS);
-        const cats = rawCats
+        const liveCats = rawCats
           .map((c: any) => ({ ...c, slug: toNewCategorySlug(c.slug) }))
           .filter((c: any) => currentSlugSet.has(c.slug));
-        if (cats.length > 0) {
-          setCategories(cats);
-          setSubcategories(subs);
-        } else {
-          setCategories((seedData as any).categories || []);
-          setSubcategories((seedData as any).subcategories || []);
-        }
+        // Merge live law-service categories over the local CMS_ONLY_CATEGORIES
+        // baseline (by slug) rather than replacing it outright -- today none of
+        // the 3 live categories exist in law-service at all, so liveCats is
+        // always empty and this is a no-op, but a real law-service category
+        // among the live set in the future gets its live id/description
+        // without the nav ever regressing to empty in the meantime.
+        const bySlug = new Map(localCategories().map((c) => [c.slug, c]));
+        liveCats.forEach((c: any) => bySlug.set(c.slug, c));
+        setCategories(Array.from(bySlug.values()));
+        setSubcategories(subs);
       } catch {
-        setCategories((seedData as any).categories || []);
-        setSubcategories((seedData as any).subcategories || []);
+        // Live law-service/subcategories fetch failed -- categories state
+        // already holds the localCategories() baseline from useState's
+        // initializer, so leave it as-is rather than re-setting it. No
+        // subcategory data source exists locally, so the mega-menu just shows
+        // no subtopics for now, same as a category with none populated.
       }
     };
     load();

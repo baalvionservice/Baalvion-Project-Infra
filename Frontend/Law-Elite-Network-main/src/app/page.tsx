@@ -95,15 +95,31 @@ export default async function KnowledgeHomePage() {
   ]);
   const apiCategories = apiCategoriesRaw;
 
+  // AdSense-readiness retirement (see category-slugs.ts's CURRENT_CATEGORY_SLUGS
+  // comment): filtered here, before any pool/source is built from it, so every
+  // downstream homepage feed (lead story, "Latest Guides" grid, "Most Viewed")
+  // is covered in one place -- mergeArticles() below unconditionally backfills
+  // every bundled article, including the 8 legacy practice areas now retired,
+  // so filtering only the live sources and not the merged pool would still
+  // leak them back in. Each of those feeds links out via articleUrl(), which
+  // would otherwise point a still-live, indexed homepage straight into a
+  // retired category's /article/{slug} gap.
+  const currentSlugSetForPool = new Set<string>(CURRENT_CATEGORY_SLUGS);
+  const isKeptCategoryArticle = (a: any) => {
+    const rawSlug = categorySlugOf(a);
+    return !rawSlug || currentSlugSetForPool.has(toNewCategorySlug(rawSlug));
+  };
+  const cmsArticlesKept = cmsArticles.filter(isKeptCategoryArticle);
+
   // CMS is the authoritative admin-managed source, so it wins on a slug collision;
   // mergeArticles() then fills any remaining gap with the bundled/static set.
   const seenSlugs = new Set<string>();
-  const combinedSource = [...cmsArticles, ...apiArticles].filter((a: any) => {
+  const combinedSource = [...cmsArticlesKept, ...apiArticles].filter((a: any) => {
     if (!a?.slug || seenSlugs.has(a.slug)) return false;
     seenSlugs.add(a.slug);
     return true;
   });
-  const pool = mergeArticles(combinedSource);
+  const pool = mergeArticles(combinedSource).filter(isKeptCategoryArticle);
 
   // Editor's-picks first, not raw popularity -- a "trending by views" sort is
   // the newsroom pattern /news already owns. The homepage is an evergreen
@@ -166,7 +182,7 @@ export default async function KnowledgeHomePage() {
   // batch (e.g. Dispute Resolution) can't dominate every slot -- backfills
   // from the overflow (still most-recent-first) if the cap leaves the grid
   // short of 8, so sparse days never render fewer than the source supports.
-  const latestGuidesSource = cmsArticles.length >= 8 ? cmsArticles : pool;
+  const latestGuidesSource = cmsArticlesKept.length >= 8 ? cmsArticlesKept : pool;
   const latestGuidesSorted = [...latestGuidesSource]
     .filter((a: any) => a?.slug && !usedSlugs.has(a.slug))
     .sort((a: any, b: any) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
