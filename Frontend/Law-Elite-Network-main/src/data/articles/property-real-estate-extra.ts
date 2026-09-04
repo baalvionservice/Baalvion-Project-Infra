@@ -21,7 +21,7 @@ export const propertyRealEstateExtraArticles: LawArticle[] = [
     author: 'Priya Nair',
     updatedAt: 'June 13, 2026',
     readingTime: 8,
-    views: 5240,
+    views: 0,
     featured: false,
     imageSeed: 'easement-right-of-way',
     country: 'United States',
@@ -106,7 +106,7 @@ export const propertyRealEstateExtraArticles: LawArticle[] = [
     author: 'Daniel Okafor',
     updatedAt: 'June 5, 2026',
     readingTime: 9,
-    views: 6080,
+    views: 0,
     featured: true,
     imageSeed: 'landlord-tenant-repairs',
     content: `<p>When something breaks in a rented home, the first question is usually: who pays to fix it? As a general rule, the landlord is responsible for major and structural repairs and for keeping the property safe and habitable, while the tenant handles minor day-to-day upkeep and any damage they cause beyond normal wear and tear. The precise dividing line is set by the tenancy agreement and, importantly, by housing laws that often override unfair clauses.</p>

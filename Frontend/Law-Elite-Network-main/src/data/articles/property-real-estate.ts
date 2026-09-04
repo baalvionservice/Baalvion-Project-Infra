@@ -25,7 +25,7 @@ export const propertyRealEstateArticles: LawArticle[] = [
     author: 'Priya Nair',
     updatedAt: 'March 14, 2026',
     readingTime: 9,
-    views: 7420,
+    views: 0,
     featured: true,
     imageSeed: 'buying-property-checklist',
     country: 'United States',
@@ -97,7 +97,7 @@ export const propertyRealEstateArticles: LawArticle[] = [
     author: 'Daniel Okafor',
     updatedAt: 'February 2, 2026',
     readingTime: 8,
-    views: 5380,
+    views: 0,
     featured: false,
     imageSeed: 'tenant-rights-rental-agreement',
     content: `<p>A rental agreement, often called a <strong>lease</strong> or <strong>tenancy agreement</strong>, is a contract that gives you the right to occupy someone else's property in exchange for rent. While the landlord retains ownership, the law in most countries grants tenants a substantial bundle of rights designed to protect their home, their money, and their privacy. Knowing these rights turns a one-sided power relationship into a fairer one — and it helps you spot when a clause in your agreement is unenforceable because it conflicts with the law.</p>

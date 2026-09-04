@@ -43,7 +43,7 @@
       "keywords": ["nda", "contracts", "privacy"],
       "alphabet": "A",
       "readingTime": 5,
-      "views": 450,
+      "views": 0,
       "featured": true,
       "createdAt": "2024-05-01T10:00:00Z"
     },
@@ -58,7 +58,7 @@
       "keywords": ["bail", "criminal", "procedure"],
       "alphabet": "B",
       "readingTime": 4,
-      "views": 320,
+      "views": 0,
       "featured": false,
       "createdAt": "2024-05-02T11:00:00Z"
     },
@@ -73,7 +73,7 @@
       "keywords": ["custody", "parents", "divorce"],
       "alphabet": "C",
       "readingTime": 6,
-      "views": 210,
+      "views": 0,
       "featured": true,
       "createdAt": "2024-05-03T12:00:00Z"
     },
@@ -88,7 +88,7 @@
       "keywords": ["divorce", "legal", "family"],
       "alphabet": "D",
       "readingTime": 3,
-      "views": 500,
+      "views": 0,
       "featured": false,
       "createdAt": "2024-05-04T13:00:00Z"
     },
@@ -103,7 +103,7 @@
       "keywords": ["employment", "job", "contract"],
       "alphabet": "E",
       "readingTime": 5,
-      "views": 180,
+      "views": 0,
       "featured": true,
       "createdAt": "2024-05-05T14:00:00Z"
     },
@@ -118,7 +118,7 @@
       "keywords": ["fir", "police", "crime"],
       "alphabet": "F",
       "readingTime": 4,
-      "views": 290,
+      "views": 0,
       "featured": false,
       "createdAt": "2024-05-06T15:00:00Z"
     },
@@ -133,7 +133,7 @@
       "keywords": ["gdpr", "privacy", "tech"],
       "alphabet": "G",
       "readingTime": 8,
-      "views": 410,
+      "views": 0,
       "featured": true,
       "createdAt": "2024-05-07T16:00:00Z"
     },
@@ -148,7 +148,7 @@
       "keywords": ["tax", "corporate", "structure"],
       "alphabet": "H",
       "readingTime": 7,
-      "views": 150,
+      "views": 0,
       "featured": false,
       "createdAt": "2024-05-08T17:00:00Z"
     },
@@ -163,7 +163,7 @@
       "keywords": ["ip", "patent", "copyright"],
       "alphabet": "I",
       "readingTime": 5,
-      "views": 220,
+      "views": 0,
       "featured": true,
       "createdAt": "2024-05-09T18:00:00Z"
     },
@@ -178,7 +178,7 @@
       "keywords": ["juvenile", "justice", "criminal"],
       "alphabet": "J",
       "readingTime": 6,
-      "views": 130,
+      "views": 0,
       "featured": false,
       "createdAt": "2024-05-10T19:00:00Z"
     }

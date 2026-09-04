@@ -21,7 +21,7 @@ export const familyPersonalArticles: LawArticle[] = [
     author: 'Sofia Almeida',
     updatedAt: 'March 14, 2026',
     readingTime: 10,
-    views: 7820,
+    views: 0,
     featured: true,
     imageSeed: 'divorce-process-overview',
     content: `<p>Divorce is the legal process that formally ends a marriage and resolves the practical questions that flow from it: how property is divided, how children are cared for, and whether one spouse must support the other. Although the emotional experience is universal, the legal mechanics vary widely by country and even by region within a country. Understanding the broad shape of the process helps people make calmer, better-informed decisions.</p>
@@ -90,7 +90,7 @@ export const familyPersonalArticles: LawArticle[] = [
     author: 'Rajesh Iyer',
     updatedAt: 'February 2, 2026',
     readingTime: 9,
-    views: 6140,
+    views: 0,
     featured: false,
     imageSeed: 'child-custody-best-interests',
     content: `<p>Child custody refers to the legal arrangements that determine where a child lives and who makes important decisions about their upbringing after parents separate. It is one of the most sensitive areas of family law, and courts approach it with a single overriding question in mind: what serves the child's welfare. This article explains the core concepts and how parents can engage with the process responsibly.</p>
@@ -159,7 +159,7 @@ export const familyPersonalArticles: LawArticle[] = [
     author: 'Eleanor Whitfield',
     updatedAt: 'April 21, 2026',
     readingTime: 11,
-    views: 5230,
+    views: 0,
     featured: false,
     imageSeed: 'valid-will-probate-guide',
     content: `<p>A will is a legal document that sets out how you want your property distributed and your affairs handled after you die. Writing one is among the most considerate things a person can do for their family, because it replaces guesswork and potential conflict with clear instructions. This guide explains what makes a will valid and how the probate process puts it into effect.</p>

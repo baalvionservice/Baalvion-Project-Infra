@@ -199,7 +199,6 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
 
           <Breadcrumbs
             category={category}
-            country={article.country}
             subcategory={article.subcategory}
             articleTitle={article.title}
           />

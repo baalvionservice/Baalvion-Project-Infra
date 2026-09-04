@@ -15,7 +15,7 @@ const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 const FEED_PAGE_SIZE = 12;
 
 // title.absolute + explicit openGraph/twitter images: same fix as
-// src/app/countries/page.tsx -- a plain-string title here gets the root
+// src/lib/seo/article-seo.tsx -- a plain-string title here gets the root
 // layout's '%s | Law Elite Network' template applied on top of the suffix
 // already baked into this string (double suffix), and a page-level
 // openGraph/twitter object replaces (not merges with) the root's, silently

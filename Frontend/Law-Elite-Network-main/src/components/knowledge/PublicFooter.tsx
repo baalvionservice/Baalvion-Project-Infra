@@ -17,7 +17,6 @@ const EXPLORE_LINKS = [
   { href: '/case-law', label: 'Case Law' },
   { href: '/legislation', label: 'Legislation' },
   { href: '/law-changes', label: 'Law Changes' },
-  { href: '/countries', label: 'Browse by Country' },
 ];
 
 // AdSense-readiness retirement (see category-slugs.ts's CURRENT_CATEGORY_SLUGS

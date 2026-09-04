@@ -21,7 +21,7 @@ export const propertyRealEstateExtra2Articles: LawArticle[] = [
     author: 'Waki Malik',
     updatedAt: 'June 22, 2026',
     readingTime: 9,
-    views: 8120,
+    views: 0,
     featured: false,
     imageSeed: 'eviction-process-landlord-tenant',
     content: `<p>Eviction is the legal process by which a landlord removes a tenant from a rental property. The defining feature, in almost every fair system, is that eviction must go through proper legal channels — typically a written notice, then a court or tribunal order, and finally lawful enforcement by authorised officers. Landlords generally cannot simply change the locks, remove belongings, or cut off services to force a tenant out; doing so is usually itself unlawful. Understanding the steps protects tenants from abuse and helps landlords act without exposing themselves to liability.</p>
@@ -111,7 +111,7 @@ export const propertyRealEstateExtra2Articles: LawArticle[] = [
     author: 'Daniel Okafor',
     updatedAt: 'June 20, 2026',
     readingTime: 8,
-    views: 6740,
+    views: 0,
     featured: false,
     imageSeed: 'power-of-attorney-authority',
     content: `<p>A power of attorney (POA) is a legal document in which one person, the principal, authorises another person, the agent or attorney-in-fact, to act on their behalf. It is one of the most useful and widely used legal tools, allowing someone to manage your property, finances, or personal affairs when you cannot — whether because you are travelling, busy, or no longer able to act for yourself. The authority can be broad or narrow, temporary or lasting, depending entirely on how the document is written.</p>

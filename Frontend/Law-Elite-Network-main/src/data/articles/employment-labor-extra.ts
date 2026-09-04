@@ -21,7 +21,7 @@ export const employmentLaborExtraArticles: LawArticle[] = [
     author: 'Priya Nair',
     updatedAt: 'June 15, 2026',
     readingTime: 9,
-    views: 6890,
+    views: 0,
     featured: true,
     imageSeed: 'non-compete-agreement-explained',
     content: `<p>A non-compete agreement is a clause or contract in which an employee agrees not to work for a competitor, or to start a competing business, for a set period after leaving their job. Its purpose is to protect an employer's legitimate interests — trade secrets, client relationships, and investment in training — once a worker moves on. But because these clauses limit a person's ability to earn a living, courts in most countries only enforce them when the restrictions are reasonable in scope, duration, and geography.</p>
@@ -105,7 +105,7 @@ export const employmentLaborExtraArticles: LawArticle[] = [
     author: 'Daniel Okoro',
     updatedAt: 'June 6, 2026',
     readingTime: 9,
-    views: 6230,
+    views: 0,
     featured: false,
     imageSeed: 'employee-vs-contractor-legal',
     content: `<p>The legal difference between an employee and an independent contractor comes down to control and independence: an employee works under the direction of an employer, while a contractor runs their own business and is hired to deliver a result. This classification is not just a label — it decides who gets paid holiday and sick leave, who pays which taxes, who carries liability, and what protections the worker enjoys. Getting it wrong can be costly for both sides.</p>

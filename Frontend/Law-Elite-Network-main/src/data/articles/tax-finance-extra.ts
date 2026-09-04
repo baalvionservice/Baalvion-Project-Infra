@@ -21,7 +21,7 @@ export const taxFinanceExtraArticles: LawArticle[] = [
     author: 'Priya Nair',
     updatedAt: 'June 17, 2026',
     readingTime: 9,
-    views: 7860,
+    views: 0,
     featured: true,
     imageSeed: 'capital-gains-tax-explained',
     country: 'United States',
@@ -109,7 +109,7 @@ export const taxFinanceExtraArticles: LawArticle[] = [
     author: 'Daniel Okafor',
     updatedAt: 'June 4, 2026',
     readingTime: 8,
-    views: 5640,
+    views: 0,
     featured: false,
     imageSeed: 'vat-vs-sales-tax',
     content: `<p>VAT (value-added tax) and sales tax are both taxes on what consumers spend, but they work in fundamentally different ways. Sales tax is charged once, at the final sale to the end customer. VAT is charged at every stage of the supply chain, with businesses reclaiming the tax they pay on their inputs, so only the "value added" at each step is effectively taxed. The end consumer usually bears a similar burden either way — the difference lies in how the tax is collected along the route.</p>

@@ -21,7 +21,7 @@ export const employmentLaborExtra2Articles: LawArticle[] = [
     author: 'Daniel Okoro',
     updatedAt: 'June 23, 2026',
     readingTime: 8,
-    views: 7320,
+    views: 0,
     featured: false,
     imageSeed: 'at-will-employment-explained',
     content: `<p>At-will employment is an arrangement in which either the employer or the employee can end the working relationship at any time, with or without notice, and for almost any reason — or no reason at all. It is the default model in the United States and shapes how millions of jobs operate there. But "at any reason" is not the same as "for any reason whatsoever": a web of legal exceptions means employers still cannot fire someone for unlawful reasons such as discrimination or retaliation. Understanding both the freedom and its limits is essential for workers and employers alike.</p>
@@ -106,7 +106,7 @@ export const employmentLaborExtra2Articles: LawArticle[] = [
     author: 'Maria Harizanova',
     updatedAt: 'June 20, 2026',
     readingTime: 8,
-    views: 6210,
+    views: 0,
     featured: false,
     imageSeed: 'severance-agreement-explained',
     content: `<p>A severance agreement is a contract between an employer and a departing employee that sets out what the employee will receive on leaving — typically a payment or continued benefits — and what they must give in return. Most often, the central exchange is money in return for the employee agreeing not to sue the employer over the employment or its ending. Because these agreements ask employees to give up valuable legal rights, they deserve careful reading and, often, professional advice before signing.</p>

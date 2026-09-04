@@ -21,7 +21,7 @@ export const criminalLawExtra2Articles: LawArticle[] = [
     author: 'Daniel Okafor',
     updatedAt: 'June 21, 2026',
     readingTime: 9,
-    views: 7840,
+    views: 0,
     featured: false,
     imageSeed: 'dui-dwi-drunk-driving-law',
     content: `<p>DUI ("driving under the influence") and DWI ("driving while intoxicated") are criminal offences for operating a vehicle while your ability to drive safely is impaired by alcohol or drugs. The terms are used differently from place to place, but the underlying idea is the same everywhere: driving while impaired endangers others, so the law sets a measurable limit — usually a blood-alcohol concentration — above which driving becomes an offence, regardless of whether you feel drunk. The consequences typically include fines, licence suspension, and in serious cases imprisonment.</p>
@@ -107,7 +107,7 @@ export const criminalLawExtra2Articles: LawArticle[] = [
     author: 'Aisha Rahman',
     updatedAt: 'June 19, 2026',
     readingTime: 9,
-    views: 8350,
+    views: 0,
     featured: true,
     imageSeed: 'rights-during-police-search',
     content: `<p>A police search is a serious intrusion on privacy, so most legal systems require the police to have a proper legal basis before searching your body, your home, your car, or your devices. In broad terms, that basis is usually either a warrant issued by a court, your genuine consent, or a recognised exception such as immediate danger or evidence about to be destroyed. Understanding when a search is lawful — and how to respond when one happens — protects your privacy and can be decisive if a case ever reaches court.</p>

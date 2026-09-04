@@ -11,6 +11,8 @@ interface CategoryContentProps {
   categoryId: string;
   /** CMS-authored articles for this category, fetched server-side by the parent page (see [categorySlug]/page.tsx). */
   cmsArticles?: any[];
+  /** Slugs already shown in the page's lead+rail spotlight above this grid — excluded here so the same guide never appears twice on one page. */
+  excludeSlugs?: string[];
 }
 
 /**
@@ -18,7 +20,7 @@ interface CategoryContentProps {
  * rendered server-side by the parent page — this piece stays client-only
  * because it merges in the live law-service article list on mount.
  */
-export function CategoryContent({ categorySlug, categoryId, cmsArticles = [] }: CategoryContentProps) {
+export function CategoryContent({ categorySlug, categoryId, cmsArticles = [], excludeSlugs = [] }: CategoryContentProps) {
   const [apiArticles, setApiArticles] = useState<any[]>([]);
   const [articlesLoading, setArticlesLoading] = useState(true);
 
@@ -35,13 +37,14 @@ export function CategoryContent({ categorySlug, categoryId, cmsArticles = [] }: 
   const articles = useMemo(() => {
     const bundled = getArticlesByCategorySlug(categorySlug);
     const seen = new Set<string>();
+    const exclude = new Set(excludeSlugs);
     const combined = [...cmsArticles, ...apiArticles, ...bundled].filter((a) => {
-      if (!a?.slug || seen.has(a.slug)) return false;
+      if (!a?.slug || seen.has(a.slug) || exclude.has(a.slug)) return false;
       seen.add(a.slug);
       return true;
     });
     return combined;
-  }, [cmsArticles, apiArticles, categorySlug]);
+  }, [cmsArticles, apiArticles, categorySlug, excludeSlugs]);
 
   return (
     <div className="container mx-auto px-4 sm:px-6 max-w-7xl pt-10">
