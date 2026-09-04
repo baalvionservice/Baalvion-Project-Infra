@@ -47,7 +47,7 @@
     { "id": "sub_dr_litigation", "categoryId": "cat_dispute_resolution", "name": "Litigation", "slug": "litigation", "isActive": true }
   ],
   "articles": [
-    { "id": "a1", "title": "Arbitration Law Guide", "slug": "arbitration-law", "alphabet": "A", "categoryId": "cat_dispute_resolution", "subcategoryId": "sub_dr_arbitration", "summary": "Comprehensive guide to private dispute resolution protocols.", "views": 1200, "readingTime": 8, "featured": true },
-    { "id": "a2", "title": "Corporate Compliance Audit", "slug": "corporate-compliance", "alphabet": "C", "categoryId": "cat_business_corporate", "subcategoryId": "sub_bc_compliance", "summary": "Strategic framework for enterprise-wide regulatory adherence.", "views": 950, "readingTime": 10, "featured": true }
+    { "id": "a1", "title": "Arbitration Law Guide", "slug": "arbitration-law", "alphabet": "A", "categoryId": "cat_dispute_resolution", "subcategoryId": "sub_dr_arbitration", "summary": "Comprehensive guide to private dispute resolution protocols.", "views": 0, "readingTime": 8, "featured": true },
+    { "id": "a2", "title": "Corporate Compliance Audit", "slug": "corporate-compliance", "alphabet": "C", "categoryId": "cat_business_corporate", "subcategoryId": "sub_bc_compliance", "summary": "Strategic framework for enterprise-wide regulatory adherence.", "views": 0, "readingTime": 10, "featured": true }
   ]
 }

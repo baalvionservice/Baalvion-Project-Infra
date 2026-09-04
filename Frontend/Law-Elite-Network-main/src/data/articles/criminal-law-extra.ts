@@ -21,7 +21,7 @@ export const criminalLawExtraArticles: LawArticle[] = [
     author: 'Aisha Rahman',
     updatedAt: 'June 16, 2026',
     readingTime: 9,
-    views: 8910,
+    views: 0,
     featured: true,
     imageSeed: 'rights-on-arrest-police',
     content: `<p>If you are arrested, you have legal rights that exist precisely to protect you at a moment when you are vulnerable and outnumbered. In broad terms, almost every fair legal system gives an arrested person the right to be told why they are being detained, the right to remain silent rather than incriminate themselves, and the right to consult a lawyer. Knowing these rights in advance — and staying calm enough to use them — is one of the most practical pieces of legal knowledge anyone can carry.</p>
@@ -102,7 +102,7 @@ export const criminalLawExtraArticles: LawArticle[] = [
     author: 'Daniel Okafor',
     updatedAt: 'June 9, 2026',
     readingTime: 8,
-    views: 7150,
+    views: 0,
     featured: false,
     imageSeed: 'misdemeanor-felony-severity',
     content: `<p>The difference between a misdemeanor and a felony is, at heart, a difference of seriousness. A misdemeanor is a less serious crime, usually punishable by a short jail term, a fine, or community-based penalties. A felony is a serious offence, typically punishable by a year or more of imprisonment and carrying consequences that can follow a person long after the sentence ends. This classification, most familiar from the United States, shapes how a case is charged, tried, and punished.</p>

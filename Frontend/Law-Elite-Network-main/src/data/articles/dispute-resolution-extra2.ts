@@ -21,7 +21,7 @@ export const disputeResolutionExtra2Articles: LawArticle[] = [
     author: 'Marcus Whitfield',
     updatedAt: 'June 23, 2026',
     readingTime: 9,
-    views: 8470,
+    views: 0,
     featured: false,
     imageSeed: 'small-claims-court-guide',
     content: `<p>Small claims court is a simplified part of the legal system designed to resolve disputes over relatively modest sums of money quickly, cheaply, and without the need for lawyers. It exists so ordinary people and small businesses can enforce their rights — over an unpaid debt, a faulty product, a withheld deposit, or a minor contract breach — without the cost and complexity of a full court case. The rules are deliberately informal, the fees are low, and many people represent themselves successfully.</p>
@@ -106,7 +106,7 @@ export const disputeResolutionExtra2Articles: LawArticle[] = [
     author: 'Marcus Whitfield',
     updatedAt: 'June 21, 2026',
     readingTime: 9,
-    views: 7050,
+    views: 0,
     featured: false,
     imageSeed: 'class-action-lawsuit-explained',
     country: 'United States',

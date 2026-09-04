@@ -21,7 +21,7 @@ export const technologyIpExtra2Articles: LawArticle[] = [
     author: 'Marcus Hale',
     updatedAt: 'June 24, 2026',
     readingTime: 10,
-    views: 7910,
+    views: 0,
     featured: true,
     imageSeed: 'patent-invention-protection',
     content: `<p>A patent is a legal right that gives an inventor exclusive control over a new invention for a limited period — usually around twenty years — in return for publicly disclosing how the invention works. During that time, no one else may make, use, or sell the patented invention without permission. The bargain at the heart of the system is simple: society grants a temporary monopoly to reward and encourage innovation, and in exchange the inventor teaches the public how the invention works, so that knowledge eventually becomes free for everyone to build on.</p>

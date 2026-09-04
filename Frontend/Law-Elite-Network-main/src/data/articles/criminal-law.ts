@@ -15,7 +15,7 @@ export const criminalLawArticles: LawArticle[] = [
     author: 'Aisha Rahman',
     updatedAt: 'August 12, 2026',
     readingTime: 10,
-    views: 7420,
+    views: 0,
     featured: true,
     imageSeed: 'bail-courthouse-keys-scales',
     primarySources: [
@@ -113,7 +113,7 @@ export const criminalLawArticles: LawArticle[] = [
     author: 'Daniel Okafor',
     updatedAt: 'March 22, 2026',
     readingTime: 9,
-    views: 5380,
+    views: 0,
     featured: false,
     imageSeed: 'whitecollar-ledger-magnifier-suit',
     primarySources: [

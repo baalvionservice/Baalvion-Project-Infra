@@ -21,7 +21,7 @@ export const technologyIpArticles: LawArticle[] = [
     author: 'Priya Nair',
     updatedAt: 'March 14, 2026',
     readingTime: 9,
-    views: 7240,
+    views: 0,
     featured: true,
     imageSeed: 'trademark-versus-copyright',
     content: `<p>Trademarks and copyrights are two of the most widely confused forms of intellectual property. People often assume that registering a business name protects its logo design, or that copyrighting a song also locks down the band&apos;s name. In reality, these rights protect different things, arise in different ways, and last for different periods. Understanding the distinction helps creators, founders, and businesses protect the right asset in the right way.</p>
@@ -88,7 +88,7 @@ export const technologyIpArticles: LawArticle[] = [
     author: 'Marcus Hale',
     updatedAt: 'January 28, 2026',
     readingTime: 10,
-    views: 5310,
+    views: 0,
     featured: false,
     imageSeed: 'data-privacy-basics',
     content: `<p>Almost every digital interaction generates personal data — names, email addresses, location history, browsing behavior, and more. Over the past decade, a wave of data privacy laws has reshaped how organizations may collect and use that information. While the details differ by country, most modern frameworks share a common set of principles built around transparency, consent, and individual control.</p>

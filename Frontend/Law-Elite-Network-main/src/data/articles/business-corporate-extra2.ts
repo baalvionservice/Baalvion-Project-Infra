@@ -21,7 +21,7 @@ export const businessCorporateExtra2Articles: LawArticle[] = [
     author: 'Marcus Hale',
     updatedAt: 'June 22, 2026',
     readingTime: 10,
-    views: 8620,
+    views: 0,
     featured: true,
     imageSeed: 'form-an-llc-step-by-step',
     content: `<p>Forming a limited liability company (LLC) is the process of legally creating a business entity that separates your personal assets from the company's debts. At its core it involves a handful of repeatable steps: pick a compliant name, file a formation document with the relevant government office, appoint someone to receive legal mail, write the rules that will govern the business, and register for the tax and licence numbers you need to operate. Done carefully, this turns a private venture into a recognised legal person that can sign contracts, open accounts, and shield its owners.</p>
@@ -105,7 +105,7 @@ export const businessCorporateExtra2Articles: LawArticle[] = [
     author: 'Elena Rossi',
     updatedAt: 'June 20, 2026',
     readingTime: 9,
-    views: 6480,
+    views: 0,
     featured: false,
     imageSeed: 'breach-of-contract-remedies',
     content: `<p>A breach of contract happens when one party fails to do what they legally promised — by not performing at all, performing late, or performing badly. When that occurs, the law gives the injured party a set of remedies designed not to punish the wrongdoer but to make the wronged party whole: to put them, as far as money can, in the position they would have enjoyed had the contract been honoured. Knowing which remedies exist, and which fit your situation, is the difference between absorbing a loss and recovering it.</p>

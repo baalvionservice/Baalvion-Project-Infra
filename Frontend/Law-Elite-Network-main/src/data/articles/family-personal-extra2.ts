@@ -21,7 +21,7 @@ export const familyPersonalExtra2Articles: LawArticle[] = [
     author: 'Aman Thakur',
     updatedAt: 'June 23, 2026',
     readingTime: 9,
-    views: 7260,
+    views: 0,
     featured: false,
     imageSeed: 'alimony-spousal-support',
     content: `<p>Alimony — also called spousal support or maintenance — is financial support that one spouse may be required to pay the other after they separate or divorce. Its purpose is not to reward or punish anyone but to soften the financial impact of ending a marriage, particularly where one spouse earns far less or gave up career opportunities to support the family. Whether it is awarded, how much, and for how long depend on the needs of one spouse, the ability of the other to pay, and the circumstances of the marriage.</p>
@@ -113,7 +113,7 @@ export const familyPersonalExtra2Articles: LawArticle[] = [
     author: 'Eleanor Whitfield',
     updatedAt: 'June 24, 2026',
     readingTime: 9,
-    views: 6920,
+    views: 0,
     featured: true,
     imageSeed: 'living-trust-estate-planning',
     content: `<p>A living trust is a legal arrangement you create during your lifetime to hold your assets, managed by a trustee for the benefit of the people you choose. Unlike a will, which only takes effect after death and usually goes through a court process called probate, a properly funded living trust lets assets pass directly to your beneficiaries when you die — often more privately and with less delay. It is a popular estate-planning tool, but it is not the right answer for everyone, and it does not replace every other document.</p>

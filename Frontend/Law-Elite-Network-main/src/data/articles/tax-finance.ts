@@ -15,7 +15,7 @@ export const taxFinanceArticles: LawArticle[] = [
     author: 'Priya Nair',
     updatedAt: 'March 14, 2026',
     readingTime: 9,
-    views: 7420,
+    views: 0,
     featured: true,
     imageSeed: 'corporate-tax-ledger',
     content: `<p>Corporate tax is a charge that governments impose on the profits earned by companies and certain other legal entities. Unlike taxes on individuals, it applies to a business as a separate legal "person", which means the company itself files returns, calculates what it owes, and pays the tax — distinct from any tax later paid by its owners or shareholders. Understanding how this system works helps founders, finance teams, and investors anticipate obligations and avoid costly surprises.</p>
@@ -94,7 +94,7 @@ export const taxFinanceArticles: LawArticle[] = [
     author: 'Daniel Okafor',
     updatedAt: 'May 2, 2026',
     readingTime: 8,
-    views: 5360,
+    views: 0,
     featured: false,
     imageSeed: 'income-tax-bracket-chart',
     content: `<p>Personal income tax is one of the most widely shared experiences in modern economies: a charge levied by governments on the money individuals earn. While the underlying idea is simple — you pay a portion of your income to the state — the mechanics of who pays, on what, and how much, can be surprisingly intricate. Knowing the building blocks helps you read a payslip, file a return correctly, and understand why two people earning the same amount can owe different sums.</p>
