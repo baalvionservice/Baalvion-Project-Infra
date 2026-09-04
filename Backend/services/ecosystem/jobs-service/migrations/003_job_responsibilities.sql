@@ -6,4 +6,4 @@
 --
 -- Same shape as requirements — one bullet per line — so the same parser handles both.
 
-ALTER TABLE job_listings ADD COLUMN IF NOT EXISTS responsibilities TEXT;
+ALTER TABLE jobs.job_listings ADD COLUMN IF NOT EXISTS responsibilities TEXT;

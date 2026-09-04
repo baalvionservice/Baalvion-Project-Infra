@@ -174,7 +174,7 @@ const sortOrder = (sort) => {
     }
 };
 
-const listJobs = async ({ orgId, status, job_type, experience_level, remote_allowed, search, page, limit, country_id, department_id, city, region, exactCity, sort }) => {
+const listJobs = async ({ orgId, status, job_type, experience_level, remote_allowed, search, page, limit, country_id, department_id, city, region, exactCity, sort, metro }) => {
     const where = {};
     if (orgId) where.org_id = orgId;
     if (status) where.status = status;
@@ -182,6 +182,9 @@ const listJobs = async ({ orgId, status, job_type, experience_level, remote_allo
     if (experience_level) where.experience_level = experience_level;
     if (country_id) where.country_id = country_id;
     if (department_id) where.department_id = department_id;
+    // Already a canonical slug (from the facet aggregation's own GROUP BY metro_slug) —
+    // an exact match, not free text, so it needs none of locationClause's name resolution.
+    if (metro) where.metro_slug = metro;
     // Town and state are free text, so match them the way a person would type them.
     // A city term is widened through the gazetteer first: "Virar" also matches roles
     // written as "Vasai-Virar" or posted across the Mumbai region, and "Mumbai" matches
@@ -202,12 +205,17 @@ const listJobs = async ({ orgId, status, job_type, experience_level, remote_allo
             const tokenClauses = tokens.map((token) => matchToken(token));
             where[Op.and] = [...(where[Op.and] || []), ...tokenClauses];
         } else if (!place) {
-            // Nothing usable at all — fall back to matching the raw phrase anywhere.
-            where[Op.or] = [
-                { title:    { [Op.iLike]: `%${search}%` } },
-                { location: { [Op.iLike]: `%${search}%` } },
-                { city:     { [Op.iLike]: `%${search}%` } },
-            ];
+            // Nothing usable at all — fall back to matching the raw phrase anywhere. AND it
+            // in (not `where[Op.or] =`): a city/state filter above already owns the Op.or
+            // key via locationClause(), and overwriting it here silently drops that scoping
+            // — e.g. ?city=virar&search=jobs would stop filtering by Virar entirely.
+            where[Op.and] = [...(where[Op.and] || []), {
+                [Op.or]: [
+                    { title:    { [Op.iLike]: `%${search}%` } },
+                    { location: { [Op.iLike]: `%${search}%` } },
+                    { city:     { [Op.iLike]: `%${search}%` } },
+                ],
+            }];
         }
 
         // A place in the query is a filter, not another loose match: "developer in virar"

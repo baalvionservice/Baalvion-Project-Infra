@@ -105,29 +105,23 @@ const EXPERIENCE_BAND_TO_API: Record<string, string> = {
 /**
  * Form shape → jobs-service payload.
  *
- * The backend takes snake_case and its own enum vocabulary; responsibilities and
- * qualifications have no columns of their own, so they're folded into the requirements
- * text rather than dropped on the floor.
+ * The backend takes snake_case and its own enum vocabulary. requirements,
+ * responsibilities and preferred_qualifications are each their own column
+ * (see jobs-service migrations 003/004) — one bullet per line, matching what
+ * mapBackendJob's parseBulletedText expects on the read side.
  */
 export const transformToApiPayload = (data: JobCreationData) => {
   const { basicInfo, roleDetails, compensation, workflow } = data;
 
-  const requirements = [
-    roleDetails.requiredQualifications.length
-      ? `Requirements:\n${roleDetails.requiredQualifications.map(q => `• ${q.value}`).join('\n')}`
-      : '',
-    roleDetails.responsibilities.length
-      ? `Responsibilities:\n${roleDetails.responsibilities.map(r => `• ${r.value}`).join('\n')}`
-      : '',
-    roleDetails.preferredQualifications?.filter(q => q.value).length
-      ? `Nice to have:\n${roleDetails.preferredQualifications.filter(q => q.value).map(q => `• ${q.value}`).join('\n')}`
-      : '',
-  ].filter(Boolean).join('\n\n');
+  const bullets = (items?: { value: string }[]) =>
+    items?.filter((i) => i.value).map((i) => `• ${i.value}`).join('\n') || undefined;
 
   return {
     title: basicInfo.title,
     description: roleDetails.description,
-    requirements: requirements || undefined,
+    requirements: bullets(roleDetails.requiredQualifications),
+    responsibilities: bullets(roleDetails.responsibilities),
+    preferred_qualifications: bullets(roleDetails.preferredQualifications),
     country_id: basicInfo.countryId,
     department_id: basicInfo.departmentId,
     city: basicInfo.city || undefined,

@@ -5,6 +5,8 @@ const createJobSchema = z.object({
     title: z.string().min(1).max(255),
     description: z.string().optional(),
     requirements: z.string().optional(),
+    responsibilities: z.string().optional(),
+    preferred_qualifications: z.string().optional(),
     location: z.string().max(255).optional(),
     // Anywhere on earth: country_id is any ISO-3166 entry, and city/region are free
     // text because no usable canonical list of towns and states exists.
@@ -30,6 +32,8 @@ const updateJobSchema = z.object({
     title: z.string().min(1).max(255).optional(),
     description: z.string().optional(),
     requirements: z.string().optional(),
+    responsibilities: z.string().optional(),
+    preferred_qualifications: z.string().optional(),
     location: z.string().max(255).optional(),
     // Anywhere on earth: country_id is any ISO-3166 entry, and city/region are free
     // text because no usable canonical list of towns and states exists.
