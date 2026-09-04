@@ -25,7 +25,10 @@ const NAV: NavCategory[] = [
   {
     id: "investing",
     label: "Investing",
-    href: "/investing",
+    // /investing is one of the categories retired pending AdSense review
+    // (see next.config.ts) — it 301s to /. Points at /stocks, the only real
+    // destination in this menu, so the label itself is never a dead click.
+    href: "/stocks",
     links: [
       { label: "Stocks", href: "/stocks" },
     ],
@@ -41,13 +44,19 @@ const NAV: NavCategory[] = [
   {
     id: "personal-finance",
     label: "Personal Finance",
-    href: "/personal-finance",
+    // /personal-finance is also retired (301s to /) — points at /budgeting-basics,
+    // the larger of this menu's two real destinations, so the label is never a
+    // dead click.
+    href: "/budgeting-basics",
     links: [
       // /budgeting isn't a real CMS category (0 articles) — it was silently
       // serving bundled demo content under a "Fact-Checked & Expert Reviewed"
       // badge (see next.config.ts's /budgeting redirect, added 2026-09-04).
       // budgeting-basics is the real, live category.
       { label: "Budgeting", href: "/budgeting-basics" },
+      // Published to the CMS 2026-09-04 (category + all 5 articles are real,
+      // live content now — this is no longer a local-only draft link).
+      { label: "Scams & Fraud Protection", href: "/fraud-protection" },
     ],
   },
 ];

@@ -3100,13 +3100,10 @@ const OVERRIDES: Record<string, TopicCopy> = {
       },
     ],
   },
-  // 2026-09-04: new category, staged ahead of its articles. Deliberately NOT
-  // added to CATEGORY_GROUPS (no parent eyebrow — it isn't a sub-topic of
-  // anything else on this site) and NOT linked from Navbar yet — CategoryFeed
-  // falls back to unrelated bundled demo content for any category with 0 live
-  // articles (see the /budgeting fix above), so this stays unlinked/unindexed
-  // until real articles are published under it. Safe to keep here meanwhile:
-  // topicCopy is just page chrome, inert with no traffic reaching it.
+  // Added 2026-09-04, live and linked from Navbar's Personal Finance menu —
+  // real category with 5 published articles. Deliberately not added to
+  // CATEGORY_GROUPS (no parent eyebrow): it isn't a sub-topic of anything
+  // else on this site, it's its own top-level section.
   'fraud-protection': {
     tag: 'FRAUD PROTECTION',
     title: 'Scams & Fraud Protection',
