@@ -1,0 +1,71 @@
+name: (temp) Backfill jobs-service code + seed real roles on box2
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      # box2's jobs-service container was built from a commit that predates PR #451/#452
+      # (candidate journey, real role content, crawlable careers site + the follow-up
+      # bugfixes) — it has no data/roleCatalogue.js, no scripts/seedRoles.js, and none of
+      # migrations 001-005. This copies the current source straight into the already-running
+      # container (no image rebuild, so app-identity/app-commerce/app-trade/app-platform/
+      # app-edge-realtime are untouched) and restarts only the jobs-service pm2 process
+      # inside app-ecosystem, which re-runs sync({alter:false}) + the migration runner on
+      # boot (both idempotent), then seeds the real ~402-role catalogue.
+      - name: Sync jobs-service source, restart it, seed the real role catalogue
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.CORE2_EC2_HOST }}
+          username: ${{ secrets.CORE2_EC2_USER }}
+          key: ${{ secrets.CORE2_EC2_SSH_KEY }}
+          timeout: 60s
+          command_timeout: 5m
+          script: |
+            set -euo pipefail
+            cd /opt/baalvion-box2
+            git fetch --all --prune
+            git checkout main
+            git pull --ff-only
+            CONTAINER=baalvion-app-ecosystem-1
+            SRC=Backend/services/ecosystem/jobs-service
+            DEST=/app/Backend/services/ecosystem/jobs-service
+
+            echo "===== copying source (excluding node_modules/.env) ====="
+            for d in controller service routes validators data scripts models middleware utils workers migrations config queues __tests__; do
+              if [ -d "$SRC/$d" ]; then
+                docker cp "$SRC/$d/." "$CONTAINER:$DEST/$d/"
+              fi
+            done
+            docker cp "$SRC/index.js" "$CONTAINER:$DEST/index.js"
+            docker cp "$SRC/package.json" "$CONTAINER:$DEST/package.json"
+
+            echo "===== restarting jobs-service (sync + migrations run automatically on boot) ====="
+            docker exec "$CONTAINER" pm2 restart jobs-service
+            sleep 8
+
+            echo "===== post-restart status ====="
+            docker exec "$CONTAINER" pm2 jlist | node -e "
+              let d='';process.stdin.on('data',c=>d+=c);
+              process.stdin.on('end',()=>{
+                const p = JSON.parse(d).find(x => x.name === 'jobs-service');
+                console.log('status:', p.pm2_env.status, 'restarts:', p.pm2_env.restart_time, 'uptime_ms:', Date.now() - p.pm2_env.pm_uptime);
+              });
+            "
+
+            echo "===== fresh logs ====="
+            docker exec "$CONTAINER" pm2 logs jobs-service --lines 40 --nostream
+
+            echo "===== seeding the real role catalogue (idempotent create/update, then publish) ====="
+            docker exec "$CONTAINER" sh -lc "cd $DEST && node scripts/seedRoles.js --publish"
+
+            echo "===== verifying from inside the container ====="
+            docker exec "$CONTAINER" sh -lc "cd $DEST && node -e \"
+              const db = require('./models');
+              db.JobListing.count({ where: { status: 'published' } })
+                .then(n => { console.log('published job_listings:', n); process.exit(0); })
+                .catch(e => { console.error('ERROR', e.message); process.exit(1); });
+            \""
