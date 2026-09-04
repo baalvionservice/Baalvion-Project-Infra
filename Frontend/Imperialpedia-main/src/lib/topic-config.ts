@@ -2316,6 +2316,40 @@ const OVERRIDES: Record<string, TopicCopy> = {
         ],
       },
     ],
+    faqs: [
+      {
+        question: "How do I buy my first stock?",
+        answer:
+          "Buying a stock requires a brokerage account, which acts as the intermediary between an individual investor and the exchange where the stock trades. After funding the account, an investor can place an order for shares of a specific company at the current market price or a specified limit price. Most major brokerages now allow buying fractional shares, so an investor doesn't need enough money for a whole share to get started.",
+      },
+      {
+        question: "Is buying individual stocks riskier than a mutual fund or ETF?",
+        answer:
+          "Generally yes, because a single stock carries company-specific risk that a diversified fund does not — an ETF or mutual fund spreads money across many companies, so one company's bad news affects only a small slice of the investment. An individual stock has no such buffer: its price depends entirely on that one company's performance and how investors feel about it.",
+      },
+      {
+        question: "What happens to my shares if the company goes bankrupt?",
+        answer:
+          "In a bankruptcy, a company's assets are used to pay creditors and preferred shareholders first; common shareholders — the type most individual investors hold — are paid only from whatever remains, and in many bankruptcies that amount is zero. This is one reason diversification matters: concentrating too much money in one company's stock means a single bankruptcy can wipe out that entire position.",
+      },
+      {
+        question: "Do I need a lot of money to start investing in stocks?",
+        answer:
+          "No. Most major brokerages now offer commission-free trading and fractional shares, which let an investor buy a portion of a single share for as little as a few dollars rather than needing the full share price upfront. The bigger factor than the amount invested is usually time in the market and consistency.",
+      },
+      {
+        question: "How long should I plan to hold a stock?",
+        answer:
+          "There's no fixed rule, but money invested in individual stocks is generally better suited to a multi-year time horizon, since prices can swing significantly over shorter periods with no guarantee of recovery by the time the money is needed. Money needed sooner is usually better held in something more stable, like savings or short-term bonds, than in individual stocks.",
+      },
+    ],
+    relatedReading: [
+      { slug: 'stocks/what-is-a-stock', anchor: 'What owning a share actually entitles you to' },
+      { slug: 'stocks/how-stock-exchanges-work', anchor: 'The four systems behind how a trade actually executes' },
+      { slug: 'stocks/public-vs-private-companies', anchor: 'What changes for a company — and its shareholders — when it goes public' },
+      { slug: 'stocks/price-to-earnings-ratio-explained', anchor: 'The P/E ratio, and why a low one isn’t automatically a bargain' },
+      { slug: 'stocks/dividend-yield-explained', anchor: 'How to read a dividend yield without being misled by it' },
+    ],
     metaTitle: 'What Is a Stock? Stock Investing Explained for Beginners',
     metaDescription:
       "A clear, practical guide to what stocks are, how stock investing works, why prices move, and how to think about risk before you buy your first share.",
@@ -3211,10 +3245,10 @@ const OVERRIDES: Record<string, TopicCopy> = {
       },
     ],
     relatedReading: [
-      { slug: 'monthly-budget', anchor: 'Monthly Budget Templates & Step-by-Step Guide' },
-      { slug: 'saving-money', anchor: 'How to Cut Everyday Expenses Without Lifestyle Sacrifices' },
-      { slug: 'family-budget', anchor: 'Family Budgeting: Coordinating Finances for Couples & Kids' },
-      { slug: 'emergency-fund', anchor: 'Building an Emergency Fund: How Much Do You Need?' },
+      { slug: 'budgeting-basics/monthly-budget-blueprint', anchor: 'A monthly budget template built to actually last' },
+      { slug: 'budgeting-basics/best-ways-to-cut-expenses', anchor: 'How to cut everyday expenses without feeling deprived' },
+      { slug: 'budgeting-basics/family-budget-guide', anchor: 'Coordinating a household budget across a family' },
+      { slug: 'budgeting-basics/emergency-fund-calculator-guide', anchor: 'A real framework for how big your emergency fund should be' },
     ],
     metaTitle: 'Budgeting Basics — Step-by-Step Beginner’s Guide to Budgeting',
     metaDescription:

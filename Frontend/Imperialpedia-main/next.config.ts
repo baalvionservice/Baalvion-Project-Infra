@@ -442,7 +442,11 @@ const nextConfig: NextConfig = {
               // *.adtrafficquality.google also serves the sodar2 fraud-check tracking pixel
               // (an <img>, not just the script above) -- unlisted here it 400'd/CSP-blocked
               // on every page once the script itself was allowed to run.
-              "img-src 'self' data: https://imperialpedia.com https://api.baalvion.com https://www.google-analytics.com https://*.googlesyndication.com https://*.g.doubleclick.net https://*.adtrafficquality.google",
+              // www.gstatic.com serves the Google "g" logo icon that Google's own Preferred
+              // Sources widget script (see layout.tsx / PreferredSourceButton) injects as an
+              // <img> -- unlisted here it CSP-blocked on every page the widget renders on,
+              // confirmed via a live headless-browser console-error sweep.
+              "img-src 'self' data: https://imperialpedia.com https://api.baalvion.com https://www.google-analytics.com https://*.googlesyndication.com https://*.g.doubleclick.net https://*.adtrafficquality.google https://www.gstatic.com",
               "font-src 'self'",
               // Dev: allow the local imperialpedia-service (:3004) and cms-service (:3018)
               // that client components (Market Movers, community, search) fetch directly.
