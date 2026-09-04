@@ -15,6 +15,8 @@ import { CMS_ONLY_CATEGORIES } from '@/lib/cms-only-categories';
 import { CategoryContent } from './CategoryContent';
 import { CURRENT_CATEGORY_SLUGS } from '@/lib/category-slugs';
 import { AdSlot } from '@/components/ads/AdSlot';
+import { KeyLegalTerms } from '@/components/knowledge/KeyLegalTerms';
+import { getKeyLegalTermsForCategory } from '@/lib/category-key-terms';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 // Same AdSense slot as AD_PLACEMENTS.CATEGORY_HERO (AdManager.tsx) -- literal
@@ -178,6 +180,11 @@ export default async function CategoryPage(
         </div>
 
         <CategoryContent categorySlug={categorySlug} categoryId={category.id} cmsArticles={cmsArticles} />
+
+        <KeyLegalTerms
+          title={`Key Terms in ${category.name}`}
+          terms={getKeyLegalTermsForCategory(categorySlug)}
+        />
       </main>
 
       <PublicFooter />
