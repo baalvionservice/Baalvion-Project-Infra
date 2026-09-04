@@ -17,6 +17,8 @@ import { CURRENT_CATEGORY_SLUGS } from '@/lib/category-slugs';
 import { AdSlot } from '@/components/ads/AdSlot';
 import { KeyLegalTerms } from '@/components/knowledge/KeyLegalTerms';
 import { getKeyLegalTermsForCategory } from '@/lib/category-key-terms';
+import { StoryCard } from '@/components/knowledge/news/StoryCard';
+import { LatestRail } from '@/components/knowledge/news/LatestRail';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 // Same AdSense slot as AD_PLACEMENTS.CATEGORY_HERO (AdManager.tsx) -- literal
@@ -122,6 +124,33 @@ export default async function CategoryPage(
   // cms.ts's env vars are server-only, then handed down as a prop.
   const cmsArticles = await cmsGetArticles(undefined, categorySlug).catch(() => []);
 
+  // Investopedia-style "spotlight" split for this practice area: one lead
+  // story with a full photo on the left, a thumbnail-led rail of the next
+  // few most-viewed guides on the right -- same lead+rail pattern the
+  // homepage already uses (StoryCard variant="lead" + LatestRail), reused
+  // here rather than re-derived so the two pages share one visual language.
+  // CMS wins on a slug collision (admin-authored, incl. any uploaded photo),
+  // bundled fills the rest; sorted by views like CategoryContent's own feed.
+  const bundledForSpotlight = getArticlesByCategorySlug(categorySlug);
+  const spotlightSeen = new Set<string>();
+  const spotlightPool = [...cmsArticles, ...bundledForSpotlight]
+    .filter((a: any) => {
+      if (!a?.slug || spotlightSeen.has(a.slug)) return false;
+      spotlightSeen.add(a.slug);
+      return true;
+    })
+    // CMS articles carry `excerpt`, not `summary` -- StoryCard/LatestRail
+    // read `summary`, so without this a CMS-led spotlight silently loses
+    // its dek paragraph even though the CMS record has one.
+    .map((a: any) => ({ ...a, summary: a.summary ?? a.excerpt }))
+    .sort((a: any, b: any) => (b.views || 0) - (a.views || 0));
+
+  const spotlightLead = spotlightPool[0];
+  const spotlightSecondary = spotlightPool.slice(1, 5);
+  const spotlightExcludeSlugs = [spotlightLead, ...spotlightSecondary]
+    .filter(Boolean)
+    .map((a: any) => a.slug);
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
@@ -179,11 +208,32 @@ export default async function CategoryPage(
           <AdSlot slotId={CATEGORY_AD_SLOT_ID} format="horizontal" placement="category-hero" fullWidthResponsive minHeight="100px" />
         </div>
 
-        <CategoryContent categorySlug={categorySlug} categoryId={category.id} cmsArticles={cmsArticles} />
+        {spotlightLead && (
+          <div className="container mx-auto px-4 sm:px-6 max-w-7xl pb-10">
+            <span className="inline-block bg-slate-100 text-slate-800 text-[11px] font-bold uppercase tracking-widest px-3 py-1 mb-6">
+              All About {category.name}
+            </span>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+              <div className="lg:col-span-7">
+                <StoryCard article={spotlightLead} variant="lead" priority />
+              </div>
+              <div className="lg:col-span-5">
+                <LatestRail articles={spotlightSecondary} title="More in This Practice Area" />
+              </div>
+            </div>
+          </div>
+        )}
 
         <KeyLegalTerms
           title={`Key Terms in ${category.name}`}
           terms={getKeyLegalTermsForCategory(categorySlug)}
+        />
+
+        <CategoryContent
+          categorySlug={categorySlug}
+          categoryId={category.id}
+          cmsArticles={cmsArticles}
+          excludeSlugs={spotlightExcludeSlugs}
         />
       </main>
 
