@@ -8,7 +8,6 @@ import type { LawAuthor } from '@/data/authors';
 interface HomeStats {
   guides: number;
   practiceAreas: number;
-  jurisdictions: number;
 }
 
 function Stat({ value, label }: { value: string; label: string }) {
@@ -52,10 +51,9 @@ export function MissionAndBoardSection({ stats, authors }: { stats: HomeStats; a
               </Link>
             </p>
           </div>
-          <div className="grid grid-cols-3 gap-6 max-w-md">
+          <div className="grid grid-cols-2 gap-6 max-w-md">
             <Stat value={`${stats.guides}+`} label="Published Guides" />
             <Stat value={String(stats.practiceAreas)} label="Practice Areas" />
-            <Stat value={String(stats.jurisdictions)} label="Jurisdictions Covered" />
           </div>
         </div>
         <div className="lg:col-span-5">
@@ -72,7 +70,7 @@ export function MissionAndBoardSection({ stats, authors }: { stats: HomeStats; a
             {authors.map((a) => (
               <Link key={a.slug} href={`/author/${a.slug}`} className="group flex items-center gap-3">
                 <div className="relative w-11 h-11 rounded-full overflow-hidden bg-slate-100 shrink-0">
-                  <Image src={resolvePersonImage(a)} alt={a.name} fill className="object-cover" />
+                  <Image src={resolvePersonImage(a)} alt={a.name} fill className="object-cover grayscale" />
                 </div>
                 <div className="min-w-0">
                   <p className="text-[13.5px] font-bold text-slate-900 group-hover:text-news-600 transition-colors">

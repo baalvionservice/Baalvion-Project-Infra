@@ -21,7 +21,7 @@ export const familyPersonalExtraArticles: LawArticle[] = [
     author: 'Sofia Almeida',
     updatedAt: 'June 14, 2026',
     readingTime: 9,
-    views: 5980,
+    views: 0,
     featured: false,
     imageSeed: 'prenuptial-agreement-guide',
     content: `<p>A prenuptial agreement, often called a "prenup", is a contract that two people sign before marriage to set out how their property, finances, and support obligations will be handled if the marriage ends. It allows couples to plan ahead while relations are good, replacing uncertainty with agreed rules. But a prenup is not all-powerful: courts in most countries will set aside terms that are unfair, signed under pressure, or that try to bargain away the rights of children.</p>
@@ -108,7 +108,7 @@ export const familyPersonalExtraArticles: LawArticle[] = [
     author: 'Rajesh Iyer',
     updatedAt: 'June 7, 2026',
     readingTime: 9,
-    views: 6510,
+    views: 0,
     featured: true,
     imageSeed: 'child-support-calculation',
     content: `<p>Child support is money one parent pays to help cover the cost of raising their child after the parents separate. In most countries it is calculated using a formula or set of guidelines built around a few key facts: how much each parent earns, how many children need support, and how much time the child spends in each parent's care. The goal is consistent and fair: a child should benefit from both parents' resources, whether or not the parents live together.</p>

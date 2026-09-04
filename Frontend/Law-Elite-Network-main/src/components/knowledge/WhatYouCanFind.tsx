@@ -4,17 +4,12 @@ import { ArrowUpRight } from 'lucide-react';
 
 // Every entry links to a section or route that already exists on the site --
 // no glossary/"research resources" page exists yet, so this deliberately
-// ships 5 items rather than inventing a 6th destination.
+// ships 4 items rather than inventing a 5th destination.
 const ITEMS = [
   {
     title: 'Legal Guides',
     body: 'Practical explanations of legal concepts, procedures, rights, and obligations.',
     href: '#legal-guides',
-  },
-  {
-    title: 'Jurisdiction-Based Information',
-    body: 'Explore legal information according to the country or jurisdiction where the law applies.',
-    href: '/countries',
   },
   {
     title: 'Legal Topics',

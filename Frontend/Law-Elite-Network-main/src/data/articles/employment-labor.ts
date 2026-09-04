@@ -23,7 +23,7 @@ export const employmentLaborArticles: LawArticle[] = [
     author: 'Priya Nair',
     updatedAt: 'March 12, 2026',
     readingTime: 9,
-    views: 6420,
+    views: 0,
     featured: true,
     imageSeed: 'employment-contract-essentials',
     content: `<p>An employment contract is the legal backbone of the working relationship. It records what each side has promised: what the employer will pay and provide, and what work the employee will perform in return. Even where a job starts on a handshake, a contract still exists in the eyes of the law — the only question is whether its terms are written down clearly or left to be argued about later. Putting the important terms in writing reduces disputes, sets expectations, and gives both parties something to rely on if things go wrong.</p>
@@ -103,7 +103,7 @@ export const employmentLaborArticles: LawArticle[] = [
     author: 'Daniel Okoro',
     updatedAt: 'April 28, 2026',
     readingTime: 8,
-    views: 5170,
+    views: 0,
     featured: false,
     imageSeed: 'wrongful-termination-explained',
     content: `<p>Losing a job is rarely pleasant, but not every dismissal is unlawful. Wrongful termination is a specific legal idea: it describes a firing that breaks the law, breaches the employment contract, or violates a protected right. Understanding the difference between a hard-but-lawful dismissal and a genuinely wrongful one helps employees know when they have a real claim — and helps employers avoid costly mistakes. The line depends heavily on where you work, because countries take very different approaches to how easily a job can be ended.</p>

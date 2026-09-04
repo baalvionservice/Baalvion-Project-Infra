@@ -62,12 +62,80 @@ export const CMS_ONLY_CATEGORIES: Record<string, CmsOnlyCategory> = {
     name: 'Cruise Ship & Passenger Vessel Accidents',
     slug: 'cruise-ship-passenger-vessel-accidents',
     description: 'Guides covering cruise ship and passenger vessel accident claims, including passenger injuries, cruise ticket contracts, and maritime law issues specific to cruise travel.',
+    descriptionHtml: `
+<p>A cruise ship injury claim generally works differently from an ordinary personal injury case, because a cruise ticket is itself a contract that can dictate where a passenger is allowed to sue, how quickly they have to act, and what a cruise line's legal duties actually are. This hub explains those differences and links to our guides on specific cruise lines, ports, and accident types. It is general legal information, not legal advice about any specific incident.</p>
+
+<h2>Why the Ticket Contract Matters</h2>
+<p>Nearly every major cruise line's passenger ticket contract includes a forum-selection clause naming the single court where a lawsuit must be filed — for most large lines operating out of U.S. ports, that's the U.S. District Court for the Southern District of Florida, in Miami, regardless of where the passenger boarded or lives. The U.S. Supreme Court upheld the enforceability of these clauses in <em>Carnival Cruise Lines, Inc. v. Shute</em>, 499 U.S. 585 (1991), so a passenger who wants to sue almost always has to do so where the contract requires. See our guide on <a href="/cruise-ship-accident-lawyer-miami">pursuing a claim in Miami federal court</a> for what that involves in practice.</p>
+
+<h2>Shorter Deadlines and Notice Requirements</h2>
+<p>Cruise ticket contracts typically shorten the deadline to file a lawsuit and separately require written notice of an injury to the cruise line within a much narrower window — often just weeks to a few months — well under the one-to-several-year statute of limitations that applies to an ordinary personal injury claim on land. Missing either deadline can bar a claim entirely, which is why identifying the specific terms early matters more here than in a typical injury case. Our guide comparing <a href="/cruise-line-accident-claims-by-brand">claims requirements across cruise lines</a> looks at how individual brands' contracts handle this.</p>
+
+<h2>Federal Safety and Reporting Requirements</h2>
+<p>The Cruise Vessel Security and Safety Act of 2010 (CVSSA) imposes specific federal safety and reporting requirements on large passenger vessels calling at U.S. ports, including minimum railing heights, peepholes on cabin doors, dedicated security staff, and a duty for the cruise line to report certain serious crimes — including homicide, suspicious death, and sexual assault — to the FBI. Separately, the Federal Maritime Commission requires cruise lines departing from U.S. ports to demonstrate financial responsibility for passenger injury and for a cancelled voyage. These federal rules apply alongside, not instead of, the general maritime negligence principles that govern injuries at sea.</p>
+
+<h2>Liability for Shore Excursions</h2>
+<p>Whether a cruise line can be held responsible for an injury during a shore excursion often turns on whether the excursion operator was the cruise line's own employee or an independent contractor the line merely arranged and marketed — cruise lines frequently argue the latter to limit their own liability, and the ticket contract's fine print on this point matters. See our guide on <a href="/tender-boat-excursion-dinner-cruise-accidents">tender boat, excursion, and dinner cruise accidents</a> for how that distinction plays out.</p>
+
+<h2>Key Terms</h2>
+<p><strong>Forum selection clause</strong> — a ticket-contract term fixing the one court where a claim must be filed. <strong>Notice of claim</strong> — a written notice, often required within weeks of an incident, separate from and earlier than the deadline to file suit itself. <strong>Maritime law</strong> — the body of federal law governing vessel operations and injuries on navigable waters, which applies alongside a passenger's ticket contract.</p>
+
+<h2>Related Legal Areas</h2>
+<p>For claims by maritime workers rather than passengers — a different legal framework entirely — see our <a href="/maritime-offshore-injury-law">Maritime &amp; Offshore Injury Law</a> hub. For contingency fees, choosing a lawyer, and deadlines that apply across accident types generally, see <a href="/what-is-a-personal-injury-lawyer">What Is a Personal Injury Lawyer?</a></p>
+
+<h2>Explore the Guides</h2>
+<p>The guides below cover pursuing a claim in specific cities and against specific cruise lines, and what happens during tender boat and shore excursion incidents.</p>
+
+<h2>Authoritative Sources &amp; Further Reading</h2>
+<ul>
+<li><a href="https://www.fmc.gov/" target="_blank" rel="noopener noreferrer">Federal Maritime Commission (FMC)</a> — passenger vessel financial responsibility requirements for cruise lines operating from U.S. ports.</li>
+<li><a href="https://www.uscg.mil/" target="_blank" rel="noopener noreferrer">United States Coast Guard</a> — large passenger vessel safety oversight and incident reporting.</li>
+<li><a href="https://www.fbi.gov/how-we-can-help-you/victim-services/additional-resources/crime-victims-on-cruise-ships" target="_blank" rel="noopener noreferrer">FBI — Crime Victims on Cruise Ships</a> — how CVSSA crime-reporting requirements work for passengers.</li>
+</ul>
+
+<p><em>This page provides general legal information about cruise ship and passenger vessel accident claims and does not constitute legal advice for any specific situation. Ticket contract terms vary by cruise line and change over time — read our full <a href="/terms-of-service#disclaimers">legal disclaimer</a>.</em></p>
+`.trim(),
   },
   'personal-injury-lawyer': {
     id: 'cms-cat-personal-injury-lawyer',
     name: 'Personal Injury Law',
     slug: 'personal-injury-lawyer',
     description: 'Educational guides on personal injury law, including what personal injury lawyers do, how contingency fees and legal costs work, how to choose and work with an attorney, statutes of limitations, free legal aid resources, and maritime and accident-law terminology.',
+    descriptionHtml: `
+<p>Personal injury law covers claims for harm caused by another party's negligence or wrongful conduct — everything from a slip-and-fall to a car crash to a maritime injury — and the concepts that apply across nearly all of them: negligence, damages, contingency fees, and filing deadlines. This hub explains those cross-cutting concepts; for accident-type-specific rules, see the related hubs linked below. It is general legal information, not legal advice about any specific injury.</p>
+
+<h2>How a Personal Injury Claim Typically Works</h2>
+<p>Most personal injury claims move through a similar sequence: the injury and its cause are documented, medical treatment continues, and a claim is negotiated with an insurance company — sometimes settling before any lawsuit is filed, sometimes escalating to litigation if the parties can't agree on liability or value. Our guide on <a href="/what-is-a-personal-injury-lawyer">what a personal injury lawyer does</a> walks through that process and when hiring one actually helps.</p>
+
+<h2>Comparative and Contributory Negligence</h2>
+<p>Most U.S. states use some form of comparative negligence, reducing an injured person's compensation by their own percentage of fault rather than barring recovery outright. A small minority of jurisdictions — Alabama, Maryland, North Carolina, Virginia, and the District of Columbia — instead apply contributory negligence, under which a plaintiff found even slightly at fault can be barred from recovering anything. Which rule applies can be the difference between a full recovery and none, and it's determined entirely by the state where the injury occurred.</p>
+
+<h2>Contingency Fees and the Cost of Hiring a Lawyer</h2>
+<p>Most personal injury lawyers work on a contingency-fee basis, taking a percentage of any settlement or verdict rather than charging by the hour, with no fee generally owed if there's no recovery. That arrangement is what makes representation accessible regardless of a client's ability to pay upfront, but it also means the fee percentage and how case costs (filing fees, expert witnesses, records) are handled are worth understanding before signing. Our guides on <a href="/contingency-fee-agreements-explained">how contingency fees work</a> and <a href="/how-much-does-a-lawyer-cost">how much a lawyer actually costs</a> go into the specifics, and <a href="/how-to-choose-a-personal-injury-lawyer">how to choose a personal injury lawyer</a> covers what to evaluate beyond the fee itself.</p>
+
+<h2>Statutes of Limitations Vary by State</h2>
+<p>There is no single nationwide deadline to file a personal injury lawsuit — each state sets its own statute of limitations, commonly (but not universally) somewhere between one and six years depending on the state and the type of claim, and missing it typically bars the claim permanently regardless of its merits. Some circumstances, such as the injured person being a minor, can pause or extend the deadline. Our guide on the <a href="/statute-of-limitations-in-the-us">statute of limitations in the U.S. by state</a> breaks down how to find the deadline that actually applies.</p>
+
+<h2>When Legal Aid Is an Option</h2>
+<p>Not every injured person can afford — or needs — a private attorney. Free and low-cost legal help exists through legal aid organizations, law school clinics, and bar association referral services, particularly for people who meet income eligibility requirements. Our guide to <a href="/legal-aid-and-free-legal-help-in-the-us">legal aid and free legal help in the U.S.</a> covers where to start looking.</p>
+
+<h2>Key Terms</h2>
+<p><strong>Negligence</strong> — a failure to exercise the care a reasonably prudent person would have exercised, resulting in harm to someone else. <strong>Damages</strong> — the compensation sought or awarded, including economic damages (medical bills, lost wages) and non-economic damages (pain and suffering). <strong>Statute of limitations</strong> — the deadline by which a lawsuit must be filed. A fuller glossary of maritime- and accident-law-specific terminology is in our <a href="/maritime-offshore-accident-law-glossary">Maritime &amp; Accident Law Glossary</a>.</p>
+
+<h2>Related Legal Areas</h2>
+<p>For injuries to maritime workers under federal frameworks like the Jones Act, see <a href="/maritime-offshore-injury-law">Maritime &amp; Offshore Injury Law</a>. For injuries aboard a cruise ship, where a passenger's ticket contract adds its own rules, see <a href="/cruise-ship-passenger-vessel-accidents">Cruise Ship &amp; Passenger Vessel Accidents</a>.</p>
+
+<h2>Explore the Guides</h2>
+<p>The guides below cover what a personal injury lawyer does, contingency fees, choosing an attorney, filing deadlines, free legal aid, and accident-law terminology.</p>
+
+<h2>Authoritative Sources &amp; Further Reading</h2>
+<ul>
+<li><a href="https://www.americanbar.org/groups/public_education/resources/law_issues_for_consumers/" target="_blank" rel="noopener noreferrer">American Bar Association — Legal Issues for Consumers</a> — consumer-facing guidance on working with a lawyer and understanding legal costs.</li>
+<li><a href="https://www.lsc.gov/" target="_blank" rel="noopener noreferrer">Legal Services Corporation (LSC)</a> — the largest funder of civil legal aid for low-income Americans, with a directory of local grantee organizations.</li>
+</ul>
+
+<p><em>This page provides general legal information about personal injury law and does not constitute legal advice for any specific situation. Laws vary significantly by state and change over time — read our full <a href="/terms-of-service#disclaimers">legal disclaimer</a>.</em></p>
+`.trim(),
   },
   'boating-accidents': {
     id: 'cms-cat-boating-accidents',
