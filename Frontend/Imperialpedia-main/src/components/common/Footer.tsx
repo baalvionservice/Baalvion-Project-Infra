@@ -70,6 +70,7 @@ const FOOTER_COLUMNS = [
       { label: 'Privacy Policy', href: '/privacy-policy' },
       { label: 'Disclaimer', href: '/disclaimer' },
       { label: 'Cookie Policy', href: '/cookie-policy' },
+      { label: 'Sitemap', href: '/sitemap.xml' },
     ],
   },
 ];

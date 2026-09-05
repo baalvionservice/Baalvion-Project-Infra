@@ -47,6 +47,7 @@ const LEGAL_LINKS = [
   { href: '/cookie-policy', label: 'Cookie Policy' },
   { href: '/editorial-disclosure-policy', label: 'DMCA' },
   { href: '/sponsored-content-policy', label: 'Advertising Disclosure' },
+  { href: '/sitemap.xml', label: 'Sitemap' },
 ];
 
 export function PublicFooter() {
