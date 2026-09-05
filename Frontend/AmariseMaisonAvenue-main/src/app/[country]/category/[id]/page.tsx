@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { Suspense } from "react";
 import { Metadata } from "next";
 import CategoryPageClient from "@/components/category/CategoryPageClient";
 import { getCategorySidebar } from "@/lib/mock-category-data";
@@ -231,13 +231,17 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(listSchema) }}
         />
       )}
-      <CategoryPageClient
-        id={id}
-        country={country}
-        pageTitle={pageTitle}
-        brandName={brandName}
-        sidebarSections={sidebarSections}
-      />
+      {/* CategoryPageClient -> useFilter() -> useSearchParams(), which bails out of
+          prerendering unless it sits under a boundary. Same reason as track-order. */}
+      <Suspense fallback={null}>
+        <CategoryPageClient
+          id={id}
+          country={country}
+          pageTitle={pageTitle}
+          brandName={brandName}
+          sidebarSections={sidebarSections}
+        />
+      </Suspense>
     </>
   );
 }

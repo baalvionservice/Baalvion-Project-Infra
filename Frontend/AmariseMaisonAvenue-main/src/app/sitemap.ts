@@ -1,5 +1,6 @@
 import { MetadataRoute } from "next";
-import { CITIES, COUNTRIES } from "@/lib/mock-data";
+import { COUNTRIES } from "@/lib/mock-data";
+import { SUPPORTED_COUNTRIES } from "@/lib/i18n/countries";
 import { getProducts, getCategories } from "@/lib/catalog";
 import { getBuyingGuides, getEditorials } from "@/lib/cms";
 import { sitemapAlternates } from "@/lib/seo";
@@ -17,7 +18,7 @@ function toDate(value: string | undefined): Date {
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://www.amarisemaisonavenue.com";
-  const countryCodes = Object.keys(COUNTRIES);
+  const countryCodes = SUPPORTED_COUNTRIES;
 
   // Live catalog from commerce-service + live editorial content from the central CMS
   // (was mock PRODUCTS/CATEGORIES/BUYING_GUIDES/EDITOR_INITIAL — sitemap now matches
@@ -61,15 +62,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
 
     // 2. High-Authority City Pages
-    CITIES.forEach((city) => {
-      routes.push({
-        url: `${baseUrl}/${code}/city/${city.id}`,
-        lastModified: new Date(),
-        changeFrequency: "weekly",
-        priority: 0.9,
-        alternates: sitemapAlternates(`/city/${city.id}`),
-      });
-    });
+    // City pages are withheld from the sitemap: their content (hero imagery, "trends",
+    // featured products, office details) is placeholder, so advertising 90 of them to search
+    // engines published fiction. Restore this loop once the pages carry real content.
 
     // 3. Programmatic Category Nodes
     categories.forEach((cat) => {
