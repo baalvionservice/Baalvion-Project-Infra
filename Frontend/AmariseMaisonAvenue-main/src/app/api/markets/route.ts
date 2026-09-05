@@ -12,9 +12,12 @@ import { NextResponse } from 'next/server';
  * Server-side callers still hit commerce-service directly (see lib/markets.ts) and skip this hop.
  */
 const COMMERCE_URL = process.env.NEXT_PUBLIC_COMMERCE_URL || 'http://localhost:3012/api/v1';
-const REVALIDATE_SECONDS = 300;
+// 900s is the repo-wide floor (scripts/check-cache-hygiene.mjs): a 5-minute window
+// regenerates 288x a day, which is what blew the ISR budget. Currency, tax and FX
+// figures change a few times a year, so a quarter-hour window costs nothing.
+const REVALIDATE_SECONDS = 900;
 
-export const revalidate = 300;
+export const revalidate = 900;
 
 export async function GET() {
   try {
@@ -29,7 +32,7 @@ export async function GET() {
     }
     return NextResponse.json(await res.json(), {
       headers: {
-        'Cache-Control': `public, s-maxage=${REVALIDATE_SECONDS}, stale-while-revalidate=600`,
+        'Cache-Control': `public, s-maxage=${REVALIDATE_SECONDS}, stale-while-revalidate=1800`,
       },
     });
   } catch {
