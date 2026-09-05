@@ -4,7 +4,7 @@
  */
 import type { Metadata } from 'next';
 import { listCohorts, num } from '@/lib/shipping-directory/api';
-import { canonical } from '@/lib/shipping-directory/site';
+import { href, canonical } from '@/lib/shipping-directory/site';
 import { breadcrumbJsonLd, itemListJsonLd, jsonLdProps } from '@/lib/shipping-directory/jsonld';
 import { CohortIndexPage } from '../_components/cohort-hub';
 import { EmptyState } from '../_components/ui';
@@ -19,7 +19,12 @@ export const metadata: Metadata = {
   alternates: { canonical: canonical('builders') },
 };
 
-export default async function Page() {
+type SP = Record<string, string | string[] | undefined>;
+const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
+
+export default async function Page({ searchParams }: { searchParams: Promise<SP> }) {
+  const sp = await searchParams;
+  const offset = Number(first(sp.offset) ?? 0) || 0;
   const rows = await listCohorts('builder');
   if (!rows || rows.length === 0) {
     return (
@@ -39,7 +44,12 @@ export default async function Page() {
         rows.slice(0, 100).map((r) => ({ name: r.cohort_key, path: `builders/${r.slug}` })),
         { name: 'Shipbuilders by vessels on record' },
       ))} />
-      <CohortIndexPage rows={rows} dimension="builder" />
+      <CohortIndexPage
+        rows={rows}
+        dimension="builder"
+        offset={offset}
+        pageHref={(o) => `${href('builders')}${o ? `?offset=${o}` : ''}`}
+      />
     </>
   );
 }

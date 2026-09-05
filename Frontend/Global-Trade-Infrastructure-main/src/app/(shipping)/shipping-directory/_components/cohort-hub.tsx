@@ -252,16 +252,31 @@ export function CohortHubPage({
   );
 }
 
-/** The index of every builder or flag state, ranked by hulls on record. */
+/**
+ * The index of every builder or flag state, ranked by hulls on record.
+ *
+ * PAGINATED, because 1,514 shipbuilders rendered in one document came to 3.11 MB — slow to
+ * download, slow to parse, and a poor LCP on a page whose whole purpose is to be crawled.
+ * (A headless browser could not finish parsing it inside 120s, which is how it was found.)
+ * Nothing is lost by splitting it: every builder page is listed individually in the
+ * sitemap, so discovery never depended on this page showing all of them at once.
+ */
+const INDEX_PAGE_SIZE = 200;
+
 export function CohortIndexPage({
-  rows, dimension,
+  rows, dimension, offset = 0, pageHref,
 }: {
   rows: { slug: string; cohort_key: string; n: number; median_gt: string | number | null; oldest_year: number | null; newest_year: number | null; top_type: string | null }[];
   dimension: 'builder' | 'flag';
+  offset?: number;
+  pageHref?: (offset: number) => string;
 }) {
   const isBuilder = dimension === 'builder';
+  // The bar scale comes from the WHOLE set, not the visible page, or bars would rescale
+  // between pages and imply page 2's leader is as large as page 1's.
   const max = Math.max(...rows.map((r) => r.n), 0);
   const total = rows.reduce((s, r) => s + r.n, 0);
+  const visible = rows.slice(offset, offset + INDEX_PAGE_SIZE);
 
   return (
     <>
@@ -281,7 +296,8 @@ export function CohortIndexPage({
           </h1>
           <p className="mt-4 max-w-2xl text-[16.5px] leading-relaxed text-white/80">
             {num(rows.length)} {isBuilder ? 'yards' : 'countries of registry'} appear against the{' '}
-            {num(total)} vessels this registry can attribute to one. Ranked by hulls on record.
+            {num(total)} vessels this registry can attribute to one. Ranked by hulls on record
+            {rows.length > INDEX_PAGE_SIZE ? <>, {num(INDEX_PAGE_SIZE)} at a time</> : null}.
           </p>
         </div>
       </header>
@@ -295,13 +311,13 @@ export function CohortIndexPage({
             : 'The flag a ship flies is its country of registry, which frequently differs from where its operator is registered — company country is shown separately.'}
         />
         <ol className="border-t border-wsd-ink">
-          {rows.map((r, i) => (
+          {visible.map((r, i) => (
             <li key={r.slug} className="wsd-row">
               <Link
                 href={href(`${isBuilder ? 'builders' : 'flags'}/${r.slug}`)}
                 className="flex flex-wrap items-center gap-x-6 gap-y-2 py-3 pl-4"
               >
-                <span data-figure className="w-10 shrink-0 text-[15px] font-bold text-wsd-line">{i + 1}</span>
+                <span data-figure className="w-10 shrink-0 text-[15px] font-bold text-wsd-line">{offset + i + 1}</span>
                 <div className="min-w-[200px] flex-1">
                   <p className="text-[16.5px] font-bold text-wsd-ink">{r.cohort_key}</p>
                   <p className="mt-0.5 text-[12.5px] text-wsd-muted">
@@ -325,6 +341,10 @@ export function CohortIndexPage({
             </li>
           ))}
         </ol>
+
+        {pageHref ? (
+          <Pagination offset={offset} pageSize={INDEX_PAGE_SIZE} total={rows.length} hrefFor={pageHref} />
+        ) : null}
       </div>
     </>
   );

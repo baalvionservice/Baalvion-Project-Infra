@@ -19,6 +19,20 @@ import { itemListJsonLd, breadcrumbJsonLd, jsonLdProps } from '@/lib/shipping-di
 import { EmptyState, SectionHead, Eyebrow, FleetNumbersNote, Breadcrumbs } from '../_components/ui';
 import { Logo } from '../_components/media';
 
+/**
+ * NOT PRERENDERED AT BUILD TIME.
+ *
+ * This page reads the registry and has no searchParams, so Next would prerender it during
+ * `next build` — where, inside Docker, there is no network route to the API. The fetch
+ * fails, the page renders its "registry unavailable" empty state, and THAT gets baked into
+ * the image. With revalidate at a day, the empty state then served for a day.
+ *
+ * The sibling list pages escaped this only by accident: they await searchParams, which
+ * already makes them dynamic. Made explicit here rather than left to that coincidence.
+ * Caching is not lost — middleware.ts sets Cache-Control with s-maxage for this host, so a
+ * CDN holds the result.
+ */
+export const dynamic = 'force-dynamic';
 /** Revalidation policy: see the detail pages — the underlying set changes on an ingest
  *  run, so a day is generous rather than stale. */
 export const revalidate = 86400;
