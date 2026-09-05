@@ -8,36 +8,55 @@
 @tailwind utilities;
 
 @layer base {
+  /* These were still shadcn's stock defaults, which are BLUE — --primary rendered as
+     rgb(37,99,235) wherever `text-primary` was used, and --border/--muted-foreground
+     carried a blue-grey cast that fought the ivory ground. They are now derived from the
+     brand colours in tailwind.config.ts, so the neutral layer is warm and consistent:
+       ink   #1a1a1a   ivory #FAF9F6   cream #f8f6f3   gold #D4AF37   hairline #e5e5e5 */
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Warm near-white ground rather than clinical #fff — the ivory the layouts assume. */
+    --background: 45 27% 99%;
+    --foreground: 0 0% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 0 0% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 0 0% 10%;
 
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary is the brand ink: every solid button in this design is near-black, not blue. */
+    --primary: 0 0% 10%;
+    --primary-foreground: 45 27% 97%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 40 20% 96%;
+    --secondary-foreground: 0 0% 10%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 40 20% 96%;
+    /* Warm grey. The old value was a blue-grey that read cold against ivory. */
+    --muted-foreground: 30 6% 42%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 46 65% 52%;
+    --accent-foreground: 0 0% 10%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 45 27% 97%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
+    /* Hairline rules carry the same warm cast as the ground. */
+    --border: 36 16% 89%;
+    --input: 36 16% 89%;
+    /* Gold focus ring — visible against both the ivory ground and the ink buttons. */
+    --ring: 46 65% 52%;
 
     --radius: 0.25rem;
+
+    /* ── Type scale ────────────────────────────────────────────────────────────
+       Display sizes are for the Newsreader display serif and are set slightly tight,
+       high-contrast serif at 4rem+ opens up visually and needs negative tracking
+       to hold together. UI sizes are Inter and stay open. */
+    --tracking-display: -0.012em;
+    --tracking-eyebrow: 0.42em;
+    --tracking-label: 0.15em;
+    --leading-display: 1.04;
   }
 }
 
@@ -78,14 +97,83 @@
     font-family: var(--font-inter), system-ui, sans-serif;
   }
 
-  /* Heading tags use the luxury serif (Cormorant Garamond via next/font). */
+  /* Heading tags use the display serif (Newsreader via next/font). */
   h1,
   h2,
   h3,
   h4,
   h5,
   h6 {
-    font-family: var(--font-serif), "Cormorant Garamond", Georgia, serif;
+    font-family: var(--font-serif), Newsreader, "Iowan Old Style", Palatino, Georgia, serif;
+    /* Force lining figures so prices do not sit as old-style, and let the opsz axis follow the
+       rendered size so the display cut is used large and the text cut small. */
+    font-optical-sizing: auto;
+    letter-spacing: var(--tracking-display);
+    font-feature-settings: "kern" 1, "liga" 1, "lnum" 1;
+    text-wrap: balance;
+  }
+
+  /* The AE market renders lang="ar-AE" dir="rtl". Latin display/UI faces carry no Arabic
+     glyphs, so without this Arabic fell to a browser default. Naskh leads, and the Latin
+     faces stay in the stack for the brand name and any Latin runs inside Arabic copy. */
+  :where([lang^="ar"]) body,
+  :where([lang^="ar"]) h1,
+  :where([lang^="ar"]) h2,
+  :where([lang^="ar"]) h3,
+  :where([lang^="ar"]) h4,
+  :where([lang^="ar"]) h5,
+  :where([lang^="ar"]) h6,
+  :where([lang^="ar"]) p,
+  :where([lang^="ar"]) span,
+  :where([lang^="ar"]) a,
+  :where([lang^="ar"]) button,
+  :where([lang^="ar"]) li {
+    font-family: var(--font-arabic), "Noto Naskh Arabic", var(--font-inter), system-ui, sans-serif;
+  }
+
+  /* Arabic has no uppercase, and the tracked micro-labels become unreadable when a Latin
+     `uppercase`/letter-spacing rule is applied to Naskh. */
+  :where([lang^="ar"]) .eyebrow,
+  :where([lang^="ar"]) [class*="uppercase"] {
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  /* Prices and any figure the eye compares down a column must not wobble. */
+  .tabular-price {
+    font-variant-numeric: tabular-nums lining-nums;
+    letter-spacing: 0.01em;
+  }
+
+  /* The uppercase micro-label repeated across every section header. Codified here so the
+     tracking is one value rather than ad-hoc 0.3em/0.4em/0.5em per component. */
+  .eyebrow {
+    font-family: var(--font-inter), system-ui, sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-eyebrow);
+  }
+
+  /* There was no visible keyboard focus anywhere — the stock ring was blue and mostly
+     overridden by rounded-none resets. Gold sits legibly on ivory and on the ink buttons. */
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+    border-radius: 1px;
+  }
+
+  /* Respect reduced-motion: the hero slow-zoom and marquee are decorative. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 
   /* All other elements use the body sans (Inter via next/font). */

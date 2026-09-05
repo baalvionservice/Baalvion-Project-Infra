@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Cormorant_Garamond } from "next/font/google";
+import { Inter, Newsreader, Noto_Naskh_Arabic } from "next/font/google";
 import "../globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import UnifiedAnalytics from "@/components/UnifiedAnalytics";
@@ -8,19 +8,36 @@ import { AppProvider } from "@/lib/store";
 import { MaisonPopup } from "@/components/layout/MaisonPopup";
 import type { WelcomeOfferContent } from "@/lib/cms";
 
+// Variable axis rather than five static cuts: one file instead of five, and any weight in
+// between is reachable (the UI leans on 300-600).
 const inter = Inter({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-inter",
-  weight: ["300", "400", "500", "600", "700"],
 });
 
-// Elegant high-contrast luxury serif for all headings (replaces the never-loaded "Ivy Ora").
-// Self-hosted by next/font — no external request, no CSP/ORB issue.
-const cormorant = Cormorant_Garamond({
+// Display face. Two predecessors did not work: Cormorant Garamond (old-style revival — reads
+// literary, renders weak on screen) and Bodoni Moda (Didone — correct for a fashion masthead but
+// too ornate and high-contrast here). Newsreader is the quieter option: moderate stroke contrast,
+// near-even weight, upright and architectural rather than decorative, and it stays sturdy at
+// caption sizes where a hairline serif breaks up. Its italic is strong, which matters because
+// every headline in this design is set italic. Variable, with `opsz` so the browser uses the
+// display cut large and the text cut small.
+const newsreader = Newsreader({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-serif",
+  style: ["normal", "italic"],
+  axes: ["opsz"],
+});
+
+// The AE market serves lang="ar-AE" dir="rtl", but neither Latin face carries Arabic glyphs, so
+// Arabic fell back to whatever the browser happened to pick. Naskh is the correct register for
+// running Arabic text.
+const naskh = Noto_Naskh_Arabic({
+  subsets: ["arabic"],
+  display: "swap",
+  variable: "--font-arabic",
   weight: ["400", "500", "600", "700"],
 });
 
@@ -39,7 +56,7 @@ const cormorant = Cormorant_Garamond({
  * handful of country-less routes — lets the storefront read its locale from
  * `params` and be statically rendered, with identical markup either way.
  */
-export { inter, cormorant };
+export { inter, newsreader, naskh };
 
 export const sharedViewport: Viewport = {
   themeColor: "#000000",
@@ -57,7 +74,7 @@ export const sharedMetadata: Metadata = {
     template: "%s | AMARISÉ MAISON AVENUE",
   },
   description:
-    "Curating the world's most exquisite treasures since 1924. Explore exclusive collections in haute couture, high-end watches, and fine jewelry.",
+    "Authenticated pre-owned Hermès, Chanel, Goyard and fine jewelry. Every piece verified in-house before it is listed.",
   keywords: [
     "luxury fashion",
     "bespoke jewelry",
@@ -70,7 +87,7 @@ export const sharedMetadata: Metadata = {
   publisher: "Amarisé Maison Avenue",
   openGraph: {
     title: "AMARISÉ MAISON AVENUE | The Pinnacle of Global Luxury",
-    description: "Curating the world's most exquisite treasures since 1924.",
+    description: "Authenticated pre-owned Hermès, Chanel, Goyard and fine jewelry.",
     url: "https://www.amarisemaisonavenue.com/",
     siteName: "Amarisé Maison Avenue",
     type: "website",
@@ -111,7 +128,7 @@ export function RootHtml({
     <html
       lang={lang}
       dir={dir}
-      className={`${inter.variable} ${cormorant.variable} light scroll-smooth`}
+      className={`${inter.variable} ${newsreader.variable} ${naskh.variable} light scroll-smooth`}
     >
       <head>
         <GoogleAnalytics />
@@ -130,9 +147,9 @@ export function RootHtml({
               brand: "Amarisé Maison Avenue",
               url: "https://www.amarisemaisonavenue.com/",
               logo: "https://www.amarisemaisonavenue.com/favicon.svg",
-              foundingDate: "1924",
+              foundingDate: "2025-03-11",
               description:
-                "Ultra-luxury maison curating the world's most exquisite treasures in haute couture, high-end watches, and fine jewelry since 1924.",
+                "Luxury resale house specialising in authenticated pre-owned Herm\u00e8s, Chanel, Goyard and fine jewelry. Established 2025.",
               // What the business does and where — the two facts a search/AI engine needs
               // to correctly place this entity (luxury RESALE, not a first-hand fashion house).
               knowsAbout: [

@@ -41,6 +41,10 @@ import type {
   ProvenanceShowcaseContent,
 } from "./cms";
 
+// NOTE: office.address / phone / mapUrl are intentionally blank. They previously held
+// invented street addresses at real landmarks (730 Fifth Avenue, Old Bond Street, The
+// Dubai Mall, Jio World Centre, Marina Bay Sands) with 555-0192 placeholder numbers, and
+// were emitted as schema.org Store data. Fill these in only with a real trading address.
 export const COUNTRIES: Record<string, Country> = {
   us: {
     code: "us",
@@ -51,10 +55,10 @@ export const COUNTRIES: Record<string, Country> = {
     flag: "🇺🇸",
     office: {
       city: "New York",
-      address: "730 Fifth Avenue, New York, NY 10019",
-      phone: "+1 (212) 555-0192",
+      address: "",
+      phone: "",
       email: "concierge.us@amarise-luxe.com",
-      mapUrl: "https://maps.google.com/?q=730+Fifth+Avenue+New+York",
+      mapUrl: "",
       image: "",
     },
   },
@@ -67,10 +71,10 @@ export const COUNTRIES: Record<string, Country> = {
     flag: "🇬🇧",
     office: {
       city: "London",
-      address: "17-18 Old Bond Street, London W1S 4PT",
-      phone: "+44 20 7555 0192",
+      address: "",
+      phone: "",
       email: "concierge.uk@amarise-luxe.com",
-      mapUrl: "https://maps.google.com/?q=Old+Bond+Street+London",
+      mapUrl: "",
       image: "",
     },
   },
@@ -83,10 +87,10 @@ export const COUNTRIES: Record<string, Country> = {
     flag: "🇦🇪",
     office: {
       city: "Dubai",
-      address: "The Dubai Mall, Fashion Avenue, Downtown Dubai",
-      phone: "+971 4 555 0192",
+      address: "",
+      phone: "",
       email: "concierge.ae@amarise-luxe.com",
-      mapUrl: "https://maps.google.com/?q=Dubai+Mall+Fashion+Avenue",
+      mapUrl: "",
       image: "",
     },
   },
@@ -99,10 +103,10 @@ export const COUNTRIES: Record<string, Country> = {
     flag: "🇮🇳",
     office: {
       city: "Mumbai",
-      address: "Jio World Centre, BKC, Mumbai, Maharashtra 400051",
-      phone: "+91 22 5555 0192",
+      address: "",
+      phone: "",
       email: "concierge.in@amarise-luxe.com",
-      mapUrl: "https://maps.google.com/?q=Jio+World+Centre+Mumbai",
+      mapUrl: "",
       image: "",
     },
   },
@@ -115,10 +119,10 @@ export const COUNTRIES: Record<string, Country> = {
     flag: "🇸🇬",
     office: {
       city: "Singapore",
-      address: "2 Bayfront Ave, Marina Bay Sands, Singapore 018972",
-      phone: "+65 6555 0192",
+      address: "",
+      phone: "",
       email: "concierge.sg@amarise-luxe.com",
-      mapUrl: "https://maps.google.com/?q=Marina+Bay+Sands+Singapore",
+      mapUrl: "",
       image: "",
     },
   },
@@ -131,10 +135,10 @@ export const COUNTRIES: Record<string, Country> = {
     flag: "🇨🇦",
     office: {
       city: "Toronto",
-      address: "100 Bloor Street West, Toronto, ON M5S 3M2",
-      phone: "+1 (416) 555-0192",
+      address: "",
+      phone: "",
       email: "concierge.ca@amarise-luxe.com",
-      mapUrl: "https://maps.google.com/?q=100+Bloor+Street+West+Toronto",
+      mapUrl: "",
       image: "",
     },
   },
@@ -239,7 +243,7 @@ const generateSEOContent = () => {
       id: `seo-ed-${i}`,
       title: `${topic.title} in ${COUNTRIES[country].name}`,
       excerpt: `An exploration of ${topic.keyword} within the global Maison context.`,
-      content: `In the heart of our global ateliers, the pursuit of ${topic.keyword} remains a dialogue between human brilliance and timeless heritage. Whether observing the craftsmanship in ${COUNTRIES[country].office?.city} or our Parisian headquarters, the standard of the absolute is never compromised.`,
+      content: `In the heart of our global ateliers, the pursuit of ${topic.keyword} remains a dialogue between human brilliance and timeless heritage. Whether observing the craftsmanship in ${COUNTRIES[country].office?.city}, the standard of the absolute is never compromised.`,
       imageUrl: `https://picsum.photos/seed/amarise-seo-${i}/1200/800`,
       category: topic.category as any,
       country: country,
@@ -293,23 +297,18 @@ export const EDITOR_INITIAL = seoContent.editorials;
 export const BUYING_GUIDES = seoContent.guides;
 
 export const MAISON_STORY: MaisonStory = {
-  title: "A Legacy of Radiance",
-  subtitle: "Since 1924.",
+  title: "A Standard, Not a Story",
+  subtitle: "Established 2025.",
   history: [
     {
-      year: "1924",
-      milestone: "The First Atelier",
-      description: "Founded in Paris.",
+      year: "2025",
+      milestone: "Founded",
+      description: "Amarisé Maison Avenue was established on 11 March 2025.",
     },
   ],
-  philosophy: "Luxury is human brilliance.",
-  craftsmanship: [
-    {
-      title: "Haute Couture",
-      description: "Hand-sewn.",
-      imageUrl: "https://picsum.photos/seed/craft-1/800/1000",
-    },
-  ],
+  philosophy: "Provenance before prestige.",
+  // We authenticate and resell — we do not manufacture. No atelier or craft claims here.
+  craftsmanship: [],
   sustainability: "Preserving the earth.",
   institutionalCharter:
     "Our mission is to maintain the standard of the absolute in every artifact we curate.",
@@ -1058,10 +1057,10 @@ export const getLocalizedMockText = (text: string, countryCode: string) => text;
  */
 export const HOMEPAGE_FALLBACK: HomepageContent = {
   hero: {
-    eyebrow: "Maison Amarisé · Est. 1924",
+    eyebrow: "Maison Amarisé · Est. 2025",
     title: "The Art of Authenticated Luxury",
     subtitle:
-      "A century of connoisseurship. Rare and pre-owned Hermès, Chanel and fine jewelry — every piece authenticated by our master curators.",
+      "Rare and pre-owned Hermès, Chanel and fine jewelry — every piece authenticated in-house before it is listed.",
     ctaLabel: "Discover New Arrivals",
     ctaHref: "/category/new-arrivals-handbags",
     secondaryCtaLabel: "Sell or Consign",
@@ -1150,42 +1149,15 @@ export const HOMEPAGE_FALLBACK: HomepageContent = {
  */
 export const PRESS_FALLBACK: PressContent = {
   title: "Amarisé in the Press",
-  subtitle:
-    "The Maison and its archive have been featured by the world's foremost authorities on luxury, investment and style.",
-  logos: [
-    { name: "Vogue", image: "", href: "#" },
-    { name: "Bloomberg", image: "", href: "#" },
-    { name: "Financial Times", image: "", href: "#" },
-    { name: "WWD", image: "", href: "#" },
-    { name: "Robb Report", image: "", href: "#" },
-    { name: "Harper's Bazaar", image: "", href: "#" },
-  ],
-  articles: [
-    {
-      title: "Why authenticated pre-owned luxury is the new investment class",
-      outlet: "Bloomberg",
-      date: "2026",
-      excerpt:
-        "Inside the houses setting the standard for provenance and trust in the secondary luxury market.",
-      href: "#",
-    },
-    {
-      title: "The collectors quietly building museum-grade archives",
-      outlet: "Financial Times",
-      date: "2026",
-      excerpt:
-        "How a new generation of connoisseurs is treating the Birkin and the flap bag as heritage assets.",
-      href: "#",
-    },
-    {
-      title: "The art of the authenticated handbag",
-      outlet: "Vogue",
-      date: "2025",
-      excerpt:
-        "A look behind the curtain at the experts who certify the rare, the iconic and the extraordinary.",
-      href: "#",
-    },
-  ],
+  subtitle: "",
+  // Deliberately empty. This previously listed Vogue, Bloomberg, the Financial Times, WWD,
+  // Robb Report and Harper's Bazaar as "As Seen In", with three invented articles attributed
+  // to those mastheads — all href:"#". The house was founded 11 March 2025 and has no press
+  // coverage; naming real publications as endorsers is a false-association claim, not a
+  // placeholder. PressStrip returns null on an empty logos array, so the strip simply does
+  // not render until there is something real to put in it.
+  logos: [],
+  articles: [],
 };
 
 export const FOOTER_FALLBACK: FooterConfig = {

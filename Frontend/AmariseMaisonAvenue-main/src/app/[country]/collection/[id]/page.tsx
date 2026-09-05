@@ -137,7 +137,7 @@ export default function CollectionPage() {
           </h3>
           <p className="text-muted-foreground max-w-xl mx-auto font-light">
             Each piece in the {collection.name} represents a marriage of
-            centuries-old craft and contemporary vision.
+            in-house authentication and contemporary vision.
           </p>
           <Button
             variant="outline"

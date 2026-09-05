@@ -36,7 +36,7 @@ export default function SsoCallbackPage() {
         minHeight: '60vh',
         display: 'grid',
         placeItems: 'center',
-        fontFamily: 'var(--font-serif, Cormorant Garamond, serif)',
+        fontFamily: 'var(--font-serif, Newsreader, Georgia, serif)',
         color: '#1a1a1a',
         letterSpacing: '0.04em',
       }}

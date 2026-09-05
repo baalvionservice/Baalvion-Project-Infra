@@ -761,11 +761,11 @@ export async function getWelcomeOfferContent(): Promise<WelcomeOfferContent | nu
   if (!cf && !c?.featuredImage) return null;
   return {
     image: cf?.image ?? c?.featuredImage ?? '',
-    archiveLabel: cf?.archiveLabel ?? 'Archive No. 1924',
+    archiveLabel: cf?.archiveLabel ?? 'Collector Network',
     headline: cf?.headline ?? '$100 Off, On Us?',
     subtext:
       cf?.subtext ??
-      'Join our collector network for first access to the 1924 heritage series and bespoke curatorial guidance.',
+      'Join our collector network for first access to new arrivals and bespoke sourcing.',
     ctaLabel: cf?.ctaLabel ?? 'Collect Your Offer',
     disclaimer: cf?.disclaimer ?? '*Offer valid on all orders $2,500+.',
   };

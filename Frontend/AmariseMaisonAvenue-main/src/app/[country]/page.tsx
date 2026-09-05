@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: CountryHomeProps): Promise<Me
   // Genuinely distinct per market (city + currency), not the same paragraph with the
   // country name swapped in — that reads as thin/duplicate content to search engines
   // running 5 near-identical pages.
-  const description = `Rare and pre-owned Hermès, Chanel and fine jewelry, authenticated in-house and priced in ${countryData.currency}. Private showroom in ${office.city}, white-glove delivery across ${countryData.name} — curating the world's most exquisite treasures since 1924.`;
+  const description = `Rare and pre-owned Hermès, Chanel and fine jewelry, authenticated in-house and priced in ${countryData.currency}. Delivered across ${countryData.name}, with local duty and tax applied at checkout.`;
   return {
     title: `AMARISÉ MAISON AVENUE | Authenticated Luxury in ${countryData.name}`,
     description,
@@ -63,10 +63,12 @@ export default async function CountryPage({ params }: CountryHomeProps) {
 
   return (
     <div className="animate-fade-in bg-white">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(storeSchema) }}
-      />
+      {storeSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(storeSchema) }}
+        />
+      )}
       <HomeHero hero={homepage.hero} countryCode={countryCode} />
       <ServiceCards services={homepage.services} countryCode={countryCode} />
       <FeaturedCollections

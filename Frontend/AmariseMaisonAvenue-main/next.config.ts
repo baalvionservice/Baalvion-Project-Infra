@@ -113,6 +113,10 @@ const nextConfig: NextConfig = {
       'https://api.baalvion.com',
       'https://*.googleapis.com',
       'https://www.google-analytics.com',
+      'https://*.google-analytics.com',
+      'https://analytics.google.com',
+      'https://*.analytics.google.com',
+      'https://www.google.com',
       'https://stats.g.doubleclick.net',
       // Payment gateways the browser talks to directly (Razorpay popup, Stripe.js).
       'https://api.razorpay.com',
@@ -127,9 +131,9 @@ const nextConfig: NextConfig = {
     // upgrade-insecure-requests would rewrite http://localhost:* to https in dev — only emit in prod.
     const cspHeader = `
       default-src 'self';
-      script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://www.googletagmanager.com https://www.google-analytics.com https://checkout.razorpay.com https://js.stripe.com;
+      script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://api.baalvion.com https://www.googletagmanager.com https://www.google-analytics.com https://checkout.razorpay.com https://js.stripe.com;
       style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-      img-src 'self' blob: data: https://picsum.photos https://images.unsplash.com https://placehold.co https://madisonavenuecouture.com https://www.google-analytics.com https://www.googletagmanager.com ${MEDIA_HOST ? `https://${MEDIA_HOST}` : ''} ${cmsImgSrc} ${devImgSrc};
+      img-src 'self' blob: data: https://picsum.photos https://images.unsplash.com https://placehold.co https://madisonavenuecouture.com https://www.google-analytics.com https://www.googletagmanager.com https://www.google.com https://www.google.co.in https://www.google.co.uk https://www.google.ae https://www.google.com.sg ${MEDIA_HOST ? `https://${MEDIA_HOST}` : ''} ${cmsImgSrc} ${devImgSrc};
       font-src 'self' data: https://fonts.gstatic.com;
       object-src 'none';
       base-uri 'self';

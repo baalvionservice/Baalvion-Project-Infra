@@ -39,7 +39,7 @@ export async function generateEditorialContent(
     return {
       title: `${input.topic}: The Maison Perspective`,
       excerpt: `An exploration of ${input.topic} within the context of the ${input.country} hub.`,
-      content: `In the heart of our ${input.country} atelier, the dialogue between heritage and human brilliance remains our guiding light. The study of ${input.topic} reveals a deeper commitment to the artisanal standard that has defined the Maison since 1924. As we continue to curate the world's most significant artifacts, we find that rarity is not merely an attribute, but a philosophy. This volume of the AMARISÉ Journal serves as an invitation to the connoisseur seeking to master the art of acquisition.`
+      content: `From our ${input.country} desk, the discipline of authentication remains the whole of the work. The study of ${input.topic} reveals a deeper commitment to the standard the Maison has held since it was founded in 2025. As we continue to curate the world's most significant artifacts, we find that rarity is not merely an attribute, but a philosophy. This volume of the AMARISÉ Journal serves as an invitation to the connoisseur seeking to master the art of acquisition.`
     };
   }
 }
