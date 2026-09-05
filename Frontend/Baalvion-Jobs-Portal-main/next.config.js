@@ -87,6 +87,7 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_JOBS_SERVICE_URL: process.env.NEXT_PUBLIC_JOBS_SERVICE_URL || 'http://localhost:3002/api/v1',
   },
+  output: process.platform === 'win32' ? undefined : 'standalone',
   reactStrictMode: true,
   compress: true,
   poweredByHeader: false,

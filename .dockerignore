@@ -13,20 +13,25 @@
 **/.env
 **/.env.local
 **/.env.*.local
-# Frontend is excluded from the lean backend build contexts, EXCEPT the two frontends built
-# from the repo root: auth-baalvion (core-auth-baalvion) and admin-platform (admin-web, the
-# admin.baalvion.com console). Re-include just those; their build artifacts stay excluded by
-# the **/node_modules etc. rules below. NOTE: without admin-platform here, its source never
-# enters the build context and `turbo prune baalvion-admin-platform` fails "package not found".
+# Frontend is excluded from the lean backend build contexts, EXCEPT the frontends built
+# from the repo root: auth-baalvion (core-auth-baalvion), admin-platform (admin-web, the
+# admin.baalvion.com console), and Baalvion-Jobs-Portal-main (jobs.baalvion.com). Re-include
+# just those; their build artifacts stay excluded by the **/node_modules etc. rules below.
+# NOTE: without an app listed here, its source never enters the build context and
+# `turbo prune <package-name>` fails "package not found".
 Frontend/*
 !Frontend/auth-baalvion
 !Frontend/admin-platform
+!Frontend/Baalvion-Jobs-Portal-main
 Frontend/auth-baalvion/node_modules
 Frontend/auth-baalvion/.next
 Frontend/auth-baalvion/.turbo
 Frontend/admin-platform/node_modules
 Frontend/admin-platform/.next
 Frontend/admin-platform/.turbo
+Frontend/Baalvion-Jobs-Portal-main/node_modules
+Frontend/Baalvion-Jobs-Portal-main/.next
+Frontend/Baalvion-Jobs-Portal-main/.turbo
 e2e
 docs
 *.md
