@@ -79,6 +79,13 @@ router.use('/carbon_footprints', require('./carbonRoutes'));
 // Insurance — cargo/credit/parametric policies (quote→bind) + claims (file→pay) lifecycle.
 router.use('/insurance_policies', require('./insuranceRoutes'));
 router.use('/insurance_claims', require('./insuranceClaimsRoutes'));
+// General Average (migration 066) — voyage-wide loss apportionment after a
+// casualty. Runs alongside the cargo policy, not through it: every interest on
+// the voyage contributes, insured or not.
+router.use('/general_average', require('./generalAverageRoutes'));
+// Underwriters + binders (migration 071) — whose paper the cover is written on and
+// the delegated authority the platform holds on it.
+router.use('/insurance_underwriters', require('./underwriterRoutes'));
 
 // Trade Operations — Shipment Workflow State Machine (War Room 4, Prompt 2):
 // deterministic event-driven lifecycle engine + transition event log + webhooks.
@@ -184,6 +191,9 @@ router.use('/returns',          require('./returnRoutes'));
 // warehouse/products/documents/compliance/risk/trust-score) + the country-
 // configurable tax-identifier catalog it reads from.
 router.use('/verification_center',    require('./verificationCenterRoutes'));
+// KYC/KYB vendor callbacks + which adapter is active (migration 070). Vendor-signed,
+// so the webhook is deliberately outside the session auth path.
+router.use('/kyc_provider',           require('./kycProviderRoutes'));
 router.use('/tax_id_types',           require('./taxIdTypeRoutes'));
 router.use('/identity_verifications', require('./identityVerificationRoutes'));
 router.use('/company_verifications', require('./companyVerificationRoutes'));
@@ -221,6 +231,37 @@ router.use('/tracking_search',      require('./trackingSearchRoutes'));
 router.use('/tracking_dashboard',   require('./logisticsTrackingDashboardRoutes'));
 router.use('/tracking_reports',     require('./trackingReportRoutes'));
 router.use('/intelligence',         require('./intelligenceRoutes'));
+
+// Vessel Sailing Schedules (migration 065) — carrier-published "which ship sails
+// from where, when". Independent of any booking: shippers read it to choose a
+// sailing, and shipments then reference the voyage they ride on.
+router.use('/sailing_schedules',    require('./scheduleRoutes'));
+
+// World Shipping Directory (migration 067) — the PUBLIC, unauthenticated reference
+// directory of shipping companies and their ships. Mounted under /public/ to make the
+// absence of authMiddleware in shippingDirectoryRoutes.js deliberate and greppable
+// rather than an oversight: everything under it is openly-licensed reference data
+// (Wikidata CC0 + a dated Alphaliner capacity ranking), never tenant rows.
+router.use('/public/shipping',      require('./shippingDirectoryRoutes'));
+
+// Clearance Compression (migrations 078-080). The stage ledger measures where the
+// ~19-day paperwork cycle actually goes; consignments are the canonical record
+// every trade document derives from; the corridor gate stops a filing that would
+// bounce from ever being submitted; the clearance gates expose the parallel work
+// front that replaces the linear stage chain.
+router.use('/clearance_ledger',  require('./clearanceLedgerRoutes'));
+router.use('/clearance_gates',   require('./clearanceGateRoutes'));
+router.use('/consignments',      require('./consignmentRoutes'));
+router.use('/corridor',          require('./corridorRoutes'));
+
+// Clearance Compression, continued (migrations 081-084). Pre-arrival filing moves
+// the customs decision ahead of the vessel; the duty rail turns payment into a
+// ledger debit; trusted-trader status is the only lever that changes what the
+// AUTHORITY does; delegated authority removes the overnight wait for a human.
+router.use('/prearrival',        require('./preArrivalRoutes'));
+router.use('/duty',              require('./dutyRoutes'));
+router.use('/trusted_trader',    require('./trustedTraderRoutes'));
+router.use('/authority',         require('./authorityRoutes'));
 
 // Generic persistence store — MUST be last so it only catches collections that
 // have no bespoke typed route above (alerts, risk_signals, contracts, ...).

@@ -1,0 +1,74 @@
+/**
+ * @file flags/[slug]/page.tsx
+ * @description One flag state — every hull on record against it.
+ *
+ * Thin route around CohortHubPage: the builder and flag hubs are structurally the same
+ * page over the same precomputed cohort statistics, and keeping two copies would let them
+ * drift. See _components/cohort-hub.tsx for why these pages exist at all.
+ */
+import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
+import { getCohort, num, typeLabel } from '@/lib/shipping-directory/api';
+import { href, canonical } from '@/lib/shipping-directory/site';
+import { breadcrumbJsonLd, itemListJsonLd, jsonLdProps } from '@/lib/shipping-directory/jsonld';
+import { CohortHubPage } from '../../_components/cohort-hub';
+
+/**
+ * Revalidation policy: this record changes only when the ingest re-runs, which is monthly
+ * at most — NOT every five minutes. The original 300 here was multiplied across ~99,700
+ * ISR-backed URLs, and on a metered host every regeneration is a billable ISR write. Seven
+ * days, refreshed on demand after an ingest, is what the data actually warrants.
+ */
+export const revalidate = 604800;
+
+const PAGE_SIZE = 60;
+type SP = Record<string, string | string[] | undefined>;
+const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const hub = await getCohort('flag', slug);
+  if (!hub) return { title: 'Flag state not found', robots: { index: false, follow: true } };
+
+  const c = hub.cohort;
+  const span = c.oldest_year && c.newest_year ? `${c.oldest_year}–${c.newest_year}` : null;
+  return {
+    title: `Ships flagged ${c.cohort_key}`,
+    description: `${num(c.n)} vessels flagged ${c.cohort_key} on record${span ? `, delivered ${span}` : ''}`
+      + `${c.top_type ? `, mostly ${typeLabel(c.top_type).toLowerCase()}s` : ''}`
+      + `${c.median_gt ? `, median ${num(c.median_gt)} GT` : ''}. Full list with IMO number, tonnage, operator and dimensions.`,
+    alternates: { canonical: canonical(`flags/${slug}`) },
+  };
+}
+
+export default async function Page({
+  params, searchParams,
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<SP>;
+}) {
+  const { slug } = await params;
+  const sp = await searchParams;
+  const offset = Number(first(sp.offset) ?? 0) || 0;
+
+  const hub = await getCohort('flag', slug, { limit: PAGE_SIZE, offset });
+  if (!hub) notFound();
+
+  const path = `flags/${slug}`;
+  const pageHref = (o: number) => `${href(path)}${o ? `?offset=${o}` : ''}`;
+
+  return (
+    <>
+      <script {...jsonLdProps(breadcrumbJsonLd([
+        { label: 'Directory', path: '' },
+        { label: 'Flag states', path: 'flags' },
+        { label: hub.cohort.cohort_key, path },
+      ]))} />
+      <script {...jsonLdProps(itemListJsonLd(
+        hub.vessels.data.map((v) => ({ name: v.name, path: `ships/${v.slug}` })),
+        { name: `Vessels flagged ${hub.cohort.cohort_key}`, offset },
+      ))} />
+      <CohortHubPage hub={hub} dimension="flag" pageHref={pageHref} />
+    </>
+  );
+}

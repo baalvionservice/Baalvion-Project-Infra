@@ -44,7 +44,14 @@ export interface CompareQuotesResult {
   cheapest: NormalizedQuote | null;
   fastest: NormalizedQuote | null;
   best: NormalizedQuote | null;
-  errors: { carrier: string; kind: string; code: string | null; message: string }[];
+  errors: {
+    carrier: string;
+    kind: string;
+    code: string | null;
+    message: string;
+    /** The connector's own reasons — where an actionable cause actually lives. */
+    messages?: { code?: string; level?: string; text: string }[];
+  }[];
   carriers_quoted: string[];
   carriers_failed: string[];
   valid_until: string;
@@ -104,6 +111,8 @@ export interface ShipmentRequest {
   destination: { country: string; city?: string; postal_code?: string; residential?: boolean };
   pieces: { quantity: number; weight_kg: number; length_cm: number; width_cm: number; height_cm: number }[];
   ready_date?: string;
+  /** Free-form context carried through to the booking record (port codes, corridor, cargo). */
+  metadata?: Record<string, unknown>;
 }
 
 export const freightBookingApi = {

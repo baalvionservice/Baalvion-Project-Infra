@@ -21,6 +21,7 @@ const QUEUE_NAMES = [
     'eta_predict',     // Shipment Tracking Platform — periodic live ETA re-prediction sweep
     'delay_sweep',     // Shipment Tracking Platform — periodic delay-cause detection sweep
     'notification_dispatch', // Shipment Tracking Platform — async retry of a failed alert-channel notification
+    'insurance_expiry', // Insurance — daily cover-expiry sweep + lapse warnings (migration 066)
 ];
 const DLQ = 'dead-letter';
 

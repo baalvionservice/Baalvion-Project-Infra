@@ -46,14 +46,17 @@ export default function IdentityCommandCenter() {
 
   const fetchData = async () => {
     setSyncing(true);
-    const [iData, tData] = await Promise.all([
-      iamService.getIdentities(),
-      tenantService.getTenants()
-    ]);
-    setIdentities(iData);
-    setTenants(tData);
-    setSyncing(false);
-    setLoading(false);
+    try {
+      const [iData, tData] = await Promise.all([
+        iamService.getIdentities(),
+        tenantService.getTenants()
+      ]);
+      setIdentities(iData);
+      setTenants(tData);
+    } finally {
+      setSyncing(false);
+      setLoading(false);
+    }
   };
 
   useEffect(() => {

@@ -59,13 +59,22 @@ function normalizeAddress(addr = {}) {
     const country = normalizeCountry(addr.country || addr.country_code);
     const city = str(addr.city, 120);
     const postal = str(addr.postal_code || addr.postalCode || addr.zip, 32);
-    if (!country && !city && !postal) return null;
+    // The seaport/airport this leg calls at. Carriers price on country/city, so this
+    // was originally dropped — but dropping it means a BOOKED ocean shipment records
+    // no lane, which the tracking, schedule and insurance-rating layers all need.
+    // Carried through untouched; nothing downstream is required to read it.
+    const port = str(addr.unlocode || addr.unLocode || addr.port || addr.code, 16);
+    const placeName = str(addr.name || addr.place, 160);
+
+    if (!country && !city && !postal && !port) return null;
     return {
         country,
         city,
         postal_code: postal,
         line1: str(addr.line1 || addr.address || addr.street, 256),
         residential: addr.residential === true,
+        unlocode: port || null,
+        name: placeName || null,
     };
 }
 

@@ -39,6 +39,12 @@
     --warning: 38 92% 50%;
     --error: 0 84% 60%;
     --security: 239 84% 67%;
+
+    /* Sovereign gold — the platform's second brand hue (premium CTAs, sovereign/strategy
+       surfaces), paired with --primary blue so the chrome reads "global finance", not
+       single-hue "same same" navy-on-navy. */
+    --gold: 38 92% 55%;
+    --gold-foreground: 24 40% 12%;
   }
 }
 
@@ -87,4 +93,66 @@
 }
 .animate-pulse-terminal {
   animation: pulse-terminal 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Aurora background — three slow-drifting color blobs (blue / gold / emerald) behind hero
+   and command-center surfaces, replacing the single static radial gradient. Keeps the dark
+   institutional base but gives the page a sense of motion instead of reading flat/inert. */
+@keyframes aurora-drift-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(4%, 6%) scale(1.12); }
+}
+@keyframes aurora-drift-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-6%, -4%) scale(1.08); }
+}
+@keyframes aurora-drift-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-3%, 5%) scale(1.15); }
+}
+.aurora-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.aurora-bg span {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(90px);
+  opacity: 0.35;
+}
+.aurora-bg span:nth-child(1) {
+  top: -10%; left: 5%; width: 42rem; height: 42rem;
+  background: radial-gradient(circle, hsl(var(--primary) / 0.5), transparent 70%);
+  animation: aurora-drift-1 18s ease-in-out infinite;
+}
+.aurora-bg span:nth-child(2) {
+  top: 10%; right: -5%; width: 34rem; height: 34rem;
+  background: radial-gradient(circle, hsl(var(--gold) / 0.4), transparent 70%);
+  animation: aurora-drift-2 22s ease-in-out infinite;
+}
+.aurora-bg span:nth-child(3) {
+  bottom: -15%; left: 30%; width: 38rem; height: 38rem;
+  background: radial-gradient(circle, hsl(142 71% 45% / 0.28), transparent 70%);
+  animation: aurora-drift-3 26s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.35); }
+  50% { box-shadow: 0 0 32px 4px hsl(var(--primary) / 0.35); }
+}
+.animate-glow-pulse {
+  animation: glow-pulse 2.6s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.animate-shimmer {
+  background: linear-gradient(110deg, transparent 40%, hsl(var(--foreground) / 0.08) 50%, transparent 60%);
+  background-size: 200% 100%;
+  animation: shimmer 2.2s ease-in-out infinite;
 }

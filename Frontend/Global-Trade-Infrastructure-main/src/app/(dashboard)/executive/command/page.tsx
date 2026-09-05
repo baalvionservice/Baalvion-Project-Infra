@@ -43,14 +43,14 @@ export default function GlobalCommandPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const [hData, iData, sData] = await Promise.all([
+      const [hData, iData, sData] = await Promise.allSettled([
         adminService.getTradeHeatmapData(),
         incidentService.getActiveIncidents(),
         adminService.getPlatformOverview()
       ]);
-      setHeatmap(hData);
-      setIncidents(iData);
-      setStats(sData);
+      if (hData.status === 'fulfilled') setHeatmap(hData.value);
+      if (iData.status === 'fulfilled') setIncidents(iData.value);
+      if (sData.status === 'fulfilled') setStats(sData.value);
       setLoading(false);
     };
     fetchData();
@@ -86,7 +86,7 @@ export default function GlobalCommandPage() {
       {/* EXECUTIVE KPI ROW — live platform telemetry at a glance */}
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         {[
-          { label: 'Global Trade Volume', val: stats ? formatCurrency(stats.volume.total) : '—', sub: stats?.volume.growth ?? 'YoY', icon: TrendingUp, tone: 'text-emerald-600' },
+          { label: 'Global Trade Volume', val: stats ? formatCurrency(stats.volume.total) : '—', sub: 'Escrow-backed', icon: TrendingUp, tone: 'text-emerald-600' },
           { label: 'Active Deals', val: stats ? String(stats.operations.activeDeals) : '—', sub: 'In orchestration', icon: Zap, tone: 'text-primary' },
           { label: 'Live Incidents', val: String(incidents.length), sub: incidents.length ? 'Require attention' : 'All clear', icon: Siren, tone: incidents.length ? 'text-red-600' : 'text-emerald-600' },
           { label: 'Institutions', val: stats ? String(stats.entities.total) : '—', sub: `${stats?.entities.activeTenants ?? 0} active`, icon: Users, tone: 'text-blue-600' },
@@ -228,9 +228,9 @@ export default function GlobalCommandPage() {
            <Card className="shadow-sm border bg-background p-6 space-y-5 rounded-2xl">
               <h4 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Orchestration Pulse</h4>
               {[
-                { label: 'Platform Finality', val: stats?.operations.settlementFinality || '12.4s', change: 'Stable', icon: History, color: 'text-primary' },
-                { label: 'Consensus Depth', val: 'Level 4', change: 'Optimal', icon: ShieldCheck, color: 'text-emerald-500' },
-                { label: 'Atomic Success', val: '99.98%', change: 'Verified', icon: Zap, color: 'text-blue-500' }
+                { label: 'Settlements Processed', val: String(stats?.operations.settlementsProcessed ?? 0), change: 'Live', icon: History, color: 'text-primary' },
+                { label: 'Active Deals', val: String(stats?.operations.activeDeals ?? 0), change: 'In orchestration', icon: Zap, color: 'text-emerald-500' },
+                { label: 'Shipments In Transit', val: String(stats?.operations.shipmentsInTransit ?? 0), change: 'Live', icon: ShieldCheck, color: 'text-blue-500' }
               ].map((kpi, i) => (
                  <div key={i} className="space-y-4">
                     <div className="flex items-center justify-between">

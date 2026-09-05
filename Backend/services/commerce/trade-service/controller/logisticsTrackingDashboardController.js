@@ -101,6 +101,16 @@ const mapOverview = async (req, res, next) => {
                 longitude: lastPing && lastPing.longitude != null ? Number(lastPing.longitude) : null,
                 locationLabel: (lastPing && lastPing.location_label) || (s.metadata && s.metadata.lastKnownLocation) || null,
                 lastUpdated: lastPing ? lastPing.occurred_at : null,
+                // Who reported the fix. Carried through so the map can separate an
+                // observed ping from a simulated one instead of drawing both as
+                // the same dot — providers/tracking.js still runs simulated until
+                // TRACKING_API_KEY names a real carrier feed.
+                source: (lastPing && lastPing.source) || null,
+                // Lane context — lets the maritime SIGINT UI group real active
+                // shipments into real origin/destination corridors instead of
+                // a hand-authored list of named "sea routes".
+                mode: s.mode, vesselName: s.vessel_name,
+                originPort: s.origin_port, destinationPort: s.destination_port,
             };
         }));
         return res.json({ success: true, data: points.filter((p) => p.latitude != null && p.longitude != null) });
@@ -119,15 +129,29 @@ const recentEvents = async (req, res, next) => {
 // GET /tracking_dashboard/alerts — active alerts feed for the dashboard widget.
 // Maps to the same camelCase shape shipmentAlertController.js's toApi() produces,
 // since the frontend's ShipmentAlert type (src/api/tracking-platform.ts) expects it.
+// Also carries the associated shipment's vessel/lane context — the maritime SIGINT
+// UI (governance/maritime, intelligence-hub/maritime) needs a real vessel identity
+// per alert rather than just an opaque shipment id.
 const alerts = async (req, res, next) => {
     try {
         const limit = Number(req.query.limit) || 20;
-        const rows = await db.ShipmentAlert.findAll({ where: { status: 'active' }, order: [['triggered_at', 'DESC']], limit });
+        const rows = await db.ShipmentAlert.findAll({
+            where: { status: 'active' }, order: [['triggered_at', 'DESC']], limit,
+            include: [{
+                model: db.TradeShipment, as: 'shipment',
+                attributes: ['shipment_no', 'vessel_name', 'mode', 'origin_port', 'destination_port'],
+            }],
+        });
         const data = rows.map((r) => ({
             id: r.id, shipmentId: r.shipment_id, alertType: r.alert_type, severity: r.severity,
             message: r.message, status: r.status, triggeredAt: r.triggered_at,
             acknowledgedBy: r.acknowledged_by, acknowledgedAt: r.acknowledged_at, resolvedAt: r.resolved_at,
             metadata: r.metadata,
+            shipmentNo: r.shipment ? r.shipment.shipment_no : null,
+            vesselName: r.shipment ? r.shipment.vessel_name : null,
+            mode: r.shipment ? r.shipment.mode : null,
+            originPort: r.shipment ? r.shipment.origin_port : null,
+            destinationPort: r.shipment ? r.shipment.destination_port : null,
         }));
         return res.json({ success: true, data });
     } catch (err) { return next(err); }

@@ -40,15 +40,18 @@ export default function CommerceCommandPage() {
   const router = useRouter();
 
   const fetchData = async () => {
-    const [sData, oData, hData] = await Promise.all([
-      commerceIntelligenceService.getDemandSignals(),
-      commerceIntelligenceService.getCorridorOpportunities(),
-      adminService.getTradeHeatmapData()
-    ]);
-    setSignals(sData);
-    setOpportunities(oData);
-    setHeatmap(hData);
-    setLoading(false);
+    try {
+      const [sData, oData, hData] = await Promise.all([
+        commerceIntelligenceService.getDemandSignals(),
+        commerceIntelligenceService.getCorridorOpportunities(),
+        adminService.getTradeHeatmapData()
+      ]);
+      setSignals(sData);
+      setOpportunities(oData);
+      setHeatmap(hData);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {

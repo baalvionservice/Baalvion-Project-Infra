@@ -1,124 +1,243 @@
 'use strict';
 /**
- * ChinaConnector — GACC International Trade Single Window gateway (PLACEHOLDER)
- * (Phase 1 core-commerce alignment — the audit found China missing from the
- * customs-gateway registry despite being one of the four Phase 1 target markets).
+ * ChinaConnector — GACC / China International Trade Single Window (real integration).
  *
- * Maps a canonical declaration to a China Customs (GACC) declaration and submits
- * it via the International Trade Single Window. China keys the trading party on
- * its 18-digit Unified Social Credit Code (USCC), so the jurisdiction rule is
- * "the trading party must carry a tax_id (USCC)". China also requires a 10-digit
- * (not the 8-digit HTSUS minimum other jurisdictions accept) HS classification on
- * every line. The gateway returns a `customsDeclarationNo` and a `declStatus`
- * (CLEARED / UNDER_REVIEW / REJECTED), collapsed by parseResponse into the
- * normalized shape — mirrors uaeConnector.js / usConnector.js exactly.
+ * Lodges an import or export declaration as signed XML over mutual TLS.
  *
- * The live channel needs China e-Port / Single Window enrolment credentials, so
- * `transmit()` only calls the real endpoint when CHINA_SW_ENDPOINT + CHINA_SW_API_KEY
- * are set; otherwise it falls back to the deterministic simulator.
+ * Message signing is REQUIRED here, not optional: GACC requires the declaration
+ * to carry a signature from a certificate issued by an approved Chinese
+ * certification authority, and an unsigned message is refused at the gateway.
+ * The connector therefore treats missing signing material as a configuration
+ * failure rather than degrading to an unsigned filing.
+ *
+ * TRADE MODE AND EXEMPTION NATURE are mandatory and consequential. They select
+ * the customs regime — general trade, processing, bonded — and with it the duty
+ * treatment. Defaulting them would file the wrong regime, which is a
+ * misdeclaration rather than a formatting error, so they must be supplied.
+ *
+ * SPEC BINDING. Element names live in ELEMENTS; the trade-mode and exemption
+ * codelists are GACC-published and versioned — reconcile both against the Single
+ * Window integration pack you are provisioned against.
  */
 
 const { CustomsConnector } = require('./baseConnector');
-const { httpTransmit } = require('./transport');
-const { decideOutcome, deterministicRef } = require('./simulate');
+const transport = require('./transport');
+const signing = require('./signing');
+const xml = require('./xml');
 const { CHANNEL, STATUS } = require('../schema');
 
-// GACC native status → normalized status.
-const CHINA_STATUS_MAP = {
-    CLEARED: STATUS.ACCEPTED,
-    RELEASED: STATUS.ACCEPTED,
+const ELEMENTS = Object.freeze({
+    envelope: 'DeclarationMessage',
+    header: 'MessageHead',
+    body: 'DeclarationHead',
+    item: 'DeclarationList',
+});
+
+const DIRECTION_CODE = Object.freeze({ import: 'I', export: 'E' });
+
+const GACC_STATUS = Object.freeze({
+    SENT: STATUS.SUBMITTED,
+    RECEIVED: STATUS.SUBMITTED,
+    DECLARED: STATUS.SUBMITTED,
     UNDER_REVIEW: STATUS.SUBMITTED,
-    PENDING: STATUS.SUBMITTED,
-    REJECTED: STATUS.REJECTED,
+    INSPECTION: STATUS.SUBMITTED,
+    TAX_PENDING: STATUS.SUBMITTED,
+    RELEASED: STATUS.ACCEPTED,
+    CLEARED: STATUS.ACCEPTED,
+    PASSED: STATUS.ACCEPTED,
     RETURNED: STATUS.REJECTED,
-};
+    REJECTED: STATUS.REJECTED,
+    CANCELLED: STATUS.CANCELLED,
+});
 
 class ChinaConnector extends CustomsConnector {
     constructor(opts = {}) {
         super({ channel: CHANNEL.CHINA_SINGLE_WINDOW, gatewayName: 'China Single Window', ...opts });
-        this.endpoint = opts.endpoint || process.env.CHINA_SW_ENDPOINT || null;
-        this.apiKey = opts.apiKey || process.env.CHINA_SW_API_KEY || null;
+        this.messageVersion = opts.messageVersion || process.env.CHINA_SW_MESSAGE_VERSION || '1.0';
     }
 
     validateDeclaration(declaration) {
         const errors = [];
-        const trader = declaration.entry_type === 'export' ? declaration.exporter : declaration.importer;
-        if (!trader || !trader.tax_id) {
-            errors.push({ code: 'CN_MISSING_USCC', level: 'error', text: 'GACC requires the 18-digit Unified Social Credit Code (USCC) on the trading party' });
-        }
-        // The Single Window requires a full 10-digit HS classification on every line.
-        declaration.line_items.forEach((l) => {
-            const digits = String(l.hs_code || '').replace(/\D/g, '');
-            if (digits.length < 10) {
-                errors.push({ code: 'CN_SHORT_HS', level: 'error', text: `Line ${l.line_no}: GACC requires a 10-digit HS classification` });
+        const meta = declaration.metadata || {};
+
+        for (const line of declaration.line_items || []) {
+            const hs = String(line.hs_code || '').replace(/\D/g, '');
+            // China assesses on the 10-digit national tariff line.
+            if (hs.length < 10) {
+                errors.push({
+                    code: 'CN_HS_TOO_SHORT',
+                    level: 'error',
+                    text: `Line ${line.line_no}: GACC assesses on the 10-digit tariff line; "${line.hs_code}" has ${hs.length} digits`,
+                });
             }
-        });
+            if (!line.origin_country) {
+                errors.push({ code: 'CN_MISSING_ORIGIN', level: 'error', text: `Line ${line.line_no}: country of origin is required` });
+            }
+            if (!line.unit) {
+                errors.push({ code: 'CN_MISSING_UNIT', level: 'error', text: `Line ${line.line_no}: a declared unit of measure is required` });
+            }
+        }
+
+        // Regime-selecting fields. Getting these wrong is a misdeclaration, not a
+        // formatting problem, so neither is defaulted.
+        if (!meta.trade_mode) {
+            errors.push({ code: 'CN_MISSING_TRADE_MODE', level: 'error', text: 'metadata.trade_mode is required — it selects the customs regime (general, processing, bonded) and therefore the duty treatment' });
+        }
+        if (!meta.exemption_nature) {
+            errors.push({ code: 'CN_MISSING_EXEMPTION_NATURE', level: 'error', text: 'metadata.exemption_nature is required — it declares the duty/tax exemption basis' });
+        }
+        if (!meta.transport_mode_code) {
+            errors.push({ code: 'CN_MISSING_TRANSPORT_MODE', level: 'error', text: 'metadata.transport_mode_code is required on a GACC declaration' });
+        }
+        if (!meta.port_code) {
+            errors.push({ code: 'CN_MISSING_PORT', level: 'error', text: 'metadata.port_code (the declaring customs district) is required' });
+        }
+
         return errors;
     }
 
-    buildPayload(declaration) {
+    buildPayload(declaration, ctx = {}) {
+        const cfg = ctx.cfg || {};
+        const meta = declaration.metadata || {};
         const isExport = declaration.entry_type === 'export';
-        const trader = (isExport ? declaration.exporter : declaration.importer) || {};
+
+        const items = (declaration.line_items || []).map((line) => xml.el(ELEMENTS.item, {
+            GNo: line.line_no,
+            CodeTS: String(line.hs_code || '').replace(/\D/g, ''),
+            GName: line.description,
+            OriginCountry: line.origin_country,
+            GQty: Number(line.quantity || 0).toFixed(5),
+            GUnit: line.unit,
+            DeclPrice: Number(line.unit_value || 0).toFixed(4),
+            DeclTotal: Number(line.value || 0).toFixed(2),
+            TradeCurr: declaration.currency,
+            DutyMode: meta.exemption_nature,
+        }));
+
+        const body = xml.build(xml.el(ELEMENTS.envelope, {
+            children: [
+                xml.el(ELEMENTS.header, {
+                    MessageVersion: this.messageVersion,
+                    MessageId: ctx.idempotencyKey || null,
+                    MessageType: isExport ? 'EXP' : 'IMP',
+                    SenderId: cfg.customsCode,
+                    SendTime: new Date().toISOString(),
+                }),
+                xml.el(ELEMENTS.body, {
+                    IEFlag: DIRECTION_CODE[declaration.entry_type] || 'I',
+                    CustomMaster: meta.port_code,
+                    TradeCode: cfg.customsCode,
+                    TradeName: (isExport ? declaration.exporter : declaration.importer || {}).name,
+                    AgentCode: cfg.declarantCode,
+                    TradeMode: meta.trade_mode,
+                    CutMode: meta.exemption_nature,
+                    TrafMode: meta.transport_mode_code,
+                    TrafName: meta.vessel_name || null,
+                    BillNo: meta.bill_of_lading_no || null,
+                    TradeCountry: isExport ? declaration.destination_country : declaration.origin_country,
+                    DistinatePort: meta.port_of_discharge || null,
+                    ContrNo: meta.contract_no || null,
+                    PackNo: meta.total_packages || null,
+                    GrossWt: meta.gross_mass_kg ? Number(meta.gross_mass_kg).toFixed(3) : null,
+                    NetWt: meta.net_mass_kg ? Number(meta.net_mass_kg).toFixed(3) : null,
+                    TransMode: String(declaration.incoterm || '').toUpperCase() || null,
+                    FeeAmount: meta.freight_amount ? Number(meta.freight_amount).toFixed(2) : null,
+                    InsurAmount: meta.insurance_amount ? Number(meta.insurance_amount).toFixed(2) : null,
+                    DeclTotal: Number(declaration.customs_value || 0).toFixed(2),
+                    Items: items,
+                }),
+            ],
+        }));
+
+        // Required, not optional — an unsigned GACC declaration is refused, so a
+        // missing key must surface as a configuration failure rather than as a
+        // filing that quietly goes out unsigned.
+        if (!cfg.signingCertPath || !cfg.signingKeyPath) {
+            throw this.failPermanent(
+                'China Single Window requires a message signature; CHINA_SW_SIGNING_CERT and CHINA_SW_SIGNING_KEY are not configured. Nothing was transmitted.',
+                { code: 'SIGNING_NOT_CONFIGURED' },
+            );
+        }
+        const signature = signing.signDetachedCms(body, {
+            certPath: cfg.signingCertPath,
+            keyPath: cfg.signingKeyPath,
+            passphrase: cfg.signingKeyPassphrase || null,
+        });
+
         return {
-            declType: isExport ? 'E' : 'I', // Export / Import
-            uscc: trader.tax_id || null,
-            customsOffice: (declaration.metadata && declaration.metadata.port_code) || 'SHANGHAI',
-            totalValue: declaration.customs_value,
-            currency: declaration.currency,
-            goods: declaration.line_items.map((l) => ({
-                hsCode: String(l.hs_code || '').replace(/\D/g, ''),
-                description: l.description,
-                quantity: l.quantity,
-                unit: l.unit,
-                originCountry: l.origin_country,
-                value: l.value,
-            })),
+            contentType: transport.CONTENT_TYPE.XML,
+            body,
+            headers: {
+                'X-SW-Customs-Code': cfg.customsCode,
+                'X-SW-Declarant-Code': cfg.declarantCode,
+                'X-SW-Signature': signature.base64,
+                'X-SW-Signature-Alg': 'CMS-SHA256-detached',
+            },
+            meta: {
+                message_version: this.messageVersion,
+                direction: DIRECTION_CODE[declaration.entry_type] || 'I',
+                trade_mode: meta.trade_mode,
+                signer: signature.signer,
+                content_digest: signature.content_digest,
+            },
         };
     }
 
-    async transmit(payload, ctx) {
-        if (this.endpoint && this.apiKey) {
-            return httpTransmit(this, {
-                url: this.endpoint,
-                headers: { 'X-SW-Key': this.apiKey },
-                payload,
-            });
-        }
-        return this._simulate(ctx.declaration, ctx);
+    async transmit(payload, ctx = {}) {
+        const cfg = ctx.cfg || this.assertConfigured();
+        const res = await transport.transmit(this, {
+            url: cfg.endpoint, headers: payload.headers, body: payload.body,
+            contentType: payload.contentType, cfg,
+        });
+        return { ...res, payloadMeta: payload.meta };
     }
 
-    _simulate(declaration, ctx) {
-        const outcome = decideOutcome(declaration, ctx);
-        if (!outcome.ok) {
-            const err = outcome.kind === 'permanent'
-                ? this.failPermanent(outcome.reason, { code: outcome.code })
-                : this.failTransient(outcome.reason, { code: outcome.code });
-            err.raw = { customsDeclarationNo: null, declStatus: 'REJECTED', reason: outcome.code };
-            throw err;
-        }
-        const pending = outcome.mode === 'pending';
-        return {
-            customsDeclarationNo: deterministicRef('CN', declaration),
-            declStatus: pending ? 'UNDER_REVIEW' : 'CLEARED',
-            reason: null,
-        };
+    async poll(gatewayReference, ctx = {}) {
+        const cfg = ctx.cfg || this.assertConfigured();
+        const url = new URL(cfg.statusEndpoint || cfg.endpoint);
+        url.searchParams.set('tradeCode', cfg.customsCode);
+        url.searchParams.set('entryId', String(gatewayReference));
+        const res = await transport.transmit(this, {
+            url: url.toString(), method: 'GET', cfg, contentType: transport.CONTENT_TYPE.XML,
+        });
+        return this.parseResponse(res, { ...ctx, cfg, polled: true });
     }
 
     parseResponse(raw) {
-        const s = String((raw && raw.declStatus) || 'UNDER_REVIEW').toUpperCase();
-        const status = CHINA_STATUS_MAP[s] || STATUS.SUBMITTED;
+        let doc;
+        try {
+            doc = xml.parse(raw.body);
+        } catch (err) {
+            throw this.failTransient(`Single Window returned an unparseable response: ${err.message}`, {
+                code: 'BAD_RESPONSE', raw: { body: String(raw.body || '').slice(0, 500) },
+            });
+        }
+
+        const native = (xml.textAny(doc, ['Status', 'DeclStatus', 'StatusCode', 'ResultCode']) || 'SENT')
+            .toUpperCase().replace(/\s+/g, '_');
+        const status = GACC_STATUS[native] || STATUS.SUBMITTED;
+
+        const messages = xml.findAll(doc, 'Error').concat(xml.findAll(doc, 'Note')).map((node) => ({
+            code: xml.textAny(node, ['ErrorCode', 'Code', 'ResultCode']) || 'GACC_ERROR',
+            level: 'error',
+            text: xml.textAny(node, ['ErrorMessage', 'Message', 'ResultMessage', 'Description']) || node.text || 'GACC reported an error',
+        }));
+
         return this.normalize({
             status,
             accepted: status === STATUS.ACCEPTED,
-            gateway_reference: (raw && raw.customsDeclarationNo) || null,
-            gateway_status: s,
-            messages: status === STATUS.REJECTED
-                ? [{ code: (raw && raw.reason) || 'REJECTED', level: 'error', text: `China Single Window: ${(raw && raw.reason) || 'rejected'}` }]
-                : [],
+            gateway_reference: xml.textAny(doc, ['EntryId', 'CusDeclNo', 'DeclNo', 'SeqNo']),
+            gateway_status: native,
+            messages,
             retryable: false,
-            raw: raw || {},
+            raw: {
+                http_status: raw.status,
+                audit: raw.audit,
+                payload_meta: raw.payloadMeta || null,
+                document: xml.toObject(doc),
+            },
         });
     }
 }
 
-module.exports = { ChinaConnector };
+module.exports = { ChinaConnector, ELEMENTS, GACC_STATUS, DIRECTION_CODE };

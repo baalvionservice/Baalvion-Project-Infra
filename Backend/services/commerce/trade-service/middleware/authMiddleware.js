@@ -61,4 +61,52 @@ const requireRole = (...roles) => (req, res, next) => {
     return next();
 };
 
-module.exports = { authMiddleware, optionalAuth, requireRole };
+/**
+ * Hard gate on the caller's KYC/KYB state. Until this existed, verification was a
+ * form that filled a table and permitted nothing: an unverified account could book
+ * a container and bind a policy that charges a real premium.
+ *
+ * Platform operators bypass (they administer the queue that grants verification, so
+ * gating them on it would deadlock the review flow). Org-scoped roles — admin,
+ * owner, super_admin — do NOT bypass: being an admin of your own company says
+ * nothing about whether that company has been verified.
+ *
+ * Set VERIFICATION_ENFORCEMENT=off only for an isolated local environment; it logs
+ * loudly, and appConfig refuses the value outside development.
+ */
+const PLATFORM_BYPASS_ROLES = new Set(['platform_admin', 'platform_security_admin']);
+
+const requireVerified = (level = 'business') => async (req, res, next) => {
+    if (!req.auth) return next(new AppError('UNAUTHORIZED', 'Authentication required', 401));
+
+    const config = require('../config/appConfig');
+    if (!config.verification.enforce) {
+        // eslint-disable-next-line no-console
+        console.warn(`[verification] gate BYPASSED for ${req.method} ${req.originalUrl} — VERIFICATION_ENFORCEMENT=off`);
+        return next();
+    }
+
+    const roles = Array.isArray(req.auth.roles) ? req.auth.roles : [];
+    if (roles.some((r) => PLATFORM_BYPASS_ROLES.has(r))) return next();
+
+    try {
+        const gate = require('../service/verification/gate');
+        const state = await gate.meets(level, {
+            orgId: req.auth.orgId,
+            userId: req.auth.userId,
+            tenantId: req.auth.tenantId,
+        });
+        if (state.ok) { req.verification = state; return next(); }
+        return next(new AppError(
+            'VERIFICATION_REQUIRED',
+            `This action requires '${level}' verification; this account is at '${state.level}'. Outstanding: ${state.reasons.join('; ')}.`,
+            403,
+            { required: level, current: state.level, reasons: state.reasons },
+        ));
+    } catch (err) {
+        // Fail CLOSED. A verification lookup that errors must not become an open door.
+        return next(new AppError('VERIFICATION_UNAVAILABLE', `could not establish verification state: ${err.message}`, 503));
+    }
+};
+
+module.exports = { authMiddleware, optionalAuth, requireRole, requireVerified };

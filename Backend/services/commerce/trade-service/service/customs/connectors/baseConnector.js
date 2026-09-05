@@ -13,6 +13,11 @@
  *   parseResponse(rawResponse, ctx)   → normalizedResponse()  collapse to one shape
  *
  * THE PIPELINE — `submit()`:
+ *   0. configure     resolve the gateway credentials, or REFUSE. There is no
+ *                    simulated path: an unconfigured channel throws a PERMANENT
+ *                    GatewayNotConfiguredError naming every missing setting, and
+ *                    nothing is transmitted. A filing that silently succeeds
+ *                    against a fake gateway is far worse than one that fails.
  *   1. normalize     the declaration to the canonical form (shared)
  *   2. validate      base completeness + the connector's jurisdiction rules.
  *                    Any error → throw a VALIDATION GatewayError (never retried).
@@ -33,6 +38,7 @@ const {
     DEFAULT_MAX_ATTEMPTS, DEFAULT_BACKOFF_MS, isRetryableKind,
 } = require('../schema');
 const norm = require('../normalize');
+const config = require('./config');
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -57,6 +63,37 @@ class CustomsConnector {
         this.backoffMs = Math.max(0, Number(opts.backoffMs) || DEFAULT_BACKOFF_MS);
         this.onAttempt = typeof opts.onAttempt === 'function' ? opts.onAttempt : null;
         this._sleep = typeof opts.sleep === 'function' ? opts.sleep : sleep;
+        // Credentials may be injected (a per-tenant credential store) instead of
+        // coming from the environment. Resolution is deferred to first use so a
+        // connector can be constructed on a host that will never file with it.
+        this.configOverrides = opts.config || {};
+        this._env = opts.env || process.env;
+    }
+
+    // ── Configuration ────────────────────────────────────────────────────────
+
+    /** Resolve this channel's configuration. Never throws — reports. */
+    resolveConfig() {
+        return config.resolve(this.channel, { env: this._env, overrides: this.configOverrides });
+    }
+
+    /** True when every required credential is present and usable. */
+    isConfigured() {
+        return this.resolveConfig().configured;
+    }
+
+    /**
+     * Resolve or REFUSE. The refusal is PERMANENT and names every missing
+     * setting plus where it is obtained, because "gateway error" tells an
+     * operator nothing they can act on.
+     */
+    assertConfigured() {
+        return config.assertConfigured(this.channel, { env: this._env, overrides: this.configOverrides });
+    }
+
+    /** The integration checklist for this channel. */
+    requirements() {
+        return config.requirements(this.channel);
     }
 
     // ── Abstract steps — concrete connectors MUST override these. ────────────
@@ -141,13 +178,13 @@ class CustomsConnector {
      *                                   TRANSIENT only after exhausting retries.
      */
     async submit(declarationInput, ctx = {}) {
+        // 0. Configuration gate. Refuse before doing any work we cannot use.
+        const cfg = this.assertConfigured();
+
         const declaration = norm.normalizeDeclaration(declarationInput);
 
         // 2. Validate (base + jurisdiction). Validation failures are never retried.
-        const errors = [
-            ...norm.baseValidationErrors(declaration),
-            ...(this.validateDeclaration(declaration) || []),
-        ];
+        const errors = this.validate(declaration);
         if (errors.length) {
             throw this.failValidation(
                 `declaration failed ${this.gatewayName} validation (${errors.length} issue${errors.length === 1 ? '' : 's'})`,
@@ -156,17 +193,47 @@ class CustomsConnector {
         }
 
         // 3. Build the gateway payload.
-        const payload = this.buildPayload(declaration, { ...ctx, channel: this.channel });
+        const payload = this.buildPayload(declaration, { ...ctx, cfg, channel: this.channel });
 
         // 4. Transmit with the retry mechanism.
-        const { rawResponse, attempts } = await this._transmitWithRetry(payload, { ...ctx, declaration });
+        const { rawResponse, attempts } = await this._transmitWithRetry(payload, { ...ctx, cfg, declaration });
 
         // 5. Normalize the response.
-        const normalized = this.parseResponse(rawResponse, { ...ctx, declaration, channel: this.channel });
+        const normalized = this.parseResponse(rawResponse, { ...ctx, cfg, declaration, channel: this.channel });
         if (!normalized || normalized.channel !== this.channel) {
             throw this.failTransient('connector returned a non-normalized response');
         }
         return { normalized, payload, declaration, attempts };
+    }
+
+    /**
+     * Validate without transmitting — base completeness plus jurisdiction rules.
+     * Deliberately separate from submit() so a declaration can be checked before
+     * any credentials exist, which is most of the integration period.
+     */
+    validate(declarationInput) {
+        // Always normalize. A raw input can carry `line_items` too, so treating
+        // their presence as "already canonical" skipped the pass that assigns
+        // line numbers and left every finding saying "Line undefined".
+        // normalizeDeclaration is idempotent, so re-running it is free.
+        const declaration = norm.normalizeDeclaration(declarationInput);
+        return [
+            ...norm.baseValidationErrors(declaration),
+            ...(this.validateDeclaration(declaration) || []),
+        ];
+    }
+
+    /**
+     * Retrieve the current status of an already-lodged filing.
+     *
+     * Every one of these gateways is ASYNCHRONOUS: the response to a submission
+     * is an acknowledgement, and the actual customs decision arrives minutes to
+     * hours later. Without polling, a submission sits at `submitted` forever and
+     * the whole pre-arrival strategy silently stops working.
+     */
+    // eslint-disable-next-line no-unused-vars, class-methods-use-this
+    async poll(gatewayReference, ctx) {
+        throw new Error('poll() not implemented');
     }
 
     /**

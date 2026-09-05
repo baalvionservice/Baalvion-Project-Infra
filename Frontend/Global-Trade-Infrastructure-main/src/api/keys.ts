@@ -106,6 +106,19 @@ export const qk = {
     detail: (id: string) => [...root, 'freight-bookings', 'detail', id] as const,
     events: (id: string) => [...root, 'freight-bookings', 'events', id] as const,
   },
+  // The party-scoped shipment surface (/dashboard/shipments) — kept separate from
+  // `shipments` above, which keys the tenant-scoped legacy collection.
+  tradeShipments: {
+    all: [...root, 'trade-shipments'] as const,
+    list: (params: ListParams) => [...root, 'trade-shipments', 'list', params] as const,
+    detail: (id: string) => [...root, 'trade-shipments', 'detail', id] as const,
+    timeline: (id: string) => [...root, 'trade-shipments', 'timeline', id] as const,
+    schedule: (id: string) => [...root, 'trade-shipments', 'schedule', id] as const,
+    clearance: (id: string) => [...root, 'trade-shipments', 'clearance', id] as const,
+    documents: (id: string) => [...root, 'trade-shipments', 'documents', id] as const,
+    readiness: (id: string) => [...root, 'trade-shipments', 'readiness', id] as const,
+    bottlenecks: (params: ListParams) => [...root, 'trade-shipments', 'bottlenecks', params] as const,
+  },
   trackingPlatform: {
     all: [...root, 'tracking-platform'] as const,
     dashboardSummary: [...root, 'tracking-platform', 'dashboard', 'summary'] as const,

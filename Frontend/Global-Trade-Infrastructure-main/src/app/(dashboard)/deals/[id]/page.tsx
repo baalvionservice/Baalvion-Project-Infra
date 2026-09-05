@@ -61,7 +61,7 @@ export default function DealRoomPage() {
   const fetchData = async () => {
     if (typeof id !== 'string') return;
     const [dealData, msgData] = await Promise.all([
-      dealService.getDealById(id), 
+      dealService.getDealById(id),
       dealService.getMessages(id)
     ]);
     setDeal(dealData);
@@ -69,7 +69,7 @@ export default function DealRoomPage() {
   };
 
   useEffect(() => {
-    fetchData().then(() => setLoading(false));
+    fetchData().finally(() => setLoading(false));
     const interval = setInterval(fetchData, 8000);
     return () => clearInterval(interval);
   }, [id]);

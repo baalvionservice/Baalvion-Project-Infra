@@ -45,15 +45,18 @@ export default function InteroperabilityHubPage() {
 
   const fetchData = async () => {
     setSyncing(true);
-    const [cData, lData, mData] = await Promise.all([
-      connectorService.getRegistry(),
-      gatewayService.getExchangeLedger(),
-      gatewayService.getGatewayPulse()
-    ]);
-    setConnectors(cData);
-    setLogs(lData);
-    setMetrics(mData);
-    setSyncing(false);
+    try {
+      const [cData, lData, mData] = await Promise.all([
+        connectorService.getRegistry(),
+        gatewayService.getExchangeLedger(),
+        gatewayService.getGatewayPulse()
+      ]);
+      setConnectors(cData);
+      setLogs(lData);
+      setMetrics(mData);
+    } finally {
+      setSyncing(false);
+    }
   };
 
   useEffect(() => {

@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.7
 # Multi-stage build for any financial service in the reactor.
 # Usage: docker build --build-arg SERVICE=payment-service -t baalvion/payment-service .
 #
@@ -13,7 +14,15 @@ COPY . .
 # service image from unrelated sibling modules (a break in one module no longer fails
 # every image build) and is far faster than compiling all 22 modules per image.
 RUN test -n "$SERVICE" || (echo "ERROR: --build-arg SERVICE=<module> is required" >&2; exit 1)
-RUN mvn -B -ntp -DskipTests -pl "$SERVICE" -am clean package
+# BuildKit cache mount for ~/.m2: without this, EVERY one of the 22 per-service image builds
+# independently re-downloads the full dependency tree from Maven Central from a cold, empty
+# repo — 22x the network calls for what is mostly the same shared parent-POM dependency set,
+# which made this reactor's builds highly susceptible to transient Central flakiness (connection
+# resets, truncated bodies) since any single dropped download fails the whole build. The cache
+# mount persists across builds (keyed, shared+locked for concurrent-safe access) so only the
+# first build populates it and everything after reuses it.
+RUN --mount=type=cache,target=/root/.m2,sharing=locked \
+    mvn -B -ntp -DskipTests -pl "$SERVICE" -am clean package
 
 # ---- Runtime stage ----
 FROM eclipse-temurin:17-jre@sha256:8016378253033ebd971c237f6580f108b4afac11a188d3fc3b982497bbe55c65

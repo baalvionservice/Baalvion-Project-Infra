@@ -128,6 +128,30 @@ module.exports = {
             timeoutMs: Number(process.env.CLAMAV_TIMEOUT_MS || 15000),
         },
     },
+    // KYC/KYB validity policy. An approved verification is not valid forever — periodic
+    // re-verification is standard AML practice (and required in most jurisdictions). These
+    // are the DEFAULT validity windows applied at approval time; a reviewer can still
+    // override per-record by passing an explicit expiry on the approve call.
+    // Set the months to 0 to disable expiry entirely for that track.
+    verification: {
+        // Master switch for the KYC/KYB gate (middleware/authMiddleware.requireVerified).
+        // Booking freight and binding cover move real money, so this defaults ON and
+        // may only be disabled in local development.
+        enforce: (() => {
+            const off = String(process.env.VERIFICATION_ENFORCEMENT || 'on').toLowerCase() === 'off';
+            if (off && !IS_DEV) {
+                console.error('[appConfig] FATAL: VERIFICATION_ENFORCEMENT=off is not permitted outside development.');
+                process.exit(1);
+            }
+            return !off;
+        })(),
+        // Level demanded before a caller may commit money: 'identity' | 'business' | 'full'.
+        requiredLevel: process.env.VERIFICATION_REQUIRED_LEVEL || 'business',
+        // Personal identity: 24 months is the common standard-risk refresh cycle.
+        identityValidityMonths: Number(process.env.KYC_IDENTITY_VALIDITY_MONTHS ?? 24),
+        // Company/KYB: annual refresh is the usual baseline for business verification.
+        companyValidityMonths: Number(process.env.KYB_COMPANY_VALIDITY_MONTHS ?? 12),
+    },
     // financial-services-java integration (money/KYC/risk system of record).
     finance: {
         // Shared HMAC-SHA256 secret for the Java→Node finance-events webhook. MUST match the
@@ -144,5 +168,17 @@ module.exports = {
         risk:       process.env.SVC_RISK       || 'http://localhost:3035',
         // Set true once the Java suite is up; gates the facade from hard-failing when it's down.
         enabled:    process.env.FINANCE_ENABLED === 'true',
+        // Account premiums are paid into and claims paid out of. Unset in dev, where
+        // lib/insuranceAccounts.js provisions the platform underwriting org's own
+        // account; point this at the real carrier's account once cover is placed.
+        insuranceUnderwriterAccountId: process.env.INSURANCE_UNDERWRITER_ACCOUNT_ID || null,
+        // Payout ceiling for that book. account-service defaults every account to
+        // 1,000,000/day and cannot raise it later, so it is set at provisioning.
+        insuranceUnderwriterDailyLimit: Number(process.env.INSURANCE_UNDERWRITER_DAILY_LIMIT) || 1_000_000_000,
+        // Segregated client-money (IBA) account premium is collected into. Unset in
+        // dev, where lib/insuranceAccounts.js provisions an internal stand-in that
+        // separates the money in the books but is NOT legal segregation — point this
+        // at a genuinely ring-fenced account before taking client money.
+        insuranceTrustAccountId: process.env.INSURANCE_TRUST_ACCOUNT_ID || null,
     },
 };

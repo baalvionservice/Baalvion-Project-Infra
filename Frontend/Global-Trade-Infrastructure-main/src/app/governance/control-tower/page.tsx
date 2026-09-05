@@ -45,12 +45,15 @@ export default function GlobalSingularityObservatory() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const [sData] = await Promise.all([
-        adminService.getPlatformOverview()
-      ]);
-      setStats(sData);
-      setRecentEvents(eventStore.getAllEvents().slice(0, 15));
-      setLoading(false);
+      try {
+        const [sData] = await Promise.all([
+          adminService.getPlatformOverview()
+        ]);
+        setStats(sData);
+        setRecentEvents(eventStore.getAllEvents().slice(0, 15));
+      } finally {
+        setLoading(false);
+      }
     };
     fetchData();
     const interval = setInterval(fetchData, 5000);

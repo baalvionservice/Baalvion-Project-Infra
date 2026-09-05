@@ -38,14 +38,17 @@ export default function BankersWorkbenchPage() {
   const { toast } = useToast();
 
   const fetchData = async () => {
-    const [s, inst, liq] = await Promise.all([
+    // Promise.allSettled — one data source being down (e.g. a retired legacy endpoint, or a
+    // Java finance microservice not yet up) must not leave the whole workbench spinning forever.
+    // Each source keeps its last-known value on failure instead of blocking the other two.
+    const [s, inst, liq] = await Promise.allSettled([
       (adminService as any).getFinancialMonitoringStats(),
       (tradeFinanceService as any).getBankInstruments('BANK-001'),
       treasuryService.getLiquidityPositions()
     ]);
-    setStats(s);
-    setInstruments(inst);
-    setLiquidity(liq);
+    if (s.status === 'fulfilled') setStats(s.value);
+    if (inst.status === 'fulfilled') setInstruments(inst.value);
+    if (liq.status === 'fulfilled') setLiquidity(liq.value);
     setLoading(false);
   };
 

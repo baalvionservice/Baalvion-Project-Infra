@@ -14,8 +14,89 @@ import { safeInternalPath } from '@/lib/safe-redirect';
  */
 const AUTH_COOKIE = process.env.NEXT_PUBLIC_REFRESH_COOKIE_NAME || 'baalvion_refresh';
 
+/**
+ * Hosts that serve the public World Shipping Directory as their own site. The directory
+ * lives at /shipping-directory in this app; on its own subdomain it is rewritten to the
+ * site root so its URLs read as ships.example.com/companies/maersk rather than exposing
+ * the internal path. Configure per environment with SHIPPING_DIRECTORY_HOSTS (comma
+ * separated); the defaults cover local development.
+ */
+const SHIPPING_DIRECTORY_PREFIX = '/shipping-directory';
+const SHIPPING_DIRECTORY_HOSTS = (process.env.SHIPPING_DIRECTORY_HOSTS || 'ships.localhost,shipping.localhost')
+  .split(',')
+  .map((h) => h.trim().toLowerCase())
+  .filter(Boolean);
+
+function isDirectoryHost(request: NextRequest): boolean {
+  const host = (request.headers.get('host') || '').toLowerCase().split(':')[0];
+  return host.length > 0 && SHIPPING_DIRECTORY_HOSTS.includes(host);
+}
+
 export async function middleware(request: NextRequest): Promise<NextResponse> {
   const { pathname } = request.nextUrl;
+
+  // Subdomain -> route group. Done before the auth gate because every directory route is
+  // anonymous; rewriting after it would make the gate judge the pre-rewrite path.
+  if (isDirectoryHost(request) && !pathname.startsWith('/_next') && !pathname.startsWith('/api/')) {
+    if (pathname.startsWith(SHIPPING_DIRECTORY_PREFIX)) {
+      // Canonical URL on this host omits the prefix; keep one address per page.
+      const canonical = request.nextUrl.clone();
+      canonical.pathname = pathname.slice(SHIPPING_DIRECTORY_PREFIX.length) || '/';
+      return NextResponse.redirect(canonical);
+    }
+    const rewritten = request.nextUrl.clone();
+    rewritten.pathname = `${SHIPPING_DIRECTORY_PREFIX}${pathname === '/' ? '' : pathname}`;
+    const res = secureHeaders(NextResponse.rewrite(rewritten), request);
+
+    /**
+     * Let a CDN hold these pages.
+     *
+     * The directory is anonymous reference content that only changes when the ingest
+     * re-runs, so a shared cache can serve it for a long time — and it has to, because the
+     * origin is a 2-vCPU box and the site is ~99,700 crawlable URLs.
+     *
+     * `s-maxage` targets shared caches only; a browser still revalidates on its own
+     * schedule. NOTE: Cloudflare does NOT cache HTML on the strength of this header alone —
+     * it also needs a Cache Rule for the hostname (Eligible for cache, Edge TTL: respect
+     * origin). Without the rule this header is inert and every crawler hit reaches the box.
+     *
+     * WHY ONE HOUR AND NOT A WEEK. This document carries more than the data: it carries the
+     * CSP and the app shell, which change on DEPLOY, not on ingest. At s-maxage=604800 a bad
+     * header stuck at the edge for seven days and only a manual Cloudflare purge cleared it —
+     * that happened twice, once for the injected Cloudflare beacon and once for the Google
+     * tag. An hour makes a deploy self-heal without anyone remembering to purge.
+     *
+     * It does not cost the origin much: 18 of the 23 directory pages set their own
+     * `revalidate`, so an edge revalidation is answered from Next's ISR cache — a file read,
+     * not a query — and only 5 are force-dynamic. Crawlers rarely re-request one URL inside
+     * an hour, so the miss rate that actually matters is unchanged. The long
+     * stale-while-revalidate keeps serving instantly while that refresh happens behind it.
+     */
+    res.headers.set(
+      'Cache-Control',
+      'public, s-maxage=3600, stale-while-revalidate=604800',
+    );
+
+    /**
+     * Make the response actually cacheable by Cloudflare.
+     *
+     * Next's App Router sets `Vary: rsc, next-router-state-tree, …` for RSC negotiation,
+     * and **Cloudflare only caches on `Vary: Accept-Encoding`** — any other value makes a
+     * response ineligible, which showed up as cf-cache-status: DYNAMIC on every HTML hit
+     * even with a Cache Rule in place.
+     *
+     * Safe to narrow because Next distinguishes RSC requests by URL, not only by header:
+     * they carry `?_rsc=<hash>`, so a CDN cache keyed on URL never confuses an RSC payload
+     * with a document. RSC requests are additionally marked no-store here so an edge never
+     * holds one at all.
+     */
+    if (request.headers.get('rsc') || request.nextUrl.searchParams.has('_rsc')) {
+      res.headers.set('Cache-Control', 'private, no-store');
+    } else {
+      res.headers.set('Vary', 'Accept-Encoding');
+    }
+    return res;
+  }
 
   if (
     pathname.startsWith('/_next') ||
@@ -60,11 +141,21 @@ function secureHeaders(response: NextResponse, _request: NextRequest): NextRespo
     "default-src 'self'",
     // Payment gateways: Razorpay Checkout.js + Stripe.js load as scripts; their hosted widgets run
     // in iframes (frame-src); PayU is a top-level form-POST (form-action).
-    `script-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://*.razorpay.com https://js.stripe.com${isDev ? " 'unsafe-eval'" : ''}`,
+    // static.cloudflareinsights.com: when a host sits behind the Cloudflare proxy with Web
+    // Analytics on, Cloudflare INJECTS its beacon into the HTML. Without it in script-src
+    // that injected script is refused on every page load — 80 CSP violations across the
+    // directory the moment proxying was switched on.
+    // www.googletagmanager.com: Google Tag Gateway is on at the zone, so it serves the tag
+    // first-party (a rotating /xxxx/ path, already covered by 'self') and GTM does load —
+    // but the loader also pings gtm.js?gtg_health=1 on the canonical host to confirm the
+    // third-party fallback is reachable. Blocking that costs no measurement and left a CSP
+    // error on every page instead, which buries real ones.
+    `script-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://*.razorpay.com https://js.stripe.com https://static.cloudflareinsights.com https://www.googletagmanager.com${isDev ? " 'unsafe-eval'" : ''}`,
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "img-src 'self' data: blob: https:",
     "font-src 'self' data: https://fonts.gstatic.com",
-    `connect-src 'self' https://api.razorpay.com https://*.razorpay.com https://api.stripe.com${isDev ? ' ws: wss:' : ''}`,
+    // cloudflareinsights.com is where that beacon POSTs its measurements.
+    `connect-src 'self' https://api.razorpay.com https://*.razorpay.com https://api.stripe.com https://cloudflareinsights.com${isDev ? ' ws: wss:' : ''}`,
     "frame-src https://api.razorpay.com https://checkout.razorpay.com https://*.razorpay.com https://js.stripe.com https://*.stripe.com",
     "object-src 'none'",
     "base-uri 'self'",

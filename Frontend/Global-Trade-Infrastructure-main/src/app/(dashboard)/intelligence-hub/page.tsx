@@ -178,16 +178,16 @@ export default function IntelligenceCommandHub() {
                  <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
               </div>
               <div className="space-y-8">
+                 {congestion.length === 0 && (
+                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-center py-4">No active vessel positions reporting</p>
+                 )}
                  {congestion.map(item => (
                    <div key={item.port} className="flex items-center justify-between group cursor-default">
                       <div className="flex items-center gap-4">
                          <div className="p-3 rounded-2xl bg-muted border-2 shadow-inner group-hover:bg-primary/5 transition-colors"><Ship className="h-5 w-5 text-primary opacity-60" /></div>
-                         <div className="space-y-1">
-                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{item.port} Load</p>
-                            <p className="text-[8px] font-black text-orange-600 uppercase">Trend: {item.trend}</p>
-                         </div>
+                         <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{item.port}</p>
                       </div>
-                      <span className="text-2xl font-black tracking-tighter tabular-nums">{item.load}%</span>
+                      <span className="text-2xl font-black tracking-tighter tabular-nums">{item.vesselCount}</span>
                    </div>
                  ))}
               </div>

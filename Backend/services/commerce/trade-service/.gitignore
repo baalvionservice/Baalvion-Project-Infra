@@ -21,3 +21,6 @@ dist/
 build/
 coverage/
 *.tsbuildinfo
+
+# World Shipping Directory ingest caches (regenerable, ~150MB)
+scripts/shipping-directory/.cache/

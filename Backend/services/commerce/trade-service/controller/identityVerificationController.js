@@ -8,7 +8,7 @@ const db = require('../models');
 const { sendSuccess, sendPaginated } = require('../utils/response');
 const { AppError } = require('../utils/errors');
 const { recordAudit } = require('../utils/audit');
-const { isAdmin, callerTenantId, actorOf } = require('../service/verification/access');
+const { isAdmin, callerTenantId, actorOf, ensureTradeUserId } = require('../service/verification/access');
 const identitySvc = require('../service/verification/identity');
 const { IdentityVerification } = db;
 
@@ -34,7 +34,7 @@ async function fetchOwned(id, req, next) {
 
 const submitIdentityVerification = async (req, res, next) => {
     try {
-        const userId = callerUserId(req);
+        const userId = await ensureTradeUserId(req);
         if (!userId) return next(new AppError('UNAUTHORIZED', 'Authentication required', 401));
         const {
             org_id = null, full_name, date_of_birth = null, nationality = null,
@@ -129,7 +129,10 @@ async function reviewDecision(req, res, next, decision) {
     if (!isAdmin(req)) return next(new AppError('FORBIDDEN', 'Admin or reviewer role required', 403));
     const record = await IdentityVerification.findByPk(req.params.id);
     if (!record) return next(new AppError('NOT_FOUND', 'Identity verification not found', 404));
-    const { rejection_reason = null, expires_at = null } = req.body || {};
+    // `expires_at` is left UNDEFINED when the reviewer doesn't supply one, so the service
+    // applies the configured default validity window. Sending an explicit null means
+    // "no expiry" and is honoured as such.
+    const { rejection_reason = null, expires_at } = req.body || {};
     await identitySvc.review({ identityVerification: record, decision, reviewedBy: actorOf(req), rejectionReason: rejection_reason, expiresAt: expires_at });
     await recordAudit({
         actorId: actorOf(req), action: `identity_verification.${decision}`, resourceType: 'identity_verification',

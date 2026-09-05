@@ -3,7 +3,7 @@
  * @description Collection endpoints for a GCKB entity type: search/list and create.
  */
 import { ok, toErrorResponse, parsePagination, rateLimit, clientKey } from '@/server/http/api';
-import { kbRequest, assertEntity } from '@/server/gckb/http';
+import { kbRequest, assertEntity, ensureOrganizationProvisioned } from '@/server/gckb/http';
 import { gckbService } from '@/server/services/gckb-service';
 import { createRecordSchema } from '@/server/gckb/schemas';
 import type { GckbStatus } from '@/server/gckb/types';
@@ -42,6 +42,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ entity: string 
 export async function POST(req: Request, ctx: { params: Promise<{ entity: string }> }) {
   try {
     const { principal, ctx: actor } = kbRequest(req);
+    await ensureOrganizationProvisioned(principal);
     const { entity } = await ctx.params;
     assertEntity(entity);
     rateLimit(clientKey(principal, 'gckb-write'), 120, 60_000);

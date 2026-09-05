@@ -5,12 +5,12 @@
  */
 import { apiClient } from '@/lib/api-client';
 import { toList } from '@/lib/api-list';
+import { seaRouteIntelligenceService } from './sea-route-intelligence-service';
 
 export interface PlatformStats {
   volume: {
     total: number;
     escrow: number;
-    growth: string;
   };
   entities: {
     total: number;
@@ -21,13 +21,8 @@ export interface PlatformStats {
   operations: {
     activeDeals: number;
     shipmentsInTransit: number;
-    systemLoad: number;
-    settlementFinality: string;
+    settlementsProcessed: number;
   };
-  adoption: {
-    successScore: number; // 0-10
-    regionalPenetration: Record<string, number>;
-  }
 }
 
 export interface FinancialStats {
@@ -95,26 +90,27 @@ export const adminService = {
    * Aggregates live global metrics for the Operational Command Center.
    */
   async getPlatformOverview(): Promise<PlatformStats> {
-    const [companiesRes, escrowsRes, dealsRes, shipmentsRes] = await Promise.all([
+    const [companiesRes, escrowsRes, dealsRes, shipmentsRes, settlementsRes] = await Promise.all([
       apiClient.get<any[]>('/organizations'),
       apiClient.get<any[]>('/escrows'),
       apiClient.get<any[]>('/deals', { status: 'negotiation' }),
-      apiClient.get<any[]>('/shipments', { status: 'in_transit' })
+      apiClient.get<any[]>('/shipments', { status: 'in_transit' }),
+      apiClient.get<any[]>('/settlements'),
     ]);
 
     const companies = toList<any>(companiesRes);
     const escrows = toList<any>(escrowsRes);
     const deals = toList<any>(dealsRes);
     const shipments = toList<any>(shipmentsRes);
+    const settlements = toList<any>(settlementsRes);
 
     const totalVolume = escrows.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
     const activeTenants = companies.filter(c => c.status === 'active' || c.status === 'verified').length;
 
     return {
       volume: {
-        total: totalVolume * 1.84, // Institutional multiplier
+        total: totalVolume,
         escrow: totalVolume,
-        growth: '+14.2% YoY'
       },
       entities: {
         total: companies.length,
@@ -125,29 +121,23 @@ export const adminService = {
       operations: {
         activeDeals: deals.length,
         shipmentsInTransit: shipments.length,
-        systemLoad: 42,
-        settlementFinality: '12.4s'
+        settlementsProcessed: settlements.length,
       },
-      adoption: {
-        successScore: 9.2,
-        regionalPenetration: {
-          'North America': 84,
-          'Europe': 72,
-          'Asia-Pacific': 65,
-          'Middle East': 42,
-          'Latin America': 28,
-          'Africa': 14
-        }
-      }
     };
   },
 
+  /** Real trade corridors, derived from tradeops.shipments (sea-mode lanes) — see
+   *  seaRouteIntelligenceService for the same underlying aggregation. */
   async getCorridorMetrics(): Promise<CorridorHealth[]> {
-    return [
-      { id: 'C1', name: 'China - USA', status: 'stable', avgTransitTime: '22.4 Days', activeShipments: 142, riskIndex: 12 },
-      { id: 'C2', name: 'India - UAE', status: 'optimizing', avgTransitTime: '8.2 Days', activeShipments: 215, riskIndex: 5 },
-      { id: 'C3', name: 'Vietnam - USA', status: 'congested', avgTransitTime: '18.5 Days', activeShipments: 88, riskIndex: 34 }
-    ];
+    const routes = await seaRouteIntelligenceService.getSeaRoutes();
+    return routes.map((r) => ({
+      id: r.id,
+      name: `${r.originPort} - ${r.destinationPort}`,
+      status: r.status === 'obstructed' ? 'congested' : 'stable',
+      avgTransitTime: r.avgTransitDays != null ? `${r.avgTransitDays} Days` : 'Unknown',
+      activeShipments: r.activeShipmentCount,
+      riskIndex: r.status === 'obstructed' ? 50 : 0,
+    }));
   },
 
   async getTradeHeatmapData(): Promise<HeatmapData[]> {
