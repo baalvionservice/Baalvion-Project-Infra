@@ -22,17 +22,9 @@ const PREMIUM_RENDERERS = {
 // ── Template bodies ───────────────────────────────────────────────────────────
 
 const TEMPLATES = {
-    // User registers or is invited
-    welcome: {
-        subject: 'Welcome to Baalvion, {{name}}!',
-        preview: 'Your account is ready',
-        body: baseLayout(`
-<h1 class="h1">Welcome to Baalvion, {{name}}!</h1>
-<p class="text">Your account has been created. Verify your email to unlock all features.</p>
-<a href="{{verifyUrl}}" class="btn">Verify Email Address</a>
-<p class="text" style="font-size:13px;color:#a1a1aa">This link expires in 24 hours. If you didn't create this account, please ignore this email.</p>
-`, 'Your account is ready — verify your email'),
-    },
+    // NOTE: there is deliberately no plain-layout 'welcome' entry here — 'welcome' is a
+    // PREMIUM_RENDERERS key (see above) and render() checks PREMIUM_RENDERERS first, so a
+    // generic TEMPLATES.welcome would be unreachable dead code.
 
     // Email verification resend
     emailVerification: {
@@ -222,6 +214,126 @@ const TEMPLATES = {
 </div>
 <p class="text" style="font-size:13px;color:#a1a1aa">If you have concerns, contact support immediately.</p>
 `, 'An admin started an impersonation session'),
+    },
+
+    // Payment attempt failed (order/checkout)
+    paymentFailed: {
+        subject: 'Payment failed for {{orderNumber}}',
+        preview: 'We were unable to process your payment for {{orderNumber}}',
+        body: baseLayout(`
+<h1 class="h1">We couldn't process your payment</h1>
+<div class="alert-box">
+  <p style="margin:0;font-size:14px;color:#7f1d1d"><strong>Your payment for order {{orderNumber}} did not go through.</strong>{{#if reason}} {{reason}}{{/if}}</p>
+</div>
+<div style="background:#f4f5f7;border-radius:8px;padding:20px;margin:16px 0">
+  <p style="margin:4px 0;font-size:13px;color:#52525b"><strong>Order:</strong> {{orderNumber}}</p>
+  <p style="margin:4px 0;font-size:13px;color:#52525b"><strong>Amount:</strong> {{amount}} {{currency}}</p>
+</div>
+<a href="{{retryUrl}}" class="btn">Try Payment Again</a>
+<p class="text" style="font-size:13px;color:#a1a1aa">Your order is on hold until payment is completed. No charge has been made.</p>
+`, 'We were unable to process your payment'),
+    },
+
+    // Refund processed
+    paymentRefunded: {
+        subject: 'Refund processed for {{orderNumber}}',
+        preview: 'Your refund for {{orderNumber}} has been processed',
+        body: baseLayout(`
+<h1 class="h1">Your refund has been processed</h1>
+<div class="success-box">
+  <p style="margin:0;font-size:14px;color:#14532d"><strong>{{amount}} {{currency}}</strong> has been refunded for order <strong>{{orderNumber}}</strong>.</p>
+</div>
+<div style="background:#f4f5f7;border-radius:8px;padding:20px;margin:16px 0">
+  <p style="margin:4px 0;font-size:13px;color:#52525b"><strong>Order:</strong> {{orderNumber}}</p>
+  <p style="margin:4px 0;font-size:13px;color:#52525b"><strong>Refund amount:</strong> {{amount}} {{currency}}</p>
+  <p style="margin:4px 0;font-size:13px;color:#52525b"><strong>Processed:</strong> {{formatDate processedAt}}</p>
+</div>
+<a href="{{orderUrl}}" class="btn">View Order</a>
+<p class="text" style="font-size:13px;color:#a1a1aa">Refunds typically appear on your original payment method within 5-10 business days.</p>
+`, 'Your refund has been processed'),
+    },
+
+    // Upcoming payment due (checklist: "Payment Reminders")
+    paymentReminder: {
+        subject: 'Payment due soon for {{orderNumber}}',
+        preview: 'Your payment of {{amount}} {{currency}} is due {{formatDate dueDate}}',
+        body: baseLayout(`
+<h1 class="h1">A payment is coming up</h1>
+<p class="text">This is a reminder that a payment for <strong>{{orderNumber}}</strong> is due soon.</p>
+<div style="background:#f4f5f7;border-radius:8px;padding:20px;margin:16px 0">
+  <p style="margin:4px 0;font-size:13px;color:#52525b"><strong>Amount due:</strong> {{amount}} {{currency}}</p>
+  <p style="margin:4px 0;font-size:13px;color:#52525b"><strong>Due date:</strong> {{formatDate dueDate}}</p>
+</div>
+<a href="{{payUrl}}" class="btn">Pay Now</a>
+<p class="text" style="font-size:13px;color:#a1a1aa">If you've already paid, please disregard this reminder.</p>
+`, 'A payment is coming up'),
+    },
+
+    // Invoice — reuses the exact same items-table markup as orderConfirmation/orderPaid
+    invoice: {
+        subject: 'Your invoice {{invoiceNumber}}',
+        preview: 'Invoice {{invoiceNumber}} for {{total}} {{currency}}',
+        body: baseLayout(`
+<h1 class="h1">Invoice {{invoiceNumber}}</h1>
+<p class="text">{{#if issuedTo}}Billed to {{issuedTo}}. {{/if}}Here is a summary of your invoice.</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0;border-collapse:collapse">
+  <thead>
+    <tr>
+      <th align="left"  style="padding:8px 0;font-size:12px;color:#a1a1aa;border-bottom:1px solid #e4e4e7;text-transform:uppercase;letter-spacing:0.5px">Item</th>
+      <th align="center" style="padding:8px 0;font-size:12px;color:#a1a1aa;border-bottom:1px solid #e4e4e7;text-transform:uppercase;letter-spacing:0.5px">Qty</th>
+      <th align="right" style="padding:8px 0;font-size:12px;color:#a1a1aa;border-bottom:1px solid #e4e4e7;text-transform:uppercase;letter-spacing:0.5px">Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each items}}
+    <tr>
+      <td align="left"  style="padding:10px 0;font-size:14px;color:#09090b;border-bottom:1px solid #f4f4f5">{{this.name}}</td>
+      <td align="center" style="padding:10px 0;font-size:14px;color:#52525b;border-bottom:1px solid #f4f4f5">{{this.quantity}}</td>
+      <td align="right" style="padding:10px 0;font-size:14px;color:#09090b;border-bottom:1px solid #f4f4f5">{{this.total}} {{../currency}}</td>
+    </tr>
+    {{/each}}
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2" align="right" style="padding:14px 0 0;font-size:15px;font-weight:700;color:#09090b">Total</td>
+      <td align="right" style="padding:14px 0 0;font-size:15px;font-weight:700;color:#09090b">{{total}} {{currency}}</td>
+    </tr>
+  </tfoot>
+</table>
+<a href="{{invoiceUrl}}" class="btn">View Invoice</a>
+<p class="text" style="font-size:13px;color:#a1a1aa">{{#if dueDate}}Payment due {{formatDate dueDate}}.{{/if}}</p>
+`, 'Invoice {{invoiceNumber}}'),
+    },
+
+    // Subscription renewed successfully
+    subscriptionRenewal: {
+        subject: 'Your {{planName}} subscription has renewed',
+        preview: 'Your subscription renewed for {{amount}} {{currency}}',
+        body: baseLayout(`
+<h1 class="h1">Subscription renewed</h1>
+<div class="success-box">
+  <p style="margin:0;font-size:14px;color:#14532d">Your <strong>{{planName}}</strong> subscription has renewed for <strong>{{amount}} {{currency}}</strong>.</p>
+</div>
+<div style="background:#f4f5f7;border-radius:8px;padding:20px;margin:16px 0">
+  <p style="margin:4px 0;font-size:13px;color:#52525b"><strong>Plan:</strong> {{planName}}</p>
+  <p style="margin:4px 0;font-size:13px;color:#52525b"><strong>Next renewal:</strong> {{formatDate nextRenewalDate}}</p>
+</div>
+<a href="{{manageUrl}}" class="btn">Manage Subscription</a>
+`, 'Your subscription renewed'),
+    },
+
+    // Subscription expiring soon OR already expired (data.expired: boolean)
+    subscriptionExpiry: {
+        subject: '{{#if expired}}Your {{planName}} subscription has expired{{else}}Your {{planName}} subscription is expiring soon{{/if}}',
+        preview: 'Your {{planName}} subscription needs attention',
+        body: baseLayout(`
+<h1 class="h1">{{#if expired}}Your subscription has expired{{else}}Your subscription is expiring soon{{/if}}</h1>
+<div class="alert-box">
+  <p style="margin:0;font-size:14px;color:#7f1d1d">{{#if expired}}Your <strong>{{planName}}</strong> subscription expired on {{formatDate expiresAt}}.{{else}}Your <strong>{{planName}}</strong> subscription expires on {{formatDate expiresAt}}.{{/if}}</p>
+</div>
+<a href="{{renewUrl}}" class="btn">{{#if expired}}Reactivate Subscription{{else}}Renew Now{{/if}}</a>
+<p class="text" style="font-size:13px;color:#a1a1aa">{{#unless expired}}Renew before the expiry date to avoid any interruption to your access.{{/unless}}</p>
+`, 'Your subscription needs attention'),
     },
 };
 
