@@ -7,7 +7,11 @@
 // consumer: Market Underworld's cart/checkout/payments/wishlists/returns/consignments/
 // appointments (Caddyfile's @order_service carve-out has been proxying to app-commerce:3013
 // this whole time regardless). Without it running, the entire buyer purchase flow 502s.
-// trade-service still has no admin-console panel and stays omitted here.
+// trade-service IS now here. It was previously omitted for having no admin-console panel,
+// which was true and is no longer the whole story: it owns the `tradeops` schema and serves
+// the PUBLIC World Shipping Directory at /v1/public/shipping/* (ships.baalvion.com, ~99,700
+// pages). Those routes carry no auth and no tenant data by design — see
+// routes/shippingDirectoryRoutes.js — but they cannot serve at all unless this process runs.
 const ROOT = '/app/Backend/services';
 const svc = (name, dir, port, heapMB = 192, maxMemMB = 320) => ({
   name,
@@ -31,5 +35,8 @@ module.exports = {
     svc('market-service',      'commerce/market-service',      3007),
     svc('marketplace-service', 'marketplace/marketplace-service', 3060),
     svc('order-service',       'commerce/order-service',       3013, 192, 320),
+    // Reads are aggregate-heavy (cohort rollups, a 40k-row sitemap page) over ~96k vessel
+    // rows, so it gets more headroom than the default 192/320.
+    svc('trade-service',       'commerce/trade-service',       3025, 320, 448),
   ],
 };
