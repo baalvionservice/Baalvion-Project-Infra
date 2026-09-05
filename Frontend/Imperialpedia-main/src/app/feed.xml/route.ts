@@ -2,7 +2,11 @@ import { listCmsContent, type CmsContent } from "@/services/data/cms-public";
 import { articleUrl } from "@/lib/data/article-url";
 import { env } from "@/config/env";
 
-export const revalidate = 300;
+// The RSS feed's own window. It reads through cms-public, so /api/revalidate's
+// revalidateTag() already refreshes it the moment anything is published — this
+// is only the no-webhook safety net, and a reader polling it every 5 minutes
+// was regenerating the whole feed each time.
+export const revalidate = 3600;
 
 const esc = (s: string): string =>
   s

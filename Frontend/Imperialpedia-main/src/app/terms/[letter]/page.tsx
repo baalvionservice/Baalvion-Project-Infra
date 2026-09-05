@@ -7,7 +7,10 @@ import type { Term } from "@/lib/data/terms";
 import { GLOSSARY_LIVE } from "@/config/glossary";
 
 // Refresh published listings periodically without freezing them at build time.
-export const revalidate = 300;
+// Glossary definitions are hand-edited reference content; the 5-minute window
+// here regenerated this page 288 times a day to pick up an edit that lands
+// every few weeks. Matches term-live.ts's own fetch window.
+export const revalidate = 86400;
 
 const ALPHABET = "abcdefghijklmnopqrstuvwxyz".split("");
 const ALL_LETTERS = ["num", ...ALPHABET];
