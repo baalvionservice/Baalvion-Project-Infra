@@ -17,6 +17,20 @@ import {
 } from '@/lib/shipping-directory/api';
 import { urlSet, xmlResponse, URLS_PER_CHUNK, type SitemapUrl } from '@/lib/shipping-directory/sitemap-xml';
 
+/**
+ * NEVER PRERENDERED AT BUILD TIME.
+ *
+ * A sitemap is a statement about what currently exists, and it is only true if it was
+ * built against a reachable registry. During `next build` inside Docker there is no
+ * network route to the API, so a prerendered sitemap would bake in whatever the failed
+ * call returned — which is exactly the silent truncation the guard below refuses to
+ * publish. (It duly failed the build, which is how this was found.)
+ *
+ * `force-dynamic` moves generation to request time, where the registry is reachable.
+ * Caching is not lost: xmlResponse() sets Cache-Control with s-maxage, so a CDN and the
+ * crawler's own cache hold it — and a sitemap is fetched rarely by design.
+ */
+export const dynamic = 'force-dynamic';
 export const revalidate = 86400;
 
 const CHUNK_PATTERN = /^(companies|ships)-(\d{1,3})\.xml$/;

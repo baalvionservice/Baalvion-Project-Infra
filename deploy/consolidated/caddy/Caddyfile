@@ -78,6 +78,17 @@ api.baalvion.com {
 		reverse_proxy app-edge-realtime:3031
 	}
 
+	# Public World Shipping Directory (UNAUTHENTICATED) — ships.baalvion.com reads the
+	# reference registry from here. trade-service (app-commerce:3025) owns the `tradeops`
+	# schema; these routes carry no auth and no tenant data by design, which is why
+	# routes/shippingDirectoryRoutes.js mounts them under /public/ specifically — the absence
+	# of authMiddleware there is deliberate and greppable. Nothing else on trade-service is
+	# exposed: only this prefix is proxied, so the authenticated trade surface stays dark.
+	@shipping_public path /v1/public/shipping /v1/public/shipping/*
+	handle @shipping_public {
+		reverse_proxy app-commerce:3025
+	}
+
 	# Payment public surface (Java PSP gateway, app-payments:3015 — runs under --profile payments):
 	# initiate a charge, read its status, receive provider webhooks (HMAC-verified inside the svc).
 	# Money-OUT (refund/capture) + actuator are denied at the edge (listed first → first match wins).

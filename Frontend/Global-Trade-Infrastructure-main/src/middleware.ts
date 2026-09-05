@@ -46,7 +46,25 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     }
     const rewritten = request.nextUrl.clone();
     rewritten.pathname = `${SHIPPING_DIRECTORY_PREFIX}${pathname === '/' ? '' : pathname}`;
-    return secureHeaders(NextResponse.rewrite(rewritten), request);
+    const res = secureHeaders(NextResponse.rewrite(rewritten), request);
+
+    /**
+     * Let a CDN hold these pages.
+     *
+     * The directory is anonymous reference content that only changes when the ingest
+     * re-runs, so a shared cache can serve it for a long time — and it has to, because the
+     * origin is a 2-vCPU box and the site is ~99,700 crawlable URLs.
+     *
+     * `s-maxage` targets shared caches only; a browser still revalidates on its own
+     * schedule. NOTE: Cloudflare does NOT cache HTML on the strength of this header alone —
+     * it also needs a Cache Rule for the hostname (Eligible for cache, Edge TTL: respect
+     * origin). Without the rule this header is inert and every crawler hit reaches the box.
+     */
+    res.headers.set(
+      'Cache-Control',
+      'public, s-maxage=604800, stale-while-revalidate=86400',
+    );
+    return res;
   }
 
   if (

@@ -453,9 +453,19 @@ async function getStats() {
             WHERE flag_country IS NOT NULL GROUP BY flag_country ORDER BY n DESC LIMIT 20`),
         q(`SELECT (year_built / 10) * 10 AS decade, COUNT(*)::int AS n FROM tradeops.vessels
             WHERE year_built IS NOT NULL GROUP BY 1 ORDER BY 1`),
-        q(`SELECT country, country_code, COUNT(*)::int AS n FROM tradeops.carriers
-            WHERE country IS NOT NULL AND company_type = 'commercial' AND deleted_at IS NULL
-            GROUP BY country, country_code ORDER BY n DESC LIMIT 25`),
+        // Grouped by ISO code, not by name — see listCountries for why one country can
+        // arrive under two labels.
+        q(`WITH by_name AS (
+               SELECT COALESCE(UPPER(country_code), country) AS grp, country,
+                      UPPER(country_code) AS country_code, COUNT(*)::int AS n
+                 FROM tradeops.carriers
+                WHERE country IS NOT NULL AND company_type = 'commercial' AND deleted_at IS NULL
+                GROUP BY 1, 2, 3
+           )
+           SELECT (array_agg(country ORDER BY n DESC))[1] AS country,
+                  (array_agg(country_code ORDER BY n DESC))[1] AS country_code,
+                  SUM(n)::int AS n
+             FROM by_name GROUP BY grp ORDER BY n DESC LIMIT 25`),
         q(`SELECT builder_name, COUNT(*)::int AS n, SUM(gross_tonnage)::bigint AS gt
             FROM tradeops.vessels WHERE builder_name IS NOT NULL
             GROUP BY builder_name ORDER BY n DESC LIMIT 20`),
@@ -476,12 +486,38 @@ async function getRankings() {
     return { data, provenance };
 }
 
+/**
+ * Countries, grouped by ISO CODE rather than by name.
+ *
+ * Wikidata carries more than one entity per country, and they do not share a label:
+ * "Netherlands" (76 operators) and "Kingdom of the Netherlands" (2) both resolve to NL.
+ * Grouping by (country, country_code) therefore produced two rows for one country — two
+ * index entries with split counts, both linking to the SAME /countries/nl page (which
+ * matches on the code and correctly showed the combined 78), and a duplicate URL in the
+ * sitemap.
+ *
+ * So the code is the key, and the displayed name is the one the most operators actually
+ * use. Rows with no code fall back to grouping by name — they have no page either way.
+ */
 async function listCountries() {
-    return q(`SELECT country, country_code, COUNT(*)::int AS companies,
-                     SUM(registry_vessel_count)::int AS registry_vessels
+    return q(`
+        WITH by_name AS (
+            SELECT COALESCE(UPPER(country_code), country) AS grp,
+                   country,
+                   UPPER(country_code) AS country_code,
+                   COUNT(*)::int AS companies,
+                   COALESCE(SUM(registry_vessel_count), 0)::int AS registry_vessels
               FROM tradeops.carriers
-              WHERE country IS NOT NULL AND deleted_at IS NULL AND company_type <> 'state'
-              GROUP BY country, country_code ORDER BY companies DESC`);
+             WHERE country IS NOT NULL AND deleted_at IS NULL AND company_type = 'commercial'
+             GROUP BY 1, 2, 3
+        )
+        SELECT (array_agg(country      ORDER BY companies DESC))[1] AS country,
+               (array_agg(country_code ORDER BY companies DESC))[1] AS country_code,
+               SUM(companies)::int        AS companies,
+               SUM(registry_vessels)::int AS registry_vessels
+          FROM by_name
+         GROUP BY grp
+         ORDER BY companies DESC`);
 }
 
 /**

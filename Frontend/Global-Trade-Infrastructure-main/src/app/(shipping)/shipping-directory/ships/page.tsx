@@ -44,7 +44,19 @@ const SORTS = [
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<SP> }): Promise<Metadata> {
   const sp = await searchParams;
-  const filtered = Boolean(first(sp.q) || first(sp.type) || first(sp.flag) || first(sp.offset));
+  /**
+   * ANY parameter makes this a permutation of the index, not a page of its own.
+   *
+   * `scope` and `sort` were missing here, so /companies?scope=all returned index,follow
+   * while robots.txt simultaneously told Google not to crawl it — the combination that
+   * gets a URL indexed with no content, because a disallowed page's noindex is never read.
+   * The robots.txt Disallow for scope/sort has been dropped in favour of this: these are a
+   * small, internally-linked set, so letting Google crawl them and read noindex,follow is
+   * cleaner than blocking them and hoping.
+   */
+  const filtered = Boolean(
+    first(sp.q) || first(sp.type) || first(sp.flag) || first(sp.offset) || first(sp.sort),
+  );
   return {
     title: 'Ships',
     description:
