@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { ROLES } from '@/lib/constants/roles';
 import { initials } from '@/lib/utils/format';
+import AuthzVersionToggle from '@/components/authz/AuthzVersionToggle';
 
 export default function UserMenu() {
   const { user, logout } = useAuth();
@@ -65,6 +66,10 @@ export default function UserMenu() {
             Settings
           </Link>
         </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        {/* Not a DropdownMenuItem: the switch handles its own click, and an item wrapper
+            would close the menu on every toggle. */}
+        <AuthzVersionToggle />
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={logout}

@@ -365,6 +365,12 @@ export const NAVIGATION: NavGroup[] = [
     label: 'People',
     items: [
       {
+        title: 'People',
+        href: '/people',
+        iconName: 'Users',
+        roles: ['super_admin', 'owner', 'admin'],
+      },
+      {
         title: 'Staff',
         href: '/staff',
         iconName: 'Users2',

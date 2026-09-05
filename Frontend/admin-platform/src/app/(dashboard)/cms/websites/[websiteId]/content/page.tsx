@@ -628,7 +628,7 @@ export default function WebsiteContentPage({
                     </button>
                   )}
                 </span>
-                {/* Backend gates: publish needs cms_publisher (level 70) -> canPublish;
+                {/* Backend gates: publish needs cms_author (level 40) -> canPublish;
                     archive needs cms_editor (level 80) -> the same role floor canDelete
                     already matches. Hiding these for lower roles means the button never
                     just sits there waiting to 403. */}
