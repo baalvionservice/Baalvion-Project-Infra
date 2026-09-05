@@ -5,6 +5,7 @@
 // their own tenant (cross-tenant resolves to 404, never 403).
 const gateway = require('../service/customs/customsGateway');
 const customs = require('../service/customs');
+const connectorConfig = require('../service/customs/connectors/config');
 const { sendSuccess, sendPaginated } = require('../utils/response');
 const { AppError } = require('../utils/errors');
 
@@ -146,7 +147,76 @@ const recoverStalled = async (req, res, next) => {
     }
 };
 
+
+// ── GET /v1/customs_gateway/readiness ────────────────────────────────────────
+// Which government gateways can actually file today, and exactly what is missing
+// on the ones that cannot. This is the integration checklist: during the
+// enrolment period it is the most useful endpoint in the service, and afterwards
+// it is what catches a certificate that expired over a weekend.
+//
+// Never returns a secret — only whether each setting is present and usable.
+const getReadiness = (req, res, next) => {
+    try {
+        return sendSuccess(req, res, gateway.integrationReadiness());
+    } catch (err) {
+        return next(err);
+    }
+};
+
+// ── GET /v1/customs_gateway/requirements/:channel ────────────────────────────
+// The full credential checklist for one channel, including where each item is
+// obtained. Public: a prospective filer should be able to see what enrolment
+// costs before committing to a corridor.
+const getRequirements = (req, res, next) => {
+    try {
+        const requirements = connectorConfig.requirements(req.params.channel);
+        if (!requirements) {
+            throw new AppError('UNKNOWN_CHANNEL', `Unknown gateway channel: ${req.params.channel}`, 404, {
+                known: Object.keys(connectorConfig.CHANNEL_CONFIG),
+            });
+        }
+        return sendSuccess(req, res, requirements);
+    } catch (err) {
+        return next(err);
+    }
+};
+
+// ── POST /v1/customs_gateway/:id/poll ────────────────────────────────────────
+// Ask the authority where a lodged filing stands. These gateways decide
+// asynchronously, so without this a filing sits at `submitted` and pre-arrival
+// clearance never registers as having happened.
+const pollSubmission = async (req, res, next) => {
+    try {
+        const result = await gateway.pollSubmission(req.params.id, {
+            tenantId: scopeTenant(req),
+            actor: actorOf(req),
+        });
+        return sendSuccess(req, res, result);
+    } catch (err) {
+        return next(err);
+    }
+};
+
+// ── POST /v1/customs_gateway/poll ────────────────────────────────────────────
+// Sweep every in-flight filing that has a gateway handle.
+const pollPending = async (req, res, next) => {
+    try {
+        const result = await gateway.pollPending({
+            tenantId: scopeTenant(req),
+            limit: (req.body || {}).limit,
+            channel: (req.body || {}).channel,
+        });
+        return sendSuccess(req, res, result);
+    } catch (err) {
+        return next(err);
+    }
+};
+
 module.exports = {
+    getReadiness,
+    getRequirements,
+    pollSubmission,
+    pollPending,
     getChannels,
     createSubmission,
     listSubmissions,

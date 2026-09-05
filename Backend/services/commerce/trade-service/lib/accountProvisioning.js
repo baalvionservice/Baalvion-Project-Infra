@@ -24,6 +24,10 @@ async function getOrCreateLedgerAccount(org, ctx = {}) {
         accountName: org.name,
         accountType: 'BUSINESS',
         currency: ctx.currency || 'USD',
+        // account-service applies a 1,000,000/day default and exposes no way to raise
+        // it afterwards, so a book that legitimately moves more than that (an
+        // underwriter paying a total loss) must declare its limit at provisioning time.
+        dailyLimit: ctx.dailyLimit,
         metadata: { orgId: org.id, orgCode: org.code },
     }, ctx);
     const accountId = account && account.id;

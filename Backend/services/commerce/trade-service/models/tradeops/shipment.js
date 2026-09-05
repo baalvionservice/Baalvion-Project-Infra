@@ -17,6 +17,13 @@ module.exports = (sequelize, DataTypes) => {
         tracking_number: { type: DataTypes.TEXT },
         vessel_name: { type: DataTypes.TEXT },
         voyage_no: { type: DataTypes.TEXT },
+        // Migration 068 — the actual sailing this shipment rides on. When set, the
+        // shipment's schedule is DERIVED from these port calls rather than from the
+        // free-text vessel_name/voyage_no above (which stay for charter/air bookings
+        // that aren't on a scheduled liner service).
+        voyage_id: { type: DataTypes.UUID },
+        load_port_call_id: { type: DataTypes.UUID },
+        discharge_port_call_id: { type: DataTypes.UUID },
         container_no: { type: DataTypes.TEXT },
         bill_of_lading_no: { type: DataTypes.TEXT },
         origin_port: { type: DataTypes.TEXT },
@@ -64,6 +71,11 @@ module.exports = (sequelize, DataTypes) => {
 
     Shipment.associate = (db) => {
         Shipment.belongsTo(db.TradeOperation, { as: 'tradeOperation', foreignKey: 'trade_operation_id' });
+        // Migration 068 — the sailing this shipment rides on, plus its specific
+        // load/discharge stops on that vessel's rotation.
+        Shipment.belongsTo(db.Voyage, { as: 'voyage', foreignKey: 'voyage_id' });
+        Shipment.belongsTo(db.VoyagePortCall, { as: 'loadPortCall', foreignKey: 'load_port_call_id' });
+        Shipment.belongsTo(db.VoyagePortCall, { as: 'dischargePortCall', foreignKey: 'discharge_port_call_id' });
         Shipment.hasMany(db.ShipmentEvent, { as: 'events', foreignKey: 'shipment_id' });
         Shipment.hasMany(db.ShipmentDocument, { as: 'documents', foreignKey: 'shipment_id' });
         Shipment.hasMany(db.ShipmentStatusHistory, { as: 'statusHistory', foreignKey: 'shipment_id' });

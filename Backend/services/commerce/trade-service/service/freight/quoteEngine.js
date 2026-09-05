@@ -22,6 +22,7 @@
  */
 
 const registry = require('./connectors');
+const directory = require('./directoryConnectors');
 const norm = require('./normalize');
 const {
     RANK, DEFAULT_RANK_WEIGHTS, DEFAULT_QUOTE_TTL_HOURS, FAILURE_KIND, FreightError,
@@ -99,9 +100,11 @@ async function compareQuotes(requestInput, opts = {}) {
     const now = opts.now instanceof Date ? opts.now : new Date();
     const validUntil = quoteExpiry(now, ttlHours);
 
+    // Coded connectors PLUS every Carrier Directory row onboarded for this mode, so a
+    // carrier added as data competes in the same comparison as a bespoke integration.
     const connectors = Array.isArray(opts.connectors) && opts.connectors.length
         ? opts.connectors
-        : registry.eligibleConnectors(request);
+        : await directory.allEligibleConnectors(request);
 
     // Fan out — each carrier quotes independently; one failure never sinks the rest.
     const settled = await Promise.all(connectors.map(async (connector) => {

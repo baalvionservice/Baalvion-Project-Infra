@@ -22,13 +22,25 @@ function callerTenantId(req) {
 }
 
 function toApi(r) {
+    const s = r.shipment;
     return {
         id: r.id, shipmentId: r.shipment_id, alertType: r.alert_type, severity: r.severity,
         message: r.message, status: r.status, triggeredAt: r.triggered_at,
         acknowledgedBy: r.acknowledged_by, acknowledgedAt: r.acknowledged_at, resolvedAt: r.resolved_at,
         metadata: r.metadata, createdAt: r.created_at,
+        // Real shipment context for maritime/tracking UIs — no display-layer fabrication needed.
+        shipmentNo: s ? s.shipment_no : null,
+        vesselName: s ? s.vessel_name : null,
+        mode: s ? s.mode : null,
+        originPort: s ? s.origin_port : null,
+        destinationPort: s ? s.destination_port : null,
     };
 }
+
+const SHIPMENT_CONTEXT_INCLUDE = [{
+    model: db.TradeShipment, as: 'shipment',
+    attributes: ['shipment_no', 'vessel_name', 'mode', 'origin_port', 'destination_port'],
+}];
 
 const list = async (req, res, next) => {
     try {
@@ -42,7 +54,9 @@ const list = async (req, res, next) => {
             const tenantId = callerTenantId(req);
             if (tenantId) where.tenant_id = tenantId;
         }
-        const { count, rows } = await db.ShipmentAlert.findAndCountAll({ where, limit, offset, order: [['triggered_at', 'DESC']] });
+        const { count, rows } = await db.ShipmentAlert.findAndCountAll({
+            where, limit, offset, order: [['triggered_at', 'DESC']], include: SHIPMENT_CONTEXT_INCLUDE,
+        });
         return sendPaginated(req, res, { items: rows.map(toApi), total: count, page: Number(req.query.page) || 1, limit });
     } catch (err) { return next(err); }
 };

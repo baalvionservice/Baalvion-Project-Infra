@@ -19,12 +19,16 @@ const submitCompanyVerification = async (req, res, next) => {
         const {
             legal_company_name = null, registration_number = null, incorporation_date = null,
             business_type = null, company_website = null, authorized_representative_user_id = null,
+            metadata = undefined,
         } = req.body || {};
 
         const record = await companySvc.submitCompanyVerification({
             orgId, tenantId: org.tenant_id, actor: actorOf(req),
             legal_company_name, registration_number, incorporation_date, business_type,
             company_website, authorized_representative_user_id,
+            // Supplementary fields not yet promoted to first-class columns (e.g. HQ address
+            // text, tax residency) — an opaque JSONB bag, not schema-validated.
+            ...(metadata && typeof metadata === 'object' ? { metadata } : {}),
         });
 
         await recordAudit({
@@ -72,7 +76,9 @@ async function reviewDecision(req, res, next, decision) {
     const orgId = Number(req.params.orgId);
     const record = await db.CompanyVerification.findOne({ where: { org_id: orgId } });
     if (!record) return next(new AppError('NOT_FOUND', 'No company verification on file', 404));
-    const { rejection_reason = null, renewal_due_at = null } = req.body || {};
+    // Same contract as identity: undefined ⇒ apply the configured KYB validity window,
+    // explicit null ⇒ no renewal date.
+    const { rejection_reason = null, renewal_due_at } = req.body || {};
     await companySvc.reviewCompanyVerification({ record, decision, reviewedBy: actorOf(req), rejectionReason: rejection_reason, renewalDueAt: renewal_due_at });
     await recordAudit({
         actorId: actorOf(req), action: `company_verification.${decision}`, resourceType: 'company_verification',
