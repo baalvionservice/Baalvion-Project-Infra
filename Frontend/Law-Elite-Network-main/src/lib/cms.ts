@@ -10,6 +10,7 @@
  * module only covers CMS-managed editorial surfaces and degrades gracefully to
  * `null` when the CMS is unreachable so callers can fall back to built-in copy.
  */
+import { CONTENT_CACHE_TAG } from '@/lib/cache-tags';
 import { toNewCategorySlug } from '@/lib/category-slugs';
 
 // In production default to the API gateway's public delivery host (the former
@@ -21,6 +22,16 @@ const CMS_BASE = process.env.CMS_PUBLIC_URL?.trim()
   || (IS_PROD ? 'https://api.baalvion.com/api/v1/public' : 'http://localhost:3011/api/v1/public');
 const SITE = process.env.CMS_WEBSITE_SLUG || 'law-elite-network';
 const BASE = `${CMS_BASE}/${SITE}`;
+
+// This is the site's GLOBAL revalidate floor, not just this client's default:
+// Next takes the lowest revalidate of any fetch a route touches as that route's
+// own ISR window, and nearly every page reaches this client. At 300s that meant
+// 17 prerendered routes regenerating every 5 minutes — a full React render and
+// a function-to-edge transfer each — to re-fetch copy that had not changed.
+// Freshness does NOT come from this number: /api/revalidate calls
+// revalidateTag(CONTENT_CACHE_TAG) on every publish, which drops every entry at
+// once. A day is the safety net for when that webhook never fires.
+const DEFAULT_REVALIDATE_SECONDS = 86400;
 
 // Hard cap on every CMS fetch so a slow/hung CMS degrades to the caller's
 // fallback instead of hanging the page — this module backs the root layout
@@ -45,15 +56,20 @@ const DEFAULT_ADSENSE_CLIENT = 'ca-pub-8968452296456450';
  * `GET {CMS_PUBLIC_URL}/{site}` as `config.ads.adsensePublisherId`.
  *
  * Falls back to NEXT_PUBLIC_ADSENSE_CLIENT, then DEFAULT_ADSENSE_CLIENT, when
- * the CMS is unreachable or unset. Cached for an hour rather than `no-store` so
- * it doesn't force dynamic rendering.
+ * the CMS is unreachable or unset. Cached rather than `no-store` so it doesn't
+ * force dynamic rendering — and on the shared window/tag rather than its own
+ * hour, because this runs in the root layout: its window was the ISR floor for
+ * every prerendered route on the site.
  */
 export async function cmsGetAdsenseClient(): Promise<string | null> {
   const envFallback = process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim();
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
-    const r = await fetch(BASE, { next: { revalidate: 3600 }, signal: controller.signal });
+    const r = await fetch(BASE, {
+      next: { revalidate: DEFAULT_REVALIDATE_SECONDS, tags: [CONTENT_CACHE_TAG] },
+      signal: controller.signal,
+    });
     if (r.ok) {
       const j = (await r.json()) as { data?: { config?: { ads?: { adsensePublisherId?: string } } } };
       const fromCms = j?.data?.config?.ads?.adsensePublisherId?.trim();
@@ -113,7 +129,6 @@ export interface CmsHomepage {
 // Public editorial content changes by admin action, not by the second — a short
 // revalidation window keeps pages fast (served from cache, no live round-trip
 // on every visitor/Googlebot hit) while still picking up new publishes quickly.
-const DEFAULT_REVALIDATE_SECONDS = 300;
 
 /**
  * `revalidate: false` opts a call out of caching entirely (`no-store`) for
@@ -133,7 +148,9 @@ async function fetchJSON(
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
     const r = await fetch(url, {
-      ...(revalidate === false ? { cache: 'no-store' as const } : { next: { revalidate } }),
+      ...(revalidate === false
+        ? { cache: 'no-store' as const }
+        : { next: { revalidate, tags: [CONTENT_CACHE_TAG] } }),
       signal: controller.signal,
     });
     if (!r.ok) return null; // clean HTTP response: CMS confirms no such record — not a failure.

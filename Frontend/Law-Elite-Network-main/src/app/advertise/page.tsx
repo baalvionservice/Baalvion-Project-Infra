@@ -14,7 +14,9 @@ import { CURRENT_CATEGORY_SLUGS } from '@/lib/category-slugs';
 // "72+ / 8 / 11" figures this page shipped with (8 practice areas was stale
 // the moment the network grew to 16). The only client-side bit -- the
 // collapsible table of contents -- is split out into AdvertiseToc.tsx.
-export const revalidate = 300;
+// Raised off the 5-minute clock: /api/revalidate's revalidateTag() refreshes
+// this on publish, so the window is only the no-webhook safety net.
+export const revalidate = 86400;
 
 // Only the two sections this page actually has content for. The previous
 // version listed 7 anchors ("Content Integration", "Network Intelligence
