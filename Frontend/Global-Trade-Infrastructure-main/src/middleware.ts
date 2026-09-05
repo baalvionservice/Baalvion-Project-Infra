@@ -129,11 +129,16 @@ function secureHeaders(response: NextResponse, _request: NextRequest): NextRespo
     "default-src 'self'",
     // Payment gateways: Razorpay Checkout.js + Stripe.js load as scripts; their hosted widgets run
     // in iframes (frame-src); PayU is a top-level form-POST (form-action).
-    `script-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://*.razorpay.com https://js.stripe.com${isDev ? " 'unsafe-eval'" : ''}`,
+    // static.cloudflareinsights.com: when a host sits behind the Cloudflare proxy with Web
+    // Analytics on, Cloudflare INJECTS its beacon into the HTML. Without it in script-src
+    // that injected script is refused on every page load — 80 CSP violations across the
+    // directory the moment proxying was switched on.
+    `script-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://*.razorpay.com https://js.stripe.com https://static.cloudflareinsights.com${isDev ? " 'unsafe-eval'" : ''}`,
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "img-src 'self' data: blob: https:",
     "font-src 'self' data: https://fonts.gstatic.com",
-    `connect-src 'self' https://api.razorpay.com https://*.razorpay.com https://api.stripe.com${isDev ? ' ws: wss:' : ''}`,
+    // cloudflareinsights.com is where that beacon POSTs its measurements.
+    `connect-src 'self' https://api.razorpay.com https://*.razorpay.com https://api.stripe.com https://cloudflareinsights.com${isDev ? ' ws: wss:' : ''}`,
     "frame-src https://api.razorpay.com https://checkout.razorpay.com https://*.razorpay.com https://js.stripe.com https://*.stripe.com",
     "object-src 'none'",
     "base-uri 'self'",
