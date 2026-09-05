@@ -20,7 +20,7 @@ import { EmailOtpLogin } from '@/components/account/EmailOtpLogin';
  */
 type Tab = 'returning' | 'new';
 
-export default function LoginPage() {
+function LoginPageInner() {
   const { country } = useParams();
   const countryCode = (country as string) || 'us';
   const router = useRouter();
@@ -208,5 +208,21 @@ export default function LoginPage() {
         )}
       </main>
     </div>
+  );
+}
+
+/**
+ * useSearchParams() opts a client component into client-side rendering, and Next
+ * refuses to prerender the page unless that component sits under a Suspense
+ * boundary. Nothing caught this before because the app had no prerendering at
+ * all — the root layout's headers() call made every route dynamic, so the rule
+ * never applied. With the storefront statically rendered, the boundary has to be
+ * real: the shell prerenders, and this hydrates with the query string.
+ */
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginPageInner />
+    </Suspense>
   );
 }
