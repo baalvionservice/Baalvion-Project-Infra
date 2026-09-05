@@ -30,7 +30,9 @@ const CATEGORY_AD_SLOT_ID = '4123514154';
 // Serve a cached page and refresh it in the background every 5 minutes,
 // instead of re-rendering (and re-fetching from the CMS/law-service) on
 // every single visitor/Googlebot request.
-export const revalidate = 300;
+// Raised off the 5-minute clock: /api/revalidate's revalidateTag() refreshes
+// this on publish, so the window is only the no-webhook safety net.
+export const revalidate = 86400;
 
 // `revalidate` above only produces a cached HTML response for paths Next
 // knows about ahead of time -- without this, a dynamic segment with no

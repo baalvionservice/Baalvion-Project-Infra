@@ -1,6 +1,12 @@
+import { CONTENT_CACHE_TAG } from '@/lib/cache-tags';
 import seedData from '../../docs/seed-data.json';
 import { getArticleBySlug } from '@/data/law-content';
 import { cmsGetArticleBySlug, cmsGetPreviewContent } from '@/lib/cms';
+
+// the article body read that runs on every article render.
+// Matches lib/cms.ts's window: /api/revalidate's revalidateTag() is what
+// refreshes this on publish, so the window is only the no-webhook safety net.
+const CONTENT_REVALIDATE_SECONDS = 86400;
 
 const API = process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3015/v1');
 
@@ -9,7 +15,7 @@ const API = process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || (process.env.NODE_EN
 const FETCH_TIMEOUT_MS = 4000;
 
 /**
- * Cached (revalidate: 300s) law-service lookup -- replaces the old per-request
+ * Cached law-service lookup (CONTENT_REVALIDATE_SECONDS) -- replaces the old per-request
  * axios call so Googlebot/visitor hits get a fast cached response instead of
  * a live round-trip on every article view. Deliberately does NOT catch a
  * network failure: a clean non-2xx response resolves `null` ("law-service
@@ -22,7 +28,7 @@ async function fetchArticleFromLawService(slug: string): Promise<any | null> {
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
     const r = await fetch(`${API}/articles/${encodeURIComponent(slug)}`, {
-      next: { revalidate: 300 },
+      next: { revalidate: CONTENT_REVALIDATE_SECONDS, tags: [CONTENT_CACHE_TAG] },
       signal: controller.signal,
     });
     if (!r.ok) return null;
