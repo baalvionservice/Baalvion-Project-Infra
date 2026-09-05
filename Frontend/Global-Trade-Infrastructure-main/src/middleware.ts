@@ -59,10 +59,22 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
      * schedule. NOTE: Cloudflare does NOT cache HTML on the strength of this header alone —
      * it also needs a Cache Rule for the hostname (Eligible for cache, Edge TTL: respect
      * origin). Without the rule this header is inert and every crawler hit reaches the box.
+     *
+     * WHY ONE HOUR AND NOT A WEEK. This document carries more than the data: it carries the
+     * CSP and the app shell, which change on DEPLOY, not on ingest. At s-maxage=604800 a bad
+     * header stuck at the edge for seven days and only a manual Cloudflare purge cleared it —
+     * that happened twice, once for the injected Cloudflare beacon and once for the Google
+     * tag. An hour makes a deploy self-heal without anyone remembering to purge.
+     *
+     * It does not cost the origin much: 18 of the 23 directory pages set their own
+     * `revalidate`, so an edge revalidation is answered from Next's ISR cache — a file read,
+     * not a query — and only 5 are force-dynamic. Crawlers rarely re-request one URL inside
+     * an hour, so the miss rate that actually matters is unchanged. The long
+     * stale-while-revalidate keeps serving instantly while that refresh happens behind it.
      */
     res.headers.set(
       'Cache-Control',
-      'public, s-maxage=604800, stale-while-revalidate=86400',
+      'public, s-maxage=3600, stale-while-revalidate=604800',
     );
 
     /**
