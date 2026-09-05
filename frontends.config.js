@@ -31,6 +31,9 @@ module.exports = {
     next('law-web',          'Law-Elite-Network-main',           9002),
     next('brand-web',        'brand-connector-main',             3035),
     next('mining-web',       'Mining.Baalvion-main',             3028),
+    // Absent until 2026-09: CI derives its frontend build matrix from this list,
+    // so Imperialpedia was the one production site CI never built.
+    next('imperialpedia-web','Imperialpedia-main',               3029),
 
     // --- Vite SPAs ---
     vite('insiders-web',     'For Invstors and Founders',        8080),

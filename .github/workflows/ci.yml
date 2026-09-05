@@ -518,6 +518,20 @@ jobs:
   # Aggregate gate required by branch protection on `main`.
   # A single stable context that turns red if ANY required job failed or was
   # cancelled — set this as the required status check in branch protection.
+  cache-hygiene:
+    name: Cache Hygiene
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      # Pure Node, no dependencies — deliberately does not need an install or a
+      # build, so it stays fast and cannot be skipped when a build is skipped.
+      - name: Check Next.js cache hygiene
+        run: node scripts/check-cache-hygiene.mjs
+
   ci-success:
     name: ci-success
     if: always()
@@ -533,6 +547,7 @@ jobs:
       - integration-test
       - node-package-tests
       - deploy-compose-validate
+      - cache-hygiene
     runs-on: ubuntu-latest
     steps:
       - name: Verify all required jobs succeeded
