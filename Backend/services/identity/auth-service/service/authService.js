@@ -3,13 +3,14 @@ const { v4: uuidv4 } = require('uuid');
 const mfaService    = require('./mfaService');
 const sessionEnrichment = require('./sessionEnrichmentService');
 
-const { userRepo, orgRepo, sessionRepo, rtRepo, inviteRepo, auditRepo } = require('../repositories');
+const { userRepo, orgRepo, sessionRepo, rtRepo, inviteRepo, auditRepo, bizGrantRepo } = require('../repositories');
 const password   = require('../utils/password');
 const jwt        = require('../utils/jwtRsa');
 const redis      = require('../config/redis');
 const eventBus   = require('../utils/eventBus');
 const { generateToken, hashToken } = require('../utils/crypto');
 const { sendMail }  = require('../utils/mailer');
+const logger        = require('../utils/logger');
 const { computeInitials } = require('../utils/initials');
 const { AppError }  = require('../utils/errors');
 const config        = require('../config/appConfig');
@@ -111,19 +112,42 @@ async function resolveTokenPayload(user, orgId) {
     const platformRole = isPlatformRole(user.platform_role) ? user.platform_role : null;
     const roles = platformRole ? [platformRole, role] : [role];
 
-    // Permissions = role grants ∪ any explicit per-service grants on the membership.
+    // Per-business grants (trade, jobs, ir, …). Carried IN THE TOKEN so a grant issued once
+    // in the admin console is honoured by every app through the RS256 verification it already
+    // does — no per-app membership table, and revoking centrally revokes everywhere on the
+    // next token. Expired and revoked grants are filtered out in SQL, so a lapsed grant can
+    // never be minted into a token.
+    //
+    // Two shapes, deliberately:
+    //   permissions[] gains `biz:<business>` — so existing requirePermission guards and
+    //     auth-node's wildcard matching ("biz:*") work with no new API.
+    //   businesses{}  maps business → role — so an app that needs the SPECIFIC role inside
+    //     its own vocabulary ('recruiter', 'ops') can read it without parsing strings.
+    let businessGrants = [];
+    try {
+        businessGrants = await bizGrantRepo.listLiveForUser(user.id);
+    } catch (err) {
+        // Fail CLOSED on grants: a database hiccup must narrow access, never widen it. The
+        // user still gets a valid token for their org role; they just reach no businesses.
+        logger.warn({ err: err.message, userId: user.id }, 'business grants unavailable — issuing token without them');
+    }
+    const businesses = Object.fromEntries(businessGrants.map((g) => [g.business, g.role]));
+
+    // Permissions = role grants ∪ any explicit per-service grants on the membership
+    //             ∪ one `biz:<business>` entry per live business grant.
     const permissions = Array.from(new Set([
         ...(ROLE_PERMISSIONS[role] || ROLE_PERMISSIONS.member),
         ...Object.keys(serviceRoles),
+        ...businessGrants.map((g) => `biz:${g.business}`),
     ]));
 
-    return { userId: user.id, email: user.email, orgId, orgType, role, roles, permissions, serviceRoles };
+    return { userId: user.id, email: user.email, orgId, orgType, role, roles, permissions, serviceRoles, businesses };
 }
 
 // ── Token issuance ─────────────────────────────────────────────────────────────
 
 async function issueTokenPair(user, orgId, sessionId, familyId) {
-    const { userId, email, role, roles, permissions, orgType } = await resolveTokenPayload(user, orgId);
+    const { userId, email, role, roles, permissions, orgType, businesses } = await resolveTokenPayload(user, orgId);
 
     const accessToken  = jwt.signAccessToken({
         sub:         userId,
@@ -134,6 +158,10 @@ async function issueTokenPair(user, orgId, sessionId, familyId) {
         roles,
         permissions,
         sid:         sessionId,
+        // business → role, so an app can read the SPECIFIC role it granted ('recruiter',
+        // 'ops') rather than only learning from permissions[] that access exists at all.
+        // Omitted entirely when empty, to keep tokens small for the many users with none.
+        ...(businesses && Object.keys(businesses).length ? { businesses } : {}),
     });
 
     const rawRefresh   = jwt.signRefreshToken({
