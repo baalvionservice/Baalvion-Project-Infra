@@ -886,6 +886,33 @@ async function CategoryArticlePage({ categorySlug, articleSlug }: { categorySlug
 
 // ─── Route entry point ────────────────────────────────────────────────────────
 
+/**
+ * Empty on purpose: this route resolves far too many URL shapes to enumerate at
+ * build time (bare slugs, /<category>/<slug>, dated /YYYY/MM/DD/<slug> news
+ * URLs, /terms/<letter>, reviews, broker guides), and prerendering the wrong
+ * subset would be worse than prerendering none.
+ *
+ * It still has to exist. Without a generateStaticParams export Next treats a
+ * dynamic route as fully dynamic — `ƒ`, absent from prerender-manifest.json
+ * entirely — and server-renders it from scratch on EVERY request, cache
+ * disabled. That is what this route was doing: a full React render plus ~20
+ * upstream fetches for every hit on every article, the site's most-requested
+ * page type. Returning [] prerenders nothing (build stays fast) but registers
+ * the route as ISR with a blocking fallback, so the first request for a URL
+ * renders it and every later one is served from the cache until `revalidate`
+ * elapses or /api/revalidate busts the tag.
+ */
+export async function generateStaticParams(): Promise<SlugParams[]> {
+  return [];
+}
+
+// Explicit rather than inherited from whichever fetch happens to have the
+// lowest window — this route reaches a lot of them, and the effective window
+// silently following the most aggressive one is how it ended up regenerating
+// every 30 seconds. Publishes come through /api/revalidate's revalidateTag(),
+// so this is the no-webhook safety net.
+export const revalidate = 86400;
+
 export default async function CatchAllSlugPage({ params }: { params: Promise<SlugParams> }) {
   const { slug: segments } = await params;
 
