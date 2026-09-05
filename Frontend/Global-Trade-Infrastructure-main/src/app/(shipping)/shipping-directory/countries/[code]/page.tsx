@@ -20,7 +20,13 @@ import { breadcrumbJsonLd, itemListJsonLd, jsonLdProps } from '@/lib/shipping-di
 import { SectionHead, Eyebrow, BarRow, TableShell, Th, FleetNumbersNote } from '../../_components/ui';
 import { Logo } from '../../_components/media';
 
-export const revalidate = 300;
+/**
+ * Revalidation policy: this record changes only when the ingest re-runs, which is monthly
+ * at most — NOT every five minutes. The original 300 here was multiplied across ~99,700
+ * ISR-backed URLs, and on a metered host every regeneration is a billable ISR write. Seven
+ * days, refreshed on demand after an ingest, is what the data actually warrants.
+ */
+export const revalidate = 604800;
 
 export async function generateMetadata({ params }: { params: Promise<{ code: string }> }): Promise<Metadata> {
   const { code } = await params;

@@ -22,7 +22,13 @@ import { href, canonical, commonsImage } from '@/lib/shipping-directory/site';
 import { breadcrumbJsonLd, itemListJsonLd, jsonLdProps } from '@/lib/shipping-directory/jsonld';
 import { SectionHead, Eyebrow, TableShell, Th, Pagination, EmptyState } from '../../../_components/ui';
 
-export const revalidate = 300;
+/**
+ * Revalidation policy: this record changes only when the ingest re-runs, which is monthly
+ * at most — NOT every five minutes. The original 300 here was multiplied across ~99,700
+ * ISR-backed URLs, and on a metered host every regeneration is a billable ISR write. Seven
+ * days, refreshed on demand after an ingest, is what the data actually warrants.
+ */
+export const revalidate = 604800;
 
 const PAGE_SIZE = 60;
 type SP = Record<string, string | string[] | undefined>;

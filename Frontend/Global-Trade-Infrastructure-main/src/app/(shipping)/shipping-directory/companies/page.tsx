@@ -20,7 +20,9 @@ import { itemListJsonLd, breadcrumbJsonLd, jsonLdProps } from '@/lib/shipping-di
 import { EmptyState, SectionHead, Eyebrow, Pagination, FleetNumbersNote, Breadcrumbs } from '../_components/ui';
 import { Logo } from '../_components/media';
 
-export const revalidate = 300;
+/** Revalidation policy: see the detail pages — the underlying set changes on an ingest
+ *  run, so a day is generous rather than stale. */
+export const revalidate = 86400;
 
 const PAGE_SIZE = 50;
 

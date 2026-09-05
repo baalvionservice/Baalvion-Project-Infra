@@ -9,7 +9,9 @@ import { breadcrumbJsonLd, itemListJsonLd, jsonLdProps } from '@/lib/shipping-di
 import { CohortIndexPage } from '../_components/cohort-hub';
 import { EmptyState } from '../_components/ui';
 
-export const revalidate = 300;
+/** Revalidation policy: see the detail pages — the underlying set changes on an ingest
+ *  run, so a day is generous rather than stale. */
+export const revalidate = 86400;
 
 export const metadata: Metadata = {
   title: 'Flag states',

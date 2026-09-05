@@ -14,7 +14,9 @@ import { canonical } from '@/lib/shipping-directory/site';
 import { breadcrumbJsonLd, itemListJsonLd, jsonLdProps } from '@/lib/shipping-directory/jsonld';
 import { SuperlativeList } from '../_components/superlative';
 
-export const revalidate = 300;
+/** Revalidation policy: see the detail pages — the underlying set changes on an ingest
+ *  run, so a day is generous rather than stale. */
+export const revalidate = 86400;
 
 const TOP = 100;
 

@@ -15,7 +15,9 @@ import { href, canonical } from '@/lib/shipping-directory/site';
 import { breadcrumbJsonLd, itemListJsonLd, jsonLdProps } from '@/lib/shipping-directory/jsonld';
 import { EmptyState, SectionHead, Eyebrow, BarRow, Breadcrumbs } from '../_components/ui';
 
-export const revalidate = 300;
+/** Revalidation policy: see the detail pages — the underlying set changes on an ingest
+ *  run, so a day is generous rather than stale. */
+export const revalidate = 86400;
 
 export const metadata: Metadata = {
   title: 'Shipping companies by country',

@@ -14,7 +14,9 @@ import { datasetJsonLd, webSiteJsonLd, jsonLdProps } from '@/lib/shipping-direct
 import { BarRow, EmptyState, SectionHead, Eyebrow, TableShell, Th, FleetNumbersNote } from './_components/ui';
 import { Logo } from './_components/media';
 
-export const revalidate = 300;
+/** Revalidation policy: see the detail pages — the underlying set changes on an ingest
+ *  run, so a day is generous rather than stale. */
+export const revalidate = 86400;
 
 // Absolute, because title.template applies to CHILD segments only — a plain 'Overview'
 // here would fall through to the root app's "%s | Baalvion OS" template and title the

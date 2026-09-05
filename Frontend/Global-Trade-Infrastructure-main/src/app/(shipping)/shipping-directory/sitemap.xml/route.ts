@@ -13,7 +13,7 @@
 import { getSitemapEntries, VESSEL_TYPE_LABELS } from '@/lib/shipping-directory/api';
 import { sitemapIndex, xmlResponse, URLS_PER_CHUNK } from '@/lib/shipping-directory/sitemap-xml';
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 export async function GET() {
   // One row each, purely to learn the totals — the entries themselves are served by the

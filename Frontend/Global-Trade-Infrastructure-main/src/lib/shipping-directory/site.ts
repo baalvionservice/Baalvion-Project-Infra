@@ -17,6 +17,24 @@
  * resolved against whichever host is actually serving the request.
  */
 
+/**
+ * KNOWN ISSUE — soft 404s on invalid slugs.
+ *
+ * An unknown slug on a dynamic route (/ships/<bad>, /companies/<bad>, /flags/<bad>/<type>)
+ * renders the not-found page but returns HTTP 200, not 404. Verified in a production
+ * build, so it is not a dev artifact. Calling notFound() from generateMetadata instead of
+ * returning a metadata object does not change it either: generateMetadata resolving
+ * successfully appears to commit the 200 before the component throws.
+ *
+ * MITIGATION ALREADY IN PLACE: every not-found path returns
+ * `robots: { index: false, follow: true }`, so these pages are not indexed. Nothing links
+ * to an invalid slug and the sitemap contains only valid ones, so the residual cost is
+ * Search Console soft-404 reports and a little wasted crawl — not lost rankings.
+ *
+ * If this is picked up again, the thing to test is a `middleware` that validates the slug
+ * before the route renders, which is the only layer that can set a status early enough.
+ */
+
 /** Public origin of the directory. No trailing slash. */
 export const SITE_URL = (
   process.env.NEXT_PUBLIC_SHIPPING_DIRECTORY_URL

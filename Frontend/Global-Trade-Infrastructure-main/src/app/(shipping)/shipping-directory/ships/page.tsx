@@ -16,7 +16,9 @@ import { href, canonical, commonsImage } from '@/lib/shipping-directory/site';
 import { itemListJsonLd, breadcrumbJsonLd, jsonLdProps } from '@/lib/shipping-directory/jsonld';
 import { EmptyState, SectionHead, Eyebrow, TableShell, Th, Pagination, TypeChip, Breadcrumbs } from '../_components/ui';
 
-export const revalidate = 300;
+/** Revalidation policy: see the detail pages — the underlying set changes on an ingest
+ *  run, so a day is generous rather than stale. */
+export const revalidate = 86400;
 
 const PAGE_SIZE = 60;
 type SP = Record<string, string | string[] | undefined>;

@@ -19,7 +19,9 @@ import { itemListJsonLd, breadcrumbJsonLd, jsonLdProps } from '@/lib/shipping-di
 import { EmptyState, SectionHead, Eyebrow, FleetNumbersNote, Breadcrumbs } from '../_components/ui';
 import { Logo } from '../_components/media';
 
-export const revalidate = 300;
+/** Revalidation policy: see the detail pages — the underlying set changes on an ingest
+ *  run, so a day is generous rather than stale. */
+export const revalidate = 86400;
 
 export const metadata: Metadata = {
   title: 'Largest container shipping companies',

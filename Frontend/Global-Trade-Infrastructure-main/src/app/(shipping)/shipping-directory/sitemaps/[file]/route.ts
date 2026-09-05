@@ -17,13 +17,13 @@ import {
 } from '@/lib/shipping-directory/api';
 import { urlSet, xmlResponse, URLS_PER_CHUNK, type SitemapUrl } from '@/lib/shipping-directory/sitemap-xml';
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 const CHUNK_PATTERN = /^(companies|ships)-(\d{1,3})\.xml$/;
 
 async function coreUrls(): Promise<SitemapUrl[]> {
-  const [countries, stats, builders, flags] = await Promise.all([
-    getCountries(), getStats(), listCohorts('builder'), listCohorts('flag'),
+  const [countries, stats, builders, flags, crosses] = await Promise.all([
+    getCountries(), getStats(), listCohorts('builder'), listCohorts('flag'), listCohorts('flag_type'),
   ]);
   const lastmod = stats?.totals.last_ingested_at ?? null;
 
@@ -51,6 +51,13 @@ async function coreUrls(): Promise<SitemapUrl[]> {
   for (const f of flags ?? []) {
     if (!f.slug || !f.n) continue;
     urls.push({ path: `flags/${f.slug}`, changefreq: 'monthly', priority: 0.6, lastmod });
+  }
+  // The flag x type cross-cut. Its slug is already two segments (<flag>/<type>), so it
+  // slots straight under /flags/. Only pairs clearing the 25-vessel floor have a cohort
+  // row, so a thin pair is absent here by construction rather than by a filter.
+  for (const c of crosses ?? []) {
+    if (!c.slug || !c.n) continue;
+    urls.push({ path: `flags/${c.slug}`, changefreq: 'monthly', priority: 0.6, lastmod });
   }
 
   // A type hub is only listed once at least one vessel carries that type — a sitemap
