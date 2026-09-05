@@ -18,6 +18,13 @@ module.exports = {
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],
         mono: ["JetBrains Mono", "SFMono-Regular", "monospace"],
+        // World Shipping Directory only. BlackRock sets its sites in BLK Fort, a
+        // commissioned cut of Displaay's "Fort" that is licensed to them and served from
+        // their own CDN — it cannot be used here. Archivo is the closest open grotesque:
+        // same high x-height, same tight apertures, same flat terminals, and it ships a
+        // true narrow companion for the condensed data labels BLK Fort Condensed carries.
+        blk: ["var(--font-blk)", "Archivo", "Helvetica Neue", "Arial", "sans-serif"],
+        "blk-cond": ["var(--font-blk-cond)", "Archivo Narrow", "Arial Narrow", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -57,6 +64,32 @@ module.exports = {
         success: "hsl(var(--success))",
         warning: "hsl(var(--warning))",
         info: "hsl(var(--info))",
+        gold: {
+          DEFAULT: "hsl(var(--gold))",
+          foreground: "hsl(var(--gold-foreground))",
+        },
+        // World Shipping Directory palette, read off careers.blackrock.com's own
+        // stylesheet: --base-color #6F00EF plus the vermilion/yellow/pink accents it
+        // pairs with, on a white ground with near-black type. The directory is a separate
+        // public property on its own subdomain, so it does not inherit the dark
+        // Baalvion OS chrome and needs its own scale rather than the shadcn tokens.
+        wsd: {
+          black: "#000000",
+          ink: "#141414",
+          body: "#252525",
+          muted: "#767676",
+          line: "#c2c2c2",
+          "line-soft": "#e4e4e4",
+          ground: "#ffffff",
+          "ground-alt": "#f7f7f7",
+          "ground-mid": "#efefef",
+          violet: "#6f00ef",
+          "violet-deep": "#4b00a3",
+          "violet-wash": "#f3ebff",
+          vermilion: "#ff4713",
+          yellow: "#ffce00",
+          pink: "#fc9bb3",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

@@ -35,6 +35,15 @@ import {
 } from 'lucide-react';
 import { cn, formatCurrency } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { PATHS } from '@/lib/paths';
+
+/**
+ * This console reads the legacy integer-PK `trade.shipments` collection. Tracking search, the
+ * global map and the alert centre all resolve `tradeops.shipments` UUIDs, which used to be sent
+ * here and 404'd against the wrong entity. Those links now point at the party-scoped record
+ * directly; this guard catches bookmarks and anything else still carrying a UUID.
+ */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export default function ShipmentMissionControl() {
   const { id } = useParams();
@@ -44,19 +53,25 @@ export default function ShipmentMissionControl() {
   const [loading, setLoading] = useState(true);
   const [predicting, setPredicting] = useState(false);
 
+  const isTradeOpsId = typeof id === 'string' && UUID_RE.test(id);
+
   useEffect(() => {
+    if (isTradeOpsId) { router.replace(`${PATHS.SHIPMENT_VISIBILITY}/${id}`); return; }
     if (typeof id !== 'string') return;
     const fetchData = async () => {
-      const [sData, rData] = await Promise.all([
-        logisticsService.getShipment(id),
-        logisticsIntelligence.getExecutionRisk(id)
-      ]);
-      setShipment(sData);
-      setRisk(rData);
-      setLoading(false);
+      try {
+        const [sData, rData] = await Promise.all([
+          logisticsService.getShipment(id),
+          logisticsIntelligence.getExecutionRisk(id)
+        ]);
+        setShipment(sData);
+        setRisk(rData);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchData();
-  }, [id]);
+  }, [id, isTradeOpsId, router]);
 
   const handlePredict = async () => {
     setPredicting(true);

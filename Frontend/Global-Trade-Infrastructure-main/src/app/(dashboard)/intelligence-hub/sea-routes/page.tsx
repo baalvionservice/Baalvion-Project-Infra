@@ -34,14 +34,14 @@ export default function SeaRouteIntelligencePage() {
 
   const fetchData = async () => {
     setLoading(true);
-    const [rData, zData, cData] = await Promise.all([
+    const [rData, zData, cData] = await Promise.allSettled([
       seaRouteIntelligenceService.getSeaRoutes(),
       seaRouteIntelligenceService.getRiskZones(),
       seaRouteIntelligenceService.getCongestionReports()
     ]);
-    setRoutes(rData);
-    setRisks(zData);
-    setReports(cData);
+    if (rData.status === 'fulfilled') setRoutes(rData.value);
+    if (zData.status === 'fulfilled') setRisks(zData.value);
+    if (cData.status === 'fulfilled') setReports(cData.value);
     setLoading(false);
   };
 
@@ -69,7 +69,7 @@ export default function SeaRouteIntelligencePage() {
         <div className="flex items-center gap-4">
            <div className="flex items-center gap-2 px-4 py-2 bg-background rounded-full border-2 shadow-sm text-xs font-black uppercase tracking-widest text-indigo-700 border-indigo-200">
               <Waves className="h-4 w-4" />
-              Oceanic Sensor Network: Online
+              {routes.length} Active Lane{routes.length === 1 ? '' : 's'}
            </div>
            <Button variant="outline" onClick={fetchData} className="bg-background border-2 font-black h-12 shadow-sm">
              <Activity className="mr-2 h-4 w-4" /> Refresh Signals
@@ -92,6 +92,13 @@ export default function SeaRouteIntelligencePage() {
               </CardHeader>
               <CardContent className="p-0">
                  <div className="divide-y">
+                    {routes.length === 0 && (
+                       <div className="p-12 text-center">
+                          <Ship className="h-8 w-8 mx-auto text-muted-foreground opacity-30 mb-3" />
+                          <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">No active sea corridors</p>
+                          <p className="text-[11px] text-muted-foreground mt-1">Lanes appear once sea-mode shipments are booked with real origin/destination ports.</p>
+                       </div>
+                    )}
                     {routes.map((route) => {
                        const health = seaRouteIntelligenceService.calculateRouteHealth(route, reports, risks);
                        return (
@@ -102,8 +109,8 @@ export default function SeaRouteIntelligencePage() {
                                     <Ship className="h-6 w-6 text-muted-foreground" />
                                  </div>
                                  <div className="space-y-1">
-                                    <p className="font-black text-lg uppercase tracking-tighter leading-none">{route.name}</p>
-                                    <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-60">Origin: {route.originNode} → Destination: {route.destinationNode}</p>
+                                    <p className="font-black text-lg uppercase tracking-tighter leading-none">{route.originPort} → {route.destinationPort}</p>
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-60">{route.status === 'obstructed' ? 'Obstructed' : 'Active'} · Avg transit {route.avgTransitDays != null ? `${route.avgTransitDays}d` : 'unknown'}</p>
                                  </div>
                               </div>
                               <div className="text-right">
@@ -114,12 +121,12 @@ export default function SeaRouteIntelligencePage() {
 
                            <div className="mt-8 space-y-4 relative z-10">
                               <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                                 <span>Congestion Load</span>
-                                 <span className={cn(route.currentCongestionLevel > 60 ? "text-orange-600" : "text-green-600")}>
-                                   {route.currentCongestionLevel}% Capacity
+                                 <span>Lane Volume</span>
+                                 <span className={cn(route.activeShipmentCount > 5 ? "text-orange-600" : "text-green-600")}>
+                                   {route.activeShipmentCount} active shipment{route.activeShipmentCount === 1 ? '' : 's'}
                                  </span>
                               </div>
-                              <Progress value={route.currentCongestionLevel} className="h-1.5 bg-muted" />
+                              <Progress value={Math.min(100, route.activeShipmentCount * 10)} className="h-1.5 bg-muted" />
                            </div>
                         </div>
                        );
@@ -142,6 +149,12 @@ export default function SeaRouteIntelligencePage() {
                  </CardTitle>
               </CardHeader>
               <CardContent className="pt-8 space-y-6 relative">
+                 {risks.length === 0 && (
+                    <p className="text-xs font-medium italic opacity-70 leading-relaxed">
+                       No active risk zones — no geopolitical/piracy/weather risk feed is connected yet, so this
+                       reflects real alerts only, not a placeholder threat list.
+                    </p>
+                 )}
                  {risks.map(risk => (
                     <div key={risk.id} className="p-5 rounded-2xl bg-white/10 border border-white/10 space-y-3">
                        <div className="flex items-center justify-between">
@@ -157,9 +170,6 @@ export default function SeaRouteIntelligencePage() {
                        <p className="text-xs leading-relaxed opacity-80 font-medium italic">"{risk.description}"</p>
                     </div>
                  ))}
-                 <Button variant="secondary" className="w-full text-[10px] font-black py-7 uppercase tracking-widest shadow-2xl">
-                    View Rerouting Protocols
-                 </Button>
               </CardContent>
            </Card>
 
@@ -172,15 +182,18 @@ export default function SeaRouteIntelligencePage() {
               </CardHeader>
               <CardContent className="p-0">
                  <div className="divide-y">
+                    {reports.length === 0 && (
+                       <p className="p-6 text-[11px] font-bold text-muted-foreground uppercase tracking-widest text-center">No delayed shipments</p>
+                    )}
                     {reports.map(report => (
                        <div key={report.id} className="p-6 flex items-center justify-between hover:bg-muted/30 transition-colors">
                           <div className="space-y-1">
-                             <p className="text-xs font-black uppercase tracking-tight">{report.portId}</p>
-                             <p className="text-[10px] text-muted-foreground font-bold uppercase opacity-60">Status: {report.trend}</p>
+                             <p className="text-xs font-black uppercase tracking-tight">{report.port}</p>
+                             <p className="text-[10px] text-muted-foreground font-bold uppercase opacity-60">{report.delayedShipmentCount} delayed shipment{report.delayedShipmentCount === 1 ? '' : 's'}</p>
                           </div>
                           <div className="text-right">
-                             <p className="text-lg font-black text-primary leading-none">+{report.delayHours}h</p>
-                             <p className="text-[8px] font-black text-muted-foreground uppercase mt-1">Operational Delay</p>
+                             <p className="text-lg font-black text-primary leading-none">{report.avgDelayHours != null ? `+${report.avgDelayHours}h` : '—'}</p>
+                             <p className="text-[8px] font-black text-muted-foreground uppercase mt-1">Avg Overdue</p>
                           </div>
                        </div>
                     ))}

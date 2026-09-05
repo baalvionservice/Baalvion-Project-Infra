@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getKYCStatus, submitKYC, KYCStatus } from '@/services/compliance-service';
+import { getKYCDetail, submitKYC, KYCStatus, IdTypeOption, KYCDetail } from '@/services/compliance-service';
 import { documentsApi } from '@/api/documents';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -54,10 +54,20 @@ export default function KYCPage() {
     governmentId: { ...EMPTY_UPLOAD },
     businessLicense: { ...EMPTY_UPLOAD },
   });
+  const [idType, setIdType] = useState<IdTypeOption>('passport');
+
+  const [rejections, setRejections] = useState<KYCDetail['rejectionReasons']>([]);
+  const [validUntil, setValidUntil] = useState<string | null>(null);
+  const [expired, setExpired] = useState(false);
 
   useEffect(() => {
-    getKYCStatus()
-      .then(setStatus)
+    getKYCDetail()
+      .then((detail) => {
+        setStatus(detail.status);
+        setRejections(detail.rejectionReasons);
+        setValidUntil(detail.validUntil);
+        setExpired(detail.expired);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -93,6 +103,7 @@ export default function KYCPage() {
           governmentId: uploads.governmentId.documentId,
           businessLicense: uploads.businessLicense.documentId,
         },
+        idType,
       });
       setStatus('pending');
       toast({ title: "KYC Submitted", description: "Your verification is now being reviewed by compliance." });
@@ -145,6 +156,11 @@ export default function KYCPage() {
               <p className="text-muted-foreground">
                 Your institution has been successfully verified. You now have full access to platform liquidity and trade settlements.
               </p>
+              {validUntil && (
+                <p className="text-xs text-muted-foreground pt-2">
+                  Valid until <span className="font-semibold text-foreground">{new Date(validUntil).toLocaleDateString()}</span> — you&apos;ll need to re-verify before then.
+                </p>
+              )}
             </div>
             <Button className="w-full bg-green-600 hover:bg-green-700" asChild>
               <a href="/dashboard">Return to Dashboard</a>
@@ -162,6 +178,42 @@ export default function KYCPage() {
           <h2 className="text-3xl font-bold tracking-tight">Institutional Verification (KYC)</h2>
           <p className="text-muted-foreground">Ensure platform integrity and regulatory alignment by completing your institutional profile.</p>
         </div>
+
+        {expired && (
+          <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-5 space-y-2">
+            <div className="flex items-center gap-2 text-amber-600 font-semibold">
+              <Clock className="h-5 w-5" />
+              Verification expired
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Your previous verification has passed its validity period and is no longer active.
+              Complete the form again to re-verify your institution.
+            </p>
+          </div>
+        )}
+
+        {status === 'rejected' && (
+          <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-5 space-y-3">
+            <div className="flex items-center gap-2 text-destructive font-semibold">
+              <AlertCircle className="h-5 w-5" />
+              Previous submission was rejected
+            </div>
+            {rejections.length > 0 ? (
+              <ul className="space-y-1.5 text-sm">
+                {rejections.map((r) => (
+                  <li key={r.track} className="text-muted-foreground">
+                    <span className="font-semibold text-foreground">{r.track}:</span> {r.reason}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground">No reason was recorded by the reviewer.</p>
+            )}
+            <p className="text-xs text-muted-foreground">
+              Correct the issue above and submit again — your resubmission replaces the rejected one.
+            </p>
+          </div>
+        )}
 
         {/* Stepper */}
         <div className="flex items-center justify-between px-2 max-w-2xl">
@@ -283,6 +335,24 @@ export default function KYCPage() {
                 <CardDescription>Provide high-resolution scans of your institutional documentation.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
+                <div className="space-y-2">
+                  <Label>Government ID Type</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {(['passport', 'driving_license', 'government_id'] as IdTypeOption[]).map((opt) => (
+                      <button
+                        key={opt}
+                        type="button"
+                        onClick={() => setIdType(opt)}
+                        className={cn(
+                          'px-3 py-1.5 rounded-full border text-xs font-medium capitalize transition-colors',
+                          idType === opt ? 'bg-primary text-primary-foreground border-primary' : 'bg-background border-input hover:bg-accent'
+                        )}
+                      >
+                        {opt.replace('_', ' ')}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <div className="space-y-4">
                   <UploadSlotCard
                     label="Government Issued ID (Representative)"

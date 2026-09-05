@@ -11,6 +11,7 @@ import Link from 'next/link';
 import { adminService, PlatformStats } from '@/services/admin-service';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { CountUp } from '@/components/ui/count-up';
 import { cn, formatCurrency } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import {
@@ -21,11 +22,25 @@ import {
 } from 'lucide-react';
 
 interface ModuleLink { label: string; href: string; icon: any; desc: string; }
-interface ModuleGroup { title: string; items: ModuleLink[]; }
+type GroupColor = 'emerald' | 'cyan' | 'gold' | 'orange' | 'violet' | 'primary';
+interface ModuleGroup { title: string; color: GroupColor; items: ModuleLink[]; }
+
+/** Each group gets its own hue so the module map reads as six distinct domains instead of
+ *  one primary-blue color repeated ~28 times. Full literal class strings so Tailwind's JIT
+ *  scanner picks them up. */
+const GROUP_STYLES: Record<GroupColor, { bar: string; dot: string; chip: string; icon: string; hover: string }> = {
+  emerald: { bar: 'bg-emerald-500', dot: 'bg-emerald-400', chip: 'bg-emerald-500/10 group-hover:bg-emerald-500/20', icon: 'text-emerald-400', hover: 'hover:border-emerald-500/40' },
+  cyan:    { bar: 'bg-cyan-500',    dot: 'bg-cyan-400',    chip: 'bg-cyan-500/10 group-hover:bg-cyan-500/20',       icon: 'text-cyan-400',    hover: 'hover:border-cyan-500/40' },
+  gold:    { bar: 'bg-gold',        dot: 'bg-gold',         chip: 'bg-gold/10 group-hover:bg-gold/20',               icon: 'text-gold',        hover: 'hover:border-gold/40' },
+  orange:  { bar: 'bg-orange-500',  dot: 'bg-orange-400',  chip: 'bg-orange-500/10 group-hover:bg-orange-500/20',   icon: 'text-orange-400',  hover: 'hover:border-orange-500/40' },
+  violet:  { bar: 'bg-violet-500',  dot: 'bg-violet-400',  chip: 'bg-violet-500/10 group-hover:bg-violet-500/20',   icon: 'text-violet-400',  hover: 'hover:border-violet-500/40' },
+  primary: { bar: 'bg-primary',     dot: 'bg-primary',     chip: 'bg-primary/10 group-hover:bg-primary/20',        icon: 'text-primary',     hover: 'hover:border-primary/40' },
+};
 
 const GROUPS: ModuleGroup[] = [
   {
     title: 'Commerce & Economic Command',
+    color: 'emerald',
     items: [
       { label: 'Commerce Command', href: '/governance/commerce-command', icon: Boxes, desc: 'Trade execution oversight' },
       { label: 'Economic Command', href: '/governance/economic-command', icon: Activity, desc: 'Liquidity & market control' },
@@ -35,6 +50,7 @@ const GROUPS: ModuleGroup[] = [
   },
   {
     title: 'Compliance, Risk & Disputes',
+    color: 'cyan',
     items: [
       { label: 'Compliance Admin', href: '/governance/compliance-admin', icon: FileCheck, desc: 'KYC / AML / sanctions' },
       { label: 'Disputes & Arbitration', href: '/governance/disputes', icon: Gavel, desc: 'Case resolution' },
@@ -46,6 +62,7 @@ const GROUPS: ModuleGroup[] = [
   },
   {
     title: 'Sovereign & Strategy',
+    color: 'gold',
     items: [
       { label: 'Sovereign Admin', href: '/governance/sovereign-admin', icon: ShieldCheck, desc: 'Root authority' },
       { label: 'Control Tower', href: '/governance/control-tower', icon: Radar, desc: 'Executive command' },
@@ -57,6 +74,7 @@ const GROUPS: ModuleGroup[] = [
   },
   {
     title: 'Maritime & Logistics',
+    color: 'orange',
     items: [
       { label: 'Maritime', href: '/governance/maritime', icon: Ship, desc: 'Fleet & corridors' },
       { label: 'SLA Monitoring', href: '/governance/sla', icon: Activity, desc: 'Carrier SLAs' },
@@ -64,6 +82,7 @@ const GROUPS: ModuleGroup[] = [
   },
   {
     title: 'Identity & Access',
+    color: 'violet',
     items: [
       { label: 'Identity', href: '/governance/identity', icon: Users, desc: 'Identity fabric' },
       { label: 'Permissions', href: '/governance/permissions', icon: Lock, desc: 'RBAC matrix' },
@@ -73,6 +92,7 @@ const GROUPS: ModuleGroup[] = [
   },
   {
     title: 'Platform & Infrastructure',
+    color: 'primary',
     items: [
       { label: 'Platform Admin', href: '/governance/platform-admin', icon: Server, desc: 'Master control tower' },
       { label: 'Master Data', href: '/governance/master-data', icon: Database, desc: 'Reference data' },
@@ -100,10 +120,10 @@ export default function GovernanceOverviewPage() {
   }, []);
 
   const kpis = [
-    { label: 'Global Liquidity', value: stats ? formatCurrency(stats.volume.total) : '—', sub: 'Escrow-backed', icon: Lock, color: 'text-emerald-600' },
-    { label: 'Institutions', value: stats ? String(stats.entities.total) : '—', sub: `${stats?.entities.activeTenants ?? 0} active`, icon: Building2, color: 'text-blue-600' },
-    { label: 'Active Deals', value: stats ? String(stats.operations.activeDeals) : '—', sub: 'In negotiation', icon: Activity, color: 'text-purple-600' },
-    { label: 'In Transit', value: stats ? String(stats.operations.shipmentsInTransit) : '—', sub: 'Live shipments', icon: Ship, color: 'text-amber-600' },
+    { label: 'Global Liquidity', value: stats ? formatCurrency(stats.volume.total) : null, sub: 'Escrow-backed', icon: Lock, color: 'text-emerald-400', chip: 'bg-emerald-500/10', glow: 'hover:shadow-[0_0_30px_-10px_rgba(52,211,153,0.5)]' },
+    { label: 'Institutions', num: stats?.entities.total, sub: `${stats?.entities.activeTenants ?? 0} active`, icon: Building2, color: 'text-sky-400', chip: 'bg-sky-500/10', glow: 'hover:shadow-[0_0_30px_-10px_rgba(56,189,248,0.5)]' },
+    { label: 'Active Deals', num: stats?.operations.activeDeals, sub: 'In negotiation', icon: Activity, color: 'text-violet-400', chip: 'bg-violet-500/10', glow: 'hover:shadow-[0_0_30px_-10px_rgba(167,139,250,0.5)]' },
+    { label: 'In Transit', num: stats?.operations.shipmentsInTransit, sub: 'Live shipments', icon: Ship, color: 'text-gold', chip: 'bg-gold/10', glow: 'hover:shadow-[0_0_30px_-10px_hsl(var(--gold)/0.5)]' },
   ];
 
   return (
@@ -125,52 +145,63 @@ export default function GovernanceOverviewPage() {
 
       {/* Live KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {kpis.map((k) => (
-          <Card key={k.label}>
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{k.label}</span>
-                <k.icon className={cn('h-4 w-4', k.color)} />
-              </div>
-              <div className="text-2xl font-black mt-2">{k.value}</div>
-              <div className="text-[11px] text-muted-foreground font-medium">{k.sub}</div>
-            </CardContent>
-          </Card>
+        {kpis.map((k, i) => (
+          <motion.div key={k.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}>
+            <Card className={cn('transition-all duration-300 hover:-translate-y-0.5', k.glow)}>
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{k.label}</span>
+                  <div className={cn('p-1.5 rounded-lg', k.chip)}>
+                    <k.icon className={cn('h-4 w-4', k.color)} />
+                  </div>
+                </div>
+                <div className="text-2xl font-black mt-2">
+                  {k.value ?? (typeof k.num === 'number' ? <CountUp value={k.num} /> : '—')}
+                </div>
+                <div className="text-[11px] text-muted-foreground font-medium">{k.sub}</div>
+              </CardContent>
+            </Card>
+          </motion.div>
         ))}
       </div>
 
       {/* Module map */}
-      {GROUPS.map((group, gi) => (
-        <motion.section
-          key={group.title}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: gi * 0.04 }}
-          className="space-y-3"
-        >
-          <h2 className="text-xs font-black uppercase tracking-widest text-muted-foreground">{group.title}</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-            {group.items.map((m) => (
-              <Link key={m.href} href={m.href} className="group">
-                <Card className="h-full transition-all hover:border-primary/50 hover:shadow-md">
-                  <CardContent className="p-4 flex items-start gap-3">
-                    <div className="p-2 rounded-lg bg-muted/40 group-hover:bg-primary/10 transition-colors">
-                      <m.icon className="h-5 w-5 text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="font-bold text-sm truncate">{m.label}</span>
-                        <ArrowRight className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+      {GROUPS.map((group, gi) => {
+        const gs = GROUP_STYLES[group.color];
+        return (
+          <motion.section
+            key={group.title}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: gi * 0.04 }}
+            className="space-y-3"
+          >
+            <h2 className="text-xs font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+              <span className={cn('h-1.5 w-1.5 rounded-full', gs.dot)} /> {group.title}
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+              {group.items.map((m) => (
+                <Link key={m.href} href={m.href} className="group">
+                  <Card className={cn('h-full transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md', gs.hover)}>
+                    <CardContent className="p-4 flex items-start gap-3">
+                      <div className={cn('p-2 rounded-lg transition-colors', gs.chip)}>
+                        <m.icon className={cn('h-5 w-5', gs.icon)} />
                       </div>
-                      <p className="text-[11px] text-muted-foreground truncate">{m.desc}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </motion.section>
-      ))}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-bold text-sm truncate">{m.label}</span>
+                          <ArrowRight className={cn('h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0', gs.icon)} />
+                        </div>
+                        <p className="text-[11px] text-muted-foreground truncate">{m.desc}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </motion.section>
+        );
+      })}
     </div>
   );
 }

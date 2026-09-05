@@ -15,10 +15,42 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { CountUp } from '@/components/ui/count-up';
 import { PATHS } from '@/lib/paths';
+import { cn } from '@/lib/utils';
 import { BrowserFrame, PeekRow, PeekBadge } from './solution/solution-page';
 import { TradeFlowSection } from './trade-flow-section';
 import type { PlatformPulse } from '@/server/public/platform-pulse';
+
+/** Per-audience accent so the four cards read as distinct worlds, not four repaints of
+ *  the same blue tile. Hues match the persona accents already used across governance/
+ *  dashboard (emerald=finance, violet=sovereign/gov authority, orange=logistics). */
+const AUDIENCE_STYLES = {
+  primary: {
+    chip: 'bg-primary/10 border-primary/20 group-hover:bg-primary/20',
+    icon: 'text-primary',
+    ring: 'hover:border-primary/40 hover:shadow-[0_0_40px_-12px_hsl(var(--primary)/0.5)]',
+    label: 'text-primary',
+  },
+  emerald: {
+    chip: 'bg-emerald-500/10 border-emerald-500/20 group-hover:bg-emerald-500/20',
+    icon: 'text-emerald-400',
+    ring: 'hover:border-emerald-500/40 hover:shadow-[0_0_40px_-12px_rgba(52,211,153,0.5)]',
+    label: 'text-emerald-400',
+  },
+  violet: {
+    chip: 'bg-violet-500/10 border-violet-500/20 group-hover:bg-violet-500/20',
+    icon: 'text-violet-400',
+    ring: 'hover:border-violet-500/40 hover:shadow-[0_0_40px_-12px_rgba(167,139,250,0.5)]',
+    label: 'text-violet-400',
+  },
+  orange: {
+    chip: 'bg-orange-500/10 border-orange-500/20 group-hover:bg-orange-500/20',
+    icon: 'text-orange-400',
+    ring: 'hover:border-orange-500/40 hover:shadow-[0_0_40px_-12px_rgba(251,146,60,0.5)]',
+    label: 'text-orange-400',
+  },
+} as const;
 
 interface HomeClientProps {
   /** Real, platform-wide aggregate facts — see server/public/platform-pulse.ts. */
@@ -30,10 +62,10 @@ interface HomeClientProps {
 }
 
 const AUDIENCES = [
-  { title: 'Banks', desc: 'Escrow, ledger, and net settlement that plug into your core systems.', icon: Landmark, href: PATHS.SOLUTIONS_BANKS },
-  { title: 'Enterprises', desc: 'Run a trade end to end on one source of truth.', icon: Boxes, href: PATHS.SOLUTIONS_ENTERPRISES },
-  { title: 'Governments', desc: 'Real-time customs filing and sanctions screening.', icon: Globe, href: PATHS.SOLUTIONS_GOV },
-  { title: 'Logistics', desc: 'Route optimization and live tracking, synced to the trade.', icon: Truck, href: PATHS.SOLUTIONS_LOGISTICS },
+  { title: 'Banks', desc: 'Escrow, ledger, and net settlement that plug into your core systems.', icon: Landmark, href: PATHS.SOLUTIONS_BANKS, style: 'emerald' as const },
+  { title: 'Enterprises', desc: 'Run a trade end to end on one source of truth.', icon: Boxes, href: PATHS.SOLUTIONS_ENTERPRISES, style: 'primary' as const },
+  { title: 'Governments', desc: 'Real-time customs filing and sanctions screening.', icon: Globe, href: PATHS.SOLUTIONS_GOV, style: 'violet' as const },
+  { title: 'Logistics', desc: 'Route optimization and live tracking, synced to the trade.', icon: Truck, href: PATHS.SOLUTIONS_LOGISTICS, style: 'orange' as const },
 ];
 
 const STAGES = ['RFQ', 'Quote', 'Deal', 'Order', 'Ship', 'Settle'];
@@ -74,14 +106,14 @@ function TradePeek() {
 }
 
 export function HomeClient({ pulse, customsAuthorityCount, activeShipmentCount }: HomeClientProps) {
-  const ticker = [
+  const ticker: Array<{ label: string; val: string } | { label: string; num: number }> = [
     { label: 'Settlement Cycle', val: 'T+1' },
     { label: 'Ledger Integrity', val: pulse.ledgerBalanced ? 'All Books Balanced' : 'Under Review' },
-    { label: 'Customs Authorities', val: customsAuthorityCount.toLocaleString() },
-    { label: 'Escrows On Platform', val: pulse.escrowCount.toLocaleString() },
+    { label: 'Customs Authorities', num: customsAuthorityCount },
+    { label: 'Escrows On Platform', num: pulse.escrowCount },
     // Only shown when trade-service actually answered — a failed/timed-out
     // cross-service call omits the tile rather than showing a stale/fake number.
-    ...(activeShipmentCount != null ? [{ label: 'Active Shipments', val: activeShipmentCount.toLocaleString() }] : []),
+    ...(activeShipmentCount != null ? [{ label: 'Active Shipments', num: activeShipmentCount }] : []),
     { label: 'Screening', val: 'Fail-Closed' },
   ];
 
@@ -92,7 +124,7 @@ export function HomeClient({ pulse, customsAuthorityCount, activeShipmentCount }
       <div className="h-12 bg-slate-900/80 backdrop-blur-md border-b border-white/5 flex items-center px-4 md:px-10 justify-between overflow-hidden shrink-0 z-40 sticky top-0">
         <div className="flex items-center gap-8 overflow-x-auto no-scrollbar">
           <div className="flex items-center gap-3">
-            <div className={`h-2 w-2 rounded-full ${pulse.dbHealthy ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+            <div className={`h-2 w-2 rounded-full ${pulse.dbHealthy ? 'bg-emerald-500 animate-pulse shadow-[0_0_8px_2px_rgba(52,211,153,0.6)]' : 'bg-amber-500'}`} />
             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-400 whitespace-nowrap">
               Platform: {pulse.dbHealthy ? 'Operational' : 'Degraded'}
             </span>
@@ -100,7 +132,11 @@ export function HomeClient({ pulse, customsAuthorityCount, activeShipmentCount }
           {ticker.map((s) => (
             <div key={s.label} className="flex items-center gap-2 whitespace-nowrap border-l border-white/5 pl-8 first:border-0 first:pl-0">
               <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{s.label}:</span>
-              <span className="text-[10px] font-black text-slate-200 tabular-nums">{s.val}</span>
+              {'num' in s ? (
+                <CountUp value={s.num} className="text-[10px] font-black text-slate-200 tabular-nums" />
+              ) : (
+                <span className="text-[10px] font-black text-slate-200 tabular-nums">{s.val}</span>
+              )}
             </div>
           ))}
         </div>
@@ -108,20 +144,21 @@ export function HomeClient({ pulse, customsAuthorityCount, activeShipmentCount }
 
       {/* HERO */}
       <section className="relative px-4 md:px-10 pt-20 pb-28 md:pt-28 md:pb-36 border-b border-white/5">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_25%,_var(--tw-gradient-stops))] from-primary/20 to-transparent opacity-60" />
+        <div className="aurora-bg"><span /><span /><span /></div>
         <div className="max-w-7xl mx-auto grid lg:grid-cols-12 gap-16 items-center relative z-10">
           <motion.div {...fadeUp} className="lg:col-span-6 space-y-8">
-            <Badge variant="outline" className="px-4 py-1.5 border-primary/40 bg-primary/10 text-primary font-black uppercase text-[9px] tracking-[0.4em] rounded-full">
+            <Badge variant="outline" className="px-4 py-1.5 border-gold/40 bg-gold/10 text-gold font-black uppercase text-[9px] tracking-[0.4em] rounded-full">
               The Global Trade Operating System
             </Badge>
             <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-[0.9] text-white">
-              Sourcing To Settlement.<br /><span className="text-primary">On One Platform.</span>
+              Sourcing To Settlement.<br />
+              <span className="bg-gradient-to-r from-primary via-sky-400 to-gold bg-clip-text text-transparent">On One Platform.</span>
             </h1>
             <p className="text-lg md:text-xl text-slate-300 leading-relaxed max-w-xl">
               Baalvion runs the whole trade — RFQs, escrow-secured payments, customs, compliance, and logistics — on one governed platform that banks, enterprises, governments, and carriers share.
             </p>
             <div className="flex flex-wrap gap-4">
-              <Button className="h-14 px-9 bg-primary text-white font-black uppercase tracking-widest text-xs rounded-2xl hover:scale-105 transition-transform group" asChild>
+              <Button className="h-14 px-9 bg-gradient-to-r from-gold to-amber-500 text-gold-foreground font-black uppercase tracking-widest text-xs rounded-2xl hover:scale-105 hover:shadow-[0_0_40px_-8px_hsl(var(--gold)/0.6)] transition-all group" asChild>
                 <Link href={PATHS.ONBOARD}>Join Baalvion <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" /></Link>
               </Button>
               <Button variant="outline" className="h-14 px-9 border-white/10 bg-white/5 text-white font-black uppercase tracking-widest text-xs rounded-2xl hover:bg-white/10" asChild>
@@ -144,24 +181,27 @@ export function HomeClient({ pulse, customsAuthorityCount, activeShipmentCount }
             <p className="text-lg text-slate-400 leading-relaxed">The same trade looks different from each seat. Pick yours to see exactly how Baalvion helps.</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {AUDIENCES.map((a, i) => (
-              <motion.div key={a.title} {...fadeUp} transition={{ delay: i * 0.08 }}>
-                <Link href={a.href} className="group block h-full">
-                  <div className="h-full p-8 rounded-[28px] border border-white/5 bg-slate-900/40 hover:border-primary/40 hover:bg-slate-900/70 transition-all space-y-5">
-                    <div className="p-4 rounded-2xl bg-primary/10 border border-primary/20 w-fit group-hover:bg-primary/20 transition-colors">
-                      <a.icon className="h-6 w-6 text-primary" />
+            {AUDIENCES.map((a, i) => {
+              const s = AUDIENCE_STYLES[a.style];
+              return (
+                <motion.div key={a.title} {...fadeUp} transition={{ delay: i * 0.08 }} whileHover={{ y: -6 }}>
+                  <Link href={a.href} className="group block h-full">
+                    <div className={cn('h-full p-8 rounded-[28px] border border-white/5 bg-slate-900/40 hover:bg-slate-900/70 transition-all duration-300 space-y-5', s.ring)}>
+                      <div className={cn('p-4 rounded-2xl border w-fit transition-colors', s.chip)}>
+                        <a.icon className={cn('h-6 w-6', s.icon)} />
+                      </div>
+                      <div className="space-y-2">
+                        <h3 className="text-xl font-black uppercase tracking-tight text-white">{a.title}</h3>
+                        <p className="text-sm text-slate-400 leading-relaxed">{a.desc}</p>
+                      </div>
+                      <span className={cn('inline-flex items-center text-[10px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity', s.label)}>
+                        Explore <ArrowRight className="ml-1 h-3.5 w-3.5" />
+                      </span>
                     </div>
-                    <div className="space-y-2">
-                      <h3 className="text-xl font-black uppercase tracking-tight text-white">{a.title}</h3>
-                      <p className="text-sm text-slate-400 leading-relaxed">{a.desc}</p>
-                    </div>
-                    <span className="inline-flex items-center text-[10px] font-black uppercase tracking-widest text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                      Explore <ArrowRight className="ml-1 h-3.5 w-3.5" />
-                    </span>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
+                  </Link>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>

@@ -8,6 +8,7 @@
 import { principalFrom, type Principal } from '@/server/http/api';
 import { NotFoundError } from '@/server/db/errors';
 import { isKnownEntity } from '@/server/gckb/registry';
+import { tradeService } from '@/server/services/trade-service';
 import type { KbActorContext } from '@/server/services/gckb-service';
 
 function clientIp(req: Request): string | null {
@@ -28,6 +29,27 @@ export function kbRequest(req: Request): { principal: Principal; ctx: KbActorCon
       source: 'api',
     },
   };
+}
+
+// Organizations are owned by auth-service; this database only learns of one when a
+// member of it first writes here. Every write is audited, and the audit row carries an
+// FK to `organizations` — so without this a tenant's first write fails on a foreign-key
+// violation that reads like a bug in the write itself.
+const provisioned = new Set<string>();
+
+/**
+ * Ensure the caller's organization exists in this database before an audited write.
+ * Idempotent, and memoised per process so it costs one query per org per instance.
+ */
+export async function ensureOrganizationProvisioned(principal: Principal): Promise<void> {
+  const organizationId = principal.organizationId;
+  if (!organizationId || provisioned.has(organizationId)) return;
+  await tradeService.ensureOrganization({
+    id: organizationId,
+    name: `Organization ${organizationId.slice(0, 8)}`,
+    slug: `org-${organizationId}`,
+  });
+  provisioned.add(organizationId);
 }
 
 /** Reject an unknown entity-type path segment with a 404 (fail-closed). */

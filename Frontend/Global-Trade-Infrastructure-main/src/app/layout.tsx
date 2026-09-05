@@ -5,7 +5,6 @@ import { cn } from '@/lib/utils';
 import { AppProvider } from "./(dashboard)/_components/app-state";
 import { RouteGuard } from "./(dashboard)/_components/route-guard";
 import { TourOverlay } from '@/components/tour-overlay';
-import { organizationJsonLd, webSiteJsonLd, jsonLdScriptProps } from '@/lib/seo';
 
 // NOTE: `force-dynamic` is intentionally NOT set here. The public marketing routes
 // under (public) are designed for static/ISR rendering (see their `revalidate`
@@ -75,9 +74,12 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body className={cn("font-sans antialiased min-h-screen bg-background")}>
-        {/* Site-wide structured data: brand entity + searchable website. */}
-        <script {...jsonLdScriptProps(organizationJsonLd())} />
-        <script {...jsonLdScriptProps(webSiteJsonLd())} />
+        {/* NOTE: the brand Organization + WebSite JSON-LD deliberately does NOT live here.
+            This layout also wraps the World Shipping Directory, which is a separate public
+            property on its own subdomain with its own WebSite and Organization entities.
+            Emitting the trade app's here put a WebSite pointing at another host on all
+            ~97,000 directory pages, and two contradictory WebSite entities on its home
+            page. It now lives in (public)/layout.tsx, which is the surface it describes. */}
         <AppProvider>
            {/* Per-persona authorization on every protected route (covers the (dashboard) group AND
                top-level authenticated areas like /governance). Public routes pass through. */}

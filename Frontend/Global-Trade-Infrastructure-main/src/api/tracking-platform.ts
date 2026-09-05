@@ -36,6 +36,8 @@ export interface MapOverviewPoint {
   longitude: number;
   locationLabel: string | null;
   lastUpdated: string | null;
+  /** Who reported the fix. 'simulated' until TRACKING_API_KEY names a real carrier feed. */
+  source: string | null;
 }
 
 // ── Geofences ────────────────────────────────────────────────────────────────

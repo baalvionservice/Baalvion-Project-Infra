@@ -54,14 +54,17 @@ export default function MarketplacePage() {
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      const orgId = await resolveSessionOrgId();
-      const [lData, mData] = await Promise.all([
-        marketplaceService.getListings(),
-        orgId ? matchingService.getMatches(orgId) : Promise.resolve([]),
-      ]);
-      setListings(lData);
-      setMatches(mData);
-      setLoading(false);
+      try {
+        const orgId = await resolveSessionOrgId();
+        const [lData, mData] = await Promise.all([
+          marketplaceService.getListings(),
+          orgId ? matchingService.getMatches(orgId) : Promise.resolve([]),
+        ]);
+        setListings(lData);
+        setMatches(mData);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchData();
   }, []);

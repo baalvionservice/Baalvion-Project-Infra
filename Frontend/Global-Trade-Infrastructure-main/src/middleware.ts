@@ -14,8 +14,40 @@ import { safeInternalPath } from '@/lib/safe-redirect';
  */
 const AUTH_COOKIE = process.env.NEXT_PUBLIC_REFRESH_COOKIE_NAME || 'baalvion_refresh';
 
+/**
+ * Hosts that serve the public World Shipping Directory as their own site. The directory
+ * lives at /shipping-directory in this app; on its own subdomain it is rewritten to the
+ * site root so its URLs read as ships.example.com/companies/maersk rather than exposing
+ * the internal path. Configure per environment with SHIPPING_DIRECTORY_HOSTS (comma
+ * separated); the defaults cover local development.
+ */
+const SHIPPING_DIRECTORY_PREFIX = '/shipping-directory';
+const SHIPPING_DIRECTORY_HOSTS = (process.env.SHIPPING_DIRECTORY_HOSTS || 'ships.localhost,shipping.localhost')
+  .split(',')
+  .map((h) => h.trim().toLowerCase())
+  .filter(Boolean);
+
+function isDirectoryHost(request: NextRequest): boolean {
+  const host = (request.headers.get('host') || '').toLowerCase().split(':')[0];
+  return host.length > 0 && SHIPPING_DIRECTORY_HOSTS.includes(host);
+}
+
 export async function middleware(request: NextRequest): Promise<NextResponse> {
   const { pathname } = request.nextUrl;
+
+  // Subdomain -> route group. Done before the auth gate because every directory route is
+  // anonymous; rewriting after it would make the gate judge the pre-rewrite path.
+  if (isDirectoryHost(request) && !pathname.startsWith('/_next') && !pathname.startsWith('/api/')) {
+    if (pathname.startsWith(SHIPPING_DIRECTORY_PREFIX)) {
+      // Canonical URL on this host omits the prefix; keep one address per page.
+      const canonical = request.nextUrl.clone();
+      canonical.pathname = pathname.slice(SHIPPING_DIRECTORY_PREFIX.length) || '/';
+      return NextResponse.redirect(canonical);
+    }
+    const rewritten = request.nextUrl.clone();
+    rewritten.pathname = `${SHIPPING_DIRECTORY_PREFIX}${pathname === '/' ? '' : pathname}`;
+    return secureHeaders(NextResponse.rewrite(rewritten), request);
+  }
 
   if (
     pathname.startsWith('/_next') ||

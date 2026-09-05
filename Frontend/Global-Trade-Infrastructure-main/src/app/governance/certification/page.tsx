@@ -45,15 +45,18 @@ export default function SovereignCertificationPage() {
   const { toast } = useToast();
 
   const fetchData = async () => {
-    const [mList, rScore, iCheck] = await Promise.all([
-      certificationService.getMandates(),
-      certificationService.getReadinessScore('COMP-101'),
-      auditOrchestrator.runGlobalIntegrityCheck()
-    ]);
-    setMandates(mList);
-    setScore(rScore);
-    setIntegrity(iCheck);
-    setLoading(false);
+    try {
+      const [mList, rScore, iCheck] = await Promise.all([
+        certificationService.getMandates(),
+        certificationService.getReadinessScore('COMP-101'),
+        auditOrchestrator.runGlobalIntegrityCheck()
+      ]);
+      setMandates(mList);
+      setScore(rScore);
+      setIntegrity(iCheck);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {

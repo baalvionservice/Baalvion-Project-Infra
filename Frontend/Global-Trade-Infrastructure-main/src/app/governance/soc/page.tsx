@@ -42,15 +42,18 @@ export default function SecurityOpsPage() {
   const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
-    const [tList, sList, aList] = await Promise.all([
-      activeDefense.getActiveSignals(),
-      strategicThreatOracle.getStrategicSignals(),
-      strategicThreatOracle.getAdversaryMap()
-    ]);
-    setThreats(tList);
-    setSignals(sList);
-    setActors(aList);
-    setLoading(false);
+    try {
+      const [tList, sList, aList] = await Promise.all([
+        activeDefense.getActiveSignals(),
+        strategicThreatOracle.getStrategicSignals(),
+        strategicThreatOracle.getAdversaryMap()
+      ]);
+      setThreats(tList);
+      setSignals(sList);
+      setActors(aList);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {

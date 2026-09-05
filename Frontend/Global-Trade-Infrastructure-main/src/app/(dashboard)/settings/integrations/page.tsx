@@ -52,15 +52,18 @@ export default function InteroperabilityHubPage() {
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      const [iData, wData, lData] = await Promise.all([
-        getIntegrations(companyId),
-        getWebhooks(companyId),
-        getIntegrationLogs()
-      ]);
-      setIntegrations(iData);
-      setWebhooks(wData);
-      setLogs(lData);
-      setLoading(false);
+      try {
+        const [iData, wData, lData] = await Promise.all([
+          getIntegrations(companyId),
+          getWebhooks(companyId),
+          getIntegrationLogs()
+        ]);
+        setIntegrations(iData);
+        setWebhooks(wData);
+        setLogs(lData);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchData();
   }, []);

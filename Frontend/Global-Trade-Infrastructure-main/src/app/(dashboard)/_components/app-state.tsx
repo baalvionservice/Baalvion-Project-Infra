@@ -26,6 +26,7 @@ import {
 } from '@/core/organizations';
 import { AuthzContext } from '@/core/authorization';
 import { clearSessionOrgCache } from '@/services/session-org';
+import { isAnonymousProperty } from '@/lib/route-access';
 
 // SECURITY (P0): the forgeable base64 `baalvion_trade_session` role cookie has been REMOVED.
 // The session is the httpOnly `refresh_token` cookie (set by trade-service) + the in-memory access
@@ -126,7 +127,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   // Session rehydration: on mount, ask the gateway who we are (httpOnly cookie). This keeps a
   // full page reload signed-in without any JS-readable token — the cookie is the source of truth.
+  //
+  // Skipped entirely on the anonymous public properties. The shipping directory has no session by
+  // design, so asking is guaranteed to answer 401 — which reaches the browser as a console error on
+  // every page of a public reference site, and costs a round trip per navigation to learn nothing.
   useEffect(() => {
+    if (typeof window !== 'undefined' && isAnonymousProperty(window.location.pathname)) {
+      setAuthResolved(true);
+      return;
+    }
     let cancelled = false;
     (async () => {
       try {
