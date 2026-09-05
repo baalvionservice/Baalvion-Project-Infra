@@ -6,13 +6,15 @@
 // '/support/stats' to '/v1/support/stats'.
 //
 // Auth: the global authMiddleware in routes/v1.js has already populated req.auth before
-// this router runs. We re-apply the SAME super-admin gate used by adminRoutes.js so every
-// support endpoint requires super_admin (mirrors `router.use(requireSuperAdmin)`).
+// this router runs. We re-apply the SAME admin-tier gate used by adminRoutes.js.
 const router = require('express').Router();
 const ctrl   = require('../controller/supportController');
-const { requireSuperAdmin } = require('../middleware/authMiddleware');
+const { requireStaffAdmin } = require('../middleware/authMiddleware');
 
-router.use(requireSuperAdmin);
+// Platform-staff tier: EXACT match on admin/super_admin, NOT hierarchical. `owner` is a
+// self-service role (registration makes every user owner of their own org), so a
+// hierarchical admin gate handed these surfaces to the entire public.
+router.use(requireStaffAdmin);
 
 // Stats
 router.get('/stats', ctrl.getStats);
