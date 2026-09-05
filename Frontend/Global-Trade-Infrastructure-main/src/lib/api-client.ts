@@ -213,6 +213,12 @@ export interface GatewayUser {
   /** Organization type — drives dashboard access in the multi-tenant model. */
   orgType?: string | null;
   permissions?: string[];
+  /**
+   * Per-business grants issued in the admin console, projected by the gateway from the token
+   * (`businesses.trade` for this app). Present only when the person has been granted something;
+   * absent means no central grant, not "no access" — the caller falls back to their org role.
+   */
+  businesses?: Record<string, string>;
 }
 
 export interface DeviceSession {

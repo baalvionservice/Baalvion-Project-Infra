@@ -101,6 +101,43 @@ export function mapAuthorityRole(gatewayRole: string | undefined | null): UserRo
  * Resolve the EFFECTIVE authority from a principal's full role set: the highest-ranked recognized
  * role. Deterministic regardless of input order. Empty/garbage input → MEMBER.
  */
+/**
+ * Roles this product's own grants can confer, keyed by the vocabulary used in the admin
+ * console's business catalogue (BUSINESS_ROLES.trade there).
+ *
+ * Kept separate from GATEWAY_ROLE_MAP because these words mean something HERE: a console
+ * grant of "compliance" is a statement about trade, not about an organization membership.
+ * Anything unrecognised falls through to MEMBER — fail-closed, same as every other path.
+ */
+const TRADE_GRANT_MAP: Readonly<Record<string, UserRole>> = {
+  admin:      USER_ROLES.ORG_OWNER,
+  compliance: USER_ROLES.COMPLIANCE_OFFICER,
+  finance:    USER_ROLES.TREASURY_OPERATOR,
+  ops:        USER_ROLES.OPERATIONS_DIRECTOR,
+  viewer:     USER_ROLES.MEMBER,
+};
+
+/**
+ * Effective authority, preferring an explicit central grant over an inferred org role.
+ *
+ * A grant made once in the admin console is the deliberate statement of what someone may do
+ * in trade. An org membership role is only a fallback for principals who predate the grants —
+ * it says what they are in their organization, not what they were given here.
+ */
+export function resolveTradeAuthority(
+  roles: ReadonlyArray<string | undefined | null> | undefined | null,
+  businesses?: Record<string, string> | null,
+): UserRole {
+  const granted = businesses?.trade;
+  if (granted) {
+    const mapped = TRADE_GRANT_MAP[normalize(granted)];
+    // An unrecognised grant must not silently widen access via the org-role fallback:
+    // it was still a deliberate grant, so resolve it to the floor instead.
+    return mapped ?? USER_ROLES.MEMBER;
+  }
+  return resolveAuthority(roles);
+}
+
 export function resolveAuthority(roles: ReadonlyArray<string | undefined | null> | undefined | null): UserRole {
   const candidates = (roles ?? []).map(mapAuthorityRole);
   if (candidates.length === 0) return USER_ROLES.MEMBER;
