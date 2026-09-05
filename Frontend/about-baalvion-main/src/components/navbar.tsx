@@ -32,6 +32,7 @@ import {
   ShieldCheck,
   Lock,
   Compass,
+  Network,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import {
@@ -160,6 +161,7 @@ const mainLinks = [
   { name: "Services", href: "/services", icon: BrainCircuit },
   { name: "Industries", href: "/industries", icon: Globe2 },
   { name: "Ecosystem", href: "/ecosystem", icon: Layers },
+  { name: "Network", href: "/network", icon: Network },
   { name: "Projects", href: "/projects", icon: Briefcase },
   { name: "Trust", href: "/trust", icon: ShieldCheck },
 ];

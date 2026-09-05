@@ -454,6 +454,35 @@ export interface UserProfile {
 
 // ── authApi ────────────────────────────────────────────────────────────────
 
+/**
+ * Roles carried by the current access token.
+ *
+ * auth-service's /me returns identity fields ONLY — it omits `role`, `roles` and `permissions`
+ * (verified 2026-09-05: the response has no role key at all). Reading `me().role` therefore
+ * always yielded undefined, so the admin layout's role check failed for EVERYONE, including
+ * super_admin, and silently redirected every administrator away from /admin.
+ *
+ * Authorization claims live in the access token, which is the source of truth. This decodes
+ * (does NOT verify) the payload to read them; the API remains the security boundary.
+ */
+export function currentRoles(): string[] {
+  const token = getAccessToken();
+  if (!token) return [];
+  try {
+    const payload = token.split('.')[1];
+    if (!payload) return [];
+    const b64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = b64.padEnd(b64.length + ((4 - (b64.length % 4)) % 4), '=');
+    const claims = JSON.parse(
+      typeof atob === 'function' ? atob(padded) : Buffer.from(padded, 'base64').toString('binary'),
+    ) as { roles?: string[]; role?: string };
+    if (Array.isArray(claims.roles)) return claims.roles;
+    return claims.role ? [claims.role] : [];
+  } catch {
+    return [];
+  }
+}
+
 export const authApi = {
   async login(payload: LoginPayload): Promise<ApiResult<AuthTokens & { user: UserProfile }>> {
     const result = await apiFetch<AuthTokens & { user: UserProfile }>(`${AUTH_URL}/login`, {
