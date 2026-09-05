@@ -133,7 +133,12 @@ function secureHeaders(response: NextResponse, _request: NextRequest): NextRespo
     // Analytics on, Cloudflare INJECTS its beacon into the HTML. Without it in script-src
     // that injected script is refused on every page load — 80 CSP violations across the
     // directory the moment proxying was switched on.
-    `script-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://*.razorpay.com https://js.stripe.com https://static.cloudflareinsights.com${isDev ? " 'unsafe-eval'" : ''}`,
+    // www.googletagmanager.com: Google Tag Gateway is on at the zone, so it serves the tag
+    // first-party (a rotating /xxxx/ path, already covered by 'self') and GTM does load —
+    // but the loader also pings gtm.js?gtg_health=1 on the canonical host to confirm the
+    // third-party fallback is reachable. Blocking that costs no measurement and left a CSP
+    // error on every page instead, which buries real ones.
+    `script-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://*.razorpay.com https://js.stripe.com https://static.cloudflareinsights.com https://www.googletagmanager.com${isDev ? " 'unsafe-eval'" : ''}`,
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "img-src 'self' data: blob: https:",
     "font-src 'self' data: https://fonts.gstatic.com",
