@@ -1,18 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Cormorant_Garamond } from "next/font/google";
-import { headers } from "next/headers";
-import "./globals.css";
+import "../globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import UnifiedAnalytics from "@/components/UnifiedAnalytics";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { AppProvider } from "@/lib/store";
 import { MaisonPopup } from "@/components/layout/MaisonPopup";
-import { getWelcomeOfferContent } from "@/lib/cms";
-import {
-  normalizeCountry,
-  countryToLocale,
-  directionForCountry,
-} from "@/lib/i18n/countries";
+import type { WelcomeOfferContent } from "@/lib/cms";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -30,14 +24,31 @@ const cormorant = Cormorant_Garamond({
   weight: ["400", "500", "600", "700"],
 });
 
-export const viewport: Viewport = {
+/**
+ * The site's <html> shell, shared by both root layouts.
+ *
+ * There are two of them. `<html lang>`/`dir` has to be correct in the SSR
+ * response (AE leads in Arabic/RTL), and the only place that is knowable
+ * without a dynamic API is the URL — the `[country]` segment. A root layout
+ * can read `params`; the old single root layout could not, so it read the
+ * country from a middleware-set header via `headers()`. That one call made
+ * EVERY route in the app dynamic: the build shipped 61 of 63 routes as `f`
+ * with no revalidate window, so nothing on this site was ever cached.
+ *
+ * Splitting the root in two — `[country]` for the storefront, `(entry)` for the
+ * handful of country-less routes — lets the storefront read its locale from
+ * `params` and be statically rendered, with identical markup either way.
+ */
+export { inter, cormorant };
+
+export const sharedViewport: Viewport = {
   themeColor: "#000000",
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
 };
 
-export const metadata: Metadata = {
+export const sharedMetadata: Metadata = {
   metadataBase: new URL("https://www.amarisemaisonavenue.com/"),
   alternates: { canonical: "/" },
   icons: { icon: "/favicon.svg", shortcut: "/favicon.svg", apple: "/favicon.svg" },
@@ -85,23 +96,21 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({
+export function RootHtml({
+  lang,
+  dir,
+  welcomeOffer,
   children,
-}: Readonly<{
+}: {
+  lang: string;
+  dir: "ltr" | "rtl";
+  welcomeOffer: WelcomeOfferContent | null;
   children: React.ReactNode;
-}>) {
-  // Country is resolved in middleware and forwarded via `x-amarise-country`,
-  // so the SSR HTML carries the correct lang + direction (e.g. ar/RTL for AE).
-  const country = normalizeCountry((await headers()).get("x-amarise-country"));
-  const htmlLang = countryToLocale(country);
-  const htmlDir = directionForCountry(country);
-  // Fetched server-side: cms-service has no CORS headers, so this must not run client-side.
-  const welcomeOffer = await getWelcomeOfferContent();
-
+}) {
   return (
     <html
-      lang={htmlLang}
-      dir={htmlDir}
+      lang={lang}
+      dir={dir}
       className={`${inter.variable} ${cormorant.variable} light scroll-smooth`}
     >
       <head>

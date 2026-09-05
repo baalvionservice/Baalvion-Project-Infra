@@ -72,8 +72,17 @@ function rowToProfile(r: Row): CreatorProfile | null {
   };
 }
 
+// Cached, not `no-store`: this is reached from /transparency (a public page that
+// declares `revalidate = 3600`), and a no-store fetch silently overrode that —
+// the build failed the page's prerender with DYNAMIC_SERVER_USAGE and shipped it
+// as ƒ, so every crawler hit re-rendered it from scratch. The creator roster
+// changes on the order of weeks; an hour is far fresher than it needs to be.
+const CREATOR_ROSTER_REVALIDATE_SECONDS = 3600;
+
 async function fetchCreatorProfiles(): Promise<CreatorProfile[]> {
-  const res = await fetch(`${IMP_API}/creators?limit=100`, { cache: "no-store" });
+  const res = await fetch(`${IMP_API}/creators?limit=100`, {
+    next: { revalidate: CREATOR_ROSTER_REVALIDATE_SECONDS },
+  });
   if (!res.ok) throw new Error(String(res.status));
   const json = await res.json();
   const items: Row[] = json?.data?.items ?? [];

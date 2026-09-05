@@ -9,6 +9,7 @@
  * These run server-side (RSC); imperialpedia-service is reachable on localhost without CORS.
  */
 
+import { MARKET_DATA_REVALIDATE_SECONDS } from './worldFeed';
 import countriesData from '@/data/countries/countries.json';
 import companiesData from '@/data/companies/companies.json';
 import industriesData from '@/data/industries/industries.json';
@@ -40,10 +41,15 @@ const STATIC: Record<string, unknown[]> = {
 // (/companies/[slug] etc. still rendered as ƒ/dynamic despite the page's own
 // `revalidate = 300` export). admin-platform's entity editor has no
 // on-save revalidation call (unlike CMS content, which cms-service pings
-// via /api/revalidate on publish), so a short window here — not the long one
-// used for webhook-backed CMS content — is the ceiling on how stale an edit
-// can appear: 60s, not indefinitely no-store, but still bounded and fast.
-const ENTITY_REVALIDATE_SECONDS = 60;
+// via /api/revalidate on publish), so the window here — not the long one used
+// for webhook-backed CMS content — is the ceiling on how stale an edit can
+// appear.
+//
+// That ceiling was 60s, which is a page regenerated 1,440 times a day per URL
+// to pick up an edit that happens a few times a month; it was also what pinned
+// /stocks/lists/[slug] and friends to a 1-minute ISR window. An hour keeps the
+// "bounded, no webhook needed" property at 1/60th the regeneration cost.
+const ENTITY_REVALIDATE_SECONDS = 3600;
 
 const ENTITY_PAGE_SIZE = 500; // imperialpedia-service's own hard cap (entitiesController.js)
 
@@ -262,10 +268,17 @@ export async function getAssetQuote(symbol: string): Promise<AssetQuote | undefi
     // sidebar — no-store here forced the ENTIRE page dynamic (Key Facts,
     // Editorial Overview, everything), not just this one widget: a no-store
     // fetch anywhere in the render tree marks the whole route dynamic even
-    // inside a Suspense boundary, without Partial Prerendering enabled. 30s
-    // matches the same window marketsLoader.ts already uses for asset data.
+    // inside a Suspense boundary, without Partial Prerendering enabled.
+    //
+    // The same reasoning applies to a short revalidate, which is why this now
+    // shares marketsLoader/worldFeed's window instead of keeping its own 30s:
+    // <ArticleMarketWidget> puts this fetch in the sidebar of every article that
+    // mentions a tracked ticker, and Next takes a route's window from its
+    // lowest fetch — so 30s here meant those article pages regenerated twice a
+    // minute. Every other asset read on the site already made this trade (see
+    // MARKET_DATA_REVALIDATE_SECONDS' comment); this one was missed.
     const res = await fetch(`${IMP_API}/assets/${encodeURIComponent(symbol)}`, {
-      next: { revalidate: 30 },
+      next: { revalidate: MARKET_DATA_REVALIDATE_SECONDS },
       signal: AbortSignal.timeout(6000),
     });
     if (!res.ok) return undefined;

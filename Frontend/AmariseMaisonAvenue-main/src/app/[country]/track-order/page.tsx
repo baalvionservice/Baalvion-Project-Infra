@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { Suspense, useState, useEffect, useCallback } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -136,7 +136,7 @@ function StatusRail({ view }: { view: OrderTrackingView }) {
   );
 }
 
-export default function TrackOrderPage() {
+function TrackOrderPageInner() {
   const { country } = useParams();
   const searchParams = useSearchParams();
   const countryCode = normalizeCountry(country as string) as CountryCode;
@@ -413,5 +413,21 @@ function Row({ label, value }: { label: string; value: string }) {
       <span className="text-gray-500 font-light">{label}</span>
       <span className="text-gray-900">{value}</span>
     </div>
+  );
+}
+
+/**
+ * useSearchParams() opts a client component into client-side rendering, and Next
+ * refuses to prerender the page unless that component sits under a Suspense
+ * boundary. Nothing caught this before because the app had no prerendering at
+ * all — the root layout's headers() call made every route dynamic, so the rule
+ * never applied. With the storefront statically rendered, the boundary has to be
+ * real: the shell prerenders, and this hydrates with the query string.
+ */
+export default function TrackOrderPage() {
+  return (
+    <Suspense fallback={null}>
+      <TrackOrderPageInner />
+    </Suspense>
   );
 }

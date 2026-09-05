@@ -16,6 +16,17 @@ export async function generateMetadata({ params }: ArticleRouteProps): Promise<M
 }
 
 /**
+ * Empty on purpose — see the same export on the root [...slug] route. Without
+ * it Next renders this route from scratch on every request instead of caching
+ * it; with it, nothing is prerendered at build but on-demand renders are.
+ */
+export async function generateStaticParams(): Promise<{ slug: string }[]> {
+  return [];
+}
+
+export const revalidate = 86400;
+
+/**
  * A categorized guide's canonical home is `/<categorySlug>/<slug>` (e.g.
  * `/bonds/how-bond-yields-work`), not this flat bucket — redirect there
  * instead of serving a second indexable copy at this URL. Only uncategorized

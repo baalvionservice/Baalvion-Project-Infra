@@ -76,6 +76,19 @@ export async function generateMetadata({
  * ProductPage: Institutional Artifact View.
  * Optimized for high-fidelity technical detail and SEO authority.
  */
+/**
+ * Empty on purpose: the ids here are catalog/CMS state, not something to
+ * enumerate at build time. It still has to exist — without a
+ * generateStaticParams export Next treats a dynamic route as fully dynamic and
+ * re-renders it from scratch on every request. Returning [] prerenders nothing
+ * but registers the route as ISR, so a render is reused within its window
+ * instead of repeated per visitor. The window itself is unchanged (catalog
+ * reads stay on lib/catalog.ts's 60s), so nothing gets staler than it is today.
+ */
+export async function generateStaticParams(): Promise<{ country: string; id: string }[]> {
+  return [];
+}
+
 export default async function ProductPage({ params }: ProductPageProps) {
   const { id, country } = await params;
   const countryCode = normalizeCountry(country);

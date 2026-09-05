@@ -7,6 +7,14 @@
 import { Term, terms as staticTerms } from './terms';
 import { getTermBySlug as staticTermBySlug, getTermsByLetter as staticTermsByLetter } from './utils';
 
+// Glossary definitions are near-static reference content edited by hand, but all
+// three reads below were `cache: 'no-store'` — which silently overrode the
+// `export const revalidate` on /terms, /terms/[letter] and /terms/[letter]/[slug]
+// (89 prerendered pages) and made every request re-render them. A day matches how
+// often the glossary actually changes; admin-platform's entity editor can bust it
+// through /api/revalidate like any other publish.
+const TERM_REVALIDATE_SECONDS = 86400;
+
 const IMP_API =
   process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL ||
   (process.env.NODE_ENV === 'production'
@@ -16,7 +24,7 @@ const IMP_API =
 export async function fetchTermBySlug(slug: string): Promise<Term | undefined> {
   try {
     const res = await fetch(`${IMP_API}/entities/term/${encodeURIComponent(slug)}`, {
-      cache: 'no-store',
+      next: { revalidate: TERM_REVALIDATE_SECONDS },
       signal: AbortSignal.timeout(6000),
     });
     if (res.ok) {
@@ -32,7 +40,7 @@ export async function fetchTermBySlug(slug: string): Promise<Term | undefined> {
 export async function fetchTermsByLetter(letter: string): Promise<Term[]> {
   try {
     const res = await fetch(`${IMP_API}/entities?type=term&limit=500`, {
-      cache: 'no-store',
+      next: { revalidate: TERM_REVALIDATE_SECONDS },
       signal: AbortSignal.timeout(6000),
     });
     if (res.ok) {
@@ -52,7 +60,7 @@ export async function fetchTermsByLetter(letter: string): Promise<Term[]> {
 export async function fetchAllTerms(): Promise<Term[]> {
   try {
     const res = await fetch(`${IMP_API}/entities?type=term&limit=500`, {
-      cache: 'no-store',
+      next: { revalidate: TERM_REVALIDATE_SECONDS },
       signal: AbortSignal.timeout(6000),
     });
     if (res.ok) {

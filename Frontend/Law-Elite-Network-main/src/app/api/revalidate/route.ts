@@ -1,4 +1,5 @@
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { CONTENT_CACHE_TAG } from "@/lib/cache-tags";
 import { NextResponse } from "next/server";
 
 /**
@@ -25,6 +26,13 @@ export async function POST(req: Request) {
     paths?: string[];
     urls?: string[];
   };
+
+  // Drop every cached CMS / law-service read at once. This — not the fetch-level
+  // revalidate window — is what makes an edit appear on the site, and it reaches
+  // pages the caller cannot enumerate: category hubs whose feed just changed,
+  // author pages, the homepage rails. `paths` below still handles the routes
+  // that need a targeted bust.
+  revalidateTag(CONTENT_CACHE_TAG);
 
   const paths = Array.from(new Set([...(body.paths ?? []), ...DEFAULT_PATHS]));
   const revalidated: string[] = [];

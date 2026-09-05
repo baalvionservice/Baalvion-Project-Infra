@@ -1,6 +1,7 @@
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { sitemapService } from "@/modules/seo/services/sitemap-service";
+import { CMS_CACHE_TAG } from "@/lib/cache-tags";
 
 /**
  * On-publish revalidation webhook — near-real-time indexing.
@@ -12,8 +13,9 @@ import { sitemapService } from "@/modules/seo/services/sitemap-service";
  *   { "paths": ["/banking", "/some-article-slug"], "urls": ["https://imperialpedia.com/..."] }
  *
  * It (1) drops the sitemap cache so the index + shards reflect the change, (2)
- * revalidates the affected Next.js routes, and (3) optionally pings IndexNow so
- * Bing/Yandex (and Google via the shared protocol) recrawl immediately.
+ * invalidates every cached CMS read site-wide (revalidateTag) plus the
+ * specifically-named routes, and (3) optionally pings IndexNow so Bing/Yandex
+ * (and Google via the shared protocol) recrawl immediately.
  */
 export async function POST(req: Request) {
   const url = new URL(req.url);
@@ -30,6 +32,15 @@ export async function POST(req: Request) {
 
   // 1) Always refresh the sitemap (new/removed URLs) + the high-churn hubs.
   sitemapService.invalidate();
+
+  // Drop every cached CMS read at once. This — not the fetch-level revalidate
+  // window — is what makes an edit appear on the site, and it reaches pages the
+  // caller has no way to enumerate: category hubs whose feed now includes the
+  // new article, every article sidebar's "Trending"/"More in category" rail,
+  // /_not-found's trending list. `paths` below still handles the routes that
+  // need a targeted bust (redirect targets, the sitemap route handler).
+  revalidateTag(CMS_CACHE_TAG);
+
   const defaults = ["/", "/news", "/financial-intelligence", "/sitemap.xml"];
   const paths = Array.from(new Set([...(body.paths ?? []), ...defaults]));
   const revalidated: string[] = [];

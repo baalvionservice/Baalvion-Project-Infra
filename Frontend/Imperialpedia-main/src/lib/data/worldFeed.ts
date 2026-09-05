@@ -17,6 +17,7 @@
  * regardless of traffic, so the page stays fast and we never hammer Yahoo/GDELT.
  */
 
+import { CMS_CACHE_TAG } from "@/lib/cache-tags";
 import type { CmsContent } from "@/services/data/cms-public";
 import { categoryImage } from "./categoryImage";
 import { safeImageUrl } from "@/lib/safe-image";
@@ -143,6 +144,14 @@ const WATCHLIST_SYMBOLS: { symbol: string; name: string }[] = [
 // once real traffic / AdSense approval makes fresher data worth the API cost.
 export const MARKET_DATA_REVALIDATE_SECONDS = 86400;
 
+// Window for every input to the World feed / "Trending Now" rail: the CMS list,
+// the admin world-config, the news-service wire, the Google News fallback.
+// Shorter than cms-public.ts's own window because ordering here goes stale on
+// its own, with no publish event to fire the webhook. It has to stay well above
+// a minute regardless: getWorldDataLive backs <TrendingNowModule>, which is in
+// the sidebar of every article, so this is the article template's ISR floor.
+const CMS_FEED_REVALIDATE_SECONDS = 3600;
+
 const IMPERIALPEDIA_API =
   process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL ||
   (process.env.NODE_ENV === "production"
@@ -163,7 +172,11 @@ interface WorldConfig {
 async function getWorldConfig(): Promise<WorldConfig | null> {
   try {
     const res = await fetch(`${IMPERIALPEDIA_API}/world-config`, {
-      next: { revalidate: 120 },
+      // Admin toggles (which indices, which watchlist, is the wire fallback on).
+      // Changed a handful of times ever — but getWorldDataLive runs it on every
+      // article page too, so a 120s window here set those pages' whole ISR
+      // window to 120s.
+      next: { revalidate: CMS_FEED_REVALIDATE_SECONDS },
       signal: AbortSignal.timeout(6000),
     });
     if (!res.ok) return null;
@@ -486,7 +499,7 @@ export async function googleNews(query: string, max: number): Promise<RawArticle
     )}&hl=en-US&gl=US&ceid=US:en`;
   const res = await fetch(url, {
     headers: { "User-Agent": "Mozilla/5.0 (compatible; ImperialpediaBot/1.0)" },
-    next: { revalidate: 300 },
+    next: { revalidate: CMS_FEED_REVALIDATE_SECONDS },
     signal: AbortSignal.timeout(6000),
   });
   if (!res.ok) throw new Error(`googlenews ${res.status}`);
@@ -713,7 +726,7 @@ async function buildWireNews(region: RegionId): Promise<NewsBundle | null> {
   if (keyword) q.set("keyword", keyword);
   const res = await fetch(`${NEWS_SERVICE_URL}/internal/v1/news?${q.toString()}`, {
     headers: { "X-Internal-Key": NEWS_SERVICE_INTERNAL_KEY },
-    next: { revalidate: 120 },
+    next: { revalidate: CMS_FEED_REVALIDATE_SECONDS },
     signal: AbortSignal.timeout(6000),
   });
   if (!res.ok) throw new Error(`news-service ${res.status}`);
@@ -733,9 +746,15 @@ async function buildWireNews(region: RegionId): Promise<NewsBundle | null> {
 // matches the region id (us, europe, asia, china, emerging) and assign content
 // to it. Anything published also flows into the general feed.
 
-// Live CMS read (own copy of the client) — no-store so published content shows
-// up immediately. The World pages render dynamically (force-dynamic), so this
-// fetch runs per-request rather than at build/ISR time.
+// Live CMS read (own copy of the client). This is NOT only reached from the
+// force-dynamic World pages: getWorldDataLive also backs <TrendingNowModule>,
+// which sits in the sidebar of every article page. `cache: 'no-store'` here was
+// therefore opting the whole article template (/[...slug],
+// /financial-intelligence/[slug], /world/../[...rest]) out of static rendering —
+// a full React render plus ~20 upstream fetches on every single request, for
+// every article, forever. It reads the same CMS as cms-public.ts, so it shares
+// that module's window and cache tag: the publish webhook's revalidateTag()
+// drops it, which is what "shows up immediately" actually needs.
 // Localhost is dev-only (port aligned with the rest of the app: 3018); production
 // resolves to the public API gateway, same default cms-public.ts's own CMS_PUBLIC_URL
 // uses — an empty string here silently 500s every server-side fetch below.
@@ -755,9 +774,7 @@ async function cmsList(params: {
   if (params.limit) q.set("limit", String(params.limit));
   const res = await fetch(`${CMS_PUBLIC_URL}/${CMS_SITE}/content?${q.toString()}`, {
     headers: { Accept: "application/json" },
-    // Editorial content changes on publish — read it LIVE per-request so the
-    // World page reflects the CMS immediately (the page is rendered dynamically).
-    cache: "no-store",
+    next: { revalidate: CMS_FEED_REVALIDATE_SECONDS, tags: [CMS_CACHE_TAG] },
     signal: AbortSignal.timeout(6000),
   });
   if (!res.ok) throw new Error(`cms ${res.status}`);

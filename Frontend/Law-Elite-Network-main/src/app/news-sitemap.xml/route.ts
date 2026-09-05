@@ -15,7 +15,9 @@ const PUBLICATION_NAME = 'Law Elite Network';
 const RECENCY_WINDOW_MS = 2 * 24 * 60 * 60 * 1000; // Google News: only the last 2 days
 
 // Revalidate frequently — News sitemaps are expected to reflect near-real-time publishing.
-export const revalidate = 300;
+// Raised off the 5-minute clock: /api/revalidate's revalidateTag() refreshes
+// this on publish, so the window is only the no-webhook safety net.
+export const revalidate = 86400;
 
 function escapeXml(value: string): string {
   return value

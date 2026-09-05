@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { Suspense, useState, useMemo, useEffect } from "react";
 import Script from "next/script";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useAppStore } from "@/lib/store";
@@ -45,7 +45,7 @@ import { PaymentGateway, CountryCode } from "@/lib/types";
 import { formatAmount, normalizeCountry } from "@/lib/i18n/countries";
 import { RiskEngine } from "@/lib/fraud/risk-engine";
 
-export default function CheckoutPage() {
+function CheckoutPageInner() {
   const {
     cart,
     clearCart,
@@ -1618,5 +1618,21 @@ function GatewayCard({
         <p className="text-[10px] text-slate-400">{desc}</p>
       </div>
     </button>
+  );
+}
+
+/**
+ * useSearchParams() opts a client component into client-side rendering, and Next
+ * refuses to prerender the page unless that component sits under a Suspense
+ * boundary. Nothing caught this before because the app had no prerendering at
+ * all — the root layout's headers() call made every route dynamic, so the rule
+ * never applied. With the storefront statically rendered, the boundary has to be
+ * real: the shell prerenders, and this hydrates with the query string.
+ */
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={null}>
+      <CheckoutPageInner />
+    </Suspense>
   );
 }
