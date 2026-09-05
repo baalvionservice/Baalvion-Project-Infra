@@ -108,7 +108,7 @@ export default function LiveAtelierViewport() {
               </div>
               <div className="text-center">
                  <p className="text-[10px] font-bold uppercase tracking-widest">Maison Curator</p>
-                 <p className="text-[8px] text-gray-400 italic">Paris Central Atelier</p>
+                 <p className="text-[8px] text-gray-400 italic">Authentication Desk</p>
               </div>
            </div>
            <div className="absolute bottom-0 inset-x-0 h-1 bg-white/10 overflow-hidden">

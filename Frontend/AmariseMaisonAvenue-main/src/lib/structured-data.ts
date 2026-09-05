@@ -99,7 +99,14 @@ const ADDRESS_COUNTRY_NAME: Record<string, string> = {
 export function localBusinessJsonLd(
   countryCode: string,
   country: Country
-): Record<string, unknown> {
+): Record<string, unknown> | null {
+  // A schema.org Store asserts a physical trading address to search engines. Emitting one with
+  // a placeholder address or phone is a false claim about where the business operates, so this
+  // returns null unless BOTH are actually populated. Callers must skip the <script> on null.
+  const address = country.office?.address?.trim();
+  const phone = country.office?.phone?.trim();
+  if (!address || !phone) return null;
+
   return {
     "@context": "https://schema.org",
     "@type": "Store",

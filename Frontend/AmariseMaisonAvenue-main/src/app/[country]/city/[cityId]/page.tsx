@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, notFound } from "next/navigation";
 import Link from "next/link";
 import { BrandImage } from "@/components/ui/BrandImage";
 import { CITIES, COUNTRIES } from "@/lib/mock-data";
@@ -39,7 +39,16 @@ function safeJsonLd(data: unknown): string {
  * CityPage: Programmatic SEO Authority Page.
  * Focuses on high-authority city-specific luxury content and local structured data.
  */
+// Withheld from service. Every input to this page is placeholder: picsum.photos hero imagery,
+// invented "trends", featuredProducts pointing at ids that do not exist, an AI-generated
+// narrative, and office details that were blanked because the addresses were not real. Rather
+// than publish 90 pages of fiction, the route 404s until it has something true to show. The
+// implementation below is intact — delete this guard to bring it back.
 export default function CityPage() {
+  notFound();
+}
+
+function CityPageImplementation() {
   const { country, cityId } = useParams();
   const countryCode = (country as string) || "us";
   const currentCountry = COUNTRIES[countryCode] || COUNTRIES.us;

@@ -54,7 +54,7 @@ export function MaisonPopup({ initialOffer: offer }: MaisonPopupProps) {
   const headline = offer?.headline ?? '$100 Off, On Us?';
   const subtext =
     offer?.subtext ??
-    'Join our collector network for first access to the 1924 heritage series and bespoke curatorial guidance.';
+    'Join our collector network for first access to new arrivals and bespoke sourcing.';
   const ctaLabel = offer?.ctaLabel ?? 'Collect Your Offer';
   const disclaimer = offer?.disclaimer ?? '*Offer valid on all orders $2,500+.';
 

@@ -90,7 +90,7 @@ export async function generateProductRecommendations(
         {
           id: "prod-1",
           name: "Amarisé Heritage Silk Scarf",
-          description: "Hand-painted archival silk from our 1924 collection.",
+          description: "Authenticated pre-owned silk scarf, graded and documented.",
           basePrice: 1200,
           currency: "USD",
           imageUrl: "https://picsum.photos/seed/amarise-fallback-1/800/800",

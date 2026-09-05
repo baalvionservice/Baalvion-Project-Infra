@@ -37,7 +37,7 @@ export async function generateCollectionNarrative(
   } catch (error) {
     console.warn("AI Collection Narrative Quota Exceeded. Returning curated narrative.");
     return {
-      narrative: `The ${input.collectionName} series at Maison Amarisé represents a profound dialogue between the archives of 1924 and the contemporary vision of our master artisans. ${input.baseDescription}. Each piece serves as a testament to the pursuit of perfection, hand-selected for the world's most discerning connoisseurs.`
+      narrative: `The ${input.collectionName} selection at Maison Amarisé is assembled piece by piece from consignment, each one authenticated before it is listed. ${input.baseDescription}. Each piece serves as a testament to the pursuit of perfection, hand-selected for the world's most discerning connoisseurs.`
     };
   }
 }

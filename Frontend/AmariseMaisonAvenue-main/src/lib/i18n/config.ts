@@ -24,7 +24,7 @@ export const I18N_CONFIG: LocalizationConfig = {
       'product.inquire': 'Inquire Privately',
       'product.add_to_bag': 'Add to Shopping Bag',
       'product.provenance': 'Provenance Verified',
-      'footer.charter': 'Founding Charter 1924',
+      'footer.charter': 'Founding Charter 2025',
       'common.search': 'Search Registry...',
       'common.hub': 'Market Hub',
       'common.login': 'Log in | Sign up'
@@ -63,7 +63,7 @@ export const I18N_CONFIG: LocalizationConfig = {
       'product.inquire': 'S’informer en privé',
       'product.add_to_bag': 'Ajouter au panier',
       'product.provenance': 'Provenance vérifiée',
-      'footer.charter': 'Charte de Fondation 1924',
+      'footer.charter': 'Charte de Fondation 2025',
       'common.search': 'Rechercher dans le registre...',
       'common.hub': 'Centre de Marché',
       'common.login': 'Connexion | Inscription'

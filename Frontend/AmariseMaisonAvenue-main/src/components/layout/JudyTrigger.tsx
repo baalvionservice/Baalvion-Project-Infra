@@ -53,7 +53,7 @@ export function MeowTrigger() {
 
               <div className="space-y-6">
                 <p className="text-sm text-gray-600 font-light italic leading-relaxed">
-                  "I am Meow, the Maison's autonomous assistant. I can guide you through the 1924 series or assist with a private brief."
+                  "I am Meow, the Maison's autonomous assistant. I can help you browse new arrivals or assist with a private brief."
                 </p>
 
                 <div className="space-y-3">

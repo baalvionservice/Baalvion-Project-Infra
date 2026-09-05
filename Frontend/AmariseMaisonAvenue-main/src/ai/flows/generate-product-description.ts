@@ -37,7 +37,7 @@ export async function generateProductDescription(
   } catch (error) {
     console.warn("AI Description Quota Exceeded. Returning archive description.");
     return {
-      description: `A testament to the pursuit of perfection, this ${input.productName} represents the pinnacle of Maison Amarisé's ${input.category} atelier. Designed in our Paris flagship and brought to life through centuries-old craft, it is an artifact for the modern connoisseur.`
+      description: `This ${input.productName} has been authenticated in-house and graded before listing. Condition, provenance and hardware are documented in full; each ${input.category} piece is sold as a single unit.`
     };
   }
 }
