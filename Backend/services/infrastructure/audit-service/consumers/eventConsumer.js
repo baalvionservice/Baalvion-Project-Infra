@@ -21,7 +21,13 @@ function toAuditEvent(eventType, payload, meta) {
     const severity = HIGH_SEV.test(eventType) ? 'high' : (FAILURE_HINT.test(eventType) ? 'medium' : 'info');
     return {
         action:         eventType || 'event',
-        actorId:        payload.userId ?? payload.actorId ?? payload.sub ?? null,
+        // `actorId` first: it unambiguously means "who performed this". `userId` does not —
+        // cms.member.invited carries the person being GRANTED in userId, so preferring it
+        // attributed every access grant to its recipient instead of the administrator who
+        // made it. Kept as a fallback for events that only carry userId.
+        actorId:        payload.actorId ?? payload.userId ?? payload.sub ?? null,
+        // The subject of the action, when the payload distinguishes it from the actor.
+        targetUserId:   payload.targetUserId ?? null,
         orgId:          payload.orgId ?? payload.org_id ?? null,
         ip:             payload.ipAddress ?? payload.ip ?? null,
         userAgent:      payload.userAgent ?? null,
