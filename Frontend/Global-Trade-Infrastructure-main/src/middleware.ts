@@ -64,6 +64,25 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
       'Cache-Control',
       'public, s-maxage=604800, stale-while-revalidate=86400',
     );
+
+    /**
+     * Make the response actually cacheable by Cloudflare.
+     *
+     * Next's App Router sets `Vary: rsc, next-router-state-tree, …` for RSC negotiation,
+     * and **Cloudflare only caches on `Vary: Accept-Encoding`** — any other value makes a
+     * response ineligible, which showed up as cf-cache-status: DYNAMIC on every HTML hit
+     * even with a Cache Rule in place.
+     *
+     * Safe to narrow because Next distinguishes RSC requests by URL, not only by header:
+     * they carry `?_rsc=<hash>`, so a CDN cache keyed on URL never confuses an RSC payload
+     * with a document. RSC requests are additionally marked no-store here so an edge never
+     * holds one at all.
+     */
+    if (request.headers.get('rsc') || request.nextUrl.searchParams.has('_rsc')) {
+      res.headers.set('Cache-Control', 'private, no-store');
+    } else {
+      res.headers.set('Vary', 'Accept-Encoding');
+    }
     return res;
   }
 

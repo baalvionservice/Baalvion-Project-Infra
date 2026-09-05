@@ -48,9 +48,27 @@ export const PUBLISHER = 'Baalvion';
 /** Internal route prefix. Must match SHIPPING_DIRECTORY_PREFIX in middleware.ts. */
 const PREFIX = '/shipping-directory';
 
-/** An in-app link. Relative, prefixed, host-agnostic. */
+/**
+ * Whether this deployment serves the directory at the ROOT of its own host.
+ *
+ * Derived from SHIPPING_DIRECTORY_HOSTS: if you have told the app which hosts serve the
+ * directory, middleware is rewriting those hosts onto the prefix AND redirecting the
+ * prefix away — so an in-app link carrying the prefix costs a 307 on every click.
+ */
+const SERVED_AT_ROOT = Boolean(process.env.SHIPPING_DIRECTORY_HOSTS);
+
+/**
+ * An in-app link.
+ *
+ * On the directory's own subdomain this MUST be the clean path. Emitting the internal
+ * prefix there meant every link on the live site pointed at a URL that 307s — every user
+ * click paid a redirect, every prefetch was wasted, and a crawler would have walked all
+ * ~99,700 pages through redirects while the canonicals pointed somewhere else. Served
+ * under the prefix (local development), the prefix is still required.
+ */
 export function href(path = ''): string {
   const clean = path.replace(/^\/+/, '');
+  if (SERVED_AT_ROOT) return clean ? `/${clean}` : '/';
   return clean ? `${PREFIX}/${clean}` : PREFIX;
 }
 

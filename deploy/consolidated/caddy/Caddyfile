@@ -89,6 +89,33 @@ api.baalvion.com {
 		reverse_proxy app-commerce:3025
 	}
 
+# ── World Shipping Directory site (ships.baalvion.com) ───────────────────────
+# One Next process (app-gti-web) serves this and trade.baalvion.com; middleware.ts rewrites
+# this host onto /shipping-directory and redirects the internal prefix away.
+#
+# Cloudflare only caches on `Vary: Accept-Encoding`. Next's App Router emits
+# `Vary: rsc, next-router-state-tree, …` for RSC negotiation, which makes every HTML
+# response ineligible. It must be rewritten HERE, not in middleware — Next sets its own
+# Vary after middleware has run. Narrowing is safe because Next marks RSC requests in the
+# URL (?_rsc=<hash>), so a URL-keyed CDN cache cannot hand an RSC payload to a document
+# request; those are matched first and marked no-store.
+ships.baalvion.com {
+	encode gzip zstd
+
+	@rsc query _rsc=*
+	handle @rsc {
+		reverse_proxy app-gti-web:9003 {
+			header_down Cache-Control "private, no-store"
+		}
+	}
+
+	handle {
+		reverse_proxy app-gti-web:9003 {
+			header_down Vary "Accept-Encoding"
+		}
+	}
+}
+
 	# Payment public surface (Java PSP gateway, app-payments:3015 — runs under --profile payments):
 	# initiate a charge, read its status, receive provider webhooks (HMAC-verified inside the svc).
 	# Money-OUT (refund/capture) + actuator are denied at the edge (listed first → first match wins).
