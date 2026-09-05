@@ -9,11 +9,12 @@
  * used MAISON_STORY / CUSTOMER_SERVICE / CITIES / BUYING_GUIDES / editorials now reads
  * here, so the content is centrally managed from the admin console (/cms/websites/...).
  *
- * Usable directly from Server Components (it `fetch`es dynamically with `cache: 'no-store'`,
- * so content is fetched live per request). Each reader
+ * Usable directly from Server Components. Reads are CACHED and tagged (see below) rather
+ * than fetched live per request. Each reader
  * degrades to `null`/`[]` on any failure so a CMS outage never breaks a page render —
  * callers supply their own last-resort fallback copy where appropriate.
  */
+import { CMS_CACHE_TAG } from './cache-tags';
 import type { CountryCode, MaisonService, MaisonReport } from './types';
 
 // Central CMS public delivery base, ending at `/api/v1`. The website is addressed by slug.
@@ -45,9 +46,20 @@ export interface CmsContent {
   createdAt?: string | null;
 }
 
+// Editorial copy — maison story, customer service, city guides, buying guides —
+// edited by hand every few weeks. `cache: 'no-store'` here (the previous
+// setting) opts EVERY route that reads it out of static rendering, silently and
+// with no build warning; combined with the root layout's `headers()` call it is
+// why this site had no cached pages at all. Freshness comes from
+// /api/revalidate's revalidateTag(CMS_CACHE_TAG) on publish, not from this
+// number — a day is the safety net for when that webhook never fires.
+const CMS_REVALIDATE_SECONDS = 86400;
+
 async function getJson<T>(path: string, fallback: T): Promise<T> {
   try {
-    const res = await fetch(`${PUBLIC_BASE}${path}`, { cache: 'no-store' });
+    const res = await fetch(`${PUBLIC_BASE}${path}`, {
+      next: { revalidate: CMS_REVALIDATE_SECONDS, tags: [CMS_CACHE_TAG] },
+    });
     if (!res.ok) return fallback;
     const json = await res.json();
     return (json && json.data !== undefined ? json.data : fallback) as T;
