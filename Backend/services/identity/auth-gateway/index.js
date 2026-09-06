@@ -11,6 +11,7 @@ const redis = require('./lib/redis');
 const authTrace = require('./observability/authTrace');
 const burnIn    = require('./observability/burnIn');
 const { requireSession, attachUser, requireCsrf } = require('./middleware/session');
+const publicReads = require('./routes/publicReads');
 const { geoFence } = require('./middleware/geoFence');
 const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-shutdown');
 
@@ -136,6 +137,10 @@ app.get('/auth-capability-check', requireInternalKey, async (req, res) => {
 
 // /auth/* — JSON-parsed (login/refresh/logout/me/.well-known/session).
 app.use('/auth', express.json({ limit: '1mb' }), authRoutes);
+
+// Anonymous reads for the public directory — a fixed allow-list of GET endpoints, no identity
+// injected. Everything it does not match falls through to the guarded chain below.
+app.use('/api', publicReads);
 
 // /api/* — TRUST BOUNDARY. NO express.json here (the proxy must stream the body to the backend).
 //   requireSession → attachUser → requireCsrf → geoFence → signed-identity proxy.
