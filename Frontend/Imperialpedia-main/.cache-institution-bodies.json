@@ -1,0 +1,352 @@
+[
+ {
+  "qid": "Q7159",
+  "name": "African Union",
+  "kind": "regional bloc"
+ },
+ {
+  "qid": "Q7172",
+  "name": "Arab League",
+  "kind": "regional bloc"
+ },
+ {
+  "qid": "Q7768",
+  "name": "ASEAN",
+  "kind": "regional bloc"
+ },
+ {
+  "qid": "Q170481",
+  "name": "Asia-Pacific Economic Cooperation",
+  "kind": "economic forum"
+ },
+ {
+  "qid": "Q309195",
+  "name": "Bank for International Settlements",
+  "kind": "central bank forum"
+ },
+ {
+  "qid": "Q243630",
+  "name": "BRICS",
+  "kind": "intergovernmental grouping"
+ },
+ {
+  "qid": "Q7785",
+  "name": "Commonwealth of Nations",
+  "kind": "intergovernmental association"
+ },
+ {
+  "qid": "Q217172",
+  "name": "Cooperation Council for the Arab States of the Persian Gulf",
+  "kind": "regional bloc"
+ },
+ {
+  "qid": "Q8901",
+  "name": "European Central Bank",
+  "kind": "central bank"
+ },
+ {
+  "qid": "Q458",
+  "name": "European Union",
+  "kind": "political and economic union"
+ },
+ {
+  "qid": "Q82151",
+  "name": "Food and Agriculture Organization of the United Nations",
+  "kind": "UN agency"
+ },
+ {
+  "qid": "Q19771",
+  "name": "G20",
+  "kind": "intergovernmental forum"
+ },
+ {
+  "qid": "Q1764511",
+  "name": "G7",
+  "kind": "intergovernmental forum"
+ },
+ {
+  "qid": "Q41984",
+  "name": "International Atomic Energy Agency",
+  "kind": "UN agency"
+ },
+ {
+  "qid": "Q54129",
+  "name": "International Labour Organization",
+  "kind": "UN agency"
+ },
+ {
+  "qid": "Q7804",
+  "name": "International Monetary Fund",
+  "kind": "monetary institution"
+ },
+ {
+  "qid": "Q4264",
+  "name": "Mercosur",
+  "kind": "trade bloc"
+ },
+ {
+  "qid": "Q7184",
+  "name": "NATO",
+  "kind": "military alliance"
+ },
+ {
+  "qid": "Q41550",
+  "name": "Organization for Economic Cooperation and Development",
+  "kind": "economic organisation"
+ },
+ {
+  "qid": "Q7795",
+  "name": "Organization of the Petroleum Exporting Countries",
+  "kind": "commodity cartel"
+ },
+ {
+  "qid": "Q757276",
+  "name": "Pacific Islands Forum",
+  "kind": "regional bloc"
+ },
+ {
+  "qid": "Q485207",
+  "name": "Shanghai Cooperation Organisation",
+  "kind": "regional bloc"
+ },
+ {
+  "qid": "Q145700",
+  "name": "South Asian Association for Regional Cooperation",
+  "kind": "regional bloc"
+ },
+ {
+  "qid": "Q7809",
+  "name": "UNESCO",
+  "kind": "UN agency"
+ },
+ {
+  "qid": "Q740308",
+  "name": "UNICEF",
+  "kind": "UN agency"
+ },
+ {
+  "qid": "Q1065",
+  "name": "United Nations",
+  "kind": "international organisation"
+ },
+ {
+  "qid": "Q7164",
+  "name": "World Bank",
+  "kind": "development bank"
+ },
+ {
+  "qid": "Q7817",
+  "name": "World Health Organization",
+  "kind": "UN agency"
+ },
+ {
+  "qid": "Q7825",
+  "name": "World Trade Organization",
+  "kind": "trade body"
+ },
+ {
+  "qid": "Q204344",
+  "name": "World Food Programme",
+  "kind": "UN agency"
+ },
+ {
+  "qid": "Q161718",
+  "name": "United Nations Development Programme",
+  "kind": "UN agency"
+ },
+ {
+  "qid": "Q177773",
+  "name": "World Intellectual Property Organization",
+  "kind": "UN agency"
+ },
+ {
+  "qid": "Q170424",
+  "name": "World Meteorological Organization",
+  "kind": "UN agency"
+ },
+ {
+  "qid": "Q125761",
+  "name": "International Civil Aviation Organization",
+  "kind": "UN agency"
+ },
+ {
+  "qid": "Q201054",
+  "name": "International Maritime Organization",
+  "kind": "UN agency"
+ },
+ {
+  "qid": "Q376150",
+  "name": "International Telecommunication Union",
+  "kind": "UN agency"
+ },
+ {
+  "qid": "Q386120",
+  "name": "United Nations Industrial Development Organization",
+  "kind": "UN agency"
+ },
+ {
+  "qid": "Q182016",
+  "name": "United Nations Environment Programme",
+  "kind": "UN agency"
+ },
+ {
+  "qid": "Q636107",
+  "name": "United Nations Office on Drugs and Crime",
+  "kind": "UN agency"
+ },
+ {
+  "qid": "Q656812",
+  "name": "Office of the High Commissioner for Human Rights",
+  "kind": "UN agency"
+ },
+ {
+  "qid": "Q188822",
+  "name": "Asian Development Bank",
+  "kind": "development bank"
+ },
+ {
+  "qid": "Q340195",
+  "name": "African Development Bank",
+  "kind": "development bank"
+ },
+ {
+  "qid": "Q1153087",
+  "name": "Inter-American Development Bank",
+  "kind": "development bank"
+ },
+ {
+  "qid": "Q488981",
+  "name": "European Bank for Reconstruction and Development",
+  "kind": "development bank"
+ },
+ {
+  "qid": "Q192247",
+  "name": "European Investment Bank",
+  "kind": "development bank"
+ },
+ {
+  "qid": "Q41230",
+  "name": "Islamic Development Bank",
+  "kind": "development bank"
+ },
+ {
+  "qid": "Q8579145",
+  "name": "New Development Bank",
+  "kind": "development bank"
+ },
+ {
+  "qid": "Q18109843",
+  "name": "Asian Infrastructure Investment Bank",
+  "kind": "development bank"
+ },
+ {
+  "qid": "Q8475",
+  "name": "Interpol",
+  "kind": "international policing body"
+ },
+ {
+  "qid": "Q47488",
+  "name": "International Criminal Court",
+  "kind": "international court"
+ },
+ {
+  "qid": "Q7801",
+  "name": "International Court of Justice",
+  "kind": "international court"
+ },
+ {
+  "qid": "Q170418",
+  "name": "World Economic Forum",
+  "kind": "economic forum"
+ },
+ {
+  "qid": "Q8908",
+  "name": "Council of Europe",
+  "kind": "regional body"
+ },
+ {
+  "qid": "Q81299",
+  "name": "Organization for Security and Co-operation in Europe",
+  "kind": "regional body"
+ },
+ {
+  "qid": "Q123759",
+  "name": "Organization of American States",
+  "kind": "regional bloc"
+ },
+ {
+  "qid": "Q205995",
+  "name": "Caribbean Community",
+  "kind": "regional bloc"
+ },
+ {
+  "qid": "Q193272",
+  "name": "Economic Community of West African States",
+  "kind": "regional bloc"
+ },
+ {
+  "qid": "Q816706",
+  "name": "Southern African Development Community",
+  "kind": "regional bloc"
+ },
+ {
+  "qid": "Q337456",
+  "name": "East African Community",
+  "kind": "regional bloc"
+ },
+ {
+  "qid": "Q4173083",
+  "name": "Eurasian Economic Union",
+  "kind": "regional bloc"
+ },
+ {
+  "qid": "Q146165",
+  "name": "Nordic Council",
+  "kind": "regional body"
+ },
+ {
+  "qid": "Q47543",
+  "name": "Organisation of Islamic Cooperation",
+  "kind": "regional bloc"
+ },
+ {
+  "qid": "Q826700",
+  "name": "International Energy Agency",
+  "kind": "energy body"
+ },
+ {
+  "qid": "Q392739",
+  "name": "International Renewable Energy Agency",
+  "kind": "energy body"
+ },
+ {
+  "qid": "Q681487",
+  "name": "Financial Action Task Force",
+  "kind": "financial standards body"
+ },
+ {
+  "qid": "Q13411871",
+  "name": "Financial Stability Board",
+  "kind": "financial standards body"
+ },
+ {
+  "qid": "Q605326",
+  "name": "World Customs Organization",
+  "kind": "trade body"
+ },
+ {
+  "qid": "Q15028",
+  "name": "International Organization for Standardization",
+  "kind": "standards body"
+ },
+ {
+  "qid": "Q472311",
+  "name": "International Organization for Migration",
+  "kind": "UN agency"
+ },
+ {
+  "qid": "Q61923",
+  "name": "UN Tourism",
+  "kind": "UN agency"
+ }
+]
