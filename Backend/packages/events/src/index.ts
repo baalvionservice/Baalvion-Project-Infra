@@ -124,6 +124,12 @@ export interface RedisPublisherOptions {
    * replaces, so new code should set `rethrow: true` (or use a broker bus).
    */
   rethrow?: boolean;
+  /**
+   * Approximate cap on stream length. Defaults to EVENT_STREAM_MAXLEN, then 1,000,000.
+   * Set to 0 only if something else is trimming the stream — unbounded growth is not a
+   * configuration, it is a slow outage.
+   */
+  maxLen?: number;
 }
 
 export function createRedisPublisher(
@@ -133,6 +139,24 @@ export function createRedisPublisher(
 ): EventPublisher {
   const STREAM_KEY = 'baalvion:event_stream';
   const rethrow = options.rethrow ?? false;
+  /**
+   * Cap the stream length.
+   *
+   * `XADD` with no bound grows the stream forever: every event ever published stays in Redis
+   * memory until the instance dies. That failure is slow, silent and eventually total, and it
+   * arrives at whatever moment the platform is busiest.
+   *
+   * `MAXLEN ~ n` trims approximately, which lets Redis drop whole nodes instead of walking the
+   * stream on every write — the difference between a constant-time publish and one that gets
+   * slower as the stream grows. The default is deliberately generous: consumers read within
+   * seconds, so a million entries is many hours of headroom, and a consumer that is further
+   * behind than that has a problem trimming would only hide.
+   */
+  // Read via globalThis: this package has no Node type definitions, and it should not need them
+  // just to read one optional setting.
+  const envMaxLen = (globalThis as { process?: { env?: Record<string, string | undefined> } })
+    .process?.env?.EVENT_STREAM_MAXLEN;
+  const maxLen = Number(options.maxLen ?? envMaxLen ?? 1_000_000);
 
   async function publishOne<T>(event: PlatformEvent<T>): Promise<void> {
     if (!client) {
@@ -144,7 +168,9 @@ export function createRedisPublisher(
     try {
       await Promise.all([
         client.publish(`baalvion:events:${event.type}`, serialized),
-        client.xadd(STREAM_KEY, '*', 'type', event.type, 'payload', serialized),
+        maxLen > 0
+          ? client.xadd(STREAM_KEY, 'MAXLEN', '~', String(maxLen), '*', 'type', event.type, 'payload', serialized)
+          : client.xadd(STREAM_KEY, '*', 'type', event.type, 'payload', serialized),
       ]);
       logger.debug({ eventId: event.id, type: event.type }, 'Event published');
     } catch (err) {

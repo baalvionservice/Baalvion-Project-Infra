@@ -28,4 +28,17 @@ function decideAccess({ isPremiumContent, subscription }) {
     return { isPremium: true, hasAccess, requiredTier: MIN_PAID_TIER, currentTier };
 }
 
-module.exports = { decideAccess, MIN_PAID_TIER, FREE_TIER };
+// Cross-site grants. `decideAccess` above stays exactly as it was — it is the per-site
+// premium-content rule two services already depend on — and is superseded rather than replaced
+// by `decideEntitlement`, which answers the same question across the whole estate.
+const grants = require('./grants');
+
+module.exports = {
+    decideAccess,
+    MIN_PAID_TIER,
+    FREE_TIER,
+    decideEntitlement: grants.decideEntitlement,
+    activeEntitlements: grants.activeEntitlements,
+    grantFromObligation: grants.grantFromObligation,
+    DEFAULT_TIER_RANK: grants.DEFAULT_TIER_RANK,
+};

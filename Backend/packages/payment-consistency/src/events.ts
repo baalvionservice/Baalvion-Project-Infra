@@ -59,6 +59,23 @@ export const INTENT_TARGET: Record<PaymentIntent, PaymentState> = {
  * The canonical event. `amount` is an INTEGER in the currency's minor unit (paise/cents)
  * to keep money exact — adapters must convert before constructing the event.
  */
+/**
+ * Who paid, as the producing site knows them. Only what identity resolution needs.
+ *
+ * The `*Verified` flags carry real weight: an unverified value is a string someone typed, and
+ * merging two people on one would let anybody claim another's payment history by entering their
+ * address at checkout. The party graph refuses to merge on unverified signals for that reason.
+ */
+export interface CustomerSignal {
+  authUserId?: string | null;
+  email?: string | null;
+  emailVerified?: boolean;
+  phone?: string | null;
+  phoneVerified?: boolean;
+  name?: string | null;
+  siteCustomerId?: string | null;
+}
+
 export const PaymentEventSchema = z.object({
   type: z.enum(PAYMENT_EVENT_TYPES),
   /** The charge/intent identifier — the grain the state machine is keyed by. */
@@ -70,6 +87,25 @@ export const PaymentEventSchema = z.object({
   currency: z.string().length(3),
   /** Optional tenant scope (website slug, org id) and free-form provenance. */
   orgId: z.string().max(190).optional(),
+  /**
+   * Which Baalvion property took the money — a site id from @baalvion/sites.
+   *
+   * Optional on the schema so existing adapters keep validating, but everything downstream
+   * that has to attribute revenue depends on it: without a siteId the payment reaches the
+   * cross-estate panel as unattributable. New adapters must always set it; `recordPayment()`
+   * refuses to build a record without one.
+   */
+  siteId: z.string().max(64).optional(),
+  /** The earner within that site — a store, a paid community, a firm. */
+  tenantId: z.string().max(190).optional(),
+  /** The rail used, which must be one the site is granted. */
+  rail: z.string().max(24).optional(),
+  /** Group-wide customer id. Null/absent until the party graph is backfilled. */
+  partyId: z.string().max(190).optional(),
+  /** Processor fee in the same currency's minor units, when the provider reports it. */
+  feeMinor: z.number().int().nonnegative().optional(),
+  /** Who paid, for the party graph. Free-form here; shaped by CustomerSignal in record.ts. */
+  customer: z.record(z.unknown()).nullish(),
   occurredAt: z.string().datetime().optional(),
   metadata: z.record(z.unknown()).optional(),
 });
