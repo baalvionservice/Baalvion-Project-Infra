@@ -81,6 +81,12 @@ export function Footer() {
               </div>
               <div className="space-y-3">
                 <Link
+                  href="/network"
+                  className="block text-sm font-bold text-gray-300 hover:text-[#FF9900] transition-colors"
+                >
+                  Network
+                </Link>
+                <Link
                   href="/services"
                   className="block text-sm font-bold text-gray-300 hover:text-[#FF9900] transition-colors"
                 >
