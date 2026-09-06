@@ -1,0 +1,191 @@
+name: Payment Spine CI
+
+# The commercial backbone: exact money, the site registry, the payment engine, the party graph,
+# revenue recognition and the double-entry posting rules — plus the services that report onto it.
+#
+# These are the paths where a mistake is expensive and quiet, so they are gated on every change
+# to any of them, not on a schedule.
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'Backend/packages/money/**'
+      - 'Backend/packages/sites/**'
+      - 'Backend/packages/party/**'
+      - 'Backend/packages/revenue/**'
+      - 'Backend/packages/ledger/**'
+      - 'Backend/packages/entitlements/**'
+      - 'Backend/packages/payment-consistency/**'
+      - 'Backend/packages/events/**'
+      - 'Backend/packages/contracts/**'
+      - 'Backend/services/commerce/order-service/**'
+      - 'Backend/services/ecosystem/ctm-service/**'
+      - 'Backend/services/ecosystem/community-service/**'
+      - 'Backend/services/ecosystem/giftcard-service/**'
+      - 'Backend/services/infrastructure/proxy-service/**'
+      - 'Backend/services/trade/order-execution-service/**'
+      - 'Backend/services/platform/admin-service/**'
+      - '.github/workflows/payment-spine.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'Backend/packages/**'
+      - 'Backend/services/commerce/order-service/**'
+      - 'Backend/services/ecosystem/ctm-service/**'
+      - 'Backend/services/ecosystem/community-service/**'
+      - 'Backend/services/ecosystem/giftcard-service/**'
+      - 'Backend/services/infrastructure/proxy-service/**'
+      - 'Backend/services/trade/order-execution-service/**'
+      - 'Backend/services/platform/admin-service/**'
+      - '.github/workflows/payment-spine.yml'
+
+jobs:
+  packages:
+    name: money spine — packages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6.0.10
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install workspace deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm run build:packages
+
+      - name: money — exact arithmetic
+        working-directory: Backend/packages/money
+        run: pnpm test
+
+      - name: sites — registry and rail permissions
+        working-directory: Backend/packages/sites
+        run: pnpm test
+
+      - name: party — identity resolution
+        working-directory: Backend/packages/party
+        run: pnpm test
+
+      - name: revenue — deferred revenue and recognition
+        working-directory: Backend/packages/revenue
+        run: pnpm test
+
+      - name: ledger — double-entry postings
+        working-directory: Backend/packages/ledger
+        run: pnpm test
+
+      - name: entitlements — cross-site grants
+        working-directory: Backend/packages/entitlements
+        run: pnpm test
+
+      - name: payment-consistency — state machine and records
+        working-directory: Backend/packages/payment-consistency
+        run: pnpm test
+
+      - name: events — bus and outbox
+        working-directory: Backend/packages/events
+        run: pnpm test
+
+      # The schema gate. It used to soft-skip silently when ajv was absent, so this asserts it
+      # actually validated something rather than trusting a green tick.
+      - name: contracts — event schema gate
+        working-directory: Backend/packages/contracts
+        run: |
+          out=$(node scripts/validate-events.mjs)
+          echo "$out"
+          echo "$out" | grep -qE "[0-9]+ schemas, [0-9]+ golden samples, 0 failures" \
+            || { echo "::error::contract validation did not run — check ajv is installed"; exit 1; }
+
+      - name: Type-check the money-critical packages
+        run: |
+          for p in money sites party revenue ledger payment-consistency; do
+            (cd "Backend/packages/$p" && pnpm run type-check)
+          done
+
+  services:
+    name: money spine — reporting services
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: baalvion_test
+          POSTGRES_USER: baalvion
+          POSTGRES_PASSWORD: test_pass
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      NODE_ENV: test
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_NAME: baalvion_test
+      DB_USER: baalvion
+      DB_PASSWORD: test_pass
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6.0.10
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install workspace deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm run build:packages
+
+      - name: order-service (Amarisé)
+        working-directory: Backend/services/commerce/order-service
+        run: pnpm test
+
+      - name: ctm-service (ControlTheMarket)
+        working-directory: Backend/services/ecosystem/ctm-service
+        run: pnpm test
+
+      - name: community-service (Communities)
+        working-directory: Backend/services/ecosystem/community-service
+        run: pnpm test
+
+      - name: giftcard-service
+        working-directory: Backend/services/ecosystem/giftcard-service
+        run: pnpm test
+
+      - name: proxy-service
+        working-directory: Backend/services/infrastructure/proxy-service
+        run: pnpm test
+
+      - name: order-execution-service (GTI)
+        working-directory: Backend/services/trade/order-execution-service
+        run: npx jest --forceExit --runInBand
+
+      # The PCL schema must be creatable from a clean database, or a service that reports
+      # payments cannot start. Runs it twice: the second run must be a no-op.
+      - name: PCL migrations apply, and are idempotent
+        working-directory: Backend/services/commerce/order-service
+        env:
+          DATABASE_URL: postgres://baalvion:test_pass@localhost:5432/baalvion_test
+        run: |
+          node ../../../packages/payment-consistency/scripts/migrate.mjs
+          node ../../../packages/payment-consistency/scripts/migrate.mjs | tee /tmp/second.log
+          grep -q "up to date" /tmp/second.log \
+            || { echo "::error::re-running migrations was not a no-op"; exit 1; }
+
+  contract:
+    name: money spine — architecture contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6.0.10
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - name: Service catalogue + architecture rules
+        run: pnpm run architecture:check
