@@ -53,8 +53,41 @@ export default async function InvestDiscoverPage({ searchParams }: { searchParam
     return `/invest${q ? `?${q}` : ''}`;
   };
 
+  // Structured data built from the SAME rows the page renders — never a separate hand-written
+  // list that can drift from what is actually live.
+  const base = process.env.NEXT_PUBLIC_BASE_URL || 'https://ir.baalvion.com';
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: base },
+          { '@type': 'ListItem', position: 2, name: 'Invest', item: `${base}/invest` },
+        ],
+      },
+      {
+        '@type': 'CollectionPage',
+        name: 'Investment Opportunities',
+        description: 'Vetted private investment opportunities open to qualified investors.',
+        url: `${base}/invest`,
+        mainEntity: {
+          '@type': 'ItemList',
+          numberOfItems: opps.length,
+          itemListElement: opps.map((o, i) => ({
+            '@type': 'ListItem',
+            position: i + 1,
+            url: `${base}/invest/${o.id}`,
+            name: o.title,
+          })),
+        },
+      },
+    ],
+  };
+
   return (
     <div className="min-h-screen bg-white text-[#1d1d1f]">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       {/* Hero */}
       <section className="border-b border-gray-100 bg-gradient-to-b from-[#0a0a0a] to-[#161616] text-white">
         <div className="mx-auto max-w-[1180px] px-6 py-16 md:py-20">

@@ -1,13 +1,15 @@
-import { NextResponse } from 'next/server';
+import { irForward } from '@/lib/ir-api';
 
-// Update a subscription's preferences (standalone mode — acknowledged, echoed back).
+// Single-record proxy to ir-service. Kept alongside the collection route so the browser client's
+// detail/update/delete paths resolve same-origin rather than cross-origin to the public API.
 export const dynamic = 'force-dynamic';
 
-export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }> }) {
+async function handler(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
-  const patch = await req.json().catch(() => ({}));
-  return NextResponse.json({
-    success: true,
-    data: { id, role: 'p1_institutional', email: '', active: true, ...patch },
-  });
+  return irForward(req, `/subscriptions/${encodeURIComponent(id)}`);
 }
+
+export const GET = handler;
+export const PATCH = handler;
+export const PUT = handler;
+export const DELETE = handler;

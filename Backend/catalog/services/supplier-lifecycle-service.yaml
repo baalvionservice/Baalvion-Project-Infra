@@ -1,0 +1,23 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: supplier-lifecycle-service
+  description: >-
+    GTOS supplier lifecycle: onboarding, qualification, risk scoring, scorecards, offboarding.
+  domain: commerce
+  division: commerce
+  context: trade-supplier-lifecycle
+  owner: "@baalvion/commerce"
+  # tier derived from blast radius at registration — confirm with the owning team.
+  tier: tier-2
+  repo: baalvion-platform
+  path: Backend/services/trade/supplier-lifecycle-service
+spec:
+  lifecycle: production
+  language: node
+  datastores: [postgres]
+  dependsOn: [auth-service]
+  consumesEvents: []
+  producesEvents: []
+  slo: { availability: 0.99, latencyP95Ms: 400 }
+  deploy: { chart: baalvion-service, namespace: baalvion-commerce, minReplicas: 2, maxReplicas: 10 }

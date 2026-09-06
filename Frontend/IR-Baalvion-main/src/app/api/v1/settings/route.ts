@@ -1,19 +1,10 @@
-import { NextResponse } from 'next/server';
+import { irForward } from '@/lib/ir-api';
 
-// Seed platform settings singleton (standalone mode). Consumed by settingsApi.get → json.data.
+// Platform settings singleton.
+// Previously served hardcoded seed data from this file; it now proxies to ir-service, which owns
+// the records and scopes them to the caller.
 export const dynamic = 'force-dynamic';
 
-const SETTINGS = {
-  branding: { siteName: 'Baalvion Investor Relations', primaryColor: '#0b5fff', logoUrl: '' },
-  seo: {
-    title: 'Baalvion — Investor Relations',
-    description: 'Institutional investor relations portal for Baalvion.',
-    keywords: ['Baalvion', 'investor relations', 'institutional'],
-  },
-  features: { voting: true, dataRoom: true, emailAlerts: true, capitalOps: true },
-  environment: 'production',
-};
-
-export async function GET() {
-  return NextResponse.json({ success: true, data: SETTINGS });
-}
+export const GET = (req: Request) => irForward(req, '/settings');
+export const PATCH = (req: Request) => irForward(req, '/settings');
+export const PUT = (req: Request) => irForward(req, '/settings');

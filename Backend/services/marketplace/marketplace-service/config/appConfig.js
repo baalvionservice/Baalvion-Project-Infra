@@ -10,8 +10,6 @@ module.exports = {
     apiVersion: 'v1',
     supportedVersions: ['v1'],
     schema: 'marketplace',
-    // Fallback org for self-service onboarding before a platform identity exists.
-    defaultOrgId: process.env.MARKETPLACE_DEFAULT_ORG_ID || '52c76e5c-0668-4492-ba20-23e7ee16f49b',
     // Public investor-facing frontend — invitation emails link here to start onboarding.
     appUrl: process.env.MARKETPLACE_APP_URL || 'http://localhost:3000',
     pagination: {
@@ -19,6 +17,11 @@ module.exports = {
         maxLimit: Number(process.env.MARKETPLACE_MAX_LIMIT || 100),
     },
     corsOrigins: parseList(process.env.CORS_ORIGINS, ['http://localhost:3000']),
+    security: {
+        ipRateLimit: Number(process.env.MARKETPLACE_IP_RATE_LIMIT || 120),
+        dealWriteRateLimit: Number(process.env.MARKETPLACE_DEAL_WRITE_RATE_LIMIT || 30),
+        webhookRateLimit: Number(process.env.MARKETPLACE_WEBHOOK_RATE_LIMIT || 300),
+    },
     jwt: {
         // Optional at boot — the canonical verifier is created lazily on first protected
         // request (so the service still boots in dev without a key configured).

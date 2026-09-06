@@ -1,7 +1,6 @@
 'use strict';
 // Investor domain logic — onboarding (AML + KYC), profile/preferences, accreditation.
 const db = require('../models');
-const config = require('../config/appConfig');
 const { AppError } = require('../utils/errors');
 const { parseListQuery, paginate } = require('../utils/query');
 const { assertOwnerOrStaff } = require('../utils/authz');
@@ -31,7 +30,10 @@ async function getById({ id, user }) {
 // Onboarding — runs AML screening immediately and submits KYC.
 async function create({ data, user }) {
     const { invite_token, ...investorData } = data;
-    const org_id = user?.orgId || config.defaultOrgId;
+    // No shared fallback org — see companyService.create. An investor pooled into a default org
+    // shares a tenant, and therefore a deal pipeline, with every other investor pooled there.
+    if (!user?.orgId) throw new AppError('NO_ORG', 'Your account is not linked to an organisation', 403);
+    const org_id = user.orgId;
     const aml = await screenAml({ legalName: investorData.legal_name, country: investorData.country });
     const kyc = await submitKyc({ subjectType: 'investor', subjectId: 'pending' });
     const row = await db.Investor.create({

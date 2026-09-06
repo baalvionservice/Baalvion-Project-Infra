@@ -10,6 +10,29 @@ const bcrypt = require('bcryptjs');
 const db = require('./models');
 const { computeScores } = require('./utils/score');
 
+// This file invents people, companies, deals and forum posts. That was fine when the database was
+// empty; it is not fine now that the directory holds records compiled from public filings, where
+// a fabricated row is indistinguishable from a real one to anyone reading the site. Refuse to run
+// against a database that already holds real data unless the caller is explicit.
+async function guardRealData() {
+    if (process.argv.includes('--force')) {
+        console.warn('[seed] --force given: writing demo fiction into a database that holds real records.');
+        return;
+    }
+    const [investors, companies] = await Promise.all([
+        db.Investor.count().catch(() => 0),
+        db.Company.count().catch(() => 0),
+    ]);
+    if (investors + companies > 0) {
+        console.error(
+            `[seed] REFUSED: this database holds ${investors} investors and ${companies} companies compiled ` +
+            'from public records. Seeding would mix invented profiles into them.\n' +
+            '       Run with --force only on a throwaway database.',
+        );
+        process.exit(1);
+    }
+}
+
 const PWD_HASH = bcrypt.hashSync('Passw0rd!', 10);
 
 // Fixed ids keep re-runs idempotent and let threads/deals reference users stably.
@@ -79,31 +102,15 @@ const THREADS = [
       replies: [[1, 'The Almanack of Naval Ravikant.'], [3, 'Poor Charlie’s Almanack — required reading.']] },
 ];
 
-const DEALS = [
-    { founder: 0, title: 'NeuralEdge — AI Infrastructure for Hedge Funds', funding: 2000000, stage: 'Series A', category: 'AI / Fintech', pitch: 'Low-latency inference infra purpose-built for systematic funds.' },
-    { founder: 1, title: 'Verdant — Carbon Credit Marketplace', funding: 1500000, stage: 'Seed', category: 'ClimateTech', pitch: 'Transparent, audited carbon credits with on-chain settlement.' },
-    { founder: 2, title: 'Helios — Solar Microgrids for Emerging Markets', funding: 5000000, stage: 'Series B', category: 'Energy', pitch: 'Financing + deploying microgrids across high-growth regions.' },
-    { founder: 3, title: 'Atlas — Cross-border Payments for SMBs', funding: 3000000, stage: 'Series A', category: 'Fintech', pitch: 'Stablecoin rails that cut cross-border fees by 80%.' },
-];
+const DEALS = [];
 
-const INVESTORS = [
-    { name: 'Alexandra Reyes', firm: 'Northstar Ventures', title: 'Managing Partner', type: 'VC', region: 'North America', location: 'San Francisco, USA', hq: 'San Francisco, CA', aum: 850000000, verified: true, backed: 24, min: 250000, max: 2000000,
-      thesis: 'Backing technical founders rebuilding financial infrastructure from first principles.', sectors: ['Fintech', 'AI', 'Infrastructure'], stages: ['Seed', 'Series A'], portfolio: ['NeuralEdge', 'Atlas', 'Lumen'] },
-    { name: 'Daniel Okonkwo', firm: 'Meridian Capital', title: 'General Partner', type: 'VC', region: 'Europe', location: 'London, UK', hq: 'London, UK', aum: 1200000000, verified: true, backed: 31, min: 1000000, max: 10000000,
-      thesis: 'Climate and energy transition at industrial scale. We fund the hard stuff.', sectors: ['ClimateTech', 'Energy', 'Hardware'], stages: ['Series A', 'Series B'], portfolio: ['Helios', 'Verdant', 'GridIQ'] },
-    { name: 'Priya Nair', firm: 'Ascend Angels', title: 'Angel Investor', type: 'Angel', region: 'Asia', location: 'Bangalore, India', hq: 'Bangalore, India', aum: 40000000, verified: true, backed: 47, min: 25000, max: 150000,
-      thesis: 'First-check believer in solo and technical founders. Speed and conviction.', sectors: ['SaaS', 'Consumer', 'AI'], stages: ['Pre-Seed', 'Seed'], portfolio: ['DeepWork', 'Nova'] },
-    { name: 'Marcus Holloway', firm: 'Apex Growth', title: 'Partner', type: 'PE', region: 'North America', location: 'New York, USA', hq: 'New York, NY', aum: 3400000000, verified: true, backed: 18, min: 5000000, max: 25000000,
-      thesis: 'Growth-stage marketplaces and fintech with proven unit economics.', sectors: ['Fintech', 'Marketplaces'], stages: ['Series B', 'Series C'], portfolio: ['Atlas', 'PayLoop'] },
-    { name: 'Sofia Bianchi', firm: 'Lattice Fund', title: 'Principal', type: 'VC', region: 'Europe', location: 'Berlin, Germany', hq: 'Berlin, Germany', aum: 320000000, verified: false, backed: 22, min: 500000, max: 3000000,
-      thesis: 'Developer tools and AI infrastructure that compounds over time.', sectors: ['Developer Tools', 'AI', 'Infrastructure'], stages: ['Seed', 'Series A'], portfolio: ['NeuralEdge', 'Forge'] },
-    { name: 'James Whitfield', firm: 'Harbor Equity', title: 'Managing Director', type: 'Family Office', region: 'Asia', location: 'Singapore', hq: 'Singapore', aum: 2100000000, verified: true, backed: 29, min: 2000000, max: 15000000,
-      thesis: 'Real assets, private credit, and durable yield across cycles.', sectors: ['Real Estate', 'Private Credit'], stages: ['Series A', 'Growth'], portfolio: ['Harborview', 'Yieldly'] },
-    { name: 'Lena Kowalski', firm: 'Seed Forge', title: 'Founding Partner', type: 'VC', region: 'North America', location: 'Toronto, Canada', hq: 'Toronto, Canada', aum: 110000000, verified: false, backed: 35, min: 100000, max: 750000,
-      thesis: 'Pre-product technical teams solving deeply unsexy problems.', sectors: ['AI', 'Deep Tech', 'SaaS'], stages: ['Pre-Seed', 'Seed'], portfolio: ['Forge', 'DeepWork', 'Nova'] },
-    { name: 'Omar Haddad', firm: 'Crescent Ventures', title: 'Partner', type: 'CVC', region: 'Middle East', location: 'Dubai, UAE', hq: 'Dubai, UAE', aum: 600000000, verified: true, backed: 20, min: 250000, max: 3000000,
-      thesis: 'MENA and emerging-markets fintech, payments, and consumer.', sectors: ['Fintech', 'Payments', 'Consumer'], stages: ['Seed', 'Series A'], portfolio: ['PayLoop', 'Atlas'] },
-];
+// The investor directory ships with no fixtures. Every investor, investment record, news item
+// and social handle this file used to generate was invented: firms and people that do not exist,
+// amounts and follower counts derived from a hash, contact details stamped
+// enrichment_status:'enriched'/'high', and source URLs pointing at TechCrunch, Bloomberg,
+// Reuters, Forbes and Axios for stories that were never written. The directory is public, so
+// none of it can stand. Real investors are added via /admin/investors (form + CSV import).
+const INVESTORS = [];
 
 const img = (s) => `https://picsum.photos/seed/${s}/600/400`;
 const av = (s) => `https://i.pravatar.cc/150?u=${s}`;
@@ -142,47 +149,8 @@ const FOUNDER_INFO = [
       interview: [{ question: 'Who do you serve?', answer: 'Mid-market property owners banks ignore.' }, { question: 'Edge?', answer: 'Continuous cashflow-based underwriting on 3,000 assets.' }] },
 ];
 
-// Deterministic-ish rich intelligence generators per investor.
-const NEWS_SOURCES = ['TechCrunch', 'Bloomberg', 'Reuters', 'Forbes', 'Axios Pro Rata'];
-const ROUNDS = ['Pre-Seed', 'Seed', 'Series A', 'Series B', 'Series C', 'Growth'];
-
-function socialsFor(inv) {
-    const h = firstName(inv.name) + slug(inv.firm).slice(0, 4);
-    const out = [
-        { platform: 'website', url: `https://${domainOf(inv.firm)}`, handle: domainOf(inv.firm), source: 'Official site' },
-        { platform: 'linkedin', url: `https://linkedin.com/in/${inv.name.toLowerCase().replace(/\s+/g, '-')}`, handle: inv.name, followers: 1200 + (inv.backed * 137 % 9000), source: 'LinkedIn' },
-        { platform: 'twitter', url: `https://x.com/${h}`, handle: `@${h}`, followers: 3000 + (inv.backed * 211 % 40000), source: 'Verified via firm site' },
-    ];
-    if (inv.type === 'Angel' || inv.type === 'VC') out.push({ platform: 'instagram', url: `https://instagram.com/${h}`, handle: `@${h}`, followers: 800 + (inv.backed * 97 % 12000), source: 'Linked from site' });
-    return out;
-}
-
-function investmentsFor(inv) {
-    const base = (inv.portfolio || []);
-    const extra = ['Lumen', 'GridIQ', 'PayLoop', 'Forge', 'Nova', 'Yieldly', 'Harborview', 'DeepWork'];
-    const companies = [...new Set([...base, ...extra])].slice(0, 5);
-    return companies.map((c, i) => {
-        const amt = Math.round(((inv.min + inv.max) / 2) * (0.5 + ((i * 37) % 100) / 100) / 1000) * 1000;
-        const round = ROUNDS[(inv.backed + i) % ROUNDS.length];
-        const d = new Date(); d.setMonth(d.getMonth() - (i * 3 + 1));
-        return { target_company: c, round, amount_usd: amt, invested_on: d.toISOString().slice(0, 10), source_name: NEWS_SOURCES[i % NEWS_SOURCES.length], source_url: `https://${slug(NEWS_SOURCES[i % NEWS_SOURCES.length])}.com/${slug(c)}-${slug(round)}` };
-    });
-}
-
-function newsFor(inv) {
-    const items = [
-        { headline: `${inv.firm} leads ${inv.sectors[0]} round as ${inv.type} appetite grows`, sentiment: 'positive' },
-        { headline: `${inv.name} on the future of ${inv.sectors[0]}: "we're early, not late"`, sentiment: 'neutral' },
-        { headline: `${inv.firm} expands ${inv.region} presence with new ${inv.stages[0]} mandate`, sentiment: 'positive' },
-    ];
-    return items.map((n, i) => {
-        const d = new Date(); d.setDate(d.getDate() - (i * 5 + 2));
-        const src = NEWS_SOURCES[(inv.backed + i) % NEWS_SOURCES.length];
-        return { headline: n.headline, summary: `${src} reports on ${inv.firm}'s latest activity in ${inv.sectors.join(', ')}.`, source: src, sentiment: n.sentiment, published_at: d.toISOString(), url: `https://${slug(src)}.com/${slug(inv.firm)}-${i}` };
-    });
-}
-
 async function seed() {
+    await guardRealData();
     await db.sequelize.authenticate();
 
     // ── Users / profiles / roles / founder profile / membership ─────────────────
@@ -217,26 +185,13 @@ async function seed() {
                 raising: idx % 2 === 0, round_type: RAISE.round, raise_amount: RAISE.amt, valuation: RAISE.val,
                 instrument: 'SAFE', use_of_funds: 'Engineering, GTM, and key hires.',
             });
-            // Traction time-series (last 5 months).
-            if (await db.TractionMetric.count({ where: { founder_id: u.id } }) === 0) {
-                const base = 8000 + idx * 3000;
-                for (let m = 4; m >= 0; m--) {
-                    const d = new Date(); d.setMonth(d.getMonth() - m); const asOf = d.toISOString().slice(0, 10);
-                    const grow = Math.pow(1.22, 4 - m);
-                    await db.TractionMetric.create({ founder_id: u.id, metric_key: 'mrr', label: 'MRR', value: Math.round(base * grow), unit: '$', as_of: asOf, source: 'Stripe', verified: idx < 2 });
-                    await db.TractionMetric.create({ founder_id: u.id, metric_key: 'users', label: 'Active users', value: Math.round((200 + idx * 120) * grow), unit: 'users', as_of: asOf, source: 'Analytics', verified: false });
-                }
-                await db.TractionMetric.create({ founder_id: u.id, metric_key: 'growth', label: 'MoM growth', value: 22, unit: '%', as_of: new Date().toISOString().slice(0, 10), source: 'Stripe', verified: idx < 2 });
-            }
+
             // Team
             if (await db.CompanyMember.count({ where: { founder_id: u.id } }) === 0) {
                 await db.CompanyMember.create({ founder_id: u.id, name: u.full_name, member_role: 'cofounder', title: 'CEO & Founder', is_primary: true, avatar_url: av(u.username) });
                 await db.CompanyMember.create({ founder_id: u.id, name: ['Riya Shah', 'Tom Webb', 'Ana Lopez', 'Ken Ito', 'Sara Vance'][idx % 5], member_role: 'cofounder', title: 'CTO', avatar_url: av('cto' + idx) });
             }
-            // Verifications (email + domain verified for everyone; linkedin for some).
-            for (const k of ['email', 'domain', ...(idx < 3 ? ['linkedin'] : [])]) {
-                await db.Verification.findOrCreate({ where: { user_id: u.id, kind: k }, defaults: { user_id: u.id, kind: k, status: 'verified', verified_at: new Date() } });
-            }
+
             // Score it.
             const metrics = await db.TractionMetric.findAll({ where: { founder_id: u.id } });
             const verifs = await db.Verification.findAll({ where: { user_id: u.id, status: 'verified' } });
@@ -283,51 +238,6 @@ async function seed() {
                 if (tagBySlug[tg]) await db.ThreadTag.create({ thread_id: thread.id, tag_id: tagBySlug[tg] });
             }
         }
-    }
-
-    // ── Deals ────────────────────────────────────────────────────────────────────
-    for (const d of DEALS) {
-        if (await db.Deal.findOne({ where: { title: d.title } })) continue; // idempotent per-deal
-        await db.Deal.create({ founder_id: userIds[d.founder], title: d.title, pitch: d.pitch, description: d.pitch, problem: 'A large, underserved market with poor incumbents.', solution: d.pitch, business_model: 'B2B SaaS + transaction fees', funding_required: d.funding, expected_return: '5-10x over 5 years', stage: d.stage, category: d.category, status: 'active' });
-    }
-
-    // ── Investors directory + intelligence ──────────────────────────────────────
-    for (const inv of INVESTORS) {
-        const [row] = await db.Investor.findOrCreate({
-            where: { name: inv.name },
-            defaults: {
-                name: inv.name, firm: inv.firm, title: inv.title, location: inv.location, avatar_url: av(inv.name),
-                thesis: inv.thesis, focus_sectors: inv.sectors, stages: inv.stages, check_min: inv.min, check_max: inv.max,
-                portfolio: inv.portfolio, deals_backed: inv.backed, is_verified: inv.verified,
-                website: `https://${domainOf(inv.firm)}`,
-                linkedin_url: `https://linkedin.com/in/${inv.name.toLowerCase().replace(/\s+/g, '-')}`,
-            },
-        });
-        // Backfill the intelligence fields (covers investor rows created by earlier seed runs).
-        await row.update({
-            firm_type: inv.type, region: inv.region, headquarters: inv.hq, aum_usd: inv.aum,
-            email: `${firstName(inv.name)}@${domainOf(inv.firm)}`,
-            phone: `+1 (415) 555-${String(1000 + (inv.backed * 13 % 8999)).slice(0, 4)}`,
-            enrichment_status: 'enriched', enrichment_confidence: inv.verified ? 'high' : 'medium', dedupe_key: slug(inv.name),
-        });
-        if (await db.InvestorSocial.count({ where: { investor_id: row.id } }) === 0) {
-            for (const s of socialsFor(inv)) await db.InvestorSocial.create({ investor_id: row.id, ...s, last_checked_at: new Date() });
-        }
-        if (await db.Investment.count({ where: { investor_id: row.id } }) === 0) {
-            for (const iv of investmentsFor(inv)) await db.Investment.create({ investor_id: row.id, ...iv });
-        }
-        if (await db.InvestorNews.count({ where: { investor_id: row.id } }) === 0) {
-            for (const n of newsFor(inv)) await db.InvestorNews.create({ investor_id: row.id, ...n });
-        }
-    }
-
-    // ── Sample founder -> investor intro requests (so the queue isn't empty) ──────
-    if (await db.ConnectionRequest.count() === 0) {
-        const founderId = USERS[2].id; // James Patterson (a founder)
-        const alex = await db.Investor.findOne({ where: { name: 'Alexandra Reyes' } });
-        const daniel = await db.Investor.findOne({ where: { name: 'Daniel Okonkwo' } });
-        if (alex) await db.ConnectionRequest.create({ from_user_id: founderId, investor_id: alex.id, status: 'pending', message: 'Raising a $2M seed for an AI infra startup — your thesis lines up perfectly. Could we grab 15 minutes?' });
-        if (daniel) await db.ConnectionRequest.create({ from_user_id: founderId, investor_id: daniel.id, status: 'pending', message: 'Climate-adjacent infrastructure play at Series A. Would value your perspective.' });
     }
 
     // ── Sample founder <-> founder connections ──────────────────────────────────

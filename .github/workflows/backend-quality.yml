@@ -116,10 +116,116 @@ jobs:
         continue-on-error: true
         run: pnpm run lint:backend
 
+  # ───────────────────────────────────────────────────────────────────────────
+  # Gate 5: live integration harnesses (blocking).
+  #
+  # The suites above are pure — they never touch a database, so they cannot see
+  # the two things that matter most about these services: that Row-Level
+  # Security actually isolates tenants, and that the deal-room / capital
+  # authorization rules hold end to end. Those regressions are invisible to a
+  # type-check and to node:test, and they are exactly the kind that get shipped.
+  #
+  # marketplace-service is started as the NON-SUPERUSER baalvion_app role on
+  # purpose: Postgres ignores RLS for superusers, so running these as the owner
+  # would pass while proving nothing.
+  # ───────────────────────────────────────────────────────────────────────────
+  live-integration:
+    name: Live Integration (RLS + authorization)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: baalvion_db
+          POSTGRES_USER: baalvion
+          POSTGRES_PASSWORD: baalvion_dev_pass
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: '5432'
+      DB_NAME: baalvion_db
+      DB_USER: baalvion
+      DB_PASSWORD: baalvion_dev_pass
+      DB_SSL: 'false'
+      NODE_ENV: development
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6.0.10
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: Install Workspace Dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build Workspace Packages
+        run: pnpm --filter "./Backend/packages/*" run build
+
+      - name: Generate dev RS256 keypair
+        run: node scripts/gen-dev-jwt-keys.mjs
+
+      # The runtime role the RLS policies are written against. Migration 006 grants it.
+      - name: Provision the non-superuser app role
+        run: |
+          PGPASSWORD=baalvion_dev_pass psql -h 127.0.0.1 -U baalvion -d baalvion_db -v ON_ERROR_STOP=1 -c \
+            "DO \$\$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='baalvion_app') THEN CREATE ROLE baalvion_app LOGIN PASSWORD 'baalvion_app_ci'; END IF; END \$\$;"
+
+      - name: Migrate marketplace schema
+        working-directory: Backend/services/marketplace/marketplace-service
+        run: node scripts/migrate.js
+
+      - name: Seed deal-room fixture
+        run: |
+          PGPASSWORD=baalvion_dev_pass psql -h 127.0.0.1 -U baalvion -d baalvion_db -v ON_ERROR_STOP=1 \
+            -f Backend/services/marketplace/marketplace-service/tests/fixtures/dealroom-seed.sql
+
+      - name: Start marketplace-service (as baalvion_app — RLS enforcing)
+        working-directory: Backend/services/marketplace/marketplace-service
+        env:
+          PORT: '3060'
+          DB_USER: baalvion_app
+          DB_PASSWORD: baalvion_app_ci
+          MARKETPLACE_IP_RATE_LIMIT: '5000'
+          MARKETPLACE_DEAL_WRITE_RATE_LIMIT: '5000'
+          # Data room on the local driver so the upload/download path is exercised for real.
+          DATA_ROOM_DRIVER: local
+          DATA_ROOM_PATH: /tmp/data-room-ci
+          # Platform-review connection: a role OTHER than baalvion_app, which is what the
+          # CR-8-hardened RLS policies allow the tenant bypass for.
+          DB_ADMIN_USER: baalvion
+          DB_ADMIN_PASSWORD: baalvion_dev_pass
+        run: |
+          JWT_PUBLIC_KEY="$(cat ../../../../docker/secrets/jwt_public_key.pem)" node index.js &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:3060/health && break || sleep 1; done
+
+      - name: Deal-room isolation + authorization
+        working-directory: Backend/services/marketplace/marketplace-service
+        run: node tests/dealroom-isolation.verify.mjs
+
+      - name: Start ir-service
+        working-directory: Backend/services/ecosystem/ir-service
+        env:
+          PORT: '3008'
+        run: |
+          JWT_PUBLIC_KEY="$(cat ../../../../docker/secrets/jwt_public_key.pem)" node index.js &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:3008/health && break || sleep 1; done
+
+      # ir-service creates its tables via sync() on boot, so the fixture goes in after it starts.
+      - name: Seed capital fixture
+        run: |
+          PGPASSWORD=baalvion_dev_pass psql -h 127.0.0.1 -U baalvion -d baalvion_db -v ON_ERROR_STOP=1 \
+            -f Backend/services/ecosystem/ir-service/tests/fixtures/capital-seed.sql
+
+      - name: Capital account ledger + authorization
+        working-directory: Backend/services/ecosystem/ir-service
+        run: node tests/capital-account.verify.mjs
+
   notify-ci-failure:
     name: Notify Slack (CI failure)
-    needs: backend-quality
-    if: always() && needs.backend-quality.result == 'failure'
+    needs: [backend-quality, live-integration]
+    # A silent RLS or authorization regression is the worst kind, so the live gate alerts too.
+    if: always() && (needs.backend-quality.result == 'failure' || needs.live-integration.result == 'failure')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7

@@ -9,6 +9,9 @@ import { getPublicEvents, getPublicDocuments } from '@/lib/ir-public';
 
 export const revalidate = 120;
 export const metadata: Metadata = {
+  // Without this the page inherits the root layout's canonical ('/') and tells crawlers it is
+  // a duplicate of the homepage.
+  alternates: { canonical: '/news-and-events/investor-day' },
   title: '2025 Investor Day | Strategic Roadmap',
   description: 'Access recordings and presentations from Baalvion’s 2025 Investor Day, detailing our 5-year strategic vision.',
 };
