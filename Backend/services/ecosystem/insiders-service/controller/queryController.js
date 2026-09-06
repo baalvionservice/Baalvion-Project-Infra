@@ -50,6 +50,7 @@ const POLICIES = {
     app_settings:         { read: 'admin',  write: 'admin' },
     tag_analytics_reports:{ read: 'admin',  write: 'admin' },
     investors:            { read: 'auth',   write: 'admin' },
+    companies:            { read: 'auth',   write: 'admin' },
     investor_socials:     { read: 'auth',   write: 'admin' },
     investments:          { read: 'auth',   write: 'admin' },
     investor_news:        { read: 'auth',   write: 'admin' },
