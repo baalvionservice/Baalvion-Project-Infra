@@ -95,6 +95,43 @@ architecture contract that keeps domain boundaries clean as the platform grows.
       <p align="center"><b>Law Elite Network</b><br/><sub>Global legal knowledge network</sub></p>
     </td>
   </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="assets/screenshots/app-baalvion.png" alt="Baalvion">
+      <p align="center"><b>Baalvion</b><br/><sub>The flagship corporate identity hub</sub></p>
+    </td>
+    <td width="50%" valign="top">
+      <img src="assets/screenshots/app-investor-relations.png" alt="Investor Relations">
+      <p align="center"><b>Investor Relations</b><br/><sub>Investment thesis, governance &amp; the investor portal</sub></p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="assets/screenshots/app-talentos.png" alt="TalentOS">
+      <p align="center"><b>TalentOS</b><br/><sub>Careers, ATS console &amp; candidate self-service</sub></p>
+    </td>
+    <td width="50%" valign="top">
+      <img src="assets/screenshots/app-shipping-directory.png" alt="World Shipping Directory">
+      <p align="center"><b>World Shipping Directory</b><br/><sub>A sourced registry of vessels &amp; operators</sub></p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="assets/screenshots/app-intelligence.png" alt="Baalvion Intelligence">
+      <p align="center"><b>Baalvion Intelligence</b><br/><sub>Real-time news intelligence &amp; developer API</sub></p>
+    </td>
+    <td width="50%" valign="top">
+      <img src="assets/screenshots/app-amarise.png" alt="Amarisé Maison Avenue">
+      <p align="center"><b>Amarisé Maison Avenue</b><br/><sub>Multi-market luxury maison storefront</sub></p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="assets/screenshots/app-insiders.png" alt="Baalvion Insiders">
+      <p align="center"><b>Baalvion Insiders</b><br/><sub>Invite-only network for investors &amp; founders</sub></p>
+    </td>
+    <td width="50%" valign="top"></td>
+  </tr>
 </table>
 
 ## Repository Layout
@@ -184,10 +221,15 @@ RBAC package. Each domain owns an isolated PostgreSQL schema.
 | ControlTheMarket   | 3034 | ecosystem     |
 | Amarise            | 3033 | ecosystem     |
 | Brand Connector    | 3035 | ecosystem     |
-| Law Elite          | 9002 | knowledge     |
+| Law Elite          | 9002¹| knowledge     |
 | Global Trade (GTI) | 9003 | commerce      |
 | Proxy / Gateway    | 8080 | infrastructure|
 | Elite Circle       | 8081 | ecosystem     |
+| Baalvion Intelligence | 3070 | ecosystem  |
+| Help Center        | 3046 | platform      |
+| Baalvion Insiders   | 9002¹| ecosystem     |
+
+<sub>¹ Law Elite and Baalvion Insiders share dev port 9002 in this monorepo — run one at a time locally, or override with `-p`.</sub>
 
 ## Technology Stack
 
