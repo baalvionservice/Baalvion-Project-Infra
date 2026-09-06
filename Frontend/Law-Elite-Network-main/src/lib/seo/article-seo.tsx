@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { getAuthorByName } from '@/data/authors';
+import { buildAuthorLd } from '@/lib/seo/author-ld';
 import { resolveArticleImage } from '@/lib/article-art';
 import { extractFaqFromHtml } from '@/lib/seo/faq-extractor';
 import { articleDates } from '@/lib/seo/normalize-date';
@@ -92,10 +92,7 @@ export function buildArticleMetadata(article: any | null, slug: string, site: st
 export function ArticleJsonLd({ article, slug, site }: { article: any | null; slug: string; site: string }) {
   const url = `${site}${articleUrl(article ? { ...article, slug } : { slug })}`;
   const bylineName = (typeof article?.author === 'string' ? article.author : article?.author?.name) || undefined;
-  const matchedAuthor = bylineName ? getAuthorByName(bylineName) : null;
-  const authorLd = matchedAuthor
-    ? { '@type': 'Person', name: matchedAuthor.name, url: `${site}/author/${matchedAuthor.slug}` }
-    : { '@type': 'Organization', name: 'Law Elite Network' };
+  const authorLd = buildAuthorLd(bylineName, site);
   const articleImage = article ? resolveArticleImage({ ...article, title: article.title, slug }) : undefined;
   const jsonLd = article && {
     '@context': 'https://schema.org',
