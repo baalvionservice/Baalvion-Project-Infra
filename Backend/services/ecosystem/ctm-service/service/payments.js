@@ -11,6 +11,7 @@
 //                                                cashfree → { clientId, clientSecret } + config.mode/baseUrl
 //   Env fallback (dev only): STRIPE_*, RAZORPAY_*, PAYU_MERCHANT_KEY/SALT, CASHFREE_CLIENT_ID/SECRET
 const crypto = require('crypto');
+const { Money } = require('@baalvion/money');
 
 const SITE_SLUG = process.env.PAYMENT_SITE_SLUG || 'control-the-market';
 const CMS_BASE_URL = process.env.CMS_BASE_URL || '';            // e.g. http://cms-service:3011/api/v1
@@ -150,7 +151,8 @@ const isConfigured = async () => (await configuredProviders()).length > 0;
 // clientParams, raw }. clientParams is the PUBLIC, no-secret payload the browser needs.
 async function createCheckout({ provider: requested, amount, currency = 'USD', companyId, planName, invoiceId, successUrl, cancelUrl, customerEmail }) {
     const provider = await resolveProvider(requested);
-    const amountMinor = Math.round(Number(amount) * 100);
+    // Exponent from the currency, not a hardcoded 100 — JPY has no minor unit, KWD has three.
+    const amountMinor = Number(Money.fromDatabaseValue(amount, currency).minor);
     if (!Number.isInteger(amountMinor) || amountMinor <= 0) throw new Error('amount must be a positive number');
 
     if (provider === 'stripe') {
@@ -320,7 +322,8 @@ async function verifyWebhook({ rawBody, headers }) {
         const paid = type.toUpperCase().startsWith('PAYMENT_SUCCESS');
         const order = (evt.data && evt.data.order) || {};
         const payment = (evt.data && evt.data.payment) || {};
-        const amountMinor = order.order_amount != null ? Math.round(Number(order.order_amount) * 100) : null;
+        const orderCurrency = String(order.order_currency || 'INR').toUpperCase();
+        const amountMinor = order.order_amount != null ? Number(Money.fromDatabaseValue(order.order_amount, orderCurrency).minor) : null;
         return {
             provider: 'cashfree', type, ref: order.order_id, status: paid ? 'succeeded' : 'pending',
             amountMinor: Number.isFinite(amountMinor) ? amountMinor : null,

@@ -7,7 +7,8 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "test": "jest --testEnvironment node --forceExit",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "migrate": "node ../../../packages/payment-consistency/scripts/migrate.mjs"
   },
   "jest": {
     "testEnvironment": "node",
@@ -19,6 +20,9 @@
     "@baalvion/auth-node": "workspace:*",
     "@baalvion/events": "workspace:*",
     "@baalvion/graceful-shutdown": "workspace:*",
+    "@baalvion/money": "workspace:*",
+    "@baalvion/payment-consistency": "workspace:*",
+    "@baalvion/sites": "workspace:*",
     "@baalvion/telemetry": "workspace:*",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",

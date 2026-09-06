@@ -50,6 +50,15 @@ const start = async () => {
         console.error('[DB] Failed to connect:', err.message);
         process.exit(1);
     }
+    // Drain this service's payment outbox onto the platform bus. Each service owns its own
+    // `pcl` schema, so each runs its own relay; without it payments record locally and never
+    // reach the cross-estate panel. Flag-gated and never fatal.
+    try {
+        const { startPaymentRelay } = require('./service/paymentRelay');
+        startPaymentRelay();
+    } catch (err) {
+        console.error(JSON.stringify({ evt: 'payment_outbox.wire_failed', msg: err.message }));
+    }
     const server = app.listen(config.port, () =>
         console.log(`Baalvion CTM Service running on port ${config.port}`)
     );

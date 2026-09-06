@@ -105,7 +105,13 @@ function verifyWebhookSignature(rawBody, signature) {
     const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
     if (!webhookSecret || !signature) return false;
     const expected = crypto.createHmac('sha256', webhookSecret).update(rawBody).digest('hex');
-    return expected === signature;
+    // Constant-time compare: `expected === signature` short-circuits on the first differing
+    // byte, which leaks how much of a forged signature was correct. Lowercased first because
+    // Razorpay always sends lowercase hex, so a same-length uppercase forgery still reaches
+    // the timing-safe path rather than exiting early on the length check.
+    const got = Buffer.from(String(signature).toLowerCase(), 'utf8');
+    const want = Buffer.from(expected, 'utf8');
+    return got.length === want.length && crypto.timingSafeEqual(got, want);
 }
 
 // ─── Webhook event handler ────────────────────────────────────────────────────

@@ -24,6 +24,7 @@ let razorpay = null;
 try { razorpay = require('./providers/razorpayService'); } catch (_) { razorpay = null; }
 
 const SIGNING_SECRET = require('@baalvion/auth-node').requireEnv('BILLING_SIGNING_SECRET'); // fail-closed: no weak fallback
+const { Money } = require('@baalvion/money');
 const TAX_RATE = Number(process.env.BILLING_TAX_RATE || 0.18); // GST default
 const CURRENCY = process.env.BILLING_CURRENCY || 'USD';
 const DUNNING_MAX = Number(process.env.DUNNING_MAX_ATTEMPTS || 4);
@@ -171,10 +172,18 @@ async function computeInvoice(orgId, opts = {}) {
     // Emit the cross-division domain event AFTER commit (best-effort; the outbox
     // pattern in @baalvion/events is the exactly-once upgrade path). Consumed by
     // analytics, notifications and audit contexts.
+    // v2 payload: money as an exact integer count of minor units, not a JSON number. v1 typed
+    // `amount` as a double, which asked every consumer to parse money into a float. `amount` and
+    // `currency` are still sent alongside so a consumer that has not migrated keeps working —
+    // this is additive, and v1 is retired only once nothing reads it.
+    const invoiceTotal = Money.fromDatabaseValue(charges.total, CURRENCY);
     domainEvents.emit.billingInvoiceGenerated({
-      invoiceId: result.invoiceId, orgId,
+      invoiceId: result.invoiceId, orgId, siteId: 'proxy',
       periodStart: start.toISOString(), periodEnd: end.toISOString(),
-      totalGb: charges.totalGb, amount: charges.total, currency: CURRENCY, signature: result.signature,
+      totalGb: charges.totalGb,
+      money: invoiceTotal.toJSON(),
+      amount: charges.total, currency: CURRENCY,
+      signature: result.signature,
     });
     // Channel: accrue reseller + affiliate commissions on the invoice revenue
     // (best-effort; no-op when the org isn't part of a reseller/affiliate chain).
@@ -208,7 +217,7 @@ async function chargeInvoice(invoiceId) {
   if (!razorpay) throw new Error('Razorpay not configured');
 
   const order = await razorpay.createOrder(
-    Math.round(Number(inv.total) * 100), inv.currency || CURRENCY, `inv_${invoiceId}`,
+    Number(Money.fromDatabaseValue(inv.total, inv.currency || CURRENCY).minor), inv.currency || CURRENCY, `inv_${invoiceId}`,
   );
   await db.transactions.create({
     org_id: inv.org_id, gateway: 'razorpay', gateway_order_id: order.id,

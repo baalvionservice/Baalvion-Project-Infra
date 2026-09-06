@@ -31,6 +31,10 @@ router.post('/', verifyRazorpayWebhook, async (req, res, next) => {
                 providerPaymentId,
                 amount: entity && entity.amount,
                 currencyCode: entity && entity.currency,
+                // Razorpay reports its cut on the payment entity, GST inclusive. Absent on an
+                // authorization, and absent must stay absent — a zero would read as "no fee"
+                // and overstate margin on every order.
+                feeMinor: entity && entity.fee != null ? Number(entity.fee) : null,
             });
         }
         // Always 200 for a signature-valid, well-formed delivery (handled or intentionally ignored)
