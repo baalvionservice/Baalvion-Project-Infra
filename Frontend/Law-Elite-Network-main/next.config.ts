@@ -158,6 +158,19 @@ const nextConfig: NextConfig = {
       // backed by any actual filtering) -- a near-duplicate competing for the
       // same search intent, consolidated the same way as the redirects above.
       { source: '/world', destination: '/news', permanent: true },
+      // Synonym consolidation. "offshore injury lawyer" / "offshore accident
+      // lawyer", and the maritime and oil-rig pairs, are the same search intent
+      // with a swapped noun -- six pages competing for one query each. The text
+      // is genuinely distinct (13% shingle overlap, so not duplicate content),
+      // but distinct text serving one intent is what Google's doorway-page
+      // policy is aimed at, and on a 38-page site six of them is a sixth of the
+      // corpus. Each pair collapses into whichever page carries more of the
+      // substance. The retired pages' unique material still needs folding into
+      // the survivors in the CMS -- redirecting alone preserves the link equity
+      // but loses roughly 1,000 words per page until that is done.
+      { source: '/offshore-injury-lawyer', destination: '/offshore-accident-lawyer', permanent: true },
+      { source: '/maritime-injury-lawyer', destination: '/maritime-accident-lawyer', permanent: true },
+      { source: '/oil-rig-injury-lawyer', destination: '/oil-rig-accident-lawyer', permanent: true },
       // /plans advertised paid tiers with feature claims (AI case summaries,
       // predictive insights, document auditing, priority matching, etc.) that
       // don't exist anywhere in the backend, alongside false "PCI-DSS

@@ -35,3 +35,22 @@ export function toIsoDate(value?: string | null): string | undefined {
     Date.UTC(localParsed.getFullYear(), localParsed.getMonth(), localParsed.getDate()),
   ).toISOString();
 }
+
+/**
+ * Article records reach these helpers in more than one shape. The metadata
+ * path (article-metadata-fetch.ts) maps CMS fields to snake_case; the render
+ * path (article-fetch.ts) returns the raw CMS record, which is camelCase, and
+ * the bundled/seed sources use snake_case again.
+ *
+ * Reading only `published_at` silently dropped datePublished/dateModified from
+ * the Article JSON-LD on every CMS-served page while the OpenGraph tags — fed
+ * by the mapping path — carried the same date correctly. Undated legal
+ * guidance is a real trust problem on YMYL content, so read every shape.
+ */
+export function articleDates(article: any): { published?: string; modified?: string } {
+  const published = toIsoDate(article?.published_at ?? article?.publishedAt);
+  const modified = toIsoDate(article?.updated_at ?? article?.updatedAt);
+  // A record with only an update timestamp is still dated; CMS drafts that
+  // have never been published carry updatedAt alone.
+  return { published: published ?? modified, modified: modified ?? published };
+}

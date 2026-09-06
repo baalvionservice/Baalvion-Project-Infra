@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { getAuthorByName } from '@/data/authors';
 import { resolveArticleImage } from '@/lib/article-art';
 import { extractFaqFromHtml } from '@/lib/seo/faq-extractor';
-import { toIsoDate } from '@/lib/seo/normalize-date';
+import { articleDates } from '@/lib/seo/normalize-date';
 import { articleUrl } from '@/lib/article-url';
 import { CURRENT_CATEGORY_SLUGS } from '@/lib/category-slugs';
 
@@ -51,8 +51,8 @@ export function buildArticleMetadata(article: any | null, slug: string, site: st
       url,
       title,
       description,
-      publishedTime: toIsoDate(article.published_at),
-      modifiedTime: toIsoDate(article.updated_at),
+      publishedTime: articleDates(article).published,
+      modifiedTime: articleDates(article).modified,
       authors: authorName ? [authorName] : undefined,
       images: [{ url: ogImage, alt: title }],
     },
@@ -80,8 +80,8 @@ export function ArticleJsonLd({ article, slug, site }: { article: any | null; sl
     headline: article.title,
     description: article.excerpt || undefined,
     image: articleImage ? [articleImage] : undefined,
-    datePublished: toIsoDate(article.published_at),
-    dateModified: toIsoDate(article.updated_at) || toIsoDate(article.published_at),
+    datePublished: articleDates(article).published,
+    dateModified: articleDates(article).modified,
     mainEntityOfPage: url,
     author: authorLd,
     publisher: { '@type': 'Organization', name: 'Law Elite Network', logo: { '@type': 'ImageObject', url: `${site}/logo.png` } },

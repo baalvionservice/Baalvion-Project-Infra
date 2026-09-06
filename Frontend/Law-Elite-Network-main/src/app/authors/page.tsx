@@ -75,7 +75,12 @@ export default async function AuthorsIndexPage() {
             </p>
           </header>
 
-          <AuthorsDirectory authors={authors} counts={counts} />
+          {/* Only contributors who have actually published. A masthead of
+              24 names where 23 have written nothing reads as padding to a
+              reader and as thin content to a reviewer, and it is the same
+              zero-article filter sitemap.ts already applies — the two now
+              agree instead of the page advertising people the sitemap omits. */}
+          <AuthorsDirectory authors={authors.filter((a) => (counts[a.slug] || 0) > 0)} counts={counts} />
 
         </div>
       </main>
