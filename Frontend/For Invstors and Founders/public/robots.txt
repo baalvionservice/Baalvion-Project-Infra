@@ -1,5 +1,5 @@
-# Baalvion Insiders — invite-only founder/investor network.
-# The public landing pages are crawlable; the gated members area is not.
+# Baalvion Insiders — public investor and company directory.
+# The directory is fully crawlable; the members area and admin are not.
 
 User-agent: *
 Allow: /
@@ -12,6 +12,11 @@ Disallow: /checkout
 Disallow: /leaderboard
 Disallow: /admin
 Disallow: /reset-password
+Disallow: /elite
+Disallow: /deals
+Disallow: /pipeline
+Disallow: /connections
+Disallow: /settings
 
 # Explicit allow for major AI / LLM crawlers so the public landing can be
 # discovered and summarized by AI search engines.
@@ -39,4 +44,7 @@ Allow: /
 User-agent: CCBot
 Allow: /
 
-Sitemap: https://insiders.baalvion.com/sitemap.xml
+# Machine-readable summary of what this directory holds, where it came from and its limits.
+# https://www.marketunderworld.com/llms.txt
+
+Sitemap: https://www.marketunderworld.com/sitemap.xml

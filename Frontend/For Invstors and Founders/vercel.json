@@ -2,5 +2,39 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "ignoreCommand": "npx turbo-ignore investors-and-founders-web",
   "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
-  "buildCommand": "cd ../.. && pnpm exec turbo run build --filter=investors-and-founders-web"
+  "buildCommand": "cd ../.. && pnpm exec turbo run build --filter=investors-and-founders-web",
+  "rewrites": [
+    {
+      "comment": "Crawlers get server-rendered HTML: the SPA's index.html is 219 characters and returns the same <title> for all ~318,000 URLs, which is invisible to every crawler that does not execute JavaScript \u2014 including most AI crawlers.",
+      "source": "/:path((?!insiders-api|auth-bff|assets|sitemap).*)",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(googlebot|bingbot|slurp|duckduckbot|baiduspider|yandex|applebot|gptbot|oai-searchbot|chatgpt-user|claudebot|anthropic-ai|claude-web|perplexitybot|ccbot|google-extended|facebookexternalhit|twitterbot|linkedinbot|slackbot|discordbot|whatsapp|telegrambot).*"
+        }
+      ],
+      "destination": "https://api.baalvion.com/api/v1/insiders/v1/public/render?path=/:path*"
+    },
+    {
+      "comment": "Anonymous directory reads. Same-origin in production for the same reason as the dev proxy: no CORS, and the browser never learns the API host. Requires the auth-gateway's public read allow-list to be deployed.",
+      "source": "/insiders-api/:path*",
+      "destination": "https://api.baalvion.com/api/v1/insiders/:path*"
+    },
+    {
+      "comment": "Sitemap index. Sections are separate files because the directory is past the 50,000-URL-per-file limit.",
+      "source": "/sitemap.xml",
+      "destination": "https://api.baalvion.com/api/v1/insiders/v1/public/sitemap.xml"
+    },
+    {
+      "comment": "The index's child sitemaps \u2014 core, places, and the paged investor/company sections.",
+      "source": "/sitemap-:section.xml",
+      "destination": "https://api.baalvion.com/api/v1/insiders/v1/public/sitemap-:section.xml"
+    },
+    {
+      "comment": "SPA fallback \u2014 every directory route is client-rendered.",
+      "source": "/((?!insiders-api|auth-bff|assets|sitemap|.*\\..*).*)",
+      "destination": "/index.html"
+    }
+  ]
 }

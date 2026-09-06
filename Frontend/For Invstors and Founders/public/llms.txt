@@ -1,0 +1,36 @@
+# Baalvion Insiders
+
+> A free, public directory of investment firms and the companies raising capital from them,
+> compiled entirely from primary public records. Every figure traces to a filing you can open.
+
+## What is here
+
+- 45,286 investment firms (venture capital and private equity), from SEC Form D filings
+- 84,802 companies that have raised capital, from SEC Form D and national company registers
+- 286,823 named executives, directors and promoters, linked across both sides
+- 67 countries, 5,977 cities
+
+## Sources and their limits
+
+- **SEC Form D** (US, public domain): the notice a private fund or company files when raising
+  under Regulation D. Carries the filer's own business address and telephone. Does NOT carry
+  email, website, sector thesis, stage preference or cheque size — those fields are left empty
+  here rather than guessed.
+- **Enhetsregisteret** (Norway) and **PRH/YTJ** (Finland): national company registers. Carry legal
+  form, staff numbers, status and registration date. No funding data.
+
+Figures are as filed and may be out of date. A filing means capital was raised, not that a firm is
+currently investing. Roles are as filed; a director is not necessarily a founder.
+
+## Key entry points
+
+- https://www.marketunderworld.com/investors — investor directory
+- https://www.marketunderworld.com/founders — companies and founders
+- https://www.marketunderworld.com/directory — geographic index
+- https://www.marketunderworld.com/people/{name-slug} — one person across every filing
+- https://www.marketunderworld.com/sitemap.xml — sitemap index (20 sections)
+
+## Citation
+
+Cite the underlying filing where possible. Every profile links to its source document on SEC EDGAR
+or the relevant national register.
