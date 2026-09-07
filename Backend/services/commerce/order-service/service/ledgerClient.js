@@ -28,7 +28,7 @@
  *     the resulting gap.
  *   - DISABLED when no internal key is configured (logs `ledger.skipped`).
  *
- * Authenticates with the shared internal key (X-Internal-Key).
+ * Authenticates server-to-server with the platform shared secret (x-internal-secret).
  */
 const crypto = require('crypto');
 const config = require('../config/appConfig');
@@ -95,7 +95,7 @@ async function postEntry(storeId, entry) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-Internal-Key': config.ledger.internalKey,
+                'x-internal-secret': config.ledger.internalSecret,
                 'X-Service-Name': 'order-service',
                 'X-Tenant-ID': storeId,
             },
@@ -162,7 +162,7 @@ async function listEntries(storeId, { entryType, page = 0, size = 100 } = {}) {
     const timer = setTimeout(() => ctrl.abort(), config.ledger.timeoutMs);
     try {
         const res = await fetch(url, {
-            headers: { 'X-Internal-Key': config.ledger.internalKey, 'X-Service-Name': 'order-service', 'X-Tenant-ID': storeId },
+            headers: { 'x-internal-secret': config.ledger.internalSecret, 'X-Service-Name': 'order-service', 'X-Tenant-ID': storeId },
             signal: ctrl.signal,
         });
         if (!res.ok) return { ok: false, status: res.status, entries: [] };
