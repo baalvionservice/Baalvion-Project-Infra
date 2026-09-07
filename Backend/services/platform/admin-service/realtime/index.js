@@ -69,15 +69,19 @@ function startRealtime(server, { sequelize } = {}) {
   wss = new WebSocketServer({ noServer: true });
 
   server.on('upgrade', async (req, socket, head) => {
-    let pathname;
-    try { pathname = new URL(req.url, 'http://localhost').pathname; } catch { pathname = null; }
-    if (pathname !== PATH) return;   // leave other upgrades alone
-
     const reject = (code, why) => {
       socket.write(`HTTP/1.1 ${code}\r\nConnection: close\r\n\r\n`);
       socket.destroy();
       logger.debug({ why }, '[realtime] upgrade rejected');
     };
+
+    let pathname;
+    try { pathname = new URL(req.url, 'http://localhost').pathname; } catch { pathname = null; }
+    // Attaching an 'upgrade' listener disables Node's default, which is to destroy sockets nobody
+    // handles. This is the only upgrade handler on this server, so an unmatched path must be closed
+    // here — returning early instead leaves the socket open forever, which is an unauthenticated
+    // way to exhaust the service's file descriptors.
+    if (pathname !== PATH) return reject('404 Not Found', 'no handler for upgrade path');
 
     const token = new URL(req.url, 'http://localhost').searchParams.get('token');
     if (!token) return reject('401 Unauthorized', 'no token');

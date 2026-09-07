@@ -127,4 +127,9 @@ async function collect({ redisClient, sequelize }) {
   };
 }
 
+// Prime the CPU sampler at load. cpuPercent() needs a previous sample to difference against, so
+// without this the first frame a client receives carries cpu:null, which the console renders as a
+// 0% bar — indistinguishable from a genuinely idle box.
+cpuPercent();
+
 module.exports = { collect };
