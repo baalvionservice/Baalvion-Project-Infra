@@ -1,7 +1,7 @@
 {
   "name": "insiders-service",
   "version": "1.0.0",
-  "description": "Baalvion Insiders (For Investors & Founders) backend — Node.js + PostgreSQL, replaces Supabase",
+  "description": "Baalvion Insiders (For Investors & Founders) backend \u2014 Node.js + PostgreSQL, replaces Supabase",
   "license": "ISC",
   "type": "commonjs",
   "main": "index.js",
@@ -14,15 +14,16 @@
     "test": "node --test \"test/**/*.test.js\""
   },
   "dependencies": {
-    "@baalvion/telemetry": "workspace:*",
-    "@baalvion/graceful-shutdown": "workspace:*",
-    "express-rate-limit": "^7.5.0",
     "@baalvion/auth-node": "workspace:*",
+    "@baalvion/graceful-shutdown": "workspace:*",
+    "@baalvion/money": "workspace:*",
+    "@baalvion/telemetry": "workspace:*",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",

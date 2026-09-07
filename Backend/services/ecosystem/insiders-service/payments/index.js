@@ -11,9 +11,12 @@
  */
 const crypto = require('crypto');
 const config = require('../config/appConfig');
+const { Money } = require('@baalvion/money');
 
 const synthetic = (prefix) => `${prefix}_${crypto.randomBytes(8).toString('hex')}`;
-const toMinor = (amount) => Math.round(Number(amount) * 100); // paise/cents
+// Minor units from the currency's own exponent — paise for INR, cents for USD, whole yen for
+// JPY. A hardcoded x100 overcharges 100x on a zero-decimal currency.
+const toMinor = (amount, currency = 'INR') => Number(Money.fromDatabaseValue(amount, currency).minor);
 
 // ── Razorpay ──────────────────────────────────────────────────────────────────
 const razorpay = {
