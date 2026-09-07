@@ -107,7 +107,9 @@ export default function Hero() {
           {[
             "No credit card required",
             "Free 14-day trial",
-            "2,400+ companies trust us",
+            // "2,400+ companies trust us" sat here. That is a factual claim about adoption,
+            // and the platform currently has no companies at all. The two items left are
+            // statements about the offer, which are true.
           ].map((text, i) => (
             <div key={text} className="flex items-center gap-1">
               {i > 0 && (
@@ -169,7 +171,9 @@ export default function Hero() {
                 Hiring Dashboard — Frontend Engineer
               </div>
 
-              {/* Stats */}
+              {/* Stats — ILLUSTRATIVE. These belong to the mocked "Hiring Dashboard"
+                  screenshot above and depict the product interface, not this company's
+                  metrics. Keep them inside the device frame; never surface them as claims. */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 mb-3">
                 {[
                   { n: "1,284", l: "Applicants", g: "↑ 18%" },

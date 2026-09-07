@@ -65,6 +65,13 @@ const loadCmsRole = async (req, res, next) => {
             return next(new AppError('FORBIDDEN', 'You are not a member of this website', 403));
         }
 
+        // A lapsed grant is no grant. Checked here rather than in each caller because this is
+        // the single place every website-scoped route resolves a role — missing it in one
+        // route would leave expired access working on that route alone.
+        if (member.expiresAt && new Date(member.expiresAt).getTime() <= Date.now()) {
+            return next(new AppError('FORBIDDEN', 'Your access to this website has expired', 403));
+        }
+
         req.cmsRole = member.role;
         req.cmsLevel = CMS_ROLE_LEVEL[member.role] || 0;
         return next();
@@ -89,6 +96,10 @@ const callerScope = (req) => {
     return {
         orgId: req.user?.orgId ?? req.auth?.orgId,
         isPlatformAdmin: roles.some((r) => PLATFORM_BYPASS_ROLES.includes(r)),
+        // Needed to scope the websites LIST to the caller's memberships. Detail routes are
+        // already membership-gated by loadCmsRole, but the list was only org-filtered, so a
+        // contributor on one site could enumerate every site in the org.
+        userId: req.auth?.userId ?? req.user?.id ?? null,
     };
 };
 

@@ -95,7 +95,7 @@ router.post('/login', async (req, res) => {
   }
   const { accessToken, refreshToken, user } = data;
   const { c, csrfToken } = await establish(req, res, accessToken, refreshFromCookie);
-  return res.json({ user: { id: user && user.id, email: user && user.email, fullName: user && user.fullName, roles: c.roles || [], orgId: c.org_id ?? null, orgType: c.org_type ?? null }, csrfToken });
+  return res.json({ user: { id: user && user.id, email: user && user.email, fullName: user && user.fullName, roles: c.roles || [], orgId: c.org_id ?? null, orgType: c.org_type ?? null, businesses: c.businesses || {} }, csrfToken });
 });
 
 // POST /auth/register → auth-service register (registers + auto-logs-in) → cookies + SAFE profile + csrf.
@@ -115,7 +115,7 @@ router.post('/register', async (req, res) => {
   }
   const { accessToken, refreshToken, user } = json.data;
   const { c, csrfToken } = await establish(req, res, accessToken, refreshFromCookie);
-  return res.status(201).json({ user: { id: user && user.id, email: user && user.email, fullName: user && user.fullName, roles: c.roles || [], orgId: c.org_id ?? null, orgType: c.org_type ?? null }, csrfToken });
+  return res.status(201).json({ user: { id: user && user.id, email: user && user.email, fullName: user && user.fullName, roles: c.roles || [], orgId: c.org_id ?? null, orgType: c.org_type ?? null, businesses: c.businesses || {} }, csrfToken });
 });
 
 // Passwordless email-OTP login. request → auth-service emails a one-time code (no session).
@@ -132,7 +132,7 @@ router.post('/email/otp/verify', async (req, res) => {
   }
   const { accessToken, user } = json.data;
   const { c, csrfToken } = await establish(req, res, accessToken, refreshFromCookie);
-  return res.json({ user: { id: user && user.id, email: user && user.email, fullName: user && user.fullName, roles: c.roles || [], orgId: c.org_id ?? null, orgType: c.org_type ?? null }, csrfToken });
+  return res.json({ user: { id: user && user.id, email: user && user.email, fullName: user && user.fullName, roles: c.roles || [], orgId: c.org_id ?? null, orgType: c.org_type ?? null, businesses: c.businesses || {} }, csrfToken });
 });
 
 // POST /auth/invite → invite a member to the caller's org. Requires a valid session; forwards the
@@ -227,7 +227,7 @@ router.post('/accept-invite', async (req, res) => {
   }
   const { accessToken, refreshToken, user } = data;
   const { c, csrfToken } = await establish(req, res, accessToken, refreshFromCookie);
-  return res.status(201).json({ user: { id: user && user.id, email: user && user.email, fullName: user && user.fullName, roles: c.roles || [], orgId: c.org_id ?? null, orgType: c.org_type ?? null }, csrfToken });
+  return res.status(201).json({ user: { id: user && user.id, email: user && user.email, fullName: user && user.fullName, roles: c.roles || [], orgId: c.org_id ?? null, orgType: c.org_type ?? null, businesses: c.businesses || {} }, csrfToken });
 });
 
 // Onboarding intake — public (the applicant has no session yet). Forwards the
@@ -282,7 +282,7 @@ router.post('/mfa-challenge', async (req, res) => {
   }
   const { accessToken, refreshToken, user } = json.data;
   const { c, csrfToken } = await establish(req, res, accessToken, refreshFromCookie);
-  return res.json({ user: { id: user && user.id, email: user && user.email, fullName: user && user.fullName, roles: c.roles || [], orgId: c.org_id ?? null, orgType: c.org_type ?? null }, csrfToken });
+  return res.json({ user: { id: user && user.id, email: user && user.email, fullName: user && user.fullName, roles: c.roles || [], orgId: c.org_id ?? null, orgType: c.org_type ?? null, businesses: c.businesses || {} }, csrfToken });
 });
 
 // POST /auth/mfa-enroll/start (public) → fetch the provisioning material (QR + secret + recovery
@@ -305,7 +305,7 @@ router.post('/mfa-enroll', async (req, res) => {
   }
   const { accessToken, refreshToken, user } = json.data;
   const { c, csrfToken } = await establish(req, res, accessToken, refreshFromCookie);
-  return res.json({ user: { id: user && user.id, email: user && user.email, fullName: user && user.fullName, roles: c.roles || [], orgId: c.org_id ?? null, orgType: c.org_type ?? null }, csrfToken });
+  return res.json({ user: { id: user && user.id, email: user && user.email, fullName: user && user.fullName, roles: c.roles || [], orgId: c.org_id ?? null, orgType: c.org_type ?? null, businesses: c.businesses || {} }, csrfToken });
 });
 
 // GET /auth/me → verify cookie + session; canonical user (NO token).
@@ -316,7 +316,11 @@ router.get('/me', async (req, res) => {
     const c = await verifier.verify(token);
     const session = await getSession(c.sid);
     if (!session) return res.status(401).json({ error: { code: 'SESSION_REVOKED', message: 'Session revoked' } });
-    return res.json({ user: { userId: c.sub, email: c.email, orgId: c.org_id ?? null, orgType: c.org_type ?? null, roles: c.roles || [], permissions: c.permissions || [], sessionId: c.sid }, csrfToken: session.csrfToken });
+    // `businesses` projects the per-business grants (trade, jobs, ir, …) issued in the admin
+    // console. Apps behind this gateway run in COOKIE mode and never see the raw token, so
+    // without it here they cannot learn what they were granted and fall back to inferring
+    // authority from an org role — which is what the central grants exist to replace.
+    return res.json({ user: { userId: c.sub, email: c.email, orgId: c.org_id ?? null, orgType: c.org_type ?? null, roles: c.roles || [], permissions: c.permissions || [], businesses: c.businesses || {}, sessionId: c.sid }, csrfToken: session.csrfToken });
   } catch (err) {
     return res.status(401).json({ error: { code: err.code || 'INVALID_SESSION', message: err.message } });
   }

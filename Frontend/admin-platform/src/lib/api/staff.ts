@@ -2,6 +2,15 @@ import { adminApiClient } from './client';
 import type { ApiResponse, PaginatedResponse, PaginationParams } from '@/lib/types/common.types';
 import type { Department, Team, Employee, StaffInvitation, OnboardingChecklist } from '@/lib/types/staff.types';
 
+/** What admin-service actually returns for a staff page — items, not data. */
+interface RawEmployeePage {
+  items?: Employee[];
+  total?: number;
+  page?: number;
+  limit?: number;
+  hasMore?: boolean;
+}
+
 export const staffApi = {
   // Departments
   listDepartments: () =>
@@ -27,8 +36,33 @@ export const staffApi = {
     adminApiClient.patch<ApiResponse<Team>>(`/staff/teams/${id}`, data),
 
   // Employees
-  listEmployees: (params?: PaginationParams & { departmentId?: string; teamId?: string; status?: string; search?: string }) =>
-    adminApiClient.get<ApiResponse<PaginatedResponse<Employee>>>('/staff/employees', { params }),
+  //
+  // admin-service answers with { items, total, page, limit, hasMore } — NOT the
+  // PaginatedResponse { data, pagination } this was typed as. The cast made TypeScript accept
+  // it, so every caller read `.data` and silently got undefined: the Staff console's Employees
+  // tab has been rendering an empty list. Normalised here so the declared type is true and all
+  // call sites work.
+  listEmployees: async (params?: PaginationParams & { departmentId?: string; teamId?: string; status?: string; search?: string }) => {
+    const res = await adminApiClient.get<ApiResponse<RawEmployeePage>>('/staff/employees', { params });
+    const d = res.data.data ?? ({} as RawEmployeePage);
+    const items = d.items ?? [];
+    const limit = d.limit ?? params?.limit ?? items.length;
+    const page = d.page ?? params?.page ?? 1;
+    const total = d.total ?? items.length;
+    const body: PaginatedResponse<Employee> = {
+      success: true,
+      data: items,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: limit ? Math.ceil(total / limit) : 1,
+        hasNext: !!d.hasMore,
+        hasPrev: page > 1,
+      },
+    };
+    return { ...res, data: body };
+  },
 
   getEmployee: (id: string) =>
     adminApiClient.get<ApiResponse<Employee>>(`/staff/employees/${id}`),

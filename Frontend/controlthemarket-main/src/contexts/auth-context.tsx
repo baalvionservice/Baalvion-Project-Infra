@@ -619,7 +619,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       candidateOnboardingCompleted: details.role === "candidate" ? false : undefined,
       onboardingCompleted: details.role === "company" ? false : undefined,
       profile: {
-        avatarUrl: `https://picsum.photos/seed/${Date.now()}/100/100`,
+        // No avatar until the person uploads one. This used to assign a RANDOM photograph
+        // from picsum.photos as their profile picture — a real photo of someone or somewhere
+        // else, shown as this user. The UI already falls back to their initials.
+        avatarUrl: undefined,
         skills: details.skills || [],
       },
     };

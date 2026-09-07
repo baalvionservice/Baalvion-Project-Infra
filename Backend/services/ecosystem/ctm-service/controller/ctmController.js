@@ -402,7 +402,19 @@ exports.listTeams = async (req, res, next) => {
     try {
         const { offset, limit } = page(req);
         const where = {};
-        if (req.query.company_id) where.company_id = req.query.company_id;
+        // Tenant scoping, matching extrasController.listUsers. Without it `where` stayed empty
+        // whenever the caller omitted company_id — so ANY authenticated user (a candidate
+        // included) could enumerate every company's internal team structure by just not
+        // passing the filter. The filter was the caller's to choose, which is no filter at all.
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        if (!isAdmin) {
+            const callerOrgId = req.auth?.orgId;
+            // No org context → no teams. Fail closed rather than falling back to "all".
+            where.company_id = callerOrgId ?? '__none__';
+        } else if (req.query.company_id) {
+            where.company_id = req.query.company_id;
+        }
         const { count, rows } = await db.teams.findAndCountAll({ where, offset, limit });
         sendPaginated(res, rows, count, Number(req.query.page || 1), limit);
     } catch (err) { next(err); }

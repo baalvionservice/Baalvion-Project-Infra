@@ -41,6 +41,25 @@ function assertNoRoleConfusion(membershipRole) {
   return membershipRole;
 }
 
+/**
+ * FUNCTIONAL roles — job-shaped roles the consoles offer (support, finance, compliance, …)
+ * that were absent from ROLE_HIERARCHY. roleLevel() returned -1 for each, so anyone holding
+ * ONLY one of these failed EVERY requireRole check while the UI still showed them the screens.
+ *
+ * Mapped onto an existing hierarchy tier rather than inserted INTO ROLE_HIERARCHY, because that
+ * array's index IS the level — splicing a role in would silently renumber every tier above it.
+ * Nothing is removed or reordered here; this is purely additive.
+ */
+const FUNCTIONAL_ROLE_TIER = {
+  readonly:   'viewer',
+  support:    'member',
+  analyst:    'member',
+  developer:  'editor',
+  moderator:  'editor',
+  compliance: 'manager',
+  finance:    'manager',
+};
+
 const ROLE_PERMISSIONS = {
   viewer:      ['read:self'],
   member:      ['read:self', 'read:org', 'write:self'],
@@ -49,6 +68,15 @@ const ROLE_PERMISSIONS = {
   admin:       ['read:self', 'read:org', 'write:self', 'write:org', 'manage:members', 'manage:org', 'manage:api_keys'],
   owner:       ['read:self', 'read:org', 'write:self', 'write:org', 'manage:members', 'manage:org', 'manage:api_keys', 'manage:billing', 'delete:org'],
   super_admin: ['*'],
+
+  // Functional roles: tier-equivalent permissions plus what the job actually needs.
+  readonly:   ['read:self', 'read:org'],
+  support:    ['read:self', 'read:org', 'read:users'],
+  analyst:    ['read:self', 'read:org', 'read:analytics'],
+  developer:  ['read:self', 'read:org', 'write:self', 'manage:api_keys'],
+  moderator:  ['read:self', 'read:org', 'write:self', 'write:org', 'moderate:content'],
+  compliance: ['read:self', 'read:org', 'read:audit', 'read:users'],
+  finance:    ['read:self', 'read:org', 'manage:billing', 'read:analytics'],
 };
 
 function err(status, code, message) {
@@ -60,7 +88,14 @@ function err(status, code, message) {
   return e;
 }
 
-function roleLevel(role) { return ROLE_HIERARCHY.indexOf(role); }
+function roleLevel(role) {
+  const direct = ROLE_HIERARCHY.indexOf(role);
+  if (direct !== -1) return direct;
+  // Functional role → the tier it is equivalent to. Still -1 for genuinely unknown roles,
+  // so an unrecognised value can never accidentally acquire authority.
+  const tier = FUNCTIONAL_ROLE_TIER[role];
+  return tier ? ROLE_HIERARCHY.indexOf(tier) : -1;
+}
 
 /** Roles array from req.auth — canonical roles[], with scalar `role` fallback. */
 function authRoles(req) {
@@ -125,6 +160,32 @@ function requirePermission(...permissions) {
   };
 }
 
+/**
+ * EXACT-match role guard — deliberately NON-hierarchical.
+ *
+ * requireRole() is hierarchical, so requireRole('admin') also admits `owner` and `super_admin`.
+ * That is wrong wherever a higher tier is not actually more trusted. `owner` is SELF-SERVICE:
+ * registration creates an organization and makes the registrant its owner, so every signed-up
+ * user holds it. Gating a platform surface on requireRole('admin') therefore hands it to the
+ * entire public — verified 2026-09-05, when a freshly registered account could read the
+ * platform user list.
+ *
+ * Use this for platform-staff surfaces; use requireRole() for genuine org hierarchies.
+ */
+function requireExactRole(...roles) {
+  return (req, _res, next) => {
+    if (!req.auth) return next(err(401, 'unauthorized', 'Authentication required'));
+    const userRoles = authRoles(req);
+    if (!userRoles.some((r) => roles.includes(r))) {
+      return next(err(403, 'forbidden', `Requires role: ${roles.join(' or ')}`));
+    }
+    return next();
+  };
+}
+
+/** Platform-staff tier for admin-service surfaces: real staff only, never a self-service owner. */
+const requireStaffAdmin = requireExactRole('admin', 'super_admin');
+
 const requireSuperAdmin = requireRole('super_admin');
 const requireOrgAdmin = requireRole('admin', 'owner', 'super_admin');
 
@@ -146,9 +207,9 @@ function requirePlatformRole(...roles) {
 }
 
 module.exports = {
-  ROLE_HIERARCHY, ROLE_PERMISSIONS,
+  ROLE_HIERARCHY, ROLE_PERMISSIONS, FUNCTIONAL_ROLE_TIER,
   PLATFORM_ROLES, PLATFORM_BYPASS_ROLES,
   roleLevel, isRoleAtLeast, hasPermission,
   isPlatformRole, hasTenantBypass, assertNoRoleConfusion,
-  requireRole, requirePermission, requireSuperAdmin, requireOrgAdmin, requirePlatformRole,
+  requireRole, requireExactRole, requireStaffAdmin, requirePermission, requireSuperAdmin, requireOrgAdmin, requirePlatformRole,
 };

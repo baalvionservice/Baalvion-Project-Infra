@@ -64,3 +64,32 @@ export const useUnsuspendUser = () => {
     onError: (e: { message: string }) => toast.error(e.message),
   });
 };
+
+/**
+ * Change a person's ORG role — the one the access token carries and authz actually reads.
+ *
+ * The console's employee "Permissions" screen wrote to staff.employees.role, which nothing in
+ * the authorization path reads, so role changes from the admin panel silently did nothing.
+ * This is the real operation; the server enforces the rank guards.
+ *
+ * Session revocation is surfaced deliberately: a DEMOTION signs the person out so the change
+ * applies immediately instead of lingering until their token expires. That is visible to them,
+ * so it should not surprise the admin who did it.
+ */
+export const useChangeUserRole = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, role }: { userId: number; role: string }) =>
+      usersApi.changeRole(userId, role),
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: userKeys.all });
+      qc.invalidateQueries({ queryKey: ['people'] });
+      toast.success(
+        `Role changed to ${res.role}` +
+          (res.sessionsRevoked ? ' — they have been signed out so it applies immediately' : ''),
+      );
+    },
+    onError: (e: { message: string }) => toast.error(e.message),
+  });
+};
+

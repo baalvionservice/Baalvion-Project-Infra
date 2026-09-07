@@ -11,6 +11,8 @@ import { Badge } from '@/components/ui/badge';
 import { useUIStore } from '@/lib/store/uiStore';
 import { useAuthStore } from '@/lib/store/authStore';
 import { NAVIGATION, type NavItem } from '@/lib/constants/navigation';
+import { useAccess } from '@/lib/authz/useAccess';
+import { useAuthzVersion } from '@/lib/authz/version';
 import type { UserRole } from '@/lib/types/auth.types';
 
 interface SidebarLinkProps {
@@ -19,17 +21,48 @@ interface SidebarLinkProps {
   depth?: number;
 }
 
+/**
+ * Legacy per-item role list from lib/constants/navigation.ts. Retained for external items
+ * (which have no console route to look up) and as documentation of original intent.
+ */
 function hasAccess(item: NavItem, role?: UserRole): boolean {
   if (!item.roles || item.roles.length === 0) return true;
   return role ? item.roles.includes(role) : false;
 }
 
+/** Nav hrefs carry query strings (/identity?tab=risk); policy matches on pathname. */
+const toPathname = (href: string): string => href.split(/[?#]/)[0];
+
+/**
+ * Whether to show a nav item.
+ *
+ * The route policy is authoritative, so the sidebar can never advertise a section that the
+ * route gate would then refuse — the two now read the same rules. This is deliberately
+ * broader than the old per-item lists in one respect: those named roles literally
+ * (['super_admin','admin']), silently hiding sections from `owner` even though the backend
+ * hierarchy grants owner MORE than admin and would have served the request.
+ */
+function useNavVisibility() {
+  const { checkRoute } = useAccess();
+  const user = useAuthStore((s) => s.user);
+  const authzVersion = useAuthzVersion();
+
+  return (item: NavItem): boolean => {
+    // Legacy mode: the original per-item role lists decide visibility, nothing else.
+    if (authzVersion === 'old') return hasAccess(item, user?.role);
+
+    const isExternal = item.external || /^https?:\/\//.test(item.href);
+    if (isExternal) return hasAccess(item, user?.role);
+    return checkRoute(toPathname(item.href)).allowed;
+  };
+}
+
 function SidebarLink({ item, collapsed, depth = 0 }: SidebarLinkProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(() => item.children?.some((c) => pathname.startsWith(c.href)) ?? false);
-  const user = useAuthStore((s) => s.user);
+  const isVisible = useNavVisibility();
 
-  if (!hasAccess(item, user?.role)) return null;
+  if (!isVisible(item)) return null;
 
   const IconComp = Icons[item.iconName as keyof typeof Icons] as React.ComponentType<{ className?: string }> | undefined;
   const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
@@ -117,7 +150,7 @@ function SidebarLink({ item, collapsed, depth = 0 }: SidebarLinkProps) {
 
 export default function Sidebar() {
   const { sidebarCollapsed } = useUIStore();
-  const user = useAuthStore((s) => s.user);
+  const isVisible = useNavVisibility();
 
   return (
     <aside
@@ -147,7 +180,7 @@ export default function Sidebar() {
           {NAVIGATION.map((group) => {
             // Skip a whole group when the current role can't access any of its items,
             // so we never render a bare section header with no links beneath it.
-            const visibleItems = group.items.filter((item) => hasAccess(item, user?.role));
+            const visibleItems = group.items.filter(isVisible);
             if (visibleItems.length === 0) return null;
 
             return (

@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, KeyRound } from 'lucide-react';
 import PageHeader from '@/components/common/PageHeader';
 import WebsiteCard from '@/components/cms/WebsiteCard';
 import CreateWebsiteModal from '@/components/cms/CreateWebsiteModal';
+import GrantSiteAccessDialog from '@/components/cms/GrantSiteAccessDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -12,6 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useWebsites, useDeleteWebsite } from '@/lib/queries/cms-websites.queries';
 import { useCmsStore } from '@/lib/store/cmsStore';
 import { useUIStore } from '@/lib/store/uiStore';
+import { useAccess } from '@/lib/authz/useAccess';
 
 export default function WebsitesPage() {
   const { setBreadcrumbs } = useUIStore();
@@ -19,6 +21,11 @@ export default function WebsitesPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
+  const [grantOpen, setGrantOpen] = useState(false);
+  // cms-service accepts access grants from platform principals only, so the action is
+  // shown to exactly the people it will work for.
+  const { roles } = useAccess();
+  const canGrantAccess = roles.some((r) => ['super_admin', 'owner', 'admin'].includes(r));
 
   const { data, isLoading, isError, error, refetch } = useWebsites({
     search: search || undefined,
@@ -38,10 +45,18 @@ export default function WebsitesPage() {
         title="Websites"
         description={`${data?.pagination.total ?? 0} managed websites`}
         actions={
-          <Button size="sm" onClick={() => setCreateOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            New Website
-          </Button>
+          <div className="flex items-center gap-2">
+            {canGrantAccess && (
+              <Button size="sm" variant="outline" onClick={() => setGrantOpen(true)}>
+                <KeyRound className="mr-2 h-4 w-4" />
+                Grant Access
+              </Button>
+            )}
+            <Button size="sm" onClick={() => setCreateOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              New Website
+            </Button>
+          </div>
         }
       />
 
@@ -112,6 +127,8 @@ export default function WebsitesPage() {
       )}
 
       <CreateWebsiteModal open={createOpen} onClose={() => setCreateOpen(false)} />
+
+      <GrantSiteAccessDialog open={grantOpen} onOpenChange={setGrantOpen} websites={websites} />
     </div>
   );
 }

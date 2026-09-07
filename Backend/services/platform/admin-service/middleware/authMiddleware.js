@@ -6,6 +6,7 @@ const fs = require('fs');
 const {
     createAuthMiddleware,
     requireRole:       rbacRequireRole,
+    requireStaffAdmin: rbacRequireStaffAdmin,
     requirePermission: rbacRequirePermission,
     requireSuperAdmin: rbacRequireSuperAdmin,
     requireOrgAdmin:   rbacRequireOrgAdmin,
@@ -55,8 +56,11 @@ const authMiddleware = (req, res, next) => _canonical(req, res, (err) => {
 
 const wrap = (mw) => (req, res, next) => mw(req, res, (err) => (err ? next(toAppError(err)) : next()));
 const requireRole       = (...roles) => wrap(rbacRequireRole(...roles));
+// Platform-staff gate: exact match on admin/super_admin. NOT requireRole('admin'), which is
+// hierarchical and would also admit `owner` — a role every self-registered user holds.
+const requireStaffAdmin = wrap(rbacRequireStaffAdmin);
 const requirePermission = (...perms) => wrap(rbacRequirePermission(...perms));
 const requireSuperAdmin = wrap(rbacRequireSuperAdmin);
 const requireOrgAdmin   = wrap(rbacRequireOrgAdmin);
 
-module.exports = { authMiddleware, requireRole, requirePermission, requireSuperAdmin, requireOrgAdmin };
+module.exports = { authMiddleware, requireRole, requireStaffAdmin, requirePermission, requireSuperAdmin, requireOrgAdmin };

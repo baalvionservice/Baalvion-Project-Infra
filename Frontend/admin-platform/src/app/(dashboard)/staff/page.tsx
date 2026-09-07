@@ -235,7 +235,9 @@ export default function StaffPage() {
   });
 
   const deptList:  Department[]      = departments ?? [];
-  const empList:   Employee[]        = employees?.data ?? [];
+  // listEmployees now returns a real PaginatedResponse, so this IS the array (it used to
+  // read `.data` off admin-service's { items } envelope and silently render nothing).
+  const empList:   Employee[]        = employees ?? [];
   const invList:   StaffInvitation[] = invitations?.data ?? [];
 
   const activeCount = empList.filter((e) => e.status === 'active').length;
