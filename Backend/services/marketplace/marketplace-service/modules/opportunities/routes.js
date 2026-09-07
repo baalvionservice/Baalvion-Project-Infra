@@ -16,6 +16,15 @@ router.get('/', optionalAuth, async (req, res, next) => {
     } catch (err) { return next(err); }
 });
 
+// The caller's own rounds, any status — what a founder needs to see their drafts and publish
+// them. Declared BEFORE '/:id' so 'mine' is not parsed as an opportunity id.
+router.get('/mine', authMiddleware, async (req, res, next) => {
+    try {
+        const result = await service.listMine({ orgId: req.user.orgId, query: req.query });
+        return sendPaginated(req, res, result);
+    } catch (err) { return next(err); }
+});
+
 // AI-recommended opportunities for the authenticated investor (by ?investorId or org).
 router.get('/recommended', authMiddleware, async (req, res, next) => {
     try {

@@ -1,0 +1,23 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: auth-gateway
+  description: >-
+    BFF / cookie gateway and trust boundary: HttpOnly cookie sessions backed by auth-service RS256, CSRF double-submit, session revocation and per-upstream proxying.
+  domain: identity
+  division: platform-core
+  context: auth-gateway
+  owner: "@baalvion/platform-core"
+  # tier derived from blast radius at registration — confirm with the owning team.
+  tier: tier-0
+  repo: baalvion-platform
+  path: Backend/services/identity/auth-gateway
+spec:
+  lifecycle: production
+  language: node
+  datastores: [redis]
+  dependsOn: [auth-service, session-service]
+  consumesEvents: []
+  producesEvents: []
+  slo: { availability: 0.99, latencyP95Ms: 400 }
+  deploy: { chart: baalvion-service, namespace: baalvion-identity, minReplicas: 2, maxReplicas: 10 }

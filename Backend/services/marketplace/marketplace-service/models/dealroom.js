@@ -17,6 +17,8 @@ module.exports = (sequelize, DataTypes) => {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
         deal_id: { type: DataTypes.UUID, allowNull: false },
         sender_id: { type: DataTypes.STRING(120), allowNull: false },
+        // Which side of the table sent it — null on rows written before migration 010.
+        sender_org_id: { type: DataTypes.UUID },
         body: { type: DataTypes.TEXT },
         attachments_json: { type: DataTypes.JSONB, defaultValue: [] },
         kind: { type: DataTypes.STRING(10), defaultValue: 'chat' },
@@ -47,7 +49,16 @@ module.exports = (sequelize, DataTypes) => {
         id: { type: DataTypes.UUID, primaryKey: true, defaultValue: DataTypes.UUIDV4 },
         deal_id: { type: DataTypes.UUID, allowNull: false },
         document_request_id: { type: DataTypes.UUID },
+        // Matched against document_access_grants.category. NULL = uncategorised, visible only to
+        // a holder of an 'all' grant.
+        category: { type: DataTypes.STRING(20) },
+        // file_url stays for rows written before migration 011, which referenced something
+        // external. New uploads are stored objects addressed by storage_key.
         file_url: { type: DataTypes.STRING(600), allowNull: false },
+        storage_key: { type: DataTypes.STRING(600) },
+        filename: { type: DataTypes.STRING(300) },
+        mime: { type: DataTypes.STRING(120) },
+        size_bytes: { type: DataTypes.BIGINT },
         version: { type: DataTypes.INTEGER, defaultValue: 1 },
         uploaded_by: { type: DataTypes.STRING(120) },
         created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },

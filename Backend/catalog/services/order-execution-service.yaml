@@ -1,0 +1,23 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: order-execution-service
+  description: >-
+    GTOS order lifecycle state machine, transactional outbox and the payment-to-order saga. Owns the /trade/v1/orders subtree.
+  domain: commerce
+  division: commerce
+  context: trade-order-execution
+  owner: "@baalvion/commerce"
+  # tier derived from blast radius at registration — confirm with the owning team.
+  tier: tier-1
+  repo: baalvion-platform
+  path: Backend/services/trade/order-execution-service
+spec:
+  lifecycle: production
+  language: node
+  datastores: [postgres, redis]
+  dependsOn: [auth-service]
+  consumesEvents: []
+  producesEvents: []
+  slo: { availability: 0.99, latencyP95Ms: 400 }
+  deploy: { chart: baalvion-service, namespace: baalvion-commerce, minReplicas: 2, maxReplicas: 10 }

@@ -1,134 +1,61 @@
 import { AppConfig } from "@/config";
 import { MetadataRoute } from "next";
-import { pageService } from "@/core/services/page.service";
-import { boardMaterialsService } from "@/core/services/board-materials.service";
-import { navigationService } from "@/core/services/navigation.service";
-import { contentService } from "@/core/services/content.service";
+// The four services previously imported here (page/board-materials/navigation/content) are all
+// marked 'use client'. A server-rendered sitemap cannot call them: in a production build they
+// resolve to client references and every call threw "getAllPages is not a function", which the
+// try/catch below swallowed. The dynamic branch has therefore NEVER contributed a URL in
+// production — CMS-authored pages were silently absent from the sitemap. lib/cms.ts is the
+// server-side reader for the same content.
+import { cmsListPages } from "@/lib/cms";
 import { IR_PAGES } from "@/lib/ir-pages";
+import { isGatedPath } from "@/lib/seo-routes";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = AppConfig.baseUrl;
   const currentDate = new Date();
 
-  // Main public routes
+  // PUBLIC routes only.
+  //
+  // A sitemap is a request to index. Listing a page that robots.txt disallows asks a crawler to do
+  // two contradictory things, and it was doing exactly that for 11 gated routes — /dashboard,
+  // /capital-ops, /onboarding, /governance/my-voting and the phase2/phase3 portals — four of which
+  // (/data-room, /performance, /phase2, /phase3) are not even routes in this app.
+  //
+  // GATED_PREFIXES below is the same list robots.ts blocks, exported from one place so the two
+  // cannot drift apart again. Anything matching it is filtered out at the end, whatever adds it.
   const staticRoutes = [
-    {
-      url: `${baseUrl}`,
-      lastModified: currentDate,
-      changeFrequency: "daily" as const,
-      priority: 1.0,
-    },
-    {
-      url: `${baseUrl}/capital-ops`,
-      lastModified: currentDate,
-      changeFrequency: "weekly" as const,
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/dashboard`,
-      lastModified: currentDate,
-      changeFrequency: "daily" as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/data-room`,
-      lastModified: currentDate,
-      changeFrequency: "weekly" as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/performance`,
-      lastModified: currentDate,
-      changeFrequency: "weekly" as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/onboarding`,
-      lastModified: currentDate,
-      changeFrequency: "monthly" as const,
-      priority: 0.6,
-    },
+    { url: `${baseUrl}`, lastModified: currentDate, changeFrequency: "daily" as const, priority: 1.0 },
+    { url: `${baseUrl}/faq`, lastModified: currentDate, changeFrequency: "monthly" as const, priority: 0.7 },
+  ];
+
+  // The marketplace — the two-sided surface investors and founders arrive on. Both sides need to
+  // be findable: an investor searching for opportunities, and a founder searching for somewhere
+  // to raise.
+  const marketplaceRoutes = [
+    { url: `${baseUrl}/invest`, lastModified: currentDate, changeFrequency: "daily" as const, priority: 0.9 },
+    { url: `${baseUrl}/invest/list-your-business`, lastModified: currentDate, changeFrequency: "weekly" as const, priority: 0.9 },
   ];
 
   // Governance section routes
   const governanceRoutes = [
-    {
-      url: `${baseUrl}/governance`,
-      lastModified: currentDate,
-      changeFrequency: "weekly" as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/governance/overview`,
-      lastModified: currentDate,
-      changeFrequency: "monthly" as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/governance/board-of-directors`,
-      lastModified: currentDate,
-      changeFrequency: "monthly" as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/governance/committee-composition`,
-      lastModified: currentDate,
-      changeFrequency: "monthly" as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/governance/leadership`,
-      lastModified: currentDate,
-      changeFrequency: "monthly" as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/governance/my-voting`,
-      lastModified: currentDate,
-      changeFrequency: "weekly" as const,
-      priority: 0.6,
-    },
+    { url: `${baseUrl}/governance`, lastModified: currentDate, changeFrequency: "weekly" as const, priority: 0.8 },
+    { url: `${baseUrl}/governance/overview`, lastModified: currentDate, changeFrequency: "monthly" as const, priority: 0.7 },
+    { url: `${baseUrl}/governance/board-of-directors`, lastModified: currentDate, changeFrequency: "monthly" as const, priority: 0.7 },
+    { url: `${baseUrl}/governance/committee-composition`, lastModified: currentDate, changeFrequency: "monthly" as const, priority: 0.7 },
+    { url: `${baseUrl}/governance/leadership`, lastModified: currentDate, changeFrequency: "monthly" as const, priority: 0.7 },
+    { url: `${baseUrl}/governance/framework`, lastModified: currentDate, changeFrequency: "monthly" as const, priority: 0.7 },
   ];
 
-  // News and Events section routes
+  // News and Events — every published surface, not just the four that were listed.
   const newsEventsRoutes = [
-    {
-      url: `${baseUrl}/news-and-events`,
-      lastModified: currentDate,
-      changeFrequency: "daily" as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/news-and-events/news`,
-      lastModified: currentDate,
-      changeFrequency: "daily" as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/news-and-events/press-releases`,
-      lastModified: currentDate,
-      changeFrequency: "weekly" as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/news-and-events/events`,
-      lastModified: currentDate,
-      changeFrequency: "weekly" as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/news-and-events/investor-day`,
-      lastModified: currentDate,
-      changeFrequency: "monthly" as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/news-and-events/webcast`,
-      lastModified: currentDate,
-      changeFrequency: "weekly" as const,
-      priority: 0.7,
-    },
-  ];
+    "", "/news", "/press-releases", "/events", "/investor-day", "/webcast",
+    "/filings", "/financial-reports", "/documents", "/stock",
+  ].map((seg) => ({
+    url: `${baseUrl}/news-and-events${seg}`,
+    lastModified: currentDate,
+    changeFrequency: (seg === "" || seg === "/news" ? "daily" : "weekly") as "daily" | "weekly",
+    priority: seg === "" || seg === "/news" ? 0.8 : 0.7,
+  }));
 
   // Canonical institutional IR marketing pages (why-invest, thesis, market,
   // use-of-proceeds, story, financials, governance framework, FAQ, resources).
@@ -164,196 +91,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  // Phase routes (if publicly accessible)
-  const phaseRoutes = [
-    {
-      url: `${baseUrl}/phase2`,
-      lastModified: currentDate,
-      changeFrequency: "weekly" as const,
-      priority: 0.5,
-    },
-    {
-      url: `${baseUrl}/phase2/dashboard`,
-      lastModified: currentDate,
-      changeFrequency: "weekly" as const,
-      priority: 0.5,
-    },
-    {
-      url: `${baseUrl}/phase2/data-room`,
-      lastModified: currentDate,
-      changeFrequency: "weekly" as const,
-      priority: 0.5,
-    },
-    {
-      url: `${baseUrl}/phase3`,
-      lastModified: currentDate,
-      changeFrequency: "weekly" as const,
-      priority: 0.5,
-    },
-    {
-      url: `${baseUrl}/phase3/dashboard`,
-      lastModified: currentDate,
-      changeFrequency: "weekly" as const,
-      priority: 0.5,
-    },
-  ];
-
   // Dynamic content from services
+  // CMS-authored pages, read server-side. A failure here must not take the whole sitemap down —
+  // the static routes are the ones that matter most — but it is logged rather than swallowed.
   let dynamicRoutes: MetadataRoute.Sitemap = [];
-
   try {
-    // Get dynamic pages from page service
-    const pagesResponse = await pageService.getAllPages();
-    if (pagesResponse.success && pagesResponse.data) {
-      const publishedPages = pagesResponse.data.filter(
-        (page) =>
-          page.status === "Published" && page.workflowStatus === "Published"
-      );
-
-      const pageRoutes = publishedPages.map((page) => ({
-        url: `${baseUrl}${page.slug === "/" ? "" : page.slug}`,
-        lastModified:
-          page.versionHistory.length > 0
-            ? new Date(
-                page.versionHistory[page.versionHistory.length - 1].timestamp
-              )
-            : currentDate,
+    const pages = await cmsListPages();
+    dynamicRoutes = pages
+      .filter((page) => page?.slug && page.slug !== "/")
+      .map((page) => ({
+        url: `${baseUrl}${page.slug.startsWith("/") ? page.slug : `/${page.slug}`}`,
+        lastModified: page.updatedAt ? new Date(page.updatedAt) : currentDate,
         changeFrequency: "weekly" as const,
-        priority: page.slug === "/" ? 1.0 : 0.7,
+        priority: 0.7,
       }));
-
-      dynamicRoutes.push(...pageRoutes);
-    }
-
-    // Get navigation items for additional routes
-    const navigationResponse = await navigationService.getNavigation();
-    if (navigationResponse.success && navigationResponse.data) {
-      const extractNavigationUrls = (items: any[]): string[] => {
-        const urls: string[] = [];
-        items.forEach((item) => {
-          if (
-            item.href &&
-            item.href !== "#" &&
-            !item.href.startsWith("/#") &&
-            item.isActive
-          ) {
-            urls.push(item.href);
-          }
-          if (item.children) {
-            urls.push(...extractNavigationUrls(item.children));
-          }
-        });
-        return urls;
-      };
-
-      const navUrls = extractNavigationUrls(navigationResponse.data);
-      const uniqueNavUrls = [...new Set(navUrls)];
-
-      const navRoutes = uniqueNavUrls.map((href) => ({
-        url: `${baseUrl}${href}`,
-        lastModified: currentDate,
-        changeFrequency: "weekly" as const,
-        priority: 0.6,
-      }));
-
-      dynamicRoutes.push(...navRoutes);
-    }
-
-    // Get board materials for governance content
-    const boardMaterials = await boardMaterialsService.getMaterials();
-    const publishedMaterials = boardMaterials.filter(
-      (material) => material.workflowStatus === "Published"
-    );
-
-    const materialRoutes = publishedMaterials.map((material) => ({
-      url: `${baseUrl}/governance/board-materials/${material.id}`,
-      lastModified:
-        material.versionHistory.length > 0
-          ? new Date(
-              material.versionHistory[
-                material.versionHistory.length - 1
-              ].timestamp
-            )
-          : currentDate,
-      changeFrequency: "monthly" as const,
-      priority: 0.5,
-    }));
-
-    dynamicRoutes.push(...materialRoutes);
-
-    // Get dynamic content from content service
-    const contentData = await contentService.getAllContentForSitemap();
-
-    // Add news articles to sitemap
-    const newsRoutes = contentData.news.map((article) => ({
-      url: `${baseUrl}/news-and-events/${
-        article.category === "press-release" ? "press-releases" : "news"
-      }/${article.slug}`,
-      lastModified: new Date(article.lastModified),
-      changeFrequency: "monthly" as const,
-      priority: article.priority || 0.7,
-    }));
-
-    dynamicRoutes.push(...newsRoutes);
-
-    // Add investor documents to sitemap
-    const documentRoutes = contentData.documents.map((doc) => {
-      let basePath = "/data-room";
-      switch (doc.type) {
-        case "annual-report":
-          basePath += "/annual-reports";
-          break;
-        case "quarterly-report":
-          basePath += "/quarterly-reports";
-          break;
-        case "presentation":
-          basePath += "/investor-presentations";
-          break;
-        case "filing":
-          basePath += "/sec-filings";
-          break;
-        default:
-          basePath += "/documents";
-      }
-
-      return {
-        url: `${baseUrl}${basePath}/${doc.slug}`,
-        lastModified: new Date(doc.lastModified),
-        changeFrequency:
-          doc.type === "annual-report"
-            ? ("yearly" as const)
-            : ("monthly" as const),
-        priority: doc.type === "annual-report" ? 0.9 : 0.8,
-      };
-    });
-
-    dynamicRoutes.push(...documentRoutes);
-  } catch (error) {
-    console.warn("Error fetching dynamic content for sitemap:", error);
-    // Continue with static routes if dynamic content fails
+  } catch (err) {
+    console.error("[sitemap] CMS pages unavailable — static routes only:", err instanceof Error ? err.message : err);
   }
-
-  // Sample governance documents (you can replace with actual governance service)
-  const sampleGovernanceRoutes = [
-    {
-      url: `${baseUrl}/governance/policies/code-of-conduct`,
-      lastModified: new Date("2025-12-01"),
-      changeFrequency: "yearly" as const,
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/governance/policies/whistleblower-policy`,
-      lastModified: new Date("2025-11-15"),
-      changeFrequency: "yearly" as const,
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/governance/audit-reports/2025-annual-audit`,
-      lastModified: new Date("2026-02-01"),
-      changeFrequency: "yearly" as const,
-      priority: 0.7,
-    },
-  ];
 
   // Combine all routes and remove duplicates
   const allRoutes = [
@@ -361,15 +115,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...irMarketingRoutes,
     ...governanceRoutes,
     ...newsEventsRoutes,
+    ...marketplaceRoutes,
     ...resourcesRoutes,
-    ...phaseRoutes,
     ...dynamicRoutes,
-    ...sampleGovernanceRoutes,
   ];
 
-  // Remove duplicates by URL and sort by priority
+  // Final guard: whatever any branch above contributed — including the dynamic CMS routes — a
+  // gated path never reaches the sitemap. Deduped so each URL appears exactly once.
   const uniqueRoutes = allRoutes.filter(
-    (route, index, self) => index === self.findIndex((r) => r.url === route.url)
+    (route, index, self) =>
+      index === self.findIndex((r) => r.url === route.url) &&
+      !isGatedPath(route.url.replace(baseUrl, "") || "/")
   );
 
   return uniqueRoutes.sort((a, b) => (b.priority || 0) - (a.priority || 0));

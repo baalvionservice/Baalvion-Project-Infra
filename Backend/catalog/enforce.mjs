@@ -181,15 +181,32 @@ if (YAML) {
   else if (publicIngress.length > 1) add('C4', 'catalog', `multiple public entrypoints (${publicIngress.join(', ')}) — gateway must be the only one`);
   else if (!/gateway/.test(publicIngress[0])) add('C4', 'catalog', `public entrypoint '${publicIngress[0]}' is not the gateway`);
 
-  // scaffold/registration: every deployable Backend service has a descriptor
+  // scaffold/registration: every deployable Backend service has a descriptor.
+  //
+  // This used to scan only Backend/* one level deep, with 'services' in NON_SERVICE_DIRS — so
+  // the entire Backend/services/<domain>/<service>/ tree, which is where virtually every service
+  // actually lives, was never checked. The rule reported ✓ while services went unregistered.
+  // Walk both layouts: Backend/<svc> and Backend/services/<domain>/<svc>.
   const registeredPaths = new Set(descriptors.map((s) => (s.doc?.metadata?.path || '').replace(/\/$/, '')));
   const backendDir = join(ROOT, 'Backend');
+  const checkService = (relPath, name) => {
+    if (!existsSync(join(ROOT, relPath, 'package.json'))) return;
+    if (!registeredPaths.has(relPath) && !names.has(name)) {
+      add('SCAFFOLD', relPath, 'deployable service has no catalog descriptor — create services via the scaffold tool (catalog descriptor required)');
+    }
+  };
   for (const e of readdirSync(backendDir, { withFileTypes: true })) {
     if (!e.isDirectory() || NON_SERVICE_DIRS.has(e.name)) continue;
-    if (!existsSync(join(backendDir, e.name, 'package.json'))) continue;
-    const p = `Backend/${e.name}`;
-    if (!registeredPaths.has(p) && !names.has(e.name)) {
-      add('SCAFFOLD', p, 'deployable service has no catalog descriptor — create services via the scaffold tool (catalog descriptor required)');
+    checkService(`Backend/${e.name}`, e.name);
+  }
+  const backendServicesDir = join(backendDir, 'services');
+  if (existsSync(backendServicesDir)) {
+    for (const domain of readdirSync(backendServicesDir, { withFileTypes: true })) {
+      if (!domain.isDirectory()) continue;
+      for (const svc of readdirSync(join(backendServicesDir, domain.name), { withFileTypes: true })) {
+        if (!svc.isDirectory()) continue;
+        checkService(`Backend/services/${domain.name}/${svc.name}`, svc.name);
+      }
     }
   }
 } else {

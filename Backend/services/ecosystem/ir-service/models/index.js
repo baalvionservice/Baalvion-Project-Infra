@@ -31,6 +31,8 @@ db.IrEvent = require('./ir_events')(sequelize, Sequelize.DataTypes);
 db.IrNotification = require('./ir_notifications')(sequelize, Sequelize.DataTypes);
 db.IrSubscription = require('./ir_subscriptions')(sequelize, Sequelize.DataTypes);
 db.IrVote = require('./ir_votes')(sequelize, Sequelize.DataTypes);
+// Capital account domain (commitments, calls, allocations, distributions, NAV).
+Object.assign(db, require('./ir_capital')(sequelize, Sequelize.DataTypes));
 db.IrSetting = require('./ir_settings')(sequelize, Sequelize.DataTypes);
 db.IrAlert = require('./ir_alerts')(sequelize, Sequelize.DataTypes);
 db.IrBoardMaterial = require('./ir_board_materials')(sequelize, Sequelize.DataTypes);

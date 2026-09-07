@@ -1,8 +1,9 @@
-import { NextResponse } from 'next/server';
+import { irForward } from '@/lib/ir-api';
 
-// Seed generated reports (standalone mode). Consumed by generatedReportsApi.list → listOf(data).items.
+// Generated report artefacts.
+// Previously served hardcoded seed data from this file; it now proxies to ir-service, which owns
+// the records and scopes them to the caller.
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
-  return NextResponse.json({ success: true, data: { items: [] } });
-}
+export const GET = (req: Request) => irForward(req, '/generated-reports');
+export const POST = (req: Request) => irForward(req, '/generated-reports');

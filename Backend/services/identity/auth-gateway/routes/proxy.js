@@ -25,6 +25,12 @@ const TARGETS = {
   // Phase 6E-5 — island backends (dual-auth via bffBridge; gateway is the preferred path).
   insiders:       process.env.SVC_INSIDERS     || 'http://localhost:3050',
   trade:          process.env.SVC_TRADE        || 'http://localhost:3025',
+  // Baalvion Invest — the investment marketplace and deal room. Routed here so deal-room traffic
+  // inherits session revocation, CSRF and the gateway's rate limiting instead of being reached
+  // service-direct. It verifies the RS256 Bearer this proxy forwards in hybrid mode; before
+  // BFF_ENFORCEMENT_MODE=strict it needs a bffBridge like insiders/trade, or the Authorization
+  // header is stripped and it sees no identity at all.
+  marketplace:    process.env.SVC_MARKETPLACE  || 'http://localhost:3060',
   // financial-services-java — system of record for money/KYC/risk (Spring resource servers,
   // base path /api/v1/...). RS256-verified against auth-service when APP_SECURITY_ENABLED=true,
   // gateway-trusted (X-Tenant-ID) in dev. risk moved 3025→3035 to free :3025 for trade.

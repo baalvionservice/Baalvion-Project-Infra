@@ -25,7 +25,7 @@ export default function OnboardingPage() {
 
       {/* Onboarding Footer */}
       <footer className="p-8 text-center text-[10px] text-muted-foreground uppercase tracking-widest border-t bg-card/20">
-        <p>SEC Rule 501 Compliance Simulation • All data is encrypted and handled per Baalvion Fiduciary Standards</p>
+        <p>Onboarding includes identity, KYC and AML verification. All data is encrypted in transit and at rest.</p>
       </footer>
     </main>
   );

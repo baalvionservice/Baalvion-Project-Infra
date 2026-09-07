@@ -155,13 +155,17 @@ export default function RootLayout({
         >
           Skip to main content
         </a>
-        <Script
-          id="structured-data-org"
+        {/*
+          Plain <script>, not next/script. next/script injects on the CLIENT, so this JSON-LD was
+          only ever in the RSC payload and never in the server-rendered HTML — invisible to any
+          crawler that does not execute JavaScript, which includes most social scrapers. A plain
+          tag puts it in the initial response, which is the whole point of structured data.
+        */}
+        <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
         />
-        <Script
-          id="structured-data-website"
+        <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
