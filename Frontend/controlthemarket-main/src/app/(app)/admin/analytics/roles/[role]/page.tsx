@@ -41,6 +41,11 @@ import {
 import type { RoleCategory } from "@/lib/types";
 import { notFound } from "next/navigation";
 
+// Reads live ControlTheMarket data through @/lib/api, which throws CtmDataError when
+// ctm-service is unreachable rather than showing placeholder data. Prerendering this at
+// build time therefore fails; it is a per-request view, not a static page.
+export const dynamic = 'force-dynamic';
+
 const ROLE_ICONS: Record<RoleCategory, React.ElementType> = {
   Engineering: Code,
   Frontend: Monitor,

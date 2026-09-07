@@ -1,4 +1,3 @@
-import { describe, it, expect } from 'vitest';
 import { normRole, businessRole } from '../AuthProvider';
 import { ALL_ADMIN_ROLES } from '@/lib/access/access.types';
 
@@ -26,7 +25,7 @@ describe('org roles grant nothing on their own', () => {
     expect(canReachAdmin(normRole('owner'))).toBe(false);
   });
 
-  it.each(['member', 'viewer', 'owner'])('%s cannot reach the admin panel', (r) => {
+  it.each(['member', 'viewer', 'owner'])('%s cannot reach the admin panel', (r: string) => {
     expect(canReachAdmin(normRole(r))).toBe(false);
   });
 
