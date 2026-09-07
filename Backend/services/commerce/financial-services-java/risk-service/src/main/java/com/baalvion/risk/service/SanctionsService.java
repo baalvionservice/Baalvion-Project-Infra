@@ -25,6 +25,8 @@ import com.baalvion.risk.screening.NameMatcher;
 import com.baalvion.risk.screening.NameNormalizer;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -34,7 +36,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -83,6 +89,12 @@ public class SanctionsService {
 
   private final AtomicReference<Snapshot> snapshotRef = new AtomicReference<>();
 
+  // Ingest commits in batches of its own rather than joining the caller's transaction; see ingestOne.
+  private final TransactionTemplate ingestTx;
+
+  @PersistenceContext
+  private EntityManager entityManager;
+
   public SanctionsService(SanctionedEntityRepository entityRepository,
                           SanctionsScreeningRepository screeningRepository,
                           SanctionsSourceMapRepository sourceMapRepository,
@@ -92,7 +104,8 @@ public class SanctionsService {
                           List<SanctionsListProvider> providers,
                           SanctionsDatasetStatus datasetStatus,
                           KafkaTemplate<String, String> kafkaTemplate,
-                          ObjectMapper objectMapper) {
+                          ObjectMapper objectMapper,
+                          PlatformTransactionManager transactionManager) {
     this.entityRepository = entityRepository;
     this.screeningRepository = screeningRepository;
     this.sourceMapRepository = sourceMapRepository;
@@ -103,6 +116,9 @@ public class SanctionsService {
     this.datasetStatus = datasetStatus;
     this.kafkaTemplate = kafkaTemplate;
     this.objectMapper = objectMapper;
+    this.ingestTx = new TransactionTemplate(transactionManager);
+    // REQUIRES_NEW so each batch commits on its own even if a caller does hold a transaction.
+    this.ingestTx.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
   }
 
   // --------------------------------------------------------------------------- list ingestion
@@ -112,6 +128,7 @@ public class SanctionsService {
    * provider failure (e.g. its external feed is down) is logged and skipped — its previously-ingested
    * rows remain (last-known-good), and the other providers still ingest. Returns total rows upserted.
    */
+  @Transactional(propagation = Propagation.NOT_SUPPORTED)
   public int ingest() {
     int total = 0;
     for (SanctionsListProvider provider : providers) {
@@ -122,6 +139,7 @@ public class SanctionsService {
   }
 
   /** Refresh a single named provider (used by the per-provider scheduled jobs). Fail-isolated. */
+  @Transactional(propagation = Propagation.NOT_SUPPORTED)
   public int ingestProvider(String name) {
     SanctionsListProvider provider = providers.stream()
       .filter(p -> p.name().equalsIgnoreCase(name)).findFirst().orElse(null);
@@ -134,7 +152,47 @@ public class SanctionsService {
     return n;
   }
 
-  /** Fetch + normalize + upsert one provider. Never throws — fail-independent (last-known-good kept). */
+  /**
+   * Upsert one batch in its own transaction and detach it afterwards.
+   *
+   * <p>Every record writes an entity, a source-map row and a row per alias, so a run that holds them
+   * all in one persistence context makes each flush dirty-check everything written so far — the cost
+   * of a record grows with the number already processed. Clearing per batch keeps it flat.
+   */
+  private int upsertBatch(List<SanctionsListRecord> batch, int[] skipped) {
+    Integer upserted = ingestTx.execute(status -> {
+      int n = 0;
+      for (SanctionsListRecord rec : batch) {
+        try {
+          if (upsertRecord(rec)) {
+            n++;
+          } else {
+            skipped[0]++;
+          }
+        } catch (Exception e) {
+          skipped[0]++;
+          log.warn("Sanctions upsert failed for source={} externalId={}: {}",
+            rec.getListSource(), rec.getExternalId(), e.getMessage());
+        }
+      }
+      entityManager.flush();
+      entityManager.clear();
+      return n;
+    });
+    return upserted == null ? 0 : upserted;
+  }
+
+  /**
+   * Fetch + normalize + upsert one provider. Never throws — fail-independent (last-known-good kept).
+   *
+   * <p>Commits in batches rather than inside the caller's transaction. The class-level
+   * {@code @Transactional} previously wrapped the whole multi-provider run in a single transaction,
+   * which quietly broke the fail-independence promised above: nothing any provider wrote was durable
+   * until every provider had finished, so a late failure discarded the earlier providers' work too.
+   *
+   * <p>Batch boundaries come from {@code ingestTx} (REQUIRES_NEW), not from an annotation — this is a
+   * private method, so a {@code @Transactional} here would never be proxied and would do nothing.
+   */
   private int ingestOne(SanctionsListProvider provider) {
     datasetStatus.recordAttempt(provider.name());
     List<SanctionsListRecord> records;
@@ -147,23 +205,24 @@ public class SanctionsService {
       return 0;
     }
     int count = 0;
-    int skipped = 0;
-    for (SanctionsListRecord rec : records) {
+    int[] skipped = {0};
+    int batchSize = Math.max(1, props.getIngestBatchSize());
+    for (int from = 0; from < records.size(); from += batchSize) {
+      List<SanctionsListRecord> batch = records.subList(from, Math.min(from + batchSize, records.size()));
       try {
-        if (upsertRecord(rec)) {
-          count++;
-        } else {
-          skipped++;
-        }
+        count += upsertBatch(batch, skipped);
       } catch (Exception e) {
-        skipped++;
-        log.warn("Sanctions upsert failed for source={} externalId={}: {}",
-          rec.getListSource(), rec.getExternalId(), e.getMessage());
+        // One batch failing loses only that batch — earlier batches are already committed.
+        skipped[0] += batch.size();
+        log.warn("Sanctions ingest batch failed for provider '{}' at offset {}: {}",
+          provider.name(), from, e.getMessage());
       }
+      log.debug("Sanctions ingest '{}': {}/{} records processed", provider.name(),
+        Math.min(from + batchSize, records.size()), records.size());
     }
     datasetStatus.recordSuccess(provider.name(), count);
     log.info("Sanctions ingest from provider '{}': {} entities upserted, {} skipped",
-      provider.name(), count, skipped);
+      provider.name(), count, skipped[0]);
     return count;
   }
 

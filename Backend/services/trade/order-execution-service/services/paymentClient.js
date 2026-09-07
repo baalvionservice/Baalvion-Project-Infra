@@ -54,6 +54,11 @@ async function initiate(payment, opts = {}) {
     try {
         const headers = { 'Content-Type': 'application/json' };
         if (payment.tenantId && UUID_RE.test(String(payment.tenantId))) headers['X-Tenant-ID'] = String(payment.tenantId);
+        // The Java services are Spring resource servers: a server-to-server caller with no user
+        // JWT authenticates with the platform shared secret, which InternalServiceAuthFilter turns
+        // into a ROLE_INTERNAL principal. Sent unconditionally — it is ignored while the target
+        // runs with app.security.enabled=false, and is the only thing that works once it doesn't.
+        if (config.internalSecret) headers['x-internal-secret'] = config.internalSecret;
         const res = await fetch(`${url}/api/v1/payments/initiate`, {
             method: 'POST',
             headers,
