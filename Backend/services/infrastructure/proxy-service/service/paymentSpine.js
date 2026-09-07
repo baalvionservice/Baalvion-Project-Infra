@@ -79,16 +79,25 @@ async function reportRazorpayEvent(event, payload) {
         occurredAt: entity.created_at ? new Date(entity.created_at * 1000) : undefined,
     };
 
-    if (event === 'payment.captured') return spine().recordCapture(common);
-    if (event === 'payment.authorized') return spine().recordAuthorization(common);
-    if (event === 'payment.failed') {
-        return spine().recordFailure({
-            ...common,
-            failureReason: entity.error_reason || entity.error_code || 'declined',
-        });
-    }
-    return null;
+    // Dispatch through a frozen allow-list rather than comparing the request's own string
+    // against literals. The signature is already verified before this is reached (see
+    // controller/paymentController.js), so `event` is not attacker-chosen — but an explicit
+    // table makes the set of events that can move money visible in one place, and an unknown
+    // event returns null instead of falling through a chain of conditionals.
+    const record = Object.prototype.hasOwnProperty.call(SPINE_HANDLERS, event) ? SPINE_HANDLERS[event] : null;
+    if (!record) return null;
+    return record(spine(), common, entity);
 }
+
+/** The only Razorpay events that may move a payment's recorded state. */
+const SPINE_HANDLERS = Object.freeze({
+    'payment.captured': (s, common) => s.recordCapture(common),
+    'payment.authorized': (s, common) => s.recordAuthorization(common),
+    'payment.failed': (s, common, entity) => s.recordFailure({
+        ...common,
+        failureReason: entity.error_reason || entity.error_code || 'declined',
+    }),
+});
 
 // ── Outbox relay ──────────────────────────────────────────────────────────────
 // Each service keeps its own `pcl` schema in its own database, so each drains its own outbox.
