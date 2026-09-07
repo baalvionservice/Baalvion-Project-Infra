@@ -63,9 +63,18 @@ function recentQuarters(n) {
 const CACHE = path.join(os.tmpdir(), 'baalvion-formd');
 fs.mkdirSync(CACHE, { recursive: true });
 
+// The four TSVs the parser actually reads. A quarter is only usable if all four survived —
+// tmpdir reapers prune the extracted files but leave the .ok marker, and trusting the marker
+// alone made a pruned quarter parse as zero filings while still reporting success.
+const REQUIRED_TSV = ['FORMDSUBMISSION.tsv', 'ISSUERS.tsv', 'RELATEDPERSONS.tsv', 'OFFERING.tsv'];
+const quarterIsComplete = (dir) =>
+    fs.existsSync(path.join(dir, '.ok')) && REQUIRED_TSV.every((f) => fs.existsSync(path.join(dir, f)));
+
 function fetchQuarter(qtr) {
     const dir = path.join(CACHE, qtr);
-    if (fs.existsSync(path.join(dir, '.ok'))) return dir;
+    if (quarterIsComplete(dir)) return dir;
+    // Stale or half-extracted cache — drop it and re-download rather than parse a gap.
+    fs.rmSync(dir, { recursive: true, force: true });
     const zip = path.join(CACHE, `${qtr}.zip`);
     let got = false;
     for (const p of PATHS) {
