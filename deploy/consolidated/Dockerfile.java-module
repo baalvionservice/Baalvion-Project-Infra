@@ -1,0 +1,29 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Any single module of the financial-services-java Maven reactor.
+#
+# Dockerfile.java is hardcoded to payment-service. This is the same shape with the
+# module as a build argument, so the other 20 services can be built without copying
+# the file again each time.
+#
+# Build (from REPO ROOT):
+#   docker build -f deploy/consolidated/Dockerfile.java-module \
+#     --build-arg SERVICE=ledger-service -t baalvion-ledger-service:local .
+#
+# Builds only the requested module and its in-reactor dependencies (-am) rather than
+# the full 22-module reactor.
+# ─────────────────────────────────────────────────────────────────────────────
+ARG SERVICE=payment-service
+
+FROM maven:3.9-eclipse-temurin-17 AS build
+ARG SERVICE
+WORKDIR /src
+COPY Backend/services/commerce/financial-services-java/ ./
+RUN mvn -q -DskipTests -pl "${SERVICE}" -am clean package
+
+FROM eclipse-temurin:17-jre-jammy AS runtime
+ARG SERVICE
+WORKDIR /app
+COPY --from=build /src/${SERVICE}/target/*.jar /app/app.jar
+# Heap capped well inside the container budget — this box runs a shared 7.9GB.
+ENV JAVA_OPTS="-Xms128m -Xmx448m -XX:+UseSerialGC -XX:MaxRAMPercentage=70"
+ENTRYPOINT ["sh","-c","exec java $JAVA_OPTS -jar /app/app.jar"]
