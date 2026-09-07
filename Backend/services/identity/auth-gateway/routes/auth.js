@@ -37,6 +37,13 @@ async function authService(path, body, req) {
     if (ua) headers['user-agent'] = ua;
     const ip = clientIp(req);
     if (ip) headers['x-forwarded-for'] = ip;
+    // Which SITE the person is on. auth-service resolves a brand slug from this to theme
+    // lifecycle email and to build verification / reset links; without it, every account
+    // registered through this gateway was branded as the flagship whatever product it came
+    // from, and its emails linked to the wrong application. Forwarded verbatim — the only
+    // use downstream is a lookup in a fixed registry with a safe default.
+    const origin = req.headers && (req.headers.origin || req.headers.referer);
+    if (origin) headers.origin = origin;
   }
   const res = await fetch(`${config.authServiceUrl}${path}`, {
     method: 'POST',
@@ -262,6 +269,14 @@ router.post('/verify-email', async (req, res) => {
   const { status, json } = await authService('/verify-email', { token: req.body && req.body.token }, req);
   return res.status(status || 400).json(json ?? { error: { code: 'VERIFY_EMAIL_FAILED', message: 'Verification failed' } });
 });
+// Re-send the verification link. Public and unauthenticated on purpose: somebody who never
+// received the first mail cannot necessarily sign in to ask for a second one. The answer is
+// the same whether or not the address has an account, so it leaks nothing.
+router.post('/resend-verification', async (req, res) => {
+  const { status, json } = await authService('/resend-verification', { email: req.body && req.body.email }, req);
+  return res.status(status || 400).json(json ?? { error: { code: 'RESEND_FAILED', message: 'Could not resend verification' } });
+});
+
 router.get('/verify-email', async (req, res) => {
   try {
     const q = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
@@ -320,7 +335,11 @@ router.get('/me', async (req, res) => {
     // console. Apps behind this gateway run in COOKIE mode and never see the raw token, so
     // without it here they cannot learn what they were granted and fall back to inferring
     // authority from an org role — which is what the central grants exist to replace.
-    return res.json({ user: { userId: c.sub, email: c.email, orgId: c.org_id ?? null, orgType: c.org_type ?? null, roles: c.roles || [], permissions: c.permissions || [], businesses: c.businesses || {}, sessionId: c.sid }, csrfToken: session.csrfToken });
+    //
+    // `emailVerified` is null rather than false when the claim is absent, because "we do not
+    // know" and "we checked and they have not" are different answers, and a consumer that
+    // conflates them refuses every account issued by a version that predates the claim.
+    return res.json({ user: { userId: c.sub, email: c.email, orgId: c.org_id ?? null, orgType: c.org_type ?? null, roles: c.roles || [], permissions: c.permissions || [], businesses: c.businesses || {}, sessionId: c.sid, emailVerified: typeof c.email_verified === 'boolean' ? c.email_verified : null }, csrfToken: session.csrfToken });
   } catch (err) {
     return res.status(401).json({ error: { code: err.code || 'INVALID_SESSION', message: err.message } });
   }
