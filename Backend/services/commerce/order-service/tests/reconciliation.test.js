@@ -91,9 +91,11 @@ test('report matches captures present in the ledger and flags refunds missing fr
         { id: 'ref9', orderId: 'ord1', amount: '40.00', currencyCode: 'USD', status: 'refunded', transactionId: 'rf', metadata: { refund: true }, orderNumber: 'ORD-1' },
     ]);
     // The ledger has only the PAYMENT entry — the REFUND is missing.
+    // ledger-service returns a MAJOR-unit decimal ("100.00"), not minor units: its amount column
+    // is a BigDecimal(19,4) with an 0.01 minimum.
     ledgerClient.listEntries = async (storeId, { entryType }) =>
         entryType === 'PAYMENT'
-            ? { ok: true, entries: [{ transactionRef: 'pay-cap1', amount: 10000, entryType: 'PAYMENT', id: 'e1' }] }
+            ? { ok: true, entries: [{ transactionRef: 'pay-cap1', amount: '100.00', entryType: 'PAYMENT', id: 'e1' }] }
             : { ok: true, entries: [] };
 
     const r = await reconciliation.report(STORE, {});
@@ -107,6 +109,45 @@ test('report matches captures present in the ledger and flags refunds missing fr
     assert.equal(r.totals.netMinor, 6000);
     assert.equal(r.balanced, false);
     config.ledger.internalKey = ''; // restore
+});
+
+test('a ledger entry posted in minor units is caught as a mismatch, not matched', async () => {
+    // Regression: this client used to POST minor units into ledger-service's major-unit
+    // BigDecimal column, overstating every entry by 100x. Reconciliation compared the two with
+    // the same wrong assumption on both sides, so it reported "balanced" over a 100x error.
+    config.ledger.internalKey = 'recon-test-key';
+    models.sequelize.query = async () => ([
+        { id: 'cap1', orderId: 'ord1', amount: '100.00', currencyCode: 'USD', status: 'captured', transactionId: 'txn1', metadata: {}, orderNumber: 'ORD-1' },
+    ]);
+    ledgerClient.listEntries = async (storeId, { entryType }) =>
+        entryType === 'PAYMENT'
+            ? { ok: true, entries: [{ transactionRef: 'pay-cap1', amount: '10000.00', entryType: 'PAYMENT', id: 'e1' }] }
+            : { ok: true, entries: [] };
+
+    const r = await reconciliation.report(STORE, {});
+    assert.equal(r.counts.mismatched, 1);
+    assert.equal(r.mismatched[0].ledgerAmountMinor, 1000000);
+    assert.equal(r.mismatched[0].amountMinor, 10000);
+    assert.equal(r.balanced, false);
+    config.ledger.internalKey = '';
+});
+
+test('a zero-decimal currency is not read at 100x', async () => {
+    // JPY has no minor unit. Defaulting the exponent to USD's would turn 5000 yen into 500000.
+    config.ledger.internalKey = 'recon-test-key';
+    models.sequelize.query = async () => ([
+        { id: 'cap1', orderId: 'ord1', amount: '5000', currencyCode: 'JPY', status: 'captured', transactionId: 'txn1', metadata: {}, orderNumber: 'ORD-1' },
+    ]);
+    ledgerClient.listEntries = async (storeId, { entryType }) =>
+        entryType === 'PAYMENT'
+            ? { ok: true, entries: [{ transactionRef: 'pay-cap1', amount: '5000', entryType: 'PAYMENT', id: 'e1' }] }
+            : { ok: true, entries: [] };
+
+    const r = await reconciliation.report(STORE, {});
+    assert.equal(r.totals.capturedMinor, 5000);
+    assert.equal(r.counts.matched, 1);
+    assert.equal(r.balanced, true);
+    config.ledger.internalKey = '';
 });
 
 test('report reports ledger unavailable when not configured', async () => {

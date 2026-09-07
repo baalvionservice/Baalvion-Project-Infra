@@ -66,7 +66,11 @@ jobs:
       # only because dist/ already exists on disk).
       - name: Build workspace package deps
         working-directory: .
-        run: pnpm --filter @baalvion/payment-consistency build
+        # turbo, not a bare pnpm filter: payment-consistency now depends on
+        # @baalvion/money and @baalvion/sites, and building it alone leaves their
+        # dist/ absent, so its .d.ts emit fails with TS2307. turbo.json's build task
+        # declares dependsOn ^build, so this builds the dependencies first.
+        run: pnpm exec turbo run build --filter=@baalvion/payment-consistency
 
       - name: Run tests
         working-directory: .

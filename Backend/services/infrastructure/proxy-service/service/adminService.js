@@ -1,6 +1,7 @@
 const store = require('./platformStore');
 const db = require('../models');
 const { AppError } = require('../utils/errors');
+const { Money } = require('@baalvion/money');
 
 const getDashboard = async () => ({
     totalTenants: (await store.getCollection('organizations')).length,
@@ -167,17 +168,28 @@ const listSubscriptions = async (query = {}) => {
     return store.paginate(rows, query.page, query.pageSize);
 };
 
+// Money reporting runs on exact integer minor units. The previous `Math.round(x * 100) / 100`
+// rounded a float that had already drifted while accumulating: summing a few hundred
+// subscriptions in floating point leaves the total a fraction out, and rounding afterwards
+// cannot recover what the addition lost. Proxy bills in one currency, so it is fixed here
+// rather than threaded through every call site.
+const REPORTING_CURRENCY = process.env.BILLING_CURRENCY || 'USD';
+const money = (v) => Money.fromDatabaseValue(v ?? 0, REPORTING_CURRENCY);
+const zero = () => Money.zero(REPORTING_CURRENCY);
+/** Exact total as a plain number, for the JSON the console already expects. */
+const asNumber = (m) => Number(m.toDecimalString());
+
 const getSubscriptionSummary = async () => {
     const [subs, plans] = await Promise.all([store.getCollection('subscriptions'), store.getCollection('plans')]);
     const priceBySlug = {};
     plans.forEach((p) => { priceBySlug[p.slug] = Number(p.monthlyPrice) || 0; });
     const byStatus = {};
-    let mrr = 0;
+    let mrr = zero();
     subs.forEach((s) => {
         byStatus[s.status] = (byStatus[s.status] || 0) + 1;
-        if (s.status === 'active') mrr += priceBySlug[s.planSlug] || 0;
+        if (s.status === 'active') mrr = mrr.add(money(priceBySlug[s.planSlug]));
     });
-    return { total: subs.length, byStatus, activeMrr: Math.round(mrr * 100) / 100 };
+    return { total: subs.length, byStatus, activeMrr: asNumber(mrr) };
 };
 
 // Per-customer (org) revenue breakdown: monthly recurring (active plan price),
@@ -211,17 +223,17 @@ const getRevenueByCustomer = async () => {
         const sub = subByOrg[o.id];
         const planSlug = (sub && sub.planSlug) || o.planSlug || 'none';
         const status = (sub && sub.status) || 'none';
-        const mrr = status === 'active' && planSlug !== 'pay-as-you-go' ? (priceBySlug[planSlug] || 0) : 0;
-        const creditPurchased = creditByOrg[o.id] || 0;
-        const lifetimeRevenue = (paidByOrg[o.id] || 0) + creditPurchased;
+        const mrr = status === 'active' && planSlug !== 'pay-as-you-go' ? money(priceBySlug[planSlug]) : zero();
+        const creditPurchased = money(creditByOrg[o.id]);
+        const lifetimeRevenue = money(paidByOrg[o.id]).add(creditPurchased);
         return {
             orgId: o.id,
             orgName: o.name,
             planSlug,
             status,
-            mrr: Math.round(mrr * 100) / 100,
-            creditPurchased: Math.round(creditPurchased * 100) / 100,
-            lifetimeRevenue: Math.round(lifetimeRevenue * 100) / 100,
+            mrr: asNumber(mrr),
+            creditPurchased: asNumber(creditPurchased),
+            lifetimeRevenue: asNumber(lifetimeRevenue),
         };
     });
     // Only paying / billable customers (drop empty placeholder orgs).
@@ -229,16 +241,20 @@ const getRevenueByCustomer = async () => {
         .filter((c) => c.mrr > 0 || c.creditPurchased > 0 || c.lifetimeRevenue > 0 || c.status === 'active' || c.status === 'trialing')
         .sort((a, b) => b.lifetimeRevenue - a.lifetimeRevenue || b.mrr - a.mrr);
 
-    const totals = customers.reduce((t, c) => ({
-        mrr: t.mrr + c.mrr,
-        creditRevenue: t.creditRevenue + c.creditPurchased,
-        lifetimeRevenue: t.lifetimeRevenue + c.lifetimeRevenue,
+    const exactTotals = customers.reduce((t, c) => ({
+        mrr: t.mrr.add(money(c.mrr)),
+        creditRevenue: t.creditRevenue.add(money(c.creditPurchased)),
+        lifetimeRevenue: t.lifetimeRevenue.add(money(c.lifetimeRevenue)),
         customers: t.customers + 1,
-    }), { mrr: 0, creditRevenue: 0, lifetimeRevenue: 0, customers: 0 });
-    totals.mrr = Math.round(totals.mrr * 100) / 100;
-    totals.creditRevenue = Math.round(totals.creditRevenue * 100) / 100;
-    totals.lifetimeRevenue = Math.round(totals.lifetimeRevenue * 100) / 100;
-    totals.arr = Math.round(totals.mrr * 12 * 100) / 100;
+    }), { mrr: zero(), creditRevenue: zero(), lifetimeRevenue: zero(), customers: 0 });
+    const totals = {
+        customers: exactTotals.customers,
+        mrr: asNumber(exactTotals.mrr),
+        creditRevenue: asNumber(exactTotals.creditRevenue),
+        lifetimeRevenue: asNumber(exactTotals.lifetimeRevenue),
+        // ARR is MRR scaled by a whole number — an exact integer multiply, not a re-derivation.
+        arr: asNumber(exactTotals.mrr.multiply(12)),
+    };
 
     // Revenue grouped by plan (real share for the "Revenue by Plan" breakdown).
     const planAgg = {};
@@ -253,8 +269,8 @@ const getRevenueByCustomer = async () => {
         .map((p) => ({
             planSlug: p.planSlug,
             customers: p.customers,
-            mrr: Math.round(p.mrr * 100) / 100,
-            lifetimeRevenue: Math.round(p.lifetimeRevenue * 100) / 100,
+            mrr: asNumber(money(p.mrr)),
+            lifetimeRevenue: asNumber(money(p.lifetimeRevenue)),
             // % share of MRR (PAYG plans show their lifetime-credit share instead).
             sharePct: totals.mrr > 0 ? Math.round((p.mrr / totals.mrr) * 1000) / 10 : 0,
         }))

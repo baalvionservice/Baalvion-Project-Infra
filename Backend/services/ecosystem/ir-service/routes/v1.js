@@ -17,6 +17,7 @@ router.use('/alerts', require('./alerts'));
 router.use('/board-materials', require('./boardMaterials'));
 router.use('/generated-reports', require('./generatedReports'));
 router.use('/performance', require('./performance'));
+router.use('/capital', require('./capital'));
 router.use('/market', require('./market'));
 router.use('/applications', require('./applications'));
 router.use('/business-applications', require('./businessApplications'));

@@ -1,14 +1,21 @@
-// SERVER-ONLY. Mints a short-lived RS256 platform JWT so the IR app's BFF can authenticate
-// to marketplace-service on behalf of the logged-in IR investor. Mirrors
-// Backend/scripts/mint-token.cjs (same private key → verifies against every service's
-// JWT_PUBLIC_KEY). The key never reaches the browser — only used inside route handlers.
+/**
+ * SERVER-ONLY, DEV-ONLY. Mints a short-lived RS256 platform JWT so the IR app can talk to
+ * domain services while the central identity stack is not running locally.
+ *
+ * SECURITY (fail-closed): this is PERMANENTLY DISABLED when NODE_ENV=production, and further
+ * requires the same IR_LOCAL_AUTH_ENABLED opt-in as the local seed-user backend. It signs with
+ * the platform private key, which every service trusts — a frontend able to mint arbitrary
+ * subjects, orgs and roles in production is a privilege-escalation primitive, not a convenience.
+ * In production, identity comes from the auth-gateway and the user's own access token is
+ * forwarded onward (see lib/auth/identity.ts).
+ *
+ * `org` is REQUIRED and has no default. A shared fallback org silently collapses every investor
+ * into one tenant, which defeats deal-room isolation.
+ */
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
-
-// The IR investor persona maps to a stable marketplace investor org. (A full build would
-// resolve this from the user's real org via auth-service; this keeps the demo coherent.)
-export const INVESTOR_ORG = process.env.MARKETPLACE_INVESTOR_ORG || '11111111-1111-1111-1111-111111111111';
+import { isLocalAuthEnabled } from '@/lib/auth/local-auth';
 
 function loadPrivateKey(): string | null {
   if (process.env.JWT_PRIVATE_KEY && process.env.JWT_PRIVATE_KEY.includes('PRIVATE KEY')) {
@@ -28,10 +35,27 @@ function loadPrivateKey(): string | null {
 const b64url = (b: Buffer | string) =>
   Buffer.from(b).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 
-export function mintMarketplaceToken(opts: { sub: string | number; roles?: string[]; org?: string; email?: string; ttlSeconds?: number }): string | null {
+/**
+ * Stable per-user org for local dev, derived from the user id so two dev accounts are two
+ * distinct tenants and isolation is actually exercised offline.
+ */
+export function devOrgForUser(userId: string): string {
+  const h = crypto.createHash('sha256').update(`ir-dev-org:${userId}`).digest('hex');
+  return [h.slice(0, 8), h.slice(8, 12), `4${h.slice(13, 16)}`, `8${h.slice(17, 20)}`, h.slice(20, 32)].join('-');
+}
+
+export function mintMarketplaceToken(opts: {
+  sub: string | number;
+  org: string;
+  roles?: string[];
+  email?: string;
+  ttlSeconds?: number;
+}): string | null {
+  if (process.env.NODE_ENV === 'production' || !isLocalAuthEnabled()) return null;
   const priv = loadPrivateKey();
   if (!priv) return null;
-  const { sub, roles = ['investor_admin'], org = INVESTOR_ORG, email, ttlSeconds = 900 } = opts;
+  const { sub, org, roles = ['investor_admin'], email, ttlSeconds = 900 } = opts;
+  if (!org) return null;
   const now = Math.floor(Date.now() / 1000);
   const header = { alg: 'RS256', typ: 'JWT', kid: 'baalvion-key-1' };
   const payload = {

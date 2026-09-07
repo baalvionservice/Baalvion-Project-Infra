@@ -1,0 +1,29 @@
+{
+  "name": "@baalvion/money",
+  "version": "1.0.0",
+  "description": "Exact monetary arithmetic in integer minor units — the platform's only sanctioned money representation. No floats, no implicit FX, no lost pennies.",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "type-check": "tsc --noEmit",
+    "test": "node --test test/*.test.mjs",
+    "clean": "rimraf dist"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.7.2",
+    "rimraf": "^6.0.1"
+  }
+}

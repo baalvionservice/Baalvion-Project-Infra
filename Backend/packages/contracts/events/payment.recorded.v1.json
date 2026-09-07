@@ -1,0 +1,253 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "baalvion://events/payment.recorded.v1.json",
+  "title": "PaymentRecorded",
+  "description": "The canonical record of a payment state transition on any Baalvion property. Every site emits this and nothing else \u2014 it is what makes one admin panel able to show every payment across the estate, attributed to a site and a tenant. Money is carried as an integer count of minor units in a string, never a JSON number, so no consumer can parse it into a float.",
+  "allOf": [
+    {
+      "$ref": "baalvion://events/_envelope.json"
+    }
+  ],
+  "properties": {
+    "type": {
+      "const": "payment.recorded"
+    },
+    "siteId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "payload": {
+      "type": "object",
+      "required": [
+        "paymentId",
+        "siteId",
+        "state",
+        "provider",
+        "rail",
+        "money",
+        "idempotencyKey",
+        "occurredAt"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "paymentId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Canonical payment id \u2014 stable across every transition of this payment."
+        },
+        "siteId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Which property took the money. Resolved from @baalvion/sites; never inferred from a host at consume time."
+        },
+        "tenantId": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Who within the property earned it \u2014 an Amaris\u00e9 store, a paid community, a law firm. Null only where the site itself is the earner."
+        },
+        "partyId": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The group-wide customer id. Null until the party graph is backfilled; never a per-site customer id."
+        },
+        "customer": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "description": "Who paid, as the producing site knows them \u2014 the signal the party graph resolves a group-wide identity from. Carries only what identity resolution needs; `emailVerified` and `phoneVerified` matter because an unverified value is a string someone typed and must never merge two people.",
+          "additionalProperties": false,
+          "properties": {
+            "authUserId": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "The platform account, when the customer was signed in. The strongest identity signal available."
+            },
+            "email": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "emailVerified": {
+              "type": "boolean",
+              "description": "Whether the address was proven (a confirmed link, an OAuth provider, a verified login) \u2014 not merely entered."
+            },
+            "phone": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "phoneVerified": {
+              "type": "boolean"
+            },
+            "name": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Display and review only. Never a match key."
+            },
+            "siteCustomerId": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "The producing site's own id for this customer."
+            }
+          }
+        },
+        "state": {
+          "enum": [
+            "INITIATED",
+            "AUTHORIZED",
+            "CAPTURED",
+            "SETTLED",
+            "FAILED"
+          ],
+          "description": "The canonical lifecycle state from @baalvion/payment-consistency. There is no sixth state and no service-local variant."
+        },
+        "provider": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The PSP that handled it (razorpay, stripe, payu, cashfree, crypto, bank)."
+        },
+        "rail": {
+          "enum": [
+            "razorpay",
+            "payu",
+            "stripe",
+            "cashfree",
+            "bank_transfer",
+            "crypto"
+          ],
+          "description": "The payment rail, which must be one the site is granted in @baalvion/sites."
+        },
+        "providerPaymentId": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The PSP's own id for this payment, for reconciliation against their settlement report."
+        },
+        "money": {
+          "type": "object",
+          "required": [
+            "amount",
+            "currency",
+            "exponent"
+          ],
+          "additionalProperties": false,
+          "description": "Exact money. Matches Money.toJSON() from @baalvion/money.",
+          "properties": {
+            "amount": {
+              "type": "string",
+              "pattern": "^-?[0-9]+$",
+              "description": "Integer count of minor units as a string \u2014 paise, cents, or whole yen. A string so a 64-bit value survives JSON."
+            },
+            "currency": {
+              "type": "string",
+              "pattern": "^[A-Z]{3}$"
+            },
+            "exponent": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4,
+              "description": "Digits after the decimal point for this currency: 2 for INR, 0 for JPY, 3 for KWD."
+            }
+          }
+        },
+        "fee": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "required": [
+            "amount",
+            "currency",
+            "exponent"
+          ],
+          "additionalProperties": false,
+          "description": "What the processor kept. Null when the provider has not reported it yet \u2014 a fee that is unknown must not be recorded as zero, or every margin figure derived from it is overstated.",
+          "properties": {
+            "amount": {
+              "type": "string",
+              "pattern": "^-?[0-9]+$",
+              "description": "Integer count of minor units as a string \u2014 paise, cents, or whole yen. A string so a 64-bit value survives JSON."
+            },
+            "currency": {
+              "type": "string",
+              "pattern": "^[A-Z]{3}$"
+            },
+            "exponent": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4,
+              "description": "Digits after the decimal point for this currency: 2 for INR, 0 for JPY, 3 for KWD."
+            }
+          }
+        },
+        "net": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "required": [
+            "amount",
+            "currency",
+            "exponent"
+          ],
+          "additionalProperties": false,
+          "description": "money minus fee \u2014 what the business actually received. Null while the fee is unknown, for the same reason.",
+          "properties": {
+            "amount": {
+              "type": "string",
+              "pattern": "^-?[0-9]+$",
+              "description": "Integer count of minor units as a string \u2014 paise, cents, or whole yen. A string so a 64-bit value survives JSON."
+            },
+            "currency": {
+              "type": "string",
+              "pattern": "^[A-Z]{3}$"
+            },
+            "exponent": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4,
+              "description": "Digits after the decimal point for this currency: 2 for INR, 0 for JPY, 3 for KWD."
+            }
+          }
+        },
+        "idempotencyKey": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable key for this transition. A consumer that sees it twice must apply it once."
+        },
+        "orderRef": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The producing site's own reference (order id, subscription id, community slug) for support and dispute handling."
+        },
+        "failureReason": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Set only when state is FAILED. Never echoes a raw provider message."
+        },
+        "occurredAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

@@ -39,3 +39,69 @@ exports.listWebhooks = async (req, res, next) => { try { const { page, limit } =
 exports.retryWebhook = async (req, res, next) => { try { sendSuccess(req, res, notFound(await pay.retryWebhook(req.params.id), 'Webhook')); } catch (e) { next(e); } };
 
 exports.summary = async (req, res, next) => { try { sendSuccess(req, res, await pay.summary()); } catch (e) { next(e); } };
+
+// ── Cross-estate payment records ────────────────────────────────────────────────
+// Every payment taken on any Baalvion property, attributed to a site and a tenant. Fed by
+// `payment.recorded` events, so a site being unreachable does not blank the figures the way
+// the live platform fan-out does.
+const paymentRecords = require('../service/paymentRecordsService');
+
+exports.listPaymentRecords = async (req, res, next) => {
+    try {
+        const q = req.query || {};
+        const result = await paymentRecords.listPayments({
+            siteId: q.siteId,
+            state: q.state,
+            provider: q.provider,
+            from: q.from,
+            to: q.to,
+            limit: q.limit,
+            offset: q.offset,
+        });
+        sendSuccess(req, res, result);
+    } catch (e) { next(e); }
+};
+
+exports.paymentRecordsSummary = async (req, res, next) => {
+    try {
+        const q = req.query || {};
+        sendSuccess(req, res, await paymentRecords.summaryBySite({ from: q.from, to: q.to }));
+    } catch (e) { next(e); }
+};
+
+// ── Party graph ────────────────────────────────────────────────────────────────
+// One identity per human across every property. Ambiguous and unverified matches are queued
+// rather than guessed, because a wrong merge joins two people's payment history.
+const parties = require('../service/partyService');
+
+exports.listPartyReviews = async (req, res, next) => {
+    try {
+        sendSuccess(req, res, { reviews: await parties.openReviews({ limit: req.query && req.query.limit }) });
+    } catch (e) { next(e); }
+};
+
+exports.resolvePartyReview = async (req, res, next) => {
+    try {
+        const { action, survivorId } = req.body || {};
+        if (!['merge', 'separate', 'dismiss'].includes(action)) {
+            throw new AppError('VALIDATION_ERROR', "action must be 'merge', 'separate' or 'dismiss'", 400);
+        }
+        const actorId = req.user && (req.user.sub || req.user.id);
+        let result;
+        try {
+            result = await parties.resolveReview(req.params.id, { action, survivorId, actorId });
+        } catch (err) {
+            // A refused merge is a 409 the caller can act on; anything else is a real failure.
+            if (err.userReason) throw new AppError('CONFLICT', err.userReason, 409);
+            throw err;
+        }
+        if (!result.resolved) throw new AppError('CONFLICT', result.reason, 409);
+        sendSuccess(req, res, result);
+    } catch (e) { next(e); }
+};
+
+exports.getParty = async (req, res, next) => {
+    try {
+        sendSuccess(req, res, notFound(await parties.partyDetail(req.params.id), 'Party'));
+    } catch (e) { next(e); }
+};

@@ -1,21 +1,9 @@
-import { NextResponse } from 'next/server';
+import { irForward } from '@/lib/ir-api';
 
-// Seed board materials (standalone mode). Consumed by boardMaterialsApi.list → listOf(data).items.
+// Board packs — confidential; ir-service enforces the classification.
+// Previously served hardcoded seed data from this file; it now proxies to ir-service, which owns
+// the records and scopes them to the caller.
 export const dynamic = 'force-dynamic';
 
-const MATERIALS = [
-  {
-    id: 'bm-1',
-    title: 'Q1 2024 Board Pack',
-    meeting_date: '2024-04-20',
-    classification: 'Confidential',
-    related_votes: ['vote-2024-03'],
-    document_ids: [],
-    workflow_status: 'Published',
-    version_history: [],
-  },
-];
-
-export async function GET() {
-  return NextResponse.json({ success: true, data: { items: MATERIALS } });
-}
+export const GET = (req: Request) => irForward(req, '/board-materials');
+export const POST = (req: Request) => irForward(req, '/board-materials');

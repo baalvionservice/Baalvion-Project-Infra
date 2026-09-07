@@ -2,16 +2,51 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "baalvion://events/_envelope.json",
   "title": "PlatformEventEnvelope",
-  "description": "Common envelope for every event on the bus. Payload is constrained per event type.",
+  "description": "Common envelope for every event on the bus. Payload is constrained per event type. `siteId` identifies which Baalvion property produced the event.",
   "type": "object",
-  "required": ["id", "type", "payload", "timestamp", "traceId"],
+  "required": [
+    "id",
+    "type",
+    "payload",
+    "timestamp",
+    "traceId"
+  ],
   "properties": {
-    "id": { "type": "string", "format": "uuid" },
-    "type": { "type": "string" },
-    "orgId": { "type": ["string", "null"] },
-    "userId": { "type": ["string", "null"] },
-    "timestamp": { "type": "string", "format": "date-time" },
-    "traceId": { "type": "string" },
-    "payload": { "type": "object" }
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "type": {
+      "type": "string"
+    },
+    "orgId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "siteId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Baalvion site id from @baalvion/sites. Required for any event that carries money."
+    },
+    "userId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "traceId": {
+      "type": "string"
+    },
+    "payload": {
+      "type": "object"
+    }
   }
 }

@@ -1,0 +1,23 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: order-service
+  description: >-
+    Baalvion enterprise order management. NOTE: superseded for the GTOS trade domain by order-execution-service; registered so the contract can see it while its retirement is decided.
+  domain: commerce
+  division: commerce
+  context: order
+  owner: "@baalvion/commerce"
+  # tier derived from blast radius at registration — confirm with the owning team.
+  tier: tier-1
+  repo: baalvion-platform
+  path: Backend/services/commerce/order-service
+spec:
+  lifecycle: production
+  language: node
+  datastores: [postgres, redis]
+  dependsOn: [auth-service]
+  consumesEvents: []
+  producesEvents: []
+  slo: { availability: 0.99, latencyP95Ms: 400 }
+  deploy: { chart: baalvion-service, namespace: baalvion-commerce, minReplicas: 2, maxReplicas: 10 }

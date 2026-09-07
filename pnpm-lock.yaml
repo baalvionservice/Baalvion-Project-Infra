@@ -217,6 +217,9 @@ importers:
       ajv:
         specifier: 8.18.0
         version: 8.18.0
+      ajv-formats:
+        specifier: ^3.0.1
+        version: 3.0.1(ajv@8.18.0)
 
   Backend/packages/crypto:
     devDependencies:
@@ -288,6 +291,8 @@ importers:
         specifier: ^5.7.2
         version: 5.9.3
 
+  Backend/packages/gateway-bridge: {}
+
   Backend/packages/graceful-shutdown: {}
 
   Backend/packages/illustrations:
@@ -299,6 +304,25 @@ importers:
       '@types/node':
         specifier: ^22.10.2
         version: 22.20.1
+      rimraf:
+        specifier: ^6.0.1
+        version: 6.1.3
+      tsup:
+        specifier: ^8.3.0
+        version: 8.5.1(@swc/core@1.15.43)(jiti@2.7.0)(postcss@8.5.23)(tsx@4.23.0)(typescript@5.9.3)(yaml@2.8.3)
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+
+  Backend/packages/ledger:
+    dependencies:
+      '@baalvion/money':
+        specifier: workspace:*
+        version: link:../money
+    devDependencies:
+      '@types/node':
+        specifier: ^20.19.0
+        version: 20.19.43
       rimraf:
         specifier: ^6.0.1
         version: 6.1.3
@@ -377,6 +401,21 @@ importers:
         specifier: ^5.7.2
         version: 5.9.3
 
+  Backend/packages/money:
+    devDependencies:
+      '@types/node':
+        specifier: ^20.19.0
+        version: 20.19.43
+      rimraf:
+        specifier: ^6.0.1
+        version: 6.1.3
+      tsup:
+        specifier: ^8.3.0
+        version: 8.5.1(@swc/core@1.15.43)(jiti@2.7.0)(postcss@8.5.23)(tsx@4.23.0)(typescript@5.9.3)(yaml@2.8.3)
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+
   Backend/packages/news-mcp-server:
     dependencies:
       '@modelcontextprotocol/sdk':
@@ -396,11 +435,32 @@ importers:
         specifier: ^5.7.2
         version: 5.9.3
 
+  Backend/packages/party:
+    devDependencies:
+      '@types/node':
+        specifier: ^20.19.0
+        version: 20.19.43
+      rimraf:
+        specifier: ^6.0.1
+        version: 6.1.3
+      tsup:
+        specifier: ^8.3.0
+        version: 8.5.1(@swc/core@1.15.43)(jiti@2.7.0)(postcss@8.5.23)(tsx@4.23.0)(typescript@5.9.3)(yaml@2.8.3)
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+
   Backend/packages/payment-consistency:
     dependencies:
       '@baalvion/events':
         specifier: workspace:*
         version: link:../events
+      '@baalvion/money':
+        specifier: workspace:*
+        version: link:../money
+      '@baalvion/sites':
+        specifier: workspace:*
+        version: link:../sites
       zod:
         specifier: ^3.24.2
         version: 3.25.76
@@ -467,6 +527,25 @@ importers:
       express:
         specifier: ^5.2.1
         version: 5.2.1
+      rimraf:
+        specifier: ^6.0.1
+        version: 6.1.3
+      tsup:
+        specifier: ^8.3.0
+        version: 8.5.1(@swc/core@1.15.43)(jiti@2.7.0)(postcss@8.5.23)(tsx@4.23.0)(typescript@5.9.3)(yaml@2.8.3)
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+
+  Backend/packages/revenue:
+    dependencies:
+      '@baalvion/money':
+        specifier: workspace:*
+        version: link:../money
+    devDependencies:
+      '@types/node':
+        specifier: ^20.19.0
+        version: 20.19.43
       rimraf:
         specifier: ^6.0.1
         version: 6.1.3
@@ -581,6 +660,21 @@ importers:
       '@types/express':
         specifier: ^4.17.21
         version: 4.17.25
+      rimraf:
+        specifier: ^6.0.1
+        version: 6.1.3
+      tsup:
+        specifier: ^8.3.0
+        version: 8.5.1(@swc/core@1.15.43)(jiti@2.7.0)(postcss@8.5.23)(tsx@4.23.0)(typescript@5.9.3)(yaml@2.8.3)
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+
+  Backend/packages/sites:
+    devDependencies:
+      '@types/node':
+        specifier: ^20.19.0
+        version: 20.19.43
       rimraf:
         specifier: ^6.0.1
         version: 6.1.3
@@ -1074,9 +1168,15 @@ importers:
       '@baalvion/graceful-shutdown':
         specifier: workspace:*
         version: link:../../../packages/graceful-shutdown
+      '@baalvion/money':
+        specifier: workspace:*
+        version: link:../../../packages/money
       '@baalvion/payment-consistency':
         specifier: workspace:*
         version: link:../../../packages/payment-consistency
+      '@baalvion/sites':
+        specifier: workspace:*
+        version: link:../../../packages/sites
       '@baalvion/telemetry':
         specifier: workspace:*
         version: link:../../../packages/telemetry
@@ -1391,6 +1491,15 @@ importers:
       '@baalvion/graceful-shutdown':
         specifier: workspace:*
         version: link:../../../packages/graceful-shutdown
+      '@baalvion/money':
+        specifier: workspace:*
+        version: link:../../../packages/money
+      '@baalvion/payment-consistency':
+        specifier: workspace:*
+        version: link:../../../packages/payment-consistency
+      '@baalvion/sites':
+        specifier: workspace:*
+        version: link:../../../packages/sites
       '@baalvion/telemetry':
         specifier: workspace:*
         version: link:../../../packages/telemetry
@@ -1507,12 +1616,21 @@ importers:
       '@baalvion/auth-node':
         specifier: workspace:*
         version: link:../../../packages/auth-node
+      '@baalvion/events':
+        specifier: workspace:*
+        version: link:../../../packages/events
       '@baalvion/graceful-shutdown':
         specifier: workspace:*
         version: link:../../../packages/graceful-shutdown
+      '@baalvion/money':
+        specifier: workspace:*
+        version: link:../../../packages/money
       '@baalvion/payment-consistency':
         specifier: workspace:*
         version: link:../../../packages/payment-consistency
+      '@baalvion/sites':
+        specifier: workspace:*
+        version: link:../../../packages/sites
       '@baalvion/telemetry':
         specifier: workspace:*
         version: link:../../../packages/telemetry
@@ -1534,6 +1652,9 @@ importers:
       helmet:
         specifier: ^8.1.0
         version: 8.2.0
+      ioredis:
+        specifier: ^5.6.1
+        version: 5.11.1
       jsonwebtoken:
         specifier: ^9.0.3
         version: 9.0.3
@@ -1580,6 +1701,15 @@ importers:
       '@baalvion/graceful-shutdown':
         specifier: workspace:*
         version: link:../../../packages/graceful-shutdown
+      '@baalvion/money':
+        specifier: workspace:*
+        version: link:../../../packages/money
+      '@baalvion/payment-consistency':
+        specifier: workspace:*
+        version: link:../../../packages/payment-consistency
+      '@baalvion/sites':
+        specifier: workspace:*
+        version: link:../../../packages/sites
       '@baalvion/telemetry':
         specifier: workspace:*
         version: link:../../../packages/telemetry
@@ -2519,9 +2649,21 @@ importers:
       '@baalvion/email':
         specifier: workspace:*
         version: link:../../../packages/email
+      '@baalvion/events':
+        specifier: workspace:*
+        version: link:../../../packages/events
       '@baalvion/graceful-shutdown':
         specifier: workspace:*
         version: link:../../../packages/graceful-shutdown
+      '@baalvion/money':
+        specifier: workspace:*
+        version: link:../../../packages/money
+      '@baalvion/payment-consistency':
+        specifier: workspace:*
+        version: link:../../../packages/payment-consistency
+      '@baalvion/sites':
+        specifier: workspace:*
+        version: link:../../../packages/sites
       '@node-saml/node-saml':
         specifier: ^5.0.0
         version: 5.1.0
@@ -3074,12 +3216,18 @@ importers:
       '@baalvion/email':
         specifier: workspace:*
         version: link:../../../packages/email
+      '@baalvion/gateway-bridge':
+        specifier: workspace:*
+        version: link:../../../packages/gateway-bridge
       '@baalvion/graceful-shutdown':
         specifier: workspace:*
         version: link:../../../packages/graceful-shutdown
       '@baalvion/telemetry':
         specifier: workspace:*
         version: link:../../../packages/telemetry
+      '@baalvion/upload':
+        specifier: workspace:*
+        version: link:../../../packages/upload
       cors:
         specifier: ^2.8.6
         version: 2.8.6
@@ -3089,15 +3237,24 @@ importers:
       express:
         specifier: ^5.2.1
         version: 5.2.1
+      express-rate-limit:
+        specifier: ^7.5.0
+        version: 7.5.1(express@5.2.1)
       helmet:
         specifier: ^8.1.0
         version: 8.2.0
+      multer:
+        specifier: 2.2.0
+        version: 2.2.0
       pg:
         specifier: ^8.20.0
         version: 8.22.0
       pg-hstore:
         specifier: ^2.3.4
         version: 2.3.4
+      prom-client:
+        specifier: ^15.1.3
+        version: 15.1.3
       sequelize:
         specifier: ^6.37.8
         version: 6.37.8(pg-hstore@2.3.4)(pg@8.22.0)
@@ -3123,6 +3280,15 @@ importers:
       '@baalvion/graceful-shutdown':
         specifier: workspace:*
         version: link:../../../packages/graceful-shutdown
+      '@baalvion/money':
+        specifier: workspace:*
+        version: link:../../../packages/money
+      '@baalvion/party':
+        specifier: workspace:*
+        version: link:../../../packages/party
+      '@baalvion/sites':
+        specifier: workspace:*
+        version: link:../../../packages/sites
       '@baalvion/telemetry':
         specifier: workspace:*
         version: link:../../../packages/telemetry
@@ -3364,15 +3530,27 @@ importers:
       '@baalvion/auth-node':
         specifier: workspace:*
         version: link:../../../packages/auth-node
+      '@baalvion/events':
+        specifier: workspace:*
+        version: link:../../../packages/events
       '@baalvion/graceful-shutdown':
         specifier: workspace:*
         version: link:../../../packages/graceful-shutdown
+      '@baalvion/money':
+        specifier: workspace:*
+        version: link:../../../packages/money
+      '@baalvion/payment-consistency':
+        specifier: workspace:*
+        version: link:../../../packages/payment-consistency
       '@baalvion/resilience':
         specifier: workspace:*
         version: link:../../../packages/resilience
       '@baalvion/sdk':
         specifier: workspace:*
         version: link:../../../packages/sdk
+      '@baalvion/sites':
+        specifier: workspace:*
+        version: link:../../../packages/sites
       '@baalvion/telemetry':
         specifier: workspace:*
         version: link:../../../packages/telemetry

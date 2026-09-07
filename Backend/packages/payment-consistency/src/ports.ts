@@ -8,7 +8,7 @@
  * atomically — that atomicity is the transactional-outbox guarantee (no lost events,
  * no dual-write drift).
  */
-import type { PaymentEvent } from './events';
+import type { PaymentEvent, CustomerSignal } from './events';
 import type { PaymentState } from './states';
 
 /** Opaque transaction handle threaded through the ports (a pg client, a Sequelize tx, …). */
@@ -27,6 +27,10 @@ export interface PaymentRecord {
   transactionId: string;
   amountMinor: number;
   currency: string;
+  /** Attribution dimensions. Null on rows written before the site dimension existed. */
+  siteId?: string | null;
+  tenantId?: string | null;
+  rail?: string | null;
 }
 
 export interface PaymentStateStore {
@@ -61,6 +65,16 @@ export interface OutboxEnvelope {
   fromState: PaymentState | null;
   toState: PaymentState;
   orgId?: string;
+  /**
+   * Attribution, copied from the event so a consumer never has to join back to payment_state
+   * to learn which property an event belongs to — the event is self-describing.
+   */
+  siteId?: string;
+  tenantId?: string;
+  rail?: string;
+  partyId?: string;
+  feeMinor?: number;
+  customer?: CustomerSignal | null;
   occurredAt: string;
   metadata?: Record<string, unknown>;
 }

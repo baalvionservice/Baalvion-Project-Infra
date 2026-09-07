@@ -46,6 +46,24 @@ app.use(errorHandler);
 
 async function start() {
     await redis.connect();
+
+    // Consumes `payment.recorded` off the event stream into admin.payment_records — the
+    // cross-estate read model behind the payments panel. Opt-in while producers are being
+    // migrated; a consumer with no producers is harmless but the flag keeps it off where the
+    // stream is not available. Never fatal: the console must still start without it.
+    if (process.env.PAYMENT_RECORDS_CONSUMER === 'true') {
+        const { startPaymentRecordsConsumer, stopPaymentRecordsConsumer } = require('./service/paymentRecordsConsumer');
+        await startPaymentRecordsConsumer().catch((err) => logger.error({ err: err.message }, 'payment-records consumer failed to start'));
+        registerShutdown('payment-records-consumer', async () => { await stopPaymentRecordsConsumer(); });
+    }
+
+    // Retention sweep for the payments read model. OFF unless PAYMENT_RECORDS_RETENTION_DAYS is
+    // set: there is no safe default number of days to keep financial records for.
+    const { startRetentionSweep, stopRetentionSweep } = require('./service/paymentRecordsRetention');
+    if (startRetentionSweep().started) {
+        registerShutdown('payment-records-retention', async () => { stopRetentionSweep(); });
+    }
+
     const server = app.listen(config.port, () => {
         logger.info({ port: config.port }, 'admin-service started');
     });

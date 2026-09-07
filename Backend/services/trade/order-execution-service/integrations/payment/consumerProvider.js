@@ -16,6 +16,7 @@ const crypto = require('crypto');
 // Central key vault — resolves PSP keys from the CMS "Integrations & Keys" store (managed in the
 // admin panel, encrypted at rest). Returns null → fall back to env, so a vault outage never breaks pay.
 const { getPaymentCreds } = require('./cmsVault');
+const { Money, toRazorpayAmount, toStripeAmount } = require('@baalvion/money');
 
 // In-memory intent store for the MOCK provider — NON-PRODUCTION (not durable, single-process).
 const mockIntents = new Map();
@@ -102,8 +103,9 @@ const razorpayProvider = {
   async createPaymentIntent({ orderId, amount, currencyCode }) {
     const keys = await razorpayKeys();
     // Razorpay amount is in the smallest currency unit (paise/cents). receipt max 40 chars (orderId UUID fits).
-    const minor = Math.round(Number(amount) * 100);
-    if (!Number.isFinite(minor) || minor < 1) throw new Error('razorpay: invalid order amount');
+    // Exponent from the currency, not a hardcoded 100.
+    const minor = toRazorpayAmount(Money.fromDatabaseValue(amount, currencyCode || 'INR'));
+    if (minor < 1) throw new Error('razorpay: invalid order amount');
     const order = await razorpayFetch('/orders', keys, {
       method: 'POST',
       body: JSON.stringify({
@@ -140,10 +142,10 @@ const razorpayProvider = {
   },
   async failPayment() { return { status: 'failed' }; },
   async cancelPayment() { return { status: 'voided' }; },
-  async refundPayment({ transactionId, amount, reason }) {
+  async refundPayment({ transactionId, amount, currencyCode, reason }) {
     const keys = await razorpayKeys();
     if (!transactionId) throw new Error('razorpay: refund requires the captured payment id');
-    const minor = amount != null ? Math.round(Number(amount) * 100) : undefined;
+    const minor = amount != null ? toRazorpayAmount(Money.fromDatabaseValue(amount, currencyCode || 'INR')) : undefined;
     const data = await razorpayFetch(`/payments/${transactionId}/refund`, keys, {
       method: 'POST',
       body: JSON.stringify({ ...(minor != null ? { amount: minor } : {}), notes: { reason: reason || 'refund' } }),
@@ -210,8 +212,8 @@ const stripeProvider = {
   name: 'stripe',
   PRODUCTION: true,
   async createPaymentIntent({ orderId, amount, currencyCode, country }) {
-    const minor = Math.round(Number(amount) * 100); // Stripe amount = smallest currency unit
-    if (!Number.isFinite(minor) || minor < 1) throw new Error('stripe: invalid order amount');
+    const minor = toStripeAmount(Money.fromDatabaseValue(amount, currencyCode)); // smallest currency unit
+    if (minor < 1) throw new Error('stripe: invalid order amount');
     const base = stripeReturnBase();
     const cc = (country || 'us').toLowerCase();
     const form = toForm({
@@ -252,9 +254,9 @@ const stripeProvider = {
   },
   async failPayment() { return { status: 'failed' }; },
   async cancelPayment() { return { status: 'voided' }; },
-  async refundPayment({ transactionId, amount, reason }) {
+  async refundPayment({ transactionId, amount, currencyCode, reason }) {
     if (!transactionId) throw new Error('stripe: refund requires the captured payment_intent id');
-    const minor = amount != null ? Math.round(Number(amount) * 100) : undefined;
+    const minor = amount != null ? toStripeAmount(Money.fromDatabaseValue(amount, currencyCode || 'USD')) : undefined;
     const form = toForm({ payment_intent: transactionId, ...(minor != null ? { amount: minor } : {}), metadata: { reason: reason || 'refund' } });
     const data = await stripeFetch('/refunds', { method: 'POST', form });
     return { status: 'refunded', provider: 'stripe', refundId: data.id, amount };

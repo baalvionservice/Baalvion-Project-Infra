@@ -1,0 +1,30 @@
+{
+  "name": "@baalvion/sites",
+  "version": "1.0.0",
+  "description": "The canonical site registry — one stable site_id per Baalvion property, the host→site resolution every service shares, and the payment rails each property is permitted to use.",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./sites.json": "./dist/sites.json"
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup && node scripts/emit-json.mjs",
+    "dev": "tsup --watch",
+    "type-check": "tsc --noEmit",
+    "test": "node --test test/*.test.mjs",
+    "clean": "rimraf dist"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.7.2",
+    "rimraf": "^6.0.1"
+  }
+}

@@ -32,6 +32,18 @@ export interface IRLoginResponse {
   user: IRAuthUser;
 }
 
+/**
+ * Presence of the non-httpOnly session hint (set at login, cleared at logout). NEVER a trust
+ * signal — see the note in lib/auth/local-auth.ts. Returns true when we cannot read cookies at
+ * all (SSR), so nothing is suppressed by accident.
+ */
+function hasSessionHint(): boolean {
+  if (typeof document === 'undefined') return true;
+  return document.cookie.split('; ').some(
+    (c) => c.startsWith('baalvion_has_session=') || c.startsWith('csrf_token='),
+  );
+}
+
 // ─── In-memory access token (single-flight refresh) ─────────────────────────────
 
 let _accessToken: string | null = null;
@@ -110,6 +122,16 @@ export const irAuthClient = {
 
   /** POST /refresh — rotate via the httpOnly cookie (single-flight). */
   async refreshToken(): Promise<string | null> {
+    // An anonymous visitor has no cookie to rotate, so the call can only 401 — and the browser
+    // logs every 401 as a console error regardless of how we handle it, on every public page
+    // load. Skip the round-trip when no session hint is present. This is a PERFORMANCE and noise
+    // check only: the hint carries no identity and is trivially forgeable, so a forged one buys
+    // exactly one rejected request. Authorization still rests entirely on the httpOnly cookie
+    // that only the server can read.
+    if (!hasSessionHint()) {
+      _accessToken = null;
+      return null;
+    }
     if (!_refreshPromise) {
       _refreshPromise = (async () => {
         try {

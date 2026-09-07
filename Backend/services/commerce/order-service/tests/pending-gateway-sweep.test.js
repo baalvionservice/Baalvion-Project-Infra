@@ -107,3 +107,28 @@ test('non-pollable providers (no getPaymentStatus: PayU/bank) are skipped, never
     assert.equal(r.settled, 0);
     assert.equal(captureCalls.length, 0);
 });
+
+test('the fee the gateway kept survives the sweep, not just the webhook', async () => {
+    // Regression: getPaymentStatus already fetched the full payment object (which carries `fee`)
+    // and dropped it, so the same payment was reported fee-free when the sweep settled it and
+    // with its fee when the webhook did. Two different numbers for one payment, decided by a race.
+    pendingRows = [row()];
+    statusResponders.razorpay = async () => ({
+        status: 'captured', transactionId: 'pay_1', amountMinor: 10000, currency: 'USD', feeMinor: 236,
+    });
+
+    await reconciliation.sweepPendingPayments(STORE, { delayMs: 0 });
+
+    assert.equal(captureCalls.length, 1);
+    assert.equal(captureCalls[0].feeMinor, 236);
+});
+
+test('a gateway that reports no fee reports null, never zero', async () => {
+    // Zero is a claim ("this payment cost nothing"); null is the truth ("we were not told").
+    pendingRows = [row()];
+    statusResponders.razorpay = async () => ({ status: 'captured', transactionId: 'pay_1', amountMinor: 10000, currency: 'USD' });
+
+    await reconciliation.sweepPendingPayments(STORE, { delayMs: 0 });
+
+    assert.equal(captureCalls[0].feeMinor, null);
+});

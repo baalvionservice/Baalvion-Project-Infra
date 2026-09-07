@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import {
   REFRESH_COOKIE,
+  SESSION_HINT_COOKIE,
   encodeRefresh,
   findUser,
   isLocalAuthEnabled,
@@ -45,6 +46,9 @@ export async function POST(req: Request) {
     success: true,
     data: { accessToken, user: publicUser(user) },
   });
+
+  // Readable presence hint so an anonymous visitor never fires a doomed refresh.
+  res.cookies.set(SESSION_HINT_COOKIE, '1', { httpOnly: false, sameSite: 'lax', path: '/' });
 
   res.cookies.set(REFRESH_COOKIE, encodeRefresh(user), {
     httpOnly: true,

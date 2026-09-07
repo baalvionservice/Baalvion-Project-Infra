@@ -72,8 +72,21 @@ function authRoles(req) {
 
 function maxLevel(roles) { return roles.reduce((m, r) => Math.max(m, roleLevel(r)), -1); }
 
-/** True if the caller's highest role is >= the required role. */
-function isRoleAtLeast(roles, required) { return maxLevel(roles) >= roleLevel(required); }
+/**
+ * True if the caller's highest role is >= the required role IN THE ORG HIERARCHY.
+ *
+ * Returns false when `required` is not a hierarchy role. Without that guard the comparison
+ * degenerates: roleLevel() yields -1 for anything unknown — including the PLATFORM_ROLES, which
+ * are deliberately a separate dimension — and maxLevel() is itself floored at -1, so
+ * `isRoleAtLeast(anyRoles, 'platform_admin')` evaluated `-1 >= -1` and was true for EVERY caller.
+ * A `viewer` satisfied requireRole('platform_security_admin'). Platform roles are matched exactly,
+ * by requireRole, not by level.
+ */
+function isRoleAtLeast(roles, required) {
+  const need = roleLevel(required);
+  if (need === -1) return false;
+  return maxLevel(roles) >= need;
+}
 
 function hasPermission(req, permission) {
   const a = (req && req.auth) || {};
@@ -92,7 +105,10 @@ function requireRole(...roles) {
   return (req, _res, next) => {
     if (!req.auth) return next(err(401, 'unauthorized', 'Authentication required'));
     const userRoles = authRoles(req);
-    const ok = userRoles.includes('super_admin') || roles.some((r) => isRoleAtLeast(userRoles, r));
+    // Exact match first so a platform role (or any non-hierarchy role) is still satisfiable by a
+    // caller who genuinely holds it; hierarchy comparison only for org roles that have a level.
+    const ok = userRoles.includes('super_admin')
+      || roles.some((r) => userRoles.includes(r) || isRoleAtLeast(userRoles, r));
     if (!ok) return next(err(403, 'forbidden', `Requires role: ${roles.join(' or ')}`));
     return next();
   };

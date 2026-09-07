@@ -101,6 +101,14 @@ function normalize(status, ctx) {
     transactionId: ctx.transactionId,
     money: { amountMinor: ctx.amountMinor, currency: ctx.currency },
     orgId: ctx.orgId,
+    // Attribution — without these a payment reaches the cross-estate panel belonging nowhere,
+    // and the relay refuses it rather than recording it unattributed.
+    siteId: ctx.siteId,
+    tenantId: ctx.tenantId,
+    rail: ctx.rail,
+    partyId: ctx.partyId,
+    feeMinor: ctx.feeMinor,
+    customer: ctx.customer,
     metadata: { service: 'order-service', via: ctx.via || 'webhook' },
   });
 }

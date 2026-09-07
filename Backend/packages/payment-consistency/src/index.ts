@@ -69,12 +69,30 @@ export {
   createPgPaymentStateStore,
   createPgInboxStore,
   createPgOutboxWriter,
+  createSequelizeTxRunner,
+  sequelizeQueryRunner,
   type PgPool,
   type PgClient,
   type PgQueryRunner,
   type PgQueryResult,
   type PclPgOptions,
+  type SequelizeLike,
 } from './pgStore';
 
 // Errors
 export { PclError, PclValidationError } from './errors';
+
+// Canonical payment record — the one way a service reports that money moved, and the
+// enforcement point for "no payment without a registered site and a permitted rail".
+export { recordPayment, buildPaymentRecordedEvent, derivePaymentIdempotencyKey, toPaymentEvent, paymentRecordedFromEnvelope, PaymentRecordError } from './record';
+export type { PaymentRecordInput, CanonicalPayment, PaymentRecordedEvent, MoneyInput, EventEnvelopeMeta } from './record';
+
+// One-call wiring so a new property joins the spine in a few lines, not a project.
+export { createPaymentSpine } from './spine';
+export type { PaymentSpine, PaymentSpineOptions, SpinePaymentInput } from './spine';
+export type { CustomerSignal } from './events';
+
+// One relay wiring, used by every service that drains its own payment outbox.
+export { createPaymentOutboxRelay, readOutboxHealth } from './relay';
+export type { OutboxHealth } from './relay';
+export type { PaymentOutboxRelay, PaymentOutboxRelayOptions, EventBus, RelayLogger } from './relay';
