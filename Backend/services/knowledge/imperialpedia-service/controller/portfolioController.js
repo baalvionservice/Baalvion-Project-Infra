@@ -3,6 +3,7 @@ const { Op } = require('sequelize');
 const db = require('../models');
 const { sendSuccess } = require('../utils/response');
 const { AppError } = require('../utils/errors');
+const { Money } = require('@baalvion/money');
 
 // Load the live asset map (symbol → asset_summary) for the given symbols.
 async function assetMap(symbols) {
@@ -98,9 +99,11 @@ const getPortfolio = async (req, res, next) => {
             return {
                 id: h.id, symbol: h.symbol, asset: a ? a.name : h.symbol, asset_type: a ? a.asset_type : null,
                 quantity: qty, avg_cost: avg, current_price: price,
-                market_value: Math.round(marketValue * 100) / 100,
-                cost_basis: Math.round(costBasis * 100) / 100,
-                gain_loss: Math.round(gl * 100) / 100,
+                // Exact: these are money, and rounding a drifted float cannot recover what the
+                // arithmetic already lost.
+                market_value: Number(Money.fromDatabaseValue(marketValue, 'USD').toDecimalString()),
+                cost_basis: Number(Money.fromDatabaseValue(costBasis, 'USD').toDecimalString()),
+                gain_loss: Number(Money.fromDatabaseValue(gl, 'USD').toDecimalString()),
                 gain_loss_percent: costBasis ? Math.round((gl / costBasis) * 10000) / 100 : 0,
                 sentiment: sentLabel(a && a.sentiment),
             };
