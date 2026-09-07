@@ -13,6 +13,14 @@ const { AppError } = require('../utils/errors');
 const slugify = (s) => String(s || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
 const withSlug = (base, id) => `${slugify(base) || 'profile'}-${String(id).slice(0, 8)}`;
 
+// Page params shared by both list endpoints. Defaults match the paginated directory
+// (25/page, hard ceiling 100) so a caller cannot pull the whole table in one request.
+const pageParams = (q) => {
+    const limit = Math.min(Math.max(parseInt(q.limit, 10) || 25, 1), 100);
+    const page = Math.max(parseInt(q.page, 10) || 1, 1);
+    return { limit, page, offset: (page - 1) * limit };
+};
+
 // ── Founders (curated) ──────────────────────────────────────────────────────────
 const FOUNDER_COLS = ['id', 'username', 'full_name', 'avatar_url', 'bio', 'company_name', 'company_about', 'headline', 'sector', 'stage', 'region', 'website', 'linkedin_url', 'updated_at'];
 const publicFounder = (p) => {
@@ -24,13 +32,21 @@ const publicFounder = (p) => {
 
 async function listFounders(req, res, next) {
     try {
-        const rows = await db.Profile.findAll({
+        const { limit, page, offset } = pageParams(req.query);
+        const { rows, count } = await db.Profile.findAndCountAll({
             where: { role: 'founder', company_name: { [Op.ne]: null } },
             attributes: FOUNDER_COLS,
             order: [['updated_at', 'DESC']],
-            limit: 2000,
+            limit,
+            offset,
         });
-        return sendSuccess(req, res, { founders: rows.map(publicFounder) });
+        return sendSuccess(req, res, {
+            founders: rows.map(publicFounder),
+            total: count,
+            page,
+            pages: Math.ceil(count / limit) || 1,
+            limit,
+        });
     } catch (e) { return next(e); }
 }
 
@@ -53,12 +69,20 @@ const publicInvestor = (i) => {
 
 async function listInvestors(req, res, next) {
     try {
-        const rows = await db.Investor.findAll({
+        const { limit, page, offset } = pageParams(req.query);
+        const { rows, count } = await db.Investor.findAndCountAll({
             attributes: INVESTOR_COLS,
             order: [['deals_backed', 'DESC'], ['updated_at', 'DESC']],
-            limit: 5000,
+            limit,
+            offset,
         });
-        return sendSuccess(req, res, { investors: rows.map(publicInvestor) });
+        return sendSuccess(req, res, {
+            investors: rows.map(publicInvestor),
+            total: count,
+            page,
+            pages: Math.ceil(count / limit) || 1,
+            limit,
+        });
     } catch (e) { return next(e); }
 }
 
