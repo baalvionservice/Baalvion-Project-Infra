@@ -68,6 +68,12 @@ async function start() {
         logger.info({ port: config.port }, 'admin-service started');
     });
 
+    // Realtime feed for the admin console's Infrastructure panel. Shares this HTTP server, so it
+    // needs no extra port and rides the existing /api-bff/platform/admin route at the edge.
+    const { startRealtime, stopRealtime } = require('./realtime');
+    startRealtime(server, { sequelize: require('./models').sequelize });
+    registerShutdown('realtime-ws', async () => { await stopRealtime(); });
+
     registerShutdown('redis', async () => { const r = require('./config/redis'); const c = (r.getClient && r.getClient()) || r.client || (typeof r.quit === 'function' ? r : null); if (c && c.quit) await c.quit(); });
     initGracefulShutdown(server);
 }
