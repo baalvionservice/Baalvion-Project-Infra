@@ -13,30 +13,272 @@ Disallow: /leaderboard
 Disallow: /admin
 Disallow: /reset-password
 
-# Explicit allow for major AI / LLM crawlers so the public landing can be
-# discovered and summarized by AI search engines.
+# Explicit groups for AI / LLM and search crawlers.
+# robots.txt is not additive: a crawler obeys only its most specific matching group, so a bot
+# named here would ignore the Disallow list under "*" entirely. Each group repeats it.
+
 User-agent: GPTBot
 Allow: /
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /forums
+Disallow: /marketplace
+Disallow: /profile
+Disallow: /checkout
+Disallow: /leaderboard
+Disallow: /admin
+Disallow: /reset-password
 
 User-agent: OAI-SearchBot
 Allow: /
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /forums
+Disallow: /marketplace
+Disallow: /profile
+Disallow: /checkout
+Disallow: /leaderboard
+Disallow: /admin
+Disallow: /reset-password
 
 User-agent: ChatGPT-User
 Allow: /
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /forums
+Disallow: /marketplace
+Disallow: /profile
+Disallow: /checkout
+Disallow: /leaderboard
+Disallow: /admin
+Disallow: /reset-password
 
 User-agent: Google-Extended
 Allow: /
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /forums
+Disallow: /marketplace
+Disallow: /profile
+Disallow: /checkout
+Disallow: /leaderboard
+Disallow: /admin
+Disallow: /reset-password
 
 User-agent: ClaudeBot
 Allow: /
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /forums
+Disallow: /marketplace
+Disallow: /profile
+Disallow: /checkout
+Disallow: /leaderboard
+Disallow: /admin
+Disallow: /reset-password
 
 User-agent: anthropic-ai
 Allow: /
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /forums
+Disallow: /marketplace
+Disallow: /profile
+Disallow: /checkout
+Disallow: /leaderboard
+Disallow: /admin
+Disallow: /reset-password
+
+User-agent: Claude-Web
+Allow: /
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /forums
+Disallow: /marketplace
+Disallow: /profile
+Disallow: /checkout
+Disallow: /leaderboard
+Disallow: /admin
+Disallow: /reset-password
+
+User-agent: Claude-SearchBot
+Allow: /
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /forums
+Disallow: /marketplace
+Disallow: /profile
+Disallow: /checkout
+Disallow: /leaderboard
+Disallow: /admin
+Disallow: /reset-password
 
 User-agent: PerplexityBot
 Allow: /
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /forums
+Disallow: /marketplace
+Disallow: /profile
+Disallow: /checkout
+Disallow: /leaderboard
+Disallow: /admin
+Disallow: /reset-password
+
+User-agent: Perplexity-User
+Allow: /
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /forums
+Disallow: /marketplace
+Disallow: /profile
+Disallow: /checkout
+Disallow: /leaderboard
+Disallow: /admin
+Disallow: /reset-password
 
 User-agent: CCBot
 Allow: /
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /forums
+Disallow: /marketplace
+Disallow: /profile
+Disallow: /checkout
+Disallow: /leaderboard
+Disallow: /admin
+Disallow: /reset-password
 
-Sitemap: https://insiders.baalvion.com/sitemap.xml
+User-agent: DuckAssistBot
+Allow: /
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /forums
+Disallow: /marketplace
+Disallow: /profile
+Disallow: /checkout
+Disallow: /leaderboard
+Disallow: /admin
+Disallow: /reset-password
+
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /forums
+Disallow: /marketplace
+Disallow: /profile
+Disallow: /checkout
+Disallow: /leaderboard
+Disallow: /admin
+Disallow: /reset-password
+
+User-agent: meta-externalagent
+Allow: /
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /forums
+Disallow: /marketplace
+Disallow: /profile
+Disallow: /checkout
+Disallow: /leaderboard
+Disallow: /admin
+Disallow: /reset-password
+
+User-agent: Amazonbot
+Allow: /
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /forums
+Disallow: /marketplace
+Disallow: /profile
+Disallow: /checkout
+Disallow: /leaderboard
+Disallow: /admin
+Disallow: /reset-password
+
+User-agent: Bytespider
+Allow: /
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /forums
+Disallow: /marketplace
+Disallow: /profile
+Disallow: /checkout
+Disallow: /leaderboard
+Disallow: /admin
+Disallow: /reset-password
+
+User-agent: YouBot
+Allow: /
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /forums
+Disallow: /marketplace
+Disallow: /profile
+Disallow: /checkout
+Disallow: /leaderboard
+Disallow: /admin
+Disallow: /reset-password
+
+User-agent: MistralAI-User
+Allow: /
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /forums
+Disallow: /marketplace
+Disallow: /profile
+Disallow: /checkout
+Disallow: /leaderboard
+Disallow: /admin
+Disallow: /reset-password
+
+User-agent: cohere-ai
+Allow: /
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /forums
+Disallow: /marketplace
+Disallow: /profile
+Disallow: /checkout
+Disallow: /leaderboard
+Disallow: /admin
+Disallow: /reset-password
+
+User-agent: Diffbot
+Allow: /
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /forums
+Disallow: /marketplace
+Disallow: /profile
+Disallow: /checkout
+Disallow: /leaderboard
+Disallow: /admin
+Disallow: /reset-password
+
+User-agent: PetalBot
+Allow: /
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /forums
+Disallow: /marketplace
+Disallow: /profile
+Disallow: /checkout
+Disallow: /leaderboard
+Disallow: /admin
+Disallow: /reset-password
+
+User-agent: Timpibot
+Allow: /
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /forums
+Disallow: /marketplace
+Disallow: /profile
+Disallow: /checkout
+Disallow: /leaderboard
+Disallow: /admin
+Disallow: /reset-password
+
+Sitemap: https://www.marketunderworld.com/sitemap.xml
