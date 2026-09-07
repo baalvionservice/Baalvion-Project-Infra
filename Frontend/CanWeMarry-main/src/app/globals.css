@@ -1,0 +1,193 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Palette notes — the visual identity is doing real work here.
+ *
+ * The ground is a warm off-white rather than pure white, and the accent is a deep,
+ * desaturated teal. Between them they read as considered and institutional: the register
+ * of a mediation service or a legal-aid charity.
+ *
+ * What is deliberately absent matters as much. There is no rose or magenta anywhere in
+ * the scale, because that is the palette of a dating product and this is not one. There is
+ * no high-chroma red or black-and-yellow warning motif, because fear is not the tone to
+ * greet someone in difficulty with. Red exists only as `danger`, reserved for destructive
+ * confirmations.
+ */
+:root {
+  --ground: 40 30% 98%;
+  --surface: 40 22% 96%;
+  --surface-2: 38 18% 92%;
+  --line: 36 14% 87%;
+  --line-strong: 34 12% 74%;
+  --foreground: 210 24% 14%;
+  --muted: 212 12% 40%;
+  /* 43%, not 55%. A machine sweep measured this at 3.0–3.4:1 against the surfaces it
+     actually sits on, where WCAG AA wants 4.5 for 12px text. 43% is the SMALLEST value that
+     passes on ground, surface and surface-2 alike (5.27 / 5.02 / 4.57), so the scale keeps
+     its character rather than collapsing towards black. Dark mode already passed and is
+     unchanged. */
+  --muted-2: 212 10% 43%;
+  --accent: 182 44% 27%;
+  --accent-strong: 184 48% 21%;
+  --accent-soft: 180 34% 92%;
+  --on-accent: 40 30% 98%;
+  --ok: 152 44% 30%;
+  --warn: 32 62% 36%;
+  --danger: 358 52% 42%;
+
+  /* Celebration palette — marketing surfaces only.
+     The product UI stays on the teal accent above, because a moderation queue should feel
+     calm. A page about getting married should not: these are the colours of the clothes,
+     the flowers and the powder, and they carry the front page. */
+  --rose: 344 72% 47%;
+  --rose-deep: 340 68% 33%;
+  --marigold: 32 92% 52%;
+  --saffron: 24 88% 46%;
+  --rose-soft: 348 70% 95%;
+}
+
+.dark {
+  --ground: 210 24% 9%;
+  --surface: 210 22% 12%;
+  --surface-2: 210 18% 16%;
+  --line: 210 14% 22%;
+  --line-strong: 210 12% 34%;
+  --foreground: 40 24% 94%;
+  --muted: 212 12% 70%;
+  --muted-2: 212 10% 54%;
+  --accent: 180 42% 58%;
+  --accent-strong: 180 46% 68%;
+  --accent-soft: 195 30% 18%;
+  --on-accent: 210 24% 9%;
+  --ok: 152 40% 58%;
+  --warn: 36 68% 62%;
+  --danger: 358 62% 66%;
+
+  /* Celebration palette, lifted for dark ground so it stays vivid rather than muddy. */
+  --rose: 344 78% 62%;
+  --rose-deep: 340 60% 46%;
+  --marigold: 36 92% 60%;
+  --saffron: 28 88% 58%;
+  --rose-soft: 340 30% 17%;
+}
+
+* {
+  border-color: hsl(var(--line));
+}
+
+html {
+  color-scheme: light;
+  -webkit-text-size-adjust: 100%;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+body {
+  background-color: hsl(var(--ground));
+  color: hsl(var(--foreground));
+  font-family: var(--font-text), system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  text-rendering: optimizeLegibility;
+}
+
+/* Someone reading this site may be doing so with a family member nearby. Motion that
+   draws the eye is a liability, so transitions are short and reduced-motion is honoured. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+::selection {
+  background: hsl(var(--accent) / 0.18);
+}
+
+/* The only continuous animation in the product: a spinner on an in-flight button. Reduced
+   motion flattens it via the rule above, leaving a static ring — the disabled state and the
+   aria-busy announcement carry the meaning without it. */
+@keyframes cwm-fade-in {
+  from { opacity: 0; transform: translateY(2px); }
+  to   { opacity: 1; transform: none; }
+}
+
+dialog[open] {
+  animation: cwm-fade-in 140ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@layer components {
+  .container-site {
+    @apply mx-auto w-full max-w-site px-5 sm:px-6 lg:px-8;
+  }
+
+  /* One focus treatment, applied everywhere, visible against both grounds. */
+  .focus-ring {
+    @apply outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ground;
+  }
+
+  .heading {
+    @apply font-display font-semibold tracking-[-0.01em] text-foreground;
+  }
+}
+
+/*
+ * Touch targets.
+ *
+ * A 34px pill is comfortable with a mouse and a poor target for a thumb. Rather than
+ * inflating every control on every screen — which would make the desktop UI loose and
+ * change the design — the floor is applied only where a coarse pointer is actually in use.
+ * 44px is the accepted minimum for a finger.
+ *
+ * `pointer: coarse` rather than a width breakpoint on purpose: a touchscreen laptop at
+ * 1280px needs this and a narrow desktop window does not, and width cannot tell them apart.
+ *
+ * Excluded: controls that are visually hidden until focused (the skip link), controls whose
+ * hit area is deliberately the whole surrounding row, and anything already large enough.
+ */
+@media (pointer: coarse) {
+  button:not(.sr-only):not([data-compact]),
+  [role='button']:not([data-compact]),
+  [role='tab'],
+  a[href]:not(.sr-only):not([data-inline]),
+  select,
+  summary {
+    min-height: 44px;
+  }
+
+  /* Inline links inside running text are words, not buttons; stretching them would break
+     the line box and the paragraph around it. */
+  p a[href],
+  li a[href],
+  dd a[href],
+  span a[href] {
+    min-height: 0;
+  }
+}
+
+/*
+ * A horizontally scrolling container must also be a containing block.
+ *
+ * Found at 390px on the user table: `overflow-x: auto` clips its own children, but an
+ * ABSOLUTELY POSITIONED descendant is laid out against its nearest positioned ancestor —
+ * and if there is none inside the scroller, that is the page. Tailwind's `.sr-only` is
+ * absolutely positioned, so a visually-hidden label deep inside a 768px-wide table landed at
+ * x=454 on a 390px screen and stretched the document, giving every admin page a horizontal
+ * scrollbar for one invisible span.
+ *
+ * `position: relative` makes the scroller the containing block, so those descendants scroll
+ * and clip with the content they belong to. It changes nothing visually.
+ */
+@layer components {
+  .overflow-x-auto {
+    position: relative;
+  }
+}
