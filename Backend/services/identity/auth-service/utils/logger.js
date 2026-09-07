@@ -17,7 +17,10 @@ const logger = pino({
         paths: [
             'password', 'passwordHash', 'token', 'refreshToken',
             'req.headers.authorization', 'req.headers.cookie',
-            'body.password', 'body.refreshToken',
+            // Set-Cookie carries the refresh token. Redacted here as well as omitted by the
+            // serialisers, so widening a serialiser later cannot silently reintroduce the leak.
+            'res.headers["set-cookie"]', 'res.headers.set-cookie',
+            'body.password', 'body.refreshToken', 'body.newPassword',
         ],
         censor: '[REDACTED]',
     },
