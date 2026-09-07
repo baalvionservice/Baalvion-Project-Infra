@@ -1,0 +1,29 @@
+{
+  "name": "@baalvion/party",
+  "version": "1.0.0",
+  "description": "The party graph — one identity for a human across every Baalvion property. Normalisation, deterministic match keys and merge rules for resolving per-site customers to a single party.",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "type-check": "tsc --noEmit",
+    "test": "node --test test/*.test.mjs",
+    "clean": "rimraf dist"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.7.2",
+    "rimraf": "^6.0.1"
+  }
+}

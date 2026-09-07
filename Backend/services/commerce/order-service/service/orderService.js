@@ -19,6 +19,10 @@ const { sendOrderEmail } = require('./orderNotifications');
 const inventoryClient = require('./inventoryClient');
 const alerts = require('./alerts');
 const shippingService = require('./shippingService');
+// Exact money. Replaces float comparisons whose epsilons (`> 0.01`, `+ 1e-9`) were tolerating
+// a real short-payment of up to one minor unit on every single capture.
+const { Money, checkCapturedAmount } = require('@baalvion/money');
+const attribution = require('./paymentAttribution');
 
 // ── Cross-service inventory reservation (the AUTHORITATIVE oversell guard) ──────────────────────
 // inventory-service owns warehouse-scoped stock and an atomic, row-locked reserve→confirm→release
@@ -711,16 +715,23 @@ async function refundPayment(storeId, orderId, body = {}) {
 
     // The captured payment we are refunding against (most recent capture).
     const captured = await OrdersOrderPayment.findOne({ where: { orderId, status: 'captured' }, order: [['createdAt', 'DESC']] });
-    const captureAmount = captured ? Number(captured.amount) : Number(order.totalAmount);
-    const amount = body.amount != null ? Number(body.amount) : captureAmount;
-    if (!Number.isFinite(amount) || amount <= 0) throw new AppError('VALIDATION_ERROR', 'Refund amount must be a positive number', 400);
-    if (amount > captureAmount + 1e-9) throw new AppError('VALIDATION_ERROR', `Refund amount exceeds captured amount (${captureAmount})`, 400);
+    const captureMoney = Money.fromDatabaseValue(captured ? captured.amount : order.totalAmount, order.currencyCode);
+    let refundMoney;
+    try {
+        refundMoney = body.amount != null ? Money.fromDatabaseValue(body.amount, order.currencyCode) : captureMoney;
+    } catch {
+        throw new AppError('VALIDATION_ERROR', 'Refund amount must be a positive number', 400);
+    }
+    if (!refundMoney.isPositive()) throw new AppError('VALIDATION_ERROR', 'Refund amount must be a positive number', 400);
+    // Exact: the old `+ 1e-9` slack let a refund exceed the capture by a sub-minor-unit sliver.
+    if (refundMoney.greaterThan(captureMoney)) throw new AppError('VALIDATION_ERROR', `Refund amount exceeds captured amount (${captureMoney.toDecimalString()})`, 400);
+    const amount = refundMoney.toDecimalString();
 
     const provider = getProvider();
     if (typeof provider.refundPayment !== 'function') {
         throw new AppError('NOT_IMPLEMENTED', `Payment provider '${provider.name}' does not support refunds`, 501);
     }
-    const result = await provider.refundPayment({ orderId, transactionId: captured && captured.transactionId, amount, reason: body.reason });
+    const result = await provider.refundPayment({ orderId, transactionId: captured && captured.transactionId, amount, currencyCode: order.currencyCode, reason: body.reason });
     if (!result || result.status !== 'refunded') throw new AppError('REFUND_FAILED', `Refund failed: ${(result && result.reason) || 'declined'}`, 402);
 
     const refundTxnId = result.refundId || `rf_${crypto.randomUUID()}`;
@@ -731,7 +742,7 @@ async function refundPayment(storeId, orderId, body = {}) {
         return dupe.toJSON();
     }
 
-    const isFull = amount >= captureAmount - 1e-9;
+    const isFull = refundMoney.greaterThanOrEqual(captureMoney);
     const refundRow = await sequelize.transaction(async (t) => {
         const row = await OrdersOrderPayment.create({
             orderId, provider: provider.name, transactionId: refundTxnId,
@@ -781,7 +792,7 @@ async function createPaymentIntent(storeId, orderId, actor, selectedGateway = nu
     let intent;
     try {
         intent = await provider.createPaymentIntent({
-            orderId, amount: Number(order.totalAmount), currencyCode: order.currencyCode, country: order.market || order.country,
+            orderId, amount: order.totalAmount, currencyCode: order.currencyCode, country: order.market || order.country,
             // The storefront that placed this order — lets a REDIRECT-based gateway (Stripe/PayU)
             // bounce the shopper back to the CORRECT tenant's checkout instead of the single global
             // STOREFRONT_URL/APP_URL default, which only ever pointed at one hardcoded site. Optional:
@@ -918,9 +929,14 @@ async function failPayment(storeId, orderId, intentId, reason) {
         paymentId: orderId,
         provider: 'unknown',
         transactionId: intentId || `fail:${reason || 'declined'}`,
-        amountMinor: Math.round(Number(order.totalAmount) * 100),
+        amountMinor: Money.fromDatabaseValue(order.totalAmount, order.currencyCode).toSafeNumber(),
         currency: order.currencyCode,
         orgId: storeId,
+        siteId: attribution.SITE_ID,
+        tenantId: storeId != null ? String(storeId) : undefined,
+        // A failure has no confirmed provider, so the rail falls back to the order's own
+        // recorded gateway rather than being guessed.
+        rail: attribution.railFor((order.metadata && order.metadata.selectedGateway) || 'bank'),
     }).catch(() => {});
     return order.toJSON();
 }
@@ -957,12 +973,20 @@ async function settlePayuReturn(body) {
     if (!parsed.txnid) return { ok: false, reason: 'missing_txnid' };
     const payment = await OrdersOrderPayment.findOne({ where: { transactionId: parsed.txnid }, attributes: ['orderId'] });
     if (!payment) return { ok: false, reason: 'unknown_order' };
-    const order = await OrdersOrder.findOne({ where: { id: payment.orderId }, attributes: ['id', 'storeId', 'market', 'totalAmount', 'metadata'] });
+    const order = await OrdersOrder.findOne({ where: { id: payment.orderId }, attributes: ['id', 'storeId', 'market', 'totalAmount', 'currencyCode', 'metadata'] });
     if (!order) return { ok: false, reason: 'order_not_found' };
     const returnUrl = (order.metadata && order.metadata.returnUrl) || null;
     // Defence-in-depth (beyond the reverse-hash): the settled amount MUST match the order total, so a
     // leaked salt alone can't capture a tampered/short amount. PayU echoes the amount we submitted.
-    if (Math.abs(parseFloat(parsed.amount) - Number(order.totalAmount)) > 0.01) {
+    let payuAmountMatch;
+    try {
+        payuAmountMatch = Money.fromDatabaseValue(parsed.amount, order.currencyCode)
+            .equals(Money.fromDatabaseValue(order.totalAmount, order.currencyCode));
+    } catch {
+        payuAmountMatch = false; // unparseable amount from the gateway is a mismatch, not a pass
+    }
+    if (!payuAmountMatch) {
+        console.error(JSON.stringify({ evt: 'payu_return_amount_mismatch', orderId: order.id, seen: String(parsed.amount), expected: String(order.totalAmount), currency: order.currencyCode }));
         return { ok: true, orderId: order.id, market: order.market, returnUrl, settled: 'failed' };
     }
     if (parsed.status === 'captured') {
@@ -989,7 +1013,7 @@ async function handlePaymentWebhook({ event, orderId, intentId, reason }) {
 // {client confirm, webhook} acquires the lock first captures; the other sees paymentStatus='paid' and
 // no-ops. So it is idempotent AND never double-fulfills / double-ledgers / double-emails — even if
 // the webhook is delivered more than once or races the client confirm.
-async function capturePaymentFromWebhook({ providerOrderId, providerPaymentId, amount, currencyCode }) {
+async function capturePaymentFromWebhook({ providerOrderId, providerPaymentId, amount, currencyCode, feeMinor: providerFeeMinor }) {
     if (!providerOrderId) return { ok: false, reason: 'missing_order_id' };
     const intentPayment = await OrdersOrderPayment.findOne({ where: { transactionId: providerOrderId } });
     if (!intentPayment) {
@@ -1014,11 +1038,17 @@ async function capturePaymentFromWebhook({ providerOrderId, providerPaymentId, a
         // sent an amount (payment.captured/order.paid always do). Strict by default (reject mismatch);
         // RAZORPAY_WEBHOOK_STRICT_AMOUNT=false downgrades to warn-and-continue.
         if (amount != null) {
-            const expectedMinor = Math.round(Number(order.totalAmount) * 100);
-            const seenMinor = Math.round(Number(amount));
-            const currencyOk = !currencyCode || String(currencyCode).toUpperCase() === String(order.currencyCode).toUpperCase();
-            if (!Number.isFinite(seenMinor) || seenMinor !== expectedMinor || !currencyOk) {
-                const detail = { evt: 'razorpay_webhook_amount_mismatch', orderId, providerOrderId, expectedMinor, seenMinor, expectedCurrency: order.currencyCode, seenCurrency: currencyCode || null };
+            const expected = Money.fromDatabaseValue(order.totalAmount, order.currencyCode);
+            let match;
+            try {
+                match = checkCapturedAmount(expected, amount, currencyCode || order.currencyCode);
+            } catch {
+                match = { ok: false, expected, seen: null, difference: null }; // unparseable amount/currency
+            }
+            if (!match.ok) {
+                const expectedMinor = expected.minor.toString();
+                const seenMinor = match.seen ? match.seen.minor.toString() : String(amount);
+                const detail = { evt: 'razorpay_webhook_amount_mismatch', orderId, providerOrderId, expectedMinor, seenMinor, shortfall: match.difference ? match.difference.toDecimalString() : null, expectedCurrency: order.currencyCode, seenCurrency: currencyCode || null };
                 console.error(JSON.stringify(detail));
                 securityAudit.payment('captured', 'deny', { storeId, resource: { type: 'order', id: orderId }, metadata: { via: 'webhook', reason: 'amount_mismatch', expectedMinor, seenMinor } });
                 if (process.env.RAZORPAY_WEBHOOK_STRICT_AMOUNT !== 'false') {
@@ -1055,9 +1085,19 @@ async function capturePaymentFromWebhook({ providerOrderId, providerPaymentId, a
             paymentId: orderId,
             provider: intentPayment.provider,
             transactionId: providerPaymentId || providerOrderId,
-            amountMinor: Math.round(Number(intentPayment.amount) * 100),
+            amountMinor: Money.fromDatabaseValue(intentPayment.amount, intentPayment.currencyCode).toSafeNumber(),
             currency: intentPayment.currencyCode,
             orgId: storeId,
+            // Attribution: order-service is multi-store, so the STORE is the tenant.
+            siteId: attribution.SITE_ID,
+            tenantId: storeId != null ? String(storeId) : undefined,
+            rail: attribution.railFor(intentPayment.provider),
+            feeMinor: providerFeeMinor,
+            customer: attribution.customerSignalFor(
+                fresh && fresh.customerId
+                    ? await OrdersCustomer.findByPk(fresh.customerId).catch(() => null)
+                    : null,
+            ),
         }).catch(() => {});
     }
     return out;

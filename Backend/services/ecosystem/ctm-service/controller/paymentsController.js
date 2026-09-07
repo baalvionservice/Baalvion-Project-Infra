@@ -3,6 +3,48 @@ const db = require('../models');
 const { AppError } = require('../utils/errors');
 const { sendSuccess } = require('../utils/response');
 const pay = require('../service/payments');
+const { Money } = require('@baalvion/money');
+const { railFor, SITE_ID } = require('../service/paymentAttribution');
+/**
+ * The processor's own fee, in minor units, when the webhook reports one.
+ *
+ * Razorpay puts it on the payment entity, already inclusive of GST. It is absent on an
+ * authorization (the fee is only known once captured), and absent must stay absent: a zero
+ * would read as "no fee" rather than "not reported yet".
+ */
+function providerFeeMinor(evt) {
+    const entity = evt && evt.raw && evt.raw.payload
+        && ((evt.raw.payload.payment && evt.raw.payload.payment.entity)
+            || (evt.raw.payload.order && evt.raw.payload.order.entity));
+    const fee = entity && entity.fee;
+    return fee == null ? undefined : Number(fee);
+}
+
+/**
+ * Who paid, for the party graph.
+ *
+ * ControlTheMarket bills companies, so the payer is the company's owner. `owner_user_id` is a
+ * real platform account and therefore the strongest identity signal available — far stronger
+ * than an address typed at a payment page. The email the gateway echoes back IS that typed
+ * value, so it travels marked UNVERIFIED and can never merge two people on its own.
+ */
+async function customerSignalFor(payment, evt) {
+    const entity = evt && evt.raw && evt.raw.payload && evt.raw.payload.payment && evt.raw.payload.payment.entity;
+    let ownerUserId = null;
+    try {
+        const company = await db.companies.findByPk(payment.company_id, { attributes: ['owner_user_id'] });
+        ownerUserId = company && company.owner_user_id != null ? String(company.owner_user_id) : null;
+    } catch { /* identity is best-effort — never block a captured payment on it */ }
+
+    if (!ownerUserId && !(entity && entity.email)) return undefined;
+    return {
+        authUserId: ownerUserId,
+        email: (entity && entity.email) || null,
+        emailVerified: false,
+        siteCustomerId: payment.company_id != null ? String(payment.company_id) : null,
+    };
+}
+
 const pclShadow = require('../service/pclShadow'); // PCL Phase-1 shadow mode (flag-gated, non-blocking, never throws)
 
 // Create an invoice + payment + (provider) checkout in one call. The buyer picks the provider
@@ -119,7 +161,9 @@ exports.handleWebhook = async (req, res) => {
                 // (server-authoritative). A mismatch is a tamper/misroute signal and is deterministic
                 // (a retry cannot fix it) → 400, never activate.
                 if (evt.amountMinor != null) {
-                    const expectedMinor = Math.round(Number(payment.amount) * 100);
+                    // Exact: the currency's own exponent, not a hardcoded 100, and an integer
+                    // comparison rather than a float with a tolerance.
+                    const expectedMinor = Number(Money.fromDatabaseValue(payment.amount, payment.currency).minor);
                     const currencyOk = !evt.currency || String(evt.currency).toUpperCase() === String(payment.currency).toUpperCase();
                     if (Number(evt.amountMinor) !== expectedMinor || !currencyOk) {
                         await db.integration_logs.create({ source: 'Payments', event_type: evt.type, status: 'Failed', description: `Webhook amount/currency mismatch for ${evt.ref} (got ${evt.amountMinor} ${evt.currency}, expected ${expectedMinor} ${payment.currency})`, related_entity: { type: 'Company', id: payment.company_id } }).catch(() => {});
@@ -144,9 +188,17 @@ exports.handleWebhook = async (req, res) => {
                     paymentId: payment.id,
                     provider: payment.provider,
                     transactionId: evt.ref,
-                    amountMinor: Math.round(Number(payment.amount) * 100),
+                    amountMinor: Number(Money.fromDatabaseValue(payment.amount, payment.currency).minor),
                     currency: payment.currency,
                     orgId: payment.company_id != null ? String(payment.company_id) : undefined,
+                    // Attribution for the cross-estate panel.
+                    siteId: SITE_ID,
+                    tenantId: payment.company_id != null ? String(payment.company_id) : undefined,
+                    rail: railFor(payment.provider),
+                    // What the processor kept, when it tells us. Absent stays absent — a fee
+                    // recorded as zero would overstate margin on every payment.
+                    feeMinor: providerFeeMinor(evt),
+                    customer: await customerSignalFor(payment, evt),
                 }).catch(() => {});
                 return res.status(200).json({ received: true, idempotent: !firstTransition });
             }
@@ -179,9 +231,13 @@ exports.payuReturn = async (req, res) => {
         if (payment.status !== 'succeeded') {
             // Amount integrity: the settled amount MUST match what we recorded at checkout. Fail closed
             // if PayU's amount is absent/unparseable (don't activate on an unknown amount).
-            const expectedMinor = Math.round(Number(payment.amount) * 100);
-            const gotMinor = parsed.amountMajor != null && parsed.amountMajor !== '' && Number.isFinite(Number(parsed.amountMajor))
-                ? Math.round(Number(parsed.amountMajor) * 100) : null;
+            const expectedMinor = Number(Money.fromDatabaseValue(payment.amount, payment.currency).minor);
+            // Fail closed on an absent/unparseable amount rather than activating on an unknown one.
+            let gotMinor = null;
+            if (parsed.amountMajor != null && parsed.amountMajor !== '') {
+                try { gotMinor = Number(Money.fromDatabaseValue(parsed.amountMajor, payment.currency).minor); }
+                catch { gotMinor = null; }
+            }
             if (gotMinor === null || gotMinor !== expectedMinor) {
                 await db.integration_logs.create({ source: 'Payments', event_type: 'payu.return', status: 'Failed', description: `PayU amount mismatch for ${parsed.txnid} (got ${gotMinor}, expected ${expectedMinor})`, related_entity: { type: 'Company', id: payment.company_id } }).catch(() => {});
                 return res.redirect(303, cancelUrl);
@@ -195,9 +251,12 @@ exports.payuReturn = async (req, res) => {
                 paymentId: payment.id,
                 provider: payment.provider,
                 transactionId: parsed.txnid,
-                amountMinor: Math.round(Number(payment.amount) * 100),
+                amountMinor: Number(Money.fromDatabaseValue(payment.amount, payment.currency).minor),
                 currency: payment.currency,
                 orgId: payment.company_id != null ? String(payment.company_id) : undefined,
+                siteId: SITE_ID,
+                tenantId: payment.company_id != null ? String(payment.company_id) : undefined,
+                rail: railFor(payment.provider),
                 via: 'payu_return',
             }).catch(() => {});
         }

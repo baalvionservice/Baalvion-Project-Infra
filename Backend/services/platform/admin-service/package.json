@@ -1,40 +1,43 @@
 {
   "name": "admin-service",
   "version": "1.0.0",
-  "description": "Baalvion Identity Admin Microservice — super-admin operations, impersonation, platform stats",
+  "description": "Baalvion Identity Admin Microservice \u2014 super-admin operations, impersonation, platform stats",
   "license": "ISC",
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev":   "nodemon index.js",
-    "test":  "node --test",
-    "lint":  "eslint .",
-    "migrate": "psql $DATABASE_URL -f migrations/001_feature_flags.sql && psql $DATABASE_URL -f migrations/002_analytics.sql && psql $DATABASE_URL -f migrations/003_support.sql && psql $DATABASE_URL -f migrations/004_developer.sql && psql $DATABASE_URL -f migrations/005_ai.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/006_rls_tenant_isolation.sql"
+    "dev": "nodemon index.js",
+    "test": "node --test",
+    "lint": "eslint .",
+    "migrate": "psql $DATABASE_URL -f migrations/001_feature_flags.sql && psql $DATABASE_URL -f migrations/002_analytics.sql && psql $DATABASE_URL -f migrations/003_support.sql && psql $DATABASE_URL -f migrations/004_developer.sql && psql $DATABASE_URL -f migrations/005_ai.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/006_rls_tenant_isolation.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/007_payment_records.sql"
   },
   "dependencies": {
-    "@baalvion/email": "workspace:*",
-    "@baalvion/telemetry": "workspace:*",
-    "@baalvion/graceful-shutdown": "workspace:*",
     "@baalvion/auth-node": "workspace:*",
-    "express":             "^5.2.1",
-    "express-rate-limit":  "^7.5.0",
-    "helmet":              "^8.1.0",
-    "cors":                "^2.8.6",
-    "cookie-parser":       "^1.4.7",
-    "dotenv":              "^17.3.1",
-    "sequelize":           "^6.37.8",
-    "pg":                  "^8.20.0",
-    "pg-hstore":           "^2.3.4",
-    "jsonwebtoken":        "^9.0.3",
-    "ioredis":             "^5.10.1",
-    "pino":                "^10.3.1",
-    "pino-http":           "^11.0.0",
-    "uuid":                "^11.1.0",
-    "zod":                 "^3.24.2"
+    "@baalvion/email": "workspace:*",
+    "@baalvion/graceful-shutdown": "workspace:*",
+    "@baalvion/money": "workspace:*",
+    "@baalvion/party": "workspace:*",
+    "@baalvion/sites": "workspace:*",
+    "@baalvion/telemetry": "workspace:*",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.1.0",
+    "ioredis": "^5.10.1",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.20.0",
+    "pg-hstore": "^2.3.4",
+    "pino": "^10.3.1",
+    "pino-http": "^11.0.0",
+    "sequelize": "^6.37.8",
+    "uuid": "^11.1.0",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "nodemon": "^3.1.14",
-    "vitest":  "^4.1.0"
+    "vitest": "^4.1.0"
   }
 }

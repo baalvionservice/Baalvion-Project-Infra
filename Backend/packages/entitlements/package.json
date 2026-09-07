@@ -1,11 +1,12 @@
 {
   "name": "@baalvion/entitlements",
   "version": "1.0.0",
-  "description": "Shared premium-content entitlement decision logic (decideAccess) — the single source of truth for 'does this user have paid access', consumed by every service that gates content behind a subscription (imperialpedia-service, cms-service).",
+  "description": "Entitlement decisions \u2014 the per-site premium-content rule (decideAccess) plus cross-site grants keyed on the group-wide partyId, so paying on one property can unlock another.",
   "private": true,
   "main": "index.js",
   "files": [
-    "index.js"
+    "index.js",
+    "grants.js"
   ],
   "scripts": {
     "test": "node --test"

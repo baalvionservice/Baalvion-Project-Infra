@@ -1,5 +1,6 @@
 const paymentService = require('../service/paymentService');
 const orchestrator = require('../service/paymentOrchestrator');
+const paymentSpine = require('../service/paymentSpine');
 const razorpayService = require('../service/providers/razorpayService');
 const payuService = require('../service/providers/payuService');
 const razorpayXService = require('../service/razorpayXService');
@@ -175,7 +176,11 @@ const fetchRazorpayPayment = async (req, res) => {
 
 const razorpayWebhook = async (req, res) => {
     const signature = req.headers['x-razorpay-signature'];
-    const rawBody = JSON.stringify(req.body);
+    // Razorpay signs the EXACT bytes it sent. `JSON.stringify(req.body)` re-serialises a parsed
+    // object, so key order, whitespace and unicode escaping can all differ from the original —
+    // the signature then fails to match a genuine webhook. The route already captures the raw
+    // body for precisely this reason; use it.
+    const rawBody = req.rawBody != null ? req.rawBody : JSON.stringify(req.body);
     const signatureVerified = razorpayService.verifyWebhookSignature(rawBody, signature);
 
     try {
@@ -190,6 +195,12 @@ const razorpayWebhook = async (req, res) => {
         const event = req.body.event;
         const payload = req.body.payload || {};
         await razorpayService.handleWebhookEvent(event, payload);
+        // Report the payment onto the platform spine so it appears on the cross-estate panel
+        // attributed to this property. Never fatal: a spine failure must not turn a genuine
+        // captured payment into a webhook error that Razorpay retries forever.
+        await paymentSpine.reportRazorpayEvent(event, payload).catch((err) => {
+            console.warn(JSON.stringify({ evt: 'payment_spine.report_failed', event, msg: err.message }));
+        });
         if (models.webhook_logs?.update) {
             await models.webhook_logs.update({ processed: true }, { where: { gateway: 'razorpay', payload_json: { event } } }).catch(() => {});
         }
@@ -294,7 +305,11 @@ const webhook = async (req, res) => {
         const result = await orchestrator.handleWebhook(provider, req.body);
         res.json({ success: true, result });
     } catch (err) {
-        res.status(400).json({ error: err.message });
+        // Never echo the raw error to an unauthenticated caller — this endpoint takes no
+        // signature, so anything it says is said to the public.
+        console.warn(JSON.stringify({ evt: 'legacy_webhook_rejected', provider, code: err.code || null }));
+        const status = Number.isInteger(err.statusCode) ? err.statusCode : 400;
+        res.status(status).json({ error: status === 404 ? 'Unknown provider' : 'This webhook path is no longer supported' });
     }
 };
 

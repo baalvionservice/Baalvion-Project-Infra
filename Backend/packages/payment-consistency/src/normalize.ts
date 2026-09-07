@@ -11,6 +11,7 @@ import {
   PaymentEventSchema,
   type PaymentEvent,
   type PaymentEventType,
+  type CustomerSignal,
 } from './events';
 
 /** Money in the currency's minor unit — adapters must hand us integers, not floats. */
@@ -53,6 +54,17 @@ export interface WebhookInput {
   transactionId: string;
   money: NormalizedMoney;
   orgId?: string;
+  /**
+   * Attribution — which property took the money, who within it earned it, and on which rail.
+   * Optional so existing adapters keep compiling, but every migrated adapter must set siteId:
+   * without it the payment reaches the cross-estate panel unattributable.
+   */
+  siteId?: string;
+  tenantId?: string;
+  rail?: string;
+  partyId?: string;
+  feeMinor?: number;
+  customer?: CustomerSignal | null;
   occurredAt?: string;
   metadata?: Record<string, unknown>;
 }
@@ -69,6 +81,12 @@ export function normalizeWebhook(input: WebhookInput): PaymentEvent | null {
     amount: input.money.amountMinor,
     currency: input.money.currency,
     orgId: input.orgId,
+    siteId: input.siteId,
+    tenantId: input.tenantId,
+    rail: input.rail,
+    partyId: input.partyId,
+    feeMinor: input.feeMinor,
+    customer: input.customer,
     occurredAt: input.occurredAt,
     metadata: { source: 'webhook', nativeStatus: input.status, ...input.metadata },
   });
@@ -82,6 +100,17 @@ export interface SagaInput {
   transactionId: string;
   money: NormalizedMoney;
   orgId?: string;
+  /**
+   * Attribution — which property took the money, who within it earned it, and on which rail.
+   * Optional so existing adapters keep compiling, but every migrated adapter must set siteId:
+   * without it the payment reaches the cross-estate panel unattributable.
+   */
+  siteId?: string;
+  tenantId?: string;
+  rail?: string;
+  partyId?: string;
+  feeMinor?: number;
+  customer?: CustomerSignal | null;
   occurredAt?: string;
   metadata?: Record<string, unknown>;
 }
@@ -105,6 +134,12 @@ export function normalizeSagaEvent(input: SagaInput): PaymentEvent | null {
     amount: input.money.amountMinor,
     currency: input.money.currency,
     orgId: input.orgId,
+    siteId: input.siteId,
+    tenantId: input.tenantId,
+    rail: input.rail,
+    partyId: input.partyId,
+    feeMinor: input.feeMinor,
+    customer: input.customer,
     occurredAt: input.occurredAt,
     metadata: { source: 'saga', topic: input.topic, ...input.metadata },
   });

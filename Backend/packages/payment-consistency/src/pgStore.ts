@@ -56,6 +56,49 @@ export interface PclPgOptions {
   outboxTable?: string; // default 'payment_outbox'
 }
 
+/** Anything with Sequelize's `query` and `transaction` methods. */
+export interface SequelizeLike {
+  query(sql: string, options?: Record<string, unknown>): Promise<unknown>;
+  transaction<T>(fn: (t: unknown) => Promise<T>): Promise<T>;
+}
+
+/**
+ * A transaction runner backed by Sequelize.
+ *
+ * Most services in this platform hold a Sequelize instance, not a node-postgres Pool, and
+ * `createPgTxRunner` needs a real Pool because it calls `pool.connect()`. Handing it a
+ * `{ query }` adapter type-checks and then throws on the first capture — so services that use
+ * Sequelize must use this instead.
+ *
+ * The `tx` handed to the ports carries its own `query` bound to the open transaction, which is
+ * exactly what `runnerOf` looks for, so the inbox claim, the state mutation and the outbox
+ * enqueue all commit atomically — the transactional-outbox guarantee.
+ */
+export function createSequelizeTxRunner(sequelize: SequelizeLike): TxRunner {
+  return {
+    async transaction<T>(fn: (tx: Tx) => Promise<T>): Promise<T> {
+      return sequelize.transaction(async (t: unknown) => fn({
+        query: async (text: string, params?: unknown[]) => {
+          const result = (await sequelize.query(text, { bind: params, transaction: t })) as unknown[];
+          const rows = Array.isArray(result) ? result[0] : result;
+          return { rows: Array.isArray(rows) ? rows : [] };
+        },
+      } as PgQueryRunner));
+    },
+  };
+}
+
+/** Adapt a Sequelize instance to the non-transactional runner the stores fall back to. */
+export function sequelizeQueryRunner(sequelize: SequelizeLike): PgPool {
+  return {
+    query: async (text: string, params?: unknown[]) => {
+      const result = (await sequelize.query(text, { bind: params })) as unknown[];
+      const rows = Array.isArray(result) ? result[0] : result;
+      return { rows: Array.isArray(rows) ? rows : [] };
+    },
+  } as unknown as PgPool;
+}
+
 /** A transaction runner backed by a node-postgres-style pool. */
 export function createPgTxRunner(pool: PgPool): TxRunner {
   return {
@@ -89,6 +132,9 @@ function mapRecord(row: Record<string, unknown>): PaymentRecord {
     transactionId: String(row.transaction_id),
     amountMinor: Number(row.amount_minor),
     currency: String(row.currency),
+    siteId: row.site_id == null ? null : String(row.site_id),
+    tenantId: row.tenant_id == null ? null : String(row.tenant_id),
+    rail: row.rail == null ? null : String(row.rail),
   };
 }
 
@@ -103,10 +149,14 @@ export function createPgPaymentStateStore(opts: PclPgOptions): PaymentStateStore
       // can't both create. Then take the row lock for the rest of the transaction.
       await r.query(
         `INSERT INTO ${table}
-           (payment_id, provider, transaction_id, amount_minor, currency, state, version, last_event_type, org_id, created_at, updated_at)
-         VALUES ($1, $2, $3, $4, $5, 'INITIATED', 1, $6, $7, now(), now())
+           (payment_id, provider, transaction_id, amount_minor, currency, state, version, last_event_type, org_id,
+            site_id, tenant_id, rail, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, 'INITIATED', 1, $6, $7, $8, $9, $10, now(), now())
          ON CONFLICT (payment_id) DO NOTHING`,
-        [event.paymentId, event.provider, event.transactionId, event.amount, event.currency, event.type, event.orgId ?? null],
+        [
+          event.paymentId, event.provider, event.transactionId, event.amount, event.currency, event.type,
+          event.orgId ?? null, event.siteId ?? null, event.tenantId ?? null, event.rail ?? null,
+        ],
       );
       const { rows } = await r.query(`SELECT * FROM ${table} WHERE payment_id = $1 FOR UPDATE`, [event.paymentId]);
       if (!rows.length) {
@@ -122,9 +172,15 @@ export function createPgPaymentStateStore(opts: PclPgOptions): PaymentStateStore
                 version = version + 1,
                 last_event_type = $3,
                 last_transaction_id = $4,
+                -- Backfill attribution if the row predates it, but never overwrite a value
+                -- already recorded: the first writer to attribute a payment wins.
+                site_id = COALESCE(site_id, $5),
+                tenant_id = COALESCE(tenant_id, $6),
+                rail = COALESCE(rail, $7),
                 updated_at = now()
           WHERE payment_id = $1`,
-        [paymentId, toState, event.type, event.transactionId],
+        [paymentId, toState, event.type, event.transactionId,
+         event.siteId ?? null, event.tenantId ?? null, event.rail ?? null],
       );
     },
   };
@@ -159,10 +215,10 @@ export function createPgOutboxWriter(opts: PclPgOptions): OutboxWriter {
       // `payload` is text (not jsonb) so the @baalvion/events relay's JSON.parse round-trips
       // a string unambiguously across drivers — identical contract to event_outbox.
       await r.query(
-        `INSERT INTO ${table} (id, type, payload, org_id, status, attempts, available_at, created_at)
-         VALUES ($1, $2, $3, $4, 'pending', 0, now(), now())
+        `INSERT INTO ${table} (id, type, payload, org_id, site_id, status, attempts, available_at, created_at)
+         VALUES ($1, $2, $3, $4, $5, 'pending', 0, now(), now())
          ON CONFLICT (id) DO NOTHING`,
-        [env.id, env.type, JSON.stringify(env), env.orgId ?? null],
+        [env.id, env.type, JSON.stringify(env), env.orgId ?? null, env.siteId ?? null],
       );
     },
   };
