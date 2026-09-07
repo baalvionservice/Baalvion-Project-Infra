@@ -1,7 +1,16 @@
 CREATE SCHEMA IF NOT EXISTS payments;
 
--- Enable RLS
-ALTER SCHEMA payments OWNER TO postgres;
+-- Schema owner. Must be the role that actually RUNS the migration, not a hardcoded name:
+-- `postgres` does not exist on every deployment (the consolidated box's superuser is
+-- baalvion_app), and an unguarded ALTER fails the migration with "42704 role does not exist",
+-- leaving a fresh deployment unable to start at all. CURRENT_USER is spring.flyway.user, which
+-- defaults to the same DB_USER the app connects as, so the RLS policies that assume "the app
+-- connects as the schema owner" still hold.
+--
+-- NOTE: this file was already applied in earlier environments, so changing it changes its
+-- Flyway checksum. `flyway repair` must be run against any database that already has
+-- flyway_history_payment, or the service will refuse to start on validation.
+ALTER SCHEMA payments OWNER TO CURRENT_USER;
 
 CREATE TABLE payments.transactions (
   id uuid PRIMARY KEY,
