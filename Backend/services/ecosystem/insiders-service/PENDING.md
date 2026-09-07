@@ -1,22 +1,27 @@
 # Baalvion Insiders — pending work
 
-State of the public directory as of 2026-09-07, and everything still open. Written so the next
+State of the public directory as of 2026-09-08, and everything still open. Written so the next
 person does not have to rediscover why a decision was made.
 
 ## What is live
 
 | | |
 |---|---|
-| Investment firms | 22,608 |
-| Their filings | 83,076 |
-| Companies | 84,599 |
-| Their filings | 100,654 |
-| Named people | 276,053 |
-| Countries / cities | 67 / 5,977 |
-| Indexable URLs | ~134,600 across 11 sitemap files |
+| Investment firms | 28,367 |
+| Their filings | 108,935 |
+| Companies | 114,889 |
+| Their filings | 161,093 |
+| Named people | 416,778 |
+| Countries / cities | 77 / 8,460 |
+| Indexable URLs | not recounted since the 2026-09-08 ingest |
 
-Sources: SEC Form D quarterly datasets (20 quarters), Norway's Enhetsregisteret, Finland's PRH.
-Every figure on a profile traces to a filing linked from that profile.
+Sources: SEC Form D quarterly datasets (32 quarters, 2018q3–2026q2), Norway's Enhetsregisteret,
+Finland's PRH. Every figure on a profile traces to a filing linked from that profile.
+
+Counted 2026-09-08 straight from the `insiders` schema. Cities are gazetteer-resolved city slugs
+on visible rows, which is what the places index offers — counting raw city strings gives a larger
+and less meaningful number. The sitemap total is deliberately left unstated rather than scaled
+from the old one; regenerate the sitemaps and read it off.
 
 ---
 
@@ -65,9 +70,9 @@ another source.
 ## Known limits worth stating publicly
 
 ### Coverage is US-filing-shaped
-67 countries sounds global; it is not. 25,488 of the companies are US-domiciled, and the non-US
-entries are mostly foreign-domiciled US filers plus Norway and Finland. Say so rather than
-implying worldwide coverage.
+77 countries sounds global; it is not. 88,076 of the companies are US-domiciled — 77% of the
+table — and the non-US entries are mostly foreign-domiciled US filers plus Norway (21,538) and
+Finland (453). Say so rather than implying worldwide coverage.
 
 ### Register records carry no funding
 A Norwegian or Finnish record shows legal form, staff, status and registration number, and no
