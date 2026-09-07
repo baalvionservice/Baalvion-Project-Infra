@@ -7,6 +7,7 @@ import type {
   UpdateWebsitePayload,
   AddWebsiteMemberPayload,
   CmsRole,
+  GrantSiteAccessPayload,
 } from '@/lib/types/cms-website.types';
 
 export const websiteKeys = {
@@ -53,6 +54,89 @@ export const useWebsiteInvitations = (websiteId: string) =>
     queryFn: () => websitesApi.invitations.list(websiteId).then((r) => r.data.data),
     enabled: !!websiteId,
   });
+
+/**
+ * Grant one person access to several websites at once.
+ *
+ * The result is deliberately mixed — a person may be added to sites they already have an
+ * account for, invited by email to others, and skipped on any where they are already a
+ * member. The toast reports each outcome rather than claiming a flat success.
+ */
+/**
+ * Site grants for a specific set of people — the access half of the People view.
+ *
+ * Scoped to the visible page rather than fetching every grant on the platform: the query is
+ * disabled until there are ids, so it never fires an unbounded request on first render.
+ */
+export const useSiteGrantsFor = (userIds: number[]) =>
+  useQuery({
+    queryKey: [...websiteKeys.all, 'grants', userIds],
+    queryFn: () => websitesApi.listAllGrants({ userIds }),
+    enabled: userIds.length > 0,
+    staleTime: 30_000,
+  });
+
+/** Every site grant across all websites. Prefer useSiteGrantsFor where a page is known. */
+export const useAllSiteGrants = () =>
+  useQuery({
+    queryKey: [...websiteKeys.all, 'grants', 'all'],
+    queryFn: () => websitesApi.listAllGrants(),
+    staleTime: 30_000,
+  });
+
+/**
+ * Remove one person from every website. Reports per-site outcomes rather than a flat success —
+ * a partial failure during offboarding is exactly what someone needs to know about.
+ */
+export const useRevokeAllSiteAccess = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (userId: number) => websitesApi.revokeAllAccess(userId),
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: websiteKeys.all });
+      if (res.revoked.length === 0 && res.failed.length === 0) {
+        toast.info('That person had no site access to remove');
+      } else if (res.revoked.length) {
+        toast.success(`Removed from ${res.revoked.length} site${res.revoked.length > 1 ? 's' : ''}`);
+      }
+      if (res.failed.length) {
+        toast.warning(
+          `${res.failed.length} site${res.failed.length > 1 ? 's' : ''} could not be revoked: ${res.failed
+            .map((f) => f.websiteName)
+            .join(', ')} — they still have access there.`,
+        );
+      }
+    },
+    onError: (e: { message: string }) => toast.error(e.message),
+  });
+};
+
+export const useGrantSiteAccess = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: GrantSiteAccessPayload) => websitesApi.grantAccess(payload),
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: websiteKeys.all });
+
+      const parts: string[] = [];
+      if (res.granted.length) parts.push(`${res.granted.length} site${res.granted.length > 1 ? 's' : ''} granted`);
+      if (res.invited.length) parts.push(`${res.invited.length} invite${res.invited.length > 1 ? 's' : ''} sent`);
+
+      if (parts.length) toast.success(parts.join(' · '));
+
+      // Never swallow a partial failure — the admin needs to know which sites didn't take.
+      if (res.skipped.length) {
+        toast.warning(
+          `${res.skipped.length} site${res.skipped.length > 1 ? 's' : ''} skipped: ${res.skipped
+            .map((s) => s.reason)
+            .join('; ')}`,
+        );
+      }
+      if (!parts.length && !res.skipped.length) toast.info('No changes were made');
+    },
+    onError: (e: { message: string }) => toast.error(e.message),
+  });
+};
 
 export const useCreateWebsite = () => {
   const qc = useQueryClient();

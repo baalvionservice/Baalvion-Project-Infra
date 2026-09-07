@@ -25,6 +25,11 @@ const CmsEvents = Object.freeze({
     INTEGRATION_UPDATED: 'cms.integration.updated',
     INTEGRATION_REMOVED: 'cms.integration.removed',
     MEMBER_INVITED: 'cms.member.invited',
+    // Access REMOVAL and role CHANGE were previously unemitted: only grants were recorded.
+    // That is inverted for audit purposes — an investigation asks who still has access and
+    // who took it away, not who was given it. Both now emit.
+    MEMBER_REMOVED: 'cms.member.removed',
+    MEMBER_ROLE_CHANGED: 'cms.member.role_changed',
 });
 
 /** Await an event publish; resolves quietly if the bus is unavailable. */

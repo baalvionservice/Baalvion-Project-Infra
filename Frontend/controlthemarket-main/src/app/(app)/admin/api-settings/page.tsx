@@ -11,6 +11,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 
+// Reads live ControlTheMarket data through @/lib/api, which throws CtmDataError when
+// ctm-service is unreachable rather than showing placeholder data. Prerendering this at
+// build time therefore fails; it is a per-request view, not a static page.
+export const dynamic = 'force-dynamic';
+
 export default async function ApiSettingsPage() {
   const integrations = await getApiIntegrations();
 

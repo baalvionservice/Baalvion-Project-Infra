@@ -9,6 +9,7 @@ const { parsePagination, buildPaginated } = require('../utils/pagination');
 const identityService = require('./identityService');
 const invitationService = require('./invitationService');
 const { emitSafe, CmsEvents } = require('../platform/events');
+const { logger } = require('../platform/logger');
 const db = require('../models');
 
 /**
@@ -68,12 +69,53 @@ async function attachCounts(rows) {
     }));
 }
 
+/**
+ * Website ids the caller is a member of, or null when they should not be membership-scoped.
+ *
+ * A platform principal (super_admin/owner/admin) manages every site, so returns null.
+ * Everyone else is limited to the sites they were explicitly granted — one person may hold
+ * several, which is the normal case for a writer working across two or three publications.
+ */
+async function memberWebsiteIds(scope) {
+    if (!scope || typeof scope !== 'object' || scope.isPlatformAdmin) return null;
+    if (scope.userId == null) return []; // unknown principal → no sites, never all of them
+    const rows = await CmsWebsiteMember.findAll({
+        // An expired grant must not keep a site visible in the list either — otherwise the
+        // console still advertises a site whose every request now 403s at loadCmsRole.
+        where: {
+            userId: scope.userId,
+            [Op.or]: [{ expiresAt: null }, { expiresAt: { [Op.gt]: new Date() } }],
+        },
+        attributes: ['websiteId'],
+        raw: true,
+    });
+    return rows.map((r) => r.websiteId);
+}
+
 async function listWebsites(scope, query = {}) {
     const { page, limit, offset } = parsePagination(query);
     const { status, search } = query;
-    const where = { ...orgFilter(scope) };
+    const where = {};
     if (status) where.status = status;
     if (search) where.name = { [Op.iLike]: `%${search}%` };
+
+    // Scope the list to the caller's memberships. Detail routes were already gated by
+    // loadCmsRole, but the list itself was only org-filtered — so a writer granted one site
+    // could still read back the name and domain of every other site in the org.
+    //
+    // Membership REPLACES the org filter rather than narrowing it: a membership row is an
+    // explicit, deliberate grant, and the sites someone is hired to work on frequently live
+    // under a different organization than the one their own account was created in. ANDing
+    // the two would silently hide exactly the sites they were just given.
+    const allowedIds = await memberWebsiteIds(scope);
+    if (allowedIds === null) {
+        Object.assign(where, orgFilter(scope)); // platform principal → org rules apply
+    } else {
+        if (allowedIds.length === 0) {
+            return buildPaginated([], 0, { page, limit });
+        }
+        where.id = { [Op.in]: allowedIds };
+    }
 
     const { rows, count } = await CmsWebsite.findAndCountAll({
         where, limit, offset,
@@ -163,6 +205,128 @@ async function listMembers(websiteId, scope) {
  * `{ kind: 'member', ... }` for an immediate grant, `{ kind: 'invitation', ... }` for
  * a pending invite (with `emailSent` reflecting whether the mail actually went out).
  */
+/**
+ * Grant one person access to SEVERAL websites in a single action.
+ *
+ * The console previously only offered a per-website member form, so granting a writer three
+ * publications meant visiting three separate pages. Each site still goes through addMember,
+ * so invitations for unknown emails, membership rows and MEMBER_INVITED events all behave
+ * exactly as they do for a single grant.
+ *
+ * Per-site failures are collected rather than thrown: granting five sites where the user is
+ * already on one should still grant the other four, and say so.
+ */
+/**
+ * Every website membership across every site, for the console's People view.
+ *
+ * The staff directory knows a person's department; the CMS knows their site access — and
+ * nothing joined the two, so "who is in Finance AND what can they reach?" could not be
+ * answered anywhere. This returns the access half so the console can join them.
+ *
+ * Platform administrators only (enforced in the controller): it deliberately spans all
+ * websites, which is exactly what a per-site membership check would otherwise prevent.
+ */
+async function listAllGrants(scope, query = {}) {
+    const where = {};
+    if (query.userId != null) where.userId = query.userId;
+    // Batched lookup for a page of people. Without this the console had to pull EVERY grant
+    // on the platform to annotate 50 rows, which stops being viable the moment the directory
+    // is larger than a single page.
+    if (Array.isArray(query.userIds) && query.userIds.length > 0) {
+        where.userId = { [Op.in]: query.userIds };
+    }
+    if (query.websiteId) where.websiteId = query.websiteId;
+
+    const members = await CmsWebsiteMember.findAll({ where, order: [['createdAt', 'DESC']] });
+    if (members.length === 0) return [];
+
+    const websites = await CmsWebsite.findAll({
+        where: { id: { [Op.in]: [...new Set(members.map((m) => m.websiteId))] } },
+        attributes: ['id', 'name', 'slug', 'domain'],
+    });
+    const siteById = new Map(websites.map((w) => [w.id, w.toJSON()]));
+
+    const enriched = await enrichMembers(members);
+    return enriched.map((m) => ({
+        ...m,
+        website: siteById.get(m.websiteId) ?? { id: m.websiteId, name: 'Unknown site', slug: '', domain: '' },
+    }));
+}
+
+/**
+ * Remove one person's access to EVERY website in a single action.
+ *
+ * Offboarding is where access management actually fails: revoking site by site means the one
+ * site someone forgets stays live indefinitely. This does the whole set, and — importantly —
+ * writes a separate audit record per site, so the trail names exactly what was taken away
+ * rather than a single opaque "revoked all".
+ *
+ * Platform administrators only (enforced in the controller), since it spans every website.
+ */
+async function revokeAllAccess(scope, userId, actorId = null) {
+    const members = await CmsWebsiteMember.findAll({ where: { userId } });
+    if (members.length === 0) return { revoked: [], failed: [] };
+
+    const websites = await CmsWebsite.findAll({
+        where: { id: { [Op.in]: [...new Set(members.map((m) => m.websiteId))] } },
+        attributes: ['id', 'name', 'slug'],
+    });
+    const siteById = new Map(websites.map((w) => [w.id, w.toJSON()]));
+
+    const revoked = [];
+    const failed = [];
+
+    for (const member of members) {
+        const site = siteById.get(member.websiteId);
+        const revokedRole = member.role;
+        try {
+            await member.destroy();
+            // One record per site — post-destroy, so a failed delete never logs a revocation.
+            logAccessChange('removed', {
+                websiteId: member.websiteId, websiteSlug: site?.slug ?? null,
+                targetUserId: userId, revokedRole, actorId, viaRevokeAll: true,
+            });
+            emitSafe(CmsEvents.MEMBER_REMOVED, {
+                websiteId: member.websiteId, websiteSlug: site?.slug ?? null,
+                targetUserId: userId, revokedRole, actorId, viaRevokeAll: true,
+            }, { tenantId: site?.slug });
+            revoked.push({ websiteId: member.websiteId, websiteName: site?.name ?? 'Unknown site', role: revokedRole });
+        } catch (err) {
+            // Report rather than abort: one stuck row must not leave the rest of the access in place.
+            failed.push({ websiteId: member.websiteId, websiteName: site?.name ?? 'Unknown site', reason: err.message });
+        }
+    }
+
+    return { revoked, failed };
+}
+
+async function grantAccess(scope, body, inviterId = null) {
+    const { websiteIds, role } = body;
+    const granted = [];
+    const invited = [];
+    const skipped = [];
+
+    for (const websiteId of websiteIds) {
+        try {
+            const result = await addMember(
+                websiteId,
+                scope,
+                { userId: body.userId, email: body.email, role, personalNote: body.personalNote, expiresAt: body.expiresAt },
+                inviterId,
+            );
+            (result.kind === 'invitation' ? invited : granted).push({ websiteId, ...result });
+        } catch (err) {
+            skipped.push({
+                websiteId,
+                code: err.code || 'ERROR',
+                reason: err.message || 'Could not grant access to this website',
+            });
+        }
+    }
+
+    return { granted, invited, skipped, role };
+}
+
 async function addMember(websiteId, scope, body, inviterId = null) {
     const website = await CmsWebsite.findOne({ where: { id: websiteId, ...orgFilter(scope) } });
     if (!website) throw new AppError('NOT_FOUND', 'Website not found', 404);
@@ -190,18 +354,40 @@ async function addMember(websiteId, scope, body, inviterId = null) {
         role: body.role,
         invitedBy: inviterId,
         joinedAt: new Date(),
+        expiresAt: body.expiresAt ? new Date(body.expiresAt) : null,
     });
     const [enriched] = await enrichMembers([member]);
 
+    // Grants already emitted to the bus; also written to the local access log so the
+    // granted / changed / revoked trail is readable in one place.
+    logAccessChange('granted', { websiteId, websiteSlug: website.slug, targetUserId: userId, grantedRole: body.role, expiresAt: body.expiresAt ?? null, actorId: inviterId ?? null });
     emitSafe(CmsEvents.MEMBER_INVITED, {
         websiteSlug: website.slug,
         websiteId,
-        userId,
+        userId, // kept for existing consumers — this is the RECIPIENT, not the actor
+        targetUserId: userId,
+        actorId: inviterId ?? null,
         role: body.role,
+        expiresAt: body.expiresAt ?? null,
         invitedBy: inviterId,
     }, { tenantId: website.slug });
 
     return { kind: 'member', ...enriched };
+}
+
+/**
+ * Write an access change to the service log as well as the event bus.
+ *
+ * emitSafe is fire-and-forget and FAIL-OPEN by design — a bus outage silently drops the
+ * event. That is acceptable for cache-busting events, but a revocation is exactly the record
+ * you need when something has gone wrong, so it also lands in the service log where it
+ * survives independently of the bus.
+ */
+function logAccessChange(action, details) {
+    try {
+        // platform/logger exports a FACTORY — logger('scope').info(...) — not a logger object.
+        logger('access-audit').info({ action, ...details }, `cms access ${action}`);
+    } catch { /* logging must never throw into business logic */ }
 }
 
 async function updateMemberRole(websiteId, scope, userId, role) {
@@ -211,7 +397,26 @@ async function updateMemberRole(websiteId, scope, userId, role) {
     const member = await CmsWebsiteMember.findOne({ where: { websiteId, userId } });
     if (!member) throw new AppError('NOT_FOUND', 'Member not found', 404);
 
+    // Captured BEFORE the update — once member.update() runs the old value is gone, and
+    // "changed from X to Y" is the only form of this record worth having.
+    const previousRole = member.role;
+
     await member.update({ role });
+
+    // No-op guard: re-saving the same role should not manufacture an audit entry.
+    if (previousRole !== role) {
+        // scope.userId is the ACTOR (who made the change); `userId` is the TARGET.
+        logAccessChange('role_changed', { websiteId, websiteSlug: website.slug, targetUserId: userId, previousRole, newRole: role, actorId: scope.userId ?? null });
+        emitSafe(CmsEvents.MEMBER_ROLE_CHANGED, {
+            websiteId,
+            websiteSlug: website.slug,
+            targetUserId: userId,
+            previousRole,
+            newRole: role,
+            actorId: scope.userId ?? null,
+        }, { tenantId: website.slug });
+    }
+
     const [enriched] = await enrichMembers([member]);
     return enriched;
 }
@@ -223,7 +428,21 @@ async function removeMember(websiteId, scope, userId) {
     const member = await CmsWebsiteMember.findOne({ where: { websiteId, userId } });
     if (!member) throw new AppError('NOT_FOUND', 'Member not found', 404);
 
+    // Read the role off the row before destroying it — afterwards there is nothing left to
+    // say WHAT access was revoked, which is the part an investigation actually needs.
+    const revokedRole = member.role;
+
     await member.destroy();
+
+    // Emitted post-destroy so a failed delete never produces a revocation record.
+    logAccessChange('removed', { websiteId, websiteSlug: website.slug, targetUserId: userId, revokedRole, actorId: scope.userId ?? null });
+    emitSafe(CmsEvents.MEMBER_REMOVED, {
+        websiteId,
+        websiteSlug: website.slug,
+        targetUserId: userId,
+        revokedRole,
+        actorId: scope.userId ?? null,
+    }, { tenantId: website.slug });
 }
 
 /** Typeahead for the invite dialog: find platform users to add to this website. */
@@ -264,4 +483,5 @@ async function getStats(websiteId) {
     return { totalContent, publishedContent, draftContent, scheduledContent, pendingReview, totalMedia, mediaStorageUsedMb: 0 };
 }
 
-module.exports = { listWebsites, getWebsite, createWebsite, updateWebsite, deleteWebsite, listMembers, addMember, updateMemberRole, removeMember, searchUsers, getStats };
+module.exports = {
+    grantAccess, listAllGrants, revokeAllAccess, listWebsites, getWebsite, createWebsite, updateWebsite, deleteWebsite, listMembers, addMember, updateMemberRole, removeMember, searchUsers, getStats };

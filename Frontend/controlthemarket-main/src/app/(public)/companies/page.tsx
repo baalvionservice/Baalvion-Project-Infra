@@ -13,17 +13,24 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { ArrowRight, BadgeCheck, MapPin, Briefcase, Quote } from 'lucide-react';
+import { ArrowRight, BadgeCheck, MapPin, Briefcase, Quote, Building2 } from 'lucide-react';
+
+// Reads live ControlTheMarket data through @/lib/api, which throws CtmDataError when
+// ctm-service is unreachable rather than showing placeholder data. Prerendering this at
+// build time therefore fails; it is a per-request view, not a static page.
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Companies Hiring',
   description:
-    'Thousands of companies hire on ControlTheMarket — on proven skill, not resumes. Browse teams hiring now and see why hiring managers are switching to evidence-based hiring.',
+    // Metadata is a claim too — it is what search engines quote. No scale assertion here
+    // while the directory is empty.
+    'Hire on proven skill, not resumes. Browse the teams hiring on ControlTheMarket and see how evidence-based hiring works.',
   alternates: { canonical: absoluteUrl('/companies') },
   openGraph: {
     url: absoluteUrl('/companies'),
     title: 'Companies Hiring | ControlTheMarket',
-    description: 'Thousands of companies hire on proven skill, not resumes. See who is hiring now.',
+    description: 'Hire on proven skill, not resumes. See who is hiring on ControlTheMarket.',
   },
 };
 
@@ -38,34 +45,52 @@ type CompanyCard = {
   href: string;
 };
 
-// Curated showcase used when the live directory is sparse, so the page always reads as a real,
-// populated marketplace. When the backend returns real companies, those are shown instead.
-const FEATURED: CompanyCard[] = [
-  { id: 'northwind', name: 'Northwind Labs', industry: 'Cloud Infrastructure', location: 'Austin, US', description: 'Building the real-time data platform that powers modern developer teams.', openRoles: 12, verified: true, href: '/signup/company' },
-  { id: 'foundry', name: 'Foundry & Co', industry: 'FinTech', location: 'London, UK', description: 'Payments infrastructure for the world’s fastest-growing marketplaces.', openRoles: 15, verified: true, href: '/signup/company' },
-  { id: 'brightwave', name: 'Brightwave', industry: 'AI / Machine Learning', location: 'Bengaluru, IN', description: 'Applied AI that automates the back office for enterprise operations.', openRoles: 20, verified: true, href: '/signup/company' },
-  { id: 'lumen', name: 'Lumen Health', industry: 'Healthcare Technology', location: 'Boston, US', description: 'Clinical decision tools trusted by more than 400 hospitals.', openRoles: 8, verified: true, href: '/signup/company' },
-  { id: 'harbor', name: 'Harbor Analytics', industry: 'Data & Analytics', location: 'Singapore', description: 'Decision intelligence for retail and global supply chains.', openRoles: 9, href: '/signup/company' },
-  { id: 'vantage', name: 'Vantage Security', industry: 'Cybersecurity', location: 'Tel Aviv, IL', description: 'Threat detection built for cloud-native engineering teams.', openRoles: 11, verified: true, href: '/signup/company' },
-  { id: 'cobalt', name: 'Cobalt Mobility', industry: 'Electric Vehicles', location: 'Berlin, DE', description: 'Software for the next generation of electric fleets.', openRoles: 6, href: '/signup/company' },
-  { id: 'meridian', name: 'Meridian Studios', industry: 'Product Design', location: 'Remote', description: 'The design partner behind dozens of breakout startups.', openRoles: 5, href: '/signup/company' },
-  { id: 'greenfield', name: 'Greenfield Robotics', industry: 'Robotics', location: 'Toronto, CA', description: 'Autonomy for sustainable, large-scale agriculture.', openRoles: 7, href: '/signup/company' },
-];
+/**
+ * Fallback cards for the directory — NOT companies.
+ *
+ * This list previously held seven invented employers (Northwind Labs, Foundry & Co, Brightwave,
+ * …) with fabricated locations, descriptions, open-role counts and `verified: true`. The
+ * original comment said the quiet part: they existed "so the page always reads as a real,
+ * populated marketplace". With no real companies in the database, every employer a visitor saw
+ * was fictional — and marked verified.
+ *
+ * Empty now. When the directory has nothing in it, the page says so.
+ */
+const FEATURED: CompanyCard[] = [];
 
-const STATS = [
-  { value: '2,400+', label: 'Companies hiring' },
-  { value: '8,600', label: 'Open roles' },
-  { value: '180k', label: 'Candidates assessed' },
-  { value: '63', label: 'Countries' },
-];
+/**
+ * Real measurements only.
+ *
+ * These four figures — 2,400+ companies, 8,600 open roles, 180k candidates assessed, 63
+ * countries — were invented. The database currently holds zero companies, zero tasks and zero
+ * users, so every one of them was off by its entire value.
+ *
+ * Populate from live counts when there is something to count. The band hides while empty.
+ */
+type Stat = { value: string; label: string };
+const STATS: Stat[] = [];
 
-const TRUSTED_BY = ['Northwind Labs', 'Foundry & Co', 'Brightwave', 'Lumen Health', 'Vantage Security', 'Harbor Analytics', 'Cobalt Mobility'];
+/**
+ * Real customers only.
+ *
+ * This listed seven invented companies — Northwind Labs, Foundry & Co, Brightwave and others —
+ * under the heading "Trusted by teams at". None of them exist as customers; the database holds
+ * no companies at all. Naming fictional clients is a claim about who uses the product.
+ *
+ * The band below renders nothing while this is empty.
+ */
+const TRUSTED_BY: string[] = [];
 
-const TESTIMONIALS = [
-  { quote: 'ControlTheMarket surfaced a candidate our ATS had auto-rejected on keywords. She’s now one of our strongest engineers.', name: 'Daniel Osei', role: 'Engineering Manager, Foundry & Co', seed: 'ctm-daniel' },
-  { quote: 'We hire on evidence now. The ranked submissions make the decision almost obvious — and far easier to defend.', name: 'Sofia Marchetti', role: 'Head of Talent, Brightwave', seed: 'ctm-sofia' },
-  { quote: 'Time-to-hire fell 40%, and candidates actually thank us — they finally get to show their work instead of selling it.', name: 'Kenji Tanaka', role: 'COO, Harbor Analytics', seed: 'ctm-kenji' },
-];
+/**
+ * Real endorsements only.
+ *
+ * Three fabricated quotes lived here, attributed to named people at named companies and
+ * carrying invented performance figures ("Time-to-hire fell 40%"). An invented endorsement is
+ * a statement someone did not make, and an invented statistic is a claim about results the
+ * product has not been shown to produce.
+ */
+type Testimonial = { quote: string; name: string; role: string; seed: string };
+const TESTIMONIALS: Testimonial[] = [];
 
 export default async function CompaniesPage() {
   const fetched = await getCompanies().catch(() => []);
@@ -78,7 +103,9 @@ export default async function CompaniesPage() {
     verified: c.isVerified,
     href: `/company/${c.id}`,
   }));
-  const companies = realCards.length >= 6 ? realCards.slice(0, 9) : FEATURED;
+  // Real companies only. This used to swap in the fictional showcase whenever fewer than six
+  // real ones existed, so a sparse directory silently became an invented one.
+  const companies = realCards.slice(0, 9);
 
   return (
     <div className="bg-background">
@@ -86,13 +113,16 @@ export default async function CompaniesPage() {
       <section className="border-b bg-muted/30">
         <div className="container py-16 md:py-20">
           <div className="mx-auto max-w-3xl text-center">
-            <Badge variant="secondary" className="mb-4">Actively hiring now</Badge>
+            {/* "Actively hiring now" asserted live activity; nothing is posted yet. */}
+            <Badge variant="secondary" className="mb-4">Hire on proven work</Badge>
             <h1 className="font-headline text-4xl font-extrabold tracking-tight md:text-5xl">
               The companies hiring on proof
             </h1>
             <p className="mt-4 text-lg text-muted-foreground">
-              From seed-stage startups to public companies, thousands of teams use ControlTheMarket to find people who
-              can actually do the work — and skip the resume guesswork.
+              {/* "thousands of teams use ControlTheMarket" was a scale claim with nothing
+                  behind it. Describes what the product does, not how many use it. */}
+              Hire on evidence, not resumes. Send a real task, review ranked submissions, and
+              find people who can actually do the work.
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               <Button asChild size="lg"><Link href="/signup/company">List your company</Link></Button>
@@ -100,6 +130,7 @@ export default async function CompaniesPage() {
             </div>
           </div>
 
+          {STATS.length > 0 && (
           <dl className="mx-auto mt-12 grid max-w-3xl grid-cols-2 gap-6 md:grid-cols-4">
             {STATS.map((s) => (
               <div key={s.label} className="text-center">
@@ -108,10 +139,12 @@ export default async function CompaniesPage() {
               </div>
             ))}
           </dl>
+          )}
         </div>
       </section>
 
       {/* Trusted by */}
+      {TRUSTED_BY.length > 0 && (
       <section className="border-b">
         <div className="container py-8">
           <p className="text-center text-xs font-semibold uppercase tracking-widest text-muted-foreground">Trusted by teams at</p>
@@ -122,9 +155,27 @@ export default async function CompaniesPage() {
           </div>
         </div>
       </section>
+      )}
 
       <div className="container py-16 md:py-20">
         {/* Directory */}
+        {companies.length === 0 ? (
+          // An honest empty directory. Previously this state was impossible to reach: the page
+          // substituted seven fictional employers so it never looked new.
+          <Card className="mx-auto max-w-xl border-dashed">
+            <CardContent className="flex flex-col items-center gap-3 px-8 py-16 text-center">
+              <Building2 className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
+              <h2 className="text-lg font-semibold">No companies listed yet</h2>
+              <p className="text-sm text-muted-foreground">
+                ControlTheMarket is new. Be one of the first teams to hire here on proven work
+                rather than resumes.
+              </p>
+              <Button asChild size="sm" className="mt-2">
+                <Link href="/signup/company">List your company</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {companies.map((company) => (
             <Card key={company.id} className="flex flex-col transition-shadow hover:shadow-md">
@@ -160,6 +211,7 @@ export default async function CompaniesPage() {
             </Card>
           ))}
         </div>
+        )}
 
         {/* Testimonials / feedback */}
         <div className="mt-24">
@@ -190,7 +242,8 @@ export default async function CompaniesPage() {
         <div className="mt-24 rounded-2xl bg-primary px-8 py-12 text-center text-primary-foreground md:py-16">
           <h2 className="font-headline text-3xl font-bold">Put your roles in front of proven talent.</h2>
           <p className="mx-auto mt-3 max-w-xl text-primary-foreground/90">
-            Join 2,400+ companies hiring on ControlTheMarket. Post a task, review ranked work, and make your next hire on evidence.
+            {/* "Join 2,400+ companies" was invented — the platform has none yet. */}
+            Post a task, review ranked work, and make your next hire on evidence.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Button asChild size="lg" variant="secondary"><Link href="/signup/company">List your company <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>

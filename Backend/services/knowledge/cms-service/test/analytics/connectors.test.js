@@ -115,4 +115,10 @@ test('PROVIDER_CATALOG requiredCreds match the registered connector for every im
 // this closes it so the test file actually exits.
 after(async () => {
     await require('../../service/analytics/redisClient').closeRedis();
+    // server.sync() above issues a real query (SELECT 1), which opens the sequelize pool.
+    // Closing Redis alone left that pool open, so every assertion passed and then the process
+    // hung forever — which meant `npm test` never completed for this service at all.
+    try {
+        await require('../../models').sequelize.close();
+    } catch { /* already closed, or never opened in this run */ }
 });

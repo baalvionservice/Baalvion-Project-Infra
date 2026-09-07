@@ -9,6 +9,32 @@ const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
 // ctm-service is /api/v1/ecosystem/ctm at the gateway (was wrongly pointed at :3011 = cms-service).
 const CTM_BASE = process.env.NEXT_PUBLIC_CTM_API_URL || 'https://api.baalvion.com/api/v1/ecosystem/ctm/api/v1';
 
+/**
+ * Turn an upstream failure into an error the UI must handle.
+ *
+ * Every one of these reads previously ended in a bare catch marked "fallback" and silently
+ * returned hardcoded fixtures — so when ctm-service was unreachable the console showed a
+ * complete, confident, entirely invented picture: fake users, fake companies, fake system
+ * errors. Nothing distinguished it from live data.
+ *
+ * Failing loudly is the only honest option: src/app/error.tsx renders the boundary, and an
+ * operator sees "this is broken" instead of trusting numbers that were never real.
+ *
+ * Fixtures remain available for local work via NEXT_PUBLIC_USE_MOCK=true, which is explicit.
+ */
+class CtmDataError extends Error {
+  constructor(cause: unknown) {
+    super(
+      'ControlTheMarket data is unavailable — ctm-service could not be reached. ' +
+      'No data is shown rather than placeholder data.',
+    );
+    this.name = 'CtmDataError';
+    this.cause = cause;
+  }
+}
+
+const asDataError = (err: unknown) => (err instanceof CtmDataError ? err : new CtmDataError(err));
+
 // ── Server-side fetch helper ─────────────────────────────────────────────────
 // Anonymous by design: in the auth-service JWT model the access token is held in memory on the
 // client, so a server component has no credential to forward. Public / optionalAuth reads return
@@ -225,12 +251,11 @@ function mapCtmActivity(a: any): Activity {
 export const getUsers = async (): Promise<User[]> => {
   if (!USE_MOCK) {
     try {
-      const ctmUsers = (await ctmGet<any[]>('/users?limit=200')).map(mapCtmUser);
-      // Merge mock seed users (so demo profiles still render) without duplicating real ones.
-      const realIds = new Set(ctmUsers.map(u => u.id));
-      const mock = await dataLayer.getHybridUsers();
-      return [...ctmUsers, ...mock.filter(u => !realIds.has(u.id))];
-    } catch { /* fallback */ }
+      // Returns ONLY what ctm-service holds. This used to merge `mockUsers` in "so demo
+      // profiles still render", which meant the admin console counted and listed invented
+      // people alongside real ones with nothing to tell them apart.
+      return (await ctmGet<any[]>('/users?limit=200')).map(mapCtmUser);
+    } catch (err) { throw asDataError(err); }
   }
   return dataLayer.getHybridUsers();
 };
@@ -238,7 +263,7 @@ export const getUsers = async (): Promise<User[]> => {
 export const getUser = async (id: string): Promise<User | undefined> => {
   if (!USE_MOCK) {
     try { return mapCtmUser(await ctmGet<any>(`/users/${id}`)); }
-    catch { /* fallback */ }
+    catch (err) { throw asDataError(err); }
   }
   return (await mockApi.getUserById(id)).data;
 };
@@ -246,7 +271,7 @@ export const getUser = async (id: string): Promise<User | undefined> => {
 export const getLeaderboard = async (limit = 50): Promise<User[]> => {
   if (!USE_MOCK) {
     try { return (await ctmGet<any[]>(`/leaderboard?limit=${limit}`)).map(mapCtmUser); }
-    catch { /* fallback */ }
+    catch (err) { throw asDataError(err); }
   }
   const users = await dataLayer.getHybridUsers();
   return users
@@ -262,7 +287,7 @@ export const updateUser  = mockApi.updateUser;
 export const getCompanies = async (): Promise<Company[]> => {
   if (!USE_MOCK) {
     try { return (await ctmGet<any[]>('/companies?limit=100')).map(mapCtmCompany); }
-    catch { /* fallback to mock */ }
+    catch (err) { throw asDataError(err); }
   }
   return dataLayer.getHybridCompanies();
 };
@@ -270,7 +295,7 @@ export const getCompanies = async (): Promise<Company[]> => {
 export const getCompany = async (id: string): Promise<Company | undefined> => {
   if (!USE_MOCK) {
     try { return mapCtmCompany(await ctmGet<any>(`/companies/${id}`)); }
-    catch { /* fallback */ }
+    catch (err) { throw asDataError(err); }
   }
   return (await mockApi.getCompanyById(id)).data;
 };
@@ -281,7 +306,7 @@ export const createCompany = mockApi.createCompany;
 export const getTasks = async (): Promise<Task[]> => {
   if (!USE_MOCK) {
     try { return (await ctmGet<any[]>('/tasks?limit=100')).map(mapCtmTask); }
-    catch { /* fallback */ }
+    catch (err) { throw asDataError(err); }
   }
   return dataLayer.getHybridTasks();
 };
@@ -289,7 +314,7 @@ export const getTasks = async (): Promise<Task[]> => {
 export const getTask = async (id: string): Promise<Task | undefined> => {
   if (!USE_MOCK) {
     try { return mapCtmTask(await ctmGet<any>(`/tasks/${id}`)); }
-    catch { /* fallback */ }
+    catch (err) { throw asDataError(err); }
   }
   return (await mockApi.getTaskById(id)).data;
 };
@@ -297,7 +322,7 @@ export const getTask = async (id: string): Promise<Task | undefined> => {
 export const getTasksByCompany = async (companyId: string): Promise<Task[]> => {
   if (!USE_MOCK) {
     try { return (await ctmGet<any[]>(`/tasks?company_id=${companyId}&limit=100`)).map(mapCtmTask); }
-    catch { /* fallback */ }
+    catch (err) { throw asDataError(err); }
   }
   const all = await dataLayer.getHybridTasks();
   return all.filter(t => t.companyId === companyId);
@@ -310,7 +335,7 @@ export const assignTask   = mockApi.assignTask;
 export const getSubmissions = async (): Promise<Submission[]> => {
   if (!USE_MOCK) {
     try { return (await ctmGet<any[]>('/submissions?limit=100')).map(mapCtmSubmission); }
-    catch { /* fallback */ }
+    catch (err) { throw asDataError(err); }
   }
   return dataLayer.getHybridSubmissions();
 };
@@ -318,7 +343,7 @@ export const getSubmissions = async (): Promise<Submission[]> => {
 export const getSubmission = async (id: string): Promise<Submission | undefined> => {
   if (!USE_MOCK) {
     try { return mapCtmSubmission(await ctmGet<any>(`/submissions/${id}`)); }
-    catch { /* fallback */ }
+    catch (err) { throw asDataError(err); }
   }
   return (await mockApi.getSubmissionById(id)).data;
 };
@@ -326,7 +351,7 @@ export const getSubmission = async (id: string): Promise<Submission | undefined>
 export const getSubmissionsByUser = async (userId: string): Promise<Submission[]> => {
   if (!USE_MOCK) {
     try { return (await ctmGet<any[]>(`/submissions?user_id=${userId}&limit=100`)).map(mapCtmSubmission); }
-    catch { /* fallback */ }
+    catch (err) { throw asDataError(err); }
   }
   const all = await dataLayer.getHybridSubmissions();
   return all.filter(s => s.userId === userId);
@@ -335,7 +360,7 @@ export const getSubmissionsByUser = async (userId: string): Promise<Submission[]
 export const getSubmissionsByTask = async (taskId: string): Promise<Submission[]> => {
   if (!USE_MOCK) {
     try { return (await ctmGet<any[]>(`/submissions?task_id=${taskId}&limit=100`)).map(mapCtmSubmission); }
-    catch { /* fallback */ }
+    catch (err) { throw asDataError(err); }
   }
   const all = await dataLayer.getHybridSubmissions();
   return all.filter(s => s.taskId === taskId);
@@ -352,7 +377,7 @@ export const getEvaluationBySubmission = async (submissionId: string): Promise<E
       const rows = await ctmGet<any[]>(`/evaluations?submission_id=${submissionId}&limit=1`);
       if (rows?.length) return mapCtmEvaluation(rows[0]);
       return undefined;
-    } catch { /* fallback */ }
+    } catch (err) { throw asDataError(err); }
   }
   return (await mockApi.getEvaluationBySubmissionId(submissionId)).data;
 };
@@ -360,7 +385,7 @@ export const getEvaluationBySubmission = async (submissionId: string): Promise<E
 export const getAllEvaluations = async (): Promise<Evaluation[]> => {
   if (!USE_MOCK) {
     try { return (await ctmGet<any[]>('/evaluations?limit=100')).map(mapCtmEvaluation); }
-    catch { /* fallback */ }
+    catch (err) { throw asDataError(err); }
   }
   return dataLayer.getHybridEvaluations();
 };
@@ -369,7 +394,7 @@ export const createEvaluation   = mockApi.createEvaluation;
 export const getEvaluationSchemas = async () => {
   if (!USE_MOCK) {
     try { return await ctmGet<any[]>('/evaluation-schemas'); }
-    catch { /* fallback */ }
+    catch (err) { throw asDataError(err); }
   }
   return (await mockApi.getEvaluationSchemas()).data;
 };
@@ -379,7 +404,7 @@ export const createPayment             = mockApi.createPayment;
 export const getInvoicesByCompanyId    = async (companyId: string): Promise<{ success: true; data: Invoice[] }> => {
   if (!USE_MOCK) {
     try { return { success: true, data: (await ctmGet<any[]>(`/invoices?company_id=${companyId}&limit=100`)).map(mapCtmInvoice) }; }
-    catch { /* fallback */ }
+    catch (err) { throw asDataError(err); }
   }
   return mockApi.getInvoicesByCompanyId(companyId);
 };
@@ -388,14 +413,14 @@ export const updateSubscription        = mockApi.updateSubscription;
 export const getAllSubscriptions        = async () => {
   if (!USE_MOCK) {
     try { return await ctmGet<any[]>('/subscriptions?limit=200'); }
-    catch { /* fallback */ }
+    catch (err) { throw asDataError(err); }
   }
   return (await mockApi.getAllSubscriptions()).data;
 };
 export const getAllInvoices             = async (): Promise<Invoice[]> => {
   if (!USE_MOCK) {
     try { return (await ctmGet<any[]>('/invoices?limit=200')).map(mapCtmInvoice); }
-    catch { /* fallback */ }
+    catch (err) { throw asDataError(err); }
   }
   return (await mockApi.getAllInvoices()).data;
 };
@@ -412,7 +437,7 @@ export const getAllPlans = async (): Promise<Plan[]> => {
         limits: { tasks: -1, submissions: -1, teamMembers: -1 },
         features: Array.isArray(p.features) ? p.features : [],
       }));
-    } catch { /* fallback */ }
+    } catch (err) { throw asDataError(err); }
   }
   return (await mockApi.getAllPlans()).data;
 };
@@ -422,7 +447,7 @@ export const getSubscriptionByCompany = async (companyId: string) => {
     try {
       const subs = await ctmGet<any[]>(`/subscriptions?company_id=${companyId}&limit=1`);
       if (subs?.length) return subs[0];
-    } catch { /* fallback */ }
+    } catch (err) { throw asDataError(err); }
   }
   return (await mockApi.getSubscriptionByCompany(companyId)).data;
 };
@@ -431,7 +456,7 @@ export const getSubscriptionByCompany = async (companyId: string) => {
 export const getBadges = async () => {
   if (!USE_MOCK) {
     try { return await ctmGet<any[]>('/badges'); }
-    catch { /* fallback */ }
+    catch (err) { throw asDataError(err); }
   }
   return (await mockApi.getAllBadges()).data;
 };
@@ -440,7 +465,7 @@ export const getBadges = async () => {
 export const getActivityLogs = async (): Promise<Activity[]> => {
   if (!USE_MOCK) {
     try { return (await ctmGet<any[]>('/activities?limit=100')).map(mapCtmActivity); }
-    catch { /* fallback */ }
+    catch (err) { throw asDataError(err); }
   }
   return dataLayer.getHybridActivities();
 };
@@ -448,7 +473,7 @@ export const getActivityLogs = async (): Promise<Activity[]> => {
 export const getNotifications = async (): Promise<Notification[]> => {
   if (!USE_MOCK) {
     try { return (await ctmGet<any[]>('/notifications?limit=100')).map(mapCtmNotification); }
-    catch { /* fallback */ }
+    catch (err) { throw asDataError(err); }
   }
   return dataLayer.getHybridNotifications();
 };
@@ -457,7 +482,7 @@ export const getNotifications = async (): Promise<Notification[]> => {
 export const getTemplates = async (): Promise<TaskTemplate[]> => {
   if (!USE_MOCK) {
     try { return (await ctmGet<any[]>('/templates?limit=100')).map(mapCtmTemplate); }
-    catch { /* fallback */ }
+    catch (err) { throw asDataError(err); }
   }
   return (await mockApi.getTemplates()).data;
 };
@@ -467,49 +492,49 @@ export const saveTemplate = mockApi.saveTaskAsTemplate;
 export const getTestCasesBySubmission = async (submissionId: string): Promise<TestCase[]> => {
   if (!USE_MOCK) {
     try { return await ctmGet<TestCase[]>(`/submissions/${submissionId}/test-cases`); }
-    catch { /* fallback */ }
+    catch (err) { throw asDataError(err); }
   }
   return (await mockApi.getTestCasesBySubmission(submissionId)).data;
 };
 export const getGitHubRepositories   = async (): Promise<GitHubRepository[]> => {
   if (!USE_MOCK) {
     try { return await ctmGet<GitHubRepository[]>('/integrations/github/repos'); }
-    catch { /* fallback */ }
+    catch (err) { throw asDataError(err); }
   }
   return (await mockApi.getGitHubRepositories()).data;
 };
 export const getWebhooks             = async (): Promise<Webhook[]> => {
   if (!USE_MOCK) {
     try { return await ctmGet<Webhook[]>('/webhooks'); }
-    catch { /* fallback */ }
+    catch (err) { throw asDataError(err); }
   }
   return (await mockApi.getWebhooks()).data;
 };
 export const getWebhookTriggerLogs   = async (webhookId: string): Promise<WebhookTriggerLog[]> => {
   if (!USE_MOCK) {
     try { return await ctmGet<WebhookTriggerLog[]>(`/webhooks/${webhookId}/deliveries`); }
-    catch { /* fallback */ }
+    catch (err) { throw asDataError(err); }
   }
   return (await mockApi.getWebhookTriggerLogs(webhookId)).data;
 };
 export const getTeams                = async (): Promise<Team[]> => {
   if (!USE_MOCK) {
     try { return (await ctmGet<any[]>('/teams?limit=100')).map(mapCtmTeam); }
-    catch { /* fallback */ }
+    catch (err) { throw asDataError(err); }
   }
   return (await mockApi.getTeams()).data;
 };
 export const getApiIntegrations      = async (): Promise<ApiIntegration[]> => {
   if (!USE_MOCK) {
     try { return await ctmGet<ApiIntegration[]>('/api-integrations'); }
-    catch { /* fallback */ }
+    catch (err) { throw asDataError(err); }
   }
   return (await mockApi.getApiIntegrations()).data;
 };
 export const getIntegrationLogs      = async (): Promise<IntegrationLog[]> => {
   if (!USE_MOCK) {
     try { return await ctmGet<IntegrationLog[]>('/integration-logs?limit=100'); }
-    catch { /* fallback */ }
+    catch (err) { throw asDataError(err); }
   }
   return (await mockApi.getIntegrationLogs()).data;
 };
@@ -519,7 +544,7 @@ export const getIntegrationLogs      = async (): Promise<IntegrationLog[]> => {
 const ctmList = async <T>(path: string, fallback: () => Promise<T[]>): Promise<T[]> => {
   if (!USE_MOCK) {
     try { return await ctmGet<T[]>(path); }
-    catch { /* fallback */ }
+    catch (err) { throw asDataError(err); }
   }
   return fallback();
 };

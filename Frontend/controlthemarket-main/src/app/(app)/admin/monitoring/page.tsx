@@ -12,6 +12,11 @@ import { SystemLoadChart, ApiRequestChart, ApiResponseTimeChart, DatabaseQueryCh
 import { ServiceUptimeList } from "./service-uptime-list";
 import { IncidentTimeline } from "./incident-timeline";
 
+// Reads live ControlTheMarket data through @/lib/api, which throws CtmDataError when
+// ctm-service is unreachable rather than showing placeholder data. Prerendering this at
+// build time therefore fails; it is a per-request view, not a static page.
+export const dynamic = 'force-dynamic';
+
 export default async function SystemMonitoringPage() {
   const [metrics, services, incidents] = await Promise.all([
     getSystemMetrics(),
