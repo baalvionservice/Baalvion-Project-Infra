@@ -140,6 +140,30 @@ jobs:
       - name: Build packages
         run: pnpm run build:packages
 
+      # These suites exercise real transactions and the payment outbox, so the schemas they
+      # write to have to exist. Against a bare Postgres they fail with
+      # `relation "orders.event_outbox" does not exist`, which reads like a code regression
+      # and is not one. Provisioning also proves both schemas are creatable from clean.
+      - name: Provision the schemas the service tests write to
+        env:
+          PGPASSWORD: test_pass
+        run: psql -h localhost -U baalvion -d baalvion_test -v ON_ERROR_STOP=1 -c "CREATE SCHEMA IF NOT EXISTS orders;"
+
+      - name: PCL migrations apply from clean
+        working-directory: Backend/services/commerce/order-service
+        env:
+          DATABASE_URL: postgres://baalvion:test_pass@localhost:5432/baalvion_test
+        run: node ../../../packages/payment-consistency/scripts/migrate.mjs
+
+      - name: order-service migrations
+        working-directory: Backend/services/commerce/order-service
+        # sequelize-cli picks its config by NODE_ENV and config/database.js declares only
+        # `development` and `production` — under the job's NODE_ENV=test it finds nothing.
+        env:
+          NODE_ENV: development
+          DB_SSL: 'false'
+        run: npx sequelize-cli db:migrate
+
       - name: order-service (Amarisé)
         working-directory: Backend/services/commerce/order-service
         run: pnpm test
@@ -164,14 +188,13 @@ jobs:
         working-directory: Backend/services/trade/order-execution-service
         run: npx jest --forceExit --runInBand
 
-      # The PCL schema must be creatable from a clean database, or a service that reports
-      # payments cannot start. Runs it twice: the second run must be a no-op.
-      - name: PCL migrations apply, and are idempotent
+      # Migrations already ran above. Re-running them must be a no-op — a migration that is
+      # not idempotent is only discovered on the second deploy, against real data.
+      - name: PCL migrations are idempotent
         working-directory: Backend/services/commerce/order-service
         env:
           DATABASE_URL: postgres://baalvion:test_pass@localhost:5432/baalvion_test
         run: |
-          node ../../../packages/payment-consistency/scripts/migrate.mjs
           node ../../../packages/payment-consistency/scripts/migrate.mjs | tee /tmp/second.log
           grep -q "up to date" /tmp/second.log \
             || { echo "::error::re-running migrations was not a no-op"; exit 1; }
