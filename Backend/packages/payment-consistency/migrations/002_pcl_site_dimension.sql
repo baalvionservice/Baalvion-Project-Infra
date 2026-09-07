@@ -12,6 +12,15 @@
 -- NOT NULL here would break every legacy writer the moment this ships. The NOT NULL is added
 -- in a later migration once the backfill is verified — see the rollout note at the bottom.
 --
+-- On row-level security: `pcl` is a service-internal schema. One service, one database, and
+-- that service is its only reader and writer -- no tenant ever holds a connection to it, and
+-- `tenant_id` here records WHO EARNED the money so the panel can attribute it, rather than
+-- acting as an isolation key. The relay drains the outbox across every tenant by design, the
+-- same shape as tradeops.event_outbox. Isolation is owner-only grants.
+--
+-- The cross-estate copy of this data, admin.payment_records, is a different matter: it holds
+-- every tenant's payments in ONE table, and it does carry a fail-closed RLS policy.
+
 -- Idempotent (IF NOT EXISTS), so it is safe to re-run and safe alongside shadow mode.
 
 ALTER TABLE pcl.payment_state ADD COLUMN IF NOT EXISTS site_id   varchar(64);

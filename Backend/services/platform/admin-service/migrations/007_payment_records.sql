@@ -81,3 +81,36 @@ CREATE TABLE IF NOT EXISTS admin.payment_stream_offsets (
     last_id     VARCHAR(64)  NOT NULL,
     updated_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
+
+-- ── Row-level security ────────────────────────────────────────────────────────
+-- This table holds EVERY tenant's payments in one place, which is exactly why it gets a real
+-- fail-closed policy rather than an audit exemption.
+--
+-- The rule, using @baalvion/tenancy's standard shape (packages/tenancy/sql.js):
+--   • no tenant set and no bypass  → ZERO rows. A service that reaches this table without
+--     establishing who it is sees nothing, which is the lateral-movement case that matters.
+--   • a tenant set                 → only that tenant's rows.
+--   • bypass, from a role that is NOT the restricted runtime role → all rows. This is how the
+--     console reads across the estate, and `current_user <> 'baalvion_app'` means a SQL
+--     injection on the app connection cannot turn the bypass on for itself (CR-8).
+--
+-- ⚠️ POSTGRES IGNORES RLS FOR SUPERUSERS. While admin-service connects as a superuser this
+-- policy is inert — present and correct, enforcing nothing. Give the service a non-superuser
+-- login role to make it real. Verify with:
+--   SELECT current_user, usesuper FROM pg_user WHERE usename = current_user;
+ALTER TABLE admin.payment_records ENABLE ROW LEVEL SECURITY;
+ALTER TABLE admin.payment_records FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS tenant_isolation ON admin.payment_records;
+CREATE POLICY tenant_isolation ON admin.payment_records
+    USING (
+        (current_setting('app.tenant_bypass', true) = 'on' AND current_user <> 'baalvion_app')
+        OR (current_setting('app.current_tenant', true) IS NOT NULL
+            AND current_setting('app.current_tenant', true) <> ''
+            AND tenant_id::text = current_setting('app.current_tenant', true))
+    )
+    WITH CHECK (
+        (current_setting('app.tenant_bypass', true) = 'on' AND current_user <> 'baalvion_app')
+        OR (current_setting('app.current_tenant', true) IS NOT NULL
+            AND current_setting('app.current_tenant', true) <> ''
+            AND tenant_id::text = current_setting('app.current_tenant', true))
+    );

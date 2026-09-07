@@ -23,6 +23,33 @@ function db() {
     return _db;
 }
 
+/**
+ * Run a statement against the payment read model with the platform scope established.
+ *
+ * `admin.payment_records` carries a fail-closed RLS policy (see the DDL below). Reading across
+ * every tenant is the console's whole job, so each statement declares that intent explicitly by
+ * setting `app.tenant_bypass` transaction-locally — the same GUC contract as @baalvion/tenancy.
+ *
+ * Transaction-local (`set_config(..., true)`) rather than session-level on purpose: a pooled
+ * connection must never carry the bypass on to whatever borrows it next.
+ *
+ * The bypass only works for a role that is NOT the restricted runtime role, so this cannot be
+ * used from `baalvion_app`, and an injection there cannot turn it on for itself.
+ *
+ * Every read and write of this table goes through here. Route a new one through it too: a
+ * statement that misses this returns zero rows rather than the wrong rows, which is the safe
+ * direction, but it makes the panel look empty rather than broken.
+ */
+function platformQuery(sql, options = {}) {
+    return db().sequelize.transaction(async (transaction) => {
+        await db().sequelize.query(
+            "SELECT set_config('app.tenant_bypass', 'on', true)",
+            { transaction },
+        );
+        return db().sequelize.query(sql, { ...options, transaction });
+    });
+}
+
 // Position on the payment ladder. Scaled by 10 so FAILED sits between AUTHORIZED and CAPTURED:
 // a failure is a pre-capture terminal, so it may supersede an authorization but must never
 // overwrite a capture or a settlement that a later, out-of-order delivery could carry.
@@ -66,6 +93,39 @@ CREATE INDEX IF NOT EXISTS idx_payment_records_party ON admin.payment_records (p
 -- Retention: this table is a read model, not the source of truth, so old rows can be archived.
 -- Nothing is deleted automatically -- this only provides the index an archive sweep needs.
 CREATE INDEX IF NOT EXISTS idx_payment_records_recorded ON admin.payment_records (recorded_at);
+-- Row-level security. Same policy as migrations/007_payment_records.sql -- see there for the
+-- This table holds EVERY tenant's payments in one place, which is exactly why it gets a real
+-- fail-closed policy rather than an audit exemption.
+--
+-- The rule, using @baalvion/tenancy's standard shape (packages/tenancy/sql.js):
+--   • no tenant set and no bypass  → ZERO rows. A service that reaches this table without
+--     establishing who it is sees nothing, which is the lateral-movement case that matters.
+--   • a tenant set                 → only that tenant's rows.
+--   • bypass, from a role that is NOT the restricted runtime role → all rows. This is how the
+--     console reads across the estate, and 'current_user <> 'baalvion_app'' means a SQL
+--     injection on the app connection cannot turn the bypass on for itself (CR-8).
+--
+-- ⚠️ POSTGRES IGNORES RLS FOR SUPERUSERS. While admin-service connects as a superuser this
+-- policy is inert — present and correct, enforcing nothing. Give the service a non-superuser
+-- login role to make it real. Verify with:
+--   SELECT current_user, usesuper FROM pg_user WHERE usename = current_user;
+ALTER TABLE admin.payment_records ENABLE ROW LEVEL SECURITY;
+ALTER TABLE admin.payment_records FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS tenant_isolation ON admin.payment_records;
+CREATE POLICY tenant_isolation ON admin.payment_records
+    USING (
+        (current_setting('app.tenant_bypass', true) = 'on' AND current_user <> 'baalvion_app')
+        OR (current_setting('app.current_tenant', true) IS NOT NULL
+            AND current_setting('app.current_tenant', true) <> ''
+            AND tenant_id::text = current_setting('app.current_tenant', true))
+    )
+    WITH CHECK (
+        (current_setting('app.tenant_bypass', true) = 'on' AND current_user <> 'baalvion_app')
+        OR (current_setting('app.current_tenant', true) IS NOT NULL
+            AND current_setting('app.current_tenant', true) <> ''
+            AND tenant_id::text = current_setting('app.current_tenant', true))
+    );
+
 CREATE TABLE IF NOT EXISTS admin.payment_stream_offsets (
     consumer    VARCHAR(120) PRIMARY KEY,
     last_id     VARCHAR(64)  NOT NULL,
@@ -125,7 +185,7 @@ async function applyPaymentRecorded(event) {
     const fee = p.fee ? Money.of(p.fee.amount, p.fee.currency) : null;
     const net = p.net ? Money.of(p.net.amount, p.net.currency) : (fee ? money.subtract(fee) : null);
 
-    const [rows] = await db().sequelize.query(
+    const [rows] = await platformQuery(
         `INSERT INTO admin.payment_records (
             payment_id, site_id, tenant_id, party_id, state, state_rank, provider, rail,
             provider_payment_id, amount_minor, currency, exponent, fee_minor, net_minor,
@@ -206,13 +266,13 @@ async function listPayments({ siteId, state, provider, from, to, limit = 50, off
     bind.push(capped, Math.max(Number(offset) || 0, 0));
 
     const clause = where.length ? `WHERE ${where.join(' AND ')}` : '';
-    const [rows] = await db().sequelize.query(
+    const [rows] = await platformQuery(
         `SELECT * FROM admin.payment_records ${clause}
           ORDER BY occurred_at DESC
           LIMIT $${bind.length - 1} OFFSET $${bind.length}`,
         { bind },
     );
-    const [[counted]] = await db().sequelize.query(
+    const [[counted]] = await platformQuery(
         `SELECT COUNT(*)::bigint AS total FROM admin.payment_records ${clause}`,
         { bind: bind.slice(0, bind.length - 2) },
     );
@@ -238,7 +298,7 @@ async function summaryBySite({ from, to } = {}) {
     if (from) { bind.push(from); where.push(`occurred_at >= $${bind.length}`); }
     if (to) { bind.push(to); where.push(`occurred_at <= $${bind.length}`); }
 
-    const [rows] = await db().sequelize.query(
+    const [rows] = await platformQuery(
         `SELECT site_id, currency, exponent,
                 COUNT(*)::bigint                    AS payment_count,
                 SUM(amount_minor)::bigint           AS gross_minor,
@@ -299,7 +359,7 @@ async function summaryBySite({ from, to } = {}) {
 async function retentionReport({ olderThanDays = 730 } = {}) {
     await ensureSchema();
     const days = Math.max(Number(olderThanDays) || 730, 1);
-    const [[row]] = await db().sequelize.query(
+    const [[row]] = await platformQuery(
         `SELECT COUNT(*)::bigint AS total,
                 COUNT(*) FILTER (WHERE recorded_at < NOW() - ($1 || ' days')::interval)::bigint AS older,
                 MIN(recorded_at) AS oldest,
@@ -326,7 +386,7 @@ async function pruneOlderThan({ olderThanDays = 730, confirm = false, limit = 10
         return { pruned: 0, refused: 'pruneOlderThan requires confirm:true — it deletes financial history' };
     }
     const days = Math.max(Number(olderThanDays) || 730, 1);
-    const [, meta] = await db().sequelize.query(
+    const [, meta] = await platformQuery(
         `DELETE FROM admin.payment_records
           WHERE ctid IN (
             SELECT ctid FROM admin.payment_records
