@@ -623,9 +623,27 @@ async function sitemapIndex(req, res, next) {
         for (let i = 1; i <= Math.ceil(companies / SITEMAP_CHUNK); i++) sections.push(`companies-${i}`);
         for (let i = 1; i <= Math.ceil(people / SITEMAP_CHUNK); i++) sections.push(`people-${i}`);
 
-        const today = new Date().toISOString().slice(0, 10);
+        // The index obeys the same rule as the URLs it points at: lastmod is the newest record the
+        // section actually contains, not "now". Stamping today on all 13 told Google every section
+        // changed on every crawl, which is the one thing the per-URL lastmod above avoids.
+        const newest = async (model) => iso((await model.max('updated_at')) || null);
+        const [invMod, coMod, guideMod] = await Promise.all([
+            newest(db.Investor), newest(db.Company), newest(db.Article),
+        ]);
+        // Places and facets are derived from both tables; people from both people tables.
+        const bothMod = [invMod, coMod].filter(Boolean).sort().pop() || null;
+        const lastmodFor = (name) => {
+            if (name === 'core') return [guideMod, bothMod].filter(Boolean).sort().pop();
+            if (name === 'places' || name === 'facets' || name.startsWith('people-')) return bothMod;
+            if (name.startsWith('investors-')) return invMod;
+            if (name.startsWith('companies-')) return coMod;
+            return bothMod;
+        };
         const inner = sections
-            .map((name) => `  <sitemap><loc>${xmlEscape(`${SITE}/sitemap-${name}.xml`)}</loc><lastmod>${today}</lastmod></sitemap>`)
+            .map((name) => {
+                const lm = lastmodFor(name);
+                return `  <sitemap><loc>${xmlEscape(`${SITE}/sitemap-${name}.xml`)}</loc>${lm ? `<lastmod>${lm}</lastmod>` : ''}</sitemap>`;
+            })
             .join('\n');
         return sendXml(res, xmlDoc(inner, 'sitemapindex'));
     } catch (e) { return next(e); }

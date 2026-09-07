@@ -5,10 +5,14 @@
 
 ## What is here
 
-- 45,286 investment firms (venture capital and private equity), from SEC Form D filings
-- 84,802 companies that have raised capital, from SEC Form D and national company registers
-- 286,823 named executives, directors and promoters, linked across both sides
-- 67 countries, 5,977 cities
+- 28,367 investment firms (venture capital and private equity), from SEC Form D filings
+- 114,889 companies that have raised capital, from SEC Form D and national company registers
+- 268,981 distinct named executives, directors and promoters, linked across both sides
+- 77 countries, 8,460 cities
+
+Counted 2026-09-08 from the live database. Form D coverage runs 2018q3–2026q2 (32 quarters).
+Firm count is lower than the raw filer count because one firm raises many fund vehicles and they
+are merged into a single record; people are counted as distinct names, not filing appearances.
 
 ## Sources and their limits
 
@@ -28,7 +32,7 @@ currently investing. Roles are as filed; a director is not necessarily a founder
 - https://www.marketunderworld.com/founders — companies and founders
 - https://www.marketunderworld.com/directory — geographic index
 - https://www.marketunderworld.com/people/{name-slug} — one person across every filing
-- https://www.marketunderworld.com/sitemap.xml — sitemap index (20 sections)
+- https://www.marketunderworld.com/sitemap.xml — sitemap index (13 sections)
 
 ## Citation
 

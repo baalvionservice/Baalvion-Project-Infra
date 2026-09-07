@@ -11,7 +11,7 @@
         {
           "type": "header",
           "key": "user-agent",
-          "value": "(?i).*(googlebot|bingbot|slurp|duckduckbot|baiduspider|yandex|applebot|gptbot|oai-searchbot|chatgpt-user|claudebot|anthropic-ai|claude-web|perplexitybot|ccbot|google-extended|facebookexternalhit|twitterbot|linkedinbot|slackbot|discordbot|whatsapp|telegrambot).*"
+          "value": "(?i).*(googlebot|bingbot|slurp|duckduckbot|duckassistbot|baiduspider|yandex|applebot|gptbot|oai-searchbot|chatgpt-user|claudebot|anthropic-ai|claude-web|claude-searchbot|perplexitybot|perplexity-user|ccbot|google-extended|meta-externalagent|amazonbot|bytespider|youbot|mistralai-user|cohere-ai|diffbot|petalbot|timpibot|facebookexternalhit|twitterbot|linkedinbot|slackbot|discordbot|whatsapp|telegrambot).*"
         }
       ],
       "destination": "https://api.baalvion.com/api/v1/insiders/v1/public/render?path=/:path*"
