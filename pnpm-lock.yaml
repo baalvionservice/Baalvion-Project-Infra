@@ -429,6 +429,8 @@ importers:
         specifier: ^5.7.2
         version: 5.9.3
 
+  Backend/packages/notify-ntfy: {}
+
   Backend/packages/party:
     devDependencies:
       '@types/node':
@@ -2618,6 +2620,9 @@ importers:
       '@baalvion/graceful-shutdown':
         specifier: workspace:*
         version: link:../../../packages/graceful-shutdown
+      '@baalvion/notify-ntfy':
+        specifier: workspace:*
+        version: link:../../../packages/notify-ntfy
       '@baalvion/sdk':
         specifier: workspace:*
         version: link:../../../packages/sdk
@@ -3326,6 +3331,9 @@ importers:
       '@baalvion/auth-node':
         specifier: workspace:*
         version: link:../../../packages/auth-node
+      '@baalvion/catalog':
+        specifier: workspace:*
+        version: link:../../../catalog
       '@baalvion/email':
         specifier: workspace:*
         version: link:../../../packages/email
@@ -3335,6 +3343,9 @@ importers:
       '@baalvion/money':
         specifier: workspace:*
         version: link:../../../packages/money
+      '@baalvion/notify-ntfy':
+        specifier: workspace:*
+        version: link:../../../packages/notify-ntfy
       '@baalvion/party':
         specifier: workspace:*
         version: link:../../../packages/party
@@ -3386,6 +3397,9 @@ importers:
       uuid:
         specifier: 11.1.1
         version: 11.1.1
+      ws:
+        specifier: 8.21.0
+        version: 8.21.0
       zod:
         specifier: ^3.24.2
         version: 3.25.76

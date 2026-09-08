@@ -20,3 +20,5 @@ spec:
   apis: ["/api/v1/reconciliation"]
   slo: { availability: 0.99, latencyP95Ms: 500 }
   deploy: { chart: baalvion-financial, namespace: financial, minReplicas: 1, maxReplicas: 4 }
+  runtime:
+    deployment: not-deployed
