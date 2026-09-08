@@ -145,17 +145,16 @@ function loadCashfree(): Promise<void> {
 export async function startGatewayCheckout(req: CheckoutRequest): Promise<CheckoutResult> {
   const init = await createIntent(req);
 
-  // LOCAL/TEST: in mock mode there is no real provider order, so simulate the
-  // hosted step (a real widget would reject a mock order id). The branches below
-  // open the REAL Razorpay/Stripe checkout once the tenant is mode='live' + hosted.
+  // A tenant still in test mode has no real provider order, so there is nothing to open. This
+  // used to pop a window.confirm offering to "simulate a SUCCESSFUL payment" and returned
+  // status:"success" if the operator clicked OK — a payment outcome asserted by a dialog box,
+  // which every caller downstream then believed. Report it as unavailable instead: the only
+  // thing that may mark a subscription paid is a signature-verified provider webhook.
   if (init.mode === "mock") {
-    const ok = window.confirm(
-      `[TEST MODE — ${init.provider}] Simulate a SUCCESSFUL payment of ` +
-      `${(init.amount / 100).toFixed(2)} ${init.currency}?\n\nOK = success · Cancel = cancelled`,
-    );
-    return ok
-      ? { status: "success", provider: init.provider, reference: init.orderId }
-      : { status: "cancelled" };
+    return {
+      status: "failed",
+      message: "Payments are in test mode for this account — no charge can be taken yet.",
+    };
   }
 
   if (init.provider === "stripe" && init.checkoutUrl) {
