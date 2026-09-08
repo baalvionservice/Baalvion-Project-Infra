@@ -101,6 +101,14 @@ const attachAuthRetry = (client: typeof apiClient) =>
 
 attachAuthRetry(apiClient);
 
+// authClient stays out of the refresh-retry (it IS the refresh path), but its errors
+// still need normalizing or callers surface axios' generic "Request failed with status
+// code 401" instead of the service's message ("Invalid email or password").
+authClient.interceptors.response.use(
+  (r) => r,
+  (error: AxiosError) => Promise.reject(normalizeError(error)),
+);
+
 // ─── Error normalizer ─────────────────────────────────────────────────────────
 export interface NormalizedError {
   code: string;
