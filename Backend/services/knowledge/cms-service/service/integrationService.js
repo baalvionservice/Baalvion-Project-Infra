@@ -200,8 +200,44 @@ async function test(websiteId, scope, provider) {
                     : `Connection failed: ${e.message || 'error'}`;
             }
         }
+    } else if (provider === 'gemini') {
+        // Genuinely verified, not merely present. The editorial pipeline cannot
+        // draft anything without this key, so "Keys present" is the wrong answer
+        // to give about a mistyped one -- the failure would otherwise surface
+        // much later, as a drafting error with no obvious cause. Listing models
+        // is the cheapest call that proves the key works, and it generates
+        // nothing and costs nothing.
+        const key = secrets.apiKey || cfg.apiKey;
+        if (!key) {
+            message = 'Missing: apiKey';
+        } else {
+            try {
+                const resp = await getSdk().http.get(
+                    `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(key)}`,
+                    { timeoutMs: 8000, retries: 0, internal: false, trace: false }
+                );
+                ok = resp.ok;
+                if (ok) {
+                    const models = (resp.body && resp.body.models) || [];
+                    const wanted = cfg.model || 'gemini-2.5-flash';
+                    // A key can be valid while the configured model name is not.
+                    // Say so rather than reporting a flat pass.
+                    const has = models.some((m) => String(m.name || '').endsWith(wanted));
+                    message = has
+                        ? `Key valid — ${wanted} available (${models.length} models)`
+                        : `Key valid, but "${wanted}" is not in the ${models.length} models this key can reach`;
+                    ok = has;
+                } else {
+                    message = `Google rejected the key (HTTP ${resp.status})`;
+                }
+            } catch (e) {
+                message = e && e.name === 'CircuitOpenError'
+                    ? 'Too many recent failures — circuit open, retry in ~15s'
+                    : `Could not reach Google: ${e.message || 'error'}`;
+            }
+        }
     } else {
-        // Payment / SMS / AI: don't call live third parties from here in dev —
+        // Payment / SMS / other AI: don't call live third parties from here in dev —
         // confirm the required keys are present so the wiring is verifiably complete.
         const need = PROVIDER_REQUIRED[provider] || ['secretKey'];
         const missing = need.filter((k) => !secrets[k] && !cfg[k]);
