@@ -8,13 +8,17 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "migrate": "node migrate.js",
+    "migrate": "node migrate.js && node ../../../packages/payment-consistency/scripts/migrate.mjs",
     "migrate:status": "node migrate.js status",
     "seed": "node seed.js",
     "test": "node --test \"test/**/*.test.js\""
   },
   "dependencies": {
     "@baalvion/telemetry": "workspace:*",
+    "@baalvion/money": "workspace:*",
+    "@baalvion/payment-consistency": "workspace:*",
+    "@baalvion/sites": "workspace:*",
+    "ioredis": "^5.4.1",
     "@baalvion/graceful-shutdown": "workspace:*",
     "express-rate-limit": "^7.5.0",
     "@baalvion/auth-node": "workspace:*",
