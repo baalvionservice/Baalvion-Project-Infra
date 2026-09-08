@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Structural design language modelled on IBM's Carbon: a strict 1px rule grid, square corners
+ * everywhere, IBM Plex Sans, and large display type set LIGHT rather than bold. The weight
+ * inversion is the part people miss — Carbon's authority comes from big type at weight 300 with
+ * tight leading, not from heavy headlines.
+ *
+ * Every colour is a token. `--accent` is the single interactive colour: swap that one line to
+ * move the whole site off blue without touching a component.
+ */
+:root {
+  /* Carbon-style neutral ramp: white paper, near-black ink, two greys. */
+  --paper: 0 0% 100%;
+  --paper-alt: 0 0% 96%;
+  --ink: 0 0% 9%;
+  --ink-invert: 0 0% 100%;
+  --muted-ink: 0 0% 33%;
+  --line: 0 0% 87%;
+  --line-invert: 0 0% 25%;
+
+  --accent: 220 100% 53%;
+
+  --live: 155 92% 24%;
+  --pending: 33 92% 32%;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    background-color: hsl(var(--paper));
+    color: hsl(var(--ink));
+  }
+  ::selection {
+    background: hsl(var(--accent));
+    color: hsl(var(--ink-invert));
+  }
+  /* Carbon is square. Nothing in this site rounds a corner. */
+  * {
+    border-radius: 0;
+  }
+  :focus-visible {
+    outline: 2px solid hsl(var(--accent));
+    outline-offset: -2px;
+  }
+}
+
+@layer utilities {
+  /* Uppercase micro-label — section eyebrows, field names, status chips. */
+  .label {
+    @apply text-[11px] font-medium uppercase tracking-[0.16em];
+  }
+  /*
+   * Display type: light weight, tight leading, clamped so the hero holds its proportions from a
+   * phone to a wide desktop without a pile of breakpoints.
+   */
+  .display {
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    line-height: 1.06;
+    font-size: clamp(2.5rem, 5.4vw, 4.5rem);
+  }
+  .display-sm {
+    font-weight: 300;
+    letter-spacing: -0.015em;
+    line-height: 1.12;
+    font-size: clamp(1.9rem, 3.4vw, 3rem);
+  }
+}
