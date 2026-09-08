@@ -1,0 +1,113 @@
+'use strict';
+/**
+ * The anonymous allow-list.
+ *
+ * Two things are checked here, and the second is the one that will actually catch a
+ * mistake a year from now: that the list matches only what it says it matches, and that
+ * every path on it is served upstream by a route which resolves its own viewer. A path
+ * added here whose backend route demands authentication would be a gateway that waves a
+ * visitor through to a 401 — and, far worse, the same edit made in the other order (adding
+ * an authenticated route under a path shape already on this list) would publish it.
+ */
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+
+const { isAnonymousAllowed, PUBLIC_PATHS } = require('../middleware/anonymousAllowList');
+
+test('public reads are allowed without a session', () => {
+  for (const p of ['/canwemarry/v1/cases', '/canwemarry/v1/resources', '/canwemarry/v1/me']) {
+    assert.equal(isAnonymousAllowed('GET', p), true, p);
+  }
+  assert.equal(isAnonymousAllowed('GET', '/canwemarry/v1/cases/7f3a1c2e-0000-4000-8000-00000000abcd'), true);
+  assert.equal(isAnonymousAllowed('GET', '/canwemarry/v1/invitations/example-invite-token'), true);
+});
+
+test('a query string cannot smuggle a different path past the match', () => {
+  assert.equal(isAnonymousAllowed('GET', '/canwemarry/v1/cases?page=2'), true);
+  assert.equal(isAnonymousAllowed('GET', '/canwemarry/v1/admin/users?x=/canwemarry/v1/cases'), false);
+});
+
+test('nothing that changes state is ever anonymous', () => {
+  for (const method of ['POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']) {
+    assert.equal(isAnonymousAllowed(method, '/canwemarry/v1/cases'), false, method);
+  }
+});
+
+test('the private surface stays private', () => {
+  const mustNeverBePublic = [
+    '/canwemarry/v1/admin/users',
+    '/canwemarry/v1/admin/audit',
+    '/canwemarry/v1/moderation/reports',
+    '/canwemarry/v1/me/notifications',
+    '/canwemarry/v1/me/profile',
+    '/canwemarry/v1/me/reports',
+    '/canwemarry/v1/me/invitations',
+    '/canwemarry/v1/cases/some-id/participants',
+    '/canwemarry/v1/cases/some-id/supporters',
+    '/canwemarry/v1/cases/some-id/invitations',
+  ];
+  for (const p of mustNeverBePublic) assert.equal(isAnonymousAllowed('GET', p), false, p);
+});
+
+test('a :param matches one segment and cannot reach deeper', () => {
+  // Without this, `/cases/:id` would also match `/cases/<id>/participants`.
+  assert.equal(isAnonymousAllowed('GET', '/canwemarry/v1/cases/abc/participants'), false);
+  assert.equal(isAnonymousAllowed('GET', '/canwemarry/v1/profiles/handle/secrets'), false);
+});
+
+test('the list is exact, never a prefix', () => {
+  assert.equal(isAnonymousAllowed('GET', '/canwemarry/v1/casesX'), false);
+  assert.equal(isAnonymousAllowed('GET', '/canwemarry/v1'), false);
+  assert.equal(isAnonymousAllowed('GET', '/canwemarry'), false);
+  // Another service must not inherit CanWeMarry's list.
+  assert.equal(isAnonymousAllowed('GET', '/insiders/v1/cases'), false);
+});
+
+test('no allow-listed path is served upstream by a route that demands a session', () => {
+  // The invariant that makes the list safe, read from the service's own route table so the
+  // two cannot drift apart silently.
+  //
+  // The rule is the absence of a hard gate, not the presence of `optionalAuth`: the
+  // invitation preview carries no auth middleware at all — the token in the URL is the
+  // proof, and somebody who was sent a link must be able to see what it is before deciding
+  // whether to make an account. What must never appear is requireAuth and its stricter kin.
+  const routeFile = path.join(
+    __dirname, '..', '..', '..', 'ecosystem', 'canwemarry-service', 'routes', 'v1.js',
+  );
+  const source = fs.readFileSync(routeFile, 'utf8');
+
+  const DEMANDS_AUTH = ['requireAuth', 'requireStaff', 'requireAdmin', 'requirePermission', 'requireVerified'];
+
+  // Each `router.get('<path>', <chain>);` — the chain read whole, not just its first entry.
+  const routes = new Map();
+  const re = /router\.get\(\s*'([^']+)'\s*,([\s\S]*?)\);/g;
+  let m;
+  while ((m = re.exec(source)) !== null) routes.set(m[1], m[2]);
+  assert.ok(routes.size > 5, 'route table did not parse — the check would pass vacuously');
+
+  for (const listed of PUBLIC_PATHS) {
+    const upstream = listed.replace('/canwemarry/v1', '');
+    const chain = routes.get(upstream);
+    assert.ok(chain !== undefined, `allow-listed path has no GET route upstream: ${upstream}`);
+    for (const guard of DEMANDS_AUTH) {
+      assert.ok(
+        !new RegExp(`\\b${guard}\\b`).test(chain),
+        `allow-listed path ${upstream} is mounted with ${guard} — it is not public`,
+      );
+    }
+  }
+});
+
+test('the guard names the invariant checks for are the ones the service actually uses', () => {
+  // If a route file were refactored to gate with a differently-named middleware, the check
+  // above would silently pass on every path. This fails first, and loudly.
+  const routeFile = path.join(
+    __dirname, '..', '..', '..', 'ecosystem', 'canwemarry-service', 'routes', 'v1.js',
+  );
+  const source = fs.readFileSync(routeFile, 'utf8');
+  for (const guard of ['requireAuth', 'optionalAuth', 'requireStaff', 'requireAdmin']) {
+    assert.ok(source.includes(guard), `route table no longer mentions ${guard}`);
+  }
+});

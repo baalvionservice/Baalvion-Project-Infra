@@ -2,7 +2,7 @@ const express = require('express');
 const ctrl    = require('../controller/authController');
 const oauthCtrl = require('../controller/oauthController');
 const { authMiddleware }       = require('../middleware/authMiddleware');
-const { registerLimiter, forgotPwLimiter, mfaChallengeLimiter, verifyEmailLimiter, verifyTokenLimiter, otpRequestLimiter, otpVerifyLimiter, emailOtpRequestLimiter, emailOtpVerifyLimiter } = require('../middleware/rateLimiter');
+const { registerLimiter, forgotPwLimiter, resendVerifyLimiter, mfaChallengeLimiter, verifyEmailLimiter, verifyTokenLimiter, otpRequestLimiter, otpVerifyLimiter, emailOtpRequestLimiter, emailOtpVerifyLimiter } = require('../middleware/rateLimiter');
 const internalAuth = require('../middleware/internalAuth');
 
 // ---------------------------------------------------------------------------
@@ -68,6 +68,7 @@ router.post('/forgot-password', forgotPwLimiter,    ctrl.forgotPassword);
 router.post('/reset-password',                      ctrl.resetPassword);
 router.get('/verify-email',    verifyEmailLimiter,  ctrl.verifyEmail);
 router.post('/verify-email',   verifyEmailLimiter,  ctrl.verifyEmail);
+router.post('/resend-verification', resendVerifyLimiter, ctrl.resendVerification);
 router.post('/verify-token',   verifyTokenLimiter,  ctrl.verifyToken);
 
 // Internal S2S (dual-issue window): an island service mints a canonical token for a user it has

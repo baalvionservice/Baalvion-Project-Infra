@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-06T19:53:54.118Z",
+  "generatedAt": "2026-09-07T23:08:04.112Z",
   "services": [
     "about-service",
     "account-service",
@@ -13,6 +13,7 @@
     "baalvion-os",
     "brand-connector-service",
     "cache",
+    "canwemarry-service",
     "cms-service",
     "commerce-service",
     "community-service",
@@ -103,6 +104,9 @@
       "auth-service"
     ],
     "cache": [],
+    "canwemarry-service": [
+      "auth-service"
+    ],
     "cms-service": [
       "auth-service"
     ],
