@@ -65,6 +65,14 @@
          old majors here would conflict with the BOM. The 4.1.0 BOM already carries the CVE-patched
          versions those overrides existed for — re-check Trivy/Dependabot after the migration and
          re-add a within-major override only if a specific CVE is still flagged. -->
+    <!-- Doing exactly what the note above prescribes. Trivy fails every module's image scan on
+         tomcat-embed-core 11.0.24, which the SB 4.1.1 BOM ships:
+             CVE-2026-65182  CRITICAL
+             CVE-2026-65905  CRITICAL
+             CVE-2026-68525  CRITICAL
+         All three are fixed in 11.0.25 — a within-major patch bump, so no Jakarta EE 11 or BOM
+         conflict. Property is BOM-managed, so this lifts every module at once. -->
+    <tomcat.version>11.0.25</tomcat.version>
   </properties>
 
   <dependencyManagement>

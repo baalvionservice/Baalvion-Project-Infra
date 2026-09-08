@@ -79,6 +79,27 @@ async function remove({ id, user }) {
     return { id, status: 'closed' };
 }
 
+/**
+ * A company's OWN rounds, whatever their status.
+ *
+ * listPublic is discovery — it deliberately returns only live, public rounds. That left a founder
+ * with no way to see the draft they had just created, so the dashboard showed nothing and the
+ * publish step was unreachable. This is the owner's view: scoped to the caller's org, never
+ * accepting an org from the client.
+ */
+async function listMine({ orgId, query = {} }) {
+    if (!orgId) throw new AppError('NO_ORG', 'Your account is not linked to an organisation', 403);
+    const { order, limit, offset, page } = parseListQuery(query, { sortable: SORTABLE, defaultSort: ['created_at', 'DESC'] });
+    const where = { org_id: orgId };
+    if (query.status) where.status = query.status;
+    if (query.company_id) where.company_id = query.company_id;
+    const { count, rows } = await db.Opportunity.findAndCountAll({
+        where, order, limit, offset,
+        include: [{ model: db.Company, as: 'company', required: false }],
+    });
+    return paginate({ rows, count, page, limit });
+}
+
 // Go live — only the owning org (or staff), and only once the company is approved.
 async function publish({ id, user }) {
     const opp = await db.Opportunity.findByPk(id);
@@ -103,4 +124,4 @@ async function recommended({ investorId, orgId, limit }) {
     return recommendForInvestor(id, { limit: limit || 20 });
 }
 
-module.exports = { SORTABLE, listPublic, getById, create, update, remove, publish, recommended };
+module.exports = { SORTABLE, listPublic, listMine, getById, create, update, remove, publish, recommended };

@@ -18,6 +18,11 @@ import { CandidateInsights } from './candidate-insights';
 import { CompanyInsights } from './company-insights';
 import { PlatformInsights } from './platform-insights';
 
+// Reads live ControlTheMarket data through @/lib/api, which throws CtmDataError when
+// ctm-service is unreachable rather than showing placeholder data. Prerendering this at
+// build time therefore fails; it is a per-request view, not a static page.
+export const dynamic = 'force-dynamic';
+
 const calculateAggregatedScore = (
   evaluations: Evaluation[]
 ): { score: number; criteria: Record<string, number> } => {

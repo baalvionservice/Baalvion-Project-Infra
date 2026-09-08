@@ -9,12 +9,30 @@ FROM base AS pruner
 COPY . .
 RUN pnpm dlx turbo@2.9.14 prune community-service --docker
 
+# The @baalvion/* packages this service depends on are TypeScript and compile to dist/, which
+# is .gitignored and therefore never in the build context. turbo prune's filtered install cannot
+# build them: it omits the devDeps (tsup) and the root tsconfig.base.json those builds need, and
+# it cannot resolve type deps of packages reached only transitively. So build them exactly the
+# way deploy/consolidated/Dockerfile.node does — a full Backend workspace install with devDeps —
+# and carry the dist/ forward. Skipping this leaves paymentSpine.js's top-level
+# require('@baalvion/payment-consistency') throwing at module load, so the service never boots.
+FROM base AS pkgbuild
+COPY deploy/consolidated/pnpm-workspace.docker.yaml ./pnpm-workspace.yaml
+COPY package.json pnpm-lock.yaml tsconfig.base.json ./
+COPY Backend ./Backend
+RUN pnpm install --no-frozen-lockfile --prod=false \
+ && pnpm -r --filter "./Backend/packages/*" run build \
+ && mkdir -p /dists \
+ && for d in Backend/packages/*/dist; do mkdir -p "/dists/$(dirname "$d")"; cp -r "$d" "/dists/$(dirname "$d")/"; done
+
 FROM base AS installer
 COPY .npmrc ./
 COPY --from=pruner /repo/out/json/ ./
 COPY --from=pruner /repo/out/pnpm-lock.yaml ./pnpm-lock.yaml
 RUN pnpm install --no-frozen-lockfile --filter community-service...
 COPY --from=pruner /repo/out/full/ ./
+# dist/ only — merges into the pruned package dirs without dragging in build-stage deps.
+COPY --from=pkgbuild /dists/Backend/packages ./Backend/packages
 RUN pnpm deploy --filter=community-service --prod /out
 
 FROM node:20.12-alpine AS final

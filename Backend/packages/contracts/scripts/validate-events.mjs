@@ -50,10 +50,33 @@ const samples = {
     timestamp: new Date().toISOString(), traceId: 't3',
     payload: { invoiceId: 'inv1', orgId: 'o1', periodStart: new Date().toISOString(), periodEnd: new Date().toISOString(), totalGb: 12.5, amount: 37.5, currency: 'USD', signature: 'abc' },
   },
+  'baalvion://events/billing.invoice.generated.v2.json': {
+    id: '77777777-7777-7777-7777-777777777777', type: 'billing.invoice.generated', orgId: 'o1', siteId: 'proxy', userId: null,
+    timestamp: new Date().toISOString(), traceId: 't7',
+    payload: {
+      invoiceId: 'inv1', orgId: 'o1', siteId: 'proxy',
+      periodStart: new Date().toISOString(), periodEnd: new Date().toISOString(),
+      totalGb: 12.5, money: { amount: '3750', currency: 'USD', exponent: 2 }, signature: 'abc',
+    },
+  },
   'baalvion://events/provider.health.changed.v1.json': {
     id: '44444444-4444-4444-4444-444444444444', type: 'provider.health.changed', orgId: null, userId: null,
     timestamp: new Date().toISOString(), traceId: 't4',
     payload: { provider: 'oxylabs', previousState: 'HEALTHY', newState: 'DEGRADED', successRate: 0.82, banRate: 0.2, latencyMs: 1900, region: 'us-east-1' },
+  },
+  'baalvion://events/payment.recorded.v1.json': {
+    id: '66666666-6666-6666-6666-666666666666', type: 'payment.recorded', orgId: 'o1', siteId: 'community', userId: null,
+    timestamp: new Date().toISOString(), traceId: 't6',
+    payload: {
+      paymentId: 'pay_01J8', siteId: 'community', tenantId: 'community:founders-circle', partyId: null,
+      state: 'CAPTURED', provider: 'crypto', rail: 'crypto', providerPaymentId: '0xabc',
+      customer: { authUserId: null, email: 'buyer@example.com', emailVerified: true, phone: null, phoneVerified: false, name: 'A Buyer', siteCustomerId: 'u1' },
+      money: { amount: '1000055', currency: 'INR', exponent: 2 },
+      fee: { amount: '23600', currency: 'INR', exponent: 2 },
+      net: { amount: '976455', currency: 'INR', exponent: 2 },
+      idempotencyKey: 'pay_01J8:CAPTURED:0xabc', orderRef: 'community:founders-circle:u1',
+      failureReason: null, occurredAt: new Date().toISOString(),
+    },
   },
   'baalvion://events/abuse.action.triggered.v1.json': {
     id: '55555555-5555-5555-5555-555555555555', type: 'abuse.action.triggered', orgId: 'o1', userId: null,

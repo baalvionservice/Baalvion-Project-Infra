@@ -11,6 +11,11 @@ import {
 } from '@/components/ui/card';
 import { getLeaderboard } from '@/lib/ranking-engine';
 
+// Reads live ControlTheMarket data through @/lib/api, which throws CtmDataError when
+// ctm-service is unreachable rather than showing placeholder data. Prerendering this at
+// build time therefore fails; it is a per-request view, not a static page.
+export const dynamic = 'force-dynamic';
+
 
 // The local CandidateRanking type is now aligned with the LeaderboardRanking from the engine.
 export type CandidateRanking = {

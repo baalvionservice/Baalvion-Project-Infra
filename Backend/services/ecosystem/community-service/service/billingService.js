@@ -5,6 +5,8 @@
 // here — payment-service owns the merchant wallet config and chain polling.
 const crypto = require('crypto');
 const db = require('../models');
+const { Money } = require('@baalvion/money');
+const paymentSpine = require('./paymentSpine');
 const nodebb = require('./nodebbClient');
 const moderation = require('./moderationService');
 const { SECRET: INTERNAL_SECRET } = require('./internalSecret');
@@ -114,10 +116,13 @@ async function fulfill({ eventId, metadata, amountMinor, currency, providerRef }
         where: { community_id: community.id, user_id: userId },
         defaults: { community_id: community.id, user_id: userId, role: 'member' },
     });
+    // Exact: the currency's own exponent, not a hardcoded /100, and no float hop. The column
+    // is a decimal, so it takes the exact string rather than a divided double.
+    const paid = Money.of(amountMinor || 0, currency || 'USD');
     await membership.update({
         status: 'paid',
         tier: 'paid',
-        amount_usd: (amountMinor || 0) / 100,
+        amount_usd: paid.toDecimalString(),
         currency: currency || 'USD',
         payment_ref: providerRef || null,
         started_at: new Date(),
@@ -141,6 +146,17 @@ async function fulfill({ eventId, metadata, amountMinor, currency, providerRef }
     });
 
     await claim.update({ status: 'applied' });
+
+    // Report onto the platform spine so this payment appears on the cross-estate panel,
+    // attributed to this site and to the community that earned it. Never fatal: a spine
+    // failure must not turn a paid membership into a 503 that payment-service retries.
+    await paymentSpine.reportMembershipPayment({
+        eventId, communitySlug, userId, amountMinor, currency, providerRef,
+        email: metadata && metadata.email,
+    }).catch((err) => {
+        console.warn(JSON.stringify({ evt: 'payment_spine.report_failed', eventId, msg: err.message }));
+    });
+
     return { applied: true, duplicate: false };
 }
 

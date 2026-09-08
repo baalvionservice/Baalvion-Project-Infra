@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-24T12:01:33.158Z",
+  "generatedAt": "2026-09-06T19:53:54.118Z",
   "services": [
     "about-service",
     "account-service",
@@ -7,6 +7,7 @@
     "agent-service",
     "aml-service",
     "audit-service",
+    "auth-gateway",
     "auth-node",
     "auth-service",
     "baalvion-os",
@@ -16,6 +17,7 @@
     "commerce-service",
     "community-service",
     "credit-service",
+    "crm-service",
     "ctm-service",
     "dashboard-service",
     "deal-room-service",
@@ -36,14 +38,20 @@
     "law-service",
     "ledger-service",
     "market-service",
+    "marketplace-service",
     "mining-service",
     "ml-service",
+    "network-graph-service",
     "news-service",
     "notification-service",
     "oauth-service",
+    "order-execution-service",
+    "order-service",
     "payment-rails-service",
     "payment-service",
+    "product-registry-service",
     "proxy-platform",
+    "quality-inspection-service",
     "rbac-service",
     "real-estate-service",
     "realtime-service",
@@ -55,8 +63,10 @@
     "session-service",
     "settlement-service",
     "smart-contract-service",
+    "supplier-lifecycle-service",
     "tenancy",
     "tenant-service",
+    "trade-documentation-service",
     "trade-finance-service",
     "trade-intelligence-service",
     "trade-service",
@@ -82,6 +92,10 @@
     "audit-service": [
       "auth-service"
     ],
+    "auth-gateway": [
+      "auth-service",
+      "session-service"
+    ],
     "auth-node": [],
     "auth-service": [],
     "baalvion-os": [],
@@ -102,6 +116,9 @@
       "auth-service",
       "ledger-service",
       "account-service"
+    ],
+    "crm-service": [
+      "auth-service"
     ],
     "ctm-service": [
       "auth-service"
@@ -163,10 +180,19 @@
     "market-service": [
       "auth-service"
     ],
+    "marketplace-service": [
+      "auth-service",
+      "audit-service",
+      "aml-service",
+      "account-service"
+    ],
     "mining-service": [
       "auth-service"
     ],
     "ml-service": [
+      "auth-service"
+    ],
+    "network-graph-service": [
       "auth-service"
     ],
     "news-service": [
@@ -179,6 +205,12 @@
     "oauth-service": [
       "auth-service"
     ],
+    "order-execution-service": [
+      "auth-service"
+    ],
+    "order-service": [
+      "auth-service"
+    ],
     "payment-rails-service": [
       "auth-service",
       "ledger-service",
@@ -187,9 +219,15 @@
     "payment-service": [
       "auth-service"
     ],
+    "product-registry-service": [
+      "auth-service"
+    ],
     "proxy-platform": [
       "auth-service",
       "commerce-service"
+    ],
+    "quality-inspection-service": [
+      "auth-service"
     ],
     "rbac-service": [
       "auth-service"
@@ -224,8 +262,14 @@
     "smart-contract-service": [
       "auth-service"
     ],
+    "supplier-lifecycle-service": [
+      "auth-service"
+    ],
     "tenancy": [],
     "tenant-service": [
+      "auth-service"
+    ],
+    "trade-documentation-service": [
       "auth-service"
     ],
     "trade-finance-service": [

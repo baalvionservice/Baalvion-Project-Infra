@@ -1,0 +1,29 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: marketplace-service
+  description: >-
+    Baalvion Invest — the investment marketplace and deal room: companies, investors and
+    opportunities, then the bilateral deal lifecycle (NDA-gated data room, due diligence,
+    versioned term sheets, e-signature, escrow and cap-table issuance on release).
+  domain: commerce
+  division: commerce
+  context: investment-marketplace
+  owner: "@baalvion/commerce"
+  # tier-1: holds the deal room and the cap table, and gates escrow release.
+  tier: tier-1
+  repo: baalvion-platform
+  path: Backend/services/marketplace/marketplace-service
+spec:
+  lifecycle: beta
+  language: node
+  datastores: [postgres]
+  # auth-service supplies the RS256 keys the canonical verifier checks tokens against;
+  # audit-service receives the deal-room trail; aml/account are the KYC/AML seam
+  # (integrations/compliance.js) and run a local screen until their URLs are configured.
+  dependsOn: [auth-service, audit-service, aml-service, account-service]
+  consumesEvents: []
+  producesEvents: []
+  apis: ["/v1/companies", "/v1/investors", "/v1/opportunities", "/v1/deals", "/v1/admin"]
+  slo: { availability: 0.99, latencyP95Ms: 400 }
+  deploy: { chart: baalvion-service, namespace: baalvion-commerce, minReplicas: 2, maxReplicas: 10 }

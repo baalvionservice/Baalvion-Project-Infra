@@ -4,13 +4,20 @@ const ctrl = require('../controller/websiteController');
 const { loadCmsRole, requireCmsRole } = require('../middleware/cmsAccess');
 const { resolveWebsiteParam } = require('../middleware/resolveWebsite');
 const { validate } = require('../middleware/validate');
-const { createWebsiteSchema, updateWebsiteSchema, addMemberSchema, updateMemberRoleSchema } = require('../validators/websiteSchemas');
+const { createWebsiteSchema, updateWebsiteSchema, addMemberSchema, updateMemberRoleSchema, grantAccessSchema } = require('../validators/websiteSchemas');
 
 const router = Router();
 
 // /cms/websites
 router.get('/', ctrl.list);
 router.post('/', validate(createWebsiteSchema), ctrl.create);
+
+// Grant one person access to several websites at once. Declared BEFORE the /:websiteId
+// block so the literal path can never be captured as a websiteId param.
+router.get('/access-grants', ctrl.listAllGrants);
+router.post('/access-grants', validate(grantAccessSchema), ctrl.grantAccess);
+// Offboarding: DELETE /access-grants?userId=<id> removes the person from every website.
+router.delete('/access-grants', ctrl.revokeAllAccess);
 
 // /cms/websites/:websiteId — loadCmsRole resolves a slug in :websiteId to the
 // canonical UUID. The delete route has no loadCmsRole, so it gets the standalone

@@ -1,0 +1,23 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: network-graph-service
+  description: >-
+    GTOS trade relationship graph (Neo4j): supplier/buyer network, sanctions path-finding, visibility. Graph store is not a Postgres system of record.
+  domain: commerce
+  division: commerce
+  context: trade-network-graph
+  owner: "@baalvion/commerce"
+  # tier derived from blast radius at registration — confirm with the owning team.
+  tier: tier-2
+  repo: baalvion-platform
+  path: Backend/services/trade/network-graph-service
+spec:
+  lifecycle: production
+  language: node
+  datastores: []
+  dependsOn: [auth-service]
+  consumesEvents: []
+  producesEvents: []
+  slo: { availability: 0.99, latencyP95Ms: 400 }
+  deploy: { chart: baalvion-service, namespace: baalvion-commerce, minReplicas: 2, maxReplicas: 10 }

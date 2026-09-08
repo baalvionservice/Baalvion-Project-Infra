@@ -1,7 +1,11 @@
 CREATE SCHEMA IF NOT EXISTS ledger;
 
--- Enable RLS
-ALTER SCHEMA ledger OWNER TO postgres;
+-- Schema owner. V003/V004 rely on the app connecting AS the owner for their RLS semantics,
+-- so this must be the role that actually runs the migration rather than a hardcoded name:
+-- `postgres` does not exist on every deployment (the consolidated box's superuser is
+-- baalvion_app), and the unguarded ALTER failed V001 outright with 42704 role does not exist.
+-- CURRENT_USER is spring.flyway.user, which defaults to the same DB_USER the app connects as.
+ALTER SCHEMA ledger OWNER TO CURRENT_USER;
 
 CREATE TABLE ledger.journal_entries (
   id uuid PRIMARY KEY,

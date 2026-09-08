@@ -1,0 +1,23 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: trade-documentation-service
+  description: >-
+    GTOS trade documents: invoice, packing list, bill of lading, certificate of origin, LC documents — generate, version and e-sign.
+  domain: commerce
+  division: commerce
+  context: trade-documentation
+  owner: "@baalvion/commerce"
+  # tier derived from blast radius at registration — confirm with the owning team.
+  tier: tier-1
+  repo: baalvion-platform
+  path: Backend/services/trade/trade-documentation-service
+spec:
+  lifecycle: production
+  language: node
+  datastores: [postgres]
+  dependsOn: [auth-service]
+  consumesEvents: []
+  producesEvents: []
+  slo: { availability: 0.99, latencyP95Ms: 400 }
+  deploy: { chart: baalvion-service, namespace: baalvion-commerce, minReplicas: 2, maxReplicas: 10 }

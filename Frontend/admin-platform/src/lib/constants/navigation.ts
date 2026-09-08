@@ -308,6 +308,8 @@ export const NAVIGATION: NavGroup[] = [
         roles: ['super_admin', 'owner', 'admin'],
         children: [
           { title: 'Transactions',  href: '/payments',               iconName: 'ArrowLeftRight' },
+          { title: 'All properties', href: '/payments/records',      iconName: 'Globe'          },
+          { title: 'Identity reviews', href: '/payments/parties',   iconName: 'Users'          },
           { title: 'Subscriptions', href: '/payments/subscriptions', iconName: 'RefreshCw'      },
           { title: 'Invoices',      href: '/payments/invoices',      iconName: 'Receipt'        },
           { title: 'Webhooks',      href: '/payments/webhooks',      iconName: 'Webhook'        },
@@ -364,6 +366,12 @@ export const NAVIGATION: NavGroup[] = [
   {
     label: 'People',
     items: [
+      {
+        title: 'People',
+        href: '/people',
+        iconName: 'Users',
+        roles: ['super_admin', 'owner', 'admin'],
+      },
       {
         title: 'Staff',
         href: '/staff',

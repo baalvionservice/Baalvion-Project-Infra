@@ -119,6 +119,39 @@ Cross-cutting request/response behavior is identical across every resource:
 - **Layering** — routes are thin controllers (validate → delegate → shape response); all
   business logic and authorization live in `service/*Service.js`.
 
+### Tenant isolation (RLS)
+
+Every table in the `marketplace` schema carries a fail-closed Row-Level Security policy.
+Two shapes, because the data has two shapes:
+
+- **Single-tenant tables** (`companies`, `investors`, `opportunities`, …) use the canonical
+  `org_id` match from `@baalvion/tenancy` (migrations `002` / `004`).
+- **The deal room** is bilateral, so it cannot: a deal belongs to *two* orgs plus any invited
+  members, and its children (`deal_messages`, `nda_agreements`, `data_room_documents`,
+  `term_sheets`, `escrow_transactions`, …) are keyed only by `deal_id`. Migration `005` therefore
+  keys on **membership** — a child row is visible exactly when its parent deal is, so the rule
+  lives in one place and cannot drift per table.
+
+Two carve-outs, both deliberate and both SELECT-only (migration `007`): live `public`
+opportunities and the companies behind them stay readable with no tenant set, because
+marketplace discovery is cross-tenant by definition. Writes still go through tenant isolation.
+
+**RLS is inert until the service connects as a non-superuser.** Postgres ignores RLS entirely
+for superusers, so with `DB_USER=baalvion` (the schema owner, a superuser) the policies exist
+but enforce nothing. The cutover is:
+
+```bash
+node scripts/migrate.js          # as the OWNER — 006 grants DML to baalvion_app
+DB_USER=baalvion_app DB_PASSWORD=… npm start
+```
+
+`middleware/tenantConnection.js` is the runtime half: it opens one transaction per request and
+stamps `app.current_tenant` LOCAL to it from the verified `req.user.orgId`. Without it every
+query on the `baalvion_app` role returns zero rows — the policies fail closed by design.
+
+Verify the whole thing end to end (happy path plus the authz attacks it blocks) with
+`node tests/dealroom-isolation.verify.mjs` — see the header in that file for prerequisites.
+
 ## Configuration
 
 Configuration is environment-driven (`config/appConfig.js`); copy `.env` from the example.

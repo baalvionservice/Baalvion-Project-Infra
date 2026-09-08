@@ -30,6 +30,27 @@ exports.getUserDetail = async (req, res, next) => {
     } catch (err) { next(err); }
 };
 
+/**
+ * PATCH /admin/users/:userId/role — change a person's ORG role (the one authz actually reads).
+ * The rank guards live in the service so they hold for any caller, not just this route.
+ */
+exports.changeUserRole = async (req, res, next) => {
+    try {
+        const { userId } = req.params;
+        const { role } = req.body || {};
+        if (!role || typeof role !== 'string') {
+            throw new AppError('INVALID_REQUEST', 'A role is required', 400);
+        }
+        const result = await adminService.changeUserRole(
+            userId,
+            role,
+            { id: req.auth.userId, roles: req.auth.roles || [] },
+            req.ip,
+        );
+        sendSuccess(req, res, result);
+    } catch (err) { next(err); }
+};
+
 exports.suspendUser = async (req, res, next) => {
     try {
         const { userId } = req.params;

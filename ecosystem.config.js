@@ -148,7 +148,12 @@ module.exports = {
     svc('jobs-service', './Backend/services/ecosystem/jobs-service'),
     svc('market-service', './Backend/services/commerce/market-service'),
     // Now resolves its own node_modules (pnpm install) — no NODE_PATH borrow.
-    svc('marketplace-service', './Backend/services/marketplace/marketplace-service'),
+    // PORT pinned to :3060 — the port the IR app's BFF and the gateway upstream both target.
+    // DATA_ROOM_DRIVER is explicit so a deploy never silently falls back to pod-local disk.
+    svc('marketplace-service', './Backend/services/marketplace/marketplace-service', {
+      PORT: '3060',
+      DATA_ROOM_DRIVER: process.env.DATA_ROOM_DRIVER || 'local',
+    }),
     svc('mining-service', './Backend/services/ecosystem/mining-service'),
     svc('notification-service', './Backend/services/infrastructure/notification-service'),
     svc('oauth-service', './Backend/services/identity/oauth-service'),

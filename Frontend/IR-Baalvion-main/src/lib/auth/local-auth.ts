@@ -18,6 +18,14 @@ export const REFRESH_COOKIE =
   process.env.NEXT_PUBLIC_REFRESH_COOKIE_NAME || 'baalvion_refresh';
 
 /**
+ * NON-httpOnly presence hint. Carries NO identity, NO role and NO authorization value — it is a
+ * single character whose only job is to let the client skip a refresh call it knows will 401.
+ * It must never gate anything: forging it buys an attacker one rejected request. (The old
+ * forgeable `baalvion_session_mock` ROLE cookie is a different thing entirely and stays deleted.)
+ */
+export const SESSION_HINT_COOKIE = 'baalvion_has_session';
+
+/**
  * Whether the local (dev/standalone) auth backend is permitted to run.
  * Fail-closed: production ALWAYS returns false regardless of any other env var, so the
  * /api/auth-local routes and seed accounts cannot exist in a production deployment.

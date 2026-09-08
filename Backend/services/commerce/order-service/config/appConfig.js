@@ -61,8 +61,15 @@ module.exports = {
     // any resulting gap. transactionRef gives idempotency, so a later backfill is always safe.
     ledger: {
         baseUrl:     process.env.LEDGER_BASE_URL || 'http://localhost:3014',
-        apiPrefix:   process.env.LEDGER_API_PREFIX || '/v1',
+        // ledger-service maps its controller at /api/v1/ledger — a '/v1' prefix 404s every call.
+        apiPrefix:   process.env.LEDGER_API_PREFIX || '/api/v1',
         internalKey: process.env.LEDGER_INTERNAL_KEY || '',
+        // ledger-service is a Spring resource server: server-to-server callers authenticate with
+        // the platform shared secret in `x-internal-secret` (InternalServiceAuthFilter -> ROLE_INTERNAL),
+        // which is a different thing from LEDGER_INTERNAL_KEY above — that one is only the on/off
+        // toggle for this client. Sending the toggle as the credential 401s once the Java service
+        // runs with app.security.enabled=true.
+        internalSecret: process.env.INTERNAL_SERVICE_SECRET || '',
         timeoutMs:   Number(process.env.LEDGER_TIMEOUT_MS || 4000),
         get enabled() { return !!this.internalKey; },
     },

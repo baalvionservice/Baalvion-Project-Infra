@@ -12,6 +12,8 @@ import {
 import { GUIDE_SLUGS } from '@/lib/guides';
 import { INSIGHT_SLUGS } from '@/lib/insights';
 import { RESEARCH_SLUGS } from '@/lib/research';
+import { NETWORK_ENTRIES } from '@/lib/network';
+import { getNetworkDetail } from '@/lib/network-detail';
 
 const BASE_URL = 'https://about.baalvion.com';
 
@@ -101,6 +103,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ['leadership', 0.6],
     ['platform', 0.6],
     ['ecosystem', 0.6],
+    ['network', 0.8],
     ['projects', 0.7],
     ['news', 0.7],
     ['guides', 0.8],
@@ -140,6 +143,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
+  // Network detail pages — only entries with a reviewed deep profile
+  // (see src/lib/network-detail.ts) get their own indexed URL.
+  const networkDetailRoutes: MetadataRoute.Sitemap = NETWORK_ENTRIES.filter((e) => getNetworkDetail(e.slug)).map(
+    (e) => ({
+      url: `${BASE_URL}/network/${e.slug}`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    })
+  );
+
   // Deduplicate by URL (hub routes may overlap with CMS page routes).
   const all = [
     ...hubRoutes,
@@ -154,6 +168,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...guideRoutes,
     ...insightRoutes,
     ...researchRoutes,
+    ...networkDetailRoutes,
   ];
   const seen = new Set<string>();
   return all.filter((entry) => {

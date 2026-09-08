@@ -10,5 +10,5 @@ export default defineConfig({
   treeshake: true,
   target: 'node20',
   outDir: 'dist',
-  external: ['@baalvion/events'],
+  external: ['@baalvion/events', '@baalvion/money', '@baalvion/sites'],
 });

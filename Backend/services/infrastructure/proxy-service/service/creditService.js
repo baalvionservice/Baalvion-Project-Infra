@@ -8,6 +8,7 @@
  */
 const db = require('../models');
 const { AppError } = require('../utils/errors');
+const { Money } = require('@baalvion/money');
 
 const USD_PER_GB = 3;
 // Sane bounds on a single top-up (USD).
@@ -22,7 +23,7 @@ const getBalance = async (orgId) => {
     );
     const balance = Number(rows && rows[0] && rows[0].balance) || 0;
     return {
-        balanceUsd: Math.round(balance * 100) / 100,
+        balanceUsd: Number(Money.fromDatabaseValue(balance ?? 0, 'USD').toDecimalString()),
         gbRemaining: Math.floor((balance / USD_PER_GB) * 100) / 100,
         usdPerGb: USD_PER_GB,
     };

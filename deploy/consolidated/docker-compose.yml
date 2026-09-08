@@ -63,7 +63,15 @@ services:
   app-identity:
     <<: *node-app
     command: ["pm2-runtime","start","/app/pm2/identity.config.js"]
-    environment: { <<: [*db, *redis] }
+    # REFRESH_COOKIE_DOMAIN scopes the httpOnly refresh cookie to the whole apex domain, so a
+    # single sign-in at any *.baalvion.com property is recognised by all of them (admin, trade,
+    # jobs, ir, …) instead of each subdomain demanding its own login. auth-service already
+    # supports it (config.refreshCookieDomain); it was simply never set, so cookies stayed
+    # host-only. Override per environment; leave EMPTY for single-host or local setups, where a
+    # dotted domain would not match localhost and would break login entirely.
+    environment:
+      <<: [*db, *redis]
+      REFRESH_COOKIE_DOMAIN: ${REFRESH_COOKIE_DOMAIN:-.baalvion.com}
     mem_limit: 768m
     mem_reservation: 384m
     healthcheck:

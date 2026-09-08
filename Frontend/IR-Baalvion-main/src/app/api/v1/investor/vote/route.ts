@@ -1,22 +1,8 @@
-import { NextResponse } from 'next/server';
-import { withPermission } from '@/lib/rbac/with-permission';
+import { irForward } from '@/lib/ir-api';
 
-export const POST = withPermission('VOTE_RESOLUTION', async (req) => {
-  const body = await req.json();
-  
-  if (!body.voteId || !body.choice) {
-    return NextResponse.json({ success: false, error: 'BAD_REQUEST', message: 'Missing vote parameters' }, { status: 400 });
-  }
+// Casts a ballot. ir-service owns eligibility and one-vote-per-holder.
+// Previously served hardcoded seed data from this file; it now proxies to ir-service, which owns
+// the records and scopes them to the caller.
+export const dynamic = 'force-dynamic';
 
-  return NextResponse.json({
-    success: true,
-    data: {
-      confirmationId: `CONF-${crypto.randomUUID().slice(0, 8).toUpperCase()}`,
-      recordedAt: new Date().toISOString(),
-    },
-    meta: {
-      timestamp: Date.now(),
-      requestId: crypto.randomUUID(),
-    },
-  });
-});
+export const POST = (req: Request) => irForward(req, '/votes');
