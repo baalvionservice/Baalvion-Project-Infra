@@ -135,6 +135,9 @@ module.exports = {
     svc('auth-service', './Backend/services/identity/auth-service'),
     svc('brand-connector-service', './Backend/services/ecosystem/brand-connector-service'),
     svc('commerce-service', './Backend/services/commerce/commerce-service'),
+    // Schema `canwemarry`. Reached only through the auth-gateway BFF (upstream key
+    // `canwemarry`); ALLOW_PUBLIC_CASES stays off until moderation cover is staffed.
+    svc('canwemarry-service', './Backend/services/ecosystem/canwemarry-service', { PORT: '3070' }),
     // Schema `crm`, brand-scoped (amarise-luxe). Now resolves its own node_modules
     // (pnpm install), so no NODE_PATH borrow from ir-service.
     svc('crm-service', './Backend/services/ecosystem/crm-service', { PORT: '3063' }),
@@ -175,6 +178,14 @@ module.exports = {
     nextApp('amarise-web', './Frontend/AmariseMaisonAvenue-main', 3033),
     // :3043 (moved off :3040, the realtime-service contract port).
     nextApp('baalvion-com-web', './Frontend/baalvion-com-main', 3043),
+    nextApp('canwemarry-web', './Frontend/CanWeMarry-main', 3071, {
+      // Server-side only. The browser reaches the gateway through this app's own origin
+      // (/auth-bff/*, /api/canwemarry/*), so the session cookie stays first-party.
+      // :3099 is where the gateway actually runs (its own .env, health-check.ps1, the fleet
+      // docs). The gateway's CODE default is still the stale :3026, which is jobs-web's
+      // assigned port — pointing this at that default aimed the BFF at the jobs portal.
+      GATEWAY_ORIGIN: process.env.GATEWAY_ORIGIN || 'http://localhost:3099',
+    }),
     nextApp('brand-web', './Frontend/brand-connector-main', 3035),
     nextApp('ctm-web', './Frontend/controlthemarket-main', 3034),
     nextApp('dashboard-web', './Frontend/company-unified-Dashboard-main', 3024),

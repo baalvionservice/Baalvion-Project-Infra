@@ -10,7 +10,8 @@ export function djb2(input: string): number {
 /** Deterministically pick one item from a non-empty array using a seed string. */
 export function pick<T>(items: readonly T[], seed: string, salt = ''): T {
   const h = djb2(`${seed}:${salt}`);
-  return items[h % items.length];
+  // Callers guarantee a non-empty array, so the modulo index always resolves.
+  return items[h % items.length] as T;
 }
 
 /** Deterministically pick `count` distinct items from a non-empty array using a seed string. */
@@ -25,7 +26,7 @@ export function pickMany<T>(items: readonly T[], seed: string, count: number, sa
   while (out.length < count) {
     if (!seen.has(idx)) {
       seen.add(idx);
-      out.push(items[idx]);
+      out.push(items[idx] as T);
     }
     idx = (idx + step) % items.length;
   }
