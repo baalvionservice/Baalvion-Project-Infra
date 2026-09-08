@@ -27,7 +27,9 @@ spec:
   apis: ["/v1/cases", "/v1/communities", "/v1/posts", "/v1/comments", "/v1/resources", "/v1/moderation", "/v1/admin"]
   slo: { availability: 0.99, latencyP95Ms: 400 }
   deploy: { chart: baalvion-service, namespace: baalvion-ecosystem, minReplicas: 1, maxReplicas: 4 }
-  # NOTE: no `runtime:` block. A parallel change adds contract C8 ("a service declares where
-  # it answers") along with the schema property that permits it; until that lands, `runtime`
-  # is an unknown key here and catalog validation rejects it. When C8 merges, this service
-  # needs `runtime: { deployment: not-deployed }` adding back — it is not deployed anywhere.
+  # C8 has landed with this change, so the runtime block the note here asked for is now
+  # declared. CanWeMarry runs under the root ecosystem.config.js on :3070 but is not in the
+  # consolidated production deploy, so `not-deployed` is the honest answer — the console
+  # reports it as "not set up" rather than as an outage.
+  runtime:
+    deployment: not-deployed
