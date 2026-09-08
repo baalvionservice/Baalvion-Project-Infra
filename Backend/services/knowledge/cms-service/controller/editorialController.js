@@ -14,6 +14,12 @@ const charterService = require('../service/editorial/charterService');
 const policyService = require('../service/editorial/policyService');
 const intakeService = require('../service/editorial/intakeService');
 const clusterService = require('../service/editorial/clusterService');
+const briefService = require('../service/editorial/briefService');
+const draftService = require('../service/editorial/draftService');
+const gateService = require('../service/editorial/gateService');
+const pipelineService = require('../service/editorial/pipelineService');
+const coverageService = require('../service/editorial/coverageService');
+const artService = require('../service/editorial/artService');
 const { CmsStorySignal, CmsCategory } = require('../models');
 const { sendSuccess } = require('../utils/response');
 const { Op } = require('sequelize');
@@ -123,5 +129,135 @@ exports.runClustering = async (req, res, next) => {
         });
         // The member rows are heavy and the caller only needs the shape.
         sendSuccess(req, res, clusters.map(({ members, ...rest }) => rest));
+    } catch (e) { next(e); }
+};
+
+// ── Briefs (stage 3) ─────────────────────────────────────────────────────────
+
+exports.listBriefs = async (req, res, next) => {
+    try {
+        sendSuccess(req, res, await briefService.listBriefs(siteOf(req), {
+            status: req.query.status || null,
+            limit: req.query.limit,
+        }));
+    } catch (e) { next(e); }
+};
+
+exports.getBrief = async (req, res, next) => {
+    try { sendSuccess(req, res, await briefService.getBrief(siteOf(req), req.params.briefId)); } catch (e) { next(e); }
+};
+
+exports.runBriefing = async (req, res, next) => {
+    try {
+        const body = req.body || {};
+        sendSuccess(req, res, await briefService.runBriefing(siteOf(req), {
+            windowHours: Number(body.windowHours) || 72,
+            limit: Number(body.limit) || 10,
+            force: Boolean(body.force),
+        }));
+    } catch (e) { next(e); }
+};
+
+// ── Drafts (stage 4) ─────────────────────────────────────────────────────────
+
+exports.listDrafts = async (req, res, next) => {
+    try {
+        sendSuccess(req, res, await draftService.listDrafts(siteOf(req), {
+            status: req.query.status || null,
+            gateStatus: req.query.gateStatus || null,
+            limit: req.query.limit,
+        }));
+    } catch (e) { next(e); }
+};
+
+exports.getDraft = async (req, res, next) => {
+    try { sendSuccess(req, res, await draftService.getDraft(siteOf(req), req.params.draftId)); } catch (e) { next(e); }
+};
+
+exports.runDrafting = async (req, res, next) => {
+    try {
+        const body = req.body || {};
+        // A brief id drafts exactly that story; without one the stage works the queue.
+        if (body.briefId) {
+            const draft = await draftService.buildDraft(siteOf(req), body.briefId, {
+                format: body.format || 'news',
+                authorSlug: body.authorSlug || null,
+            });
+            return sendSuccess(req, res, draft, 201);
+        }
+        sendSuccess(req, res, await draftService.runDrafting(siteOf(req), {
+            limit: Number(body.limit) || 5,
+            format: body.format || 'news',
+            authorSlug: body.authorSlug || null,
+        }));
+    } catch (e) { next(e); }
+};
+
+// ── Gates and approval (stage 5) ─────────────────────────────────────────────
+
+exports.gateDraft = async (req, res, next) => {
+    try {
+        sendSuccess(req, res, await gateService.evaluateDraft(siteOf(req), req.params.draftId, {
+            reviewerSlug: (req.body && req.body.reviewerSlug) || null,
+        }));
+    } catch (e) { next(e); }
+};
+
+exports.approveDraft = async (req, res, next) => {
+    try {
+        const body = req.body || {};
+        sendSuccess(req, res, await gateService.approveDraft(siteOf(req), req.params.draftId, userOf(req), {
+            reviewerSlug: body.reviewerSlug || null,
+            overrideNotes: body.notes || null,
+        }));
+    } catch (e) { next(e); }
+};
+
+exports.rejectDraft = async (req, res, next) => {
+    try {
+        sendSuccess(req, res, await gateService.rejectDraft(siteOf(req), req.params.draftId, userOf(req), {
+            notes: (req.body && req.body.notes) || null,
+        }));
+    } catch (e) { next(e); }
+};
+
+// ── Whole pipeline ───────────────────────────────────────────────────────────
+
+exports.preflight = async (req, res, next) => {
+    try { sendSuccess(req, res, await pipelineService.preflight(siteOf(req))); } catch (e) { next(e); }
+};
+
+exports.runPipeline = async (req, res, next) => {
+    try {
+        const body = req.body || {};
+        sendSuccess(req, res, await pipelineService.runPipeline(siteOf(req), {
+            sinceHours: Number(body.sinceHours) || 72,
+            windowHours: Number(body.windowHours) || 72,
+            intakeLimit: Number(body.intakeLimit) || 200,
+            briefLimit: Number(body.briefLimit) || 10,
+            draftLimit: Number(body.draftLimit) || 5,
+            authorSlug: body.authorSlug || null,
+            stopAfter: body.stopAfter || null,
+        }));
+    } catch (e) { next(e); }
+};
+
+// ── Coverage ─────────────────────────────────────────────────────────────────
+
+exports.getCoverage = async (req, res, next) => {
+    try {
+        sendSuccess(req, res, await coverageService.getCoverage(siteOf(req), {
+            days: Math.min(Number(req.query.days) || 7, 90),
+        }));
+    } catch (e) { next(e); }
+};
+
+// ── Art (stage 4b) ───────────────────────────────────────────────────────────
+
+exports.runArt = async (req, res, next) => {
+    try {
+        const draftId = req.body && req.body.draftId;
+        if (draftId) return sendSuccess(req, res, await artService.generateForDraft(siteOf(req), draftId), 201);
+        sendSuccess(req, res, await artService.runArt(siteOf(req), { limit: Number(req.body && req.body.limit) || 20 }));
     } catch (e) { next(e); }
 };
