@@ -799,9 +799,18 @@ function mapCmsCategory(name: string | null | undefined, title: string): string 
   if (/politic|policy|government/.test(n)) return "POLITICS";
   if (/personal.?finance|budget|saving|credit.?score/.test(n)) return "PERSONAL FINANCE";
   if (/invest|portfolio|\betf\b|brokers?\b|bonds?\b|stocks?\b/.test(n)) return "INVESTING";
-  if (/econom|inflation|\bfed\b|banking|monetary/.test(n)) return "FINANCE";
+  // "Finance" itself has to be listed: the CMS category is named exactly that,
+  // and without it the site's second-largest beat fell through to the headline
+  // heuristic and landed on whichever rail a keyword happened to hit.
+  if (/finance|econom|inflation|\bfed\b|banking|monetary/.test(n)) return "FINANCE";
   if (/business|company.?news|earnings/.test(n)) return "BUSINESS";
   if (/^world$|geopolit/.test(n)) return "WORLD";
+  // Region categories are prioritisation buckets, not topic rails — let them
+  // fall through to the headline heuristic rather than claiming MARKETS on the
+  // strength of the word "Markets" in "Emerging Markets".
+  if (/^(u\.?s\.?|europe|asia.?pacific|china|emerging markets|world)$/.test(n.trim())) {
+    return classifyCategory(title);
+  }
   if (/market/.test(n)) return "MARKETS";
   return classifyCategory(title);
 }
@@ -935,7 +944,15 @@ async function topUpNews(
   ].filter((i) => !seen.has(i.headline.toLowerCase()));
 
   const need = Math.max(0, target - newsCount(primary));
-  return { ...primary, latest: [...primary.latest, ...pool.slice(0, need)] };
+
+  // Re-key what we append. buildCmsNews and buildWireNews both number their
+  // `latest` items from 2000, so concatenating the two produced duplicate React
+  // keys the moment the CMS had content to top up — silent while the CMS was
+  // empty, because only one list ever existed. 6000+ is outside every range
+  // these builders assign (1000 featured, 2000 latest, 3000 sections, 4900 the
+  // promoted featured above).
+  const topped = pool.slice(0, need).map((item, i) => ({ ...item, id: 6000 + i }));
+  return { ...primary, latest: [...primary.latest, ...topped] };
 }
 
 // ── timestamp ───────────────────────────────────────────────────────────────

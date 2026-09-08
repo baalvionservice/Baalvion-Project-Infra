@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAdSenseClientId } from './AdSenseClientContext';
 
 // Extend window type for adsbygoogle
@@ -39,6 +39,9 @@ export function AdSenseUnit({
   // replaced a direct process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_ID read (wrong,
   // never-configured env var name; every ad unit silently rendered nothing).
   const clientId = useAdSenseClientId();
+  const insRef = useRef<HTMLModElement | null>(null);
+  // null = undecided (reserve space), true = filled, false = collapse.
+  const [filled, setFilled] = useState<boolean | null>(null);
 
   useEffect(() => {
     // Wait for adsbygoogle script to load, then push ad unit
@@ -60,6 +63,39 @@ export function AdSenseUnit({
     return () => clearTimeout(timer);
   }, [slot]); // Reload when slot changes
 
+  // Collapse the reserved space when no ad arrives.
+  //
+  // The min-height below exists to stop the page jumping when a creative loads,
+  // but it was unconditional: a slot that never fills held 250px of blank page
+  // forever. On an article with three in-body units that is ~840px of dead space
+  // between paragraphs, which is what it looked like — and it is guaranteed while
+  // the account is unapproved, since nothing fills at all.
+  //
+  // AdSense stamps data-ad-status="filled" | "unfilled" on the <ins> once it has
+  // decided, so watch for it. The timeout covers the cases where that never
+  // happens — script blocked, request failed, no account — where the honest
+  // outcome is also to collapse.
+  useEffect(() => {
+    const el = insRef.current;
+    if (!el) return undefined;
+
+    const read = () => {
+      const status = el.getAttribute('data-ad-status');
+      if (status === 'unfilled') setFilled(false);
+      else if (status === 'filled') setFilled(true);
+    };
+
+    read();
+    const observer = new MutationObserver(read);
+    observer.observe(el, { attributes: true, attributeFilter: ['data-ad-status'] });
+
+    const giveUp = setTimeout(() => {
+      if (!el.getAttribute('data-ad-status')) setFilled(false);
+    }, 4000);
+
+    return () => { observer.disconnect(); clearTimeout(giveUp); };
+  }, [slot]);
+
   if (!clientId) {
     if (process.env.NODE_ENV === 'development') {
       console.warn(
@@ -77,10 +113,14 @@ export function AdSenseUnit({
     // pages with several ad units, like the homepage. Heights approximate
     // AdSense's typical responsive rectangle/banner sizes; the slot can still
     // grow taller if the served creative is bigger, it just never starts flat.
-    <div className={`min-h-[100px] sm:min-h-[250px] ${className}`}>
+    <div
+      className={filled === false ? '' : `min-h-[100px] sm:min-h-[250px] ${className}`}
+      aria-hidden={filled === false ? true : undefined}
+    >
       <ins
+        ref={insRef}
         className="adsbygoogle"
-        style={{ display: 'block' }}
+        style={{ display: filled === false ? 'none' : 'block' }}
         data-ad-client={clientId}
         data-ad-slot={slot}
         data-ad-format={format}
