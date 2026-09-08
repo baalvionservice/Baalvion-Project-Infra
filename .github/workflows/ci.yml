@@ -199,6 +199,13 @@ jobs:
       - name: Build App
         run: pnpm ${{ steps.build-cmd.outputs.cmd }}
         working-directory: Frontend/${{ matrix.app }}
+        env:
+          # This job compiles each app to prove it builds; the artifact is never deployed
+          # (Vercel builds its own from source). CanWeMarry refuses an unset SITE_URL because
+          # a real deploy would bake localhost canonicals into its prerendered pages — and the
+          # escape hatch its own error names is exactly this case. Apps that do not read the
+          # flag are unaffected.
+          ALLOW_LOCALHOST_ORIGIN: '1'
         
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v7
