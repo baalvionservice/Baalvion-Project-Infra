@@ -25,6 +25,9 @@ RUN apk add --no-cache dumb-init \
 ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=installer /out ./
+# index.js mkdirSync's the upload root at boot. /app is root-owned and the image drops to
+# USER app below, so create it and hand it over first or the service EACCESes on every start.
+RUN mkdir -p /app/uploads && chown -R app:app /app/uploads
 EXPOSE 3050
 USER app
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
