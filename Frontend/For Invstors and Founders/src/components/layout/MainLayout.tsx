@@ -1,7 +1,7 @@
 import { ReactNode, useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { 
-  Zap, Search, Menu, X, Moon, Sun, LogOut,
+  Zap, Search, Menu, X, Moon, Sun, LogOut, ChevronDown, Shield, MapPin, BookOpen,
   MessageSquare, ShoppingBag, LayoutDashboard, User, Trophy, Sparkles, Briefcase, Wallet, Handshake, Rocket, Crown, Pencil, ClipboardList, KanbanSquare
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,8 @@ interface MainLayoutProps {
 
 export default function MainLayout({ children }: MainLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [darkMode, setDarkMode] = useState(() => document.documentElement.classList.contains("dark"));
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const location = useLocation();
@@ -71,8 +72,10 @@ export default function MainLayout({ children }: MainLayoutProps) {
   };
 
   const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-    document.documentElement.classList.toggle('dark');
+    const next = !darkMode;
+    setDarkMode(next);
+    document.documentElement.classList.toggle('dark', next);
+    try { localStorage.setItem('insiders.theme', next ? 'dark' : 'light'); } catch { /* ignore */ }
     toast({
       title: darkMode ? "Light mode enabled" : "Dark mode enabled",
       duration: 2000,
@@ -92,16 +95,24 @@ export default function MainLayout({ children }: MainLayoutProps) {
     }
   };
 
-  const navItems = [
+  // The directory is the product for a first-time visitor, so it carries the bar on its own.
+  // Everything else needs an account, so it sits one click away under "More" rather than
+  // filling the nav with links that bounce a logged-out founder to /auth.
+  const primaryNav = [
+    { path: "/investors", label: "Investors", icon: Wallet },
+    { path: "/founders", label: "Companies", icon: Rocket },
+    { path: "/directory", label: "Locations", icon: MapPin },
+    { path: "/guides", label: "Guides", icon: BookOpen },
+  ];
+  const memberNav = [
     { path: "/dashboard", label: "Feed", icon: LayoutDashboard },
     { path: "/deals", label: "Deals", icon: Briefcase },
-    { path: "/investors", label: "Investors", icon: Wallet },
-    { path: "/founders", label: "Founders", icon: Rocket },
     { path: "/forums", label: "Forums", icon: MessageSquare },
     { path: "/marketplace", label: "Marketplace", icon: ShoppingBag },
     { path: "/leaderboard", label: "Leaderboard", icon: Trophy },
     { path: "/elite/premium", label: "Elite", icon: Sparkles },
   ];
+  const navItems = [...primaryNav, ...memberNav];
 
   return (
     <div className="min-h-screen bg-background">
@@ -114,16 +125,16 @@ export default function MainLayout({ children }: MainLayoutProps) {
               <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
                 <Zap className="w-6 h-6 text-primary-foreground" />
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-primary to-[hsl(38,92%,50%)] bg-clip-text text-transparent hidden sm:block">
-                Baalvion Elite
+              <span className="text-xl font-semibold tracking-tight hidden sm:block">
+                Baalvion <span className="text-primary">Insiders</span>
               </span>
             </Link>
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-1">
-              {navItems.map((item) => {
+              {primaryNav.map((item) => {
                 const Icon = item.icon;
-                const isActive = location.pathname === item.path;
+                const isActive = location.pathname.startsWith(item.path);
                 return (
                   <Button
                     key={item.path}
@@ -137,18 +148,51 @@ export default function MainLayout({ children }: MainLayoutProps) {
                   </Button>
                 );
               })}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant={memberNav.some((i) => location.pathname.startsWith(i.path)) ? "secondary" : "ghost"}>
+                    More
+                    <ChevronDown className="w-4 h-4 ml-1 opacity-60" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-52">
+                  <DropdownMenuLabel className="text-xs text-muted-foreground">Members</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {memberNav.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <DropdownMenuItem key={item.path} asChild>
+                        <Link to={item.path} className="cursor-pointer">
+                          <Icon className="w-4 h-4 mr-2" />
+                          {item.label}
+                        </Link>
+                      </DropdownMenuItem>
+                    );
+                  })}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </nav>
 
             {/* Right Actions */}
             <div className="flex items-center gap-2">
               {/* Search */}
-              <div className="relative hidden lg:block">
+              <form
+                className="relative hidden lg:block"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const q = searchTerm.trim();
+                  if (q) navigate(`/search?q=${encodeURIComponent(q)}`);
+                }}
+              >
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search..."
-                  className="pl-10 w-48 bg-secondary/50 border-border"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search firms, companies, people"
+                  aria-label="Search the directory"
+                  className="pl-10 w-64 bg-secondary/50 border-border"
                 />
-              </div>
+              </form>
 
               {/* AI Assistant Button */}
               <Button variant="ghost" size="icon" className="hidden sm:flex" aria-label="Open AI assistant">
@@ -175,6 +219,29 @@ export default function MainLayout({ children }: MainLayoutProps) {
                   <DropdownMenuContent align="end" className="w-56">
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
+                    {user?.roles?.includes("admin") && (
+                      <>
+                        <DropdownMenuItem asChild>
+                          <Link to="/admin/investors" className="cursor-pointer">
+                            <Wallet className="w-4 h-4 mr-2" />
+                            Manage investors
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to="/admin/companies" className="cursor-pointer">
+                            <Rocket className="w-4 h-4 mr-2" />
+                            Manage companies
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to="/admin" className="cursor-pointer">
+                            <Shield className="w-4 h-4 mr-2" />
+                            Admin panel
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                      </>
+                    )}
                     <DropdownMenuItem asChild>
                       <Link to="/profile" className="cursor-pointer">
                         <User className="w-4 h-4 mr-2" />
@@ -246,22 +313,26 @@ export default function MainLayout({ children }: MainLayoutProps) {
           {/* Mobile Menu */}
           {mobileMenuOpen && (
             <div className="md:hidden mt-4 pb-4 space-y-2">
-              {navItems.map((item) => {
+              {navItems.map((item, idx) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.path;
                 return (
-                  <Button
-                    key={item.path}
-                    variant={isActive ? "secondary" : "ghost"}
-                    className="w-full justify-start"
-                    asChild
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <Link to={item.path}>
-                      <Icon className="w-4 h-4 mr-2" />
-                      {item.label}
-                    </Link>
-                  </Button>
+                  <div key={item.path}>
+                    {idx === primaryNav.length && (
+                      <div className="pt-3 pb-1 px-3 text-xs uppercase tracking-wide text-muted-foreground">Members</div>
+                    )}
+                    <Button
+                      variant={isActive ? "secondary" : "ghost"}
+                      className="w-full justify-start"
+                      asChild
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Link to={item.path}>
+                        <Icon className="w-4 h-4 mr-2" />
+                        {item.label}
+                      </Link>
+                    </Button>
+                  </div>
                 );
               })}
               <div className="pt-2 border-t border-border">

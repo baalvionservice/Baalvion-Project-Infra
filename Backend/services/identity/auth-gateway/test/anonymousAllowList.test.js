@@ -16,6 +16,30 @@ const path = require('node:path');
 
 const { isAnonymousAllowed, PUBLIC_PATHS } = require('../middleware/anonymousAllowList');
 
+/**
+ * Where each allow-listed prefix is actually served, and what "this route demands a session"
+ * looks like in that service's own vocabulary.
+ *
+ * `demandsAuth` is the list of middleware whose presence on a GET route disqualifies it from
+ * the allow-list. `mustMention` is the tripwire: if a service stops using these names the
+ * check above would pass vacuously, so it is asserted separately.
+ */
+const svcPath = (...p) => path.join(__dirname, '..', '..', '..', ...p);
+const SERVICES = [
+  {
+    prefix: '/canwemarry/v1',
+    routeFile: svcPath('ecosystem', 'canwemarry-service', 'routes', 'v1.js'),
+    demandsAuth: ['requireAuth', 'requireStaff', 'requireAdmin', 'requirePermission', 'requireVerified'],
+    mustMention: ['requireAuth', 'optionalAuth', 'requireStaff', 'requireAdmin'],
+  },
+  {
+    prefix: '/insiders/v1',
+    routeFile: svcPath('ecosystem', 'insiders-service', 'routes', 'v1.js'),
+    demandsAuth: ['authMiddleware', 'requireRole', 'requireAuth', 'requireAdmin'],
+    mustMention: ['authMiddleware', 'requireRole', 'optionalAuth'],
+  },
+];
+
 test('public reads are allowed without a session', () => {
   for (const p of ['/canwemarry/v1/cases', '/canwemarry/v1/resources', '/canwemarry/v1/me']) {
     assert.equal(isAnonymousAllowed('GET', p), true, p);
@@ -66,48 +90,59 @@ test('the list is exact, never a prefix', () => {
 });
 
 test('no allow-listed path is served upstream by a route that demands a session', () => {
-  // The invariant that makes the list safe, read from the service's own route table so the
+  // The invariant that makes the list safe, read from each service's own route table so the
   // two cannot drift apart silently.
   //
   // The rule is the absence of a hard gate, not the presence of `optionalAuth`: the
   // invitation preview carries no auth middleware at all — the token in the URL is the
   // proof, and somebody who was sent a link must be able to see what it is before deciding
   // whether to make an account. What must never appear is requireAuth and its stricter kin.
-  const routeFile = path.join(
-    __dirname, '..', '..', '..', 'ecosystem', 'canwemarry-service', 'routes', 'v1.js',
-  );
-  const source = fs.readFileSync(routeFile, 'utf8');
+  //
+  // Guard names are per-service on purpose. Insiders gates with `authMiddleware`/`requireRole`
+  // and knows nothing of `requireAuth`; checking it against CanWeMarry's vocabulary would pass
+  // on every path while proving nothing.
+  for (const svc of SERVICES) {
+    const source = fs.readFileSync(svc.routeFile, 'utf8');
 
-  const DEMANDS_AUTH = ['requireAuth', 'requireStaff', 'requireAdmin', 'requirePermission', 'requireVerified'];
+    // Each `router.get('<path>', <chain>);` — the chain read whole, not just its first entry.
+    const routes = new Map();
+    const re = /router\.get\(\s*'([^']+)'\s*,([\s\S]*?)\);/g;
+    let m;
+    while ((m = re.exec(source)) !== null) routes.set(m[1], m[2]);
+    assert.ok(routes.size > 5, `route table did not parse for ${svc.prefix} — the check would pass vacuously`);
 
-  // Each `router.get('<path>', <chain>);` — the chain read whole, not just its first entry.
-  const routes = new Map();
-  const re = /router\.get\(\s*'([^']+)'\s*,([\s\S]*?)\);/g;
-  let m;
-  while ((m = re.exec(source)) !== null) routes.set(m[1], m[2]);
-  assert.ok(routes.size > 5, 'route table did not parse — the check would pass vacuously');
-
-  for (const listed of PUBLIC_PATHS) {
-    const upstream = listed.replace('/canwemarry/v1', '');
-    const chain = routes.get(upstream);
-    assert.ok(chain !== undefined, `allow-listed path has no GET route upstream: ${upstream}`);
-    for (const guard of DEMANDS_AUTH) {
-      assert.ok(
-        !new RegExp(`\\b${guard}\\b`).test(chain),
-        `allow-listed path ${upstream} is mounted with ${guard} — it is not public`,
-      );
+    for (const listed of PUBLIC_PATHS.filter((x) => x.startsWith(`${svc.prefix}/`))) {
+      const upstream = listed.slice(svc.prefix.length);
+      const chain = routes.get(upstream);
+      assert.ok(chain !== undefined, `allow-listed path has no GET route upstream: ${upstream}`);
+      for (const guard of svc.demandsAuth) {
+        assert.ok(
+          !new RegExp(`\\b${guard}\\b`).test(chain),
+          `allow-listed path ${upstream} is mounted with ${guard} — it is not public`,
+        );
+      }
     }
   }
 });
 
-test('the guard names the invariant checks for are the ones the service actually uses', () => {
+test('every allow-listed path belongs to a service the invariant actually checks', () => {
+  // Without this, adding a path under a brand-new prefix would skip the check above entirely
+  // and publish it unexamined.
+  for (const listed of PUBLIC_PATHS) {
+    assert.ok(
+      SERVICES.some((svc) => listed.startsWith(`${svc.prefix}/`)),
+      `allow-listed path is under no known service prefix: ${listed}`,
+    );
+  }
+});
+
+test('the guard names the invariant checks for are the ones each service actually uses', () => {
   // If a route file were refactored to gate with a differently-named middleware, the check
   // above would silently pass on every path. This fails first, and loudly.
-  const routeFile = path.join(
-    __dirname, '..', '..', '..', 'ecosystem', 'canwemarry-service', 'routes', 'v1.js',
-  );
-  const source = fs.readFileSync(routeFile, 'utf8');
-  for (const guard of ['requireAuth', 'optionalAuth', 'requireStaff', 'requireAdmin']) {
-    assert.ok(source.includes(guard), `route table no longer mentions ${guard}`);
+  for (const svc of SERVICES) {
+    const source = fs.readFileSync(svc.routeFile, 'utf8');
+    for (const guard of svc.mustMention) {
+      assert.ok(source.includes(guard), `${svc.prefix} route table no longer mentions ${guard}`);
+    }
   }
 });

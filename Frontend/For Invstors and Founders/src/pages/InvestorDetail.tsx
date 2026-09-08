@@ -14,23 +14,29 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import {
-  ArrowLeft, BadgeCheck, MapPin, Globe, Linkedin, Twitter, Instagram, Facebook, Wallet, Briefcase, Mail, Phone, Building2, Landmark, ExternalLink, TrendingUp, Newspaper, Users, Link2, ShieldCheck,
+  ArrowLeft, BadgeCheck, MapPin, Globe, Linkedin, ChevronRight, FileText, Twitter, Instagram, Facebook, Wallet, Briefcase, Mail, Phone, Building2, Landmark, ExternalLink, TrendingUp, Newspaper, Users, Link2, ShieldCheck,
   Lock, Clock, CheckCircle2, XCircle, Send,
 } from "lucide-react";
-import { Investor, money, checkRange } from "./Investors";
+import { Investor, money, initials, placeLabel } from "@/lib/investor";
+import { getPublicInvestor, type InvestorFund, type InvestorPerson } from "@/lib/publicApi";
+import { investorPath, placePath } from "@/lib/directory-url";
+import { irBusinessOnboardingUrl } from "@/lib/ir";
+import ClaimProfileDialog from "@/components/directory/ClaimProfileDialog";
+import PageSeo from "@/components/seo/PageSeo";
 
 type Social = { id: string; platform: string; url: string; handle: string | null; followers: number | null; source: string | null };
 type Investment = { id: string; target_company: string; round: string | null; amount_usd: number | null; invested_on: string | null; source_url: string | null; source_name: string | null };
 type News = { id: string; url: string | null; headline: string; summary: string | null; source: string | null; sentiment: string | null; published_at: string | null };
 
-const initials = (n = "?") => n.split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase();
 const PLATFORM_ICON: Record<string, any> = { twitter: Twitter, linkedin: Linkedin, instagram: Instagram, facebook: Facebook, website: Globe, angellist: Link2 };
 const SENTIMENT: Record<string, string> = {
   positive: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
   neutral: "bg-zinc-500/15 text-zinc-300 border-zinc-500/30",
   negative: "bg-rose-500/15 text-rose-400 border-rose-500/30",
 };
-const fmtDate = (d: string | null) => (d ? new Date(d).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }) : "—");
+// Form D encodes "indefinite offering" as a zero target rather than a blank.
+const INDEFINITE = 0;
+const fmtDate = (d: string | null | undefined) => (d ? new Date(d).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }) : "—");
 const fmtFollowers = (n: number | null) => (n == null ? null : n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n));
 
 export default function InvestorDetail() {
@@ -41,6 +47,8 @@ export default function InvestorDetail() {
   const [socials, setSocials] = useState<Social[]>([]);
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [news, setNews] = useState<News[]>([]);
+  const [funds, setFunds] = useState<InvestorFund[]>([]);
+  const [people, setPeople] = useState<InvestorPerson[]>([]);
   const [loading, setLoading] = useState(true);
   // founder -> investor intro request
   const [myRequest, setMyRequest] = useState<{ id: string; status: string } | null>(null);
@@ -53,29 +61,32 @@ export default function InvestorDetail() {
   useEffect(() => {
     (async () => {
       try {
-        const { data } = await supabase.from("investors" as any).select("*").eq("id", id).maybeSingle();
-        if (!data) { toast.error("Investor not found"); navigate("/investors"); return; }
-        setInv(data as Investor);
-        const [{ data: s }, { data: iv }, { data: n }] = await Promise.all([
-          supabase.from("investor_socials" as any).select("*").eq("investor_id", id),
-          supabase.from("investments" as any).select("*").eq("investor_id", id).order("invested_on", { ascending: false }),
-          supabase.from("investor_news" as any).select("*").eq("investor_id", id).order("published_at", { ascending: false }),
-        ]);
-        setSocials((s as Social[]) || []);
-        setInvestments((iv as Investment[]) || []);
-        setNews((n as News[]) || []);
+        const pub = await getPublicInvestor(String(id));
+        if (!pub) { toast.error("Investor not found"); navigate("/investors"); return; }
+        setInv(pub as unknown as Investor);
+        setInvestments((pub.recent_investments as unknown as Investment[]) || []);
+        setNews((pub.news as unknown as News[]) || []);
+        setFunds(pub.funds || []);
+        setPeople(pub.people || []);
       } catch (e) { console.error(e); }
       finally { setLoading(false); }
     })();
   }, [id, navigate]);
 
-  // Load the current user's existing request for this investor + their deals.
+  // Signed-in extras: the contact channels the public payload withholds (website, linkedin,
+  // socials — email/phone stay behind an accepted intro), plus this user's request and deals.
   useEffect(() => {
     if (!user || !id) return;
     (async () => {
-      const { data: req } = await supabase.from("connection_requests" as any).select("id, status").eq("investor_id", id).maybeSingle();
+      const [{ data: full }, { data: s }, { data: req }, { data: deals }] = await Promise.all([
+        supabase.from("investors" as any).select("*").eq("id", id).maybeSingle(),
+        supabase.from("investor_socials" as any).select("*").eq("investor_id", id),
+        supabase.from("connection_requests" as any).select("id, status").eq("investor_id", id).maybeSingle(),
+        supabase.from("deals" as any).select("id, title").eq("founder_id", user.id),
+      ]);
+      if (full) setInv((prev) => ({ ...(prev as Investor), ...(full as Investor) }));
+      setSocials((s as Social[]) || []);
       setMyRequest((req as any) || null);
-      const { data: deals } = await supabase.from("deals" as any).select("id, title").eq("founder_id", user.id);
       setMyDeals((deals as any) || []);
     })();
   }, [user, id]);
@@ -92,6 +103,20 @@ export default function InvestorDetail() {
     setDlgOpen(false);
     toast.success(`Intro request sent to ${inv?.name}. Our team will broker the connection.`);
   };
+
+  // Compiled from a public filing rather than claimed by its owner: no member relationship exists,
+  // so the intro flow must not be offered for it.
+  const isListedOnly = inv?.source === "sec_form_d";
+
+  // Home > Investors > Country > State > City > Name — each place crumb is a real listing page.
+  const placeCrumbs: { label: string; to?: string }[] = inv ? [
+    { label: "Home", to: "/" },
+    { label: "Investors", to: "/investors" },
+    ...(inv.country_slug ? [{ label: inv.country as string, to: placePath("investors", { country: inv.country_slug }) }] : []),
+    ...(inv.country_slug && inv.state_slug ? [{ label: inv.state as string, to: placePath("investors", { country: inv.country_slug, state: inv.state_slug }) }] : []),
+    ...(inv.country_slug && inv.city_slug ? [{ label: inv.city as string, to: placePath("investors", { country: inv.country_slug, state: inv.state_slug || undefined, city: inv.city_slug }) }] : []),
+    { label: inv.name },
+  ] : [];
 
   if (loading) return <MainLayout><div className="container mx-auto px-4 py-8 max-w-5xl"><Skeleton className="h-64 w-full rounded-2xl" /></div></MainLayout>;
   if (!inv) return null;
@@ -118,92 +143,271 @@ export default function InvestorDetail() {
 
   return (
     <MainLayout>
+      <PageSeo
+        title={`${inv.name}${inv.firm ? ` — ${inv.firm}` : ""} | Investor Profile | Baalvion`}
+        description={
+          inv.thesis ||
+          `${inv.name} is a ${(inv.firm_type || "investment").toLowerCase()} firm based in ${placeLabel(inv)}` +
+          `${inv.fund_count ? ` with ${inv.fund_count} fund${inv.fund_count === 1 ? "" : "s"} on record` : ""}` +
+          `${inv.total_raised_usd ? `, ${money(inv.total_raised_usd)} raised across them` : ""}` +
+          `${inv.last_filing_date ? `. Last SEC filing ${fmtDate(inv.last_filing_date)}.` : "."}`
+        }
+        path={investorPath(inv)}
+        image={inv.avatar_url || undefined}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Person",
+          name: inv.name,
+          jobTitle: inv.title || undefined,
+          description: inv.thesis || undefined,
+          image: inv.avatar_url || undefined,
+          worksFor: inv.firm ? { "@type": "Organization", name: inv.firm } : undefined,
+          address: inv.headquarters || inv.location || undefined,
+          knowsAbout: (inv.focus_sectors || []).length ? inv.focus_sectors : undefined,
+        }}
+      />
       <div className="container mx-auto px-4 py-8 max-w-5xl">
         <Button variant="ghost" size="sm" className="mb-4" onClick={() => navigate("/investors")}><ArrowLeft className="w-4 h-4 mr-1" />All investors</Button>
 
-        {/* Header */}
-        <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary/10 via-card to-card p-8 mb-6">
-          <div className="flex flex-col sm:flex-row items-start gap-6">
-            {inv.avatar_url
-              ? <img src={inv.avatar_url} alt={inv.name} className="w-24 h-24 rounded-2xl object-cover ring-2 ring-primary/30" />
-              : <div className="w-24 h-24 rounded-2xl bg-primary/15 text-primary text-2xl font-bold flex items-center justify-center">{initials(inv.name)}</div>}
-            <div className="flex-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-3xl font-bold">{inv.name}</h1>
-                {inv.is_verified && <BadgeCheck className="w-6 h-6 text-primary" />}
-                {inv.firm_type && <Badge variant="outline" className="border-primary/40 text-primary">{inv.firm_type}</Badge>}
-              </div>
-              <p className="text-lg text-muted-foreground flex items-center gap-2 mt-1"><Building2 className="w-4 h-4" />{inv.title}{inv.firm ? ` · ${inv.firm}` : ""}</p>
-              <p className="text-sm text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
-                {inv.headquarters && <span className="flex items-center gap-1"><MapPin className="w-4 h-4" />{inv.headquarters}</span>}
-                {inv.region && <span className="flex items-center gap-1"><Globe className="w-4 h-4" />{inv.region}</span>}
-                {inv.enrichment_confidence && <span className="flex items-center gap-1"><ShieldCheck className="w-4 h-4" />{inv.enrichment_confidence} confidence</span>}
-              </p>
-              <div className="flex flex-wrap gap-2 mt-4">
-                {myRequest ? (
-                  myRequest.status === "accepted" ? (
-                    <Button variant="outline" className="border-emerald-500/40 text-emerald-400 pointer-events-none"><CheckCircle2 className="w-4 h-4 mr-2" />Intro accepted</Button>
-                  ) : myRequest.status === "declined" ? (
-                    <Button variant="outline" className="border-rose-500/40 text-rose-400 pointer-events-none"><XCircle className="w-4 h-4 mr-2" />Request declined</Button>
-                  ) : (
-                    <Button variant="outline" className="pointer-events-none"><Clock className="w-4 h-4 mr-2" />Intro requested · pending</Button>
-                  )
+        {/* Header — left-aligned, with the place crumbs linking back into the geography so a
+            profile is a route into the directory rather than a dead end. */}
+        <nav aria-label="Breadcrumb" className="flex items-center flex-wrap gap-1 text-xs text-muted-foreground mb-5">
+          {placeCrumbs.map((c, idx) => (
+            <span key={`${c.label}-${idx}`} className="flex items-center gap-1">
+              {idx > 0 && <ChevronRight className="w-3 h-3 opacity-50" />}
+              {c.to ? <Link to={c.to} className="hover:text-primary hover:underline">{c.label}</Link> : <span className="text-foreground">{c.label}</span>}
+            </span>
+          ))}
+        </nav>
+
+        <div className="flex flex-col sm:flex-row items-start gap-6 pb-8 border-b border-foreground/80">
+          {inv.avatar_url
+            ? <img src={inv.avatar_url} alt={inv.name} className="w-20 h-20 rounded object-cover border border-border" />
+            : <div className="w-20 h-20 rounded bg-secondary text-muted-foreground text-xl font-semibold flex items-center justify-center">{initials(inv.name)}</div>}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-3xl lg:text-4xl font-semibold">{inv.name}</h1>
+              {inv.is_verified && <BadgeCheck className="w-6 h-6 text-primary" aria-label="Verified" />}
+            </div>
+            <p className="text-base mt-1.5">
+              {[inv.title, inv.firm === inv.name ? null : inv.firm].filter(Boolean).join(" · ")}
+              {inv.firm_type && <span className="text-muted-foreground"> · {inv.firm_type}</span>}
+            </p>
+            <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5" />{placeLabel(inv)}
+            </p>
+
+            <div className="flex flex-wrap gap-3 mt-5">
+              {!user ? (
+                <Button asChild>
+                  <Link to={`/auth?redirect=${investorPath(inv)}`}><Mail className="w-4 h-4 mr-2" />Create a free account to request an intro</Link>
+                </Button>
+              ) : myRequest ? (
+                myRequest.status === "accepted" ? (
+                  <Button variant="outline" className="border-emerald-600/40 text-emerald-700 pointer-events-none"><CheckCircle2 className="w-4 h-4 mr-2" />Intro accepted</Button>
+                ) : myRequest.status === "declined" ? (
+                  <Button variant="outline" className="border-destructive/40 text-destructive pointer-events-none"><XCircle className="w-4 h-4 mr-2" />Request declined</Button>
                 ) : (
-                  <Button variant="premium" onClick={() => setDlgOpen(true)}><Mail className="w-4 h-4 mr-2" />Request intro</Button>
-                )}
-                {inv.website && <Button variant="outline" asChild><a href={inv.website} target="_blank" rel="noreferrer"><Globe className="w-4 h-4 mr-2" />Website</a></Button>}
-                {inv.linkedin_url && <Button variant="outline" asChild><a href={inv.linkedin_url} target="_blank" rel="noreferrer"><Linkedin className="w-4 h-4 mr-2" />LinkedIn</a></Button>}
-              </div>
+                  <Button variant="outline" className="pointer-events-none"><Clock className="w-4 h-4 mr-2" />Intro requested · pending</Button>
+                )
+              ) : (
+                <Button onClick={() => setDlgOpen(true)}><Mail className="w-4 h-4 mr-2" />Request intro</Button>
+              )}
+              {isListedOnly && !inv.claimed_at && (
+                <ClaimProfileDialog entityType="investor" entityId={inv.id} entityName={inv.name} />
+              )}
+              {inv.website && <Button variant="outline" asChild><a href={inv.website} target="_blank" rel="noreferrer"><Globe className="w-4 h-4 mr-2" />Website</a></Button>}
+              {inv.linkedin_url && <Button variant="outline" asChild><a href={inv.linkedin_url} target="_blank" rel="noreferrer"><Linkedin className="w-4 h-4 mr-2" />LinkedIn</a></Button>}
             </div>
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-          <Stat icon={Landmark} label="Assets under mgmt" value={money(inv.aum_usd)} />
-          <Stat icon={Wallet} label="Typical check" value={checkRange(inv)} />
-          <Stat icon={Briefcase} label="Deals backed" value={String(inv.deals_backed)} />
-          <Stat icon={TrendingUp} label="Tracked investments" value={String(investments.length)} />
-        </div>
+        {/* Facts */}
+        <dl className="grid grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-6 py-7 border-b border-border mb-8">
+          {[
+            { label: "Capital raised", value: money(inv.total_raised_usd ?? inv.aum_usd) },
+            { label: "Funds on record", value: String(inv.fund_count ?? funds.length) },
+            { label: "Last filing", value: fmtDate(inv.last_filing_date) },
+            { label: "People named", value: String(people.length) },
+          ].map((f) => (
+            <div key={f.label}>
+              <dt className="label-eyebrow">{f.label}</dt>
+              <dd className="text-xl font-semibold mt-1 tabular-nums">{f.value}</dd>
+            </div>
+          ))}
+        </dl>
 
         {/* Tabs */}
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 max-w-xl mb-6">
+          <TabsList className="inline-flex mb-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="investments">Investments <span className="ml-1 text-xs opacity-60">{investments.length}</span></TabsTrigger>
-            <TabsTrigger value="news">News <span className="ml-1 text-xs opacity-60">{news.length}</span></TabsTrigger>
-            <TabsTrigger value="social">Social <span className="ml-1 text-xs opacity-60">{socials.length}</span></TabsTrigger>
+            <TabsTrigger value="filings">Filings <span className="ml-1 text-xs opacity-60">{funds.length}</span></TabsTrigger>
+            <TabsTrigger value="people">People <span className="ml-1 text-xs opacity-60">{people.length}</span></TabsTrigger>
+            {investments.length > 0 && <TabsTrigger value="investments">Investments <span className="ml-1 text-xs opacity-60">{investments.length}</span></TabsTrigger>}
+            {news.length > 0 && <TabsTrigger value="news">News <span className="ml-1 text-xs opacity-60">{news.length}</span></TabsTrigger>}
+            <TabsTrigger value="social">Links</TabsTrigger>
           </TabsList>
+
+          {/* Filings — the primary records every figure on this page is drawn from. */}
+          <TabsContent value="filings" className="mt-0">
+            {funds.length === 0 ? (
+              <p className="py-12 text-center text-muted-foreground">No filings on record.</p>
+            ) : (
+              <div className="overflow-x-auto border border-border rounded">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-left border-b border-border bg-secondary/60">
+                      <th className="py-2.5 px-3 font-medium">Fund</th>
+                      <th className="py-2.5 px-3 font-medium">Type</th>
+                      <th className="py-2.5 px-3 font-medium text-right">Sold</th>
+                      <th className="py-2.5 px-3 font-medium text-right">Target</th>
+                      <th className="py-2.5 px-3 font-medium text-right">Min</th>
+                      <th className="py-2.5 px-3 font-medium text-right">Investors</th>
+                      <th className="py-2.5 px-3 font-medium">First sale</th>
+                      <th className="py-2.5 px-3 font-medium">Filed</th>
+                      <th className="py-2.5 px-3 font-medium">Filing</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {funds.map((f) => (
+                      <tr key={f.id} className="border-b border-border/60 last:border-0 hover:bg-secondary/40 align-top">
+                        <td className="py-2.5 px-3">
+                          <div className="font-medium">{f.fund_name}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {[f.entity_type, f.jurisdiction && `${f.jurisdiction} entity`, f.year_of_inc && `formed ${f.year_of_inc}`].filter(Boolean).join(" · ")}
+                          </div>
+                        </td>
+                        <td className="py-2.5 px-3 whitespace-nowrap">{f.fund_type || "—"}</td>
+                        <td className="py-2.5 px-3 text-right tabular-nums font-medium">{money(f.total_sold_usd)}</td>
+                        <td className="py-2.5 px-3 text-right tabular-nums text-muted-foreground">{f.total_offering_usd === INDEFINITE ? "Indefinite" : money(f.total_offering_usd)}</td>
+                        <td className="py-2.5 px-3 text-right tabular-nums text-muted-foreground">{f.min_investment_usd ? money(f.min_investment_usd) : "—"}</td>
+                        <td className="py-2.5 px-3 text-right tabular-nums text-muted-foreground">{f.investor_count ?? "—"}</td>
+                        <td className="py-2.5 px-3 whitespace-nowrap text-muted-foreground">{fmtDate(f.first_sale_date)}</td>
+                        <td className="py-2.5 px-3 whitespace-nowrap text-muted-foreground">{fmtDate(f.filing_date)}{f.is_amendment && <span className="ml-1 text-[10px] uppercase tracking-wide">amd</span>}</td>
+                        <td className="py-2.5 px-3 whitespace-nowrap">
+                          {f.source_url
+                            ? <a href={f.source_url} target="_blank" rel="noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">SEC<ExternalLink className="w-3 h-3" /></a>
+                            : <span className="text-muted-foreground">—</span>}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            <p className="text-xs text-muted-foreground mt-3">
+              "Sold" is the amount reported sold at the time of each filing, not a running total. "Target" is the
+              offering amount; funds that file an indefinite offering show no figure.
+            </p>
+          </TabsContent>
+
+          {/* People named on the filings. Roles are as filed, not as marketed. */}
+          <TabsContent value="people" className="mt-0">
+            {people.length === 0 ? (
+              <p className="py-12 text-center text-muted-foreground">
+                No individuals are named on this firm's filings — some firms file through a management entity instead.
+              </p>
+            ) : (
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-8">
+                {people.map((p) => (
+                  <div key={p.id} className="py-3 border-b border-border">
+                    <div className="font-medium">{p.full_name}</div>
+                    <div className="text-sm text-muted-foreground">{(p.relationships || []).join(", ") || "—"}</div>
+                    <div className="text-xs text-muted-foreground mt-0.5">
+                      {[p.city, p.state_or_country].filter(Boolean).join(", ")}
+                      {p.filings_count > 1 && <span> · on {p.filings_count} filings</span>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </TabsContent>
 
           {/* Overview */}
           <TabsContent value="overview" className="mt-0">
             <div className="grid lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-6">
+                {/* What the record says, stated as a record — not as a marketing profile the firm
+                    never wrote. Fields Form D does not report are shown as not disclosed rather
+                    than filled with a guess. */}
                 <Card className="border-border"><CardContent className="p-6">
-                  <h2 className="text-lg font-semibold mb-2">Investment thesis</h2>
-                  <p className="text-muted-foreground leading-relaxed">{inv.thesis}</p>
+                  <h2 className="text-lg font-semibold mb-4">On the public record</h2>
+                  <dl className="grid sm:grid-cols-2 gap-x-8 gap-y-4">
+                    {[
+                      ["Type", inv.firm_type],
+                      ["Legal form", inv.entity_type],
+                      ["Formed", inv.year_founded ? String(inv.year_founded) : null],
+                      ["Based", placeLabel(inv)],
+                      ["Funds on record", inv.fund_count ? String(inv.fund_count) : null],
+                      ["Capital raised across funds", money(inv.total_raised_usd)],
+                      ["First filing", fmtDate(inv.first_filing_date)],
+                      ["Most recent filing", fmtDate(inv.last_filing_date)],
+                    ].map(([label, value]) => (
+                      <div key={label as string}>
+                        <dt className="label-eyebrow">{label}</dt>
+                        <dd className="text-sm font-medium mt-0.5">{(value as string) || <span className="text-muted-foreground font-normal">Not disclosed</span>}</dd>
+                      </div>
+                    ))}
+                  </dl>
                 </CardContent></Card>
-                <div className="grid sm:grid-cols-2 gap-6">
+                {inv.thesis && (
                   <Card className="border-border"><CardContent className="p-6">
-                    <h2 className="text-base font-semibold mb-3">Focus sectors</h2>
-                    <div className="flex flex-wrap gap-2">{(inv.focus_sectors || []).map((s) => <Badge key={s} variant="secondary">{s}</Badge>)}</div>
-                    <h2 className="text-base font-semibold mb-3 mt-5">Stages</h2>
-                    <div className="flex flex-wrap gap-2">{(inv.stages || []).map((s) => <Badge key={s} variant="outline" className="border-primary/40 text-primary">{s}</Badge>)}</div>
+                    <h2 className="text-lg font-semibold mb-2">Investment thesis</h2>
+                    <p className="text-muted-foreground leading-relaxed">{inv.thesis}</p>
                   </CardContent></Card>
-                  <Card className="border-border"><CardContent className="p-6">
-                    <h2 className="text-base font-semibold mb-3">Notable portfolio</h2>
-                    <div className="flex flex-wrap gap-2">
-                      {(inv.portfolio || []).length === 0 ? <span className="text-sm text-muted-foreground">Not disclosed</span>
-                        : (inv.portfolio || []).map((p) => <span key={p} className="px-3 py-1.5 rounded-lg bg-secondary text-sm font-medium">{p}</span>)}
-                    </div>
-                  </CardContent></Card>
-                </div>
+                )}
+                {((inv.focus_sectors || []).length > 0 || (inv.stages || []).length > 0 || (inv.portfolio || []).length > 0) && (
+                  <div className="grid sm:grid-cols-2 gap-6">
+                    <Card className="border-border"><CardContent className="p-6">
+                      <h2 className="text-base font-semibold mb-3">Focus sectors</h2>
+                      <div className="flex flex-wrap gap-2">
+                        {(inv.focus_sectors || []).length === 0 ? <span className="text-sm text-muted-foreground">Not disclosed</span>
+                          : (inv.focus_sectors || []).map((x) => <Badge key={x} variant="secondary">{x}</Badge>)}
+                      </div>
+                      <h2 className="text-base font-semibold mb-3 mt-5">Stages</h2>
+                      <div className="flex flex-wrap gap-2">
+                        {(inv.stages || []).length === 0 ? <span className="text-sm text-muted-foreground">Not disclosed</span>
+                          : (inv.stages || []).map((x) => <Badge key={x} variant="outline" className="border-primary/40 text-primary">{x}</Badge>)}
+                      </div>
+                    </CardContent></Card>
+                    <Card className="border-border"><CardContent className="p-6">
+                      <h2 className="text-base font-semibold mb-3">Notable portfolio</h2>
+                      <div className="flex flex-wrap gap-2">
+                        {(inv.portfolio || []).length === 0 ? <span className="text-sm text-muted-foreground">Not disclosed</span>
+                          : (inv.portfolio || []).map((x) => <span key={x} className="px-3 py-1.5 rounded bg-secondary text-sm font-medium">{x}</span>)}
+                      </div>
+                    </CardContent></Card>
+                  </div>
+                )}
               </div>
-              {/* Contact card */}
-              <div>
+              {/* Contact + provenance */}
+              <div className="space-y-6">
                 <Card className="border-border"><CardContent className="p-6">
                   <h2 className="text-lg font-semibold mb-3 flex items-center gap-2"><Link2 className="w-4 h-4 text-primary" />Contact & links</h2>
-                  {myRequest?.status === "accepted" ? (
+                  {isListedOnly ? (
+                    (inv.street || inv.phone) ? (
+                      <>
+                        <ContactRow icon={MapPin} label="Address" value={[inv.street, placeLabel(inv), inv.postal_code].filter(Boolean).join(", ")} />
+                        <ContactRow icon={Phone} label="Telephone" value={inv.phone} href={inv.phone ? `tel:${String(inv.phone).replace(/[^0-9+]/g, "")}` : undefined} />
+                        <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
+                          The business address and telephone this firm gave the SEC on its most recent filing.
+                          It is a regulatory contact, not an invitation — expect a cold approach to be treated as one.
+                        </p>
+                      </>
+                    ) : (
+                      <p className="text-sm text-muted-foreground py-2 leading-relaxed">
+                        No contact details on this firm's filings.
+                      </p>
+                    )
+                  ) : !user ? (
+                    <Link
+                      to={`/auth?redirect=${investorPath(inv)}`}
+                      className="w-full flex items-center gap-2 py-3 px-3 my-2 rounded-lg bg-secondary/50 border border-dashed border-border text-sm text-left text-muted-foreground hover:border-primary/40 transition-colors"
+                    >
+                      <Lock className="w-4 h-4 shrink-0 text-primary" />
+                      <span>Create a free account to see this investor's website, LinkedIn and social profiles.</span>
+                    </Link>
+                  ) : myRequest?.status === "accepted" ? (
                     <>
                       <ContactRow icon={Mail} label="Email" value={inv.email} href={inv.email ? `mailto:${inv.email}` : undefined} />
                       <ContactRow icon={Phone} label="Phone" value={inv.phone} href={inv.phone ? `tel:${inv.phone.replace(/[^0-9+]/g, "")}` : undefined} />
@@ -226,6 +430,37 @@ export default function InvestorDetail() {
                     })}
                   </div>
                 </CardContent></Card>
+
+                {/* Where this came from. A directory that states figures without saying where they
+                    came from is asking to be trusted; this one can be checked. */}
+                {inv.source === "sec_form_d" && (
+                  <Card className="border-border"><CardContent className="p-6">
+                    <h2 className="text-lg font-semibold mb-3 flex items-center gap-2"><FileText className="w-4 h-4 text-primary" />Source</h2>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Compiled from this firm's <strong className="font-medium text-foreground">SEC Form D</strong> filings —
+                      the notice a US private fund files when it raises capital. Figures are as filed.
+                    </p>
+                    <dl className="mt-4 space-y-2.5">
+                      <div className="flex justify-between gap-3 text-sm">
+                        <dt className="text-muted-foreground">Filings used</dt>
+                        <dd className="font-medium tabular-nums">{funds.length}</dd>
+                      </div>
+                      <div className="flex justify-between gap-3 text-sm">
+                        <dt className="text-muted-foreground">Record updated</dt>
+                        <dd className="font-medium">{fmtDate(inv.last_verified_at)}</dd>
+                      </div>
+                    </dl>
+                    {inv.source_url && (
+                      <a href={inv.source_url} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center gap-1.5 text-sm text-primary hover:underline">
+                        Latest filing on SEC EDGAR<ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-4 leading-relaxed">
+                      A filing means this firm raised capital, not that Baalvion has vetted it or that it is
+                      open to new approaches.
+                    </p>
+                  </CardContent></Card>
+                )}
               </div>
             </div>
           </TabsContent>
@@ -286,7 +521,20 @@ export default function InvestorDetail() {
           {/* Social */}
           <TabsContent value="social" className="mt-0">
             <div className="grid sm:grid-cols-2 gap-3">
-              {socials.length === 0 ? <Card><CardContent className="py-10 text-center text-muted-foreground">No social profiles found.</CardContent></Card>
+              {isListedOnly ? (
+                <Card className="sm:col-span-2"><CardContent className="py-10 text-center">
+                  <p className="text-muted-foreground">
+                    No links are on file. This record is compiled from SEC filings, which do not carry a
+                    website or social profiles.
+                  </p>
+                </CardContent></Card>
+              ) : !user ? (
+                <Card className="sm:col-span-2 border-dashed"><CardContent className="py-10 text-center space-y-3">
+                  <Lock className="w-5 h-5 text-primary mx-auto" />
+                  <p className="text-muted-foreground">Social profiles are available to signed-in members.</p>
+                  <Button variant="premium" asChild><Link to={`/auth?redirect=${investorPath(inv)}`}>Create a free account</Link></Button>
+                </CardContent></Card>
+              ) : socials.length === 0 ? <Card><CardContent className="py-10 text-center text-muted-foreground">No social profiles found.</CardContent></Card>
                 : socials.map((s) => {
                   const Icon = PLATFORM_ICON[s.platform] || Link2;
                   return (
@@ -309,7 +557,11 @@ export default function InvestorDetail() {
         </Tabs>
 
         <p className="text-center text-sm text-muted-foreground mt-8">
-          Are you raising? <Link to="/deals/new" className="text-primary hover:underline underline-offset-2">Post your deal</Link> to get on investors' radar.
+          Are you raising?{" "}
+          <a href={irBusinessOnboardingUrl("investor-profile")} target="_blank" rel="noreferrer" className="text-primary hover:underline underline-offset-2">
+            Submit your company
+          </a>{" "}
+          on Baalvion IR — it goes through KYC review, not into a public listing.
         </p>
       </div>
 

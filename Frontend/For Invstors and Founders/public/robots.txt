@@ -1,5 +1,5 @@
-# Baalvion Insiders — invite-only founder/investor network.
-# The public landing pages are crawlable; the gated members area is not.
+# Baalvion Insiders — public investor and company directory.
+# The directory is fully crawlable; the members area and admin are not.
 
 User-agent: *
 Allow: /
@@ -12,6 +12,11 @@ Disallow: /checkout
 Disallow: /leaderboard
 Disallow: /admin
 Disallow: /reset-password
+Disallow: /elite
+Disallow: /deals
+Disallow: /pipeline
+Disallow: /connections
+Disallow: /settings
 
 # Explicit groups for AI / LLM and search crawlers.
 # robots.txt is not additive: a crawler obeys only its most specific matching group, so a bot
@@ -28,6 +33,11 @@ Disallow: /checkout
 Disallow: /leaderboard
 Disallow: /admin
 Disallow: /reset-password
+Disallow: /elite
+Disallow: /deals
+Disallow: /pipeline
+Disallow: /connections
+Disallow: /settings
 
 User-agent: OAI-SearchBot
 Allow: /
@@ -40,6 +50,11 @@ Disallow: /checkout
 Disallow: /leaderboard
 Disallow: /admin
 Disallow: /reset-password
+Disallow: /elite
+Disallow: /deals
+Disallow: /pipeline
+Disallow: /connections
+Disallow: /settings
 
 User-agent: ChatGPT-User
 Allow: /
@@ -52,6 +67,11 @@ Disallow: /checkout
 Disallow: /leaderboard
 Disallow: /admin
 Disallow: /reset-password
+Disallow: /elite
+Disallow: /deals
+Disallow: /pipeline
+Disallow: /connections
+Disallow: /settings
 
 User-agent: Google-Extended
 Allow: /
@@ -64,6 +84,11 @@ Disallow: /checkout
 Disallow: /leaderboard
 Disallow: /admin
 Disallow: /reset-password
+Disallow: /elite
+Disallow: /deals
+Disallow: /pipeline
+Disallow: /connections
+Disallow: /settings
 
 User-agent: ClaudeBot
 Allow: /
@@ -76,6 +101,11 @@ Disallow: /checkout
 Disallow: /leaderboard
 Disallow: /admin
 Disallow: /reset-password
+Disallow: /elite
+Disallow: /deals
+Disallow: /pipeline
+Disallow: /connections
+Disallow: /settings
 
 User-agent: anthropic-ai
 Allow: /
@@ -88,6 +118,11 @@ Disallow: /checkout
 Disallow: /leaderboard
 Disallow: /admin
 Disallow: /reset-password
+Disallow: /elite
+Disallow: /deals
+Disallow: /pipeline
+Disallow: /connections
+Disallow: /settings
 
 User-agent: Claude-Web
 Allow: /
@@ -100,6 +135,11 @@ Disallow: /checkout
 Disallow: /leaderboard
 Disallow: /admin
 Disallow: /reset-password
+Disallow: /elite
+Disallow: /deals
+Disallow: /pipeline
+Disallow: /connections
+Disallow: /settings
 
 User-agent: Claude-SearchBot
 Allow: /
@@ -112,6 +152,11 @@ Disallow: /checkout
 Disallow: /leaderboard
 Disallow: /admin
 Disallow: /reset-password
+Disallow: /elite
+Disallow: /deals
+Disallow: /pipeline
+Disallow: /connections
+Disallow: /settings
 
 User-agent: PerplexityBot
 Allow: /
@@ -124,6 +169,11 @@ Disallow: /checkout
 Disallow: /leaderboard
 Disallow: /admin
 Disallow: /reset-password
+Disallow: /elite
+Disallow: /deals
+Disallow: /pipeline
+Disallow: /connections
+Disallow: /settings
 
 User-agent: Perplexity-User
 Allow: /
@@ -136,6 +186,11 @@ Disallow: /checkout
 Disallow: /leaderboard
 Disallow: /admin
 Disallow: /reset-password
+Disallow: /elite
+Disallow: /deals
+Disallow: /pipeline
+Disallow: /connections
+Disallow: /settings
 
 User-agent: CCBot
 Allow: /
@@ -148,6 +203,11 @@ Disallow: /checkout
 Disallow: /leaderboard
 Disallow: /admin
 Disallow: /reset-password
+Disallow: /elite
+Disallow: /deals
+Disallow: /pipeline
+Disallow: /connections
+Disallow: /settings
 
 User-agent: DuckAssistBot
 Allow: /
@@ -160,6 +220,11 @@ Disallow: /checkout
 Disallow: /leaderboard
 Disallow: /admin
 Disallow: /reset-password
+Disallow: /elite
+Disallow: /deals
+Disallow: /pipeline
+Disallow: /connections
+Disallow: /settings
 
 User-agent: Applebot-Extended
 Allow: /
@@ -172,6 +237,11 @@ Disallow: /checkout
 Disallow: /leaderboard
 Disallow: /admin
 Disallow: /reset-password
+Disallow: /elite
+Disallow: /deals
+Disallow: /pipeline
+Disallow: /connections
+Disallow: /settings
 
 User-agent: meta-externalagent
 Allow: /
@@ -184,6 +254,11 @@ Disallow: /checkout
 Disallow: /leaderboard
 Disallow: /admin
 Disallow: /reset-password
+Disallow: /elite
+Disallow: /deals
+Disallow: /pipeline
+Disallow: /connections
+Disallow: /settings
 
 User-agent: Amazonbot
 Allow: /
@@ -196,6 +271,11 @@ Disallow: /checkout
 Disallow: /leaderboard
 Disallow: /admin
 Disallow: /reset-password
+Disallow: /elite
+Disallow: /deals
+Disallow: /pipeline
+Disallow: /connections
+Disallow: /settings
 
 User-agent: Bytespider
 Allow: /
@@ -208,6 +288,11 @@ Disallow: /checkout
 Disallow: /leaderboard
 Disallow: /admin
 Disallow: /reset-password
+Disallow: /elite
+Disallow: /deals
+Disallow: /pipeline
+Disallow: /connections
+Disallow: /settings
 
 User-agent: YouBot
 Allow: /
@@ -220,6 +305,11 @@ Disallow: /checkout
 Disallow: /leaderboard
 Disallow: /admin
 Disallow: /reset-password
+Disallow: /elite
+Disallow: /deals
+Disallow: /pipeline
+Disallow: /connections
+Disallow: /settings
 
 User-agent: MistralAI-User
 Allow: /
@@ -232,6 +322,11 @@ Disallow: /checkout
 Disallow: /leaderboard
 Disallow: /admin
 Disallow: /reset-password
+Disallow: /elite
+Disallow: /deals
+Disallow: /pipeline
+Disallow: /connections
+Disallow: /settings
 
 User-agent: cohere-ai
 Allow: /
@@ -244,6 +339,11 @@ Disallow: /checkout
 Disallow: /leaderboard
 Disallow: /admin
 Disallow: /reset-password
+Disallow: /elite
+Disallow: /deals
+Disallow: /pipeline
+Disallow: /connections
+Disallow: /settings
 
 User-agent: Diffbot
 Allow: /
@@ -256,6 +356,11 @@ Disallow: /checkout
 Disallow: /leaderboard
 Disallow: /admin
 Disallow: /reset-password
+Disallow: /elite
+Disallow: /deals
+Disallow: /pipeline
+Disallow: /connections
+Disallow: /settings
 
 User-agent: PetalBot
 Allow: /
@@ -268,6 +373,11 @@ Disallow: /checkout
 Disallow: /leaderboard
 Disallow: /admin
 Disallow: /reset-password
+Disallow: /elite
+Disallow: /deals
+Disallow: /pipeline
+Disallow: /connections
+Disallow: /settings
 
 User-agent: Timpibot
 Allow: /
@@ -280,5 +390,13 @@ Disallow: /checkout
 Disallow: /leaderboard
 Disallow: /admin
 Disallow: /reset-password
+Disallow: /elite
+Disallow: /deals
+Disallow: /pipeline
+Disallow: /connections
+Disallow: /settings
+
+# Machine-readable summary of what this directory holds, where it came from and its limits.
+# https://www.marketunderworld.com/llms.txt
 
 Sitemap: https://www.marketunderworld.com/sitemap.xml

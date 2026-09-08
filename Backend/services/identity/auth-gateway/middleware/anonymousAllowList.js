@@ -23,11 +23,17 @@
  *      of the same URL rather than the anonymous one.
  */
 
-/** `:param` matches one path segment; nothing matches a `/`, so no pattern can span depth. */
+/**
+ * `:param` matches one path segment; nothing matches a `/`, so no pattern can span depth.
+ *
+ * A parameter may sit inside a segment as well as be the whole of one — `sitemap-:section.xml`
+ * is a real upstream route shape. The segment is escaped first, so every literal character
+ * (the `.` in `.xml` included) is matched literally, and only then is the placeholder widened.
+ */
 function compile(pattern) {
   const source = pattern
     .split('/')
-    .map((segment) => (segment.startsWith(':') ? '[^/]+' : segment.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))
+    .map((segment) => segment.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/:\w+/g, '[^/]+'))
     .join('/');
   return new RegExp(`^${source}$`);
 }
@@ -77,6 +83,34 @@ const PUBLIC_PATHS = [
   // to see what they were invited to before deciding whether to make an account. It returns
   // the relation and the status, never the case or the person who sent it.
   '/canwemarry/v1/invitations/:token',
+
+  // ── Baalvion Insiders ────────────────────────────────────────────────────────────────
+  // The public investor/company directory. It is published deliberately: the whole product
+  // is a reference a founder reads before they have an account, and crawlers must reach it
+  // for any of it to be findable. Every path below is a GET mounted with no auth middleware
+  // at all in the service's own route table, and each controller returns a curated subset —
+  // never contact details, financials, decks or data rooms.
+  //
+  // Listed one by one rather than as `/insiders/v1/public/*` on purpose: a prefix would
+  // publish whatever is added under that path next, without anyone deciding to.
+  '/insiders/v1/public/investors',
+  '/insiders/v1/public/investors/:id',
+  '/insiders/v1/public/founders',
+  '/insiders/v1/public/founders/:id',
+  '/insiders/v1/public/companies',
+  '/insiders/v1/public/companies/:id',
+  '/insiders/v1/public/people',
+  '/insiders/v1/public/people/:slug',
+  '/insiders/v1/public/articles',
+  '/insiders/v1/public/articles/:slug',
+  '/insiders/v1/public/places',
+
+  // Server-rendered HTML for crawlers, and the sitemaps that point them at it. The SPA
+  // returns one 219-character shell for every URL, which is invisible to any crawler that
+  // does not run JavaScript.
+  '/insiders/v1/public/render',
+  '/insiders/v1/public/sitemap.xml',
+  '/insiders/v1/public/sitemap-:section.xml',
 ];
 
 const SAFE_METHODS = new Set(['GET', 'HEAD']);
