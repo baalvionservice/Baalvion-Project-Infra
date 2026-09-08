@@ -175,9 +175,9 @@ export const PROVIDER_CATALOG: ProviderDef[] = [
     provider: 'gemini',
     category: 'ai',
     label: 'Google Gemini',
-    description: 'AI features (content generation, assistants).',
-    fields: [{ key: 'model', label: 'Model', placeholder: 'gemini-1.5-pro' }],
-    secretFields: [{ key: 'apiKey', label: 'API Key' }],
+    description: 'Drafting for the editorial pipeline. Test verifies the key against Google and checks the model is reachable.',
+    fields: [{ key: 'model', label: 'Model', placeholder: 'gemini-2.5-flash' }],
+    secretFields: [{ key: 'apiKey', label: 'API Key', placeholder: 'from aistudio.google.com/apikey' }],
   },
   {
     provider: 'google-oauth',

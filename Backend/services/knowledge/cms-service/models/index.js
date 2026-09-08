@@ -47,6 +47,17 @@ db.CmsSeoRedirect     = require('./cmsSeoRedirect')(sequelize, DataTypes);
 db.CmsAuthor          = require('./cmsAuthor')(sequelize, DataTypes);
 db.MarketAsset        = require('./marketAsset')(sequelize, DataTypes);
 
+// ── Editorial pipeline (schema `cms`) ─────────────────────────────────────────
+// wire signal → scored candidate → corroborated brief → drafted article → machine
+// gates → human vetting desk → cms_contents. Drafts live outside cms_contents on
+// purpose: an ungated, unreviewed draft must be unreachable from public delivery.
+db.CmsEditorialCharter = require('./cmsEditorialCharter')(sequelize, DataTypes);
+db.CmsPublicationPolicy = require('./cmsPublicationPolicy')(sequelize, DataTypes);
+db.CmsStorySignal      = require('./cmsStorySignal')(sequelize, DataTypes);
+db.CmsStoryBrief       = require('./cmsStoryBrief')(sequelize, DataTypes);
+db.CmsArticleDraft     = require('./cmsArticleDraft')(sequelize, DataTypes);
+db.CmsArticleArt       = require('./cmsArticleArt')(sequelize, DataTypes);
+
 // ── Unified Analytics Platform (schema `analytics`) ───────────────────────────
 // Standalone event spine — no Sequelize associations to the `cms` tables (they
 // join by website_id/organization_id value, cross-schema). Scoped at the service
@@ -69,6 +80,17 @@ db.CmsWebsite.hasMany(db.CmsContent,       { foreignKey: 'websiteId', as: 'conte
 db.CmsWebsite.hasMany(db.CmsWebsiteMember, { foreignKey: 'websiteId', as: 'members' });
 db.CmsWebsite.hasMany(db.CmsSeoRedirect,   { foreignKey: 'websiteId', as: 'redirects' });
 db.CmsWebsite.hasMany(db.CmsAuthor,        { foreignKey: 'websiteId', as: 'authors' });
+db.CmsWebsite.hasOne(db.CmsEditorialCharter, { foreignKey: 'websiteId', as: 'charter' });
+db.CmsWebsite.hasOne(db.CmsPublicationPolicy, { foreignKey: 'websiteId', as: 'publicationPolicy' });
+db.CmsWebsite.hasMany(db.CmsStorySignal,     { foreignKey: 'websiteId', as: 'storySignals' });
+db.CmsWebsite.hasMany(db.CmsStoryBrief,      { foreignKey: 'websiteId', as: 'storyBriefs' });
+db.CmsWebsite.hasMany(db.CmsArticleDraft,    { foreignKey: 'websiteId', as: 'articleDrafts' });
+
+db.CmsEditorialCharter.belongsTo(db.CmsWebsite, { foreignKey: 'websiteId', as: 'website' });
+db.CmsStoryBrief.hasMany(db.CmsArticleDraft,    { foreignKey: 'briefId', as: 'drafts' });
+db.CmsArticleDraft.belongsTo(db.CmsStoryBrief,  { foreignKey: 'briefId', as: 'brief' });
+db.CmsArticleDraft.hasMany(db.CmsArticleArt,    { foreignKey: 'draftId', as: 'art' });
+db.CmsArticleArt.belongsTo(db.CmsArticleDraft,  { foreignKey: 'draftId', as: 'draft' });
 
 db.CmsAuthor.belongsTo(db.CmsWebsite,   { foreignKey: 'websiteId', as: 'website' });
 db.CmsCategory.belongsTo(db.CmsWebsite, { foreignKey: 'websiteId', as: 'website' });
