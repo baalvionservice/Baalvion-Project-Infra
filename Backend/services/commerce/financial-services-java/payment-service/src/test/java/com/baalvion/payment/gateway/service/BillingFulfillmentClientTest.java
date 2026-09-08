@@ -52,6 +52,7 @@ class BillingFulfillmentClientTest {
         "http://127.0.0.1:" + port + "/community/billing/fulfill",
         "http://127.0.0.1:" + port + "/giftcard/billing/fulfill",
         "http://127.0.0.1:" + port + "/wallet/billing/fulfill",
+        "http://127.0.0.1:" + port + "/insiders/billing/fulfill",
         true,
         "test-internal-secret");
 
