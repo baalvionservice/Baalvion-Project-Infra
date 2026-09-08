@@ -27,6 +27,9 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Baalvion Intelligence" }],
   metadataBase: new URL("https://signal.baalvion.com"),
+  // Next emits no canonical link unless one is declared, so this page shipped without one and
+  // left search engines to decide for themselves which URL is authoritative.
+  alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     locale: "en_US",
