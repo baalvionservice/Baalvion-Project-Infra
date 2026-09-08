@@ -8,11 +8,14 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "migrate": "psql $DATABASE_URL -f migrations/001_developer_schema.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/002_rls_tenant_isolation.sql",
+    "migrate": "psql $DATABASE_URL -f migrations/001_developer_schema.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/002_rls_tenant_isolation.sql && node ../../../packages/payment-consistency/scripts/migrate.mjs",
     "smoke": "node scripts/smoke.mjs"
   },
   "dependencies": {
     "@baalvion/telemetry": "workspace:*",
+    "@baalvion/money": "workspace:*",
+    "@baalvion/payment-consistency": "workspace:*",
+    "@baalvion/sites": "workspace:*",
     "@baalvion/graceful-shutdown": "workspace:*",
     "express-rate-limit": "^7.5.0",
     "@baalvion/auth-node": "workspace:*",
