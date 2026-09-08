@@ -21,3 +21,8 @@ spec:
   producesEvents: []
   slo: { availability: 0.99, latencyP95Ms: 400 }
   deploy: { chart: baalvion-service, namespace: baalvion-commerce, minReplicas: 2, maxReplicas: 10 }
+  runtime:
+    deployment: consolidated-box
+    port: 3051
+    healthPath: /health
+    container: app-trade

@@ -21,3 +21,5 @@ spec:
   apis: ["/v1/api-gateway"]
   slo: { availability: 0.99, latencyP95Ms: 400 }
   deploy: { chart: baalvion-service, namespace: baalvion-infrastructure, minReplicas: 2, maxReplicas: 10 }
+  runtime:
+    deployment: not-deployed

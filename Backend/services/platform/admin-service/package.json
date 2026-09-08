@@ -10,13 +10,15 @@
     "dev": "nodemon index.js",
     "test": "node --test",
     "lint": "eslint .",
-    "migrate": "psql $DATABASE_URL -f migrations/001_feature_flags.sql && psql $DATABASE_URL -f migrations/002_analytics.sql && psql $DATABASE_URL -f migrations/003_support.sql && psql $DATABASE_URL -f migrations/004_developer.sql && psql $DATABASE_URL -f migrations/005_ai.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/006_rls_tenant_isolation.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/007_payment_records.sql"
+    "migrate": "psql $DATABASE_URL -f migrations/001_feature_flags.sql && psql $DATABASE_URL -f migrations/002_analytics.sql && psql $DATABASE_URL -f migrations/003_support.sql && psql $DATABASE_URL -f migrations/004_developer.sql && psql $DATABASE_URL -f migrations/005_ai.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/006_rls_tenant_isolation.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/007_payment_records.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/008_status_monitoring.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/009_status_seo_kind.sql"
   },
   "dependencies": {
     "@baalvion/auth-node": "workspace:*",
+    "@baalvion/catalog": "workspace:*",
     "@baalvion/email": "workspace:*",
     "@baalvion/graceful-shutdown": "workspace:*",
     "@baalvion/money": "workspace:*",
+    "@baalvion/notify-ntfy": "workspace:*",
     "@baalvion/party": "workspace:*",
     "@baalvion/sites": "workspace:*",
     "@baalvion/telemetry": "workspace:*",
@@ -34,6 +36,7 @@
     "pino-http": "^11.0.0",
     "sequelize": "^6.37.8",
     "uuid": "^11.1.0",
+    "ws": "^8.21.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {

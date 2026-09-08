@@ -20,3 +20,5 @@ spec:
   apis: ["/v1/law-elite"]
   slo: { availability: 0.99, latencyP95Ms: 400 }
   deploy: { chart: baalvion-service, namespace: baalvion-ecosystem, minReplicas: 2, maxReplicas: 10 }
+  runtime:
+    deployment: not-deployed

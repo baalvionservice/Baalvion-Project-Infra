@@ -68,6 +68,24 @@ async function start() {
         logger.info({ port: config.port }, 'admin-service started');
     });
 
+    // Realtime feed for the admin console's Infrastructure panel. Shares this HTTP server, so it
+    // needs no extra port and rides the existing /api-bff/platform/admin route at the edge.
+    const { startRealtime, stopRealtime, broadcast } = require('./realtime');
+    startRealtime(server, { sequelize: require('./models').sequelize });
+    registerShutdown('realtime-ws', async () => { await stopRealtime(); });
+
+    // Status prober — probes every site and service in the catalog, opens incidents on state
+    // transitions and pushes to ntfy. OFF unless STATUS_PROBER=true. It shares this process, so
+    // a total failure of this box takes the prober with it: STATUS_HEARTBEAT_URL is the external
+    // dead-man's switch that covers exactly that case.
+    const { startStatusProber, stopStatusProber } = require('./service/statusProbe');
+    startStatusProber({
+        sequelize: require('./models').sequelize,
+        redisClient: require('./config/redis').getClient?.(),
+        broadcast,
+    });
+    registerShutdown('status-prober', async () => { stopStatusProber(); });
+
     registerShutdown('redis', async () => { const r = require('./config/redis'); const c = (r.getClient && r.getClient()) || r.client || (typeof r.quit === 'function' ? r : null); if (c && c.quit) await c.quit(); });
     initGracefulShutdown(server);
 }

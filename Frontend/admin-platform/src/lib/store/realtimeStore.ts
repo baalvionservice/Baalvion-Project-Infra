@@ -14,6 +14,8 @@ interface RealtimeState {
   events:         LiveEvent[];
   queues:         QueueStat[];
   infra:          InfraMetrics | null;
+  /** Per-site rollup pushed by admin-service's status prober; null until the first sweep lands. */
+  siteStatus:     unknown | null;
   // time series for charts
   requestSeries:  TimeSeriesPoint[];   // req/min over time
   latencySeries:  TimeSeriesPoint[];   // p95 latency over time
@@ -25,6 +27,7 @@ interface RealtimeState {
   pushEvent:       (e: LiveEvent) => void;
   setQueues:       (q: QueueStat[]) => void;
   setInfra:        (m: InfraMetrics) => void;
+  setSiteStatus:   (s: unknown) => void;
   pushRequestPoint:(p: TimeSeriesPoint) => void;
   pushLatencyPoint:(p: TimeSeriesPoint) => void;
   pushLoginPoint:  (p: TimeSeriesPoint) => void;
@@ -43,6 +46,7 @@ export const useRealtimeStore = create<RealtimeState>((set) => ({
   events:        [],
   queues:        [],
   infra:         null,
+  siteStatus:    null,
   requestSeries: [],
   latencySeries: [],
   loginSeries:   [],
@@ -53,6 +57,7 @@ export const useRealtimeStore = create<RealtimeState>((set) => ({
   pushEvent:        (e)          => set((s) => ({ events: pushCapped(s.events, e, MAX_EVENTS) })),
   setQueues:        (queues)     => set({ queues }),
   setInfra:         (infra)      => set({ infra }),
+  setSiteStatus:    (siteStatus) => set({ siteStatus }),
   pushRequestPoint: (p)          => set((s) => ({ requestSeries: pushCapped(s.requestSeries, p, MAX_TS_PTS) })),
   pushLatencyPoint: (p)          => set((s) => ({ latencySeries: pushCapped(s.latencySeries, p, MAX_TS_PTS) })),
   pushLoginPoint:   (p)          => set((s) => ({ loginSeries: pushCapped(s.loginSeries, p, MAX_TS_PTS) })),

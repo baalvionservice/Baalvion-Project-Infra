@@ -23,3 +23,8 @@ spec:
   apis: ["/v1/community"]
   slo: { availability: 0.99, latencyP95Ms: 400 }
   deploy: { chart: baalvion-service, namespace: baalvion-ecosystem, minReplicas: 1, maxReplicas: 4 }
+  runtime:
+    deployment: standalone
+    port: 3064
+    healthPath: /health
+    container: app-community
