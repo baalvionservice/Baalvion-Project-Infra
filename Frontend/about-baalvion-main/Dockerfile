@@ -27,6 +27,11 @@ RUN pnpm install --no-frozen-lockfile
 # (CMS_PUBLIC_URL / CMS_WEBSITE_SLUG are plain runtime env, NOT baked). The only build-time
 # value the client bundle needs is the public app URL.
 ARG NEXT_PUBLIC_APP_URL
+# Build inputs, not runtime: next.config resolves rewrites() at build time and bakes the
+# destinations into routes-manifest.json, so setting these on the running container is a
+# no-op. Unset, the config silently falls back to its hardcoded default.
+ARG BUILD_STANDALONE
+ENV BUILD_STANDALONE=$BUILD_STANDALONE
 # CRITICAL: ARG alone is NOT visible to `next build`; re-export as ENV so it is inlined.
 # BUILD_STANDALONE=1 enables `output: 'standalone'` (see next.config.ts) for the container
 # image; it stays off for local `next build` so Windows/pm2 builds don't hit symlink EPERM.

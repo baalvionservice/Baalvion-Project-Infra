@@ -307,56 +307,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  // Mock mode: fetch subscription + plan from mock API
-  const fetchCompanyData = async (companyId: string) => {
-    const [subRes, plansRes] = await Promise.all([
-      api.getSubscriptionByCompany(companyId),
-      api.getAllPlans(),
-    ]);
-    const activeSub = (subRes as any)?.data || subRes;
-    const allPlans = (plansRes as any)?.data || plansRes;
-
-    if (activeSub) {
-      const currentPlan =
-        allPlans?.find((p: any) => p.id === activeSub.planId) || null;
-      setSubscription(activeSub);
-      setPlan(currentPlan);
-
-      if (new Date(activeSub.endDate) < new Date()) {
-        const freePlan = allPlans?.find((p: any) => p.name === "Free")!;
-        await api.updateSubscription(activeSub.id, { status: "EXPIRED" });
-        const { data: newFreeSub } = await api.createSubscription({
-          companyId,
-          planId: freePlan.id,
-          status: "ACTIVE",
-          startDate: new Date().toISOString(),
-          endDate: new Date(
-            new Date().setFullYear(new Date().getFullYear() + 1)
-          ).toISOString(),
-          billingCycle: "YEARLY",
-          usage: { tasksCreated: 0, submissionsReceived: 0 },
-        });
-        setSubscription(newFreeSub);
-        setPlan(freePlan);
-      }
-    } else {
-      const freePlan = allPlans?.find((p: any) => p.name === "Free")!;
-      const { data: newFreeSub } = await api.createSubscription({
-        companyId,
-        planId: freePlan.id,
-        status: "ACTIVE",
-        startDate: new Date().toISOString(),
-        endDate: new Date(
-          new Date().setFullYear(new Date().getFullYear() + 99)
-        ).toISOString(),
-        billingCycle: "YEARLY",
-        usage: { tasksCreated: 0, submissionsReceived: 0 },
-      });
-      setSubscription(newFreeSub);
-      setPlan(freePlan);
-    }
-  };
-
   // Real mode: fetch subscription + plan from ctm-service
   const fetchRealCompanyData = async (companyId: string) => {
     try {
@@ -373,37 +323,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       let activeSub = subs.find((s) => s.status === 'active') ?? subs[0];
 
-      if (activeSub) {
-        // Auto-expire and reprovision if past end date
-        if (activeSub.current_period_end && new Date(activeSub.current_period_end) < new Date()) {
-          await ctmClient.patch(`/subscriptions/${activeSub.id}`, { status: 'expired' });
-          const freePlan = plans.find((p) => p.name?.toLowerCase().includes('free')) ?? plans[0];
-          if (freePlan) {
-            const newSubRaw = await ctmClient.post<unknown>('/subscriptions', {
-              company_id: companyId,
-              plan_id: freePlan.id,
-              billing_cycle: 'annual',
-            });
-            const newSub: CtmSubscription = (newSubRaw as any)?.data ?? newSubRaw as CtmSubscription;
-            activeSub = newSub;
-            setPlan(mapCtmPlan(freePlan));
-          }
-        } else {
-          const matchedPlan = plans.find((p) => p.id === activeSub.plan_id) ?? null;
-          if (matchedPlan) setPlan(mapCtmPlan(matchedPlan));
-        }
+      if (activeSub && activeSub.current_period_end && new Date(activeSub.current_period_end) >= new Date()) {
+        // Still inside its paid period — just reflect it.
+        const matchedPlan = plans.find((p) => p.id === activeSub.plan_id) ?? null;
+        if (matchedPlan) setPlan(mapCtmPlan(matchedPlan));
         setSubscription(mapCtmSubscription(activeSub));
-      } else if (plans.length > 0) {
-        // No subscription exists — provision free plan
-        const freePlan = plans.find((p) => p.name?.toLowerCase().includes('free')) ?? plans[0];
-        const newSubRaw = await ctmClient.post<unknown>('/subscriptions', {
-          company_id: companyId,
-          plan_id: freePlan.id,
-          billing_cycle: 'annual',
-        });
-        const newSub: CtmSubscription = (newSubRaw as any)?.data ?? newSubRaw as CtmSubscription;
-        setSubscription(mapCtmSubscription(newSub));
-        setPlan(mapCtmPlan(freePlan));
+      } else {
+        // Expired, or none at all. The browser used to resolve this itself — PATCH the old row to
+        // `expired`, then POST a replacement — which put an entitlement decision in the client and
+        // fell back to plans[0] (potentially a PAID plan) when nothing was named "Free". One
+        // idempotent server call now owns the rule and can only ever grant a zero-priced plan.
+        const ensured = await ctmClient.post<unknown>('/subscriptions/ensure', {});
+        const payload = ((ensured as any)?.data ?? ensured) as
+          { subscription: CtmSubscription | null; plan: CtmPlan | null };
+        if (payload?.subscription) setSubscription(mapCtmSubscription(payload.subscription));
+        if (payload?.plan) setPlan(mapCtmPlan(payload.plan));
       }
     } catch {
       // Non-fatal — proceed without subscription data
@@ -457,7 +391,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const parsedUser = JSON.parse(storedUser);
         setUser(parsedUser);
         if (parsedUser.role === "company" && parsedUser.companyId) {
-          fetchCompanyData(parsedUser.companyId);
+          fetchRealCompanyData(parsedUser.companyId);
         }
       }
     } catch (error) {
@@ -540,7 +474,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (foundUser.role === "company" && foundUser.companyId) {
         const company = await api.getCompany(foundUser.companyId);
         if (company) foundUser.companyName = company.name;
-        await fetchCompanyData(foundUser.companyId);
+        await fetchRealCompanyData(foundUser.companyId);
       }
       setUser(foundUser);
       localStorage.setItem("skillmatch-user", JSON.stringify(foundUser));

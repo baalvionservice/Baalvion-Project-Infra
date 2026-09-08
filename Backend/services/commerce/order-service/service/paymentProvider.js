@@ -37,8 +37,8 @@ const mockProvider = {
     // Defense-in-depth: the mock provider performs NO signature verification, so reaching this
     // path in production would let a caller confirm with no real payment. getProvider() already
     // blocks mock in production, but guard the capture path independently so it always fails closed.
-    if (process.env.NODE_ENV === 'production' && process.env.ALLOW_MOCK_PAYMENTS !== 'true') {
-      return { status: 'failed', transactionId: null, reason: 'mock_disabled_in_production' };
+    if (process.env.NODE_ENV === 'production' || process.env.ALLOW_MOCK_PAYMENTS !== 'true') {
+      return { status: 'failed', transactionId: null, reason: 'mock_payments_not_enabled' };
     }
     const intent = mockIntents.get(intentId);
     if (!intent) return { status: 'failed', transactionId: null, reason: 'unknown_intent' };
@@ -505,7 +505,14 @@ const unconfigured = (name) => ({
  * 'mock' is still blocked in production unless explicitly opted in, so a client can't force it.
  */
 function getProvider(selectedGateway = null) {
-  const id = String(selectedGateway || process.env.PAYMENT_PROVIDER || 'mock').toLowerCase();
+  // No implicit 'mock'. It used to be the final fallback, so a service with PAYMENT_PROVIDER
+  // unset silently captured orders against a provider that verifies nothing — real orders marked
+  // paid with no money. Mock is now reachable only by naming it AND opting in, in every
+  // environment, so a misconfiguration fails loudly instead of taking fake payments quietly.
+  const id = String(selectedGateway || process.env.PAYMENT_PROVIDER || '').toLowerCase();
+  if (!id) {
+    throw new Error('PAYMENT_PROVIDER is not set and no gateway was selected — refusing to guess a payment provider');
+  }
   switch (id) {
     case 'stripe':                  return stripeProvider;
     case 'razorpay':                return razorpayProvider;
@@ -514,13 +521,57 @@ function getProvider(selectedGateway = null) {
     case 'payu':                    return payuProvider;
     case 'paypal':                  return unconfigured('paypal');
     case 'mock':
-    default:
-      // Never silently use mock payments in production unless explicitly opted in.
-      if (process.env.NODE_ENV === 'production' && process.env.ALLOW_MOCK_PAYMENTS !== 'true') {
-        throw new Error('PAYMENT_PROVIDER not configured for production (mock requires ALLOW_MOCK_PAYMENTS=true)');
+      // Explicit opt-in required everywhere. A developer who wants it says so; nobody gets it by
+      // omission, and no environment inherits it from an unset variable.
+      if (process.env.ALLOW_MOCK_PAYMENTS !== 'true') {
+        throw new Error("payment provider 'mock' requires ALLOW_MOCK_PAYMENTS=true and must never be enabled in production");
+      }
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error("payment provider 'mock' is forbidden in production");
       }
       return mockProvider;
+    default:
+      throw new Error(`unknown payment provider '${id}'`);
   }
 }
 
-module.exports = { getProvider, payuVerifyReturn, payuParseReturn };
+/**
+ * Which gateways can actually take a payment right now.
+ *
+ * The storefront used to render a fixed set of four gateway cards and default to Stripe, so a
+ * shopper on a site with no Stripe account picked it by default and only discovered the problem
+ * at the last step of checkout. Each entry below is proved by resolving the SAME credentials the
+ * charge would use, so "offered" and "chargeable" cannot drift apart.
+ *
+ * Bank transfer needs no credentials — it issues instructions and settles out of band — so it is
+ * always available. `mock` is never advertised.
+ */
+async function configuredGateways() {
+  const checks = [
+    ['razorpay', razorpayKeys],
+    ['stripe', stripeCreds],
+    ['payu', payuCreds],
+  ];
+  const available = [];
+  for (const [name, resolve] of checks) {
+    try {
+      await resolve();
+      available.push(name);
+    } catch {
+      // Unconfigured — simply not offered. Never surface the reason to a storefront caller.
+    }
+  }
+  available.push('bank');
+  if (CRYPTO_WALLETS && Object.values(CRYPTO_WALLETS).some(Boolean)) available.push('crypto');
+
+  // The service default, when it is one we can actually charge with, is the best "preferred".
+  const fallbackOrder = ['razorpay', 'payu', 'stripe', 'bank'];
+  const envDefault = String(process.env.PAYMENT_PROVIDER || '').toLowerCase();
+  const preferred = available.includes(envDefault)
+    ? envDefault
+    : fallbackOrder.find((g) => available.includes(g)) || null;
+
+  return { gateways: available, preferred };
+}
+
+module.exports = { getProvider, payuVerifyReturn, payuParseReturn, configuredGateways };

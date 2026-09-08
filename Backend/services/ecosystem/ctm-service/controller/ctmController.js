@@ -466,11 +466,86 @@ exports.createSubscription = async (req, res, next) => {
             company_id = req.auth?.orgId;
         }
         if (!company_id || !plan_id) throw new AppError('VALIDATION_ERROR', 'company_id and plan_id are required', 400);
+
+        // This endpoint creates a subscription already marked ACTIVE, so for a non-admin it may
+        // only ever name a FREE plan. Without this a company member could POST the most expensive
+        // plan id and be entitled to it immediately, having paid nothing — the ownership check
+        // above proves who they are, not what they bought. Paid tiers are activated from a
+        // signature-verified payment webhook (see paymentsController), never from a browser.
+        const plan = await db.plans.findByPk(plan_id);
+        if (!plan) throw new AppError('VALIDATION_ERROR', 'Unknown plan', 400);
+        if (!isAdmin) {
+            const monthly = Number(plan.monthly_price ?? 0);
+            const annual = Number(plan.annual_price ?? 0);
+            if (monthly > 0 || annual > 0) {
+                throw new AppError('PAYMENT_REQUIRED', 'This plan must be purchased through checkout', 402);
+            }
+        }
+
+        // One active subscription per company: without this, repeated calls stack up rows and the
+        // "current plan" lookup becomes whichever the query happens to return first.
+        const existing = await db.subscriptions.findOne({ where: { company_id, status: 'active' } });
+        if (existing) throw new AppError('CONFLICT', 'This company already has an active subscription', 409);
+
         const now = new Date();
         const periodEnd = new Date(now);
         periodEnd.setMonth(periodEnd.getMonth() + (billing_cycle === 'annual' ? 12 : 1));
         const sub = await db.subscriptions.create({ company_id, plan_id, billing_cycle: billing_cycle || 'monthly', status: 'active', current_period_start: now, current_period_end: periodEnd });
         sendSuccess(res, sub, 201);
+    } catch (err) { next(err); }
+};
+
+/**
+ * Idempotent "what is this company entitled to right now" — POST /v1/subscriptions/ensure.
+ *
+ * The browser used to run this lifecycle itself: on every load it PATCHed an out-of-date
+ * subscription to `expired` and POSTed a replacement. That put entitlement decisions in the
+ * client, and its free-plan lookup fell back to `plans[0]` when nothing was named "Free" — which
+ * could hand out a PAID plan for nothing.
+ *
+ * The rules now live here, where they can be enforced: an expired period is expired, every
+ * company falls back to the cheapest ZERO-priced plan, and a paid plan is never granted. Safe to
+ * call on every page load — it converges rather than accumulating rows.
+ */
+exports.ensureSubscription = async (req, res, next) => {
+    try {
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        const company_id = isAdmin ? (req.body?.company_id || req.auth?.orgId) : req.auth?.orgId;
+        if (!company_id) throw new AppError('VALIDATION_ERROR', 'No company for this caller', 400);
+
+        let sub = await db.subscriptions.findOne({ where: { company_id, status: 'active' } });
+
+        // An active row whose period has elapsed is not active any more.
+        if (sub && sub.current_period_end && new Date(sub.current_period_end) < new Date()) {
+            sub.status = 'expired';
+            await sub.save();
+            sub = null;
+        }
+
+        if (!sub) {
+            // The free tier is a plan that costs nothing — identified by price, never by name.
+            // A name match ("Free") silently degrades to plans[0] when the catalogue is renamed,
+            // and plans[0] can be the most expensive plan there is.
+            const plans = await db.plans.findAll();
+            const free = plans
+                .filter((p) => Number(p.monthly_price ?? 0) === 0 && Number(p.annual_price ?? 0) === 0)
+                .sort((a, b) => String(a.id).localeCompare(String(b.id)))[0];
+            if (!free) {
+                // No zero-priced plan exists. Report honestly rather than provisioning a paid one.
+                return sendSuccess(res, { subscription: null, plan: null, reason: 'no_free_plan' });
+            }
+            const now = new Date();
+            const periodEnd = new Date(now);
+            periodEnd.setFullYear(periodEnd.getFullYear() + 1);
+            sub = await db.subscriptions.create({
+                company_id, plan_id: free.id, billing_cycle: 'annual', status: 'active',
+                current_period_start: now, current_period_end: periodEnd,
+            });
+        }
+
+        const plan = await db.plans.findByPk(sub.plan_id);
+        return sendSuccess(res, { subscription: sub, plan: plan || null });
     } catch (err) { next(err); }
 };
 
@@ -488,7 +563,27 @@ exports.updateSubscription = async (req, res, next) => {
             }
         }
         // Mass-assignment guard: company_id is never writeable.
-        const fields = ['status', 'plan_id', 'billing_cycle', 'gateway', 'gateway_subscription_id'];
+        //
+        // Beyond that, the fields below decide what a company has PAID for, and the org-ownership
+        // check above only proves the caller owns the row — not that they bought anything. Left
+        // writeable, any member of the owning company could PATCH their own subscription to the
+        // most expensive plan with status ACTIVE and take it for free. plan_id, gateway and the
+        // gateway reference are therefore admin-only; the paid path sets them server-side from a
+        // signature-verified webhook (see paymentsController), never from a browser.
+        const BILLING_CONTROLLED = ['plan_id', 'billing_cycle', 'gateway', 'gateway_subscription_id'];
+        if (!isAdmin) {
+            const attempted = BILLING_CONTROLLED.filter((f) => req.body[f] !== undefined);
+            if (attempted.length) {
+                throw new AppError('FORBIDDEN', `Only billing may change: ${attempted.join(', ')}`, 403);
+            }
+            // The one status change a customer may make for themselves is cancelling. Anything
+            // else (notably ACTIVE) is an entitlement decision and belongs to the payment path.
+            if (req.body.status !== undefined && String(req.body.status).toLowerCase() !== 'cancelled') {
+                throw new AppError('FORBIDDEN', 'Only billing may change a subscription status', 403);
+            }
+        }
+
+        const fields = ['status', ...BILLING_CONTROLLED];
         fields.forEach(f => { if (req.body[f] !== undefined) sub[f] = req.body[f]; });
         await sub.save();
         sendSuccess(res, sub);

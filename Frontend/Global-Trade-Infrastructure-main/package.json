@@ -3,6 +3,9 @@
   "version": "142.0.0-SINGULARITY",
   "private": true,
   "description": "Baalvion Sovereign Global Trade Operating System - Eternal Absolute Singularity",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "dev": "next dev -p 9003",
     "postinstall": "prisma generate",

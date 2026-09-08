@@ -30,6 +30,11 @@ ARG NEXT_PUBLIC_APP_URL
 ARG NEXT_PUBLIC_REALTIME_WS_URL
 # Must equal the gateway's COOKIE_REFRESH_NAME, else the route-gate middleware 307-loops to /login.
 ARG NEXT_PUBLIC_REFRESH_COOKIE_NAME=baalvion_refresh
+# Build inputs, not runtime: next.config resolves rewrites() at build time and bakes the
+# destinations into routes-manifest.json, so setting these on the running container is a
+# no-op. Unset, the config silently falls back to its hardcoded default.
+ARG DASHBOARD_API_URL
+ENV DASHBOARD_API_URL=$DASHBOARD_API_URL
 ENV NEXT_TELEMETRY_DISABLED=1 NODE_ENV=production
 COPY --from=pruner /app/out/full/ ./
 RUN pnpm turbo run build --filter=company-unified-dashboard-web
