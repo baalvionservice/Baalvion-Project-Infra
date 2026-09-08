@@ -38,19 +38,19 @@ export default function NewsImagesPage() {
         <Card>
           <CardContent className="pt-5 pb-4">
             <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">With Image</p>
-            <p className="text-2xl font-bold">{isLoading ? <Skeleton className="h-7 w-14" /> : data?.withImage ?? 0}</p>
+            <div className="text-2xl font-bold">{isLoading ? <Skeleton className="h-7 w-14" /> : data?.withImage ?? 0}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-5 pb-4">
             <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">Without Image</p>
-            <p className="text-2xl font-bold">{isLoading ? <Skeleton className="h-7 w-14" /> : data?.withoutImage ?? 0}</p>
+            <div className="text-2xl font-bold">{isLoading ? <Skeleton className="h-7 w-14" /> : data?.withoutImage ?? 0}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-5 pb-4">
             <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">Coverage</p>
-            <p className="text-2xl font-bold">{isLoading ? <Skeleton className="h-7 w-14" /> : `${data?.coveragePct ?? 0}%`}</p>
+            <div className="text-2xl font-bold">{isLoading ? <Skeleton className="h-7 w-14" /> : `${data?.coveragePct ?? 0}%`}</div>
           </CardContent>
         </Card>
       </div>
