@@ -210,6 +210,29 @@ exports.resolveRiskEvent = async (req, res, next) => {
     } catch (err) { next(err); }
 };
 
+/**
+ * Sign-in activity across every property, from the canonical auth audit stream.
+ *
+ * sendSuccess rather than sendPaginated: the response carries the per-site rollup alongside the
+ * page of events, and sendPaginated has no room for it. The `data` shape is otherwise identical
+ * to sendPaginated's, plus `sites`.
+ */
+exports.getLoginActivity = async (req, res, next) => {
+    try {
+        const { page = 1, limit = 50, site, event, userId, from, to } = req.query;
+        const result = await adminService.getLoginActivity({
+            page:   Math.max(1, parseInt(page, 10) || 1),
+            limit:  Math.min(200, Math.max(1, parseInt(limit, 10) || 50)),
+            site:   site   || undefined,
+            event:  event  || undefined,
+            userId: userId || undefined,
+            from:   from   || undefined,
+            to:     to     || undefined,
+        });
+        sendSuccess(req, res, result);
+    } catch (err) { next(err); }
+};
+
 exports.getAuditLogs = async (req, res, next) => {
     try {
         const { page = 1, limit = 50, orgId, userId, action, severity, from, to } = req.query;

@@ -976,6 +976,80 @@ async function getAuditLogs({ page = 1, limit = 50, orgId, userId, action, from,
     return { items: logs, total: count, page, limit, hasMore: offset + limit < count };
 }
 
+// ── Sign-in activity, per site ──────────────────────────────────────────────────
+// Reads auth.auth_audit_log, NOT auth.audit_logs: the two streams run in parallel and carry
+// the same events, but only the canonical one has app_id — the column that says WHICH property
+// a sign-in came from. auth-service fills it from the request Origin (see siteFromRequest).
+//
+// A NULL app_id is a real, distinct answer, not missing data: the request carried no Origin at
+// all (server-to-server, OAuth callbacks). It surfaces as 'unknown' rather than being folded
+// into the flagship brand, so the console never claims a sign-in happened on a site it did not.
+const SIGNIN_EVENTS = ['login_success', 'login_failure'];
+
+async function getLoginActivity({ page = 1, limit = 50, site, event, userId, from, to } = {}) {
+    const db     = getDb();
+    const offset = (page - 1) * limit;
+    const events = event && SIGNIN_EVENTS.includes(event) ? [event] : SIGNIN_EVENTS;
+
+    // Two independent (clause, bind) pairs. The rollup runs the SAME filters EXCEPT `site` —
+    // it is what the site picker is built from, so narrowing it to the selected site would
+    // leave the picker with a single option and no way back. They cannot share one bind list:
+    // dropping a clause from the middle would leave every later $n pointing at the wrong value.
+    const build = ({ withSite }) => {
+        const where = ['a.event_type = ANY($1)'];
+        const bind  = [events];
+        const add   = (sql, value) => { where.push(sql(bind.length + 1)); bind.push(value); };
+
+        if (withSite) {
+            // 'unknown' is the UI's label for a NULL app_id — no row ever stores that string.
+            if (site === 'unknown') where.push('a.app_id IS NULL');
+            else if (site)          add((n) => `a.app_id = $${n}`, site);
+        }
+        if (userId) add((n) => `a.user_id = $${n}`, String(userId));
+        if (from)   add((n) => `a.created_at >= $${n}`, from);
+        if (to)     add((n) => `a.created_at <= $${n}`, to);
+
+        return { sql: where.join(' AND '), bind };
+    };
+
+    const scoped = build({ withSite: true });
+    const rollup = build({ withSite: false });
+    const whereSql = scoped.sql;
+    const bind     = scoped.bind;
+
+    const [rows, [{ count }], sites] = await Promise.all([
+        db.sequelize.query(
+            `SELECT a.id, a.event_type, a.app_id, a.user_id, a.org_id, a.session_id,
+                    a.ip_address, a.user_agent, a.severity, a.metadata, a.created_at,
+                    u.email AS user_email, u.full_name AS user_name, u.avatar_url AS user_avatar
+             FROM auth.auth_audit_log a
+             LEFT JOIN auth.users u ON u.id = a.user_id
+             WHERE ${whereSql}
+             ORDER BY a.created_at DESC
+             LIMIT $${bind.length + 1} OFFSET $${bind.length + 2}`,
+            { type: db.Sequelize.QueryTypes.SELECT, bind: [...bind, limit, offset] }
+        ),
+        db.sequelize.query(
+            `SELECT COUNT(*)::int AS count FROM auth.auth_audit_log a WHERE ${whereSql}`,
+            { type: db.Sequelize.QueryTypes.SELECT, bind }
+        ),
+        db.sequelize.query(
+            `SELECT COALESCE(a.app_id, 'unknown') AS site,
+                    COUNT(*) FILTER (WHERE a.event_type = 'login_success')::int AS logins,
+                    COUNT(*) FILTER (WHERE a.event_type = 'login_failure')::int AS failures,
+                    COUNT(DISTINCT a.user_id) FILTER (WHERE a.event_type = 'login_success')::int AS users,
+                    MAX(a.created_at) AS last_seen_at
+             FROM auth.auth_audit_log a
+             WHERE ${rollup.sql}
+             GROUP BY 1
+             ORDER BY logins DESC, site ASC`,
+            { type: db.Sequelize.QueryTypes.SELECT, bind: rollup.bind }
+        ),
+    ]);
+
+    return { items: rows, total: count, page, limit, hasMore: offset + limit < count, sites };
+}
+
 // ── Risk events (derived from the audit log) ────────────────────────────────────
 // admin-service has no dedicated risk engine; the Security console's risk feed is
 // synthesized from security-relevant audit actions so it shows real signal.
@@ -1037,5 +1111,6 @@ module.exports = {
     createImpersonationToken,
     listAllSessions, revokeSessionAdmin,
     getAuditLogs,
+    getLoginActivity,
     listRiskEvents,
 };
