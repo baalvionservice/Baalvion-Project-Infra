@@ -54,12 +54,26 @@ for (const { file, doc } of services) {
   console.log(`✓ ${doc.metadata.name} (${doc.metadata.division}/${doc.metadata.tier})`);
 }
 
-// Emit the index (dependency graph + reverse event-consumer map).
+// Emit the index (dependency graph + reverse event-consumer map + the runtime address book).
+// `runtime` is what the status prober reads to know what to probe and where — consumers import
+// it as @baalvion/catalog/index.json rather than re-deriving it, so there is exactly one
+// address book and CI (rule C8) keeps it complete.
 const index = {
   generatedAt: new Date().toISOString(),
   services: services.map((s) => s.doc.metadata.name),
   graph: Object.fromEntries(services.map((s) => [s.doc.metadata.name, s.doc.spec.dependsOn ?? []])),
   eventConsumers: {},
+  runtime: Object.fromEntries(
+    services
+      .filter((s) => s.doc.kind === 'Service' && s.doc.spec.runtime)
+      .map((s) => [s.doc.metadata.name, {
+        ...s.doc.spec.runtime,
+        tier: s.doc.metadata.tier,
+        domain: s.doc.metadata.domain,
+        lifecycle: s.doc.spec.lifecycle,
+        datastores: s.doc.spec.datastores ?? [],
+      }]),
+  ),
 };
 for (const { doc } of services) {
   for (const e of doc.spec.consumesEvents ?? []) {

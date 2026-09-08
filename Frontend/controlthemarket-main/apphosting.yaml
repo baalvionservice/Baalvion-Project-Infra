@@ -17,9 +17,11 @@ runConfig:
 # if it differs (currently the platform gateway api.baalvion.com).
 env:
   # Canonical public origin — drives all SEO canonicals, robots.txt host, and
-  # sitemap.xml absolute URLs (src/lib/site-url.ts). This is the product apex domain.
+  # sitemap.xml absolute URLs (src/lib/site-url.ts). This is the host that actually SERVES:
+  # production 307-redirects the apex to www, so naming the apex here published a sitemap whose
+  # every entry redirected, and a canonical pointing at a redirect.
   - variable: NEXT_PUBLIC_APP_URL
-    value: https://controlthemarket.com
+    value: https://www.controlthemarket.com
     availability:
       - BUILD
       - RUNTIME

@@ -73,12 +73,20 @@ function ServiceRow({ svc }: { svc: ServiceStatus }) {
 
 // ── Metric gauge ──────────────────────────────────────────────────────────────
 
+// The probe reports null for a metric it could not read (and 0 max connections divides to
+// NaN), so every reading here is treated as optional and shown as "—" when absent.
+function num(value: unknown): number | null {
+  return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
+
 function MetricGauge({ label, value, max = 100, unit = '%', warn = 75, danger = 90, icon: Icon }: {
-  label: string; value: number; max?: number; unit?: string;
+  label: string; value: number | null | undefined; max?: number; unit?: string;
   warn?: number; danger?: number; icon: React.ComponentType<{ className?: string }>;
 }) {
-  const pct = Math.min((value / max) * 100, 100);
-  const color = pct >= danger ? 'text-red-500' : pct >= warn ? 'text-yellow-500' : 'text-green-500';
+  const safe = num(value);
+  const pct = safe === null ? 0 : Math.min((safe / max) * 100, 100);
+  const color = safe === null ? 'text-muted-foreground'
+    : pct >= danger ? 'text-red-500' : pct >= warn ? 'text-yellow-500' : 'text-green-500';
   const barColor = pct >= danger ? 'bg-red-500' : pct >= warn ? 'bg-yellow-500' : 'bg-green-500';
 
   return (
@@ -88,7 +96,9 @@ function MetricGauge({ label, value, max = 100, unit = '%', warn = 75, danger = 
           <Icon className={cn('h-3.5 w-3.5', color)} />
           <span>{label}</span>
         </div>
-        <span className={cn('text-xs font-semibold', color)}>{value.toFixed(1)}{unit}</span>
+        <span className={cn('text-xs font-semibold', color)}>
+          {safe === null ? '—' : `${safe.toFixed(1)}${unit}`}
+        </span>
       </div>
       <div className="h-2 bg-muted rounded overflow-hidden">
         <div className={cn('h-full rounded transition-all', barColor)} style={{ width: `${pct}%` }} />
@@ -338,11 +348,11 @@ export default function InfrastructurePage() {
                     <div className="pt-2 border-t space-y-1 text-xs text-muted-foreground">
                       <div className="flex justify-between">
                         <span>Network In</span>
-                        <span className="font-medium text-foreground">{infra.network.inKbps.toFixed(0)} KB/s</span>
+                        <span className="font-medium text-foreground">{num(infra.network?.inKbps)?.toFixed(0) ?? '—'} KB/s</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Network Out</span>
-                        <span className="font-medium text-foreground">{infra.network.outKbps.toFixed(0)} KB/s</span>
+                        <span className="font-medium text-foreground">{num(infra.network?.outKbps)?.toFixed(0) ?? '—'} KB/s</span>
                       </div>
                     </div>
                   </>
@@ -418,12 +428,12 @@ export default function InfrastructurePage() {
                       </div>
                       <div className="flex items-center justify-between text-xs">
                         <span>Memory</span>
-                        <span className="font-medium">{infra.redis.memoryMb.toFixed(0)} MB</span>
+                        <span className="font-medium">{num(infra.redis?.memoryMb)?.toFixed(0) ?? '—'} MB</span>
                       </div>
                       <div className="flex items-center justify-between text-xs">
                         <span>Hit rate</span>
-                        <span className={cn('font-medium', infra.redis.hitRate >= 0.9 ? 'text-green-500' : 'text-yellow-500')}>
-                          {(infra.redis.hitRate * 100).toFixed(1)}%
+                        <span className={cn('font-medium', (num(infra.redis?.hitRate) ?? 0) >= 0.9 ? 'text-green-500' : 'text-yellow-500')}>
+                          {num(infra.redis?.hitRate) === null ? '—' : `${(num(infra.redis.hitRate)! * 100).toFixed(1)}%`}
                         </span>
                       </div>
                     </>

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="CanWeMarry">
+  <rect width="64" height="64" rx="14" fill="#26565b"/>
+  <!-- Two open arcs meeting but not fused: joined, still distinct. -->
+  <g fill="none" stroke="#fbfaf7" stroke-width="4.5" stroke-linecap="round">
+    <path d="M27 20a13 13 0 1 0 0 24"/>
+    <path d="M37 20a13 13 0 1 1 0 24"/>
+  </g>
+</svg>

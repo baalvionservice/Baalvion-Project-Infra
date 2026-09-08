@@ -102,6 +102,11 @@ function handleMessage(msg: { type: string; data: unknown; ts?: number }) {
     case 'infra_metrics':
       store.setInfra(msg.data as Parameters<typeof store.setInfra>[0]);
       break;
+    // Per-site rollup from the status prober — pushed once per sweep so Mission Control
+    // updates without polling, and falls back to the REST route when this never arrives.
+    case 'site_status':
+      store.setSiteStatus(msg.data);
+      break;
     case 'pong':
       // heartbeat ok
       break;

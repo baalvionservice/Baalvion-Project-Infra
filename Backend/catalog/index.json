@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-06T19:53:54.118Z",
+  "generatedAt": "2026-09-08T00:06:14.807Z",
   "services": [
     "about-service",
     "account-service",
@@ -55,6 +55,7 @@
     "rbac-service",
     "real-estate-service",
     "realtime-service",
+    "realtime-telemetry",
     "reconciliation-service",
     "report-service",
     "reporting-service",
@@ -238,6 +239,9 @@
     "realtime-service": [
       "auth-service"
     ],
+    "realtime-telemetry": [
+      "auth-service"
+    ],
     "reconciliation-service": [
       "auth-service"
     ],
@@ -297,5 +301,799 @@
     "org.created": [
       "proxy-platform"
     ]
+  },
+  "runtime": {
+    "about-service": {
+      "deployment": "consolidated-box",
+      "port": 3010,
+      "healthPath": "/health",
+      "container": "app-ecosystem",
+      "tier": "tier-3",
+      "domain": "ecosystem",
+      "lifecycle": "production",
+      "datastores": [
+        "postgres"
+      ]
+    },
+    "account-service": {
+      "deployment": "not-deployed",
+      "tier": "tier-1",
+      "domain": "commerce",
+      "lifecycle": "beta",
+      "datastores": [
+        "postgres",
+        "kafka"
+      ]
+    },
+    "admin-service": {
+      "deployment": "consolidated-box",
+      "port": 3021,
+      "healthPath": "/health",
+      "container": "app-platform",
+      "tier": "tier-1",
+      "domain": "platform",
+      "lifecycle": "production",
+      "datastores": [
+        "postgres"
+      ]
+    },
+    "agent-service": {
+      "deployment": "not-deployed",
+      "tier": "tier-2",
+      "domain": "ecosystem",
+      "lifecycle": "beta",
+      "datastores": [
+        "postgres",
+        "redis"
+      ]
+    },
+    "aml-service": {
+      "deployment": "not-deployed",
+      "tier": "tier-1",
+      "domain": "commerce",
+      "lifecycle": "beta",
+      "datastores": [
+        "postgres",
+        "kafka"
+      ]
+    },
+    "audit-service": {
+      "deployment": "consolidated-box",
+      "port": 3032,
+      "healthPath": "/health",
+      "container": "app-platform",
+      "tier": "tier-0",
+      "domain": "infrastructure",
+      "lifecycle": "production",
+      "datastores": [
+        "postgres",
+        "redis"
+      ]
+    },
+    "auth-gateway": {
+      "deployment": "consolidated-box",
+      "port": 3026,
+      "healthPath": "/health",
+      "container": "app-identity",
+      "tier": "tier-0",
+      "domain": "identity",
+      "lifecycle": "production",
+      "datastores": [
+        "redis"
+      ]
+    },
+    "auth-service": {
+      "deployment": "consolidated-box",
+      "port": 3001,
+      "healthPath": "/health",
+      "container": "app-identity",
+      "publicHealthUrl": "https://auth-api.baalvion.com/health",
+      "tier": "tier-0",
+      "domain": "identity",
+      "lifecycle": "production",
+      "datastores": [
+        "postgres",
+        "redis"
+      ]
+    },
+    "baalvion-os": {
+      "deployment": "not-deployed",
+      "tier": "tier-0",
+      "domain": "platform",
+      "lifecycle": "production",
+      "datastores": [
+        "postgres",
+        "redis"
+      ]
+    },
+    "brand-connector-service": {
+      "deployment": "consolidated-box",
+      "port": 3006,
+      "healthPath": "/health",
+      "container": "app-ecosystem",
+      "tier": "tier-3",
+      "domain": "ecosystem",
+      "lifecycle": "production",
+      "datastores": [
+        "postgres"
+      ]
+    },
+    "cms-service": {
+      "deployment": "consolidated-box",
+      "port": 3018,
+      "healthPath": "/api/v1/health",
+      "container": "app-platform",
+      "tier": "tier-2",
+      "domain": "knowledge",
+      "lifecycle": "production",
+      "datastores": [
+        "postgres"
+      ]
+    },
+    "commerce-service": {
+      "deployment": "consolidated-box",
+      "port": 3012,
+      "healthPath": "/health",
+      "container": "app-commerce",
+      "tier": "tier-1",
+      "domain": "commerce",
+      "lifecycle": "production",
+      "datastores": [
+        "postgres"
+      ]
+    },
+    "community-service": {
+      "deployment": "standalone",
+      "port": 3064,
+      "healthPath": "/health",
+      "container": "app-community",
+      "tier": "tier-2",
+      "domain": "ecosystem",
+      "lifecycle": "experimental",
+      "datastores": [
+        "postgres",
+        "redis"
+      ]
+    },
+    "credit-service": {
+      "deployment": "not-deployed",
+      "tier": "tier-1",
+      "domain": "commerce",
+      "lifecycle": "beta",
+      "datastores": [
+        "postgres",
+        "kafka"
+      ]
+    },
+    "crm-service": {
+      "deployment": "consolidated-box",
+      "port": 3063,
+      "healthPath": "/health",
+      "container": "app-ecosystem",
+      "tier": "tier-2",
+      "domain": "ecosystem",
+      "lifecycle": "production",
+      "datastores": [
+        "postgres"
+      ]
+    },
+    "ctm-service": {
+      "deployment": "consolidated-box",
+      "port": 3017,
+      "healthPath": "/health",
+      "container": "app-ecosystem",
+      "tier": "tier-2",
+      "domain": "ecosystem",
+      "lifecycle": "production",
+      "datastores": [
+        "postgres"
+      ]
+    },
+    "dashboard-service": {
+      "deployment": "consolidated-box",
+      "port": 3009,
+      "healthPath": "/health",
+      "container": "app-platform",
+      "tier": "tier-2",
+      "domain": "platform",
+      "lifecycle": "production",
+      "datastores": [
+        "postgres"
+      ]
+    },
+    "deal-room-service": {
+      "deployment": "not-deployed",
+      "tier": "tier-1",
+      "domain": "commerce",
+      "lifecycle": "beta",
+      "datastores": [
+        "postgres",
+        "kafka"
+      ]
+    },
+    "developer-service": {
+      "deployment": "consolidated-box",
+      "port": 3042,
+      "healthPath": "/health",
+      "container": "app-platform",
+      "publicHealthUrl": "https://developer-api.baalvion.com/health",
+      "tier": "tier-1",
+      "domain": "infrastructure",
+      "lifecycle": "beta",
+      "datastores": [
+        "postgres",
+        "redis"
+      ]
+    },
+    "dispute-service": {
+      "deployment": "not-deployed",
+      "tier": "tier-1",
+      "domain": "commerce",
+      "lifecycle": "beta",
+      "datastores": [
+        "postgres",
+        "kafka"
+      ]
+    },
+    "escrow-service": {
+      "deployment": "not-deployed",
+      "tier": "tier-1",
+      "domain": "commerce",
+      "lifecycle": "beta",
+      "datastores": [
+        "postgres",
+        "kafka"
+      ]
+    },
+    "finance-audit-service": {
+      "deployment": "not-deployed",
+      "tier": "tier-1",
+      "domain": "commerce",
+      "lifecycle": "beta",
+      "datastores": [
+        "postgres",
+        "kafka"
+      ]
+    },
+    "fulfillment-service": {
+      "deployment": "consolidated-box",
+      "port": 3016,
+      "healthPath": "/health",
+      "container": "app-commerce",
+      "tier": "tier-2",
+      "domain": "commerce",
+      "lifecycle": "production",
+      "datastores": [
+        "postgres"
+      ]
+    },
+    "fx-service": {
+      "deployment": "not-deployed",
+      "tier": "tier-1",
+      "domain": "commerce",
+      "lifecycle": "beta",
+      "datastores": [
+        "postgres",
+        "kafka"
+      ]
+    },
+    "gateway": {
+      "deployment": "not-deployed",
+      "tier": "tier-0",
+      "domain": "infrastructure",
+      "lifecycle": "production",
+      "datastores": [
+        "redis"
+      ]
+    },
+    "giftcard-service": {
+      "deployment": "standalone",
+      "port": 3065,
+      "healthPath": "/health",
+      "container": "app-giftcard",
+      "tier": "tier-2",
+      "domain": "ecosystem",
+      "lifecycle": "experimental",
+      "datastores": [
+        "postgres",
+        "redis"
+      ]
+    },
+    "imperialpedia-service": {
+      "deployment": "consolidated-box",
+      "port": 3004,
+      "healthPath": "/health",
+      "container": "app-platform",
+      "tier": "tier-2",
+      "domain": "knowledge",
+      "lifecycle": "production",
+      "datastores": [
+        "postgres"
+      ]
+    },
+    "insiders-service": {
+      "deployment": "not-deployed",
+      "tier": "tier-2",
+      "domain": "ecosystem",
+      "lifecycle": "production",
+      "datastores": [
+        "postgres"
+      ]
+    },
+    "inventory-service": {
+      "deployment": "consolidated-box",
+      "port": 3014,
+      "healthPath": "/health",
+      "container": "app-commerce",
+      "tier": "tier-2",
+      "domain": "commerce",
+      "lifecycle": "production",
+      "datastores": [
+        "postgres"
+      ]
+    },
+    "ir-service": {
+      "deployment": "consolidated-box",
+      "port": 3008,
+      "healthPath": "/health",
+      "container": "app-ecosystem",
+      "tier": "tier-2",
+      "domain": "ecosystem",
+      "lifecycle": "production",
+      "datastores": [
+        "postgres"
+      ]
+    },
+    "jobs-service": {
+      "deployment": "consolidated-box",
+      "port": 3002,
+      "healthPath": "/health",
+      "container": "app-ecosystem",
+      "tier": "tier-2",
+      "domain": "ecosystem",
+      "lifecycle": "production",
+      "datastores": [
+        "postgres"
+      ]
+    },
+    "law-elite": {
+      "deployment": "not-deployed",
+      "tier": "tier-2",
+      "domain": "ecosystem",
+      "lifecycle": "production",
+      "datastores": [
+        "postgres"
+      ]
+    },
+    "law-service": {
+      "deployment": "consolidated-box",
+      "port": 3015,
+      "healthPath": "/health",
+      "container": "app-platform",
+      "tier": "tier-2",
+      "domain": "knowledge",
+      "lifecycle": "production",
+      "datastores": [
+        "postgres"
+      ]
+    },
+    "ledger-service": {
+      "deployment": "not-deployed",
+      "tier": "tier-1",
+      "domain": "commerce",
+      "lifecycle": "beta",
+      "datastores": [
+        "postgres",
+        "kafka"
+      ]
+    },
+    "market-service": {
+      "deployment": "consolidated-box",
+      "port": 3007,
+      "healthPath": "/health",
+      "container": "app-commerce",
+      "tier": "tier-2",
+      "domain": "commerce",
+      "lifecycle": "production",
+      "datastores": [
+        "postgres"
+      ]
+    },
+    "marketplace-service": {
+      "deployment": "consolidated-box",
+      "port": 3060,
+      "healthPath": "/health",
+      "container": "app-commerce",
+      "tier": "tier-1",
+      "domain": "commerce",
+      "lifecycle": "beta",
+      "datastores": [
+        "postgres"
+      ]
+    },
+    "mining-service": {
+      "deployment": "consolidated-box",
+      "port": 3003,
+      "healthPath": "/health",
+      "container": "app-ecosystem",
+      "tier": "tier-2",
+      "domain": "ecosystem",
+      "lifecycle": "production",
+      "datastores": [
+        "postgres"
+      ]
+    },
+    "ml-service": {
+      "deployment": "not-deployed",
+      "tier": "tier-2",
+      "domain": "knowledge",
+      "lifecycle": "production",
+      "datastores": [
+        "postgres",
+        "clickhouse"
+      ]
+    },
+    "network-graph-service": {
+      "deployment": "consolidated-box",
+      "port": 3047,
+      "healthPath": "/health",
+      "container": "app-trade",
+      "tier": "tier-2",
+      "domain": "commerce",
+      "lifecycle": "production",
+      "datastores": []
+    },
+    "news-service": {
+      "deployment": "consolidated-box",
+      "port": 3045,
+      "healthPath": "/health",
+      "container": "app-platform",
+      "publicHealthUrl": "https://news.baalvion.com/health",
+      "tier": "tier-2",
+      "domain": "knowledge",
+      "lifecycle": "experimental",
+      "datastores": [
+        "postgres",
+        "redis"
+      ]
+    },
+    "notification-service": {
+      "deployment": "consolidated-box",
+      "port": 3031,
+      "healthPath": "/health",
+      "container": "app-edge-realtime",
+      "tier": "tier-1",
+      "domain": "infrastructure",
+      "lifecycle": "production",
+      "datastores": [
+        "postgres",
+        "redis"
+      ]
+    },
+    "oauth-service": {
+      "deployment": "consolidated-box",
+      "port": 3023,
+      "healthPath": "/health",
+      "container": "app-identity",
+      "tier": "tier-0",
+      "domain": "identity",
+      "lifecycle": "production",
+      "datastores": [
+        "postgres",
+        "redis"
+      ]
+    },
+    "order-execution-service": {
+      "deployment": "consolidated-box",
+      "port": 3052,
+      "healthPath": "/health",
+      "container": "app-trade",
+      "tier": "tier-1",
+      "domain": "commerce",
+      "lifecycle": "production",
+      "datastores": [
+        "postgres",
+        "redis"
+      ]
+    },
+    "order-service": {
+      "deployment": "consolidated-box",
+      "port": 3013,
+      "healthPath": "/health",
+      "container": "app-commerce",
+      "tier": "tier-1",
+      "domain": "commerce",
+      "lifecycle": "production",
+      "datastores": [
+        "postgres",
+        "redis"
+      ]
+    },
+    "payment-rails-service": {
+      "deployment": "not-deployed",
+      "tier": "tier-0",
+      "domain": "commerce",
+      "lifecycle": "beta",
+      "datastores": [
+        "postgres",
+        "kafka"
+      ]
+    },
+    "payment-service": {
+      "deployment": "standalone",
+      "port": 3015,
+      "healthPath": "/actuator/health",
+      "container": "app-payments",
+      "tier": "tier-1",
+      "domain": "commerce",
+      "lifecycle": "beta",
+      "datastores": [
+        "postgres",
+        "redis",
+        "kafka"
+      ]
+    },
+    "product-registry-service": {
+      "deployment": "consolidated-box",
+      "port": 3048,
+      "healthPath": "/health",
+      "container": "app-trade",
+      "tier": "tier-2",
+      "domain": "commerce",
+      "lifecycle": "production",
+      "datastores": [
+        "postgres"
+      ]
+    },
+    "proxy-platform": {
+      "deployment": "consolidated-box",
+      "port": 4000,
+      "healthPath": "/health",
+      "container": "app-edge-realtime",
+      "tier": "tier-0",
+      "domain": "infrastructure",
+      "lifecycle": "production",
+      "datastores": [
+        "postgres",
+        "timescaledb",
+        "clickhouse",
+        "redis"
+      ]
+    },
+    "quality-inspection-service": {
+      "deployment": "consolidated-box",
+      "port": 3050,
+      "healthPath": "/health",
+      "container": "app-trade",
+      "tier": "tier-2",
+      "domain": "commerce",
+      "lifecycle": "production",
+      "datastores": [
+        "postgres"
+      ]
+    },
+    "rbac-service": {
+      "deployment": "consolidated-box",
+      "port": 3053,
+      "healthPath": "/health",
+      "container": "app-identity",
+      "tier": "tier-0",
+      "domain": "identity",
+      "lifecycle": "production",
+      "datastores": [
+        "postgres"
+      ]
+    },
+    "real-estate-service": {
+      "deployment": "consolidated-box",
+      "port": 3005,
+      "healthPath": "/health",
+      "container": "app-ecosystem",
+      "tier": "tier-2",
+      "domain": "ecosystem",
+      "lifecycle": "production",
+      "datastores": [
+        "postgres"
+      ]
+    },
+    "realtime-service": {
+      "deployment": "consolidated-box",
+      "port": 3040,
+      "healthPath": "/health",
+      "container": "app-edge-realtime",
+      "tier": "tier-1",
+      "domain": "infrastructure",
+      "lifecycle": "production",
+      "datastores": [
+        "redis"
+      ]
+    },
+    "realtime-telemetry": {
+      "deployment": "consolidated-box",
+      "port": 3046,
+      "healthPath": "/health",
+      "container": "app-edge-realtime",
+      "tier": "tier-2",
+      "domain": "platform",
+      "lifecycle": "production",
+      "datastores": [
+        "postgres",
+        "redis"
+      ]
+    },
+    "reconciliation-service": {
+      "deployment": "not-deployed",
+      "tier": "tier-2",
+      "domain": "commerce",
+      "lifecycle": "beta",
+      "datastores": [
+        "postgres",
+        "kafka"
+      ]
+    },
+    "report-service": {
+      "deployment": "consolidated-box",
+      "port": 3041,
+      "healthPath": "/health",
+      "container": "app-platform",
+      "tier": "tier-2",
+      "domain": "infrastructure",
+      "lifecycle": "beta",
+      "datastores": [
+        "postgres",
+        "redis"
+      ]
+    },
+    "reporting-service": {
+      "deployment": "not-deployed",
+      "tier": "tier-2",
+      "domain": "commerce",
+      "lifecycle": "beta",
+      "datastores": [
+        "postgres"
+      ]
+    },
+    "risk-service": {
+      "deployment": "not-deployed",
+      "tier": "tier-1",
+      "domain": "commerce",
+      "lifecycle": "beta",
+      "datastores": [
+        "postgres",
+        "kafka"
+      ]
+    },
+    "search-service": {
+      "deployment": "consolidated-box",
+      "port": 3036,
+      "healthPath": "/health",
+      "container": "app-platform",
+      "tier": "tier-1",
+      "domain": "infrastructure",
+      "lifecycle": "production",
+      "datastores": []
+    },
+    "session-service": {
+      "deployment": "consolidated-box",
+      "port": 3022,
+      "healthPath": "/health",
+      "container": "app-identity",
+      "tier": "tier-0",
+      "domain": "identity",
+      "lifecycle": "production",
+      "datastores": [
+        "redis",
+        "postgres"
+      ]
+    },
+    "settlement-service": {
+      "deployment": "not-deployed",
+      "tier": "tier-1",
+      "domain": "commerce",
+      "lifecycle": "beta",
+      "datastores": [
+        "postgres",
+        "kafka"
+      ]
+    },
+    "smart-contract-service": {
+      "deployment": "not-deployed",
+      "tier": "tier-1",
+      "domain": "commerce",
+      "lifecycle": "beta",
+      "datastores": [
+        "postgres",
+        "kafka"
+      ]
+    },
+    "supplier-lifecycle-service": {
+      "deployment": "consolidated-box",
+      "port": 3051,
+      "healthPath": "/health",
+      "container": "app-trade",
+      "tier": "tier-2",
+      "domain": "commerce",
+      "lifecycle": "production",
+      "datastores": [
+        "postgres"
+      ]
+    },
+    "tenant-service": {
+      "deployment": "consolidated-box",
+      "port": 3043,
+      "healthPath": "/health",
+      "container": "app-platform",
+      "tier": "tier-1",
+      "domain": "platform",
+      "lifecycle": "beta",
+      "datastores": [
+        "postgres",
+        "redis"
+      ]
+    },
+    "trade-documentation-service": {
+      "deployment": "consolidated-box",
+      "port": 3049,
+      "healthPath": "/health",
+      "container": "app-trade",
+      "tier": "tier-1",
+      "domain": "commerce",
+      "lifecycle": "production",
+      "datastores": [
+        "postgres"
+      ]
+    },
+    "trade-finance-service": {
+      "deployment": "not-deployed",
+      "tier": "tier-1",
+      "domain": "commerce",
+      "lifecycle": "beta",
+      "datastores": [
+        "postgres",
+        "kafka"
+      ]
+    },
+    "trade-intelligence-service": {
+      "deployment": "not-deployed",
+      "tier": "tier-2",
+      "domain": "commerce",
+      "lifecycle": "beta",
+      "datastores": [
+        "postgres"
+      ]
+    },
+    "trade-service": {
+      "deployment": "consolidated-box",
+      "port": 3025,
+      "healthPath": "/health",
+      "container": "app-commerce",
+      "tier": "tier-1",
+      "domain": "commerce",
+      "lifecycle": "production",
+      "datastores": [
+        "postgres",
+        "redis"
+      ]
+    },
+    "trust-score-service": {
+      "deployment": "not-deployed",
+      "tier": "tier-1",
+      "domain": "commerce",
+      "lifecycle": "beta",
+      "datastores": [
+        "postgres",
+        "kafka"
+      ]
+    },
+    "wallet-service": {
+      "deployment": "not-deployed",
+      "tier": "tier-1",
+      "domain": "commerce",
+      "lifecycle": "beta",
+      "datastores": [
+        "postgres",
+        "kafka"
+      ]
+    }
   }
 }

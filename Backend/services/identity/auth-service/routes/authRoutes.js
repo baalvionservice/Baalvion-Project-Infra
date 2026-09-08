@@ -12,7 +12,11 @@ const internalAuth = require('../middleware/internalAuth');
 // ---------------------------------------------------------------------------
 const rateLimit = require('express-rate-limit');
 
-// POST /auth/login — 10 attempts per 15 minutes per IP
+// POST /auth/login — 10 FAILED attempts per 15 minutes per IP.
+// Successes are skipped: brute force is made of failures, so counting successful logins
+// only punishes legitimate users (several devices, tabs, or a re-login after logout) with
+// a 15-minute lockout whose message reads like a credentials problem. This matches the
+// Redis brute-force layer, which already clears its counters on a successful login.
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 10,
@@ -20,6 +24,7 @@ const loginLimiter = rateLimit({
     legacyHeaders: false,
     message: { success: false, error: { code: 'RATE_LIMITED', message: 'Too many login attempts. Please try again in 15 minutes.' } },
     skipFailedRequests: false,
+    skipSuccessfulRequests: true,
 });
 
 // POST /auth/token (client_credentials) — 30 attempts per 15 minutes per IP. Higher than

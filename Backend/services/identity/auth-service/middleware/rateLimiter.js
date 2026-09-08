@@ -47,6 +47,9 @@ const REGISTER_MAX = Number(process.env.RATE_LIMIT_REGISTER_MAX || 5);
 const registerLimiter     = createRateLimiter({ max: REGISTER_MAX, window: 3600, prefix: 'auth:rl:reg', keyFn: (req) => req.ip, message: 'Too many registrations from this IP. Try again in an hour.' });
 const forgotPwLimiter     = createRateLimiter({ max: 5,  window: 3600,  prefix: 'auth:rl:fp',    keyFn: (req) => req.ip, message: 'Too many password reset requests. Try again in an hour.' });
 const verifyEmailLimiter  = createRateLimiter({ max: 10, window: 3600,  prefix: 'auth:rl:ve',    keyFn: (req) => req.ip });
+// Resending mails a third party's inbox, so it is capped like a password reset, not like a
+// token check. Keyed by IP because the endpoint is unauthenticated.
+const resendVerifyLimiter = createRateLimiter({ max: 5,  window: 3600,  prefix: 'auth:rl:rsv',   keyFn: (req) => req.ip, message: 'Too many verification emails requested. Try again in an hour.' });
 const mfaChallengeLimiter = createRateLimiter({ max: 10, window: 300,   prefix: 'auth:rl:mfa',   keyFn: (req) => req.ip, message: 'Too many MFA attempts. Try again in 5 minutes.' });
 const verifyTokenLimiter  = createRateLimiter({ max: 60, window: 60,    prefix: 'auth:rl:vtok',  keyFn: (req) => req.ip });
 // Phone OTP — keyed by the authenticated user (authMiddleware runs first), IP as a fallback.
@@ -66,6 +69,7 @@ module.exports = {
     registerLimiter,
     forgotPwLimiter,
     verifyEmailLimiter,
+    resendVerifyLimiter,
     mfaChallengeLimiter,
     verifyTokenLimiter,
     otpRequestLimiter,

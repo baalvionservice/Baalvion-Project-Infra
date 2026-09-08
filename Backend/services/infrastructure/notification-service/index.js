@@ -58,6 +58,7 @@ app.get('/health', async (_req, res) => {
             sms:   config.sms.provider,
             push:  pushService.resolveProvider(),
             inapp: 'redis-pubsub',
+            ntfy:  require('./service/ntfyService').resolveProvider(),
         },
     });
 });

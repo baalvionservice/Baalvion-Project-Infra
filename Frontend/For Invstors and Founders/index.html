@@ -1,16 +1,19 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="icon" href="data:," />
     <title>Baalvion Insiders — Where Founders Meet Active Investors</title>
     <meta name="description" content="Baalvion connects founders with investors who have recently funded businesses like theirs. Find active investors by sector and stage, and raise your round faster." />
     <meta name="author" content="Baalvion" />
     <meta name="robots" content="index, follow" />
+    <!-- www.marketunderworld.com is where this app is actually served: the apex 307-redirects
+         to www, and public/robots.txt already advertises the sitemap on www. It previously named
+         insiders.baalvion.com, which has NO DNS record at all — every crawler was pointed at a
+         host that does not resolve.
+         NOTE: og-image.png does not exist on this site yet (404). The tag was already broken;
+         it now at least names the right host, so adding the file is all that is left. -->
     <link rel="canonical" href="https://www.marketunderworld.com/" />
 
     <meta property="og:title" content="Baalvion Insiders — Where Founders Meet Active Investors" />
@@ -40,10 +43,6 @@
   </head>
 
   <body>
-    <script>
-      // Apply the saved theme before first paint so a dark-mode user never sees a white flash.
-      try { if (localStorage.getItem('insiders.theme') === 'dark') document.documentElement.classList.add('dark'); } catch (e) {}
-    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
