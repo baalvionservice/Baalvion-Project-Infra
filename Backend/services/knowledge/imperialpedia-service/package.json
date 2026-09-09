@@ -1,5 +1,9 @@
 {
   "name": "imperialpedia-service",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "description": "Baalvion Imperialpedia \u2014 Financial education, market intelligence & community",
   "license": "ISC",

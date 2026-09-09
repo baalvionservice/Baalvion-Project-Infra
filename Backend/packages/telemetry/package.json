@@ -1,5 +1,9 @@
 {
   "name": "@baalvion/telemetry",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "description": "OpenTelemetry instrumentation and structured logging for all Baalvion services",
   "main": "./dist/index.js",
@@ -37,7 +41,7 @@
   },
   "devDependencies": {
     "tsup": "^8.5.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.3"
   },
   "peerDependencies": {
     "express": "^4 || ^5"

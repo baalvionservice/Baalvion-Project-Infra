@@ -1,0 +1,88 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Repair Dependabot's pnpm-overrides blind spot.
+#
+#   72 of this repo's dependency versions are pinned centrally in the root
+#   package.json `pnpm.overrides` block (the security-pin mechanism). Dependabot
+#   does not know that block exists: on a bump it edits the leaf package.json
+#   files and regenerates pnpm-lock.yaml — so the LOCKFILE's overrides move while
+#   the ROOT package.json's stay behind. Result: every such PR fails
+#   ERR_PNPM_LOCKFILE_CONFIG_MISMATCH on the first `pnpm install --frozen-lockfile`,
+#   before a single test runs, for a reason that has nothing to do with the bump.
+#
+#   This pushes the one-line correction onto the Dependabot branch so the PR can
+#   be judged on the actual dependency change.
+#
+# HARD INVARIANTS:
+#   • Only runs on branches Dependabot owns, and only when the actor IS Dependabot.
+#   • Only ever rewrites the `pnpm.overrides` block to match the lockfile that
+#     Dependabot itself just resolved. It never picks a version of its own.
+#   • Never touches main. Never merges. Never approves.
+# ─────────────────────────────────────────────────────────────────────────────
+name: Dependabot overrides autofix
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'pnpm-lock.yaml'
+      - 'package.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  autofix:
+    name: Sync root overrides to lockfile
+    # Dependabot PRs only. A human bumping an override is expected to run the
+    # --fix themselves (the pre-commit hook tells them to); silently rewriting a
+    # person's package.json under them would be worse than the failure.
+    if: github.actor == 'dependabot[bot]' && startsWith(github.head_ref, 'dependabot/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.head_ref }}
+          # Default GITHUB_TOKEN cannot re-trigger checks on its own push. That is
+          # deliberate here: the autofix commit is a repair, and the PR's existing
+          # checks re-run on the next event. Swap for a PAT only if the team wants
+          # the repaired branch to re-run CI immediately.
+          persist-credentials: true
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Sync root pnpm.overrides to the resolved lockfile
+        id: sync
+        run: |
+          if node scripts/check-lockfile-overrides.mjs; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          node scripts/check-lockfile-overrides.mjs --fix
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Commit the correction
+        if: steps.sync.outputs.changed == 'true'
+        run: |
+          if git diff --quiet -- package.json; then
+            echo "::notice::Nothing to commit — overrides already matched."
+            exit 0
+          fi
+          git config user.name  'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add package.json
+          git commit -m "fix(deps): sync root pnpm.overrides with the resolved lockfile
+
+          Dependabot bumps the leaf package.json files and pnpm-lock.yaml but not the
+          root pnpm.overrides block, which leaves every install failing
+          ERR_PNPM_LOCKFILE_CONFIG_MISMATCH. This is the matching root-side pin."
+          git push
+          echo "::notice title=Overrides repaired::Root pnpm.overrides now matches the lockfile."

@@ -1,5 +1,9 @@
 {
   "name": "report-service",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "description": "Baalvion Report Service — report builder (parameterized read-only queries) with CSV / Excel / PDF / JSON / HTML export and scheduled delivery.",
   "license": "ISC",

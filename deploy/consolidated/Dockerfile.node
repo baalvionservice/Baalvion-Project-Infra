@@ -17,7 +17,7 @@
 # git checkout already is (node_modules is .gitignored); on a working tree add a
 # repo-root .dockerignore with: node_modules, **/node_modules, Frontend, .git, .turbo
 # ─────────────────────────────────────────────────────────────────────────────
-FROM node:20-bookworm-slim AS runtime
+FROM node:24-bookworm-slim AS runtime
 
 ENV PNPM_HOME=/pnpm \
     PATH=/pnpm:$PATH \

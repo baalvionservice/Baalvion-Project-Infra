@@ -16,11 +16,16 @@ on:
     branches: [main, develop]
 
 env:
-  NODE_VERSION: '20'
+  NODE_VERSION: '24'
   TRIVY_SEVERITY: 'CRITICAL'
   GO_VERSION: '1.25'
   JAVA_VERSION: '17'
   MAVEN_OPTS: '-Dmaven.repo.local=${{ github.workspace }}/.m2/repository'
+  # Shared Turbo build cache. Unset secrets simply mean turbo falls back to its
+  # local cache, so this is safe to leave in place before the secrets exist.
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+  TURBO_REMOTE_CACHE_SIGNATURE_KEY: ${{ secrets.TURBO_REMOTE_CACHE_SIGNATURE_KEY }}
 
 # Least-privilege default token; jobs that need more must opt in explicitly.
 permissions:
@@ -32,6 +37,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Runs before anything installs. Root `pnpm.overrides` and the lockfile's
+  # `overrides:` block must agree or EVERY job's `pnpm install --frozen-lockfile`
+  # dies with ERR_PNPM_LOCKFILE_CONFIG_MISMATCH before running a single test —
+  # which is exactly how Dependabot PRs kept landing red (it bumps the leaf
+  # package.json files and the lockfile, but not the root overrides block).
+  # Pure Node, no install needed, so it reports the real cause in ~10s.
+  lockfile-integrity:
+    name: Lockfile Integrity
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Check pnpm overrides are in sync
+        run: node scripts/check-lockfile-overrides.mjs
+
   lint-and-typecheck:
     name: Lint & Typecheck
     runs-on: ubuntu-latest
@@ -55,15 +78,21 @@ jobs:
       - name: Build Workspace Packages
         run: pnpm --filter "./Backend/packages/*" run build
 
-      # Lint each package through its own toolchain (turbo runs the `lint`
-      # script only where it exists, with the package's own eslint + config).
-      # A root `pnpm exec eslint` cannot work: the root has no eslint, and the
-      # target packages use incompatible config styles.
-      # Blocking: the app-level lint debt for the two scoped apps has been
-      # burned down (proxy-baalvionstack-web + baalvion-admin-platform are
-      # clean — zero errors). Expand the --filter list as more apps are cleaned.
-      - name: Run ESLint
-        run: pnpm exec turbo run lint --filter=proxy-baalvionstack-web --filter=baalvion-admin-platform
+      # Lint every workspace package that has a lint script, and fail only where the
+      # error count went UP against .lint-baseline.json.
+      #
+      # This replaces a two-app --filter allow-list. A hardcoded list has to be edited
+      # for every new app, so in practice it never was: thirteen apps had no ESLint
+      # config at all and nobody noticed, because `next lint` silently supplied
+      # defaults and nothing else ran. Discovery is now by convention — a package.json
+      # with a `lint` script gets linted — so a new app is covered with no CI change,
+      # starts at a baseline of zero, and a package whose lint cannot run FAILS rather
+      # than quietly passing.
+      #
+      # Existing debt is frozen and can only shrink. After fixing errors, run
+      # `node scripts/lint-ratchet.mjs --update` to lower the floor permanently.
+      - name: Run ESLint (ratchet)
+        run: node scripts/lint-ratchet.mjs
 
       - name: TypeScript Typecheck
         run: |
@@ -357,6 +386,74 @@ jobs:
           # (docker-compose / testcontainers) is wired up.
           echo "Integration test harness pending — per-service checks run in backend-go / backend-java."
 
+  # Runs EVERY workspace package's tests, whatever runner it uses.
+  #
+  # The old gate ran two selections: Backend/packages via a --filter, and, for
+  # services, ONLY those whose test script is literally `node --test`. jest and
+  # vitest services were "deliberately excluded until their runners are wired" and
+  # never were — so 213 test files across 13 packages never executed on any merge,
+  # including auth-service (19 files) and order-execution-service (46). Engineers
+  # wrote them; CI ignored them; merging proved nothing about any of it.
+  #
+  # They were not excluded for failing: auth-service runs 230 tests with 205
+  # passing locally, and its only failures are ECONNREFUSED from tests that want
+  # the Postgres this job now provides.
+  #
+  # Discovery is by convention (a real `test` script), so a new service is covered
+  # with no CI change. Known-failing packages are frozen by .test-baseline.json and
+  # cannot grow; a package with no baseline entry is expected to PASS.
+  all-package-tests:
+    name: All Package Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: baalvion_db
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s
+          --health-timeout 5s --health-retries 12
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 5s
+          --health-timeout 5s --health-retries 12
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: '5432'
+      DB_NAME: baalvion_test
+      DB_USER: baalvion
+      DB_PASSWORD: baalvion_dev_pass
+      REDIS_URL: redis://127.0.0.1:6379
+      NODE_ENV: test
+      JWT_ACCESS_SECRET: ci-dummy-access-secret-not-used-for-real-auth
+      JWT_REFRESH_SECRET: ci-dummy-refresh-secret-not-used-for-real-auth
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6.0.10
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: Install Workspace Dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build Workspace Packages
+        run: pnpm --filter "./Backend/packages/*" run build
+      # Several suites expect this role/database rather than the default postgres one.
+      - name: Provision the test role and database
+        run: |
+          PGPASSWORD=postgres psql -h 127.0.0.1 -U postgres -c \
+            "CREATE ROLE baalvion LOGIN PASSWORD 'baalvion_dev_pass' SUPERUSER;" || true
+          PGPASSWORD=postgres psql -h 127.0.0.1 -U postgres -c \
+            "CREATE DATABASE baalvion_test OWNER baalvion;" || true
+      - name: Run every package's tests
+        run: node scripts/test-all.mjs
+
   node-package-tests:
     name: Node Package Tests
     runs-on: ubuntu-latest
@@ -432,42 +529,49 @@ jobs:
   # pnpm.overrides; plus base-image OS CVEs). Promote into ci-success (add it to the
   # needs list + drop continue-on-error) once those are burned down — see
   # docs/RUNBOOK or the cert report's burn-down list.
+  # The Docker scan matrix, discovered from the repo instead of hand-listed.
+  # The old matrix named eight services while the repo holds 60 buildable images —
+  # the other 52 were never built in CI and never CVE-scanned, and nothing said so,
+  # because a hardcoded matrix cannot report what it omits.
+  #
+  # --changed narrows to images a diff can actually have broken; a change to the
+  # shared packages, lockfile, turbo.json or root manifest fans out to everything.
+  # An unknown base ref falls back to building ALL rather than silently zero.
+  discover-images:
+    name: Discover Service Images
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.find.outputs.matrix }}
+      count: ${{ steps.find.outputs.count }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0   # --changed needs history to diff against the base ref
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Fail on duplicate image names
+        run: node scripts/discover-images.mjs --check
+      - id: find
+        run: |
+          BASE="${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || 'HEAD~1' }}"
+          M=$(node scripts/discover-images.mjs --changed "$BASE" --matrix)
+          echo "matrix=$M" >> "$GITHUB_OUTPUT"
+          echo "count=$(echo "$M" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>console.log(JSON.parse(s).include.length))')" >> "$GITHUB_OUTPUT"
+
   docker-build-scan:
     name: Docker Build + Trivy Scan
     runs-on: ubuntu-latest
+    needs: discover-images
+    if: needs.discover-images.outputs.count != '0'
     continue-on-error: true
     permissions:
       contents: read
     strategy:
       fail-fast: false
       matrix:
-        include:
-          # ── Production fleet images — `name` mirrors the deploy.yml ECR repo
-          #    (baalvion/<name>) so the scanned artifact maps 1:1 to the pushed image.
-          - name: auth-service
-            file: Backend/services/identity/auth-service/Dockerfile
-          - name: auth-gateway
-            file: Backend/services/identity/auth-gateway/Dockerfile
-          - name: cms-service
-            file: Backend/services/knowledge/cms-service/Dockerfile
-          # deploy.yml ECR repo is controlthemarket-ctm-service (same Dockerfile);
-          # name kept in sync — was the drifting `ctm-service` alias.
-          - name: controlthemarket-ctm-service
-            file: Backend/services/ecosystem/ctm-service/Dockerfile
-          # deploy.yml ECR repo is proxy-baalvionstack-proxy-service (same Dockerfile);
-          # name kept in sync — was the drifting `proxy-service` alias.
-          - name: proxy-baalvionstack-proxy-service
-            file: Backend/services/infrastructure/proxy-service/Dockerfile
-          - name: community-service
-            file: Backend/services/ecosystem/community-service/Dockerfile
-          - name: giftcard-service
-            file: Backend/services/ecosystem/giftcard-service/Dockerfile
-          # ── Dev-only — NOT part of the deploy.yml 19-service production stack.
-          #    dashboard-service deploys via the separate company-dashboard package and
-          #    is build-verified in domain-services.yml; scanned here for CVE hygiene
-          #    only. Do not read its presence as production-deploy coverage.
-          - name: dashboard-service
-            file: Backend/services/platform/dashboard-service/Dockerfile
+        include: ${{ fromJson(needs.discover-images.outputs.matrix).include }}
     steps:
       - uses: actions/checkout@v7
 
@@ -543,6 +647,8 @@ jobs:
     name: ci-success
     if: always()
     needs:
+      - lockfile-integrity
+      - discover-images
       - lint-and-typecheck
       - backend-go
       - backend-java
@@ -552,6 +658,7 @@ jobs:
       - tenant-rls-audit
       - tenant-rls-live
       - integration-test
+      - all-package-tests
       - node-package-tests
       - deploy-compose-validate
       - cache-hygiene

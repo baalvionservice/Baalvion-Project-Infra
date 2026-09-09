@@ -1,5 +1,9 @@
 {
   "name": "crm-service",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "description": "Baalvion CRM & Marketing Service — VIP clients, segments, campaigns, vendors, affiliates, appointments",
   "license": "ISC",

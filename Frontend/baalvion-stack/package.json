@@ -1,15 +1,20 @@
 {
   "name": "baalvion-stack-web",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3072",
     "build": "next build",
     "start": "next start -p 3072",
-    "lint": "next lint",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@baalvion/eslint-config": "workspace:*",
     "@baalvion/company": "workspace:*",
     "@baalvion/design": "workspace:*",
     "@baalvion/sites": "workspace:*",
@@ -18,12 +23,12 @@
     "react-dom": "^19.2.1"
   },
   "devDependencies": {
-    "@types/node": "^20",
+    "@types/node": "^24.13.4",
     "@types/react": "^19.2.1",
     "@types/react-dom": "^19.2.1",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5.8.2"
+    "typescript": "^5.9.3"
   }
 }

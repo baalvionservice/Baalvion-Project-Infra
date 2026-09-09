@@ -1,5 +1,9 @@
 {
   "name": "@baalvion/catalog",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "private": true,
   "type": "module",
   "description": "Service catalog governance gate (schema validation + dependency graph).",

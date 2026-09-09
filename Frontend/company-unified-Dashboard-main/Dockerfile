@@ -6,7 +6,7 @@
 # (see ARGs below), pointed at the PUBLIC prod origin. The /auth-bff + /api-bff rewrite target
 # (NEXT_PUBLIC_GATEWAY_URL) is read by next.config at SERVER START, so it stays a RUNTIME env
 # (set it to the internal gateway, e.g. http://auth-gateway:3099, in docker-compose).
-FROM node:20-alpine AS base
+FROM node:24-alpine AS base
 RUN apk add --no-cache libc6-compat && corepack enable
 WORKDIR /app
 

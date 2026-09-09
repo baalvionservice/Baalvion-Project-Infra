@@ -567,6 +567,19 @@ jobs:
             # connect-timeout in the admin-web build job left its tag never pushed, which then
             # blocked redis/neo4j/caddy/everything from pulling too). Core services are always
             # required and pulled explicitly by name; admin-web can't take them down with it.
+            # Record what is running RIGHT NOW, before anything is pulled. These digests are
+            # what the rollback step restores if the smoke test fails; capturing them after the
+            # pull would record the new images and make rollback a no-op.
+            : > /opt/baalvion-box2/deploy/consolidated/.rollback-digests
+            for svc in app-identity app-commerce app-trade app-ecosystem app-platform app-edge-realtime; do
+              cid="$($COMPOSE ps -q "$svc" 2>/dev/null | head -1)"
+              [ -z "$cid" ] && continue
+              img="$(docker inspect --format '{{.Config.Image}}' "$cid" 2>/dev/null)"
+              dig="$(docker inspect --format '{{.Image}}' "$cid" 2>/dev/null)"
+              [ -n "$img" ] && [ -n "$dig" ] && echo "$img $dig" >> /opt/baalvion-box2/deploy/consolidated/.rollback-digests
+            done
+            echo "Pre-roll digests recorded:"; cat /opt/baalvion-box2/deploy/consolidated/.rollback-digests || true
+
             $COMPOSE pull app-identity app-commerce app-trade app-ecosystem app-platform app-edge-realtime redis neo4j caddy
             $COMPOSE up -d --no-build app-identity app-commerce app-trade app-ecosystem app-platform app-edge-realtime redis neo4j
 
@@ -683,14 +696,54 @@ jobs:
               node /app/Backend/services/identity/auth-service/scripts/bootstrapSuperAdmin.js
             echo "::notice title=Superadmin seeded::${SA_EMAIL} asserted in app-identity (role=super_admin)."
 
+      # Verify the roll actually serves, and FAIL if it does not.
+      #
+      # The previous version of this step could not fail under any circumstance. It
+      # carried continue-on-error, and its loop only printed the status code —
+      # `code=$(curl ...)` succeeds whatever curl returns — so a 500, a refused
+      # connection or a dead box all reported a green deploy. With no rollback
+      # anywhere in the pipeline, a bad roll then stayed live and silent.
       - name: Smoke test public ingress
+        id: smoke
         if: steps.gate.outputs.ready == 'true'
-        continue-on-error: true
         run: |
-          sleep 25
-          for url in \
+          node scripts/smoke-check.mjs \
             "http://${{ secrets.CORE2_EC2_HOST }}/health" \
-            "http://${{ secrets.CORE2_EC2_HOST }}:3001/health" ; do
-            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 "$url" || echo "000")
-            echo "  $url -> $code"
-          done
+            "http://${{ secrets.CORE2_EC2_HOST }}:3001/health" \
+            --retries 8 --delay 5000 --timeout 15000
+
+      # Automatic rollback. Every service image is pushed with an immutable
+      # prod-<sha> tag beside prod-latest, and the digest running BEFORE this roll was
+      # captured above, so restoring is a retag plus a restart — no rebuild, no ECR
+      # round trip, and it works even when the new image is the thing that is broken.
+      - name: Roll back to the previous images
+        if: failure() && steps.smoke.outcome == 'failure' && steps.gate.outputs.ready == 'true'
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.CORE2_EC2_HOST }}
+          username: ${{ secrets.CORE2_EC2_USER }}
+          key: ${{ secrets.CORE2_EC2_SSH_KEY }}
+          script: |
+            set -e
+            cd /opt/baalvion-box2/deploy/consolidated
+            if [ ! -f .rollback-digests ]; then
+              echo "::error::No pre-roll digests recorded — cannot roll back automatically."
+              exit 1
+            fi
+            echo "Restoring the images that were running before this deploy:"
+            while read -r image digest; do
+              [ -z "$image" ] && continue
+              echo "  $image -> $digest"
+              docker tag "$digest" "$image" || echo "  (digest $digest no longer present locally)"
+            done < .rollback-digests
+            docker compose --env-file .env -f docker-compose.prod.yml \
+              up -d --no-build app-identity app-commerce app-trade app-ecosystem app-platform app-edge-realtime
+            echo "::warning title=Rolled back::Smoke test failed; the previous images were restored."
+
+      - name: Verify the rollback serves
+        if: failure() && steps.smoke.outcome == 'failure' && steps.gate.outputs.ready == 'true'
+        run: |
+          node scripts/smoke-check.mjs \
+            "http://${{ secrets.CORE2_EC2_HOST }}/health" \
+            --retries 6 --delay 5000 --timeout 15000 \
+          || { echo "::error title=Rollback did not restore service::Manual intervention required on ${{ secrets.CORE2_EC2_HOST }}."; exit 1; }
