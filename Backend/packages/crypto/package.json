@@ -1,5 +1,9 @@
 {
   "name": "@baalvion/crypto",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "description": "Cryptographic utilities: token generation, hashing",
   "private": true,

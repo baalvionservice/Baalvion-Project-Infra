@@ -16,7 +16,7 @@ on:
     branches: [main, develop]
 
 env:
-  NODE_VERSION: '20'
+  NODE_VERSION: '24'
   TRIVY_SEVERITY: 'CRITICAL'
   GO_VERSION: '1.25'
   JAVA_VERSION: '17'

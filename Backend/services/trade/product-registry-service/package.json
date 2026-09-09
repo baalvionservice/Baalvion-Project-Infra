@@ -1,5 +1,9 @@
 {
   "name": "product-registry-service",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "description": "GTOS canonical product master: SKU/GTIN, HS classification, doc requirements.",
   "license": "ISC",

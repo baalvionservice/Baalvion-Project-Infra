@@ -1,5 +1,9 @@
 {
   "name": "insiders-service",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "description": "Baalvion Insiders (For Investors & Founders) backend \u2014 Node.js + PostgreSQL, replaces Supabase",
   "license": "ISC",

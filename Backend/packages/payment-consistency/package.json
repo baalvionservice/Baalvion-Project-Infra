@@ -1,5 +1,9 @@
 {
   "name": "@baalvion/payment-consistency",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "description": "Payment Consistency Layer (PCL) \u2014 the single deterministic state machine + transactional outbox for every payment state transition across the platform.",
   "private": true,

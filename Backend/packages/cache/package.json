@@ -1,5 +1,9 @@
 {
   "name": "@baalvion/cache",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "private": true,
   "main": "dist/index.js",

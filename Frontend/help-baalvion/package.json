@@ -1,5 +1,9 @@
 {
   "name": "help-baalvion-web",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "0.1.0",
   "private": true,
   "scripts": {

@@ -6,7 +6,7 @@
 # PINNED to a tagged release — do NOT float :latest or `master`, this is a production forum
 # with real user data. Bump NODEBB_VERSION deliberately (and re-run bootstrap/seed-categories.js
 # against a staging instance first) when upgrading.
-FROM node:20-bookworm-slim AS base
+FROM node:24-bookworm-slim AS base
 ARG NODEBB_VERSION=v3.9.1
 RUN apt-get update && apt-get install -y --no-install-recommends git ca-certificates python3 build-essential \
     && rm -rf /var/lib/apt/lists/*

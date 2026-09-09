@@ -1,5 +1,9 @@
 {
   "name": "@baalvion/rbac",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "description": "RBAC engine: role definitions, permission checks, guards",
   "private": true,

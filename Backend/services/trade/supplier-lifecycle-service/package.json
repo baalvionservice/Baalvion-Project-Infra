@@ -1,5 +1,9 @@
 {
   "name": "supplier-lifecycle-service",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "description": "GTOS supplier lifecycle: onboarding, qualification, risk scoring, scorecards, offboarding.",
   "license": "ISC",

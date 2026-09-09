@@ -4,7 +4,8 @@
   "private": true,
   "description": "Baalvion OS — unified NestJS backend (replaces Firebase)",
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=24",
+    "pnpm": ">=9"
   },
   "scripts": {
     "prebuild": "prisma generate",

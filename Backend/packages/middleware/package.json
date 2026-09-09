@@ -1,5 +1,9 @@
 {
   "name": "@baalvion/middleware",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "description": "Shared Express middleware: auth, CSRF, rate limiting, request context",
   "private": true,

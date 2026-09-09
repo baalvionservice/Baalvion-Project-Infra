@@ -4,12 +4,12 @@
 #     --build-arg NEXT_PUBLIC_API_BASE_URL=https://api.yourdomain.com/v1 \
 #     --build-arg NEXT_PUBLIC_APP_URL=https://yourdomain.com \
 #     Frontend/Law-Elite-Network-main
-FROM node:20-alpine AS deps
+FROM node:24-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm install --no-audit --no-fund
 
-FROM node:20-alpine AS builder
+FROM node:24-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -23,7 +23,7 @@ ENV NEXT_PUBLIC_GA_ID=$NEXT_PUBLIC_GA_ID
 ENV NODE_ENV=production
 RUN npm run build
 
-FROM node:20-alpine AS runner
+FROM node:24-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=9002

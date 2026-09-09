@@ -1,5 +1,9 @@
 {
   "name": "ir-service",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "description": "Baalvion IR Service — Investor Relations reports, filings and communications",
   "license": "ISC",

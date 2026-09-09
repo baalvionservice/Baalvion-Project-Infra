@@ -1,5 +1,9 @@
 {
   "name": "network-graph-service",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "description": "GTOS trade relationship graph (Neo4j): supplier/buyer network, sanctions path-finding, visibility gating.",
   "license": "ISC",

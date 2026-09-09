@@ -1,6 +1,6 @@
 # Multi-stage build for the shared auth surface (Next.js standalone output).
 # Built from the repo ROOT so the pnpm workspace lockfile is available.
-FROM node:22-alpine AS base
+FROM node:24-alpine AS base
 RUN corepack enable
 WORKDIR /app
 

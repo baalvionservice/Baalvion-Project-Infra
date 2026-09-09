@@ -1,5 +1,9 @@
 {
   "name": "@baalvion/money",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "description": "Exact monetary arithmetic in integer minor units — the platform's only sanctioned money representation. No floats, no implicit FX, no lost pennies.",
   "private": true,

@@ -1,5 +1,9 @@
 {
   "name": "agent-service",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "description": "Baalvion Agent Management — sales/partner agents, commission plans + accrual tracker, leaderboards, and training/certification.",
   "license": "ISC",

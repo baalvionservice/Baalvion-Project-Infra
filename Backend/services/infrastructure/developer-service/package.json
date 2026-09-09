@@ -1,5 +1,9 @@
 {
   "name": "developer-service",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "description": "Baalvion Developer Platform — API key issuance/verification, signed webhook subscriptions with retry delivery, an OpenAPI spec catalog, and a test-mode sandbox.",
   "license": "ISC",

@@ -1,7 +1,7 @@
 # Monorepo-aware build for the pnpm workspace (build model: Option A).
 # BUILD CONTEXT MUST BE THE REPO ROOT:
 #   docker build -f Backend/services/ecosystem/ctm-service/Dockerfile -t ctm-service .
-FROM node:20.12-alpine AS base
+FROM node:24-alpine AS base
 RUN corepack enable
 WORKDIR /repo
 
@@ -31,7 +31,7 @@ COPY tsconfig.base.json ./tsconfig.base.json
 RUN pnpm -r --filter "./Backend/packages/*" run build
 RUN pnpm deploy --filter=baalvion-ctm-service --prod /out
 
-FROM node:20.12-alpine AS final
+FROM node:24-alpine AS final
 # Patch OS packages (e.g. openssl) and drop the runtime-unused npm/corepack shipped in the
 # node base image (its bundled deps are the source of the image-layer CVE findings).
 RUN apk upgrade --no-cache \
