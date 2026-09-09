@@ -17,6 +17,15 @@ COPY --from=pruner /repo/out/pnpm-lock.yaml ./pnpm-lock.yaml
 # (e.g. uuid@11). Reconcile in-image rather than hard-failing on the pruned lockfile.
 RUN pnpm install --no-frozen-lockfile --filter cms-service...
 COPY --from=pruner /repo/out/full/ ./
+# turbo prune carries neither the root tsconfig.base.json (which every package tsconfig
+# extends) nor any built output. Workspace packages like @baalvion/money point their
+# "exports" at dist/, which only exists after tsup runs — so without these two lines the
+# image builds clean, `pnpm deploy` copies a package with no dist/, and the container dies
+# at require() time with MODULE_NOT_FOUND and a health check that just says "unhealthy".
+# Cost production an outage on app-insiders 2026-09-09. The prune already scopes this to
+# the packages this service actually depends on.
+COPY tsconfig.base.json ./tsconfig.base.json
+RUN pnpm -r --filter "./Backend/packages/*" run build
 # Build the TS workspace deps (e.g. @baalvion/sdk -> dist) BEFORE deploy: dist is git- and
 # docker-ignored, so it cannot be copied from the host — it must be compiled inside the image.
 # The shared tsconfig chain (root base + Backend shim) is not part of the pruned output → copy it.
