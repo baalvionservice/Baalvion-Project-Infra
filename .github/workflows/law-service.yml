@@ -19,6 +19,7 @@ jobs:
   backend:
     name: law-service — test & migrate
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:15-alpine
@@ -78,6 +79,7 @@ jobs:
   frontend:
     name: Law-Elite — build
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
 
@@ -111,6 +113,7 @@ jobs:
     needs: [backend, frontend]
     if: always() && (needs.backend.result == 'failure' || needs.frontend.result == 'failure')
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/slack-notify

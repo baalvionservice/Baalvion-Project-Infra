@@ -6,6 +6,7 @@ on:
 jobs:
   fix:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     environment: production
     steps:
       # box2's jobs-service container was built from a commit that predates PR #451/#452

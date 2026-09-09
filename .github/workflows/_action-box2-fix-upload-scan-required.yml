@@ -6,6 +6,7 @@ on:
 jobs:
   fix-upload-scan:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment: production
     steps:
       - name: Set UPLOAD_SCAN_REQUIRED=false and recreate app-platform

@@ -25,6 +25,7 @@ jobs:
   build-test:
     name: Build & Test
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
       - name: Set up JDK 17
@@ -46,6 +47,7 @@ jobs:
   trivy-fs:
     name: Trivy filesystem scan
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
       - name: Trivy FS (vuln + secret + misconfig)
@@ -62,6 +64,7 @@ jobs:
     name: Build & scan images
     needs: [build-test, trivy-fs]
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
     strategy:
@@ -114,6 +117,7 @@ jobs:
     needs: [build-test, trivy-fs, images]
     if: always() && contains(needs.*.result, 'failure')
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/slack-notify

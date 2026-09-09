@@ -6,6 +6,7 @@ on:
 jobs:
   diag:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment: production
     steps:
       - name: Mint a diagnostic token for the real super_admin and hit the dashboard APIs
@@ -122,6 +123,7 @@ jobs:
 
   caddy-check:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment: production
     steps:
       - name: Check box2 Caddyfile routing for the cms/knowledge path
@@ -140,6 +142,7 @@ jobs:
 
   org-membership-check:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment: production
     steps:
       - name: List ALL org memberships for the super_admin user + which org owns the websites
@@ -175,6 +178,7 @@ jobs:
 
   box2-full-inventory:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment: production
     steps:
       - name: List every container running on box2

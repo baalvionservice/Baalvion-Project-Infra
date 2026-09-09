@@ -58,6 +58,7 @@ jobs:
   lint-and-typecheck:
     name: Lint & Typecheck
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
 
@@ -107,6 +108,7 @@ jobs:
   backend-go:
     name: Backend Go (Gateway)
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
       
@@ -142,6 +144,7 @@ jobs:
   backend-java:
     name: Backend Java (Financial Services)
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
       
@@ -172,6 +175,7 @@ jobs:
   discover-frontends:
     name: Discover Frontend Apps
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     outputs:
       dirs: ${{ steps.extract-apps.outputs.dirs }}
     steps:
@@ -188,6 +192,7 @@ jobs:
   frontend-build:
     name: Frontend Apps Build
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: discover-frontends
     strategy:
       matrix:
@@ -246,6 +251,7 @@ jobs:
   security-cross-tenant:
     name: Security — Cross-Tenant RLS (R1)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     services:
       postgres:
         image: postgres:15
@@ -313,6 +319,7 @@ jobs:
   tenant-rls-audit:
     name: Security — Tenant RLS Coverage Audit
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -332,6 +339,7 @@ jobs:
   tenant-rls-live:
     name: Security — Tenant RLS Live Probe
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     services:
       postgres:
         image: postgres:15
@@ -374,6 +382,7 @@ jobs:
     name: Integration Tests
     needs: [backend-go, backend-java, frontend-build]
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
       - name: Run Backend Integration Tests
@@ -457,6 +466,7 @@ jobs:
   node-package-tests:
     name: Node Package Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
       - name: Setup pnpm
@@ -479,6 +489,7 @@ jobs:
   dockerfile-lint:
     name: Dockerfile Lint (hadolint)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     # Informational for now: surfaces Dockerfile issues without blocking (existing lint debt).
     # Promote into ci-success once the findings are burned down.
     continue-on-error: true
@@ -497,6 +508,7 @@ jobs:
   deploy-compose-validate:
     name: Deploy Compose Validate
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
       - name: Validate deploy docker-compose files
@@ -563,6 +575,7 @@ jobs:
   docker-build-scan:
     name: Docker Build + Trivy Scan
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: discover-images
     if: needs.discover-images.outputs.count != '0'
     continue-on-error: true
@@ -632,6 +645,7 @@ jobs:
   cache-hygiene:
     name: Cache Hygiene
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
       - name: Setup Node.js
@@ -663,6 +677,7 @@ jobs:
       - deploy-compose-validate
       - cache-hygiene
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Verify all required jobs succeeded
         run: |
@@ -683,6 +698,7 @@ jobs:
     needs: ci-success
     if: always() && needs.ci-success.result == 'failure'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/slack-notify

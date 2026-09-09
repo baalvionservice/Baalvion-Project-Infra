@@ -6,6 +6,7 @@ on:
 jobs:
   diag:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment: production
     steps:
       - name: Read-only status + CMS data check over SSH

@@ -6,6 +6,7 @@ on:
 jobs:
   free-space:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     environment: production
     steps:
       - name: Prune unused Docker images/build cache over SSH

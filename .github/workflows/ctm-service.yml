@@ -19,6 +19,7 @@ jobs:
   lint-and-test:
     name: Lint & Test
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     services:
       postgres:
@@ -86,6 +87,7 @@ jobs:
     needs: lint-and-test
     if: always() && needs.lint-and-test.result == 'failure'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/slack-notify

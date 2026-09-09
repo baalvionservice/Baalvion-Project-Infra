@@ -6,6 +6,7 @@ on:
 jobs:
   diag:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment: production
     steps:
       - name: Check app-platform container status + law-service pm2 status

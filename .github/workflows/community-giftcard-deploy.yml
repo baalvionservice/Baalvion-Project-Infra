@@ -60,6 +60,7 @@ jobs:
   build-push-community:
     name: build community-service
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     outputs:
       image_tag: ${{ steps.tag.outputs.image_tag }}
     steps:
@@ -118,6 +119,7 @@ jobs:
   build-push-giftcard:
     name: build giftcard-service
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     outputs:
       image_tag: ${{ steps.tag.outputs.image_tag }}
     steps:
@@ -178,6 +180,7 @@ jobs:
     needs: [build-push-community, build-push-giftcard]
     if: ${{ github.event_name == 'push' || github.event.inputs.roll != 'false' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     environment: production       # protected environment — manual approval gate
     env:
       EC2_HOST: ${{ secrets.CORE_EC2_HOST }}
@@ -283,6 +286,7 @@ jobs:
     needs: [build-push-community, build-push-giftcard, deploy]
     if: always()
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
 

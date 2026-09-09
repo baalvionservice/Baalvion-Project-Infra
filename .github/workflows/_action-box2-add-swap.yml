@@ -6,6 +6,7 @@ on:
 jobs:
   add-swap:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     environment: production
     steps:
       - name: Create + enable 2GB swap file (idempotent, persisted in fstab)

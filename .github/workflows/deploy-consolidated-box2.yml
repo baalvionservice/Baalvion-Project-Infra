@@ -51,6 +51,7 @@ jobs:
   build-push-backend:
     name: build baalvion/backend
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     outputs:
       image_tag: ${{ steps.tag.outputs.image_tag }}
     steps:
@@ -106,6 +107,7 @@ jobs:
   build-push-admin-web:
     name: build baalvion/admin-web
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     continue-on-error: true   # non-fatal: admin console is a nice-to-have, never blocks the backend roll
     outputs:
       image_tag: ${{ steps.tag.outputs.image_tag }}
@@ -171,6 +173,7 @@ jobs:
   build-push-auth-web:
     name: build baalvion/auth-baalvion
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     continue-on-error: true   # first-time build for this image; never block the core roll
     outputs:
       image_tag: ${{ steps.tag.outputs.image_tag }}
@@ -241,6 +244,7 @@ jobs:
   build-push-payment:
     name: build baalvion/payment-service
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     outputs:
       image_tag: ${{ steps.tag.outputs.image_tag }}
     steps:
@@ -300,6 +304,7 @@ jobs:
   build-push-community:
     name: build baalvion/community-service
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     continue-on-error: true   # first-time build for this image; never block the core roll
     outputs:
       image_tag: ${{ steps.tag.outputs.image_tag }}
@@ -356,6 +361,7 @@ jobs:
   build-push-giftcard:
     name: build baalvion/giftcard-service
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     continue-on-error: true   # first-time build for this image; never block the core roll
     outputs:
       image_tag: ${{ steps.tag.outputs.image_tag }}
@@ -414,6 +420,7 @@ jobs:
     needs: [build-push-backend, build-push-admin-web, build-push-auth-web, build-push-payment, build-push-community, build-push-giftcard]
     if: ${{ github.event.inputs.roll != 'false' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     environment: production
     env:
       EC2_HOST: ${{ secrets.CORE2_EC2_HOST }}

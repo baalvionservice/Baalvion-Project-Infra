@@ -38,6 +38,7 @@ jobs:
   # ── Detect which services changed ──────────────────────────────────────────
   changes:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     outputs:
       mining:       ${{ steps.filter.outputs.mining }}
       imperialpedia: ${{ steps.filter.outputs.imperialpedia }}
@@ -75,6 +76,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.mining == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:15-alpine
@@ -120,6 +122,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.imperialpedia == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:15-alpine
@@ -165,6 +168,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.real_estate == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:15-alpine
@@ -210,6 +214,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.market == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:15-alpine
@@ -255,6 +260,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.ir == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:15-alpine
@@ -300,6 +306,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.about == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:15-alpine
@@ -346,6 +353,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.brand == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:15-alpine
@@ -391,6 +399,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.dashboard == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:15-alpine
@@ -450,6 +459,7 @@ jobs:
       - dashboard-service
     if: always()
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Check all domain service jobs passed
         run: |
@@ -463,6 +473,7 @@ jobs:
     needs: domain-ci-success
     if: always() && needs.domain-ci-success.result == 'failure'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/slack-notify

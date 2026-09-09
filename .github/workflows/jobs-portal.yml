@@ -16,6 +16,7 @@ jobs:
   lint-typecheck:
     name: Lint & Type Check
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - uses: actions/checkout@v7
@@ -54,6 +55,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     needs: lint-typecheck
     if: github.ref == 'refs/heads/main'
 
@@ -98,6 +100,7 @@ jobs:
     # legitimately 'skipped' on a PR run — only 'failure' should page.
     if: always() && (needs.lint-typecheck.result == 'failure' || needs.build.result == 'failure')
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/slack-notify

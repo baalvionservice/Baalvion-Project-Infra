@@ -6,6 +6,7 @@ on:
 jobs:
   stop-and-verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment: production
     steps:
       - name: Stop app-trade + neo4j (confirmed zero external route), verify rest stays healthy

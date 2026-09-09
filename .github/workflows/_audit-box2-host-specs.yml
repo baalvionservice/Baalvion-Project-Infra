@@ -6,6 +6,7 @@ on:
 jobs:
   audit:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment: production
     steps:
       - name: CPU count + memory + AWS instance-metadata (from inside the box, no IAM needed)

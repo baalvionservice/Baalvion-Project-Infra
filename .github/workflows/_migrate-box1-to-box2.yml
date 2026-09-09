@@ -6,6 +6,7 @@ on:
 jobs:
   migrate:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     environment: production
     steps:
       - name: Set up SSH keys for both hosts
@@ -74,6 +75,7 @@ jobs:
 
   migrate-media:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     environment: production
     steps:
       - name: Set up SSH keys
@@ -112,6 +114,7 @@ jobs:
 
   migrate-nodebb:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     environment: production
     steps:
       - name: Set up SSH keys

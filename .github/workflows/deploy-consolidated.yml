@@ -52,6 +52,7 @@ jobs:
   build-push:
     name: build baalvion-backend
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     outputs:
       image_tag: ${{ steps.tag.outputs.image_tag }}
     steps:
@@ -120,6 +121,7 @@ jobs:
   build-push-admin-web:
     name: build admin-web
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     # Non-fatal: if the ECR repo `baalvion/admin-web` isn't created yet, this fails but is
     # treated as success by `needs`, so the shared-blocker backend roll still proceeds. The
     # roll pulls admin-web best-effort. Create the repo (runbook §4) to bring the console up.
@@ -198,6 +200,7 @@ jobs:
     needs: [build-push, build-push-admin-web]
     if: ${{ github.event_name == 'push' || github.event.inputs.roll != 'false' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     environment: production       # protected environment — manual approval gate
     env:
       EC2_HOST: ${{ secrets.CORE_EC2_HOST }}
@@ -375,6 +378,7 @@ jobs:
     needs: [build-push, build-push-admin-web, deploy]
     if: always()
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
 
