@@ -19,6 +19,8 @@
 #   • OIDC only — no static AWS keys.
 #   • The roll is gated behind the `production` environment + CORE2_EC2_* secrets;
 #     a partial/unconfigured target SKIPS (stays green) rather than failing.
+#   • Nothing reaches ECR until Trivy has scanned that exact image (skip_image_scan
+#     is the audited, per-run escape hatch).
 # ─────────────────────────────────────────────────────────────────────────────
 name: Deploy — consolidated backend, box2 (ECR → EC2)
 
@@ -33,6 +35,10 @@ on:
         description: "Compose profiles to bring up on the roll (space-separated, e.g. 'payments')"
         required: false
         default: "payments"
+      skip_image_scan:
+        description: "EMERGENCY ONLY: push images without the Trivy gate (true/false)"
+        required: false
+        default: "false"
 
 concurrency:
   group: deploy-consolidated-box2
@@ -45,6 +51,10 @@ permissions:
 env:
   AWS_REGION: ${{ vars.CORE2_AWS_REGION || 'ap-south-1' }}
   RELEASE_TAG: ${{ vars.CORE2_RELEASE_TAG || 'v1.0.0-box2' }}
+  # ci.yml's own TRIVY_SEVERITY is 'CRITICAL' despite its step being named HIGH/CRITICAL.
+  # This pipeline is the one whose artifacts actually reach production, so it gates on
+  # HIGH too -- which does mean a run can pass CI and still be blocked here.
+  TRIVY_SEVERITY: 'HIGH,CRITICAL'
 
 jobs:
   # ════════════════════════════ 1) build + push baalvion-backend ════════════════════════════
@@ -90,17 +100,59 @@ jobs:
             type=raw,value=${{ env.RELEASE_TAG }}
             type=raw,value=${{ steps.tag.outputs.image_tag }}
 
-      - name: Build and push to ECR
+      # Build LOCALLY (load into the runner's docker, do NOT push) so Trivy below scans
+      # the exact artifact this job is about to ship, not a rebuild of it.
+      - name: Build backend image (local, unpushed)
         uses: docker/build-push-action@v7
         with:
           context: .
           file: deploy/consolidated/Dockerfile.node
-          push: true
+          push: false
+          load: true
           provenance: false
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: baalvion/backend:scan
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=box2-backend
           cache-to: type=gha,mode=max,scope=box2-backend
+
+      # Nothing that reaches production had ever been scanned. ci.yml builds ~60 images
+      # and Trivy-scans them, then throws them away (push: false -- correct, CI must never
+      # push); this workflow then rebuilt from scratch and pushed straight to ECR with no
+      # scan at all. So the images were built locally above and are pushed below only if
+      # this passes. Same action, SHA pin and vuln-DB mirror as ci.yml's docker-build-scan
+      # job -- the ECR mirror is there because GHCR rate-limits anonymous DB pulls in CI.
+      #
+      # Tradeoff: the gate is real, so a pre-existing fixable HIGH/CRITICAL in a base image
+      # can block a deploy that has nothing to do with it. `skip_image_scan: true` on the
+      # dispatch is the release valve -- it skips the SCAN, not the push, and has to be
+      # asked for per run, so the default path stays gated and nobody ends up wedged.
+      - name: Trivy image scan (gates the ECR push)
+        if: ${{ github.event.inputs.skip_image_scan != 'true' }}
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        env:
+          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
+          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
+        with:
+          image-ref: baalvion/backend:scan
+          format: table
+          severity: ${{ env.TRIVY_SEVERITY }}
+          vuln-type: os,library
+          ignore-unfixed: true
+          exit-code: '1'
+
+      # Retag and push the exact bytes Trivy just scanned. A second build-push-action run
+      # would re-export the image and, on a cache miss, could ship something the scan never
+      # saw -- which is the bug this whole change exists to close.
+      - name: Push the scanned backend image to ECR
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          set -euo pipefail
+          while IFS= read -r t; do
+            [ -z "$t" ] && continue
+            docker tag baalvion/backend:scan "$t"
+            docker push "$t"
+          done <<< "$TAGS"
 
   # ════════════════════════════ 2) build + push admin-web ════════════════════════════
   build-push-admin-web:
@@ -146,12 +198,14 @@ jobs:
             type=raw,value=${{ env.RELEASE_TAG }}
             type=raw,value=${{ steps.tag.outputs.image_tag }}
 
-      - name: Build and push admin-web to ECR
+      # Built locally so the scan below sees the artifact that gets pushed.
+      - name: Build admin-web image (local, unpushed)
         uses: docker/build-push-action@v7
         with:
           context: .
           file: Frontend/admin-platform/Dockerfile.deploy
-          push: true
+          push: false
+          load: true
           provenance: false
           build-args: |
             NEXT_PUBLIC_APP_URL=${{ vars.CORE2_ADMIN_URL || 'https://admin-box2.baalvion.com' }}
@@ -159,10 +213,36 @@ jobs:
             NEXT_PUBLIC_CMS_API_URL=${{ vars.CORE2_ADMIN_URL || 'https://admin-box2.baalvion.com' }}/api-bff/knowledge/cms/api/v1
             NEXT_PUBLIC_AUTH_URL=${{ vars.CORE2_ADMIN_URL || 'https://admin-box2.baalvion.com' }}/auth-bff
             NEXT_PUBLIC_APP_ENV=production
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: baalvion/admin-web:scan
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=box2-admin-web
           cache-to: type=gha,mode=max,scope=box2-admin-web
+
+      # Same pre-push gate as build-push-backend -- see the comment there.
+      - name: Trivy image scan (gates the ECR push)
+        if: ${{ github.event.inputs.skip_image_scan != 'true' }}
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        env:
+          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
+          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
+        with:
+          image-ref: baalvion/admin-web:scan
+          format: table
+          severity: ${{ env.TRIVY_SEVERITY }}
+          vuln-type: os,library
+          ignore-unfixed: true
+          exit-code: '1'
+
+      - name: Push the scanned admin-web image to ECR
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          set -euo pipefail
+          while IFS= read -r t; do
+            [ -z "$t" ] && continue
+            docker tag baalvion/admin-web:scan "$t"
+            docker push "$t"
+          done <<< "$TAGS"
 
   # ════════════════════════════ 2b) build + push auth-baalvion ════════════════════════════
   # Shared brand-aware email-OTP sign-in surface (auth.baalvion.com) used by every Baalvion
@@ -211,12 +291,14 @@ jobs:
             type=raw,value=${{ env.RELEASE_TAG }}
             type=raw,value=${{ steps.tag.outputs.image_tag }}
 
-      - name: Build and push auth-baalvion to ECR
+      # Built locally so the scan below sees the artifact that gets pushed.
+      - name: Build auth-baalvion image (local, unpushed)
         uses: docker/build-push-action@v7
         with:
           context: .
           file: Frontend/auth-baalvion/Dockerfile
-          push: true
+          push: false
+          load: true
           provenance: false
           # No Turnstile key configured yet: the widget just doesn't render and the
           # server-side check is skipped (same as local dev) — not a build blocker.
@@ -229,10 +311,36 @@ jobs:
           # http://localhost:3001 fallback instead of app-identity).
           build-args: |
             AUTH_SERVICE_URL=http://app-identity:3001
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: baalvion/auth-baalvion:scan
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=box2-auth-web
           cache-to: type=gha,mode=max,scope=box2-auth-web
+
+      # Same pre-push gate as build-push-backend -- see the comment there.
+      - name: Trivy image scan (gates the ECR push)
+        if: ${{ github.event.inputs.skip_image_scan != 'true' }}
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        env:
+          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
+          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
+        with:
+          image-ref: baalvion/auth-baalvion:scan
+          format: table
+          severity: ${{ env.TRIVY_SEVERITY }}
+          vuln-type: os,library
+          ignore-unfixed: true
+          exit-code: '1'
+
+      - name: Push the scanned auth-baalvion image to ECR
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          set -euo pipefail
+          while IFS= read -r t; do
+            [ -z "$t" ] && continue
+            docker tag baalvion/auth-baalvion:scan "$t"
+            docker push "$t"
+          done <<< "$TAGS"
 
   # ════════════════════════════ 3) build + push payment-service (Java) ════════════════════════════
   # NOTE: nothing else in the repo currently builds+pushes baalvion/payment-service — the
@@ -280,18 +388,46 @@ jobs:
             type=raw,value=${{ env.RELEASE_TAG }}
             type=raw,value=${{ steps.tag.outputs.image_tag }}
 
-      - name: Build and push payment-service to ECR
+      # Built locally so the scan below sees the artifact that gets pushed.
+      - name: Build payment-service image (local, unpushed)
         uses: docker/build-push-action@v7
         with:
           context: Backend/services/commerce/financial-services-java
           file: Backend/services/commerce/financial-services-java/Dockerfile
           build-args: SERVICE=payment-service
-          push: true
+          push: false
+          load: true
           provenance: false
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: baalvion/payment-service:scan
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=box2-payjava
           cache-to: type=gha,mode=max,scope=box2-payjava
+
+      # Same pre-push gate as build-push-backend -- see the comment there.
+      - name: Trivy image scan (gates the ECR push)
+        if: ${{ github.event.inputs.skip_image_scan != 'true' }}
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        env:
+          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
+          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
+        with:
+          image-ref: baalvion/payment-service:scan
+          format: table
+          severity: ${{ env.TRIVY_SEVERITY }}
+          vuln-type: os,library
+          ignore-unfixed: true
+          exit-code: '1'
+
+      - name: Push the scanned payment-service image to ECR
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          set -euo pipefail
+          while IFS= read -r t; do
+            [ -z "$t" ] && continue
+            docker tag baalvion/payment-service:scan "$t"
+            docker push "$t"
+          done <<< "$TAGS"
 
   # ════════════════════════════ 4) build + push community-service ════════════════════════════
   # NOTE: no CI pipeline previously built this image (deploy/consolidated/docker-compose.prod.yml's
@@ -340,17 +476,45 @@ jobs:
             type=raw,value=${{ env.RELEASE_TAG }}
             type=raw,value=${{ steps.tag.outputs.image_tag }}
 
-      - name: Build and push community-service to ECR
+      # Built locally so the scan below sees the artifact that gets pushed.
+      - name: Build community-service image (local, unpushed)
         uses: docker/build-push-action@v7
         with:
           context: .
           file: Backend/services/ecosystem/community-service/Dockerfile
-          push: true
+          push: false
+          load: true
           provenance: false
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: baalvion/community-service:scan
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=box2-community
           cache-to: type=gha,mode=max,scope=box2-community
+
+      # Same pre-push gate as build-push-backend -- see the comment there.
+      - name: Trivy image scan (gates the ECR push)
+        if: ${{ github.event.inputs.skip_image_scan != 'true' }}
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        env:
+          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
+          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
+        with:
+          image-ref: baalvion/community-service:scan
+          format: table
+          severity: ${{ env.TRIVY_SEVERITY }}
+          vuln-type: os,library
+          ignore-unfixed: true
+          exit-code: '1'
+
+      - name: Push the scanned community-service image to ECR
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          set -euo pipefail
+          while IFS= read -r t; do
+            [ -z "$t" ] && continue
+            docker tag baalvion/community-service:scan "$t"
+            docker push "$t"
+          done <<< "$TAGS"
 
   # ════════════════════════════ 5) build + push giftcard-service ════════════════════════════
   build-push-giftcard:
@@ -396,17 +560,45 @@ jobs:
             type=raw,value=${{ env.RELEASE_TAG }}
             type=raw,value=${{ steps.tag.outputs.image_tag }}
 
-      - name: Build and push giftcard-service to ECR
+      # Built locally so the scan below sees the artifact that gets pushed.
+      - name: Build giftcard-service image (local, unpushed)
         uses: docker/build-push-action@v7
         with:
           context: .
           file: Backend/services/ecosystem/giftcard-service/Dockerfile
-          push: true
+          push: false
+          load: true
           provenance: false
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: baalvion/giftcard-service:scan
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=box2-giftcard
           cache-to: type=gha,mode=max,scope=box2-giftcard
+
+      # Same pre-push gate as build-push-backend -- see the comment there.
+      - name: Trivy image scan (gates the ECR push)
+        if: ${{ github.event.inputs.skip_image_scan != 'true' }}
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        env:
+          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
+          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
+        with:
+          image-ref: baalvion/giftcard-service:scan
+          format: table
+          severity: ${{ env.TRIVY_SEVERITY }}
+          vuln-type: os,library
+          ignore-unfixed: true
+          exit-code: '1'
+
+      - name: Push the scanned giftcard-service image to ECR
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          set -euo pipefail
+          while IFS= read -r t; do
+            [ -z "$t" ] && continue
+            docker tag baalvion/giftcard-service:scan "$t"
+            docker push "$t"
+          done <<< "$TAGS"
 
   # ════════════════════════════ 6) roll the stack on box2 ════════════════════════════
   deploy:
