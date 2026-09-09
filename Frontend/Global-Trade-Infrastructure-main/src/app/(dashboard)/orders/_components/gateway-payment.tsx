@@ -35,6 +35,11 @@ const GATEWAYS: { id: GatewaySlug; label: string; desc: string; Icon: typeof Cre
   { id: 'bank', label: 'Bank Transfer', desc: 'Wire · settles in 1–2 days', Icon: Building2 },
 ];
 
+// Offered before (or instead of) a successful read of the configured-gateway list. Razorpay and
+// bank transfer are the rails this site is actually granted in the site registry; anything wider
+// has to be confirmed by the server first.
+const FALLBACK_GATEWAYS: GatewaySlug[] = ['razorpay', 'bank'];
+
 let razorpayScript: Promise<void> | null = null;
 function loadRazorpay(): Promise<void> {
   if (typeof window === 'undefined') return Promise.reject(new Error('no window'));
@@ -85,14 +90,18 @@ export function GatewayPayment({ order, onPaid }: { order: Order; onPaid: (o: Or
   const [gateway, setGateway] = useState<GatewaySlug>('razorpay');
   const [busy, setBusy] = useState(false);
   const [instructions, setInstructions] = useState<string | null>(null);
-  // Only offer gateways with keys configured in the admin vault. Default to ALL until we know, so a
-  // slow/unavailable endpoint never blocks checkout; once known we default to the card-capable one.
-  const [available, setAvailable] = useState<GatewaySlug[]>(GATEWAYS.map((g) => g.id));
+  // Only offer gateways with keys configured in the admin vault.
+  //
+  // The starting set is FALLBACK_GATEWAYS, not every gateway: offering one that has no keys is
+  // not a graceful fallback for a payment form — it walks the buyer into a checkout that dies at
+  // the last step. Stripe is excluded because there is no Stripe merchant account on this estate,
+  // so it appears only if the server positively reports it as configured.
+  const [available, setAvailable] = useState<GatewaySlug[]>(FALLBACK_GATEWAYS);
 
   useEffect(() => {
     let active = true;
     getConfiguredGateways().then(({ gateways, preferred }) => {
-      if (!active || !gateways.length) return; // empty → keep showing all (graceful fallback)
+      if (!active || !gateways.length) return; // keep the safe fallback rather than widening it
       setAvailable(gateways);
       setGateway((cur) => (gateways.includes(cur) ? cur : (preferred ?? gateways[0])));
     });

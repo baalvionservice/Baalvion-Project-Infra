@@ -8,6 +8,7 @@
 // env-fallback pattern already used by ctm-service/service/payments.js.
 // Implemented with fetch + HMAC (no SDK dependency).
 const crypto = require('crypto');
+const { Money } = require('@baalvion/money');
 
 const SITE_SLUG = process.env.PAYMENT_SITE_SLUG || 'law-elite-network';
 const CMS_BASE_URL = process.env.CMS_BASE_URL || '';           // e.g. http://cms-service:3011/api/v1
@@ -84,7 +85,8 @@ async function createOrder({ amount, currency, receipt, notes }) {
         method: 'POST',
         headers: { authorization: `Basic ${auth}`, 'content-type': 'application/json' },
         body: JSON.stringify({
-            amount: Math.round(Number(amount) * 100), // smallest currency unit (paise)
+            // Smallest currency unit, taken from the currency's own exponent.
+            amount: Number(Money.fromDatabaseValue(amount, String(currency || 'INR')).minor),
             currency: String(currency || 'INR').toUpperCase(),
             receipt: receipt ? String(receipt) : undefined,
             notes: notes || {},

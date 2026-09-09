@@ -66,6 +66,14 @@ const start = async () => {
 
     server.listen(config.port, () => logger.info(`[developer-service] running on port ${config.port} (RS256=${jwt.isRs256Enabled()})`));
 
+    // Drain this service's payment outbox onto the event bus. Each service owns its own `pcl`
+    // schema in its own database, so each needs its own relay — without it, plan payments record
+    // correctly and reach nobody. A no-op unless PAYMENT_SPINE=true; a relay that cannot start
+    // must never block boot, because the outbox is durable and drains once the cause is fixed.
+    const paymentSpine = require('./services/paymentSpine');
+    paymentSpine.startPaymentRelay();
+
+    registerShutdown('payment-outbox', async () => { await paymentSpine.stopPaymentRelay(); });
     registerShutdown('delivery-worker', async () => { stopDeliveryWorker(); });
     registerShutdown('event-consumer', async () => { await stopEventConsumer(); });
     registerShutdown('redis', async () => { const r = require('./config/redis'); const c = (r.getClient && r.getClient()) || r.client || (typeof r.quit === 'function' ? r : null); if (c && c.quit) await c.quit(); });

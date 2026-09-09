@@ -7,6 +7,7 @@
  * a failing audit insert NEVER breaks the auth response. Retention: AUTH_AUDIT_RETENTION_DAYS.
  */
 const db = require('../models');
+const { siteFromRequest } = require('../utils/brandFromOrigin');
 
 const EVENTS = Object.freeze({
   LOGIN_SUCCESS: 'login_success',
@@ -38,7 +39,11 @@ function sanitize(meta) {
   return out;
 }
 
-const appIdOf = (req) => (req && req.headers && (req.headers['x-baalvion-app'] || req.headers['x-baalvion-app-id'])) || null;
+// X-Baalvion-App is the explicit signal, but nothing in the fleet sends it — every app_id in the
+// table was NULL, so "which site did this login come from?" had no answer. The request's Origin
+// already carries it (that is how lifecycle emails get themed), so fall back to that.
+const appIdOf = (req) =>
+  (req && req.headers && (req.headers['x-baalvion-app'] || req.headers['x-baalvion-app-id'])) || siteFromRequest(req);
 const ipOf = (req) => (req && (req.ip || (req.headers && req.headers['x-forwarded-for']) || (req.socket && req.socket.remoteAddress))) || null;
 const uaOf = (req) => (req && req.headers && req.headers['user-agent']) || null;
 

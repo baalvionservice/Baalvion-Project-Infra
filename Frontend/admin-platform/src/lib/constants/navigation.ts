@@ -112,6 +112,12 @@ export const NAVIGATION: NavGroup[] = [
         roles: ['super_admin', 'owner', 'admin'],
       },
       {
+        title: 'Sign-in Activity',
+        href: '/login-activity',
+        iconName: 'LogIn',
+        roles: ['super_admin', 'owner', 'admin'],
+      },
+      {
         title: 'Audit Center',
         href: '/audit-center',
         iconName: 'ShieldCheck',
