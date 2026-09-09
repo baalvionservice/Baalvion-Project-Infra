@@ -21,6 +21,13 @@
 Frontend/*
 !Frontend/auth-baalvion
 !Frontend/admin-platform
+# jobs.baalvion.com is built from the repo root too. Without this its source never enters
+# the build context and `turbo prune baalvion-jobs-portal-web` fails "package not found" —
+# which is why its image could only ever be rebuilt from a branch that was never merged.
+!Frontend/Baalvion-Jobs-Portal-main
+Frontend/Baalvion-Jobs-Portal-main/node_modules
+Frontend/Baalvion-Jobs-Portal-main/.next
+Frontend/Baalvion-Jobs-Portal-main/.turbo
 # baalvion-stack (baalvionstack.com) is built from the repo root too, so its source must be
 # re-included or `turbo prune baalvion-stack-web` fails with "package not found" — exactly the
 # failure the note above describes.
