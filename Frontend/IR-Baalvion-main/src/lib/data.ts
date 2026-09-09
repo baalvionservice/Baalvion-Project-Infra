@@ -91,58 +91,24 @@ export const VicePersidents = [
     position: "Worldwide Sales",
     bio: "Jaid Alam oversees Baalvion's worldwide sales operations, driving revenue growth and client acquisition across global markets. With a proven track record in sales leadership and a deep understanding of the B2B commerce landscape, he is instrumental in expanding our customer base and strengthening our market position.",
   },
-  {
-    name: "Nathan P. Cole",
-    title: "Vice President",
-    position: "Investor Relations",
-    bio: "Nathan P. Cole leads Baalvion's communications and engagement with the company's shareholders, analysts and the wider investment community, ensuring clear, consistent and transparent dialogue with investors.",
-  },
 ];
 
-export const boardOfDirectors = [
-  {
-    name: "Jonathan R. Whitfield",
-    title: "Non-Executive Chairman of the Board",
-    imageId: "bod-1",
-    bio: "Jonathan R. Whitfield serves as Non-Executive Chairman of the Board of Baalvion Industries Private Limited. He brings more than three decades of leadership across global technology, infrastructure and financial services, and chairs the Board with a focus on long-term value creation, sound governance and disciplined oversight.",
-  },
-  {
-    name: "Margaret A. Sinclair",
-    title: "Lead Independent Director",
-    imageId: "bod-2",
-    bio: "Margaret A. Sinclair is the Lead Independent Director of Baalvion Industries Private Limited. A seasoned finance and operations executive, she provides independent oversight of management and serves as a key liaison between the Board and shareholders.",
-  },
-  {
-    name: "David C. Harrington",
-    title: "Independent Director",
-    imageId: "bod-3",
-    bio: "David C. Harrington is an Independent Director of Baalvion Industries Private Limited. With a distinguished career in capital markets and corporate strategy, he advises the Board on growth, capital allocation and value creation.",
-  },
-  {
-    name: "Catherine E. Lawson",
-    title: "Independent Director",
-    imageId: "bod-4",
-    bio: "Catherine E. Lawson is an Independent Director of Baalvion Industries Private Limited. She brings deep expertise in operations, technology and organisational development, and supports the Board's oversight of strategy execution and talent.",
-  },
-  {
-    name: "Richard P. Donnelly",
-    title: "Independent Director",
-    imageId: "bod-5",
-    bio: "Richard P. Donnelly is an Independent Director of Baalvion Industries Private Limited. A veteran of global risk management and regulated industries, he provides the Board with independent counsel on risk, compliance and governance.",
-  },
-  {
-    name: "Andrew S. Caldwell",
-    title: "Non-Executive Director",
-    imageId: "bod-6",
-    bio: "Andrew S. Caldwell serves as a Non-Executive Director of Baalvion Industries Private Limited. With extensive experience in growth investing and company building, he advises the Board on long-term strategy, scaling and global expansion.",
-  },
-  {
-    name: "Eleanor M. Brooks",
-    title: "Non-Executive Director",
-    imageId: "bod-7",
-    bio: "Eleanor M. Brooks is a Non-Executive Director of Baalvion Industries Private Limited. She brings a strong record in technology, product and innovation leadership, and helps the Board oversee the company's long-term technology direction and market positioning.",
-  },
-];
+/**
+ * Real directors only.
+ *
+ * Seven invented directors sat here — "Jonathan R. Whitfield, Non-Executive Chairman of
+ * the Board", "Margaret A. Sinclair, Lead Independent Director" and five more — each with
+ * a governance bio naming Baalvion Industries Private Limited and claiming independent
+ * oversight of management. None are directors of the company. cmsGetBoard() falls back to
+ * this list whenever the CMS returns no board, so they rendered on the public
+ * /governance/board-of-directors page.
+ *
+ * Board composition is a statutory fact about a company and a representation to investors;
+ * independent-director claims carry governance meaning. This is not a place for
+ * placeholders. Leave empty until the real directors are entered in the CMS — the page
+ * says the roster is not published yet rather than showing invented names.
+ */
+export const boardOfDirectors: never[] = [];
 
 export const newsArticles = [
   {
