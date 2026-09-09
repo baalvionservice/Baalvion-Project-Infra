@@ -441,10 +441,11 @@ jobs:
         run: docker build -f Backend/services/platform/dashboard-service/Dockerfile -t baalvion-dashboard:ci .
 
   # NOTE: the GHCR `push-images` job was removed during the ECR consolidation.
-  # These domain services are not part of the single-host production stack; production
-  # image builds for the deployed fleet are owned by the canonical pipeline
-  # (.github/workflows/deploy.yml → Amazon ECR only). The per-service jobs above keep
-  # their local `docker build … :ci` compile-verification step (no registry push).
+  # deploy.yml, named here as the owner of those builds, was deleted 2026-07-02.
+  # These services ship inside the consolidated baalvion/backend image built by
+  # deploy-consolidated-box2.yml (pm2, see deploy/consolidated/pm2/*.config.js); none
+  # of them is pushed as a standalone image. The per-service jobs above keep their
+  # local `docker build … :ci` compile-verification step (no registry push).
 
   # ── CI gate ────────────────────────────────────────────────────────────────
   domain-ci-success:

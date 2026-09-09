@@ -16,9 +16,10 @@ on:
 
 env:
   MODULE_DIR: Backend/services/commerce/financial-services-java
-  # Local-only image tag prefix used for the Trivy scan below. Production images are
-  # built + pushed to Amazon ECR by the canonical pipeline (.github/workflows/deploy.yml).
-  # This workflow no longer pushes to any registry — it builds + scans only.
+  # Local-only image tag prefix used for the Trivy scan below. The deployed image
+  # (baalvion/payment-service) is built + pushed to Amazon ECR by
+  # deploy-consolidated-box2.yml — deploy.yml, named here before, was deleted
+  # 2026-07-02. This workflow no longer pushes to any registry — it builds + scans only.
   IMAGE_PREFIX: baalvion-financial
 
 jobs:
@@ -105,8 +106,8 @@ jobs:
           ignore-unfixed: "true"
       # GHCR login + push removed during the ECR consolidation. The deployed Java
       # payment-service is built + pushed to Amazon ECR (repo baalvion/payment-service,
-      # build-arg SERVICE=payment-service) by the canonical pipeline
-      # .github/workflows/deploy.yml. This job now builds + Trivy-scans only.
+      # build-arg SERVICE=payment-service) by deploy-consolidated-box2.yml — deploy.yml,
+      # named here before, was deleted 2026-07-02. This job builds + Trivy-scans only.
 
   # build-test / trivy-fs / images are NOT continue-on-error here (unlike ci.yml's
   # report-only docker-build-scan), so a Trivy finding fails the job directly and is

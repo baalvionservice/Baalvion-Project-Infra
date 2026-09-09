@@ -5,7 +5,8 @@
 #   into ONE Docker image (`baalvion-backend`) that all six Node app containers
 #   share; pm2 picks the per-container personality. This image has its OWN build
 #   (deploy/consolidated/Dockerfile.node, repo-root context) — it is NOT one of the
-#   per-service images that deploy.yml builds for the ec2-single-host stack.
+#   per-service images the old deploy.yml built for the ec2-single-host stack
+#   (that workflow was deleted 2026-07-02).
 #
 # box1 (baalvion-prod-01, AWS account 869657603174) was retired 2026-07-28 —
 # see [[box2-becomes-sole-prod-2026-07-28]]. box2 (deploy-consolidated-box2.yml)

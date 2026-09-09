@@ -238,9 +238,9 @@ jobs:
           cache-to: type=gha,mode=max,scope=box2-auth-web
 
   # ════════════════════════════ 3) build + push payment-service (Java) ════════════════════════════
-  # NOTE: nothing else in the repo currently builds+pushes baalvion/payment-service — the
-  # comment in financial-services.yml pointing at deploy.yml is stale (deploy.yml was deleted
-  # 2026-07-02). This is the one live pipeline that produces this image.
+  # NOTE: nothing else in the repo builds+pushes baalvion/payment-service. This is the
+  # one live pipeline that produces it; financial-services.yml builds + Trivy-scans a
+  # local tag only.
   build-push-payment:
     name: build baalvion/payment-service
     runs-on: ubuntu-latest

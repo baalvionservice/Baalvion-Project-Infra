@@ -78,9 +78,11 @@ jobs:
         run: pnpm --filter baalvion-ctm-service test --if-present
 
   # NOTE: the GHCR `build-docker` push job was removed during the ECR consolidation.
-  # ctm-service is now built + pushed to Amazon ECR (repo controlthemarket-ctm-service)
-  # by the single canonical pipeline: .github/workflows/deploy.yml. Its image is also
-  # build + Trivy-scanned in ci.yml (docker-build-scan). This workflow is now test-only.
+  # Nothing pushes a standalone ctm-service image any more — deploy.yml, which did,
+  # was deleted 2026-07-02. Production runs it inside the consolidated
+  # baalvion/backend image built by deploy-consolidated-box2.yml (pm2, see
+  # deploy/consolidated/pm2/ecosystem.config.js). ci.yml still build + Trivy-scans
+  # its Dockerfile. This workflow is test-only.
 
   notify-ci-failure:
     name: Notify Slack (CI failure)

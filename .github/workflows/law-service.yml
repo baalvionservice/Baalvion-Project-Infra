@@ -104,9 +104,11 @@ jobs:
           NEXT_TELEMETRY_DISABLED: '1'
 
   # NOTE: the GHCR `docker` build & push job was removed during the ECR consolidation.
-  # law-service is now built + pushed to Amazon ECR (repo law-service) by the single
-  # canonical pipeline: .github/workflows/deploy.yml. This workflow is now test-only
-  # (backend unit tests + migrations, and the Law-Elite frontend production build).
+  # deploy.yml, which pushed a law-service image, was deleted 2026-07-02. law-service
+  # now ships inside the consolidated baalvion/backend image built by
+  # deploy-consolidated-box2.yml (pm2, see deploy/consolidated/pm2/platform.config.js).
+  # This workflow is test-only (backend unit tests + migrations, and the Law-Elite
+  # frontend production build).
 
   notify-ci-failure:
     name: Notify Slack (CI failure)
