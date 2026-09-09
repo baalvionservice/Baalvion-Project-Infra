@@ -104,9 +104,11 @@ test('a rail is only usable where it was granted', () => {
 });
 
 test('a site with no rails cannot take money at all', () => {
-  assert.throws(() => assertRailAllowed('signal', 'razorpay'), (e) => e.code === 'NO_RAILS_CONFIGURED');
-  assert.throws(() => assertRailAllowed('law', 'razorpay'), (e) => e.code === 'NO_RAILS_CONFIGURED');
-  assert.equal(isRailAllowed('signal', 'razorpay'), false);
+  // imperialpedia-service ships a complete Razorpay checkout, but its frontend has no checkout
+  // UI at all, so nothing can charge there yet — the rails stay empty until one exists.
+  assert.throws(() => assertRailAllowed('imperialpedia', 'razorpay'), (e) => e.code === 'NO_RAILS_CONFIGURED');
+  assert.throws(() => assertRailAllowed('jobs', 'razorpay'), (e) => e.code === 'NO_RAILS_CONFIGURED');
+  assert.equal(isRailAllowed('imperialpedia', 'razorpay'), false);
 });
 
 test('code-inferred rails are usable but not confirmed', () => {
@@ -148,8 +150,27 @@ test('legal entity is unset everywhere and blocks ledger work', () => {
   assert.ok(SITES.every((s) => s.legalEntity === null));
 });
 
-test('only five sites can currently take money', () => {
-  assert.deepEqual(sitesWithRails().map((s) => s.id).sort(), ['amarise', 'community', 'ctm', 'gti', 'proxy']);
+test('exactly the sites with a working charge path carry rails', () => {
+  // law, signal and insiders were audited as having no revenue source and were later found to
+  // charge anyway (law-service and developer-service ship live Razorpay integrations; insiders
+  // sells Elite Circle membership through payment-service). A site that can charge but declares
+  // no rails is the dangerous case: the spine refuses its own captures, so the money is taken
+  // and never reported.
+  assert.deepEqual(
+    sitesWithRails().map((s) => s.id).sort(),
+    ['amarise', 'community', 'ctm', 'gti', 'insiders', 'law', 'proxy', 'signal'],
+  );
+});
+
+test('rails granted to a site are ones its code can actually settle on', () => {
+  // Guards against granting a rail nobody implemented — the spine would accept a capture filed
+  // under a provider the site cannot take money with.
+  assert.deepEqual(railsFor('law'), ['razorpay']);
+  assert.deepEqual(railsFor('signal'), ['razorpay']);
+  // No Stripe anywhere on this estate: there is no Stripe merchant account behind it.
+  assert.ok(!railsFor('insiders').includes('stripe'));
+  assert.ok(!railsFor('law').includes('stripe'));
+  assert.ok(!railsFor('signal').includes('stripe'));
 });
 
 // ---------------------------------------------------------------- legal entities
