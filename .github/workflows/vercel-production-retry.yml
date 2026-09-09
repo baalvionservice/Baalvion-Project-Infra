@@ -1,0 +1,179 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Vercel — retry production deploys blocked by the build rate limit
+#
+#   The free-tier build rate limit ("Deployment rate limited — retry in 24 hours")
+#   can leave main merged but never shipped: the production deploy simply never
+#   runs, and nothing retries it. This job closes that gap — it checks whether
+#   each project's production deployment matches main and redeploys the ones that
+#   do not, so a merge reaches production on its own once the window clears.
+#
+# HARD INVARIANTS:
+#   • ir.baalvion is NOT deployed unless IR_INVEST_ACCESS_CODE exists in its
+#     production environment. The invitation gate fails CLOSED, so shipping
+#     without it turns every real investor away at /invest and /onboarding.
+#     See Frontend/IR-Baalvion-main/src/lib/invite-gate.ts.
+#   • A project already in sync is a no-op, so the schedule is cheap to leave on.
+#   • Nothing here force-pushes, rewrites history, or edits environment variables.
+#     It only asks Vercel to build a commit that is already on main.
+# ─────────────────────────────────────────────────────────────────────────────
+name: Vercel — production retry
+
+on:
+  schedule:
+    # Every two hours. Runs are no-ops once production matches main, so this
+    # settles down by itself after a successful catch-up.
+    - cron: "17 */2 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Report what would deploy, but do not trigger anything"
+        required: false
+        default: "false"
+
+concurrency:
+  group: vercel-production-retry
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  retry:
+    name: Redeploy projects behind main
+    runs-on: ubuntu-latest
+    # Only ever act on the trunk. A scheduled run on a fork or a stale ref must
+    # not push someone else's commit to production.
+    if: github.repository == 'baalvionservice/Baalvion-Project-Infra'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Redeploy
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+          DRY_RUN: ${{ github.event.inputs.dry_run }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${VERCEL_TOKEN:-}" ]; then
+            echo "::error::VERCEL_TOKEN is not set. Add it under Settings → Secrets → Actions."
+            exit 1
+          fi
+
+          API="https://api.vercel.com"
+          AUTH=(-H "Authorization: Bearer ${VERCEL_TOKEN}")
+          SHA="$(git rev-parse HEAD)"
+          echo "main is at ${SHA}"
+
+          # The projects this monorepo ships to production, as Vercel names them.
+          PROJECTS="ir.baalvion about.baalvion jobs.baalvion tradebaalvion imperialpedia lawelitenetwork controlthemarket proxybaalvionstack baalvion-project-infra-for-invstors-and-founders"
+
+          # These projects live under a Vercel team, and a team-scoped project is
+          # invisible to a call that does not name the team — the request succeeds
+          # and simply returns nothing, which would look like "no such project"
+          # rather than an error. Resolve the team first and thread it through.
+          SCOPE=""
+          if [ -n "${VERCEL_TEAM_ID:-}" ]; then
+            SCOPE="teamId=${VERCEL_TEAM_ID}"
+            echo "using team from VERCEL_TEAM_ID: ${VERCEL_TEAM_ID}"
+          else
+            teams_json="$(curl -sS "${AUTH[@]}" "${API}/v2/teams?limit=10" || echo '{}')"
+            team_id="$(echo "${teams_json}" | jq -r '.teams[0].id // ""')"
+            if [ -n "${team_id}" ]; then
+              SCOPE="teamId=${team_id}"
+              echo "discovered team: $(echo "${teams_json}" | jq -r '.teams[0].slug // "?"') (${team_id})"
+            else
+              echo "no team on this token — treating projects as personal-account scoped"
+            fi
+          fi
+          q() { if [ -n "${SCOPE}" ]; then printf '%s&%s' "$1" "${SCOPE}"; else printf '%s' "$1"; fi; }
+
+          # Vercel paginates projects; pull enough to cover the whole account.
+          projects_json="$(curl -sS "${AUTH[@]}" "${API}/v9/projects?$(q "limit=100")")"
+          if ! echo "${projects_json}" | jq -e '.projects' >/dev/null 2>&1; then
+            echo "::error::Could not list Vercel projects. Response:"
+            echo "${projects_json}" | head -c 2000
+            exit 1
+          fi
+
+          triggered=0; skipped=0; insync=0; failed=0
+
+          for name in ${PROJECTS}; do
+            id="$(echo "${projects_json}" | jq -r --arg n "${name}" '.projects[] | select(.name==$n) | .id' | head -1)"
+            if [ -z "${id}" ] || [ "${id}" = "null" ]; then
+              echo "::warning::No Vercel project named '${name}' — skipping."
+              skipped=$((skipped+1)); continue
+            fi
+
+            # ── The gate guard. ir.baalvion ships only when the invitation code
+            # exists, because the gate fails closed without it. ──────────────
+            if [ "${name}" = "ir.baalvion" ]; then
+              env_json="$(curl -sS "${AUTH[@]}" "${API}/v9/projects/${id}/env?$(q "decrypt=false")")"
+              has_code="$(echo "${env_json}" | jq -r '[.envs[]? | select(.key=="IR_INVEST_ACCESS_CODE") | select((.target // []) | index("production"))] | length' 2>/dev/null || echo 0)"
+              if [ "${has_code}" = "0" ]; then
+                echo "::error::ir.baalvion NOT deployed: IR_INVEST_ACCESS_CODE is missing from its production environment."
+                echo "::error::The s.42 invitation gate fails closed — shipping now would redirect every investor away from /invest and /onboarding."
+                echo "::error::Set it in Vercel (Project → Settings → Environment Variables, Production), then re-run this workflow."
+                skipped=$((skipped+1)); continue
+              fi
+            fi
+
+            # Latest READY production deployment for this project.
+            dep_json="$(curl -sS "${AUTH[@]}" "${API}/v6/deployments?$(q "projectId=${id}&target=production&limit=1")")"
+            live_sha="$(echo "${dep_json}" | jq -r '.deployments[0].meta.githubCommitSha // ""')"
+            state="$(echo "${dep_json}" | jq -r '.deployments[0].state // .deployments[0].readyState // ""')"
+
+            if [ "${live_sha}" = "${SHA}" ] && [ "${state}" = "READY" ]; then
+              echo "✓ ${name} — already on ${SHA:0:8}"
+              insync=$((insync+1)); continue
+            fi
+
+            echo "→ ${name} — production is at '${live_sha:0:8}' (${state:-none}), main is at ${SHA:0:8}"
+
+            if [ "${DRY_RUN:-false}" = "true" ]; then
+              echo "  (dry run — not triggering)"
+              continue
+            fi
+
+            # Rebuild the current main commit for this project. repoId comes from
+            # the project's own git link, so we never guess at the connection.
+            repo_id="$(echo "${projects_json}" | jq -r --arg n "${name}" '.projects[] | select(.name==$n) | .link.repoId // empty' | head -1)"
+            if [ -z "${repo_id}" ]; then
+              echo "::warning::${name} has no linked Git repo in Vercel — cannot trigger a build. Skipping."
+              skipped=$((skipped+1)); continue
+            fi
+
+            body="$(jq -nc --arg name "${name}" --arg sha "${SHA}" --argjson repoId "${repo_id}" \
+              '{name:$name, target:"production", gitSource:{type:"github", repoId:$repoId, ref:"main", sha:$sha}}')"
+
+            resp="$(curl -sS -w '\n%{http_code}' "${AUTH[@]}" -H 'Content-Type: application/json' \
+              -X POST "${API}/v13/deployments?$(q "forceNew=1")" -d "${body}")"
+            code="$(echo "${resp}" | tail -1)"
+            payload="$(echo "${resp}" | sed '$d')"
+
+            if [ "${code}" = "200" ] || [ "${code}" = "201" ]; then
+              url="$(echo "${payload}" | jq -r '.url // "?"')"
+              echo "  ✓ queued → https://${url}"
+              triggered=$((triggered+1))
+            else
+              # Still rate limited is expected and not a failure — the next run retries.
+              if echo "${payload}" | grep -qi "rate.limit"; then
+                echo "  · still rate limited — will retry on the next scheduled run"
+                skipped=$((skipped+1))
+              else
+                echo "::error::${name} failed to queue (HTTP ${code}):"
+                echo "${payload}" | head -c 1500
+                failed=$((failed+1))
+              fi
+            fi
+          done
+
+          echo ""
+          echo "in sync: ${insync}   triggered: ${triggered}   skipped: ${skipped}   failed: ${failed}"
+          {
+            echo "### Vercel production retry"
+            echo ""
+            echo "main \`${SHA:0:8}\` — in sync **${insync}**, triggered **${triggered}**, skipped **${skipped}**, failed **${failed}**"
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+          [ "${failed}" -eq 0 ]
