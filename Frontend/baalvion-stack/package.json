@@ -10,10 +10,11 @@
     "dev": "next dev -p 3072",
     "build": "next build",
     "start": "next start -p 3072",
-    "lint": "next lint",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@baalvion/eslint-config": "workspace:*",
     "@baalvion/company": "workspace:*",
     "@baalvion/design": "workspace:*",
     "@baalvion/sites": "workspace:*",

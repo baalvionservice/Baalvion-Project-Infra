@@ -13,10 +13,11 @@
     "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
     "build": " next build",
     "start": "next start -p 3024",
-    "lint": "next lint",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@baalvion/eslint-config": "workspace:*",
     "@baalvion/auth-sdk": "workspace:*",
     "@baalvion/company": "workspace:*",
     "@baalvion/design": "workspace:*",

@@ -12,10 +12,11 @@
     "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
     "build": " next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@baalvion/eslint-config": "workspace:*",
     "@baalvion/auth-sdk": "workspace:*",
     "@baalvion/design": "workspace:*",
     "@genkit-ai/google-genai": "^1.28.0",

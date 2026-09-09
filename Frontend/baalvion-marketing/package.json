@@ -10,10 +10,11 @@
     "dev": "next dev --turbopack -p 3044",
     "build": "next build",
     "start": "next start -p 3044",
-    "lint": "next lint",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@baalvion/eslint-config": "workspace:*",
     "@baalvion/design": "workspace:*",
     "next": "15.5.21",
     "react": "^19.2.1",
