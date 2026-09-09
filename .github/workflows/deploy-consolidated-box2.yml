@@ -19,6 +19,8 @@
 #   • OIDC only — no static AWS keys.
 #   • The roll is gated behind the `production` environment + CORE2_EC2_* secrets;
 #     a partial/unconfigured target SKIPS (stays green) rather than failing.
+#   • Nothing reaches ECR until Trivy has scanned that exact image (skip_image_scan
+#     is the audited, per-run escape hatch).
 # ─────────────────────────────────────────────────────────────────────────────
 name: Deploy — consolidated backend, box2 (ECR → EC2)
 
@@ -33,6 +35,10 @@ on:
         description: "Compose profiles to bring up on the roll (space-separated, e.g. 'payments')"
         required: false
         default: "payments"
+      skip_image_scan:
+        description: "EMERGENCY ONLY: push images without the Trivy gate (true/false)"
+        required: false
+        default: "false"
 
 concurrency:
   group: deploy-consolidated-box2
@@ -45,6 +51,10 @@ permissions:
 env:
   AWS_REGION: ${{ vars.CORE2_AWS_REGION || 'ap-south-1' }}
   RELEASE_TAG: ${{ vars.CORE2_RELEASE_TAG || 'v1.0.0-box2' }}
+  # ci.yml's own TRIVY_SEVERITY is 'CRITICAL' despite its step being named HIGH/CRITICAL.
+  # This pipeline is the one whose artifacts actually reach production, so it gates on
+  # HIGH too -- which does mean a run can pass CI and still be blocked here.
+  TRIVY_SEVERITY: 'HIGH,CRITICAL'
 
 jobs:
   # ════════════════════════════ 1) build + push baalvion-backend ════════════════════════════
@@ -91,17 +101,59 @@ jobs:
             type=raw,value=${{ env.RELEASE_TAG }}
             type=raw,value=${{ steps.tag.outputs.image_tag }}
 
-      - name: Build and push to ECR
+      # Build LOCALLY (load into the runner's docker, do NOT push) so Trivy below scans
+      # the exact artifact this job is about to ship, not a rebuild of it.
+      - name: Build backend image (local, unpushed)
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
           file: deploy/consolidated/Dockerfile.node
-          push: true
+          push: false
+          load: true
           provenance: false
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: baalvion/backend:scan
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=box2-backend
           cache-to: type=gha,mode=max,scope=box2-backend
+
+      # Nothing that reaches production had ever been scanned. ci.yml builds ~60 images
+      # and Trivy-scans them, then throws them away (push: false -- correct, CI must never
+      # push); this workflow then rebuilt from scratch and pushed straight to ECR with no
+      # scan at all. So the images were built locally above and are pushed below only if
+      # this passes. Same action, SHA pin and vuln-DB mirror as ci.yml's docker-build-scan
+      # job -- the ECR mirror is there because GHCR rate-limits anonymous DB pulls in CI.
+      #
+      # Tradeoff: the gate is real, so a pre-existing fixable HIGH/CRITICAL in a base image
+      # can block a deploy that has nothing to do with it. `skip_image_scan: true` on the
+      # dispatch is the release valve -- it skips the SCAN, not the push, and has to be
+      # asked for per run, so the default path stays gated and nobody ends up wedged.
+      - name: Trivy image scan (gates the ECR push)
+        if: ${{ github.event.inputs.skip_image_scan != 'true' }}
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        env:
+          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
+          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
+        with:
+          image-ref: baalvion/backend:scan
+          format: table
+          severity: ${{ env.TRIVY_SEVERITY }}
+          vuln-type: os,library
+          ignore-unfixed: true
+          exit-code: '1'
+
+      # Retag and push the exact bytes Trivy just scanned. A second build-push-action run
+      # would re-export the image and, on a cache miss, could ship something the scan never
+      # saw -- which is the bug this whole change exists to close.
+      - name: Push the scanned backend image to ECR
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          set -euo pipefail
+          while IFS= read -r t; do
+            [ -z "$t" ] && continue
+            docker tag baalvion/backend:scan "$t"
+            docker push "$t"
+          done <<< "$TAGS"
 
   # ════════════════════════════ 2) build + push admin-web ════════════════════════════
   build-push-admin-web:
@@ -148,12 +200,14 @@ jobs:
             type=raw,value=${{ env.RELEASE_TAG }}
             type=raw,value=${{ steps.tag.outputs.image_tag }}
 
-      - name: Build and push admin-web to ECR
+      # Built locally so the scan below sees the artifact that gets pushed.
+      - name: Build admin-web image (local, unpushed)
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
           file: Frontend/admin-platform/Dockerfile.deploy
-          push: true
+          push: false
+          load: true
           provenance: false
           build-args: |
             NEXT_PUBLIC_APP_URL=${{ vars.CORE2_ADMIN_URL || 'https://admin-box2.baalvion.com' }}
@@ -161,10 +215,36 @@ jobs:
             NEXT_PUBLIC_CMS_API_URL=${{ vars.CORE2_ADMIN_URL || 'https://admin-box2.baalvion.com' }}/api-bff/knowledge/cms/api/v1
             NEXT_PUBLIC_AUTH_URL=${{ vars.CORE2_ADMIN_URL || 'https://admin-box2.baalvion.com' }}/auth-bff
             NEXT_PUBLIC_APP_ENV=production
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: baalvion/admin-web:scan
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=box2-admin-web
           cache-to: type=gha,mode=max,scope=box2-admin-web
+
+      # Same pre-push gate as build-push-backend -- see the comment there.
+      - name: Trivy image scan (gates the ECR push)
+        if: ${{ github.event.inputs.skip_image_scan != 'true' }}
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        env:
+          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
+          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
+        with:
+          image-ref: baalvion/admin-web:scan
+          format: table
+          severity: ${{ env.TRIVY_SEVERITY }}
+          vuln-type: os,library
+          ignore-unfixed: true
+          exit-code: '1'
+
+      - name: Push the scanned admin-web image to ECR
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          set -euo pipefail
+          while IFS= read -r t; do
+            [ -z "$t" ] && continue
+            docker tag baalvion/admin-web:scan "$t"
+            docker push "$t"
+          done <<< "$TAGS"
 
   # ════════════════════════════ 2b) build + push auth-baalvion ════════════════════════════
   # Shared brand-aware email-OTP sign-in surface (auth.baalvion.com) used by every Baalvion
@@ -214,12 +294,14 @@ jobs:
             type=raw,value=${{ env.RELEASE_TAG }}
             type=raw,value=${{ steps.tag.outputs.image_tag }}
 
-      - name: Build and push auth-baalvion to ECR
+      # Built locally so the scan below sees the artifact that gets pushed.
+      - name: Build auth-baalvion image (local, unpushed)
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
           file: Frontend/auth-baalvion/Dockerfile
-          push: true
+          push: false
+          load: true
           provenance: false
           # No Turnstile key configured yet: the widget just doesn't render and the
           # server-side check is skipped (same as local dev) — not a build blocker.
@@ -232,10 +314,36 @@ jobs:
           # http://localhost:3001 fallback instead of app-identity).
           build-args: |
             AUTH_SERVICE_URL=http://app-identity:3001
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: baalvion/auth-baalvion:scan
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=box2-auth-web
           cache-to: type=gha,mode=max,scope=box2-auth-web
+
+      # Same pre-push gate as build-push-backend -- see the comment there.
+      - name: Trivy image scan (gates the ECR push)
+        if: ${{ github.event.inputs.skip_image_scan != 'true' }}
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        env:
+          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
+          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
+        with:
+          image-ref: baalvion/auth-baalvion:scan
+          format: table
+          severity: ${{ env.TRIVY_SEVERITY }}
+          vuln-type: os,library
+          ignore-unfixed: true
+          exit-code: '1'
+
+      - name: Push the scanned auth-baalvion image to ECR
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          set -euo pipefail
+          while IFS= read -r t; do
+            [ -z "$t" ] && continue
+            docker tag baalvion/auth-baalvion:scan "$t"
+            docker push "$t"
+          done <<< "$TAGS"
 
   # ════════════════════════════ 3) build + push payment-service (Java) ════════════════════════════
   # NOTE: nothing else in the repo builds+pushes baalvion/payment-service. This is the
@@ -284,18 +392,46 @@ jobs:
             type=raw,value=${{ env.RELEASE_TAG }}
             type=raw,value=${{ steps.tag.outputs.image_tag }}
 
-      - name: Build and push payment-service to ECR
+      # Built locally so the scan below sees the artifact that gets pushed.
+      - name: Build payment-service image (local, unpushed)
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: Backend/services/commerce/financial-services-java
           file: Backend/services/commerce/financial-services-java/Dockerfile
           build-args: SERVICE=payment-service
-          push: true
+          push: false
+          load: true
           provenance: false
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: baalvion/payment-service:scan
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=box2-payjava
           cache-to: type=gha,mode=max,scope=box2-payjava
+
+      # Same pre-push gate as build-push-backend -- see the comment there.
+      - name: Trivy image scan (gates the ECR push)
+        if: ${{ github.event.inputs.skip_image_scan != 'true' }}
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        env:
+          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
+          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
+        with:
+          image-ref: baalvion/payment-service:scan
+          format: table
+          severity: ${{ env.TRIVY_SEVERITY }}
+          vuln-type: os,library
+          ignore-unfixed: true
+          exit-code: '1'
+
+      - name: Push the scanned payment-service image to ECR
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          set -euo pipefail
+          while IFS= read -r t; do
+            [ -z "$t" ] && continue
+            docker tag baalvion/payment-service:scan "$t"
+            docker push "$t"
+          done <<< "$TAGS"
 
   # ════════════════════════════ 4) build + push community-service ════════════════════════════
   # NOTE: no CI pipeline previously built this image (deploy/consolidated/docker-compose.prod.yml's
@@ -345,17 +481,45 @@ jobs:
             type=raw,value=${{ env.RELEASE_TAG }}
             type=raw,value=${{ steps.tag.outputs.image_tag }}
 
-      - name: Build and push community-service to ECR
+      # Built locally so the scan below sees the artifact that gets pushed.
+      - name: Build community-service image (local, unpushed)
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
           file: Backend/services/ecosystem/community-service/Dockerfile
-          push: true
+          push: false
+          load: true
           provenance: false
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: baalvion/community-service:scan
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=box2-community
           cache-to: type=gha,mode=max,scope=box2-community
+
+      # Same pre-push gate as build-push-backend -- see the comment there.
+      - name: Trivy image scan (gates the ECR push)
+        if: ${{ github.event.inputs.skip_image_scan != 'true' }}
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        env:
+          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
+          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
+        with:
+          image-ref: baalvion/community-service:scan
+          format: table
+          severity: ${{ env.TRIVY_SEVERITY }}
+          vuln-type: os,library
+          ignore-unfixed: true
+          exit-code: '1'
+
+      - name: Push the scanned community-service image to ECR
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          set -euo pipefail
+          while IFS= read -r t; do
+            [ -z "$t" ] && continue
+            docker tag baalvion/community-service:scan "$t"
+            docker push "$t"
+          done <<< "$TAGS"
 
   # ════════════════════════════ 5) build + push giftcard-service ════════════════════════════
   build-push-giftcard:
@@ -402,17 +566,45 @@ jobs:
             type=raw,value=${{ env.RELEASE_TAG }}
             type=raw,value=${{ steps.tag.outputs.image_tag }}
 
-      - name: Build and push giftcard-service to ECR
+      # Built locally so the scan below sees the artifact that gets pushed.
+      - name: Build giftcard-service image (local, unpushed)
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
           file: Backend/services/ecosystem/giftcard-service/Dockerfile
-          push: true
+          push: false
+          load: true
           provenance: false
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: baalvion/giftcard-service:scan
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=box2-giftcard
           cache-to: type=gha,mode=max,scope=box2-giftcard
+
+      # Same pre-push gate as build-push-backend -- see the comment there.
+      - name: Trivy image scan (gates the ECR push)
+        if: ${{ github.event.inputs.skip_image_scan != 'true' }}
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        env:
+          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
+          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
+        with:
+          image-ref: baalvion/giftcard-service:scan
+          format: table
+          severity: ${{ env.TRIVY_SEVERITY }}
+          vuln-type: os,library
+          ignore-unfixed: true
+          exit-code: '1'
+
+      - name: Push the scanned giftcard-service image to ECR
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          set -euo pipefail
+          while IFS= read -r t; do
+            [ -z "$t" ] && continue
+            docker tag baalvion/giftcard-service:scan "$t"
+            docker push "$t"
+          done <<< "$TAGS"
 
   # ════════════════════════════ 6) roll the stack on box2 ════════════════════════════
   deploy:
@@ -516,7 +708,12 @@ jobs:
               psql "postgresql://${DB_USER}@${DB_HOST}:${DB_PORT}/${DB_NAME}" -v ON_ERROR_STOP=1 -f /tmp/016.sql
             echo "::notice title=Migration applied::auth.users.signup_brand/reengagement_sent_at are current."
 
-      - name: Pull + roll on box2
+      # Sync the box and pull the incoming images, but start NOTHING yet. Split out
+      # of the old "Pull + roll" step so the service migrations below can run against
+      # the image this deploy is about to start while the previous release is still
+      # the one serving traffic -- and so a migration failure aborts before any
+      # container is replaced.
+      - name: Sync box2 and pull the new images
         if: steps.gate.outputs.ready == 'true'
         uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         env:
@@ -525,12 +722,11 @@ jobs:
           COMMUNITY_IMAGE_TAG: ${{ needs.build-push-community.outputs.image_tag }}
           GIFTCARD_IMAGE_TAG: ${{ needs.build-push-giftcard.outputs.image_tag }}
           AUTH_WEB_IMAGE_TAG: ${{ needs.build-push-auth-web.outputs.image_tag }}
-          PROFILES: ${{ github.event.inputs.profiles }}
         with:
           host: ${{ secrets.CORE2_EC2_HOST }}
           username: ${{ secrets.CORE2_EC2_USER }}
           key: ${{ secrets.CORE2_EC2_SSH_KEY }}
-          envs: IMAGE_TAG,PAYMENTS_IMAGE_TAG,COMMUNITY_IMAGE_TAG,GIFTCARD_IMAGE_TAG,AUTH_WEB_IMAGE_TAG,PROFILES
+          envs: IMAGE_TAG,PAYMENTS_IMAGE_TAG,COMMUNITY_IMAGE_TAG,GIFTCARD_IMAGE_TAG,AUTH_WEB_IMAGE_TAG
           script: |
             set -euo pipefail
             cd /opt/baalvion-box2
@@ -555,6 +751,119 @@ jobs:
             REGISTRY="$(grep -E '^ECR_REGISTRY=' "$ENV" | head -1 | cut -d= -f2)"
             aws ecr get-login-password --region "${REGION:-ap-south-1}" | docker login --username AWS --password-stdin "${REGISTRY}"
 
+            COMPOSE="docker compose --env-file $ENV -f deploy/consolidated/docker-compose.prod.yml"
+
+            # Record what is running RIGHT NOW, before anything is pulled. These digests are
+            # what the rollback step restores if the smoke test fails; capturing them after the
+            # pull would record the new images and make rollback a no-op.
+            : > /opt/baalvion-box2/deploy/consolidated/.rollback-digests
+            for svc in app-identity app-commerce app-trade app-ecosystem app-platform app-edge-realtime; do
+              cid="$($COMPOSE ps -q "$svc" 2>/dev/null | head -1)"
+              [ -z "$cid" ] && continue
+              img="$(docker inspect --format '{{.Config.Image}}' "$cid" 2>/dev/null)"
+              dig="$(docker inspect --format '{{.Image}}' "$cid" 2>/dev/null)"
+              [ -n "$img" ] && [ -n "$dig" ] && echo "$img $dig" >> /opt/baalvion-box2/deploy/consolidated/.rollback-digests
+            done
+            echo "Pre-roll digests recorded:"; cat /opt/baalvion-box2/deploy/consolidated/.rollback-digests || true
+
+            $COMPOSE pull app-identity app-commerce app-trade app-ecosystem app-platform app-edge-realtime redis neo4j caddy
+
+      - name: Apply app-commerce service migrations (idempotent, pre-roll)
+        if: steps.gate.outputs.ready == 'true'
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
+        with:
+          host: ${{ secrets.CORE2_EC2_HOST }}
+          username: ${{ secrets.CORE2_EC2_USER }}
+          key: ${{ secrets.CORE2_EC2_SSH_KEY }}
+          # commerce-service, inventory-service, fulfillment-service, and marketplace-service
+          # all ship real sequelize-cli/custom migration files but none of them are ever
+          # invoked anywhere in this pipeline (only market-service self-migrates via
+          # sync({alter:false})) -- same class of bug as the auth-service oauth-tables fix
+          # above. Confirmed live: fulfillment-service 500s with 'relation
+          # "fulfillment.fulfillment_shipments" does not exist' on every shipments call.
+          # All four migration chains here are verified idempotent (sequelize-cli tracks
+          # SequelizeMeta; marketplace-service's custom migrate.js has no tracking table but
+          # every statement in its 4 files is additive/IF-NOT-EXISTS or DROP-POLICY-then-
+          # CREATE, so re-running the whole chain every deploy is safe).
+          #
+          # `run --rm --no-deps` against a one-off container, not `exec` into the live one:
+          # this now runs BEFORE the roll, so the container holding the new migration files
+          # does not exist yet. A throwaway container off the freshly-pulled image applies the
+          # schema the incoming release expects while the OLD release keeps serving -- the
+          # same expand-then-roll ordering the auth-service 014/016 steps above already use.
+          #
+          # Deliberately NO continue-on-error and no `|| echo` swallowing the exit code (both
+          # were here before). A half-applied schema followed by a successful roll is new code
+          # against an old schema, which is strictly worse than not deploying: fail here and
+          # the previous release stays up, untouched.
+          script: |
+            set -euo pipefail
+            cd /opt/baalvion-box2
+            ENV=deploy/consolidated/.env
+            # pull_policy is `always` on the shared node-app anchor, so `run` re-pulls; the
+            # login is per-host and expires, so re-assert it rather than lean on the last step.
+            REGION="$(grep -E '^AWS_REGION=' "$ENV" | head -1 | cut -d= -f2)"
+            REGISTRY="$(grep -E '^ECR_REGISTRY=' "$ENV" | head -1 | cut -d= -f2)"
+            aws ecr get-login-password --region "${REGION:-ap-south-1}" | docker login --username AWS --password-stdin "${REGISTRY}"
+            COMPOSE="docker compose --env-file $ENV -f deploy/consolidated/docker-compose.prod.yml"
+            for svc in commerce-service inventory-service fulfillment-service; do
+              $COMPOSE run --rm --no-deps -T -e PGSSLMODE=require app-commerce \
+                sh -lc "cd /app/Backend/services/commerce/${svc} && npm run migrate"
+            done
+            $COMPOSE run --rm --no-deps -T -e PGSSLMODE=require app-commerce \
+              sh -lc "cd /app/Backend/services/marketplace/marketplace-service && npm run migrate"
+            echo "::notice title=Migrations applied::commerce/inventory/fulfillment/marketplace schemas current."
+
+      - name: Apply cms-service + news-service migrations (idempotent, pre-roll)
+        if: steps.gate.outputs.ready == 'true'
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
+        with:
+          host: ${{ secrets.CORE2_EC2_HOST }}
+          username: ${{ secrets.CORE2_EC2_USER }}
+          key: ${{ secrets.CORE2_EC2_SSH_KEY }}
+          # Same missing-migration-step bug as app-commerce, confirmed live: GET .../cms/websites
+          # 500s with 'relation "cms.cms_websites" does not exist'. deploy-consolidated.yml (the
+          # original prod-01 workflow) has always run these two via `npm run migrate` post-roll --
+          # this box2 workflow simply never had the equivalent step. news-service also gained a
+          # sync({alter:false}) call in its own boot code earlier this session (a different,
+          # already-live fix for the same underlying gap), so this is redundant-but-harmless
+          # belt-and-suspenders for news-service specifically; it's the real fix for cms-service.
+          #
+          # Pre-roll one-off container and hard-fail, for the same reasons as the step above.
+          script: |
+            set -euo pipefail
+            cd /opt/baalvion-box2
+            ENV=deploy/consolidated/.env
+            REGION="$(grep -E '^AWS_REGION=' "$ENV" | head -1 | cut -d= -f2)"
+            REGISTRY="$(grep -E '^ECR_REGISTRY=' "$ENV" | head -1 | cut -d= -f2)"
+            aws ecr get-login-password --region "${REGION:-ap-south-1}" | docker login --username AWS --password-stdin "${REGISTRY}"
+            COMPOSE="docker compose --env-file $ENV -f deploy/consolidated/docker-compose.prod.yml"
+            $COMPOSE run --rm --no-deps -T -e PGSSLMODE=require app-platform \
+              sh -lc "cd /app/Backend/services/knowledge/cms-service && npm run migrate"
+            $COMPOSE run --rm --no-deps -T -e PGSSLMODE=require app-platform \
+              sh -lc "cd /app/Backend/services/knowledge/news-service && npm run migrate"
+            echo "::notice title=Migrations applied::cms-service + news-service schemas current."
+
+      # Only reached when every migration above succeeded -- see those steps for why.
+      - name: Roll box2
+        if: steps.gate.outputs.ready == 'true'
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
+        env:
+          PROFILES: ${{ github.event.inputs.profiles }}
+        with:
+          host: ${{ secrets.CORE2_EC2_HOST }}
+          username: ${{ secrets.CORE2_EC2_USER }}
+          key: ${{ secrets.CORE2_EC2_SSH_KEY }}
+          envs: PROFILES
+          script: |
+            set -euo pipefail
+            cd /opt/baalvion-box2
+
+            ENV=deploy/consolidated/.env
+            REGION="$(grep -E '^AWS_REGION=' "$ENV" | head -1 | cut -d= -f2)"
+            REGISTRY="$(grep -E '^ECR_REGISTRY=' "$ENV" | head -1 | cut -d= -f2)"
+            aws ecr get-login-password --region "${REGION:-ap-south-1}" | docker login --username AWS --password-stdin "${REGISTRY}"
+
             PROFILE_FLAGS=""
             for p in $PROFILES; do PROFILE_FLAGS="$PROFILE_FLAGS --profile $p"; done
 
@@ -574,20 +883,7 @@ jobs:
             # connect-timeout in the admin-web build job left its tag never pushed, which then
             # blocked redis/neo4j/caddy/everything from pulling too). Core services are always
             # required and pulled explicitly by name; admin-web can't take them down with it.
-            # Record what is running RIGHT NOW, before anything is pulled. These digests are
-            # what the rollback step restores if the smoke test fails; capturing them after the
-            # pull would record the new images and make rollback a no-op.
-            : > /opt/baalvion-box2/deploy/consolidated/.rollback-digests
-            for svc in app-identity app-commerce app-trade app-ecosystem app-platform app-edge-realtime; do
-              cid="$($COMPOSE ps -q "$svc" 2>/dev/null | head -1)"
-              [ -z "$cid" ] && continue
-              img="$(docker inspect --format '{{.Config.Image}}' "$cid" 2>/dev/null)"
-              dig="$(docker inspect --format '{{.Image}}' "$cid" 2>/dev/null)"
-              [ -n "$img" ] && [ -n "$dig" ] && echo "$img $dig" >> /opt/baalvion-box2/deploy/consolidated/.rollback-digests
-            done
-            echo "Pre-roll digests recorded:"; cat /opt/baalvion-box2/deploy/consolidated/.rollback-digests || true
-
-            $COMPOSE pull app-identity app-commerce app-trade app-ecosystem app-platform app-edge-realtime redis neo4j caddy
+            # The core images were already pulled by the sync step above.
             $COMPOSE up -d --no-build app-identity app-commerce app-trade app-ecosystem app-platform app-edge-realtime redis neo4j
 
             # Profile-gated services (payments/community/giftcard) — separate call so a
@@ -607,67 +903,6 @@ jobs:
             # container re-reads the current file. See deploy-consolidated.yml for the same fix.
             $COMPOSE up -d --no-build --no-deps --force-recreate caddy
             docker image prune -f
-
-      - name: Apply app-commerce service migrations (idempotent)
-        if: steps.gate.outputs.ready == 'true'
-        continue-on-error: true   # never block the backend roll on a migration hiccup
-        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
-        with:
-          host: ${{ secrets.CORE2_EC2_HOST }}
-          username: ${{ secrets.CORE2_EC2_USER }}
-          key: ${{ secrets.CORE2_EC2_SSH_KEY }}
-          # commerce-service, inventory-service, fulfillment-service, and marketplace-service
-          # all ship real sequelize-cli/custom migration files but none of them are ever
-          # invoked anywhere in this pipeline (only market-service self-migrates via
-          # sync({alter:false})) -- same class of bug as the auth-service oauth-tables fix
-          # above. Confirmed live: fulfillment-service 500s with 'relation
-          # "fulfillment.fulfillment_shipments" does not exist' on every shipments call.
-          # All four migration chains here are verified idempotent (sequelize-cli tracks
-          # SequelizeMeta; marketplace-service's custom migrate.js has no tracking table but
-          # every statement in its 4 files is additive/IF-NOT-EXISTS or DROP-POLICY-then-
-          # CREATE, so re-running the whole chain every deploy is safe).
-          script: |
-            set -euo pipefail
-            cd /opt/baalvion-box2
-            ENV=deploy/consolidated/.env
-            COMPOSE="docker compose --env-file $ENV -f deploy/consolidated/docker-compose.prod.yml"
-            for svc in commerce-service inventory-service fulfillment-service; do
-              $COMPOSE exec -T -e PGSSLMODE=require app-commerce \
-                sh -lc "cd /app/Backend/services/commerce/${svc} && npm run migrate" \
-                || echo "::notice::${svc} migration step failed this run -- check logs"
-            done
-            $COMPOSE exec -T -e PGSSLMODE=require app-commerce \
-              sh -lc "cd /app/Backend/services/marketplace/marketplace-service && npm run migrate" \
-              || echo "::notice::marketplace-service migration step failed this run -- check logs"
-            echo "::notice title=Migrations applied::commerce/inventory/fulfillment/marketplace schemas current on app-commerce."
-
-      - name: Apply cms-service + news-service migrations (idempotent)
-        if: steps.gate.outputs.ready == 'true'
-        continue-on-error: true   # never block the backend roll on a migration hiccup
-        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
-        with:
-          host: ${{ secrets.CORE2_EC2_HOST }}
-          username: ${{ secrets.CORE2_EC2_USER }}
-          key: ${{ secrets.CORE2_EC2_SSH_KEY }}
-          # Same missing-migration-step bug as app-commerce, confirmed live: GET .../cms/websites
-          # 500s with 'relation "cms.cms_websites" does not exist'. deploy-consolidated.yml (the
-          # original prod-01 workflow) has always run these two via `npm run migrate` post-roll --
-          # this box2 workflow simply never had the equivalent step. news-service also gained a
-          # sync({alter:false}) call in its own boot code earlier this session (a different,
-          # already-live fix for the same underlying gap), so this is redundant-but-harmless
-          # belt-and-suspenders for news-service specifically; it's the real fix for cms-service.
-          script: |
-            set -euo pipefail
-            cd /opt/baalvion-box2
-            ENV=deploy/consolidated/.env
-            COMPOSE="docker compose --env-file $ENV -f deploy/consolidated/docker-compose.prod.yml"
-            $COMPOSE exec -T -e PGSSLMODE=require app-platform \
-              sh -lc "cd /app/Backend/services/knowledge/cms-service && npm run migrate" \
-              || echo "::notice::cms-service migration step failed this run -- check logs"
-            $COMPOSE exec -T -e PGSSLMODE=require app-platform \
-              sh -lc "cd /app/Backend/services/knowledge/news-service && npm run migrate" \
-              || echo "::notice::news-service migration step failed this run -- check logs"
-            echo "::notice title=Migrations applied::cms-service + news-service schemas current on app-platform."
 
       - name: Bootstrap / repair platform super-admin (idempotent)
         if: steps.gate.outputs.ready == 'true'
