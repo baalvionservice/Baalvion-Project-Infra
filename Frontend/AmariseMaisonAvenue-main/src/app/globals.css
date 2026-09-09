@@ -1,3 +1,4 @@
+@import '@baalvion/design/base.css';
 /* NOTE: "Ivy Ora" and "Avenir" are premium foundry fonts, NOT hosted on Google Fonts —
    those @import URLs always 404'd (ORB-blocked in the browser console) and never loaded.
    Headlines fall back to the serif stack and body text to Inter (loaded via next/font in

@@ -1,81 +1,45 @@
-export const leadershipTeam = [
-  {
-    name: 'Deepak Kumar Kuldeep',
-    title: 'Founder & Chief Visionary Officer',
-    bio: 'Deepak is the driving force behind Baalvion, bringing over two decades of experience in global trade and technology. His vision is to build a transparent and efficient ecosystem for B2B commerce worldwide.',
-    imageId: 'founder-photo',
-  },
-  {
-    name: 'Tamanna shaikh',
-    title: 'Chief Executive Officer',
-    bio: "Prathamesh Pawer leads Baalvion's strategic execution and day-to-day operations. With a background in corporate strategy and finance, he is focused on scaling the company and delivering value to our stakeholders.",
-    imageId: 'tamanna-photo',
-  },
-  {
-    name: 'Dilip Kumar Kuldeep',
-    title: 'Director',
-    bio: "Prathamesh Pawer leads Baalvion's strategic execution and day-to-day operations. With a background in corporate strategy and finance, he is focused on scaling the company and delivering value to our stakeholders.",
-    imageId: 'dilip-photo',
-  },
-  {
-    name: 'Adarsh Patra',
-    title: 'Chief Executive Officer',
-    bio: "Adarsh leads Baalvion's strategic execution and day-to-day operations. With a background in corporate strategy and finance, he is focused on scaling the company and delivering value to our stakeholders.",
-    imageId: 'executive-1-photo',
-  },
-];
-export const globalLeaders = [
-  {
-    name: 'Parthamesh Pawer',
-    title: 'Co-Head of the Global Partners Office',
-    imageId: 'prathamesh-photo',
-    bio: "Prathamesh Pawer leads Baalvion's strategic execution and day-to-day operations. With a background in corporate strategy and finance, he is focused on scaling the company and delivering value to our stakeholders.",
-  },
-  {
-    name: 'Laxman Singh Champia',
-    title: 'Co-Head of Aladdin Product Engineering',
-    imageId: 'laxman-photo',
-    bio: "Laxman Singh Champia leads Baalvion's strategic execution and day-to-day operations. With a background in corporate strategy and finance, he is focused on scaling the company and delivering value to our stakeholders.",
-  },
-  {
-    name: 'Rashmika Singh',
-    title: 'Co-Head of Aladdin Product Engineering',
-    imageId: 'rashmika-photo',
-    bio: "Rashmika Singh leads Baalvion's strategic execution and day-to-day operations. With a background in corporate strategy and finance, he is focused on scaling the company and delivering value to our stakeholders.",
-  },
-  {
-    name: 'Preeti snigdha Mallick',
-    title: 'Deputy General Counsel',
-    imageId: 'preeti-photo',
-    bio: "Preeti snigdha Mallick leads Baalvion's strategic execution and day-to-day operations. With a background in corporate strategy and finance, he is focused on scaling the company and delivering value to our stakeholders.",
-  },
-  {
-    name: 'Susan Chan',
-    title: 'Head of Asia Pacific',
-    bio: "Preeti snigdha Mallick leads Baalvion's strategic execution and day-to-day operations. With a background in corporate strategy and finance, he is focused on scaling the company and delivering value to our stakeholders.",
-    imageId: '',
-  },
-  {
-    name: 'Tarek Chouman',
-    title: 'Global Head of Aladdin Client Business',
-    bio: "Preeti snigdha Mallick leads Baalvion's strategic execution and day-to-day operations. With a background in corporate strategy and finance, he is focused on scaling the company and delivering value to our stakeholders.",
+/**
+ * Real people only.
+ *
+ * Four entries here were not Baalvion's: Susan Chan, Tarek Chouman, Alex Claringbull and
+ * Samara Cohen are BlackRock executives, listed on this company's public, crawlable team
+ * page — which also emits Person structured data — under their real or near-real BlackRock
+ * titles. The site's design was modelled on BlackRock's; the leadership roster came along
+ * with it. Naming other companies' officers as your own is not a placeholder problem, so
+ * they are removed rather than relabelled.
+ *
+ * "Aladdin" is BlackRock's platform, not a Baalvion product; it has been dropped from the
+ * two engineering titles that carried it.
+ *
+ * The bios were a single template with a name swapped in, and often the wrong name — the
+ * CEO's bio described a different person entirely, as did the Director's. A wrong bio is
+ * worse than none, so `bio` is now optional and unset. Add real ones when they exist; the
+ * cards render without it.
+ *
+ * Still unresolved and deliberately left alone: two people carry the title Chief Executive
+ * Officer. That is a fact about the company, not something to guess at here.
+ */
+export type Leader = {
+  name: string;
+  title: string;
+  imageId?: string;
+  bio?: string;
+};
 
-    imageId: '',
-  },
-
-  {
-    name: 'Alex Claringbull',
-    title: 'Global Head of Index Investments',
-    bio: "Preeti snigdha Mallick leads Baalvion's strategic execution and day-to-day operations. With a background in corporate strategy and finance, he is focused on scaling the company and delivering value to our stakeholders.",
-    imageId: '',
-  },
-  {
-    name: 'Samara Cohen',
-    title: 'Global Head of Market Development',
-    bio: "Preeti snigdha Mallick leads Baalvion's strategic execution and day-to-day operations. With a background in corporate strategy and finance, he is focused on scaling the company and delivering value to our stakeholders.",
-    imageId: '',
-  },
+export const leadershipTeam: Leader[] = [
+  { name: 'Deepak Kumar Kuldeep', title: 'Founder & Chief Visionary Officer', imageId: 'founder-photo' },
+  { name: 'Tamanna shaikh',       title: 'Chief Executive Officer',           imageId: 'tamanna-photo' },
+  { name: 'Dilip Kumar Kuldeep',  title: 'Director',                          imageId: 'dilip-photo' },
+  { name: 'Adarsh Patra',         title: 'Chief Executive Officer',           imageId: 'executive-1-photo' },
 ];
+
+export const globalLeaders: Leader[] = [
+  { name: 'Parthamesh Pawer',       title: 'Co-Head of the Global Partners Office', imageId: 'prathamesh-photo' },
+  { name: 'Laxman Singh Champia',   title: 'Co-Head of Product Engineering',        imageId: 'laxman-photo' },
+  { name: 'Rashmika Singh',         title: 'Co-Head of Product Engineering',        imageId: 'rashmika-photo' },
+  { name: 'Preeti snigdha Mallick', title: 'Deputy General Counsel',                imageId: 'preeti-photo' },
+];
+
 // export const VicePersidents = [
 //   {
 //     name: 'Sasmita Gemel',

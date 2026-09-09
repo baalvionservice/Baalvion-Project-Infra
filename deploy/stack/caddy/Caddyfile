@@ -1,0 +1,587 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Edge: TLS termination + host/path routing to the app containers. Only Caddy binds
+# 80/443; every app + Redis stay internal to the compose network. Caddy auto-upgrades
+# websockets, so socket.io / realtime work through reverse_proxy unchanged.
+#
+# Routing targets are <app-container>:<service-port>. Because each app container has its
+# own network IP, the same port can appear in two apps without colliding.
+#
+# Internal service-to-service calls do NOT go through Caddy — they use Docker DNS directly
+# (e.g. http://app-commerce:3013, http://app-platform:3018), exactly as before.
+# ─────────────────────────────────────────────────────────────────────────────
+{
+	email ops@baalvion.com
+}
+
+# ── Central auth surface → shared sign-in frontend (auth-baalvion). Its own
+# /auth-bff/* rewrite proxies to auth-service internally — this domain never talked
+# to the auth-gateway BFF as a UI, that was a stopgap before auth-baalvion existed. ──
+auth.baalvion.com {
+	encode gzip zstd
+	reverse_proxy app-auth-web:3055
+}
+
+# ── Jobs Portal pilot (Next.js standalone), test subdomain pending sign-off on the
+# real jobs.baalvion.com cutover. *.baalvion.com already passes auth-baalvion's
+# safeReturnTo() allow-list, so sign-in works correctly here (it can't over the bare
+# IP:port this replaces — no HTTPS, no allow-listed host).
+# ── World Shipping Directory (public reference property) ─────────────────────
+# One Next process (app-gti-web) serves this AND trade.baalvion.com; src/middleware.ts
+# rewrites this host onto /shipping-directory and redirects the internal prefix away, so
+# there is exactly one canonical URL per page. Only ships is routed here for now — the rest
+# of the trade app needs a Prisma database (57 models) this box does not have yet.
+#
+# The app sets Cache-Control: public, s-maxage=604800 on these responses. Cloudflare will
+# NOT honour that for HTML without a Cache Rule on this hostname (Eligible for cache,
+# Edge TTL: respect origin) — without the rule every crawler hit lands on 2 vCPU.
+ships.baalvion.com {
+	encode gzip zstd
+
+	# Cloudflare only caches on `Vary: Accept-Encoding`. Next's App Router emits
+	# `Vary: rsc, next-router-state-tree, …` for RSC negotiation, which made every HTML
+	# response ineligible (cf-cache-status: DYNAMIC) even with a Cache Rule in place. It has
+	# to be rewritten HERE rather than in middleware, because Next sets its own Vary after
+	# middleware has run.
+	#
+	# Narrowing it is safe because Next distinguishes RSC requests by URL, not just header:
+	# they carry ?_rsc=<hash>, so a URL-keyed CDN cache can never hand an RSC payload to a
+	# document request. Those are matched first and marked no-store so no edge holds one.
+	@rsc query _rsc=*
+	handle @rsc {
+		reverse_proxy app-gti-web:9003 {
+			header_down Cache-Control "private, no-store"
+		}
+	}
+
+	handle {
+		reverse_proxy app-gti-web:9003 {
+			header_down Vary "Accept-Encoding"
+		}
+	}
+}
+
+jobs-test.baalvion.com {
+	encode gzip zstd
+	reverse_proxy app-jobs-portal:3026
+}
+
+# ── auth-service direct surface (consumer social login: Google/Facebook/Discord) ──
+# Sites that talk to auth-service directly (no gateway) reach it here via their own
+# same-origin /auth-bff/* rewrite, exactly like Amarisé — see auth-service's
+# oauthController.js. Keeps the OAuth refresh cookie first-party to the calling site,
+# since the browser only ever sees <site>/auth-bff/*, never this hostname directly.
+auth-api.baalvion.com {
+	encode gzip zstd
+	reverse_proxy app-identity:3001
+}
+
+# ── Consumer + admin BFF → edge-realtime app (proxy-service) ──
+# The session-gated BFF answers /api/* by default, but two surfaces MUST be reachable without a
+# session for the public Vercel sites to work — public CMS delivery and the PSP webhook/initiate
+# surface. These carve-outs are matched first; everything else falls through to the BFF unchanged.
+api.baalvion.com {
+	encode gzip zstd
+
+	# Public CMS delivery (UNAUTHENTICATED) — the live sites (imperialpedia, law, about, …) fetch
+	# published content from api.baalvion.com/api/v1/public/*. cms-service is in app-platform:3018.
+	# The per-tenant key vault (/api/v1/internal/*) is NEVER exposed here — deny it explicitly.
+	@cms_internal path /api/v1/internal/* /internal/*
+	handle @cms_internal {
+		respond "Forbidden" 403
+	}
+	@cms_public path /api/v1/public /api/v1/public/*
+	handle @cms_public {
+		reverse_proxy app-platform:3018
+	}
+
+	# Public CMS media delivery (UNAUTHENTICATED) — featuredImage/generated-art files referenced
+	# by published content must be fetchable by anonymous site visitors and social/search
+	# crawlers, not just by logged-in admin sessions. cms-service serves UPLOAD_DIR statically
+	# at /uploads/** (see mediaService.js).
+	@cms_media path /uploads/*
+	handle @cms_media {
+		reverse_proxy app-platform:3018
+	}
+
+	# Public analytics collector (UNAUTHENTICATED first-party beacon). The live sites load the
+	# tracker (/api/v1/collect.js) and POST page/scroll/vitals/ecommerce events to /api/v1/collect;
+	# the OpenAPI contract is public too. The reporting API (/api/v1/cms/.../analytics/*) stays
+	# auth-gated (reached via the admin BFF), and the vault (/api/v1/internal/*) is denied above.
+	@cms_collect path /api/v1/collect /api/v1/collect.js /api/v1/analytics/openapi.json
+	handle @cms_collect {
+		reverse_proxy app-platform:3018
+	}
+
+	# Public lead-capture (UNAUTHENTICATED) — separately-deployed Vercel frontends (Mining,
+	# about-baalvion, Imperialpedia, …) have no shared secret with the backend network, so their
+	# contact-form API routes call this instead of the internalAuth-gated /v1/notifications/*.
+	# notification-service validates against a hardcoded site->recipient allowlist (never a
+	# caller-supplied address) and rate-limits per IP — see controller/publicController.js.
+	@lead_public path /v1/public/lead
+	handle @lead_public {
+		reverse_proxy app-edge-realtime:3031
+	}
+
+	# Public World Shipping Directory (UNAUTHENTICATED) — ships.baalvion.com reads the
+	# reference registry from here. trade-service (app-commerce:3025) owns the `tradeops`
+	# schema; these routes carry no auth and no tenant data by design, which is why
+	# routes/shippingDirectoryRoutes.js mounts them under /public/ specifically — the absence
+	# of authMiddleware there is deliberate and greppable. Nothing else on trade-service is
+	# exposed: only this prefix is proxied, so the authenticated trade surface stays dark.
+	@shipping_public path /v1/public/shipping /v1/public/shipping/*
+	handle @shipping_public {
+		reverse_proxy app-commerce:3025
+	}
+
+	# Payment public surface (Java PSP gateway, app-payments:3015 — runs under --profile payments):
+	# initiate a charge, read its status, receive provider webhooks (HMAC-verified inside the svc).
+	# Money-OUT (refund/capture) + actuator are denied at the edge (listed first → first match wins).
+	@pay_locked path /v1/gateway/payments/*/refund /v1/gateway/payments/*/capture /actuator/*
+	handle @pay_locked {
+		respond "Forbidden" 403
+	}
+	@pay path /v1/gateway/payments /v1/gateway/payments/* /v1/gateway/webhooks/*
+	handle @pay {
+		reverse_proxy app-payments:3015
+	}
+
+	# Public commerce storefront delivery (UNAUTHENTICATED, read-only) -- real-goods marketplace
+	# frontends (e.g. community.marketunderworld.com) fetch published/public catalog data from
+	# api.baalvion.com/api/v1/commerce/storefront/:storeId/*. commerce-service already mounts this
+	# router without authMiddleware (routes/storefrontRoutes.js) since it is public by design;
+	# this carve-out just exposes it past the session-gated BFF below, same pattern as CMS public.
+	@commerce_storefront path /api/v1/commerce/storefront /api/v1/commerce/storefront/*
+	handle @commerce_storefront {
+		reverse_proxy app-commerce:3012
+	}
+	@commerce_markets path /api/v1/commerce/markets
+	handle @commerce_markets {
+		reverse_proxy app-commerce:3012
+	}
+
+	# order-service (cart/checkout/payment/returns/appointments/wishlists/consignments — Amarisé
+	# and any other storefront's buy-side) — same container as commerce-service, DIFFERENT port
+	# (app-commerce:3013, not 3012). Guest checkout uses X-Cart-Session (no bearer token) and
+	# logged-in customers use their own JWT, so like community-service above this does its own
+	# optionalAuth/authMiddleware verification per-route (routes/v1.js) rather than needing the
+	# session-gated BFF to translate anything. Without this carve-out NOTHING under /orders,
+	# /wishlists, /consignments or /appointments is reachable from the public internet at all —
+	# checkout, cart, and payment-gateway webhooks (Razorpay/PayU call back into
+	# /api/v1/orders/webhooks/*) all 404/401 through the BFF today.
+	@order_service path /api/v1/orders /api/v1/orders/* /api/v1/wishlists/* /api/v1/consignments/* /api/v1/appointments/*
+	handle @order_service {
+		reverse_proxy app-commerce:3013
+	}
+
+	# crm-service PUBLIC storefront surface (private sales inquiries, VIP wallet/membership,
+	# the general contact-form support tickets) — Amarisé's concierge flow. Same per-route
+	# optionalAuth/authMiddleware pattern as order-service above (crm-service verifies every
+	# request itself; nothing here trusts the edge). The staff/admin-console view of this same
+	# service already exists at admin.baalvion.com/api-bff/ecosystem/crm/* — this is the
+	# SEPARATE public entry point real customers' browsers actually call. Without this,
+	# createInquiry/getMyVipClient/createSupportTicket etc. all fail from the live storefront.
+	@crm_service path /api/v1/crm /api/v1/crm/*
+	handle @crm_service {
+		reverse_proxy app-ecosystem:3063
+	}
+
+	# Market Underworld community-service. VERIFIED against routes/v1.js: every one of its
+	# sub-routers (communitiesRoutes, adminRoutes, billingRoutes, chatRoutes, etc.) mounts
+	# under router.use('/community', ...) — so the real prefix IS /api/v1/community/*, exactly
+	# what this carve-out already had. (An earlier pass here mistakenly "fixed" this to
+	# /api/v1/public/communities after grepping only the leaf route files and missing that
+	# extra /community nesting level — reverted.) admin/* and billing/* live under this SAME
+	# /community prefix (e.g. /api/v1/community/admin/flags), so they must be denied BEFORE
+	# the general carve-out below (first matching handle wins) — billing/fulfill is
+	# requireInternalSecret (server-to-server only), and admin/* needs a real session, same
+	# reasoning as the payment refund/capture deny-list above.
+	@community_locked path /api/v1/community/admin/* /api/v1/community/billing/*
+	handle @community_locked {
+		respond "Forbidden" 403
+	}
+	@community_api path /api/v1/community/* /api/v1/community
+	handle @community_api {
+		reverse_proxy app-community:3064
+	}
+
+	# Market Underworld giftcard-service. VERIFIED against routes/v1.js: every sub-router
+	# (catalogRoutes, ordersRoutes, billingRoutes, adminRoutes) mounts under
+	# router.use('/giftcards', ...) — so /api/v1/giftcards/* was already correct (same
+	# earlier-mistake-then-revert as community-service above). admin/* and billing/* denied
+	# first, same reasoning.
+	@giftcard_locked path /api/v1/giftcards/admin/* /api/v1/giftcards/billing/*
+	handle @giftcard_locked {
+		respond "Forbidden" 403
+	}
+	@giftcard_api path /api/v1/giftcards/* /api/v1/giftcards
+	handle @giftcard_api {
+		reverse_proxy app-giftcard:3065
+	}
+
+	# Public OAuth2/OIDC provider surface (oauth-service, UNAUTHENTICATED by design) -- exposes
+	# the actual authorization-code flow endpoints (/oauth/authorize, /oauth/token, /oauth/userinfo)
+	# for relying parties like the NodeBB community forum (nodebb-plugin-sso-oauth2-multiple).
+	# Distinct from the session-gated /api-bff/identity/oauth/* carve-out below, which is only for
+	# the admin console's client-management API (POST/GET/DELETE /v1/clients). Path-prefixed
+	# (not its own subdomain) to avoid provisioning new DNS/TLS just for this.
+	handle_path /oidc-provider/* {
+		reverse_proxy app-identity:3023
+	}
+
+	# CTM (controlthemarket.com) login BFF. The Vercel FE proxies /auth-bff/* to the code-default
+	# AUTH_PROXY_TARGET = api.baalvion.com/api/v1/identity/auth/v1/auth, which otherwise falls into
+	# the proxy-service BFF below and 401s ("No bearer token"). Route it to the identity auth-gateway
+	# (app-identity:3026) instead: strip the namespaced prefix, remap onto /auth/* (login|refresh|me|
+	# logout) — the gateway BFF that issues the session cookies the FE expects.
+	@identity_auth_bff path /api/v1/identity/auth/v1/auth /api/v1/identity/auth/v1/auth/*
+	handle @identity_auth_bff {
+		uri replace /api/v1/identity/auth/v1/auth /auth
+		reverse_proxy app-identity:3026
+	}
+
+	# Law Elite Network (lawelitenetwork.com) public API. The frontend calls
+	# api.baalvion.com/api/v1/knowledge/law/v1/*; law-service (app-platform:3015) mounts its
+	# own router at /v1 (and /api/v1) and gates each route individually (most lawyer directory/
+	# registration/public routes need no session at all). Without this carve-out the request
+	# falls through to the proxy-service BFF below, which blanket-requires a bearer token and
+	# 401s ("No bearer token provided") before law-service is ever reached.
+	@knowledge_law path /api/v1/knowledge/law /api/v1/knowledge/law/*
+	handle @knowledge_law {
+		uri strip_prefix /api/v1/knowledge/law
+		reverse_proxy app-platform:3015
+	}
+
+	# Imperialpedia public API. The frontend calls
+	# api.baalvion.com/api/v1/knowledge/imperialpedia/api/v1/*; imperialpedia-service
+	# (app-platform:3004) mounts its own router at /api/v1 and gates each route
+	# individually (assets/entities/world-config reads need no session; only
+	# writes like POST /assets require authMiddleware internally). Without this
+	# carve-out the request falls through to the proxy-service BFF below, which
+	# blanket-requires a bearer token and 401s before imperialpedia-service is
+	# ever reached — this was silently missing since the public market-data
+	# pipeline shipped, causing /market-news, /world and /markets/quote/* to hang
+	# (the frontend's fetch calls had no valid public route to resolve against).
+	@knowledge_imperialpedia path /api/v1/knowledge/imperialpedia /api/v1/knowledge/imperialpedia/*
+	handle @knowledge_imperialpedia {
+		uri strip_prefix /api/v1/knowledge/imperialpedia
+		reverse_proxy app-platform:3004
+	}
+
+	# cms-service public delivery, namespaced form. The frontends' NEXT_PUBLIC_CMS_PUBLIC_URL
+	# (search-service.ts, cms-public.ts, worldFeed.ts, …) calls
+	# api.baalvion.com/api/v1/knowledge/cms/api/v1/public/*; cms-service (app-platform:3018)
+	# mounts its public router at /api/v1/public (see routes/v1.js), unauthenticated by design.
+	# Same class of gap as @knowledge_law and @knowledge_imperialpedia above — without this
+	# carve-out the request falls through to the proxy-service BFF, which blanket-requires a
+	# bearer token and 401s ("No bearer token provided") before cms-service is ever reached,
+	# silently dropping every article/news result (e.g. site search never finding CMS content).
+	@knowledge_cms path /api/v1/knowledge/cms /api/v1/knowledge/cms/*
+	handle @knowledge_cms {
+		uri strip_prefix /api/v1/knowledge/cms
+		reverse_proxy app-platform:3018
+	}
+
+	# Baalvion Insiders public directory (www.marketunderworld.com). The Vercel FE
+	# rewrites /insiders-api/* and /sitemap*.xml onto api.baalvion.com/api/v1/insiders/*.
+	# Public reads deliberately BYPASS the auth-gateway: a logged-out visitor has no
+	# session cookie or CSRF token, so the gateway BFF would 401 every crawler. Same
+	# carve-out shape as the law-service block above. insiders-service gates itself:
+	# /v1/public/* is open by design, everything else needs a signed gateway identity.
+	@insiders_public path /api/v1/insiders /api/v1/insiders/*
+	handle @insiders_public {
+		uri strip_prefix /api/v1/insiders
+		reverse_proxy app-insiders:3050
+	}
+
+	# proxy-service PUBLIC marketing surface (proxy.baalvionstack.com's pricing/status pages).
+	# routes/platformRoutes.js mounts /public/* ABOVE its router.use(authMiddleware, ...) line, so
+	# these are unauthenticated by design — but without this carve-out the request fell through to
+	# the BFF below, which blanket-requires a bearer token and 401d. The browser reports that as a
+	# CORS failure (a 401 carrying no Access-Control-Allow-Origin header looks like CORS, not like
+	# auth), so the pricing page silently rendered no plans at all.
+	# Scoped to /v1/public/* only — the authenticated proxy surface stays behind the BFF.
+	@proxy_public_marketing path /api/v1/infrastructure/proxy/v1/public/*
+	handle @proxy_public_marketing {
+		uri strip_prefix /api/v1/infrastructure/proxy
+		reverse_proxy app-edge-realtime:4000
+	}
+
+	# Everything else → the consumer/admin BFF (proxy-service, session-gated) — unchanged.
+	handle {
+		reverse_proxy app-edge-realtime:4000
+	}
+}
+
+# ── Market Underworld community forum → NodeBB (dedicated Postgres, separate
+# entity from the main frontend, per owner directive). ──
+forum.marketunderworld.com {
+	encode gzip zstd
+	reverse_proxy nodebb:4567
+}
+
+# ── Realtime websocket stream → edge-realtime app (socket.io fan-out) ──
+ws.baalvion.com {
+	reverse_proxy app-edge-realtime:3040
+}
+
+# ── Admin platform → admin-web console, with auth + CMS BFF carve-outs ──
+# The browser only ever sees same-origin /auth-bff + /api-bff; Caddy terminates them at the
+# edge so the httpOnly refresh cookie + the Bearer the console holds reach the right backend.
+# Everything else is the Next.js standalone admin console (admin-web:3030).
+admin.baalvion.com {
+	encode gzip zstd
+	# Auth BFF shim → identity app (matches the proven core-stack /auth-bff → /v1/auth rewrite).
+	handle_path /auth-bff/* {
+		rewrite * /v1/auth{uri}
+		reverse_proxy app-identity:3001
+	}
+	# CMS admin API BFF: the admin image calls /api-bff/knowledge/cms/api/v1/* with the Bearer it
+	# already holds; terminate at the edge → cms-service (strips the prefix → /api/v1/*).
+	handle_path /api-bff/knowledge/cms/* {
+		reverse_proxy app-platform:3018
+	}
+	# Platform admin API BFF: the admin image calls /api-bff/platform/admin/v1/* (dashboard
+	# stats, users, orgs, sessions, audit-logs). handle_path strips the prefix → admin-service
+	# receives /v1/* (it mounts at /v1). Without this the console fell back to the public
+	# api.baalvion.com path, which the edge BFF does not route → 404 "Route not found".
+	handle_path /api-bff/platform/admin/* {
+		reverse_proxy app-platform:3021
+	}
+	# Identity session API BFF: the admin image calls /api-bff/identity/session/v1/* (active
+	# sessions + session stats). session-service mounts at /v1 → strip prefix → /v1/*.
+	handle_path /api-bff/identity/session/* {
+		reverse_proxy app-identity:3022
+	}
+	# ── Per-domain service consoles (same-origin /api-bff/<domain>/<service>) ──
+	# Each strips its /api-bff/<domain>/<service> prefix; the service then receives its own
+	# mount (/api/v1 or /v1) + endpoint, exactly as the local /__api/<service> proxy does.
+	# Ports are the pm2-assigned ports — some are remapped from the standalone default
+	# (rbac 3055→3053, marketplace 3062→3060). Without these the console fell back to
+	# api.baalvion.com, which the edge BFF does not route → 404 "Route not found".
+	handle_path /api-bff/identity/oauth/* {
+		reverse_proxy app-identity:3023
+	}
+	handle_path /api-bff/identity/rbac/* {
+		reverse_proxy app-identity:3053
+	}
+	handle_path /api-bff/platform/dashboard/* {
+		reverse_proxy app-platform:3009
+	}
+	handle_path /api-bff/knowledge/imperialpedia/* {
+		reverse_proxy app-platform:3004
+	}
+	handle_path /api-bff/knowledge/law/* {
+		reverse_proxy app-platform:3015
+	}
+	handle_path /api-bff/infrastructure/audit/* {
+		reverse_proxy app-platform:3032
+	}
+	handle_path /api-bff/infrastructure/notification/* {
+		reverse_proxy app-edge-realtime:3031
+	}
+	handle_path /api-bff/commerce/commerce/* {
+		reverse_proxy app-commerce:3012
+	}
+	# order-service admin surface (order/cart/return/appointment oversight — authMiddleware-gated
+	# internally). Same app-commerce container, port 3013 not 3012 — see the public order-service
+	# carve-out above for why these are different ports on one container.
+	handle_path /api-bff/commerce/orders/* {
+		reverse_proxy app-commerce:3013
+	}
+	handle_path /api-bff/commerce/market/* {
+		reverse_proxy app-commerce:3007
+	}
+	handle_path /api-bff/commerce/inventory/* {
+		reverse_proxy app-commerce:3014
+	}
+	handle_path /api-bff/commerce/fulfillment/* {
+		reverse_proxy app-commerce:3016
+	}
+	handle_path /api-bff/ecosystem/jobs/* {
+		reverse_proxy app-ecosystem:3002
+	}
+	handle_path /api-bff/ecosystem/mining/* {
+		reverse_proxy app-ecosystem:3003
+	}
+	handle_path /api-bff/ecosystem/real-estate/* {
+		reverse_proxy app-ecosystem:3005
+	}
+	handle_path /api-bff/ecosystem/brand-connector/* {
+		reverse_proxy app-ecosystem:3006
+	}
+	handle_path /api-bff/ecosystem/ir/* {
+		reverse_proxy app-ecosystem:3008
+	}
+	handle_path /api-bff/ecosystem/about/* {
+		reverse_proxy app-ecosystem:3010
+	}
+	handle_path /api-bff/ecosystem/ctm/* {
+		reverse_proxy app-ecosystem:3017
+	}
+	handle_path /api-bff/ecosystem/crm/* {
+		reverse_proxy app-ecosystem:3063
+	}
+	# community-service is a standalone deployment (own container, app-community:3064) —
+	# not part of the shared app-ecosystem pm2 group, which is memory-capped (see
+	# deploy/consolidated/pm2/ecosystem.config.js). This is the central admin console's
+	# cross-community oversight view, distinct from the public/authed carve-outs above
+	# that the market-underworld frontend itself calls.
+	handle_path /api-bff/ecosystem/community/* {
+		reverse_proxy app-community:3064
+	}
+	handle_path /api-bff/marketplace/marketplace/* {
+		reverse_proxy app-commerce:3060
+	}
+	# news-service's internal RS256 admin surface (/v1/admin/*) — distinct from the public,
+	# API-key-gated news.baalvion.com site block below (that one serves external consumers).
+	handle_path /api-bff/knowledge/news/* {
+		reverse_proxy app-platform:3045
+	}
+	# CMS public delivery bypasses the session gateway → knowledge/cms-service.
+	handle /api/v1/public/* {
+		reverse_proxy app-platform:3018
+	}
+	# Everything else → the admin console (Next.js standalone). app-platform:3021 (admin-service
+	# API) stays internal — it is NOT a browser surface and 404s on GET /.
+	reverse_proxy admin-web:3030
+}
+
+# ── Direct service APIs (gateway-signed): add one block per public surface as needed,
+#    always pointing at <app>:<port>. Examples:
+#      commerce.baalvion.com   -> app-commerce:3013   (order-service)
+#      trade.baalvion.com      -> app-trade:3052      (order-execution-service)
+#      ir.baalvion.com         -> app-ecosystem:3008  (ir-service)
+
+# ── News Intelligence public API → news-service. Called server-side by the
+# baalvion-intelligence Cloudflare Worker (signal.baalvion.com); each request carries its
+# own Authorization: Bearer <key>, verified by news-service itself against developer-service
+# (see routes/v1: /v1/news, /v1/stats). No session/BFF gating needed at the edge.
+news.baalvion.com {
+	encode gzip zstd
+	reverse_proxy app-platform:3045
+}
+
+# ── Developer key management + billing checkout/webhook → developer-service. Called server-side
+# by the baalvion-intelligence Cloudflare Worker (/api/keys/*, /api/billing/* route handlers
+# forward the signed-in user's own RS256 access token; developer-service verifies it directly —
+# no BFF gating needed) and by Razorpay (/v1/billing/razorpay-webhook, authenticated by
+# X-Razorpay-Signature, not a session).
+developer-api.baalvion.com {
+	encode gzip zstd
+	reverse_proxy app-platform:3042
+}
+
+# ── Amarisé Maison Avenue storefront → app-amarise-web ────────────────────────
+# Cloudflare-proxied (orange cloud), same as ships.baalvion.com. The Vary rewrite below
+# is required for CF to cache at all — see the ships block for the full reasoning: Next's
+# App Router emits `Vary: rsc, next-router-state-tree, …`, which makes every HTML response
+# cf-cache-status: DYNAMIC. RSC payloads carry ?_rsc=<hash> so a URL-keyed edge cache can
+# never hand one to a document request; they are matched first and marked no-store.
+www.amarisemaisonavenue.com {
+	encode gzip zstd
+
+	@rsc query _rsc=*
+	handle @rsc {
+		reverse_proxy app-amarise-web:9004 {
+			header_down Cache-Control "private, no-store"
+		}
+	}
+
+	handle {
+		reverse_proxy app-amarise-web:9004 {
+			header_down Vary "Accept-Encoding"
+		}
+	}
+}
+
+# Apex → www. Canonical host is www (NEXT_PUBLIC_SITE_URL is baked to match), so the apex
+# only ever redirects; it never proxies, which keeps one canonical origin for SEO.
+amarisemaisonavenue.com {
+	redir https://www.amarisemaisonavenue.com{uri} permanent
+}
+
+# CanWeMarry — community support platform. Server-side rendering talks to the gateway over
+# the docker network, so nothing here needs to reach the public API host.
+canwemarry.baalvion.com {
+	encode gzip zstd
+	reverse_proxy app-canwemarry-web:3071
+}
+
+# ── Baalvion Insiders — the public investor/company directory (www.marketunderworld.com).
+#    Moved off Vercel: that account is over its free resource limits and every deploy was
+#    rate limited. The API lives on this box, so /insiders-api is a local container hop
+#    rather than a round trip to the public internet.
+#
+#    These rules replace the `rewrites` block in the app's vercel.json. Change one and you
+#    must change the other while both deployments exist, or the two targets drift.
+(insiders_site) {
+	encode gzip zstd
+
+	# Anonymous directory reads. Same-origin, so there is no CORS preflight and the browser
+	# never learns the API host. insiders-service gates itself: /v1/public/* is open by
+	# design, everything else requires a signed gateway identity.
+	handle_path /insiders-api/* {
+		reverse_proxy app-insiders:3050
+	}
+
+	# Authenticated calls -> the auth-gateway BFF, which serves these under /auth/*.
+	handle_path /auth-bff/* {
+		reverse_proxy app-identity:3026
+	}
+
+	# Sitemap index, then its child sitemaps. Separate files because the directory is past
+	# the 50,000-URL-per-file limit.
+	@sitemap_index path /sitemap.xml
+	handle @sitemap_index {
+		rewrite * /v1/public/sitemap.xml
+		reverse_proxy app-insiders:3050
+	}
+	@sitemap_section path_regexp sm ^/sitemap-([a-z0-9-]+)\.xml$
+	handle @sitemap_section {
+		rewrite * /v1/public/sitemap-{re.sm.1}.xml
+		reverse_proxy app-insiders:3050
+	}
+
+	# Crawlers get a real document per URL. index.html is a 2.8KB shell that returns the
+	# same <title> for every one of ~318,000 routes — invisible to any crawler that does not
+	# execute JavaScript, which is most of the AI ones.
+	@bot {
+		not path /assets/*
+		header_regexp User-Agent (?i)(googlebot|bingbot|slurp|duckduckbot|duckassistbot|baiduspider|yandex|applebot|gptbot|oai-searchbot|chatgpt-user|claudebot|anthropic-ai|claude-web|claude-searchbot|perplexitybot|perplexity-user|ccbot|google-extended|meta-externalagent|amazonbot|bytespider|youbot|mistralai-user|cohere-ai|diffbot|petalbot|timpibot|facebookexternalhit|twitterbot|linkedinbot|slackbot|discordbot|whatsapp|telegrambot)
+	}
+	handle @bot {
+		rewrite * /v1/public/render?path={path}
+		reverse_proxy app-insiders:3050
+	}
+
+	# The SPA itself. nginx serves index.html for any unmatched path.
+	handle {
+		reverse_proxy app-insiders-web:8080
+	}
+}
+
+# Plain-HTTP twin used to prove the routing above before DNS moves — Caddy cannot obtain a
+# certificate for a hostname that still resolves elsewhere. Reached with curl --resolve.
+# DELETE once the cutover is verified.
+http://insiders-test.baalvion.com {
+	import insiders_site
+}
+
+www.marketunderworld.com {
+	import insiders_site
+}
+
+# Apex -> www. The bare domain had NO DNS record at all, so it returned 525; the record now
+# points at this box (same as www). Redirect rather than a second copy of the site, so there is
+# one canonical host. Same pattern as amarisemaisonavenue.com above.
+marketunderworld.com {
+	redir https://www.marketunderworld.com{uri} permanent
+}
+
+# Baalvion Stack — the public product index (baalvionstack.com).
+# NOTE: proxy.baalvionstack.com is NOT served here. It is a separate product on Vercel via its
+# own CNAME, so this block names only the apex and www and must never be widened to a wildcard.
+baalvionstack.com, www.baalvionstack.com {
+	encode gzip zstd
+	reverse_proxy app-stack-web:3072
+}

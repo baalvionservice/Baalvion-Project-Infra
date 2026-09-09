@@ -1,0 +1,102 @@
+/*
+ * @baalvion/design — base layer.
+ *
+ * Import once at the top of each app's global stylesheet, above the @tailwind
+ * directives (postcss-import hoists it there regardless):
+ *   @import '@baalvion/design/base.css';
+ *
+ * Deliberately not wrapped in @layer base — the import is hoisted above
+ * @tailwind base, so the layer would have nothing to join. Every selector here
+ * is element-level, which utility classes outrank on specificity anyway.
+ *
+ * Sets no colours. Everything here is either a defect fix (focus rings, tap
+ * highlight, motion safety) or a typographic refinement that applies whatever
+ * the palette is.
+ */
+
+html {
+  -webkit-text-size-adjust: 100%;       /* stop iOS inflating text in landscape */
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-synthesis-weight: none;          /* never fake a bold that isn't loaded */
+}
+
+/* Headings set tight and balanced; the browser default is neither. */
+h1, h2, h3, h4 {
+  text-wrap: balance;
+  letter-spacing: -0.02em;
+}
+p, li {
+  text-wrap: pretty;                    /* no single-word last lines */
+}
+
+/* Keyboard focus must be visible everywhere. Mouse focus must not be. */
+:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* The grey flash on tap that makes a site feel like a 2012 web view. */
+a, button, [role='button'] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Media should never blow out its container or shift layout on load. */
+img, video, svg, canvas {
+  max-width: 100%;
+  height: auto;
+}
+img {
+  vertical-align: middle;
+}
+
+/* Anchored sections shouldn't hide under a sticky header. */
+:target {
+  scroll-margin-top: 6rem;
+}
+
+/* Long words and URLs break instead of forcing a horizontal scrollbar. */
+p, h1, h2, h3, h4, li, td {
+  overflow-wrap: break-word;
+}
+
+/* Tables of figures line up. */
+td, th {
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+ * Honour the OS setting. Users who ask for less motion get none — this is an
+ * accessibility requirement, not a preference, and the repo had no global
+ * handling for it.
+ */
+@media (prefers-reduced-motion: reduce) {
+html {
+  scroll-behavior: auto;
+}
+*, *::before, *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+}
+
+/* Printed pages shouldn't carry navigation furniture. */
+@media print {
+[data-bv-noprint], nav, footer[role='contentinfo'] {
+  display: none !important;
+}
+body {
+  background: #fff !important;
+  color: #000 !important;
+}
+}

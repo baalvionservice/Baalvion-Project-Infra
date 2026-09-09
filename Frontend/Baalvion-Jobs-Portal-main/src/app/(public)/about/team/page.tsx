@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TeamGrid } from '@/modules/team/components/TeamGrid';
-import { globalLeaders, leadershipTeam } from '@/lib/data';
+import { globalLeaders, leadershipTeam, type Leader } from '@/lib/data';
 import { Separator } from '@/components/ui/separator';
 import { TeamMember } from '@/lib/team.data';
 import {
@@ -109,14 +109,15 @@ const relatedLinks = [
   { href: '/placement', label: 'Placement Programs' },
 ];
 
-// Convert data.ts format to TeamMember format
-const convertToTeamMember = (member: any, category: string): TeamMember => {
+// Bios are optional on Leader — an absent one renders as an empty string rather
+// than the word "undefined".
+const convertToTeamMember = (member: Leader, category: string): TeamMember => {
   return {
     id: member.name.toLowerCase().replace(/\s+/g, '-'),
     name: member.name,
     role: member.title,
-    tagline: member.position || category,
-    bio: member.bio,
+    tagline: category,
+    bio: member.bio ?? '',
     expertise: [],
     socials: {
       linkedin: '',
