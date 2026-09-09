@@ -1,0 +1,272 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# End-to-end journeys and the load smoke gate.
+#
+# e2e/playwright.config.ts and `pnpm run test:e2e` predate this file by a long
+# way, but nothing in CI ever ran them, so the specs were free to rot. This
+# workflow runs the one journey that stands up its own dependencies from scratch:
+# the IR business-onboarding funnel, browser -> Next BFF -> ir-service -> Postgres
+# and back. See e2e/ir-business-onboarding.spec.ts for what each hop proves.
+#
+# The other three specs in e2e/ are NOT run here. about.spec.ts and jobs.spec.ts
+# need about-baalvion/jobs-portal running (jobs-service also wants Redis queues and
+# Elasticsearch), and canwemarry-http-semantics.spec.ts needs the Go gateway on
+# :3099. Wiring those is a follow-up per stack, not a reason to keep zero coverage.
+# ─────────────────────────────────────────────────────────────────────────────
+name: E2E & Performance
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Least-privilege default token; nothing here needs more.
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: '24'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: E2E Journey (IR business onboarding)
+    runs-on: ubuntu-latest
+    # The Next production build is the long pole (~2 min warm, more from cold), and
+    # the browser install adds a minute. 30 leaves room without letting a hung
+    # service burn an hour.
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: baalvion_db
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s
+          --health-timeout 5s --health-retries 12
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 5s
+          --health-timeout 5s --health-retries 12
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: '5432'
+      DB_NAME: baalvion_test
+      DB_USER: baalvion
+      DB_PASSWORD: baalvion_dev_pass
+      REDIS_URL: redis://127.0.0.1:6379
+      NODE_ENV: test
+      JWT_ACCESS_SECRET: ci-dummy-access-secret-not-used-for-real-auth
+      JWT_REFRESH_SECRET: ci-dummy-refresh-secret-not-used-for-real-auth
+      # @baalvion/auth-node's buildPgSsl engages TLS whenever NODE_ENV is production.
+      # The service container speaks plaintext, so pin it off rather than relying on
+      # NODE_ENV staying `test` through every step.
+      DB_SSL: 'false'
+      IR_WEB_URL: http://127.0.0.1:3027
+      IR_SERVICE_URL: http://127.0.0.1:3008
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6.0.10
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install Workspace Dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Shared @baalvion/* packages publish types and dist/ from tsup output, which is
+      # gitignored. ir-service requires @baalvion/auth-node and @baalvion/telemetry at boot.
+      - name: Build Workspace Packages
+        run: pnpm --filter "./Backend/packages/*" run build
+
+      # Several suites expect this role/database rather than the default postgres one.
+      - name: Provision the test role and database
+        run: |
+          PGPASSWORD=postgres psql -h 127.0.0.1 -U postgres -c \
+            "CREATE ROLE baalvion LOGIN PASSWORD 'baalvion_dev_pass' SUPERUSER;" || true
+          PGPASSWORD=postgres psql -h 127.0.0.1 -U postgres -c \
+            "CREATE DATABASE baalvion_test OWNER baalvion;" || true
+
+      # ir-service's config refuses to boot without JWT_PUBLIC_KEY (auth-node requireEnv).
+      # The onboarding intake itself is public, but the module is loaded either way.
+      - name: Generate dev RS256 keypair
+        run: node scripts/gen-dev-jwt-keys.mjs
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      # --no-lint because ci.yml's lint-and-typecheck already gates lint through the
+      # ratchet in scripts/lint-ratchet.mjs. Without it this build fails on IR's existing
+      # baselined debt, which would make the e2e gate red for reasons that are not e2e.
+      - name: Build the IR frontend
+        working-directory: Frontend/IR-Baalvion-main
+        env:
+          NODE_ENV: production
+        run: pnpm exec next build --no-lint
+
+      # ir-service creates schema `ir` and its tables via sequelize.sync() on boot, so
+      # there is no migration or fixture step — an empty database is the starting state.
+      - name: Start ir-service
+        working-directory: Backend/services/ecosystem/ir-service
+        env:
+          PORT: '3008'
+        run: |
+          JWT_PUBLIC_KEY="$(cat ../../../../docker/secrets/jwt_public_key.pem)" \
+            nohup node index.js > "${RUNNER_TEMP}/ir-service.log" 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:3008/health >/dev/null && break || sleep 1; done
+          # Fail here rather than three steps later with an unreadable browser error.
+          curl -sf http://127.0.0.1:3008/health
+
+      - name: Start the IR frontend
+        working-directory: Frontend/IR-Baalvion-main
+        env:
+          NODE_ENV: production
+        run: |
+          nohup pnpm exec next start -p 3027 > "${RUNNER_TEMP}/ir-web.log" 2>&1 &
+          for i in $(seq 1 60); do curl -sf http://127.0.0.1:3027/onboarding/business >/dev/null && break || sleep 1; done
+          curl -sf http://127.0.0.1:3027/onboarding/business >/dev/null
+
+      - name: Run the onboarding journey
+        run: pnpm exec playwright test --config e2e/playwright.config.ts e2e/ir-business-onboarding.spec.ts
+
+      # A journey failure is almost always the service, not the browser. The HTML report
+      # holds the trace; these logs hold the reason.
+      - name: Service logs
+        if: failure()
+        run: |
+          echo '--- ir-service ---'; tail -100 "${RUNNER_TEMP}/ir-service.log" || true
+          echo '--- ir-web ---';     tail -100 "${RUNNER_TEMP}/ir-web.log" || true
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          # Both are written relative to the working directory, not to the config's.
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+  perf-smoke:
+    name: Performance Smoke (ir-service)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: baalvion_db
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s
+          --health-timeout 5s --health-retries 12
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 5s
+          --health-timeout 5s --health-retries 12
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: '5432'
+      DB_NAME: baalvion_test
+      DB_USER: baalvion
+      DB_PASSWORD: baalvion_dev_pass
+      REDIS_URL: redis://127.0.0.1:6379
+      NODE_ENV: test
+      JWT_ACCESS_SECRET: ci-dummy-access-secret-not-used-for-real-auth
+      JWT_REFRESH_SECRET: ci-dummy-refresh-secret-not-used-for-real-auth
+      DB_SSL: 'false'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6.0.10
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install Workspace Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Workspace Packages
+        run: pnpm --filter "./Backend/packages/*" run build
+
+      - name: Provision the test role and database
+        run: |
+          PGPASSWORD=postgres psql -h 127.0.0.1 -U postgres -c \
+            "CREATE ROLE baalvion LOGIN PASSWORD 'baalvion_dev_pass' SUPERUSER;" || true
+          PGPASSWORD=postgres psql -h 127.0.0.1 -U postgres -c \
+            "CREATE DATABASE baalvion_test OWNER baalvion;" || true
+
+      - name: Generate dev RS256 keypair
+        run: node scripts/gen-dev-jwt-keys.mjs
+
+      # RATE_LIMIT_IP_MAX defaults to 120/min (middleware/rateLimit.js). Under load every
+      # request after the first 120 answers 429, so the gate would measure the limiter
+      # instead of the route and fail on non-2xx. Raised, not removed — the limiter still
+      # exists, it is just not the subject.
+      - name: Start ir-service
+        working-directory: Backend/services/ecosystem/ir-service
+        env:
+          PORT: '3008'
+          RATE_LIMIT_IP_MAX: '1000000'
+        run: |
+          JWT_PUBLIC_KEY="$(cat ../../../../docker/secrets/jwt_public_key.pem)" \
+            nohup node index.js > "${RUNNER_TEMP}/ir-service.log" 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:3008/health >/dev/null && break || sleep 1; done
+          curl -sf http://127.0.0.1:3008/health
+
+      - name: Write the POST body
+        run: |
+          cat > "${RUNNER_TEMP}/perf-body.json" <<'JSON'
+          {
+            "legal_name": "Perf Smoke Load Pvt Ltd",
+            "entity_type": "private_limited",
+            "incorporation_country": "India",
+            "contact_name": "Perf Smoke",
+            "contact_email": "perf@example.test",
+            "iec_code": "PERF000001"
+          }
+          JSON
+
+      # BUDGETS. ubuntu-latest is a shared 4-vCPU VM running Postgres, the service and the
+      # load generator at once, so absolute latency there runs several times a laptop's and
+      # varies run to run. These are set roughly an order of magnitude above the measured
+      # local p99 (10 connections x 5s, Postgres 15 in Docker):
+      #
+      #   GET  /health                          p99   3ms  -> budget  400ms
+      #   GET  /api/v1/reports                  p99  30ms  -> budget  800ms
+      #   POST /api/v1/business-applications    p99  42ms  -> budget 2000ms
+      #
+      # That headroom is deliberate: the gate is a tripwire for the change that turns a
+      # 30 ms query into a 2 s one — a dropped index, an N+1 behind a helper — not a
+      # benchmark. A budget tight enough to be interesting here would be red every third
+      # run for reasons owned by GitHub, and a gate people rerun is a gate people ignore.
+      #
+      # The three routes are the ones the journey above actually traverses: liveness, the
+      # public read path, and the onboarding write path that reaches Postgres.
+      - name: Run the perf smoke gate
+        run: |
+          node scripts/perf-smoke.mjs \
+            --base http://127.0.0.1:3008 \
+            --route '/health=400' \
+            --route '/api/v1/reports=800' \
+            --route 'POST /api/v1/business-applications=2000' \
+            --body-file "${RUNNER_TEMP}/perf-body.json" \
+            --duration 5 \
+            --connections 10
+
+      - name: Service logs
+        if: failure()
+        run: tail -100 "${RUNNER_TEMP}/ir-service.log" || true
