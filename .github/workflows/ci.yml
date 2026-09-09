@@ -244,8 +244,20 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
-      - name: Install psql client
-        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      # The ubuntu-24.04 runner already ships a psql client. Re-installing it through apt
+      # is what was failing here — and because this step sits before every assertion, the
+      # job reported FAILURE while running not one RLS check. A security gate that fails
+      # open-looking (red, but proving nothing) is worse than no gate: it trains people to
+      # ignore it. Use what the image provides; only fall back to apt if it is genuinely absent.
+      - name: Ensure psql client
+        run: |
+          if command -v psql >/dev/null 2>&1; then
+            echo "psql already present: $(psql --version)"
+          else
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends postgresql-client
+          fi
+          psql --version
       # trade-service declares @baalvion/auth-node as a pnpm `workspace:*` dep,
       # which npm cannot resolve in a standalone submodule checkout
       # (EUNSUPPORTEDPROTOCOL). migrate.js and the RLS probe don't use it, so
@@ -319,8 +331,20 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
-      - name: Install psql client
-        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      # The ubuntu-24.04 runner already ships a psql client. Re-installing it through apt
+      # is what was failing here — and because this step sits before every assertion, the
+      # job reported FAILURE while running not one RLS check. A security gate that fails
+      # open-looking (red, but proving nothing) is worse than no gate: it trains people to
+      # ignore it. Use what the image provides; only fall back to apt if it is genuinely absent.
+      - name: Ensure psql client
+        run: |
+          if command -v psql >/dev/null 2>&1; then
+            echo "psql already present: $(psql --version)"
+          else
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends postgresql-client
+          fi
+          psql --version
       - name: Create baalvion_app role (027)
         run: psql "postgresql://postgres:postgres@localhost:5432/baalvion_db" -v app_pw=ci_app_pw -f Backend/database/migrations/027_app_role.sql
       # The tenancy package does not declare pg (it ships only policy-builder SQL);
