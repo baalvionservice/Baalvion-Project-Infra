@@ -342,7 +342,7 @@ export function Navbar() {
 
           <div className="flex items-center gap-3 xl:gap-4 ml-2 xl:ml-4">
             <Link
-              href="#"
+              href="/#newsletter"
               className="hidden xl:flex items-center gap-1.5 text-sm font-semibold text-gray-900 hover:text-primary group transition-colors whitespace-nowrap"
               aria-label="Subscribe to weekly insights"
             >

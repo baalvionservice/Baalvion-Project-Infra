@@ -41,7 +41,7 @@ export default async function BaalvionHiringPortal() {
       <div className="container py-12 md:py-20">
         <div className="mx-auto max-w-4xl text-center">
           <h1 className="font-headline text-4xl font-extrabold tracking-tight md:text-5xl">
-            {company?.name || 'Baalvion Inc.'}
+            {company?.name || 'Baalvion Industries Private Limited'}
           </h1>
            <p className="mt-2 text-xl font-semibold text-primary">Senior Backend Engineer Virtual Job Simulation</p>
           <p className="mt-4 text-lg text-muted-foreground">

@@ -260,7 +260,7 @@ export const mockCompanies: Company[] = [
   },
   {
     id: 'company-3',
-    name: 'Baalvion Inc.',
+    name: 'Baalvion Industries Private Limited',
     description: 'A next-generation institutional Investor Relations Platform.',
     ownerId: 'user-10',
     domains: [

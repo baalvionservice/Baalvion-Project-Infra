@@ -154,7 +154,7 @@ export default async function TeamPage() {
           description: member.bio,
           worksFor: {
             '@type': 'Organization',
-            name: 'Baalvion Industries Pvt Ltd',
+            name: 'Baalvion Industries Private Limited',
           },
         },
       })),
