@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-08T17:28:49.743Z",
+  "generatedAt": "2026-09-09T14:55:35.347Z",
   "services": [
     "about-service",
     "account-service",
@@ -423,7 +423,10 @@
       ]
     },
     "canwemarry-service": {
-      "deployment": "not-deployed",
+      "deployment": "standalone",
+      "port": 3070,
+      "container": "app-canwemarry",
+      "healthPath": "/health",
       "tier": "tier-2",
       "domain": "ecosystem",
       "lifecycle": "experimental",
