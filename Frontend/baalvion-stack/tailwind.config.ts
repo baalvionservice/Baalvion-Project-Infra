@@ -1,6 +1,7 @@
 import type { Config } from 'tailwindcss';
 
 export default {
+  presets: [require('@baalvion/design/tailwind')],
   content: ['./src/**/*.{ts,tsx}'],
   theme: {
     extend: {
