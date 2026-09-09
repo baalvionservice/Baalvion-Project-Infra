@@ -6244,6 +6244,9 @@ importers:
 
   Frontend/baalvion-marketing:
     dependencies:
+      '@baalvion/company':
+        specifier: workspace:*
+        version: link:../../Backend/packages/company
       '@baalvion/design':
         specifier: workspace:*
         version: link:../../Backend/packages/design
