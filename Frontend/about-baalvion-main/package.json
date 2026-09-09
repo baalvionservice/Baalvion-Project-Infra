@@ -2,6 +2,9 @@
     "name": "about-baalvion-web",
     "version": "0.1.0",
     "private": true,
+    "engines": {
+      "node": ">=20.0.0"
+    },
     "scripts": {
         "dev": "next dev --turbopack -p 3020",
         "genkit:dev": "genkit start -- tsx src/ai/dev.ts",

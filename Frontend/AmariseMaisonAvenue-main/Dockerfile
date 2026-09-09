@@ -38,6 +38,11 @@ ARG NEXT_PUBLIC_APP_URL
 ARG NEXT_PUBLIC_SITE_URL
 ARG NEXT_PUBLIC_MEDIA_HOST
 ARG NEXT_PUBLIC_GA_ID
+# Build inputs, not runtime: next.config resolves rewrites() at build time and bakes the
+# destinations into routes-manifest.json, so setting these on the running container is a
+# no-op. Unset, the config silently falls back to its hardcoded default.
+ARG AUTH_PROXY_TARGET
+ENV AUTH_PROXY_TARGET=$AUTH_PROXY_TARGET
 # CRITICAL: ARG alone is NOT visible to `next build`. Each value must be re-exported as a
 # NEXT_PUBLIC_* ENV so Next inlines it into the client bundle. Without these ENV lines the
 # build bakes the localhost code-defaults regardless of --build-arg.

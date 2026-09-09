@@ -13,6 +13,14 @@ const getOrder = async (req, res, next) => {
     catch (err) { return next(err); }
 };
 
+// Which payment gateways this store can actually charge with right now. Public: the storefront
+// needs it before a shopper has an order, and it exposes only gateway NAMES — never a key, and
+// never why an absent one is absent.
+const listPaymentGateways = async (req, res, next) => {
+    try { return sendSuccess(req, res, await require('../service/paymentProvider').configuredGateways()); }
+    catch (err) { return next(err); }
+};
+
 // PUBLIC guest order lookup/tracking (email + orderNumber). No auth/session — see lookupGuestOrder.
 const lookupOrder = async (req, res, next) => {
     try { return sendSuccess(req, res, await orderService.lookupGuestOrder(req.params.storeId, req.validated)); }
@@ -75,4 +83,4 @@ const paymentWebhook = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
-module.exports = { listOrders, listMyOrders, getOrder, lookupOrder, createOrder, updateOrderStatus, cancelOrder, recordPayment, refundPayment, createPaymentIntent, confirmPayment, paymentWebhook };
+module.exports = { listOrders, listMyOrders, getOrder, lookupOrder, listPaymentGateways, createOrder, updateOrderStatus, cancelOrder, recordPayment, refundPayment, createPaymentIntent, confirmPayment, paymentWebhook };

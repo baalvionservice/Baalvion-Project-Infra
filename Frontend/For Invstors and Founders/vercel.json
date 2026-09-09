@@ -1,8 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "ignoreCommand": "npx turbo-ignore investors-and-founders-web",
-  "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
-  "buildCommand": "cd ../.. && pnpm exec turbo run build --filter=investors-and-founders-web",
+  "installCommand": "cd ../.. && npx --yes pnpm@9.15.0 install --frozen-lockfile",
+  "buildCommand": "cd ../.. && npx --yes pnpm@9.15.0 exec turbo run build --filter=investors-and-founders-web",
   "rewrites": [
     {
       "source": "/:path((?!insiders-api|auth-bff|assets|sitemap).*)",

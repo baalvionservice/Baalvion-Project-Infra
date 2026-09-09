@@ -29,6 +29,11 @@ ARG NEXT_PUBLIC_CTM_API_URL
 ARG NEXT_PUBLIC_APP_URL
 ARG NEXT_PUBLIC_USE_MOCK=false
 ARG NEXT_PUBLIC_GA_ID
+# Build inputs, not runtime: next.config resolves rewrites() at build time and bakes the
+# destinations into routes-manifest.json, so setting these on the running container is a
+# no-op. Unset, the config silently falls back to its hardcoded default.
+ARG AUTH_PROXY_TARGET
+ENV AUTH_PROXY_TARGET=$AUTH_PROXY_TARGET
 ENV NEXT_TELEMETRY_DISABLED=1 NODE_ENV=production
 COPY --from=pruner /app/out/full/ ./
 RUN pnpm turbo run build --filter=controlthemarket-web
