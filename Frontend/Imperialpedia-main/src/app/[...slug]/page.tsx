@@ -1,6 +1,7 @@
 import { cache, Suspense } from "react";
 import { newsArticles, NewsArticle, NewsCategory } from "@/lib/data.news";
-import { getPublishedNewsBySlug, findAuthorProfileByName, resolveAuthor } from "@/services/data/cms-public";
+import { getPublishedNewsBySlug, getPublishedNews, getRecentContent, findAuthorProfileByName, resolveAuthor } from "@/services/data/cms-public";
+import { MoreFromGrid, MoreFromList, type MoreFromItem } from "@/components/news/MoreFrom";
 import { buildMetadata } from "@/lib/seo";
 import { formatDate } from "@/services/format-date";
 import Image from "next/image";
@@ -404,7 +405,11 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
           )}
         </nav>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-10 xl:gap-14">
+        {/* CNBC sets its article body in a 630px column; ours ran to 872px, which
+            is ~105 characters a line — well past the 65-75 that reads comfortably.
+            Capping the text column rather than the grid keeps the hero image and
+            share bar full width, the way a news template is supposed to work. */}
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,680px)_320px] gap-10 xl:gap-14 lg:justify-center">
           {/* ══ LEFT: Article ══════════════════════════════════════════ */}
           <article className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
@@ -420,7 +425,7 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
             </div>
 
             {/* Article Title */}
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 font-headline">{article.title}</h1>
+            <h1 className="!font-news text-[2.125rem] sm:text-[2.625rem] font-bold tracking-tight text-gray-900 font-headline leading-[1.06]">{article.title}</h1>
 
             <p className="article-excerpt text-lg text-gray-600 leading-relaxed mt-4 max-w-2xl">
               {article.excerpt}
@@ -614,8 +619,60 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
             )}
           </aside>
         </div>
+
+        {/* CNBC closes an article with full-width "MORE IN <SECTION>" and "MORE
+            FROM" blocks below the two-column grid, not inside the text column.
+            Sponsored ("FROM THE WEB") is deliberately not reproduced. */}
+        <Suspense fallback={null}>
+          <ArticleMoreFrom currentSlug={slug} category={article.category} />
+        </Suspense>
       </div>
     </div>
+  );
+}
+
+/**
+ * Related coverage for the foot of a news article.
+ *
+ * Pulls live CMS news, drops the piece being read, and splits it: the newest on
+ * the same beat leads the image grid, everything else fills the headline list.
+ * Renders nothing when the CMS has nothing to show, rather than an empty rule
+ * with a gold bar over it.
+ */
+async function ArticleMoreFrom({ currentSlug, category }: { currentSlug: string; category?: string | null }) {
+  // News first. A young desk publishes news slowly while the site already has a
+  // library of guides, so the site's other content backs it up rather than
+  // leaving the reader at a dead end under a gold rule.
+  const [wire, evergreen] = await Promise.all([
+    getPublishedNews(24),
+    getRecentContent(16),
+  ]);
+  const seen = new Set<string>([currentSlug]);
+  const news = [...wire, ...evergreen].filter((n) => {
+    if (!n.slug || seen.has(n.slug)) return false;
+    seen.add(n.slug);
+    return true;
+  });
+  if (!news.length) return null;
+
+  const toItem = (n: (typeof news)[number]): MoreFromItem => ({
+    title: n.title,
+    href: newsArticleHref(n),
+    image: n.imageUrl ?? null,
+    byline: n.author?.name ?? null,
+  });
+
+  const sameBeat = category ? news.filter((n) => n.category === category) : [];
+  const gridSource = sameBeat.length >= 2 ? sameBeat : news;
+  const grid = gridSource.slice(0, 5).map(toItem);
+  const gridHrefs = new Set(grid.map((g) => g.href));
+  const list = news.filter((n) => !gridHrefs.has(newsArticleHref(n))).slice(0, 6).map(toItem);
+
+  return (
+    <>
+      <MoreFromGrid title={category ? `More in ${category}` : "More from Imperialpedia"} items={grid} />
+      <MoreFromList title="From Imperialpedia" items={list} />
+    </>
   );
 }
 
