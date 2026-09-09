@@ -1,0 +1,293 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Baalvion — per-service blue/green overlay for box2.
+#
+# Layered on top of docker-compose.prod.yml. It adds ONE candidate ("green")
+# container per app service, each behind its OWN profile, so exactly one green
+# ever runs:
+#
+#   docker compose --env-file deploy/consolidated/.env \
+#     -f deploy/consolidated/docker-compose.prod.yml \
+#     -f deploy/consolidated/docker-compose.bluegreen.yml \
+#     --profile bg-app-platform up -d app-platform-green
+#
+# In practice you do not type that — scripts/canary-rollout.mjs does. See
+# docs/progressive-delivery.md.
+#
+# WHY per-service and not a second full stack: box2 is a t3.large (8 GiB) with a
+# 2 GiB swapfile. The default-profile services alone declare 8.91 GiB of
+# mem_limit. A second copy of everything needs another 8.91 GiB of caps against
+# 4.25 GiB of reservations that must actually resident. It does not fit, and no
+# amount of tuning makes it fit. One green at a time costs at most 1.5 GiB
+# (app-ecosystem / app-platform), which does.
+#
+# ── Rules this file encodes ──────────────────────────────────────────────────
+#
+#   restart: "no"  — deliberate. A green that dies must STAY dead: Caddy's
+#     passive health check drains it within max_fails, the soak sees the failure
+#     and aborts. `unless-stopped` would hide a crash-looping candidate behind
+#     retries while it kept eating the headroom that made room for it.
+#
+#   image tag      — GREEN_IMAGE_TAG, never IMAGE_TAG. The default "UNSET" is
+#     intentionally unresolvable so an env-less `docker compose config` still
+#     validates in CI while a real `up` without the variable fails fast.
+#
+#   ports          — bound to 127.0.0.1 ONLY. A green is never publicly
+#     reachable; the loopback port exists so scripts/smoke-check.mjs can probe
+#     the candidate from the box before any traffic is shifted to it. Caddy
+#     reaches greens over the compose network by service name, not through these.
+#
+#   singleton jobs — several of these containers run background loops that are
+#     NOT request-driven, so a traffic shift does nothing to contain them. Where
+#     a kill switch exists it is set below. Where it does not, the service is
+#     marked UNSAFE and scripts/canary-rollout.mjs refuses it. Full table in
+#     docs/progressive-delivery.md.
+# ─────────────────────────────────────────────────────────────────────────────
+
+x-db: &db
+  DB_HOST: ${DB_HOST}
+  DB_PORT: ${DB_PORT:-5432}
+  DB_NAME: ${DB_NAME}
+  DB_USER: ${DB_USER}
+  DB_PASSWORD: ${DB_PASSWORD}
+  DB_SSL: ${DB_SSL:-true}
+
+x-redis: &redis
+  REDIS_HOST: ${REDIS_HOST:-redis}
+  REDIS_PORT: ${REDIS_PORT:-6379}
+
+x-green: &green
+  image: ${ECR_REGISTRY}/baalvion/backend:${GREEN_IMAGE_TAG:-UNSET}
+  pull_policy: always
+  restart: "no"
+  env_file:
+    - path: .env
+      required: false
+  logging:
+    driver: awslogs
+    options:
+      awslogs-region: ${AWS_REGION:-ap-south-1}
+      awslogs-group: /baalvion/consolidated
+  depends_on:
+    redis: { condition: service_healthy }
+
+services:
+
+  # ── SAFE: no unguarded background singletons ────────────────────────────────
+  app-platform-green:
+    <<: *green
+    profiles: ["bg-app-platform"]
+    command: ["pm2-runtime","start","/app/pm2/platform.config.js"]
+    environment:
+      <<: [*db, *redis]
+      # Both are advisory-locked already (billingWorker.js takes pg_try_advisory_lock(728193),
+      # paymentRecordsRetention.js its own key), so a second copy would no-op rather than
+      # double-run. Off anyway: during a canary the candidate's job is to answer requests,
+      # and a sweeper that loses a lock race is noise in the soak signal.
+      BILLING_WORKER_ENABLED: "false"
+      STATUS_PROBER: "false"
+    # Same named volume as blue. Without it, media uploaded while the canary carries
+    # traffic lands in the green container's writable layer and dies with it.
+    volumes:
+      - cms_uploads:/app/Backend/services/knowledge/cms-service/uploads
+    mem_limit: 1536m
+    mem_reservation: 768m
+    ports: ["127.0.0.1:19021:3021"]
+    labels:
+      com.baalvion.colour: "green"
+      com.baalvion.blue: "app-platform"
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:3021/health',r=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  # ── SAFE once the re-engagement cron is off ─────────────────────────────────
+  app-identity-green:
+    <<: *green
+    profiles: ["bg-app-identity"]
+    command: ["pm2-runtime","start","/app/pm2/identity.config.js"]
+    environment:
+      <<: [*db, *redis]
+      # reengagementCron.js has no lock and no dedupe beyond a cooldown timestamp it
+      # reads-then-writes. Two copies race that window and mail the same users twice.
+      REENGAGEMENT_CRON_ENABLED: "false"
+    mem_limit: 1024m
+    mem_reservation: 512m
+    ports: ["127.0.0.1:19001:3001"]
+    labels:
+      com.baalvion.colour: "green"
+      com.baalvion.blue: "app-identity"
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:3001/health',r=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  # ── ACCEPTABLE: duplicates are visible, not corrupting ──────────────────────
+  # marketplace-service's auditRelay drains an outbox with no row lock, so two copies
+  # can relay the same row twice. Its own header calls that out: audit-service hash-chains
+  # what it receives, so a duplicate shows up as a duplicate rather than breaking the chain.
+  # commerce-service's fxRateProvider only refreshes a Redis snapshot — idempotent.
+  app-commerce-green:
+    <<: *green
+    profiles: ["bg-app-commerce"]
+    command: ["pm2-runtime","start","/app/pm2/commerce.config.js"]
+    environment: { <<: [*db, *redis] }
+    mem_limit: 1280m
+    mem_reservation: 640m
+    ports: ["127.0.0.1:19012:3012"]
+    labels:
+      com.baalvion.colour: "green"
+      com.baalvion.blue: "app-commerce"
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:3012/health',r=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  app-ecosystem-green:
+    <<: *green
+    profiles: ["bg-app-ecosystem"]
+    command: ["pm2-runtime","start","/app/pm2/ecosystem.config.js"]
+    environment: { <<: [*db, *redis] }
+    mem_limit: 1536m
+    mem_reservation: 768m
+    ports: ["127.0.0.1:19008:3008"]
+    labels:
+      com.baalvion.colour: "green"
+      com.baalvion.blue: "app-ecosystem"
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:3008/health',r=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  # ── Stateless Next.js standalone — nothing but request handling ─────────────
+  admin-web-green:
+    image: ${ECR_REGISTRY}/baalvion/admin-web:${GREEN_IMAGE_TAG:-UNSET}
+    pull_policy: always
+    restart: "no"
+    profiles: ["bg-admin-web"]
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      NODE_ENV: production
+      PORT: "3030"
+      HOSTNAME: 0.0.0.0
+    mem_limit: 384m
+    mem_reservation: 96m
+    ports: ["127.0.0.1:19030:3030"]
+    labels:
+      com.baalvion.colour: "green"
+      com.baalvion.blue: "admin-web"
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: ${AWS_REGION:-ap-south-1}
+        awslogs-group: /baalvion/consolidated
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:3030',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  app-auth-web-green:
+    image: ${ECR_REGISTRY}/baalvion/auth-baalvion:${GREEN_IMAGE_TAG:-UNSET}
+    pull_policy: always
+    restart: "no"
+    profiles: ["bg-app-auth-web"]
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      NODE_ENV: production
+      PORT: "3055"
+      HOSTNAME: 0.0.0.0
+      AUTH_SERVICE_URL: http://app-identity:3001
+    mem_limit: 256m
+    mem_reservation: 96m
+    ports: ["127.0.0.1:19055:3055"]
+    labels:
+      com.baalvion.colour: "green"
+      com.baalvion.blue: "app-auth-web"
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: ${AWS_REGION:-ap-south-1}
+        awslogs-group: /baalvion/consolidated
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:3055',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  # ── UNSAFE: defined so the machinery is complete, refused by the rollout script ──
+  #
+  # order-execution-service/services/outboxPublisher.js selects PENDING rows with a plain
+  # findAll — no FOR UPDATE SKIP LOCKED, no advisory lock — then publishes each one before
+  # marking it SENT. Two copies read the same batch and publish it twice, and there is no
+  # env switch to turn it off. Downstream consumers see duplicate sdk.events. Fix the claim
+  # query first; the traffic shift cannot help here, because this loop never sees traffic.
+  app-trade-green:
+    <<: *green
+    profiles: ["bg-app-trade"]
+    command: ["pm2-runtime","start","/app/pm2/trade.config.js"]
+    environment:
+      <<: [*db, *redis]
+      NEO4J_URI: ${NEO4J_URI:-bolt://neo4j:7687}
+      NEO4J_USER: ${NEO4J_USER:-neo4j}
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD}
+      NEO4J_DATABASE: ${NEO4J_DATABASE:-neo4j}
+    depends_on:
+      redis: { condition: service_healthy }
+      neo4j: { condition: service_healthy }
+    mem_limit: 1024m
+    mem_reservation: 512m
+    ports: ["127.0.0.1:19048:3048"]
+    labels:
+      com.baalvion.colour: "green"
+      com.baalvion.blue: "app-trade"
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:3048/health',r=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  # ── UNSAFE: two independent reasons ─────────────────────────────────────────
+  #
+  #  1. ws.baalvion.com is socket.io on :3040. weighted_round_robin splits REQUESTS, not
+  #     sessions. A websocket that upgrades cleanly stays on one upstream for its life, but
+  #     the HTTP long-polling fallback issues a fresh request per poll and will alternate
+  #     colours mid-session. Caddy cannot do weighted AND sticky at once.
+  #  2. proxy-service/workers/intelligenceWorker.js schedules model training, forecasts and
+  #     route-weight publishing on timers. Two copies double every one of those on a 2-vCPU box.
+  app-edge-realtime-green:
+    <<: *green
+    profiles: ["bg-app-edge-realtime"]
+    command: ["pm2-runtime","start","/app/pm2/edge-realtime.config.js"]
+    environment:
+      <<: [*db, *redis]
+      OAUTH_PUBLIC_BASE_URL: https://proxy.baalvionstack.com
+    mem_limit: 896m
+    mem_reservation: 448m
+    ports: ["127.0.0.1:19004:4000"]
+    labels:
+      com.baalvion.colour: "green"
+      com.baalvion.blue: "app-edge-realtime"
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:4000/health',r=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+volumes:
+  cms_uploads:

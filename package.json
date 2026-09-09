@@ -54,7 +54,10 @@
     "contracts:lint": "cd Backend/packages/contracts && buf lint",
     "contracts:events": "node Backend/packages/contracts/scripts/validate-events.mjs",
     "baalctl": "node Backend/platform/cli/baalctl.mjs",
-    "scan:errors": "node scripts/error-scan.mjs"
+    "scan:errors": "node scripts/error-scan.mjs",
+    "canary": "node scripts/canary-rollout.mjs",
+    "canary:shift": "node scripts/traffic-shift.mjs",
+    "canary:test": "node --test scripts/traffic-shift.test.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
