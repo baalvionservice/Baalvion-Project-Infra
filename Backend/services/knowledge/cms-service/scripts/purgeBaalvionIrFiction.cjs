@@ -99,6 +99,9 @@ const FICTIONAL_TITLE_MARKERS = [
 const TITLE_FIXES = [
   { name: 'Laxman Singh Champia', from: 'Co-Head of Aladdin Product Engineering', to: 'Co-Head of Product Engineering' },
   { name: 'Rashmika Singh',       from: 'Co-Head of Aladdin Product Engineering', to: 'Co-Head of Product Engineering' },
+  // The company confirmed the split: Tamanna shaikh is CEO, Adarsh Patra is CTO. Both were
+  // published as Chief Executive Officer.
+  { name: 'Adarsh Patra',         from: 'Chief Executive Officer',                to: 'Chief Technology Officer' },
 ];
 
 async function req(method, url, token, body) {
