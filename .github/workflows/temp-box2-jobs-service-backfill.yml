@@ -17,7 +17,7 @@ jobs:
       # inside app-ecosystem, which re-runs sync({alter:false}) + the migration runner on
       # boot (both idempotent), then seeds the real ~402-role catalogue.
       - name: Sync jobs-service source, restart it, seed the real role catalogue
-        uses: appleboy/ssh-action@v1
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
           host: ${{ secrets.CORE2_EC2_HOST }}
           username: ${{ secrets.CORE2_EC2_USER }}

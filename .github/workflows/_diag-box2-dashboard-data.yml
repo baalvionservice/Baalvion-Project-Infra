@@ -9,7 +9,7 @@ jobs:
     environment: production
     steps:
       - name: Mint a diagnostic token for the real super_admin and hit the dashboard APIs
-        uses: appleboy/ssh-action@v1
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
           host: ${{ secrets.CORE2_EC2_HOST }}
           username: ${{ secrets.CORE2_EC2_USER }}
@@ -50,7 +50,7 @@ jobs:
               })().catch(e=>{console.log('SCRIPT ERROR:', e.message); process.exit(1);});
             "
       - name: Retry with a real, existing session id
-        uses: appleboy/ssh-action@v1
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
           host: ${{ secrets.CORE2_EC2_HOST }}
           username: ${{ secrets.CORE2_EC2_USER }}
@@ -125,7 +125,7 @@ jobs:
     environment: production
     steps:
       - name: Check box2 Caddyfile routing for the cms/knowledge path
-        uses: appleboy/ssh-action@v1
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
           host: ${{ secrets.CORE2_EC2_HOST }}
           username: ${{ secrets.CORE2_EC2_USER }}
@@ -143,7 +143,7 @@ jobs:
     environment: production
     steps:
       - name: List ALL org memberships for the super_admin user + which org owns the websites
-        uses: appleboy/ssh-action@v1
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
           host: ${{ secrets.CORE2_EC2_HOST }}
           username: ${{ secrets.CORE2_EC2_USER }}
@@ -178,7 +178,7 @@ jobs:
     environment: production
     steps:
       - name: List every container running on box2
-        uses: appleboy/ssh-action@v1
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
           host: ${{ secrets.CORE2_EC2_HOST }}
           username: ${{ secrets.CORE2_EC2_USER }}
