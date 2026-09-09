@@ -36,12 +36,16 @@ export class ErrorBoundary extends React.Component<Props, State> {
               <h1 className="text-2xl font-bold text-foreground">Something went wrong</h1>
             </div>
             <p className="text-muted-foreground mb-4">
-              The app crashed unexpectedly. The error details are shown below.
+              The page failed to load. Reloading usually clears it.
             </p>
-            <pre className="bg-muted text-xs p-3 rounded overflow-auto max-h-60 mb-4 text-foreground">
-              {this.state.error.name}: {this.state.error.message}
-              {this.state.error.stack ? `\n\n${this.state.error.stack}` : ""}
-            </pre>
+            {/* The trace is for whoever is debugging, not for a visitor — it goes to
+                the console always, and on screen only outside production. */}
+            {import.meta.env.DEV && (
+              <pre className="bg-muted text-xs p-3 rounded overflow-auto max-h-60 mb-4 text-foreground">
+                {this.state.error.name}: {this.state.error.message}
+                {this.state.error.stack ? `\n\n${this.state.error.stack}` : ""}
+              </pre>
+            )}
             <Button onClick={this.handleReload} className="w-full">
               <RefreshCw className="w-4 h-4 mr-2" />
               Reload App

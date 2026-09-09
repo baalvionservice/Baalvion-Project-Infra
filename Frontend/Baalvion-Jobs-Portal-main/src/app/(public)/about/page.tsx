@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { INCORPORATED_ON } from '@baalvion/company';
 
 export const metadata: Metadata = {
   title: "About Us — Global Hiring",
@@ -60,7 +61,9 @@ const organizationJsonLd = {
   sameAs: ["https://www.baalvion.com"],
   description:
     "Baalvion builds TalentOS, the intelligent infrastructure platform for global, AI-driven, compliant talent acquisition.",
-  foundingDate: "2023",
+  // Every other Baalvion property and the CIN itself say 2025-03-11; "2023"
+  // was wrong in structured data, which search engines take at face value.
+  foundingDate: INCORPORATED_ON,
   areaServed: "Worldwide",
   knowsAbout: [
     "Global Talent Acquisition",
@@ -95,12 +98,18 @@ type StatItem = {
   sublabel: string;
 };
 
-const stats: StatItem[] = [
-  { value: "50+", label: "Countries Served", sublabel: "Cross-border reach" },
-  { value: "200K+", label: "Roles Processed", sublabel: "AI-screened annually" },
-  { value: "98%", label: "Screening Accuracy", sublabel: "vs keyword-only ATS" },
-  { value: "10+", label: "Enterprise Partners", sublabel: "Multi-org deployments" },
-];
+/**
+ * Real measurements only.
+ *
+ * Four invented figures sat here — "50+ Countries Served", "200K+ Roles Processed",
+ * "98% Screening Accuracy vs keyword-only ATS" and "10+ Enterprise Partners" — presented
+ * as this platform's results under the heading "Platform capability at a glance". None
+ * were measured. The accuracy claim is the worst of them: it is a comparative performance
+ * benchmark against other products, invented.
+ *
+ * Populate from real telemetry when there is some. The band renders nothing while empty.
+ */
+const stats: StatItem[] = [];
 
 type FeatureCard = {
   icon: React.ReactNode;
@@ -336,21 +345,26 @@ export default function AboutPage() {
 
       <Separator />
 
-      {/* 2. Credibility / Stats Band */}
-      <section className="py-20 lg:py-28">
-        <div className="container mx-auto px-4">
-          <p className="text-center text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-12">
-            Platform capability at a glance
-          </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
-            {stats.map((stat) => (
-              <StatCard key={stat.label} stat={stat} />
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* 2. Credibility / Stats Band — omitted entirely while there is nothing
+          measured to put in it, rather than leaving the heading over a gap. */}
+      {stats.length > 0 && (
+        <>
+          <section className="py-20 lg:py-28">
+            <div className="container mx-auto px-4">
+              <p className="text-center text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-12">
+                Platform capability at a glance
+              </p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
+                {stats.map((stat) => (
+                  <StatCard key={stat.label} stat={stat} />
+                ))}
+              </div>
+            </div>
+          </section>
 
-      <Separator />
+          <Separator />
+        </>
+      )}
 
       {/* 3. Our Mission */}
       <section className="py-20 lg:py-32 bg-muted/30">

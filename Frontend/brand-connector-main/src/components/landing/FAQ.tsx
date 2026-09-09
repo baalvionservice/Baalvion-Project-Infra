@@ -23,7 +23,7 @@ const BRAND_FAQS = [
   },
   {
     question: "What is the AI Matching Engine and how accurate is it?",
-    answer: "Our proprietary AI analyzes millions of data points, including audience demographics, content sentiment, and historical ROI. It matches brands with creators whose audience perfectly aligns with their target market, achieving up to 95% higher engagement compared to manual searching."
+    answer: "Our matching engine weighs audience demographics, content sentiment and campaign history to surface creators whose audience overlaps your target market, then ranks them against the objectives you set."
   },
   {
     question: "Can I set specific campaign requirements and deliverables?",
