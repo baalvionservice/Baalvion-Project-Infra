@@ -386,6 +386,74 @@ jobs:
           # (docker-compose / testcontainers) is wired up.
           echo "Integration test harness pending — per-service checks run in backend-go / backend-java."
 
+  # Runs EVERY workspace package's tests, whatever runner it uses.
+  #
+  # The old gate ran two selections: Backend/packages via a --filter, and, for
+  # services, ONLY those whose test script is literally `node --test`. jest and
+  # vitest services were "deliberately excluded until their runners are wired" and
+  # never were — so 213 test files across 13 packages never executed on any merge,
+  # including auth-service (19 files) and order-execution-service (46). Engineers
+  # wrote them; CI ignored them; merging proved nothing about any of it.
+  #
+  # They were not excluded for failing: auth-service runs 230 tests with 205
+  # passing locally, and its only failures are ECONNREFUSED from tests that want
+  # the Postgres this job now provides.
+  #
+  # Discovery is by convention (a real `test` script), so a new service is covered
+  # with no CI change. Known-failing packages are frozen by .test-baseline.json and
+  # cannot grow; a package with no baseline entry is expected to PASS.
+  all-package-tests:
+    name: All Package Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: baalvion_db
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s
+          --health-timeout 5s --health-retries 12
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 5s
+          --health-timeout 5s --health-retries 12
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: '5432'
+      DB_NAME: baalvion_test
+      DB_USER: baalvion
+      DB_PASSWORD: baalvion_dev_pass
+      REDIS_URL: redis://127.0.0.1:6379
+      NODE_ENV: test
+      JWT_ACCESS_SECRET: ci-dummy-access-secret-not-used-for-real-auth
+      JWT_REFRESH_SECRET: ci-dummy-refresh-secret-not-used-for-real-auth
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6.0.10
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: Install Workspace Dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build Workspace Packages
+        run: pnpm --filter "./Backend/packages/*" run build
+      # Several suites expect this role/database rather than the default postgres one.
+      - name: Provision the test role and database
+        run: |
+          PGPASSWORD=postgres psql -h 127.0.0.1 -U postgres -c \
+            "CREATE ROLE baalvion LOGIN PASSWORD 'baalvion_dev_pass' SUPERUSER;" || true
+          PGPASSWORD=postgres psql -h 127.0.0.1 -U postgres -c \
+            "CREATE DATABASE baalvion_test OWNER baalvion;" || true
+      - name: Run every package's tests
+        run: node scripts/test-all.mjs
+
   node-package-tests:
     name: Node Package Tests
     runs-on: ubuntu-latest
@@ -590,6 +658,7 @@ jobs:
       - tenant-rls-audit
       - tenant-rls-live
       - integration-test
+      - all-package-tests
       - node-package-tests
       - deploy-compose-validate
       - cache-hygiene
