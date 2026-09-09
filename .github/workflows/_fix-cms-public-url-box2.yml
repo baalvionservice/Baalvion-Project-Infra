@@ -22,10 +22,11 @@ on:
 jobs:
   fix:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment: production
     steps:
       - name: 1) Report current state (read-only)
-        uses: appleboy/ssh-action@v1
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
           host: ${{ secrets.CORE2_EC2_HOST }}
           username: ${{ secrets.CORE2_EC2_USER }}
@@ -53,7 +54,7 @@ jobs:
             "
 
       - name: 2) Set CMS_PUBLIC_URL in .env and restart app-platform
-        uses: appleboy/ssh-action@v1
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
           host: ${{ secrets.CORE2_EC2_HOST }}
           username: ${{ secrets.CORE2_EC2_USER }}
@@ -85,7 +86,7 @@ jobs:
             docker exec "$APP_PLATFORM" env | grep -E '^CMS_PUBLIC_URL='
 
       - name: 3) Backfill already-broken rows to the real public host
-        uses: appleboy/ssh-action@v1
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
           host: ${{ secrets.CORE2_EC2_HOST }}
           username: ${{ secrets.CORE2_EC2_USER }}
@@ -110,7 +111,7 @@ jobs:
             "
 
       - name: 4) Spot-check a rewritten URL over HTTPS
-        uses: appleboy/ssh-action@v1
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
           host: ${{ secrets.CORE2_EC2_HOST }}
           username: ${{ secrets.CORE2_EC2_USER }}

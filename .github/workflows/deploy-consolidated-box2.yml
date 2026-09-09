@@ -51,16 +51,17 @@ jobs:
   build-push-backend:
     name: build baalvion/backend
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     outputs:
       image_tag: ${{ steps.tag.outputs.image_tag }}
     steps:
       - uses: actions/checkout@v7
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
 
       - name: Configure AWS credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v6
+        uses: aws-actions/configure-aws-credentials@cbe3b392738ccf3f987d68400dafcf4b0624a56c # v6.2.4
         with:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ secrets.CORE2_AWS_DEPLOY_ROLE_ARN }}
@@ -68,7 +69,7 @@ jobs:
 
       - name: Log in to Amazon ECR
         id: ecr
-        uses: aws-actions/amazon-ecr-login@v2
+        uses: aws-actions/amazon-ecr-login@03f1aad4c6c7ffd436567f42f9384779290529bd # v2.1.7
 
       - name: Ensure ECR repository exists
         run: |
@@ -82,7 +83,7 @@ jobs:
 
       - name: Resolve image tags
         id: meta
-        uses: docker/metadata-action@v6
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
           images: ${{ steps.ecr.outputs.registry }}/baalvion/backend
           tags: |
@@ -91,7 +92,7 @@ jobs:
             type=raw,value=${{ steps.tag.outputs.image_tag }}
 
       - name: Build and push to ECR
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
           file: deploy/consolidated/Dockerfile.node
@@ -106,6 +107,7 @@ jobs:
   build-push-admin-web:
     name: build baalvion/admin-web
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     continue-on-error: true   # non-fatal: admin console is a nice-to-have, never blocks the backend roll
     outputs:
       image_tag: ${{ steps.tag.outputs.image_tag }}
@@ -113,10 +115,10 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
 
       - name: Configure AWS credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v6
+        uses: aws-actions/configure-aws-credentials@cbe3b392738ccf3f987d68400dafcf4b0624a56c # v6.2.4
         with:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ secrets.CORE2_AWS_DEPLOY_ROLE_ARN }}
@@ -124,7 +126,7 @@ jobs:
 
       - name: Log in to Amazon ECR
         id: ecr
-        uses: aws-actions/amazon-ecr-login@v2
+        uses: aws-actions/amazon-ecr-login@03f1aad4c6c7ffd436567f42f9384779290529bd # v2.1.7
 
       - name: Ensure ECR repository exists
         run: |
@@ -138,7 +140,7 @@ jobs:
 
       - name: Resolve image tags
         id: meta
-        uses: docker/metadata-action@v6
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
           images: ${{ steps.ecr.outputs.registry }}/baalvion/admin-web
           tags: |
@@ -147,7 +149,7 @@ jobs:
             type=raw,value=${{ steps.tag.outputs.image_tag }}
 
       - name: Build and push admin-web to ECR
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
           file: Frontend/admin-platform/Dockerfile.deploy
@@ -171,6 +173,7 @@ jobs:
   build-push-auth-web:
     name: build baalvion/auth-baalvion
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     continue-on-error: true   # first-time build for this image; never block the core roll
     outputs:
       image_tag: ${{ steps.tag.outputs.image_tag }}
@@ -178,10 +181,10 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
 
       - name: Configure AWS credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v6
+        uses: aws-actions/configure-aws-credentials@cbe3b392738ccf3f987d68400dafcf4b0624a56c # v6.2.4
         with:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ secrets.CORE2_AWS_DEPLOY_ROLE_ARN }}
@@ -189,7 +192,7 @@ jobs:
 
       - name: Log in to Amazon ECR
         id: ecr
-        uses: aws-actions/amazon-ecr-login@v2
+        uses: aws-actions/amazon-ecr-login@03f1aad4c6c7ffd436567f42f9384779290529bd # v2.1.7
 
       - name: Ensure ECR repository exists
         run: |
@@ -203,7 +206,7 @@ jobs:
 
       - name: Resolve image tags
         id: meta
-        uses: docker/metadata-action@v6
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
           images: ${{ steps.ecr.outputs.registry }}/baalvion/auth-baalvion
           tags: |
@@ -212,7 +215,7 @@ jobs:
             type=raw,value=${{ steps.tag.outputs.image_tag }}
 
       - name: Build and push auth-baalvion to ECR
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
           file: Frontend/auth-baalvion/Dockerfile
@@ -235,22 +238,23 @@ jobs:
           cache-to: type=gha,mode=max,scope=box2-auth-web
 
   # ════════════════════════════ 3) build + push payment-service (Java) ════════════════════════════
-  # NOTE: nothing else in the repo currently builds+pushes baalvion/payment-service — the
-  # comment in financial-services.yml pointing at deploy.yml is stale (deploy.yml was deleted
-  # 2026-07-02). This is the one live pipeline that produces this image.
+  # NOTE: nothing else in the repo builds+pushes baalvion/payment-service. This is the
+  # one live pipeline that produces it; financial-services.yml builds + Trivy-scans a
+  # local tag only.
   build-push-payment:
     name: build baalvion/payment-service
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     outputs:
       image_tag: ${{ steps.tag.outputs.image_tag }}
     steps:
       - uses: actions/checkout@v7
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
 
       - name: Configure AWS credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v6
+        uses: aws-actions/configure-aws-credentials@cbe3b392738ccf3f987d68400dafcf4b0624a56c # v6.2.4
         with:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ secrets.CORE2_AWS_DEPLOY_ROLE_ARN }}
@@ -258,7 +262,7 @@ jobs:
 
       - name: Log in to Amazon ECR
         id: ecr
-        uses: aws-actions/amazon-ecr-login@v2
+        uses: aws-actions/amazon-ecr-login@03f1aad4c6c7ffd436567f42f9384779290529bd # v2.1.7
 
       - name: Ensure ECR repository exists
         run: |
@@ -272,7 +276,7 @@ jobs:
 
       - name: Resolve image tags
         id: meta
-        uses: docker/metadata-action@v6
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
           images: ${{ steps.ecr.outputs.registry }}/baalvion/payment-service
           tags: |
@@ -281,7 +285,7 @@ jobs:
             type=raw,value=${{ steps.tag.outputs.image_tag }}
 
       - name: Build and push payment-service to ECR
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: Backend/services/commerce/financial-services-java
           file: Backend/services/commerce/financial-services-java/Dockerfile
@@ -300,6 +304,7 @@ jobs:
   build-push-community:
     name: build baalvion/community-service
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     continue-on-error: true   # first-time build for this image; never block the core roll
     outputs:
       image_tag: ${{ steps.tag.outputs.image_tag }}
@@ -307,10 +312,10 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
 
       - name: Configure AWS credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v6
+        uses: aws-actions/configure-aws-credentials@cbe3b392738ccf3f987d68400dafcf4b0624a56c # v6.2.4
         with:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ secrets.CORE2_AWS_DEPLOY_ROLE_ARN }}
@@ -318,7 +323,7 @@ jobs:
 
       - name: Log in to Amazon ECR
         id: ecr
-        uses: aws-actions/amazon-ecr-login@v2
+        uses: aws-actions/amazon-ecr-login@03f1aad4c6c7ffd436567f42f9384779290529bd # v2.1.7
 
       - name: Ensure ECR repository exists
         run: |
@@ -332,7 +337,7 @@ jobs:
 
       - name: Resolve image tags
         id: meta
-        uses: docker/metadata-action@v6
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
           images: ${{ steps.ecr.outputs.registry }}/baalvion/community-service
           tags: |
@@ -341,7 +346,7 @@ jobs:
             type=raw,value=${{ steps.tag.outputs.image_tag }}
 
       - name: Build and push community-service to ECR
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
           file: Backend/services/ecosystem/community-service/Dockerfile
@@ -356,6 +361,7 @@ jobs:
   build-push-giftcard:
     name: build baalvion/giftcard-service
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     continue-on-error: true   # first-time build for this image; never block the core roll
     outputs:
       image_tag: ${{ steps.tag.outputs.image_tag }}
@@ -363,10 +369,10 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
 
       - name: Configure AWS credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v6
+        uses: aws-actions/configure-aws-credentials@cbe3b392738ccf3f987d68400dafcf4b0624a56c # v6.2.4
         with:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ secrets.CORE2_AWS_DEPLOY_ROLE_ARN }}
@@ -374,7 +380,7 @@ jobs:
 
       - name: Log in to Amazon ECR
         id: ecr
-        uses: aws-actions/amazon-ecr-login@v2
+        uses: aws-actions/amazon-ecr-login@03f1aad4c6c7ffd436567f42f9384779290529bd # v2.1.7
 
       - name: Ensure ECR repository exists
         run: |
@@ -388,7 +394,7 @@ jobs:
 
       - name: Resolve image tags
         id: meta
-        uses: docker/metadata-action@v6
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
           images: ${{ steps.ecr.outputs.registry }}/baalvion/giftcard-service
           tags: |
@@ -397,7 +403,7 @@ jobs:
             type=raw,value=${{ steps.tag.outputs.image_tag }}
 
       - name: Build and push giftcard-service to ECR
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
           file: Backend/services/ecosystem/giftcard-service/Dockerfile
@@ -414,6 +420,7 @@ jobs:
     needs: [build-push-backend, build-push-admin-web, build-push-auth-web, build-push-payment, build-push-community, build-push-giftcard]
     if: ${{ github.event.inputs.roll != 'false' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     environment: production
     env:
       EC2_HOST: ${{ secrets.CORE2_EC2_HOST }}
@@ -442,7 +449,7 @@ jobs:
 
       - name: Apply auth-service OAuth platform tables migration (idempotent)
         if: steps.gate.outputs.ready == 'true'
-        uses: appleboy/ssh-action@v1
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
           host: ${{ secrets.CORE2_EC2_HOST }}
           username: ${{ secrets.CORE2_EC2_USER }}
@@ -481,7 +488,7 @@ jobs:
 
       - name: Apply auth-service lifecycle/re-engagement columns migration (idempotent)
         if: steps.gate.outputs.ready == 'true'
-        uses: appleboy/ssh-action@v1
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
           host: ${{ secrets.CORE2_EC2_HOST }}
           username: ${{ secrets.CORE2_EC2_USER }}
@@ -511,7 +518,7 @@ jobs:
 
       - name: Pull + roll on box2
         if: steps.gate.outputs.ready == 'true'
-        uses: appleboy/ssh-action@v1
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         env:
           IMAGE_TAG: ${{ needs.build-push-backend.outputs.image_tag }}
           PAYMENTS_IMAGE_TAG: ${{ needs.build-push-payment.outputs.image_tag }}
@@ -604,7 +611,7 @@ jobs:
       - name: Apply app-commerce service migrations (idempotent)
         if: steps.gate.outputs.ready == 'true'
         continue-on-error: true   # never block the backend roll on a migration hiccup
-        uses: appleboy/ssh-action@v1
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
           host: ${{ secrets.CORE2_EC2_HOST }}
           username: ${{ secrets.CORE2_EC2_USER }}
@@ -637,7 +644,7 @@ jobs:
       - name: Apply cms-service + news-service migrations (idempotent)
         if: steps.gate.outputs.ready == 'true'
         continue-on-error: true   # never block the backend roll on a migration hiccup
-        uses: appleboy/ssh-action@v1
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
           host: ${{ secrets.CORE2_EC2_HOST }}
           username: ${{ secrets.CORE2_EC2_USER }}
@@ -665,7 +672,7 @@ jobs:
       - name: Bootstrap / repair platform super-admin (idempotent)
         if: steps.gate.outputs.ready == 'true'
         continue-on-error: true   # never block the backend roll on the admin seed
-        uses: appleboy/ssh-action@v1
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
           host: ${{ secrets.CORE2_EC2_HOST }}
           username: ${{ secrets.CORE2_EC2_USER }}
@@ -718,7 +725,7 @@ jobs:
       # round trip, and it works even when the new image is the thing that is broken.
       - name: Roll back to the previous images
         if: failure() && steps.smoke.outcome == 'failure' && steps.gate.outputs.ready == 'true'
-        uses: appleboy/ssh-action@v1
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
           host: ${{ secrets.CORE2_EC2_HOST }}
           username: ${{ secrets.CORE2_EC2_USER }}

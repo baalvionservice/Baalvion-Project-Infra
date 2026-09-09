@@ -6,10 +6,11 @@ on:
 jobs:
   diag:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment: production
     steps:
       - name: Check app-platform container status + law-service pm2 status
-        uses: appleboy/ssh-action@v1
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
           host: ${{ secrets.CORE2_EC2_HOST }}
           username: ${{ secrets.CORE2_EC2_USER }}

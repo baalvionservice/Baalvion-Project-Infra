@@ -16,6 +16,7 @@ jobs:
   lint-typecheck:
     name: Lint & Type Check
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - uses: actions/checkout@v7
@@ -24,7 +25,7 @@ jobs:
       # at the repo root and there is no per-app package-lock.json, so dependency
       # install must run from the root via pnpm — not `npm ci` in the app folder.
       - name: Setup pnpm
-        uses: pnpm/action-setup@v6.0.10
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
 
       - name: Set up Node.js
         uses: actions/setup-node@v7
@@ -54,6 +55,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     needs: lint-typecheck
     if: github.ref == 'refs/heads/main'
 
@@ -67,7 +69,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v6.0.10
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
 
       - name: Set up Node.js
         uses: actions/setup-node@v7
@@ -98,6 +100,7 @@ jobs:
     # legitimately 'skipped' on a PR run — only 'failure' should page.
     if: always() && (needs.lint-typecheck.result == 'failure' || needs.build.result == 'failure')
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/slack-notify

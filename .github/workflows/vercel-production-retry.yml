@@ -41,6 +41,7 @@ jobs:
   retry:
     name: Redeploy projects behind main
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     # Only ever act on the trunk. A scheduled run on a fork or a stale ref must
     # not push someone else's commit to production.
     if: github.repository == 'baalvionservice/Baalvion-Project-Infra'

@@ -19,6 +19,7 @@ jobs:
   backend:
     name: law-service — test & migrate
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:15-alpine
@@ -50,7 +51,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: pnpm/action-setup@v6.0.10
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
 
       - uses: actions/setup-node@v7
         with:
@@ -78,10 +79,11 @@ jobs:
   frontend:
     name: Law-Elite — build
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
 
-      - uses: pnpm/action-setup@v6.0.10
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
 
       - uses: actions/setup-node@v7
         with:
@@ -102,15 +104,18 @@ jobs:
           NEXT_TELEMETRY_DISABLED: '1'
 
   # NOTE: the GHCR `docker` build & push job was removed during the ECR consolidation.
-  # law-service is now built + pushed to Amazon ECR (repo law-service) by the single
-  # canonical pipeline: .github/workflows/deploy.yml. This workflow is now test-only
-  # (backend unit tests + migrations, and the Law-Elite frontend production build).
+  # deploy.yml, which pushed a law-service image, was deleted 2026-07-02. law-service
+  # now ships inside the consolidated baalvion/backend image built by
+  # deploy-consolidated-box2.yml (pm2, see deploy/consolidated/pm2/platform.config.js).
+  # This workflow is test-only (backend unit tests + migrations, and the Law-Elite
+  # frontend production build).
 
   notify-ci-failure:
     name: Notify Slack (CI failure)
     needs: [backend, frontend]
     if: always() && (needs.backend.result == 'failure' || needs.frontend.result == 'failure')
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/slack-notify

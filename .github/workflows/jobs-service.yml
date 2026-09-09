@@ -26,6 +26,7 @@ jobs:
   lint-and-test:
     name: Lint & Test
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     services:
       postgres:
@@ -65,7 +66,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Set up pnpm
-        uses: pnpm/action-setup@v6.0.10
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
 
       - name: Set up Node.js
         uses: actions/setup-node@v7
@@ -85,15 +86,18 @@ jobs:
         run: pnpm test --if-present
 
   # NOTE: the GHCR `build-docker` push job was removed during the ECR consolidation.
-  # jobs-service is not part of the single-host production stack; image builds for the
-  # production fleet are owned by the canonical pipeline (.github/workflows/deploy.yml,
-  # which pushes only to Amazon ECR). This workflow is now test-only.
+  # deploy.yml, named here as the owner of production image builds, was deleted
+  # 2026-07-02. jobs-service ships inside the consolidated baalvion/backend image
+  # built by deploy-consolidated-box2.yml (pm2, see
+  # deploy/consolidated/pm2/ecosystem.config.js) — no standalone image is pushed for
+  # it. This workflow is test-only.
 
   notify-ci-failure:
     name: Notify Slack (CI failure)
     needs: lint-and-test
     if: always() && needs.lint-and-test.result == 'failure'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/slack-notify
