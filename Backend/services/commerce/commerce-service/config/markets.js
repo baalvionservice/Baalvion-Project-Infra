@@ -18,6 +18,7 @@
  */
 
 const fxRateProvider = require('../service/fxRateProvider');
+const { Money } = require('@baalvion/money');
 
 const BASE_CURRENCY = 'USD';
 
@@ -55,8 +56,23 @@ function listMarkets() {
   return SUPPORTED_MARKETS.map((c) => ({ ...MARKETS[c] }));
 }
 
-function applyRounding(amount, roundTo) {
-  if (!roundTo || roundTo <= 1) return Math.round(amount * 100) / 100; // 2dp
+/**
+ * Round a converted price for display in a market.
+ *
+ * `roundTo` is a psychological-pricing step (round INR to the nearest 100, AED to the nearest
+ * 10), which is a whole-unit operation and stays as it is. The default path rounds to the
+ * currency's own precision through exact minor units rather than `x * 100 / 100`, which cannot
+ * recover precision a float multiply has already lost — and which silently assumes two decimals
+ * for every currency.
+ */
+function applyRounding(amount, roundTo, currency = BASE_CURRENCY) {
+  if (!roundTo || roundTo <= 1) {
+    try {
+      return Number(Money.fromDatabaseValue(amount, currency).toDecimalString());
+    } catch {
+      return Math.round(Number(amount) * 100) / 100; // unknown currency: prior behaviour
+    }
+  }
   return Math.round(amount / roundTo) * roundTo;
 }
 

@@ -1246,6 +1246,9 @@ importers:
       '@baalvion/graceful-shutdown':
         specifier: workspace:*
         version: link:../../../packages/graceful-shutdown
+      '@baalvion/money':
+        specifier: workspace:*
+        version: link:../../../packages/money
       '@baalvion/search':
         specifier: workspace:*
         version: link:../../../packages/search
@@ -3096,6 +3099,9 @@ importers:
       '@baalvion/graceful-shutdown':
         specifier: workspace:*
         version: link:../../../packages/graceful-shutdown
+      '@baalvion/money':
+        specifier: workspace:*
+        version: link:../../../packages/money
       '@baalvion/sdk':
         specifier: workspace:*
         version: link:../../../packages/sdk
