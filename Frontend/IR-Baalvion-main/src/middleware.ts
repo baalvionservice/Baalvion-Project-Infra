@@ -4,9 +4,10 @@ import { getRequiredPermissionForRoute } from '@/lib/rbac/routeRegistry';
 import {
   INVITE_COOKIE,
   REQUEST_ACCESS_PATH,
-  codeMatches,
-  configuredInviteCode,
+  configuredInvites,
   isInviteGated,
+  resolveCode,
+  resolveInviteId,
 } from '@/lib/invite-gate';
 
 /**
@@ -49,31 +50,37 @@ const CENTRAL_CONSOLE_URL =
     ? `${CMS_URL.replace(/\/$/, '')}/websites/${CMS_WEBSITE_ID}`
     : '');
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Investor-side invitation gate. See lib/invite-gate.ts for the s.42 constraint behind it.
   if (isInviteGated(pathname)) {
-    const expected = configuredInviteCode(process.env);
+    const invites = configuredInvites(process.env);
 
     // An invitation link carries the code once; it is exchanged for a cookie and stripped from
-    // the URL so the code does not end up in browser history, referrers or shared links.
+    // the URL so the code does not end up in browser history, referrers or shared links. The
+    // cookie holds the invitation ID, never the code — a stolen cookie then names a single
+    // revocable recipient instead of handing over a working credential.
     const supplied = request.nextUrl.searchParams.get('code');
-    if (expected && supplied && codeMatches(supplied, expected)) {
+    const redeemed = supplied ? await resolveCode(supplied, invites) : null;
+    if (redeemed) {
       const clean = request.nextUrl.clone();
       clean.searchParams.delete('code');
       const response = NextResponse.redirect(clean);
-      response.cookies.set(INVITE_COOKIE, expected, {
+      response.cookies.set(INVITE_COOKIE, redeemed.id, {
         httpOnly: true,
         sameSite: 'lax',
         secure: IS_PRODUCTION,
         path: '/',
         maxAge: 60 * 60 * 24 * 30,
       });
+      // Who was let in, and when. s.42 is about identified persons, so an access record that
+      // cannot name the person is not much of a record.
+      console.info(`[invite] redeemed id=${redeemed.id} label=${JSON.stringify(redeemed.label)} path=${pathname}`);
       return response;
     }
 
-    const invited = expected && codeMatches(request.cookies.get(INVITE_COOKIE)?.value, expected);
+    const invited = resolveInviteId(request.cookies.get(INVITE_COOKIE)?.value, invites);
     // Development stays open so the funnel is workable locally; production does not.
     if (!invited && IS_PRODUCTION) {
       const url = request.nextUrl.clone();
