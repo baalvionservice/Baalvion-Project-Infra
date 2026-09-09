@@ -11,7 +11,10 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
     },
-    "./tailwind": "./tailwind-preset.cjs",
+    "./tailwind": {
+      "types": "./tailwind-preset.d.ts",
+      "default": "./tailwind-preset.cjs"
+    },
     "./base.css": "./styles/base.css",
     "./identity.css": "./styles/identity.css",
     "./styles/base.css": "./styles/base.css",
@@ -20,7 +23,9 @@
   "files": [
     "dist",
     "styles",
-    "tailwind-preset.cjs"
+    "tailwind-preset.cjs",
+    "tailwind-preset.d.ts",
+    "tailwind.d.ts"
   ],
   "scripts": {
     "build": "tsup",

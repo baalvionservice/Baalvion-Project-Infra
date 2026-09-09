@@ -1,7 +1,8 @@
 import type { Config } from 'tailwindcss';
+import baalvionDesign from '@baalvion/design/tailwind';
 
 const config: Config = {
-  presets: [require('@baalvion/design/tailwind')],
+  presets: [baalvionDesign],
   darkMode: ['class'],
   content: ['./src/**/*.{ts,tsx}'],
   theme: {

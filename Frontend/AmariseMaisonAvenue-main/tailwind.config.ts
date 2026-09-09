@@ -1,8 +1,9 @@
 import type { Config } from "tailwindcss";
 import tailwindcssAnimate from "tailwindcss-animate";
+import baalvionDesign from "@baalvion/design/tailwind";
 
 export default {
-  presets: [require('@baalvion/design/tailwind')],
+  presets: [baalvionDesign],
   darkMode: ["class"],
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
