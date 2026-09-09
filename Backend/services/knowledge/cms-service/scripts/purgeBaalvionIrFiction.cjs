@@ -187,6 +187,15 @@ async function main() {
     return;
   }
 
+  // Published content cannot be deleted outright — contentService refuses with
+  // "Archive it first." Archive the whole set in one bulk call, then delete.
+  const ids = doomed.map((d) => d.id);
+  const arch = await req('POST', `${BASE}/content/bulk`, token, { ids, action: 'archive' });
+  if (arch.status !== 200 && arch.status !== 204) {
+    throw new Error(`archive failed -> ${arch.status} ${JSON.stringify(arch.data).slice(0, 200)}`);
+  }
+  console.log(`\n  archived ${ids.length} item(s)`);
+
   let gone = 0;
   for (const d of doomed) {
     const r = await req('DELETE', `${BASE}/content/${d.id}`, token);
