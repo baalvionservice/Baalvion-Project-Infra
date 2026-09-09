@@ -21,6 +21,11 @@ env:
   GO_VERSION: '1.25'
   JAVA_VERSION: '17'
   MAVEN_OPTS: '-Dmaven.repo.local=${{ github.workspace }}/.m2/repository'
+  # Shared Turbo build cache. Unset secrets simply mean turbo falls back to its
+  # local cache, so this is safe to leave in place before the secrets exist.
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+  TURBO_REMOTE_CACHE_SIGNATURE_KEY: ${{ secrets.TURBO_REMOTE_CACHE_SIGNATURE_KEY }}
 
 # Least-privilege default token; jobs that need more must opt in explicitly.
 permissions:
