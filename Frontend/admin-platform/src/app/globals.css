@@ -84,6 +84,37 @@
   }
 }
 
+/* ── Branded loading state (BaalvionLoader) ──────────────────────────────────
+   Same red as the sign-in screen. Transform/opacity only, and still on brand when
+   motion is reduced — the arc parks instead of disappearing. */
+/* colour is inherited so the same mark works on the light console and the dark auth stage */
+.bvl { position: relative; color: inherit; }
+.bvl__frame { opacity: 0.14; }
+.bvl__spin { animation: bvl-spin 1.5s linear infinite; }
+.bvl__monogram { opacity: 0.9; animation: bvl-breathe 2.4s ease-in-out infinite; }
+.bvl__bar {
+  display: block;
+  width: 7rem;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, #e0122c, transparent);
+  background-size: 200% 100%;
+  animation: bvl-sweep 1.5s ease-in-out infinite;
+}
+@keyframes bvl-spin { to { transform: rotate(360deg); } }
+@keyframes bvl-breathe {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+@keyframes bvl-sweep {
+  0% { background-position: 150% 0; }
+  100% { background-position: -50% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bvl__spin, .bvl__monogram, .bvl__bar { animation: none; }
+  .bvl__bar { background: #e0122c; opacity: 0.5; }
+}
+
 @layer utilities {
   .scrollbar-thin {
     scrollbar-width: thin;

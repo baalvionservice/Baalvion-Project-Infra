@@ -12,6 +12,29 @@ module.exports = {
     apiVersion:  'v1',
     baseUrl:     process.env.API_BASE_URL  || 'http://localhost:3001',
     frontendUrl: process.env.FRONTEND_URL  || 'http://localhost:8080',
+
+    /**
+     * Where a lifecycle link (verify, reset, invite) should point for a given brand.
+     *
+     * FRONTEND_URL is one global setting shared by every application on the platform, so a
+     * verification link was always sent to whichever app it named — which meant CanWeMarry's
+     * links landed on another product's origin. Rather than change the global and break the
+     * others, each brand may override it with FRONTEND_URL_<BRAND>; anything without an
+     * override keeps exactly the behaviour it has today.
+     *
+     *   FRONTEND_URL_CANWEMARRY=https://canwemarry.com
+     *
+     * @param {string|null} brand slug from utils/brandFromOrigin.js
+     */
+    frontendUrlFor(brand) {
+        const base = process.env.FRONTEND_URL || 'http://localhost:8080';
+        if (!brand) return base;
+        const key = `FRONTEND_URL_${String(brand).toUpperCase().replace(/[^A-Z0-9]/g, '_')}`;
+        const override = process.env[key];
+        // Only an absolute http(s) origin is accepted: a malformed override must not turn a
+        // verification link into something that points nowhere, or somewhere else.
+        return /^https?:\/\//i.test(String(override || '')) ? override.replace(/\/$/, '') : base;
+    },
     corsOrigins: parseList(process.env.CORS_ORIGINS, ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:8080']),
 
     refreshCookieName: process.env.REFRESH_COOKIE_NAME || 'baalvion_refresh',

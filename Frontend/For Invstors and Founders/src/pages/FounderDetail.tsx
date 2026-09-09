@@ -2,6 +2,9 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { getPublicFounder } from "@/lib/publicApi";
+import PageSeo from "@/components/seo/PageSeo";
+import { memberPath } from "@/lib/directory-url";
 import MainLayout from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -52,22 +55,33 @@ export default function FounderDetail() {
     setPipe((pp as any[])?.[0]?.stage || "none");
   }, [user, id, isMe]);
 
+  // Public first: company, founder, sector, stage and location render with no account, which is
+  // what makes the page indexable. Raise size, valuation, deck, traction and team are NOT in the
+  // public payload — they arrive only in the signed-in pass below.
   useEffect(() => {
     (async () => {
-      const { data } = await supabase.from("profiles").select("*").eq("id", id).maybeSingle();
-      if (!data) { toast.error("Founder not found"); navigate("/founders"); return; }
-      setF(data);
-      const [{ data: t }, { data: m }, { data: v }] = await Promise.all([
+      const pub = await getPublicFounder(String(id));
+      if (!pub) { toast.error("Company not found"); navigate("/founders"); return; }
+      setF(pub);
+      setLoading(false);
+    })();
+  }, [id, navigate]);
+
+  useEffect(() => {
+    if (!user || !id) return;
+    (async () => {
+      const [{ data: full }, { data: t }, { data: m }, { data: v }] = await Promise.all([
+        supabase.from("profiles").select("*").eq("id", id).maybeSingle(),
         supabase.from("company_members" as any).select("*").eq("founder_id", id),
         supabase.from("traction_metrics" as any).select("*").eq("founder_id", id).order("as_of", { ascending: true }),
         supabase.from("verifications" as any).select("kind, status").eq("user_id", id),
       ]);
+      if (full) setF((prev: any) => ({ ...(prev || {}), ...(full as any) }));
       setTeam((t as any[]) || []);
       setTraction((m as any[]) || []);
       setVerifs(((v as any[]) || []).filter((x) => x.status === "verified").map((x) => x.kind));
-      setLoading(false);
     })();
-  }, [id, navigate]);
+  }, [user, id]);
 
   useEffect(() => { loadConn(); }, [loadConn]);
 
@@ -101,8 +115,27 @@ export default function FounderDetail() {
   const mrr = traction.filter((m) => m.metric_key === "mrr");
   const latest = (k: string) => { const r = traction.filter((m) => m.metric_key === k); return r[r.length - 1]; };
 
+  const place = [f.city, f.state, f.country].filter(Boolean).join(", ") || f.location || f.region || null;
+
   return (
     <MainLayout>
+      <PageSeo
+        title={`${f.company_name || f.full_name}${place ? ` — ${place}` : ""} | Company Profile | Baalvion`}
+        description={
+          f.headline || f.company_about ||
+          `${f.company_name || f.full_name} is a ${f.sector || "startup"} company${place ? ` based in ${place}` : ""}${f.stage ? ` at ${f.stage} stage` : ""}.`
+        }
+        path={memberPath(f)}
+        image={f.avatar_url || undefined}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: f.company_name || f.full_name,
+          description: f.company_about || f.headline || undefined,
+          address: place || undefined,
+          founder: f.full_name ? { "@type": "Person", name: f.full_name } : undefined,
+        }}
+      />
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <Button variant="ghost" size="sm" className="mb-4" onClick={() => navigate("/founders")}><ArrowLeft className="w-4 h-4 mr-1" />All founders</Button>
 

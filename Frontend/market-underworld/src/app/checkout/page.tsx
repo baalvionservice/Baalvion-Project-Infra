@@ -191,9 +191,11 @@ export default function CheckoutPage() {
           rzp.open();
         });
       } else {
-        // No provider keys configured — order-service falls back to its non-production mock
-        // provider, which captures immediately with no user interaction required.
-        await confirmPayment(MARKET_UNDERWORLD_STORE_ID, order.id, { intentId: intent.intentId });
+        // The intent carried no hosted-checkout handle: no redirect URL, no form-post, no
+        // Razorpay key. This branch used to confirm the order anyway, which reached
+        // order-service's mock provider and marked a REAL order paid without a payment. Refuse
+        // instead — an order that cannot be charged must not become an order that looks settled.
+        throw new Error('Payment could not be started. Please choose another method or try again shortly.');
       }
 
       await clear();

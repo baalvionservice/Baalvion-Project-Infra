@@ -32,5 +32,15 @@ module.exports = {
     // the default. ~448M cap keeps app-ecosystem (crm 320 + ir 320 + jobs 448 = 1088M) under
     // its 1536m mem_limit. Port 3002 = the Caddy /api-bff/ecosystem/jobs/* target.
     svc('jobs-service',            'ecosystem/jobs-service',            3002, 256, 448),
+    // Restored to the box: each of these DOES have an admin-console panel (client.ts defines
+    // ctm/mining/realEstate/brand/about service clients, and Caddy already routes
+    // /api-bff/ecosystem/<svc>/*), so with them absent the console showed them permanently
+    // "down". Smaller caps than the three above — they are thin CRUD services, and 5 x 192M on
+    // top of the existing 1088M needs the container's mem_limit raised to 2048m to match.
+    svc('ctm-service',             'ecosystem/ctm-service',             3017, 128, 192),
+    svc('mining-service',          'ecosystem/mining-service',          3003, 128, 192),
+    svc('real-estate-service',     'ecosystem/real-estate-service',     3005, 128, 192),
+    svc('brand-connector-service', 'ecosystem/brand-connector-service', 3006, 128, 192),
+    svc('about-service',           'ecosystem/about-service',           3010, 128, 192),
   ],
 };

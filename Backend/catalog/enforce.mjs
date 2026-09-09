@@ -13,6 +13,7 @@
  *   C5  comms via contracts/events     (dependsOn resolves; events exist in the registry)
  *   C6  identity only via auth-node    (no ad-hoc token verify outside the authority)
  *   C7  kernel owns identity only      (Prisma confined to the kernel)
+ *   C8  service declares its runtime   (spec.runtime — the status prober's address book)
  *
  * Deps: `yaml` + `ajv` (catalog devDeps). Soft-skips catalog parsing when absent
  * so the repo still boots, but source-level rules always run.
@@ -175,6 +176,15 @@ if (YAML) {
     for (const e of [...(spec.consumesEvents || []), ...(spec.producesEvents || [])]) if (!knownEvents.has(e)) add('C5', file, `references unknown event '${e}'`);
     // scaffold: metadata.path must exist
     if (doc.metadata.path && !existsSync(join(ROOT, doc.metadata.path))) add('SCAFFOLD', file, `metadata.path '${doc.metadata.path}' does not exist`);
+    // C8: a service must say where it answers, or say plainly that nothing runs it.
+    // The status console derives its probe targets from this block, so an undeclared service
+    // is an unmonitored one — which is how platform/realtime-service ran for months with
+    // nothing watching it. 'not-deployed' is a valid, honest answer; silence is not.
+    if (doc.kind === 'Service') {
+      const rt = spec.runtime;
+      if (!rt) add('C8', file, 'no spec.runtime — declare where it answers (or deployment: not-deployed)');
+      else if (rt.deployment !== 'not-deployed' && !rt.port) add('C8', file, `deployment '${rt.deployment}' but no port`);
+    }
   }
   // C4: exactly one public entrypoint, and it is the gateway
   if (publicIngress.length === 0) add('C4', 'catalog', 'no service declares ingress: public — the gateway must be the single entrypoint');
@@ -220,6 +230,7 @@ const RULES = {
   C1: 'one service = one DB', C2: 'no cross-service DB access', C3: 'no auth duplication',
   C4: 'gateway is the only entrypoint', C5: 'comms via contracts/events',
   C6: 'identity only via auth-node', C7: 'kernel owns identity only',
+  C8: 'service declares where it answers',
   CATALOG: 'catalog descriptors valid', SCAFFOLD: 'services registered via scaffold',
 };
 console.log('BAALVION SYSTEM CONTRACT — enforcement\n');

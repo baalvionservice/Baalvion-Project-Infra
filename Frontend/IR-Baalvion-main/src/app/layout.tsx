@@ -10,6 +10,7 @@ import QuickLinksSection from '@/components/sections/quick-links-section';
 import Script from 'next/script';
 import { AppConfig } from '@/config';
 import { Analytics } from '@/components/seo/Analytics';
+import { CIN, INCORPORATED_ON, IR_EMAIL, IR_PHONE, LEGAL_ENTITY_NAME, OPERATING_ADDRESS } from '@baalvion/company';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -95,14 +96,15 @@ export default function RootLayout({
     '@type': ['Organization', 'FinancialService'],
     '@id': `${AppConfig.baseUrl}/#organization`,
     name: 'Baalvion',
-    alternateName: 'Baalvion Industries Pvt Ltd',
+    legalName: LEGAL_ENTITY_NAME,
+    identifier: { '@type': 'PropertyValue', name: 'CIN', value: CIN },
     url: AppConfig.baseUrl,
     logo: {
       '@type': 'ImageObject',
       url: 'https://baalvion.com/logo.png',
     },
     description: 'Baalvion is an AI-native operating system for global B2B trade, unifying logistics, trade finance and compliance on a single platform.',
-    foundingDate: '2025',
+    foundingDate: INCORPORATED_ON,
     slogan: 'The operating system for global trade.',
     knowsAbout: [
       'Artificial Intelligence',
@@ -117,17 +119,17 @@ export default function RootLayout({
     areaServed: 'Worldwide',
     address: {
       '@type': 'PostalAddress',
-      streetAddress: 'Yeshwant Avenue Building, NX',
-      addressLocality: 'Virar',
-      addressRegion: 'Maharashtra',
-      postalCode: '401303',
-      addressCountry: 'IN',
+      streetAddress: OPERATING_ADDRESS.street,
+      addressLocality: OPERATING_ADDRESS.locality,
+      addressRegion: OPERATING_ADDRESS.region,
+      postalCode: OPERATING_ADDRESS.postalCode,
+      addressCountry: OPERATING_ADDRESS.country,
     },
     contactPoint: {
       '@type': 'ContactPoint',
-      telephone: '+91-8951284770',
+      telephone: IR_PHONE,
       contactType: 'Investor Relations',
-      email: 'invrel@baalvion.com',
+      email: IR_EMAIL,
       areaServed: 'Worldwide',
       availableLanguage: ['English'],
     },

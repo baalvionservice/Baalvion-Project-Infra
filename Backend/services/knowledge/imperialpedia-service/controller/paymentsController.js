@@ -1,6 +1,7 @@
 'use strict';
 const db = require('../models');
 const pay = require('../service/payments');
+const { Money } = require('@baalvion/money');
 
 // Create a subscription + Razorpay checkout. Price is SERVER-AUTHORITATIVE — computed from the
 // `plans` row by tier_key + billing_cycle, never trusted from the client.
@@ -72,7 +73,7 @@ exports.handleWebhook = async (req, res) => {
             const payment = await db.Payment.findOne({ where: { provider_ref: evt.ref } });
             if (payment) {
                 if (evt.amountMinor != null) {
-                    const expectedMinor = Math.round(Number(payment.amount) * 100);
+                    const expectedMinor = Number(Money.fromDatabaseValue(payment.amount, payment.currency).minor);
                     const currencyOk = !evt.currency || String(evt.currency).toUpperCase() === String(payment.currency).toUpperCase();
                     if (Number(evt.amountMinor) !== expectedMinor || !currencyOk) {
                         return res.status(400).json({ error: 'amount mismatch' });

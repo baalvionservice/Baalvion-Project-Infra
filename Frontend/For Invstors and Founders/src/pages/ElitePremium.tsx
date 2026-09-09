@@ -1,58 +1,74 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  fetchTiers, startMembershipCheckout, awaitMembership,
+  type MembershipTier, type TierRow, type MembershipRow,
+} from "@/lib/gatewayCheckout";
 import MainLayout from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Crown, Check, CreditCard, Bitcoin, Building2, Wallet, ShieldCheck, ArrowUp, Sparkles } from "lucide-react";
+import { Crown, Check, ShieldCheck, ArrowUp, Sparkles, type LucideIcon } from "lucide-react";
 
 const FEATURES: Record<string, string[]> = {
   founder: ["Full investor directory access", "Browse & post deals", "Founder profile + AI analysis", "Founders network & connections", "Warm-intro requests"],
   investor_partner: ["Everything in Founder", "Investor pipeline CRM (Kanban)", "Saved lists & startup comparison", "Priority warm intros & data-room access", "AI investor matching & deal flow"],
 };
-const PROVIDERS = [
-  { key: "razorpay", label: "Razorpay", icon: Wallet, note: "UPI, cards, netbanking" },
-  { key: "payu", label: "PayU", icon: Building2, note: "Cards, UPI, wallets" },
-  { key: "stripe", label: "Credit / Debit card", icon: CreditCard, note: "Visa, Mastercard, Amex" },
-  { key: "crypto", label: "Crypto", icon: Bitcoin, note: "BTC, ETH, USDC" },
-];
 
 export default function ElitePremium() {
   const navigate = useNavigate();
-  const [tiers, setTiers] = useState<any[]>([]);
-  const [membership, setMembership] = useState<any>(null);
+  const [tiers, setTiers] = useState<TierRow[]>([]);
+  const [membership, setMembership] = useState<MembershipRow | null>(null);
   const [grace, setGrace] = useState(5);
   const [loading, setLoading] = useState(true);
-  const [picker, setPicker] = useState<{ tier: string; quote: any } | null>(null);
   const [paying, setPaying] = useState("");
 
   const load = useCallback(async () => {
-    const { data } = await supabase.functions.invoke("payment-tiers", { body: {} });
-    if (data) { setTiers(data.tiers || []); setMembership(data.membership || null); setGrace(data.grace_days || 5); }
-    setLoading(false);
+    try {
+      const data = await fetchTiers();
+      setTiers(data.tiers || []);
+      setMembership(data.membership || null);
+      setGrace(data.grace_days || 5);
+    } catch {
+      setTiers([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
   useEffect(() => { load(); }, [load]);
 
-  const pay = async (provider: string) => {
-    if (!picker) return;
-    setPaying(provider);
-    const { data: order, error } = await supabase.functions.invoke("payment-order", { body: { provider, tier: picker.tier } });
-    if (error || !order) { setPaying(""); return toast.error("Could not start payment"); }
-    // Demo confirm. LIVE: open the provider's checkout (Razorpay modal / PayU redirect / Stripe Elements /
-    // Coinbase hosted_url) and call payment-confirm with the real gateway response payload.
-    const demoPayload: Record<string, any> = { payu: { status: "success" }, stripe: { status: "succeeded" }, crypto: { event: "charge:confirmed" }, razorpay: {} };
-    const { data: conf, error: e2 } = await supabase.functions.invoke("payment-confirm", { body: { payment_id: order.payment_id, payload: demoPayload[provider] || {} } });
-    setPaying(""); setPicker(null);
-    if (e2 || !conf) return toast.error("Payment could not be confirmed");
-    await load();
-    toast.success(`Payment successful — you're now ${picker.tier === "investor_partner" ? "an Investor Partner" : "a Founder member"}!`);
-    navigate("/investors");
+  // The browser names a TIER and nothing else: the price is quoted server-side and the provider is
+  // resolved by payment-service from the vault. The membership itself is granted only by the
+  // provider's verified webhook, so nothing here may announce success on its own.
+  const pay = async (tier: MembershipTier) => {
+    setPaying(tier);
+    try {
+      const outcome = await startMembershipCheckout(tier);
+      if (outcome.status === "cancelled") return;
+      if (outcome.status === "failed") { toast.error(outcome.message); return; }
+      if (outcome.status === "redirecting") return;
+      if (outcome.status === "awaiting_transfer") {
+        toast.info("Send the transfer shown to complete your membership — it activates once it confirms on-chain.");
+        return;
+      }
+      toast.info("Payment submitted — confirming with your bank…");
+      const confirmed = await awaitMembership(tier);
+      await load();
+      if (confirmed) {
+        toast.success(`Payment confirmed — you're now ${tier === "investor_partner" ? "an Investor Partner" : "a Founder member"}.`);
+        navigate("/investors");
+      } else {
+        toast.info("Payment received. Your membership activates as soon as it clears.");
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not start payment");
+    } finally {
+      setPaying("");
+    }
   };
 
-  const ICONS: Record<string, any> = { founder: Crown, investor_partner: ShieldCheck };
+  const ICONS: Record<string, LucideIcon> = { founder: Crown, investor_partner: ShieldCheck };
 
   return (
     <MainLayout>
@@ -90,8 +106,9 @@ export default function ElitePremium() {
                     {isCurrent ? (
                       <Button variant="outline" className="w-full pointer-events-none"><Check className="w-4 h-4 mr-2" />Current plan</Button>
                     ) : (
-                      <Button variant={featured ? "premium" : "default"} className="w-full" onClick={() => setPicker({ tier: t.key, quote: t.quote })}>
-                        <Sparkles className="w-4 h-4 mr-2" />{isUpgrade ? `Upgrade — $${due}` : `Get ${t.label} — $${due}`}
+                      <Button variant={featured ? "premium" : "default"} className="w-full" onClick={() => pay(t.key)} disabled={!!paying}>
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        {paying === t.key ? "Starting checkout…" : isUpgrade ? `Upgrade — $${due}` : `Get ${t.label} — $${due}`}
                       </Button>
                     )}
                   </CardContent>
@@ -100,28 +117,11 @@ export default function ElitePremium() {
             })}
           </div>
         )}
-        <p className="text-center text-xs text-muted-foreground mt-6">Secured payments via Razorpay, PayU, card & crypto. Demo mode until live API keys are configured.</p>
+        <p className="text-center text-xs text-muted-foreground mt-6">
+          Secure hosted checkout — card details are entered on the payment provider's page, never here.
+        </p>
       </div>
 
-      {/* Provider chooser */}
-      <Dialog open={!!picker} onOpenChange={(o) => !o && setPicker(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Pay ${picker?.quote?.amount ?? ""} — {picker?.tier === "investor_partner" ? "Investor Partner" : "Founder"}</DialogTitle>
-            <DialogDescription>{picker?.quote?.note || "Choose a payment method."}</DialogDescription>
-          </DialogHeader>
-          <div className="grid grid-cols-2 gap-3 py-2">
-            {PROVIDERS.map((p) => (
-              <button key={p.key} onClick={() => pay(p.key)} disabled={!!paying}
-                className="flex flex-col items-start gap-1 rounded-xl border border-border p-4 text-left hover:border-primary/50 hover:bg-secondary/40 transition-colors disabled:opacity-50">
-                <p.icon className="w-6 h-6 text-primary" />
-                <span className="font-medium text-sm">{paying === p.key ? "Processing…" : p.label}</span>
-                <span className="text-xs text-muted-foreground">{p.note}</span>
-              </button>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
     </MainLayout>
   );
 }

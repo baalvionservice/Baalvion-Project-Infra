@@ -16,7 +16,32 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
+      // Build-time configuration read by next.config / vite.config. Turbo 2 defaults to STRICT
+      // env mode, so anything not listed here is invisible to `next build` — the config falls
+      // back to its hardcoded default and bakes that into the routes manifest, whatever the
+      // deploy sets. That is why trade.baalvion.com's BFF 404'd and CanWeMarry's build threw on
+      // an "unset" SITE_URL. Framework inference already covers NEXT_PUBLIC_* / VITE_*; these
+      // are the unprefixed ones it does not. Listing them also makes them part of the cache key,
+      // so two builds with different targets can no longer share one cached output.
+      "env": [
+        "ALLOW_LOCALHOST_ORIGIN",
+        "ALLOW_LOCAL_BACKENDS",
+        "API_PROXY_TARGET",
+        "AUTH_PROXY_TARGET",
+        "AUTH_SERVICE_URL",
+        "BRAND_API_URL",
+        "BUILD_STANDALONE",
+        "DASHBOARD_API_URL",
+        "GATEWAY_PROXY_TARGET",
+        "IR_INVEST_ACCESS_CODE",
+        "NEXT_PUBLIC_CORPORATE_URL",
+        "SITE_URL",
+        "VITE_GATEWAY_TARGET",
+        "VITE_GATEWAY_URL",
+        "VITE_INSIDERS_TARGET",
+        "VITE_INSIDERS_URL"
+      ]
     },
     "dev": {
       "cache": false,

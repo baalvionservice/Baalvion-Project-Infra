@@ -1,0 +1,35 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: canwemarry-service
+  description: >-
+    CanWeMarry — community support for people facing family or community opposition to
+    their relationship or marriage. Owns support cases (with PUBLIC/COMMUNITY/PRIVATE
+    visibility and per-participant consent), communities, discussion, the safety report
+    queue, moderation actions and the outside-help resource directory. Identity stays
+    with auth-service: this schema holds no credential and no contact detail.
+  domain: ecosystem
+  division: community
+  context: canwemarry
+  owner: "@baalvion/ecosystem"
+  tier: tier-2
+  repo: baalvion-platform
+  path: Backend/services/ecosystem/canwemarry-service
+spec:
+  lifecycle: experimental
+  language: node
+  # Postgres only. No cache and no projection store yet — adding one before there is
+  # traffic to justify it would be a second place for private case data to live.
+  datastores: [postgres]
+  dependsOn: [auth-service]
+  consumesEvents: []
+  producesEvents: []
+  apis: ["/v1/cases", "/v1/communities", "/v1/posts", "/v1/comments", "/v1/resources", "/v1/moderation", "/v1/admin"]
+  slo: { availability: 0.99, latencyP95Ms: 400 }
+  deploy: { chart: baalvion-service, namespace: baalvion-ecosystem, minReplicas: 1, maxReplicas: 4 }
+  # C8 has landed with this change, so the runtime block the note here asked for is now
+  # declared. CanWeMarry runs under the root ecosystem.config.js on :3070 but is not in the
+  # consolidated production deploy, so `not-deployed` is the honest answer — the console
+  # reports it as "not set up" rather than as an outage.
+  runtime:
+    deployment: not-deployed

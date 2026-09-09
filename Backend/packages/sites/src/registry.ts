@@ -108,8 +108,12 @@ export const SITES: readonly Site[] = Object.freeze([
     domains: ['lawelitenetwork.com'],
     apexOwnsSubdomains: false,
     status: 'live',
-    rails: [],
-    railsBasis: 'none',
+    // law-service ships a complete Razorpay integration (service/razorpay.js: order creation,
+    // signature verification, webhook secret resolution) and the frontend's /checkout/[bookingId]
+    // opens Razorpay Checkout against it. Consultation bookings are charged here today, so the
+    // site must declare the rail or the spine refuses its own captures.
+    rails: ['razorpay'],
+    railsBasis: 'code',
     services: ['law-service', 'law-elite'],
     legalEntity: null,
   },
@@ -143,8 +147,11 @@ export const SITES: readonly Site[] = Object.freeze([
     // subdomains. auth-service currently suffix-matches this apex — see the note in README.
     apexOwnsSubdomains: false,
     status: 'live',
-    rails: [],
-    railsBasis: 'none',
+    // Elite Circle membership. insiders-service holds no PSP keys — it relays to the JVM
+    // payment-service, so the rails here are the providers that service can settle on, minus
+    // Stripe (no Stripe account on this estate).
+    rails: ['razorpay', 'payu', 'cashfree', 'crypto'],
+    railsBasis: 'code',
     services: ['insiders-service'],
     legalEntity: null,
   },
@@ -176,11 +183,13 @@ export const SITES: readonly Site[] = Object.freeze([
     domains: ['signal.baalvion.com'],
     apexOwnsSubdomains: false,
     status: 'live',
-    // A 2026-07-12 audit confirmed news-service has no payment or subscription model at all;
-    // the billing page it ships is mock data. No revenue source exists to configure.
-    rails: [],
-    railsBasis: 'none',
-    services: ['news-service'],
+    // The 2026-07-12 audit checked news-service and concluded there was no revenue source. It
+    // had the wrong service: baalvion-intelligence's /api/billing/* routes proxy to
+    // DEVELOPER_SERVICE_URL, and developer-service ships a live Razorpay billing integration
+    // (services/razorpayBillingService.js) that its /pricing page opens a checkout against.
+    rails: ['razorpay'],
+    railsBasis: 'code',
+    services: ['developer-service', 'news-service'],
     legalEntity: null,
   },
   {

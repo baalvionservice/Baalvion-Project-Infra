@@ -315,6 +315,32 @@ Never put secrets here. Defaults are wired in `vite.config.ts`.
   (admin/expert/student), and a live data client (`src/lib/protocol-api.ts`). Its routes are **not**
   wrapped in `ProtectedRoute`.
 
+
+## Routing (`vercel.json`)
+
+Vercel's config schema rejects unknown properties inside a `rewrites` entry, so these notes live
+here rather than as `"comment"` keys in the file — a deploy fails outright with
+`rewrites[0] should NOT have additional property 'comment'`.
+
+The rewrites, in order, and why each exists:
+
+1. **Crawler server-rendering.** `index.html` is 219 characters and returns the same `<title>` for
+   all ~318,000 URLs, which is invisible to any crawler that does not execute JavaScript —
+   including most AI crawlers. Requests carrying a known bot user-agent are sent to
+   `/v1/public/render`, which returns a real document per URL.
+2. **`/insiders-api/*` → the directory API.** Same-origin in production for the same reason as the
+   dev proxy: no CORS, and the browser never learns the API host.
+3. **`/sitemap.xml`** → the sitemap index.
+4. **`/sitemap-:section.xml`** → the index's child sitemaps (core, places, facets, and the paged
+   investor/company/people sections). They are separate files because the directory is past the
+   50,000-URL-per-file limit.
+5. **SPA fallback** — every directory route is client-rendered, so anything not matched above
+   returns `index.html`.
+
+All four API rewrites target `api.baalvion.com/api/v1/insiders/*`, which Caddy strips to
+`/v1/*` and forwards to the `app-insiders` container. Public reads deliberately bypass the
+auth-gateway: a logged-out visitor has no session cookie, so the BFF would 401 every crawler.
+
 ---
 
 <div align="center">

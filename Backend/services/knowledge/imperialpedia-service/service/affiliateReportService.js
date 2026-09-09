@@ -1,6 +1,7 @@
 'use strict';
 const { QueryTypes } = require('sequelize');
 const { AppError } = require('../utils/errors');
+const { Money } = require('@baalvion/money');
 
 // Never interpolate the caller's groupBy value directly into SQL — map through this allowlist
 // to a fixed, safe column/CASE expression instead.
@@ -57,7 +58,7 @@ const buildReport = async ({ groupBy = 'merchant', from, to }) => {
             productCount: r.product_count,
             estimatedRevenue: Number(r.estimated_revenue || 0),
         })),
-        totals: { clicks: totals.clicks, estimatedRevenue: Math.round(totals.estimatedRevenue * 100) / 100 },
+        totals: { clicks: totals.clicks, estimatedRevenue: Number(Money.fromDatabaseValue(totals.estimatedRevenue, 'USD').toDecimalString()) },
         // Surfaced verbatim in the admin UI next to the figure — see ArticleForm-style
         // disclosure convention used elsewhere (affiliate disclosure text on Provider cards).
         disclaimer: 'Estimated revenue assumes every click converts at the admin-entered average order value × commission rate. No purchase/conversion tracking exists yet — treat this as a projection, not confirmed revenue.',

@@ -87,7 +87,13 @@ export default function NewsArticlesPage() {
                       {article.source.name} · {new Date(article.published_at).toLocaleString()}
                     </p>
                   </div>
-                  <Button variant="ghost" size="sm" onClick={() => removeArticle.mutate(article.id)} className="shrink-0">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    aria-label={`Delete article ${article.title}`}
+                    onClick={() => removeArticle.mutate(article.id)}
+                    className="shrink-0"
+                  >
                     <Trash2 className="h-4 w-4 text-destructive" />
                   </Button>
                 </div>

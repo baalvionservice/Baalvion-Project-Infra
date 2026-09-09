@@ -73,6 +73,14 @@ db.Profile = def('Profile', 'profiles', {
     region: DataTypes.STRING,
     sector: DataTypes.STRING,
     stage: DataTypes.STRING,
+    // resolved from `location` on write — see the geo hook below (migration 009)
+    location: DataTypes.TEXT,
+    country: DataTypes.TEXT,
+    country_slug: DataTypes.TEXT,
+    state: DataTypes.TEXT,
+    state_slug: DataTypes.TEXT,
+    city: DataTypes.TEXT,
+    city_slug: DataTypes.TEXT,
     idea: DataTypes.TEXT,
     interview: { type: DataTypes.JSONB, defaultValue: [] },
     video_url: DataTypes.TEXT,
@@ -348,6 +356,174 @@ db.Investor = def('Investor', 'investors', {
     enrichment_status: { type: DataTypes.STRING, defaultValue: 'enriched' },
     enrichment_confidence: DataTypes.STRING,
     dedupe_key: DataTypes.TEXT,
+    // resolved from `location` on write — see the geo hook below (migration 009)
+    country: DataTypes.TEXT,
+    country_slug: DataTypes.TEXT,
+    state: DataTypes.TEXT,
+    state_slug: DataTypes.TEXT,
+    city: DataTypes.TEXT,
+    city_slug: DataTypes.TEXT,
+    // provenance (migration 010) — where the row came from and when it was last confirmed
+    source: DataTypes.TEXT,
+    source_id: DataTypes.TEXT,
+    source_url: DataTypes.TEXT,
+    entity_type: DataTypes.TEXT,
+    year_founded: DataTypes.INTEGER,
+    street: DataTypes.TEXT,
+    postal_code: DataTypes.TEXT,
+    fund_count: { type: DataTypes.INTEGER, defaultValue: 0 },
+    total_raised_usd: num('total_raised_usd'),
+    first_filing_date: DataTypes.DATEONLY,
+    last_filing_date: DataTypes.DATEONLY,
+    last_verified_at: DataTypes.DATE,
+    is_hidden: { type: DataTypes.BOOLEAN, defaultValue: false },
+    claimed_at: DataTypes.DATE,
+    claimed_by: DataTypes.TEXT,
+}, bothTs);
+
+db.InvestorFund = def('InvestorFund', 'investor_funds', {
+    id: uuidPk,
+    investor_id: { type: DataTypes.UUID, allowNull: false },
+    fund_name: { type: DataTypes.TEXT, allowNull: false },
+    cik: DataTypes.TEXT,
+    accession_number: { type: DataTypes.TEXT, allowNull: false },
+    fund_type: DataTypes.TEXT,
+    industry_group: DataTypes.TEXT,
+    entity_type: DataTypes.TEXT,
+    jurisdiction: DataTypes.TEXT,
+    year_of_inc: DataTypes.INTEGER,
+    total_offering_usd: num('total_offering_usd'),
+    total_sold_usd: num('total_sold_usd'),
+    remaining_usd: num('remaining_usd'),
+    min_investment_usd: num('min_investment_usd'),
+    investor_count: DataTypes.INTEGER,
+    first_sale_date: DataTypes.DATEONLY,
+    filing_date: DataTypes.DATEONLY,
+    is_amendment: { type: DataTypes.BOOLEAN, defaultValue: false },
+    city: DataTypes.TEXT,
+    state_or_country: DataTypes.TEXT,
+    source_url: DataTypes.TEXT,
+}, bothTs);
+
+db.Article = def('Article', 'articles', {
+    id: uuidPk,
+    slug: { type: DataTypes.TEXT, allowNull: false },
+    title: { type: DataTypes.TEXT, allowNull: false },
+    summary: { type: DataTypes.TEXT, allowNull: false },
+    body: { type: DataTypes.TEXT, allowNull: false },
+    topic: DataTypes.TEXT,
+    reading_mins: DataTypes.INTEGER,
+    published_at: DataTypes.DATE,
+}, bothTs);
+
+db.ProfileClaim = def('ProfileClaim', 'profile_claims', {
+    id: uuidPk,
+    entity_type: { type: DataTypes.TEXT, allowNull: false },
+    entity_id: { type: DataTypes.UUID, allowNull: false },
+    entity_name: DataTypes.TEXT,
+    claimant_name: { type: DataTypes.TEXT, allowNull: false },
+    claimant_email: { type: DataTypes.TEXT, allowNull: false },
+    claimant_role: DataTypes.TEXT,
+    claimant_phone: DataTypes.TEXT,
+    evidence_url: DataTypes.TEXT,
+    message: DataTypes.TEXT,
+    status: { type: DataTypes.TEXT, defaultValue: 'pending' },
+    review_note: DataTypes.TEXT,
+    reviewed_by: DataTypes.UUID,
+    reviewed_at: DataTypes.DATE,
+    ip_hash: DataTypes.TEXT,
+}, bothTs);
+
+db.Company = def('Company', 'companies', {
+    id: uuidPk,
+    name: { type: DataTypes.TEXT, allowNull: false },
+    cik: DataTypes.TEXT,
+    source: DataTypes.TEXT,
+    source_id: DataTypes.TEXT,
+    source_url: DataTypes.TEXT,
+    entity_type: DataTypes.TEXT,
+    jurisdiction: DataTypes.TEXT,
+    year_founded: DataTypes.INTEGER,
+    industry_group: DataTypes.TEXT,
+    revenue_range: DataTypes.TEXT,
+    street: DataTypes.TEXT,
+    postal_code: DataTypes.TEXT,
+    phone: DataTypes.TEXT,
+    location: DataTypes.TEXT,
+    country: DataTypes.TEXT,
+    country_slug: DataTypes.TEXT,
+    state: DataTypes.TEXT,
+    state_slug: DataTypes.TEXT,
+    city: DataTypes.TEXT,
+    city_slug: DataTypes.TEXT,
+    filing_count: { type: DataTypes.INTEGER, defaultValue: 0 },
+    total_raised_usd: num('total_raised_usd'),
+    largest_round_usd: num('largest_round_usd'),
+    first_filing_date: DataTypes.DATEONLY,
+    last_filing_date: DataTypes.DATEONLY,
+    last_verified_at: DataTypes.DATE,
+    is_hidden: { type: DataTypes.BOOLEAN, defaultValue: false },
+    claimed_at: DataTypes.DATE,
+    claimed_by: DataTypes.TEXT,
+    // national company registers (migration 013)
+    registry_name: DataTypes.TEXT,
+    registry_number: DataTypes.TEXT,
+    industry_code: DataTypes.TEXT,
+    legal_form: DataTypes.TEXT,
+    status: DataTypes.TEXT,
+    founded_on: DataTypes.DATEONLY,
+    website: DataTypes.TEXT,
+    employees: DataTypes.INTEGER,
+}, bothTs);
+
+db.CompanyFiling = def('CompanyFiling', 'company_filings', {
+    id: uuidPk,
+    company_id: { type: DataTypes.UUID, allowNull: false },
+    accession_number: { type: DataTypes.TEXT, allowNull: false },
+    cik: DataTypes.TEXT,
+    entity_name: DataTypes.TEXT,
+    industry_group: DataTypes.TEXT,
+    revenue_range: DataTypes.TEXT,
+    entity_type: DataTypes.TEXT,
+    jurisdiction: DataTypes.TEXT,
+    year_of_inc: DataTypes.INTEGER,
+    total_offering_usd: num('total_offering_usd'),
+    total_sold_usd: num('total_sold_usd'),
+    remaining_usd: num('remaining_usd'),
+    min_investment_usd: num('min_investment_usd'),
+    investor_count: DataTypes.INTEGER,
+    has_non_accredited: DataTypes.BOOLEAN,
+    first_sale_date: DataTypes.DATEONLY,
+    filing_date: DataTypes.DATEONLY,
+    is_amendment: { type: DataTypes.BOOLEAN, defaultValue: false },
+    city: DataTypes.TEXT,
+    state_or_country: DataTypes.TEXT,
+    source_url: DataTypes.TEXT,
+}, bothTs);
+
+db.CompanyPerson = def('CompanyPerson', 'company_people', {
+    id: uuidPk,
+    company_id: { type: DataTypes.UUID, allowNull: false },
+    full_name: { type: DataTypes.TEXT, allowNull: false },
+    relationships: DataTypes.ARRAY(DataTypes.TEXT),
+    city: DataTypes.TEXT,
+    state_or_country: DataTypes.TEXT,
+    filings_count: { type: DataTypes.INTEGER, defaultValue: 1 },
+    first_seen: DataTypes.DATEONLY,
+    last_seen: DataTypes.DATEONLY,
+}, bothTs);
+
+db.InvestorPerson = def('InvestorPerson', 'investor_people', {
+    id: uuidPk,
+    investor_id: { type: DataTypes.UUID, allowNull: false },
+    full_name: { type: DataTypes.TEXT, allowNull: false },
+    relationships: DataTypes.ARRAY(DataTypes.TEXT),
+    city: DataTypes.TEXT,
+    state_or_country: DataTypes.TEXT,
+    filings_count: { type: DataTypes.INTEGER, defaultValue: 1 },
+    first_seen: DataTypes.DATEONLY,
+    last_seen: DataTypes.DATEONLY,
+    source_url: DataTypes.TEXT,
 }, bothTs);
 
 db.InvestorSocial = def('InvestorSocial', 'investor_socials', {
@@ -485,6 +661,17 @@ db.Payment = def('Payment', 'payments', {
     meta: { type: DataTypes.JSONB, defaultValue: {} },
 }, bothTs);
 
+// Durable idempotency for payment-service's fulfilment callback (migration 009). The claim is
+// a row, not process memory: a provider redelivery or a JVM retry must net exactly one
+// membership activation even across a restart or a second replica.
+db.BillingWebhookEvent = def('BillingWebhookEvent', 'billing_webhook_events', {
+    id: uuidPk,
+    provider: { type: DataTypes.STRING, allowNull: false },
+    event_id: { type: DataTypes.TEXT, allowNull: false },
+    status: { type: DataTypes.STRING, allowNull: false, defaultValue: 'claimed' },
+    payload: { type: DataTypes.JSONB, defaultValue: {} },
+}, bothTs);
+
 // ── Protocol platform (migration 008) ─────────────────────────────────────────
 db.ProtocolExpert = def('ProtocolExpert', 'protocol_experts', {
     id: uuidPk,
@@ -595,6 +782,27 @@ db.ProtocolNotification = def('ProtocolNotification', 'protocol_notifications', 
     message: { type: DataTypes.TEXT, allowNull: false },
     read: { type: DataTypes.BOOLEAN, defaultValue: false },
 }, createdOnly);
+
+// Geography is derived, never hand-entered: one hook on both location-bearing models means the
+// admin form, the CSV importer, the seed script and any future enrichment job all produce the
+// same slugs. `headquarters` is the better signal for a firm when it disagrees with `location`.
+const { resolvePlace } = require('../data/gazetteer');
+const attachGeoHook = (model, sourceFields) => {
+    const apply = (row) => {
+        if (!row) return;
+        const touched = sourceFields.some((f) => row.changed(f)) || row.isNewRecord;
+        if (!touched) return;
+        const text = sourceFields.map((f) => row.get(f)).find((v) => v && String(v).trim());
+        const place = resolvePlace(text, row.get('region'));
+        for (const k of ['country', 'country_slug', 'state', 'state_slug', 'city', 'city_slug']) {
+            row.set(k, place[k]);
+        }
+    };
+    model.addHook('beforeSave', apply);
+    model.addHook('beforeBulkCreate', (rows) => rows.forEach(apply));
+};
+attachGeoHook(db.Investor, ['headquarters', 'location']);
+attachGeoHook(db.Profile, ['location']);
 
 // Registry: table name -> model (used by the generic query engine).
 db.byTable = {};

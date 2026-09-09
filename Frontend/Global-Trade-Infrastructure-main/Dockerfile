@@ -34,6 +34,13 @@ RUN pnpm install --no-frozen-lockfile --ignore-scripts
 ARG NEXT_PUBLIC_API_BASE_URL
 ARG NEXT_PUBLIC_APP_URL
 ARG NEXT_PUBLIC_TELEMETRY_INGEST
+# next.config resolves rewrites() at BUILD time and writes the destinations into
+# routes-manifest.json, so the gateway target is a build input, not a runtime one — setting it
+# on the running container does nothing. Unset, the production branch falls back to
+# auth.baalvion.com, which serves /auth-bff/* and not /auth/*, and every /trade-bff/* request
+# 404s. Pass --build-arg GATEWAY_PROXY_TARGET=http://app-identity:3026 on the box.
+ARG GATEWAY_PROXY_TARGET
+ENV GATEWAY_PROXY_TARGET=$GATEWAY_PROXY_TARGET
 ENV NEXT_TELEMETRY_DISABLED=1 NODE_ENV=production
 COPY --from=pruner /app/out/full/ ./
 # Shared tsconfig chain is not part of the pruned output → copy it for the TS build.

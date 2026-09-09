@@ -141,13 +141,19 @@ async function resolveTokenPayload(user, orgId) {
         ...businessGrants.map((g) => `biz:${g.business}`),
     ]));
 
-    return { userId: user.id, email: user.email, orgId, orgType, role, roles, permissions, serviceRoles, businesses };
+    // Email verification, as a stable boolean derived from the timestamp of record.
+    // A boolean rather than the timestamp itself: downstream services need to know WHETHER
+    // an address is confirmed, never when, and a date in a token is one more thing to leak.
+    // It adds no new personal information — `email` is already a claim.
+    const emailVerified = Boolean(user.email_verified_at);
+
+    return { userId: user.id, email: user.email, orgId, orgType, role, roles, permissions, serviceRoles, businesses, emailVerified };
 }
 
 // ── Token issuance ─────────────────────────────────────────────────────────────
 
 async function issueTokenPair(user, orgId, sessionId, familyId) {
-    const { userId, email, role, roles, permissions, orgType, businesses } = await resolveTokenPayload(user, orgId);
+    const { userId, email, role, roles, permissions, orgType, businesses, emailVerified } = await resolveTokenPayload(user, orgId);
 
     const accessToken  = jwt.signAccessToken({
         sub:         userId,
@@ -162,6 +168,12 @@ async function issueTokenPair(user, orgId, sessionId, familyId) {
         // 'ops') rather than only learning from permissions[] that access exists at all.
         // Omitted entirely when empty, to keep tokens small for the many users with none.
         ...(businesses && Object.keys(businesses).length ? { businesses } : {}),
+        // Additive claim. Every token-issuing path — login, register, refresh, MFA, OTP,
+        // invitation acceptance — routes through here, and each reloads the user row, so a
+        // token minted after someone confirms their address reports the new value. An
+        // access token already in flight keeps the old one until it expires (15 minutes) or
+        // is refreshed, which is the same staleness every other claim here carries.
+        email_verified: emailVerified,
     });
 
     const rawRefresh   = jwt.signRefreshToken({
@@ -221,7 +233,8 @@ async function register({ email, password: plainPw, fullName, orgName, accountTy
         token_hash: hashToken(verifyToken),
         expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000),
     });
-    const frontendUrl = config.frontendUrl || 'http://localhost:8080';
+    // Brand-aware: the link goes back to the site the person actually signed up on.
+    const frontendUrl = config.frontendUrlFor(brand);
     sendMail({
         to:      email,
         subject: 'Verify your Baalvion account',
@@ -478,7 +491,9 @@ async function forgotPassword({ email, ipAddress }) {
     await db.PasswordReset.update({ used_at: new Date() }, { where: { user_id: user.id, used_at: null } });
     await db.PasswordReset.create({ user_id: user.id, token_hash, expires_at });
 
-    const frontendUrl = config.frontendUrl || 'http://localhost:8080';
+    // The account's own signup brand — a reset link should return somebody to the site they
+    // joined on, not to whichever app FRONTEND_URL happens to name.
+    const frontendUrl = config.frontendUrlFor(user.signup_brand);
     const resetUrl = `${frontendUrl}/reset-password?token=${token}`;
 
     // Publish event for notification-service to send the email via its template engine
@@ -509,15 +524,88 @@ async function resetPassword({ token, newPassword: plainPw, ipAddress }) {
         throw new AppError('INVALID_TOKEN', 'Reset token is invalid or expired', 400);
     }
 
+    /*
+     * Claim the token before using it.
+     *
+     * The read above and the write below used to be separate, so three requests arriving with
+     * the same token in the same instant all found it unused and all reset the password —
+     * measured, not theoretical. The last writer won, which meant somebody who intercepted a
+     * reset link could race the legitimate owner and set the password themselves.
+     *
+     * This UPDATE is the claim: `used_at IS NULL` is part of the WHERE, so exactly one caller
+     * can change a row from unused to used, and the affected-row count says who that was.
+     * Everyone else gets the same INVALID_TOKEN as a replay, which is what a losing racer is.
+     */
+    const [claimed] = await db.PasswordReset.update(
+        { used_at: new Date() },
+        { where: { id: record.id, used_at: null } },
+    );
+    if (claimed !== 1) {
+        throw new AppError('INVALID_TOKEN', 'Reset token is invalid or expired', 400);
+    }
+
     const passwordHash = await password.hash(plainPw);
     await userRepo.setPasswordHash(record.user_id, passwordHash);
-    await record.update({ used_at: new Date() });
 
-    // Security: invalidate all sessions on password reset
+    // Security: invalidate every session on password reset.
+    //
+    // Two halves, and both are needed. The database rows stop the next REFRESH; the Redis
+    // markers stop the access tokens ALREADY ISSUED, which otherwise stayed valid for up to
+    // their full 15-minute lifetime — so somebody resetting a password because their account
+    // was taken over left the attacker signed in for a quarter of an hour.
+    //
+    // The sessions are read BEFORE they are revoked, because the ids are what the markers are
+    // keyed on.
+    const liveSessions = await sessionRepo.listActiveForUser(record.user_id);
     await sessionRepo.revokeAllForUser(record.user_id);
     await rtRepo.revokeAllForUser(record.user_id);
+    await Promise.all(liveSessions.map((s) => redis.revokeSession(s.id)));
 
     await auditRepo.append({ userId: record.user_id, action: 'user.password_reset', ipAddress });
+}
+
+/**
+ * Re-send the email-verification link.
+ *
+ * Same non-enumerating contract as forgotPassword: returns silently whether the address is
+ * unknown, already verified, or genuinely pending, so the response can never be used to test
+ * whether an account exists or what state it is in. The caller always reports the same message.
+ *
+ * Any earlier unused token is dropped first, so exactly one verification link is live per
+ * account at a time — a link that leaks from an old inbox stops working the moment a new one
+ * is requested.
+ */
+async function resendVerification({ email, ipAddress, brand }) {
+    const user = await userRepo.findByEmail(email);
+    if (!user) return;                      // silent — do not leak whether email exists
+    if (user.email_verified_at) return;     // silent — nor whether it is already verified
+
+    const db = require('../models');
+    const token      = generateToken();
+    const expires_at = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+    await db.EmailVerification.destroy({ where: { user_id: user.id, verified_at: null } });
+    await db.EmailVerification.create({ user_id: user.id, token_hash: hashToken(token), expires_at });
+
+    // The brand of the site the request came from, falling back to the one the account was
+    // created on — a verification link must return somebody to the app they are actually using.
+    const frontendUrl = config.frontendUrlFor(brand || user.signup_brand);
+    const verifyUrl   = `${frontendUrl}/verify-email?token=${token}`;
+
+    sendMail({
+        to:      email,
+        subject: 'Verify your Baalvion account',
+        html:    `<p><a href="${verifyUrl}">Verify your email</a>. Expires in 24 hours.</p>`,
+    }).catch(() => {});
+
+    eventBus.publish('auth.email_verification_requested', {
+        userId:    String(user.id),
+        email:     user.email,
+        verifyUrl,
+        expiresAt: expires_at.toISOString(),
+    }).catch(() => {});
+
+    await auditRepo.append({ userId: user.id, action: 'user.verification_resent', ipAddress });
 }
 
 async function verifyEmail({ token }) {
@@ -774,6 +862,7 @@ module.exports = {
     forgotPassword,
     resetPassword,
     verifyEmail,
+    resendVerification,
     getMe,
     updateMe,
     enableMfa,

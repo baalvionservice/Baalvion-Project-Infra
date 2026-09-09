@@ -38,7 +38,11 @@ async function dispatch({ severity, title, body, data = {}, idempotencyKey }) {
         }
         const res = await fetch(url, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-Internal-Key': config.notifications.internalKey, 'X-Service-Name': 'order-service' },
+            // Header is `x-internal-secret`, not `X-Internal-Key`. notification-service verifies
+            // via @baalvion/sdk internalAuth, which reads only that name — so every ops alert
+            // this function has ever sent was rejected with a 401 and silently counted as
+            // "delivery attempted". The console.error fallback above was the only thing working.
+            headers: { 'Content-Type': 'application/json', 'x-internal-secret': config.notifications.internalKey, 'X-Service-Name': 'order-service' },
             body: JSON.stringify(payload),
             signal: ctrl.signal,
         });

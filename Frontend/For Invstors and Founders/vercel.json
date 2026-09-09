@@ -1,6 +1,35 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "ignoreCommand": "npx turbo-ignore investors-and-founders-web",
-  "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
-  "buildCommand": "cd ../.. && pnpm exec turbo run build --filter=investors-and-founders-web"
+  "installCommand": "cd ../.. && npx --yes pnpm@9.15.0 install --frozen-lockfile",
+  "buildCommand": "cd ../.. && npx --yes pnpm@9.15.0 exec turbo run build --filter=investors-and-founders-web",
+  "rewrites": [
+    {
+      "source": "/:path((?!insiders-api|auth-bff|assets|sitemap).*)",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(googlebot|bingbot|slurp|duckduckbot|duckassistbot|baiduspider|yandex|applebot|gptbot|oai-searchbot|chatgpt-user|claudebot|anthropic-ai|claude-web|claude-searchbot|perplexitybot|perplexity-user|ccbot|google-extended|meta-externalagent|amazonbot|bytespider|youbot|mistralai-user|cohere-ai|diffbot|petalbot|timpibot|facebookexternalhit|twitterbot|linkedinbot|slackbot|discordbot|whatsapp|telegrambot).*"
+        }
+      ],
+      "destination": "https://api.baalvion.com/api/v1/insiders/v1/public/render?path=/:path*"
+    },
+    {
+      "source": "/insiders-api/:path*",
+      "destination": "https://api.baalvion.com/api/v1/insiders/:path*"
+    },
+    {
+      "source": "/sitemap.xml",
+      "destination": "https://api.baalvion.com/api/v1/insiders/v1/public/sitemap.xml"
+    },
+    {
+      "source": "/sitemap-:section.xml",
+      "destination": "https://api.baalvion.com/api/v1/insiders/v1/public/sitemap-:section.xml"
+    },
+    {
+      "source": "/((?!insiders-api|auth-bff|assets|sitemap|.*\\..*).*)",
+      "destination": "/index.html"
+    }
+  ]
 }

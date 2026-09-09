@@ -3,93 +3,99 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
 @layer base {
+  /* Institutional palette: white ground, near-black ink, one blue that means "action" and one
+     amber that means "highlight". Colour marks something or it isn't used — decoration comes
+     from rules, spacing and type, not from fills. */
   :root {
-    --background: 222 47% 11%;
-    --foreground: 210 40% 98%;
+    --background: 0 0% 100%;
+    --foreground: 222 24% 11%;
 
-    --card: 222 47% 14%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 24% 11%;
 
-    --popover: 222 47% 14%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 24% 11%;
 
-    --primary: 45 93% 58%;
-    --primary-foreground: 222 47% 11%;
+    --primary: 224 72% 38%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 220 20% 96%;
+    --secondary-foreground: 222 24% 11%;
 
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 220 20% 96%;
+    --muted-foreground: 220 9% 42%;
 
-    --accent: 45 93% 58%;
-    --accent-foreground: 222 47% 11%;
+    --accent: 28 92% 48%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 45%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217 33% 20%;
-    --input: 217 33% 20%;
-    --ring: 45 93% 58%;
+    --border: 220 13% 88%;
+    --input: 220 13% 84%;
+    --ring: 224 72% 38%;
 
-    --radius: 0.75rem;
-    
-    --gradient-premium: linear-gradient(135deg, hsl(45 93% 58%), hsl(38 92% 50%));
-    --gradient-card: linear-gradient(145deg, hsl(222 47% 14%), hsl(222 47% 16%));
-    --shadow-premium: 0 10px 40px -10px hsl(45 93% 58% / 0.3);
-    --shadow-elevated: 0 20px 60px -15px hsl(0 0% 0% / 0.5);
+    /* 4px. shadcn binds rounded-lg/md/sm to this; Tailwind's 8px default reads as a consumer app. */
+    --radius: 4px;
 
-    --sidebar-background: 222 47% 12%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 45 93% 58%;
-    --sidebar-primary-foreground: 222 47% 11%;
-    --sidebar-accent: 217 33% 17%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217 33% 20%;
-    --sidebar-ring: 45 93% 58%;
+    --gradient-premium: linear-gradient(135deg, hsl(224 72% 38%), hsl(224 72% 30%));
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(220 20% 98%));
+    --shadow-premium: 0 1px 2px hsl(222 24% 11% / 0.08), 0 8px 24px -12px hsl(222 24% 11% / 0.18);
+    --shadow-elevated: 0 12px 40px -16px hsl(222 24% 11% / 0.22);
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222 24% 11%;
+    --sidebar-primary: 224 72% 38%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 20% 96%;
+    --sidebar-accent-foreground: 222 24% 11%;
+    --sidebar-border: 220 13% 88%;
+    --sidebar-ring: 224 72% 38%;
   }
 
   .dark {
-    --background: 222 47% 11%;
-    --foreground: 210 40% 98%;
+    --background: 222 30% 9%;
+    --foreground: 210 20% 96%;
 
-    --card: 222 47% 14%;
-    --card-foreground: 210 40% 98%;
+    --card: 222 26% 12%;
+    --card-foreground: 210 20% 96%;
 
-    --popover: 222 47% 14%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 222 26% 12%;
+    --popover-foreground: 210 20% 96%;
 
-    --primary: 45 93% 58%;
-    --primary-foreground: 222 47% 11%;
+    --primary: 217 84% 62%;
+    --primary-foreground: 222 30% 9%;
 
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 220 18% 18%;
+    --secondary-foreground: 210 20% 96%;
 
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 220 18% 18%;
+    --muted-foreground: 218 12% 66%;
 
-    --accent: 45 93% 58%;
-    --accent-foreground: 222 47% 11%;
+    --accent: 28 92% 55%;
+    --accent-foreground: 222 30% 9%;
 
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217 33% 20%;
-    --input: 217 33% 20%;
-    --ring: 45 93% 58%;
-    --sidebar-background: 222 47% 12%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 45 93% 58%;
-    --sidebar-primary-foreground: 222 47% 11%;
-    --sidebar-accent: 217 33% 17%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217 33% 20%;
-    --sidebar-ring: 45 93% 58%;
+    --border: 220 16% 22%;
+    --input: 220 16% 26%;
+    --ring: 217 84% 62%;
+
+    --gradient-premium: linear-gradient(135deg, hsl(217 84% 62%), hsl(224 72% 46%));
+    --gradient-card: linear-gradient(145deg, hsl(222 26% 12%), hsl(222 26% 14%));
+    --shadow-premium: 0 10px 40px -18px hsl(0 0% 0% / 0.7);
+    --shadow-elevated: 0 20px 60px -20px hsl(0 0% 0% / 0.75);
+
+    --sidebar-background: 222 30% 10%;
+    --sidebar-foreground: 210 20% 96%;
+    --sidebar-primary: 217 84% 62%;
+    --sidebar-primary-foreground: 222 30% 9%;
+    --sidebar-accent: 220 18% 18%;
+    --sidebar-accent-foreground: 210 20% 96%;
+    --sidebar-border: 220 16% 22%;
+    --sidebar-ring: 217 84% 62%;
   }
 }
 
@@ -100,6 +106,22 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    letter-spacing: -0.006em;
+  }
+
+  h1, h2, h3, h4 {
+    letter-spacing: -0.02em;
+  }
+
+  /* The "Fact" label used above every value in a detail row or stat. */
+  .label-eyebrow {
+    @apply text-[11px] uppercase tracking-wider text-muted-foreground font-medium;
+  }
+
+  /* Results are rows separated by rules, not a grid of cards. */
+  .rule-list > * + * {
+    @apply border-t border-border;
   }
 }
 

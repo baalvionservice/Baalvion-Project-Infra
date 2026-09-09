@@ -1,6 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { supabase } from "@/integrations/supabase/client";
 import { useMembership } from "@/hooks/useMembership";
 import MainLayout from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { Check, Crown, Wallet, Briefcase, Users, ShieldCheck, Sparkles } from "lucide-react";
+import { fetchTiers, startMembershipCheckout, awaitMembership } from "@/lib/gatewayCheckout";
 
 const BENEFITS = [
   { icon: Wallet, text: "Full access to the investor directory — types, sectors, regions, check sizes" },
@@ -21,15 +21,47 @@ export default function Membership() {
   const navigate = useNavigate();
   const { active, membership, loading, refresh } = useMembership();
   const [paying, setPaying] = useState(false);
+  // The price is whatever the server will actually charge. This page used to hardcode "$199"
+  // while the tier catalogue charged $299 — a figure no one would notice was wrong until a
+  // customer's card was debited for the larger amount.
+  const [price, setPrice] = useState<number | null>(null);
+  const [priceError, setPriceError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchTiers()
+      .then((t) => { if (!cancelled) setPrice(t.tiers.find((x) => x.key === "founder")?.quote?.amount ?? null); })
+      .catch(() => { if (!cancelled) setPriceError(true); });
+    return () => { cancelled = true; };
+  }, []);
 
   const pay = async () => {
     setPaying(true);
-    const { data, error } = await supabase.functions.invoke("checkout", { body: { plan: "founder" } });
-    setPaying(false);
-    if (error || !data) { toast.error("Payment could not be completed"); return; }
-    await refresh();
-    toast.success("Payment successful — welcome aboard! Investor & deal access unlocked.");
-    navigate("/investors");
+    try {
+      const outcome = await startMembershipCheckout("founder");
+      if (outcome.status === "cancelled") return;
+      if (outcome.status === "failed") { toast.error(outcome.message); return; }
+      if (outcome.status === "redirecting") return; // the browser is leaving for the hosted page
+      if (outcome.status === "awaiting_transfer") {
+        toast.info("Send the transfer shown to complete your membership — it activates automatically once it confirms on-chain.");
+        return;
+      }
+      // Submitted, not yet paid: the membership is granted by the provider's webhook, so ask the
+      // server rather than assuming. Never announce success the browser cannot actually know.
+      toast.info("Payment submitted — confirming with your bank…");
+      const confirmed = await awaitMembership("founder");
+      await refresh();
+      if (confirmed) {
+        toast.success("Payment confirmed — welcome aboard. Investor & deal access unlocked.");
+        navigate("/investors");
+      } else {
+        toast.info("Payment received. Your membership will activate as soon as it clears — this page updates automatically.");
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Payment could not be started");
+    } finally {
+      setPaying(false);
+    }
   };
 
   return (
@@ -61,9 +93,11 @@ export default function Membership() {
             <div className="bg-gradient-to-br from-primary/15 to-card p-8 text-center">
               <Badge className="bg-primary/20 text-primary hover:bg-primary/20 mb-3">Founder plan</Badge>
               <div className="flex items-baseline justify-center gap-1">
-                <span className="text-5xl font-bold">$199</span><span className="text-muted-foreground">/year</span>
+                {price === null
+                  ? <Skeleton className="h-12 w-32" />
+                  : <><span className="text-5xl font-bold">${price}</span><span className="text-muted-foreground">/year</span></>}
               </div>
-              <p className="text-sm text-muted-foreground mt-1">Cancel anytime. Full access the moment you join.</p>
+              <p className="text-sm text-muted-foreground mt-1">Full access the moment your payment clears.</p>
             </div>
             <CardContent className="p-8">
               <ul className="space-y-3 mb-6">
@@ -74,11 +108,17 @@ export default function Membership() {
                   </li>
                 ))}
               </ul>
-              <Button variant="premium" size="lg" className="w-full" onClick={pay} disabled={paying}>
-                <Sparkles className="w-4 h-4 mr-2" />{paying ? "Processing payment…" : "Complete payment — $199"}
+              <Button variant="premium" size="lg" className="w-full" onClick={pay} disabled={paying || price === null}>
+                <Sparkles className="w-4 h-4 mr-2" />
+                {paying ? "Processing payment…" : price === null ? "Loading price…" : `Continue to payment — $${price}`}
               </Button>
+              {priceError && (
+                <p className="text-center text-xs text-destructive mt-3">
+                  Pricing is unavailable right now. Please refresh — checkout is disabled rather than showing a price we cannot honour.
+                </p>
+              )}
               <p className="text-center text-xs text-muted-foreground mt-3">
-                Demo checkout (no card charged). Wire Stripe in <code>functions/checkout</code> for live payments.
+                Secure hosted checkout. Card details are entered on the payment provider's page — never here.
               </p>
             </CardContent>
           </Card>

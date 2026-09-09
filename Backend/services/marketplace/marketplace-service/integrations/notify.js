@@ -30,7 +30,9 @@ function send(e) {
     if (!ENABLED || !e?.to) return Promise.resolve();
     const ctl = new AbortController();
     const timer = setTimeout(() => ctl.abort(), TIMEOUT_MS);
-    return fetch(`${NOTIFY_URL}/api/v1/notifications/email`, {
+    // notification-service mounts its router at /v1, not /api/v1 — the old path 404'd on every
+    // send, and the .then below logged it as "notification dropped" rather than as a wiring bug.
+    return fetch(`${NOTIFY_URL}/v1/notifications/email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-internal-secret': INTERNAL_SECRET },
         body: JSON.stringify({

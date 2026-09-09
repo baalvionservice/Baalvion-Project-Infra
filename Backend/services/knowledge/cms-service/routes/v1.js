@@ -5,6 +5,7 @@ const internalAuth = require('../middleware/internalAuth');
 const websiteRoutes = require('./websiteRoutes');
 const taxonomyRoutes = require('./taxonomyRoutes');
 const contentRoutes = require('./contentRoutes');
+const editorialRoutes = require('./editorialRoutes');
 const mediaRoutes = require('./mediaRoutes');
 const publicRoutes = require('./publicRoutes');
 const integrationRoutes = require('./integrationRoutes');
@@ -83,6 +84,10 @@ router.use('/cms/market-data', authMiddleware, marketDataRoutes);
 // would discard it before the mergeParams sub-router runs.
 router.use('/cms/websites/:websiteId', authMiddleware, taxonomyRoutes);
 router.use('/cms/websites/:websiteId/content', authMiddleware, contentRoutes);
+
+// Editorial pipeline: the charter and publication policy that govern what this
+// site publishes and how much, plus the scored signal queue behind them.
+router.use('/cms/websites/:websiteId/editorial', authMiddleware, editorialRoutes);
 router.use('/cms/websites/:websiteId/integrations', authMiddleware, integrationRoutes);
 
 // Unified Analytics reporting (website-scoped). loadCmsRole inside the sub-router

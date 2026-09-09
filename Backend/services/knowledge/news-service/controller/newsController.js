@@ -5,7 +5,7 @@ const db = require('../models');
 const { AppError } = require('../utils/errors');
 const { sendPaginated, sendSuccess } = require('../utils/response');
 
-const CATEGORIES = ['AI', 'Technology', 'Business', 'Finance', 'Startups', 'Cybersecurity', 'World', 'Science'];
+const CATEGORIES = ['AI', 'Technology', 'Business', 'Finance', 'Startups', 'Cybersecurity', 'World', 'Science', 'Legal'];
 const SENTIMENTS = ['positive', 'neutral', 'negative'];
 
 const listQuerySchema = z.object({

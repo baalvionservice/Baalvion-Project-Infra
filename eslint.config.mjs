@@ -29,7 +29,9 @@ export default [
   },
   js.configs.recommended,
   {
-    files: ['Backend/services/**/*.{js,cjs}'],
+    // Shared packages were outside every block, so their CommonJS files linted as ESM and
+    // reported `module is not defined` on every one of them. Covered here alongside services.
+    files: ['Backend/{services,packages}/**/*.{js,cjs}'],
     languageOptions: {
       ecmaVersion: 2023,
       sourceType: 'commonjs',
@@ -38,7 +40,7 @@ export default [
     rules: sharedRules,
   },
   {
-    files: ['Backend/services/**/*.mjs'],
+    files: ['Backend/{services,packages}/**/*.mjs'],
     languageOptions: {
       ecmaVersion: 2023,
       sourceType: 'module',

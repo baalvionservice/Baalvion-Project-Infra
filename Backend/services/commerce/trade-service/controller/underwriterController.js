@@ -17,6 +17,7 @@ const financeClient = require('../lib/financeClient');
 const config = require('../config/appConfig');
 const { sendSuccess } = require('../utils/response');
 const { AppError } = require('../utils/errors');
+const { Money } = require('@baalvion/money');
 
 const uwId = () => `UW-${Date.now().toString(36).toUpperCase()}-${crypto.randomBytes(2).toString('hex').toUpperCase()}`;
 const num = (x) => (x == null ? 0 : Number(x) || 0);
@@ -87,7 +88,14 @@ const list = async (req, res, next) => {
             out.push(toApi(r, {
                 used,
                 limit,
-                remaining: limit == null ? null : Math.max(0, Math.round((limit - used) * 100) / 100),
+                // Exact subtraction rather than a float round-trip through *100/100.
+                remaining: limit == null ? null : (() => {
+                    const ccy = String(r.currency || 'USD').toUpperCase();
+                    try {
+                        const left = Money.fromDatabaseValue(limit, ccy).subtract(Money.fromDatabaseValue(used, ccy));
+                        return left.isNegative() ? 0 : Number(left.toDecimalString());
+                    } catch { return Math.max(0, Number(limit) - Number(used)); }
+                })(),
                 utilisation: limit ? Math.round((used / limit) * 10000) / 10000 : null,
             }));
         }

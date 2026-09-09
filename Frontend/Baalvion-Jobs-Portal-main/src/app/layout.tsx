@@ -3,6 +3,7 @@ import './globals.css';
 import { AppProvider } from '@/app/providers/AppProvider';
 import { AppConfig } from '@/config/app.config';
 import { Inter } from 'next/font/google';
+import { BRAND_NAME, CIN, LEGAL_ENTITY_NAME } from '@baalvion/company';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -50,7 +51,9 @@ export const metadata: Metadata = {
 const organizationSchema = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
-  name: 'Baalvion Industries Pvt Ltd',
+  name: BRAND_NAME,
+  legalName: LEGAL_ENTITY_NAME,
+  identifier: { '@type': 'PropertyValue', name: 'CIN', value: CIN },
   url: AppConfig.baseUrl,
   logo: `${AppConfig.baseUrl}/logo.png`,
   sameAs: [

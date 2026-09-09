@@ -35,7 +35,7 @@ export default function ProfileEdit() {
   const [uploading, setUploading] = useState(false);
   const [f, setF] = useState<any>({
     full_name: "", username: "", avatar_url: "", bio: "", company_name: "", company_about: "",
-    contact_email: "", contact_phone: "", region: "", sector: "", stage: "", idea: "",
+    contact_email: "", contact_phone: "", region: "", location: "", sector: "", stage: "", idea: "",
     interview: [] as QA[], video_url: "", linkedin_url: "", website: "",
   });
 
@@ -74,7 +74,7 @@ export default function ProfileEdit() {
       full_name: f.full_name, avatar_url: f.avatar_url || null, bio: f.bio || null,
       company_name: f.company_name || null, company_about: f.company_about || null,
       contact_email: f.contact_email || null, contact_phone: f.contact_phone || null,
-      region: f.region || null, sector: f.sector || null, stage: f.stage || null,
+      region: f.region || null, location: f.location || null, sector: f.sector || null, stage: f.stage || null,
       idea: f.idea || null, interview: (f.interview || []).filter((q: QA) => q.question || q.answer),
       video_url: f.video_url || null, linkedin_url: f.linkedin_url || null, website: f.website || null,
     };
@@ -110,6 +110,11 @@ export default function ProfileEdit() {
 
           <Section icon={Building2} title="Company">
             <div><Label>Company name</Label><Input value={f.company_name || ""} onChange={(e) => set("company_name", e.target.value)} placeholder="Acme Inc." /></div>
+            <div>
+              <Label>Location</Label>
+              <Input value={f.location || ""} onChange={(e) => set("location", e.target.value)} placeholder="Lisbon, Portugal" />
+              <p className="text-xs text-muted-foreground mt-1">City and country. This is what puts your company on the city and country pages of the directory.</p>
+            </div>
             <div><Label>What does your company do?</Label><Textarea rows={3} value={f.company_about || ""} onChange={(e) => set("company_about", e.target.value)} /></div>
             <div className="grid sm:grid-cols-3 gap-4">
               <div><Label>Sector</Label>

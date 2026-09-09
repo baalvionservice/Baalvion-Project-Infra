@@ -112,6 +112,12 @@ export const NAVIGATION: NavGroup[] = [
         roles: ['super_admin', 'owner', 'admin'],
       },
       {
+        title: 'Sign-in Activity',
+        href: '/login-activity',
+        iconName: 'LogIn',
+        roles: ['super_admin', 'owner', 'admin'],
+      },
+      {
         title: 'Audit Center',
         href: '/audit-center',
         iconName: 'ShieldCheck',
@@ -367,12 +373,6 @@ export const NAVIGATION: NavGroup[] = [
     label: 'People',
     items: [
       {
-        title: 'People',
-        href: '/people',
-        iconName: 'Users',
-        roles: ['super_admin', 'owner', 'admin'],
-      },
-      {
         title: 'Staff',
         href: '/staff',
         iconName: 'Users2',
@@ -406,6 +406,14 @@ export const NAVIGATION: NavGroup[] = [
   {
     label: 'System',
     items: [
+      // Site-first view: what is broken, on which property. The Infrastructure page below is
+      // the service-first view of the same estate — useful once you know where to look.
+      {
+        title: 'Mission Control',
+        href: '/status',
+        iconName: 'Activity',
+        roles: ['super_admin', 'admin'],
+      },
       {
         title: 'Infrastructure',
         href: '/infrastructure',

@@ -21,6 +21,13 @@
 Frontend/*
 !Frontend/auth-baalvion
 !Frontend/admin-platform
+# baalvion-stack (baalvionstack.com) is built from the repo root too, so its source must be
+# re-included or `turbo prune baalvion-stack-web` fails with "package not found" — exactly the
+# failure the note above describes.
+!Frontend/baalvion-stack
+Frontend/baalvion-stack/node_modules
+Frontend/baalvion-stack/.next
+Frontend/baalvion-stack/.turbo
 Frontend/auth-baalvion/node_modules
 Frontend/auth-baalvion/.next
 Frontend/auth-baalvion/.turbo

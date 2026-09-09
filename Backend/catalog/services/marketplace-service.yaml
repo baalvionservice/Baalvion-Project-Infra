@@ -27,3 +27,8 @@ spec:
   apis: ["/v1/companies", "/v1/investors", "/v1/opportunities", "/v1/deals", "/v1/admin"]
   slo: { availability: 0.99, latencyP95Ms: 400 }
   deploy: { chart: baalvion-service, namespace: baalvion-commerce, minReplicas: 2, maxReplicas: 10 }
+  runtime:
+    deployment: consolidated-box
+    port: 3060
+    healthPath: /health
+    container: app-commerce
