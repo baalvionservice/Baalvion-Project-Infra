@@ -138,7 +138,7 @@ export default function OrgChartPane() {
             <div className="flex justify-center gap-1.5 flex-wrap">
               {[
                 {
-                  title: "CEO & Partner",
+                  title: "CTO & Partner",
                   name: "Adarsh Patra",
                   desc: "Full operational control. Reports to Founder. Manages all 28 other co-founders. 10 votes.",
                   controls: "All 4 Baalvion platforms",

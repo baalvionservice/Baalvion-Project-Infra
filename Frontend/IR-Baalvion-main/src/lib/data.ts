@@ -19,7 +19,7 @@ export const leadershipTeam = [
   },
   {
     name: "Adarsh Patra",
-    title: "Chief Executive Officer",
+    title: "Chief Technology Officer",
     bio: "Adarsh leads Baalvion's strategic execution and day-to-day operations. With a background in corporate strategy and finance, he is focused on scaling the company and delivering value to our stakeholders.",
     imageId: "executive-1-photo",
   },
