@@ -6,6 +6,7 @@
  * share-ready without duplicating boilerplate.
  */
 import type { Metadata } from 'next';
+import { CIN, INCORPORATED_ON, LEGAL_ENTITY_NAME } from '@baalvion/company';
 
 export const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://trade.baalvion.com';
 export const SITE_NAME = 'Baalvion';
@@ -69,7 +70,9 @@ export function organizationJsonLd() {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: SITE_NAME,
-    legalName: 'Baalvion',
+    legalName: LEGAL_ENTITY_NAME,
+    identifier: { '@type': 'PropertyValue', name: 'CIN', value: CIN },
+    foundingDate: INCORPORATED_ON,
     url: SITE_URL,
     logo: absoluteUrl('/icon.svg'),
     description:

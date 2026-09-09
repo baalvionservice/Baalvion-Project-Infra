@@ -60,7 +60,7 @@ const SITES = {
         excerpt: 'How Baalvion grew from an idea into a global federated enterprise.',
         blocks: [ ['heading','From Vision to Platform'], ['paragraph','Baalvion began with a simple conviction: that one shared operating system could power an entire ecosystem of businesses.'] ] },
       { title: 'Leadership', slug: 'leadership', contentType: 'page', cat: 'people',
-        excerpt: 'Meet the people steering the Baalvion Group.',
+        excerpt: 'Meet the people steering Baalvion.',
         blocks: [ ['heading','Executive Team'], ['paragraph','Our leadership brings together decades of experience across technology, finance, and operations.'] ] },
       { title: 'Careers at Baalvion', slug: 'careers-at-baalvion', contentType: 'page', cat: 'company',
         excerpt: 'Build the future of multi-tenant infrastructure with us.',

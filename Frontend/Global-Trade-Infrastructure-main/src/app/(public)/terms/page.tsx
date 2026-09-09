@@ -17,7 +17,7 @@ export default function TermsOfUsePage() {
 
         <div className="bg-card p-8 md:p-12 rounded-lg border shadow-sm text-left space-y-6">
           <p className="text-lg text-muted-foreground leading-relaxed">
-            These Terms of Use ("Terms") govern your access to and use of the Baalvion platform, including all associated software, APIs, documentation, and services (collectively, the "Platform"). These Terms constitute a legally binding agreement between you, the institution you represent ("Institution"), and Baalvion Industries Pvt. Ltd. ("Baalvion", "we", "us", "our").
+            These Terms of Use ("Terms") govern your access to and use of the Baalvion platform, including all associated software, APIs, documentation, and services (collectively, the "Platform"). These Terms constitute a legally binding agreement between you, the institution you represent ("Institution"), and Baalvion Industries Private Limited ("Baalvion", "we", "us", "our").
           </p>
           <p className="text-lg text-muted-foreground leading-relaxed">
             By accessing or using the Platform, you confirm that you are an authorized representative of your Institution with the authority to bind the Institution to these Terms, and you agree on behalf of your Institution to be bound by these Terms.
