@@ -509,7 +509,12 @@ jobs:
               psql "postgresql://${DB_USER}@${DB_HOST}:${DB_PORT}/${DB_NAME}" -v ON_ERROR_STOP=1 -f /tmp/016.sql
             echo "::notice title=Migration applied::auth.users.signup_brand/reengagement_sent_at are current."
 
-      - name: Pull + roll on box2
+      # Sync the box and pull the incoming images, but start NOTHING yet. Split out
+      # of the old "Pull + roll" step so the service migrations below can run against
+      # the image this deploy is about to start while the previous release is still
+      # the one serving traffic -- and so a migration failure aborts before any
+      # container is replaced.
+      - name: Sync box2 and pull the new images
         if: steps.gate.outputs.ready == 'true'
         uses: appleboy/ssh-action@v1
         env:
@@ -518,12 +523,11 @@ jobs:
           COMMUNITY_IMAGE_TAG: ${{ needs.build-push-community.outputs.image_tag }}
           GIFTCARD_IMAGE_TAG: ${{ needs.build-push-giftcard.outputs.image_tag }}
           AUTH_WEB_IMAGE_TAG: ${{ needs.build-push-auth-web.outputs.image_tag }}
-          PROFILES: ${{ github.event.inputs.profiles }}
         with:
           host: ${{ secrets.CORE2_EC2_HOST }}
           username: ${{ secrets.CORE2_EC2_USER }}
           key: ${{ secrets.CORE2_EC2_SSH_KEY }}
-          envs: IMAGE_TAG,PAYMENTS_IMAGE_TAG,COMMUNITY_IMAGE_TAG,GIFTCARD_IMAGE_TAG,AUTH_WEB_IMAGE_TAG,PROFILES
+          envs: IMAGE_TAG,PAYMENTS_IMAGE_TAG,COMMUNITY_IMAGE_TAG,GIFTCARD_IMAGE_TAG,AUTH_WEB_IMAGE_TAG
           script: |
             set -euo pipefail
             cd /opt/baalvion-box2
@@ -548,6 +552,119 @@ jobs:
             REGISTRY="$(grep -E '^ECR_REGISTRY=' "$ENV" | head -1 | cut -d= -f2)"
             aws ecr get-login-password --region "${REGION:-ap-south-1}" | docker login --username AWS --password-stdin "${REGISTRY}"
 
+            COMPOSE="docker compose --env-file $ENV -f deploy/consolidated/docker-compose.prod.yml"
+
+            # Record what is running RIGHT NOW, before anything is pulled. These digests are
+            # what the rollback step restores if the smoke test fails; capturing them after the
+            # pull would record the new images and make rollback a no-op.
+            : > /opt/baalvion-box2/deploy/consolidated/.rollback-digests
+            for svc in app-identity app-commerce app-trade app-ecosystem app-platform app-edge-realtime; do
+              cid="$($COMPOSE ps -q "$svc" 2>/dev/null | head -1)"
+              [ -z "$cid" ] && continue
+              img="$(docker inspect --format '{{.Config.Image}}' "$cid" 2>/dev/null)"
+              dig="$(docker inspect --format '{{.Image}}' "$cid" 2>/dev/null)"
+              [ -n "$img" ] && [ -n "$dig" ] && echo "$img $dig" >> /opt/baalvion-box2/deploy/consolidated/.rollback-digests
+            done
+            echo "Pre-roll digests recorded:"; cat /opt/baalvion-box2/deploy/consolidated/.rollback-digests || true
+
+            $COMPOSE pull app-identity app-commerce app-trade app-ecosystem app-platform app-edge-realtime redis neo4j caddy
+
+      - name: Apply app-commerce service migrations (idempotent, pre-roll)
+        if: steps.gate.outputs.ready == 'true'
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.CORE2_EC2_HOST }}
+          username: ${{ secrets.CORE2_EC2_USER }}
+          key: ${{ secrets.CORE2_EC2_SSH_KEY }}
+          # commerce-service, inventory-service, fulfillment-service, and marketplace-service
+          # all ship real sequelize-cli/custom migration files but none of them are ever
+          # invoked anywhere in this pipeline (only market-service self-migrates via
+          # sync({alter:false})) -- same class of bug as the auth-service oauth-tables fix
+          # above. Confirmed live: fulfillment-service 500s with 'relation
+          # "fulfillment.fulfillment_shipments" does not exist' on every shipments call.
+          # All four migration chains here are verified idempotent (sequelize-cli tracks
+          # SequelizeMeta; marketplace-service's custom migrate.js has no tracking table but
+          # every statement in its 4 files is additive/IF-NOT-EXISTS or DROP-POLICY-then-
+          # CREATE, so re-running the whole chain every deploy is safe).
+          #
+          # `run --rm --no-deps` against a one-off container, not `exec` into the live one:
+          # this now runs BEFORE the roll, so the container holding the new migration files
+          # does not exist yet. A throwaway container off the freshly-pulled image applies the
+          # schema the incoming release expects while the OLD release keeps serving -- the
+          # same expand-then-roll ordering the auth-service 014/016 steps above already use.
+          #
+          # Deliberately NO continue-on-error and no `|| echo` swallowing the exit code (both
+          # were here before). A half-applied schema followed by a successful roll is new code
+          # against an old schema, which is strictly worse than not deploying: fail here and
+          # the previous release stays up, untouched.
+          script: |
+            set -euo pipefail
+            cd /opt/baalvion-box2
+            ENV=deploy/consolidated/.env
+            # pull_policy is `always` on the shared node-app anchor, so `run` re-pulls; the
+            # login is per-host and expires, so re-assert it rather than lean on the last step.
+            REGION="$(grep -E '^AWS_REGION=' "$ENV" | head -1 | cut -d= -f2)"
+            REGISTRY="$(grep -E '^ECR_REGISTRY=' "$ENV" | head -1 | cut -d= -f2)"
+            aws ecr get-login-password --region "${REGION:-ap-south-1}" | docker login --username AWS --password-stdin "${REGISTRY}"
+            COMPOSE="docker compose --env-file $ENV -f deploy/consolidated/docker-compose.prod.yml"
+            for svc in commerce-service inventory-service fulfillment-service; do
+              $COMPOSE run --rm --no-deps -T -e PGSSLMODE=require app-commerce \
+                sh -lc "cd /app/Backend/services/commerce/${svc} && npm run migrate"
+            done
+            $COMPOSE run --rm --no-deps -T -e PGSSLMODE=require app-commerce \
+              sh -lc "cd /app/Backend/services/marketplace/marketplace-service && npm run migrate"
+            echo "::notice title=Migrations applied::commerce/inventory/fulfillment/marketplace schemas current."
+
+      - name: Apply cms-service + news-service migrations (idempotent, pre-roll)
+        if: steps.gate.outputs.ready == 'true'
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.CORE2_EC2_HOST }}
+          username: ${{ secrets.CORE2_EC2_USER }}
+          key: ${{ secrets.CORE2_EC2_SSH_KEY }}
+          # Same missing-migration-step bug as app-commerce, confirmed live: GET .../cms/websites
+          # 500s with 'relation "cms.cms_websites" does not exist'. deploy-consolidated.yml (the
+          # original prod-01 workflow) has always run these two via `npm run migrate` post-roll --
+          # this box2 workflow simply never had the equivalent step. news-service also gained a
+          # sync({alter:false}) call in its own boot code earlier this session (a different,
+          # already-live fix for the same underlying gap), so this is redundant-but-harmless
+          # belt-and-suspenders for news-service specifically; it's the real fix for cms-service.
+          #
+          # Pre-roll one-off container and hard-fail, for the same reasons as the step above.
+          script: |
+            set -euo pipefail
+            cd /opt/baalvion-box2
+            ENV=deploy/consolidated/.env
+            REGION="$(grep -E '^AWS_REGION=' "$ENV" | head -1 | cut -d= -f2)"
+            REGISTRY="$(grep -E '^ECR_REGISTRY=' "$ENV" | head -1 | cut -d= -f2)"
+            aws ecr get-login-password --region "${REGION:-ap-south-1}" | docker login --username AWS --password-stdin "${REGISTRY}"
+            COMPOSE="docker compose --env-file $ENV -f deploy/consolidated/docker-compose.prod.yml"
+            $COMPOSE run --rm --no-deps -T -e PGSSLMODE=require app-platform \
+              sh -lc "cd /app/Backend/services/knowledge/cms-service && npm run migrate"
+            $COMPOSE run --rm --no-deps -T -e PGSSLMODE=require app-platform \
+              sh -lc "cd /app/Backend/services/knowledge/news-service && npm run migrate"
+            echo "::notice title=Migrations applied::cms-service + news-service schemas current."
+
+      # Only reached when every migration above succeeded -- see those steps for why.
+      - name: Roll box2
+        if: steps.gate.outputs.ready == 'true'
+        uses: appleboy/ssh-action@v1
+        env:
+          PROFILES: ${{ github.event.inputs.profiles }}
+        with:
+          host: ${{ secrets.CORE2_EC2_HOST }}
+          username: ${{ secrets.CORE2_EC2_USER }}
+          key: ${{ secrets.CORE2_EC2_SSH_KEY }}
+          envs: PROFILES
+          script: |
+            set -euo pipefail
+            cd /opt/baalvion-box2
+
+            ENV=deploy/consolidated/.env
+            REGION="$(grep -E '^AWS_REGION=' "$ENV" | head -1 | cut -d= -f2)"
+            REGISTRY="$(grep -E '^ECR_REGISTRY=' "$ENV" | head -1 | cut -d= -f2)"
+            aws ecr get-login-password --region "${REGION:-ap-south-1}" | docker login --username AWS --password-stdin "${REGISTRY}"
+
             PROFILE_FLAGS=""
             for p in $PROFILES; do PROFILE_FLAGS="$PROFILE_FLAGS --profile $p"; done
 
@@ -567,20 +684,7 @@ jobs:
             # connect-timeout in the admin-web build job left its tag never pushed, which then
             # blocked redis/neo4j/caddy/everything from pulling too). Core services are always
             # required and pulled explicitly by name; admin-web can't take them down with it.
-            # Record what is running RIGHT NOW, before anything is pulled. These digests are
-            # what the rollback step restores if the smoke test fails; capturing them after the
-            # pull would record the new images and make rollback a no-op.
-            : > /opt/baalvion-box2/deploy/consolidated/.rollback-digests
-            for svc in app-identity app-commerce app-trade app-ecosystem app-platform app-edge-realtime; do
-              cid="$($COMPOSE ps -q "$svc" 2>/dev/null | head -1)"
-              [ -z "$cid" ] && continue
-              img="$(docker inspect --format '{{.Config.Image}}' "$cid" 2>/dev/null)"
-              dig="$(docker inspect --format '{{.Image}}' "$cid" 2>/dev/null)"
-              [ -n "$img" ] && [ -n "$dig" ] && echo "$img $dig" >> /opt/baalvion-box2/deploy/consolidated/.rollback-digests
-            done
-            echo "Pre-roll digests recorded:"; cat /opt/baalvion-box2/deploy/consolidated/.rollback-digests || true
-
-            $COMPOSE pull app-identity app-commerce app-trade app-ecosystem app-platform app-edge-realtime redis neo4j caddy
+            # The core images were already pulled by the sync step above.
             $COMPOSE up -d --no-build app-identity app-commerce app-trade app-ecosystem app-platform app-edge-realtime redis neo4j
 
             # Profile-gated services (payments/community/giftcard) — separate call so a
@@ -600,67 +704,6 @@ jobs:
             # container re-reads the current file. See deploy-consolidated.yml for the same fix.
             $COMPOSE up -d --no-build --no-deps --force-recreate caddy
             docker image prune -f
-
-      - name: Apply app-commerce service migrations (idempotent)
-        if: steps.gate.outputs.ready == 'true'
-        continue-on-error: true   # never block the backend roll on a migration hiccup
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.CORE2_EC2_HOST }}
-          username: ${{ secrets.CORE2_EC2_USER }}
-          key: ${{ secrets.CORE2_EC2_SSH_KEY }}
-          # commerce-service, inventory-service, fulfillment-service, and marketplace-service
-          # all ship real sequelize-cli/custom migration files but none of them are ever
-          # invoked anywhere in this pipeline (only market-service self-migrates via
-          # sync({alter:false})) -- same class of bug as the auth-service oauth-tables fix
-          # above. Confirmed live: fulfillment-service 500s with 'relation
-          # "fulfillment.fulfillment_shipments" does not exist' on every shipments call.
-          # All four migration chains here are verified idempotent (sequelize-cli tracks
-          # SequelizeMeta; marketplace-service's custom migrate.js has no tracking table but
-          # every statement in its 4 files is additive/IF-NOT-EXISTS or DROP-POLICY-then-
-          # CREATE, so re-running the whole chain every deploy is safe).
-          script: |
-            set -euo pipefail
-            cd /opt/baalvion-box2
-            ENV=deploy/consolidated/.env
-            COMPOSE="docker compose --env-file $ENV -f deploy/consolidated/docker-compose.prod.yml"
-            for svc in commerce-service inventory-service fulfillment-service; do
-              $COMPOSE exec -T -e PGSSLMODE=require app-commerce \
-                sh -lc "cd /app/Backend/services/commerce/${svc} && npm run migrate" \
-                || echo "::notice::${svc} migration step failed this run -- check logs"
-            done
-            $COMPOSE exec -T -e PGSSLMODE=require app-commerce \
-              sh -lc "cd /app/Backend/services/marketplace/marketplace-service && npm run migrate" \
-              || echo "::notice::marketplace-service migration step failed this run -- check logs"
-            echo "::notice title=Migrations applied::commerce/inventory/fulfillment/marketplace schemas current on app-commerce."
-
-      - name: Apply cms-service + news-service migrations (idempotent)
-        if: steps.gate.outputs.ready == 'true'
-        continue-on-error: true   # never block the backend roll on a migration hiccup
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.CORE2_EC2_HOST }}
-          username: ${{ secrets.CORE2_EC2_USER }}
-          key: ${{ secrets.CORE2_EC2_SSH_KEY }}
-          # Same missing-migration-step bug as app-commerce, confirmed live: GET .../cms/websites
-          # 500s with 'relation "cms.cms_websites" does not exist'. deploy-consolidated.yml (the
-          # original prod-01 workflow) has always run these two via `npm run migrate` post-roll --
-          # this box2 workflow simply never had the equivalent step. news-service also gained a
-          # sync({alter:false}) call in its own boot code earlier this session (a different,
-          # already-live fix for the same underlying gap), so this is redundant-but-harmless
-          # belt-and-suspenders for news-service specifically; it's the real fix for cms-service.
-          script: |
-            set -euo pipefail
-            cd /opt/baalvion-box2
-            ENV=deploy/consolidated/.env
-            COMPOSE="docker compose --env-file $ENV -f deploy/consolidated/docker-compose.prod.yml"
-            $COMPOSE exec -T -e PGSSLMODE=require app-platform \
-              sh -lc "cd /app/Backend/services/knowledge/cms-service && npm run migrate" \
-              || echo "::notice::cms-service migration step failed this run -- check logs"
-            $COMPOSE exec -T -e PGSSLMODE=require app-platform \
-              sh -lc "cd /app/Backend/services/knowledge/news-service && npm run migrate" \
-              || echo "::notice::news-service migration step failed this run -- check logs"
-            echo "::notice title=Migrations applied::cms-service + news-service schemas current on app-platform."
 
       - name: Bootstrap / repair platform super-admin (idempotent)
         if: steps.gate.outputs.ready == 'true'
