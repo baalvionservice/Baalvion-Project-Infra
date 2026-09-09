@@ -18,7 +18,7 @@
     "dev:frontends": "turbo run dev --filter='./Frontend/*'",
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
-    "test:e2e": "playwright test",
+    "test:e2e": "playwright test --config e2e/playwright.config.ts",
     "test:e2e:report": "playwright show-report",
     "lighthouse": "lhci autorun",
     "test:packages": "turbo run test --filter='./Backend/packages/*'",
