@@ -17,6 +17,11 @@ COPY --from=pruner /repo/out/pnpm-lock.yaml ./pnpm-lock.yaml
 # install fails (ERR_PNPM_LOCKFILE_MISSING_DEPENDENCY); --no-frozen lets pnpm repair it in-image.
 RUN pnpm install --no-frozen-lockfile --filter insiders-service...
 COPY --from=pruner /repo/out/full/ ./
+# turbo prune does not carry the root tsconfig.base.json, and every package's tsconfig
+# extends it. Without this the tsup DTS build fails with "Cannot find base config file"
+# and the whole recursive build exits 1. Dockerfile.node and the CanWeMarry image both
+# copy it for the same reason.
+COPY tsconfig.base.json ./tsconfig.base.json
 # Build the workspace packages BEFORE pnpm deploy. @baalvion/money and @baalvion/sites are
 # TypeScript whose package.json "exports" points at dist/, which only exists after tsup runs.
 # Without this the install succeeds, `pnpm deploy` copies the package with no dist/, and the
