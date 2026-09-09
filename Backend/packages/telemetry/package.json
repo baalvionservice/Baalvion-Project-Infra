@@ -41,7 +41,7 @@
   },
   "devDependencies": {
     "tsup": "^8.5.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.3"
   },
   "peerDependencies": {
     "express": "^4 || ^5"

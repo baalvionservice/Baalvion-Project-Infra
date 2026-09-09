@@ -22,7 +22,7 @@
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {
-    "typescript": "^5.7.2",
-    "@types/node": "^22.0.0"
+    "typescript": "^5.9.3",
+    "@types/node": "^24.13.4"
   }
 }

@@ -70,7 +70,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@opennextjs/cloudflare": "^1.20.1",
-    "@types/node": "^20",
+    "@types/node": "^24.13.4",
     "@types/qrcode": "^1.5.5",
     "@types/react": "^19.2.1",
     "@types/react-dom": "^19.2.1",
@@ -80,7 +80,7 @@
     "genkit-cli": "^1.28.0",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5",
+    "typescript": "^5.9.3",
     "wrangler": "^4.110.0"
   }
 }

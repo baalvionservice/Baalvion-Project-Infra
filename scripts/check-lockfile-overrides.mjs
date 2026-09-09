@@ -24,6 +24,23 @@ const raw = readFileSync(PKG, 'utf8');
 const pkg = JSON.parse(raw);
 const declared = pkg.pnpm?.overrides ?? {};
 
+// pnpm 10 moved `overrides` out of package.json's `pnpm` field and into
+// pnpm-workspace.yaml. pnpm 9 reads ONLY the former; pnpm 10+ reads ONLY the
+// latter and silently ignores the other — no error, no failed install, just 71
+// security pins quietly not applying. `packageManager` is the only thing keeping
+// this repo on the version that still reads them, so a routine pnpm bump would
+// drop every pin at once. Refuse to let that happen quietly.
+const pinned = /^pnpm@(\d+)\./.exec(pkg.packageManager ?? '')?.[1];
+if (pinned && Number(pinned) >= 10 && Object.keys(declared).length > 0) {
+  console.error(
+    `packageManager is pnpm@${pinned}.x, which does NOT read pnpm.overrides from ${PKG} —\n` +
+      `it reads an \`overrides:\` block in pnpm-workspace.yaml instead. The ` +
+      `${Object.keys(declared).length} pins in ${PKG} (most of them security pins) would be\n` +
+      `silently ignored.\n\nMove them to pnpm-workspace.yaml before raising the pnpm major.\n`,
+  );
+  process.exit(1);
+}
+
 // The lockfile is YAML, but the overrides block is a flat scalar map at column 2 and
 // pulling in a YAML parser here would mean this check cannot run before an install.
 const lock = readFileSync(LOCK, 'utf8');
