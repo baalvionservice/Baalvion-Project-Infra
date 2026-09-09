@@ -65,6 +65,11 @@ The preset reads one variable, and falls back to a neutral slate if you skip it:
 }
 ```
 
+Hairlines and loading placeholders are *not* keyed to that variable — they mix
+against `currentColor`, so they stay visible on a near-black site and a white
+one alike with nothing to configure. `--bv-veil-rgb` only feeds the flat
+fallback for engines without `color-mix`.
+
 Channels are space-separated RGB so Tailwind's opacity modifier works:
 `rgb(var(--bv-accent-rgb) / 0.12)`.
 
