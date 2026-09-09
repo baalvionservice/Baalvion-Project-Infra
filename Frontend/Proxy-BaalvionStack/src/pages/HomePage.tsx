@@ -82,12 +82,19 @@ const proxyTypes = [
   },
 ];
 
-const testimonials = [
-  { name: "Sarah Chen", role: "CTO, DataFlow AI", text: "Baalvion reduced our scraping infrastructure costs by 60% while improving success rates to 99.2%. The API is exceptionally well-designed.", stars: 5 },
-  { name: "Marcus Weber", role: "Head of Engineering, PriceTrack", text: "We migrated from 3 different proxy providers to Baalvion. The unified dashboard and team management alone saved us 20 hours/week.", stars: 5 },
-  { name: "Anya Petrova", role: "VP Product, AdVerify Global", text: "The mobile proxy coverage is unmatched. We verify ads in 140+ countries with carrier-level authenticity. Enterprise support is world-class.", stars: 5 },
-  { name: "James Okafor", role: "Founder, SEORank.io", text: "From zero to 50M daily requests in 3 months. Baalvion's infrastructure scaled seamlessly. The usage forecast feature prevented surprise bills.", stars: 5 },
-];
+/**
+ * Real endorsements only.
+ *
+ * Four invented customers sat here — "Sarah Chen, CTO, DataFlow AI", "Marcus Weber",
+ * "Anya Petrova" and "James Okafor" — each five stars, each quoting a specific result
+ * ("reduced our infrastructure costs by 60%", "zero to 50M daily requests in 3 months").
+ * None is a customer of this platform.
+ *
+ * The section renders nothing while empty.
+ */
+type Testimonial = { name: string; role: string; text: string; stars: number };
+
+const testimonials: Testimonial[] = [];
 
 const integrationLogos = [
   "Python", "Node.js", "Go", "Java", "Scrapy", "Selenium", "Puppeteer", "Playwright",
@@ -358,7 +365,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Testimonials */}
+      {/* Testimonials — the whole band is omitted while there are no real ones,
+          rather than heading an empty grid with "Trusted by Industry Leaders". */}
+      {testimonials.length > 0 && (
       <section className="py-24 border-t border-border">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
@@ -388,6 +397,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      )}
 
       {/* Integrations Logos */}
       <section className="py-16 border-t border-border bg-card/30">
