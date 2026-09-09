@@ -18,16 +18,26 @@
  * The company's real staff are listed in KEEP below and are never touched. Anything not
  * matched by a rule here is also left alone: the script removes only what it can name.
  *
+ * Auth: either a pre-issued access token (preferred) or a superadmin login.
+ *   export CMS_ACCESS_TOKEN='eyJ…'      # from the admin console session
+ *   export SUPERADMIN_PASSWORD='…'      # fallback
+ *
  * Dry run (default — prints what it would delete, changes nothing):
- *   SUPERADMIN_PASSWORD=… node scripts/purgeBaalvionIrFiction.cjs
+ *   node scripts/purgeBaalvionIrFiction.cjs
  *
  * Apply:
- *   SUPERADMIN_PASSWORD=… node scripts/purgeBaalvionIrFiction.cjs --apply
+ *   node scripts/purgeBaalvionIrFiction.cjs --apply
  */
 const AUTH = process.env.AUTH_URL || 'http://localhost:3001/v1/auth';
 const CMS = process.env.CMS_URL || 'http://localhost:3018/api/v1';
 const EMAIL = process.env.SUPERADMIN_EMAIL || 'superadmin@baalvion.com';
 const PW = process.env.SUPERADMIN_PASSWORD;
+/**
+ * A pre-issued access token, as an alternative to logging in. Preferred: it avoids putting
+ * a long-lived password on a command line, and these tokens are short-lived, so a leaked
+ * one expires on its own. Grab it from the admin console's session and export it.
+ */
+const TOKEN = process.env.CMS_ACCESS_TOKEN;
 const WEBSITE_ID = process.env.IR_WEBSITE_ID || '7bced69e-a861-4530-9660-e0ddb955d72b';
 const BASE = `${CMS}/cms/websites/${WEBSITE_ID}`;
 const APPLY = process.argv.includes('--apply');
@@ -124,11 +134,17 @@ function isFiction(item) {
   return null;
 }
 
-async function main() {
-  if (!PW) throw new Error('SUPERADMIN_PASSWORD is required');
+async function resolveToken() {
+  if (TOKEN) return TOKEN.replace(/^Bearer\s+/i, '');
+  if (!PW) throw new Error('Set CMS_ACCESS_TOKEN (preferred) or SUPERADMIN_PASSWORD');
   const login = await req('POST', `${AUTH}/login`, null, { email: EMAIL, password: PW });
-  const token = login.data?.data?.accessToken;
-  if (!token) throw new Error('login failed: ' + JSON.stringify(login.data).slice(0, 200));
+  const t = login.data?.data?.accessToken;
+  if (!t) throw new Error('login failed: ' + JSON.stringify(login.data).slice(0, 200));
+  return t;
+}
+
+async function main() {
+  const token = await resolveToken();
 
   const res = await req('GET', `${BASE}/content?limit=500`, token);
   const items = res.data?.data || [];
