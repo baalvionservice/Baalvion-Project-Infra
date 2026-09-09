@@ -28,11 +28,6 @@ ENV NEXT_PUBLIC_TURNSTILE_SITE_KEY=$NEXT_PUBLIC_TURNSTILE_SITE_KEY
 ENV NEXT_PUBLIC_ALLOWED_RETURN_HOSTS=$NEXT_PUBLIC_ALLOWED_RETURN_HOSTS
 ENV AUTH_SERVICE_URL=$AUTH_SERVICE_URL
 WORKDIR /app/Frontend/auth-baalvion
-# turbo prune does not carry the root tsconfig.base.json, which every package tsconfig
-# extends. Without it tsup's DTS step fails "Cannot find base config file" and takes the
-# whole build with it. Latent until this app gained a workspace package that needs building
-# — @baalvion/design did exactly that and broke the Amarise image on 2026-09-09.
-COPY tsconfig.base.json ./tsconfig.base.json
 RUN pnpm build
 
 # Minimal runner. Next's standalone output preserves the monorepo path, so root the app at /app:
