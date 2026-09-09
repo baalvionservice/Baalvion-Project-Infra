@@ -143,10 +143,10 @@ const mkApp = (slug, name, category, description, rating, installs, developer, p
     ],
 });
 const marketplaceApps = [
-    mkApp('gst-billing-india', 'GST Billing', 'Finance', 'Automate GST invoicing, filing and reconciliation for India.', 4.8, 5200, 'Baalvion Inc.', '$12/month', true),
+    mkApp('gst-billing-india', 'GST Billing', 'Finance', 'Automate GST invoicing, filing and reconciliation for India.', 4.8, 5200, 'Baalvion Industries Private Limited', '$12/month', true),
     mkApp('quickbooks-sync', 'QuickBooks Sync', 'Finance', 'Two-way sync of invoices and ledgers with QuickBooks.', 4.6, 8900, 'Intuit', '$19/month', true),
     mkApp('slack-integration', 'Slack Integration', 'Productivity', 'Push alerts and approvals to Slack channels.', 4.7, 14200, 'Slack', 'Free', false),
-    mkApp('hr-onboarding', 'HR Onboarding', 'People', 'Automated onboarding workflows for new hires.', 4.5, 3100, 'Baalvion Inc.', '$9/month', false),
+    mkApp('hr-onboarding', 'HR Onboarding', 'People', 'Automated onboarding workflows for new hires.', 4.5, 3100, 'Baalvion Industries Private Limited', '$9/month', false),
     mkApp('ad-optimizer', 'Ad Optimizer', 'Marketing', 'AI-driven ad spend optimization across channels.', 4.4, 2600, 'AdWorks', '$29/month', false),
 ];
 const marketplaceInstalls = [

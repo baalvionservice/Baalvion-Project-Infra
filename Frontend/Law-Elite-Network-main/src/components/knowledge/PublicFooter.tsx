@@ -137,7 +137,7 @@ export function PublicFooter() {
             Law Elite <span className="text-slate-500">Network.</span>
           </span>
           <p className="text-[11px] font-medium text-slate-500">
-            Law Elite Network is operated by Baalvion Industries Private Limited, part of the Baalvion Group.
+            Law Elite Network is operated by Baalvion Industries Private Limited.
             © {new Date().getFullYear()} All rights reserved. CIN: U43121OD2025PTC048479
           </p>
         </div>

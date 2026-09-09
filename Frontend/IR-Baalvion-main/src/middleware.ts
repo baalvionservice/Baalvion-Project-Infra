@@ -1,6 +1,13 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getRequiredPermissionForRoute } from '@/lib/rbac/routeRegistry';
+import {
+  INVITE_COOKIE,
+  REQUEST_ACCESS_PATH,
+  codeMatches,
+  configuredInviteCode,
+  isInviteGated,
+} from '@/lib/invite-gate';
 
 /**
  * Institutional Edge Gatekeeper
@@ -45,6 +52,37 @@ const CENTRAL_CONSOLE_URL =
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Investor-side invitation gate. See lib/invite-gate.ts for the s.42 constraint behind it.
+  if (isInviteGated(pathname)) {
+    const expected = configuredInviteCode(process.env);
+
+    // An invitation link carries the code once; it is exchanged for a cookie and stripped from
+    // the URL so the code does not end up in browser history, referrers or shared links.
+    const supplied = request.nextUrl.searchParams.get('code');
+    if (expected && supplied && codeMatches(supplied, expected)) {
+      const clean = request.nextUrl.clone();
+      clean.searchParams.delete('code');
+      const response = NextResponse.redirect(clean);
+      response.cookies.set(INVITE_COOKIE, expected, {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: IS_PRODUCTION,
+        path: '/',
+        maxAge: 60 * 60 * 24 * 30,
+      });
+      return response;
+    }
+
+    const invited = expected && codeMatches(request.cookies.get(INVITE_COOKIE)?.value, expected);
+    // Development stays open so the funnel is workable locally; production does not.
+    if (!invited && IS_PRODUCTION) {
+      const url = request.nextUrl.clone();
+      url.pathname = REQUEST_ACCESS_PATH;
+      url.search = '';
+      return NextResponse.redirect(url);
+    }
+  }
+
   if (pathname === '/admin' || pathname.startsWith('/admin/')) {
     // Only redirect when the central console is configured. In production with
     // no CMS env set we fall through rather than redirect to localhost.
@@ -80,5 +118,9 @@ export const config = {
     '/performance/:path*',
     '/capital-ops/:path*',
     '/governance/my-voting',
+    '/invest',
+    '/invest/:path*',
+    '/onboarding',
+    '/onboarding/:path*',
   ],
 };

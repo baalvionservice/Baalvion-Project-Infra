@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Bell, FileText, CalendarDays, FileCheck, Landmark, LineChart, Newspaper,
+  Bell, FileText, CalendarDays, FileCheck, Landmark, Newspaper,
   CheckCircle2, Loader2, ShieldCheck, ArrowRight,
 } from "lucide-react";
 
@@ -16,10 +16,9 @@ const COMPANY = "Baalvion Industries Private Limited";
 const ALERT_OPTIONS = [
   { key: "news", icon: Newspaper, label: "Press Releases & News", desc: "Company announcements and corporate news." },
   { key: "reports", icon: FileText, label: "Financial Reports & Results", desc: "Quarterly and annual financial reports." },
-  { key: "events", icon: CalendarDays, label: "Events & Presentations", desc: "Earnings calls, investor days and webcasts." },
-  { key: "filings", icon: FileCheck, label: "Regulatory Filings", desc: "Statutory and exchange filings." },
+  { key: "events", icon: CalendarDays, label: "Events & Presentations", desc: "Investor briefings and webcasts." },
+  { key: "filings", icon: FileCheck, label: "Regulatory Filings", desc: "Statutory filings with the Registrar of Companies." },
   { key: "governance", icon: Landmark, label: "Governance & Voting", desc: "Board, AGM and shareholder resolutions." },
-  { key: "stock", icon: LineChart, label: "Stock Information", desc: "Share price and market updates." },
 ] as const;
 
 type AlertKey = (typeof ALERT_OPTIONS)[number]["key"];
@@ -27,7 +26,7 @@ type AlertKey = (typeof ALERT_OPTIONS)[number]["key"];
 export default function EmailAlertsPage() {
   const [email, setEmail] = useState("");
   const [prefs, setPrefs] = useState<Record<AlertKey, boolean>>({
-    news: true, reports: true, events: true, filings: true, governance: false, stock: false,
+    news: true, reports: true, events: true, filings: true, governance: false,
   });
   const [status, setStatus] = useState<"idle" | "submitting" | "done">("idle");
   const [error, setError] = useState("");

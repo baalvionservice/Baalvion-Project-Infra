@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Logo } from './logo';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
+import { copyrightLine } from '@baalvion/company';
 
 const footerLinkConfig = {
   company: [
@@ -105,7 +106,7 @@ export function PublicFooter() {
         </div>
         
         <div className="mt-16 border-t pt-8 text-center">
-          <p className="text-sm text-muted-foreground">&copy; {new Date().getFullYear()} Baalvion Industries Pvt Ltd. All Rights Reserved.</p>
+          <p className="text-sm text-muted-foreground">{copyrightLine(new Date().getUTCFullYear())}</p>
         </div>
       </div>
     </footer>

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { BaalvionLogo } from '@/components/icons';
 import * as React from 'react';
 import { PATHS } from '@/lib/paths';
+import { copyrightLine } from '@baalvion/company';
 
 /**
  * @file institutional-footer.tsx
@@ -68,7 +69,7 @@ export function InstitutionalFooter() {
                     </div>
                 </div>
                 <div className="mt-12 pt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
-                    <p className="font-semibold text-foreground/80">Part of the Baalvion group</p>
+                    <p className="font-semibold text-foreground/80">Part of Baalvion</p>
                     <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
                         <a href="https://baalvion.com" className="hover:text-foreground">Baalvion.com</a>
                         <a href="https://about.baalvion.com" className="hover:text-foreground">About Baalvion</a>
@@ -76,7 +77,7 @@ export function InstitutionalFooter() {
                     </div>
                 </div>
                 <div className="mt-6 pt-6 border-t flex flex-col sm:flex-row items-center justify-between text-sm">
-                    <p className='mb-4 sm:mb-0'>&copy; {year ? year : ''} Baalvion Industries Pvt. Ltd.</p>
+                    <p className='mb-4 sm:mb-0'>{year ? copyrightLine(year) : ''}</p>
                     <div className="flex items-center gap-4">
                         <Link href={PATHS.PRIVACY_POLICY} className="hover:text-foreground">Privacy Policy</Link>
                         <Link href={PATHS.TERMS_OF_USE} className="hover:text-foreground">Terms of Use</Link>

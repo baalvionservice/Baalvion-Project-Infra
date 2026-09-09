@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { FOOTER, SITE } from '@/lib/content';
 import { Wordmark } from './wordmark';
+import { copyrightLine } from '@baalvion/company';
 
 function isInternal(href: string): boolean {
   return href.startsWith('/');
@@ -52,7 +53,7 @@ export function SiteFooter() {
       <div className="border-t hairline">
         <div className="site-container flex flex-col gap-2 py-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="mono-caption">{FOOTER.charter}</p>
-          <p className="mono-caption">© {new Date().getFullYear()} {SITE.name}</p>
+          <p className="mono-caption">{copyrightLine(new Date().getUTCFullYear())}</p>
         </div>
       </div>
     </footer>
