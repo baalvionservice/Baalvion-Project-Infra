@@ -7,6 +7,7 @@ import { Text } from '@/design-system/typography/text';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, ListChecks } from 'lucide-react';
 import { buildMetadata } from '@/lib/seo';
+import { STOCK_REFERENCE_PAGES_LIVE } from '@/config/sections';
 import { structuredData } from '@/lib/seo/structured-data';
 import { JsonLd } from '@/modules/seo-engine/components/JsonLd';
 import { loadCompanies } from '@/lib/data/loaders';
@@ -36,6 +37,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     canonical: `/stocks/lists/${slug}`,
     title: `${list.name} | Imperialpedia`,
     description: list.description,
+    noIndex: !STOCK_REFERENCE_PAGES_LIVE,
   });
 }
 

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { ImperialpediaMark } from "@/components/icons/ImperialpediaMark";
 import { PreferredSourceButton } from "@/components/common/PreferredSourceButton";
+import { withoutRetired } from "@/lib/content/retired-paths";
+import { NEWS_SECTION_LIVE } from "@/config/sections";
 
 /**
  * Shared dark footer for /world, /news, /market-news — promoted from
@@ -13,19 +15,27 @@ import { PreferredSourceButton } from "@/components/common/PreferredSourceButton
  * corresponding page on this site and were dropped rather than left as
  * href="#" or pointed at a route that would 404 — both fail Google's
  * crawlable-links requirement just as badly as the placeholder they replace.
+ *
+ * 2026-09-10: that claim had gone stale. "Investing" and "Personal Finance"
+ * were retired hubs 301ing to the homepage, "Premium" bounced anonymous
+ * readers into a sign-in wall, and "Politics" is a live route with no articles
+ * in it — a whole column of this footer led nowhere. Columns are filtered
+ * through withoutRetired and any that empty out are dropped, so a future
+ * retirement degrades this footer instead of quietly breaking it.
  */
 export default function Footer() {
   const links: { label: string; href: string }[][] = [
     [
-      { label: "News", href: "/news" },
+      ...(NEWS_SECTION_LIVE ? [{ label: "News", href: "/news" }] : []),
       { label: "World Markets", href: "/world" },
       { label: "Business", href: "/market-news" },
-      { label: "Politics", href: "/politics" },
+      { label: "Financial Intelligence", href: "/financial-intelligence" },
     ],
     [
-      { label: "Investing", href: "/investing" },
-      { label: "Personal Finance", href: "/personal-finance" },
-      { label: "Premium", href: "/premium" },
+      { label: "Stocks", href: "/stocks" },
+      { label: "Budgeting", href: "/budgeting-basics" },
+      { label: "Scams & Fraud Protection", href: "/fraud-protection" },
+      { label: "Financial Tools", href: "/financial-tools" },
     ],
     [
       { label: "About Imperialpedia", href: "/about" },
@@ -38,7 +48,9 @@ export default function Footer() {
       { label: "Terms", href: "/terms-of-service" },
       { label: "RSS Feeds", href: "/feed.xml" },
     ],
-  ];
+  ]
+    .map(withoutRetired)
+    .filter((col) => col.length > 0);
 
   return (
     <footer className="bg-[#0B1528] text-gray-300 mt-8 border-t border-[#16284A]">

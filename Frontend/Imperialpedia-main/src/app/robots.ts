@@ -3,7 +3,7 @@ import { env } from '@/config/env';
 
 /**
  * robots.txt configuration for search engine crawlers.
- * Engineered to maximize discovery of intelligence nodes while shielding governance clusters.
+ * Opens the public site to crawlers and keeps admin, auth and API routes out.
  */
 
 const ALLOW = [

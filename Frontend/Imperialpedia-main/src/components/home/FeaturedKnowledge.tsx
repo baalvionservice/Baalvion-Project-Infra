@@ -2,20 +2,28 @@ import React from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { HomeSectionHeading } from "./HomeSectionHeading";
+import { withoutRetired } from "@/lib/content/retired-paths";
 
 // Core evergreen guides, hand-picked rather than pulled from recency — these
 // are the pages everything else on the site should eventually link back to.
-// Every href below is a real, live published page (verified against prod,
-// not a generated/guessed slug).
+//
+// Every href below is a real, live published page. The previous set pointed at
+// /inflation, /etfs, /bonds, /gdp, /credit-cards, /interest-rates and
+// /personal-finance guides — 7 of these 8 links — all of which now 301 to the
+// homepage under the category retirement, so the most prominent block on the
+// homepage bounced readers straight back to where they started. Drawn only from
+// the two live pillars (/stocks, /budgeting-basics) plus a live calculator, and
+// filtered through isRetiredPath at render so a future retirement pass can't
+// reintroduce the same dead end silently.
 const FOUNDATIONS = [
+  { title: "What Is a Stock?", href: "/stocks/what-is-a-stock" },
+  { title: "How the Stock Market Works", href: "/stocks/what-is-the-stock-market" },
+  { title: "How Stock Exchanges Work", href: "/stocks/how-stock-exchanges-work" },
+  { title: "What Is Market Capitalization?", href: "/stocks/what-is-market-capitalization" },
+  { title: "What Is a Budget?", href: "/budgeting-basics/what-is-a-budget" },
+  { title: "How to Build an Emergency Fund", href: "/budgeting-basics/building-emergency-fund-into-your-budget" },
+  { title: "Understanding the P/E Ratio", href: "/stocks/price-to-earnings-ratio-explained" },
   { title: "What Is Compound Interest?", href: "/financial-tools/compound-interest" },
-  { title: "What Is Inflation?", href: "/inflation/complete-guide-to-inflation" },
-  { title: "How Interest Rates Work", href: "/interest-rates/complete-guide-to-interest-rates" },
-  { title: "How the Stock Market Works", href: "/personal-finance/understanding-the-stock-market" },
-  { title: "What Is an ETF?", href: "/etfs/etfs" },
-  { title: "What Is a Credit Score?", href: "/credit-cards/credit-scores-and-credit-utilization" },
-  { title: "How Bonds Work", href: "/bonds/bonds" },
-  { title: "What Is GDP?", href: "/gdp/complete-guide-to-gdp" },
 ] as const;
 
 /**
@@ -32,7 +40,7 @@ export function FeaturedKnowledge() {
         Financial Foundations
       </h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-1">
-        {FOUNDATIONS.map((item) => (
+        {withoutRetired(FOUNDATIONS).map((item) => (
           <Link
             key={item.href}
             href={item.href}

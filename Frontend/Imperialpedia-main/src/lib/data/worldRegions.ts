@@ -55,6 +55,10 @@ export interface FeaturedStory {
   /** Owned article (CMS/editorial) — resolved via storyHref() in article-url.ts. */
   slug?: string;
   dateISO?: string;
+  /** CMS contentType + category, so storyHref can build the canonical path
+   *  (a guide lives at /<categorySlug>/<slug>, not at a dated news path). */
+  contentType?: string;
+  categorySlug?: string;
   /** External link — set instead of slug/dateISO for wire content with no owned article page. */
   href?: string;
 }
@@ -67,6 +71,10 @@ export interface LatestNewsItem {
   positive: boolean | null;
   slug?: string;
   dateISO?: string;
+  /** CMS contentType + category, so storyHref can build the canonical path
+   *  (a guide lives at /<categorySlug>/<slug>, not at a dated news path). */
+  contentType?: string;
+  categorySlug?: string;
   href?: string;
 }
 
@@ -77,6 +85,10 @@ export interface NewsGridItem {
   image?: string | null;
   slug?: string;
   dateISO?: string;
+  /** CMS contentType + category, so storyHref can build the canonical path
+   *  (a guide lives at /<categorySlug>/<slug>, not at a dated news path). */
+  contentType?: string;
+  categorySlug?: string;
   href?: string;
 }
 

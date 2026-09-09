@@ -15,20 +15,23 @@ import { NewsSidebar } from "@/components/news/NewsSidebar";
 import { NewsletterBand } from "@/components/landing/investopedia/NewsletterBand";
 import { newsArticleHref } from "@/lib/data/article-url";
 import { AdSenseUnit } from "@/components/common/AdSense";
+import { NEWS_HUB_MIN_ARTICLES, newsHubIsLive } from "@/config/sections";
 
 // Empty hubs read to Google as exactly the thin/low-value content pattern
 // that blocks AdSense approval (see GLOSSARY_LIVE in config/glossary.ts for
-// the same call made for the glossary). noindex while no `news` content has
-// been published — flips back automatically the moment one is, no redeploy
-// needed.
+// the same call made for the glossary). noindex until the newsroom has enough
+// published items to be a section rather than a template: at two articles this
+// page rendered an eight-tab masthead, a "Breaking" ticker, Trending Now,
+// Today's Highlights, a Latest feed and Editor's Picks over the same two
+// stories, with the newer of them nine days old.
 export async function generateMetadata(): Promise<Metadata> {
-  const liveNews = await getPublishedNews(1);
+  const liveNews = await getPublishedNews(NEWS_HUB_MIN_ARTICLES);
   return buildMetadata({
     canonical: '/news',
     title: "Financial News and Analysis",
     description:
       "Stay informed with the latest financial news, market insights, and expert analysis. Our news section covers global markets, economic trends, and investment strategies to help you make informed decisions.",
-    noIndex: liveNews.length === 0,
+    noIndex: !newsHubIsLive(liveNews.length),
   });
 }
 

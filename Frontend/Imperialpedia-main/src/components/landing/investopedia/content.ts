@@ -6,9 +6,16 @@
  * image and no real CMS-backed data source.
  */
 
+// "Read full definition" has to land on a page that really is the full
+// definition. The previous entry paired a dollar-cost-averaging blurb with
+// href "/personal-finance" — a retired hub that 301s to the homepage, and whose
+// DCA article was pulled in the 2026-08 cleanup anyway, so there was nothing
+// left to point at. Swapped to a term the site actually still publishes in
+// depth. If this term's article is ever retired, TermOfDay drops the link
+// rather than rendering a bounce back to the homepage.
 export const TERM_OF_DAY = {
-  term: "Dollar-Cost Averaging",
+  term: "Zero-Based Budgeting",
   definition:
-    "Dollar-cost averaging means investing a fixed amount on a regular schedule, regardless of price. Because you buy more units when prices are low and fewer when they're high, your average cost per unit smooths out over time — reducing the risk of mistiming the market and building a calm, repeatable investing habit.",
-  href: "/personal-finance",
+    "Zero-based budgeting assigns every dollar of income a job — rent, groceries, debt payoff, savings, even guilt-free spending — until income minus every assigned category equals exactly zero. “Zero” means every dollar has a destination, not that every dollar gets spent: savings and debt payments are assigned categories too.",
+  href: "/budgeting-basics/zero-based-budgeting",
 };

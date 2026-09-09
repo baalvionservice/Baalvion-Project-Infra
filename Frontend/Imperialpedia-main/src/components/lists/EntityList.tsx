@@ -29,9 +29,9 @@ export const EntityList = ({ entities, type, totalCount, hrefMap }: EntityListPr
       <div className="py-24 text-center space-y-6 bg-muted/10 rounded-[3rem] border-2 border-dashed border-white/5">
         <SearchX className="w-16 h-16 text-muted-foreground mx-auto opacity-30" />
         <div className="space-y-2">
-          <Text variant="h3" className="font-bold">No results localized</Text>
+          <Text variant="h3" className="font-bold">No results</Text>
           <Text variant="bodySmall" className="text-muted-foreground max-w-sm mx-auto leading-relaxed">
-            Try adjusting your search terms or taxonomy filters to discover new intelligence nodes.
+            Try adjusting your search terms or filters.
           </Text>
         </div>
       </div>
@@ -42,7 +42,7 @@ export const EntityList = ({ entities, type, totalCount, hrefMap }: EntityListPr
     <div className="space-y-8">
       <div className="flex items-center justify-between px-2">
         <Text variant="label" className="text-muted-foreground font-bold">
-          Localized <span className="text-foreground">{totalCount}</span> intelligence nodes
+          <span className="text-foreground">{totalCount}</span> {totalCount === 1 ? "company" : "companies"}
         </Text>
       </div>
 
