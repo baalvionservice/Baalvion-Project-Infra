@@ -22,8 +22,21 @@
 const shadowRgb = 'var(--bv-shadow-rgb, 15 23 42)';
 const s = (alpha) => `rgb(${shadowRgb} / ${alpha})`;
 
+/**
+ * The neutral veil behind hairlines and loading placeholders.
+ *
+ * Derived from currentColor, not the shadow hue: a dark tint is invisible on a
+ * dark surface, and most of this estate is dark. Mixing against the inherited
+ * text colour makes it correct on a near-black ground and a white one with no
+ * per-site configuration.
+ *
+ * Each use emits a flat rgb() fallback first for engines without color-mix.
+ */
+const veilFallback = (alpha) => `rgb(var(--bv-veil-rgb, 128 128 128) / ${alpha})`;
+const veil = (pct) => `color-mix(in srgb, currentColor ${pct}%, transparent)`;
+
 /** A hairline that survives dark mode, where a solid border reads too heavy. */
-const hairline = `inset 0 0 0 1px rgb(${shadowRgb} / 0.06)`;
+const hairline = `inset 0 0 0 1px ${veil(9)}`;
 
 module.exports = {
   theme: {
@@ -134,14 +147,16 @@ module.exports = {
         '.bv-skeleton': {
           position: 'relative',
           overflow: 'hidden',
-          backgroundColor: `rgb(${shadowRgb} / 0.07)`,
+          // postcss-js needs an array to emit the same property twice; the
+          // first entry is the fallback for engines without color-mix.
+          backgroundColor: [veilFallback(0.22), veil(11)],
           borderRadius: '0.375rem',
           '&::after': {
             content: '""',
             position: 'absolute',
             inset: '0',
             transform: 'translateX(-100%)',
-            backgroundImage: `linear-gradient(90deg, transparent, rgb(${shadowRgb} / 0.06), transparent)`,
+            backgroundImage: `linear-gradient(90deg, transparent, ${veil(9)}, transparent)`,
             animation: 'bv-shimmer 1.6s infinite',
           },
         },
