@@ -2,34 +2,28 @@
 
 import { motion } from "framer-motion";
 
-const testimonials = [
-  {
-    quote: "ControlTheMarket transformed our hiring process completely. We now hire faster and with more confidence. The quality of candidates is unlike anything we've seen.",
-    name: "Jane Doe",
-    role: "Head of Talent, TechCorp",
-    initials: "JD",
-    bg: "hsl(221,83%,88%)",
-    col: "hsl(221,83%,40%)",
-  },
-  {
-    quote: "As a developer, I finally got to show what I can actually do. No more cover letters nobody reads. I landed my dream job in two weeks flat.",
-    name: "John Smith",
-    role: "Senior Frontend Engineer",
-    initials: "JS",
-    bg: "hsl(142,76%,88%)",
-    col: "hsl(142,76%,30%)",
-  },
-  {
-    quote: "The analytics are a game-changer. We can see skill gaps and strengths across all candidates at a glance. Changed how our entire team thinks about hiring.",
-    name: "Emily White",
-    role: "CTO, Innovate Inc.",
-    initials: "EW",
-    bg: "hsl(280,70%,88%)",
-    col: "hsl(280,70%,35%)",
-  },
-];
+/**
+ * Real endorsements only.
+ *
+ * Three invented testimonials sat here — "Jane Doe, Head of Talent, TechCorp", "John Smith"
+ * and "Emily White, CTO, Innovate Inc." — quoting results this platform has not produced,
+ * under a heading promising "Real results. Real people." The company has no customers yet.
+ *
+ * The section renders nothing while empty.
+ */
+type Testimonial = {
+  quote: string;
+  name: string;
+  role: string;
+  initials: string;
+  bg: string;
+  col: string;
+};
+const testimonials: Testimonial[] = [];
+
 
 export default function Testimonials() {
+  if (testimonials.length === 0) return null;
   return (
     <div className="bg-gray-50 py-[88px] px-6">
       <div className="max-w-[1100px] mx-auto">
