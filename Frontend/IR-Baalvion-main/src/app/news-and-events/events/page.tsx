@@ -9,6 +9,7 @@ import { Download, Link as LinkIcon, FileText, FileSpreadsheet } from 'lucide-re
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { LEGAL_ENTITY_NAME } from "@baalvion/company";
 
 type EventItem = {
     id: string;
@@ -186,7 +187,7 @@ export default function EventsPage() {
                             <h2 className="text-2xl font-bold mb-6">Latest Events</h2>
                             <div className="space-y-8">
                                 <p className="text-xs text-gray-500">
-                                    Statements made during these events may contain a number of forward-looking statements. We call your attention to the fact that Baalvion's actual results may of course differ from these statements. Baalvion has filed reports with the SEC, which list some of the factors that may cause the results of Baalvion to differ materially from what is included in the event. Baalvion assumes no duty and does not undertake to update any forward-looking statements.
+                                    Statements made during these events may contain forward-looking statements. Actual results may differ materially from those statements. Baalvion assumes no duty and does not undertake to update any forward-looking statement.
                                 </p>
                                 <div className="border border-gray-200 p-8">
                                     <h3 className="text-xl font-bold mb-2">
@@ -210,7 +211,7 @@ export default function EventsPage() {
                         <div className="space-y-4">
                             <p className="font-semibold">12 JUN 2025</p>
                             <h3 className="text-4xl font-bold">
-                                Baalvion, Inc. 2025 Investor Day
+                                {LEGAL_ENTITY_NAME} 2025 Investor Day
                             </h3>
                             <Button asChild variant="link" className="text-black p-0 text-base hover:underline">
                                 <Link href="#">
@@ -269,7 +270,7 @@ export default function EventsPage() {
                             <div className="border-b border-gray-200 pb-8">
                                 <p className="text-sm text-gray-500 mb-2">15 Jan 2026 7:30 AM ET</p>
                                 <h3 className="text-xl font-bold mb-4">
-                                    Q4 2025 Baalvion, Inc. Earnings Conference Call
+                                    Q4 2025 {LEGAL_ENTITY_NAME} Earnings Conference Call
                                 </h3>
                                 <div className="flex gap-4 flex-wrap">
                                     <Link href="#" className="text-sm font-bold text-primary hover:underline flex items-center gap-1">
@@ -309,7 +310,7 @@ export default function EventsPage() {
                             <div className="border-b border-gray-200 pb-8">
                                 <p className="text-sm text-gray-500 mb-2">12 Jun 2025</p>
                                 <h3 className="text-xl font-bold mb-4">
-                                    Baalvion, Inc. 2025 Investor Day
+                                    {LEGAL_ENTITY_NAME} 2025 Investor Day
                                 </h3>
                                 <div className="flex gap-4">
                                     <Button asChild variant="link" className="text-black p-0 hover:underline">

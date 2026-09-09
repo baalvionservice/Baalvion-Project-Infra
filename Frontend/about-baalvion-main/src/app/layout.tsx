@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import ClientLayout from "./client-layout";
+import { BRAND_NAME, CIN, INCORPORATED_ON, LEGAL_ENTITY_NAME } from "@baalvion/company";
 
 export const viewport: Viewport = {
   themeColor: "#FF9900",
@@ -69,9 +70,12 @@ export const metadata: Metadata = {
 const organizationJsonLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: "Baalvion Industries",
+  name: BRAND_NAME,
+  legalName: LEGAL_ENTITY_NAME,
+  identifier: { "@type": "PropertyValue", name: "CIN", value: CIN },
+  foundingDate: INCORPORATED_ON,
   url: "https://about.baalvion.com",
-  sameAs: ["https://baalvion.nexus"],
+  sameAs: ["https://baalvion.com", "https://www.linkedin.com/company/baalvion"],
   description: "Baalvion Industries builds the unified global trade infrastructure connecting businesses, finance, compliance, and intelligence systems into a single Baalvion Operating System (BOS).",
 };
 

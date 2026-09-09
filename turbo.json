@@ -34,6 +34,8 @@
         "BUILD_STANDALONE",
         "DASHBOARD_API_URL",
         "GATEWAY_PROXY_TARGET",
+        "IR_INVEST_ACCESS_CODE",
+        "NEXT_PUBLIC_CORPORATE_URL",
         "SITE_URL",
         "VITE_GATEWAY_TARGET",
         "VITE_GATEWAY_URL",

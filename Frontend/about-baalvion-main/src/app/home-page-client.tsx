@@ -979,6 +979,7 @@ export default function HomePageClient() {
 
         {/* NEWSLETTER SIGNUP - Growth & Engagement Terminal */}
         <section
+          id="newsletter"
           className="section-vertical-padding bg-gray-50"
           aria-labelledby="newsletter-title"
         >

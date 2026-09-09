@@ -8,7 +8,7 @@ import { MetadataRoute } from "next";
 // server-side reader for the same content.
 import { cmsListPages } from "@/lib/cms";
 import { IR_PAGES } from "@/lib/ir-pages";
-import { isGatedPath } from "@/lib/seo-routes";
+import { isNoIndexPath } from "@/lib/seo-routes";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = AppConfig.baseUrl;
@@ -28,17 +28,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/faq`, lastModified: currentDate, changeFrequency: "monthly" as const, priority: 0.7 },
   ];
 
-  // The marketplace — the two-sided surface investors and founders arrive on. Both sides need to
-  // be findable: an investor searching for opportunities, and a founder searching for somewhere
-  // to raise.
+  // The founder side of the marketplace only. /invest is the investor side and is now invitation
+  // -only under Companies Act s.42 (lib/invite-gate.ts), so it is neither crawled nor listed; a
+  // founder looking for somewhere to raise still needs to find this page.
   const marketplaceRoutes = [
-    { url: `${baseUrl}/invest`, lastModified: currentDate, changeFrequency: "daily" as const, priority: 0.9 },
     { url: `${baseUrl}/invest/list-your-business`, lastModified: currentDate, changeFrequency: "weekly" as const, priority: 0.9 },
   ];
 
-  // Governance section routes
+  // Governance section routes. There is deliberately no bare /governance entry: the section has
+  // no index route, so listing it asked crawlers to fetch a 404. Same for /news-and-events below.
   const governanceRoutes = [
-    { url: `${baseUrl}/governance`, lastModified: currentDate, changeFrequency: "weekly" as const, priority: 0.8 },
     { url: `${baseUrl}/governance/overview`, lastModified: currentDate, changeFrequency: "monthly" as const, priority: 0.7 },
     { url: `${baseUrl}/governance/board-of-directors`, lastModified: currentDate, changeFrequency: "monthly" as const, priority: 0.7 },
     { url: `${baseUrl}/governance/committee-composition`, lastModified: currentDate, changeFrequency: "monthly" as const, priority: 0.7 },
@@ -48,13 +47,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // News and Events — every published surface, not just the four that were listed.
   const newsEventsRoutes = [
-    "", "/news", "/press-releases", "/events", "/investor-day", "/webcast",
-    "/filings", "/financial-reports", "/documents", "/stock",
+    "/news", "/press-releases", "/events", "/investor-day", "/webcast",
+    "/filings", "/financial-reports", "/documents",
   ].map((seg) => ({
     url: `${baseUrl}/news-and-events${seg}`,
     lastModified: currentDate,
-    changeFrequency: (seg === "" || seg === "/news" ? "daily" : "weekly") as "daily" | "weekly",
-    priority: seg === "" || seg === "/news" ? 0.8 : 0.7,
+    changeFrequency: (seg === "/news" ? "daily" : "weekly") as "daily" | "weekly",
+    priority: seg === "/news" ? 0.8 : 0.7,
   }));
 
   // Canonical institutional IR marketing pages (why-invest, thesis, market,
@@ -125,7 +124,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const uniqueRoutes = allRoutes.filter(
     (route, index, self) =>
       index === self.findIndex((r) => r.url === route.url) &&
-      !isGatedPath(route.url.replace(baseUrl, "") || "/")
+      !isNoIndexPath(route.url.replace(baseUrl, "") || "/")
   );
 
   return uniqueRoutes.sort((a, b) => (b.priority || 0) - (a.priority || 0));

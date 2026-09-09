@@ -55,7 +55,7 @@ export const metadata: Metadata = {
 const organizationJsonLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: "Baalvion Industries Pvt Ltd",
+  name: "Baalvion Industries Private Limited",
   url: "https://jobs.baalvion.com",
   sameAs: ["https://www.baalvion.com"],
   description:
@@ -310,7 +310,7 @@ export default function AboutPage() {
       {/* 1. Hero */}
       <section className="py-24 sm:py-32 text-center bg-muted/30">
         <div className="container mx-auto px-4">
-          <Badge variant="secondary" className="mb-6">Baalvion Industries Pvt Ltd</Badge>
+          <Badge variant="secondary" className="mb-6">Baalvion Industries Private Limited</Badge>
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
             The Operating System<br className="hidden md:block" /> for Global Talent
           </h1>
