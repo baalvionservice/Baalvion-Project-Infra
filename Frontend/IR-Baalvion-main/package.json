@@ -12,7 +12,9 @@
                     "build":  "next build",
                     "start":  "next start",
                     "lint":  "next lint",
-                    "typecheck":  "tsc --noEmit"
+                    "typecheck":  "tsc --noEmit",
+                    "invite:new":  "node scripts/new-invite.mjs",
+                    "test:gate":  "node --test src/lib/__tests__/*.test.mjs"
                 },
     "dependencies":  {
                          "@baalvion/auth-sdk":  "workspace:*",
