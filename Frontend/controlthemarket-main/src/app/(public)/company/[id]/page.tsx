@@ -248,7 +248,7 @@ export default async function CompanyProfilePage({
                       Senior Backend Engineer Opportunity
                     </h3>
                     <p className="mt-2 text-muted-foreground">
-                      Baalvion Inc. is seeking expert backend developers for a
+                      Baalvion Industries Private Limited is seeking expert backend developers for a
                       unique virtual job simulation. Prove your skills by
                       building core modules for our next-gen investor platform.
                     </p>

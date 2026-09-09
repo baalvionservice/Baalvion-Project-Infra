@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { countries } from '@/lib/countries';
+import { LEGAL_ENTITY_NAME } from "@baalvion/company";
 
 // Note: Metadata is typically handled in a parent layout or server-side page file
 // for pages marked with "use client".
@@ -67,7 +68,7 @@ export default function WebcastPage() {
                         {/* Left Column: Event Info */}
                         <div className="space-y-6">
                             <h2 className="text-3xl font-bold">
-                                Baalvion, Inc. 2025 Investor Day
+                                {LEGAL_ENTITY_NAME} 2025 Investor Day
                             </h2>
                             
                             {webcastImage && (

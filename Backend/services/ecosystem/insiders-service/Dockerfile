@@ -17,6 +17,14 @@ COPY --from=pruner /repo/out/pnpm-lock.yaml ./pnpm-lock.yaml
 # install fails (ERR_PNPM_LOCKFILE_MISSING_DEPENDENCY); --no-frozen lets pnpm repair it in-image.
 RUN pnpm install --no-frozen-lockfile --filter insiders-service...
 COPY --from=pruner /repo/out/full/ ./
+# Build the workspace packages BEFORE pnpm deploy. @baalvion/money and @baalvion/sites are
+# TypeScript whose package.json "exports" points at dist/, which only exists after tsup runs.
+# Without this the install succeeds, `pnpm deploy` copies the package with no dist/, and the
+# container dies at require() time — MODULE_NOT_FOUND on @baalvion/money/dist/index.js — with
+# a health check that just reports "unhealthy" and no hint that a build step is missing.
+# deploy/consolidated/Dockerfile.node already does this; this image did not, which is how the
+# gap survived: every service inside the app-* bundles was fine, only the standalone ones broke.
+RUN pnpm -r --filter "./Backend/packages/*" run build
 RUN pnpm deploy --filter=insiders-service --prod /out
 
 FROM node:20.12-alpine AS final

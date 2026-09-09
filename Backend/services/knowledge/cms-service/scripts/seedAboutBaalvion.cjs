@@ -117,7 +117,7 @@ const COMPANY_PAGES = [
     excerpt: 'How Baalvion grew from an idea into a global federated enterprise.',
     blocks: [ head(0, 'From Vision to Platform'), para(1, 'Baalvion began with a simple conviction: that one shared operating system could power an entire ecosystem of businesses.') ] },
   { title: 'Leadership', slug: 'leadership', cat: 'people',
-    excerpt: 'Meet the people steering the Baalvion Group.',
+    excerpt: 'Meet the people steering Baalvion.',
     blocks: [ head(0, 'Executive Team'), para(1, 'Our leadership brings together decades of experience across technology, finance, and operations.') ] },
   { title: 'Careers at Baalvion', slug: 'careers-at-baalvion', cat: 'company',
     excerpt: 'Build the future of multi-tenant infrastructure with us.',
@@ -200,11 +200,11 @@ const NEWS = [
       para(1, 'Recent expansions in the Middle East trade corridors have demonstrated a 40% reduction in clearing latency for mid-market partners. Additionally, our satellite production facility has reached a new milestone, with production capacity now at 30 units per week.'),
       para(2, 'In the UK, the AI compliance scoring system has officially launched, providing real-time risk assessment for cross-border transactions.') ],
     seo: { title: 'Daily Update: March 24, 2026 | Baalvion News', description: 'Latest headlines from the Baalvion Operating System expansion and global trade corridors.' } },
-  { title: 'Baalvion Group Unifies Platform Under a Single Operating System', slug: 'platform-unification', cat: 'news-company',
+  { title: 'Baalvion Unifies Platform Under a Single Operating System', slug: 'platform-unification', cat: 'news-company',
     excerpt: 'A landmark consolidation brings every Baalvion property onto one identity and one ledger.',
     featuredImage: 'https://picsum.photos/seed/news2/600/400',
     cf: { category: 'company', author: 'Communications', readTime: '3 min read', date: 'April 2, 2026', isTrending: false },
-    blocks: [ head(0, 'One Platform, Many Businesses'), para(1, 'Baalvion Group has completed the migration of its commerce, media, mining and legal properties onto a single multi-tenant operating system.') ],
+    blocks: [ head(0, 'One Platform, Many Businesses'), para(1, 'Baalvion has completed the migration of its commerce, media, mining and legal properties onto a single multi-tenant operating system.') ],
     seo: { title: 'Platform Unification | Baalvion News', description: 'Every Baalvion property now runs on one identity and one ledger.' } },
 ];
 
