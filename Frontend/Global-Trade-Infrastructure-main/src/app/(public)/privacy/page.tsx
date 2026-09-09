@@ -17,7 +17,7 @@ export default function PrivacyPolicyPage() {
 
         <div className="bg-card p-8 md:p-12 rounded-lg border shadow-sm text-left space-y-6">
           <p className="text-lg text-muted-foreground leading-relaxed">
-            Baalvion Industries Pvt. Ltd. ("Baalvion", "we", "us", "our") is committed to protecting the privacy and security of the data on our platform. This Privacy Policy explains how we collect, use, process, and disclose information in relation to our institutional-grade operating system for global trade (the "Platform"). This policy applies to Verified Institutions and their authorized users.
+            Baalvion Industries Private Limited ("Baalvion", "we", "us", "our") is committed to protecting the privacy and security of the data on our platform. This Privacy Policy explains how we collect, use, process, and disclose information in relation to our institutional-grade operating system for global trade (the "Platform"). This policy applies to Verified Institutions and their authorized users.
           </p>
 
           <Separator className="my-8" />

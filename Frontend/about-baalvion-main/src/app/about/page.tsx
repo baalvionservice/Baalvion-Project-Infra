@@ -28,7 +28,7 @@ const STATIC_LINKS = [
   { title: 'What We Do', excerpt: 'The Baalvion Operating System and the platform layers that power global commerce.', href: '/company' },
   { title: 'Company Structure', excerpt: 'One foundation operating across three layers: corporate, platform, and independent brands.', href: '/structure' },
   { title: 'Philosophy', excerpt: 'The principles Baalvion builds against: permanence, systems, discipline, and trust.', href: '/philosophy' },
-  { title: 'Leadership & Founders', excerpt: 'The people steering the Baalvion Group.', href: '/leadership' },
+  { title: 'Leadership & Founders', excerpt: 'The people steering Baalvion.', href: '/leadership' },
   { title: 'Careers', excerpt: 'Build infrastructure-grade software with us.', href: '/careers' },
   { title: 'Trust & Security', excerpt: 'How we keep the platform secure, compliant, and auditable.', href: '/trust' },
 ];

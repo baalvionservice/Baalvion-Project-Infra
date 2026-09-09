@@ -3,6 +3,7 @@ import { IBM_Plex_Sans, IBM_Plex_Mono } from 'next/font/google';
 import './globals.css';
 import { counts, productsByCategory, PRODUCTS } from '@/lib/products';
 import { Nav, type Menu } from '@/components/Nav';
+import { copyrightLine } from '@baalvion/company';
 
 // Weight 300 carries the display type; 400/500 carry body and labels.
 const plex = IBM_Plex_Sans({
@@ -98,7 +99,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               actually has.
             </p>
             <p className="mt-10 font-mono text-[12px] text-[hsl(var(--muted-ink))]">
-              © {new Date().getFullYear()} Baalvion Industries Private Limited
+              {copyrightLine(new Date().getUTCFullYear())}
             </p>
           </div>
         </footer>
