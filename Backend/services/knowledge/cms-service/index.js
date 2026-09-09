@@ -17,6 +17,7 @@ const { startSchedulerWorker } = require('./queues/schedulerQueue');
 const { startNotificationWorker } = require('./queues/notificationQueue');
 const { startAnalyticsWorkers, stopAnalyticsWorkers, scheduleAnalyticsJobs } = require('./queues/analyticsWorkers');
 const { closeQueues: closeAnalyticsQueues } = require('./queues/analyticsQueue');
+const { startEditorialWorker, scheduleEditorialJobs, stopEditorialWorker } = require('./queues/editorialQueue');
 const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-shutdown');
 
 const app = express();
@@ -75,10 +76,17 @@ async function start() {
         startAnalyticsWorkers();
         await scheduleAnalyticsJobs();
 
+        // The daily newsroom run, for websites that have an editorial charter.
+        // Gated by EDITORIAL_SCHEDULER so it stays off unless a deployment asks
+        // for it; it drafts and gates, and never publishes.
+        startEditorialWorker();
+        await scheduleEditorialJobs();
+
         const server = app.listen(config.port, () => {
             logger('boot').info({ port: config.port, env: config.env }, 'cms-service listening');
         });
 
+        registerShutdown('editorial-queue', async () => { await stopEditorialWorker(); });
         registerShutdown('analytics-queues', async () => {
             await stopAnalyticsWorkers();
             await closeAnalyticsQueues();

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { editorialApi } from '@/lib/api/editorial';
+import { editorialApi, editorialPipelineApi } from '@/lib/api/editorial';
 import type { EditorialCharter, PublicationPolicy } from '@/lib/types/editorial.types';
 
 export const editorialKeys = {
@@ -89,3 +89,127 @@ function errorMessage(e: unknown, fallback: string): string {
   const res = (e as { response?: { data?: { error?: { message?: string } } } })?.response;
   return res?.data?.error?.message ?? fallback;
 }
+
+// ── Stage 3-5 ────────────────────────────────────────────────────────────────
+
+export const pipelineKeys = {
+  preflight: (id: string) => [...editorialKeys.all, 'preflight', id] as const,
+  briefs: (id: string, p?: Record<string, unknown>) => [...editorialKeys.all, 'briefs', id, p] as const,
+  drafts: (id: string, p?: Record<string, unknown>) => [...editorialKeys.all, 'drafts', id, p] as const,
+  draft: (id: string, draftId: string) => [...editorialKeys.all, 'draft', id, draftId] as const,
+  coverage: (id: string) => [...editorialKeys.all, 'coverage', id] as const,
+};
+
+export const usePreflight = (websiteId: string) =>
+  useQuery({
+    queryKey: pipelineKeys.preflight(websiteId),
+    queryFn: () => editorialPipelineApi.preflight(websiteId).then((r) => r.data.data),
+    enabled: Boolean(websiteId),
+    retry: false,
+  });
+
+export const useBriefs = (websiteId: string, params?: { status?: string; limit?: number }) =>
+  useQuery({
+    queryKey: pipelineKeys.briefs(websiteId, params),
+    queryFn: () => editorialPipelineApi.listBriefs(websiteId, params).then((r) => r.data.data),
+    enabled: Boolean(websiteId),
+  });
+
+export const useDrafts = (websiteId: string, params?: { status?: string; gateStatus?: string; limit?: number }) =>
+  useQuery({
+    queryKey: pipelineKeys.drafts(websiteId, params),
+    queryFn: () => editorialPipelineApi.listDrafts(websiteId, params).then((r) => r.data.data),
+    enabled: Boolean(websiteId),
+  });
+
+export const useDraft = (websiteId: string, draftId: string | null) =>
+  useQuery({
+    queryKey: pipelineKeys.draft(websiteId, draftId ?? ''),
+    queryFn: () => editorialPipelineApi.getDraft(websiteId, draftId as string).then((r) => r.data.data),
+    enabled: Boolean(websiteId && draftId),
+  });
+
+/** Everything on this screen derives from a run, so invalidate the whole subtree. */
+const useEditorialMutation = <TArgs, TData>(
+  websiteId: string,
+  fn: (args: TArgs) => Promise<TData>,
+  onOk: (data: TData) => string,
+) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: fn,
+    onSuccess: (data) => {
+      qc.invalidateQueries({ queryKey: editorialKeys.all });
+      toast.success(onOk(data));
+    },
+    onError: (e: unknown) => {
+      const err = e as { response?: { data?: { error?: { message?: string } } } };
+      toast.error(err?.response?.data?.error?.message ?? 'Request failed');
+    },
+  });
+};
+
+export const useRunPipeline = (websiteId: string) =>
+  useEditorialMutation(
+    websiteId,
+    (body: { stopAfter?: string; briefLimit?: number; draftLimit?: number } = {}) =>
+      editorialPipelineApi.run(websiteId, body).then((r) => r.data.data),
+    (run) => {
+      const s = run.stages;
+      const parts = [
+        s.intake?.accepted != null ? `${s.intake.accepted} accepted` : null,
+        s.cluster?.clusters != null ? `${s.cluster.clusters} clusters` : null,
+        s.brief?.ready != null ? `${s.brief.ready} briefs` : null,
+        s.draft?.drafted != null ? `${s.draft.drafted} drafts` : null,
+        s.gate?.passed != null ? `${s.gate.passed} passed gates` : null,
+      ].filter(Boolean);
+      return parts.length ? `Run complete — ${parts.join(' · ')}` : 'Run complete';
+    },
+  );
+
+export const useRunBriefing = (websiteId: string) =>
+  useEditorialMutation(
+    websiteId,
+    (body: { limit?: number; force?: boolean } = {}) =>
+      editorialPipelineApi.runBriefing(websiteId, body).then((r) => r.data.data),
+    () => 'Briefing run complete',
+  );
+
+export const useRunDrafting = (websiteId: string) =>
+  useEditorialMutation(
+    websiteId,
+    (body: { briefId?: string; limit?: number } = {}) =>
+      editorialPipelineApi.runDrafting(websiteId, body).then((r) => r.data.data),
+    () => 'Drafting run complete',
+  );
+
+export const useGateDraft = (websiteId: string) =>
+  useEditorialMutation(
+    websiteId,
+    (draftId: string) => editorialPipelineApi.gateDraft(websiteId, draftId).then((r) => r.data.data),
+    (v) => (v.allowed ? 'All gates passed' : `${v.failedCount} gate(s) refuse this draft`),
+  );
+
+export const useApproveDraft = (websiteId: string) =>
+  useEditorialMutation(
+    websiteId,
+    (args: { draftId: string; reviewerSlug?: string }) =>
+      editorialPipelineApi.approveDraft(websiteId, args.draftId, { reviewerSlug: args.reviewerSlug }).then((r) => r.data.data),
+    () => 'Published',
+  );
+
+export const useRejectDraft = (websiteId: string) =>
+  useEditorialMutation(
+    websiteId,
+    (args: { draftId: string; notes?: string }) =>
+      editorialPipelineApi.rejectDraft(websiteId, args.draftId, { notes: args.notes }).then((r) => r.data.data),
+    () => 'Draft rejected',
+  );
+
+export const useCoverage = (websiteId: string) =>
+  useQuery({
+    queryKey: pipelineKeys.coverage(websiteId),
+    queryFn: () => editorialPipelineApi.coverage(websiteId).then((r) => r.data.data),
+    enabled: Boolean(websiteId),
+    retry: false,
+  });

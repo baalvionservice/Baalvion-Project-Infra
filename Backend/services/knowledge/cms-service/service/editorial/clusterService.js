@@ -139,6 +139,10 @@ function sharedCount(a, b) {
 const SIMILARITY_THRESHOLD = 0.30;
 const MIN_SHARED_DISTINCTIVE = 2;
 
+// Kept in step with briefService: a regulator's own notice is the record, not a
+// report of it, and one is enough under the charter's primary-source rule.
+const PRIMARY_SOURCE_TYPES = new Set(['government', 'press_release']);
+
 /** Stable, readable cluster key from a seed signal. */
 function buildClusterKey(signal, distinctive) {
     const distinct = [...(distinctive || [])].slice(0, 3);
@@ -238,14 +242,22 @@ async function clusterSignals(websiteId, { windowHours = 72, dryRun = false } = 
         // Distinct outlets, not distinct articles: three wires republishing one
         // agency release is one source, and the charter's minimum counts sources.
         sourceCount: new Set(c.members.map((m) => m.sourceName).filter(Boolean)).size,
+        // Whether the cluster rests on a document rather than a report of one.
+        // briefService needs this to apply the charter's primary-source rule, and
+        // sorting on it puts writable stories at the top of the queue.
+        hasPrimarySource: c.members.some((m) => PRIMARY_SOURCE_TYPES.has(String(m.sourceType || ''))),
+        sourceTypes: [...new Set(c.members.map((m) => m.sourceType).filter(Boolean))],
         topScore: Math.max(...c.members.map((m) => m.relevanceScore || 0)),
         titles: c.members.map((m) => m.title),
         members: c.members,
-    })).sort((a, b) => b.sourceCount - a.sourceCount || b.topScore - a.topScore);
+    })).sort((a, b) =>
+        b.sourceCount - a.sourceCount ||
+        Number(b.hasPrimarySource) - Number(a.hasPrimarySource) ||
+        b.topScore - a.topScore);
 }
 
 module.exports = {
     clusterSignals, contentTokens, figureTokens, buildDocumentFrequency, signatureOf,
     jaccard, buildClusterKey,
-    SIMILARITY_THRESHOLD, MIN_SHARED_DISTINCTIVE, SIGNATURE_SIZE,
+    SIMILARITY_THRESHOLD, MIN_SHARED_DISTINCTIVE, SIGNATURE_SIZE, PRIMARY_SOURCE_TYPES,
 };

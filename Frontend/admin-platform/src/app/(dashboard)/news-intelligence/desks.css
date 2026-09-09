@@ -1,0 +1,346 @@
+/*
+ * News Intelligence desk picker and per-desk overview.
+ *
+ * Same terminal treatment as the Newsroom workspace (.bv-newsroom), so moving
+ * between choosing a desk and working it does not feel like two products. One
+ * committed look rather than theme-aware: the palette is the point.
+ */
+
+.bv-desks {
+  --nr-bg: #07090c;
+  --nr-panel: #0d1116;
+  --nr-panel-2: #11161c;
+  --nr-line: #1e262f;
+  --nr-line-soft: #161c23;
+  --nr-ink: #e8edf3;
+  --nr-dim: #7d8b9a;
+  --nr-dimmer: #55626f;
+  --nr-red: #e0122c;
+  --nr-red-soft: #ff5468;
+  --nr-green-soft: #4ade80;
+  --nr-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  background: var(--nr-bg);
+  color: var(--nr-ink);
+  border: 1px solid var(--nr-line);
+  font-feature-settings: "tnum" 1;
+}
+
+.bv-desks__masthead {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 12px 18px;
+  background: #000;
+  border-bottom: 1px solid var(--nr-line);
+}
+
+.bv-desks__wordmark {
+  font-family: var(--nr-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.bv-desks__wordmark span { color: var(--nr-red); }
+
+.bv-desks__sub {
+  font-family: var(--nr-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--nr-dim);
+  padding-left: 18px;
+  border-left: 1px solid var(--nr-line);
+}
+
+.bv-desks__feed {
+  font-family: var(--nr-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--nr-dimmer);
+  margin-left: auto;
+}
+
+/* the two desk boxes ---------------------------------------------------- */
+
+.bv-desks__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--nr-line-soft);
+}
+
+.bv-desk {
+  display: block;
+  background: var(--nr-panel);
+  padding: 26px 28px 24px;
+  border: 0;
+  border-top: 3px solid transparent;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  text-decoration: none;
+  transition: background 0.14s ease, border-color 0.14s ease;
+}
+
+.bv-desk:hover { background: var(--nr-panel-2); border-top-color: var(--nr-red); }
+.bv-desk:focus-visible { outline: 2px solid var(--nr-red); outline-offset: -2px; }
+
+.bv-desk__k {
+  font-family: var(--nr-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--nr-dimmer);
+  display: block;
+  margin-bottom: 10px;
+}
+
+.bv-desk__name {
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin: 0 0 4px;
+}
+
+.bv-desk__site {
+  font-family: var(--nr-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--nr-red-soft);
+  margin: 0 0 14px;
+}
+
+.bv-desk__blurb {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--nr-dim);
+  margin: 0 0 20px;
+  max-width: 44ch;
+  min-height: 42px;
+}
+
+.bv-desk__stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--nr-line);
+  border: 1px solid var(--nr-line);
+  margin-bottom: 16px;
+}
+
+.bv-desk__stat { background: var(--nr-panel); padding: 10px 12px; }
+
+.bv-desk__stat-k {
+  font-family: var(--nr-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--nr-dimmer);
+  display: block;
+}
+
+.bv-desk__stat-v {
+  font-family: var(--nr-mono);
+  font-size: 19px;
+  margin-top: 4px;
+  display: block;
+  line-height: 1;
+}
+
+.bv-desk__cats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.bv-desk__cat {
+  font-family: var(--nr-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border: 1px solid var(--nr-line);
+  color: var(--nr-dim);
+}
+
+.bv-desk__go {
+  font-family: var(--nr-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--nr-ink);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bv-desk:hover .bv-desk__go { color: var(--nr-red-soft); }
+
+/* unclaimed coverage ---------------------------------------------------- */
+
+.bv-desks__spare {
+  border-top: 1px solid var(--nr-line);
+  padding: 14px 18px 18px;
+  background: var(--nr-panel-2);
+}
+
+.bv-desks__spare-k {
+  font-family: var(--nr-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--nr-dimmer);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.bv-desks__spare-note {
+  font-size: 12.5px;
+  color: var(--nr-dim);
+  margin: 0 0 12px;
+  max-width: 88ch;
+  line-height: 1.5;
+}
+
+.bv-desks__spare-list { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.bv-desks__spare-item {
+  font-family: var(--nr-mono);
+  font-size: 10.5px;
+  padding: 3px 9px;
+  border: 1px dashed var(--nr-line);
+  color: var(--nr-dimmer);
+}
+
+/* per-desk overview ------------------------------------------------------ */
+
+.bv-desks__rail {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--nr-line-soft);
+  border-bottom: 1px solid var(--nr-line);
+}
+
+.bv-desks__tile { background: var(--nr-panel); padding: 13px 16px 15px; }
+
+.bv-desks__tile-k {
+  font-family: var(--nr-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--nr-dimmer);
+  display: block;
+  margin-bottom: 7px;
+}
+
+.bv-desks__tile-v {
+  font-family: var(--nr-mono);
+  font-size: 25px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.bv-desks__tile-n {
+  font-family: var(--nr-mono);
+  font-size: 10px;
+  color: var(--nr-dim);
+  margin-top: 6px;
+  display: block;
+  min-height: 13px;
+}
+
+.bv-desks__panel { border-bottom: 1px solid var(--nr-line); }
+
+.bv-desks__panel-head {
+  padding: 10px 18px;
+  background: var(--nr-panel-2);
+  border-bottom: 1px solid var(--nr-line);
+  font-family: var(--nr-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--nr-dim);
+}
+
+.bv-desks__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 11px 18px;
+  border-bottom: 1px solid var(--nr-line-soft);
+  font-size: 13px;
+}
+
+.bv-desks__row:last-child { border-bottom: 0; }
+
+.bv-desks__bar {
+  height: 3px;
+  background: var(--nr-red);
+  min-width: 2px;
+  margin-top: 6px;
+}
+
+.bv-desks__num {
+  font-family: var(--nr-mono);
+  font-size: 12px;
+  color: var(--nr-dim);
+  white-space: nowrap;
+}
+
+.bv-desks__links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1px;
+  background: var(--nr-line-soft);
+}
+
+.bv-desks__link {
+  background: var(--nr-panel);
+  padding: 15px 16px;
+  font-family: var(--nr-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--nr-dim);
+  text-decoration: none;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.bv-desks__link:hover { background: var(--nr-panel-2); color: var(--nr-ink); }
+.bv-desks__link:focus-visible { outline: 2px solid var(--nr-red); outline-offset: -2px; }
+.bv-desks__link--go { color: var(--nr-red-soft); }
+
+.bv-desks__back {
+  font-family: var(--nr-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--nr-dimmer);
+  text-decoration: none;
+}
+
+.bv-desks__back:hover { color: var(--nr-ink); }
+
+.bv-desks__empty {
+  padding: 40px 18px;
+  text-align: center;
+  font-family: var(--nr-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--nr-dimmer);
+}
+
+@media (max-width: 900px) {
+  .bv-desks__grid { grid-template-columns: 1fr; }
+  .bv-desks__rail { grid-template-columns: repeat(2, 1fr); }
+}
