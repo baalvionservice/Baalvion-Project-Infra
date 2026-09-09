@@ -1,7 +1,7 @@
 {
   "name": "insiders-service",
   "version": "1.0.0",
-  "description": "Baalvion Insiders (For Investors & Founders) backend — Node.js + PostgreSQL, replaces Supabase",
+  "description": "Baalvion Insiders (For Investors & Founders) backend \u2014 Node.js + PostgreSQL, replaces Supabase",
   "license": "ISC",
   "type": "commonjs",
   "main": "index.js",
@@ -17,6 +17,7 @@
     "@baalvion/telemetry": "workspace:*",
     "@baalvion/money": "workspace:*",
     "@baalvion/payment-consistency": "workspace:*",
+    "@baalvion/events": "workspace:*",
     "@baalvion/sites": "workspace:*",
     "ioredis": "^5.4.1",
     "@baalvion/graceful-shutdown": "workspace:*",
