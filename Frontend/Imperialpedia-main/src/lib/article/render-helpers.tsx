@@ -122,23 +122,29 @@ export function BodyBlock({ block, linker }: { block: NewsBodyBlock; linker?: En
   const withLinks = (text: string) => (linker ? linkEntitiesInText(text, linker) : text);
 
   switch (block.type) {
+    // Measured against CNBC's article template (18px Lyon, line-height 29.88px,
+    // 18px paragraph gap, near-black, in a 630px column). Ours was 17px sans at
+    // 1.85 in an 872px column: a line of ~105 characters set airily, which is
+    // what read as loose and unfinished. Serif body against sans furniture is
+    // the pairing every broadsheet uses, and Source Serif 4 is already loaded
+    // for headlines so this costs no extra font request.
     case "paragraph":
       return (
-        <p className="text-foreground text-[1.0625rem] leading-[1.85] mb-5">
+        <p className="font-headline text-foreground text-[1.125rem] leading-[1.66] mb-[1.125rem]">
           {withLinks(block.text)}
         </p>
       );
 
     case "heading":
       return (
-        <h2 className="text-foreground text-2xl font-bold mt-10 mb-4 leading-snug">
+        <h2 className="!font-news text-foreground text-[1.375rem] font-bold mt-9 mb-3 leading-tight tracking-tight">
           {block.text}
         </h2>
       );
 
     case "subheading":
       return (
-        <h3 className="text-foreground text-lg font-semibold mt-7 mb-3 leading-snug">
+        <h3 className="!font-news text-foreground text-[1.1875rem] font-bold mt-8 mb-2.5 leading-tight tracking-tight">
           {block.text}
         </h3>
       );

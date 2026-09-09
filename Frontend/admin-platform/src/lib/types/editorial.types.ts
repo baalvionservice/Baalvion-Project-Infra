@@ -160,3 +160,153 @@ export interface StoryCluster {
   topScore: number;
   titles: string[];
 }
+
+// ── Stage 3-5: briefs, drafts and the gates ─────────────────────────────────
+
+export interface BriefSource {
+  signalId: string;
+  name: string | null;
+  url: string;
+  type: string | null;
+  publishedAt: string | null;
+  /** A regulator, court or agency publishing its own notice. */
+  isPrimary: boolean;
+}
+
+export interface BriefFact {
+  statement: string;
+  sourceUrl: string;
+  figure?: string;
+}
+
+export interface BriefQuote {
+  text: string;
+  speaker?: string;
+  sourceUrl: string;
+}
+
+/** Why the brief was allowed to proceed. Null while it was refused. */
+export type SourcingBasis = 'multi_outlet' | 'verified_primary' | null;
+
+export interface StoryBrief {
+  id: string;
+  websiteId: string;
+  clusterKey: string;
+  workingTitle: string;
+  sources: BriefSource[];
+  facts: BriefFact[];
+  disputed: { claim: string; readings?: string[] }[];
+  quotes: BriefQuote[];
+  angle: string | null;
+  whyItMatters: string | null;
+  entities: string[];
+  sourcingBasis: SourcingBasis;
+  /** 'pending' | 'ready' | 'insufficient_sources' | 'failed' */
+  status: string;
+  failureReason: string | null;
+  createdAt: string;
+}
+
+export interface ContentBlock {
+  id: string;
+  type: string;
+  order: number;
+  content: { text?: string; html?: string; level?: number };
+}
+
+export interface DraftCitation {
+  claim: string;
+  sourceUrl: string;
+  sourceName?: string;
+}
+
+export interface ArticleDraft {
+  id: string;
+  websiteId: string;
+  briefId: string;
+  title: string;
+  dek: string | null;
+  slug: string | null;
+  contentBlocks: ContentBlock[];
+  citations: DraftCitation[];
+  authorSlug: string | null;
+  reviewerSlug: string | null;
+  categoryHint: string | null;
+  /** 'pending' | 'passed' | 'failed' */
+  gateStatus: string;
+  gateResults: GateResult[];
+  similarityPct: string | number | null;
+  citationCoveragePct: string | number | null;
+  /** 'generating' | 'drafted' | 'approved' | 'published' | 'rejected' | 'failed' */
+  status: string;
+  modelUsed: string | null;
+  failureReason: string | null;
+  cmsContentId: string | null;
+  createdAt: string;
+}
+
+export interface GateResult {
+  rule: string;
+  status: 'passed' | 'failed';
+  message: string;
+}
+
+export interface GateVerdict {
+  draftId: string;
+  gateStatus: string;
+  allowed: boolean;
+  results: GateResult[];
+  failedCount: number;
+  words: number;
+  warnings: { rule: string; message: string }[];
+}
+
+export interface PreflightProblem {
+  code: string;
+  message: string;
+  /** Which stage this stops: 'all' | 'intake' | 'brief' | 'draft'. */
+  blocks: string;
+}
+
+export interface Preflight {
+  ok: boolean;
+  problems: PreflightProblem[];
+}
+
+export interface PipelineRun {
+  ok: boolean;
+  preflight: Preflight;
+  ms: number;
+  stages: {
+    intake?: { scanned?: number; accepted?: number; rejected?: number; skipped?: string; error?: string };
+    cluster?: { clusters?: number; multiOutlet?: number; withPrimary?: number; error?: string };
+    brief?: { ready?: number; insufficientSources?: number; failed?: number; skipped?: string; error?: string };
+    draft?: { drafted?: number; briefsReady?: number; skipped?: string; error?: string };
+    gate?: { evaluated?: number; passed?: number; failed?: number; error?: string };
+  };
+}
+
+// ── Coverage ────────────────────────────────────────────────────────────────
+
+/** 'fresh' | 'stale' | 'empty' | 'no_route' — see coverageService. */
+export type CoverageStatus = 'fresh' | 'stale' | 'empty' | 'no_route';
+
+export interface CoverageRow {
+  slug: string;
+  last24h: number;
+  last7d: number;
+  lastPublishedAt: string | null;
+  ageDays: number | null;
+  status: CoverageStatus;
+}
+
+export interface Coverage {
+  windowDays: number;
+  publishedInWindow: number;
+  publishedLast24h: number;
+  dailyTarget: number;
+  sections: CoverageRow[];
+  regions: CoverageRow[];
+  plan: { slug: string; label: string; targetPct: number }[];
+  staleAfterDays: number;
+}

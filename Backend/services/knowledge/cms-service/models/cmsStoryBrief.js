@@ -21,6 +21,8 @@ module.exports = function (sequelize, DataTypes) {
         angle: { type: DataTypes.TEXT, allowNull: true },
         whyItMatters: { type: DataTypes.TEXT, allowNull: true },
         entities: { type: DataTypes.JSONB, allowNull: false, defaultValue: [] },
+        // 'multi_outlet' | 'verified_primary' -- see 20260040.
+        sourcingBasis: { type: DataTypes.STRING(24), allowNull: true },
         status: { type: DataTypes.STRING(24), allowNull: false, defaultValue: 'pending' },
         failureReason: { type: DataTypes.TEXT, allowNull: true },
     }, {

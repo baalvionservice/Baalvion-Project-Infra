@@ -10,6 +10,10 @@ export default {
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/modules/**/*.{js,ts,jsx,tsx,mdx}",
+    // src/lib holds shared renderers (article/render-helpers.tsx renders every
+    // news body). It was missing, so a utility used only there generated no CSS
+    // and silently did nothing — the class landed in the HTML and never applied.
+    "./src/lib/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     extend: {
@@ -20,6 +24,8 @@ export default {
         headline: ["var(--font-headline)", "Georgia", "Times New Roman", "serif"],
         corinthian: ["var(--font-corinthian)", "Georgia", "Times New Roman", "serif"],
         ui: ["-apple-system", "BlinkMacSystemFont", "Segoe UI", "Helvetica Neue", "Helvetica", "Arial", "sans-serif"],
+        // News template only — the Proxima Nova stand-in. See app/layout.tsx.
+        news: ["var(--font-news)", "-apple-system", "Helvetica Neue", "Helvetica", "Arial", "sans-serif"],
         code: ["monospace"],
       },
       colors: {

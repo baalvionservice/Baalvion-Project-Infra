@@ -20,9 +20,10 @@ import {
 } from '@/components/ui/dialog';
 import { useUIStore } from '@/lib/store/uiStore';
 import { serviceClients } from '@/lib/api/client';
+import { NEWS_CATEGORIES } from '@/lib/types/news.types';
 import type { NewsCategory, NewsSource, NewsSourceType } from '@/lib/types/news.types';
 
-const CATEGORIES: NewsCategory[] = ['AI', 'Technology', 'Business', 'Finance', 'Startups', 'Cybersecurity', 'World', 'Science'];
+const CATEGORIES = NEWS_CATEGORIES;
 const TYPES: NewsSourceType[] = ['rss', 'press_release', 'government'];
 
 export default function NewsSourcesPage() {

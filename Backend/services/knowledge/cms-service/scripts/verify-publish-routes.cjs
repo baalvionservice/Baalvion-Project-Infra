@@ -32,6 +32,10 @@ const BASE = arg('base', process.env.SITE_BASE_URL);
 const DRY = process.argv.includes('--dry-run');
 const TIMEOUT_MS = 20000;
 
+// Categories whose public page is nested under /world rather than served at the
+// bare slug. Kept in step with the frontend's REGIONS list.
+const REGION_SLUGS = new Set(['us', 'europe', 'asia', 'china', 'emerging']);
+
 async function probe(base, path) {
     const url = `${base.replace(/\/$/, '')}${path}`;
     try {
@@ -59,13 +63,26 @@ async function main() {
     const site = await db.CmsWebsite.findOne({ where: { slug: WEBSITE } });
     if (!site) { console.error(`website "${WEBSITE}" not found`); process.exit(1); }
 
-    const categories = await db.CmsCategory.findAll({ where: { websiteId: site.id }, attributes: ['slug', 'name'], raw: true });
+    // Archived categories are skipped. An inactive category cannot be published
+    // into at all, so probing it adds nothing and its slug in dead_category_slugs
+    // is noise the reviewer has to filter out by hand -- the useful list is
+    // categories that are live in the CMS but broken on the site.
+    const categories = await db.CmsCategory.findAll({
+        where: { websiteId: site.id, status: 'active' },
+        attributes: ['slug', 'name'],
+        raw: true,
+    });
     if (!categories.length) { console.log('no categories to check'); process.exit(0); }
 
     const dead = [];
     console.log(`probing ${categories.length} categories on ${BASE}\n`);
     for (const c of categories) {
-        const r = await probe(BASE, `/${c.slug}`);
+        // Region categories are not served at /<slug>. Imperialpedia's world
+        // desk lives under /world/<region>, so probing the bare slug reported
+        // all five as dead when every one of them returns 200 — it over-counted
+        // this site's dead routes by five. Probe where the page actually is.
+        const path = REGION_SLUGS.has(c.slug) ? `/world/${c.slug}` : `/${c.slug}`;
+        const r = await probe(BASE, path);
         const verdict = r.alive ? 'live' : 'DEAD';
         const detail = r.error ? r.error : r.location ? `${r.status} -> ${r.location || '/'}` : String(r.status);
         console.log(`  ${verdict.padEnd(5)} /${c.slug.padEnd(28)} ${detail}`);

@@ -434,7 +434,10 @@ const nextConfig: NextConfig = {
               // literal <script> tag and PreferredSourceButton) -- it was never allow-listed here,
               // so the browser blocked the load on every single page, confirmed the same way.
               `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://adservice.google.com https://api.baalvion.com https://*.adtrafficquality.google https://news.google.com`,
-              "script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://adservice.google.com https://api.baalvion.com https://*.adtrafficquality.google https://news.google.com",
+              // In dev the CMS and its analytics collector live on localhost rather
+              // than api.baalvion.com, so the collect.js element load was blocked on
+              // every page. Scoped to isDev — production must never trust localhost.
+              `script-src-elem 'self' 'unsafe-inline'${isDev ? ' http://localhost:*' : ''} https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://adservice.google.com https://api.baalvion.com https://*.adtrafficquality.google https://news.google.com`,
               "style-src 'self' 'unsafe-inline'",
               // 'self' + data: (inline generated SVG artwork) + imperialpedia.com +
               // api.baalvion.com (cms-service-hosted generated artwork) are the only

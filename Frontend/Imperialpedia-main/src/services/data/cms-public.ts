@@ -30,7 +30,9 @@ import { getEditorialGuide } from '@/lib/articles/editorial-guides';
 // can still override via NEXT_PUBLIC_CMS_PUBLIC_URL.
 export const CMS_PUBLIC_URL =
   process.env.NEXT_PUBLIC_CMS_PUBLIC_URL ||
-  'https://api.baalvion.com/api/v1/public';
+  (process.env.NODE_ENV === 'production'
+    ? 'https://api.baalvion.com/api/v1/public'
+    : 'http://localhost:3018/api/v1/public');
 export const CMS_SITE_SLUG = process.env.NEXT_PUBLIC_CMS_SITE_SLUG || 'imperialpedia';
 
 // `cache: 'no-store'` (the previous setting) forces full dynamic rendering on
@@ -1052,6 +1054,23 @@ export async function getCategoryArticles(
     // those ~10 callers — is what actually keeps a 410'd article from getting
     // picked as a hub's "featured" card (see removed-article-paths.ts; this
     // was previously only enforced for the sitemap and homepage editorial).
+    return items.map(cmsContentToNews).filter((a) => !isRemovedArticlePath(a));
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Recent published content of any type.
+ *
+ * getPublishedNews is news-only and getCategoryArticles needs a category that
+ * actually has content — on a desk that publishes news slowly, both come back
+ * with just the piece being read. This backs the "more from" rail with whatever
+ * the site genuinely has.
+ */
+export async function getRecentContent(limit = 24): Promise<NewsArticle[]> {
+  try {
+    const { items } = await listCmsContent({ limit });
     return items.map(cmsContentToNews).filter((a) => !isRemovedArticlePath(a));
   } catch {
     return [];
