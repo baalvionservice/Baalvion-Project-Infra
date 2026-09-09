@@ -44,7 +44,7 @@ export function NewsletterBand() {
   };
 
   return (
-    <section className="bg-foreground text-background">
+    <section id="newsletter" className="bg-foreground text-background">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <div>

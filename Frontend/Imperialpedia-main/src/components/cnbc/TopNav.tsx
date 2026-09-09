@@ -4,22 +4,27 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ImperialpediaMark } from "@/components/icons/ImperialpediaMark";
 import { SearchModal } from "@/components/search/SearchModal";
+import { withoutRetired } from "@/lib/content/retired-paths";
 
 // Real destinations only. The original navCategories list (worldData.ts) also
 // had "Health & Science", "Media", "Energy", and "Climate" -- none of which
 // have a corresponding page anywhere on the site, so rather than link them to
 // a 404 (or leave them as decorative buttons that go nowhere, the bug this
 // list replaces) they're left out entirely.
-const NAV_CATEGORIES: { label: string; href: string }[] = [
+//
+// 2026-09-10: "Investing", "Real Estate" and "Personal Finance" had since
+// become retired hubs that 301 to the homepage, and "Politics" is a live route
+// with no articles behind it -- so more than half this masthead bounced the
+// reader home or showed them an empty hub. Dropped, and "Business" folded into
+// "Markets" (both pointed at /market-news). The two live pillars fill the gap
+// so the newsroom masthead still reaches the site's actual content.
+const NAV_CATEGORIES: { label: string; href: string }[] = withoutRetired([
   { label: "Markets", href: "/market-news" },
-  { label: "Business", href: "/market-news" },
-  { label: "Investing", href: "/investing" },
-  { label: "Politics", href: "/politics" },
   { label: "World", href: "/world" },
   { label: "Finance", href: "/financial-intelligence" },
-  { label: "Real Estate", href: "/real-estate" },
-  { label: "Personal Finance", href: "/personal-finance" },
-];
+  { label: "Stocks", href: "/stocks" },
+  { label: "Budgeting", href: "/budgeting-basics" },
+]);
 
 // "Wed, Apr 8, 2026" was hardcoded here — never wired to an actual clock, so it
 // just froze at whatever date someone typed in and never matched "today."
@@ -94,14 +99,20 @@ export default function TopNav() {
           <nav className="hidden md:flex items-center gap-1 text-xs text-white/60 font-medium">
             <Link href="/market-news" className="hover:text-[hsl(var(--cnbc-red))] transition-colors px-2 py-1">Markets</Link>
             <span className="text-white/20">|</span>
-            <Link href="/personal-finance" className="hover:text-[hsl(var(--cnbc-red))] transition-colors px-2 py-1">Personal Finance</Link>
+            <Link href="/budgeting-basics" className="hover:text-[hsl(var(--cnbc-red))] transition-colors px-2 py-1">Budgeting</Link>
           </nav>
         </div>
         <div className="flex items-center gap-3 text-xs text-white/50">
           <span className="hidden sm:block" suppressHydrationWarning>{liveClock}</span>
-          <button className="world-kicker bg-[hsl(var(--cnbc-red))] text-white text-xs font-bold px-3 py-1.5 rounded-sm hover:opacity-90 transition-opacity">
+          {/* Was a bare <button> with no handler and no href — decorative, and
+              a dead end for anyone who clicked it. Points at the newsletter
+              sign-up in the footer, which is a real destination. */}
+          <Link
+            href="/#newsletter"
+            className="world-kicker bg-[hsl(var(--cnbc-red))] text-white text-xs font-bold px-3 py-1.5 rounded-sm hover:opacity-90 transition-opacity"
+          >
             SUBSCRIBE
-          </button>
+          </Link>
           <button
             type="button"
             aria-label="Search"

@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { ImperialpediaMark } from '@/components/icons/ImperialpediaMark';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
 import { PreferredSourceButton } from '@/components/common/PreferredSourceButton';
+import { withoutRetired } from '@/lib/content/retired-paths';
+import { NEWS_SECTION_LIVE, REVIEWS_SECTION_LIVE } from '@/config/sections';
 
 // ─── Remove stubs and restore your real imports in production ─────────────────
 //   import { Container } from '@/design-system/layout/container';
@@ -25,17 +27,23 @@ const Container = ({ children }: { children: React.ReactNode }) => (
 // retired categories that 301 to / (see next.config.ts). This footer column
 // was never updated when the Navbar was fixed for the same issue. Replaced
 // with the site's actual live sections.
+// 2026-09-10: News and Reviews dropped for the same reason, one step further
+// along — both routes exist and render, but neither has the content to justify
+// being a section. /reviews has published zero reviews; /news fronts an
+// eight-tab newsroom over two articles. Linking either from every page in the
+// site put an empty section one click from anywhere. Gated rather than deleted
+// so both come back the moment they're published into — see config/sections.ts.
 const EXPLORE_COLUMN = {
   label: 'Explore',
-  links: [
+  links: withoutRetired([
     { label: 'Stocks', href: '/stocks' },
     { label: 'Budgeting', href: '/budgeting-basics' },
     { label: 'Scams & Fraud Protection', href: '/fraud-protection' },
     { label: 'Market News', href: '/market-news' },
     { label: 'Financial Tools', href: '/financial-tools' },
-    { label: 'News', href: '/news' },
-    { label: 'Reviews', href: '/reviews' },
-  ],
+    ...(NEWS_SECTION_LIVE ? [{ label: 'News', href: '/news' }] : []),
+    ...(REVIEWS_SECTION_LIVE ? [{ label: 'Reviews', href: '/reviews' }] : []),
+  ]),
 };
 
 // Essential company/editorial/legal links only — pruned from a much longer list

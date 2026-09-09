@@ -74,6 +74,10 @@ export interface LinkableStory {
   slug?: string;
   dateISO?: string;
   href?: string;
+  /** CMS contentType ('article' | 'news' | …) and category, when known — an
+   *  article's canonical lives at /<categorySlug>/<slug>, not at a dated path. */
+  contentType?: string;
+  categorySlug?: string;
 }
 
 /**
@@ -83,7 +87,22 @@ export interface LinkableStory {
  * nothing to link to yet.
  */
 export function storyHref(item: LinkableStory): { href: string; external: boolean } | null {
-  if (item.slug) return { href: articleUrl(item.dateISO, item.slug), external: false };
+  if (item.slug) {
+    // Was always articleUrl(), i.e. the dated /YYYY/MM/DD/<slug> news path, for
+    // every owned item. Guides carry a category and canonicalise to
+    // /<categorySlug>/<slug>, so every World tile pointing at one emitted a URL
+    // that 301s — 11 of them, on /world and each regional page. newsArticleHref
+    // already encodes the correct shape per content type; defer to it.
+    return {
+      href: newsArticleHref({
+        slug: item.slug,
+        publishedAt: item.dateISO ?? "",
+        contentType: item.contentType,
+        categorySlug: item.categorySlug,
+      }),
+      external: false,
+    };
+  }
   if (item.href) return { href: item.href, external: true };
   return null;
 }
