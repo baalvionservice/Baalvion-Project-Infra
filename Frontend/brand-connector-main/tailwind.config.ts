@@ -2,6 +2,7 @@ import tailwindcssAnimate from "tailwindcss-animate";
 import type {Config} from 'tailwindcss';
 
 export default {
+  presets: [require('@baalvion/design/tailwind')],
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',

@@ -3,6 +3,7 @@ import tailwindcssAnimate from "tailwindcss-animate";
 import tailwindcssTypography from "@tailwindcss/typography";
 
 export default {
+  presets: [require('@baalvion/design/tailwind')],
   darkMode: ["class"],
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",

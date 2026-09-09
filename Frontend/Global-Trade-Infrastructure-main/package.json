@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@baalvion/auth-sdk": "workspace:*",
+    "@baalvion/design": "workspace:*",
     "@genkit-ai/google-genai": "^1.0.0",
     "@prisma/client": "^6",
     "@radix-ui/react-accordion": "^1.2.1",

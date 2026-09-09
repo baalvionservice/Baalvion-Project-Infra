@@ -3,6 +3,7 @@ import animate from 'tailwindcss-animate';
 import typography from '@tailwindcss/typography';
 
 const config: Config = {
+  presets: [require('@baalvion/design/tailwind')],
   darkMode: ['class'],
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',

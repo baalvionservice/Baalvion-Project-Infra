@@ -1,0 +1,42 @@
+/*
+ * @baalvion/design — the per-site identity contract.
+ *
+ * The preset deliberately ships no palette. Each property declares its own by
+ * setting these variables in its global stylesheet; anything it leaves unset
+ * falls back to a neutral that is legible but plainly not branded, so a missing
+ * value is obvious in review rather than silently wrong.
+ *
+ * Only --bv-shadow-rgb is consumed by the Tailwind preset (it tints the `lift-*`
+ * elevation scale). The rest exist so sites describe themselves in one place
+ * instead of scattering hex codes through TSX.
+ *
+ * Values are space-separated RGB channels so Tailwind's `/ opacity` modifier
+ * works: rgb(var(--bv-accent-rgb) / 0.12)
+ *
+ * Example — Amarisé (luxury, warm):
+ *   :root {
+ *     --bv-accent-rgb: 176 141 87;
+ *     --bv-shadow-rgb: 61 44 24;
+ *     --bv-radius: 2px;
+ *   }
+ *
+ * Example — market-underworld (terminal, high-contrast):
+ *   :root {
+ *     --bv-accent-rgb: 57 255 20;
+ *     --bv-shadow-rgb: 0 0 0;
+ *     --bv-radius: 6px;
+ *   }
+ */
+
+:root {
+  /* Tints the shared elevation scale. Set this to a dark version of the site's
+     dominant hue, never pure black, unless the site is genuinely black. */
+  --bv-shadow-rgb: 15 23 42;
+
+  /* The site's primary action colour. */
+  --bv-accent-rgb: 15 23 42;
+
+  /* Corner treatment carries a lot of personality: 0–2px reads institutional,
+     8–12px reads consumer software. */
+  --bv-radius: 6px;
+}

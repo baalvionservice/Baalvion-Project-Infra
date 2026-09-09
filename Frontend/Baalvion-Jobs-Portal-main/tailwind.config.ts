@@ -2,6 +2,7 @@ import tailwindcssAnimate from "tailwindcss-animate";
 import type { Config } from 'tailwindcss'
 
 const config: Config = {
+  presets: [require('@baalvion/design/tailwind')],
   darkMode: ['class'],
   content: [
     './pages/**/*.{ts,tsx}',

@@ -15,6 +15,7 @@
                     "genkit:watch":  "genkit start -- tsx --watch src/ai/dev.ts"
                 },
     "dependencies":  {
+                         "@baalvion/design":  "workspace:*",
                          "@baalvion/illustrations":  "workspace:*",
                          "@genkit-ai/google-genai":  "^1.28.0",
                          "@radix-ui/react-accordion":  "^1.2.3",
