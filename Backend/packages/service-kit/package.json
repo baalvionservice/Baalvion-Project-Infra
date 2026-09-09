@@ -27,7 +27,7 @@
     "@baalvion/types": "workspace:*"
   },
   "peerDependencies": {
-    "express": "^4.19.0"
+    "express": "^4 || ^5"
   },
   "devDependencies": {
     "tsup": "^8.3.0",

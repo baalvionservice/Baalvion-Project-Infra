@@ -171,7 +171,10 @@ router.post('/invite', requireSession(), async (req, res) => {
 // surface (platform org management, members, invitations, user lifecycle, MFA enrolment, audit)
 // WITHOUT a bespoke gateway route per endpoint. Session is required + CSRF on unsafe methods.
 // auth-service still enforces org membership + capability checks on its side.
-router.all('/svc/*', requireSession(), requireCsrf, async (req, res) => {
+// Express 5 (path-to-regexp v8) rejects a bare '*' with "Missing parameter name";
+// the wildcard must be named. Nothing below reads the capture — the target path is
+// rebuilt from req.url — so this is purely the v5 spelling of the same route.
+router.all('/svc/*splat', requireSession(), requireCsrf, async (req, res) => {
   const accessToken = req.cookies && req.cookies[config.cookie.accessName];
   if (!accessToken) return res.status(401).json({ error: { code: 'NO_SESSION', message: 'No session' } });
 
