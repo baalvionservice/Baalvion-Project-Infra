@@ -32,6 +32,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Runs before anything installs. Root `pnpm.overrides` and the lockfile's
+  # `overrides:` block must agree or EVERY job's `pnpm install --frozen-lockfile`
+  # dies with ERR_PNPM_LOCKFILE_CONFIG_MISMATCH before running a single test —
+  # which is exactly how Dependabot PRs kept landing red (it bumps the leaf
+  # package.json files and the lockfile, but not the root overrides block).
+  # Pure Node, no install needed, so it reports the real cause in ~10s.
+  lockfile-integrity:
+    name: Lockfile Integrity
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Check pnpm overrides are in sync
+        run: node scripts/check-lockfile-overrides.mjs
+
   lint-and-typecheck:
     name: Lint & Typecheck
     runs-on: ubuntu-latest
@@ -543,6 +561,7 @@ jobs:
     name: ci-success
     if: always()
     needs:
+      - lockfile-integrity
       - lint-and-typecheck
       - backend-go
       - backend-java

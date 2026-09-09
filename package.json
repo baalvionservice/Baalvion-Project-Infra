@@ -33,6 +33,8 @@
     "ci:rls:audit": "node Backend/scripts/tenant-isolation-audit.mjs",
     "ci:rls:test": "node --test Backend/scripts/tenant-isolation-audit.test.mjs Backend/packages/tenancy/test.smoke.js",
     "ci:rls": "npm run ci:rls:audit && npm run ci:rls:test",
+    "lockfile:check": "node scripts/check-lockfile-overrides.mjs",
+    "lockfile:fix": "node scripts/check-lockfile-overrides.mjs --fix",
     "clean": "turbo run clean && rimraf node_modules",
     "db:up": "docker compose up -d postgres redis",
     "db:down": "docker compose down",
