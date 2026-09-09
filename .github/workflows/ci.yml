@@ -370,21 +370,114 @@ jobs:
           BAALVION_APP_PASSWORD: ci_app_pw
         run: node --test tests/rls-live.test.mjs
 
+  # A real cross-service test. The previous body was an `echo` saying no harness existed,
+  # sitting inside the REQUIRED ci-success gate — a green check that proved nothing.
+  #
+  # Two services in two processes: auth-service registers a user and mints an RS256 token,
+  # crm-service verifies it via @baalvion/auth-node by fetching auth-service's JWKS over
+  # HTTP, then serves an authenticated write and read back.
+  #
+  # crm-service gets a DECOY JWT_PUBLIC_KEY deliberately. auth-node falls back to the static
+  # key whenever the JWKS path errors, so handing it the real key would let this pass with
+  # auth-service dead. With a decoy, the JWKS hop is the only thing that can produce a 2xx —
+  # verified by pointing BAALVION_JWKS_URI at a dead port, which turns the suite red.
   integration-test:
     name: Integration Tests
     needs: [backend-go, backend-java, frontend-build]
     runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: baalvion_db
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s
+          --health-timeout 5s --health-retries 12
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 5s
+          --health-timeout 5s --health-retries 12
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: '5432'
+      DB_NAME: baalvion_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_SSL: 'false'
+      REDIS_HOST: 127.0.0.1
+      REDIS_PORT: '6379'
+      # NOT production: config/vault.js hard-throws when NODE_ENV=production and the RSA keys
+      # are not provisioned from a secret store.
+      NODE_ENV: development
+      JWT_ISSUER: baalvion-auth
+      JWT_AUDIENCE: baalvion-platform
+      # auth-service defaults to 20 requests/min per IP, which the suite would trip.
+      RATE_LIMIT_IP_MAX: '5000'
     steps:
       - uses: actions/checkout@v7
-      - name: Run Backend Integration Tests
+      - uses: pnpm/action-setup@v6.0.10
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: Install Workspace Dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build Workspace Packages
+        run: pnpm --filter "./Backend/packages/*" run build
+      - name: Install psql client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      # One keypair both sides agree on — the same script backend-quality.yml and local dev use.
+      - name: Generate the shared RS256 keypair
+        run: node scripts/gen-dev-jwt-keys.mjs
+      - name: Emit the decoy public key
+        run: node scripts/ci/integration-identity-crm.mjs --emit-decoy "$RUNNER_TEMP"
+      # 17 chained psql files, all IF NOT EXISTS. crm-service needs no migrations — it
+      # creates its own schema with sync({alter:false}) at boot.
+      - name: Apply auth-service migrations
         run: |
-          # No cross-service integration harness exists yet. The previous body ran
-          # `go test ./...` and `mvn verify` from the repo root, which has no Go
-          # module or Maven pom, so the step always errored once it was no longer
-          # skipped. Per-service build/test coverage runs in the backend-go and
-          # backend-java jobs. This placeholder stays green until a real harness
-          # (docker-compose / testcontainers) is wired up.
-          echo "Integration test harness pending — per-service checks run in backend-go / backend-java."
+          DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/baalvion_db \
+            npm --prefix Backend/services/identity/auth-service run migrate
+      # Background processes survive between steps on the runner (same pattern as
+      # backend-quality.yml's live-integration job). smoke-check.mjs rather than a bare curl
+      # loop so a service that never comes up fails the step instead of falling through.
+      - name: Start auth-service (:3001)
+        working-directory: Backend/services/identity/auth-service
+        env:
+          PORT: '3001'
+          REENGAGEMENT_CRON_ENABLED: 'false'
+        run: |
+          JWT_PRIVATE_KEY_PATH="$GITHUB_WORKSPACE/docker/secrets/jwt_private_key.pem" \
+          JWT_PUBLIC_KEY_PATH="$GITHUB_WORKSPACE/docker/secrets/jwt_public_key.pem" \
+            node index.js > "$RUNNER_TEMP/auth-service.log" 2>&1 &
+          node "$GITHUB_WORKSPACE/scripts/smoke-check.mjs" \
+            http://127.0.0.1:3001/health http://127.0.0.1:3001/.well-known/jwks.json \
+            --retries 30 --delay 2000 --timeout 5000
+      - name: Start crm-service (:3063)
+        working-directory: Backend/services/ecosystem/crm-service
+        env:
+          PORT: '3063'
+          BAALVION_JWKS_URI: http://127.0.0.1:3001/.well-known/jwks.json
+        run: |
+          JWT_PUBLIC_KEY="$(cat "$RUNNER_TEMP/decoy_public.pem")" \
+            node index.js > "$RUNNER_TEMP/crm-service.log" 2>&1 &
+          node "$GITHUB_WORKSPACE/scripts/smoke-check.mjs" http://127.0.0.1:3063/health \
+            --retries 30 --delay 2000 --timeout 5000
+      - name: Cross-service auth + CRM round trip
+        run: node scripts/ci/integration-identity-crm.mjs
+      - name: Service logs
+        if: always()
+        run: |
+          for f in "$RUNNER_TEMP/auth-service.log" "$RUNNER_TEMP/crm-service.log"; do
+            echo "::group::$(basename "$f")"
+            tail -n 200 "$f" || echo "(no log)"
+            echo "::endgroup::"
+          done
 
   # Runs EVERY workspace package's tests, whatever runner it uses.
   #
