@@ -929,6 +929,9 @@ importers:
       '@baalvion/graceful-shutdown':
         specifier: workspace:*
         version: link:../../../packages/graceful-shutdown
+      '@baalvion/money':
+        specifier: workspace:*
+        version: link:../../../packages/money
       '@baalvion/telemetry':
         specifier: workspace:*
         version: link:../../../packages/telemetry
