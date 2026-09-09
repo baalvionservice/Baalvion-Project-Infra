@@ -8,6 +8,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { MembershipGate } from "@/components/auth/MembershipGate";
 import { BackendHealthBanner } from "@/components/BackendHealthBanner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
@@ -78,79 +79,81 @@ const RouteFallback = () => (
 );
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BackendHealthBanner />
-      <BrowserRouter>
-        <Suspense fallback={<RouteFallback />}>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/auth/forgot-password" element={<ForgotPassword />} />
-            <Route path="/auth/verify-email" element={<VerifyEmail />} />
-            <Route path="/auth/callback" element={<AuthCallback />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/forums" element={<ProtectedRoute><ForumThreads /></ProtectedRoute>} />
-            <Route path="/forums/thread/:threadId" element={<ProtectedRoute><ThreadDetail /></ProtectedRoute>} />
-            <Route path="/forums/new" element={<ProtectedRoute><CreateThread /></ProtectedRoute>} />
-            <Route path="/marketplace" element={<ProtectedRoute><MarketplaceConnected /></ProtectedRoute>} />
-            <Route path="/profile" element={<ProtectedRoute><ProfileConnected /></ProtectedRoute>} />
-            <Route path="/elite" element={<Elite />} />
-            <Route path="/elite/apply" element={<ProtectedRoute><EliteApply /></ProtectedRoute>} />
-            <Route path="/elite/status" element={<ProtectedRoute><EliteStatus /></ProtectedRoute>} />
-            <Route path="/elite/premium" element={<ProtectedRoute><ElitePremium /></ProtectedRoute>} />
-            <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
-            <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
-            <Route path="/admin" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
-            <Route path="/admin/analytics" element={<ProtectedRoute><AdminAnalytics /></ProtectedRoute>} />
-            <Route path="/admin/applications" element={<ProtectedRoute><AdminApplications /></ProtectedRoute>} />
-            <Route path="/admin/members" element={<ProtectedRoute><AdminMembers /></ProtectedRoute>} />
-            <Route path="/apply" element={<Apply />} />
-            {/* Membership + founder profile (no paywall — these let a founder pay & set up) */}
-            <Route path="/membership" element={<ProtectedRoute><Membership /></ProtectedRoute>} />
-            <Route path="/profile/edit" element={<ProtectedRoute><ProfileEdit /></ProtectedRoute>} />
-            <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
-            <Route path="/connections" element={<ProtectedRoute><Connections /></ProtectedRoute>} />
-            <Route path="/pipeline" element={<ProtectedRoute><MembershipGate><Pipeline /></MembershipGate></ProtectedRoute>} />
-            {/* Members-only (paid): deals, investors, founders */}
-            <Route path="/deals" element={<ProtectedRoute><MembershipGate><Deals /></MembershipGate></ProtectedRoute>} />
-            <Route path="/deals/new" element={<ProtectedRoute><MembershipGate><DealCreate /></MembershipGate></ProtectedRoute>} />
-            <Route path="/deals/:id" element={<ProtectedRoute><MembershipGate><DealDetail /></MembershipGate></ProtectedRoute>} />
-            <Route path="/deals/:id/manage" element={<ProtectedRoute><MembershipGate><DealManage /></MembershipGate></ProtectedRoute>} />
-            <Route path="/investors" element={<ProtectedRoute><MembershipGate><Investors /></MembershipGate></ProtectedRoute>} />
-            <Route path="/investors/:id" element={<ProtectedRoute><MembershipGate><InvestorDetail /></MembershipGate></ProtectedRoute>} />
-            <Route path="/founders" element={<ProtectedRoute><MembershipGate><Founders /></MembershipGate></ProtectedRoute>} />
-            <Route path="/founders/:id" element={<ProtectedRoute><MembershipGate><FounderDetail /></MembershipGate></ProtectedRoute>} />
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BackendHealthBanner />
+        <BrowserRouter>
+          <Suspense fallback={<RouteFallback />}>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+              <Route path="/auth/verify-email" element={<VerifyEmail />} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/forums" element={<ProtectedRoute><ForumThreads /></ProtectedRoute>} />
+              <Route path="/forums/thread/:threadId" element={<ProtectedRoute><ThreadDetail /></ProtectedRoute>} />
+              <Route path="/forums/new" element={<ProtectedRoute><CreateThread /></ProtectedRoute>} />
+              <Route path="/marketplace" element={<ProtectedRoute><MarketplaceConnected /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><ProfileConnected /></ProtectedRoute>} />
+              <Route path="/elite" element={<Elite />} />
+              <Route path="/elite/apply" element={<ProtectedRoute><EliteApply /></ProtectedRoute>} />
+              <Route path="/elite/status" element={<ProtectedRoute><EliteStatus /></ProtectedRoute>} />
+              <Route path="/elite/premium" element={<ProtectedRoute><ElitePremium /></ProtectedRoute>} />
+              <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+              <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
+              <Route path="/admin" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
+              <Route path="/admin/analytics" element={<ProtectedRoute><AdminAnalytics /></ProtectedRoute>} />
+              <Route path="/admin/applications" element={<ProtectedRoute><AdminApplications /></ProtectedRoute>} />
+              <Route path="/admin/members" element={<ProtectedRoute><AdminMembers /></ProtectedRoute>} />
+              <Route path="/apply" element={<Apply />} />
+              {/* Membership + founder profile (no paywall — these let a founder pay & set up) */}
+              <Route path="/membership" element={<ProtectedRoute><Membership /></ProtectedRoute>} />
+              <Route path="/profile/edit" element={<ProtectedRoute><ProfileEdit /></ProtectedRoute>} />
+              <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
+              <Route path="/connections" element={<ProtectedRoute><Connections /></ProtectedRoute>} />
+              <Route path="/pipeline" element={<ProtectedRoute><MembershipGate><Pipeline /></MembershipGate></ProtectedRoute>} />
+              {/* Members-only (paid): deals, investors, founders */}
+              <Route path="/deals" element={<ProtectedRoute><MembershipGate><Deals /></MembershipGate></ProtectedRoute>} />
+              <Route path="/deals/new" element={<ProtectedRoute><MembershipGate><DealCreate /></MembershipGate></ProtectedRoute>} />
+              <Route path="/deals/:id" element={<ProtectedRoute><MembershipGate><DealDetail /></MembershipGate></ProtectedRoute>} />
+              <Route path="/deals/:id/manage" element={<ProtectedRoute><MembershipGate><DealManage /></MembershipGate></ProtectedRoute>} />
+              <Route path="/investors" element={<ProtectedRoute><MembershipGate><Investors /></MembershipGate></ProtectedRoute>} />
+              <Route path="/investors/:id" element={<ProtectedRoute><MembershipGate><InvestorDetail /></MembershipGate></ProtectedRoute>} />
+              <Route path="/founders" element={<ProtectedRoute><MembershipGate><Founders /></MembershipGate></ProtectedRoute>} />
+              <Route path="/founders/:id" element={<ProtectedRoute><MembershipGate><FounderDetail /></MembershipGate></ProtectedRoute>} />
 
-            {/* Protocol Platform Routes */}
-            <Route path="/protocol" element={<ProtocolLanding />} />
-            <Route path="/protocol/select-role" element={<RoleSelector />} />
-            <Route path="/protocol/admin" element={<AdminDashboard />} />
-            <Route path="/protocol/admin/experts" element={<ExpertsManagement />} />
-            <Route path="/protocol/admin/countries" element={<CountryCAD />} />
-            <Route path="/protocol/admin/revenue" element={<AdminRevenue />} />
-            <Route path="/protocol/admin/users" element={<AdminUsers />} />
-            <Route path="/protocol/expert" element={<ExpertDashboard />} />
-            <Route path="/protocol/expert/students" element={<ExpertStudents />} />
-            <Route path="/protocol/expert/calls" element={<ExpertCalls />} />
-            <Route path="/protocol/expert/feed" element={<ExpertFeed />} />
-            <Route path="/protocol/expert/content" element={<ExpertContent />} />
-            <Route path="/protocol/expert/invites" element={<ExpertInvites />} />
-            <Route path="/protocol/student" element={<StudentDashboard />} />
-            <Route path="/protocol/student/feed" element={<StudentFeed />} />
-            <Route path="/protocol/student/calls" element={<StudentCalls />} />
-            <Route path="/protocol/student/store" element={<StudentStore />} />
+              {/* Protocol Platform Routes */}
+              <Route path="/protocol" element={<ProtocolLanding />} />
+              <Route path="/protocol/select-role" element={<RoleSelector />} />
+              <Route path="/protocol/admin" element={<AdminDashboard />} />
+              <Route path="/protocol/admin/experts" element={<ExpertsManagement />} />
+              <Route path="/protocol/admin/countries" element={<CountryCAD />} />
+              <Route path="/protocol/admin/revenue" element={<AdminRevenue />} />
+              <Route path="/protocol/admin/users" element={<AdminUsers />} />
+              <Route path="/protocol/expert" element={<ExpertDashboard />} />
+              <Route path="/protocol/expert/students" element={<ExpertStudents />} />
+              <Route path="/protocol/expert/calls" element={<ExpertCalls />} />
+              <Route path="/protocol/expert/feed" element={<ExpertFeed />} />
+              <Route path="/protocol/expert/content" element={<ExpertContent />} />
+              <Route path="/protocol/expert/invites" element={<ExpertInvites />} />
+              <Route path="/protocol/student" element={<StudentDashboard />} />
+              <Route path="/protocol/student/feed" element={<StudentFeed />} />
+              <Route path="/protocol/student/calls" element={<StudentCalls />} />
+              <Route path="/protocol/student/store" element={<StudentStore />} />
 
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Suspense>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;
