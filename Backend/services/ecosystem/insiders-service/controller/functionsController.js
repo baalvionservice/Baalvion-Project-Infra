@@ -114,19 +114,15 @@ async function sendNotification(req, res, next) {
 // POST /functions/checkout  — completes a (demo) membership payment for the caller.
 // Replace the "mark active" block with a real Stripe charge/webhook when keys exist.
 async function checkout(req, res, next) {
-    try {
-        const plan = (req.body?.plan && config.tiers[req.body.plan]) ? req.body.plan : 'founder';
-        const amount = config.tiers[plan];
-        const now = new Date();
-        const expires = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
-        const [m] = await db.Membership.findOrCreate({
-            where: { user_id: req.auth.userId },
-            defaults: { user_id: req.auth.userId, plan, status: 'active', amount_usd: amount, started_at: now, expires_at: expires, payment_ref: `demo_${Date.now()}` },
-        });
-        await m.update({ plan, status: 'active', amount_usd: amount, started_at: now, expires_at: expires, payment_ref: m.payment_ref || `demo_${Date.now()}` });
-        await createNotification({ userId: req.auth.userId, type: 'membership', title: 'Membership active', message: `Your ${plan} membership is active. Investor & deal access unlocked.`, link: '/investors' });
-        return sendSuccess(req, res, { membership: m });
-    } catch (err) { return next(err); }
+    // SUPERSEDED. This granted a full 365-day membership on request, with no charge and no
+    // provider involved at all (payment_ref was literally `demo_<timestamp>`), so any
+    // authenticated caller could take a paid tier for free. Membership is now granted ONLY by
+    // billingService.fulfill, on payment-service's signed callback for a captured payment.
+    return next(new AppError(
+        'ENDPOINT_RETIRED',
+        'This checkout endpoint has been retired. Use POST /v1/billing/checkout.',
+        410,
+    ));
 }
 
 // POST /functions/profile-score — recompute + persist the caller's profile/readiness score.
@@ -218,91 +214,43 @@ async function matchInvestors(req, res, next) {
     } catch (err) { return next(err); }
 }
 
-// ── Payments: tiers, proration quote, create-order, confirm ───────────────────
-const { getProvider, PROVIDERS } = require('../payments');
-const TIER_LABEL = { founder: 'Founder', investor_partner: 'Investor Partner' };
-
-// Quote the amount due to move to `targetTier`, applying the upgrade-within-grace rule.
-function quoteTier(membership, targetTier) {
-    const tiers = config.tiers;
-    const full = tiers[targetTier];
-    if (full == null) return null;
-    let amount = full, proration = false, note = `${TIER_LABEL[targetTier]} membership`;
-    if (membership && membership.status === 'active' && membership.plan && membership.plan !== targetTier) {
-        const currentPrice = tiers[membership.plan] ?? 0;
-        const days = membership.started_at ? (Date.now() - new Date(membership.started_at).getTime()) / 86400000 : Infinity;
-        if (currentPrice < full && days <= config.upgradeGraceDays) {
-            amount = full - currentPrice; proration = true;
-            note = `Upgrade credit: $${currentPrice} paid ${Math.floor(days)}d ago (within ${config.upgradeGraceDays} days) → pay only the difference.`;
-        } else if (currentPrice < full) {
-            note = `Past the ${config.upgradeGraceDays}-day upgrade window — full ${TIER_LABEL[targetTier]} price applies.`;
-        }
-    }
-    return { tier: targetTier, label: TIER_LABEL[targetTier], full_price: full, amount, proration, note, currency: 'USD' };
-}
+// ── Payments: tier catalogue ──────────────────────────────────────────────────
+// The quote/checkout logic itself lives in service/billingService.js so that one
+// server-authoritative price is shared by the catalogue and the charge.
+const billing = require('../service/billingService');
 
 // GET-ish: returns tiers, current membership, and an upgrade quote for each tier.
 async function paymentTiers(req, res, next) {
     try {
-        const membership = await db.Membership.findOne({ where: { user_id: req.auth.userId } });
-        const tiers = Object.keys(config.tiers).map((t) => ({
-            key: t, label: TIER_LABEL[t], price: config.tiers[t],
-            current: membership?.status === 'active' && membership.plan === t,
-            quote: quoteTier(membership, t),
-        }));
-        // Only advertise gateways that are actually configured — never offer a provider that will fail closed.
-        const providers = Object.values(PROVIDERS).filter((p) => p.configured()).map((p) => p.name);
-        return sendSuccess(req, res, { tiers, membership, grace_days: config.upgradeGraceDays, providers });
+        const data = await billing.tiersFor(req.auth.userId);
+        // Providers are resolved by payment-service from the CMS vault, not from local keys —
+        // this service holds none. The browser opens whatever clientParams checkout returns, so
+        // it does not need to choose a provider up front.
+        return sendSuccess(req, res, { ...data, providers: [] });
     } catch (err) { return next(err); }
 }
 
-// Create a payment order with the chosen provider (amount = prorated quote).
+// SUPERSEDED — payment-order / payment-confirm.
+//
+// These ran against the adapters in ../payments, which returned SYNTHETIC order ids (no order
+// ever existed at the provider) and verified payment from a client-supplied payload:
+// PayU accepted `{status:'success'}`, Stripe `{status:'succeeded'}`, crypto
+// `{event:'charge:confirmed'}`. The browser sent exactly those literals, so confirming a payment
+// required no payment. Adding real keys would not have fixed it — `configured()` would flip to
+// true and the same client-asserted verification would then grant memberships against a live
+// merchant account.
+//
+// Both are kept as explicit 410s rather than deleted so a stale client gets a clear answer
+// instead of a 404 that looks like a routing fault.
+const RETIRED_PAYMENT_ENDPOINT = 'Retired. Membership checkout is POST /v1/billing/checkout; '
+    + 'activation happens only on payment-service\'s verified fulfilment callback.';
+
 async function paymentOrder(req, res, next) {
-    try {
-        const { provider: providerName, tier } = req.body || {};
-        const provider = getProvider(providerName);
-        if (!provider) throw new AppError('BAD_REQUEST', 'Unknown payment provider', 400);
-        if (!provider.configured()) throw new AppError('PAYMENT_GATEWAY_UNAVAILABLE', 'Payment gateway is not configured', 503);
-        if (!config.tiers[tier]) throw new AppError('BAD_REQUEST', 'Unknown tier', 400);
-        const membership = await db.Membership.findOne({ where: { user_id: req.auth.userId } });
-        const q = quoteTier(membership, tier);
-        const profile = await db.Profile.findByPk(req.auth.userId);
-        const payment = await db.Payment.create({
-            user_id: req.auth.userId, provider: providerName, tier, amount_usd: q.amount, currency: 'USD',
-            status: 'created', proration: q.proration, meta: { full_price: q.full_price, note: q.note },
-        });
-        const order = await provider.createOrder({
-            amount: q.amount, currency: 'USD', receipt: payment.id,
-            meta: { tier, name: profile?.full_name, email: req.auth.email },
-        });
-        await payment.update({ provider_order_id: order.order_id });
-        return sendSuccess(req, res, { payment_id: payment.id, provider: providerName, amount: q.amount, proration: q.proration, note: q.note, order });
-    } catch (err) { return next(err); }
+    return next(new AppError('ENDPOINT_RETIRED', RETIRED_PAYMENT_ENDPOINT, 410));
 }
 
-// Confirm a payment (verify via provider) → activate/upgrade the membership.
 async function paymentConfirm(req, res, next) {
-    try {
-        const { payment_id, payload } = req.body || {};
-        const payment = await db.Payment.findOne({ where: { id: payment_id, user_id: req.auth.userId } });
-        if (!payment) throw new AppError('NOT_FOUND', 'Payment not found', 404);
-        if (payment.status === 'paid') return sendSuccess(req, res, { already: true });
-        const provider = getProvider(payment.provider);
-        if (!provider || !provider.configured()) throw new AppError('PAYMENT_GATEWAY_UNAVAILABLE', 'Payment gateway is not configured', 503);
-        const ok = provider.verify({ payment, payload });
-        if (!ok) { await payment.update({ status: 'failed' }); throw new AppError('PAYMENT_FAILED', 'Payment verification failed', 402); }
-
-        await payment.update({ status: 'paid', provider_ref: payload?.payment_id || payload?.id || payment.provider_order_id });
-        const now = new Date();
-        const [m] = await db.Membership.findOrCreate({
-            where: { user_id: req.auth.userId },
-            defaults: { user_id: req.auth.userId, plan: payment.tier, status: 'active', amount_usd: config.tiers[payment.tier], started_at: now, expires_at: new Date(now.getTime() + 365 * 864e5), payment_ref: payment.id },
-        });
-        // On upgrade keep the original started_at? No — new tier starts now (resets the grace window).
-        await m.update({ plan: payment.tier, status: 'active', amount_usd: config.tiers[payment.tier], started_at: now, expires_at: new Date(now.getTime() + 365 * 864e5), payment_ref: payment.id });
-        await createNotification({ userId: req.auth.userId, type: 'membership', title: `${TIER_LABEL[payment.tier]} active`, message: `Payment received. Your ${TIER_LABEL[payment.tier]} membership is now active.`, link: '/investors' });
-        return sendSuccess(req, res, { membership: m, payment });
-    } catch (err) { return next(err); }
+    return next(new AppError('ENDPOINT_RETIRED', RETIRED_PAYMENT_ENDPOINT, 410));
 }
 
 module.exports = { aiChat, scheduledTagReport, updateReportSchedule, sendNotification, checkout, profileScore, aiAnalyze, matchInvestors, paymentTiers, paymentOrder, paymentConfirm };

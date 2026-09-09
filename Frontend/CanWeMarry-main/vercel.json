@@ -2,5 +2,13 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "ignoreCommand": "npx turbo-ignore canwemarry-web",
   "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
-  "buildCommand": "cd ../.. && pnpm exec turbo run build --filter=canwemarry-web"
+  "buildCommand": "cd ../.. && pnpm exec turbo run build --filter=canwemarry-web",
+  "build": {
+    "env": {
+      "SITE_URL": "https://canwemarry.com"
+    }
+  },
+  "env": {
+    "GATEWAY_ORIGIN": "https://api.baalvion.com/api/v1/identity/auth/v1"
+  }
 }

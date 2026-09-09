@@ -32,6 +32,13 @@ ARG NEXT_PUBLIC_GATEWAY_URL
 ARG NEXT_PUBLIC_CMS_API_URL
 ARG NEXT_PUBLIC_AUTH_URL
 ARG NEXT_PUBLIC_APP_ENV=production
+# Build inputs, not runtime: next.config resolves rewrites() at build time and bakes the
+# destinations into routes-manifest.json, so setting these on the running container is a
+# no-op. Unset, the config silently falls back to its hardcoded default.
+ARG ALLOW_LOCAL_BACKENDS
+ENV ALLOW_LOCAL_BACKENDS=$ALLOW_LOCAL_BACKENDS
+ARG AUTH_PROXY_TARGET
+ENV AUTH_PROXY_TARGET=$AUTH_PROXY_TARGET
 ENV NEXT_TELEMETRY_DISABLED=1 NODE_ENV=production
 COPY --from=pruner /app/out/full/ ./
 # Shared tsconfig chain is not part of the pruned output → copy it for the TS build.

@@ -21,6 +21,17 @@ import type { NextRequest } from 'next/server';
 const GATEWAY_ORIGIN = process.env.GATEWAY_ORIGIN ?? 'http://localhost:3099';
 const GATEWAY = new URL(GATEWAY_ORIGIN);
 
+/**
+ * Path prefix carried by GATEWAY_ORIGIN, if any — empty for a bare origin.
+ *
+ * The gateway is not always mounted at the root. Locally it is (`http://localhost:3099`), but
+ * from outside the compose network it is only reachable through the namespaced carve-out at
+ * `https://api.baalvion.com/api/v1/identity/auth/v1`. Building the target against the origin
+ * alone silently dropped that prefix and sent every call to `/auth/login` on the bare host,
+ * which 404s — so a Vercel deployment could never reach the gateway at all.
+ */
+const BASE_PATH = GATEWAY.pathname.replace(/\/+$/, '');
+
 // Hop-by-hop and host-specific headers that must not be replayed upstream.
 const STRIP_REQUEST = new Set([
   'host', 'connection', 'keep-alive', 'transfer-encoding', 'upgrade',
@@ -39,12 +50,16 @@ const STRIP_RESPONSE = new Set([
  * yields the protocol-relative `//evil.example/x` — which `new URL` resolves against ANY
  * base by replacing the host. That is a server-side request forgery, and this route holds
  * the visitor's session cookies. The origin is asserted afterwards as a second check, so a
- * future edit to the joining logic cannot quietly reintroduce it.
+ * future edit to the joining logic cannot quietly reintroduce it — and the result must still
+ * sit under BASE_PATH, so a caller cannot climb out of the gateway's namespace onto another
+ * surface of the same host.
  */
 function buildTarget(path: string[], search: string): URL | null {
   const safe = path.filter((segment) => segment.length > 0).map(encodeURIComponent).join('/');
-  const target = new URL(`/${safe}${search}`, GATEWAY);
-  return target.origin === GATEWAY.origin ? target : null;
+  const target = new URL(`${BASE_PATH}/${safe}${search}`, GATEWAY);
+  return target.origin === GATEWAY.origin && target.pathname.startsWith(`${BASE_PATH}/`)
+    ? target
+    : null;
 }
 
 async function forward(request: NextRequest, path: string[]) {

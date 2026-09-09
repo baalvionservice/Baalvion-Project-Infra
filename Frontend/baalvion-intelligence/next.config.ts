@@ -18,11 +18,15 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
+      // Cloudflare INJECTS its beacon and the Google tag at the edge — this bundle does not
+      // include either — so a CSP without these hosts blocks every one of them and the property
+      // reports no traffic while appearing perfectly healthy. Hosts are listed explicitly rather
+      // than as a wildcard, so this stays a narrow allowance and not an open door.
+      `script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://static.cloudflareinsights.com${isDev ? " 'unsafe-eval'" : ""}`,
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "img-src 'self' data: blob:",
+      "img-src 'self' data: blob: https://www.google-analytics.com https://www.google.com https://www.google.co.in",
       "font-src 'self' data: https://fonts.gstatic.com",
-      `connect-src 'self'${isDev ? " ws://localhost:* ws://127.0.0.1:* http://localhost:* http://127.0.0.1:*" : ""}`,
+      `connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net https://cloudflareinsights.com${isDev ? " ws://localhost:* ws://127.0.0.1:* http://localhost:* http://127.0.0.1:*" : ""}`,
       "frame-ancestors 'none'",
       "form-action 'self'",
       "base-uri 'self'",

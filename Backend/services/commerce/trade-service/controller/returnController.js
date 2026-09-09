@@ -11,6 +11,8 @@ const { AppError } = require('../utils/errors');
 const { parseListQuery } = require('../utils/pagination');
 const { createReturnSchema } = require('../validators/return.schema');
 const { auditLogistics } = require('../utils/logisticsAudit');
+const { Money } = require('@baalvion/money');
+const { evaluateDualControl } = require('../utils/financialControls');
 
 const VALID = {
     requested: ['approved', 'rejected'],
@@ -145,9 +147,36 @@ const refund = async (req, res, next) => {
         const row = await fetchReturnOwned(req.params.id, req, next);
         if (!row) return undefined;
         assertTransition(row, 'refunded');
-        const amount = req.body && req.body.refundAmount != null ? Number(req.body.refundAmount) : null;
-        await row.update({ status: 'refunded', refund_amount: amount });
-        await auditLogistics(req, 'return.refunded', 'return', row.id, { amount });
+
+        // Exact: refund_amount is a DECIMAL, so it is parsed at the currency's own precision
+        // rather than through a float.
+        const currency = (row.metadata && row.metadata.currency) || 'USD';
+        let amount = null;
+        if (req.body && req.body.refundAmount != null) {
+            try {
+                amount = Money.fromDatabaseValue(req.body.refundAmount, currency).toDecimalString();
+            } catch {
+                throw new AppError('VALIDATION_ERROR', 'refundAmount is not a valid amount', 400);
+            }
+        }
+
+        // Maker-checker on a large refund. A refund moves money OUT, so it deserves the same
+        // second approver as an escrow release — guarding one and not the other was a gap, not
+        // a decision. State lives in the existing metadata JSONB, so no migration is needed.
+        const dc = evaluateDualControl({
+            state: row.metadata || {},
+            amount, currency, action: 'refund', req,
+        });
+        if (dc.decision === 'await_approval') {
+            await row.update({ metadata: dc.nextState });
+            await auditLogistics(req, 'return.refund.requested', 'return', row.id, {
+                amount, currency, requires_second_approver: true,
+            });
+            return sendSuccess(req, res, { ...toApi(row), pending_approval: true }, 202);
+        }
+
+        await row.update({ status: 'refunded', refund_amount: amount, metadata: dc.nextState });
+        await auditLogistics(req, 'return.refunded', 'return', row.id, { amount, currency });
         return sendSuccess(req, res, toApi(row));
     } catch (err) { return next(err); }
 };

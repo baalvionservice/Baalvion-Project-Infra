@@ -400,7 +400,10 @@ export const getEvaluationSchemas = async () => {
 };
 
 // ── Payment APIs ──────────────────────────────────────────────────────────────
-export const createPayment             = mockApi.createPayment;
+// createPayment/createSubscription/updateSubscription used to be exported straight from the
+// fixture module with no USE_MOCK check at all, so any caller reaching them wrote nowhere. The
+// real implementations live in write-api.ts (createPaymentCheckout, createSubscription,
+// updateSubscription); subscription lifecycle is server-owned via POST /subscriptions/ensure.
 export const getInvoicesByCompanyId    = async (companyId: string): Promise<{ success: true; data: Invoice[] }> => {
   if (!USE_MOCK) {
     try { return { success: true, data: (await ctmGet<any[]>(`/invoices?company_id=${companyId}&limit=100`)).map(mapCtmInvoice) }; }
@@ -408,8 +411,6 @@ export const getInvoicesByCompanyId    = async (companyId: string): Promise<{ su
   }
   return mockApi.getInvoicesByCompanyId(companyId);
 };
-export const createSubscription        = mockApi.createSubscription;
-export const updateSubscription        = mockApi.updateSubscription;
 export const getAllSubscriptions        = async () => {
   if (!USE_MOCK) {
     try { return await ctmGet<any[]>('/subscriptions?limit=200'); }
