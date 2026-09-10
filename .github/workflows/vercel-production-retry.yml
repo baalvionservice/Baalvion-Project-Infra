@@ -47,7 +47,7 @@ jobs:
     # not push someone else's commit to production.
     if: github.repository == 'baalvionservice/Baalvion-Project-Infra'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Redeploy
         env:
