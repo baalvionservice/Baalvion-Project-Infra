@@ -20,9 +20,11 @@ name: Vercel — production retry
 
 on:
   schedule:
-    # Every two hours. Runs are no-ops once production matches main, so this
-    # settles down by itself after a successful catch-up.
-    - cron: "17 */2 * * *"
+    # Hourly. Runs are no-ops once production matches main, so this settles down
+    # by itself after a successful catch-up and costs nothing to leave on.
+    # Was every two hours, which meant that after a 24h quota exhaustion the
+    # catch-up could sit idle for most of another two hours past the reset.
+    - cron: "17 * * * *"
   workflow_dispatch:
     inputs:
       dry_run:
@@ -66,7 +68,13 @@ jobs:
           echo "main is at ${SHA}"
 
           # The projects this monorepo ships to production, as Vercel names them.
-          PROJECTS="ir.baalvion about.baalvion jobs.baalvion tradebaalvion imperialpedia lawelitenetwork controlthemarket proxybaalvionstack baalvion-project-infra-for-invstors-and-founders"
+          # Order matters when the daily deployment quota is nearly spent: the
+          # free tier allows 100 deployments/day account-wide, and this loop
+          # queues in order until it starts getting HTTP 402. On 2026-09-10 the
+          # last two slots went to about.baalvion and jobs.baalvion and
+          # imperialpedia — the site with an AdSense review waiting on it —
+          # was 5th and got nothing. Highest-stakes projects first.
+          PROJECTS="imperialpedia lawelitenetwork about.baalvion jobs.baalvion tradebaalvion controlthemarket proxybaalvionstack baalvion-project-infra-for-invstors-and-founders ir.baalvion"
 
           # These projects live under a Vercel team, and a team-scoped project is
           # invisible to a call that does not name the team — the request succeeds
