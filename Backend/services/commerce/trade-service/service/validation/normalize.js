@@ -99,7 +99,9 @@ function toGrams(value, defaultUnit = 'kg') {
     } else {
         const str = String(value).trim();
         amount = toNumber(str);
-        const m = str.match(/([a-zA-Z]+)\s*$/);
+        // Leading `(?:^|[^a-zA-Z])` pins the match to one start position; the bare
+        // `([a-zA-Z]+)\s*$` retried from every letter and went quadratic.
+        const m = str.match(/(?:^|[^a-zA-Z])([a-zA-Z]+)\s*$/);
         if (m) unit = m[1];
     }
     if (amount === null) return null;

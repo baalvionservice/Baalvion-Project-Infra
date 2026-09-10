@@ -16,6 +16,10 @@ const db = require('../models');
 const { Op } = require('sequelize');
 
 const SITE = (process.env.PUBLIC_SITE_URL || 'https://www.marketunderworld.com').replace(/\/$/, '');
+// Script content is raw text, so esc() would corrupt the JSON. `\u003c` is valid JSON,
+// decodes to `<`, and cannot close the element early.
+const jsonLdText = (o) => JSON.stringify(o).replace(/</g, '\\u003c');
+
 const esc = (s) => String(s ?? '').replace(/[<>&'"]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&#39;', '"': '&quot;' }[c]));
 const slugify = (s) => String(s || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
 const withSlug = (base, id) => `${slugify(base) || 'profile'}-${String(id).slice(0, 8)}`;
@@ -69,7 +73,7 @@ function page({ title, description, canonical, jsonLd, h1, lede, facts = [], sec
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:url" content="${esc(canonical)}">
 <meta property="og:type" content="website">
-${jsonLd ? `<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>` : ''}
+${jsonLd ? `<script type="application/ld+json">${jsonLdText(jsonLd)}</script>` : ''}
 </head>
 <body>
 <header><a href="${SITE}/">Baalvion Insiders</a> · <a href="${SITE}/investors">Investors</a> · <a href="${SITE}/founders">Companies</a> · <a href="${SITE}/directory">Locations</a></header>
@@ -98,7 +102,11 @@ async function byIdOrSlug(model, param) {
 }
 
 async function renderPath(path) {
-    const clean = String(path || '/').split('?')[0].replace(/\/+$/, '') || '/';
+    const raw = String(path || '/').split('?')[0];
+    // /\/+$/ retries from every offset, so a path of N slashes is O(N^2); trim by index.
+    let end = raw.length;
+    while (end > 0 && raw[end - 1] === '/') end--;
+    const clean = raw.slice(0, end) || '/';
     const parts = clean.split('/').filter(Boolean);
 
     if (parts[0] === 'guides') {

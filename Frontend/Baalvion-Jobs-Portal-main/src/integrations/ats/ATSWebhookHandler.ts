@@ -3,6 +3,9 @@ import { atsRegistry } from './ATSRegistry';
 import { atsStatusMapper } from './ATSStatusMapper';
 import { applicationService } from '@/services/application.service';
 
+// Strip CR/LF/tab from webhook-derived values before logging (no log forging).
+const sanitizeForLog = (v: unknown): string => String(v ?? '').replace(/[\r\n\t]/g, ' ');
+
 // Mock logger
 const integrationEvents: any[] = [];
 async function logEvent(eventData: any) {
@@ -48,7 +51,7 @@ async function processWebhook(params: ProcessWebhookParams): Promise<{ success: 
     // 3. Update the internal system's state (e.g., update application status in Firestore)
     // This is a mock update. In a real app, you'd use a service.
     // await applicationService.updateStatus(internalEntityId, internalStatus);
-    console.log(`[ATSWebhookHandler] MOCK: Would update application ${internalEntityId} to status ${internalStatus}`);
+    console.log(`[ATSWebhookHandler] MOCK: Would update application ${sanitizeForLog(internalEntityId)} to status ${sanitizeForLog(internalStatus)}`);
     
     // 4. Log the successful event
     await logEvent({
