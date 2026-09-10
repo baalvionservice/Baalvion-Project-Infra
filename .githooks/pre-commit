@@ -26,7 +26,12 @@ fi
 
 # 2. Staged secrets / local env backups. .gitignore already covers the usual
 #    names, but *.bak and timestamped copies slip past it.
-LEAKY=$(staged | grep -E '(^|/)\.env($|\.)|\.env\..*\.bak|\.bak-[0-9]+$|\.pem$|\.p12$|id_rsa' || true)
+# .env.example / .env.sample / .env.template are templates and are MEANT to be
+# committed — matching them was a false positive that blocked a legitimate file from
+# main on the very first real use.
+LEAKY=$(staged \
+  | grep -E '(^|/)\.env($|\.)|\.env\..*\.bak|\.bak-[0-9]+$|\.pem$|\.p12$|id_rsa' \
+  | grep -vE '\.(example|sample|template|dist)$' || true)
 if [ -n "$LEAKY" ]; then
   echo "pre-commit: refusing to commit what look like secrets or env backups:"
   echo "$LEAKY" | sed 's/^/    /'

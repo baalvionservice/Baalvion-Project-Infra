@@ -53,51 +53,46 @@ const TIERS = [
   { key: 'board-of-directors', name: 'Board of Directors' },
 ];
 
-// ── People (mirrors Frontend/IR-Baalvion-main/src/lib/data.ts) ──────────────────
+/**
+ * Real Baalvion people only.
+ *
+ * This file previously seeded BlackRock's board of directors verbatim as Baalvion's own —
+ * Laurence D. Fink, Robert S. Kapito, Susan Wagner, Hans E. Vestberg, Jessica Uhl,
+ * William C. Dudley, Charles H. Robbins, Kristin C. Peck and ten more, each with their real
+ * title at their real company. Four BlackRock operating executives (Susan Chan, Tarek
+ * Chouman, Alex Claringbull, Samara Cohen) sat in functional leadership alongside them.
+ *
+ * The versions published to the CMS are renamed copies of exactly these entries — the
+ * credentials were kept and the names changed, so "Chairman and CEO of Verizon
+ * Communications Inc." is Hans E. Vestberg's role and "Former CFO of Shell plc" is
+ * Jessica Uhl's. Removing them here stops a re-run from restoring what
+ * purgeBaalvionIrFiction.cjs deletes.
+ *
+ * boardOfDirectors is deliberately empty. Board composition is a statutory fact and a
+ * representation to investors; it is entered from the company's filings or not at all.
+ *
+ * "Aladdin" is BlackRock's platform and has been dropped from the two engineering titles
+ * that carried it.
+ */
 const leadershipTeam = [
-  { name: 'Deepak Kumar Kuldeep', title: 'Founder & Chief Visionary Officer', imageId: 'founder-photo', bio: "Deepak is the driving force behind Baalvion, bringing over two decades of experience in global trade and technology. His vision is to build a transparent and efficient ecosystem for B2B commerce worldwide." },
-  { name: 'Tamanna shaikh', title: 'Chief Executive Officer', imageId: 'tamanna-photo', bio: "Tamanna leads Baalvion's strategic execution and day-to-day operations. With a background in corporate strategy and finance, she is focused on scaling the company and delivering value to our stakeholders." },
-  { name: 'Dilip Kumar Kuldeep', title: 'Director', imageId: 'dilip-photo', bio: "Dilip Kumar Kuldeep leads Baalvion's strategic execution and day-to-day operations. With a background in corporate strategy and finance, he is focused on scaling the company and delivering value to our stakeholders." },
-  { name: 'Adarsh Patra', title: 'Chief Executive Officer', imageId: 'executive-1-photo', bio: "Adarsh leads Baalvion's strategic execution and day-to-day operations. With a background in corporate strategy and finance, he is focused on scaling the company and delivering value to our stakeholders." },
+  { name: 'Deepak Kumar Kuldeep', title: 'Founder & Chief Visionary Officer', imageId: 'founder-photo' },
+  { name: 'Tamanna shaikh', title: 'Chief Executive Officer', imageId: 'tamanna-photo' },
+  { name: 'Dilip Kumar Kuldeep', title: 'Director', imageId: 'dilip-photo' },
+  { name: 'Adarsh Patra', title: 'Chief Technology Officer', imageId: 'executive-1-photo' },
 ];
 const globalLeaders = [
-  { name: 'Parthamesh Pawer', title: 'Co-Head of the Global Partners Office', imageId: 'prathamesh-photo', bio: "Prathamesh Pawer leads Baalvion's strategic execution and day-to-day operations. With a background in corporate strategy and finance, he is focused on scaling the company and delivering value to our stakeholders." },
-  { name: 'Laxman Singh Champia', title: 'Co-Head of Aladdin Product Engineering', imageId: 'laxman-photo', bio: "Laxman Singh Champia oversees the development of Baalvion's core technology platform. With extensive experience in software engineering and product management, he ensures our solutions are innovative, reliable, and scalable." },
-  { name: 'Rashmika Singh', title: 'Co-Head of Aladdin Product Engineering', imageId: 'rashmika-photo', bio: "Rashmika Singh oversees the development of Baalvion's core technology platform. With extensive experience in software engineering and product management, she ensures our solutions are innovative, reliable, and scalable." },
-  { name: 'Preeti snigdha Mallick', title: 'Deputy General Counsel', imageId: 'preeti-photo', bio: "Preeti Snigdha Mallick leads Baalvion's legal strategy and compliance efforts. With a strong background in corporate law and regulatory affairs, she ensures our operations adhere to the highest standards of integrity and governance." },
-  { name: 'Susan Chan', title: 'Head of Asia Pacific', bio: "Susan Chan's leadership and deep knowledge of the Asia Pacific markets are critical to our expansion and operational success in this key growth region." },
-  { name: 'Tarek Chouman', title: 'Global Head of Aladdin Client Business', bio: "Tarek Chouman leads Baalvion's client engagement and business development efforts. With a focus on building strong relationships and delivering tailored solutions, he drives our global growth and market penetration strategies." },
-  { name: 'Alex Claringbull', title: 'Global Head of Index Investments', bio: "Alex Claringbull oversees Baalvion's index investment strategies and product offerings. With deep expertise in financial markets and quantitative analysis, he ensures our clients have access to innovative and effective investment solutions." },
-  { name: 'Samara Cohen', title: 'Global Head of Market Development', bio: "Samara Cohen leads Baalvion's market development initiatives, identifying new opportunities and fostering partnerships to expand our global footprint. Her strategic vision and industry insights are key to our continued growth and success." },
+  { name: 'Parthamesh Pawer', title: 'Co-Head of the Global Partners Office', imageId: 'prathamesh-photo' },
+  { name: 'Laxman Singh Champia', title: 'Co-Head of Product Engineering', imageId: 'laxman-photo' },
+  { name: 'Rashmika Singh', title: 'Co-Head of Product Engineering', imageId: 'rashmika-photo' },
+  { name: 'Preeti snigdha Mallick', title: 'Deputy General Counsel', imageId: 'preeti-photo' },
 ];
 const vicePresidents = [
-  { name: 'Sasmita Gemel', title: 'Vice President', position: 'Marketing Communications', imageId: 'sasmita-photo', bio: "Sasmita Gemel leads Baalvion's marketing communications strategy, crafting compelling narratives that resonate with our global audience. With a background in brand management and digital marketing, she drives our efforts to build a strong and recognizable brand in the global trade ecosystem." },
-  { name: 'Vishal Kumar Pingua', title: 'Vice President', position: 'Corporate Development', imageId: 'bishal-photo', bio: "Vishal Kumar Pingua heads Baalvion's corporate development initiatives, focusing on strategic partnerships, mergers and acquisitions, and growth opportunities. With extensive experience in business strategy and financial analysis, he plays a critical role in shaping our company's future trajectory." },
-  { name: 'Biswajeet Patra', title: 'Vice President', position: 'Corporate Counsel', imageId: 'biswajeet-photo', bio: "Biswajeet Patra leads Baalvion's legal affairs, ensuring compliance with global regulations and managing legal risks. With a strong background in corporate law and international business, he provides essential guidance to support our global operations and strategic initiatives." },
-  { name: 'Jaid Alam', title: 'Vice President', position: 'Worldwide Sales', imageId: 'jaid-photo', bio: "Jaid Alam oversees Baalvion's worldwide sales operations, driving revenue growth and client acquisition across global markets. With a proven track record in sales leadership and a deep understanding of the B2B commerce landscape, he is instrumental in expanding our customer base and strengthening our market position." },
-  { name: 'Joe DeVico', title: 'Vice President', position: 'Marketing Communications', bio: "Joe DeVico leads Baalvion's marketing communications strategy, crafting compelling narratives that resonate with our global audience. With a background in brand management and digital marketing, he drives our efforts to build a strong and recognizable brand in the global trade ecosystem." },
+  { name: 'Sasmita Gemel', title: 'Vice President', position: 'Marketing Communications', imageId: 'sasmita-photo' },
+  { name: 'Vishal Kumar Pingua', title: 'Vice President', position: 'Corporate Development', imageId: 'bishal-photo' },
+  { name: 'Biswajeet Patra', title: 'Vice President', position: 'Corporate Counsel', imageId: 'biswajeet-photo' },
+  { name: 'Jaid Alam', title: 'Vice President', position: 'Worldwide Sales', imageId: 'jaid-photo' },
 ];
-const boardOfDirectors = [
-  { name: 'Laurence D. Fink', title: 'Chairman and CEO of BlackRock', imageId: 'bod-1', bio: "Mr. Fink is founder, Chairman and Chief Executive Officer of BlackRock. He also leads the firm's Global Executive Committee. He is responsible for senior leadership development and succession planning, defining and reinforcing BlackRock's vision and culture, and engaging relationships with key strategic clients, industry leaders, regulators and policy makers." },
-  { name: 'Pamela Daley', title: 'Former Senior Vice President of Corporate Business Development of General Electric Company', imageId: 'bod-2', bio: "Pamela Daley brings a wealth of experience in corporate governance and strategic transactions. Her expertise guides our approach to long-term value creation and sustainable business practices. She has served on multiple public company boards." },
-  { name: 'Gregory J. Fleming', title: 'President and CEO of Rockefeller Capital Management', imageId: 'bod-3', bio: "Gregory J. Fleming has a distinguished career in the financial services industry. His leadership in wealth and asset management provides invaluable insight into our strategic growth and client service initiatives." },
-  { name: 'William E. Ford', title: 'Chairman and CEO of General Atlantic', imageId: 'bod-4', bio: "As a leader in global growth equity, William E. Ford offers deep expertise in identifying and nurturing high-potential companies. His perspective is crucial for our technology and market expansion strategies." },
-  { name: 'Fabrizio Freda', title: 'Former President and CEO of the Estee Lauder Companies Inc', imageId: 'bod-5', bio: "Fabrizio Freda's extensive background in global brand management and consumer markets provides critical insights into our customer-centric strategies and international growth ambitions." },
-  { name: 'Murry S. Gerber', title: 'LEAD INDEPENDENT DIRECTOR, Former Chairman and CEO of EQT', imageId: 'bod-6', bio: "As Lead Independent Director, Murry S. Gerber ensures robust governance and board oversight. His experience in the energy sector and as a public company CEO provides strong leadership for the board." },
-  { name: 'Margaret "Peggy" L. Johnson', title: 'CEO of Agility Robotics', imageId: 'bod-7', bio: "Margaret L. Johnson is at the forefront of technological innovation in robotics and AI. Her expertise helps steer our strategy in acquiring and integrating cutting-edge technologies into our platform." },
-  { name: 'Robert S. Kapito', title: 'President of BlackRock', imageId: 'bod-8', bio: "Robert S. Kapito's deep understanding of global markets and risk management is fundamental to our firm's strategy. He plays a key role in our client relationships and operational excellence." },
-  { name: 'Bader M. Al-Saad', title: 'Director General and Chairman of the Board of Arab Fund for Economic and Social Development', imageId: 'bod-9', bio: "Bader M. Al-Saad's international experience in economic development and investment provides a global perspective on our market strategies and partnerships, particularly in emerging economies." },
-  { name: 'Mathis Cabiallavetta', title: 'Former Vice Chairman of Swiss Re Ltd.', imageId: 'bod-10', bio: "Mathis Cabiallavetta's extensive experience in the insurance and risk management industries is invaluable to our comprehensive risk assessment and mitigation frameworks." },
-  { name: 'Susan Chan', title: 'Head of Asia Pacific', imageId: 'bod-11', bio: "Susan Chan's leadership and deep knowledge of the Asia Pacific markets are critical to our expansion and operational success in this key growth region." },
-  { name: 'William C. Dudley', title: 'Former President and CEO of the Federal Reserve Bank of New York', imageId: 'bod-12', bio: "William C. Dudley offers unparalleled expertise in economic policy and financial stability. His guidance helps us navigate complex regulatory and macroeconomic landscapes." },
-  { name: 'Kristin C. Peck', title: 'CEO of Zoetis Inc.', imageId: 'bod-13', bio: "Kristin C. Peck's leadership in the global animal health industry brings a unique perspective on supply chains and international business operations." },
-  { name: 'Charles H. Robbins', title: 'Chairman and CEO of Cisco Systems, Inc.', imageId: 'bod-14', bio: "Charles H. Robbins is a leader in digital transformation and networking technology. His insights are vital to building our secure and scalable global trade platform." },
-  { name: 'Hans E. Vestberg', title: 'Chairman and CEO of Verizon Communications Inc.', imageId: 'bod-15', bio: "Hans E. Vestberg's expertise in telecommunications and technology infrastructure is crucial for developing the robust, connected ecosystem that underpins Baalvion's vision." },
-  { name: 'Susan Wagner', title: 'Co-founder of BlackRock, Inc.', imageId: 'bod-16', bio: "As a co-founder of a leading global investment firm, Susan Wagner's entrepreneurial and strategic vision is a cornerstone of our board's advisory strength." },
-  { name: 'Mark Wilson', title: 'Former CEO of Aviva plc', imageId: 'bod-17', bio: "Mark Wilson's experience leading a multinational insurance company provides deep insights into risk management, capital allocation, and international financial services." },
-  { name: 'Jessica Uhl', title: 'Former CFO of Shell plc', imageId: 'bod-18', bio: "Jessica Uhl's background as CFO of a global energy company brings rigorous financial discipline and strategic capital management expertise to our board." },
-  { name: 'John S. Weinberg', title: 'Chairman and CEO of Evercore Inc.', imageId: 'bod-19', bio: "John S. Weinberg's extensive career in investment banking provides expert guidance on our M&A strategy, capital markets activities, and long-term financial planning." },
-];
+const boardOfDirectors = [];
 
 const GROUPS = [
   { tier: 'executive-committee', people: leadershipTeam },

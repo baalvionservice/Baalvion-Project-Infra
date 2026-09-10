@@ -1,6 +1,6 @@
 import * as transparencyMock from '@/services/mock-api/transparency';
 import { articlesService } from '@/services/data/articles-service';
-import { getCreators } from '@/services/data/creators-service';
+import { getPublicAuthors } from '@/services/data/cms-public';
 import { ApiResponse } from '@/types';
 import { TransparencyData } from '@/types/system';
 import { errorHandler } from '@/lib/errors/error-handler';
@@ -23,15 +23,22 @@ export const systemService = {
   // rather than filled with invented numbers).
   async getTransparencyData(): Promise<ApiResponse<TransparencyData | null>> {
     try {
-      const [articlesPage, creatorsRes] = await Promise.all([
+      // Contributors came from getCreators() — the Creators feature, whose
+      // routes were removed from the site, so this counted an empty list and
+      // the Transparency page published "0 Contributors" while /authors listed
+      // 34 and the homepage claimed "34+". A page whose entire purpose is
+      // trust contradicting the masthead is worse than publishing no number.
+      // Counted from the same source /authors itself renders, so the two
+      // cannot disagree again.
+      const [articlesPage, authors] = await Promise.all([
         articlesService.getArticles(1, 1),
-        getCreators(),
+        getPublicAuthors(),
       ]);
       return {
         data: {
           metrics: {
             articles_published: articlesPage.pagination?.totalItems ?? 0,
-            contributors: (creatorsRes.data ?? []).length,
+            contributors: authors.length,
           },
           policies: [
             { title: 'Editorial Policy', description: 'How our editorial team sources, reviews, and publishes intelligence content.', href: '/editorial-policy' },

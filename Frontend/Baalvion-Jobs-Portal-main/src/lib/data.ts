@@ -16,8 +16,8 @@
  * worse than none, so `bio` is now optional and unset. Add real ones when they exist; the
  * cards render without it.
  *
- * Still unresolved and deliberately left alone: two people carry the title Chief Executive
- * Officer. That is a fact about the company, not something to guess at here.
+ * The company confirmed the split: Tamanna shaikh is Chief Executive Officer and Adarsh
+ * Patra is Chief Technology Officer. Two people no longer carry the same title.
  */
 export type Leader = {
   name: string;
@@ -30,7 +30,7 @@ export const leadershipTeam: Leader[] = [
   { name: 'Deepak Kumar Kuldeep', title: 'Founder & Chief Visionary Officer', imageId: 'founder-photo' },
   { name: 'Tamanna shaikh',       title: 'Chief Executive Officer',           imageId: 'tamanna-photo' },
   { name: 'Dilip Kumar Kuldeep',  title: 'Director',                          imageId: 'dilip-photo' },
-  { name: 'Adarsh Patra',         title: 'Chief Executive Officer',           imageId: 'executive-1-photo' },
+  { name: 'Adarsh Patra',         title: 'Chief Technology Officer',          imageId: 'executive-1-photo' },
 ];
 
 export const globalLeaders: Leader[] = [

@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { isRetiredPath, withoutRetired } from '@/lib/content/retired-paths';
+import { REVIEWS_SECTION_LIVE } from '@/config/sections';
 import {
   TrendingUp,
   Building2,
@@ -64,26 +66,32 @@ const MARKET_TOPICS: Array<{ slug: string; label: string; icon: React.ComponentT
   { slug: "bonds", label: "Bonds", icon: Landmark },
 ];
 
-/** Explainer pages that exist today — the "Market Guides" rail, kept separate from daily news. */
-const MARKET_GUIDES = [
-  { href: "/fed", label: "The Federal Reserve, Explained" },
-  { href: "/inflation", label: "How Inflation Moves Markets" },
-  { href: "/gdp", label: "What Is GDP?" },
-  { href: "/bonds", label: "Understanding Bond Yields" },
-  { href: "/earnings", label: "How Earnings Affect Stocks" },
-];
+/** Explainer pages that exist today — the "Market Guides" rail, kept separate from daily news.
+ *  All five originals (/fed, /inflation, /gdp, /bonds, /earnings) had become
+ *  retired hubs 301ing to the homepage, so a rail whose whole promise is
+ *  "explainers that exist today" linked five that didn't. Repointed at live
+ *  market-mechanics articles under /stocks. */
+const MARKET_GUIDES = withoutRetired([
+  { href: "/stocks/what-is-the-stock-market", label: "What the Stock Market Actually Is" },
+  { href: "/stocks/how-stock-exchanges-work", label: "How Stock Exchanges Work" },
+  { href: "/stocks/what-is-an-order-book", label: "Reading an Order Book" },
+  { href: "/stocks/stock-market-circuit-breakers", label: "Circuit Breakers and Trading Halts" },
+  { href: "/stocks/price-to-earnings-ratio-explained", label: "How Earnings Feed Into Valuation" },
+]);
 
 /** Max FAQs shown — keeps the section a curated, scannable set instead of
  * however many happen to flatMap out of the source articles. */
 const FAQ_LIMIT = 10;
 
-const EXPLORE_MORE = [
-  { href: "/investing", label: "Investing" },
-  { href: "/economy", label: "Economy" },
-  { href: "/banking", label: "Banking" },
-  { href: "/personal-finance", label: "Personal Finance" },
-  { href: "/reviews", label: "Reviews" },
-];
+// Was Investing / Economy / Banking / Personal Finance — all retired — plus
+// Reviews, which is gated off while it has nothing published.
+const EXPLORE_MORE = withoutRetired([
+  { href: "/stocks", label: "Stocks" },
+  { href: "/budgeting-basics", label: "Budgeting" },
+  { href: "/fraud-protection", label: "Scams & Fraud Protection" },
+  { href: "/financial-tools", label: "Financial Tools" },
+  ...(REVIEWS_SECTION_LIVE ? [{ href: "/reviews", label: "Reviews" }] : []),
+]);
 
 /** Evergreen conceptual FAQs — general finance education, not time-bound facts —
  * used only to top up the CMS-aggregated list below a useful minimum. */
@@ -234,7 +242,12 @@ export async function MarketNewsHub() {
   for (const t of MARKET_TOPICS) {
     topicRails[t.slug] = claim(articlesByTopic[t.slug] ?? [], 6);
   }
-  const visibleTopics = MARKET_TOPICS.filter((t) => (topicRails[t.slug]?.length ?? 0) > 0);
+  // Also drop any topic whose hub is retired: the strip links /{slug} directly,
+  // and 7 of these 9 now 301 to the homepage, so a stray published article in
+  // one of those categories would put a dead tab back in the strip.
+  const visibleTopics = MARKET_TOPICS.filter(
+    (t) => (topicRails[t.slug]?.length ?? 0) > 0 && !isRetiredPath(`/${t.slug}`),
+  );
 
   // 5) "Market Analysis" — longer-form pieces, derived from real read time,
   //    kept in its own section and never mixed into the breaking-news feed above.

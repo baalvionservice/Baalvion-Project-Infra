@@ -9,6 +9,7 @@
  */
 
 import type { NewsCategory } from '@/lib/data.news';
+import { RETIRED_TOP_LEVEL_SLUGS } from '@/lib/content/retired-paths';
 
 export interface TopicCopy {
   /** Small uppercase eyebrow above the title. */
@@ -5818,24 +5819,16 @@ export interface SiblingTopic {
 // Categories retired pending AdSense review (2026-09-03/04) — every one of these
 // routes 301s away (see next.config.ts's two "TEMPORARY" redirect blocks), so a
 // sibling tab pointing at one would dead-end a reader on the homepage instead of
-// the related topic they clicked. Kept as its own list here (not imported — this
-// is a frontend-only lib file with no access to next.config.ts) mirroring the same
-// 54 slugs; keep in sync if the retirement list changes.
+// the related topic they clicked. This was a second hand-maintained copy of the
+// 54 slugs, with a note to keep it in sync by hand; it now derives from the
+// shared list (lib/content/retired-paths.ts), which a test pins to the redirect
+// table in next.config.ts, so there is nothing left to keep in sync.
 const RETIRED_TOPIC_SLUGS = new Set<string>([
-  'app-reviews', 'auto-loans', 'banking', 'banking-reviews', 'bonds', 'brokers',
-  'calendar', 'cd-rates', 'checking', 'commodities', 'credit', 'credit-cards',
-  'crypto', 'cryptocurrency', 'debt', 'earnings', 'economy', 'etfs', 'fed',
-  'financial-calculators', 'financial-independence', 'fiscal-policy', 'gdp',
-  'global', 'indicators', 'inflation', 'interest-rates', 'investing',
-  'live-market-news', 'loan-reviews', 'loans', 'monetary-policy',
-  'money-management', 'money-market', 'mortgages', 'mutual-funds', 'options',
-  'personal-finance', 'planning', 'portfolio', 'real-estate', 'retirement',
-  'savings', 'student-loans', 'tax-software', 'unemployment',
-  'advanced-budgeting', 'budget-rules', 'budgeting-apps', 'emergency-fund',
-  'family-budget', 'monthly-budget', 'saving-money', 'student-budget',
+  ...RETIRED_TOP_LEVEL_SLUGS,
   // Not a category retirement — 'budgeting' was never a real CMS category (0
-  // articles) and is redirected for an unrelated reason (see next.config.ts).
-  // Listed here too so it's excluded from sibling tabs the same way.
+  // articles) and redirects to /budgeting-basics for an unrelated reason (see
+  // next.config.ts). It resolves, so isRetiredPath doesn't cover it, but a
+  // sibling tab should still point at the real hub rather than a redirect.
   'budgeting',
 ]);
 

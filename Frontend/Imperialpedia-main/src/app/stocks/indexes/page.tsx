@@ -6,12 +6,14 @@ import { Text } from '@/design-system/typography/text';
 import { Badge } from '@/components/ui/badge';
 import { BarChart3 } from 'lucide-react';
 import { buildMetadata } from '@/lib/seo';
+import { STOCK_REFERENCE_PAGES_LIVE } from '@/config/sections';
 import indexes from '@/data/indexes/indexes.json';
 
 export const metadata: Metadata = buildMetadata({
   canonical: '/stocks/indexes',
   title: 'Stock Market Indexes | S&P 500, Nasdaq, Dow Jones & More',
   description: 'Learn how major world stock market indexes work, including the S&P 500, Nasdaq Composite, Dow Jones, FTSE 100, Nikkei 225, Sensex, and Nifty 50.',
+  noIndex: !STOCK_REFERENCE_PAGES_LIVE,
 });
 
 export default function IndexesPage() {

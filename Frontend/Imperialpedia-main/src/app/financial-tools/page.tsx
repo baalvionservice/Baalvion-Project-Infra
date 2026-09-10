@@ -1,4 +1,5 @@
 import React from 'react';
+import { withoutRetired } from '@/lib/content/retired-paths';
 import Link from 'next/link';
 import { getCalculatorList } from '@/services/mock-api/calculators';
 import { CalculatorCard } from '@/modules/calculators/components/CalculatorCard';
@@ -223,18 +224,22 @@ export default async function FinancialToolsDashboard() {
           </a>
         </section>
 
-        {/* Explore More — cross-links into the site's editorial hubs */}
+        {/* Explore More — cross-links into the site's editorial hubs.
+            Was Personal Finance / Investing / Stocks / Economy; three of those
+            four are retired hubs that 301 to the homepage, so this row sent
+            readers back to the start. Filtered through withoutRetired so a
+            future retirement drops a link instead of breaking it. */}
         <section>
           <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2 border-b border-gray-100">
             Explore More
           </h2>
           <div className="flex flex-wrap gap-x-8 gap-y-3">
-            {[
-              { href: '/personal-finance', label: 'Personal Finance' },
-              { href: '/investing', label: 'Investing' },
+            {withoutRetired([
               { href: '/stocks', label: 'Stocks' },
-              { href: '/economy', label: 'Economy' },
-            ].map((link) => (
+              { href: '/budgeting-basics', label: 'Budgeting' },
+              { href: '/fraud-protection', label: 'Scams & Fraud Protection' },
+              { href: '/market-news', label: 'Market News' },
+            ]).map((link) => (
               <Link
                 key={link.href}
                 href={link.href}

@@ -41,7 +41,7 @@ const EXECUTIVE_COMMITTEE: Leader[] = [
   },
   {
     name: "Adarsh Patra",
-    title: "Chief Executive Officer",
+    title: "Chief Technology Officer",
     photo: "/leadership/exec-adarsh-patra.jpeg",
     initials: "AP",
     profileHref: "https://ir.baalvion.com/governance/leadership/adarsh-patra",

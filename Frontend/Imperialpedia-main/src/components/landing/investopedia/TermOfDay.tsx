@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { BookOpen, ArrowRight } from "lucide-react";
+import { isRetiredPath } from "@/lib/content/retired-paths";
 
 type Props = {
   term: string;
@@ -28,13 +29,15 @@ export function TermOfDay({ term, definition, href }: Props) {
           </div>
           <div className="flex-1 px-6 py-5">
             <p className="text-sm text-foreground/90 leading-relaxed line-clamp-3">{definition}</p>
-            <Link
-              href={href}
-              className="group mt-3 inline-flex items-center gap-1 text-sm font-bold text-primary hover:underline underline-offset-2"
-            >
-              Read full definition
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-            </Link>
+            {!isRetiredPath(href) && (
+              <Link
+                href={href}
+                className="group mt-3 inline-flex items-center gap-1 text-sm font-bold text-primary hover:underline underline-offset-2"
+              >
+                Read full definition
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+            )}
           </div>
         </div>
       </div>

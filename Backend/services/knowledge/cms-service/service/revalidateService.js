@@ -125,10 +125,31 @@ async function pathsForContent(content, domain) {
     return { paths: [...new Set(paths)], urls };
 }
 
+// Sites already warned about, so an unconfigured site logs once per process
+// rather than on every publish.
+const _warnedUnconfigured = new Set();
+
 function dispatch(websiteSlug, { paths = [], urls = [] } = {}) {
     const endpoint = urlFor(websiteSlug);
     const secret = config.revalidate && config.revalidate.secret;
-    if (!endpoint || !secret) return; // not configured for this site → no-op
+    if (!endpoint || !secret) {
+        // Fail-open is right — a publish must not depend on a frontend webhook —
+        // but failing *silently* meant nobody noticed that Imperialpedia had
+        // REVALIDATE_SECRET unset in production while its ISR windows had been
+        // lengthened to 1h-1d specifically because this webhook was assumed to
+        // provide freshness. Every edit went stale for up to a day instead of
+        // seconds, with nothing anywhere saying so. Warn once per site.
+        if (!_warnedUnconfigured.has(websiteSlug)) {
+            _warnedUnconfigured.add(websiteSlug);
+            try {
+                logger('revalidate').warn(
+                    { websiteSlug, hasEndpoint: Boolean(endpoint), hasSecret: Boolean(secret) },
+                    'revalidation not configured — ISR pages for this site will not refresh until their TTL expires (set REVALIDATE_SECRET and REVALIDATE_WEBHOOKS)',
+                );
+            } catch { /* logging must never throw */ }
+        }
+        return;
+    }
 
     const timeoutMs = (config.revalidate && config.revalidate.timeoutMs) || 5000;
     const controller = new AbortController();

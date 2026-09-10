@@ -56,6 +56,11 @@ const securityHeaders = [
 
 
 const nextConfig = {
+  // The production image is a Next standalone server (see Dockerfile). Without this the build
+  // succeeds while emitting no .next/standalone, and the runner stage fails several minutes
+  // later on a missing COPY with an error that says nothing about output mode.
+  // Windows is excluded because standalone tracing resolves symlinks it cannot follow there.
+  output: process.platform === 'win32' ? undefined : 'standalone',
   // Keep the server-only Genkit + OpenTelemetry runtime external so Next leaves it as a runtime
   // require() instead of bundling and statically analysing its dynamic `require(expr)` calls
   // (@opentelemetry/instrumentation, require-in-the-middle, protobufjs, express). Removes the

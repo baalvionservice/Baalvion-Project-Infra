@@ -3,28 +3,26 @@ import { Star } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
-const testimonials = [
-  {
-    name: 'Aarav Shah',
-    title: 'CEO, NexGenTech India',
-    quote: "Baalvion gave us complete visibility across all 3 of our businesses. It replaced 6 different tools.",
-    avatarId: "user-alex-davis"
-  },
-  {
-    name: 'Emily Ross',
-    title: 'Co-Founder, CloudScale UK',
-    quote: "The equity management alone is worth the price. Our investors love the portal.",
-    avatarId: "user-priya-sharma"
-  },
-  {
-    name: 'Mohammed Al Rashid',
-    title: 'MD, GulfVentures UAE',
-    quote: "Finally a dashboard that understands multi-country operations. Game-changer.",
-    avatarId: "user-fatima-al-fassi"
-  }
-];
+/**
+ * Real endorsements only.
+ *
+ * Three invented customers sat here — "Aarav Shah", "Emily Ross" and "Mohammed Al Rashid" —
+ * each with a five-star rating and a placeholder avatar, quoting results ("It replaced 6
+ * different tools") that no customer has reported.
+ *
+ * The section renders nothing while empty.
+ */
+type Testimonial = {
+  name: string;
+  title: string;
+  quote: string;
+  avatarId: string;
+};
+const testimonials: Testimonial[] = [];
+
 
 export default function TestimonialsSection() {
+  if (testimonials.length === 0) return null;
   return (
     <section id="testimonials" className="py-20">
       <div className="container mx-auto px-4">

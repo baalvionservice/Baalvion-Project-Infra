@@ -5,7 +5,8 @@
   "description": "Global investment platform — NestJS + Next.js 15 + Prisma/PostgreSQL",
   "packageManager": "pnpm@9.12.0",
   "engines": {
-    "node": ">=20.11.0"
+    "node": ">=24",
+    "pnpm": ">=9"
   },
   "scripts": {
     "db:generate": "pnpm --filter @baalvion-invest/database generate",

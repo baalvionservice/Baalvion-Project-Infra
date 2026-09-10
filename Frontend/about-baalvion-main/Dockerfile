@@ -39,6 +39,11 @@ ENV NEXT_TELEMETRY_DISABLED=1 NODE_ENV=production \
     BUILD_STANDALONE=1 \
     NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
 COPY --from=pruner /app/out/full/ ./
+# turbo prune does not carry the root tsconfig.base.json, which every package tsconfig
+# extends. Without it tsup's DTS step fails "Cannot find base config file" and takes the
+# whole build with it. Latent until this app gained a workspace package that needs building
+# — @baalvion/design did exactly that and broke the Amarise image on 2026-09-09.
+COPY tsconfig.base.json ./tsconfig.base.json
 RUN pnpm turbo run build --filter=about-baalvion-web
 
 # 4) Minimal runner (standalone server)

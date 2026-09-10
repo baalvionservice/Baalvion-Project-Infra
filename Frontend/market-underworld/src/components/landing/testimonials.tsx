@@ -4,25 +4,22 @@ import { motion } from "framer-motion"
 import { NexusCard } from "@/components/ui/nexus-card"
 import { Quote, Star } from "lucide-react"
 
-const TESTIMONIALS = [
-  {
-    text: "My private teacher from Tokyo helped me master calculus in 3 weeks. Paying in USDT was seamless and instant. High precision learning.",
-    author: "Aryan M.",
-    region: "South Asia 🇮🇳",
-  },
-  {
-    text: "NEXUS is unlike anything else. I found a teacher from my exact timezone and language. Worth every satoshi. Truly globalized education.",
-    author: "Elena K.",
-    region: "Europe 🇩🇪",
-  },
-  {
-    text: "Bought clothes, booked a flight, AND hired a private coding tutor — all on one platform. Mind blown at the convenience and elite feel.",
-    author: "Marcus T.",
-    region: "North America 🇺🇸",
-  },
-]
+/**
+ * Real endorsements only.
+ *
+ * Three invented quotes sat here, attributed to "Aryan M.", "Elena K." and "Marcus T."
+ * with regions and five-star ratings. Initials are still an attribution: they present the
+ * quote as something a real member said.
+ *
+ * The section renders nothing while empty.
+ */
+type Testimonial = { text: string; author: string; region: string }
+
+const TESTIMONIALS: Testimonial[] = []
 
 export const Testimonials = () => {
+  if (TESTIMONIALS.length === 0) return null
+
   return (
     <section className="py-32 relative overflow-hidden">
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />

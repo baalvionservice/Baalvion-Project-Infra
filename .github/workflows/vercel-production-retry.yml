@@ -8,7 +8,7 @@
 #   do not, so a merge reaches production on its own once the window clears.
 #
 # HARD INVARIANTS:
-#   • ir.baalvion is NOT deployed unless IR_INVEST_ACCESS_CODE exists in its
+#   • ir.baalvion is NOT deployed unless IR_INVEST_INVITES exists in its
 #     production environment. The invitation gate fails CLOSED, so shipping
 #     without it turns every real investor away at /invest and /onboarding.
 #     See Frontend/IR-Baalvion-main/src/lib/invite-gate.ts.
@@ -20,9 +20,11 @@ name: Vercel — production retry
 
 on:
   schedule:
-    # Every two hours. Runs are no-ops once production matches main, so this
-    # settles down by itself after a successful catch-up.
-    - cron: "17 */2 * * *"
+    # Hourly. Runs are no-ops once production matches main, so this settles down
+    # by itself after a successful catch-up and costs nothing to leave on.
+    # Was every two hours, which meant that after a 24h quota exhaustion the
+    # catch-up could sit idle for most of another two hours past the reset.
+    - cron: "17 * * * *"
   workflow_dispatch:
     inputs:
       dry_run:
@@ -67,7 +69,13 @@ jobs:
           echo "main is at ${SHA}"
 
           # The projects this monorepo ships to production, as Vercel names them.
-          PROJECTS="ir.baalvion about.baalvion jobs.baalvion tradebaalvion imperialpedia lawelitenetwork controlthemarket proxybaalvionstack baalvion-project-infra-for-invstors-and-founders"
+          # Order matters when the daily deployment quota is nearly spent: the
+          # free tier allows 100 deployments/day account-wide, and this loop
+          # queues in order until it starts getting HTTP 402. On 2026-09-10 the
+          # last two slots went to about.baalvion and jobs.baalvion and
+          # imperialpedia — the site with an AdSense review waiting on it —
+          # was 5th and got nothing. Highest-stakes projects first.
+          PROJECTS="imperialpedia lawelitenetwork about.baalvion jobs.baalvion tradebaalvion controlthemarket proxybaalvionstack baalvion-project-infra-for-invstors-and-founders ir.baalvion"
 
           # These projects live under a Vercel team, and a team-scoped project is
           # invisible to a call that does not name the team — the request succeeds
@@ -110,9 +118,9 @@ jobs:
             # exists, because the gate fails closed without it. ──────────────
             if [ "${name}" = "ir.baalvion" ]; then
               env_json="$(curl -sS "${AUTH[@]}" "${API}/v9/projects/${id}/env?$(q "decrypt=false")")"
-              has_code="$(echo "${env_json}" | jq -r '[.envs[]? | select(.key=="IR_INVEST_ACCESS_CODE") | select((.target // []) | index("production"))] | length' 2>/dev/null || echo 0)"
+              has_code="$(echo "${env_json}" | jq -r '[.envs[]? | select(.key=="IR_INVEST_INVITES") | select((.target // []) | index("production"))] | length' 2>/dev/null || echo 0)"
               if [ "${has_code}" = "0" ]; then
-                echo "::error::ir.baalvion NOT deployed: IR_INVEST_ACCESS_CODE is missing from its production environment."
+                echo "::error::ir.baalvion NOT deployed: IR_INVEST_INVITES is missing from its production environment."
                 echo "::error::The s.42 invitation gate fails closed — shipping now would redirect every investor away from /invest and /onboarding."
                 echo "::error::Set it in Vercel (Project → Settings → Environment Variables, Production), then re-run this workflow."
                 skipped=$((skipped+1)); continue

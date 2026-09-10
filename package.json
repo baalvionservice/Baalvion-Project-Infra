@@ -2,7 +2,7 @@
   "name": "baalvion-platform",
   "version": "1.0.1",
   "private": true,
-  "description": "Baalvion Identity Platform — enterprise monorepo",
+  "description": "Baalvion Identity Platform \u2014 enterprise monorepo",
   "engines": {
     "node": ">=24",
     "pnpm": ">=9"
@@ -69,14 +69,14 @@
     "concurrently": "^8.2.2",
     "eslint": "^9.39.4",
     "globals": "^15.15.0",
-    "jest": "30.5.1",
+    "jest": "^30.5.1",
     "pg": "8.22.0",
     "prettier": "^3.4.2",
     "prisma": "^5.22.0",
     "rimraf": "^6.0.1",
     "ts-jest": "^29.2.0",
     "turbo": "^2.9.16",
-    "typescript": "5.9.3"
+    "typescript": "^5.9.3"
   },
   "pnpm": {
     "overrides": {
@@ -95,7 +95,7 @@
       "@types/react": "19.3.0",
       "@types/react-dom": "19.3.0",
       "cross-spawn": "7.0.5",
-      "next": "15.5.21",
+      "next": "15.5.24",
       "handlebars": "4.7.9",
       "protobufjs": "7.6.5",
       "@protobufjs/utf8": "1.1.1",

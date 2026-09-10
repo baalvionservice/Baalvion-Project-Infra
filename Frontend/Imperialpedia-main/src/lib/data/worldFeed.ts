@@ -862,6 +862,8 @@ async function buildCmsNews(region: RegionId): Promise<NewsBundle | null> {
       // Owned editorial content -- links to the real article page via storyHref().
       slug: c.slug,
       dateISO: c.publishedAt ?? undefined,
+      contentType: c.contentType,
+      categorySlug: c.category?.slug,
     };
   });
 
@@ -873,6 +875,8 @@ async function buildCmsNews(region: RegionId): Promise<NewsBundle | null> {
     positive: classifyPositive(c.title),
     slug: c.slug,
     dateISO: c.publishedAt ?? undefined,
+    contentType: c.contentType,
+    categorySlug: c.category?.slug,
   }));
 
   const buckets = new Map<string, CmsContent[]>();
@@ -891,6 +895,8 @@ async function buildCmsNews(region: RegionId): Promise<NewsBundle | null> {
         image: safeImage(c.featuredImage, mapCmsCategory(c.category?.name, c.title), c.title),
         slug: c.slug,
         dateISO: c.publishedAt ?? undefined,
+        contentType: c.contentType,
+        categorySlug: c.category?.slug,
       }));
     return { section: def.section, color: "#0a2463", items: its };
   }).filter((s) => s.items.length > 0);
