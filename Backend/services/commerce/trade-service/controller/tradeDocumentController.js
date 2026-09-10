@@ -150,6 +150,17 @@ const getDocument = async (req, res, next) => {
     }
 };
 
+// Repeated query params (`?file_name=a&file_name=b`) arrive as an array, and a JSON
+// envelope can put any type in `file_name`/`mime_type`. Everything downstream — the
+// name sanitiser, the MIME split, the original_file_name column — expects a scalar.
+// Take the first element of an array, reject objects, and stringify the rest.
+function scalar(v) {
+    if (Array.isArray(v)) v = v[0];
+    if (v === undefined || v === null) return null;
+    if (typeof v === 'object') return null;
+    return String(v);
+}
+
 // ── Upload a new version (the file-engine endpoint) ──────────────────────────
 // Accepts raw binary body (preferred — any non-JSON Content-Type, original name in
 // the X-File-Name header) OR a JSON envelope { file_base64, file_name, mime_type }.
@@ -164,12 +175,12 @@ const uploadVersion = async (req, res, next) => {
 
         if (Buffer.isBuffer(req.body) && req.body.length) {
             buffer = req.body;
-            fileName = req.get('X-File-Name') || req.query.file_name || doc.title || 'document';
-            declaredMime = req.get('Content-Type');
+            fileName = scalar(req.get('X-File-Name')) || scalar(req.query.file_name) || doc.title || 'document';
+            declaredMime = scalar(req.get('Content-Type'));
         } else if (req.body && typeof req.body === 'object' && req.body.file_base64) {
             buffer = Buffer.from(String(req.body.file_base64), 'base64');
-            fileName = req.body.file_name || doc.title || 'document';
-            declaredMime = req.body.mime_type || null;
+            fileName = scalar(req.body.file_name) || doc.title || 'document';
+            declaredMime = scalar(req.body.mime_type) || null;
         } else {
             return next(new AppError('EMPTY_UPLOAD', 'Provide file bytes as the raw request body (with Content-Type) or JSON { file_base64, file_name, mime_type }', 422));
         }
