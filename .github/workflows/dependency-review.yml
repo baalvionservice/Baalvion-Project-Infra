@@ -12,6 +12,7 @@ jobs:
   dependency-review:
     name: Review dependency changes
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
       - name: Dependency Review
@@ -40,6 +41,7 @@ jobs:
     needs: dependency-review
     if: always() && needs.dependency-review.result == 'failure'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/slack-notify

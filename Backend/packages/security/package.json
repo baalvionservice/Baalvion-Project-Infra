@@ -1,5 +1,9 @@
 {
   "name": "@baalvion/security",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "private": true,
   "main": "./src/index.ts",
@@ -14,10 +18,10 @@
     "test": "jest --passWithNoTests"
   },
   "devDependencies": {
-    "typescript": "^5",
-    "jest": "^29.7.0",
+    "typescript": "^5.9.3",
+    "jest": "^30.5.1",
     "ts-jest": "^29.2.0",
     "@types/jest": "^29.5.0",
-    "@types/node": "^22.10.2"
+    "@types/node": "^24.13.4"
   }
 }

@@ -40,16 +40,24 @@ on:
       - 'Backend/services/platform/admin-service/**'
       - '.github/workflows/payment-spine.yml'
 
+env:
+  # Shared Turbo build cache. Unset secrets simply mean turbo falls back to its
+  # local cache, so this is safe to leave in place before the secrets exist.
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+  TURBO_REMOTE_CACHE_SIGNATURE_KEY: ${{ secrets.TURBO_REMOTE_CACHE_SIGNATURE_KEY }}
+
 jobs:
   packages:
     name: money spine — packages
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6.0.10
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
       - uses: actions/setup-node@v7
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'pnpm'
 
       - name: Install workspace deps
@@ -109,6 +117,7 @@ jobs:
   services:
     name: money spine — reporting services
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:15-alpine
@@ -128,10 +137,10 @@ jobs:
       DB_PASSWORD: test_pass
     steps:
       - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6.0.10
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
       - uses: actions/setup-node@v7
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'pnpm'
 
       - name: Install workspace deps
@@ -202,12 +211,13 @@ jobs:
   contract:
     name: money spine — architecture contract
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6.0.10
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
       - uses: actions/setup-node@v7
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - name: Service catalogue + architecture rules

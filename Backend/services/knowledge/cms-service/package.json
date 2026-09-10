@@ -1,5 +1,9 @@
 {
   "name": "cms-service",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "description": "Baalvion Enterprise Multi-Website CMS Service",
   "main": "index.js",
@@ -43,9 +47,9 @@
   "devDependencies": {
     "nodemon": "^3.1.14",
     "sequelize-cli": "^6.6.2",
-    "typescript": "^5.7.2",
+    "typescript": "^5.9.3",
     "tsx": "^4.19.2",
-    "@types/node": "^22.10.0",
+    "@types/node": "^24.13.4",
     "@types/express": "^5.0.0"
   }
 }

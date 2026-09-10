@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=24",
+    "pnpm": ">=9"
   },
   "scripts": {
     "dev": "next dev -p 9002",
@@ -13,11 +14,12 @@
     "submit:indexnow": "tsx scripts/submit-indexnow.ts",
     "build": "pnpm run generate:article-art && next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test src/**/*.test.ts"
   },
   "dependencies": {
+    "@baalvion/eslint-config": "workspace:*",
     "@baalvion/company": "workspace:*",
     "@baalvion/design": "workspace:*",
     "@baalvion/illustrations": "workspace:*",
@@ -68,13 +70,13 @@
     "zustand": "^5.0.3"
   },
   "devDependencies": {
-    "@types/node": "^20",
+    "@types/node": "^24.13.4",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "genkit-cli": "^1.36.0",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "tsx": "^4.19.0",
-    "typescript": "^5.8.2"
+    "typescript": "^5.9.3"
   }
 }

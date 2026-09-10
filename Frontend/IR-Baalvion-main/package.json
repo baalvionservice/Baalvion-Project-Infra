@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=24",
+    "pnpm": ">=9"
   },
   "scripts": {
     "dev": "next dev --turbopack -p 3027",
@@ -11,7 +12,7 @@
     "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "invite:new": "node scripts/new-invite.mjs",
     "test:gate": "node --test src/lib/__tests__/*.test.mjs"
@@ -63,13 +64,13 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
-    "@types/node": "^20",
+    "@types/node": "^24.13.4",
     "@types/react": "^19.2.1",
     "@types/react-dom": "^19.2.1",
     "@types/sanitize-html": "^2.13.0",
     "genkit-cli": "^1.36.0",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "typescript": "^5.9.3"
   }
 }

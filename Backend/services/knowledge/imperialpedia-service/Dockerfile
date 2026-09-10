@@ -1,7 +1,7 @@
 # Monorepo-aware build for the pnpm workspace (build model: Option A).
 # BUILD CONTEXT MUST BE THE REPO ROOT:
 #   docker build -f Backend/services/knowledge/imperialpedia-service/Dockerfile -t imperialpedia-service .
-FROM node:20-alpine AS base
+FROM node:24-alpine AS base
 RUN corepack enable
 WORKDIR /repo
 
@@ -28,7 +28,7 @@ COPY tsconfig.base.json ./tsconfig.base.json
 RUN pnpm -r --filter "./Backend/packages/*" run build
 RUN pnpm deploy --filter=imperialpedia-service --prod /out
 
-FROM node:20-alpine AS final
+FROM node:24-alpine AS final
 RUN apk add --no-cache dumb-init \
     && addgroup -S app && adduser -S app -G app
 ENV NODE_ENV=production

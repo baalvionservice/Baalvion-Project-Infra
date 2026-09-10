@@ -1,11 +1,14 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # CI is build + scan ONLY. It never pushes images and never deploys.
-# .github/workflows/deploy.yml is the authoritative 19-service production
-# pipeline (the single source of truth for Amazon ECR push + EC2 roll).
 #
-# Any image names referenced here are kept in sync with the deploy.yml ECR repos
-# so a CI-scanned artifact maps 1:1 to the image deploy.yml ships. The image set
-# below is a representative SUBSET of those 19 services, not the full fleet.
+# deploy.yml — the 19-service pipeline this header used to name — was deleted
+# 2026-07-02. Two workflows ship to production now:
+#   • deploy-consolidated-box2.yml  — box2, the only live target (workflow_dispatch)
+#   • community-giftcard-deploy.yml — the only push-triggered deploy
+#
+# Image names referenced here are kept in sync with those two workflows' ECR repos
+# so a CI-scanned artifact maps 1:1 to a shipped image. The image set below is a
+# representative SUBSET of the fleet, not all of it.
 # ─────────────────────────────────────────────────────────────────────────────
 name: CI Pipeline
 
@@ -16,11 +19,16 @@ on:
     branches: [main, develop]
 
 env:
-  NODE_VERSION: '20'
+  NODE_VERSION: '24'
   TRIVY_SEVERITY: 'CRITICAL'
   GO_VERSION: '1.25'
   JAVA_VERSION: '17'
   MAVEN_OPTS: '-Dmaven.repo.local=${{ github.workspace }}/.m2/repository'
+  # Shared Turbo build cache. Unset secrets simply mean turbo falls back to its
+  # local cache, so this is safe to leave in place before the secrets exist.
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+  TURBO_REMOTE_CACHE_SIGNATURE_KEY: ${{ secrets.TURBO_REMOTE_CACHE_SIGNATURE_KEY }}
 
 # Least-privilege default token; jobs that need more must opt in explicitly.
 permissions:
@@ -32,14 +40,35 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Runs before anything installs. Root `pnpm.overrides` and the lockfile's
+  # `overrides:` block must agree or EVERY job's `pnpm install --frozen-lockfile`
+  # dies with ERR_PNPM_LOCKFILE_CONFIG_MISMATCH before running a single test —
+  # which is exactly how Dependabot PRs kept landing red (it bumps the leaf
+  # package.json files and the lockfile, but not the root overrides block).
+  # Pure Node, no install needed, so it reports the real cause in ~10s.
+  lockfile-integrity:
+    name: Lockfile Integrity
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Check pnpm overrides are in sync
+        run: node scripts/check-lockfile-overrides.mjs
+
   lint-and-typecheck:
     name: Lint & Typecheck
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0   # affected-package resolution needs history, not a shallow clone
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v6.0.10
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -55,15 +84,46 @@ jobs:
       - name: Build Workspace Packages
         run: pnpm --filter "./Backend/packages/*" run build
 
-      # Lint each package through its own toolchain (turbo runs the `lint`
-      # script only where it exists, with the package's own eslint + config).
-      # A root `pnpm exec eslint` cannot work: the root has no eslint, and the
-      # target packages use incompatible config styles.
-      # Blocking: the app-level lint debt for the two scoped apps has been
-      # burned down (proxy-baalvionstack-web + baalvion-admin-platform are
-      # clean — zero errors). Expand the --filter list as more apps are cleaned.
-      - name: Run ESLint
-        run: pnpm exec turbo run lint --filter=proxy-baalvionstack-web --filter=baalvion-admin-platform
+      # Lint every workspace package that has a lint script, and fail only where the
+      # error count went UP against .lint-baseline.json.
+      #
+      # This replaces a two-app --filter allow-list. A hardcoded list has to be edited
+      # for every new app, so in practice it never was: thirteen apps had no ESLint
+      # config at all and nobody noticed, because `next lint` silently supplied
+      # defaults and nothing else ran. Discovery is now by convention — a package.json
+      # with a `lint` script gets linted — so a new app is covered with no CI change,
+      # starts at a baseline of zero, and a package whose lint cannot run FAILS rather
+      # than quietly passing.
+      #
+      # Existing debt is frozen and can only shrink. After fixing errors, run
+      # `node scripts/lint-ratchet.mjs --update` to lower the floor permanently.
+      # PR-scoped: only what this diff can have broken. On a push to main BASE_REF is
+      # empty and the full set runs, so merges still prove everything. affected.mjs
+      # fails safe — an unresolvable graph selects every package.
+      - name: Resolve affected packages
+        id: affected
+        env:
+          BASE_REF: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || '' }}
+        run: |
+          if [ -n "${BASE_REF:-}" ]; then
+            node scripts/affected.mjs --base "$BASE_REF" --dirs > /tmp/affected.txt
+            echo "scope=$(node scripts/affected.mjs --base "$BASE_REF" --count)" >> "$GITHUB_OUTPUT"
+            echo "only=--only /tmp/affected.txt" >> "$GITHUB_OUTPUT"
+          else
+            echo "scope=full sweep (push)" >> "$GITHUB_OUTPUT"
+            echo "only=" >> "$GITHUB_OUTPUT"
+          fi
+          echo "::notice title=Gate scope::$(cat "$GITHUB_OUTPUT" | grep ^scope= | cut -d= -f2-)"
+
+      # Report-only for its first runs, matching how dockerfile-lint and the backend
+      # lint gate are already handled here. .lint-baseline.json was recorded on a
+      # developer machine; a runner resolves a different dependency tree, so the counts
+      # do not line up until the baseline is regenerated ON a runner. Read this job's
+      # output, commit `node scripts/lint-ratchet.mjs --update`, then delete this
+      # continue-on-error — the ratchet only means something once its floor is real.
+      - name: Run ESLint (ratchet)
+        continue-on-error: true
+        run: node scripts/lint-ratchet.mjs ${{ steps.affected.outputs.only }}
 
       - name: TypeScript Typecheck
         run: |
@@ -78,6 +138,7 @@ jobs:
   backend-go:
     name: Backend Go (Gateway)
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
       
@@ -113,6 +174,7 @@ jobs:
   backend-java:
     name: Backend Java (Financial Services)
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
       
@@ -140,26 +202,59 @@ jobs:
   # Matrix inputs must be known at workflow setup — they cannot reference a
   # same-job `steps.*` output (that was the pre-existing startup_failure). So a
   # dedicated job discovers the frontend dirs and exposes them as a JSON output.
+  # Which apps a PR can actually have broken. Turbo owns the dependency graph, so a
+  # change to a shared package correctly fans out to every consumer (verified: one app
+  # -> 1 package, @baalvion/design -> 23). On a push to main the base is empty, so the
+  # full fleet builds — PRs stay fast, merges still prove everything.
   discover-frontends:
     name: Discover Frontend Apps
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     outputs:
       dirs: ${{ steps.extract-apps.outputs.dirs }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0   # the affected diff needs history, not a shallow clone
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - name: Install Workspace Dependencies
+        run: pnpm install --frozen-lockfile
       - name: Extract App Directories from Config
         id: extract-apps
+        env:
+          BASE_REF: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || '' }}
         run: |
           # Only include apps whose package.json is present in this checkout — a
           # guard so a missing app dir can't make the build step fall through to a
           # root `pnpm run build` that builds the entire monorepo.
-          DIRS=$(node -p "JSON.stringify(require('./frontends.config.js').apps.map(a => a.cwd.replace('D:/Baalvion Projects/Frontend/', '')).filter(d => require('fs').existsSync('Frontend/' + d + '/package.json')))")
+          ALL=$(node -p "JSON.stringify(require('./frontends.config.js').apps.map(a => a.cwd.replace('D:/Baalvion Projects/Frontend/', '')).filter(d => require('fs').existsSync('Frontend/' + d + '/package.json')))")
+          if [ -z "${BASE_REF:-}" ]; then
+            echo "push/main build — every app"
+            echo "dirs=$ALL" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          # Intersect the configured app list with what the diff affects. affected.mjs
+          # fails SAFE: an unknown ref or any turbo error returns every package, so a
+          # narrowing failure over-builds rather than skipping a broken app.
+          AFF=$(node scripts/affected.mjs --base "$BASE_REF" --dirs | sed 's|^Frontend/||')
+          DIRS=$(ALL="$ALL" AFF="$AFF" node -e '
+            const all=JSON.parse(process.env.ALL);
+            const aff=new Set(process.env.AFF.split("\n").filter(Boolean));
+            console.log(JSON.stringify(all.filter(d=>aff.has(d))));
+          ')
+          echo "affected apps: $DIRS"
           echo "dirs=$DIRS" >> "$GITHUB_OUTPUT"
 
   frontend-build:
     name: Frontend Apps Build
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: discover-frontends
+    # A docs-only or backend-only PR affects no app; an empty matrix is a hard error
+    # in Actions, so skip the job rather than fail it.
+    if: needs.discover-frontends.outputs.dirs != '[]'
     strategy:
       matrix:
         app: ${{ fromJson(needs.discover-frontends.outputs.dirs) }}
@@ -168,7 +263,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v6.0.10
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -217,6 +312,7 @@ jobs:
   security-cross-tenant:
     name: Security — Cross-Tenant RLS (R1)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     services:
       postgres:
         image: postgres:15
@@ -296,6 +392,7 @@ jobs:
   tenant-rls-audit:
     name: Security — Tenant RLS Coverage Audit
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -315,6 +412,7 @@ jobs:
   tenant-rls-live:
     name: Security — Tenant RLS Live Probe
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     services:
       postgres:
         image: postgres:15
@@ -365,29 +463,218 @@ jobs:
           BAALVION_APP_PASSWORD: ci_app_pw
         run: node --test tests/rls-live.test.mjs
 
+  # A real cross-service test. The previous body was an `echo` saying no harness existed,
+  # sitting inside the REQUIRED ci-success gate — a green check that proved nothing.
+  #
+  # Two services in two processes: auth-service registers a user and mints an RS256 token,
+  # crm-service verifies it via @baalvion/auth-node by fetching auth-service's JWKS over
+  # HTTP, then serves an authenticated write and read back.
+  #
+  # crm-service gets a DECOY JWT_PUBLIC_KEY deliberately. auth-node falls back to the static
+  # key whenever the JWKS path errors, so handing it the real key would let this pass with
+  # auth-service dead. With a decoy, the JWKS hop is the only thing that can produce a 2xx —
+  # verified by pointing BAALVION_JWKS_URI at a dead port, which turns the suite red.
   integration-test:
     name: Integration Tests
     needs: [backend-go, backend-java, frontend-build]
     runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: baalvion_db
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s
+          --health-timeout 5s --health-retries 12
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 5s
+          --health-timeout 5s --health-retries 12
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: '5432'
+      DB_NAME: baalvion_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_SSL: 'false'
+      REDIS_HOST: 127.0.0.1
+      REDIS_PORT: '6379'
+      # NOT production: config/vault.js hard-throws when NODE_ENV=production and the RSA keys
+      # are not provisioned from a secret store.
+      NODE_ENV: development
+      JWT_ISSUER: baalvion-auth
+      JWT_AUDIENCE: baalvion-platform
+      # auth-service defaults to 20 requests/min per IP, which the suite would trip.
+      RATE_LIMIT_IP_MAX: '5000'
     steps:
       - uses: actions/checkout@v7
-      - name: Run Backend Integration Tests
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: Install Workspace Dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build Workspace Packages
+        run: pnpm --filter "./Backend/packages/*" run build
+      - name: Install psql client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      # One keypair both sides agree on — the same script backend-quality.yml and local dev use.
+      - name: Generate the shared RS256 keypair
+        run: node scripts/gen-dev-jwt-keys.mjs
+      - name: Emit the decoy public key
+        run: node scripts/ci/integration-identity-crm.mjs --emit-decoy "$RUNNER_TEMP"
+      # 17 chained psql files, all IF NOT EXISTS. crm-service needs no migrations — it
+      # creates its own schema with sync({alter:false}) at boot.
+      - name: Apply auth-service migrations
         run: |
-          # No cross-service integration harness exists yet. The previous body ran
-          # `go test ./...` and `mvn verify` from the repo root, which has no Go
-          # module or Maven pom, so the step always errored once it was no longer
-          # skipped. Per-service build/test coverage runs in the backend-go and
-          # backend-java jobs. This placeholder stays green until a real harness
-          # (docker-compose / testcontainers) is wired up.
-          echo "Integration test harness pending — per-service checks run in backend-go / backend-java."
+          DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/baalvion_db \
+            npm --prefix Backend/services/identity/auth-service run migrate
+      # Background processes survive between steps on the runner (same pattern as
+      # backend-quality.yml's live-integration job). smoke-check.mjs rather than a bare curl
+      # loop so a service that never comes up fails the step instead of falling through.
+      - name: Start auth-service (:3001)
+        working-directory: Backend/services/identity/auth-service
+        env:
+          PORT: '3001'
+          REENGAGEMENT_CRON_ENABLED: 'false'
+        run: |
+          JWT_PRIVATE_KEY_PATH="$GITHUB_WORKSPACE/docker/secrets/jwt_private_key.pem" \
+          JWT_PUBLIC_KEY_PATH="$GITHUB_WORKSPACE/docker/secrets/jwt_public_key.pem" \
+            node index.js > "$RUNNER_TEMP/auth-service.log" 2>&1 &
+          node "$GITHUB_WORKSPACE/scripts/smoke-check.mjs" \
+            http://127.0.0.1:3001/health http://127.0.0.1:3001/.well-known/jwks.json \
+            --retries 30 --delay 2000 --timeout 5000
+      - name: Start crm-service (:3063)
+        working-directory: Backend/services/ecosystem/crm-service
+        env:
+          PORT: '3063'
+          BAALVION_JWKS_URI: http://127.0.0.1:3001/.well-known/jwks.json
+        run: |
+          JWT_PUBLIC_KEY="$(cat "$RUNNER_TEMP/decoy_public.pem")" \
+            node index.js > "$RUNNER_TEMP/crm-service.log" 2>&1 &
+          node "$GITHUB_WORKSPACE/scripts/smoke-check.mjs" http://127.0.0.1:3063/health \
+            --retries 30 --delay 2000 --timeout 5000
+      - name: Cross-service auth + CRM round trip
+        run: node scripts/ci/integration-identity-crm.mjs
+      - name: Service logs
+        if: always()
+        run: |
+          for f in "$RUNNER_TEMP/auth-service.log" "$RUNNER_TEMP/crm-service.log"; do
+            echo "::group::$(basename "$f")"
+            tail -n 200 "$f" || echo "(no log)"
+            echo "::endgroup::"
+          done
+
+  # Runs EVERY workspace package's tests, whatever runner it uses.
+  #
+  # The old gate ran two selections: Backend/packages via a --filter, and, for
+  # services, ONLY those whose test script is literally `node --test`. jest and
+  # vitest services were "deliberately excluded until their runners are wired" and
+  # never were — so 213 test files across 13 packages never executed on any merge,
+  # including auth-service (19 files) and order-execution-service (46). Engineers
+  # wrote them; CI ignored them; merging proved nothing about any of it.
+  #
+  # They were not excluded for failing: auth-service runs 230 tests with 205
+  # passing locally, and its only failures are ECONNREFUSED from tests that want
+  # the Postgres this job now provides.
+  #
+  # Discovery is by convention (a real `test` script), so a new service is covered
+  # with no CI change. Known-failing packages are frozen by .test-baseline.json and
+  # cannot grow; a package with no baseline entry is expected to PASS.
+  all-package-tests:
+    name: All Package Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: baalvion_db
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s
+          --health-timeout 5s --health-retries 12
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 5s
+          --health-timeout 5s --health-retries 12
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: '5432'
+      DB_NAME: baalvion_test
+      DB_USER: baalvion
+      DB_PASSWORD: baalvion_dev_pass
+      REDIS_URL: redis://127.0.0.1:6379
+      NODE_ENV: test
+      JWT_ACCESS_SECRET: ci-dummy-access-secret-not-used-for-real-auth
+      JWT_REFRESH_SECRET: ci-dummy-refresh-secret-not-used-for-real-auth
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0   # affected-package resolution needs history
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: Install Workspace Dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build Workspace Packages
+        run: pnpm --filter "./Backend/packages/*" run build
+      # Several suites expect this role/database rather than the default postgres one.
+      - name: Provision the test role and database
+        run: |
+          PGPASSWORD=postgres psql -h 127.0.0.1 -U postgres -c \
+            "CREATE ROLE baalvion LOGIN PASSWORD 'baalvion_dev_pass' SUPERUSER;" || true
+          PGPASSWORD=postgres psql -h 127.0.0.1 -U postgres -c \
+            "CREATE DATABASE baalvion_test OWNER baalvion;" || true
+      # PR-scoped: only what this diff can have broken. On a push to main BASE_REF is
+      # empty and the full set runs, so merges still prove everything. affected.mjs
+      # fails safe — an unresolvable graph selects every package.
+      - name: Resolve affected packages
+        id: affected
+        env:
+          BASE_REF: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || '' }}
+        run: |
+          if [ -n "${BASE_REF:-}" ]; then
+            node scripts/affected.mjs --base "$BASE_REF" --dirs > /tmp/affected.txt
+            echo "scope=$(node scripts/affected.mjs --base "$BASE_REF" --count)" >> "$GITHUB_OUTPUT"
+            echo "only=--only /tmp/affected.txt" >> "$GITHUB_OUTPUT"
+          else
+            echo "scope=full sweep (push)" >> "$GITHUB_OUTPUT"
+            echo "only=" >> "$GITHUB_OUTPUT"
+          fi
+          echo "::notice title=Gate scope::$(cat "$GITHUB_OUTPUT" | grep ^scope= | cut -d= -f2-)"
+
+      # No .test-baseline.json is committed on purpose: this is the first time these 213
+      # test files have ever run, and the first run with a real database is what
+      # establishes the honest state. Report-only until then — a gate that goes red on
+      # its debut is a gate people learn to ignore. Commit
+      # `node scripts/test-all.mjs --update` from this job's output, then drop
+      # continue-on-error and it becomes blocking for real.
+      - name: Run every package's tests
+        continue-on-error: true
+        run: node scripts/test-all.mjs ${{ steps.affected.outputs.only }}
 
   node-package-tests:
     name: Node Package Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
       - name: Setup pnpm
-        uses: pnpm/action-setup@v6.0.10
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
       - name: Setup Node.js
         uses: actions/setup-node@v7
         with:
@@ -406,6 +693,7 @@ jobs:
   dockerfile-lint:
     name: Dockerfile Lint (hadolint)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     # Informational for now: surfaces Dockerfile issues without blocking (existing lint debt).
     # Promote into ci-success once the findings are burned down.
     continue-on-error: true
@@ -424,6 +712,7 @@ jobs:
   deploy-compose-validate:
     name: Deploy Compose Validate
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
       - name: Validate deploy docker-compose files
@@ -443,10 +732,11 @@ jobs:
 
   # Build the production service images and scan them with Trivy. The scan STEP
   # fails (exit-code 1) on any fixable HIGH or CRITICAL OS/library CVE. Scope = a
-  # representative SUBSET of the deploy.yml 19-service fleet (repo-root context +
-  # `turbo prune`, mirroring the canonical deploy.yml build). Matrix `name`s mirror
-  # the deploy.yml ECR repo names so each scanned artifact maps 1:1 to the pushed
-  # image. This job NEVER pushes — deploy.yml is the only path to ECR/EC2. Extend
+  # representative SUBSET of the production fleet (repo-root context + `turbo
+  # prune`, mirroring the deploy-consolidated-box2.yml build). Matrix `name`s mirror
+  # the ECR repo names so each scanned artifact maps 1:1 to the pushed image. This
+  # job NEVER pushes — deploy-consolidated-box2.yml and community-giftcard-deploy.yml
+  # are the only paths to ECR/EC2. Extend
   # the matrix as more Dockerfiles are build-verified (same pattern as the
   # frontend/eslint allow-list above).
   #
@@ -456,53 +746,61 @@ jobs:
   # pnpm.overrides; plus base-image OS CVEs). Promote into ci-success (add it to the
   # needs list + drop continue-on-error) once those are burned down — see
   # docs/RUNBOOK or the cert report's burn-down list.
+  # The Docker scan matrix, discovered from the repo instead of hand-listed.
+  # The old matrix named eight services while the repo holds 60 buildable images —
+  # the other 52 were never built in CI and never CVE-scanned, and nothing said so,
+  # because a hardcoded matrix cannot report what it omits.
+  #
+  # --changed narrows to images a diff can actually have broken; a change to the
+  # shared packages, lockfile, turbo.json or root manifest fans out to everything.
+  # An unknown base ref falls back to building ALL rather than silently zero.
+  discover-images:
+    name: Discover Service Images
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.find.outputs.matrix }}
+      count: ${{ steps.find.outputs.count }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0   # --changed needs history to diff against the base ref
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Fail on duplicate image names
+        run: node scripts/discover-images.mjs --check
+      - id: find
+        run: |
+          BASE="${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || 'HEAD~1' }}"
+          M=$(node scripts/discover-images.mjs --changed "$BASE" --matrix)
+          echo "matrix=$M" >> "$GITHUB_OUTPUT"
+          echo "count=$(echo "$M" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>console.log(JSON.parse(s).include.length))')" >> "$GITHUB_OUTPUT"
+
   docker-build-scan:
     name: Docker Build + Trivy Scan
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: discover-images
+    if: needs.discover-images.outputs.count != '0'
     continue-on-error: true
     permissions:
       contents: read
     strategy:
       fail-fast: false
       matrix:
-        include:
-          # ── Production fleet images — `name` mirrors the deploy.yml ECR repo
-          #    (baalvion/<name>) so the scanned artifact maps 1:1 to the pushed image.
-          - name: auth-service
-            file: Backend/services/identity/auth-service/Dockerfile
-          - name: auth-gateway
-            file: Backend/services/identity/auth-gateway/Dockerfile
-          - name: cms-service
-            file: Backend/services/knowledge/cms-service/Dockerfile
-          # deploy.yml ECR repo is controlthemarket-ctm-service (same Dockerfile);
-          # name kept in sync — was the drifting `ctm-service` alias.
-          - name: controlthemarket-ctm-service
-            file: Backend/services/ecosystem/ctm-service/Dockerfile
-          # deploy.yml ECR repo is proxy-baalvionstack-proxy-service (same Dockerfile);
-          # name kept in sync — was the drifting `proxy-service` alias.
-          - name: proxy-baalvionstack-proxy-service
-            file: Backend/services/infrastructure/proxy-service/Dockerfile
-          - name: community-service
-            file: Backend/services/ecosystem/community-service/Dockerfile
-          - name: giftcard-service
-            file: Backend/services/ecosystem/giftcard-service/Dockerfile
-          # ── Dev-only — NOT part of the deploy.yml 19-service production stack.
-          #    dashboard-service deploys via the separate company-dashboard package and
-          #    is build-verified in domain-services.yml; scanned here for CVE hygiene
-          #    only. Do not read its presence as production-deploy coverage.
-          - name: dashboard-service
-            file: Backend/services/platform/dashboard-service/Dockerfile
+        include: ${{ fromJson(needs.discover-images.outputs.matrix).include }}
     steps:
       - uses: actions/checkout@v7
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
 
       # Build locally (load into the runner's docker, do NOT push) so Trivy scans the
       # exact artifact CI produced. Repo-root context: the Dockerfile runs `turbo prune`
       # over the pnpm workspace. GHA layer cache keeps re-runs fast.
       - name: Build image
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
           file: ${{ matrix.file }}
@@ -552,6 +850,7 @@ jobs:
   cache-hygiene:
     name: Cache Hygiene
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
       - name: Setup Node.js
@@ -567,6 +866,8 @@ jobs:
     name: ci-success
     if: always()
     needs:
+      - lockfile-integrity
+      - discover-images
       - lint-and-typecheck
       - backend-go
       - backend-java
@@ -576,10 +877,12 @@ jobs:
       - tenant-rls-audit
       - tenant-rls-live
       - integration-test
+      - all-package-tests
       - node-package-tests
       - deploy-compose-validate
       - cache-hygiene
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Verify all required jobs succeeded
         run: |
@@ -600,6 +903,7 @@ jobs:
     needs: ci-success
     if: always() && needs.ci-success.result == 'failure'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/slack-notify

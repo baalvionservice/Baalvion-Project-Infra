@@ -1,5 +1,9 @@
 {
   "name": "auth-baalvion",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "private": true,
   "description": "Baalvion shared, brand-aware authentication surface (auth.baalvion.com) \u2014 passwordless email-OTP sign-in/sign-up for every Baalvion site.",
@@ -7,19 +11,20 @@
     "dev": "next dev -p 3055",
     "build": "next build",
     "start": "next start -p 3055",
-    "lint": "next lint",
+    "lint": "eslint .",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@baalvion/eslint-config": "workspace:*",
     "@baalvion/design": "workspace:*",
     "next": "15.5.24",
     "react": "19.2.1",
     "react-dom": "19.2.1"
   },
   "devDependencies": {
-    "@types/node": "^22",
+    "@types/node": "^24.13.4",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "typescript": "^5"
+    "typescript": "^5.9.3"
   }
 }

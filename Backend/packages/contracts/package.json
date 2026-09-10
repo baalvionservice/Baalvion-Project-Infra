@@ -1,5 +1,9 @@
 {
   "name": "@baalvion/contracts",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "description": "Canonical inter-service contracts \u2014 gRPC protobuf APIs + JSON Schema event registry. The single source of truth for the integration surface between bounded contexts.",
   "private": true,

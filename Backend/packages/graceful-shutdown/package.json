@@ -1,5 +1,9 @@
 {
   "name": "@baalvion/graceful-shutdown",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "description": "Graceful HTTP server shutdown with registered cleanup handlers (committed plain CommonJS — no build step, resolves in pruned production images)",
   "private": true,

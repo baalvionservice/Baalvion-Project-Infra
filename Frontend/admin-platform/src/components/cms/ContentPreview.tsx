@@ -18,7 +18,8 @@ function Block({ block }: { block: ContentBlock }) {
       return <div className={`leading-[1.8] text-[15px] text-gray-800 ${proseChild}`} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize((c.text as string) || '') }} />;
     case 'heading': {
       const lvl = Math.min(6, Math.max(1, Number(c.level) || 2));
-      const Tag = (`h${lvl}` as keyof JSX.IntrinsicElements);
+      // React 19 types removed the global JSX namespace; it lives under React now.
+      const Tag = (`h${lvl}` as keyof React.JSX.IntrinsicElements);
       const size = lvl <= 1 ? 'text-3xl' : lvl === 2 ? 'text-2xl' : lvl === 3 ? 'text-xl' : 'text-lg';
       return <Tag className={`mt-6 mb-2 font-bold tracking-tight ${size}`}>{(c.text as string) || ''}</Tag>;
     }

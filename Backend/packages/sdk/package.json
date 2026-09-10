@@ -1,5 +1,9 @@
 {
   "name": "@baalvion/sdk",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "description": "Baalvion Platform SDK v1 — unified service communication layer for CMS config resolution, service auth, event bus, logging, telemetry, and trace context. Composes internal @baalvion/* modules. Zero external runtime dependencies.",
   "private": true,
@@ -51,8 +55,8 @@
 
   "devDependencies": {
     "tsup": "^8.3.0",
-    "typescript": "^5.7.2",
+    "typescript": "^5.9.3",
     "rimraf": "^6.0.1",
-    "@types/node": "^22.10.0"
+    "@types/node": "^24.13.4"
   }
 }

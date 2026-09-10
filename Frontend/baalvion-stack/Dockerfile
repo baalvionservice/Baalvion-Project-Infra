@@ -9,7 +9,7 @@
 # the JSON-LD are all generated from the registry and baked into static HTML. So the image is a
 # snapshot of the registry at build time, and registering a new product means rebuilding this
 # image. That is the intended trade: one source of truth, no runtime lookup, no drift.
-FROM node:20-alpine AS base
+FROM node:24-alpine AS base
 RUN apk add --no-cache libc6-compat && corepack enable
 WORKDIR /app
 

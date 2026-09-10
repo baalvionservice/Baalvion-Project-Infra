@@ -1,24 +1,11 @@
-import { FlatCompat } from '@eslint/eslintrc';
+import next from '@baalvion/eslint-config/next';
 
-const compat = new FlatCompat({
-  baseDirectory: import.meta.dirname,
-});
-
-const eslintConfig = [
-  ...compat.extends('next/core-web-vitals', 'next/typescript'),
-  {
-    ignores: ['.next/**', 'node_modules/**'],
-  },
+export default [
+  ...next,
   {
     rules: {
-      // Downgraded to warnings: real correctness rules (react-hooks/*, etc.)
-      // stay as build-breaking errors; these two are style-only and the
-      // large amount of pre-existing `any`/quote usage isn't worth a
-      // big-bang rewrite in this pass.
+      // Style-only, and the pre-existing quote usage is not worth a big-bang rewrite.
       'react/no-unescaped-entities': 'warn',
-      '@typescript-eslint/no-explicit-any': 'warn',
     },
   },
 ];
-
-export default eslintConfig;

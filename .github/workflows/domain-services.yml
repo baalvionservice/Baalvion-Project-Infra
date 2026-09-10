@@ -38,6 +38,7 @@ jobs:
   # ── Detect which services changed ──────────────────────────────────────────
   changes:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     outputs:
       mining:       ${{ steps.filter.outputs.mining }}
       imperialpedia: ${{ steps.filter.outputs.imperialpedia }}
@@ -49,7 +50,7 @@ jobs:
       dashboard:    ${{ steps.filter.outputs.dashboard }}
     steps:
       - uses: actions/checkout@v7
-      - uses: dorny/paths-filter@v4
+      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         id: filter
         with:
           filters: |
@@ -75,6 +76,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.mining == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:15-alpine
@@ -101,10 +103,10 @@ jobs:
       JWT_REFRESH_SECRET: ci-test-refresh-secret
     steps:
       - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6.0.10
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
       - uses: actions/setup-node@v7
         with:
-          node-version: '20'
+          node-version: '24'
           cache: pnpm
       - name: Install (pnpm workspace)
         run: pnpm install --frozen-lockfile --filter mining-service...
@@ -120,6 +122,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.imperialpedia == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:15-alpine
@@ -146,10 +149,10 @@ jobs:
       JWT_REFRESH_SECRET: ci-test-refresh-secret
     steps:
       - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6.0.10
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
       - uses: actions/setup-node@v7
         with:
-          node-version: '20'
+          node-version: '24'
           cache: pnpm
       - name: Install (pnpm workspace)
         run: pnpm install --frozen-lockfile --filter imperialpedia-service...
@@ -165,6 +168,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.real_estate == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:15-alpine
@@ -191,10 +195,10 @@ jobs:
       JWT_REFRESH_SECRET: ci-test-refresh-secret
     steps:
       - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6.0.10
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
       - uses: actions/setup-node@v7
         with:
-          node-version: '20'
+          node-version: '24'
           cache: pnpm
       - name: Install (pnpm workspace)
         run: pnpm install --frozen-lockfile --filter real-estate-service...
@@ -210,6 +214,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.market == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:15-alpine
@@ -236,10 +241,10 @@ jobs:
       JWT_REFRESH_SECRET: ci-test-refresh-secret
     steps:
       - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6.0.10
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
       - uses: actions/setup-node@v7
         with:
-          node-version: '20'
+          node-version: '24'
           cache: pnpm
       - name: Install (pnpm workspace)
         run: pnpm install --frozen-lockfile --filter market-service...
@@ -255,6 +260,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.ir == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:15-alpine
@@ -281,10 +287,10 @@ jobs:
       JWT_REFRESH_SECRET: ci-test-refresh-secret
     steps:
       - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6.0.10
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
       - uses: actions/setup-node@v7
         with:
-          node-version: '20'
+          node-version: '24'
           cache: pnpm
       - name: Install (pnpm workspace)
         run: pnpm install --frozen-lockfile --filter ir-service...
@@ -300,6 +306,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.about == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:15-alpine
@@ -326,10 +333,10 @@ jobs:
       JWT_REFRESH_SECRET: ci-test-refresh-secret
     steps:
       - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6.0.10
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
       - uses: actions/setup-node@v7
         with:
-          node-version: '20'
+          node-version: '24'
           cache: pnpm
       # Workspace model (Option A): install the service + its @baalvion/* workspace deps.
       - name: Install (pnpm workspace)
@@ -346,6 +353,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.brand == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:15-alpine
@@ -372,10 +380,10 @@ jobs:
       JWT_REFRESH_SECRET: ci-test-refresh-secret
     steps:
       - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6.0.10
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
       - uses: actions/setup-node@v7
         with:
-          node-version: '20'
+          node-version: '24'
           cache: pnpm
       - name: Install (pnpm workspace)
         run: pnpm install --frozen-lockfile --filter brand-connector-service...
@@ -391,6 +399,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.dashboard == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:15-alpine
@@ -417,10 +426,10 @@ jobs:
       JWT_REFRESH_SECRET: ci-test-refresh-secret
     steps:
       - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6.0.10
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
       - uses: actions/setup-node@v7
         with:
-          node-version: '20'
+          node-version: '24'
           cache: pnpm
       - name: Install (pnpm workspace)
         run: pnpm install --frozen-lockfile --filter dashboard-service...
@@ -432,10 +441,11 @@ jobs:
         run: docker build -f Backend/services/platform/dashboard-service/Dockerfile -t baalvion-dashboard:ci .
 
   # NOTE: the GHCR `push-images` job was removed during the ECR consolidation.
-  # These domain services are not part of the single-host production stack; production
-  # image builds for the deployed fleet are owned by the canonical pipeline
-  # (.github/workflows/deploy.yml → Amazon ECR only). The per-service jobs above keep
-  # their local `docker build … :ci` compile-verification step (no registry push).
+  # deploy.yml, named here as the owner of those builds, was deleted 2026-07-02.
+  # These services ship inside the consolidated baalvion/backend image built by
+  # deploy-consolidated-box2.yml (pm2, see deploy/consolidated/pm2/*.config.js); none
+  # of them is pushed as a standalone image. The per-service jobs above keep their
+  # local `docker build … :ci` compile-verification step (no registry push).
 
   # ── CI gate ────────────────────────────────────────────────────────────────
   domain-ci-success:
@@ -450,6 +460,7 @@ jobs:
       - dashboard-service
     if: always()
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Check all domain service jobs passed
         run: |
@@ -463,6 +474,7 @@ jobs:
     needs: domain-ci-success
     if: always() && needs.domain-ci-success.result == 'failure'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/slack-notify
