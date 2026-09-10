@@ -108,7 +108,7 @@ export default function CommodityPricesPage() {
               )}
               {verdict && (
                 <div className="p-5 rounded-2xl bg-white/10 border border-white/10 space-y-2">
-                  <p className={cn('text-2xl font-black uppercase tracking-tighter', verdictColor.replace('text-', 'text-').replace('600', '300'))}>{verdict}</p>
+                  <p className={cn('text-2xl font-black uppercase tracking-tighter', verdictColor.replace('600', '300'))}>{verdict}</p>
                   <p className="text-sm font-bold opacity-90">{delta <= 0 ? `${Math.abs(delta)}% below` : `${delta}% above`} the 90-day benchmark of {formatCurrency(selected.benchmark90d)}.</p>
                 </div>
               )}
