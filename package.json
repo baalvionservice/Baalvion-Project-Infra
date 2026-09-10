@@ -33,7 +33,7 @@
     "ci:rls:audit": "node Backend/scripts/tenant-isolation-audit.mjs",
     "ci:rls:test": "node --test Backend/scripts/tenant-isolation-audit.test.mjs Backend/packages/tenancy/test.smoke.js",
     "ci:rls": "npm run ci:rls:audit && npm run ci:rls:test",
-    "prepare": "node scripts/setup-git.mjs",
+    "prepare": "node -e \"const f='scripts/setup-git.mjs',{existsSync}=require('fs');if(existsSync(f)){try{require('child_process').execFileSync(process.execPath,[f],{stdio:'inherit'})}catch{}}\"",
     "lockfile:check": "node scripts/check-lockfile-overrides.mjs",
     "lockfile:fix": "node scripts/check-lockfile-overrides.mjs --fix",
     "clean": "turbo run clean && rimraf node_modules",

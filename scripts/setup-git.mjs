@@ -11,6 +11,13 @@
 //
 // Never fails the install: a missing git binary, a tarball checkout with no .git,
 // or a CI runner that does not need hooks should all install normally.
+//
+// The root `prepare` script wraps this in a node existsSync guard, because prepare
+// runs inside Docker builds too and `turbo prune` does not copy scripts/ into the
+// pruned image — node cannot even find THIS file there, and every service image build
+// failed with "Cannot find module '/repo/scripts/setup-git.mjs'". A shell `|| exit 0`
+// is NOT enough: pnpm's lifecycle runner does not honour it and still reports
+// "prepare: Failed". Verified under pnpm for absent, present, and throwing.
 
 import { execFileSync } from 'node:child_process';
 
