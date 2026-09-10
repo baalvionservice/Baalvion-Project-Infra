@@ -416,6 +416,11 @@ try {
         assert.strictEqual(registry.getConnectorForCountry('US').channel, 'ace');
         assert.strictEqual(registry.getConnectorForCountry('FR').channel, 'eu_cds');
     });
+    t('an inherited Object member is not a channel', () => {
+        for (const ch of ['constructor', 'toString', '__proto__']) {
+            assert.strictEqual(registry.getConnectorByChannel(ch), null, `${ch} resolved to a connector`);
+        }
+    });
 
     console.log(`\n${pass} passed, ${fail} failed`);
 } finally {
