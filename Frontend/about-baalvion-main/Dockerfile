@@ -4,7 +4,7 @@
 # This app is CMS-driven and reads the CMS public delivery API server-side at runtime,
 # so it needs no NEXT_PUBLIC_* baked in beyond the public app URL. CMS_PUBLIC_URL /
 # CMS_WEBSITE_SLUG are read at request time (server components), passed as runtime env.
-FROM node:20-alpine AS base
+FROM node:26-alpine AS base
 RUN apk add --no-cache libc6-compat && corepack enable
 WORKDIR /app
 

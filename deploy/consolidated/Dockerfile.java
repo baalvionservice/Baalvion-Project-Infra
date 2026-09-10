@@ -10,14 +10,14 @@
 # pipeline already builds a proven payment-service image, prefer reusing that tag here
 # instead of this template.
 # ─────────────────────────────────────────────────────────────────────────────
-FROM maven:3.9-eclipse-temurin-17 AS build
+FROM maven:3-eclipse-temurin-26 AS build
 WORKDIR /src
 COPY Backend/services/commerce/financial-services-java/ ./
 # Build only the runnable payment module (+ its in-reactor deps via -am) instead of
 # the full 22-module reactor — far faster and all this image actually runs.
 RUN mvn -q -DskipTests -pl payment-service -am clean package
 
-FROM eclipse-temurin:17-jre-jammy AS runtime
+FROM eclipse-temurin:25-jre-jammy AS runtime
 WORKDIR /app
 # Adjust to the actual payment module artifact if it differs.
 COPY --from=build /src/payment-service/target/*.jar /app/app.jar

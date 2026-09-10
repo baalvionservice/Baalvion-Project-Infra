@@ -1,7 +1,7 @@
 # Monorepo-aware build for the pnpm workspace (build model: Option A).
 # BUILD CONTEXT MUST BE THE REPO ROOT:
 #   docker build -f Backend/services/identity/auth-gateway/Dockerfile -t auth-gateway .
-FROM node:20-alpine AS base
+FROM node:26-alpine AS base
 RUN corepack enable
 WORKDIR /repo
 
@@ -28,7 +28,7 @@ COPY tsconfig.base.json ./tsconfig.base.json
 RUN pnpm -r --filter "./Backend/packages/*" run build
 RUN pnpm deploy --filter=@baalvion/auth-gateway --prod /out
 
-FROM node:20-alpine AS final
+FROM node:26-alpine AS final
 # Patch OS packages (e.g. openssl) and drop the runtime-unused npm/corepack shipped in the
 # node base image (its bundled deps are the source of the image-layer CVE findings).
 RUN apk upgrade --no-cache \
