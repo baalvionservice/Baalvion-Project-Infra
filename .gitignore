@@ -21,6 +21,8 @@ credentials.json
 service-account.json
 # Local env backups & editor cruft (Phase 0 cleanup — keep these out of the tree)
 *.bak
+# a timestamped copy (`cp x x.bak-$(date +%s)`) is not matched by *.bak
+*.bak-*
 *.old
 
 # ──────────────────────────────────────────────
