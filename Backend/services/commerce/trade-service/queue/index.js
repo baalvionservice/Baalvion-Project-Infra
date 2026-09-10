@@ -32,8 +32,14 @@ const DEFAULT_JOB_OPTS = {
     removeOnFail: false,     // keep failed for inspection; DLQ holds the replayable copy
 };
 
-const queues = {};
+const KNOWN_QUEUES = new Set([...QUEUE_NAMES, DLQ]);
+
+const queues = Object.create(null);
 const q = (name) => {
+    // pause/resume take the name straight off the URL. An unregistered one would mint a
+    // phantom Redis queue and then report success against it; `constructor` would resolve
+    // to an inherited member of the map.
+    if (!KNOWN_QUEUES.has(name)) throw new Error(`Unknown queue: ${name}`);
     if (!queues[name]) queues[name] = new Queue(name, { connection, defaultJobOptions: DEFAULT_JOB_OPTS });
     return queues[name];
 };
@@ -68,7 +74,8 @@ async function replayDeadLetter(limit = 100) {
     let replayed = 0;
     for (const job of jobs) {
         const { originalQueue, jobName, data } = job.data || {};
-        if (!originalQueue) continue;
+        // A retired/renamed queue must skip, not abort the rest of the replay.
+        if (!KNOWN_QUEUES.has(originalQueue)) continue;
         await enqueue(originalQueue, jobName || 'replay', data);
         await job.remove();
         replayed += 1;
