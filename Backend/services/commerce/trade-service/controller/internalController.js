@@ -17,6 +17,10 @@ const db = require('../models');
 const { runAs } = require('../middleware/tenantContext');
 const realtime = require('../realtime');
 
+// Strip CR/LF/tab from webhook-derived values before logging (no log-injection / forging).
+// The HMAC covers the body only, so the x-webhook-event header is not signed.
+const sanitize = (v) => String(v == null ? '' : v).replace(/[\r\n\t]/g, ' ');
+
 // Bounded in-memory idempotency cache keyed by X-Webhook-Id. A dev bridge: projection updates are
 // themselves idempotent (setting a terminal status on replay is a no-op), so a crash that loses
 // this cache is safe — it just lets one duplicate event re-apply harmlessly.
@@ -130,7 +134,7 @@ async function applyEscrowProjection(eventType, payload) {
             // A syntactically-valid but nonexistent order_id (stale/deleted order) must not lose
             // the whole escrow projection — degrade to order_id=null and keep the money-state tracking.
             if (orderId !== null && err instanceof db.Sequelize.ForeignKeyConstraintError) {
-                console.error(`[finance-events] escrow ${escrowRef}: order_id ${orderId} not found in trade.orders — projecting with order_id=null`);
+                console.error(`[finance-events] escrow ${sanitize(escrowRef)}: order_id ${orderId} not found in trade.orders — projecting with order_id=null`);
                 [escrow] = await db.Escrow.findOrCreate({ where: { escrow_ref: String(escrowRef) }, defaults: buildDefaults(null) });
             } else {
                 throw err;
@@ -178,7 +182,7 @@ async function applyFinancingProjection(eventType, payload) {
             [invoice] = await db.FinancedInvoice.findOrCreate({ where: { invoice_ref: String(invoiceRef) }, defaults: buildDefaults(orderId) });
         } catch (err) {
             if (orderId !== null && err instanceof db.Sequelize.ForeignKeyConstraintError) {
-                console.error(`[finance-events] financed invoice ${invoiceRef}: order_id ${orderId} not found in trade.orders — projecting with order_id=null`);
+                console.error(`[finance-events] financed invoice ${sanitize(invoiceRef)}: order_id ${orderId} not found in trade.orders — projecting with order_id=null`);
                 [invoice] = await db.FinancedInvoice.findOrCreate({ where: { invoice_ref: String(invoiceRef) }, defaults: buildDefaults(null) });
             } else {
                 throw err;
@@ -223,7 +227,7 @@ exports.financeEvents = async (req, res) => {
         // event is still recorded + broadcast so the UI sees it live (no data loss).
     } catch (err) {
         // Mapping gaps are not transient — record + 200 so Java does not retry forever.
-        console.error('[finance-events] projection error:', eventType, err.message);
+        console.error('[finance-events] projection error:', sanitize(eventType), sanitize(err.message));
     }
 
     await recordEvent(eventType, tenantId, payload);

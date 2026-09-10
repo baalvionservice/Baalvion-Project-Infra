@@ -6,7 +6,9 @@ export async function POST(request: Request) {
   // In a real production scenario, we would validate data here 
   // and interact with a secure backend service like Firebase Admin SDK.
   
-  console.log('Processing Onboarding Data:', data);
+  // Stringify, don't interpolate: a top-level JSON string body would otherwise
+  // carry raw newlines straight into the log.
+  console.log('Processing Onboarding Data:', JSON.stringify(data));
 
   // Simulate latency
   await new Promise(resolve => setTimeout(resolve, 1500));

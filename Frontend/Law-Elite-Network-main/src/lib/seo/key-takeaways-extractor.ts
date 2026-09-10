@@ -38,15 +38,16 @@ const LIST_ITEM = /<li[^>]*>([\s\S]*?)<\/li>/gi;
 // entities the way dangerouslySetInnerHTML/the browser parser would, so a
 // raw "&#39;" from the CMS body renders literally instead of as an apostrophe
 // unless decoded here first.
+// One pass over the entities, not six: decoding `&amp;` before `&lt;` turned a
+// stored `&amp;lt;` into a literal `<`, re-creating markup the CMS had escaped.
+const ENTITIES: Record<string, string> = {
+  '&nbsp;': ' ', '&amp;': '&', '&quot;': '"', '&#39;': "'", '&lt;': '<', '&gt;': '>',
+};
+
 const stripTags = (value: string): string =>
   value
     .replace(/<[^>]+>/g, '')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
+    .replace(/&(?:nbsp|amp|quot|#39|lt|gt);/g, (m) => ENTITIES[m])
     .replace(/\s+/g, ' ')
     .trim();
 

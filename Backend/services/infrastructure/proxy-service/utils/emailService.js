@@ -98,7 +98,7 @@ const sendInvitationEmail = async ({ toEmail, toName, inviterName, orgName, role
 
   const preview = nodemailer.getTestMessageUrl(info);
   if (preview) {
-    console.log(`[Email] Invitation sent to ${toEmail}`);
+    console.log(`[Email] Invitation sent to ${String(toEmail).replace(/[\r\n]+/g, ' ')}`);
     console.log(`[Email] Preview URL: ${preview}`);
   }
   return { messageId: info.messageId, previewUrl: preview || null };

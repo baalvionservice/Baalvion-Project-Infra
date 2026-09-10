@@ -61,6 +61,9 @@ app.use(express.urlencoded({ extended: true }));
 // the HMAC-SHA256 signature over the EXACT bytes the sender signed — re-serializing would not match.
 app.use(express.json({ limit: '2mb', verify: (req, _res, buf) => { req.rawBody = buf; } }));
 app.use(cookieParser());
+// Ahead of tenantContext: that middleware verifies the bearer (a JWKS fetch on the RS256
+// path), so an unauthenticated flood would otherwise buy crypto work before any limiter.
+app.use(rateLimit());
 app.use(tenantContext); // establishes per-request tenant ALS scope for query hooks
 // R1 (P1-8): pin a per-request DB connection stamped with the tenant GUCs so
 // non-transactional controller reads carry RLS context under baalvion_app. Mounted
@@ -72,7 +75,6 @@ if (config.rlsReadPath) app.use(tenantConnection(db.sequelize));
 app.use(requestContext);
 app.use(authTrace.middleware('trade-service')); // Phase 6E-6 — logs on response finish
 app.use(metricsMiddleware);
-app.use(rateLimit());
 
 app.get('/', (req, res) => res.json({ service: 'Baalvion Global Trade Infrastructure', version: config.apiVersion }));
 app.get('/health', (req, res) => res.json({ status: 'ok', service: 'trade-service', port: config.port, timestamp: new Date().toISOString() }));

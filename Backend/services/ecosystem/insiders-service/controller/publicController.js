@@ -706,6 +706,14 @@ async function sitemapSection(req, res, next) {
     } catch (e) { return next(e); }
 }
 
+// /^-+|-+$/g retries from every offset, so a 16k-dash slug is O(n^2); scan by index.
+const trimDashes = (s) => {
+    let a = 0, b = s.length;
+    while (a < b && s[a] === '-') a++;
+    while (b > a && s[b - 1] === '-') b--;
+    return s.slice(a, b);
+};
+
 // One person, every filing they are named on, across both sides. This is the join the raw data
 // makes possible and nothing else exposes: a partner at a fund who also sits on four boards shows
 // up once, with all five roles.
@@ -736,7 +744,7 @@ async function getPerson(req, res, next) {
              WHERE regexp_replace(lower(p.full_name), '[^a-z0-9]+', '-', 'g') = :slug
              ORDER BY last_seen DESC NULLS LAST
              LIMIT 200
-        `, { replacements: { slug: slug.replace(/^-+|-+$/g, '') }, type: db.sequelize.QueryTypes.SELECT });
+        `, { replacements: { slug: trimDashes(slug) }, type: db.sequelize.QueryTypes.SELECT });
 
         if (!rows.length) throw new AppError('NOT_FOUND', 'Person not found', 404);
 

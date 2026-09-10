@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, ShieldCheck, AlertCircle } from "lucide-react";
+import { safeInternalPath } from "@/lib/safe-redirect";
 
 /** Landing route per access tier after a successful login. */
 const LANDING_BY_ROLE: Record<string, string> = {
@@ -77,7 +78,7 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
       typeof window !== "undefined"
         ? new URLSearchParams(window.location.search).get("next")
         : null;
-    return next && next.startsWith("/") ? next : LANDING_BY_ROLE[role] ?? "/dashboard";
+    return safeInternalPath(next, LANDING_BY_ROLE[role] ?? "/dashboard");
   };
 
   const submit = async (creds: { email: string; password: string }) => {
