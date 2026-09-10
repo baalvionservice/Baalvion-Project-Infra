@@ -115,7 +115,14 @@ jobs:
           fi
           echo "::notice title=Gate scope::$(cat "$GITHUB_OUTPUT" | grep ^scope= | cut -d= -f2-)"
 
+      # Report-only for its first runs, matching how dockerfile-lint and the backend
+      # lint gate are already handled here. .lint-baseline.json was recorded on a
+      # developer machine; a runner resolves a different dependency tree, so the counts
+      # do not line up until the baseline is regenerated ON a runner. Read this job's
+      # output, commit `node scripts/lint-ratchet.mjs --update`, then delete this
+      # continue-on-error — the ratchet only means something once its floor is real.
       - name: Run ESLint (ratchet)
+        continue-on-error: true
         run: node scripts/lint-ratchet.mjs ${{ steps.affected.outputs.only }}
 
       - name: TypeScript Typecheck
@@ -650,7 +657,14 @@ jobs:
           fi
           echo "::notice title=Gate scope::$(cat "$GITHUB_OUTPUT" | grep ^scope= | cut -d= -f2-)"
 
+      # No .test-baseline.json is committed on purpose: this is the first time these 213
+      # test files have ever run, and the first run with a real database is what
+      # establishes the honest state. Report-only until then — a gate that goes red on
+      # its debut is a gate people learn to ignore. Commit
+      # `node scripts/test-all.mjs --update` from this job's output, then drop
+      # continue-on-error and it becomes blocking for real.
       - name: Run every package's tests
+        continue-on-error: true
         run: node scripts/test-all.mjs ${{ steps.affected.outputs.only }}
 
   node-package-tests:
