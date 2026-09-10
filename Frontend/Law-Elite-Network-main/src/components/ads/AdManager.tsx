@@ -63,7 +63,12 @@ class AdManager {
   private sessionId: string = this.generateSessionId();
 
   generateSessionId(): string {
-    return `sess_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    // Math.random() is seeded predictably enough that two visitors can collide, which
+    // silently merges their impression counts. 'use client', so getRandomValues is present.
+    const r = new Uint8Array(9);
+    crypto.getRandomValues(r);
+    const suffix = Array.from(r, (b) => b.toString(36).padStart(2, '0')).join('').slice(0, 9);
+    return `sess_${Date.now()}_${suffix}`;
   }
 
   /**
