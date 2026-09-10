@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@baalvion/company": "workspace:*",
     "@baalvion/design": "workspace:*",
     "next": "15.5.24",
     "react": "^19.2.1",
