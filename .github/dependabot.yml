@@ -38,13 +38,29 @@ updates:
         patterns: ["*"]
 
   # ── Docker base images ────────────────────────────────────────────────────
+  # `directory: "/"` watched the repo root, which has no Dockerfile — so none of the
+  # 66 Dockerfile directories was ever scanned and Dependabot has never opened a single
+  # build(deps) PR. Base images have gone unpatched since the config was written.
+  # These seven globs cover all 66. Grouped into one PR: ungrouped, 66 directories
+  # would open 66.
   - package-ecosystem: "docker"
-    directory: "/"
+    directories:
+      - "/Backend/services/*/*"
+      - "/Backend/services/ecosystem/law-elite/gateway"
+      - "/Backend/services/ecosystem/law-elite/services/*"
+      - "/Backend/gateway"
+      - "/Frontend/*"
+      - "/deploy/consolidated"
+      - "/deploy/consolidated/nodebb"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 5
     labels: ["dependencies", "docker"]
     commit-message:
       prefix: "build(deps)"
+    groups:
+      docker-base-images:
+        patterns: ["*"]
 
   # ── Java / Spring Boot (financial services) ─────────────────────────────────
   - package-ecosystem: "maven"
