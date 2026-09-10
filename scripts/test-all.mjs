@@ -57,7 +57,18 @@ function discover(roots) {
   return found.sort((a, b) => a.dir.localeCompare(b.dir));
 }
 
+
+// CI hands us the affected set (scripts/affected.mjs --dirs) so a one-line change to one
+// of ~20 sites does not run all of them. The file is authoritative: affected.mjs already
+// fails safe by returning everything when it cannot resolve the graph, so an empty file
+// here genuinely means "this diff touches nothing we gate on".
+const onlyIdx = process.argv.indexOf('--only');
+const ONLY = onlyIdx > -1
+  ? new Set(readFileSync(process.argv[onlyIdx + 1], 'utf8').split('\n').map((l) => l.trim()).filter(Boolean))
+  : null;
+
 const packages = discover(['Backend/packages', 'Backend/services', 'Frontend'])
+  .filter((p) => !ONLY || ONLY.has(typeof p === "string" ? p : p.dir))
   .filter((p) => !FILTER || p.dir.includes(FILTER));
 
 if (LIST) {
