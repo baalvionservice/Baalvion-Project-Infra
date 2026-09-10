@@ -125,7 +125,7 @@
       "hono": "4.12.34",
       "@hono/node-server": "2.0.10",
       "undici": "7.29.0",
-      "multer": "2.2.0",
+      "multer": "2.3.0",
       "http-proxy-middleware@3": "3.0.7",
       "glob@10": "10.5.0",
       "file-type@21": "21.3.2",
