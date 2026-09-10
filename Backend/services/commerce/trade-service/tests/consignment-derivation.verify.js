@@ -200,8 +200,8 @@ const BASE = {
         // `only` comes off the regenerate request body: BUILDERS.toString is a truthy
         // inherited function, so a plain lookup used to dispatch to it and persist
         // "[object Object]" as a derived document.
-        for (const t of ['toString', 'constructor', 'valueOf']) {
-            assert.throws(() => derive.deriveOne(BASE, t), /Unknown derived document type/);
+        for (const inherited of ['toString', 'constructor', 'valueOf']) {
+            assert.throws(() => derive.deriveOne(BASE, inherited), /Unknown derived document type/);
         }
         assert.deepStrictEqual(derive.deriveAll(BASE, { only: ['toString', 'constructor'] }).documents, []);
     });
