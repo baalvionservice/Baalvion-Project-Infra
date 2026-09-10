@@ -14,7 +14,7 @@
 # GATEWAY_ORIGIN is the opposite: server-side only, read per request, so it stays a runtime
 # variable and points at the gateway over the docker network — no TLS handshake, no trip out
 # to the public internet and back.
-FROM node:20-alpine AS base
+FROM node:26-alpine AS base
 RUN apk add --no-cache libc6-compat && corepack enable
 WORKDIR /app
 

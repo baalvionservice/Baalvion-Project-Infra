@@ -3,7 +3,7 @@
 #
 # NEXT_PUBLIC_* are baked at BUILD time — pass them as --build-arg (see ARGs below),
 # not as runtime env. Point them at the PUBLIC prod API origin + media/CDN host.
-FROM node:20-alpine AS base
+FROM node:26-alpine AS base
 RUN apk add --no-cache libc6-compat && corepack enable
 WORKDIR /app
 

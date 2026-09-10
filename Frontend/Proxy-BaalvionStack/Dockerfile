@@ -12,7 +12,7 @@
 #     --build-arg VITE_API_AUTH_BASE_URL=https://api.baalvion.com/api/v1/identity/auth/v1/auth \
 #     --build-arg VITE_GATEWAY_URL=https://api.baalvion.com \
 #     .
-FROM node:20-alpine AS base
+FROM node:26-alpine AS base
 RUN apk add --no-cache libc6-compat && corepack enable
 WORKDIR /app
 
@@ -43,7 +43,7 @@ COPY tsconfig.base.json ./tsconfig.base.json
 RUN pnpm dlx turbo@2.9.14 run build --filter=proxy-baalvionstack-web
 
 # 4) Static runner — non-root nginx (uid 101), listens on 8080.
-FROM nginxinc/nginx-unprivileged:1.27-alpine AS runner
+FROM nginxinc/nginx-unprivileged:1.31-alpine AS runner
 ENV AUTH_PROXY_TARGET=https://api.baalvion.com/api/v1/identity/auth/v1/auth
 ENV AUTH_PROXY_HOST=api.baalvion.com
 COPY --chown=nginx:nginx Frontend/Proxy-BaalvionStack/nginx.conf.template /etc/nginx/templates/default.conf.template

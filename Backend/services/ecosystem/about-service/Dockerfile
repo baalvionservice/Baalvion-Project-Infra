@@ -5,7 +5,7 @@
 # docker-compose / CI set context = repo root and point dockerfile at this file.
 
 # ── base: Node 20 + corepack-pinned pnpm (root packageManager = pnpm@9.15.0) ──
-FROM node:20.12-alpine AS base
+FROM node:26.8-alpine AS base
 RUN corepack enable
 WORKDIR /repo
 
@@ -37,7 +37,7 @@ RUN pnpm -r --filter "./Backend/packages/*" run build
 RUN pnpm deploy --filter=about-service --prod /out
 
 # ── final: minimal runtime image, no workspace, no dev deps ───────────────────
-FROM node:20.12-alpine AS final
+FROM node:26.8-alpine AS final
 RUN apk add --no-cache dumb-init \
     && addgroup -S app && adduser -S app -G app
 ENV NODE_ENV=production
