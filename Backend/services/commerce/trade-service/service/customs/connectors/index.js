@@ -18,16 +18,19 @@ const { EUConnector } = require('./euConnector');
 const { UAEConnector } = require('./uaeConnector');
 const { ChinaConnector } = require('./chinaConnector');
 
-// channel → factory (lazy: construct once, on demand).
-const FACTORIES = {
+// channel → factory (lazy: construct once, on demand). Null-prototype on both maps:
+// the channel reaches here straight off a submission request, and on a plain object
+// `constructor` resolves to an inherited function that passes the lookup guards below
+// and gets dispatched as if it were a registered connector.
+const FACTORIES = Object.assign(Object.create(null), {
     [CHANNEL.ICEGATE]: () => new IndiaConnector(),
     [CHANNEL.ACE]: () => new USConnector(),
     [CHANNEL.EU_CDS]: () => new EUConnector(),
     [CHANNEL.UAE_MIRSAL]: () => new UAEConnector(),
     [CHANNEL.CHINA_SINGLE_WINDOW]: () => new ChinaConnector(),
-};
+});
 
-const instances = {};
+const instances = Object.create(null);
 
 /** Get (or lazily build) the connector for a channel. */
 function getConnectorByChannel(channel) {

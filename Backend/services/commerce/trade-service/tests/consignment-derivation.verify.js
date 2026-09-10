@@ -196,6 +196,15 @@ const BASE = {
     t('an unknown document type throws rather than deriving an empty one', () => {
         assert.throws(() => derive.deriveOne(BASE, 'bill_of_sale'), /Unknown derived document type/);
     });
+    t('an inherited Object member is not a document type', () => {
+        // `only` comes off the regenerate request body: BUILDERS.toString is a truthy
+        // inherited function, so a plain lookup used to dispatch to it and persist
+        // "[object Object]" as a derived document.
+        for (const inherited of ['toString', 'constructor', 'valueOf']) {
+            assert.throws(() => derive.deriveOne(BASE, inherited), /Unknown derived document type/);
+        }
+        assert.deepStrictEqual(derive.deriveAll(BASE, { only: ['toString', 'constructor'] }).documents, []);
+    });
 
     console.log(`\n${pass} passed, ${fail} failed`);
     if (fail) {
