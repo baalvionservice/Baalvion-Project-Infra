@@ -10,9 +10,9 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "cf:build": "opennextjs-cloudflare build",
-    "cf:preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "cf:deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
+    "cf:build": "pnpm --filter market-underworld-community^... run build && opennextjs-cloudflare build",
+    "cf:preview": "pnpm --filter market-underworld-community^... run build && opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "cf:deploy": "pnpm --filter market-underworld-community^... run build && opennextjs-cloudflare build && opennextjs-cloudflare deploy"
   },
   "dependencies": {
     "@baalvion/design": "workspace:*",
