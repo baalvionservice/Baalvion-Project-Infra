@@ -23,7 +23,14 @@
   "globalDependencies": [
     "**/.env",
     "**/.env.local",
-    "tsconfig.base.json"
+    "tsconfig.base.json",
+    // .npmrc controls RESOLUTION for the whole workspace — engine-strict,
+    // auto-install-peers, hoisting, the workspace link protocol. pnpm-workspace.yaml
+    // defines which directories are packages at all. Neither was listed, so a PR
+    // changing either selected ZERO packages and built nothing, while changing
+    // tsconfig.base.json correctly selected 110. Measured, not assumed.
+    ".npmrc",
+    "pnpm-workspace.yaml"
   ],
   "globalEnv": [
     "NODE_ENV",
