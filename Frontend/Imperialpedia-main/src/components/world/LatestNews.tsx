@@ -23,9 +23,9 @@ export default function LatestNews({ latest }: { latest: WorldData["latest"] }) 
   return (
     <div className="bg-card h-full">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b-2 border-[hsl(var(--cnbc-red))] bg-card sticky top-[88px] z-10">
+      <div className="flex items-center justify-between px-4 py-3 border-b-2 border-[hsl(var(--imperialpedia-red))] bg-card sticky top-[88px] z-10">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 bg-[hsl(var(--cnbc-red))] rounded-full animate-pulse" />
+          <span className="w-2 h-2 bg-[hsl(var(--imperialpedia-red))] rounded-full animate-pulse" />
           <h2 className="world-kicker text-xs font-black tracking-widest text-foreground uppercase">Latest News</h2>
         </div>
         <span className="text-[10px] text-muted-foreground font-medium">Live</span>
@@ -45,11 +45,11 @@ export default function LatestNews({ latest }: { latest: WorldData["latest"] }) 
               </span>
               <span className="text-[10px] text-muted-foreground font-mono shrink-0 ml-2">{item.time}</span>
             </div>
-            <p className="text-xs font-semibold leading-snug text-foreground group-hover:text-[hsl(var(--cnbc-red))] transition-colors line-clamp-2">
+            <p className="text-xs font-semibold leading-snug text-foreground group-hover:text-[hsl(var(--imperialpedia-red))] transition-colors line-clamp-2">
               {item.headline}
             </p>
             {item.positive !== null && (
-              <span className={`text-[10px] font-bold mt-1 block ${item.positive ? "text-[hsl(var(--cnbc-green))]" : "text-[hsl(var(--cnbc-red))]"}`}>
+              <span className={`text-[10px] font-bold mt-1 block ${item.positive ? "text-[hsl(var(--imperialpedia-green))]" : "text-[hsl(var(--imperialpedia-red))]"}`}>
                 {item.positive ? "▲ BULLISH" : "▼ BEARISH"}
               </span>
             )}
@@ -61,7 +61,7 @@ export default function LatestNews({ latest }: { latest: WorldData["latest"] }) 
       <div className="p-4">
         <button
           onClick={() => setExpanded(!expanded)}
-          className="world-kicker w-full text-xs font-bold text-[hsl(var(--cnbc-red))] border border-[hsl(var(--cnbc-red))] py-2 hover:bg-[hsl(var(--cnbc-red))] hover:text-white transition-colors rounded-sm tracking-wide"
+          className="world-kicker w-full text-xs font-bold text-[hsl(var(--imperialpedia-red))] border border-[hsl(var(--imperialpedia-red))] py-2 hover:bg-[hsl(var(--imperialpedia-red))] hover:text-white transition-colors rounded-sm tracking-wide"
         >
           {expanded ? "SHOW LESS ▲" : "SHOW MORE ▼"}
         </button>

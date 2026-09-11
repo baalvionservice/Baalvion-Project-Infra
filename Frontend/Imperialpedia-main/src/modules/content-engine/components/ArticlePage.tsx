@@ -27,6 +27,8 @@ import { KeyTakeawaysBox } from "@/components/pages/KeyTakeawaysBox";
 import { TableOfContents } from "@/components/article/TableOfContents";
 import { SavingsGoalWidget } from "@/components/article/SavingsGoalWidget";
 import { KeyTermsCallout } from "@/components/article/KeyTermsCallout";
+import { ArticleTopicMesh } from "@/components/article/ArticleTopicMesh";
+import { InlineTopicCallout } from "@/components/article/InlineTopicCallout";
 import { getEditorialGuide } from "@/lib/articles/editorial-guides";
 
 interface ArticlePageProps {
@@ -94,7 +96,7 @@ function splitLeadAndBody(html?: string): { leadHtml: string; restHtml: string }
 }
 
 /**
- * Main article page component with Investopedia layout & typography:
+ * Main article page component with Imperialpedia layout & typography:
  * [Sticky Left Table of Contents] | [Center Editorial Content] | [Right Sidebar]
  * Sequence: Title & Byline -> Photo -> 2 Lead Paragraphs -> Key Takeaways -> Body -> Tools
  */
@@ -273,6 +275,12 @@ export const ArticlePage = ({
               />
             ) : null}
 
+            {/* WIN 3: Inline "Read more on [Topic]" callout — injected mid-article after lead */}
+            <InlineTopicCallout
+              categorySlug={effectiveArticle.categorySlug}
+              categoryName={effectiveArticle.category}
+            />
+
             {/* 3. KEY TAKEAWAYS CALLOUT BOX (Positioned after first 2 paragraphs) */}
             {takeaways && takeaways.length > 0 && (
               <KeyTakeawaysBox items={takeaways} className="my-8" />
@@ -283,7 +291,7 @@ export const ArticlePage = ({
               <SavingsGoalWidget defaultGoal={5000} defaultMonths={12} className="my-8" />
             )}
 
-            {/* 4. REMAINING ARTICLE BODY WITH INVESTOPEDIA-GRADE PROSE TYPOGRAPHY */}
+            {/* 4. REMAINING ARTICLE BODY WITH IMPERIALPEDIA-GRADE PROSE TYPOGRAPHY */}
             {restHtml ? (
               <div
                 className="article-body prose prose-lg dark:prose-invert max-w-none mb-12
@@ -334,6 +342,11 @@ export const ArticlePage = ({
             </div>
           )}
         </div>
+
+        <ArticleTopicMesh
+          categorySlug={effectiveArticle.categorySlug}
+          categoryName={effectiveArticle.category}
+        />
 
         <RelatedArticles
           currentArticleId={effectiveArticle.id}

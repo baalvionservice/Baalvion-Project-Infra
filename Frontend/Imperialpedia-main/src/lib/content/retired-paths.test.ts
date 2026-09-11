@@ -28,6 +28,9 @@ describe("RETIRED_TOP_LEVEL_SLUGS", () => {
 describe("isRetiredPath", () => {
   it("matches a retired hub and everything under it", () => {
     expect(isRetiredPath("/investing")).toBe(true);
+    expect(isRetiredPath("/market-news")).toBe(true);
+    expect(isRetiredPath("/markets")).toBe(true);
+    expect(isRetiredPath("/markets/quote/DJI")).toBe(true);
     expect(isRetiredPath("/personal-finance/understanding-the-stock-market")).toBe(true);
     expect(isRetiredPath("/bonds/")).toBe(true);
     expect(isRetiredPath("/economy?ref=nav")).toBe(true);
@@ -71,7 +74,6 @@ describe("canonicalizeInternalHref", () => {
       "/financial-intelligence/emergency-fund-guide",
     );
     expect(canonicalizeInternalHref("/budgeting")).toBe("/budgeting-basics");
-    expect(canonicalizeInternalHref("/markets/quote/AAPL")).toBe("/market-news/quote/AAPL");
   });
 
   it("leaves canonical and external links alone", () => {

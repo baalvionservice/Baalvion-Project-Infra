@@ -4,7 +4,7 @@ import { OptimizedImage } from "@/components/common/OptimizedImage";
 import type { FeaturedStory } from "@/lib/data/worldRegions";
 import { StoryLink } from "@/components/common/StoryLink";
 
-/** CNBC-style horizontal "Special Reports" carousel — reuses the same real,
+/** Imperialpedia-style horizontal "Special Reports" carousel — reuses the same real,
  * live featured stories already fetched for the hero (no new data source). */
 export default function SpecialReports({ featured }: { featured: FeaturedStory[] }) {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -17,7 +17,7 @@ export default function SpecialReports({ featured }: { featured: FeaturedStory[]
   return (
     <div className="bg-card border-b border-border px-2 sm:px-4 py-4">
       <div className="flex items-center justify-between mb-3">
-        <span className="world-kicker text-sm font-black tracking-widest text-foreground uppercase border-l-4 border-[hsl(var(--cnbc-gold))] pl-2">
+        <span className="world-kicker text-sm font-black tracking-widest text-foreground uppercase border-l-4 border-[hsl(var(--imperialpedia-gold))] pl-2">
           Special Reports
         </span>
         <div className="flex items-center gap-1">
@@ -56,7 +56,7 @@ export default function SpecialReports({ featured }: { featured: FeaturedStory[]
             <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent" />
             <div className="absolute bottom-0 left-0 p-3">
               <p className="text-white text-xs font-bold leading-snug line-clamp-3">{story.headline}</p>
-              <p className="world-kicker text-[hsl(var(--cnbc-gold))] text-[10px] mt-1">{story.author}</p>
+              <p className="world-kicker text-[hsl(var(--imperialpedia-gold))] text-[10px] mt-1">{story.author}</p>
             </div>
           </StoryLink>
         ))}

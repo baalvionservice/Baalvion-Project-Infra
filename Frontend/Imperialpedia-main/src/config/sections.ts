@@ -74,3 +74,13 @@ export function newsHubIsLive(publishedCount: number): boolean {
  * anyone holding a link still gets the content.
  */
 export const STOCK_REFERENCE_PAGES_LIVE = false;
+
+/**
+ * Master switch for the Market News and Markets section (/market-news, /markets,
+ * /markets/*, /markets/quote/*).
+ *
+ * Hidden pending Google AdSense approval.
+ * Flip to `true` once Google AdSense approval is received to restore all
+ * market pages, quotes, widgets, and navigation links.
+ */
+export const MARKETS_SECTION_LIVE = false;

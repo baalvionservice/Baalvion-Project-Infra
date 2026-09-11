@@ -19,7 +19,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        // Investopedia-style: neutral Helvetica/Arial sans for body + UI,
+        // Imperialpedia-style: neutral Helvetica/Arial sans for body + UI,
         // editorial transitional serif for headlines.
         body: ["-apple-system", "BlinkMacSystemFont", "Segoe UI", "Helvetica Neue", "Helvetica", "Arial", "sans-serif"],
         headline: ["var(--font-headline)", "Georgia", "Times New Roman", "serif"],
@@ -62,12 +62,12 @@ export default {
         },
         // Semantic finance up/down colors — the vars already existed
         // (root + .dark) but were never wired into Tailwind, so nothing
-        // could reference them. Wired here for the CNBC re-theme (see
+        // could reference them. Wired here for the Imperialpedia re-theme (see
         // .cnbc-shell in globals.css), usable sitewide going forward.
         positive: "hsl(var(--positive))",
         negative: "hsl(var(--negative))",
         // BreakingTicker's own accent — defaults to its current red-600 look
-        // everywhere; remapped to the canonical CNBC red only inside
+        // everywhere; remapped to the canonical Imperialpedia red only inside
         // .cnbc-shell (globals.css), so other pages using this component
         // keep today's exact appearance.
         breaking: "hsl(var(--breaking))",

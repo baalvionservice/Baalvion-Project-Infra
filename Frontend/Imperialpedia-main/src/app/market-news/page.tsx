@@ -1,8 +1,10 @@
 import { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { MarketNewsHub } from "@/components/pages/MarketNewsHub";
 import { categoryHasLiveContent } from "@/components/pages/CategoryFeed";
 import { topicMeta } from "@/lib/topic-config";
 import { buildMetadata } from "@/lib/seo";
+import { MARKETS_SECTION_LIVE } from "@/config/sections";
 
 const SLUG = "market-news";
 // The CMS's real category slug is "markets" (see the identical note in
@@ -19,6 +21,7 @@ const CMS_CATEGORY_SLUG = "markets";
 // what a reviewer or crawler reads as thin content. Flips back to indexed
 // automatically once an article is published under "markets" in the CMS.
 export async function generateMetadata(): Promise<Metadata> {
+  if (!MARKETS_SECTION_LIVE) return buildMetadata({ ...topicMeta(SLUG), noIndex: true });
   const hasContent = await categoryHasLiveContent(CMS_CATEGORY_SLUG);
   return buildMetadata({ ...topicMeta(SLUG), noIndex: !hasContent });
 }
@@ -28,5 +31,10 @@ export async function generateMetadata(): Promise<Metadata> {
 export const dynamic = 'force-dynamic';
 
 export default function Page() {
+  // Belt-and-suspenders: next.config.ts already 301s /market-news to /,
+  // but guard here too so any request that bypasses the redirect layer
+  // returns 404 rather than rendering a hidden page.
+  if (!MARKETS_SECTION_LIVE) notFound();
   return <MarketNewsHub />;
 }
+

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Indicator } from "@/lib/data/worldRegions";
+import { MARKET_QUOTES_LIVE } from "@/config/market-quotes";
 
 interface Props {
   indicators: Indicator[];
@@ -11,9 +12,9 @@ export default function MarketIndicatorBar({ indicators, asOf, regionLabel }: Pr
   const keyIndicators = indicators.slice(0, 6);
 
   return (
-    <div className="bg-[hsl(var(--cnbc-surface))] py-2 sm:py-3 px-2 sm:px-4">
+    <div className="bg-[hsl(var(--imperialpedia-surface))] py-2 sm:py-3 px-2 sm:px-4">
       <div className="flex items-center gap-1 mb-1 sm:mb-2 overflow-hidden">
-        <span className="world-kicker text-[9px] sm:text-[10px] font-black tracking-widest text-[hsl(var(--cnbc-gold))] uppercase whitespace-nowrap">
+        <span className="world-kicker text-[9px] sm:text-[10px] font-black tracking-widest text-[hsl(var(--imperialpedia-gold))] uppercase whitespace-nowrap">
           {regionLabel} Markets
         </span>
         <span className="text-[8px] sm:text-[10px] text-white/50 ml-1 sm:ml-2 truncate">
@@ -28,12 +29,12 @@ export default function MarketIndicatorBar({ indicators, asOf, regionLabel }: Pr
                 {indicator.name}
               </div>
               <div className="flex items-baseline gap-1 sm:gap-1.5 min-w-0">
-                <span className="text-xs sm:text-sm font-black font-mono text-white group-hover:text-[hsl(var(--cnbc-gold))] transition-colors truncate">
+                <span className="text-xs sm:text-sm font-black font-mono text-white group-hover:text-[hsl(var(--imperialpedia-gold))] transition-colors truncate">
                   {indicator.value}
                 </span>
                 <span
                   className={`text-[9px] sm:text-[11px] font-bold font-mono whitespace-nowrap ${
-                    indicator.positive ? "text-[hsl(var(--cnbc-green))]" : "text-[hsl(var(--cnbc-red))]"
+                    indicator.positive ? "text-[hsl(var(--imperialpedia-green))]" : "text-[hsl(var(--imperialpedia-red))]"
                   }`}
                 >
                   {indicator.positive ? "▲" : "▼"} {indicator.percent}
@@ -41,14 +42,14 @@ export default function MarketIndicatorBar({ indicators, asOf, regionLabel }: Pr
               </div>
               <div
                 className={`text-[8px] sm:text-[10px] font-mono truncate ${
-                  indicator.positive ? "text-[hsl(var(--cnbc-green))]/70" : "text-[hsl(var(--cnbc-red))]/70"
+                  indicator.positive ? "text-[hsl(var(--imperialpedia-green))]/70" : "text-[hsl(var(--imperialpedia-red))]/70"
                 }`}
               >
                 {indicator.change}
               </div>
             </>
           );
-          return indicator.symbol ? (
+          return indicator.symbol && MARKET_QUOTES_LIVE ? (
             <Link key={indicator.name} href={`/markets/quote/${indicator.symbol}`} className="group block min-w-0">
               {content}
             </Link>

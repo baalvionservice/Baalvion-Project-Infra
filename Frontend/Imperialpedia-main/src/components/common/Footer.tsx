@@ -6,6 +6,7 @@ import { ImperialpediaMark } from '@/components/icons/ImperialpediaMark';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
 import { PreferredSourceButton } from '@/components/common/PreferredSourceButton';
 import { withoutRetired } from '@/lib/content/retired-paths';
+import { withoutAdsenseHidden } from '@/config/adsense-cleanup';
 import { NEWS_SECTION_LIVE, REVIEWS_SECTION_LIVE } from '@/config/sections';
 
 // ─── Remove stubs and restore your real imports in production ─────────────────
@@ -35,51 +36,62 @@ const Container = ({ children }: { children: React.ReactNode }) => (
 // so both come back the moment they're published into — see config/sections.ts.
 const EXPLORE_COLUMN = {
   label: 'Explore',
-  links: withoutRetired([
-    { label: 'Stocks', href: '/stocks' },
-    { label: 'Budgeting', href: '/budgeting-basics' },
-    { label: 'Scams & Fraud Protection', href: '/fraud-protection' },
-    { label: 'Market News', href: '/market-news' },
-    { label: 'Financial Tools', href: '/financial-tools' },
-    ...(NEWS_SECTION_LIVE ? [{ label: 'News', href: '/news' }] : []),
-    ...(REVIEWS_SECTION_LIVE ? [{ label: 'Reviews', href: '/reviews' }] : []),
+  links: withoutAdsenseHidden(
+    withoutRetired([
+      { label: 'Stocks', href: '/stocks' },
+      { label: 'Budgeting', href: '/budgeting-basics' },
+      { label: 'Scams & Fraud Protection', href: '/fraud-protection' },
+      // Added 2026-09-11 — Creator Economy hub.
+      { label: 'Creator Economy', href: '/creator-economy' },
+      { label: 'Market News', href: '/market-news' },
+      { label: 'Financial Tools', href: '/financial-tools' },
+      ...(NEWS_SECTION_LIVE ? [{ label: 'News', href: '/news' }] : []),
+      ...(REVIEWS_SECTION_LIVE ? [{ label: 'Reviews', href: '/reviews' }] : []),
+    ])
+  ),
+};
+
+const CREATOR_ECONOMY_COLUMN = {
+  label: 'Creator Economy',
+  links: withoutAdsenseHidden([
+    { label: 'YouTube Monetization', href: '/youtube-monetization' },
+    { label: 'Instagram Monetization', href: '/instagram-monetization' },
+    { label: 'Website Monetization', href: '/website-monetization' },
+    { label: 'Social Media Earnings', href: '/social-media-earnings' },
+    { label: 'Creator Business Guides', href: '/creator-guides' },
+    { label: 'Creator Tools & Calculators', href: '/creator-tools' },
   ]),
 };
 
-// Essential company/editorial/legal links only — pruned from a much longer list
-// of policy and disclosure pages (advertising policy, ownership disclosure,
-// ethics policy, diversity policy, source-attribution policy, DMCA, etc.) that
-// added clutter without helping a reader. Those pages still exist for anyone
-// who links to them directly; they're just no longer part of the footer's
-// primary navigation.
 const FOOTER_COLUMNS = [
   EXPLORE_COLUMN,
+  CREATOR_ECONOMY_COLUMN,
   {
     label: 'Company',
-    links: [
+    links: withoutAdsenseHidden([
       { label: 'About Us', href: '/about' },
       { label: 'Contact Us', href: '/contact' },
       { label: 'Our Authors', href: '/authors' },
       { label: 'Careers', href: '/careers' },
-    ],
+    ]),
   },
   {
     label: 'Editorial',
-    links: [
+    links: withoutAdsenseHidden([
       { label: 'Editorial Policy', href: '/editorial-policy' },
       { label: 'Fact-Checking Policy', href: '/fact-checking' },
       { label: 'Corrections Policy', href: '/corrections' },
-    ],
+    ]),
   },
   {
     label: 'Legal & Privacy',
-    links: [
+    links: withoutAdsenseHidden([
       { label: 'Terms of Service', href: '/terms-of-service' },
       { label: 'Privacy Policy', href: '/privacy-policy' },
       { label: 'Disclaimer', href: '/disclaimer' },
       { label: 'Cookie Policy', href: '/cookie-policy' },
       { label: 'Sitemap', href: '/sitemap.xml' },
-    ],
+    ]),
   },
 ];
 

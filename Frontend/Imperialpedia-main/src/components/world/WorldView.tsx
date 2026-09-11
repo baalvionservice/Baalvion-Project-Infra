@@ -58,7 +58,7 @@ function buildJsonLd(data: WorldData) {
 }
 
 /**
- * Shared CNBC-style World layout, rendered by both the canonical `/world`
+ * Shared Imperialpedia-style World layout, rendered by both the canonical `/world`
  * page and the clean per-region routes `/world/[region]`.
  */
 export default function WorldView({ data }: { data: WorldData }) {
@@ -71,7 +71,7 @@ export default function WorldView({ data }: { data: WorldData }) {
       {/* Scrolling market ticker (region-scoped) */}
       <MarketTicker indicators={data.indicators} />
 
-      {/* CNBC-style region selector → clean /world/<region> paths */}
+      {/* Imperialpedia-style region selector → clean /world/<region> paths */}
       <RegionSelector current={data.region.id} enabled={data.enabledRegions} />
 
       {/* Dark market indicators strip */}
@@ -92,7 +92,7 @@ export default function WorldView({ data }: { data: WorldData }) {
               World
             </span>
             <span className="text-white/20">›</span>
-            <span className="world-kicker text-[10px] font-black tracking-widest text-[hsl(var(--cnbc-red))] uppercase">
+            <span className="world-kicker text-[10px] font-black tracking-widest text-[hsl(var(--imperialpedia-red))] uppercase">
               {data.region.label}
             </span>
           </div>

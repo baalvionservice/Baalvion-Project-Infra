@@ -14,8 +14,8 @@ import { HowWeWork } from "./HowWeWork";
 export function HowItWorks() {
   return (
     <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
-      <HomeSectionHeading title="How It Works" />
-      <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16 lg:divide-x lg:divide-border">
+      <HomeSectionHeading title="HOW IT WORKS // DISCOVERY &amp; PROCESS" />
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16 lg:divide-x-3 lg:divide-black dark:lg:divide-slate-700">
         <HowToUse />
         <div className="lg:pl-16">
           <HowWeWork />

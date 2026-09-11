@@ -5,16 +5,24 @@ import { getWorldDataLive } from "@/lib/data/worldFeed";
 import { newsArticleHref } from "@/lib/data/article-url";
 import { StoryLink } from "@/components/common/StoryLink";
 import { getTopicColor } from "@/lib/topic-colors";
+import { isPathHiddenByAdsenseCleanup } from "@/config/adsense-cleanup";
 
 // Reuses the exact same live pipeline as imperialpedia.com/world (real wire
 // news + admin-published CMS content, blended by getWorldDataLive). Renders
 // with this article template's own light card styling rather than the
 // <TrendingNow> component /world uses — that one's built for the dark
-// ".world-shell" CNBC theme (text-white/20 numbers, --cnbc-red hover), both
+// ".world-shell" Imperialpedia theme (text-white/20 numbers, --imperialpedia-red hover), both
 // invisible/wrong on a plain white sidebar card outside that shell.
 export async function TrendingNowModule({ color = "#1d4fc4" }: { color?: string }) {
   const data = await getWorldDataLive("world");
-  const items = data.latest.slice(0, 5);
+  // During AdSense cleanup mode, world/news items are noindexed — don't surface
+  // them in the sidebar of indexed pages.
+  const items = data.latest
+    .filter((item) => {
+      const href = item.href ?? "";
+      return !isPathHiddenByAdsenseCleanup(href);
+    })
+    .slice(0, 5);
   if (items.length === 0) return null;
 
   return (
@@ -53,7 +61,10 @@ export async function MoreInCategoryModule({
   excludeSlug: string;
 }) {
   if (!categorySlug) return null;
-  const items = (await getCategoryArticles(categorySlug, 6)).filter((a) => a.slug !== excludeSlug).slice(0, 4);
+  const items = (await getCategoryArticles(categorySlug, 6))
+    .filter((a) => a.slug !== excludeSlug)
+    .filter((a) => !isPathHiddenByAdsenseCleanup(newsArticleHref(a)))
+    .slice(0, 4);
   if (!items.length) return null;
   const color = getTopicColor(categoryLabel);
 

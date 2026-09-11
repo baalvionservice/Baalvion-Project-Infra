@@ -176,7 +176,7 @@ export async function MarketNewsHub() {
   const liveWorld = await getWorldDataLive("world");
   const snapshotIndicators = liveWorld.indicators.length ? liveWorld.indicators : marketIndicators;
 
-  // Full CNBC-depth breakdown (movers/sectors/regions/crypto/commodities/
+  // Full Imperialpedia-depth breakdown (movers/sectors/regions/crypto/commodities/
   // currencies/bonds) — single source of truth via imperialpedia-service /assets.
   const allAssets = await getAllMarketAssets();
   const assetGroups = groupAssets(allAssets);

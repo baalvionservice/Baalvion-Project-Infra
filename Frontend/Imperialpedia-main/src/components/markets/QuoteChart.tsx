@@ -4,7 +4,7 @@ import React from "react";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import type { QuoteChartPoint } from "@/lib/data/marketsLoader";
 
-const CNBC_RED = "#E31937";
+const Imperialpedia_RED = "#E31937";
 
 export function QuoteChart({ data }: { data: QuoteChartPoint[] }) {
   if (data.length === 0) {
@@ -17,7 +17,7 @@ export function QuoteChart({ data }: { data: QuoteChartPoint[] }) {
         <XAxis dataKey="date" tick={{ fontSize: 10, fill: "rgba(255,255,255,0.5)" }} axisLine={false} tickLine={false} minTickGap={40} />
         <YAxis domain={["auto", "auto"]} tick={{ fontSize: 10, fill: "rgba(255,255,255,0.5)" }} axisLine={false} tickLine={false} width={55} />
         <Tooltip contentStyle={{ background: "#111", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 2, fontSize: 12 }} labelStyle={{ color: "#fff" }} />
-        <Line type="monotone" dataKey="close" stroke={CNBC_RED} strokeWidth={2} dot={false} isAnimationActive={false} />
+        <Line type="monotone" dataKey="close" stroke={Imperialpedia_RED} strokeWidth={2} dot={false} isAnimationActive={false} />
       </LineChart>
     </ResponsiveContainer>
   );

@@ -1,7 +1,7 @@
 "use client";
 import { useState, type FormEvent } from "react";
 
-/** CNBC-style inline newsletter band — posts to the site's real
+/** Imperialpedia-style inline newsletter band — posts to the site's real
  * newsletter API (same endpoint as components/common/Newsletter.tsx),
  * restyled to match the World section's dense editorial look. */
 export default function WorldNewsletter() {
@@ -31,10 +31,10 @@ export default function WorldNewsletter() {
   }
 
   return (
-    <div className="bg-[hsl(var(--cnbc-surface))] px-4 sm:px-6 py-5 sm:py-6">
+    <div className="bg-[hsl(var(--imperialpedia-surface))] px-4 sm:px-6 py-5 sm:py-6">
       <div className="max-w-screen-xl mx-auto flex flex-col sm:flex-row items-center gap-3 sm:gap-6">
         <div className="flex-1 text-center sm:text-left">
-          <p className="world-kicker text-[10px] font-black tracking-widest text-[hsl(var(--cnbc-gold))] uppercase mb-1">
+          <p className="world-kicker text-[10px] font-black tracking-widest text-[hsl(var(--imperialpedia-gold))] uppercase mb-1">
             Free Newsletter
           </p>
           <h2 className="text-white text-base sm:text-lg font-bold leading-snug">
@@ -43,7 +43,7 @@ export default function WorldNewsletter() {
         </div>
 
         {status === "success" ? (
-          <p className="text-[hsl(var(--cnbc-green))] text-sm font-bold shrink-0">You&rsquo;re subscribed.</p>
+          <p className="text-[hsl(var(--imperialpedia-green))] text-sm font-bold shrink-0">You&rsquo;re subscribed.</p>
         ) : (
           <form onSubmit={handleSubmit} className="flex w-full sm:w-auto gap-2 shrink-0">
             <input
@@ -52,12 +52,12 @@ export default function WorldNewsletter() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email address"
-              className="flex-1 sm:w-64 px-3 py-2 text-sm rounded-sm border-none focus:outline-none focus:ring-2 focus:ring-[hsl(var(--cnbc-red))]"
+              className="flex-1 sm:w-64 px-3 py-2 text-sm rounded-sm border-none focus:outline-none focus:ring-2 focus:ring-[hsl(var(--imperialpedia-red))]"
             />
             <button
               type="submit"
               disabled={status === "loading"}
-              className="world-kicker bg-[hsl(var(--cnbc-red))] text-white text-xs font-bold px-4 py-2 rounded-sm hover:bg-[#a82121] transition-colors disabled:opacity-60 whitespace-nowrap"
+              className="world-kicker bg-[hsl(var(--imperialpedia-red))] text-white text-xs font-bold px-4 py-2 rounded-sm hover:bg-[#a82121] transition-colors disabled:opacity-60 whitespace-nowrap"
             >
               {status === "loading" ? "..." : "SIGN UP"}
             </button>
@@ -65,7 +65,7 @@ export default function WorldNewsletter() {
         )}
       </div>
       {status === "error" && (
-        <p className="max-w-screen-xl mx-auto text-[hsl(var(--cnbc-gold))] text-xs mt-2">
+        <p className="max-w-screen-xl mx-auto text-[hsl(var(--imperialpedia-gold))] text-xs mt-2">
           Something went wrong — try again.
         </p>
       )}

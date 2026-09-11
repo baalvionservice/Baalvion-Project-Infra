@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { getAllMarketAssets, computeMovers, type MarketAssetRow } from "@/lib/data/marketsLoader";
+import { MARKETS_SECTION_LIVE } from "@/config/sections";
 import { HomeSectionHeading } from "./HomeSectionHeading";
 
 const GREEN = "#0a7d3d";
@@ -40,6 +41,7 @@ function QuoteRow({ asset }: { asset: MarketAssetRow }) {
  * /markets. Reuses `computeMovers` rather than re-deriving ranking logic.
  */
 export async function MarketHighlights() {
+  if (!MARKETS_SECTION_LIVE) return null;
   const assets = await getAllMarketAssets();
   const withPrices = assets.filter((a) => a.current_price != null);
   if (withPrices.length === 0) return null;
@@ -47,34 +49,53 @@ export async function MarketHighlights() {
   const { gainers, losers } = computeMovers(withPrices);
 
   return (
-    <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 border-t border-border">
-      <HomeSectionHeading title="Market Highlights" href="/market-news" />
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-6">
-        <div>
-          <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground pb-2 mb-1 border-b-2 border-foreground">
-            Top Gainers
-          </h3>
-          <ul>
-            {gainers.map((a) => (
-              <QuoteRow key={a.symbol} asset={a} />
-            ))}
-          </ul>
+    <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 border-t-2 border-black dark:border-slate-800">
+      <HomeSectionHeading title="MARKET HIGHLIGHTS // LIVE TICKER" href="/market-news" hrefLabel="FULL MARKET COVERAGE →" />
+
+      <div className="bg-white dark:bg-slate-900 border-3 border-black dark:border-slate-700 p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] relative rounded-xs">
+        <div className="absolute top-0 left-0 right-0 h-2 bg-[#c8102e]" />
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 pt-1">
+          {/* Top Gainers */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 border-b-2 border-black dark:border-slate-700 pb-2">
+              <span className="bg-[#00875a] text-white text-[10px] font-mono font-black uppercase tracking-widest px-2.5 py-0.5 -skew-x-6">
+                ▲ GAINERS
+              </span>
+              <h3 className="text-xs font-mono font-black uppercase tracking-widest text-black dark:text-white">
+                LIVE MARKET MOVERS
+              </h3>
+            </div>
+            <ul className="divide-y divide-slate-200 dark:divide-slate-800">
+              {gainers.map((a) => (
+                <QuoteRow key={a.symbol} asset={a} />
+              ))}
+            </ul>
+          </div>
+
+          {/* Top Losers */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 border-b-2 border-black dark:border-slate-700 pb-2">
+              <span className="bg-[#c8102e] text-white text-[10px] font-mono font-black uppercase tracking-widest px-2.5 py-0.5 -skew-x-6">
+                ▼ LOSERS
+              </span>
+              <h3 className="text-xs font-mono font-black uppercase tracking-widest text-black dark:text-white">
+                LIVE MARKET DECLINERS
+              </h3>
+            </div>
+            <ul className="divide-y divide-slate-200 dark:divide-slate-800">
+              {losers.map((a) => (
+                <QuoteRow key={a.symbol} asset={a} />
+              ))}
+            </ul>
+          </div>
         </div>
-        <div>
-          <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground pb-2 mb-1 border-b-2 border-foreground">
-            Top Losers
-          </h3>
-          <ul>
-            {losers.map((a) => (
-              <QuoteRow key={a.symbol} asset={a} />
-            ))}
-          </ul>
+
+        <div className="mt-6 pt-4 border-t-2 border-black dark:border-slate-800 flex items-center justify-between text-xs font-mono font-bold text-slate-500">
+          <span>// LIVE DATA REFRESHED ON SHORT INTERVALS</span>
+          <span className="text-[#c8102e]">Imperialpedia LEVEL FEED</span>
         </div>
       </div>
-      <p className="mt-5 text-xs text-muted-foreground">
-        Market data is provided for informational and educational purposes. Prices and percentage
-        changes may be delayed or subject to data-provider limitations.
-      </p>
     </section>
   );
 }

@@ -15,7 +15,7 @@ type Props = {
 };
 
 /**
- * Investopedia-style topic product section:
+ * Imperialpedia-style topic product section:
  * Header with "See all ->", 1 large lead guide on left, and 4 supporting article cards on right.
  */
 export function ProductSection({ slug, label, icon: Icon, articles }: Props) {

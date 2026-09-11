@@ -21,7 +21,7 @@ const QuoteChart = nextDynamic(() =>
   import("@/components/markets/QuoteChart").then((m) => m.QuoteChart),
 );
 
-const CNBC_RED = "#E31937";
+const Imperialpedia_RED = "#E31937";
 const GREEN = "#00A651";
 const RANGES = ["1D", "5D", "1M", "6M", "YTD", "1Y", "5Y", "MAX"] as const;
 
@@ -200,6 +200,11 @@ const PERF_ROWS: { key: "today" | "week" | "month" | "ytd" | "oneYear" | "fiveYe
 ];
 
 export default async function QuotePage({ params, searchParams }: PageProps) {
+  // Belt-and-suspenders: next.config.ts already 301s all /markets/* to /,
+  // but guard here too so any request that bypasses the redirect layer returns
+  // 404 rather than rendering a hidden page.
+  if (!MARKET_QUOTES_LIVE) notFound();
+
   const { symbol: rawSymbol } = await params;
   const symbol = rawSymbol.toUpperCase();
   const validRange = resolveRange((await searchParams).range);
@@ -367,7 +372,7 @@ export default async function QuotePage({ params, searchParams }: PageProps) {
       {datasetSchema && <JsonLd data={datasetSchema} />}
       {faqSchema && <JsonLd data={faqSchema} />}
 
-      <div style={{ background: CNBC_RED }} className="py-3">
+      <div style={{ background: Imperialpedia_RED }} className="py-3">
         <div className="max-w-5xl mx-auto px-4 flex items-center justify-between">
           <Link href={hub?.href ?? "/market-news"} className="text-[12px] font-semibold text-white/90 hover:underline">
             &larr; {hub?.label ?? "Markets"}
@@ -420,7 +425,7 @@ export default async function QuotePage({ params, searchParams }: PageProps) {
             <div className="flex items-baseline gap-3">
               <span className="text-4xl font-black font-mono text-white tabular-nums">{fmt(price)}</span>
               {pct != null && (
-                <span className="text-lg font-bold font-mono tabular-nums" style={{ color: up ? GREEN : CNBC_RED }}>
+                <span className="text-lg font-bold font-mono tabular-nums" style={{ color: up ? GREEN : Imperialpedia_RED }}>
                   {up ? "▲" : "▼"} {Math.abs(pct).toFixed(2)}%
                 </span>
               )}
@@ -470,7 +475,7 @@ export default async function QuotePage({ params, searchParams }: PageProps) {
                 href={`/markets/quote/${symbol}?range=${r}`}
                 aria-current={r === validRange ? "true" : undefined}
                 className="px-2.5 py-1 text-[11px] font-bold rounded-sm"
-                style={r === validRange ? { background: CNBC_RED, color: "#fff" } : { color: "rgba(255,255,255,0.5)" }}
+                style={r === validRange ? { background: Imperialpedia_RED, color: "#fff" } : { color: "rgba(255,255,255,0.5)" }}
               >
                 {r}
               </Link>
@@ -490,7 +495,7 @@ export default async function QuotePage({ params, searchParams }: PageProps) {
                 return (
                   <div key={key} className="text-center border border-white/10 rounded-sm py-2">
                     <p className="text-[10px] text-white/40 uppercase">{label}</p>
-                    <p className="text-[12px] font-mono font-bold tabular-nums" style={{ color: v == null ? "rgba(255,255,255,0.4)" : rowUp ? GREEN : CNBC_RED }}>
+                    <p className="text-[12px] font-mono font-bold tabular-nums" style={{ color: v == null ? "rgba(255,255,255,0.4)" : rowUp ? GREEN : Imperialpedia_RED }}>
                       {v == null ? "—" : `${rowUp ? "+" : ""}${v.toFixed(2)}%`}
                     </p>
                   </div>

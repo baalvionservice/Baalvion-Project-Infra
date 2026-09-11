@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
+import path from "path";
 
 const nextConfig: NextConfig = {
+  outputFileTracingRoot: path.join(__dirname),
   // Keep the server-only Genkit + OpenTelemetry runtime external so Next leaves it as a runtime
   // require() instead of bundling and statically analysing its dynamic `require(expr)` calls
   // (@opentelemetry/instrumentation, require-in-the-middle, protobufjs, express). Removes the
@@ -54,7 +56,7 @@ const nextConfig: NextConfig = {
     // Same-origin auth proxy so the httpOnly refresh cookie flows in dev and prod.
     return [
       { source: '/auth-bff/:path*', destination: `${authTarget}/:path*` },
-      // Investopedia-style A–Z glossary URLs (e.g. /terms-beginning-with-a,
+      // Imperialpedia-style A–Z glossary URLs (e.g. /terms-beginning-with-a,
       // /terms-beginning-with-num) map onto the real /terms/[letter] listing route.
       { source: '/terms-beginning-with-:letter', destination: '/terms/:letter' },
     ];
@@ -156,6 +158,10 @@ const nextConfig: NextConfig = {
       { source: '/loan-reviews/:path*', destination: '/', permanent: true },
       { source: '/loans', destination: '/', permanent: true },
       { source: '/loans/:path*', destination: '/', permanent: true },
+      { source: '/market-news', destination: '/', permanent: true },
+      { source: '/market-news/:path*', destination: '/', permanent: true },
+      { source: '/markets', destination: '/', permanent: true },
+      { source: '/markets/:path*', destination: '/', permanent: true },
       { source: '/monetary-policy', destination: '/', permanent: true },
       { source: '/monetary-policy/:path*', destination: '/', permanent: true },
       { source: '/money-management', destination: '/', permanent: true },
@@ -288,13 +294,10 @@ const nextConfig: NextConfig = {
       // made this a 301 chaining straight into a 410, which Google flags as a
       // broken redirect rather than a clean removal. /research-ai now 410s
       // directly at the edge instead.
-      // /market and /markets were both retired when the standalone markets page
-      // was removed in favour of the dynamic /market-news hub (see commit
-      // 7383eadc) — Search Console still has both indexed. /markets used to
-      // 301 to /market, which no longer exists, producing a dead redirect
-      // chain (308 → 404); both now resolve straight to the real hub.
-      { source: '/market', destination: '/market-news', permanent: true },
-      { source: '/markets', destination: '/market-news', permanent: true },
+      // /market was retired when the standalone markets page was removed;
+      // redirected to / pending Google AdSense approval.
+      { source: '/market', destination: '/', permanent: true },
+      { source: '/market/:path*', destination: '/', permanent: true },
       // /companies/google used to redirect to /companies/alphabet, but the
       // entire /companies section (including /companies/alphabet) is now
       // permanently 410'd (see REMOVED_PATHS in middleware.ts) — that made this

@@ -44,14 +44,18 @@ export async function resolveArticleForDetail(slug: string): Promise<Article | n
       title: editorial.title,
       description: editorial.description,
       body: editorial.bodyHtml,
-      category: "Savings & Budgeting",
-      categorySlug: "savings",
-      tags: ["Savings", "Budgeting", "Emergency Fund", "Personal Finance"],
-      readTime: "8 min read",
-      publishedAt: "2026-08-29T10:00:00Z",
-      updatedAt: "2026-08-29T14:30:00Z",
+      category: editorial.category ?? "Savings & Budgeting",
+      categorySlug: editorial.categorySlug ?? "savings",
+      tags: editorial.categorySlug
+        ? ["Creator Economy", "YouTube", "Monetization", "RPM", "CPM"]
+        : ["Savings", "Budgeting", "Emergency Fund", "Personal Finance"],
+      readingTime: editorial.readingTime ?? 8,
+      publishedAt: editorial.publishedAt ?? "2026-08-29T10:00:00Z",
+      updatedAt: editorial.updatedAt ?? "2026-08-29T14:30:00Z",
       featuredImage: "/images/editorial/savings-budgeting.jpg",
-      imageCaption: "Financial planning, emergency reserves, and deposit safety.",
+      imageCaption: editorial.category
+        ? `${editorial.category} — Imperialpedia Editorial Guide`
+        : "Financial planning, emergency reserves, and deposit safety.",
       keyTakeaways: editorial.keyTakeaways,
       citations: editorial.citations,
       authorSlug: "nathan-reiff",

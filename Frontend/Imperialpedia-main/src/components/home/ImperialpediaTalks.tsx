@@ -29,8 +29,9 @@ export async function ImperialpediaTalks() {
   if (talks.length === 0) return null;
 
   return (
-    <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 border-t border-border">
-      <HomeSectionHeading title="Imperialpedia Talks" href={`/${talks[0].categorySlug || ""}`} />
+    <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 border-t-2 border-black dark:border-slate-800">
+      <HomeSectionHeading title="IMPERIALPEDIA TALKS // VIDEO" href={`/${talks[0].categorySlug || ""}`} hrefLabel="ALL TALKS →" />
+      
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {talks.map((talk) => (
           <Link
@@ -41,9 +42,9 @@ export async function ImperialpediaTalks() {
               contentType: talk.contentType,
               categorySlug: talk.categorySlug,
             })}
-            className="group block"
+            className="group block bg-white dark:bg-slate-900 border-3 border-black dark:border-slate-700 p-3.5 shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] hover:shadow-[7px_7px_0px_0px_rgba(200,16,46,1)] transition-all relative"
           >
-            <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted">
+            <div className="relative aspect-video w-full overflow-hidden border-2 border-black dark:border-slate-700 bg-muted">
               {talk.featuredImage && (
                 <Image
                   src={talk.featuredImage}
@@ -53,13 +54,25 @@ export async function ImperialpediaTalks() {
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               )}
-              <div className="absolute inset-0 flex items-center justify-center bg-black/25 group-hover:bg-black/35 transition-colors">
-                <PlayCircle className="h-10 w-10 text-white drop-shadow" />
+              <div className="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/20 transition-colors">
+                <div className="bg-[#c8102e] text-white p-3 rounded-full border-2 border-black shadow-md transform group-hover:scale-110 transition-transform">
+                  <PlayCircle className="h-6 w-6 fill-white text-[#c8102e]" />
+                </div>
+              </div>
+              <div className="absolute top-2 left-2">
+                <span className="bg-black text-white text-[9px] font-mono font-black uppercase tracking-widest px-2 py-0.5 border border-white/40">
+                  INTERVIEW
+                </span>
               </div>
             </div>
-            <h3 className="mt-2.5 text-sm font-bold leading-snug text-foreground group-hover:text-primary line-clamp-3">
-              {talk.title}
-            </h3>
+            <div className="pt-3 space-y-1">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#c8102e]">
+                // IMPERIALPEDIA EXCLUSIVE TALKS
+              </span>
+              <h3 className="text-sm font-black uppercase font-serif leading-snug text-black dark:text-white group-hover:text-[#c8102e] transition-colors line-clamp-3">
+                {talk.title}
+              </h3>
+            </div>
           </Link>
         ))}
       </div>
