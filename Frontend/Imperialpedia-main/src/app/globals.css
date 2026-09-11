@@ -24,7 +24,7 @@ header h1 {
 }
 
 @layer base {
-  /* ── Investopedia-style editorial palette: clean white, royal blue, gold accent ── */
+  /* ── Imperialpedia-style editorial palette: clean white, royal blue, gold accent ── */
   :root {
     --background: 0 0% 100%;
     --foreground: 0 0% 13%; /* near-black editorial text #212121 */
@@ -32,7 +32,7 @@ header h1 {
     --card-foreground: 0 0% 13%;
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 13%;
-    --primary: 222 74% 44%; /* Investopedia royal blue ~#1d4fc4 (links, CTAs) */
+    --primary: 222 74% 44%; /* Imperialpedia royal blue ~#1d4fc4 (links, CTAs) */
     --primary-foreground: 0 0% 100%;
     --secondary: 0 0% 96%; /* light gray surfaces */
     --secondary-foreground: 0 0% 18%;
@@ -101,14 +101,14 @@ header h1 {
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/30;
     overflow-x: clip;
-    /* Investopedia-style body: neutral Helvetica/Arial sans (no webfont) */
+    /* Imperialpedia-style body: neutral Helvetica/Arial sans (no webfont) */
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
     /* Mobile performance optimizations */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeSpeed;
   }
-  /* Editorial serif headlines (Investopedia-style), tight tracking */
+  /* Editorial serif headlines (Imperialpedia-style), tight tracking */
   h1,
   h2,
   h3,
@@ -150,7 +150,7 @@ header h1 {
   }
 
   /* ── World vertical (CNBC-style) type system — scoped to .world-shell so ──
-     the sitewide Investopedia serif theme above is untouched everywhere else.
+     the sitewide Imperialpedia serif theme above is untouched everywhere else.
      Higher specificity (.world-shell h1 vs bare h1) wins over the editorial
      serif rule within the same @layer base bucket. */
   .world-shell h1,
@@ -168,7 +168,7 @@ header h1 {
     font-family: var(--font-world-condensed), "Barlow Condensed", sans-serif;
   }
 
-  /* ── CNBC design tokens — scoped to .cnbc-shell, applied on /world, /news, ──
+  /* ── CNBC design tokens — scoped to .imperialpedia-shell, applied on /world, /news, ──
      /market-news only (see RootLayoutClient.tsx + each route's layout.tsx).
      Canonical values lifted from the existing literal-CNBC reference page,
      src/app/markets/quote/[symbol]/page.tsx (CNBC_RED #E31937, GREEN #00A651,
@@ -185,28 +185,28 @@ header h1 {
      (FeaturedArticleCard, ArticleCard, NewsletterForm, FAQItem, most of
      /news's components) re-skins automatically with ZERO per-component
      edits and zero effect on the other ~8 topic hubs still in the light
-     Investopedia theme, since .cnbc-shell only applies on these 3 routes. */
-  .cnbc-shell {
-    --cnbc-bg: 0 0% 0%; /* #000000 */
-    --cnbc-surface: 0 0% 6.7%; /* #111111 */
-    --cnbc-red: 350 79% 49%; /* #E31937 */
-    --cnbc-green: 149 100% 33%; /* #00A651 */
-    --cnbc-gold: 42 100% 49%; /* secondary/featured-badge accent, distinct from red/green */
+     Imperialpedia theme, since .imperialpedia-shell only applies on these 3 routes. */
+  .imperialpedia-shell {
+    --imperialpedia-bg: 0 0% 0%; /* #000000 */
+    --imperialpedia-surface: 0 0% 6.7%; /* #111111 */
+    --imperialpedia-red: 350 79% 49%; /* #E31937 */
+    --imperialpedia-green: 149 100% 33%; /* #00A651 */
+    --imperialpedia-gold: 42 100% 49%; /* secondary/featured-badge accent, distinct from red/green */
 
-    --background: var(--cnbc-bg);
+    --background: var(--imperialpedia-bg);
     --foreground: 0 0% 100%;
-    --card: var(--cnbc-surface);
+    --card: var(--imperialpedia-surface);
     --card-foreground: 0 0% 100%;
-    --popover: var(--cnbc-surface);
+    --popover: var(--imperialpedia-surface);
     --popover-foreground: 0 0% 100%;
-    --muted: var(--cnbc-surface);
+    --muted: var(--imperialpedia-surface);
     --muted-foreground: 0 0% 65%; /* ~white/65% against black */
     --border: 0 0% 18%; /* solid-gray approximation of white/15 over black, see note below */
     --input: 0 0% 18%;
-    --destructive: var(--cnbc-red);
-    --positive: var(--cnbc-green);
-    --negative: var(--cnbc-red);
-    --breaking: var(--cnbc-red);
+    --destructive: var(--imperialpedia-red);
+    --positive: var(--imperialpedia-green);
+    --negative: var(--imperialpedia-red);
+    --breaking: var(--imperialpedia-red);
     /* --primary/--accent (sitewide royal blue / gold) intentionally left
        unremapped here — decided per-component during Phase 5 rather than
        blanket-overridden, since not every link/CTA inside these routes
@@ -224,14 +224,14 @@ header h1 {
      .world-shell type system above. Placed AFTER .world-shell's block so
      that on /world (which carries both classes) this wins on selectors of
      equal specificity — source order is the tiebreaker within one @layer. */
-  .cnbc-shell,
-  .cnbc-shell h1,
-  .cnbc-shell h2,
-  .cnbc-shell h3,
-  .cnbc-shell h4,
-  .cnbc-shell h5,
-  .cnbc-shell h6,
-  .cnbc-shell p {
+  .imperialpedia-shell,
+  .imperialpedia-shell h1,
+  .imperialpedia-shell h2,
+  .imperialpedia-shell h3,
+  .imperialpedia-shell h4,
+  .imperialpedia-shell h5,
+  .imperialpedia-shell h6,
+  .imperialpedia-shell p {
     font-family: Arial, Helvetica, sans-serif !important;
     color: hsl(var(--foreground));
   }

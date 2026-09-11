@@ -4,7 +4,7 @@ import type { WorldData } from "@/lib/data/worldRegions";
 
 /** Placeholder video-teaser grid — self-hosted category photography with a
  * play-icon overlay. Deliberately NOT real embedded video (no video pipeline
- * exists, and CNBC's actual show recordings can't be used). Real headlines
+ * exists, and Imperialpedia's actual show recordings can't be used). Real headlines
  * from the live feed, presented explicitly as a preview — no player, no
  * fabricated paid subscription product. */
 export default function TopVideos({ latest }: { latest: WorldData["latest"] }) {
@@ -14,7 +14,7 @@ export default function TopVideos({ latest }: { latest: WorldData["latest"] }) {
   return (
     <div className="bg-card border-b border-border px-2 sm:px-4 py-4">
       <div className="flex items-center gap-2 mb-3">
-        <span className="world-kicker text-sm font-black tracking-widest text-foreground uppercase border-l-4 border-[hsl(var(--cnbc-red))] pl-2">
+        <span className="world-kicker text-sm font-black tracking-widest text-foreground uppercase border-l-4 border-[hsl(var(--imperialpedia-red))] pl-2">
           Imperialpedia Video
         </span>
       </div>

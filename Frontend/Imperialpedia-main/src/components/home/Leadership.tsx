@@ -68,85 +68,111 @@ export async function Leadership() {
   const articleCount = categories.reduce((sum, c) => sum + c.articleCount, 0);
 
   const stats = [
-    { value: "2022", label: "Founded" },
-    { value: `${articleCount}+`, label: "Articles Published" },
-    { value: `${categories.length}+`, label: "Topics Covered" },
-    { value: `${authors.length}+`, label: "Contributors" },
+    { value: "2022", label: "FOUNDED" },
+    { value: `${articleCount}+`, label: "ARTICLES PUBLISHED" },
+    { value: `${categories.length}+`, label: "TOPICS COVERED" },
+    { value: `${authors.length}+`, label: "CONTRIBUTORS" },
   ];
 
   return (
-    <section className="border-t border-border bg-muted/30">
-      <div className="mx-auto grid max-w-7xl gap-12 px-4 py-14 sm:px-6 lg:grid-cols-[1fr_380px] lg:px-8">
-        <div>
-          <h2 className="text-3xl font-black tracking-tight text-foreground">Our Mission</h2>
-          <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground">
-            Imperialpedia began as an independent project on March 26, 2022, built on a simple
-            idea: financial information shouldn&apos;t be confusing. As the platform grew, it found
-            a permanent home under Baalvion Industries Private Limited, incorporated on March 11,
-            2025 — giving the work behind Imperialpedia a real legal foundation and the resources
-            to keep building. Today, we connect readers with trustworthy, organized information on
-            investing, personal finance, and the wider economy — with transparent sourcing and a
-            focus on education, not hype.
-          </p>
-          <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-4">
-            {stats.map((stat) => (
-              <div key={stat.label}>
-                <span className="block text-3xl font-black text-primary">{stat.value}</span>
-                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  {stat.label}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
+    <section className="border-t-2 border-black dark:border-slate-800 py-10">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="bg-white dark:bg-slate-900 border-3 border-black dark:border-slate-700 p-6 sm:p-10 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative rounded-xs">
+          <div className="absolute top-0 left-0 right-0 h-2 bg-[#c8102e]" />
 
-        <div className="border-t border-border pt-8 lg:border-l lg:border-t-0 lg:pl-12 lg:pt-0">
-          <h2 className="text-xl font-black tracking-tight text-foreground">Leadership</h2>
-          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-            Imperialpedia is published by Baalvion Industries Private Limited. Our executive
-            committee is listed on Baalvion&apos;s investor-relations site.
-          </p>
-          <ul className="mt-6 space-y-5">
-            {EXECUTIVE_COMMITTEE.map((leader) => (
-              <li key={leader.name}>
-                <a
-                  href={leader.profileHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex items-center gap-3"
-                >
-                  <Avatar className="h-16 w-16 shrink-0 rounded-lg border border-border">
-                    {leader.photo && (
-                      <AvatarImage
-                        src={leader.photo}
-                        alt={leader.name}
-                        className="rounded-lg grayscale transition-all duration-300 group-hover:grayscale-0"
-                      />
-                    )}
-                    <AvatarFallback className="rounded-lg text-sm font-bold">
-                      {leader.initials}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-bold leading-snug text-foreground transition-colors group-hover:text-primary">
-                      {leader.name}
-                    </p>
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      {leader.title}
-                    </p>
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-12 pt-2">
+            {/* Mission */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-3">
+                <span className="bg-[#c8102e] text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 -skew-x-12">
+                  OUR MISSION
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-black uppercase font-serif text-black dark:text-white tracking-tighter">
+                  Financial Intelligence for Everyone
+                </h2>
+              </div>
+              
+              <p className="text-base font-medium text-slate-800 dark:text-slate-200 leading-relaxed font-sans">
+                Imperialpedia began as an independent project on March 26, 2022, built on a simple
+                idea: financial information shouldn&apos;t be confusing. As the platform grew, it found
+                a permanent home under Baalvion Industries Private Limited, incorporated on March 11,
+                2025 — giving the work behind Imperialpedia a real legal foundation and the resources
+                to keep building. Today, we connect readers with trustworthy, organized information on
+                investing, personal finance, and the wider economy — with transparent sourcing and a
+                focus on education, not hype.
+              </p>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t-2 border-black dark:border-slate-800">
+                {stats.map((stat) => (
+                  <div key={stat.label} className="border-2 border-black dark:border-slate-700 p-3 bg-slate-50 dark:bg-slate-800/50 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                    <span className="block text-2xl sm:text-3xl font-black font-serif text-[#c8102e]">{stat.value}</span>
+                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-black dark:text-white">
+                      {stat.label}
+                    </span>
                   </div>
-                </a>
-              </li>
-            ))}
-          </ul>
-          <a
-            href="https://ir.baalvion.com/governance/leadership"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-6 inline-block text-sm font-bold text-primary hover:underline"
-          >
-            Meet the full leadership team →
-          </a>
+                ))}
+              </div>
+            </div>
+
+            {/* Leadership Roster */}
+            <div className="border-t-3 border-black dark:border-slate-700 pt-8 lg:border-l-3 lg:border-t-0 lg:pl-10 lg:pt-0 space-y-5">
+              <div className="flex items-center gap-2">
+                <span className="bg-black text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5">
+                  GOVERNANCE
+                </span>
+                <h3 className="text-xs font-mono font-black uppercase tracking-widest text-[#c8102e]">
+                  // EXECUTIVE BOARD
+                </h3>
+              </div>
+
+              <h4 className="text-xl font-black uppercase font-serif text-black dark:text-white">
+                Corporate Leadership
+              </h4>
+
+              <ul className="space-y-4">
+                {EXECUTIVE_COMMITTEE.map((leader) => (
+                  <li key={leader.name}>
+                    <a
+                      href={leader.profileHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group flex items-center gap-3 p-2 border-2 border-black/10 dark:border-slate-800 hover:border-black dark:hover:border-slate-600 rounded-xs transition-colors"
+                    >
+                      <Avatar className="h-12 w-12 shrink-0 rounded-none border-2 border-black dark:border-slate-700 shadow-xs">
+                        {leader.photo && (
+                          <AvatarImage
+                            src={leader.photo}
+                            alt={leader.name}
+                            className="rounded-none grayscale transition-all duration-300 group-hover:grayscale-0"
+                          />
+                        )}
+                        <AvatarFallback className="rounded-none text-xs font-black font-serif bg-[#c8102e] text-white">
+                          {leader.initials}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-black text-xs uppercase font-serif leading-tight text-black dark:text-white group-hover:text-[#c8102e] transition-colors truncate">
+                          {leader.name}
+                        </p>
+                        <p className="text-[10px] font-mono font-bold uppercase tracking-wide text-slate-500 truncate">
+                          {leader.title}
+                        </p>
+                      </div>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+
+              <a
+                href="https://ir.baalvion.com/governance/leadership"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block text-xs font-mono font-black uppercase text-[#c8102e] hover:underline pt-2"
+              >
+                MEET FULL GOVERNANCE TEAM →
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </section>

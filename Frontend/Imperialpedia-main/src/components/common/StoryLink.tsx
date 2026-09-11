@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { storyHref, type LinkableStory } from "@/lib/data/article-url";
 
 /**
- * Wraps World/CNBC-style news tiles in the correct clickable element:
+ * Wraps World/Imperialpedia-style news tiles in the correct clickable element:
  * an internal <Link> for owned CMS articles (slug present), an external
  * <a target="_blank"> for wire content with no owned page (href present),
  * or a plain non-interactive wrapper when neither is available (the static

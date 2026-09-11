@@ -7,7 +7,7 @@ function pctNum(change: string): number {
   return Number.isFinite(n) ? n : 0;
 }
 
-/** CNBC-style "Quote Finder" + sidebar "Market Movers" mini — both driven by
+/** Imperialpedia-style "Quote Finder" + sidebar "Market Movers" mini — both driven by
  * the same real, live watchlist data already fetched for the page (Yahoo
  * Finance), not fabricated numbers. Search filters the live watchlist. */
 export default function QuoteFinderMovers({ watchlist }: { watchlist: WorldData["watchlist"] }) {
@@ -41,7 +41,7 @@ export default function QuoteFinderMovers({ watchlist }: { watchlist: WorldData[
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search watchlist"
-            className="w-full text-xs border border-border rounded-sm px-2.5 py-1.5 pr-8 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--cnbc-red))]"
+            className="w-full text-xs border border-border rounded-sm px-2.5 py-1.5 pr-8 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--imperialpedia-red))]"
           />
           <svg
             className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground"
@@ -67,7 +67,7 @@ export default function QuoteFinderMovers({ watchlist }: { watchlist: WorldData[
                   <span className="font-bold text-foreground">{w.ticker}</span>
                   <span className="font-mono text-muted-foreground">{w.price}</span>
                   <span
-                    className={`font-mono font-bold ${w.positive ? "text-[hsl(var(--cnbc-green))]" : "text-[hsl(var(--cnbc-red))]"}`}
+                    className={`font-mono font-bold ${w.positive ? "text-[hsl(var(--imperialpedia-green))]" : "text-[hsl(var(--imperialpedia-red))]"}`}
                   >
                     {w.change}
                   </span>
@@ -89,7 +89,7 @@ export default function QuoteFinderMovers({ watchlist }: { watchlist: WorldData[
             {top.map((w) => (
               <div key={w.ticker} className="flex items-center justify-between py-1 text-[11px]">
                 <span className="font-bold text-foreground">{w.ticker}</span>
-                <span className="font-mono font-bold text-[hsl(var(--cnbc-green))]">{w.change}</span>
+                <span className="font-mono font-bold text-[hsl(var(--imperialpedia-green))]">{w.change}</span>
               </div>
             ))}
           </div>
@@ -98,7 +98,7 @@ export default function QuoteFinderMovers({ watchlist }: { watchlist: WorldData[
             {bottom.map((w) => (
               <div key={w.ticker} className="flex items-center justify-between py-1 text-[11px]">
                 <span className="font-bold text-foreground">{w.ticker}</span>
-                <span className="font-mono font-bold text-[hsl(var(--cnbc-red))]">{w.change}</span>
+                <span className="font-mono font-bold text-[hsl(var(--imperialpedia-red))]">{w.change}</span>
               </div>
             ))}
           </div>

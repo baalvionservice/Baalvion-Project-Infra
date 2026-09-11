@@ -24,7 +24,8 @@ export const RelatedArticles = ({ currentArticleId, category, tags, categorySlug
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+useEffect(() => {
     async function loadRelated() {
       try {
         setLoading(true);
@@ -38,7 +39,7 @@ export const RelatedArticles = ({ currentArticleId, category, tags, categorySlug
     }
 
     loadRelated();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  
   }, [currentArticleId, category, categorySlug, tags?.join(',')]);
 
   if (loading || articles.length === 0) return null;

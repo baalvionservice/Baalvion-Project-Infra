@@ -3,8 +3,9 @@ import Link from "next/link";
 import companiesData from "@/data/companies/companies.json";
 import { getAssetQuote } from "@/lib/data/loaders";
 import type { EntityMention } from "@/lib/entityLinkInjector";
+import { MARKET_QUOTES_LIVE } from "@/config/market-quotes";
 
-const CNBC_RED = "#CC0000"; // matches this site's existing news-template accent, not the /markets section's own palette
+const Imperialpedia_RED = "#CC0000"; // matches this site's existing news-template accent, not the /markets section's own palette
 const GREEN = "#0a7d3d";
 const MAX_QUOTE_CHIPS = 3;
 
@@ -48,7 +49,7 @@ export async function ArticleMarketWidget({ entityMentions }: { entityMentions?:
 
   return (
     <div>
-      <h2 className="text-xs font-black tracking-widest text-gray-900 uppercase border-b-2 pb-2 mb-4" style={{ borderColor: CNBC_RED }}>
+      <h2 className="text-xs font-black tracking-widest text-gray-900 uppercase border-b-2 pb-2 mb-4" style={{ borderColor: Imperialpedia_RED }}>
         Related Markets
       </h2>
       <ul className="space-y-3">
@@ -56,21 +57,32 @@ export async function ArticleMarketWidget({ entityMentions }: { entityMentions?:
           const price = quote!.current_price!;
           const pct = quote!.change_pct_24h;
           const up = (pct ?? 0) >= 0;
+          const rowContent = (
+            <>
+              <span className="text-sm font-semibold text-gray-800 group-hover:text-[#CC0000] transition-colors">
+                {company.name}
+              </span>
+              <span className="flex items-baseline gap-1.5 text-xs font-mono">
+                <span className="text-gray-900 font-semibold tabular-nums">${Number(price).toFixed(2)}</span>
+                {pct != null && (
+                  <span className="font-bold tabular-nums" style={{ color: up ? GREEN : Imperialpedia_RED }}>
+                    {up ? "▲" : "▼"} {Math.abs(Number(pct)).toFixed(2)}%
+                  </span>
+                )}
+              </span>
+            </>
+          );
           return (
             <li key={company.slug}>
-              <Link href={`/markets/quote/${company.ticker}`} className="flex items-center justify-between group">
-                <span className="text-sm font-semibold text-gray-800 group-hover:text-[#CC0000] transition-colors">
-                  {company.name}
-                </span>
-                <span className="flex items-baseline gap-1.5 text-xs font-mono">
-                  <span className="text-gray-900 font-semibold tabular-nums">${Number(price).toFixed(2)}</span>
-                  {pct != null && (
-                    <span className="font-bold tabular-nums" style={{ color: up ? GREEN : CNBC_RED }}>
-                      {up ? "▲" : "▼"} {Math.abs(Number(pct)).toFixed(2)}%
-                    </span>
-                  )}
-                </span>
-              </Link>
+              {MARKET_QUOTES_LIVE ? (
+                <Link href={`/markets/quote/${company.ticker}`} className="flex items-center justify-between group">
+                  {rowContent}
+                </Link>
+              ) : (
+                <div className="flex items-center justify-between group">
+                  {rowContent}
+                </div>
+              )}
             </li>
           );
         })}

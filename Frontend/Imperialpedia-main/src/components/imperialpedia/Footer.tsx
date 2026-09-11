@@ -7,10 +7,10 @@ import { NEWS_SECTION_LIVE } from "@/config/sections";
 /**
  * Shared dark footer for /world, /news, /market-news — promoted from
  * world/Footer.tsx (already dark, just the `#ce2b2b` → canonical
- * `hsl(var(--cnbc-red))` hex swap needed) so all three routes share one
+ * `hsl(var(--imperialpedia-red))` hex swap needed) so all three routes share one
  * footer instead of three near-duplicate copies.
  *
- * Every link below points at a real, live route. A few of the original CNBC
+ * Every link below points at a real, live route. A few of the original Imperialpedia
  * template labels (Watchlist, Screener, Newsletters, Podcasts, Apps) have no
  * corresponding page on this site and were dropped rather than left as
  * href="#" or pointed at a route that would 404 — both fail Google's

@@ -2,7 +2,7 @@ import { OptimizedImage } from "@/components/common/OptimizedImage";
 import type { WorldData } from "@/lib/data/worldRegions";
 import { StoryLink } from "@/components/common/StoryLink";
 
-/** CNBC's "PRO News and Analysis" module, rebranded — reuses real section
+/** Imperialpedia's "PRO News and Analysis" module, rebranded — reuses real section
  * items already fetched for the page (no new data source). No fake "PRO"
  * paywall badge: Imperialpedia doesn't have that subscription product, so
  * this uses a plain "ANALYSIS" kicker instead of fabricating a paid tier. */
@@ -12,7 +12,7 @@ export default function FeaturedAnalysis({ sections }: { sections: WorldData["se
 
   return (
     <div className="border-b border-border px-2 sm:px-4 py-5">
-      <h2 className="world-kicker text-xl font-black tracking-widest text-foreground uppercase border-b-4 border-[hsl(var(--cnbc-gold))] inline-block pb-1 mb-4">
+      <h2 className="world-kicker text-xl font-black tracking-widest text-foreground uppercase border-b-4 border-[hsl(var(--imperialpedia-gold))] inline-block pb-1 mb-4">
         Analysis
       </h2>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-5">
@@ -30,10 +30,10 @@ export default function FeaturedAnalysis({ sections }: { sections: WorldData["se
               </div>
             )}
             <div className="min-w-0">
-              <span className="world-kicker inline-block bg-[hsl(var(--cnbc-surface))] text-white text-[8px] font-black px-1.5 py-0.5 mb-1 tracking-wide">
+              <span className="world-kicker inline-block bg-[hsl(var(--imperialpedia-surface))] text-white text-[8px] font-black px-1.5 py-0.5 mb-1 tracking-wide">
                 ANALYSIS
               </span>
-              <p className="text-xs font-semibold leading-snug text-foreground hover:text-[hsl(var(--cnbc-red))] hover:underline line-clamp-3">
+              <p className="text-xs font-semibold leading-snug text-foreground hover:text-[hsl(var(--imperialpedia-red))] hover:underline line-clamp-3">
                 {item.headline}
               </p>
               <span className="text-[10px] text-muted-foreground mt-1 block">{item.time}</span>

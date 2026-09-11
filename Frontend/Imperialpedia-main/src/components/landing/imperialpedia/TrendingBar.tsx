@@ -17,7 +17,7 @@ const DEFAULT_TERMS: Term[] = [
 ];
 
 /**
- * Investopedia-style "Trending" ticker bar of hot terms beneath the header.
+ * Imperialpedia-style "Trending" ticker bar of hot terms beneath the header.
  */
 export function TrendingBar({ terms = DEFAULT_TERMS }: { terms?: Term[] }) {
   return (

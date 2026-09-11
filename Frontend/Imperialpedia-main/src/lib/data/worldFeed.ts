@@ -1,5 +1,5 @@
 /**
- * Live data layer for the CNBC-style World page (/world/?region=).
+ * Live data layer for the Imperialpedia-style World page (/world/?region=).
  *
  * Real data, fetched server-side with ISR caching, with graceful fallback to the
  * static demo set (./worldRegions) on any failure — the page can never break:

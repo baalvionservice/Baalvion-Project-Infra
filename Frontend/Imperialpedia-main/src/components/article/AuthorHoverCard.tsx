@@ -6,7 +6,7 @@ import Link from "next/link";
 import { BadgeCheck, ArrowRight, ShieldCheck } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-// Investopedia-style byline hover card: hovering (or focusing, for keyboard users)
+// Imperialpedia-style byline hover card: hovering (or focusing, for keyboard users)
 // the author name surfaces photo + credentials + bio inline, so the trust signal
 // is visible without leaving the article. Built on the existing Popover primitive
 // with a controlled `open` state driven by hover/focus instead of click — there's

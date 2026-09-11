@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
+import { Clock } from 'lucide-react';
 import { Article } from '../types';
 import { ContributorByline } from './ContributorByline';
 import type { ResolvedAuthor } from '@/services/data/cms-public';
@@ -16,12 +17,17 @@ interface ArticleHeaderProps {
   showImage?: boolean;
 }
 
-const updatedDateFormatter = new Intl.DateTimeFormat('en-US', {
-  month: 'long',
+const dateFormatter = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
   day: 'numeric',
   year: 'numeric',
   timeZone: 'UTC',
 });
+
+function formatReadTime(minutes?: number): string {
+  if (!minutes || minutes <= 0) return '4 min read';
+  return `${minutes} min read`;
+}
 
 // Default fallback authors for full E-E-A-T transparency
 const DEFAULT_AUTHOR: ResolvedAuthor = {
@@ -51,7 +57,8 @@ const DEFAULT_FACT_CHECKER: ResolvedAuthor = {
 };
 
 /**
- * Investopedia Article Header with Corinthian headline and interactive author/reviewer hover cards.
+ * Imperialpedia Style Article Header with high-contrast category kicker, bold serif headline,
+ * and interactive author/reviewer hover cards.
  */
 export const ArticleHeader = ({
   article,
@@ -61,56 +68,92 @@ export const ArticleHeader = ({
   canonicalUrl,
   showImage = true,
 }: ArticleHeaderProps) => {
-  const formattedDate = article.updatedAt
-    ? updatedDateFormatter.format(new Date(article.updatedAt))
-    : article.publishedAt
-    ? updatedDateFormatter.format(new Date(article.publishedAt))
-    : 'August 29, 2026';
+  const publishedDate = article.publishedAt
+    ? dateFormatter.format(new Date(article.publishedAt))
+    : null;
+  const updatedDate = article.updatedAt
+    ? dateFormatter.format(new Date(article.updatedAt))
+    : publishedDate ?? 'Aug 29, 2026';
+
+  const readTime = formatReadTime(article.readingTime);
 
   const effectiveAuthor = author || DEFAULT_AUTHOR;
   const effectiveReviewer = reviewer || DEFAULT_REVIEWER;
   const effectiveFactChecker = factChecker || DEFAULT_FACT_CHECKER;
 
+  const categoryTitle = (article.category || 'CREATOR ECONOMY').toUpperCase();
+
   return (
-    <header className="mb-6">
-      {/* 1. Article Title (H1) with Corinthian Medium Font */}
-      <h1 className="text-3xl sm:text-4xl lg:text-[42px] font-bold text-[#121212] dark:text-white leading-[1.18] tracking-[-0.015em] mb-3.5 font-corinthian">
+    <header className="mb-8">
+      {/* ── 1. Imperialpedia Category Kicker ── */}
+      <div className="flex flex-wrap items-center gap-2.5 mb-3.5">
+        <span className="bg-[#c8102e] text-white text-[11px] font-black uppercase tracking-tighter px-3 py-1 -skew-x-12 shadow-xs">
+          IMPERIALPEDIA EXCLUSIVE
+        </span>
+        <span className="text-xs font-black uppercase tracking-widest text-[#c8102e] font-mono">
+          // {categoryTitle}
+        </span>
+      </div>
+
+      {/* ── 2. Article Title (H1) ── */}
+      <h1 className="text-3xl sm:text-4xl lg:text-[46px] font-black text-slate-950 dark:text-white leading-[1.12] tracking-tighter mb-4 font-serif">
         {article.title}
       </h1>
 
-      {/* 2. Interactive Byline & Editorial Disclosure with Hover Cards */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200/80 dark:border-gray-800 pb-4 text-xs font-sans">
-        <div className="space-y-1">
-          {/* Author with Updated Date */}
-          <ContributorByline
-            label="By"
-            person={effectiveAuthor}
-            meta={`Updated ${formattedDate}`}
-          />
+      {/* ── 3. Editorial Subtitle / Deck ── */}
+      {article.description && (
+        <p className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-200 leading-relaxed border-l-4 border-[#c8102e] pl-4 py-2 bg-red-50/60 dark:bg-red-950/20 my-4 rounded-r-md">
+          {article.description}
+        </p>
+      )}
 
-          {/* Reviewer */}
-          <ContributorByline
-            label="Reviewed by"
-            person={effectiveReviewer}
-          />
+      {/* ── 4. Interactive Byline & Editorial Disclosure Row ── */}
+      <div className="border-y-2 border-black dark:border-slate-800 py-3.5 text-xs font-sans space-y-2.5 my-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="space-y-1.5">
+            {/* Author */}
+            <ContributorByline label="By" person={effectiveAuthor} />
+            {/* Reviewer */}
+            <ContributorByline label="Reviewed by" person={effectiveReviewer} />
+            {/* Fact Checker */}
+            <ContributorByline label="Fact checked by" person={effectiveFactChecker} />
+          </div>
 
-          {/* Fact Checker */}
-          <ContributorByline
-            label="Fact checked by"
-            person={effectiveFactChecker}
-          />
+          {canonicalUrl && (
+            <div className="shrink-0">
+              <ShareBar url={canonicalUrl} title={article.title} />
+            </div>
+          )}
         </div>
 
-        {canonicalUrl && (
-          <div className="shrink-0">
-            <ShareBar url={canonicalUrl} title={article.title} />
-          </div>
-        )}
+        {/* ── Timestamp + Read Time row ── */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pt-2 border-t border-slate-200 dark:border-slate-800 text-[11px] font-mono font-bold text-slate-600 dark:text-slate-400">
+          {publishedDate && (
+            <span>
+              PUBLISHED{' '}
+              <time dateTime={article.publishedAt ?? ''} className="text-slate-900 dark:text-white font-extrabold">
+                {publishedDate.toUpperCase()}
+              </time>
+            </span>
+          )}
+          {updatedDate && updatedDate !== publishedDate && (
+            <span>
+              UPDATED{' '}
+              <time dateTime={article.updatedAt ?? ''} className="text-[#c8102e] font-extrabold">
+                {updatedDate.toUpperCase()}
+              </time>
+            </span>
+          )}
+          <span className="flex items-center gap-1 text-[#c8102e]">
+            <Clock className="h-3 w-3" />
+            <span className="font-extrabold">{readTime.toUpperCase()}</span>
+          </span>
+        </div>
       </div>
 
-      {/* Featured Image */}
+      {/* ── Featured Image ── */}
       {showImage && article.featuredImage && !article.featuredImage.startsWith("data:") && (
-        <div className="relative aspect-[16/9] w-full rounded-xl overflow-hidden border border-gray-100 dark:border-gray-800 bg-muted mt-6">
+        <div className="relative aspect-[16/9] w-full rounded-lg overflow-hidden border-3 border-black dark:border-slate-700 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] bg-muted mt-6">
           <Image
             src={article.featuredImage}
             alt={article.title}

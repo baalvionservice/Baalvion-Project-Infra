@@ -27,8 +27,8 @@ import { ComparisonsSection, findComparisons } from "@/components/pages/Comparis
 import { ArticleCard } from "@/app/news/NewsArticleCard";
 import EditorialHeader from "@/components/pages/EditorialHeader";
 import { EditorialSpotlight } from "@/components/pages/EditorialSpotlight";
-import { InvestopediaKeyTerms, type KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
-import { InvestopediaFaqBox, type FaqItem } from "@/components/pages/InvestopediaFaqBox";
+import { ImperialpediaKeyTerms, type KeyTermItem } from "@/components/pages/ImperialpediaKeyTerms";
+import { ImperialpediaFaqBox, type FaqItem } from "@/components/pages/ImperialpediaFaqBox";
 import { EditorialArticleGuide } from "@/components/pages/EditorialArticleGuide";
 import { NewsletterForm } from "@/components/landing/NewsletterForm";
 import FAQAccordionSection from "@/components/faq/FAQAccordionSection";
@@ -89,7 +89,7 @@ const EXPLORE_MORE = [
   { href: "/reviews", label: "Reviews" },
 ];
 
-/** Core financial terms matching Investopedia's taxonomy pattern and screenshots. */
+/** Core financial terms matching Imperialpedia's taxonomy pattern and screenshots. */
 const BANKING_KEY_TERMS: KeyTermItem[] = [
   {
     term: "Deposit",
@@ -123,8 +123,8 @@ const BANKING_KEY_TERMS: KeyTermItem[] = [
   },
 ];
 
-/** Investopedia curated FAQ items matching screenshot 1. */
-const INVESTOPEDIA_FAQS: FaqItem[] = [
+/** Imperialpedia curated FAQ items matching screenshot 1. */
+const IMPERIALPEDIA_FAQS: FaqItem[] = [
   {
     question: "How does banking in the 21st century work?",
     answer:
@@ -413,7 +413,7 @@ export async function GdpHub() {
         />
       )}
 
-      {/* Investopedia Editorial Header (Centered) */}
+      {/* Imperialpedia Editorial Header (Centered) */}
       <EditorialHeader
         eyebrow={{ label: "Personal Finance", href: "/personal-finance" }}
         title={copy.title}
@@ -423,7 +423,7 @@ export async function GdpHub() {
       <TrustBar />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-16">
-        {/* Investopedia 5-Post Lead Spotlight (Lead on Left - Screenshot 4) */}
+        {/* Imperialpedia 5-Post Lead Spotlight (Lead on Left - Screenshot 4) */}
         <EditorialSpotlight
           badgeLabel="ALL ABOUT BANKING"
           featured={featured ?? undefined}
@@ -432,19 +432,19 @@ export async function GdpHub() {
           layout="left"
         />
 
-        {/* Investopedia Blue-Bordered FAQ Box (Screenshot 1 & 3) */}
-        <InvestopediaFaqBox
+        {/* Imperialpedia Blue-Bordered FAQ Box (Screenshot 1 & 3) */}
+        <ImperialpediaFaqBox
           title="Frequently Asked Questions"
-          faqs={INVESTOPEDIA_FAQS}
+          faqs={IMPERIALPEDIA_FAQS}
         />
 
-        {/* Investopedia Dark Navy Key Terms Widget (Screenshot 2) */}
-        <InvestopediaKeyTerms
+        {/* Imperialpedia Dark Navy Key Terms Widget (Screenshot 2) */}
+        <ImperialpediaKeyTerms
           title="Key Terms"
           terms={BANKING_KEY_TERMS}
         />
 
-        {/* Investopedia 5-Post Spotlight 2 (Reversed: 4 stories Left, Lead Right - Screenshot 2 & 5) */}
+        {/* Imperialpedia 5-Post Spotlight 2 (Reversed: 4 stories Left, Lead Right - Screenshot 2 & 5) */}
         {startHere.length > 0 && (
           <EditorialSpotlight
             badgeLabel="FEATURED GUIDES"

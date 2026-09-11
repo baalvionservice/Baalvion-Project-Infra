@@ -7,7 +7,7 @@ function formatVolume(n: number): string {
   return String(n);
 }
 
-/** CNBC-style "Most Active" table — real regularMarketVolume from Yahoo's
+/** Imperialpedia-style "Most Active" table — real regularMarketVolume from Yahoo's
  * chart API (same fetch already used for the watchlist), sorted descending.
  * Scoped to the tracked watchlist (not the full market universe) — no
  * fabricated volume numbers. */
@@ -34,7 +34,7 @@ export default function MostActive({ watchlist }: { watchlist: WorldData["watchl
             <span className="font-bold text-foreground">{r.ticker}</span>
             <span className="text-right font-mono text-foreground">{r.price}</span>
             <span
-              className={`text-right font-mono font-bold ${r.positive ? "text-[hsl(var(--cnbc-green))]" : "text-[hsl(var(--cnbc-red))]"}`}
+              className={`text-right font-mono font-bold ${r.positive ? "text-[hsl(var(--imperialpedia-green))]" : "text-[hsl(var(--imperialpedia-red))]"}`}
             >
               {r.change}
             </span>
