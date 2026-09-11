@@ -17,6 +17,8 @@ export function generateStaticParams() {
   return REGIONS.filter((r) => r.id !== "world").map((r) => ({ region: r.id }));
 }
 
+import { buildMetadata } from "@/lib/seo";
+
 export async function generateMetadata({
   params,
 }: {
@@ -24,19 +26,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { region } = await params;
   const seo = worldSeo(region);
-  return {
+  return buildMetadata({
     title: seo.title,
     description: seo.description,
-    alternates: { canonical: seo.canonical },
-    openGraph: {
-      title: seo.title,
-      description: seo.description,
-      url: seo.canonical,
-      type: "website",
-      siteName: "Imperialpedia",
-    },
-    twitter: { card: "summary_large_image", title: seo.title, description: seo.description },
-  };
+    canonical: `/world/${region}`,
+    ogType: "website",
+  });
 }
 
 export default async function WorldRegionPage({ params }: { params: Params }) {

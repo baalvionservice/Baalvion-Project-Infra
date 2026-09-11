@@ -151,8 +151,8 @@ export default function NewsroomPulse() {
         <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
           <div className="flex items-center gap-2">
             <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[hsl(var(--cnbc-red))] opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-[hsl(var(--cnbc-red))]" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[hsl(var(--imperialpedia-red))] opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-[hsl(var(--imperialpedia-red))]" />
             </span>
             <h2 className="world-kicker text-xs font-black uppercase tracking-widest">Newsroom Pulse — Live</h2>
           </div>
@@ -172,7 +172,7 @@ export default function NewsroomPulse() {
                     <span className="w-24 shrink-0 truncate text-white/60">{topic}</span>
                     <div className="h-1.5 flex-1 rounded-full bg-white/10 overflow-hidden">
                       <div
-                        className="h-full rounded-full bg-[hsl(var(--cnbc-red))]"
+                        className="h-full rounded-full bg-[hsl(var(--imperialpedia-red))]"
                         style={{ width: `${stats.byTopic[0][1] ? (count / stats.byTopic[0][1]) * 100 : 0}%` }}
                       />
                     </div>
@@ -213,7 +213,7 @@ export default function NewsroomPulse() {
                       href={newsArticleHref({ slug: item.slug, publishedAt: item.publishedAt ?? "", contentType: item.contentType })}
                       className="block text-xs text-white/20 hover:text-white hover:underline underline-offset-2 line-clamp-2"
                     >
-                      {item.isBreaking && <span className="text-[hsl(var(--cnbc-red))] font-bold mr-1">BREAKING</span>}
+                      {item.isBreaking && <span className="text-[hsl(var(--imperialpedia-red))] font-bold mr-1">BREAKING</span>}
                       {item.title}
                     </Link>
                   </li>

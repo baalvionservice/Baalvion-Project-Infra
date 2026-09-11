@@ -47,6 +47,8 @@ export const RETIRED_TOP_LEVEL_SLUGS: readonly string[] = [
   "live-market-news",
   "loan-reviews",
   "loans",
+  "market-news",
+  "markets",
   "monetary-policy",
   "money-management",
   "money-market",
@@ -108,7 +110,6 @@ export function withoutRetired<T extends { href: string }>(items: readonly T[]):
 const CANONICAL_PREFIX_REWRITES: ReadonlyArray<[RegExp, string]> = [
   [/^\/articles\/(?=.)/, "/financial-intelligence/"],
   [/^\/budgeting(?=\/|$)/, "/budgeting-basics"],
-  [/^\/markets(?=\/|$)/, "/market-news"],
 ];
 
 /**

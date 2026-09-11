@@ -3154,6 +3154,294 @@ const OVERRIDES: Record<string, TopicCopy> = {
       'If money has already moved, speed matters: contact your bank\'s fraud department immediately and file a report with the FTC (reportfraud.ftc.gov) or FBI IC3 (ic3.gov).',
     ],
   },
+  // Added 2026-09-11 — top-level section covering creator monetization, platform
+  // earnings, YouTube/Instagram/website income, and creator business guides.
+  // Deliberately not a sub-topic of any existing group; it's its own hub.
+  'creator-economy': {
+    tag: 'CREATOR ECONOMY',
+    title: 'Creator Economy',
+    description:
+      'How creators actually earn money — YouTube monetization, Instagram income, website advertising revenue, AdSense, sponsorships, affiliate marketing, and platform policies explained clearly.',
+    keyTakeaways: [
+      'Creator earnings depend on platform, niche, audience geography, content format, and monetization method — no single number applies universally.',
+      'YouTube pays creators through its Partner Program, splitting ad revenue roughly 55% to the creator and 45% to YouTube; RPM (what you actually receive per 1,000 views) is always lower than CPM (what advertisers paid).',
+      'Instagram does not pay directly per view in most regions — income comes from platform programs (invite-only bonuses, subscriptions), brand deals, affiliate links, and digital products.',
+      'A website earning primarily from Google AdSense sees highly variable RPMs depending on niche, audience country, and content type; finance and legal niches typically earn significantly more per visitor than entertainment or lifestyle niches.',
+      'Diversifying across ad revenue, sponsorships, affiliate income, digital products, and subscriptions is how most full-time creators build sustainable income — ad revenue alone is rarely sufficient.',
+      'Platform policies change — always verify current monetization requirements directly in each platform\'s official help center before planning around specific thresholds.',
+    ],
+    sections: [
+      {
+        heading: 'What Is the Creator Economy?',
+        body: [
+          'The creator economy refers to the ecosystem of independent content creators — YouTubers, bloggers, podcasters, newsletter writers, social media influencers, and others — who earn income directly from the content they produce, rather than through traditional employment. Enabled by platforms that distribute content and share advertising revenue, and by tools that make production accessible, it has grown substantially since the mid-2000s.',
+          'Unlike traditional media, creator income is typically non-guaranteed, highly variable, and spread across multiple revenue streams: advertising, sponsorships, subscriptions, affiliate commissions, digital product sales, and merchandise. The specific mix depends on the platform, the creator\'s niche, their audience size and geography, and how actively they pursue non-ad revenue.',
+        ],
+      },
+      {
+        heading: 'How YouTube Monetization Works',
+        body: [
+          'YouTube creators earn ad revenue through the YouTube Partner Program (YPP). Once admitted, YouTube places ads on their videos and shares a portion of the advertising revenue with the creator. YouTube\'s publicly stated share is approximately 55% to the creator and 45% to YouTube, though the actual amount a creator receives per 1,000 views — called RPM, or revenue per mille — varies considerably based on the niche, the geographic location of viewers, the time of year, video length, and how many views are actually monetized.',
+          'RPM is always lower than CPM (cost per mille, the rate advertisers pay). The gap exists because not every view is monetized with an ad, and because YouTube\'s share is taken from gross ad spend before the creator receives anything. Finance, investing, and business content channels tend to see substantially higher RPMs than entertainment or gaming channels, because advertisers targeting those audiences are willing to pay more per impression.',
+        ],
+      },
+      {
+        heading: 'How Instagram and Website Monetization Differ',
+        body: [
+          'Instagram does not have a universal pay-per-view program comparable to YouTube\'s AdSense revenue share. Most Instagram income comes from brand sponsorships (companies paying creators to feature their products), affiliate marketing (commissions on sales driven through a creator\'s unique links), platform-specific programs (such as subscriptions or invite-only bonus programs where available), and digital product sales. The amount any given creator earns per post or per thousand followers varies widely and is not publicly disclosed by Meta.',
+          'Website monetization through Google AdSense works on an impression-and-click basis: AdSense places ads on your pages and pays you a share of advertiser spend. The key metric is page RPM — estimated earnings per 1,000 page views. Finance, legal, insurance, and B2B content typically commands much higher RPMs than general entertainment, largely because advertisers in those categories pay more to reach their target audiences. A personal finance site and a movie news site might see very different RPMs even at identical traffic volumes.',
+        ],
+      },
+      {
+        heading: 'Why Earnings Vary So Much',
+        body: [
+          'Three factors account for most of the variance in creator earnings that confuses people comparing notes: audience geography, niche, and content format. An English-language finance channel with viewers primarily in the US, UK, and Australia will typically earn far more per thousand views than an entertainment channel of the same size with viewers concentrated in South Asia or Southeast Asia — not because the content is inherently more valuable, but because advertisers targeting higher-income markets bid more per impression.',
+          'Niche determines what advertisers are willing to pay to reach your audience. The higher the purchase intent and the purchase value in the advertiser\'s target market, the more they pay per impression. Content format matters on YouTube specifically: long-form videos (eight minutes or more) allow mid-roll ads, substantially increasing how much ad revenue a single video can generate compared to a shorter video with only pre-roll placement.',
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: 'How much does YouTube pay per 1,000 views?',
+        answer: 'YouTube pays creators through RPM (revenue per mille), which is what a creator receives per 1,000 views after YouTube\'s share. RPM varies significantly — it depends on the niche, audience country, video length, and time of year. Finance channels may see RPMs of $5–$15 or more; entertainment or gaming channels might see $1–$4. There is no single fixed amount YouTube guarantees per 1,000 views.',
+      },
+      {
+        question: 'Does Instagram pay creators per view?',
+        answer: 'Instagram does not have a universal pay-per-view program for all creators. Revenue-sharing programs have been introduced and modified over time, and availability varies by region. Most Instagram income for independent creators comes from brand sponsorships, affiliate marketing, digital products, and platform programs (such as subscriptions) where available. Check Instagram\'s Professional Dashboard for current programs available in your region.',
+      },
+      {
+        question: 'What is RPM vs CPM on YouTube?',
+        answer: 'CPM (cost per mille) is what advertisers pay YouTube for 1,000 ad impressions. RPM (revenue per mille) is what the creator actually receives per 1,000 total views, after YouTube takes its cut and accounting for the fact that not every view is monetized. RPM is always lower than CPM — often significantly so. RPM is the more useful metric for a creator assessing actual earnings.',
+      },
+      {
+        question: 'What are the requirements to join the YouTube Partner Program?',
+        answer: 'As of 2026, YouTube offers two tiers. Tier 1 (fan funding features: Channel Memberships, Super Chat, etc.) requires 500 subscribers, 3 public uploads in 90 days, and either 3,000 watch hours or 3 million Shorts views in 90 days. Tier 2 (full ad revenue sharing) requires 1,000 subscribers and either 4,000 watch hours or 10 million Shorts views. Note: YouTube has announced that Tier 2 thresholds will increase to 8,000 watch hours or 20 million Shorts views starting February 1, 2027. Always verify current requirements at support.google.com/youtube.',
+      },
+      {
+        question: 'How much can a website earn from Google AdSense?',
+        answer: 'Website AdSense earnings depend on niche, audience geography, ad placement, and traffic quality — not just raw visitor counts. There is no guaranteed amount. Finance, legal, and B2B niches typically see higher page RPMs than general interest or entertainment niches. The only reliable way to see what your specific site earns is through your own AdSense reporting dashboard.',
+      },
+    ],
+    relatedReading: [
+      { slug: 'how-much-does-youtube-pay-per-1000-views', anchor: 'YouTube pay per 1,000 views explained' },
+      { slug: 'youtube-rpm-vs-cpm-explained', anchor: 'YouTube RPM vs CPM — what\'s the difference?' },
+      { slug: 'how-to-qualify-for-youtube-monetization', anchor: 'How to qualify for the YouTube Partner Program' },
+      { slug: 'how-much-can-a-website-earn-from-100000-monthly-visitors', anchor: 'Website earnings from 100,000 monthly visitors' },
+      { slug: 'how-google-adsense-works', anchor: 'How Google AdSense works' },
+    ],
+    metaTitle: 'Creator Economy — YouTube, Instagram & Website Earnings Explained | Imperialpedia',
+    metaDescription: 'How creators earn money on YouTube, Instagram, and websites. Platform policies, RPM and CPM explained, AdSense earnings, sponsorships, and practical creator guides.',
+  },
+  'youtube-monetization': {
+    tag: 'YOUTUBE EARNINGS',
+    title: 'YouTube Earnings & Monetization',
+    description:
+      'Guides, calculations, RPM/CPM breakdowns, YPP requirements, Shorts revenue, and monetization rules for YouTube creators.',
+    keyTakeaways: [
+      'YouTube pays through RPM (revenue per mille) after taking its ~45% revenue split.',
+      'RPM varies widely by niche — finance and software pay significantly higher per 1,000 views than gaming or lifestyle.',
+      'Tier 2 YouTube Partner Program full ad sharing currently requires 1,000 subscribers and 4,000 watch hours (or 10M Shorts views).',
+    ],
+    sections: [
+      {
+        heading: 'How YouTube Ad Revenue Sharing Works',
+        body: [
+          'YouTube creators earn money from ad revenue through the YouTube Partner Program (YPP). When ads run on long-form videos, YouTube splits the gross advertising revenue approximately 55% to the creator and 45% to YouTube.',
+          'Your actual earnings are measured in RPM (Revenue Per Mille), which represents the net dollar amount you receive per 1,000 total video views after YouTube takes its cut and accounting for unmonetized views.',
+        ],
+      },
+      {
+        heading: 'YouTube Partner Program (YPP) Eligibility Rules',
+        body: [
+          'YouTube operates a two-tiered eligibility structure. Tier 1 (Fan Funding) requires 500 subscribers, 3 public uploads in 90 days, and either 3,000 watch hours in 12 months or 3M Shorts views in 90 days. This unlocks Channel Memberships, Super Chat, Super Stickers, and YouTube Shopping.',
+          'Tier 2 (Full Ad Revenue Sharing) requires 1,000 subscribers and either 4,000 watch hours in 12 months or 10M Shorts views in 90 days to share in video ad revenue.',
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: 'What is the average YouTube RPM?',
+        answer: 'YouTube RPM ranges from $1.00 to $15.00+ per 1,000 views. Highly targeted niches like personal finance, business, and tech see RPMs of $8–$20+, while entertainment, vlogs, and gaming average $1–$4.',
+      },
+      {
+        question: 'How does YouTube Shorts monetization work?',
+        answer: 'Shorts ad revenue is aggregated into a monthly Creator Pool based on total views and music licensing costs. Creators receive a share of the pool proportional to their share of total Shorts views, subject to a 45/55 revenue split.',
+      },
+    ],
+    relatedReading: [
+      { slug: 'how-much-does-youtube-pay-per-1000-views', anchor: 'How much YouTube pays per 1,000 views' },
+      { slug: 'youtube-rpm-vs-cpm-explained', anchor: 'YouTube RPM vs CPM explained' },
+      { slug: 'how-to-qualify-for-youtube-monetization', anchor: 'How to qualify for YouTube monetization' },
+      { slug: 'how-youtube-channel-memberships-work', anchor: 'How YouTube channel memberships work' },
+    ],
+    metaTitle: 'YouTube Earnings & Monetization — RPM, CPM & YPP Guides | Imperialpedia',
+    metaDescription: 'How YouTube creators earn money through RPM, CPM, YPP requirements, YouTube Shorts revenue pool, and channel monetization strategies.',
+  },
+  'instagram-monetization': {
+    tag: 'INSTAGRAM EARNINGS',
+    title: 'Instagram Earnings & Monetization',
+    description:
+      'How Instagram creators make money through subscriptions, brand deals, affiliate marketing, gifts, and creator programs.',
+    keyTakeaways: [
+      'Instagram does not offer a universal pay-per-view revenue share like YouTube AdSense.',
+      'Primary creator income comes from brand sponsorships, affiliate marketing, and subscriptions.',
+      'Micro-influencers (10k–50k followers) earn per sponsored post depending on engagement rate and niche.',
+    ],
+    sections: [
+      {
+        heading: 'How Instagram Monetization Operates',
+        body: [
+          'Unlike video platforms with automatic ad revenue splits, Instagram monetization is largely creator-driven. Income centers on sponsored brand integrations, affiliate product recommendations, native creator subscriptions, and virtual tipping gifts.',
+          'Creators with high engagement rates (3%+) can monetize smaller follower counts effectively through targeted niche partnerships.',
+        ],
+      },
+      {
+        heading: 'Instagram Creator Subscriptions',
+        body: [
+          'Eligible creators can set up monthly paid subscriptions ($0.99 to $99.99/mo). Subscribers receive purple subscriber badges next to their comments, access to exclusive Reels and Stories, subscriber-only broadcasts, and private group chats.',
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: 'How many followers do you need to get paid on Instagram?',
+        answer: 'There is no official follower requirement to make money through brand deals or affiliate marketing — micro-creators with 2,000–5,000 engaged followers can earn sponsorship revenue. Native Creator Subscriptions require 10,000 followers or an invitation in supported countries.',
+      },
+    ],
+    relatedReading: [
+      { slug: 'how-instagram-pays-creators', anchor: 'How Instagram pays creators' },
+      { slug: 'how-instagram-subscriptions-work-for-creators', anchor: 'How Instagram subscriptions work for creators' },
+      { slug: 'how-creator-sponsorships-and-brand-deals-work', anchor: 'How creator sponsorships and brand deals work' },
+    ],
+    metaTitle: 'Instagram Earnings & Monetization — Reels, Gifts & Sponsorships | Imperialpedia',
+    metaDescription: 'Complete breakdown of Instagram monetization, creator subscriptions, brand deal pricing, and Reels bonus eligibility.',
+  },
+  'website-monetization': {
+    tag: 'WEBSITE EARNINGS',
+    title: 'Website Earnings & Monetization',
+    description:
+      'Display advertising rates, Google AdSense performance, website RPMs, affiliate income, and digital product sales for website owners.',
+    keyTakeaways: [
+      'Website revenue depends on Page RPM — total earnings per 1,000 pageviews across all ad units.',
+      'Google AdSense pays publishers ~68% of ad spend; premium ad networks (Mediavine, Raptive) require higher traffic thresholds.',
+      'Affiliate marketing and digital products often outperform display ads for high-intent niche sites.',
+    ],
+    sections: [
+      {
+        heading: 'Website Revenue Models',
+        body: [
+          'Website owners earn income primarily through contextual ad networks (Google AdSense), premium managed header bidding networks (Mediavine, Raptive, Journey), affiliate commissions, and direct digital product sales.',
+          'Ad earnings are governed by Page RPM (Revenue Per Mille), which measures the combined revenue generated for every 1,000 pageviews your site receives.',
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: 'How much can a website earn from 100,000 monthly visitors?',
+        answer: 'Website earnings depend heavily on niche and monetization mix. A site with a $15 Page RPM earns $1,500/month from display ads alone, while finance or B2B sites with $40+ RPMs earn $4,000+/month from the same traffic.',
+      },
+    ],
+    relatedReading: [
+      { slug: 'how-google-adsense-works', anchor: 'How Google AdSense works' },
+      { slug: 'how-google-adsense-page-rpm-is-calculated', anchor: 'How to calculate AdSense page RPM' },
+      { slug: 'how-much-can-a-website-earn-from-100000-monthly-visitors', anchor: 'Website earnings from 100k visitors' },
+    ],
+    metaTitle: 'Website Earnings & Monetization — AdSense, RPMs & Traffic Rates | Imperialpedia',
+    metaDescription: 'How website owners earn money from Google AdSense, display ad networks, affiliate links, and digital product sales.',
+  },
+  'social-media-earnings': {
+    tag: 'SOCIAL MEDIA EARNINGS',
+    title: 'Social Media Earnings',
+    description:
+      'Creator monetization programs, revenue sharing, eligibility rules, and earnings potential across TikTok, Facebook, X, and LinkedIn.',
+    keyTakeaways: [
+      'TikTok Rewards Program pays per 1,000 qualified views on 1+ minute videos in eligible countries.',
+      'Facebook pays creators through In-Stream Ads and Performance Bonus programs based on post engagement.',
+      'X (Twitter) Creator Revenue Sharing requires X Premium and 5M organic impressions in 3 months.',
+    ],
+    sections: [
+      {
+        heading: 'Comparing Social Platform Payout Models',
+        body: [
+          'Monetization mechanisms vary across platforms: TikTok uses the Creator Rewards Program (paying per 1,000 qualified views on 1+ minute videos), Facebook offers In-Stream Ads and Performance Bonuses, and X shares ad revenue generated in reply threads of X Premium subscribers.',
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: 'Which social media platform pays creators the most?',
+        answer: 'YouTube offers the highest consistent ad revenue share (55%) with RPMs averaging $2–$15+. Facebook In-Stream ads rank second for long-form video creators, while short-form platforms (TikTok, Reels, Shorts) yield lower ad RPMs ($0.02–$0.50/1k views).',
+      },
+    ],
+    relatedReading: [
+      { slug: 'how-much-do-tiktok-creators-make', anchor: 'How much TikTok creators make' },
+      { slug: 'how-much-do-facebook-creators-earn', anchor: 'How much Facebook creators earn' },
+    ],
+    metaTitle: 'Social Media Earnings — TikTok, Facebook & X Creator Programs | Imperialpedia',
+    metaDescription: 'Earnings breakdown for TikTok Creator Rewards, Facebook Reels bonuses, X revenue sharing, and social media monetization.',
+  },
+  'creator-guides': {
+    tag: 'CREATOR GUIDES',
+    title: 'Creator Business Guides',
+    description:
+      'Strategic guides on creator business models, multiple revenue streams, sponsorship negotiations, and monetization diversification.',
+    keyTakeaways: [
+      'Relying on a single platform algorithm creates revenue vulnerability — top creators diversify across multiple income streams.',
+      'Sponsorship contracts should always specify deliverable scopes, usage rights, payment terms, and FTC disclosure compliance.',
+      'Digital products and email newsletters offer the highest profit margins for independent creators.',
+    ],
+    sections: [
+      {
+        heading: 'Building a Resilient Creator Business',
+        body: [
+          'Sustainable creator businesses combine baseline ad revenue with active income streams: direct brand deals, recurring affiliate sales, digital courses/eBooks, and fan memberships. Diversification protects against algorithm updates and ad rate fluctuations.',
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: 'What are the best income streams for content creators?',
+        answer: 'Digital products (eBooks, courses, templates) offer the highest profit margins (90%+). Sponsorships provide immediate cash flow, while ad revenue and affiliate links generate passive recurring income.',
+      },
+    ],
+    relatedReading: [
+      { slug: 'how-to-build-multiple-creator-income-streams', anchor: 'How to build multiple creator income streams' },
+      { slug: 'how-affiliate-marketing-works-for-content-creators', anchor: 'Affiliate marketing for content creators' },
+      { slug: 'how-to-price-digital-products-as-a-creator', anchor: 'How to price digital products as a creator' },
+    ],
+    metaTitle: 'Creator Business Guides — Sponsorships, Revenue Streams & Strategy | Imperialpedia',
+    metaDescription: 'Business guides for content creators: sponsorship negotiation, affiliate marketing, digital products, and income diversification.',
+  },
+  'creator-tools': {
+    tag: 'CREATOR TOOLS',
+    title: 'Creator Tools & Calculators',
+    description:
+      'Interactive calculators and tools to estimate YouTube RPM, ad revenue, website traffic income, and sponsorship potential.',
+    keyTakeaways: [
+      'Use interactive RPM models to estimate monthly and annual ad revenue before launching content campaigns.',
+      'Calculators account for audience geography multipliers, niche RPM ranges, and platform revenue splits.',
+    ],
+    sections: [
+      {
+        heading: 'Financial Tools for Content Creators',
+        body: [
+          'Our interactive tools allow creators to model potential earnings across YouTube, websites, and social media platforms using realistic CPM ranges, audience demographic weights, and platform revenue splits.',
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: 'How do creator earnings calculators work?',
+        answer: 'Calculators combine expected view or visitor volume with estimated niche CPM ranges and platform revenue splits (e.g. 55/45 for YouTube, 68/32 for AdSense) to calculate estimated monthly and annual revenue.',
+      },
+    ],
+    relatedReading: [
+      { slug: 'creator-economy/calculator', anchor: 'Interactive Creator Earnings Calculator' },
+      { slug: 'youtube-rpm-vs-cpm-explained', anchor: 'YouTube RPM vs CPM breakdown' },
+    ],
+    metaTitle: 'Creator Tools & Calculators — YouTube RPM & Revenue Estimators | Imperialpedia',
+    metaDescription: 'Free creator tools and calculators to estimate YouTube earnings, website AdSense revenue, and brand deal rates.',
+  },
   'budgeting-basics': {
     tag: 'BUDGETING BASICS',
     title: 'Budgeting Basics',
@@ -5739,7 +6027,7 @@ export function staticCategoryFor(slug: string): NewsCategory | undefined {
  * plus the Budgeting hub's own sub-pages, which aren't in the top nav). Drives the
  * small blue "INVESTING" / "PERSONAL FINANCE" label shown above a subcategory
  * page's title, linking back to its parent category — e.g. /bonds shows "INVESTING"
- * linking to /investing, the same way Investopedia labels its category pages.
+ * linking to /investing, the same way Imperialpedia labels its category pages.
  *
  * A slug listed under more than one group (e.g. "retirement" is reachable from both
  * Investing and Personal Finance in the nav) resolves to whichever group is listed
@@ -5788,11 +6076,21 @@ const CATEGORY_GROUPS: CategoryGroup[] = [
   },
   {
     label: 'BUDGETING',
-    // /budgeting isn't a real CMS category — see the RETIRED_TOPIC_SLUGS note
-    // above and its next.config.ts redirect (added 2026-09-04). budgeting-basics
-    // is the real, live category all the others were merged into.
     href: '/budgeting-basics',
-    children: ['budgeting-basics', 'monthly-budget', 'saving-money', 'family-budget', 'student-budget', 'budgeting-apps', 'advanced-budgeting', 'budget-rules', 'emergency-fund'],
+    children: ['budgeting-basics'],
+  },
+  {
+    label: 'CREATOR ECONOMY',
+    href: '/creator-economy',
+    children: [
+      'creator-economy',
+      'youtube-monetization',
+      'instagram-monetization',
+      'website-monetization',
+      'social-media-earnings',
+      'creator-guides',
+      'creator-tools',
+    ],
   },
 ];
 

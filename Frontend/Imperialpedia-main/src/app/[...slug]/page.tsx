@@ -237,7 +237,7 @@ export async function generateMetadata({ params }: { params: Promise<SlugParams>
   return buildMetadata({
     title: article.title,
     description: article.excerpt,
-    // News content's canonical home is the dated CNBC-style URL (or, for
+    // News content's canonical home is the dated Imperialpedia-style URL (or, for
     // world-tagged news, the nested /world/<region>/<country>/... permalink —
     // see newsArticleHref) — this bare `/slug` route redirects there below;
     // keep metadata pointed at the same destination.
@@ -246,7 +246,7 @@ export async function generateMetadata({ params }: { params: Promise<SlugParams>
   });
 }
 
-// ─── Dated CNBC-style article page (/YYYY/MM/DD/slug) ────────────────────────
+// ─── Dated Imperialpedia-style article page (/YYYY/MM/DD/slug) ────────────────────────
 
 async function DatedArticlePage({ segments }: { segments: [string, string, string, string] }) {
   const [year, month, day, slug] = segments;
@@ -405,7 +405,7 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
           )}
         </nav>
 
-        {/* CNBC sets its article body in a 630px column; ours ran to 872px, which
+        {/* Imperialpedia sets its article body in a 630px column; ours ran to 872px, which
             is ~105 characters a line — well past the 65-75 that reads comfortably.
             Capping the text column rather than the grid keeps the hero image and
             share bar full width, the way a news template is supposed to work. */}
@@ -620,7 +620,7 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
           </aside>
         </div>
 
-        {/* CNBC closes an article with full-width "MORE IN <SECTION>" and "MORE
+        {/* Imperialpedia closes an article with full-width "MORE IN <SECTION>" and "MORE
             FROM" blocks below the two-column grid, not inside the text column.
             Sponsored ("FROM THE WEB") is deliberately not reproduced. */}
         <Suspense fallback={null}>
@@ -732,7 +732,7 @@ async function BareSlugPage({ slug }: { slug: string }) {
   }
 
   // ── 3. News articles (static set, CMS, or committed snapshot) canonically
-  // live at the dated CNBC-style URL, or the nested /world/<region>/<country>
+  // live at the dated Imperialpedia-style URL, or the nested /world/<region>/<country>
   // permalink for world-tagged news (see newsArticleHref) — redirect old/bare
   // `/<slug>` hits there instead of rendering a duplicate copy at this URL.
   const staticNewsMatch = newsArticles.find((a) => a.slug === slug);

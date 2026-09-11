@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ImperialpediaMark } from "@/components/icons/ImperialpediaMark";
 import { SearchModal } from "@/components/search/SearchModal";
-import { withoutRetired } from "@/lib/content/retired-paths";
+import { isRetiredPath, withoutRetired } from "@/lib/content/retired-paths";
 
 // Real destinations only. The original navCategories list (worldData.ts) also
 // had "Health & Science", "Media", "Energy", and "Climate" -- none of which
@@ -54,12 +54,12 @@ function useLiveMastheadClock(): string {
 }
 
 /**
- * Shared dark CNBC-style masthead for /world, /news, /market-news — promoted
+ * Shared dark Imperialpedia-style masthead for /world, /news, /market-news — promoted
  * from world/TopNav.tsx (nothing about it was actually /world-specific; its
  * links already point cross-site to /markets, /personal-finance, /terms) so
  * all three routes share one nav instead of three near-duplicate copies.
  * Re-themed from the original light (`bg-white`) version to the canonical
- * CNBC black/red palette (`#ce2b2b` → `hsl(var(--cnbc-red))`) as part of the
+ * Imperialpedia black/red palette (`#ce2b2b` → `hsl(var(--imperialpedia-red))`) as part of the
  * same move, to avoid a separate follow-up edit.
  */
 export default function TopNav() {
@@ -69,7 +69,7 @@ export default function TopNav() {
 
   // Same ⌘K/Ctrl+K fallback the sitewide Navbar provides — TopNav replaces
   // Navbar entirely on /world, /news, /market-news (see RootLayoutClient's
-  // CNBC_ROUTES exclusion), so this shortcut doesn't exist anywhere else on
+  // Imperialpedia_ROUTES exclusion), so this shortcut doesn't exist anywhere else on
   // these routes unless it's wired here too.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -91,15 +91,19 @@ export default function TopNav() {
           <Link
             href="/"
             aria-label="Imperialpedia home"
-            className="flex items-center gap-1.5 bg-[hsl(var(--cnbc-red))] text-white px-2 py-1 leading-none"
+            className="flex items-center gap-1.5 bg-[hsl(var(--imperialpedia-red))] text-white px-2 py-1 leading-none"
           >
             <ImperialpediaMark className="h-4 w-4 text-white" />
             <span className="world-kicker font-black text-sm tracking-wide">IMPERIALPEDIA</span>
           </Link>
           <nav className="hidden md:flex items-center gap-1 text-xs text-white/60 font-medium">
-            <Link href="/market-news" className="hover:text-[hsl(var(--cnbc-red))] transition-colors px-2 py-1">Markets</Link>
-            <span className="text-white/20">|</span>
-            <Link href="/budgeting-basics" className="hover:text-[hsl(var(--cnbc-red))] transition-colors px-2 py-1">Budgeting</Link>
+            {!isRetiredPath("/market-news") && (
+              <>
+                <Link href="/market-news" className="hover:text-[hsl(var(--imperialpedia-red))] transition-colors px-2 py-1">Markets</Link>
+                <span className="text-white/20">|</span>
+              </>
+            )}
+            <Link href="/budgeting-basics" className="hover:text-[hsl(var(--imperialpedia-red))] transition-colors px-2 py-1">Budgeting</Link>
           </nav>
         </div>
         <div className="flex items-center gap-3 text-xs text-white/50">
@@ -109,7 +113,7 @@ export default function TopNav() {
               sign-up in the footer, which is a real destination. */}
           <Link
             href="/#newsletter"
-            className="world-kicker bg-[hsl(var(--cnbc-red))] text-white text-xs font-bold px-3 py-1.5 rounded-sm hover:opacity-90 transition-opacity"
+            className="world-kicker bg-[hsl(var(--imperialpedia-red))] text-white text-xs font-bold px-3 py-1.5 rounded-sm hover:opacity-90 transition-opacity"
           >
             SUBSCRIBE
           </Link>
@@ -135,8 +139,8 @@ export default function TopNav() {
               href={cat.href}
               className={`world-kicker text-xs font-semibold tracking-wide px-3 py-3 border-b-2 transition-all whitespace-nowrap ${
                 pathname === cat.href
-                  ? "border-[hsl(var(--cnbc-red))] text-[hsl(var(--cnbc-red))]"
-                  : "border-transparent text-white/60 hover:text-[hsl(var(--cnbc-red))] hover:border-white/30"
+                  ? "border-[hsl(var(--imperialpedia-red))] text-[hsl(var(--imperialpedia-red))]"
+                  : "border-transparent text-white/60 hover:text-[hsl(var(--imperialpedia-red))] hover:border-white/30"
               }`}
             >
               {cat.label.toUpperCase()}

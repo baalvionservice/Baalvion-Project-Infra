@@ -10,11 +10,13 @@ import { TrustBar } from "@/components/pages/TrustBar";
 import EditorialHeader from "@/components/pages/EditorialHeader";
 import { EditorialSpotlight } from "@/components/pages/EditorialSpotlight";
 import { EditorialArticleGuide } from "@/components/pages/EditorialArticleGuide";
-import { InvestopediaKeyTerms } from "@/components/pages/InvestopediaKeyTerms";
-import { InvestopediaFaqBox } from "@/components/pages/InvestopediaFaqBox";
+import { ImperialpediaKeyTerms } from "@/components/pages/ImperialpediaKeyTerms";
+import { ImperialpediaFaqBox } from "@/components/pages/ImperialpediaFaqBox";
+import { ArticleTopicMesh } from "@/components/article/ArticleTopicMesh";
 import { getKeyTermsForTopic } from "@/lib/topic-key-terms";
 import { env } from "@/config/env";
 import { newsArticleHref } from "@/lib/data/article-url";
+import { isPathHiddenByAdsenseCleanup } from "@/config/adsense-cleanup";
 import Link from "next/link";
 import { FileText } from "lucide-react";
 
@@ -84,10 +86,13 @@ export async function CategoryFeed({ slug }: Props) {
     }
   }
 
+  articles = articles.filter((a) => !isPathHiddenByAdsenseCleanup(newsArticleHref(a)));
+
   const featured = articles.find((a) => a.featured) ?? articles[0];
   const rest = articles.filter((a) => a !== featured);
   const sidebarArticles = rest.slice(0, 4);
-  const gridArticles = rest.slice(4);
+  // Ensure the explore grid shows all topic articles even when total articles <= 5
+  const gridArticles = rest.slice(4).length > 0 ? rest.slice(4) : rest.length > 0 ? rest : articles;
 
   // ── SEO: CollectionPage + ItemList + Breadcrumb structured data ──
   const base = (env.siteUrl || "https://imperialpedia.com").replace(/\/$/, "");
@@ -145,7 +150,7 @@ export async function CategoryFeed({ slug }: Props) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
         />
       )}
-      {/* Investopedia Editorial Header */}
+      {/* Imperialpedia Editorial Header */}
       <EditorialHeader
         eyebrow={
           parentFor(slug)
@@ -158,14 +163,8 @@ export async function CategoryFeed({ slug }: Props) {
 
       <TrustBar />
 
-      {siblings && (
-        <div className="max-w-7xl mx-auto px-4 pt-6">
-          <SubtopicTabs current={slug} siblings={siblings} />
-        </div>
-      )}
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-16">
-        {/* Investopedia 5-Post Lead Spotlight Section (matching screenshot) */}
+        {/* Imperialpedia 5-Post Lead Spotlight Section (matching screenshot) */}
         <EditorialSpotlight
           badgeLabel={`ALL ABOUT ${copy.title.toUpperCase()}`}
           featured={featured ?? undefined}
@@ -174,15 +173,15 @@ export async function CategoryFeed({ slug }: Props) {
           layout="right"
         />
 
-        {/* Investopedia Key Terms Glossary (Unique per topic) */}
-        <InvestopediaKeyTerms
+        {/* Imperialpedia Key Terms Glossary (Unique per topic) */}
+        <ImperialpediaKeyTerms
           title={`Key Terms in ${copy.title}`}
           terms={getKeyTermsForTopic(slug)}
         />
 
-        {/* Investopedia Blue-Bordered FAQ Box (Unique per topic) */}
+        {/* Imperialpedia Blue-Bordered FAQ Box (Unique per topic) */}
         {copy.faqs && copy.faqs.length > 0 && (
-          <InvestopediaFaqBox
+          <ImperialpediaFaqBox
             title={`Frequently Asked Questions about ${copy.title}`}
             faqs={copy.faqs.map((f) => ({
               question: f.question,
@@ -198,7 +197,12 @@ export async function CategoryFeed({ slug }: Props) {
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
               Explore {isLive ? copy.title : "News"}
             </h2>
-            <ExploreNewsSection articles={gridArticles} categoryLabel={copy.title} />
+            <ExploreNewsSection
+              articles={gridArticles}
+              categoryLabel={copy.title}
+              subtopics={siblings}
+              currentSlug={slug}
+            />
           </section>
         )}
 
@@ -210,6 +214,9 @@ export async function CategoryFeed({ slug }: Props) {
           sections={copy.sections}
           introParagraphs={introParagraphs}
         />
+
+        {/* 360-Degree Internal Link Mesh for SEO Indexation */}
+        <ArticleTopicMesh categorySlug={slug} categoryName={copy.title} />
 
         {copy.relatedReading && copy.relatedReading.length > 0 && (
           <div className="mt-10 rounded-2xl border border-border p-6 bg-muted/20">

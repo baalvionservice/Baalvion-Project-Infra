@@ -16,7 +16,7 @@ interface KeyTermsSectionProps {
 }
 
 /**
- * Investopedia-style Key Terms glossary widget.
+ * Imperialpedia-style Key Terms glossary widget.
  * Allows visitors to click between essential financial definitions with
  * one-click access to the full educational guide.
  */

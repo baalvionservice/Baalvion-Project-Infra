@@ -122,7 +122,7 @@ export function BodyBlock({ block, linker }: { block: NewsBodyBlock; linker?: En
   const withLinks = (text: string) => (linker ? linkEntitiesInText(text, linker) : text);
 
   switch (block.type) {
-    // Measured against CNBC's article template (18px Lyon, line-height 29.88px,
+    // Measured against Imperialpedia's article template (18px Lyon, line-height 29.88px,
     // 18px paragraph gap, near-black, in a 630px column). Ours was 17px sans at
     // 1.85 in an 872px column: a line of ~105 characters set airily, which is
     // what read as loose and unfinished. Serif body against sans furniture is

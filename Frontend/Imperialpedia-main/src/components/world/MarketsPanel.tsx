@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import type { Indicator, WorldData } from "@/lib/data/worldRegions";
+import { MARKET_QUOTES_LIVE } from "@/config/market-quotes";
 
 interface Props {
   markets: WorldData["markets"];
@@ -39,7 +40,7 @@ export default function MarketsPanel({ markets, watchlist, indicators }: Props) 
             onClick={() => setActiveTab(tab)}
             className={`world-kicker flex-1 text-[10px] sm:text-xs font-black tracking-widest py-2 sm:py-3 transition-all uppercase ${
               activeTab === tab
-                ? "border-b-2 border-[hsl(var(--cnbc-red))] text-[hsl(var(--cnbc-red))]"
+                ? "border-b-2 border-[hsl(var(--imperialpedia-red))] text-[hsl(var(--imperialpedia-red))]"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -73,7 +74,7 @@ export default function MarketsPanel({ markets, watchlist, indicators }: Props) 
                         </div>
                         <div
                           className={`text-[9px] sm:text-[11px] font-mono font-bold ${
-                            m.positive ? "text-[hsl(var(--cnbc-green))]" : "text-[hsl(var(--cnbc-red))]"
+                            m.positive ? "text-[hsl(var(--imperialpedia-green))]" : "text-[hsl(var(--imperialpedia-red))]"
                           }`}
                         >
                           {m.positive ? "▲" : "▼"} {m.change}
@@ -82,7 +83,7 @@ export default function MarketsPanel({ markets, watchlist, indicators }: Props) 
                     </>
                   );
                   const rowClass = "flex items-center justify-between px-2 sm:px-3 py-1.5 sm:py-2 hover:bg-muted transition-colors";
-                  return m.symbol ? (
+                  return m.symbol && MARKET_QUOTES_LIVE ? (
                     <Link key={m.name} href={`/markets/quote/${m.symbol}`} className={rowClass}>
                       {content}
                     </Link>
@@ -96,7 +97,7 @@ export default function MarketsPanel({ markets, watchlist, indicators }: Props) 
             </div>
           ))}
           <div className="p-3">
-            <button className="world-kicker w-full text-[11px] font-bold text-[hsl(var(--cnbc-red))] py-2 border border-[hsl(var(--cnbc-red))] hover:bg-[hsl(var(--cnbc-red))] hover:text-white transition-colors rounded-sm tracking-wide">
+            <button className="world-kicker w-full text-[11px] font-bold text-[hsl(var(--imperialpedia-red))] py-2 border border-[hsl(var(--imperialpedia-red))] hover:bg-[hsl(var(--imperialpedia-red))] hover:text-white transition-colors rounded-sm tracking-wide">
               VIEW FULL MARKETS →
             </button>
           </div>
@@ -118,7 +119,7 @@ export default function MarketsPanel({ markets, watchlist, indicators }: Props) 
                     <div className="text-[10px] sm:text-xs font-mono text-foreground">{i.value}</div>
                     <div
                       className={`text-[9px] sm:text-[11px] font-mono font-bold ${
-                        i.positive ? "text-[hsl(var(--cnbc-green))]" : "text-[hsl(var(--cnbc-red))]"
+                        i.positive ? "text-[hsl(var(--imperialpedia-green))]" : "text-[hsl(var(--imperialpedia-red))]"
                       }`}
                     >
                       {i.positive ? "▲" : "▼"} {i.percent}
@@ -127,7 +128,7 @@ export default function MarketsPanel({ markets, watchlist, indicators }: Props) 
                 </>
               );
               const rowClass = "flex items-center justify-between px-2 sm:px-3 py-1.5 sm:py-2 hover:bg-muted transition-colors";
-              return i.symbol ? (
+              return i.symbol && MARKET_QUOTES_LIVE ? (
                 <Link key={i.name} href={`/markets/quote/${i.symbol}`} className={rowClass}>
                   {content}
                 </Link>
@@ -152,37 +153,52 @@ export default function MarketsPanel({ markets, watchlist, indicators }: Props) 
             <span className="text-right">Change</span>
           </div>
           <div className="divide-y divide-border">
-            {watchlist.map((item) => (
-              <Link
-                key={item.ticker}
-                href={`/markets/quote/${item.ticker}`}
-                className="grid grid-cols-3 items-center px-2 sm:px-3 py-2 sm:py-2.5 hover:bg-muted transition-colors"
-              >
-                <div className="min-w-0">
-                  <div className="text-[10px] sm:text-xs font-black text-foreground">
-                    {item.ticker}
+            {watchlist.map((item) => {
+              const rowContent = (
+                <>
+                  <div className="min-w-0">
+                    <div className="text-[10px] sm:text-xs font-black text-foreground">
+                      {item.ticker}
+                    </div>
+                    <div className="text-[8px] sm:text-[10px] text-muted-foreground truncate">
+                      {item.name}
+                    </div>
                   </div>
-                  <div className="text-[8px] sm:text-[10px] text-muted-foreground truncate">
-                    {item.name}
+                  <div className="text-right">
+                    <span className="text-[10px] sm:text-xs font-mono text-foreground">
+                      {item.price}
+                    </span>
                   </div>
-                </div>
-                <div className="text-right">
-                  <span className="text-[10px] sm:text-xs font-mono text-foreground">
-                    {item.price}
-                  </span>
-                </div>
-                <div
-                  className={`text-right text-[10px] sm:text-xs font-mono font-bold ${
-                    item.positive ? "text-[hsl(var(--cnbc-green))]" : "text-[hsl(var(--cnbc-red))]"
-                  }`}
+                  <div
+                    className={`text-right text-[10px] sm:text-xs font-mono font-bold ${
+                      item.positive ? "text-[hsl(var(--imperialpedia-green))]" : "text-[hsl(var(--imperialpedia-red))]"
+                    }`}
+                  >
+                    {item.change}
+                  </div>
+                </>
+              );
+              const rowClass = "grid grid-cols-3 items-center px-2 sm:px-3 py-2 sm:py-2.5 hover:bg-muted transition-colors";
+              return MARKET_QUOTES_LIVE ? (
+                <Link
+                  key={item.ticker}
+                  href={`/markets/quote/${item.ticker}`}
+                  className={rowClass}
                 >
-                  {item.change}
+                  {rowContent}
+                </Link>
+              ) : (
+                <div
+                  key={item.ticker}
+                  className={rowClass}
+                >
+                  {rowContent}
                 </div>
-              </Link>
-            ))}
+              );
+            })}
           </div>
           <div className="p-2 sm:p-3">
-            <button className="world-kicker w-full text-[10px] sm:text-[11px] font-bold text-[hsl(var(--cnbc-red))] py-1.5 sm:py-2 border border-[hsl(var(--cnbc-red))] hover:bg-[hsl(var(--cnbc-red))] hover:text-white transition-colors rounded-sm tracking-wide">
+            <button className="world-kicker w-full text-[10px] sm:text-[11px] font-bold text-[hsl(var(--imperialpedia-red))] py-1.5 sm:py-2 border border-[hsl(var(--imperialpedia-red))] hover:bg-[hsl(var(--imperialpedia-red))] hover:text-white transition-colors rounded-sm tracking-wide">
               + ADD SYMBOL
             </button>
           </div>

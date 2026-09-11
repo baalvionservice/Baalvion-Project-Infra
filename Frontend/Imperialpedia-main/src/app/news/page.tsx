@@ -12,7 +12,7 @@ import { TodayHighlights } from "@/components/news/TodayHighlights";
 import { VideoCarousel } from "@/components/news/VideoCarousel";
 import { LatestFeed } from "@/components/news/LatestFeed";
 import { NewsSidebar } from "@/components/news/NewsSidebar";
-import { NewsletterBand } from "@/components/landing/investopedia/NewsletterBand";
+import { NewsletterBand } from "@/components/landing/imperialpedia/NewsletterBand";
 import { newsArticleHref } from "@/lib/data/article-url";
 import { AdSenseUnit } from "@/components/common/AdSense";
 import { NEWS_HUB_MIN_ARTICLES, newsHubIsLive } from "@/config/sections";
