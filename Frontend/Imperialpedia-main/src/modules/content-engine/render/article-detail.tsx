@@ -19,6 +19,7 @@ import { extractFaqFromHtml } from "@/lib/seo/faq-extractor";
 import { staticArticleBySlug } from "@/services/data/static-content";
 import { canonicalService } from "@/modules/seo/services/canonical-service";
 import { resolveAuthor, getContentRedirectSlug, getArticleFeedback, listArticleComments, getArticlePoll } from "@/services/data/cms-public";
+import { isAllowedImageHost } from "@/lib/safe-image";
 
 /**
  * @fileOverview Shared article-detail resolution + rendering, used by both the
@@ -94,7 +95,7 @@ export async function buildArticleDetailMetadata(slug: string): Promise<Metadata
     title: article.title,
     description: article.description,
     keywords: article.tags,
-    ogImage: article.featuredImage,
+    ogImage: isAllowedImageHost(article.featuredImage) ? article.featuredImage : undefined,
     ogType: "article",
     canonical,
   });
