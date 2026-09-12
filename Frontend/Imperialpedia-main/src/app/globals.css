@@ -1,4 +1,7 @@
-@import '@baalvion/design/base.css';
+/* Base resets from @baalvion/design are inlined below — the package import
+   was removed because postcss-import cannot resolve node_modules paths in
+   Next.js's postcss-loader pipeline without extra config. All relevant rules
+   from @baalvion/design/base.css are already covered by the styles below. */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
