@@ -110,63 +110,79 @@ export async function buildArticleDetailMetadata(slug: string): Promise<Metadata
 }
 
 export async function ArticleDetailContent({ article }: { article: Article }) {
-  const [author, reviewer, factChecker, feedback, comments, poll] = await Promise.all([
-    article.authorSlug ? resolveAuthor(article.authorSlug).catch(() => null) : Promise.resolve(null),
-    article.reviewerSlug ? resolveAuthor(article.reviewerSlug).catch(() => null) : Promise.resolve(null),
-    article.factCheckerSlug ? resolveAuthor(article.factCheckerSlug).catch(() => null) : Promise.resolve(null),
-    getArticleFeedback(article.slug).catch(() => ({ helpful: 0, notHelpful: 0 })),
-    listArticleComments(article.slug).catch(() => []),
-    getArticlePoll(article.slug).catch(() => null),
-  ]);
+  try {
+    const [author, reviewer, factChecker, feedback, comments, poll] = await Promise.all([
+      article.authorSlug ? resolveAuthor(article.authorSlug).catch(() => null) : Promise.resolve(null),
+      article.reviewerSlug ? resolveAuthor(article.reviewerSlug).catch(() => null) : Promise.resolve(null),
+      article.factCheckerSlug ? resolveAuthor(article.factCheckerSlug).catch(() => null) : Promise.resolve(null),
+      getArticleFeedback(article.slug).catch(() => ({ helpful: 0, notHelpful: 0 })),
+      listArticleComments(article.slug).catch(() => []),
+      getArticlePoll(article.slug).catch(() => null),
+    ]);
 
-  const breadcrumbs = breadcrumbService.generateBreadcrumbForArticle(article);
-  const articleSchema = schemaService.generateArticleSchema(article, reviewer, factChecker);
-  const faqPairs = article.faq?.length ? article.faq : extractFaqFromHtml(article.body);
-  const faqSchema = faqPairs.length ? structuredData.faq(faqPairs) : null;
-  const canonicalUrl = canonicalService.getCanonicalTag(article.slug, "article", article.categorySlug);
+    const breadcrumbs = breadcrumbService.generateBreadcrumbForArticle(article);
+    const articleSchema = schemaService.generateArticleSchema(article, reviewer, factChecker);
+    const faqPairs = article.faq?.length ? article.faq : extractFaqFromHtml(article.body);
+    const faqSchema = faqPairs.length ? structuredData.faq(faqPairs) : null;
+    const canonicalUrl = canonicalService.getCanonicalTag(article.slug, "article", article.categorySlug);
 
-  const trackedCompanies = trackedCompaniesFromMentions(article.entityMentions);
-  const marketWidget =
-    trackedCompanies.length > 0 ? (
-      <Suspense fallback={null}>
-        <ArticleMarketWidget entityMentions={article.entityMentions} />
-      </Suspense>
-    ) : null;
-  const inlineChart =
-    trackedCompanies.length === 1 && trackedCompanies[0].ticker ? (
-      <Suspense fallback={null}>
-        <ArticleInlineChart symbol={trackedCompanies[0].ticker} name={trackedCompanies[0].name} />
-      </Suspense>
-    ) : null;
+    const trackedCompanies = trackedCompaniesFromMentions(article.entityMentions);
+    const marketWidget =
+      trackedCompanies.length > 0 ? (
+        <Suspense fallback={null}>
+          <ArticleMarketWidget entityMentions={article.entityMentions} />
+        </Suspense>
+      ) : null;
+    const inlineChart =
+      trackedCompanies.length === 1 && trackedCompanies[0].ticker ? (
+        <Suspense fallback={null}>
+          <ArticleInlineChart symbol={trackedCompanies[0].ticker} name={trackedCompanies[0].name} />
+        </Suspense>
+      ) : null;
 
-  return (
-    <div className="bg-background min-h-screen">
-      <JsonLd data={articleSchema} />
-      {faqSchema && <JsonLd data={faqSchema} />}
-      <Container className="py-8">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <Breadcrumbs breadcrumb={breadcrumbs} />
-          {article.categorySlug && (
-            <FollowTopicButton categorySlug={article.categorySlug} categoryName={article.category} />
-          )}
-        </div>
-        <ArticlePage
-          slug={article.slug}
-          article={article}
-          author={author}
-          reviewer={reviewer}
-          factChecker={factChecker}
-          canonicalUrl={canonicalUrl}
-          feedback={feedback}
-          comments={comments}
-          poll={poll}
-          marketWidget={marketWidget}
-          inlineChart={inlineChart}
-          sidebar={
-            <ArticleSidebar categorySlug={article.categorySlug} categoryLabel={article.category} excludeSlug={article.slug} />
-          }
-        />
-      </Container>
-    </div>
-  );
+    return (
+      <div className="bg-background min-h-screen">
+        <JsonLd data={articleSchema} />
+        {faqSchema && <JsonLd data={faqSchema} />}
+        <Container className="py-8">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <Breadcrumbs breadcrumb={breadcrumbs} />
+            {article.categorySlug && (
+              <FollowTopicButton categorySlug={article.categorySlug} categoryName={article.category} />
+            )}
+          </div>
+          <ArticlePage
+            slug={article.slug}
+            article={article}
+            author={author}
+            reviewer={reviewer}
+            factChecker={factChecker}
+            canonicalUrl={canonicalUrl}
+            feedback={feedback}
+            comments={comments}
+            poll={poll}
+            marketWidget={marketWidget}
+            inlineChart={inlineChart}
+            sidebar={
+              <ArticleSidebar categorySlug={article.categorySlug} categoryLabel={article.category} excludeSlug={article.slug} />
+            }
+          />
+        </Container>
+      </div>
+    );
+  } catch {
+    return (
+      <div className="bg-background min-h-screen">
+        <Container className="py-8">
+          <ArticlePage
+            slug={article.slug}
+            article={article}
+            sidebar={
+              <ArticleSidebar categorySlug={article.categorySlug} categoryLabel={article.category} excludeSlug={article.slug} />
+            }
+          />
+        </Container>
+      </div>
+    );
+  }
 }
