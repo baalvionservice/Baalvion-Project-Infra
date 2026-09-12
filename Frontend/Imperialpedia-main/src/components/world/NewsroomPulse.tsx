@@ -14,11 +14,14 @@ import { newsArticleHref } from "@/lib/data/article-url";
  * workload, stale-draft counts) — that's newsroom-internal, not for readers.
  */
 
+const rawCmsUrl = process.env.NEXT_PUBLIC_CMS_PUBLIC_URL?.trim();
+const isProd = process.env.NODE_ENV === "production";
 const CMS_PUBLIC_URL =
-  process.env.NEXT_PUBLIC_CMS_PUBLIC_URL ||
-  (process.env.NODE_ENV === "production"
-    ? "https://api.baalvion.com/api/v1/public"
-    : "http://localhost:3018/api/v1/public");
+  (rawCmsUrl && !(isProd && (rawCmsUrl.includes("localhost") || rawCmsUrl.includes("127.0.0.1"))))
+    ? rawCmsUrl
+    : (isProd
+        ? "https://api.baalvion.com/api/v1/public"
+        : "http://localhost:3018/api/v1/public");
 const SITE_SLUG = process.env.NEXT_PUBLIC_CMS_SITE_SLUG || "imperialpedia";
 const REFRESH_MS = 15_000;
 
