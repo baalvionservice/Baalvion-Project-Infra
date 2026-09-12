@@ -142,7 +142,7 @@ export function staticCategoryNews(categorySlug?: string): NewsArticle[] {
     if (matchedSlugs.has(article.slug)) continue;
     const haystack = `${article.title} ${article.slug} ${article.excerpt} ${(article.tags || []).join(' ')}`.toLowerCase();
     if (keywords.some((kw) => haystack.includes(kw.toLowerCase()))) {
-      matched.append(article);
+      matched.push(article);
     }
   }
 
