@@ -31,50 +31,63 @@ import { isAllowedImageHost } from "@/lib/safe-image";
 import { getEditorialGuide } from "@/lib/articles/editorial-guides";
 
 export async function resolveArticleForDetail(slug: string): Promise<Article | null> {
-  const response = await articlesService.getArticleBySlug(slug);
-  // Live CMS first; baked snapshot keeps the article available when the CMS is offline.
-  const article = (response.data ?? staticArticleBySlug(slug)) as unknown as Article | null;
-  if (article) return article;
+  try {
+    const response = await articlesService.getArticleBySlug(slug).catch(() => ({ data: null }));
+    // Live CMS first; baked snapshot keeps the article available when the CMS is offline.
+    const article = (response?.data ?? staticArticleBySlug(slug)) as unknown as Article | null;
+    if (article) return article;
 
-  // Check editorial masterclass guides
-  const editorial = getEditorialGuide(slug);
-  if (editorial) {
-    return {
-      id: slug,
-      slug: editorial.slug,
-      title: editorial.title,
-      description: editorial.description,
-      body: editorial.bodyHtml,
-      category: editorial.category ?? "Savings & Budgeting",
-      categorySlug: editorial.categorySlug ?? "savings",
-      tags: editorial.categorySlug
-        ? ["Creator Economy", "YouTube", "Monetization", "RPM", "CPM"]
-        : ["Savings", "Budgeting", "Emergency Fund", "Personal Finance"],
-      readingTime: editorial.readingTime ?? 8,
-      publishedAt: editorial.publishedAt ?? "2026-08-29T10:00:00Z",
-      updatedAt: editorial.updatedAt ?? "2026-08-29T14:30:00Z",
-      featuredImage: "/images/editorial/savings-budgeting.jpg",
-      imageCaption: editorial.category
-        ? `${editorial.category} — Imperialpedia Editorial Guide`
-        : "Financial planning, emergency reserves, and deposit safety.",
-      keyTakeaways: editorial.keyTakeaways,
-      citations: editorial.citations,
-      authorSlug: "nathan-reiff",
-      reviewerSlug: "julius-mansa",
-      factCheckerSlug: "yarilet-perez",
-      faq: [],
-    } as unknown as Article;
-  }
+    // Check editorial masterclass guides
+    const editorial = getEditorialGuide(slug);
+    if (editorial) {
+      return {
+        id: slug,
+        slug: editorial.slug,
+        title: editorial.title,
+        description: editorial.description,
+        body: editorial.bodyHtml,
+        category: editorial.category ?? "Savings & Budgeting",
+        categorySlug: editorial.categorySlug ?? "savings",
+        tags: editorial.categorySlug
+          ? ["Creator Economy", "YouTube", "Monetization", "RPM", "CPM"]
+          : ["Savings", "Budgeting", "Emergency Fund", "Personal Finance"],
+        readingTime: editorial.readingTime ?? 8,
+        publishedAt: editorial.publishedAt ?? "2026-08-29T10:00:00Z",
+        updatedAt: editorial.updatedAt ?? "2026-08-29T14:30:00Z",
+        featuredImage: "/images/editorial/savings-budgeting.jpg",
+        imageCaption: editorial.category
+          ? `${editorial.category} — Imperialpedia Editorial Guide`
+          : "Financial planning, emergency reserves, and deposit safety.",
+        keyTakeaways: editorial.keyTakeaways,
+        citations: editorial.citations,
+        authorSlug: "nathan-reiff",
+        reviewerSlug: "julius-mansa",
+        factCheckerSlug: "yarilet-perez",
+        faq: [],
+      } as unknown as Article;
+    }
 
-  // Not found under this slug — it may have been renamed. Follow the recorded
-  // redirect (one hop only; cms-service already collapses rename chains) rather
-  // than 404ing a link that's still valid, just moved.
-  const redirectSlug = await getContentRedirectSlug(slug);
-  if (redirectSlug && redirectSlug !== slug) {
-    const targetResponse = await articlesService.getArticleBySlug(redirectSlug);
-    const target = (targetResponse.data ?? staticArticleBySlug(redirectSlug)) as unknown as Article | null;
-    if (target) {
-      permanentRedirect(canonicalService.getCanonicalTag(target.slug, "article", target.categorySlug));
+    // Not found under this slug — it may have been renamed. Follow the recorded
+    // redirect (one hop only; cms-service already collapses rename chains) rather
+    // than 404ing a link that's still valid, just moved.
+    const redirectSlug = await getContentRedirectSlug(slug).catch(() => null);
+    if (redirectSlug && redirectSlug !== slug) {
+      const targetResponse = await articlesService.getArticleBySlug(redirectSlug).catch(() => ({ data: null }));
+      const target = (targetResponse?.data ?? staticArticleBySlug(redirectSlug)) as unknown as Article | null;
+      if (target) {
+        permanentRedirect(canonicalService.getCanonicalTag(target.slug, "article", target.categorySlug));
+      }
+    }
+  } catch (err) {
+    if (
+      err &&
+      typeof err === "object" &&
+      "digest" in err &&
+      typeof (err as { digest?: string }).digest === "string" &&
+      ((err as { digest: string }).digest.startsWith("NEXT_REDIRECT") ||
+        (err as { digest: string }).digest.startsWith("NEXT_NOT_FOUND"))
+    ) {
+      throw err;
     }
   }
 
@@ -120,13 +133,42 @@ export async function ArticleDetailContent({ article }: { article: Article }) {
       getArticlePoll(article.slug).catch(() => null),
     ]);
 
-    const breadcrumbs = breadcrumbService.generateBreadcrumbForArticle(article);
-    const articleSchema = schemaService.generateArticleSchema(article, reviewer, factChecker);
-    const faqPairs = article.faq?.length ? article.faq : extractFaqFromHtml(article.body);
-    const faqSchema = faqPairs.length ? structuredData.faq(faqPairs) : null;
-    const canonicalUrl = canonicalService.getCanonicalTag(article.slug, "article", article.categorySlug);
+    let breadcrumbs: any = [];
+    try {
+      breadcrumbs = breadcrumbService.generateBreadcrumbForArticle(article);
+    } catch {
+      breadcrumbs = [];
+    }
 
-    const trackedCompanies = trackedCompaniesFromMentions(article.entityMentions);
+    let articleSchema: any = null;
+    try {
+      articleSchema = schemaService.generateArticleSchema(article, reviewer, factChecker);
+    } catch {
+      articleSchema = null;
+    }
+
+    let faqSchema: any = null;
+    try {
+      const faqPairs = article.faq?.length ? article.faq : extractFaqFromHtml(article.body);
+      faqSchema = faqPairs.length ? structuredData.faq(faqPairs) : null;
+    } catch {
+      faqSchema = null;
+    }
+
+    let canonicalUrl: string | undefined = undefined;
+    try {
+      canonicalUrl = canonicalService.getCanonicalTag(article.slug, "article", article.categorySlug);
+    } catch {
+      canonicalUrl = undefined;
+    }
+
+    let trackedCompanies: any[] = [];
+    try {
+      trackedCompanies = trackedCompaniesFromMentions(article.entityMentions);
+    } catch {
+      trackedCompanies = [];
+    }
+
     const marketWidget =
       trackedCompanies.length > 0 ? (
         <Suspense fallback={null}>
@@ -134,7 +176,7 @@ export async function ArticleDetailContent({ article }: { article: Article }) {
         </Suspense>
       ) : null;
     const inlineChart =
-      trackedCompanies.length === 1 && trackedCompanies[0].ticker ? (
+      trackedCompanies.length === 1 && trackedCompanies[0]?.ticker ? (
         <Suspense fallback={null}>
           <ArticleInlineChart symbol={trackedCompanies[0].ticker} name={trackedCompanies[0].name} />
         </Suspense>
@@ -142,13 +184,13 @@ export async function ArticleDetailContent({ article }: { article: Article }) {
 
     return (
       <div className="bg-background min-h-screen">
-        <JsonLd data={articleSchema} />
+        {articleSchema && <JsonLd data={articleSchema} />}
         {faqSchema && <JsonLd data={faqSchema} />}
         <Container className="py-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <Breadcrumbs breadcrumb={breadcrumbs} />
+            {breadcrumbs && breadcrumbs.length > 0 && <Breadcrumbs breadcrumb={breadcrumbs} />}
             {article.categorySlug && (
-              <FollowTopicButton categorySlug={article.categorySlug} categoryName={article.category} />
+              <FollowTopicButton categorySlug={article.categorySlug} categoryName={article.category || article.categorySlug} />
             )}
           </div>
           <ArticlePage
@@ -164,7 +206,7 @@ export async function ArticleDetailContent({ article }: { article: Article }) {
             marketWidget={marketWidget}
             inlineChart={inlineChart}
             sidebar={
-              <ArticleSidebar categorySlug={article.categorySlug} categoryLabel={article.category} excludeSlug={article.slug} />
+              <ArticleSidebar categorySlug={article.categorySlug} categoryLabel={article.category || article.categorySlug || "Finance"} excludeSlug={article.slug} />
             }
           />
         </Container>
@@ -178,7 +220,7 @@ export async function ArticleDetailContent({ article }: { article: Article }) {
             slug={article.slug}
             article={article}
             sidebar={
-              <ArticleSidebar categorySlug={article.categorySlug} categoryLabel={article.category} excludeSlug={article.slug} />
+              <ArticleSidebar categorySlug={article.categorySlug} categoryLabel={article.category || article.categorySlug || "Finance"} excludeSlug={article.slug} />
             }
           />
         </Container>

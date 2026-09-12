@@ -11,6 +11,9 @@ import { staticNewsBySlug } from "@/services/data/static-content";
 import { newsArticleHref } from "@/lib/data/article-url";
 import { buildMetadata } from "@/lib/seo";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 interface CategoryArticleSubpathProps {
   params: Promise<{ slug: string }>;
 }
@@ -69,7 +72,7 @@ export async function CategoryArticleSubpathPage({
       if (categorySlug && article.categorySlug && article.categorySlug !== categorySlug) {
         permanentRedirect(`/${article.categorySlug}/${slug}`);
       }
-      return <ArticleDetailContent article={article} />;
+      return await ArticleDetailContent({ article });
     }
 
     // 2. Check news article

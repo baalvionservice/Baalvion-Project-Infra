@@ -927,7 +927,7 @@ async function CategoryArticlePage({ categorySlug, articleSlug }: { categorySlug
       permanentRedirect(`/${canonicalCategory}/${articleSlug}`);
     }
 
-    return <ArticleDetailContent article={article} />;
+    return await ArticleDetailContent({ article });
   } catch (err) {
     if (
       err &&
