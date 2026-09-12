@@ -72,7 +72,7 @@ export async function CategoryArticleSubpathPage({
       if (categorySlug && article.categorySlug && article.categorySlug !== categorySlug) {
         permanentRedirect(`/${article.categorySlug}/${slug}`);
       }
-      return await ArticleDetailContent({ article });
+      return <ArticleDetailContent article={article} />;
     }
 
     // 2. Check news article

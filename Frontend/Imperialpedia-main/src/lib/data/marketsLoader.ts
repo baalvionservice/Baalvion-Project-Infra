@@ -13,11 +13,12 @@
  */
 import { fetchYahooQuote, fetchYahooChart, CANONICAL_SYMBOL_MAP, MARKET_DATA_REVALIDATE_SECONDS } from "./worldFeed";
 
+const envImpApi = process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL?.trim();
+const isProd = process.env.NODE_ENV === "production";
 const IMP_API =
-  process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL ||
-  (process.env.NODE_ENV === "production"
-    ? "https://api.baalvion.com/api/v1/knowledge/imperialpedia/api/v1"
-    : "http://localhost:3004/api/v1");
+  (envImpApi && !(isProd && (envImpApi.includes("localhost") || envImpApi.includes("127.0.0.1"))))
+    ? envImpApi
+    : (isProd ? "https://api.baalvion.com/api/v1/knowledge/imperialpedia/api/v1" : "http://localhost:3004/api/v1");
 
 export interface MarketAssetRow {
   symbol: string;

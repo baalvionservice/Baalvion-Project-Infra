@@ -28,11 +28,14 @@ import { getEditorialGuide } from '@/lib/articles/editorial-guides';
 // In production default to the API gateway's public delivery host (not localhost,
 // and not an empty string that silently forced the built-in fallback). A deploy
 // can still override via NEXT_PUBLIC_CMS_PUBLIC_URL.
+const rawCmsUrl = process.env.NEXT_PUBLIC_CMS_PUBLIC_URL?.trim();
+const isProd = process.env.NODE_ENV === 'production';
 export const CMS_PUBLIC_URL =
-  process.env.NEXT_PUBLIC_CMS_PUBLIC_URL ||
-  (process.env.NODE_ENV === 'production'
-    ? 'https://api.baalvion.com/api/v1/public'
-    : 'http://localhost:3018/api/v1/public');
+  (rawCmsUrl && !(isProd && (rawCmsUrl.includes('localhost') || rawCmsUrl.includes('127.0.0.1'))))
+    ? rawCmsUrl
+    : (isProd
+        ? 'https://api.baalvion.com/api/v1/public'
+        : 'http://localhost:3018/api/v1/public');
 export const CMS_SITE_SLUG = process.env.NEXT_PUBLIC_CMS_SITE_SLUG || 'imperialpedia';
 
 // `cache: 'no-store'` (the previous setting) forces full dynamic rendering on

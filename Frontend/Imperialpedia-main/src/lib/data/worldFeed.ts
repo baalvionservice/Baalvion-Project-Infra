@@ -152,11 +152,12 @@ export const MARKET_DATA_REVALIDATE_SECONDS = 86400;
 // the sidebar of every article, so this is the article template's ISR floor.
 const CMS_FEED_REVALIDATE_SECONDS = 3600;
 
+const envImpApi = process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL?.trim();
+const isProd = process.env.NODE_ENV === "production";
 const IMPERIALPEDIA_API =
-  process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL ||
-  (process.env.NODE_ENV === "production"
-    ? "https://api.baalvion.com/api/v1/knowledge/imperialpedia/api/v1"
-    : "http://localhost:3004/api/v1");
+  (envImpApi && !(isProd && (envImpApi.includes("localhost") || envImpApi.includes("127.0.0.1"))))
+    ? envImpApi
+    : (isProd ? "https://api.baalvion.com/api/v1/knowledge/imperialpedia/api/v1" : "http://localhost:3004/api/v1");
 
 interface WorldConfig {
   settings?: { newsFallback?: boolean; refreshSeconds?: number };
@@ -758,9 +759,11 @@ async function buildWireNews(region: RegionId): Promise<NewsBundle | null> {
 // Localhost is dev-only (port aligned with the rest of the app: 3018); production
 // resolves to the public API gateway, same default cms-public.ts's own CMS_PUBLIC_URL
 // uses — an empty string here silently 500s every server-side fetch below.
+const envCmsPublic = process.env.NEXT_PUBLIC_CMS_PUBLIC_URL?.trim();
 const CMS_PUBLIC_URL =
-  process.env.NEXT_PUBLIC_CMS_PUBLIC_URL ||
-  (process.env.NODE_ENV === "production" ? "https://api.baalvion.com/api/v1/public" : "http://localhost:3018/api/v1/public");
+  (envCmsPublic && !(isProd && (envCmsPublic.includes("localhost") || envCmsPublic.includes("127.0.0.1"))))
+    ? envCmsPublic
+    : (isProd ? "https://api.baalvion.com/api/v1/public" : "http://localhost:3018/api/v1/public");
 const CMS_SITE = process.env.NEXT_PUBLIC_CMS_SITE_SLUG || "imperialpedia";
 
 async function cmsList(params: {
