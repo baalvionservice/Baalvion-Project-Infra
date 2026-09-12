@@ -13,5 +13,5 @@ export async function generateMetadata({ params }: { params: Promise<Params> }) 
 }
 
 export default async function Page({ params }: { params: Promise<Params> }) {
-  return CategoryArticleSubpathPage({ categorySlug: "personal-finance", params });
+  return <CategoryArticleSubpathPage categorySlug="personal-finance" params={params} />;
 }
