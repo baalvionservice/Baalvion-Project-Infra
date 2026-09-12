@@ -1,13 +1,21 @@
 "use client";
 
 import { useState } from 'react';
-import { generateArticleOutline, AIContentOutlineToolOutput } from '@/ai/flows/ai-content-outline-tool';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Sparkles, Plus, CheckCircle2 } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
+
+export interface AIContentOutlineToolOutput {
+  articleTitle: string;
+  outline: Array<{
+    heading: string;
+    subSections: string[];
+  }>;
+  keyTopics: string[];
+}
 
 const OutlineGenerator = () => {
   const [topic, setTopic] = useState('');
@@ -20,7 +28,12 @@ const OutlineGenerator = () => {
 
     setLoading(true);
     try {
-      const output = await generateArticleOutline({ financialSubject: topic });
+      const res = await fetch('/api/ai/outline', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ financialSubject: topic }),
+      });
+      const output = await res.json();
       setResult(output);
     } catch (error) {
       console.error('Failed to generate outline:', error);

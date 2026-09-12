@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { Suspense } from "react";
 import { permanentRedirect } from "next/navigation";
-import { ArticlePage } from "@/modules/content-engine/components";
+import { ArticlePage } from "@/modules/content-engine/components/ArticlePage";
 import { ArticleMarketWidget, trackedCompaniesFromMentions } from "@/components/markets/ArticleMarketWidget";
 import { ArticleInlineChart } from "@/components/markets/ArticleInlineChart";
 import { FollowTopicButton } from "@/components/article/FollowTopicButton";
