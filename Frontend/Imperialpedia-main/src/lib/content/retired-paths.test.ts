@@ -27,11 +27,9 @@ describe("RETIRED_TOP_LEVEL_SLUGS", () => {
 
 describe("isRetiredPath", () => {
   it("matches a retired hub and everything under it", () => {
-    expect(isRetiredPath("/investing")).toBe(true);
     expect(isRetiredPath("/market-news")).toBe(true);
     expect(isRetiredPath("/markets")).toBe(true);
     expect(isRetiredPath("/markets/quote/DJI")).toBe(true);
-    expect(isRetiredPath("/personal-finance/understanding-the-stock-market")).toBe(true);
     expect(isRetiredPath("/bonds/")).toBe(true);
     expect(isRetiredPath("/economy?ref=nav")).toBe(true);
   });
@@ -39,6 +37,8 @@ describe("isRetiredPath", () => {
   it("leaves live paths alone", () => {
     expect(isRetiredPath("/")).toBe(false);
     expect(isRetiredPath("/stocks")).toBe(false);
+    expect(isRetiredPath("/investing")).toBe(false);
+    expect(isRetiredPath("/personal-finance/understanding-the-stock-market")).toBe(false);
     expect(isRetiredPath("/budgeting-basics/what-is-a-budget")).toBe(false);
     expect(isRetiredPath("/financial-tools/compound-interest")).toBe(false);
   });
@@ -57,8 +57,8 @@ describe("isRetiredPath", () => {
 describe("sanitizeRichHtml", () => {
   it("unwraps a link into a retired hub but keeps the wording", async () => {
     const { sanitizeRichHtml } = await import("@/lib/sanitize");
-    const out = sanitizeRichHtml('<p>See our <a href="/personal-finance">Personal Finance</a> hub.</p>');
-    expect(out).toBe("<p>See our <span>Personal Finance</span> hub.</p>");
+    const out = sanitizeRichHtml('<p>See our <a href="/banking">Banking</a> hub.</p>');
+    expect(out).toBe("<p>See our <span>Banking</span> hub.</p>");
   });
 
   it("leaves live links alone", async () => {
