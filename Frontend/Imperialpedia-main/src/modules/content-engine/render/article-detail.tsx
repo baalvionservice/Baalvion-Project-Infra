@@ -82,33 +82,41 @@ export async function resolveArticleForDetail(slug: string): Promise<Article | n
 }
 
 export async function buildArticleDetailMetadata(slug: string): Promise<Metadata> {
-  const article = await resolveArticleForDetail(slug);
-  if (!article) {
+  try {
+    const article = await resolveArticleForDetail(slug);
+    if (!article) {
+      return buildMetadata({
+        title: "Article Not Found",
+        description: "The requested financial article could not be found.",
+        noIndex: true,
+      });
+    }
+    const canonical = canonicalService.getCanonicalTag(slug, "article", article.categorySlug);
+    return buildMetadata({
+      title: article.title,
+      description: article.description,
+      keywords: article.tags,
+      ogImage: isAllowedImageHost(article.featuredImage) ? article.featuredImage : undefined,
+      ogType: "article",
+      canonical,
+    });
+  } catch {
     return buildMetadata({
       title: "Article Not Found",
       description: "The requested financial article could not be found.",
       noIndex: true,
     });
   }
-  const canonical = canonicalService.getCanonicalTag(slug, "article", article.categorySlug);
-  return buildMetadata({
-    title: article.title,
-    description: article.description,
-    keywords: article.tags,
-    ogImage: isAllowedImageHost(article.featuredImage) ? article.featuredImage : undefined,
-    ogType: "article",
-    canonical,
-  });
 }
 
 export async function ArticleDetailContent({ article }: { article: Article }) {
   const [author, reviewer, factChecker, feedback, comments, poll] = await Promise.all([
-    article.authorSlug ? resolveAuthor(article.authorSlug) : Promise.resolve(null),
-    article.reviewerSlug ? resolveAuthor(article.reviewerSlug) : Promise.resolve(null),
-    article.factCheckerSlug ? resolveAuthor(article.factCheckerSlug) : Promise.resolve(null),
-    getArticleFeedback(article.slug),
-    listArticleComments(article.slug),
-    getArticlePoll(article.slug),
+    article.authorSlug ? resolveAuthor(article.authorSlug).catch(() => null) : Promise.resolve(null),
+    article.reviewerSlug ? resolveAuthor(article.reviewerSlug).catch(() => null) : Promise.resolve(null),
+    article.factCheckerSlug ? resolveAuthor(article.factCheckerSlug).catch(() => null) : Promise.resolve(null),
+    getArticleFeedback(article.slug).catch(() => ({ helpful: 0, notHelpful: 0 })),
+    listArticleComments(article.slug).catch(() => []),
+    getArticlePoll(article.slug).catch(() => null),
   ]);
 
   const breadcrumbs = breadcrumbService.generateBreadcrumbForArticle(article);

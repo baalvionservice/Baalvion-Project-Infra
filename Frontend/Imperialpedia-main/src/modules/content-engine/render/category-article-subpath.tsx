@@ -16,33 +16,41 @@ interface CategoryArticleSubpathProps {
 }
 
 export async function generateCategoryArticleMetadata({ params }: CategoryArticleSubpathProps): Promise<Metadata> {
-  const { slug } = await params;
+  try {
+    const { slug } = await params;
 
-  // 1. Try content-engine guide / article
-  const article = await resolveArticleForDetail(slug);
-  if (article) {
-    return buildArticleDetailMetadata(slug);
-  }
+    // 1. Try content-engine guide / article
+    const article = await resolveArticleForDetail(slug).catch(() => null);
+    if (article) {
+      return buildArticleDetailMetadata(slug);
+    }
 
-  // 2. Try news article
-  const newsItem =
-    newsArticles.find((a) => a.slug === slug) ??
-    (await getPublishedNewsBySlug(slug).catch(() => null)) ??
-    staticNewsBySlug(slug);
+    // 2. Try news article
+    const newsItem =
+      newsArticles.find((a) => a.slug === slug) ??
+      (await getPublishedNewsBySlug(slug).catch(() => null)) ??
+      staticNewsBySlug(slug);
 
-  if (newsItem) {
+    if (newsItem) {
+      return buildMetadata({
+        title: newsItem.title,
+        description: newsItem.excerpt,
+        canonical: newsArticleHref(newsItem),
+      });
+    }
+
     return buildMetadata({
-      title: newsItem.title,
-      description: newsItem.excerpt,
-      canonical: newsArticleHref(newsItem),
+      title: "Article Not Found",
+      description: "The requested article could not be found.",
+      noIndex: true,
+    });
+  } catch {
+    return buildMetadata({
+      title: "Article Not Found",
+      description: "The requested article could not be found.",
+      noIndex: true,
     });
   }
-
-  return buildMetadata({
-    title: "Article Not Found",
-    description: "The requested article could not be found.",
-    noIndex: true,
-  });
 }
 
 export async function CategoryArticleSubpathPage({
@@ -54,25 +62,39 @@ export async function CategoryArticleSubpathPage({
 }) {
   const { slug } = await params;
 
-  // 1. Check content-engine guide / article
-  const article = await resolveArticleForDetail(slug);
-  if (article) {
-    if (categorySlug && article.categorySlug && article.categorySlug !== categorySlug) {
-      permanentRedirect(`/${article.categorySlug}/${slug}`);
+  try {
+    // 1. Check content-engine guide / article
+    const article = await resolveArticleForDetail(slug).catch(() => null);
+    if (article) {
+      if (categorySlug && article.categorySlug && article.categorySlug !== categorySlug) {
+        permanentRedirect(`/${article.categorySlug}/${slug}`);
+      }
+      return <ArticleDetailContent article={article} />;
     }
-    return <ArticleDetailContent article={article} />;
-  }
 
-  // 2. Check news article
-  const newsItem =
-    newsArticles.find((a) => a.slug === slug) ??
-    (await getPublishedNewsBySlug(slug).catch(() => null)) ??
-    staticNewsBySlug(slug);
+    // 2. Check news article
+    const newsItem =
+      newsArticles.find((a) => a.slug === slug) ??
+      (await getPublishedNewsBySlug(slug).catch(() => null)) ??
+      staticNewsBySlug(slug);
 
-  if (newsItem) {
-    const targetUrl = newsArticleHref(newsItem);
-    if (targetUrl) {
-      permanentRedirect(targetUrl);
+    if (newsItem) {
+      const targetUrl = newsArticleHref(newsItem);
+      if (targetUrl) {
+        permanentRedirect(targetUrl);
+      }
+    }
+  } catch (err) {
+    // Re-throw Next.js navigation signals (redirects/404s) so they function normally
+    if (
+      err &&
+      typeof err === "object" &&
+      "digest" in err &&
+      typeof (err as { digest?: string }).digest === "string" &&
+      ((err as { digest: string }).digest.startsWith("NEXT_REDIRECT") ||
+        (err as { digest: string }).digest.startsWith("NEXT_NOT_FOUND"))
+    ) {
+      throw err;
     }
   }
 
