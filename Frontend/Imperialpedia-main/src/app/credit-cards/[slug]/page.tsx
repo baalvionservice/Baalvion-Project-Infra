@@ -3,8 +3,6 @@ import {
   CategoryArticleSubpathPage,
 } from "@/modules/content-engine/render/category-article-subpath";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
 
 type Params = { slug: string };
 
