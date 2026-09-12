@@ -148,102 +148,90 @@ const CATEGORY_HREF: Partial<Record<NewsCategory, string>> = {
 // ─── Metadata ────────────────────────────────────────────────────────────────
 
 export async function generateMetadata({ params }: { params: Promise<SlugParams> }) {
-  const { slug: segments } = await params;
+  try {
+    const { slug: segments } = await params;
 
-  if (isDatedSegments(segments)) {
-    const [, , , articleSlug] = segments;
-    const article = await findNewsArticle(articleSlug);
-    if (!article) return {};
+    if (isDatedSegments(segments)) {
+      const [, , , articleSlug] = segments;
+      const article = await findNewsArticle(articleSlug).catch(() => null);
+      if (!article) return {};
 
-    const baseUrl = (env.siteUrl || "https://imperialpedia.com").replace(/\/$/, "");
-    const authorProfile = await findAuthorProfileByName(article.author.name);
-    const base = buildMetadata({
-      title: article.title,
-      description: truncateForMeta(article.excerpt),
-      keywords: article.tags && article.tags.length > 0 ? article.tags : undefined,
-      canonical: newsArticleHref(article),
-      // Some articles fall back to an inline `data:image/svg+xml,...` illustration
-      // (see @baalvion/illustrations) when no hosted artwork exists yet — that's fine
-      // for the on-page <Image>, but social unfurlers and crawlers fetch og:image as
-      // an HTTP(S) URL and can't resolve a data URI, so it must never reach this tag.
-      // buildMetadata falls back to the sitewide default OG image when this is undefined.
-      ogImage: isAllowedImageHost(article.imageUrl) ? article.imageUrl : undefined,
-      ogType: "article",
-    });
+      const baseUrl = (env.siteUrl || "https://imperialpedia.com").replace(/\/$/, "");
+      const authorProfile = await findAuthorProfileByName(article.author.name).catch(() => null);
+      const base = buildMetadata({
+        title: article.title,
+        description: truncateForMeta(article.excerpt),
+        keywords: article.tags && article.tags.length > 0 ? article.tags : undefined,
+        canonical: newsArticleHref(article),
+        ogImage: isAllowedImageHost(article.imageUrl) ? article.imageUrl : undefined,
+        ogType: "article",
+      });
 
-    return {
-      ...base,
-      authors: [
-        {
-          name: article.author.name,
-          url: authorProfile ? `${baseUrl}/authors/${authorProfile.slug}` : undefined,
+      return {
+        ...base,
+        authors: [
+          {
+            name: article.author.name,
+            url: authorProfile ? `${baseUrl}/authors/${authorProfile.slug}` : undefined,
+          },
+        ],
+        openGraph: {
+          ...base.openGraph,
+          type: "article",
+          publishedTime: article.publishedAt,
+          modifiedTime: article.updatedAt || article.publishedAt,
+          authors: [article.author.name],
+          section: article.category,
+          tags: article.tags,
         },
-      ],
-      openGraph: {
-        ...base.openGraph,
-        type: "article",
-        publishedTime: article.publishedAt,
-        modifiedTime: article.updatedAt || article.publishedAt,
-        authors: [article.author.name],
-        section: article.category,
-        tags: article.tags,
-      },
-    };
-  }
+      };
+    }
 
-  // Content-engine guides canonically live at /<categorySlug>/<slug> — a
-  // 2-segment path that isn't a real nested route (Next.js always resolves a
-  // more specific static/dynamic route first) falls through here.
-  if (segments.length === 2) {
-    const [, articleSlug] = segments;
-    return buildArticleDetailMetadata(articleSlug);
-  }
+    if (segments.length === 2) {
+      const [, articleSlug] = segments;
+      return buildArticleDetailMetadata(articleSlug).catch(() => ({}));
+    }
 
-  if (segments.length !== 1) return {};
-  const slug = segments[0];
+    if (segments.length !== 1) return {};
+    const slug = segments[0];
 
-  // Check if this is a terms-beginning-with pattern
-  if (GLOSSARY_LIVE && slug.startsWith("terms-beginning-with-")) {
-    const letter = slug.replace("terms-beginning-with-", "");
-    const terms: Term[] = await fetchTermsByLetter(letter);
-    if (terms && terms.length > 0) {
+    if (GLOSSARY_LIVE && slug.startsWith("terms-beginning-with-")) {
+      const letter = slug.replace("terms-beginning-with-", "");
+      const terms: Term[] = await fetchTermsByLetter(letter).catch(() => []);
+      if (terms && terms.length > 0) {
+        return buildMetadata({
+          title: `Financial Terms Starting with "${letter.toUpperCase()}" | Imperial Finance Glossary`,
+          description: `Explore our comprehensive glossary of financial terms starting with "${letter.toUpperCase()}". From A to Z, find clear definitions and expert insights on investment, economics, and market terminology to enhance your financial literacy.`,
+          canonical: `/${slug}`,
+          noIndex: false,
+        });
+      }
+    }
+
+    const review = await fetchReviewBySlug(slug).catch(() => null);
+    if (review) {
       return buildMetadata({
-        title: `Financial Terms Starting with "${letter.toUpperCase()}" | Imperial Finance Glossary`,
-        description: `Explore our comprehensive glossary of financial terms starting with "${letter.toUpperCase()}". From A to Z, find clear definitions and expert insights on investment, economics, and market terminology to enhance your financial literacy.`,
+        title: review.title,
+        description: review.metaDescription,
         canonical: `/${slug}`,
         noIndex: false,
       });
     }
-  }
 
-  // Review pages get their own metadata (live from imperialpedia-service, static fallback)
-  const review = await fetchReviewBySlug(slug);
-  if (review) {
+    const article =
+      newsArticles.find((a) => a.slug === slug) ??
+      (await getPublishedNewsBySlug(slug).catch(() => null)) ??
+      staticNewsBySlug(slug);
+    if (!article) return {};
     return buildMetadata({
-      title: review.title,
-      description: review.metaDescription,
-      canonical: `/${slug}`,
+      title: article.title,
+      description: article.excerpt,
+      canonical: newsArticleHref(article),
       noIndex: false,
     });
+  } catch {
+    return {};
   }
-
-  // Standard article metadata — static set first, then live CMS news, then the
-  // committed snapshot (so real articles keep valid metadata when the CMS is offline).
-  const article =
-    newsArticles.find((a) => a.slug === slug) ??
-    (await getPublishedNewsBySlug(slug)) ??
-    staticNewsBySlug(slug);
-  if (!article) return {};
-  return buildMetadata({
-    title: article.title,
-    description: article.excerpt,
-    // News content's canonical home is the dated Imperialpedia-style URL (or, for
-    // world-tagged news, the nested /world/<region>/<country>/... permalink —
-    // see newsArticleHref) — this bare `/slug` route redirects there below;
-    // keep metadata pointed at the same destination.
-    canonical: newsArticleHref(article),
-    noIndex: false,
-  });
 }
 
 // ─── Dated Imperialpedia-style article page (/YYYY/MM/DD/slug) ────────────────────────
@@ -269,10 +257,10 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
   const canonicalPath = trueCanonical;
   const canonicalUrl = `${baseUrl}${canonicalPath}`;
 
-  const authorProfile = await findAuthorProfileByName(article.author.name);
+  const authorProfile = await findAuthorProfileByName(article.author.name).catch(() => null);
   const [reviewerProfile, factCheckerProfile] = await Promise.all([
-    article.reviewerSlug ? resolveAuthor(article.reviewerSlug) : Promise.resolve(null),
-    article.factCheckerSlug ? resolveAuthor(article.factCheckerSlug) : Promise.resolve(null),
+    article.reviewerSlug ? resolveAuthor(article.reviewerSlug).catch(() => null) : Promise.resolve(null),
+    article.factCheckerSlug ? resolveAuthor(article.factCheckerSlug).catch(() => null) : Promise.resolve(null),
   ]);
   const categoryPath = CATEGORY_HREF[article.category];
 
@@ -927,18 +915,32 @@ async function BareSlugPage({ slug }: { slug: string }) {
  * the correct canonical instead of serving a second indexable copy.
  */
 async function CategoryArticlePage({ categorySlug, articleSlug }: { categorySlug: string; articleSlug: string }) {
-  const article = await resolveArticleForDetail(articleSlug);
-  if (!article) notFound();
+  try {
+    const article = await resolveArticleForDetail(articleSlug).catch(() => null);
+    if (!article) notFound();
 
-  const canonicalCategory = article.categorySlug;
-  if (!canonicalCategory) {
-    permanentRedirect(`/financial-intelligence/${articleSlug}`);
-  }
-  if (canonicalCategory !== categorySlug) {
-    permanentRedirect(`/${canonicalCategory}/${articleSlug}`);
-  }
+    const canonicalCategory = article.categorySlug;
+    if (!canonicalCategory) {
+      permanentRedirect(`/financial-intelligence/${articleSlug}`);
+    }
+    if (canonicalCategory !== categorySlug) {
+      permanentRedirect(`/${canonicalCategory}/${articleSlug}`);
+    }
 
-  return <ArticleDetailContent article={article} />;
+    return <ArticleDetailContent article={article} />;
+  } catch (err) {
+    if (
+      err &&
+      typeof err === "object" &&
+      "digest" in err &&
+      typeof (err as { digest?: string }).digest === "string" &&
+      ((err as { digest: string }).digest.startsWith("NEXT_REDIRECT") ||
+        (err as { digest: string }).digest.startsWith("NEXT_NOT_FOUND"))
+    ) {
+      throw err;
+    }
+    notFound();
+  }
 }
 
 // ─── Route entry point ────────────────────────────────────────────────────────
@@ -971,14 +973,28 @@ export async function generateStaticParams(): Promise<SlugParams[]> {
 export const revalidate = 86400;
 
 export default async function CatchAllSlugPage({ params }: { params: Promise<SlugParams> }) {
-  const { slug: segments } = await params;
+  try {
+    const { slug: segments } = await params;
 
-  if (isDatedSegments(segments)) {
-    return <DatedArticlePage segments={segments} />;
+    if (isDatedSegments(segments)) {
+      return <DatedArticlePage segments={segments} />;
+    }
+    if (segments.length === 2) {
+      return <CategoryArticlePage categorySlug={segments[0]} articleSlug={segments[1]} />;
+    }
+    if (segments.length !== 1) notFound();
+    return <BareSlugPage slug={segments[0]} />;
+  } catch (err) {
+    if (
+      err &&
+      typeof err === "object" &&
+      "digest" in err &&
+      typeof (err as { digest?: string }).digest === "string" &&
+      ((err as { digest: string }).digest.startsWith("NEXT_REDIRECT") ||
+        (err as { digest: string }).digest.startsWith("NEXT_NOT_FOUND"))
+    ) {
+      throw err;
+    }
+    notFound();
   }
-  if (segments.length === 2) {
-    return <CategoryArticlePage categorySlug={segments[0]} articleSlug={segments[1]} />;
-  }
-  if (segments.length !== 1) notFound();
-  return <BareSlugPage slug={segments[0]} />;
 }
