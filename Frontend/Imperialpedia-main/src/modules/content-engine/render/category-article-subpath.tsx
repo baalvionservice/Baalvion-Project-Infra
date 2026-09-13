@@ -13,7 +13,6 @@ import { newsArticleHref } from "@/lib/data/article-url";
 import { buildMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
 
 interface CategoryArticleSubpathProps {
   params: Promise<{ slug: string }>;
