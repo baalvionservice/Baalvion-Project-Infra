@@ -1,5 +1,5 @@
 "use client";
-import { useState, type FormEvent } from "react";
+import React, {  useState, type FormEvent  } from "react";
 
 /** Imperialpedia-style inline newsletter band — posts to the site's real
  * newsletter API (same endpoint as components/common/Newsletter.tsx),

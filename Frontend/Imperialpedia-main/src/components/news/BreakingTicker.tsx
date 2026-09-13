@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import React, {  useState  } from "react";
 import type { NewsArticle } from "@/lib/data.news";
 import { newsArticleHref } from "@/lib/data/article-url";
 

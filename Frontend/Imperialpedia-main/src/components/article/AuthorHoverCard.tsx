@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import React, {  useRef, useState  } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { BadgeCheck, ArrowRight, ShieldCheck } from "lucide-react";

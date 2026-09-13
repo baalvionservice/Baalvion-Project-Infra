@@ -1,4 +1,4 @@
-import { cache, Suspense } from "react";
+import React, {  cache, Suspense  } from "react";
 import { newsArticles, NewsArticle, NewsCategory } from "@/lib/data.news";
 import { getPublishedNewsBySlug, getPublishedNews, getRecentContent, findAuthorProfileByName, resolveAuthor } from "@/services/data/cms-public";
 import { MoreFromGrid, MoreFromList, type MoreFromItem } from "@/components/news/MoreFrom";

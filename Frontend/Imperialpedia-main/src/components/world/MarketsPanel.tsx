@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import React, {  useState  } from "react";
 import Link from "next/link";
 import type { Indicator, WorldData } from "@/lib/data/worldRegions";
 import { MARKET_QUOTES_LIVE } from "@/config/market-quotes";

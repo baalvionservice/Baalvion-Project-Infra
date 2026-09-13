@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, {  useEffect, useState  } from "react";
 import { BarChart3 } from "lucide-react";
 import { getVoterToken } from "@/lib/voter-token";
 import { getTopicColor } from "@/lib/topic-colors";

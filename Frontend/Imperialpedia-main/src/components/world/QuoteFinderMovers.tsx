@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import React, {  useMemo, useState  } from "react";
 import type { WorldData } from "@/lib/data/worldRegions";
 
 function pctNum(change: string): number {

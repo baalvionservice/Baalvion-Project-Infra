@@ -1,5 +1,5 @@
 "use client";
-import { useRef } from "react";
+import React, {  useRef  } from "react";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import type { FeaturedStory } from "@/lib/data/worldRegions";
 import { StoryLink } from "@/components/common/StoryLink";

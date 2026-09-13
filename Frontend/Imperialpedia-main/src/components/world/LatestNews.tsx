@@ -1,6 +1,6 @@
 "use client";
 import type { WorldData } from "@/lib/data/worldRegions";
-import { useState } from "react";
+import React, {  useState  } from "react";
 import { StoryLink } from "@/components/common/StoryLink";
 
 const categoryColors: Record<string, string> = {
