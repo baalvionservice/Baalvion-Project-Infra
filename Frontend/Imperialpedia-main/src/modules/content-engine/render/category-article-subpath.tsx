@@ -1,3 +1,4 @@
+import React from "react";
 import { notFound, permanentRedirect } from "next/navigation";
 import { Metadata } from "next";
 import {

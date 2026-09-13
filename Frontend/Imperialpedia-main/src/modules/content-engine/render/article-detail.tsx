@@ -1,5 +1,5 @@
+import React, { Suspense } from "react";
 import { Metadata } from "next";
-import { Suspense } from "react";
 import { permanentRedirect } from "next/navigation";
 import { ArticlePage } from "@/modules/content-engine/components/ArticlePage";
 import { ArticleMarketWidget, trackedCompaniesFromMentions } from "@/components/markets/ArticleMarketWidget";
