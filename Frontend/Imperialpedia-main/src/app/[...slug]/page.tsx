@@ -970,7 +970,7 @@ export async function generateStaticParams(): Promise<SlugParams[]> {
 // silently following the most aggressive one is how it ended up regenerating
 // every 30 seconds. Publishes come through /api/revalidate's revalidateTag(),
 // so this is the no-webhook safety net.
-export const revalidate = 86400;
+export const dynamic = "force-dynamic";
 
 export default async function CatchAllSlugPage({ params }: { params: Promise<SlugParams> }) {
   try {
