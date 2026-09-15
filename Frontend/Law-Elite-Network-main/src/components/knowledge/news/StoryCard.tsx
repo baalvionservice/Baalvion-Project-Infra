@@ -43,7 +43,7 @@ export function StoryCard({ article, variant = 'default', priority = false }: St
   if (variant === 'lead') {
     return (
       <Link href={href} className="group block">
-        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-800">
+        <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
           <Image
             src={resolveArticleImage(article)}
             alt={article.title}
@@ -55,7 +55,7 @@ export function StoryCard({ article, variant = 'default', priority = false }: St
         </div>
         <div className="pt-5">
           <Kicker article={article} />
-          <h2 className="font-headline text-2xl md:text-4xl font-extrabold leading-[1.1] text-slate-900 dark:text-white group-hover:text-news-600 transition-colors tracking-tight">
+          <h2 className="font-headline text-2xl md:text-[2.75rem] font-extrabold leading-[0.98] text-slate-900 dark:text-white group-hover:text-news-600 transition-colors tracking-[-0.02em]">
             {article.title}
           </h2>
           {article.summary && (
@@ -74,7 +74,7 @@ export function StoryCard({ article, variant = 'default', priority = false }: St
   if (variant === 'horizontal') {
     return (
       <Link href={href} className="group flex gap-4 items-start">
-        <div className="relative w-28 h-20 sm:w-32 sm:h-24 shrink-0 overflow-hidden rounded-md bg-slate-100 dark:bg-slate-800">
+        <div className="relative w-28 h-20 sm:w-32 sm:h-24 shrink-0 overflow-hidden bg-slate-100 dark:bg-slate-800">
           <Image
             src={resolveArticleImage(article)}
             alt={article.title}
@@ -99,7 +99,7 @@ export function StoryCard({ article, variant = 'default', priority = false }: St
   // default — stacked card
   return (
     <Link href={href} className="group flex flex-col h-full">
-      <div className="relative aspect-[16/10] w-full overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-800">
+      <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
         <Image
           src={resolveArticleImage(article)}
           alt={article.title}

@@ -252,20 +252,18 @@ export function PublicNavbar() {
         )}
       </div>
 
-      {/* ── Tier 2: navy section bar (desktop) ────────────────────── */}
-      <nav className="hidden lg:block bg-[#0B1F3A]" aria-label="Topic sections">
-        <div className="container mx-auto px-6 max-w-7xl h-9 flex items-center overflow-x-auto no-scrollbar">
+      {/* ── Tier 2: black section bar (desktop) ───────────────────────
+          Page Six's own masthead formula: a true-black bar (not navy) under
+          the white brand row, tight uppercase links, a red underline on
+          hover/active -- swapped in here for that same tabloid-masthead
+          punch, on Law Elite's own red (news-600) rather than Page Six's. */}
+      <nav className="hidden lg:block bg-black" aria-label="Topic sections">
+        <div className="container mx-auto px-6 max-w-7xl h-11 flex items-center overflow-x-auto no-scrollbar">
           <Link
             href="/"
-            className="flex items-center h-full px-3 shrink-0 whitespace-nowrap text-[12px] font-bold uppercase tracking-wider text-white/90 hover:text-white border-b-[3px] border-transparent hover:border-news-600 transition-colors"
+            className="flex items-center h-full px-3.5 shrink-0 whitespace-nowrap text-[13px] font-extrabold uppercase tracking-[-0.01em] text-white/90 hover:text-white border-b-[3px] border-transparent hover:border-news-600 transition-colors"
           >
             Home
-          </Link>
-          <Link
-            href="/news"
-            className="flex items-center h-full px-3 shrink-0 whitespace-nowrap text-[12px] font-bold uppercase tracking-wider text-white/90 hover:text-white border-b-[3px] border-transparent hover:border-news-600 transition-colors"
-          >
-            Legal News
           </Link>
           {categories.slice(0, 8).map((cat) => (
             <div
@@ -277,7 +275,7 @@ export function PublicNavbar() {
               <Link
                 href={`/${cat.slug}`}
                 className={cn(
-                  'flex items-center gap-1 h-full px-3 whitespace-nowrap text-[12px] font-bold uppercase tracking-wider border-b-[3px] transition-colors',
+                  'flex items-center gap-1 h-full px-3.5 whitespace-nowrap text-[13px] font-extrabold uppercase tracking-[-0.01em] border-b-[3px] transition-colors',
                   activeCategory === cat.id
                     ? 'text-white border-news-600'
                     : 'text-white/80 hover:text-white border-transparent hover:border-news-600/60',
@@ -378,7 +376,6 @@ export function PublicNavbar() {
               <nav aria-label="Mobile navigation">
                 {[
                   { label: 'Home', href: '/' },
-                  { label: 'Legal News', href: '/news' },
                 ].map((item) => (
                   <Link
                     key={item.href}

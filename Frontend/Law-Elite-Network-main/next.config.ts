@@ -157,7 +157,21 @@ const nextConfig: NextConfig = {
       // geographic filter (its "cross-border"/"every region" copy wasn't
       // backed by any actual filtering) -- a near-duplicate competing for the
       // same search intent, consolidated the same way as the redirects above.
-      { source: '/world', destination: '/news', permanent: true },
+      // Destination changed from /news to / now that /news is retired too
+      // (see the four-section block below) -- redirecting into another dead
+      // section would just move the soft-404 one hop deeper.
+      { source: '/world', destination: '/', permanent: true },
+      // AdSense second-rejection finding: these four "finished-looking"
+      // sections (an eight-tab newsroom over 3 articles, and two reference
+      // indexes pointing exclusively at articles whose practice areas were
+      // already retired above) read to a reviewer as the site under
+      // construction. retired-links.ts's RETIRED_SECTIONS already declared
+      // the intent to retire them and unwraps any in-prose link into one --
+      // this is the redirect half of that fix, which had never been added.
+      { source: '/news', destination: '/', permanent: true },
+      { source: '/case-law', destination: '/', permanent: true },
+      { source: '/legislation', destination: '/', permanent: true },
+      { source: '/law-changes', destination: '/', permanent: true },
       // /plans advertised paid tiers with feature claims (AI case summaries,
       // predictive insights, document auditing, priority matching, etc.) that
       // don't exist anywhere in the backend, alongside false "PCI-DSS

@@ -27,7 +27,9 @@ const ALLOW = [
   // "blocked by robots.txt"). More specific Allow wins over the shorter
   // Disallow regardless of list order, per the robots.txt spec Google follows.
   '/api/image',
-  '/news',
+  // /news deliberately not allowed here -- it 301s to / (next.config.ts),
+  // same as /case-law, /legislation and /law-changes, none of which were
+  // ever in this list.
   '/search',
   '/plans',
   '/about-us',
