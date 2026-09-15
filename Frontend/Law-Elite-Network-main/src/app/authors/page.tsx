@@ -3,23 +3,7 @@ import Link from 'next/link';
 import { Navbar } from '@/components/navbar';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { AuthorsDirectory } from '@/components/knowledge/AuthorsDirectory';
-import { authorNameToSlug } from '@/data/authors';
-import { getMergedAuthors } from '@/lib/authors-server';
-import { mergeArticles } from '@/data/law-content';
-import { cmsGetArticles } from '@/lib/cms';
-import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
-
-// AdSense-readiness retirement (see category-slugs.ts's CURRENT_CATEGORY_SLUGS
-// comment): the per-author "N guides" count below feeds directly into the
-// same directory that links to each author's profile, so it must match what
-// that profile now actually shows (see author/[slug]/page.tsx's matching
-// filter) rather than counting retired-category work nobody can click
-// through to from here.
-const currentSlugSet = new Set<string>(CURRENT_CATEGORY_SLUGS);
-function isKeptCategoryArticle(a: { category?: { slug?: string } }): boolean {
-  const rawSlug = a.category?.slug;
-  return !rawSlug || currentSlugSet.has(toNewCategorySlug(rawSlug));
-}
+import { getMergedAuthors, getPublishedArticleCountsByAuthorSlug } from '@/lib/authors-server';
 
 // Serve a cached page and refresh it in the background every 5 minutes,
 // instead of re-rendering (and re-fetching from the CMS) on every single
@@ -29,23 +13,21 @@ function isKeptCategoryArticle(a: { category?: { slug?: string } }): boolean {
 export const revalidate = 86400;
 
 export default async function AuthorsIndexPage() {
-  const [authors, cmsArticles] = await Promise.all([
+  const [allAuthors, countsMap] = await Promise.all([
     getMergedAuthors(),
-    cmsGetArticles().catch(() => []),
+    getPublishedArticleCountsByAuthorSlug(),
   ]);
-  // CMS-authored guides (e.g. the maritime/injury desk) never lived in the
-  // bundled array, so counting bundled-only silently showed "0 guides" for
-  // any contributor whose real work is CMS-sourced. mergeArticles() is the
-  // same CMS-wins-by-slug pool the homepage already uses.
-  const articles = mergeArticles(cmsArticles).filter(isKeptCategoryArticle);
+
+  // AdSense second-rejection finding: 23 of 24 profiles rendered "No
+  // published guides yet" -- noindexing the empty profile (author/[slug]/
+  // layout.tsx) stops it being indexed, but a human reviewer (or any visitor)
+  // clicking through from this directory still landed on one. Hiding them
+  // from the directory itself, not just their own page, is the actual fix.
+  const authors = allAuthors.filter((a) => (countsMap.get(a.slug) || 0) > 0);
 
   // A plain slug -> count map, not a closure -- functions can't cross the
   // server/client component boundary as props.
-  const counts: Record<string, number> = {};
-  for (const a of articles) {
-    const slug = authorNameToSlug(a.author);
-    if (slug) counts[slug] = (counts[slug] || 0) + 1;
-  }
+  const counts: Record<string, number> = Object.fromEntries(countsMap);
 
   return (
     <div className="min-h-screen bg-white">

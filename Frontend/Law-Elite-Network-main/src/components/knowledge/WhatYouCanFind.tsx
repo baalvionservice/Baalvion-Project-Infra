@@ -4,7 +4,9 @@ import { ArrowUpRight } from 'lucide-react';
 
 // Every entry links to a section or route that already exists on the site --
 // no glossary/"research resources" page exists yet, so this deliberately
-// ships 4 items rather than inventing a 5th destination.
+// ships 3 items rather than inventing a 4th destination. "Legal News &
+// Developments" (-> /news) was dropped when /news was retired (AdSense
+// second-rejection finding: an eight-tab newsroom over 3 articles).
 const ITEMS = [
   {
     title: 'Legal Guides',
@@ -15,11 +17,6 @@ const ITEMS = [
     title: 'Legal Topics',
     body: 'Browse different areas of law and discover relevant educational resources.',
     href: '#practice-areas',
-  },
-  {
-    title: 'Legal News & Developments',
-    body: 'Follow important legal and regulatory developments.',
-    href: '/news',
   },
   {
     title: 'Sourcing & Editorial Standards',

@@ -1,5 +1,7 @@
 import { LAW_AUTHORS, authorNameToSlug, type LawAuthor } from '@/data/authors';
-import { cmsGetAuthors, cmsGetAuthorBySlug, type CmsAuthor } from '@/lib/cms';
+import { cmsGetAuthors, cmsGetAuthorBySlug, cmsGetArticles, type CmsAuthor } from '@/lib/cms';
+import { mergeArticles } from '@/data/law-content';
+import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
 
 /**
  * Server-side author directory that actually merges CMS-managed contributors
@@ -55,4 +57,31 @@ export async function getMergedAuthorBySlug(slug: string): Promise<LawAuthor | n
 export async function getMergedAuthorByName(name: string): Promise<LawAuthor | null> {
   if (!name) return null;
   return getMergedAuthorBySlug(authorNameToSlug(name));
+}
+
+/**
+ * Article count per author slug, counting only articles whose category is
+ * still live (matches author/[slug]/page.tsx and sitemap.ts's own filter --
+ * a slug with only retired-category work shows "No published guides yet" on
+ * its own profile, so it must not count as published here either). Single
+ * source of truth for "does this contributor actually have visible work" --
+ * reused by /authors (hide empty profiles from the directory, not just
+ * noindex their pages) and /advertise (a real contributor count, not
+ * headcount including profiles with nothing published).
+ */
+export async function getPublishedArticleCountsByAuthorSlug(): Promise<Map<string, number>> {
+  const cmsArticles = await cmsGetArticles().catch(() => []);
+  const currentSlugSet = new Set<string>(CURRENT_CATEGORY_SLUGS);
+  const isKeptCategoryArticle = (a: { category?: { slug?: string } }): boolean => {
+    const rawSlug = a.category?.slug;
+    return !rawSlug || currentSlugSet.has(toNewCategorySlug(rawSlug));
+  };
+  const counts = new Map<string, number>();
+  mergeArticles(cmsArticles)
+    .filter(isKeptCategoryArticle)
+    .forEach((a) => {
+      const slug = authorNameToSlug(a.author);
+      if (slug) counts.set(slug, (counts.get(slug) || 0) + 1);
+    });
+  return counts;
 }

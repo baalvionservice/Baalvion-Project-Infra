@@ -8,6 +8,7 @@ import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { getArticlesByCategorySlug } from '@/data/law-content';
 import { ROOT_FLAT_ARTICLE_SLUGS } from '@/lib/article-url';
 import { fetchArticleForRender } from '@/lib/article-fetch';
+import { unwrapRetiredLinks } from '@/lib/content/retired-links';
 import { ArticleView } from '@/components/knowledge/ArticleView';
 import { ArticleJsonLd } from '@/lib/seo/article-seo';
 import seedData from '../../../docs/seed-data.json';
@@ -210,7 +211,7 @@ export default async function CategoryPage(
             <div className="container mx-auto px-4 sm:px-6 max-w-7xl pb-4">
               <div
                 className="prose-legal max-w-3xl"
-                dangerouslySetInnerHTML={{ __html: category.descriptionHtml }}
+                dangerouslySetInnerHTML={{ __html: unwrapRetiredLinks(category.descriptionHtml) }}
               />
             </div>
           )}

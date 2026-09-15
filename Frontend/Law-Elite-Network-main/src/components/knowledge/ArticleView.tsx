@@ -31,6 +31,7 @@ import { extractKeyTakeaways } from '@/lib/seo/key-takeaways-extractor';
 import { extractFaqSection } from '@/lib/seo/faq-section-extractor';
 import { articleUrl } from '@/lib/article-url';
 import { cmsGetArticles } from '@/lib/cms';
+import { unwrapRetiredLinks } from '@/lib/content/retired-links';
 import type { SeriesInfo } from '@/components/knowledge/SeriesNotice';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
@@ -166,7 +167,11 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
   // comment) -- both chips show the same real date rather than inventing a
   // second one.
   const updatedAt = formatArticleDate(article.updatedAt || article.updated_at);
-  const processedContent = injectHeadingIds(article.content || '');
+  // Strips anchors into retired sections/categories before anything else
+  // touches the body -- CMS prose is the one surface nobody re-edits after a
+  // retirement, so five in-article links were still landing on the homepage
+  // (see retired-links.ts) until this was wired in.
+  const processedContent = injectHeadingIds(unwrapRetiredLinks(article.content || ''));
   // Real word count from the full rendered body (before Key Takeaways/FAQ are
   // split out below) drives both ad placement and reading time -- not the
   // stored `readingTime` field, which the admin UI defaults to a flat guess

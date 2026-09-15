@@ -1,8 +1,8 @@
 import React from 'react';
 import { fetchPublicApi } from '@/lib/api/public-fetch';
 import { mergeArticles } from '@/data/law-content';
-import { cmsGetArticles, cmsGetNews } from '@/lib/cms';
-import { getMergedAuthors } from '@/lib/authors-server';
+import { cmsGetArticles } from '@/lib/cms';
+import { getMergedAuthors, getPublishedArticleCountsByAuthorSlug } from '@/lib/authors-server';
 import { authorNameToSlug, isEditorRole } from '@/data/authors';
 import { TopicTicker } from '@/components/knowledge/news/TopicTicker';
 import { StoryCard } from '@/components/knowledge/news/StoryCard';
@@ -10,7 +10,6 @@ import { LatestRail } from '@/components/knowledge/news/LatestRail';
 import { CategorySection } from '@/components/knowledge/news/CategorySection';
 import { LatestGuidesGrid } from '@/components/knowledge/LatestGuidesGrid';
 import { PracticeAreaChart } from '@/components/knowledge/PracticeAreaChart';
-import { LatestNewsList } from '@/components/knowledge/LatestNewsList';
 import { FeaturedGuideSpotlight } from '@/components/knowledge/FeaturedGuideSpotlight';
 import { ForProfessionalsSection } from '@/components/knowledge/ForProfessionalsSection';
 import { MissionAndBoardSection } from '@/components/knowledge/MissionAndBoardSection';
@@ -83,14 +82,13 @@ function deriveCategories(pool: any[]): { id: string; name: string; slug: string
 // placeholder set no matter what was published. cmsGetArticles() already carries featuredImage
 // through (see lib/cms.ts's CmsArticle.featuredImage comment); this just wires it into the pool.
 export default async function KnowledgeHomePage() {
-  const [cmsArticles, apiCategoriesRaw, apiArticles, newsItems, editorialBoard] = await Promise.all([
+  const [cmsArticles, apiCategoriesRaw, apiArticles, editorialBoard] = await Promise.all([
     cmsGetArticles().catch(() => []),
     fetchPublicApi('/categories').then((j) => (Array.isArray(j?.data) ? j.data : [])),
     fetchPublicApi('/articles', { sortBy: 'views', order: 'desc', limit: 50, status: 'published' }).then((j) => {
       const items = j?.data?.items || j?.data || [];
       return Array.isArray(items) ? items : [];
     }),
-    cmsGetNews(4).catch(() => []),
     getMergedAuthors().catch(() => []),
   ]);
   const apiCategories = apiCategoriesRaw;
@@ -217,8 +215,24 @@ export default async function KnowledgeHomePage() {
   // isEditorRole()) -- not an arbitrary slice of the full contributor list,
   // which previously could show names that don't match who's actually
   // bylining articles on this same page.
-  const editors = editorialBoard.filter((a: any) => isEditorRole(a.title));
-  const editorialBoardPreview = (editors.length > 0 ? editors : editorialBoard).slice(0, 4);
+  //
+  // AdSense second-rejection finding, confirmed live on this exact section:
+  // none of the 4 names the homepage showed (eleanor-whitfield, elena-rossi,
+  // marcus-hale, sofia-almeida) had any article reachable on the live site --
+  // isEditorRole() found zero real "...Editor" titles among the bundled/CMS
+  // roster, so the "editors.length > 0 ? editors : editorialBoard" fallback
+  // was taking the first 4 profiles in insertion order regardless of whether
+  // they'd published anything. Filtering to published authors first, same
+  // published-count source as /authors and /advertise, fixes the fallback
+  // without touching the (correct) preference for real editors when one exists.
+  const publishedAuthorSlugs = new Set(
+    Array.from((await getPublishedArticleCountsByAuthorSlug()).entries())
+      .filter(([, count]) => count > 0)
+      .map(([slug]) => slug),
+  );
+  const publishedBoard = editorialBoard.filter((a: any) => publishedAuthorSlugs.has(a.slug));
+  const editors = publishedBoard.filter((a: any) => isEditorRole(a.title));
+  const editorialBoardPreview = (editors.length > 0 ? editors : publishedBoard).slice(0, 4);
 
   const articlesByCategory = categories.map((cat: any) => ({
     ...cat,
@@ -239,7 +253,7 @@ export default async function KnowledgeHomePage() {
           <span className="kicker">
             <ShieldCheck className="w-3.5 h-3.5" /> Global Legal Education
           </span>
-          <h1 className="font-headline text-3xl md:text-[2.6rem] font-extrabold tracking-tight text-slate-900 leading-[1.05] mt-2">
+          <h1 className="font-headline text-3xl md:text-[2.9rem] font-extrabold tracking-[-0.02em] text-slate-900 leading-[0.98] mt-2">
             Plain-language legal information
             <br className="hidden md:block" /> for a global audience.
           </h1>
@@ -290,11 +304,11 @@ export default async function KnowledgeHomePage() {
         {/* Latest Guides grid */}
         <LatestGuidesGrid articles={latestGuides} />
 
-        {/* Library snapshot + newsroom + editor's pick */}
+        {/* Library snapshot + editor's pick. Newsroom widget removed with
+            /news (AdSense second-rejection retirement, see next.config.ts). */}
         <section className="py-8 border-t border-slate-200">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <PracticeAreaChart data={categoryCounts} />
-            <LatestNewsList news={newsItems} />
             <FeaturedGuideSpotlight article={spotlightGuide} author={spotlightAuthor} />
           </div>
         </section>
