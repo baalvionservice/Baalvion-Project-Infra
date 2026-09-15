@@ -7,7 +7,18 @@ const nextConfig: NextConfig = {
   // Vercel, which ignores it. win32 guard matches sibling configs (standalone's symlinked
   // node_modules trace breaks on Windows dev machines).
   output: process.platform === 'win32' ? undefined : 'standalone',
-  outputFileTracingRoot: path.join(__dirname),
+  // The monorepo ROOT, not this app's own directory. Pointing this at __dirname (as it was
+  // before) made Next trace dependencies as if this app's own folder were the workspace root —
+  // harmless for `next dev`/Vercel, but it breaks standalone output in a real pnpm monorepo
+  // build: pnpm's node_modules symlinks are relative and computed assuming the true repo-root
+  // depth (Frontend/Imperialpedia-main/node_modules/next -> ../../../node_modules/.pnpm/...,
+  // 3 levels up to repo root). With __dirname as the trace root, `next build` still copies
+  // node_modules at that same nested relative depth into .next/standalone, but Docker then
+  // has nowhere to put the matching 3-level-up target unless the image preserves that same
+  // full nested path — which is exactly what the Dockerfile does. Pointing this at repo root
+  // instead matches what every other app in the monorepo gets automatically (they don't set
+  // this at all — Next infers it from the lockfile location, which IS the repo root).
+  outputFileTracingRoot: path.join(__dirname, '../..'),
   // Keep the server-only Genkit + OpenTelemetry runtime external so Next leaves it as a runtime
   // require() instead of bundling and statically analysing its dynamic `require(expr)` calls
   // (@opentelemetry/instrumentation, require-in-the-middle, protobufjs, express). Removes the
