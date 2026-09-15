@@ -1,30 +1,15 @@
 /**
  * Fallback static content for local development and offline preview.
- * Includes Creator Economy pillar articles and full backup catalog (499 articles).
+ * Backup catalog (499 articles). Creator Economy articles were migrated into
+ * the live CMS on 2026-09-15 (see creator-economy-topics.ts for the shared
+ * topic-filtering logic) and no longer have a static fallback here.
  */
 import type { CmsPage } from './cms-public';
 import { cmsContentToArticle, cmsContentToNews, type CmsContent } from './cms-public';
 import type { Article } from '@/modules/content-engine/types/article';
 import type { NewsArticle } from '@/lib/data.news';
-import creatorEconomyData from '@/generated/creator-economy-content.json';
 import imperialpediaBackupData from '@/generated/imperialpedia-backup-content.json';
-
-const CREATOR_SLUGS = new Set([
-  'creator-economy',
-  'youtube-monetization',
-  'instagram-monetization',
-  'website-monetization',
-  'social-media-earnings',
-  'creator-guides',
-  'creator-tools',
-]);
-
-const rawCreatorDocs = (creatorEconomyData as unknown as CmsContent[]).map((raw) => ({
-  ...raw,
-  id: raw.id || raw.slug,
-  status: 'published',
-  category: { id: 'creator-economy', name: 'Creator Economy', slug: 'creator-economy' },
-}));
+import { CREATOR_SLUGS, filterCreatorArticlesByTopic } from '@/lib/creator-economy-topics';
 
 const rawBackupDocs = Object.values(imperialpediaBackupData as unknown as Record<string, CmsContent>).map((raw) => ({
   ...raw,
@@ -32,7 +17,7 @@ const rawBackupDocs = Object.values(imperialpediaBackupData as unknown as Record
   status: raw.status || 'published',
 }));
 
-const allRawDocs: CmsContent[] = [...rawCreatorDocs, ...rawBackupDocs];
+const allRawDocs: CmsContent[] = rawBackupDocs;
 
 const allStaticArticles: Article[] = allRawDocs.map((raw) => cmsContentToArticle(raw));
 const allStaticNewsArticles: NewsArticle[] = allRawDocs.map((raw) => cmsContentToNews(raw));
@@ -78,29 +63,7 @@ export function staticCategoryNews(categorySlug?: string): NewsArticle[] {
     );
     if (categorySlug === 'creator-economy') return creatorNews;
 
-    const keywordMap: Record<string, string[]> = {
-      'youtube-monetization': ['youtube'],
-      'instagram-monetization': ['instagram', 'sponsorship', 'brand-deal'],
-      'website-monetization': ['website', 'adsense', 'page-rpm'],
-      'social-media-earnings': ['tiktok', 'facebook', 'social', 'instagram'],
-      'creator-guides': ['income-stream', 'affiliate', 'digital-product', 'sponsorship', 'business'],
-      'creator-tools': ['calculator', 'rpm-vs-cpm', 'adsense-page-rpm', 'tool'],
-    };
-
-    const keywords = keywordMap[categorySlug] || [];
-    if (keywords.length === 0) return creatorNews;
-
-    const primary: NewsArticle[] = [];
-    const secondary: NewsArticle[] = [];
-    for (const article of creatorNews) {
-      const haystack = `${article.title} ${article.slug} ${article.excerpt} ${(article.tags || []).join(' ')}`.toLowerCase();
-      if (keywords.some((kw) => haystack.includes(kw.toLowerCase()))) {
-        primary.push(article);
-      } else {
-        secondary.push(article);
-      }
-    }
-    return [...primary, ...secondary];
+    return filterCreatorArticlesByTopic(creatorNews, categorySlug);
   }
 
   // General category mapping & aliases
