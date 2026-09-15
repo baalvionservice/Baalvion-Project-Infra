@@ -2,6 +2,11 @@ import type { NextConfig } from "next";
 import path from "path";
 
 const nextConfig: NextConfig = {
+  // Required for the self-hosted Docker image (Dockerfile copies .next/standalone) — every
+  // other app in the monorepo that ships a Docker image sets this the same way. Harmless for
+  // Vercel, which ignores it. win32 guard matches sibling configs (standalone's symlinked
+  // node_modules trace breaks on Windows dev machines).
+  output: process.platform === 'win32' ? undefined : 'standalone',
   outputFileTracingRoot: path.join(__dirname),
   // Keep the server-only Genkit + OpenTelemetry runtime external so Next leaves it as a runtime
   // require() instead of bundling and statically analysing its dynamic `require(expr)` calls
