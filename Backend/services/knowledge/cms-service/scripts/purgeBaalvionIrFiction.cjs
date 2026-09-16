@@ -18,6 +18,17 @@
  * The company's real staff are listed in KEEP below and are never touched. Anything not
  * matched by a rule here is also left alone: the script removes only what it can name.
  *
+ * Against production, CMS_URL must be the admin BFF, not api.baalvion.com:
+ *
+ *   CMS_URL=https://admin.baalvion.com/api-bff/knowledge/cms/api/v1
+ *
+ * api.baalvion.com only proxies /api/v1/public/* to cms-service — the authenticated
+ * /cms/websites/* routes are not routed on that host at all, so they answer 404 rather
+ * than 401. Caddy terminates /api-bff/knowledge/cms/* at the edge and strips the prefix,
+ * so cms-service receives /api/v1/*, which is what this script's paths assume.
+ *
+ * IR_WEBSITE_ID takes the slug (baalvion-ir); resolveWebsite rewrites it to the UUID.
+ *
  * Auth: either a pre-issued access token (preferred) or a superadmin login.
  *   export CMS_ACCESS_TOKEN='eyJ…'      # from the admin console session
  *   export SUPERADMIN_PASSWORD='…'      # fallback
@@ -175,6 +186,15 @@ async function main() {
     console.log('\nDry run. Re-run with --apply to delete and correct the items listed above.');
     return;
   }
+
+  // Published content cannot be deleted outright — contentService refuses with
+  // "Archive it first." Archive the whole set in one bulk call, then delete.
+  const ids = doomed.map((d) => d.id);
+  const arch = await req('POST', `${BASE}/content/bulk`, token, { ids, action: 'archive' });
+  if (arch.status !== 200 && arch.status !== 204) {
+    throw new Error(`archive failed -> ${arch.status} ${JSON.stringify(arch.data).slice(0, 200)}`);
+  }
+  console.log(`\n  archived ${ids.length} item(s)`);
 
   let gone = 0;
   for (const d of doomed) {
