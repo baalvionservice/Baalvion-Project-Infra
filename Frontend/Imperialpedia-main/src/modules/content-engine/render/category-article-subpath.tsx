@@ -12,7 +12,10 @@ import { staticNewsBySlug } from "@/services/data/static-content";
 import { newsArticleHref } from "@/lib/data/article-url";
 import { buildMetadata } from "@/lib/seo";
 
-export const dynamic = "force-dynamic";
+// Route segment config (dynamic/revalidate/generateStaticParams) only takes
+// effect when declared in the actual app/**/page.tsx route file — Next.js
+// doesn't scan imported modules like this one for it, so it belongs in each
+// category's page.tsx, not here.
 
 interface CategoryArticleSubpathProps {
   params: Promise<{ slug: string }>;
