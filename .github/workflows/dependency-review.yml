@@ -23,7 +23,26 @@ jobs:
           deny-licenses: GPL-2.0, GPL-3.0, AGPL-3.0, LGPL-3.0
           # jszip is dual-licensed "GPL-3.0-only OR MIT" — usable under MIT, but the action
           # flags it because GPL-3.0 appears in the SPDX OR-expression. Exempt it explicitly.
-          allow-dependencies-licenses: pkg:npm/jszip
+          #
+          # sharp's prebuilt libvips binaries are LGPL-3.0-or-later. sharp itself is
+          # Apache-2.0; these are separate, unmodified shared-library packages it loads at
+          # runtime, which is the linking case LGPL section 4 permits in proprietary software.
+          # They are ALREADY shipped on main at 1.3.2 — dependency-review only reports
+          # *changed* dependencies, so any sharp patch re-surfaces them and the policy blocks
+          # its own security fix. Bumping sharp for GHSA-rgj7-g3m4-5g8c could not land without
+          # this. Exempt the binaries only; the deny-list still covers everything else.
+          allow-dependencies-licenses: >-
+            pkg:npm/jszip,
+            pkg:npm/%40img/sharp-libvips-darwin-arm64,
+            pkg:npm/%40img/sharp-libvips-darwin-x64,
+            pkg:npm/%40img/sharp-libvips-linux-arm,
+            pkg:npm/%40img/sharp-libvips-linux-arm64,
+            pkg:npm/%40img/sharp-libvips-linux-ppc64,
+            pkg:npm/%40img/sharp-libvips-linux-riscv64,
+            pkg:npm/%40img/sharp-libvips-linux-s390x,
+            pkg:npm/%40img/sharp-libvips-linux-x64,
+            pkg:npm/%40img/sharp-libvips-linuxmusl-arm64,
+            pkg:npm/%40img/sharp-libvips-linuxmusl-x64
           # Acknowledged transitive build-time advisories on node-tar 6.2.1, pulled ONLY by
           # @mapbox/node-pre-gyp@1.0.11 (install-time prebuilt-binary fetch, not runtime code).
           # Still tracked by Dependabot. Remediate by upgrading node-pre-gyp to v2 (uses tar@7),

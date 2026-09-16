@@ -22,35 +22,33 @@ const SOURCES = [
  */
 export function SourcesMethodology() {
   return (
-    <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 border-t border-border/60">
-      <HomeSectionHeading title="Our Sources" href="/methodology" hrefLabel="Read our full methodology" />
-      <p className="max-w-2xl text-sm text-muted-foreground leading-relaxed">
-        For factual financial and economic information, Imperialpedia may reference authoritative
-        sources including the institutions below — the regulator or agency that sets the rule or
-        publishes the data, cited directly rather than through an intermediary. Every article&apos;s
-        specific citations appear in its own &ldquo;Sources &amp; References&rdquo; section.
-      </p>
-      <ul className="mt-5 flex flex-wrap gap-x-6 gap-y-2">
-        {SOURCES.map((source) => (
-          <li key={source.url}>
+    <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 border-t-2 border-black dark:border-slate-800">
+      <HomeSectionHeading title="OUR SOURCES // VERIFIED CITATIONS" href="/methodology" hrefLabel="FULL METHODOLOGY →" />
+      
+      <div className="bg-white dark:bg-slate-900 border-3 border-black dark:border-slate-700 p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] relative rounded-xs">
+        <div className="absolute top-0 left-0 right-0 h-2 bg-[#c8102e]" />
+        
+        <p className="max-w-3xl text-sm font-medium text-slate-800 dark:text-slate-200 leading-relaxed font-sans pt-1">
+          For factual financial and economic information, Imperialpedia cites authoritative primary sources directly
+          including the regulatory institutions below. Every published article contains its own verified
+          &ldquo;Sources &amp; References&rdquo; section.
+        </p>
+
+        <div className="mt-5 flex flex-wrap gap-2.5">
+          {SOURCES.map((source) => (
             <a
+              key={source.url}
               href={source.url}
               target="_blank"
               rel="noopener noreferrer nofollow"
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-foreground hover:text-primary transition-colors"
+              className="inline-flex items-center gap-1.5 border-2 border-black dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 px-3 py-1.5 text-xs font-mono font-black uppercase text-black dark:text-white hover:bg-[#c8102e] hover:text-white hover:border-[#c8102e] transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
             >
-              {source.name}
+              <span>{source.name}</span>
               <ExternalLink className="h-3 w-3 shrink-0" aria-hidden />
             </a>
-          </li>
-        ))}
-      </ul>
-      <Link
-        href="/methodology"
-        className="mt-5 inline-block text-sm font-bold text-primary hover:underline underline-offset-2"
-      >
-        How we select and use sources →
-      </Link>
+          ))}
+        </div>
+      </div>
     </section>
   );
 }

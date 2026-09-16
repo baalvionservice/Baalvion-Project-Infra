@@ -109,8 +109,10 @@ const splitRoleAndPlace = (query) => {
     const text = String(query).trim().replace(/\s+/g, ' ');
     if (!text) return { role: '', place: null };
 
-    // "<role> in <place>"
-    const prepositional = text.match(/^(.*?)\s+(?:in|at|near|around|jobs in|based in)\s+(.+)$/i);
+    // "<role> in <place>" -- one literal space, not `\s+`: `text` is already collapsed
+    // to single spaces above, and `(.*?)\s+` was ambiguous enough to go quadratic on a
+    // search query made of spaces.
+    const prepositional = text.match(/^(.*?) (?:in|at|near|around|jobs in|based in) (.+)$/i);
     if (prepositional && resolvePlace(prepositional[2])) {
         return { role: prepositional[1].trim(), place: prepositional[2].trim() };
     }

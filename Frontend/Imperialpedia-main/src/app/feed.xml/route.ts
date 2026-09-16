@@ -18,7 +18,7 @@ const esc = (s: string): string =>
 
 function itemXml(item: CmsContent, baseUrl: string): string {
   // Articles canonically live under their real category (/<categorySlug>/<slug>);
-  // news keeps the dated CNBC-style URL — same split `newsArticleHref` uses.
+  // news keeps the dated Imperialpedia-style URL — same split `newsArticleHref` uses.
   const path =
     item.contentType === "article"
       ? item.category?.slug

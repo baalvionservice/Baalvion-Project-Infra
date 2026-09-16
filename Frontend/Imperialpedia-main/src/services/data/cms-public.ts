@@ -28,11 +28,14 @@ import { getEditorialGuide } from '@/lib/articles/editorial-guides';
 // In production default to the API gateway's public delivery host (not localhost,
 // and not an empty string that silently forced the built-in fallback). A deploy
 // can still override via NEXT_PUBLIC_CMS_PUBLIC_URL.
+const rawCmsUrl = process.env.NEXT_PUBLIC_CMS_PUBLIC_URL?.trim();
+const isProd = process.env.NODE_ENV === 'production';
 export const CMS_PUBLIC_URL =
-  process.env.NEXT_PUBLIC_CMS_PUBLIC_URL ||
-  (process.env.NODE_ENV === 'production'
-    ? 'https://api.baalvion.com/api/v1/public'
-    : 'http://localhost:3018/api/v1/public');
+  (rawCmsUrl && !(isProd && (rawCmsUrl.includes('localhost') || rawCmsUrl.includes('127.0.0.1'))))
+    ? rawCmsUrl
+    : (isProd
+        ? 'https://api.baalvion.com/api/v1/public'
+        : 'http://localhost:3018/api/v1/public');
 export const CMS_SITE_SLUG = process.env.NEXT_PUBLIC_CMS_SITE_SLUG || 'imperialpedia';
 
 // `cache: 'no-store'` (the previous setting) forces full dynamic rendering on
@@ -237,9 +240,8 @@ async function cmsFetchOnce<T>(path: string): Promise<T> {
     return res.json() as Promise<T>;
   } catch (err) {
     if ((err as { status?: number })?.status === 404) throw err;
-    const fallbackErr = new Error('CMS_NOT_FOUND') as Error & { status?: number };
-    fallbackErr.status = 404;
-    throw fallbackErr;
+    // For non-404 errors, rethrow the original error to avoid masking underlying issues.
+    throw err;
   }
 }
 
@@ -817,9 +819,12 @@ export function cmsContentToArticle(raw: CmsContent, categoryMap?: ReadonlyMap<s
       correctIndex: Number(q.correctIndex),
       explanation: typeof q.explanation === 'string' ? q.explanation : undefined,
     }));
+
   const guide = getEditorialGuide(raw.slug);
-  const body = guide?.bodyHtml || blocksToHtml(raw.contentBlocks, categoryMap) || undefined;
-  const guideWords = guide ? guide.bodyHtml.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length : words;
+  const cfBody = typeof cf.bodyHtml === 'string' ? cf.bodyHtml : typeof cf.body === 'string' ? cf.body : undefined;
+  const body = guide?.bodyHtml || blocksToHtml(raw.contentBlocks, categoryMap) || (raw as any).bodyHtml || (raw as any).body || cfBody || undefined;
+  const bodyText = (body || '').replace(/<[^>]+>/g, ' ');
+  const guideWords = bodyText.trim().split(/\s+/).filter(Boolean).length || words;
 
   return {
     id: raw.id,

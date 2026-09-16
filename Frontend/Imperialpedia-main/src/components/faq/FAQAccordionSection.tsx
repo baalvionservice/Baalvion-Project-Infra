@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, {  useState  } from "react";
 import FAQItem from "@/components/faq/FAQItem";
 
 interface FAQAccordionSectionProps {

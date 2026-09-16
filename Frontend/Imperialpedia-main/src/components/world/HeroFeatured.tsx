@@ -22,11 +22,11 @@ export default function HeroFeatured({ featured }: { featured: FeaturedStory[] }
           <div className="absolute bottom-0 left-0 p-3 sm:p-5 text-white">
             <div className="flex items-center gap-2 mb-2 flex-wrap">
               {main.tag && (
-                <span className="world-kicker bg-[hsl(var(--cnbc-red))] text-white text-[9px] sm:text-[10px] font-black tracking-widest px-1.5 sm:px-2 py-0.5">
+                <span className="world-kicker bg-[hsl(var(--imperialpedia-red))] text-white text-[9px] sm:text-[10px] font-black tracking-widest px-1.5 sm:px-2 py-0.5">
                   {main.tag}
                 </span>
               )}
-              <span className="world-kicker text-[10px] sm:text-[11px] font-bold text-[hsl(var(--cnbc-gold))] tracking-widest uppercase">
+              <span className="world-kicker text-[10px] sm:text-[11px] font-bold text-[hsl(var(--imperialpedia-gold))] tracking-widest uppercase">
                 {main.category}
               </span>
             </div>
@@ -53,10 +53,10 @@ export default function HeroFeatured({ featured }: { featured: FeaturedStory[] }
             item={story}
             className="group block p-3 sm:p-4 hover:bg-muted transition-colors"
           >
-            <span className="world-kicker text-[9px] sm:text-[10px] font-black tracking-widest text-[hsl(var(--cnbc-red))] uppercase">
+            <span className="world-kicker text-[9px] sm:text-[10px] font-black tracking-widest text-[hsl(var(--imperialpedia-red))] uppercase">
               {story.category}
             </span>
-            <h3 className="text-xs sm:text-sm font-semibold leading-snug mt-1 text-foreground group-hover:text-[hsl(var(--cnbc-red))] transition-colors line-clamp-3">
+            <h3 className="text-xs sm:text-sm font-semibold leading-snug mt-1 text-foreground group-hover:text-[hsl(var(--imperialpedia-red))] transition-colors line-clamp-3">
               {story.headline}
             </h3>
             <p className="text-[11px] sm:text-xs text-muted-foreground mt-1.5 line-clamp-2 hidden sm:block">

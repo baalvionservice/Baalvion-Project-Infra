@@ -14,13 +14,13 @@
 # ─────────────────────────────────────────────────────────────────────────────
 ARG SERVICE=payment-service
 
-FROM maven:3.9-eclipse-temurin-17 AS build
+FROM maven:3-eclipse-temurin-26 AS build
 ARG SERVICE
 WORKDIR /src
 COPY Backend/services/commerce/financial-services-java/ ./
 RUN mvn -q -DskipTests -pl "${SERVICE}" -am clean package
 
-FROM eclipse-temurin:17-jre-jammy AS runtime
+FROM eclipse-temurin:25-jre-jammy AS runtime
 ARG SERVICE
 WORKDIR /app
 COPY --from=build /src/${SERVICE}/target/*.jar /app/app.jar

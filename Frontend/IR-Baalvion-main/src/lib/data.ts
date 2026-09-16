@@ -110,210 +110,32 @@ export const VicePersidents = [
  */
 export const boardOfDirectors: never[] = [];
 
-export const newsArticles = [
-  {
-    title:
-      "Baalvion Sets Out Its Vision for a Unified Operating System for Global Trade",
-    excerpt:
-      "Baalvion Industries outlines its long-term strategy to bring logistics, trade finance and compliance onto a single, transparent platform — reducing friction and unlocking efficiency across global B2B commerce.",
-    date: "2026-05-20",
-    category: "Vision",
-  },
-  {
-    title:
-      "Building a Compliance-First Standard for Cross-Border B2B Commerce",
-    excerpt:
-      "Why Baalvion embeds AML, KYC and sanctions screening into the core of every transaction — making cross-border trade faster to underwrite and safer for every participant.",
-    date: "2026-04-28",
-    category: "Compliance",
-  },
-  {
-    title:
-      "Connecting Logistics, Trade Finance and Compliance on One Platform",
-    excerpt:
-      "A look at how Baalvion's integrated architecture replaces fragmented point solutions with a single, connected flow — and why that creates a compounding network effect.",
-    date: "2026-04-10",
-    category: "Platform",
-  },
-  {
-    title:
-      "Baalvion Strengthens Governance with an Independent Board and Investor Reporting Framework",
-    excerpt:
-      "The company formalises independent board oversight and a transparent investor-reporting cadence as it builds toward institutional-grade standards for qualified investors.",
-    date: "2026-03-22",
-    category: "Governance",
-  },
-];
-
-export const pressReleases = [
-  {
-    title:
-      "Baalvion Industries to Present at the 2026 Global B2B Commerce & Trade Finance Conference on February 10th",
-    date: "Feb 02, 2026",
-    link: "#",
-  },
-  {
-    title: "Baalvion Industries Strengthens Board with New Independent Director Appointment",
-    date: "Jan 27, 2026",
-    link: "#",
-  },
-  {
-    title:
-      "Baalvion Reports Full Year 2025 Diluted EPS of $35.31, or $48.09 as adjusted; Fourth Quarter 2025 Diluted EPS of $7.16, or $13.16 as adjusted",
-    date: "Jan 15, 2026",
-    link: "#",
-    download: "#",
-    webcast: "#",
-    supplement: "#",
-  },
-];
-
-export const documents = [
-  {
-    id: 1,
-    name: "Baalvion Corporate Bylaws.pdf",
-    type: "PDF",
-    category: "Legal",
-    uploadDate: "2024-01-05",
-    size: "1.2 MB",
-  },
-  {
-    id: 2,
-    name: "Series A - Pitch Deck.pptx",
-    type: "PPTX",
-    category: "Presentations",
-    uploadDate: "2024-07-22",
-    size: "15.2 MB",
-  },
-  {
-    id: 3,
-    name: "Series A - Financial Model.xlsx",
-    type: "XLSX",
-    category: "Financials",
-    uploadDate: "2024-07-22",
-    size: "1.8 MB",
-  },
-  {
-    id: 4,
-    name: "Q2 2024 Unaudited Financials.pdf",
-    type: "PDF",
-    category: "Financials",
-    uploadDate: "2024-07-25",
-    size: "2.5 MB",
-  },
-  {
-    id: 5,
-    name: "Independent Audited Financials (FY 2023).pdf",
-    type: "PDF",
-    category: "Financials",
-    uploadDate: "2024-05-10",
-    size: "4.1 MB",
-  },
-  {
-    id: 6,
-    name: "Master Shareholder Agreement.pdf",
-    type: "PDF",
-    category: "Legal",
-    uploadDate: "2024-01-10",
-    size: "0.8 MB",
-  },
-  {
-    id: 7,
-    name: "Series A - Subscription Agreement.docx",
-    type: "DOCX",
-    category: "Legal",
-    uploadDate: "2024-07-14",
-    size: "0.4 MB",
-  },
-  {
-    id: 8,
-    name: "Risk Disclosure Statement (Updated Q3 2024).pdf",
-    type: "PDF",
-    category: "Compliance",
-    uploadDate: "2024-07-12",
-    size: "0.5 MB",
-  },
-  {
-    id: 9,
-    name: "Capital Deployment & Use of Funds.pdf",
-    type: "PDF",
-    category: "Strategy",
-    uploadDate: "2024-07-11",
-    size: "1.2 MB",
-  },
-];
-
-export const investorData = {
-  name: "Qualified Investor",
-  executiveOverview: {
-    investedAmount: 750000,
-    ownershipPercentage: 1.87,
-    securityType: "Series A Preferred",
-  },
-  status: {
-    accreditation: "Verified",
-    dataRoomAccess: "Granted",
-    kycAml: "Passed",
-  },
-  capitalStructure: {
-    shareClass: "Series A",
-    sharesHeld: 150000,
-    votingPower: "1.87%",
-    certificateId: "BV-CERT-001A-007",
-    capTable: [
-      { class: "Founders", count: "2,000,000", ownership: "50.00%" },
-      { class: "Seed", count: "500,000", ownership: "12.50%" },
-      { class: "Series A", count: "1,500,000", ownership: "37.50%" },
-    ],
-  },
-  financialReporting: {
-    reports: [
-      {
-        name: "Q2 2024 Financial Report",
-        date: "2024-07-25",
-        link: "/data-room",
-      },
-      {
-        name: "H1 2024 Capital Deployment Summary",
-        date: "2024-07-11",
-        link: "/data-room",
-      },
-    ],
-    metrics: {
-      totalValue: 985000,
-      totalReturnsPercent: 31.3,
-      capitalDeploymentPercent: 85,
-    },
-  },
-  governanceUpdates: {
-    notices: [
-      {
-        id: 1,
-        message:
-          "Action Required: Please vote on the new director proposal before August 5th.",
-        date: "2024-07-28",
-      },
-      {
-        id: 2,
-        message:
-          "Governance Update: Q3 board meeting minutes are now available.",
-        date: "2024-07-29",
-      },
-    ],
-  },
-  communications: {
-    announcements: [
-      {
-        id: 1,
-        message:
-          "New document 'Q2 2024 Financial Report.pdf' added to the data room.",
-        date: "2024-07-25",
-      },
-      {
-        id: 2,
-        message: "Webinar: Join us for the Q3 Investor Update on August 15th.",
-        date: "2024-07-30",
-      },
-    ],
-  },
-};
+/**
+ * Everything below this point was invented and has been removed.
+ *
+ * It is dead code — cms.ts imports only the four rosters above — which is the only reason
+ * it was not caught with the fabricated people. That makes it more dangerous, not less: the
+ * moment a documents or performance section is wired up, an investor sees it as real.
+ *
+ *   newsArticles / pressReleases  an acquisition ("VeriTrade"), a partnership ("PortLink
+ *                                 Logistics"), a Davos appearance by a founder named
+ *                                 "Alexandros Vasilias" who does not exist, "150% YoY
+ *                                 Growth", and "Full Year 2025 Diluted EPS of $35.31".
+ *                                 The same items were published to the CMS and have now
+ *                                 been purged from it.
+ *
+ *   documents                     "Independent Audited Financials (FY 2023).pdf" and
+ *                                 "Q2 2024 Unaudited Financials.pdf" — reporting periods
+ *                                 that predate the company, which was incorporated on
+ *                                 2025-03-11 — plus a Series A pitch deck, financial model,
+ *                                 subscription agreement, shareholder agreement and risk
+ *                                 disclosure, none of which exist.
+ *
+ *   investorData                  a holding of $750,000 at 1.87% for "Series A Preferred",
+ *                                 a certificate id, KYC marked Passed, and a cap table.
+ *                                 Fabricated holdings are a representation to whoever is
+ *                                 shown them.
+ *
+ * Real editorial belongs in the CMS. Real investor positions belong in ir-service, which
+ * owns them. Neither belongs in a bundled fixture.
+ */

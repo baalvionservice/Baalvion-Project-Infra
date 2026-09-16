@@ -22,7 +22,7 @@ const JOBS_SERVICE =
 //   /job/42, /careers/job/42                    — the original single-segment links
 //   /careers/countries/india/jobs/42            — the country-scoped shape
 // All of them 308 to /careers/jobs/<place>/<role-slug>-42.
-const LEGACY_JOB_PATH = /^\/(?:careers\/)?job\/([^/]+)\/?$/;
+const LEGACY_JOB_PATH = /^\/(?:careers\/)?job\/(\d+)\/?$/;
 const COUNTRY_JOB_PATH = /^\/careers\/countries\/[^/]+\/jobs\/(\d+)\/?$/;
 // The current shape. Matched so a stale slug or place — a retitled role, or one that
 // moved town — is corrected with a real redirect rather than served at two URLs.

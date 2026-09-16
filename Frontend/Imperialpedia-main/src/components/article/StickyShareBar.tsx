@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, {  useEffect, useState  } from "react";
 import { ShareBar } from "@/components/article/ShareBar";
 
 /** A compact floating share bar that appears once the reader scrolls past the

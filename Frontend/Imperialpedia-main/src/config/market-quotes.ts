@@ -1,13 +1,13 @@
 /**
  * Single toggle for the `/markets/quote/[symbol]` pages (DJI, AAPL, BTC, ...).
  *
- * Taken offline from indexing (2026-08-25) pending Google AdSense approval —
- * ~50 auto-generated ticker pages reads to reviewers as the same
- * "thin/auto-generated content at scale" pattern GLOSSARY_LIVE already guards
- * against (see config/glossary.ts). Pages still render normally (price data,
- * charts, Mediapartners-Google crawling) — only search-engine indexing and
- * sitemap submission are held back.
- *
- * Flip to `true` once AdSense approves.
+ * Previously only held these pages back from indexing (2026-08-25). Now tied
+ * to MARKETS_SECTION_LIVE — when the markets section is hidden, quote pages
+ * redirect to / via next.config.ts and MARKET_QUOTES_LIVE gates away all
+ * navigation links and sitemap entries. Flip MARKETS_SECTION_LIVE to `true`
+ * in config/sections.ts once Google AdSense approval is received; this export
+ * updates automatically.
  */
-export const MARKET_QUOTES_LIVE = false;
+import { MARKETS_SECTION_LIVE } from "./sections";
+
+export const MARKET_QUOTES_LIVE = MARKETS_SECTION_LIVE;

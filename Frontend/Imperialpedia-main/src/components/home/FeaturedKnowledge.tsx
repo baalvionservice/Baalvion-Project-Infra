@@ -34,22 +34,43 @@ const FOUNDATIONS = [
  */
 export function FeaturedKnowledge() {
   return (
-    <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 border-t border-border">
-      <HomeSectionHeading title="Featured Knowledge" />
-      <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-        Financial Foundations
-      </h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-1">
-        {withoutRetired(FOUNDATIONS).map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className="group flex items-center justify-between gap-2 py-2.5 border-b border-border text-sm font-bold text-foreground hover:text-primary transition-colors"
-          >
-            {item.title}
-            <ArrowRight className="h-3.5 w-3.5 shrink-0 opacity-0 -translate-x-1 transition-all group-hover:opacity-100 group-hover:translate-x-0" />
-          </Link>
-        ))}
+    <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 border-t-2 border-black dark:border-slate-800">
+      <HomeSectionHeading title="FEATURED KNOWLEDGE // FINANCIAL FOUNDATIONS" />
+      
+      <div className="bg-white dark:bg-slate-900 border-3 border-black dark:border-slate-700 p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] relative rounded-xs">
+        <div className="absolute top-0 left-0 right-0 h-2 bg-[#c8102e]" />
+        
+        <div className="flex items-center gap-2 mb-6 pt-1 border-b-2 border-black dark:border-slate-800 pb-3">
+          <span className="bg-[#c8102e] text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 -skew-x-6">
+            IMPERIALPEDIA FOUNDATIONS
+          </span>
+          <span className="text-xs font-mono font-black uppercase tracking-widest text-black dark:text-white">
+            EVERGREEN FINANCIAL GUIDES
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {withoutRetired(FOUNDATIONS).map((item, i) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="group flex items-start gap-3 p-3.5 border-2 border-black/10 dark:border-slate-800 hover:border-black dark:hover:border-slate-600 bg-slate-50/50 dark:bg-slate-800/30 rounded-xs transition-all hover:shadow-[4px_4px_0px_0px_rgba(200,16,46,1)]"
+            >
+              <span className="bg-black text-white font-mono text-xs font-black px-2 py-0.5 shrink-0">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <div className="min-w-0 flex-1 space-y-1">
+                <h4 className="text-sm font-black uppercase font-serif leading-tight text-black dark:text-white group-hover:text-[#c8102e] transition-colors">
+                  {item.title}
+                </h4>
+                <div className="flex items-center gap-1 text-[10px] font-mono font-bold text-[#c8102e]">
+                  <span>EXPLORE GUIDE</span>
+                  <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
       </div>
     </section>
   );

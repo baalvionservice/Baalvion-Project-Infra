@@ -7,7 +7,7 @@
 #
 # Build context = REPO ROOT:
 #   docker build -f Frontend/admin-platform/Dockerfile.deploy -t admin-web .
-FROM node:20-alpine AS base
+FROM node:26-alpine AS base
 # Install pnpm directly via npm rather than `corepack enable`. node:20-alpine ships an older
 # corepack whose signed lazy-download of pnpm@9.15.0 now fails in CI ("Corepack is about to
 # download pnpm-9.15.0.tgz | not found") after npm's corepack integrity-key rotation. A direct

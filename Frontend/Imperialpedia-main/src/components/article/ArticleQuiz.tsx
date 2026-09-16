@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, {  useState  } from "react";
 import { CheckCircle2, XCircle, HelpCircle } from "lucide-react";
 import { getTopicColor } from "@/lib/topic-colors";
 import type { Article } from "@/modules/content-engine/types/article";
