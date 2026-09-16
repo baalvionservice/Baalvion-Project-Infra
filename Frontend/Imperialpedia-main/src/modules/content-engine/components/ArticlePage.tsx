@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, use, Suspense } from "react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import { sanitizeRichHtml } from "@/lib/sanitize";
 import { Container } from "@/design-system/layout/container";
@@ -8,28 +9,32 @@ import { Article } from "../types";
 import { getArticleBySlug } from "../services/content-service";
 import { ArticleHeader } from "./ArticleHeader";
 import { ArticleBody } from "./ArticleBody";
-import { RelatedArticles } from "./RelatedArticles";
 import { SourcesCited } from "./SourcesCited";
 import { Loader2, AlertCircle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import type { ResolvedAuthor, ArticleFeedbackSummary, ArticleComment, ArticlePoll as ArticlePollData } from "@/services/data/cms-public";
-import { HelpfulVote } from "@/components/article/HelpfulVote";
-import { CommentsSection } from "@/components/article/CommentsSection";
 import { RelatedCalculators } from "@/components/article/RelatedCalculators";
-import { WeeklyDigestSignup } from "@/components/article/WeeklyDigestSignup";
-import { ArticleQuiz } from "@/components/article/ArticleQuiz";
-import { ArticlePoll } from "@/components/article/ArticlePoll";
-import { ReadingProgressBar } from "@/components/article/ReadingProgressBar";
-import { StickyShareBar } from "@/components/article/StickyShareBar";
 import { KeyTakeawaysBox } from "@/components/pages/KeyTakeawaysBox";
 import { TableOfContents } from "@/components/article/TableOfContents";
-import { SavingsGoalWidget } from "@/components/article/SavingsGoalWidget";
 import { KeyTermsCallout } from "@/components/article/KeyTermsCallout";
 import { ArticleTopicMesh } from "@/components/article/ArticleTopicMesh";
 import { InlineTopicCallout } from "@/components/article/InlineTopicCallout";
 import { getEditorialGuide } from "@/lib/articles/editorial-guides";
+
+// Below-the-fold / purely-interactive widgets: not needed for first paint or
+// LCP, so they're split out of the article route's initial JS chunk and
+// hydrated only once they're about to scroll into view.
+const RelatedArticles = dynamic(() => import("./RelatedArticles").then((m) => m.RelatedArticles));
+const HelpfulVote = dynamic(() => import("@/components/article/HelpfulVote").then((m) => m.HelpfulVote));
+const CommentsSection = dynamic(() => import("@/components/article/CommentsSection").then((m) => m.CommentsSection));
+const WeeklyDigestSignup = dynamic(() => import("@/components/article/WeeklyDigestSignup").then((m) => m.WeeklyDigestSignup));
+const ArticleQuiz = dynamic(() => import("@/components/article/ArticleQuiz").then((m) => m.ArticleQuiz));
+const ArticlePoll = dynamic(() => import("@/components/article/ArticlePoll").then((m) => m.ArticlePoll));
+const SavingsGoalWidget = dynamic(() => import("@/components/article/SavingsGoalWidget").then((m) => m.SavingsGoalWidget));
+const ReadingProgressBar = dynamic(() => import("@/components/article/ReadingProgressBar").then((m) => m.ReadingProgressBar), { ssr: false });
+const StickyShareBar = dynamic(() => import("@/components/article/StickyShareBar").then((m) => m.StickyShareBar), { ssr: false });
 
 interface ArticlePageProps {
   slug: string;
@@ -38,12 +43,41 @@ interface ArticlePageProps {
   reviewer?: ResolvedAuthor | null;
   factChecker?: ResolvedAuthor | null;
   canonicalUrl?: string;
-  feedback?: ArticleFeedbackSummary;
-  comments?: ArticleComment[];
-  poll?: ArticlePollData | null;
+  // Below-the-fold sections stream in independently via Suspense instead of
+  // gating the whole page on their (slower, per-article) CMS round trips.
+  feedback?: Promise<ArticleFeedbackSummary>;
+  comments?: Promise<ArticleComment[]>;
+  poll?: Promise<ArticlePollData | null>;
+  relatedArticles?: Promise<Article[]>;
   marketWidget?: React.ReactNode;
   inlineChart?: React.ReactNode;
   sidebar?: React.ReactNode;
+}
+
+const DEFAULT_FEEDBACK = Promise.resolve<ArticleFeedbackSummary>({ helpful: 0, notHelpful: 0 });
+const DEFAULT_COMMENTS = Promise.resolve<ArticleComment[]>([]);
+const DEFAULT_POLL = Promise.resolve<ArticlePollData | null>(null);
+const DEFAULT_RELATED: Promise<Article[]> = Promise.resolve([]);
+
+function RelatedArticlesSlot({ promise }: { promise: Promise<Article[]> }) {
+  const articles = use(promise);
+  return <RelatedArticles articles={articles} />;
+}
+
+function FeedbackSlot({ promise, slug, categoryName }: { promise: Promise<ArticleFeedbackSummary>; slug: string; categoryName?: string }) {
+  const feedback = use(promise);
+  return <HelpfulVote slug={slug} initialSummary={feedback} categoryName={categoryName} />;
+}
+
+function CommentsSlot({ promise, slug }: { promise: Promise<ArticleComment[]>; slug: string }) {
+  const comments = use(promise);
+  return <CommentsSection slug={slug} initialComments={comments} />;
+}
+
+function PollSlot({ promise, slug, categoryName }: { promise: Promise<ArticlePollData | null>; slug: string; categoryName?: string }) {
+  const poll = use(promise);
+  if (!poll) return null;
+  return <ArticlePoll slug={slug} initialPoll={poll} categoryName={categoryName} />;
 }
 
 const DEFAULT_TAKEAWAYS: Record<string, string[]> = {
@@ -107,9 +141,10 @@ export const ArticlePage = ({
   reviewer,
   factChecker,
   canonicalUrl,
-  feedback,
-  comments,
-  poll,
+  feedback = DEFAULT_FEEDBACK,
+  comments = DEFAULT_COMMENTS,
+  poll = DEFAULT_POLL,
+  relatedArticles = DEFAULT_RELATED,
   marketWidget,
   inlineChart,
   sidebar,
@@ -319,19 +354,21 @@ export const ArticlePage = ({
             {/* TOOLS & QUIZZES */}
             <div className="mb-8 space-y-4">
               <RelatedCalculators categorySlug={effectiveArticle.categorySlug} />
-              {poll && <ArticlePoll slug={effectiveArticle.slug} initialPoll={poll} categoryName={effectiveArticle.category} />}
+              <Suspense fallback={null}>
+                <PollSlot promise={poll} slug={effectiveArticle.slug} categoryName={effectiveArticle.category} />
+              </Suspense>
               <ArticleQuiz quiz={effectiveArticle.quiz} categoryName={effectiveArticle.category} />
             </div>
 
             {/* HELPFUL VOTE & COMMENTS */}
-            <HelpfulVote
-              slug={effectiveArticle.slug}
-              initialSummary={feedback ?? { helpful: 0, notHelpful: 0 }}
-              categoryName={effectiveArticle.category}
-            />
+            <Suspense fallback={null}>
+              <FeedbackSlot promise={feedback} slug={effectiveArticle.slug} categoryName={effectiveArticle.category} />
+            </Suspense>
 
             <div className="mt-16 ml-4 lg:ml-8 xl:ml-12">
-              <CommentsSection slug={effectiveArticle.slug} initialComments={comments ?? []} />
+              <Suspense fallback={null}>
+                <CommentsSlot promise={comments} slug={effectiveArticle.slug} />
+              </Suspense>
             </div>
           </div>
 
@@ -348,12 +385,9 @@ export const ArticlePage = ({
           categoryName={effectiveArticle.category}
         />
 
-        <RelatedArticles
-          currentArticleId={effectiveArticle.id}
-          category={effectiveArticle.category}
-          tags={effectiveArticle.tags}
-          categorySlug={effectiveArticle.categorySlug}
-        />
+        <Suspense fallback={null}>
+          <RelatedArticlesSlot promise={relatedArticles} />
+        </Suspense>
 
         <div className="mt-12">
           <WeeklyDigestSignup categoryName={effectiveArticle.category} />

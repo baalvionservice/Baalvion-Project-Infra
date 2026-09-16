@@ -1,7 +1,14 @@
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { getAssetDetail } from "@/lib/data/marketsLoader";
 import { MARKET_QUOTES_LIVE } from "@/config/market-quotes";
-import { ArticleInlineChartClient } from "./ArticleInlineChartClient";
+
+// recharts is heavy and only needed when an article mentions exactly one
+// tracked company (see article-detail.tsx) — dynamic() splits it into its
+// own chunk instead of shipping it in every article route's client bundle.
+const ArticleInlineChartClient = dynamic(() =>
+  import("./ArticleInlineChartClient").then((m) => m.ArticleInlineChartClient),
+);
 
 /** Server component — resolves one tracked company's recent price history and
  *  renders a light-themed inline chart. Light/primary-blue sibling of QuoteChart
