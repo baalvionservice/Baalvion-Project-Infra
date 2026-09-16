@@ -91,8 +91,8 @@ export async function CategoryFeed({ slug }: Props) {
   const featured = articles.find((a) => a.featured) ?? articles[0];
   const rest = articles.filter((a) => a !== featured);
   const sidebarArticles = rest.slice(0, 4);
-  // Ensure the explore grid shows all topic articles even when total articles <= 5
-  const gridArticles = rest.slice(4).length > 0 ? rest.slice(4) : rest.length > 0 ? rest : articles;
+  // Articles not already shown in the sidebar above, so no card is duplicated.
+  const gridArticles = rest.slice(sidebarArticles.length);
 
   // ── SEO: CollectionPage + ItemList + Breadcrumb structured data ──
   const base = (env.siteUrl || "https://imperialpedia.com").replace(/\/$/, "");
