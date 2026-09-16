@@ -20,6 +20,7 @@ import { staticArticleBySlug } from "@/services/data/static-content";
 import { canonicalService } from "@/modules/seo/services/canonical-service";
 import { resolveAuthor, getContentRedirectSlug, getArticleFeedback, listArticleComments, getArticlePoll } from "@/services/data/cms-public";
 import { isAllowedImageHost } from "@/lib/safe-image";
+import { getRelatedArticles } from "@/modules/content-engine/services/content-service";
 
 /**
  * @fileOverview Shared article-detail resolution + rendering, used by both the
@@ -124,14 +125,27 @@ export async function buildArticleDetailMetadata(slug: string): Promise<Metadata
 
 export async function ArticleDetailContent({ article }: { article: Article }) {
   try {
-    const [author, reviewer, factChecker, feedback, comments, poll] = await Promise.all([
+    // Byline (author/reviewer/fact-checker) sits right under the H1, so it stays
+    // on the blocking path. Feedback tally, comments and the poll are below the
+    // fold and each their own CMS round trip — passed down as unawaited promises
+    // so ArticlePage can stream them in via Suspense instead of holding up the
+    // whole page (title, hero image, lead paragraph) until all three resolve.
+    const [author, reviewer, factChecker] = await Promise.all([
       article.authorSlug ? resolveAuthor(article.authorSlug).catch(() => null) : Promise.resolve(null),
       article.reviewerSlug ? resolveAuthor(article.reviewerSlug).catch(() => null) : Promise.resolve(null),
       article.factCheckerSlug ? resolveAuthor(article.factCheckerSlug).catch(() => null) : Promise.resolve(null),
-      getArticleFeedback(article.slug).catch(() => ({ helpful: 0, notHelpful: 0 })),
-      listArticleComments(article.slug).catch(() => []),
-      getArticlePoll(article.slug).catch(() => null),
     ]);
+    const feedback = getArticleFeedback(article.slug).catch(() => ({ helpful: 0, notHelpful: 0 }));
+    const comments = listArticleComments(article.slug).catch(() => []);
+    const poll = getArticlePoll(article.slug).catch(() => null);
+    // Was a client-side fetch straight to the CMS's public API — that API only
+    // allow-lists server origins for CORS, so the browser call either fails
+    // outright or burns cmsFetch's 400ms+1200ms retry sequence for nothing,
+    // and kept these links out of the initial HTML entirely. Resolved
+    // server-side now, alongside the other below-the-fold Suspense slots.
+    const relatedArticles = getRelatedArticles(article.id, article.category, article.tags, article.categorySlug)
+      .then((res) => res.data)
+      .catch(() => []);
 
     let breadcrumbs: any = [];
     try {
@@ -203,6 +217,7 @@ export async function ArticleDetailContent({ article }: { article: Article }) {
             feedback={feedback}
             comments={comments}
             poll={poll}
+            relatedArticles={relatedArticles}
             marketWidget={marketWidget}
             inlineChart={inlineChart}
             sidebar={
