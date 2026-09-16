@@ -430,11 +430,15 @@ const nextConfig: NextConfig = {
               // news.google.com serves the "Preferred Sources" widget loader (see layout.tsx's
               // literal <script> tag and PreferredSourceButton) -- it was never allow-listed here,
               // so the browser blocked the load on every single page, confirmed the same way.
-              `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://adservice.google.com https://api.baalvion.com https://*.adtrafficquality.google https://news.google.com`,
+              `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://adservice.google.com https://api.baalvion.com https://*.adtrafficquality.google https://news.google.com https://static.cloudflareinsights.com`,
               // In dev the CMS and its analytics collector live on localhost rather
               // than api.baalvion.com, so the collect.js element load was blocked on
               // every page. Scoped to isDev — production must never trust localhost.
-              `script-src-elem 'self' 'unsafe-inline'${isDev ? ' http://localhost:*' : ''} https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://adservice.google.com https://api.baalvion.com https://*.adtrafficquality.google https://news.google.com`,
+              // static.cloudflareinsights.com is Cloudflare's own RUM beacon, injected
+              // automatically once the site is proxied (orange-cloud) — not something we
+              // added ourselves, but the browser still enforces our CSP against it, so it
+              // was CSP-blocked (console error + Issues-panel entry) on every page load.
+              `script-src-elem 'self' 'unsafe-inline'${isDev ? ' http://localhost:*' : ''} https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://adservice.google.com https://api.baalvion.com https://*.adtrafficquality.google https://news.google.com https://static.cloudflareinsights.com`,
               "style-src 'self' 'unsafe-inline'",
               // 'self' + data: (inline generated SVG artwork) + imperialpedia.com +
               // api.baalvion.com (cms-service-hosted generated artwork) are the only
@@ -458,7 +462,10 @@ const nextConfig: NextConfig = {
               // csi.gstatic.com is Google's client-side instrumentation ping that
               // show_ads_impl.js fires once the ad script actually runs -- unlisted here it
               // CSP-blocked on every page once script-src let the ad script itself load.
-              "connect-src 'self' https://api.baalvion.com http://localhost:3004 http://localhost:3018 https://www.google-analytics.com https://*.google-analytics.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com https://*.adtrafficquality.google https://csi.gstatic.com",
+              // cloudflareinsights.com (no "static." prefix — that's the script host above,
+              // this is where the RUM beacon actually POSTs its data) — same Cloudflare-
+              // injected beacon, blocked under connect-src once the script itself could load.
+              "connect-src 'self' https://api.baalvion.com http://localhost:3004 http://localhost:3018 https://www.google-analytics.com https://*.google-analytics.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com https://*.adtrafficquality.google https://csi.gstatic.com https://cloudflareinsights.com",
               // www.googletagmanager.com/ns.html is the GTM <noscript> fallback iframe.
               // ep2.adtrafficquality.google + www.google.com are AdSense's own ad-quality
               // confirmation/verification iframes (loaded by show_ads_impl.js); news.google.com
@@ -555,6 +562,11 @@ const nextConfig: NextConfig = {
   },
   // Compression
   compress: true,
+  // Ships .js.map files alongside the production bundle so DevTools/Lighthouse
+  // can resolve real file/line info instead of flagging large first-party
+  // chunks as unmapped. Maps are only fetched when a browser's devtools are
+  // actually open — no effect on real page-load performance.
+  productionBrowserSourceMaps: true,
   // PWA-like optimizations
   poweredByHeader: false,
   // NOTE: previously this config force-merged every node_modules package into a single

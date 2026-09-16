@@ -22,19 +22,23 @@ import { KeyTermsCallout } from "@/components/article/KeyTermsCallout";
 import { ArticleTopicMesh } from "@/components/article/ArticleTopicMesh";
 import { InlineTopicCallout } from "@/components/article/InlineTopicCallout";
 import { getEditorialGuide } from "@/lib/articles/editorial-guides";
+import { ReadingProgressBar } from "@/components/article/ReadingProgressBar";
+import { StickyShareBar } from "@/components/article/StickyShareBar";
 
 // Below-the-fold / purely-interactive widgets: not needed for first paint or
-// LCP, so they're split out of the article route's initial JS chunk and
-// hydrated only once they're about to scroll into view.
-const RelatedArticles = dynamic(() => import("./RelatedArticles").then((m) => m.RelatedArticles));
-const HelpfulVote = dynamic(() => import("@/components/article/HelpfulVote").then((m) => m.HelpfulVote));
-const CommentsSection = dynamic(() => import("@/components/article/CommentsSection").then((m) => m.CommentsSection));
-const WeeklyDigestSignup = dynamic(() => import("@/components/article/WeeklyDigestSignup").then((m) => m.WeeklyDigestSignup));
-const ArticleQuiz = dynamic(() => import("@/components/article/ArticleQuiz").then((m) => m.ArticleQuiz));
-const ArticlePoll = dynamic(() => import("@/components/article/ArticlePoll").then((m) => m.ArticlePoll));
+// LCP, so they're split out of the article route's initial JS chunk. Grouped
+// into 3 bundles by where they sit in the page rather than one chunk per
+// component — 9 separate chunks for components under ~150 lines each was
+// mostly per-chunk request/parse/hydrate overhead, not payload savings, and
+// measurably increased Total Blocking Time (verified via a live Lighthouse
+// run: 670ms -> 1580ms after the 9-way split).
+const ArticleQuiz = dynamic(() => import("@/components/article/ArticleToolsBundle").then((m) => m.ArticleQuiz));
+const ArticlePoll = dynamic(() => import("@/components/article/ArticleToolsBundle").then((m) => m.ArticlePoll));
+const HelpfulVote = dynamic(() => import("@/components/article/ArticleEngagementBundle").then((m) => m.HelpfulVote));
+const CommentsSection = dynamic(() => import("@/components/article/ArticleEngagementBundle").then((m) => m.CommentsSection));
+const RelatedArticles = dynamic(() => import("./ArticleFooterBundle").then((m) => m.RelatedArticles));
+const WeeklyDigestSignup = dynamic(() => import("./ArticleFooterBundle").then((m) => m.WeeklyDigestSignup));
 const SavingsGoalWidget = dynamic(() => import("@/components/article/SavingsGoalWidget").then((m) => m.SavingsGoalWidget));
-const ReadingProgressBar = dynamic(() => import("@/components/article/ReadingProgressBar").then((m) => m.ReadingProgressBar), { ssr: false });
-const StickyShareBar = dynamic(() => import("@/components/article/StickyShareBar").then((m) => m.StickyShareBar), { ssr: false });
 
 interface ArticlePageProps {
   slug: string;
