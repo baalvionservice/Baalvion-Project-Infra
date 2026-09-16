@@ -230,10 +230,16 @@ export default async function RootLayout({
             defaults. Confirm this ordering with a live view-source check after any
             future edit near here, the same way the original bug was found. */}
         {adsenseClient && (
+          // suppressHydrationWarning for the same reason as the consent script above:
+          // AdSense's injected show_ads_impl script can land in <head> before hydration
+          // and shift this node's position, so React diffs it against the wrong sibling.
+          // Confirmed live: without this, that cosmetic mismatch was throwing React error
+          // #418 (hard hydration-mismatch recovery, not just a dev warning) on every load.
           <script
             defer
             src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`}
             crossOrigin="anonymous"
+            suppressHydrationWarning
           />
         )}
         {adsenseClient && (
