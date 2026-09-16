@@ -5,7 +5,6 @@ import {
 import { loadCountries } from "@/lib/data/loaders";
 import { fetchAllTerms } from "@/lib/data/term-live";
 import { reviewSlugs } from "@/lib/data/review-live";
-import { staticArticleList } from "@/services/data/static-content";
 import { getPublishedNews } from "@/services/data/cms-public";
 import { newsArticleHref } from "@/lib/data/article-url";
 import { ALL_TRACKED_SYMBOLS } from "@/lib/data/marketsLoader";
@@ -227,12 +226,14 @@ export const sitemapService = {
       listSafe(calculatorsService.getCalculatorList()),
     ]);
 
-    const staticArticles = staticArticleList();
-    const articlesMap = new Map<string, typeof staticArticles[0]>();
-    staticArticles.forEach((a) => articlesMap.set(a.slug, a));
-    cmsArticles.forEach((a) => articlesMap.set(a.slug, a));
-
-    const articles = Array.from(articlesMap.values());
+    // Live CMS only — no merge with staticArticleList()'s 478-article backup
+    // catalog. That catalog exists purely as an offline/CMS-down fallback for
+    // page rendering; submitting it to the sitemap meant every article ever
+    // unpublished from the CMS (e.g. the September 2026 Stocks/Budgeting trim
+    // to a curated 10 each) stayed listed forever, since nothing in the static
+    // snapshot ever shrinks. A sitemap is a crawl invitation, not a historical
+    // archive — pre-AdSense-resubmission, it must reflect exactly what's live.
+    const articles = cmsArticles;
 
     // Thin/duplicate articles permanently killed in the 2026-08 SEO cleanup pass (see
     // REMOVED_PATHS in middleware.ts) — excluded here too so a still-published CMS row
