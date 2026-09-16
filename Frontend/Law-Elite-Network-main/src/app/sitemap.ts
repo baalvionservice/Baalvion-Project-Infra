@@ -40,7 +40,7 @@ async function safeFetch<T>(url: string): Promise<T[]> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
-    const res = await fetch(url, { next: { revalidate: 1800 }, signal: controller.signal });
+    const res = await fetch(url, { next: { revalidate: 300 }, signal: controller.signal });
     if (!res.ok) return [];
     const json = await res.json();
     const d = json?.data;
@@ -273,7 +273,7 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
 const getCachedSitemapEntries = unstable_cache(
   buildSitemapEntries,
   ['law-elite-network-sitemap-entries'],
-  { revalidate: 1800 },
+  { revalidate: 300 },
 );
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
