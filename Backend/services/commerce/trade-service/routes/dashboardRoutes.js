@@ -19,6 +19,8 @@ router.get('/shipments/:id',           authMiddleware, readLimiter, ctrl.getShip
 router.get('/shipments/:id/timeline',  authMiddleware, readLimiter, ctrl.getTimeline);
 router.get('/shipments/:id/readiness', authMiddleware, readLimiter, ctrl.getReadiness);
 router.get('/shipments/:id/documents', authMiddleware, readLimiter, ctrl.getDocuments);
+router.get('/shipments/:id/schedule',  authMiddleware, readLimiter, ctrl.getSchedule);
+router.get('/shipments/:id/clearance', authMiddleware, readLimiter, ctrl.getClearance);
 router.post('/shipments/:id/comments', authMiddleware, commentLimiter, ctrl.addComment);
 
 module.exports = router;

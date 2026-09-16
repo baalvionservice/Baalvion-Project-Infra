@@ -4,6 +4,8 @@ const db = require('../models');
 const codeVault = require('./codeVault');
 const { getSupplier } = require('./suppliers/supplierRegistry');
 const { SECRET: INTERNAL_SECRET } = require('./internalSecret');
+const { Money } = require('@baalvion/money');
+const paymentSpine = require('./paymentSpine');
 const { AppError } = require('../utils/errors');
 
 const PAYMENT_SERVICE_URL = process.env.PAYMENT_SERVICE_URL || 'http://app-payments:3015';
@@ -192,6 +194,17 @@ async function fulfill({ eventId, metadata, amountMinor, currency, providerRef }
     // The payment WAS captured either way — never throw here (that would signal payment-service
     // to treat this as retryable and re-deliver forever), even on a supplier failure.
     await claim.update({ status: 'applied' });
+
+    // Report onto the platform spine so the order appears on the cross-estate panel, attributed
+    // to the site and the brand. Same reasoning as above: never fatal.
+    await paymentSpine.reportOrderPayment({
+        orderId, brandSlug: order.brand && order.brand.slug, amountMinor, currency, providerRef, userId,
+        // Forwarded only when the callback actually carried it — the buyer's address is not
+        // stored on the order, so this is the one place it can reach the party graph.
+        email: metadata && metadata.email,
+    }).catch((err) => {
+        console.warn(JSON.stringify({ evt: 'payment_spine.report_failed', orderId, msg: err.message }));
+    });
     return result.ok
         ? { applied: true, duplicate: false }
         : { applied: true, duplicate: false, fulfillmentFailed: true };
@@ -209,8 +222,10 @@ async function checkoutWithWallet(brandSlug, userId, denominationValue) {
     if (!brand) throw new AppError('NOT_FOUND', 'Gift card brand not found', 404);
 
     const denom = validateDenomination(brand, denominationValue);
-    const priceUsdCents = Math.round(denom * 100);
-    const priceUsd = priceUsdCents / 100;
+    // Exact: the currency's own exponent, and no float round-trip back to major units.
+    const price = Money.fromDatabaseValue(denom, 'USD');
+    const priceUsdCents = Number(price.minor);
+    const priceUsd = price.toDecimalString();
 
     const order = await db.GiftCardOrder.create({
         user_id: userId,

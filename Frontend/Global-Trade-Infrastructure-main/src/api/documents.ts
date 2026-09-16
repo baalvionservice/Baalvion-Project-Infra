@@ -123,6 +123,29 @@ export const documentsApi = {
     ),
   verify: (id: string, note?: string) => tradeApi.patch<TradeDocument>(`/trade_documents/${id}/verify`, { note }),
   reject: (id: string, reason: string) => tradeApi.patch<TradeDocument>(`/trade_documents/${id}/reject`, { reason }),
+  /**
+   * Opens a document's latest version in a new tab. The backend returns either a
+   * presigned redirect ({mode:'redirect', url}, when real object storage is
+   * configured) or streams the raw file bytes directly (local/dev fallback) — this
+   * handles both so callers never need to know which mode is active.
+   */
+  async openInNewTab(id: string): Promise<void> {
+    const res = await fetch(`/trade-bff/trade_documents/${id}/download`, { credentials: 'include' });
+    if (!res.ok) throw new Error(`Could not open document (HTTP ${res.status})`);
+    const contentType = res.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+      const json = await res.json();
+      const url = json?.data?.url;
+      if (!url) throw new Error('Document service did not return a viewable URL');
+      window.open(url, '_blank', 'noopener');
+      return;
+    }
+    const blob = await res.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    window.open(objectUrl, '_blank', 'noopener');
+    // Revoke after a delay long enough for the new tab to load the blob.
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+  },
 };
 
 export function useDocumentCapabilities() {

@@ -135,7 +135,17 @@ async function cascadeOrderInTx(t, eventType, orderId, opts = {}) {
                 + 'debit/credit account ids are not UUIDs (configure LEDGER_SETTLEMENT_*_ACCOUNT_ID)');
         }
     }
-    return { matched: true, orderId: order.id, state: tr.state };
+    // The order's own dimensions travel back with the result so the caller can attribute the
+    // payment without re-reading the row it just settled. Without these the cross-estate panel
+    // shows a GTI payment with no tenant and no counterparties.
+    return {
+        matched: true,
+        orderId: order.id,
+        state: tr.state,
+        tenantId: order.tenant_id || null,
+        buyerOrgId: order.buyer_org_id || null,
+        sellerOrgId: order.seller_org_id || null,
+    };
 }
 
 // Cascade within an EXISTING transaction, resolving the order id from the payload.

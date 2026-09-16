@@ -42,7 +42,7 @@ async function expectedMovements(storeId, { from, to } = {}) {
             paymentId: p.id, orderId: p.orderId, orderNumber: p.orderNumber,
             kind: isRefund ? 'REFUND' : 'PAYMENT',
             transactionRef: isRefund ? `refund-${p.id}` : `pay-${p.id}`,
-            amountMinor: ledgerClient.toMinorUnits(p.amount),
+            amountMinor: ledgerClient.toMinorUnits(p.amount, p.currencyCode),
             currency: p.currencyCode, transactionId: p.transactionId,
         };
     });
@@ -53,13 +53,13 @@ async function ledgerIndex(storeId) {
     const byRef = new Map();
     let truncated = false;
     for (const entryType of ['PAYMENT', 'REFUND']) {
-        let offset = 0;
         for (let page = 0; page < MAX_LEDGER_PAGES; page += 1) {
-            const res = await ledgerClient.listEntries(storeId, { entryType, limit: LEDGER_PAGE, offset });
+            // ledger-service pages with page/size, not limit/offset. Unknown query params there
+            // are ignored rather than rejected, so the wrong names silently re-read page 0.
+            const res = await ledgerClient.listEntries(storeId, { entryType, page, size: LEDGER_PAGE });
             if (!res.ok) return { ok: false, skipped: res.skipped, byRef };
             for (const e of res.entries) byRef.set(e.transactionRef, e);
             if (res.entries.length < LEDGER_PAGE) break;
-            offset += LEDGER_PAGE;
             if (page === MAX_LEDGER_PAGES - 1) truncated = true;
         }
     }
@@ -80,8 +80,11 @@ async function report(storeId, opts = {}) {
     for (const m of expected) {
         const entry = idx.byRef.get(m.transactionRef);
         if (!entry) { missing.push(m); continue; }
-        if (Math.round(Number(entry.amount)) !== m.amountMinor || entry.entryType !== m.kind) {
-            mismatched.push({ ...m, ledgerAmountMinor: Math.round(Number(entry.amount)), ledgerEntryType: entry.entryType, ledgerEntryId: entry.id });
+        // The ledger returns a major-unit decimal; compare in exact minor units rather than
+        // rounding a float, so a genuine one-unit drift is never rounded away.
+        const ledgerAmountMinor = ledgerClient.ledgerAmountToMinorUnits(entry.amount, m.currency);
+        if (ledgerAmountMinor !== m.amountMinor || entry.entryType !== m.kind) {
+            mismatched.push({ ...m, ledgerAmountMinor, ledgerEntryType: entry.entryType, ledgerEntryId: entry.id });
         } else {
             matched.push(m.transactionRef);
         }
@@ -175,6 +178,9 @@ async function sweepPendingPayments(storeId, { graceMinutes = 15, windowHours = 
                     providerPaymentId: st.transactionId,
                     amount: st.amountMinor,
                     currencyCode: st.currency,
+                    // Forward what the gateway kept, so a payment settled by this sweep is
+                    // attributed identically to one settled by its webhook.
+                    feeMinor: st.feeMinor != null ? st.feeMinor : null,
                 });
                 settled += 1;
                 console.info(JSON.stringify({ evt: 'pending_sweep.settled', storeId, orderId: r.orderId, provider: r.provider, paymentId: r.id }));

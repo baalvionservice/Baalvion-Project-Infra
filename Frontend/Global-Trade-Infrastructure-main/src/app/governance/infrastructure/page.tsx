@@ -42,13 +42,16 @@ export default function GlobalInfraCommandPage() {
   const [activeTab, setActiveTab] = useState<'topology' | 'workloads' | 'resilience'>('topology');
 
   const fetchData = async () => {
-    const [topology, sPulse] = await Promise.all([
-      infraOrchestrator.getTopology(),
-      hardeningService.getSystemPulse()
-    ]);
-    setNodes(topology);
-    setPulse(sPulse);
-    setLoading(false);
+    try {
+      const [topology, sPulse] = await Promise.all([
+        infraOrchestrator.getTopology(),
+        hardeningService.getSystemPulse()
+      ]);
+      setNodes(topology);
+      setPulse(sPulse);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {

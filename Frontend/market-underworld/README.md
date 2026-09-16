@@ -1,61 +1,113 @@
-# 🌑 Market Underworld (NEXUS)
+<div align="center">
 
-The premier high-fidelity intelligence and commodity exchange node. A distributed marketplace built for the elite global trade network.
+<img src="assets/banner.svg" alt="Baalvion Insiders — Baalvion Platform" width="100%">
 
-## 🛰️ Node Status: [OPERATIONAL]
-**Current Version**: v2.4.0  
-**Global Nodes**: 7 Regions Active  
-**Security Level**: High-Fidelity Encrypted
+<br/>
+<br/>
 
-## 🚀 Vision
-Market Underworld is a multi-regional platform that bridges the gap between expert knowledge and global trade. It features a decentralized learning ecosystem (NEXUS) and a modular marketplace protocol supporting everything from physical commodities to digital creator equity.
+**A private, invite-only network for investors and founders, live today — plus a considerably larger multi-vertical marketplace, education platform, and community forums already built in this repository but not yet deployed.**
 
-## 🛠️ Tech Stack
-- **Framework**: [Next.js 15+](https://nextjs.org/) (App Router)
-- **AI Engine**: [Google Genkit](https://genkit.dev/)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
-- **UI Components**: [Shadcn UI](https://ui.shadcn.com/)
-- **Animations**: [Framer Motion](https://www.framer.com/motion/)
-- **Data**: Mock JSON data (no external database)
-- **Icons**: [Lucide React](https://lucide.dev/)
+<p>
+  <img alt="Next.js 15" src="https://img.shields.io/badge/Next.js%2015-000000?style=for-the-badge&logo=nextdotjs&logoColor=white">
+  <img alt="React 19" src="https://img.shields.io/badge/React%2019-20232A?style=for-the-badge&logo=react&logoColor=61DAFB">
+  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white">
+  <img alt="Tailwind CSS" src="https://img.shields.io/badge/Tailwind-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white">
+  <img alt="Framer Motion" src="https://img.shields.io/badge/Framer%20Motion-0055FF?style=for-the-badge&logo=framer&logoColor=white">
+</p>
 
-## 📦 Core Features
-- **NEXUS Education**: AI-powered teacher matching for 1-on-1 private classes.
-- **Global Marketplace**: Regionalized trade nodes for electronics, fashion, and raw materials.
-- **Creator Equity**: A unique protocol for investing in monetized YouTube channels and revenue-sharing.
-- **Intelligence Forums**: High-fidelity, XenForo-style discussion boards with VIP sections.
-- **Universal Command**: `Cmd+K` global search across all nodes.
-- **Crypto-Integrated**: Built-in wallet protocols for ETH, BTC, and USDT settlements.
+<sub><a href="#overview">Overview</a> · <a href="#architecture">Architecture</a> · <a href="#tech-stack">Tech Stack</a> · <a href="#getting-started">Getting started</a></sub>
 
-## 🛠️ Installation & Setup
+</div>
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/baalvionservice/market.git
-   cd market
-   ```
+---
 
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
+## Overview
 
-3. **Configure Environment**:
-   Create a `.env.local` file with your Firebase and Genkit credentials.
+**Baalvion Insiders** (repository codename `market-underworld`) is what visitors actually see live
+today: an invite-only, verified network for investors and founders — curated deal flow and
+high-value discussions.
 
-4. **Run Development Terminal**:
-   ```bash
-   npm run dev
-   ```
-   Access the dashboard at `http://localhost:9002`.
+The repository itself is considerably larger than that: a multi-vertical marketplace (clothing,
+commodities, events, food, travel, VIP listings), an education marketplace pairing teachers and
+students, community forums, gift cards, and a tiered paid-access gate (`/access` — deposit-gated
+tiers unlocking the marketplace). **None of that is live in production yet** — `/access`,
+`/marketplace`, `/forum`, `/gift-cards`, and `/education` all return HTTP 404 on
+`marketunderworld.com` today; only `/` is live. Treat this README's "Overview" as the deployed
+product, and the "Architecture" / "What's in the repo but not live" sections below as the larger
+codebase.
 
-## 📡 Deployment
-To sync this node with your GitHub repository:
-1. Run the deployment script:
-   ```bash
-   chmod +x github-setup.sh
-   ./github-setup.sh
-   ```
+- **Dev port:** `9002` (`next dev --turbopack -p 9002`)
+- **Canonical production host:** `https://marketunderworld.com` — only the root route is live
+- **Auth model:** central Baalvion identity via `@baalvion/auth-sdk`, bridged through an
+  `oauth-bridge` API route
 
-## 📜 License
-Internal use only. Part of the Underworld Protocol.
+## Architecture
+
+### Proxy layer
+
+The app never calls backend services directly from the client — every domain call goes through a
+same-origin proxy route to the shared platform gateway:
+
+```mermaid
+flowchart LR
+    B["Browser<br/><i>Next.js 15 · :9002</i>"]
+    B -->|"/api/commerce-proxy/*"| C["commerce-service<br/><i>api.baalvion.com/api/v1/commerce</i>"]
+    B -->|"/api/community-proxy/*"| CM["community-service<br/><i>api.baalvion.com/api/v1/community</i>"]
+    B -->|"/api/giftcard-proxy/*"| G["giftcard-service<br/><i>api.baalvion.com/api/v1/giftcards</i>"]
+    B -->|"/api/oauth-bridge"| A["Baalvion identity"]
+    B -->|"/api/realtime-token"| R["Realtime — community chat"]
+
+    classDef app fill:#22D3EE,stroke:#0E7490,color:#04121A;
+    class B app;
+```
+
+Additional proxy routes cover admin, orders, wallet, and wishlist, all fronting the same central
+API gateway rather than a service local to this app.
+
+### What's in the repo but not live
+
+The working tree contains full route implementations that do not currently resolve on
+`marketunderworld.com` (verified 404):
+
+| Route | What it is |
+|---|---|
+| `/access` | A tiered, deposit-gated unlock flow (e.g. "$100 USD — unlock the marketplace") |
+| `/marketplace` (+ `clothing`, `commodities`, `events`, `food`, `travel`, `vip`) | A multi-vertical listings marketplace |
+| `/education`, `/classroom/[classId]`, `/live-sessions` | A teacher/student marketplace with live sessions |
+| `/forum/[communitySlug]` | Per-community discussion threads |
+| `/gift-cards` | Gift-card purchase and redemption |
+
+The live root page (`src/app/page.tsx`) also still imports `LIVE_ACTIVITY_MOCK` from
+`src/data/mockData.ts` for its "regions" and "live activity" UI — that page renders locally, but is
+not what is actually deployed at `marketunderworld.com/` today (the live root shows the Baalvion
+Insiders hero instead). Whichever build is live is ahead of what a fresh checkout of this branch
+renders at `/`.
+
+### AI
+
+`@genkit-ai/google-genai` and `genkit` are dependencies and `src/ai/genkit.ts` initializes the
+client, but `src/ai/dev.ts` — where flows are registered — is currently empty. No generative-AI
+flow ships live yet.
+
+## Tech Stack
+
+Next.js 15 · React 19 · TypeScript · Tailwind CSS · Radix UI · Framer Motion · Embla Carousel ·
+date-fns
+
+## Getting Started
+
+```bash
+pnpm install
+pnpm run dev        # http://localhost:9002
+```
+
+## Notes
+
+- Invite-only: new members apply for access and are verified before joining — there is no public
+  sign-up.
+- The dev port (`9002`) is shared with `Law-Elite-Network-main` in this monorepo; run one at a
+  time locally, or override with `-p`.
+
+---
+
+<sub>Part of the <a href="https://github.com/baalvionservice/Baalvion-Project-Infra">Baalvion Platform</a> · centralized identity · domain-driven monorepo</sub>

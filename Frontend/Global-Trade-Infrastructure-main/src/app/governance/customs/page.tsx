@@ -39,13 +39,16 @@ export default function CustomsCommandHub() {
 
   const fetchData = async () => {
     setLoading(true);
-    const [eData, pData] = await Promise.all([
-      customsService.getCustomsEntries(),
-      customsService.getCustomsPulse()
-    ]);
-    setEntries(eData);
-    setPulse(pData);
-    setLoading(false);
+    try {
+      const [eData, pData] = await Promise.all([
+        customsService.getCustomsEntries(),
+        customsService.getCustomsPulse()
+      ]);
+      setEntries(eData);
+      setPulse(pData);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {

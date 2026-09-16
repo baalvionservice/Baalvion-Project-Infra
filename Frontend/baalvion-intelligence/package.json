@@ -8,11 +8,13 @@
     "start": "next start -p 3070",
     "lint": "eslint .",
     "type-check": "tsc --noEmit",
-    "cf:preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "cf:deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
+    "cf:build": "pnpm --filter baalvion-intelligence-web^... run build && opennextjs-cloudflare build",
+    "cf:preview": "pnpm --filter baalvion-intelligence-web^... run build && opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "cf:deploy": "pnpm --filter baalvion-intelligence-web^... run build && opennextjs-cloudflare build && opennextjs-cloudflare deploy"
   },
   "dependencies": {
     "@baalvion/auth-sdk": "workspace:*",
+    "@baalvion/design": "workspace:*",
     "@opennextjs/cloudflare": "^1.20.1",
     "@radix-ui/react-accordion": "^1.2.3",
     "@radix-ui/react-dialog": "^1.1.6",
@@ -25,7 +27,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.475.0",
-    "next": "15.5.21",
+    "next": "15.5.24",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "recharts": "^2.15.1",

@@ -1,16 +1,19 @@
 'use strict';
 // AI Operations console routes. Mounted under /v1/ai (the integrator wires the mount
-// in routes/v1.js). Every route is gated by requireSuperAdmin — same super-admin gate
-// adminRoutes applies — because this surface manages platform-wide AI configuration,
-// cost data and the inference queue.
+// in routes/v1.js). Every route is gated at the admin tier — the same gate adminRoutes
+// applies — because this surface manages platform-wide AI configuration, cost data and
+// the inference queue.
 //
 // Path contract is dictated by Frontend/admin-platform/src/lib/api/ai.ts (adminApiClient
 // base = .../platform/admin/v1, so these mount at /v1/ai/*).
 const router = require('express').Router();
 const ctrl   = require('../controller/aiController');
-const { requireSuperAdmin } = require('../middleware/authMiddleware');
+const { requireStaffAdmin } = require('../middleware/authMiddleware');
 
-router.use(requireSuperAdmin);
+// Platform-staff tier: EXACT match on admin/super_admin, NOT hierarchical. `owner` is a
+// self-service role (registration makes every user owner of their own org), so a
+// hierarchical admin gate handed these surfaces to the entire public.
+router.use(requireStaffAdmin);
 
 // Models (static catalog + persisted enable/cost overrides + live usage)
 router.get('/models',        ctrl.listModels);

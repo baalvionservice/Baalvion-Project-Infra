@@ -16,9 +16,12 @@ export default function QuickLinksSection() {
   // logged-out visitors. It must only link to PUBLIC IR surfaces — never the
   // gated investor-portal routes (/dashboard, /data-room), which exist behind
   // the middleware session gate and should not be advertised publicly.
+  // Labels describe what the destination actually contains. "Investor Performance" and "Capital
+  // Returns & Payouts" promised a track record and a distribution history that a company
+  // incorporated in March 2025 does not have; /investment-thesis was never a payouts page either.
   const quickLinks = [
-    { name: "Investor Performance & Financial Reports", href: "/financials" },
-    { name: "Capital Returns & Payouts", href: "/investment-thesis" },
+    { name: "Company Filings", href: "/financials" },
+    { name: "Investment Thesis", href: "/investment-thesis" },
     { name: "Governance & Strategic Updates", href: "/governance/overview" },
   ];
 

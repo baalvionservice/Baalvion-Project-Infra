@@ -206,7 +206,10 @@
       "Bash(curl -sS \"https://imperialpedia.com/_next/image?url=https%3A%2F%2Fapi.baalvion.com%2Fuploads%2F7f97bc8a-afee-4409-ae12-ab709d0d2f12.png&w=1200&q=75\")",
       "Bash(curl -sS -D - -o /dev/null \"https://imperialpedia.com/_next/image?url=https%3A%2F%2Fapi.baalvion.com%2Fuploads%2F7f97bc8a-afee-4409-ae12-ab709d0d2f12.png&w=1200&q=75\")",
       "Bash(curl -sS -D - -o /dev/null \"https://imperialpedia.com/\")",
-      "Bash(node \"C:\\\\Users\\\\ALLENK~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\d--Baalvion-Projects\\\\a450208d-39fb-4882-9fcf-4299dadef2b7\\\\scratchpad\\\\delete-ranges.js\")"
+      "Bash(node \"C:\\\\Users\\\\ALLENK~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\d--Baalvion-Projects\\\\a450208d-39fb-4882-9fcf-4299dadef2b7\\\\scratchpad\\\\delete-ranges.js\")",
+      "Bash(node Backend/catalog/validate.mjs)",
+      "Bash(git commit -q -m 'fix\\(catalog\\): declare canwemarry-service runtime so C8 passes *)",
+      "Bash(awk -F'\\\\t' '{print $1\"\\\\t\"$2}')"
     ],
     "additionalDirectories": [
       "D:\\wt-pay\\Backend\\services\\commerce\\financial-services-java\\payment-service\\src\\main\\java\\com\\baalvion\\payment\\gateway\\service",

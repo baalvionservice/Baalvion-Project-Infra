@@ -1,6 +1,24 @@
 import type { NextConfig } from "next";
+import path from "path";
 
 const nextConfig: NextConfig = {
+  // Required for the self-hosted Docker image (Dockerfile copies .next/standalone) — every
+  // other app in the monorepo that ships a Docker image sets this the same way. Harmless for
+  // Vercel, which ignores it. win32 guard matches sibling configs (standalone's symlinked
+  // node_modules trace breaks on Windows dev machines).
+  output: process.platform === 'win32' ? undefined : 'standalone',
+  // The monorepo ROOT, not this app's own directory. Pointing this at __dirname (as it was
+  // before) made Next trace dependencies as if this app's own folder were the workspace root —
+  // harmless for `next dev`/Vercel, but it breaks standalone output in a real pnpm monorepo
+  // build: pnpm's node_modules symlinks are relative and computed assuming the true repo-root
+  // depth (Frontend/Imperialpedia-main/node_modules/next -> ../../../node_modules/.pnpm/...,
+  // 3 levels up to repo root). With __dirname as the trace root, `next build` still copies
+  // node_modules at that same nested relative depth into .next/standalone, but Docker then
+  // has nowhere to put the matching 3-level-up target unless the image preserves that same
+  // full nested path — which is exactly what the Dockerfile does. Pointing this at repo root
+  // instead matches what every other app in the monorepo gets automatically (they don't set
+  // this at all — Next infers it from the lockfile location, which IS the repo root).
+  outputFileTracingRoot: path.join(__dirname, '../..'),
   // Keep the server-only Genkit + OpenTelemetry runtime external so Next leaves it as a runtime
   // require() instead of bundling and statically analysing its dynamic `require(expr)` calls
   // (@opentelemetry/instrumentation, require-in-the-middle, protobufjs, express). Removes the
@@ -54,7 +72,7 @@ const nextConfig: NextConfig = {
     // Same-origin auth proxy so the httpOnly refresh cookie flows in dev and prod.
     return [
       { source: '/auth-bff/:path*', destination: `${authTarget}/:path*` },
-      // Investopedia-style A–Z glossary URLs (e.g. /terms-beginning-with-a,
+      // Imperialpedia-style A–Z glossary URLs (e.g. /terms-beginning-with-a,
       // /terms-beginning-with-num) map onto the real /terms/[letter] listing route.
       { source: '/terms-beginning-with-:letter', destination: '/terms/:letter' },
     ];
@@ -84,8 +102,6 @@ const nextConfig: NextConfig = {
       // other 46. Their articles were recategorized into budgeting-basics (37 total
       // now), not archived — see recategorize-and-archive.cjs. budgeting-basics
       // itself stays live and out of this block.
-      { source: '/advanced-budgeting', destination: '/', permanent: true },
-      { source: '/advanced-budgeting/:path*', destination: '/', permanent: true },
       { source: '/app-reviews', destination: '/', permanent: true },
       { source: '/app-reviews/:path*', destination: '/', permanent: true },
       { source: '/auto-loans', destination: '/', permanent: true },
@@ -98,10 +114,6 @@ const nextConfig: NextConfig = {
       { source: '/bonds/:path*', destination: '/', permanent: true },
       { source: '/brokers', destination: '/', permanent: true },
       { source: '/brokers/:path*', destination: '/', permanent: true },
-      { source: '/budget-rules', destination: '/', permanent: true },
-      { source: '/budget-rules/:path*', destination: '/', permanent: true },
-      { source: '/budgeting-apps', destination: '/', permanent: true },
-      { source: '/budgeting-apps/:path*', destination: '/', permanent: true },
       { source: '/calendar', destination: '/', permanent: true },
       { source: '/calendar/:path*', destination: '/', permanent: true },
       { source: '/cd-rates', destination: '/', permanent: true },
@@ -124,12 +136,8 @@ const nextConfig: NextConfig = {
       { source: '/earnings/:path*', destination: '/', permanent: true },
       { source: '/economy', destination: '/', permanent: true },
       { source: '/economy/:path*', destination: '/', permanent: true },
-      { source: '/emergency-fund', destination: '/', permanent: true },
-      { source: '/emergency-fund/:path*', destination: '/', permanent: true },
       { source: '/etfs', destination: '/', permanent: true },
       { source: '/etfs/:path*', destination: '/', permanent: true },
-      { source: '/family-budget', destination: '/', permanent: true },
-      { source: '/family-budget/:path*', destination: '/', permanent: true },
       { source: '/fed', destination: '/', permanent: true },
       { source: '/fed/:path*', destination: '/', permanent: true },
       { source: '/financial-calculators', destination: '/', permanent: true },
@@ -148,30 +156,28 @@ const nextConfig: NextConfig = {
       { source: '/inflation/:path*', destination: '/', permanent: true },
       { source: '/interest-rates', destination: '/', permanent: true },
       { source: '/interest-rates/:path*', destination: '/', permanent: true },
-      { source: '/investing', destination: '/', permanent: true },
-      { source: '/investing/:path*', destination: '/', permanent: true },
       { source: '/live-market-news', destination: '/', permanent: true },
       { source: '/live-market-news/:path*', destination: '/', permanent: true },
       { source: '/loan-reviews', destination: '/', permanent: true },
       { source: '/loan-reviews/:path*', destination: '/', permanent: true },
       { source: '/loans', destination: '/', permanent: true },
       { source: '/loans/:path*', destination: '/', permanent: true },
+      { source: '/market-news', destination: '/', permanent: true },
+      { source: '/market-news/:path*', destination: '/', permanent: true },
+      { source: '/markets', destination: '/', permanent: true },
+      { source: '/markets/:path*', destination: '/', permanent: true },
       { source: '/monetary-policy', destination: '/', permanent: true },
       { source: '/monetary-policy/:path*', destination: '/', permanent: true },
       { source: '/money-management', destination: '/', permanent: true },
       { source: '/money-management/:path*', destination: '/', permanent: true },
       { source: '/money-market', destination: '/', permanent: true },
       { source: '/money-market/:path*', destination: '/', permanent: true },
-      { source: '/monthly-budget', destination: '/', permanent: true },
-      { source: '/monthly-budget/:path*', destination: '/', permanent: true },
       { source: '/mortgages', destination: '/', permanent: true },
       { source: '/mortgages/:path*', destination: '/', permanent: true },
       { source: '/mutual-funds', destination: '/', permanent: true },
       { source: '/mutual-funds/:path*', destination: '/', permanent: true },
       { source: '/options', destination: '/', permanent: true },
       { source: '/options/:path*', destination: '/', permanent: true },
-      { source: '/personal-finance', destination: '/', permanent: true },
-      { source: '/personal-finance/:path*', destination: '/', permanent: true },
       { source: '/planning', destination: '/', permanent: true },
       { source: '/planning/:path*', destination: '/', permanent: true },
       { source: '/portfolio', destination: '/', permanent: true },
@@ -180,12 +186,6 @@ const nextConfig: NextConfig = {
       { source: '/real-estate/:path*', destination: '/', permanent: true },
       { source: '/retirement', destination: '/', permanent: true },
       { source: '/retirement/:path*', destination: '/', permanent: true },
-      { source: '/saving-money', destination: '/', permanent: true },
-      { source: '/saving-money/:path*', destination: '/', permanent: true },
-      { source: '/savings', destination: '/', permanent: true },
-      { source: '/savings/:path*', destination: '/', permanent: true },
-      { source: '/student-budget', destination: '/', permanent: true },
-      { source: '/student-budget/:path*', destination: '/', permanent: true },
       { source: '/student-loans', destination: '/', permanent: true },
       { source: '/student-loans/:path*', destination: '/', permanent: true },
       { source: '/tax-software', destination: '/', permanent: true },
@@ -288,13 +288,10 @@ const nextConfig: NextConfig = {
       // made this a 301 chaining straight into a 410, which Google flags as a
       // broken redirect rather than a clean removal. /research-ai now 410s
       // directly at the edge instead.
-      // /market and /markets were both retired when the standalone markets page
-      // was removed in favour of the dynamic /market-news hub (see commit
-      // 7383eadc) — Search Console still has both indexed. /markets used to
-      // 301 to /market, which no longer exists, producing a dead redirect
-      // chain (308 → 404); both now resolve straight to the real hub.
-      { source: '/market', destination: '/market-news', permanent: true },
-      { source: '/markets', destination: '/market-news', permanent: true },
+      // /market was retired when the standalone markets page was removed;
+      // redirected to / pending Google AdSense approval.
+      { source: '/market', destination: '/', permanent: true },
+      { source: '/market/:path*', destination: '/', permanent: true },
       // /companies/google used to redirect to /companies/alphabet, but the
       // entire /companies section (including /companies/alphabet) is now
       // permanently 410'd (see REMOVED_PATHS in middleware.ts) — that made this
@@ -434,7 +431,10 @@ const nextConfig: NextConfig = {
               // literal <script> tag and PreferredSourceButton) -- it was never allow-listed here,
               // so the browser blocked the load on every single page, confirmed the same way.
               `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://adservice.google.com https://api.baalvion.com https://*.adtrafficquality.google https://news.google.com`,
-              "script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://adservice.google.com https://api.baalvion.com https://*.adtrafficquality.google https://news.google.com",
+              // In dev the CMS and its analytics collector live on localhost rather
+              // than api.baalvion.com, so the collect.js element load was blocked on
+              // every page. Scoped to isDev — production must never trust localhost.
+              `script-src-elem 'self' 'unsafe-inline'${isDev ? ' http://localhost:*' : ''} https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://adservice.google.com https://api.baalvion.com https://*.adtrafficquality.google https://news.google.com`,
               "style-src 'self' 'unsafe-inline'",
               // 'self' + data: (inline generated SVG artwork) + imperialpedia.com +
               // api.baalvion.com (cms-service-hosted generated artwork) are the only

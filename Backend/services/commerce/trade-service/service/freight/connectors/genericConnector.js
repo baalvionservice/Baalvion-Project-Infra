@@ -48,16 +48,50 @@ class GenericConnector extends CarrierConnector {
         this.reliability = opts.reliability != null ? opts.reliability : this.reliability;
         this.rateCardsByMode = opts.rateCardsByMode || {};
         const prefix = opts.credentialEnvPrefix || null;
+        this.credentialEnvPrefix = prefix;
         this.endpoint = opts.endpoint || (prefix ? process.env[`${prefix}_ENDPOINT`] : null) || null;
         this.apiKey = opts.apiKey || (prefix ? process.env[`${prefix}_API_KEY`] : null) || null;
     }
 
-    // No carrier-specific completeness rule beyond the base connector's checks —
-    // a dynamically registered carrier has no known lane restrictions to enforce.
-    // eslint-disable-next-line class-methods-use-this
-    validateRequest() { return []; }
+    // A dynamically registered carrier has no known lane restrictions to enforce, but it
+    // does have to be priceable: without a rate card or credentials for the requested
+    // mode there is no honest number to return.
+    validateRequest(request) {
+        const mode = request && request.mode;
+        if (mode && !this._hasUsableCard(mode)) {
+            return [{
+                code: 'NO_RATE_ON_FILE',
+                level: 'error',
+                text: `${this.carrierName || this.carrier} is onboarded for ${mode} but has no rate card and no API credentials, so it cannot be priced. Set ${this.credentialEnvPrefix || 'the carrier'}_ENDPOINT and _API_KEY, or add a rate card.`,
+            }];
+        }
+        return [];
+    }
 
+    /**
+     * The carrier's own rate card for this mode, or the platform default.
+     *
+     * The default is a parcel/road card (a per-KILO rate and a one-week transit). It is
+     * a reasonable stand-in for a road carrier and nonsense for an ocean one: applied to
+     * a laden container it produces a six-figure quote and a seven-day sailing. So the
+     * default is only ever used for the modes it actually fits — see `_hasUsableCard`.
+     */
     _card(mode) { return this.rateCardsByMode[mode] || DEFAULT_RATE_CARD; }
+
+    /**
+     * Whether this carrier can be priced for a mode at all.
+     *
+     * A carrier with credentials is priced by the carrier itself. Otherwise it needs its
+     * own rate card, UNLESS the mode is one the platform default actually describes.
+     * Ocean and air are priced per container and per chargeable-weight band respectively,
+     * on commercially confidential tariffs — inventing one would put a fabricated number
+     * in front of a planner, so the carrier declines instead and says why.
+     */
+    _hasUsableCard(mode) {
+        if (this.endpoint && this.apiKey) return true;
+        if (this.rateCardsByMode[mode]) return true;
+        return mode === MODE.ROAD || mode === MODE.EXPRESS;
+    }
 
     buildQuoteRequest(request, ctx) {
         const card = this._card(ctx.mode);

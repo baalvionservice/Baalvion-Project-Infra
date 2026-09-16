@@ -1,0 +1,51 @@
+{
+  "name": "canwemarry-service",
+  "version": "0.1.0",
+  "type": "commonjs",
+  "private": true,
+  "description": "CanWeMarry \u2014 community support, discussion and mediation-oriented help for people facing family or community opposition to their relationship.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "migrate": "node migrate.js",
+    "migrate:status": "node migrate.js status",
+    "seed:dev": "node scripts/seed.dev.js",
+    "test": "jest --testEnvironment node --forceExit",
+    "test:watch": "jest --watch",
+    "lint": "eslint . --ext .js"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "setupFiles": [
+      "<rootDir>/jest.setup.js"
+    ],
+    "coverageDirectory": "coverage",
+    "coverageProvider": "v8",
+    "testMatch": [
+      "<rootDir>/__tests__/**/*.test.js"
+    ]
+  },
+  "dependencies": {
+    "@baalvion/auth-node": "workspace:*",
+    "@baalvion/graceful-shutdown": "workspace:*",
+    "@baalvion/telemetry": "workspace:*",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.1.0",
+    "pg": "^8.20.0",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.8",
+    "uuid": "^11.1.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "jest": "^30.4.2",
+    "jest-environment-node": "^30.4.1",
+    "nodemon": "^3.1.14",
+    "supertest": "^7.2.2"
+  }
+}

@@ -57,7 +57,7 @@ export function EditorialArticleGuide({
         </h2>
       </div>
 
-      {/* ── Key Takeaways Callout (Investopedia Editorial Box with Coral Corner Brackets) ── */}
+      {/* ── Key Takeaways Callout (Imperialpedia Editorial Box with Coral Corner Brackets) ── */}
       {keyTakeaways && keyTakeaways.length > 0 && (
         <KeyTakeawaysBox items={keyTakeaways} />
       )}

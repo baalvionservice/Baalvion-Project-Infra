@@ -47,6 +47,18 @@ db.CertificateOfOrigin = require('./certificates_of_origin')(sequelize, Sequeliz
 db.CarbonFootprint = require('./carbon_footprints')(sequelize, Sequelize.DataTypes);
 db.InsurancePolicy = require('./insurance_policies')(sequelize, Sequelize.DataTypes);
 db.InsuranceClaim  = require('./insurance_claims')(sequelize, Sequelize.DataTypes);
+// Migration 066 — claim evidence file, and General Average (the voyage-wide loss
+// apportionment that runs alongside, not through, the cargo policy).
+db.InsuranceClaimDocument = require('./insurance_claim_documents')(sequelize, Sequelize.DataTypes);
+// Migration 071 — the carrier whose paper cover is written on, and the binder the
+// platform holds on it. Without one, a policy is retained by the platform itself.
+db.InsuranceUnderwriter = require('./insurance_underwriters')(sequelize, Sequelize.DataTypes);
+// Migration 072 — the broker's OWN professional indemnity. The one insurance record
+// on this platform where the platform is the insured, not the seller.
+db.BrokerIndemnity = require('./broker_indemnity')(sequelize, Sequelize.DataTypes);
+const generalAverage = require('./general_average')(sequelize, Sequelize.DataTypes);
+db.GeneralAverageDeclaration  = generalAverage.GeneralAverageDeclaration;
+db.GeneralAverageContribution = generalAverage.GeneralAverageContribution;
 
 // ── Trade Operations Cloud (War Room 4) — schema `tradeops`, UUID PKs ────────
 // Registered as TradeShipment (not Shipment) to avoid colliding with the legacy
@@ -328,6 +340,53 @@ db.EtaPrediction        = require('./tradeops/eta_prediction')(sequelize, Sequel
 db.DelayEvent           = require('./tradeops/delay_event')(sequelize, Sequelize.DataTypes);
 db.ShipmentRoute        = require('./tradeops/shipment_route')(sequelize, Sequelize.DataTypes);
 
+// ── Vessel Sailing Schedules (migration 065) — schema `tradeops` ─────────────
+// The carrier-published "which ship sails from where, when" layer, independent of
+// any one customer booking: Vessel (the ship) → Voyage (one sailing) →
+// VoyagePortCall (the ordered, dated stops). Shipments reference these schedules
+// rather than duplicating them.
+db.Vessel               = require('./tradeops/vessel')(sequelize, Sequelize.DataTypes);
+db.Voyage               = require('./tradeops/voyage')(sequelize, Sequelize.DataTypes);
+db.VoyagePortCall       = require('./tradeops/voyage_port_call')(sequelize, Sequelize.DataTypes);
+
+// ── Clearance Compression (migrations 078–080) — schema `tradeops` ───────────
+// The programme that turns the ~19-day paperwork cycle into a ~1-day one.
+// ClearanceStageTiming is the per-stage clock (Phase 0: measure before
+// optimizing). Consignment/ConsignmentDocument are the canonical record and its
+// derived paperwork (Phase 1: enter once, generate everything). FilingPrecheck is
+// the pre-submit gate's ledger, kept so first-pass acceptance is measured rather
+// than asserted (Phase 2). All four carry tenant_id -> auto-scoped by the tenant
+// hooks below (NOT in TENANT_EXCLUDED).
+//
+// CorridorRule is the exception: what a jurisdiction requires on a declaration is
+// a public fact, not customer data, so it is GLOBAL reference data with no
+// tenant_id (like HsCode / ComplianceRule) and IS in TENANT_EXCLUDED.
+db.ClearanceStageTiming = require('./tradeops/clearance_stage_timing')(sequelize, Sequelize.DataTypes);
+db.Consignment          = require('./tradeops/consignment')(sequelize, Sequelize.DataTypes);
+db.ConsignmentDocument  = require('./tradeops/consignment_document')(sequelize, Sequelize.DataTypes);
+db.CorridorRule         = require('./tradeops/corridor_rule')(sequelize, Sequelize.DataTypes);
+db.FilingPrecheck       = require('./tradeops/filing_precheck')(sequelize, Sequelize.DataTypes);
+
+// ── Clearance Compression, continued (migrations 081–084) — schema `tradeops` ─
+// PrearrivalFiling is the scheduled regulatory filing (Phase 4: file ahead of
+// arrival so clearance is a release event, not a queue that starts on arrival).
+// DutyAccount/DutyLedgerEntry/FxLock are the settlement rail that turns duty
+// payment from a bank transfer into a ledger debit (Phase 5). TraderAccreditation/
+// TraderRiskProfile hold trusted-trader status and the record customs actually
+// scores (Phase 6). AuthorityDelegation/AuthorityRota/AuthorityDecision are the
+// pre-authorised limits and coverage windows that remove "waiting for someone's
+// morning" (Phase 7). All carry tenant_id -> auto-scoped by the tenant hooks
+// below (NOT in TENANT_EXCLUDED).
+db.PrearrivalFiling     = require('./tradeops/prearrival_filing')(sequelize, Sequelize.DataTypes);
+db.DutyAccount          = require('./tradeops/duty_account')(sequelize, Sequelize.DataTypes);
+db.DutyLedgerEntry      = require('./tradeops/duty_ledger_entry')(sequelize, Sequelize.DataTypes);
+db.FxLock               = require('./tradeops/fx_lock')(sequelize, Sequelize.DataTypes);
+db.TraderAccreditation  = require('./tradeops/trader_accreditation')(sequelize, Sequelize.DataTypes);
+db.TraderRiskProfile    = require('./tradeops/trader_risk_profile')(sequelize, Sequelize.DataTypes);
+db.AuthorityDelegation  = require('./tradeops/authority_delegation')(sequelize, Sequelize.DataTypes);
+db.AuthorityRota        = require('./tradeops/authority_rota')(sequelize, Sequelize.DataTypes);
+db.AuthorityDecision    = require('./tradeops/authority_decision')(sequelize, Sequelize.DataTypes);
+
 Object.values(db).forEach(model => {
     if (model && model.associate) model.associate(db);
 });
@@ -368,6 +427,9 @@ const TENANT_EXCLUDED = new Set([
     // FreightQuoteItem/FreightComparison DO carry tenant_id and are intentionally
     // NOT excluded (a tenant's negotiated rates and quotes are private).
     'CarrierDirectory', 'CarrierService', 'CarrierRegion', 'CarrierPerformance',
+    // CorridorRule (migration 080): the published requirement matrix for a
+    // corridor — a jurisdictional fact with no tenant_id, like HsCode.
+    'CorridorRule',
 ]);
 
 const tenantAttr = (model) => {

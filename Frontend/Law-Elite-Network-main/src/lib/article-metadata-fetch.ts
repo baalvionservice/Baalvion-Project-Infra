@@ -1,6 +1,12 @@
+import { CONTENT_CACHE_TAG } from '@/lib/cache-tags';
 import seedData from '../../docs/seed-data.json';
 import { cmsGetArticleBySlug } from '@/lib/cms';
 import { getArticleBySlug } from '@/data/law-content';
+
+// the article's generateMetadata read.
+// Matches lib/cms.ts's window: /api/revalidate's revalidateTag() is what
+// refreshes this on publish, so the window is only the no-webhook safety net.
+const CONTENT_REVALIDATE_SECONDS = 86400;
 
 const API = process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3015/v1');
 
@@ -19,7 +25,7 @@ async function fetchFromLawService(slug: string): Promise<any | null> {
   try {
     // /articles/:slug resolves by slug (the ?slug= list filter is not applied server-side).
     const r = await fetch(`${API}/articles/${encodeURIComponent(slug)}`, {
-      next: { revalidate: 300 },
+      next: { revalidate: CONTENT_REVALIDATE_SECONDS, tags: [CONTENT_CACHE_TAG] },
       signal: controller.signal,
     });
     if (!r.ok) return null;

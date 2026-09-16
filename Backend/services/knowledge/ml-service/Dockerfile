@@ -1,5 +1,5 @@
 # Baalvion ML service — slim multi-stage build.
-FROM python:3.11-slim AS base
+FROM python:3.14-slim AS base
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \

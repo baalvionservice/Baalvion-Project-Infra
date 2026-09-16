@@ -21,6 +21,8 @@ credentials.json
 service-account.json
 # Local env backups & editor cruft (Phase 0 cleanup — keep these out of the tree)
 *.bak
+# a timestamped copy (`cp x x.bak-$(date +%s)`) is not matched by *.bak
+*.bak-*
 *.old
 
 # ──────────────────────────────────────────────
@@ -146,6 +148,7 @@ error-report.txt
 # security-alert exports (regenerable; never commit alert data)
 _codeql_alerts.json
 _dependabot_alerts.json
+admin-health.json
 
 .vercel
 .env*.local

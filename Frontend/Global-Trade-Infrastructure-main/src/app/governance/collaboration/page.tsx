@@ -43,13 +43,16 @@ export default function CollaborationCommandCenter() {
   const router = useRouter();
 
   const fetchData = async () => {
-    const [wData, pData] = await Promise.all([
-      collaborationService.getWorkspaces('COMP-101'),
-      presenceService.getClusterPresence('GLOBAL_CLUSTER')
-    ]);
-    setWorkspaces(wData);
-    setPresence(pData);
-    setLoading(false);
+    try {
+      const [wData, pData] = await Promise.all([
+        collaborationService.getWorkspaces('COMP-101'),
+        presenceService.getClusterPresence('GLOBAL_CLUSTER')
+      ]);
+      setWorkspaces(wData);
+      setPresence(pData);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {

@@ -55,6 +55,22 @@
             "minReplicas": { "type": "integer" },
             "maxReplicas": { "type": "integer" }
           }
+        },
+        "runtime": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["deployment"],
+          "description": "Where this service actually answers. The address book the status prober reads; before this existed the same fact was spread across 14 disagreeing files (pm2 configs, Caddyfile, docker-compose, gateway proxy.js, client.ts, health-check.ps1, prose docs). Derived from deploy/consolidated/ via catalog/scripts/derive-runtime.mjs — that directory is production truth, the others are not.",
+          "properties": {
+            "deployment": {
+              "enum": ["consolidated-box", "standalone", "not-deployed"],
+              "description": "consolidated-box = supervised by pm2 inside one of the app-* containers. standalone = its own container/host. not-deployed = declared here but nothing runs it; the console reports 'not deployed' rather than 'down'."
+            },
+            "port": { "type": "integer", "minimum": 1, "maximum": 65535, "description": "Port inside its container. Required unless deployment is not-deployed." },
+            "healthPath": { "type": "string", "pattern": "^/", "description": "Default /health. Real exceptions: cms-service is /api/v1/health, the Spring services are /actuator/health." },
+            "container": { "type": "string", "description": "Compose service name — answers 'what do I restart', which a port alone cannot." },
+            "publicHealthUrl": { "type": "string", "pattern": "^https?://", "description": "Set ONLY where the edge genuinely exposes this service's health endpoint on a whole-host route. Enables the edge-side probe that catches 'up internally, 502 at Caddy'. Omitted for path-carve-out routes, which expose no health path." }
+          }
         }
       }
     }

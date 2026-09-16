@@ -11,6 +11,12 @@ export interface EditorialGuideData {
   keyTakeaways: string[];
   citations: { title: string; url: string }[];
   bodyHtml: string;
+  /** Optional — overrides the default 'Savings & Budgeting' / 'savings' when present */
+  category?: string;
+  categorySlug?: string;
+  readingTime?: number;
+  publishedAt?: string;
+  updatedAt?: string;
 }
 
 export const EDITORIAL_GUIDES: Record<string, EditorialGuideData> = {
@@ -709,5 +715,199 @@ Test your numbers with our interactive <a href="/financial-tools/budget-calculat
  * Helper to fetch enriched editorial data for a given article slug.
  */
 export function getEditorialGuide(slug: string): EditorialGuideData | undefined {
-  return EDITORIAL_GUIDES[slug];
+  return EDITORIAL_GUIDES[slug] ?? CREATOR_ECONOMY_GUIDES[slug];
+}
+
+/* ─────────────────────────────────────────────────────────────
+   CREATOR ECONOMY GUIDES
+   Separate map so the savings/budgeting guides don't get polluted
+   with creator-economy category metadata.
+   ───────────────────────────────────────────────────────────── */
+export const CREATOR_ECONOMY_GUIDES: Record<string, EditorialGuideData> = {
+  "youtube-rpm-vs-cpm-explained": {
+    slug: "youtube-rpm-vs-cpm-explained",
+    category: "Creator Economy",
+    categorySlug: "youtube-monetization",
+    readingTime: 7,
+    publishedAt: "2026-08-15T09:00:00Z",
+    updatedAt: "2026-09-10T12:00:00Z",
+    title: "YouTube RPM vs. CPM: What Every Creator Needs to Know",
+    description:
+      "RPM and CPM are the two most-cited revenue numbers in YouTube monetization — but most creators confuse them. This guide explains exactly what each measures, why they differ, and how to use both to grow your ad revenue.",
+    keyTakeaways: [
+      "CPM (Cost Per Mille) is what advertisers pay YouTube per 1,000 ad impressions — it does not represent what you, the creator, actually earn.",
+      "RPM (Revenue Per Mille) is your actual earnings per 1,000 video views, after YouTube's 45% revenue share cut — this is the number that matters for your payout.",
+      "RPM is always lower than CPM because RPM accounts for non-monetized views, ad-free views, and YouTube's share; CPM only counts impressions where an ad ran.",
+      "Niche content (finance, tech, business, legal) typically commands CPMs of $15–$50+, while entertainment and gaming CPMs often range from $2–$8.",
+      "Increasing watch time, targeting high-CPM countries (US, UK, Australia, Canada), and creating mid-roll ad-friendly content are the three highest-impact levers for improving RPM.",
+      "YouTube pays creators through AdSense — payments are made monthly when your balance reaches the $100 threshold.",
+    ],
+    citations: [
+      { title: "YouTube Help — Understanding Your Revenue Reports", url: "https://support.google.com/youtube/answer/9048834" },
+      { title: "Google AdSense — Revenue Share for YouTube Partners", url: "https://support.google.com/adsense/answer/1346477" },
+      { title: "YouTube Partner Program Overview & Eligibility", url: "https://support.google.com/youtube/answer/72851" },
+      { title: "Think with Google — Video Ad Benchmark Report", url: "https://www.thinkwithgoogle.com/" },
+    ],
+    bodyHtml: `
+<p class="lead text-lg font-medium text-foreground/90 leading-relaxed mb-6">
+If you've ever opened YouTube Studio and wondered why your <strong>CPM looks high</strong> but your actual earnings feel low — you're not misreading the dashboard. CPM and RPM are two genuinely different numbers, and confusing them is one of the most common mistakes new creators make when trying to understand their revenue.
+</p>
+
+<p>
+Both metrics matter, but they tell completely different stories. CPM is an advertiser metric. RPM is your metric. This guide walks through exactly what each one is, how they're calculated, and — most importantly — what levers you can actually pull to move the number that matters: your RPM.
+</p>
+
+<h2 id="what-is-cpm">What Is CPM on YouTube?</h2>
+
+<p>
+<strong>CPM stands for Cost Per Mille</strong> — the Latin word for thousand. It represents what advertisers are willing to pay per 1,000 <em>ad impressions</em> served on YouTube. This is an advertiser-facing figure: it reflects the competitive price of ad inventory in a given niche, season, or geographic market.
+</p>
+
+<p>
+When a brand runs a pre-roll ad on your video, YouTube auctions that ad slot in real time — this is the Google Ads auction system. The winning bid determines the CPM for that impression. Multiply those bids across 1,000 impressions and you get your CPM. Crucially, <strong>CPM is measured only when an ad actually runs</strong> — it ignores views where no ad appeared.
+</p>
+
+<div class="my-6 rounded-xl bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-800 p-5">
+  <p class="font-bold text-[#1d4fc4] mb-1 font-mono text-sm">CPM = (Total Ad Revenue Paid by Advertisers ÷ Total Ad Impressions) × 1,000</p>
+  <p class="text-xs text-gray-500">This is the advertiser's cost — not your earnings.</p>
+</div>
+
+<p>
+Typical CPMs vary dramatically by niche. Finance, legal, insurance, and B2B tech content command some of the highest CPMs on the platform — often <strong>$15 to $50+ per 1,000 impressions</strong> in the United States — because advertisers in those industries compete aggressively for viewer attention. Gaming, general entertainment, and reaction content typically see CPMs in the <strong>$2–$8 range</strong>.
+</p>
+
+<h2 id="what-is-rpm">What Is RPM — and Why Is It Always Lower?</h2>
+
+<p>
+<strong>RPM stands for Revenue Per Mille</strong>, and it is <em>your</em> number. YouTube introduced RPM in 2020 specifically to give creators a clearer picture of their actual take-home earnings. Where CPM measures advertiser spend across ad impressions, RPM measures <strong>your total revenue across all views</strong> — including views where no ad ran at all.
+</p>
+
+<div class="my-6 rounded-xl bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-800 p-5">
+  <p class="font-bold text-[#1d4fc4] mb-1 font-mono text-sm">RPM = (Total Creator Revenue Earned ÷ Total Video Views) × 1,000</p>
+  <p class="text-xs text-gray-500">This is what you actually keep — after YouTube's revenue share and across all views.</p>
+</div>
+
+<p>
+RPM is <strong>always lower than CPM</strong> for two structural reasons:
+</p>
+<ul class="list-disc pl-6 space-y-2 my-4">
+  <li><strong>YouTube's 45% revenue share:</strong> YouTube takes 45% of ad revenue before it reaches you. If a CPM is $10, you receive $5.50 of that per 1,000 ad impressions — before accounting for non-monetized views.</li>
+  <li><strong>Non-monetized views:</strong> Not every view generates an ad impression. Viewers using YouTube Premium don't see ads (you still earn a share of their subscription fee, but it's typically smaller). Some views come from regions with very low ad demand, or the video simply doesn't trigger an ad. RPM divides your earnings by <em>all</em> views, which pulls the number down significantly.</li>
+</ul>
+
+<h2 id="rpm-vs-cpm-example">A Real-World Example: RPM vs. CPM</h2>
+
+<p>
+Let's say a finance channel gets 100,000 views in a month, and ads run on 60,000 of those views (60% ad impression rate). The CPM is $20.
+</p>
+
+<div class="my-6 overflow-x-auto">
+  <table class="w-full text-sm border-collapse">
+    <thead>
+      <tr class="bg-gray-100 dark:bg-slate-800">
+        <th class="text-left p-3 font-bold border border-gray-200 dark:border-slate-700">Metric</th>
+        <th class="text-left p-3 font-bold border border-gray-200 dark:border-slate-700">Calculation</th>
+        <th class="text-left p-3 font-bold border border-gray-200 dark:border-slate-700">Result</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="p-3 border border-gray-200 dark:border-slate-700">Total ad impressions</td>
+        <td class="p-3 border border-gray-200 dark:border-slate-700">60% of 100,000 views</td>
+        <td class="p-3 border border-gray-200 dark:border-slate-700 font-medium">60,000</td>
+      </tr>
+      <tr class="bg-gray-50 dark:bg-slate-900/50">
+        <td class="p-3 border border-gray-200 dark:border-slate-700">Ad revenue (CPM $20)</td>
+        <td class="p-3 border border-gray-200 dark:border-slate-700">(60,000 ÷ 1,000) × $20</td>
+        <td class="p-3 border border-gray-200 dark:border-slate-700 font-medium">$1,200 total</td>
+      </tr>
+      <tr>
+        <td class="p-3 border border-gray-200 dark:border-slate-700">YouTube's 45% cut</td>
+        <td class="p-3 border border-gray-200 dark:border-slate-700">$1,200 × 45%</td>
+        <td class="p-3 border border-gray-200 dark:border-slate-700 font-medium">−$540</td>
+      </tr>
+      <tr class="bg-gray-50 dark:bg-slate-900/50">
+        <td class="p-3 border border-gray-200 dark:border-slate-700">Your ad earnings</td>
+        <td class="p-3 border border-gray-200 dark:border-slate-700">$1,200 − $540</td>
+        <td class="p-3 border border-gray-200 dark:border-slate-700 font-semibold text-green-700">$660</td>
+      </tr>
+      <tr>
+        <td class="p-3 border border-gray-200 dark:border-slate-700 font-bold">Your RPM</td>
+        <td class="p-3 border border-gray-200 dark:border-slate-700">($660 ÷ 100,000) × 1,000</td>
+        <td class="p-3 border border-gray-200 dark:border-slate-700 font-bold text-[#1d4fc4]">$6.60 RPM</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<p>
+Notice: even with a $20 CPM, the creator's RPM is only $6.60 — less than a third. This is why comparing your CPM to another creator's RPM (or vice versa) is an apples-to-oranges mistake.
+</p>
+
+<h2 id="what-affects-rpm">What Actually Affects Your RPM?</h2>
+
+<p>RPM is influenced by several factors you have direct and indirect control over:</p>
+
+<h3 id="niche-and-audience">1. Niche and Advertiser Demand</h3>
+<p>
+The biggest RPM lever is your content niche. Advertisers in high-value industries — personal finance, investing, insurance, software, legal services — bid more per impression because a converted viewer is worth far more to them. A personal finance channel explaining <a href="/youtube-monetization">YouTube monetization</a> or <a href="/creator-guides">creator business strategies</a> will command a structurally higher CPM than a channel covering general lifestyle content.
+</p>
+
+<h3 id="audience-geography">2. Audience Geography</h3>
+<p>
+Ad rates are deeply geographic. Viewers in the United States, United Kingdom, Canada, and Australia are typically worth 3–8× more per impression than viewers in developing markets. A channel with 80% US viewership will see dramatically higher RPM than a channel with the same subscriber count but primarily South Asian or Southeast Asian traffic.
+</p>
+
+<h3 id="watch-time-and-midrolls">3. Watch Time and Mid-Roll Ads</h3>
+<p>
+Videos over 8 minutes can include mid-roll ads — additional ad placements within the video body. More ad slots per video can meaningfully increase total ad impressions per view and, by extension, your RPM. But placement matters: mid-rolls placed at natural pause points see higher completion rates and thus better CPMs than interruptive placements that viewers immediately skip.
+</p>
+
+<h3 id="seasonality">4. Seasonality</h3>
+<p>
+Advertising spend peaks in Q4 (October–December) as brands compete for holiday shoppers. CPMs — and therefore RPMs — on most channels spike 30–80% in November and December compared to Q1. January is historically the lowest-CPM month of the year as ad budgets reset. Planning content calendars around this cycle is one of the most underutilized revenue strategies for serious creators.
+</p>
+
+<h3 id="youtube-premium">5. YouTube Premium Revenue</h3>
+<p>
+Creators also earn a share of YouTube Premium subscription fees from Premium members who watch their videos. This isn't reflected in CPM (which only measures ad impressions) but <strong>is included in RPM</strong> — which is one more reason RPM is the more complete picture of your actual earnings.
+</p>
+
+<h2 id="how-to-use-rpm-and-cpm">How to Use RPM and CPM Together</h2>
+
+<p>Use each metric for what it's actually designed to measure:</p>
+
+<ul class="list-disc pl-6 space-y-2 my-4">
+  <li><strong>Use RPM</strong> to track your real income trend over time and compare earnings across different video formats or series.</li>
+  <li><strong>Use CPM</strong> as a signal of advertiser demand in your niche — a rising CPM that isn't translating to rising RPM usually points to a drop in your ad impression rate (more unmonetized views).</li>
+  <li><strong>Watch the gap between CPM and RPM</strong>: a widening gap often signals that a growing share of your views are coming from low-CPM regions, from YouTube Premium users, or from mobile viewers with lower ad load.</li>
+</ul>
+
+<p>
+For deeper analysis of how YouTube monetization works end-to-end — including the YouTube Partner Program thresholds, AdSense payment cycles, and Shorts revenue — see our full <a href="/youtube-monetization">YouTube Earnings & Monetization guide</a>.
+</p>
+
+<h2 id="frequently-asked">Common Questions</h2>
+
+<h3>Why is my RPM so much lower than the CPM I see in YouTube Studio?</h3>
+<p>
+Because CPM only counts views where an ad impression was served, while RPM divides your earnings across all views — including non-monetized ones. The gap is expected and normal. A CPM of $15 producing an RPM of $4–$6 is typical for a mid-size channel with mixed US and international traffic.
+</p>
+
+<h3>What is a good RPM on YouTube?</h3>
+<p>
+There is no universal benchmark — it varies enormously by niche and audience geography. Finance and business channels often see RPMs of $8–$20. Gaming and entertainment channels typically land in the $2–$5 range. Track your own RPM trend over time rather than comparing against others in different niches.
+</p>
+
+<h3>Can I increase my CPM directly?</h3>
+<p>
+Not directly — CPM is set by advertiser demand in YouTube's auction, not by anything creators control. What you can influence is the advertiser desirability of your content: niche selection, audience demographics, and content topics all affect which advertisers compete to show on your videos.
+</p>
+`,
+  },
+};
+
+/** Helper to fetch a creator economy guide by slug. */
+export function getCreatorGuide(slug: string): EditorialGuideData | undefined {
+  return CREATOR_ECONOMY_GUIDES[slug];
 }

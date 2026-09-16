@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, {  useEffect, useState  } from "react";
 import { getTopicColor } from "@/lib/topic-colors";
 
 export function ReadingProgressBar({ categoryName }: { categoryName?: string }) {

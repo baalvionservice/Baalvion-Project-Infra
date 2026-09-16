@@ -7,21 +7,16 @@ import { worldSeo } from "@/lib/data/worldRegions";
 // always fresh (and work on Vercel against a public CMS).
 export const dynamic = 'force-dynamic';
 
+import { buildMetadata } from "@/lib/seo";
+
 export function generateMetadata(): Metadata {
   const seo = worldSeo("world");
-  return {
+  return buildMetadata({
     title: seo.title,
     description: seo.description,
-    alternates: { canonical: seo.canonical },
-    openGraph: {
-      title: seo.title,
-      description: seo.description,
-      url: seo.canonical,
-      type: "website",
-      siteName: "Imperialpedia",
-    },
-    twitter: { card: "summary_large_image", title: seo.title, description: seo.description },
-  };
+    canonical: "/world",
+    ogType: "website",
+  });
 }
 
 export default async function WorldPage() {

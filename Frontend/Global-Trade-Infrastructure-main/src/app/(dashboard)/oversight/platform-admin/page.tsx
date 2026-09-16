@@ -34,16 +34,16 @@ export default function PlatformControlTowerPage() {
   const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
-    const [sData, cData, lData, hData] = await Promise.all([
+    const [sData, cData, lData, hData] = await Promise.allSettled([
       adminService.getPlatformOverview(),
       adminService.getCorridorMetrics(),
       loggingService.getLogs({ limit: 15 }),
       adminService.getTradeHeatmapData()
     ]);
-    setStats(sData);
-    setCorridors(cData);
-    setLogs(lData);
-    setHeatmap(hData);
+    if (sData.status === 'fulfilled') setStats(sData.value);
+    if (cData.status === 'fulfilled') setCorridors(cData.value);
+    if (lData.status === 'fulfilled') setLogs(lData.value);
+    if (hData.status === 'fulfilled') setHeatmap(hData.value);
     setLoading(false);
   };
 
@@ -86,17 +86,16 @@ export default function PlatformControlTowerPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-black">{formatCurrency(stats?.volume.total || 0)}</div>
-            <p className="text-[10px] text-green-600 font-bold mt-1 uppercase tracking-tighter">{stats?.volume.growth} Growth WoW</p>
+            <p className="text-[10px] text-muted-foreground font-bold mt-1 uppercase tracking-tighter">Escrow-backed</p>
           </CardContent>
         </Card>
         <Card className="shadow-none border border-primary/10">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Global Node Load</CardTitle>
+            <CardTitle className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Settlements Processed</CardTitle>
             <Server className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-black">{stats?.operations.systemLoad}%</div>
-            <Progress value={stats?.operations.systemLoad} className="h-1.5 mt-2 bg-muted" />
+            <div className="text-2xl font-black">{stats?.operations.settlementsProcessed ?? 0}</div>
           </CardContent>
         </Card>
         <Card className="shadow-none border border-primary/10">

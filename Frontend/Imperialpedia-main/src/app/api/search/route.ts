@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { searchService } from '@/services/data/search-service';
 import { getAllMarketAssets } from '@/lib/data/marketsLoader';
 import { getArticles } from '@/modules/content-engine/services/content-service';
+import { MARKET_QUOTES_LIVE } from '@/config/market-quotes';
 
 const POPULAR_SYMBOLS_COUNT = 5;
 const TRENDING_COUNT = 6;
@@ -30,12 +31,14 @@ export async function GET(request: Request) {
   if (!q || q.length < 2) {
     try {
       const [assets, articlesRes] = await Promise.all([
-        getAllMarketAssets(),
+        MARKET_QUOTES_LIVE ? getAllMarketAssets() : Promise.resolve([]),
         getArticles(1, TRENDING_COUNT),
       ]);
-      const popularSymbols = assets
-        .filter((a) => a.current_price != null)
-        .slice(0, POPULAR_SYMBOLS_COUNT);
+      const popularSymbols = MARKET_QUOTES_LIVE
+        ? assets
+            .filter((a) => a.current_price != null)
+            .slice(0, POPULAR_SYMBOLS_COUNT)
+        : [];
       return NextResponse.json({ popularSymbols, trending: articlesRes.data });
     } catch (error) {
       console.error('Search default-state fetch failed', error);

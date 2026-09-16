@@ -44,7 +44,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   // Auth gate: wait for the silent refresh, then require an authenticated admin before mounting
   // the data-driven admin pages (prevents the token-bootstrap race + enforces the admin boundary).
-  const isAdmin = !!currentUser && ['ADMIN', 'SUPER_ADMIN', 'OWNER'].includes(String(currentUser.role).toUpperCase());
+  // 'OWNER' is deliberately NOT here. It confused two separate role namespaces:
+  // BrandMemberRole ("OWNER" | "MANAGER" | "REVIEWER" | "VIEWER") is a per-brand TEAM role,
+  // while currentUser.role is a platform UserRole ("BRAND" | "CREATOR" | "ADMIN"). The only
+  // thing 'OWNER' actually matched was identity's SELF-SERVICE `owner` — the role every
+  // registration grants — so any new signup was treated as a platform administrator here.
+  // Verified 2026-09-05: a fresh /register issues role 'owner'.
+  const PLATFORM_ADMIN_ROLES = ['ADMIN', 'SUPER_ADMIN'];
+  const isAdmin =
+    !!currentUser && PLATFORM_ADMIN_ROLES.includes(String(currentUser.role).toUpperCase());
   useEffect(() => {
     if (loading) return;
     if (!currentUser) router.replace('/auth/login');

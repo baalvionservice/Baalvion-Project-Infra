@@ -192,6 +192,30 @@ export const apiClient = {
     const c = collection.replace(/^\/+/, '');
     return this.get<T>(`/${c}/${id}`);
   },
+
+  /**
+   * Upload a file as a raw body. The document engine's version endpoint takes the
+   * bytes directly with the real Content-Type (its parser engages for anything that
+   * is not application/json), so this cannot go through the JSON `post` above.
+   */
+  async upload<T>(path: string, file: File): Promise<ApiResponse<T>> {
+    const csrf = readCsrfCookie();
+    const res = await fetch(`${BASE_URL}${path}`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': file.type || 'application/octet-stream',
+        'X-File-Name': file.name,
+        ...(csrf ? { 'x-csrf-token': csrf } : {}),
+      },
+      body: await file.arrayBuffer(),
+    });
+    const json = await res.json().catch(() => null);
+    if (!res.ok) {
+      throw new Error(json?.error?.message || `upload failed (${res.status})`);
+    }
+    return json as ApiResponse<T>;
+  },
 };
 
 export interface AuthSession {
@@ -213,6 +237,12 @@ export interface GatewayUser {
   /** Organization type — drives dashboard access in the multi-tenant model. */
   orgType?: string | null;
   permissions?: string[];
+  /**
+   * Per-business grants issued in the admin console, projected by the gateway from the token
+   * (`businesses.trade` for this app). Present only when the person has been granted something;
+   * absent means no central grant, not "no access" — the caller falls back to their org role.
+   */
+  businesses?: Record<string, string>;
 }
 
 export interface DeviceSession {

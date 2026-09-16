@@ -12,6 +12,11 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 
+// Reads live ControlTheMarket data through @/lib/api, which throws CtmDataError when
+// ctm-service is unreachable rather than showing placeholder data. Prerendering this at
+// build time therefore fails; it is a per-request view, not a static page.
+export const dynamic = 'force-dynamic';
+
 export default async function BaalvionHiringPortal() {
   const companyId = 'company-3';
   const company = await getCompany(companyId);
@@ -36,7 +41,7 @@ export default async function BaalvionHiringPortal() {
       <div className="container py-12 md:py-20">
         <div className="mx-auto max-w-4xl text-center">
           <h1 className="font-headline text-4xl font-extrabold tracking-tight md:text-5xl">
-            {company?.name || 'Baalvion Inc.'}
+            {company?.name || 'Baalvion Industries Private Limited'}
           </h1>
            <p className="mt-2 text-xl font-semibold text-primary">Senior Backend Engineer Virtual Job Simulation</p>
           <p className="mt-4 text-lg text-muted-foreground">

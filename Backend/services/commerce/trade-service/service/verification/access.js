@@ -22,6 +22,32 @@ function actorOf(req) {
 }
 
 /**
+ * trade.users is a legacy local-auth table that predates gateway-centralized identity
+ * (auth-service now owns real accounts/passwords) and was never migrated away — it's
+ * still the FK target for identity_verifications.user_id. Real sessions authenticate
+ * entirely via the gateway's RS256 identity and have no row here, so a submission
+ * would otherwise fail with a foreign-key violation. This provisions (once) a
+ * trade.users row mirroring the gateway identity, keyed by the SAME integer id the
+ * gateway issues, so no separate id-mapping table is needed. `password_hash` is
+ * structurally required but meaningless here — auth is gateway-managed, not local.
+ */
+async function ensureTradeUserId(req) {
+    const db = require('../../models');
+    const raw = req.auth && req.auth.userId;
+    if (!/^\d+$/.test(String(raw))) return null;
+    const id = Number(raw);
+    const email = (req.auth && req.auth.email) || `gateway-user-${id}@baalvion.local`;
+    const [user] = await db.User.findOrCreate({
+        where: { id },
+        defaults: {
+            id, email, password_hash: 'GATEWAY_MANAGED', full_name: email.split('@')[0],
+            tenant_id: (req.auth && req.auth.tenantId) || 'T-DEMO',
+        },
+    });
+    return user.id;
+}
+
+/**
  * Load an organization and enforce tenant ownership. Returns null (and calls
  * `next` with a 404 — never 403, to avoid existence leaks) when the org doesn't
  * exist or belongs to another tenant, unless the caller is an admin/reviewer.
@@ -38,4 +64,4 @@ async function fetchOrgOwned(orgId, req, next) {
     return org;
 }
 
-module.exports = { isAdmin, callerTenantId, actorOf, fetchOrgOwned };
+module.exports = { isAdmin, callerTenantId, actorOf, fetchOrgOwned, ensureTradeUserId };

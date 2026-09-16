@@ -7,7 +7,7 @@
   "seo": {
     "title": "The Baalvion Story | Company History",
     "description": "How Baalvion grew from a single conviction into a global federated enterprise operating the Baalvion Operating System across 198 markets.",
-    "keywords": ["Baalvion story", "company history", "about Baalvion", "Baalvion Group", "global trade"]
+    "keywords": ["Baalvion story", "company history", "about Baalvion", "global trade"]
   },
   "blocks": [
     { "type": "heading", "level": 2, "text": "From a Single Conviction" },

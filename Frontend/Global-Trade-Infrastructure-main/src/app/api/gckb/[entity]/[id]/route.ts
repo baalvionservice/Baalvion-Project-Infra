@@ -3,7 +3,7 @@
  * @description A single GCKB record: read (with relationships), update, archive.
  */
 import { ok, toErrorResponse, rateLimit, clientKey } from '@/server/http/api';
-import { kbRequest, assertEntity } from '@/server/gckb/http';
+import { kbRequest, assertEntity, ensureOrganizationProvisioned } from '@/server/gckb/http';
 import { gckbService } from '@/server/services/gckb-service';
 import { updateRecordSchema } from '@/server/gckb/schemas';
 
@@ -23,6 +23,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ entity: string;
 export async function PATCH(req: Request, ctx: { params: Promise<{ entity: string; id: string }> }) {
   try {
     const { principal, ctx: actor } = kbRequest(req);
+    await ensureOrganizationProvisioned(principal);
     const { entity, id } = await ctx.params;
     assertEntity(entity);
     rateLimit(clientKey(principal, 'gckb-write'), 120, 60_000);
@@ -36,6 +37,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ entity: strin
 export async function DELETE(req: Request, ctx: { params: Promise<{ entity: string; id: string }> }) {
   try {
     const { principal, ctx: actor } = kbRequest(req);
+    await ensureOrganizationProvisioned(principal);
     const { entity, id } = await ctx.params;
     assertEntity(entity);
     rateLimit(clientKey(principal, 'gckb-write'), 120, 60_000);

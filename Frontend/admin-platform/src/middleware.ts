@@ -1,11 +1,10 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-
-const PUBLIC_PATHS = ['/login', '/mfa', '/forgot-password', '/reset-password'];
+import { isPublicPath } from '@/lib/constants/public-paths';
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
+  const isPublic = isPublicPath(pathname);
 
   // Static files / API routes / same-origin auth proxy pass through
   if (

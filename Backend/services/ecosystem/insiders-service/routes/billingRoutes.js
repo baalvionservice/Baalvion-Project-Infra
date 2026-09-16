@@ -1,51 +1,75 @@
 'use strict';
 /**
- * BFF checkout for Baalvion Elite Circle — the ONLY payment path the frontend uses.
- * Forwards to the SDK-native payment-service server-to-server (internal-auth), which
- * resolves provider + keys from the CMS vault. No payment logic / keys live here.
- * Mirrors proxy-service/routes/billingRoutes.js (slug = baalvion-elite-circle).
+ * Elite Circle membership billing — the ONLY payment path for this site.
+ *
+ * Checkout forwards server-to-server to the JVM payment-service, which owns the merchant
+ * credentials and resolves the provider from the CMS vault. No payment logic and no PSP keys
+ * live here, and no client-supplied amount is ever trusted: the price is quoted from the tier
+ * catalogue plus the caller's own membership row.
+ *
+ * `/fulfill` is the return leg — payment-service calls it after signature-verifying a CAPTURED
+ * provider webhook. That is the only thing that grants a membership.
  */
 const express = require('express');
 const router = express.Router();
 const { authMiddleware } = require('../middleware/authMiddleware');
+const billing = require('../service/billingService');
+const { AppError } = require('../utils/errors');
 
-// Canonical PSP gateway = Java payment-service (financial-services-java) on host 13015. It exposes
-// the same /v1/gateway/* contract as the retired Node twin, so this re-points by host only.
-const PAYMENT_SERVICE_URL = process.env.PAYMENT_SERVICE_URL || 'http://localhost:13015';
-const INTERNAL_SECRET = process.env.INTERNAL_SERVICE_SECRET || 'baalvion-internal-dev-secret';
-// Fail-fast: refuse to boot with the committed dev inter-service secret in production
-// (matches payment-service/cms-service appConfig guards). A misconfig is caught at deploy,
-// not at the first checkout — and never silently authenticates with a publicly-known string.
-if (process.env.NODE_ENV === 'production' && (!process.env.INTERNAL_SERVICE_SECRET || INTERNAL_SECRET === 'baalvion-internal-dev-secret')) {
-    throw new Error('INTERNAL_SERVICE_SECRET must be set to a non-default value in production');
-}
-const SITE_SLUG = process.env.PAYMENT_SITE_SLUG || 'baalvion-elite-circle';
-
-router.post('/checkout', authMiddleware, async (req, res) => {
-    const { amount, currency, idempotencyKey, receipt } = req.body || {};
-    if (!(Number(amount) > 0) || !currency || !idempotencyKey) {
-        return res.status(400).json({ error: { code: 'VALIDATION', message: 'amount (minor units), currency, idempotencyKey are required' } });
-    }
+// Tier catalogue + the caller's current membership + a per-tier upgrade quote.
+router.get('/tiers', authMiddleware, async (req, res, next) => {
     try {
-        const r = await fetch(`${PAYMENT_SERVICE_URL}/v1/gateway/payments`, {
-            method: 'POST',
-            headers: { 'content-type': 'application/json', 'x-internal-secret': INTERNAL_SECRET, 'x-internal-service': 'insiders-service' },
-            body: JSON.stringify({ websiteSlug: SITE_SLUG, amount, currency, idempotencyKey, receipt }),
+        return res.json({ success: true, data: await billing.tiersFor(req.auth.userId) });
+    } catch (err) { return next(err); }
+});
+
+/**
+ * Start a checkout. The body names a TIER, never an amount — pricing is server-authoritative,
+ * so a tampered client cannot buy an Investor Partner membership for a dollar.
+ */
+router.post('/checkout', authMiddleware, async (req, res, next) => {
+    try {
+        const tier = req.body && req.body.tier;
+        const data = await billing.startCheckout({
+            userId: req.auth.userId,
+            email: req.auth.email || null,
+            tier,
         });
-        const d = await r.json().catch(() => ({}));
-        if (!r.ok) return res.status(r.status).json(d);
-        const data = d.data || {};
-        return res.json({
-            provider: data.provider,
-            mode: data.mode,
-            orderId: data.providerOrderId,
-            amount: data.payment && data.payment.amount,
-            currency: data.payment && data.payment.currency,
-            clientKey: data.clientParams && (data.clientParams.key || data.clientParams.publishableKey),
-            checkoutUrl: data.clientParams && data.clientParams.checkoutUrl,
+        return res.json({ success: true, data });
+    } catch (err) { return next(err); }
+});
+
+/**
+ * Internal fulfilment callback from payment-service.
+ *
+ * Deliberately NOT behind authMiddleware — the caller is a service, not a user. Authenticity is
+ * the shared internal secret, compared in constant time.
+ *
+ * Status contract the JVM depends on: 200 = applied/duplicate (commit, no retry); 400 =
+ * permanently malformed (no retry); 503 = transient (roll back so the provider redelivers).
+ */
+router.post('/fulfill', async (req, res) => {
+    if (!billing.secretMatches(req.headers['x-internal-secret'])) {
+        return res.status(401).json({ success: false, code: 'UNAUTHORIZED', message: 'internal secret required' });
+    }
+    const b = req.body || {};
+    try {
+        const out = await billing.fulfill({
+            eventId: b.eventId || b.providerEventId || b.providerRef,
+            provider: b.provider,
+            metadata: b.metadata,
+            amountMinor: b.amountMinor,
+            currency: b.currency,
+            providerRef: b.providerRef || b.provider_ref,
         });
-    } catch (e) {
-        return res.status(502).json({ error: { code: 'PAYMENT_UPSTREAM', message: 'payment-service unreachable' } });
+        return res.status(200).json({ ok: true, ...out, membership: undefined });
+    } catch (err) {
+        const status = err instanceof AppError ? err.statusCode : 503;
+        // 4xx is permanent (the JVM must not retry); anything else is transient.
+        return res.status(status >= 400 && status < 500 ? status : 503).json({
+            ok: false,
+            error: { code: err.code || 'FULFILL_FAILED', message: err.message },
+        });
     }
 });
 

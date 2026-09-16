@@ -38,7 +38,7 @@ export default function OpenGraphImage() {
             textTransform: 'uppercase',
           }}
         >
-          Established 1924
+          Established 2025
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 26 }}>

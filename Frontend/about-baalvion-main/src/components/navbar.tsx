@@ -32,6 +32,7 @@ import {
   ShieldCheck,
   Lock,
   Compass,
+  Network,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import {
@@ -160,6 +161,7 @@ const mainLinks = [
   { name: "Services", href: "/services", icon: BrainCircuit },
   { name: "Industries", href: "/industries", icon: Globe2 },
   { name: "Ecosystem", href: "/ecosystem", icon: Layers },
+  { name: "Network", href: "/network", icon: Network },
   { name: "Projects", href: "/projects", icon: Briefcase },
   { name: "Trust", href: "/trust", icon: ShieldCheck },
 ];
@@ -340,7 +342,7 @@ export function Navbar() {
 
           <div className="flex items-center gap-3 xl:gap-4 ml-2 xl:ml-4">
             <Link
-              href="#"
+              href="/#newsletter"
               className="hidden xl:flex items-center gap-1.5 text-sm font-semibold text-gray-900 hover:text-primary group transition-colors whitespace-nowrap"
               aria-label="Subscribe to weekly insights"
             >

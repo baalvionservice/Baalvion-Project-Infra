@@ -46,11 +46,24 @@ async function orchestratePayment({ amount, currency, receipt, provider: preferr
     throw lastError || new Error('Payment provider failed');
   }
 }
-// Webhook-based verification entry point
-async function handleWebhook(provider, webhookData) {
-  if (!providersMap[provider]) throw new Error('Unknown provider');
-  // Each provider should implement its own webhook handler/validator
-  return providersMap[provider].service.handleWebhook(webhookData);
+// Legacy webhook entry point — superseded by the per-provider routes (/webhook/razorpay,
+// /webhook/payu), which capture the raw body and verify the signature before dispatching.
+//
+// No provider implements `handleWebhook`: they expose `handleWebhookEvent(event, payload)`,
+// which is only safe to call AFTER the signature has been checked. This path receives a
+// parsed body with no headers and no raw bytes, so it cannot verify anything — meaning there
+// is no correct implementation of it. It therefore refuses rather than dispatching, and the
+// refusal is explicit instead of surfacing as a TypeError.
+async function handleWebhook(provider) {
+  const entry = providersMap[provider];
+  const err = new Error(
+    entry
+      ? `The legacy webhook path cannot verify a ${provider} signature. Use POST /payments/webhook/${provider}.`
+      : 'Unknown provider',
+  );
+  err.statusCode = entry ? 410 : 404;
+  err.code = entry ? 'WEBHOOK_PATH_SUPERSEDED' : 'UNKNOWN_PROVIDER';
+  throw err;
 }
 
 // Reconciliation entry point

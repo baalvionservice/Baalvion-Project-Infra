@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 
 export const metadata: Metadata = {
+  // Gated — a crawler sees only the sign-in wall.
+  robots: { index: false, follow: false },
   title: 'Institutional Voting Center | Governance',
   description: 'Review and cast your votes on key corporate resolutions and board appointments as a Baalvion institutional investor.',
 };

@@ -169,15 +169,19 @@ export default function SovereignAdminPage() {
                           <div className="flex items-center gap-5">
                              <div className="h-12 w-12 rounded-2xl bg-muted flex items-center justify-center border-2 shadow-inner group-hover:scale-105 transition-transform"><Activity className="h-6 w-6 text-muted-foreground opacity-40" /></div>
                              <div>
-                                <p className="text-[11px] font-black uppercase tracking-tight leading-none text-foreground">{route.name}</p>
-                                <p className="text-[9px] font-bold text-muted-foreground uppercase opacity-40 mt-2 tracking-widest">{route.status}</p>
+                                <p className="text-[11px] font-black uppercase tracking-tight leading-none text-foreground">{route.originPort} &rarr; {route.destinationPort}</p>
+                                <p className="text-[9px] font-bold text-muted-foreground uppercase opacity-40 mt-2 tracking-widest">
+                                  {route.status}{route.avgTransitDays != null ? ` · ${route.avgTransitDays}d avg transit` : ''}
+                                </p>
                              </div>
                           </div>
+                          {/* Real count of shipments on the lane. There is no congestion-percentage
+                              feed in this platform, so none is shown. */}
                           <Badge variant="outline" className={cn(
                             "text-[10px] font-black uppercase h-7 px-3 border-2 rounded-lg",
-                            route.currentCongestionLevel > 60 ? "bg-orange-50 text-orange-700 border-orange-200" : "bg-green-50 text-green-700 border-green-200"
+                            route.status === 'obstructed' ? "bg-orange-50 text-orange-700 border-orange-200" : "bg-green-50 text-green-700 border-green-200"
                           )}>
-                            {route.currentCongestionLevel}% Load
+                            {route.activeShipmentCount} active
                           </Badge>
                        </div>
                     ))}

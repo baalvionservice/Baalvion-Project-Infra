@@ -5,6 +5,13 @@
  * visitors now get a fast cached response instead of a live round-trip each
  * time, matching the caching strategy already used for CMS reads (@/lib/cms).
  */
+import { CONTENT_CACHE_TAG } from '@/lib/cache-tags';
+
+// law-service public reads — the homepage and category rails.
+// Matches lib/cms.ts's window: /api/revalidate's revalidateTag() is what
+// refreshes this on publish, so the window is only the no-webhook safety net.
+const CONTENT_REVALIDATE_SECONDS = 86400;
+
 const BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL?.trim() ||
   (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3015/v1');
@@ -33,7 +40,7 @@ export async function fetchPublicApi(
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
     const r = await fetch(`${BASE_URL}${path}${qs}`, {
-      next: { revalidate: 300 },
+      next: { revalidate: CONTENT_REVALIDATE_SECONDS, tags: [CONTENT_CACHE_TAG] },
       signal: controller.signal,
     });
     if (!r.ok) return null;

@@ -1,6 +1,7 @@
 import { getDepartments } from "@/lib/catalog";
 import { getMarketOffices } from "@/lib/cms";
 import { COUNTRIES } from "@/lib/mock-data";
+import { SUPPORTED_COUNTRIES } from "@/lib/i18n/countries";
 
 /**
  * llms.txt (llmstxt.org convention) — a concise, machine-readable summary for AI
@@ -13,7 +14,7 @@ export const revalidate = 3600;
 
 export async function GET() {
   const [departments, cmsOffices] = await Promise.all([getDepartments(), getMarketOffices()]);
-  const countryCodes = Object.keys(COUNTRIES);
+  const countryCodes = SUPPORTED_COUNTRIES;
   const baseUrl = "https://www.amarisemaisonavenue.com";
 
   const marketLines = countryCodes
@@ -32,7 +33,7 @@ export async function GET() {
 
   const body = `# Amarisé Maison Avenue
 
-> Authenticated luxury resale maison, founded 1924. We source, authenticate, and sell
+> Authenticated luxury resale maison, founded 2025. We source, authenticate, and sell
 > rare and pre-owned Hermès, Chanel, and fine jewelry — every piece verified in-house by
 > master authenticators and issued a numbered Certificate of Authenticity. We also buy,
 > consign, and provide private-client sourcing/advisory services.

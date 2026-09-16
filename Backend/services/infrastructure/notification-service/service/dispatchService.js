@@ -5,6 +5,7 @@
 const { getQueues } = require('../queue/queues');
 const deviceService = require('./deviceService');
 const inappService  = require('./inappService');
+const ntfyService   = require('./ntfyService');
 const logger        = require('../utils/logger');
 
 /**
@@ -29,14 +30,22 @@ async function dispatch(msg = {}) {
     if (msg.sms && recipients.phone)   inferred.push('sms');
     if (msg.push && userId)            inferred.push('push');
     if (msg.inapp && userId)           inferred.push('inapp');
+    // ntfy is topic-addressed, not user-addressed — it needs no userId or recipient, which is
+    // what makes it usable for ops alerts that belong to nobody's inbox.
+    if (msg.ntfy)                      inferred.push('ntfy');
     const channels = (msg.channels && msg.channels.length ? msg.channels : inferred);
 
     const idem = (ch) => (idempotencyKey ? `${idempotencyKey}:${ch}` : undefined);
     const result = {};
 
     for (const ch of channels) {
-        // Honor per-user opt-outs.
-        if (!(await deviceService.isChannelEnabled(userId, ch))) { result[ch] = { skipped: 'preference_off' }; continue; }
+        // Honor per-user opt-outs — except on ntfy, which addresses a topic rather than a person.
+        // Running an ops alert through a per-user preference lookup means a stale or missing
+        // preference row can silently suppress the page telling you the platform is down.
+        if (ch !== 'ntfy' && !(await deviceService.isChannelEnabled(userId, ch))) {
+            result[ch] = { skipped: 'preference_off' };
+            continue;
+        }
         try {
             if (ch === 'email' && recipients.email) {
                 const job = await emailQueue.add('dispatch-email', { to: recipients.email, ...msg.email, idempotencyKey: idem('email') });
@@ -49,6 +58,10 @@ async function dispatch(msg = {}) {
                 result.push = { queued: job.id };
             } else if (ch === 'inapp' && userId) {
                 result.inapp = await inappService.sendInApp({ userId, ...msg.inapp, idempotencyKey: idem('inapp') });
+            } else if (ch === 'ntfy' && msg.ntfy) {
+                // Sent inline rather than queued: an ops alert that waits behind a BullMQ worker
+                // is an ops alert that arrives after the outage it was warning about.
+                result.ntfy = await ntfyService.sendNtfyNotification(msg.ntfy);
             } else {
                 result[ch] = { skipped: 'missing_recipient_or_payload' };
             }

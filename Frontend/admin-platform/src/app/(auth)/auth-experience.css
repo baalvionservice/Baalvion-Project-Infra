@@ -437,11 +437,343 @@
   z-index: 2;
 }
 
+/* ===================================================================
+ * Terminal shell — scoped to the (auth) routes only, so /welcome and
+ * /invite keep the original glass treatment.
+ * =================================================================== */
+.bv-stage--terminal {
+  --bv-red: #e0122c;
+  --bv-red-soft: #ff5468;
+  --bv-line: rgba(255, 255, 255, 0.1);
+
+  display: flex;
+  flex-direction: column;
+  height: 100svh;
+  background: radial-gradient(115% 85% at 50% -15%, #0a0e1a 0%, #06080f 46%, #04050a 100%);
+}
+/* the data carries the page, not the light show */
+.bv-stage--terminal .bv-aurora { opacity: 0.18; filter: blur(110px); }
+.bv-stage--terminal .bv-particles { display: none; }
+
+/* ---------- Masthead + ticker ---------- */
+.bv-masthead {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 1.15rem;
+  flex-shrink: 0;
+  height: 3.4rem;
+  padding-left: 1.4rem;
+  background: rgba(3, 5, 10, 0.9);
+  border-bottom: 1px solid var(--bv-line);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+.bv-masthead__brand { flex-shrink: 0; }
+.bv-masthead__rule { flex-shrink: 0; width: 1px; height: 1.5rem; background: var(--bv-line); }
+
+.bv-ticker {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 93%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 93%, transparent);
+}
+.bv-ticker__track {
+  display: flex;
+  width: max-content;
+  animation: bv-ticker 52s linear infinite;
+}
+.bv-ticker__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 1.35rem;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: rgba(200, 210, 235, 0.7);
+}
+.bv-ticker__dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--bv-red);
+  box-shadow: 0 0 8px 1px rgba(224, 18, 44, 0.7);
+}
+@keyframes bv-ticker {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+/* ---------- Split shell ---------- */
+.bv-terminal-shell {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 1024px) {
+  .bv-terminal-shell { grid-template-columns: 1.08fr 0.92fr; }
+}
+
+.bv-rail { display: none; }
+@media (min-width: 1024px) {
+  .bv-rail {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1.15rem;
+    padding: 3rem 4.5rem 4rem 4rem;
+    border-right: 1px solid var(--bv-line);
+  }
+}
+.bv-rail__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--bv-red-soft);
+}
+.bv-rail__title {
+  max-width: 16ch;
+  font-size: clamp(2.1rem, 1.1rem + 2.1vw, 3.1rem);
+  font-weight: 700;
+  letter-spacing: -0.028em;
+  line-height: 1.05;
+}
+.bv-rail__title em {
+  font-style: normal;
+  background: linear-gradient(92deg, #ffffff, #9db1dc);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.bv-rail__divider { width: 3.25rem; height: 2px; background: var(--bv-red); }
+.bv-rail__lede {
+  max-width: 44ch;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--bv-ink-dim);
+}
+.bv-domains { display: flex; flex-wrap: wrap; gap: 0.4rem; max-width: 26rem; margin-top: 0.6rem; }
+.bv-domain {
+  padding: 0.4rem 0.7rem;
+  border: 1px solid var(--bv-line);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.028);
+  font-size: 0.63rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(200, 210, 235, 0.68);
+}
+
+.bv-terminal-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 2.5rem 1.25rem 3rem;
+}
+
+/* ---------- Card + controls, terminal treatment ---------- */
+.bv-stage--terminal .bv-card {
+  max-width: 25.5rem;
+  padding: 1.9rem 1.85rem 1.7rem;
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.058), rgba(255, 255, 255, 0.025));
+  box-shadow:
+    0 30px 90px -45px rgba(0, 0, 0, 0.9),
+    0 1px 0 rgba(255, 255, 255, 0.07) inset;
+}
+.bv-stage--terminal .bv-card::before {
+  background: linear-gradient(90deg, transparent, var(--bv-red), transparent);
+  opacity: 0.85;
+}
+
+.bv-eyebrow-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.bv-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.63rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(210, 219, 240, 0.8);
+}
+.bv-eyebrow--muted { color: rgba(139, 151, 184, 0.75); letter-spacing: 0.14em; }
+.bv-dot-live--red { background: var(--bv-red); box-shadow: 0 0 10px 2px rgba(224, 18, 44, 0.75); }
+.bv-title {
+  margin-top: 0.35rem;
+  font-size: 1.55rem;
+  font-weight: 700;
+  letter-spacing: -0.022em;
+  line-height: 1.2;
+}
+.bv-sub { font-size: 0.85rem; line-height: 1.55; color: var(--bv-ink-dim); }
+
+.bv-stage--terminal .bv-input { border-radius: 8px; height: 2.9rem; }
+.bv-input--code {
+  padding: 0 1rem;
+  text-align: center;
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: 0.5em;
+  text-indent: 0.5em;
+  font-variant-numeric: tabular-nums;
+}
+.bv-stage--terminal .bv-input--code { height: 3.4rem; }
+.bv-stage--terminal .bv-input:focus {
+  border-color: rgba(224, 18, 44, 0.6);
+  box-shadow: 0 0 0 3px rgba(224, 18, 44, 0.15);
+}
+.bv-stage--terminal .bv-input-wrap:focus-within > .bv-input-icon { color: var(--bv-red-soft); }
+.bv-stage--terminal .bv-link:hover { color: var(--bv-red-soft); }
+
+.bv-stage--terminal .bv-biobtn {
+  height: 2.95rem;
+  margin-top: 0.4rem;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  background: linear-gradient(180deg, #e0122c, #a50d21);
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow:
+    0 10px 24px -18px rgba(224, 18, 44, 0.8),
+    0 1px 0 rgba(255, 255, 255, 0.14) inset;
+}
+.bv-stage--terminal .bv-biobtn:hover:not(:disabled) {
+  box-shadow: 0 14px 28px -16px rgba(224, 18, 44, 0.9);
+  filter: brightness(1.06);
+}
+.bv-stage--terminal .bv-biobtn--scan { background: linear-gradient(180deg, #7d0c1d, #4b0712); }
+.bv-stage--terminal .bv-scanline {
+  background: linear-gradient(90deg, transparent, #ff6b7d, transparent);
+  box-shadow: 0 0 12px 2px rgba(255, 107, 125, 0.7);
+}
+
+.bv-trust {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-top: 0.95rem;
+  border-top: 1px solid var(--bv-line);
+  font-size: 0.6rem;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: rgba(139, 151, 184, 0.75);
+}
+
+/* ---------- Session entry (/welcome) ---------- */
+@media (min-width: 1024px) {
+  .bv-terminal-shell.bv-terminal-shell--single { grid-template-columns: minmax(0, 1fr); }
+}
+.bv-enter { width: 100%; max-width: 60rem; padding: 1rem 0.5rem; }
+.bv-enter__greet {
+  margin-top: 1rem;
+  font-size: clamp(2rem, 1.1rem + 2.8vw, 3.3rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+.bv-enter__greeting { color: var(--bv-ink-dim); font-weight: 600; }
+.bv-facts {
+  margin-top: 2.25rem;
+  padding-top: 1.35rem;
+  border-top: 1px solid var(--bv-line);
+  display: grid;
+  gap: 1.4rem 2.5rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (min-width: 860px) {
+  .bv-facts { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+.bv-fact__label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(139, 151, 184, 0.75);
+}
+.bv-fact__value {
+  margin-top: 0.45rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--bv-ink);
+  font-variant-numeric: tabular-nums;
+}
+.bv-enter__lede {
+  margin-top: 1.75rem;
+  max-width: 58ch;
+  font-size: 0.97rem;
+  line-height: 1.65;
+  color: var(--bv-ink-dim);
+}
+.bv-enter__actions {
+  margin-top: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.25rem;
+}
+.bv-stage--terminal .bv-enter__btn { width: auto; margin-top: 0; padding: 0 1.6rem; }
+.bv-enter__auto {
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(139, 151, 184, 0.75);
+  font-variant-numeric: tabular-nums;
+}
+.bv-enter__progress {
+  margin-top: 1.6rem;
+  max-width: 22rem;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.09);
+  overflow: hidden;
+}
+.bv-enter__bar {
+  height: 100%;
+  width: 100%;
+  transform-origin: left;
+  background: var(--bv-red);
+  animation: bv-load 4s linear forwards;
+}
+
+.bv-trust--center { justify-content: center; }
+@media (max-width: 380px) {
+  .bv-trust { flex-direction: column; align-items: center; gap: 0.3rem; }
+}
+.bv-stage--terminal .bv-ghost-btn { justify-content: center; border-radius: 8px; }
+
+.bv-stage--terminal .bv-footer {
+  position: static;
+  flex-shrink: 0;
+  padding: 0.9rem 1.25rem 1.1rem;
+  border-top: 1px solid var(--bv-line);
+  background: rgba(3, 5, 10, 0.6);
+}
+
 /* ---------- Reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
   .bv-aurora, .bv-net__line, .bv-net__node, .bv-particle,
   .bv-card, .bv-stagger > *, .bv-reveal, .bv-mark__ring, .bv-mark__ring--rev,
-  .bv-mark__core, .bv-halo::before, .bv-progress__bar, .bv-scanline, .bv-bioicon--pulse {
+  .bv-mark__core, .bv-halo::before, .bv-progress__bar, .bv-scanline, .bv-bioicon--pulse,
+  .bv-ticker__track, .bv-enter__bar {
     animation: none !important;
   }
   .bv-progress__bar { transform: scaleX(1); }

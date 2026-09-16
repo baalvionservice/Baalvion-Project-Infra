@@ -24,7 +24,9 @@ function isKeptCategoryArticle(a: { category?: { slug?: string } }): boolean {
 // Serve a cached page and refresh it in the background every 5 minutes,
 // instead of re-rendering (and re-fetching from the CMS) on every single
 // visitor/Googlebot request.
-export const revalidate = 300;
+// Raised off the 5-minute clock: /api/revalidate's revalidateTag() refreshes
+// this on publish, so the window is only the no-webhook safety net.
+export const revalidate = 86400;
 
 export default async function AuthorsIndexPage() {
   const [authors, cmsArticles] = await Promise.all([

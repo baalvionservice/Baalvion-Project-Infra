@@ -70,7 +70,7 @@ export const breadcrumbService = {
 
   /**
    * Generic builder for one-off trails that don't fit the standard
-   * article/author/entity/category shapes above (e.g. the CNBC-style
+   * article/author/entity/category shapes above (e.g. the Imperialpedia-style
    * World/Category/Title dated-news path). Routing a custom trail through
    * this instead of a hand-rolled array means a page can derive both its
    * visible <nav> and its BreadcrumbList schema from the exact same list,

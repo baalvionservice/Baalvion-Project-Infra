@@ -1,7 +1,9 @@
 import type { Config } from "tailwindcss";
 import tailwindcssAnimate from "tailwindcss-animate";
+import baalvionDesign from "@baalvion/design/tailwind";
 
 export default {
+  presets: [baalvionDesign],
   darkMode: ["class"],
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -14,8 +16,9 @@ export default {
         body: ["var(--font-inter)", "Avenir", "system-ui", "sans-serif"],
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
         // Luxury serif for all headings (loaded via next/font as --font-serif).
-        serif: ["var(--font-serif)", "Cormorant Garamond", "Georgia", "serif"],
-        headline: ["var(--font-serif)", "Cormorant Garamond", "Georgia", "serif"],
+        serif: ["var(--font-serif)", "Newsreader", "Iowan Old Style", "Palatino", "Georgia", "serif"],
+        headline: ["var(--font-serif)", "Newsreader", "Iowan Old Style", "Palatino", "Georgia", "serif"],
+        arabic: ["var(--font-arabic)", "Noto Naskh Arabic", "Geeza Pro", "Traditional Arabic", "serif"],
         mono: [
           "ui-monospace",
           "SFMono-Regular",

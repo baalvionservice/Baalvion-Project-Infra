@@ -461,20 +461,19 @@ export default function ProductInfoPanel({
                   Only {stock} left.{" "}
                 </span>
               )}
-              In stock &amp; available now with FREE Express shipping or pickup at
-              our{" "}
+              In stock &amp; available now with FREE Express shipping, or collect by{" "}
               <Link
-                href={`/${country}/contact?subject=${encodeURIComponent("Showroom appointment")}`}
+                href={`/${country}/contact?subject=${encodeURIComponent("Private appointment")}`}
                 className="underline underline-offset-2 text-gray-800 hover:text-black"
               >
-                New York City Showroom
+                private appointment
               </Link>
             </span>
           ) : (
             <span className="text-gray-500 text-xs sm:text-[14px] tracking-wide leading-snug">
               This artifact is currently unavailable. Contact our{" "}
               <a
-                href="mailto:info@madisonavenuecouture.com"
+                href={`/${countryCode}/contact`}
                 className="underline underline-offset-2 text-gray-700 hover:text-black"
               >
                 client services team
@@ -528,12 +527,9 @@ export default function ProductInfoPanel({
             with all original packaging, authentication cards, and dust bags
             intact. Returns that show signs of use, alteration, or missing
             components will not be accepted. To initiate a return, please
-            contact our client services team at{" "}
-            <a
-              href="mailto:info@madisonavenuecouture.com"
-              className="underline"
-            >
-              info@madisonavenuecouture.com
+            contact our client services team through the{" "}
+            <a href={`/${countryCode}/contact`} className="underline">
+              contact page
             </a>{" "}
             within 24 hours of delivery.
           </p>

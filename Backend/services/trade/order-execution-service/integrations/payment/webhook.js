@@ -64,6 +64,15 @@ function parsePayoutEvent(body) {
         // RazorpayX `entity.amount` is in the minor unit (paise) — convert to MAJOR units
         // so it can be compared to the order's stored base_currency_amount. Guard non-finite.
         amount: paiseToMajor(entity.amount),
+        // The untouched integer, kept alongside the converted value. The platform records money
+        // in minor units, so anything reporting onward uses this rather than converting the
+        // major figure back and picking up a rounding hop it does not need.
+        amountMinor: Number.isFinite(Number(entity.amount)) ? Number(entity.amount) : null,
+        // RazorpayX reports a payout's cost as `fees` (with `tax` broken out separately),
+        // not `fee` as on a payment. Absent stays absent — a zero would read as "no fee".
+        feeMinor: Number.isFinite(Number(entity.fees))
+            ? Number(entity.fees) + (Number.isFinite(Number(entity.tax)) ? Number(entity.tax) : 0)
+            : null,
         currency: entity.currency != null ? String(entity.currency) : null,
         status,
         rawStatus,

@@ -1,13 +1,15 @@
 'use strict';
 // Developer Platform console routes. Mounted under /v1/developer (see routes/v1.js).
-// Every route is gated by requireSuperAdmin — identical to adminRoutes — so this module
-// enforces the same super-admin policy on its own even though it mounts as a sibling.
+// Every route is gated at the admin tier — identical to adminRoutes — so this module
+// enforces the same policy on its own even though it mounts as a sibling.
 const router = require('express').Router();
 const ctrl   = require('../controller/developerController');
-const { requireSuperAdmin } = require('../middleware/authMiddleware');
+const { requireStaffAdmin } = require('../middleware/authMiddleware');
 
-// All developer-platform routes require super_admin.
-router.use(requireSuperAdmin);
+// Platform-staff tier: EXACT match on admin/super_admin, NOT hierarchical. `owner` is a
+// self-service role (registration makes every user owner of their own org), so a
+// hierarchical admin gate handed these surfaces to the entire public.
+router.use(requireStaffAdmin);
 
 // API usage stats
 router.get('/stats', ctrl.getApiStats);

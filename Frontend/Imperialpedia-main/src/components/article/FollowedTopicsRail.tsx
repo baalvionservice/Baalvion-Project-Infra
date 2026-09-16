@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, {  useEffect, useState  } from "react";
 import Link from "next/link";
 import { Sparkles } from "lucide-react";
 import { getFollowedTopics } from "@/lib/followed-topics";

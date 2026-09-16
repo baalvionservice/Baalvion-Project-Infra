@@ -20,3 +20,5 @@ spec:
   apis: ["/api/v1/fx"]
   slo: { availability: 0.999, latencyP95Ms: 300 }
   deploy: { chart: baalvion-financial, namespace: financial, minReplicas: 2, maxReplicas: 8 }
+  runtime:
+    deployment: not-deployed

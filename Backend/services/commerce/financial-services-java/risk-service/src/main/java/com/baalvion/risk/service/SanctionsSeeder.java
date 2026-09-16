@@ -10,7 +10,8 @@ import org.springframework.stereotype.Component;
 /**
  * Loads the active sanctions list on startup when {@code app.sanctions.auto-seed-on-startup} is true
  * and the watchlist is empty, so screening is usable out of the box. Runs as a separate bean (not a
- * self-invocation) so {@link SanctionsService#ingest()} executes within its transaction.
+ * self-invocation) so the transaction semantics {@link SanctionsService#ingest()} declares actually
+ * apply — it commits per batch rather than in one transaction spanning the whole load.
  */
 @Slf4j
 @Component

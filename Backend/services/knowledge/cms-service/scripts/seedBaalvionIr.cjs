@@ -27,44 +27,32 @@ const CATEGORIES = [
 const blk = (i, type, content) => ({ id: `blk-${i}`, type, order: i, content });
 const para = (i, text) => blk(i, 'paragraph', { text });
 
-// Press releases (contentType news, kind=press-release)
-const PRESS = [
-  { title: "Baalvion's Martin S. Small to Present at the 2026 Bank of America Securities Financial Services Conference on February 10th",
-    slug: 'martin-small-bofa-2026', cat: 'press-releases',
-    excerpt: 'Baalvion will present at the 2026 Bank of America Securities Financial Services Conference.',
-    cf: { kind: 'press-release', date: 'Feb 02, 2026', link: '#' },
-    blocks: [ para(0, 'Baalvion today announced that Martin S. Small will present at the 2026 Bank of America Securities Financial Services Conference on February 10th.') ] },
-  { title: 'Baalvion Elects Gregg Lemkau to Board of Directors',
-    slug: 'gregg-lemkau-board', cat: 'press-releases',
-    excerpt: 'Baalvion has elected Gregg Lemkau to its Board of Directors.',
-    cf: { kind: 'press-release', date: 'Jan 27, 2026', link: '#' },
-    blocks: [ para(0, 'Baalvion today announced the election of Gregg Lemkau to its Board of Directors, effective immediately.') ] },
-  { title: 'Baalvion Reports Full Year 2025 Diluted EPS of $35.31, or $48.09 as adjusted; Fourth Quarter 2025 Diluted EPS of $7.16, or $13.16 as adjusted',
-    slug: 'fy2025-eps-results', cat: 'earnings-reports',
-    excerpt: 'Baalvion reports full year and fourth quarter 2025 financial results.',
-    cf: { kind: 'press-release', date: 'Jan 15, 2026', link: '#', download: '#', webcast: '#', supplement: '#' },
-    blocks: [ para(0, 'Baalvion today reported full year 2025 diluted EPS of $35.31, or $48.09 as adjusted, and fourth quarter 2025 diluted EPS of $7.16, or $13.16 as adjusted.') ] },
-];
-
-// News articles (contentType news, kind=news-article)
-const NEWS = [
-  { title: "Baalvion Acquires FinTech 'VeriTrade' to Automate Trade Finance Compliance",
-    slug: 'veritrade-acquisition', cat: 'news',
-    excerpt: "The acquisition integrates VeriTrade's AI-powered AML and KYC technology directly into the Baalvion OS, reducing transaction friction and enhancing security for all platform participants. This move is central to our strategy of owning the complete compliance stack.",
-    cf: { kind: 'news-article', date: '2024-07-15', imageId: 'news-1-image' } },
-  { title: "Strategic Partnership with 'PortLink Logistics' to Digitize Global Shipping Routes",
-    slug: 'portlink-partnership', cat: 'news',
-    excerpt: "This collaboration will onboard PortLink's extensive network of carriers and port operators onto the Baalvion platform, creating unprecedented visibility and efficiency in maritime logistics. We anticipate a 30% reduction in processing times for shared clients.",
-    cf: { kind: 'news-article', date: '2024-06-28', imageId: 'news-2-image' } },
-  { title: "Founder Alexandros Vasilias Details Vision for a 'Unified Ledger for Global Trade' at Davos",
-    slug: 'davos-unified-ledger', cat: 'news',
-    excerpt: "Speaking at the World Economic Forum, Mr. Vasilias outlined Baalvion's long-term vision to create a single, immutable source of truth for B2B transactions, aiming to unlock trillions in liquidity and eliminate fraud.",
-    cf: { kind: 'news-article', date: '2024-06-10', imageId: 'news-3-image' } },
-  { title: 'Baalvion Reports 150% YoY Growth in Platform Transaction Volume for Q2 2024',
-    slug: 'q2-2024-growth', cat: 'news',
-    excerpt: 'The company has exceeded all financial projections, citing strong enterprise adoption of its integrated trade OS and the successful rollout of its automated customs clearance module in key APAC markets.',
-    cf: { kind: 'news-article', date: '2024-07-20', imageId: 'news-1-image' } },
-];
+/**
+ * PRESS and NEWS are empty, and must stay empty until there is something real.
+ *
+ * Seven fabricated items were seeded from here into the production CMS and served
+ * publicly on ir.baalvion.com. They were modelled on BlackRock's investor relations
+ * releases, and several named real people and real figures:
+ *
+ *   - "Baalvion's Martin S. Small to Present at the 2026 Bank of America Securities
+ *     Financial Services Conference" — Martin S. Small is BlackRock's CFO.
+ *   - "Baalvion Elects Gregg Lemkau to Board of Directors" — Gregg Lemkau is a real
+ *     person and has never been a director of this company.
+ *   - "Full Year 2025 Diluted EPS of $35.31, or $48.09 as adjusted" — an invented
+ *     earnings disclosure for a private company incorporated on 2025-03-11, using
+ *     figures in the shape of BlackRock's own reported results.
+ *   - An acquisition ("VeriTrade"), a partnership ("PortLink Logistics"), a Davos
+ *     appearance by a founder named "Alexandros Vasilias" who does not exist, and
+ *     "150% YoY Growth in Platform Transaction Volume".
+ *
+ * Invented earnings figures and board appointments on an investor relations site are
+ * representations to investors, not placeholder copy. Nothing goes in these arrays that
+ * did not actually happen, and no entry may name a person who has not agreed to appear.
+ *
+ * To purge what was already published, run scripts/purgeBaalvionIrFiction.cjs.
+ */
+const PRESS = [];
+const NEWS = [];
 
 async function req(method, url, token, body) {
   const r = await fetch(url, {

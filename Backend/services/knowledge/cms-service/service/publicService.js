@@ -175,6 +175,12 @@ function _typoBudget(len) {
     return 2;
 }
 
+// The fuzzy pass costs O(query words x candidate words x word length) across up to 500
+// rows, on a public unauthenticated endpoint. Nothing longer than this is a typo of a
+// headline, so bound the query side rather than let one request burn minutes of CPU.
+const FUZZY_MAX_SEARCH_LEN = 80;
+const FUZZY_MAX_QUERY_WORDS = 8;
+
 const _WORD_RE = /[a-z0-9]+/g;
 function _words(text) {
     return (text || '').toLowerCase().match(_WORD_RE) || [];
@@ -261,8 +267,8 @@ async function listPublicContent(websiteSlug, query = {}, { callerId } = {}) {
     // (see _fuzzyMatch above) before reporting a genuine zero-result search.
     // Scoped to `search && count === 0` only: every other query keeps using
     // the fast, index-backed exact match above untouched.
-    if (search && count === 0) {
-        const queryWords = _words(search);
+    if (search && count === 0 && String(search).length <= FUZZY_MAX_SEARCH_LEN) {
+        const queryWords = _words(search).slice(0, FUZZY_MAX_QUERY_WORDS);
         if (queryWords.length) {
             const fallbackWhere = { ...where };
             delete fallbackWhere[Op.or];

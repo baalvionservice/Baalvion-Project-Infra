@@ -305,6 +305,9 @@ function ClaimAndProfile({
           emailVerifiedAt: raw.user.emailVerified ? new Date().toISOString() : null,
           mfaEnabled: raw.user.mfaEnabled,
           role: raw.user.role as AuthUser['role'],
+          // Invite sign-in predates the canonical roles[]; seed it from the scalar so the
+          // policy engine has something to resolve against on the very first render.
+          roles: (raw.user.role ? [raw.user.role] : []) as AuthUser['roles'],
           orgId: raw.user.orgId ?? null,
           permissions: [],
           sessionId: '',

@@ -50,7 +50,7 @@ export interface PersonaDef {
 const NAV_TRADE_CORE = [
   '/marketplace', '/discovery', '/sourcing', '/suppliers', '/deals',
   '/negotiations', '/messages', '/orders', '/trade-management', '/trade-ops',
-  '/logistics-shipment', '/shipments', '/carriers', '/customs',
+  '/logistics-shipment', '/shipments', '/sailing-schedules', '/carriers', '/customs',
   '/payments', '/escrow', '/financials/invoices', '/insurance',
   '/compliance', '/documents', '/intelligence-hub', '/profile',
 ];
@@ -68,7 +68,7 @@ const NAV_COMPLIANCE = [
 ];
 
 const NAV_LOGISTICS = [
-  '/logistics-shipment', '/shipments', '/carriers', '/customs', '/trade-ops',
+  '/logistics-shipment', '/shipments', '/sailing-schedules', '/carriers', '/customs', '/trade-ops',
   '/governance/maritime', '/governance/sla', '/intelligence-hub/maritime',
   '/intelligence-hub/sea-routes', '/documents', '/profile',
 ];
@@ -233,7 +233,7 @@ export const PERSONAS: PersonaDef[] = [
     nav: [
       '/buyer/dashboard', '/marketplace', '/discovery', '/buyer/rfqs',
       '/sourcing', '/suppliers', '/products', '/deals', '/negotiations', '/messages',
-      '/orders', '/trade-ops', '/logistics-shipment', '/shipments', '/customs',
+      '/orders', '/trade-ops', '/logistics-shipment', '/shipments', '/sailing-schedules', '/customs',
       '/payments', '/escrow', '/financials/invoices', '/insurance',
       '/compliance', '/documents', '/notifications', '/support', '/intelligence-hub', '/profile',
     ],
@@ -249,7 +249,7 @@ export const PERSONAS: PersonaDef[] = [
     nav: [
       '/seller/dashboard', '/seller/listings', '/seller/rfqs', '/seller/responses',
       '/marketplace', '/deals', '/negotiations', '/messages', '/orders', '/trade-ops',
-      '/logistics-shipment', '/shipments', '/carriers', '/customs',
+      '/logistics-shipment', '/shipments', '/sailing-schedules', '/carriers', '/customs',
       '/payments', '/escrow', '/financials/invoices', '/insurance',
       '/compliance', '/documents', '/notifications', '/intelligence-hub', '/profile',
     ],
@@ -308,7 +308,7 @@ export const PERSONAS: PersonaDef[] = [
     home: '/logistics-shipment',
     icon: Truck,
     accent: 'text-blue-300',
-    nav: ['/logistics-shipment', '/shipments', '/carriers', '/customs', '/documents', '/profile'],
+    nav: ['/logistics-shipment', '/shipments', '/sailing-schedules', '/carriers', '/customs', '/documents', '/profile'],
   },
 
   // ============ EXTERNAL AUTHORITY NODES ============

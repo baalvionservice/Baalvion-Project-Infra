@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { withoutRetired } from '@/lib/content/retired-paths';
 import {
   HandCoins,
   Smartphone,
@@ -16,7 +17,6 @@ import type { ReviewArticle } from "@/types/Review";
 import { FeaturedArticleCard } from "@/components/pages/FeaturedArticleCard";
 import { HorizontalArticleCard } from "@/components/pages/HorizontalArticleCard";
 import { TrustBar } from "@/components/pages/TrustBar";
-import { TopicCard } from "@/components/pages/TopicCard";
 import { ProductSection } from "@/components/pages/ProductSection";
 import { ComparisonsSection, findComparisons } from "@/components/pages/ComparisonsSection";
 import { BuyingGuideCard } from "@/components/pages/reviews/BuyingGuideCard";
@@ -41,18 +41,24 @@ const TOPICS: Array<{
 ];
 
 /** "Find The Right Product" concept tiles — each links to a real, live category page. */
-const START_HERE_CONCEPTS = [
+// Both category tiles pointed at retired hubs (/loan-reviews, /app-reviews)
+// that 301 to the homepage — a "Find the Right Financial Product" grid whose
+// every tile bounced the reader back. There is no live reviews taxonomy to
+// point them at yet, so the grid is empty until there is; the hub renders its
+// own "no reviews published yet" state, which is at least honest about it.
+const START_HERE_CONCEPTS = withoutRetired([
   { emoji: "💰", label: "Loans", description: "Compare personal loans, mortgages, and lenders.", href: "/loan-reviews" },
   { emoji: "📱", label: "Finance Apps", description: "Review budgeting, investing, and money management apps.", href: "/app-reviews" },
-];
+]);
 
-const EXPLORE_MORE = [
-  { href: "/investing", label: "Investing" },
+// Was Investing / Banking / Personal Finance / Economy — four of five retired.
+const EXPLORE_MORE = withoutRetired([
+  { href: "/stocks", label: "Stocks" },
+  { href: "/budgeting-basics", label: "Budgeting" },
   { href: "/market-news", label: "Market News" },
-  { href: "/banking", label: "Banking" },
-  { href: "/personal-finance", label: "Personal Finance" },
-  { href: "/economy", label: "Economy" },
-];
+  { href: "/fraud-protection", label: "Scams & Fraud Protection" },
+  { href: "/financial-tools", label: "Financial Tools" },
+]);
 
 /** Evergreen conceptual FAQs about the site's own review practice — describes
  * the real methodology/reviewedBy/factCheckedBy fields every review carries,
@@ -261,7 +267,11 @@ export async function ReviewsHub() {
       <TrustBar />
 
       <div className="max-w-7xl mx-auto px-4 py-4 space-y-16">
-        {/* Find The Right Product — concept tiles, not article stand-ins */}
+        {/* Find The Right Product — concept tiles, not article stand-ins.
+            Hidden entirely when no tile survives the retired-link filter: a
+            heading over an empty grid is the same under-construction look this
+            page is already being held back for. */}
+        {START_HERE_CONCEPTS.length > 0 && (
         <section>
           <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
             Find the Right Financial Product
@@ -280,6 +290,7 @@ export async function ReviewsHub() {
             ))}
           </div>
         </section>
+        )}
 
         {featured && (
           <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">

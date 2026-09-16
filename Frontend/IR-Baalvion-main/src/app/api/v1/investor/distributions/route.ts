@@ -1,28 +1,8 @@
-import { NextResponse } from 'next/server';
-import { withPermission } from '@/lib/rbac/with-permission';
+import { irGet } from '@/lib/ir-api';
 
-export const GET = withPermission('VIEW_DASHBOARD', async () => {
-  return NextResponse.json({
-    success: true,
-    data: [
-      {
-        id: 'DIST-2024-01',
-        date: '2024-02-20',
-        type: 'INCOME',
-        amount: 750000,
-        wireStatus: 'PROCESSED',
-      },
-      {
-        id: 'DIST-2023-02',
-        date: '2023-12-15',
-        type: 'RETURN_OF_CAPITAL',
-        amount: 500000,
-        wireStatus: 'PROCESSED',
-      },
-    ],
-    meta: {
-      timestamp: Date.now(),
-      requestId: crypto.randomUUID(),
-    },
-  });
-});
+// Proxies to ir-service, which owns the capital ledgers and scopes the read to the caller.
+// This route previously returned a hardcoded position — a commitment, a NAV, an IRR that came
+// from nowhere. It now returns only what the ledgers actually hold.
+export const dynamic = 'force-dynamic';
+
+export const GET = () => irGet('/capital/distributions');

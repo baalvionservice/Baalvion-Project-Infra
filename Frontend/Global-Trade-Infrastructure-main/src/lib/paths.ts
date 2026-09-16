@@ -61,6 +61,9 @@ export const PATHS = {
   // 3. EXECUTION & MISSION CONTROL
   ORDERS: '/orders',
   LOGISTICS_SHIPMENT: '/logistics-shipment',
+  // Party-scoped counterparty view: the one trade a buyer or seller is entitled
+  // to see, as opposed to the tenant-wide operator console above.
+  SHIPMENT_VISIBILITY: '/logistics-shipment/visibility',
   LOGISTICS_MARKETPLACE: '/carriers',
   WAREHOUSE_MANAGEMENT: '/warehouse-management',
   WAREHOUSE_RECEIVING: '/warehouse-management/receiving',
@@ -142,6 +145,8 @@ export const PATHS = {
   INSURANCE: '/insurance',
   INSURANCE_POLICIES: '/insurance/policies',
   INSURANCE_CLAIMS: '/insurance/claims',
+  INSURANCE_GENERAL_AVERAGE: '/insurance/general-average',
+  INSURANCE_UNDERWRITERS: '/insurance/underwriters',
 
   // 11. SUPREME COMMAND
   SINGULARITY_COMMAND: '/singularity-command',

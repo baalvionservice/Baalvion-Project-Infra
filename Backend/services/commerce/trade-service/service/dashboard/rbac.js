@@ -76,9 +76,31 @@ function canSeeDocument(access, docType) {
     return true; // buyer/seller see their own operation's docs
 }
 
+
+/**
+ * Whether a trade operation falls inside the caller's party scope. Pure — the
+ * caller supplies the operation row (or the buyer/seller org ids off it) and the
+ * org identities the caller may act as.
+ *
+ * An operation-less subject is visible only to tenant-wide roles: without a
+ * buyer/seller pair there is nothing to match a party against, and guessing
+ * would be the wrong side of a fail-closed decision.
+ */
+function isOperationInScope(operation, access, partyOrgIds = []) {
+    if (!operation) return access.scope === 'all'; // orphan subject: only tenant-wide roles
+    if (access.scope === 'all') return true;
+    const ids = (partyOrgIds || []).filter(Boolean);
+    if (!ids.length) return false; // fail-closed
+    if (access.scope === 'buyer') return ids.includes(operation.buyer_org_id);
+    if (access.scope === 'seller') return ids.includes(operation.seller_org_id);
+    if (access.scope === 'party') return ids.includes(operation.buyer_org_id) || ids.includes(operation.seller_org_id);
+    return false;
+}
+
 module.exports = {
     resolve,
     canSeeDocument,
+    isOperationInScope,
     ADMIN_ROLES,
     DASHBOARD_ROLES,
     BANK_HIDDEN_DOC_TYPES,

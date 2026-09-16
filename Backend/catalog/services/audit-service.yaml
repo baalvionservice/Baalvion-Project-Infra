@@ -22,3 +22,8 @@ spec:
   apis: ["/v1/audit"]
   slo: { availability: 0.99, latencyP95Ms: 300 }
   deploy: { chart: baalvion-service, namespace: baalvion-infra, minReplicas: 2, maxReplicas: 8 }
+  runtime:
+    deployment: consolidated-box
+    port: 3032
+    healthPath: /health
+    container: app-platform

@@ -9,6 +9,15 @@
 const router = require('express').Router();
 const { authMiddleware } = require('../../middleware/authMiddleware');
 const { validate } = require('../../middleware/validate');
+const { AppError } = require('../../utils/errors');
+const multer = require('multer');
+
+// In memory so the bytes can be magic-byte validated and malware scanned before anything is
+// written. Capped — a data room takes documents, not archives.
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: Number(process.env.DATA_ROOM_MAX_MB || 25) * 1024 * 1024, files: 1 },
+});
 const { sendSuccess, sendPaginated } = require('../../utils/response');
 const service = require('../../service/dealService');
 const s = require('./schemas');
@@ -31,8 +40,14 @@ router.get('/', authMiddleware, async (req, res, next) => {
 
 // Deal-room access guard — authenticates, then restricts every deal-scoped route below to the
 // deal's parties (the two principal orgs, an added deal member, or staff). `req.deal` is set.
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 const dealAccess = async (req, res, next) => {
     try {
+        // A malformed id is a bad request, not a database cast error surfacing as a 500.
+        if (!UUID_RE.test(req.params.dealId || '')) {
+            throw new AppError('VALIDATION_ERROR', 'Invalid deal id', 400);
+        }
         req.deal = await service.assertDealAccess(req.params.dealId, req.user);
         return next();
     } catch (err) { return next(err); }
@@ -45,7 +60,7 @@ router.get('/:dealId', async (req, res, next) => {
 
 router.patch('/:dealId', validate({ body: s.statusSchema }), async (req, res, next) => {
     try {
-        const deal = await service.updateStatus({ id: req.params.dealId, status: req.valid.body.status });
+        const deal = await service.updateStatus({ id: req.params.dealId, status: req.valid.body.status, user: req.user });
         return sendSuccess(req, res, deal);
     } catch (err) { return next(err); }
 });
@@ -67,7 +82,7 @@ router.get('/:dealId/members', async (req, res, next) => {
 });
 router.post('/:dealId/members', validate({ body: s.memberSchema }), async (req, res, next) => {
     try {
-        const row = await service.addMember({ dealId: req.params.dealId, data: req.valid.body });
+        const row = await service.addMember({ dealId: req.params.dealId, data: req.valid.body, user: req.user });
         return sendSuccess(req, res, row, 201);
     } catch (err) { return next(err); }
 });
@@ -95,7 +110,7 @@ router.post('/:dealId/document-requests', validate({ body: s.documentRequestSche
 });
 router.patch('/:dealId/document-requests/:rid', validate({ body: s.documentRequestStatusSchema }), async (req, res, next) => {
     try {
-        const row = await service.updateDocumentRequest({ dealId: req.params.dealId, requestId: req.params.rid, status: req.valid.body.status });
+        const row = await service.updateDocumentRequest({ dealId: req.params.dealId, requestId: req.params.rid, status: req.valid.body.status, user: req.user });
         return sendSuccess(req, res, row);
     } catch (err) { return next(err); }
 });
@@ -104,10 +119,31 @@ router.patch('/:dealId/document-requests/:rid', validate({ body: s.documentReque
 router.get('/:dealId/documents', async (req, res, next) => {
     try { return sendSuccess(req, res, await service.listDataRoom({ dealId: req.params.dealId, user: req.user })); } catch (err) { return next(err); }
 });
-router.post('/:dealId/documents', validate({ body: s.dataRoomDocSchema }), async (req, res, next) => {
+// Upload a real document (multipart). The service validates content, scans it, stores it and
+// records the object — replacing the old endpoint that only saved a client-supplied file_url.
+router.post('/:dealId/documents', upload.single('file'), async (req, res, next) => {
     try {
-        const row = await service.addDataRoomDocument({ dealId: req.params.dealId, data: req.valid.body, user: req.user });
+        const row = await service.uploadDataRoomDocument({
+            dealId: req.params.dealId,
+            file: req.file,
+            data: { category: req.body?.category, document_request_id: req.body?.document_request_id || undefined },
+            user: req.user,
+        });
         return sendSuccess(req, res, row, 201);
+    } catch (err) { return next(err); }
+});
+
+// Read one back. Re-authorised against the caller's CURRENT category scope and audited on every
+// read — deliberately not a presigned URL, which would outlive the permission check.
+router.get('/:dealId/documents/:documentId/download', async (req, res, next) => {
+    try {
+        const { body, filename, mime } = await service.downloadDataRoomDocument({
+            dealId: req.params.dealId, documentId: req.params.documentId, user: req.user,
+        });
+        res.setHeader('Content-Type', mime);
+        res.setHeader('Content-Disposition', `attachment; filename="${filename.replace(/"/g, '')}"`);
+        res.setHeader('Cache-Control', 'no-store');
+        return res.send(body);
     } catch (err) { return next(err); }
 });
 
@@ -128,13 +164,13 @@ router.get('/:dealId/due-diligence', async (req, res, next) => {
 });
 router.post('/:dealId/due-diligence', validate({ body: s.dueDiligenceSchema }), async (req, res, next) => {
     try {
-        const row = await service.addDueDiligenceItem({ dealId: req.params.dealId, data: req.valid.body });
+        const row = await service.addDueDiligenceItem({ dealId: req.params.dealId, data: req.valid.body, user: req.user });
         return sendSuccess(req, res, row, 201);
     } catch (err) { return next(err); }
 });
 router.patch('/:dealId/due-diligence/:itemId', validate({ body: s.dueDiligenceUpdateSchema }), async (req, res, next) => {
     try {
-        const row = await service.updateDueDiligenceItem({ dealId: req.params.dealId, itemId: req.params.itemId, data: req.valid.body });
+        const row = await service.updateDueDiligenceItem({ dealId: req.params.dealId, itemId: req.params.itemId, data: req.valid.body, user: req.user });
         return sendSuccess(req, res, row);
     } catch (err) { return next(err); }
 });
@@ -166,12 +202,9 @@ router.post('/:dealId/signatures', validate({ body: s.signatureSchema }), async 
         return sendSuccess(req, res, row, 201);
     } catch (err) { return next(err); }
 });
-router.post('/:dealId/signatures/:sid/complete', async (req, res, next) => {
-    try {
-        const row = await service.completeSignature({ dealId: req.params.dealId, signatureId: req.params.sid });
-        return sendSuccess(req, res, row);
-    } catch (err) { return next(err); }
-});
+// There is deliberately NO "complete this signature" endpoint. A signature is completed by the
+// provider callback (routes/webhooks.js) carrying its own envelope id and audit trail. A party
+// marking its own counterparty's signature complete is not a signature.
 
 // ── Escrow ────────────────────────────────────────────────────────────────────
 router.get('/:dealId/escrow', async (req, res, next) => {
@@ -179,16 +212,12 @@ router.get('/:dealId/escrow', async (req, res, next) => {
 });
 router.post('/:dealId/escrow', validate({ body: s.escrowSchema }), async (req, res, next) => {
     try {
-        const row = await service.createEscrow({ dealId: req.params.dealId, data: req.valid.body });
+        const row = await service.createEscrow({ dealId: req.params.dealId, data: req.valid.body, user: req.user });
         return sendSuccess(req, res, row, 201);
     } catch (err) { return next(err); }
 });
-router.post('/:dealId/escrow/:eid/fund', async (req, res, next) => {
-    try {
-        const row = await service.fundEscrow({ dealId: req.params.dealId, escrowId: req.params.eid });
-        return sendSuccess(req, res, row);
-    } catch (err) { return next(err); }
-});
+// Likewise no "fund this escrow" endpoint. Money arriving is something the escrow provider
+// observes and reports over a signed webhook; it is not a state this API can be asked to enter.
 // Release additionally requires a staff role (enforced in the service).
 router.post('/:dealId/escrow/:eid/release', async (req, res, next) => {
     try {

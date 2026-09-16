@@ -19,6 +19,10 @@ export const metadata: Metadata = {
 import type { User, RoleCategory } from '@/lib/types';
 import { LeaderboardClientPage } from './leaderboard-client-page';
 
+// Reaches ctm-service transitively (ranking-engine -> @/lib/api), which throws CtmDataError
+// when the service is unreachable. Prerendering this at build time therefore fails.
+export const dynamic = 'force-dynamic';
+
 // Reusing a similar ranking type from the admin dashboard
 export type PublicCandidateRanking = {
   rank: number;

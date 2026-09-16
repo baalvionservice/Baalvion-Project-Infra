@@ -31,6 +31,20 @@ class SessionRepository {
         return db.Session.update({ revoked_at: new Date() }, { where: { id, revoked_at: null } });
     }
 
+    /**
+     * Session ids that are still live for a user.
+     *
+     * Read before revoking, because the id is what the Redis revocation marker is keyed on —
+     * once `revoked_at` is set the rows are no longer "active" and the ids would be lost.
+     */
+    async listActiveForUser(userId) {
+        return db.Session.findAll({
+            where: { user_id: userId, revoked_at: null },
+            attributes: ['id'],
+            raw: true,
+        });
+    }
+
     async revokeAllForUser(userId) {
         return db.Session.update({ revoked_at: new Date() }, { where: { user_id: userId, revoked_at: null } });
     }

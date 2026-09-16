@@ -207,6 +207,7 @@ export default function CategoryPageClient({
                         <ProductGrid
                             products={filteredProducts}
                             countryCode={country}
+                            filtersActive={filter.totalActive > 0}
                         />
 
                         {/* Pagination — real, server-backed (was capped at a single

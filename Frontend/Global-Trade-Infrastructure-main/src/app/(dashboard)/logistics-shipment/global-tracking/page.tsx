@@ -85,7 +85,7 @@ export default function GlobalTrackingDashboardPage() {
                   <button
                     key={s.id}
                     className="w-full text-left p-3 rounded-xl hover:bg-muted/40 transition-colors"
-                    onClick={() => router.push(`${PATHS.LOGISTICS_SHIPMENT}/${s.id}`)}
+                    onClick={() => router.push(`${PATHS.SHIPMENT_VISIBILITY}/${s.id}`)}
                   >
                     <p className="text-sm font-black uppercase">{s.shipment_no}</p>
                     <p className="text-[10px] text-muted-foreground uppercase">{s.status} • {s.tracking_number || 'no tracking #'}</p>
@@ -147,7 +147,7 @@ export default function GlobalTrackingDashboardPage() {
               {mapLoading ? (
                 <div className="flex h-[480px] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>
               ) : (
-                <LiveMap markers={markers} onMarkerClick={(m) => router.push(`${PATHS.LOGISTICS_SHIPMENT}/${m.id}`)} />
+                <LiveMap markers={markers} onMarkerClick={(m) => router.push(`${PATHS.SHIPMENT_VISIBILITY}/${m.id}`)} />
               )}
             </CardContent>
           </Card>
@@ -170,7 +170,7 @@ export default function GlobalTrackingDashboardPage() {
               )}
               {(alerts || []).map((alert) => (
                 <div key={alert.id} className="p-4 space-y-1 hover:bg-muted/20 transition-colors cursor-pointer"
-                  onClick={() => router.push(`${PATHS.LOGISTICS_SHIPMENT}/${alert.shipmentId}`)}>
+                  onClick={() => router.push(`${PATHS.SHIPMENT_VISIBILITY}/${alert.shipmentId}`)}>
                   <div className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full" style={{ backgroundColor: STATUS_SEVERITY_COLOR[alert.severity] || '#64748b' }} />
                     <span className="text-[10px] font-black uppercase tracking-wide">{alert.alertType.replace(/_/g, ' ')}</span>

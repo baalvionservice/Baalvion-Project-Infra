@@ -12,7 +12,7 @@ export function sectionAnchorId(title: string): string {
   return `section-${slugify(title)}`;
 }
 
-/** CNBC-style "Quick Links" pill row — real section titles from the live
+/** Imperialpedia-style "Quick Links" pill row — real section titles from the live
  * feed, each an in-page anchor (no fabricated topics). */
 export default function QuickLinks({ sections }: { sections: WorldData["sections"] }) {
   if (sections.length === 0) return null;
@@ -27,7 +27,7 @@ export default function QuickLinks({ sections }: { sections: WorldData["sections
           <a
             key={s.section}
             href={`#${sectionAnchorId(s.section)}`}
-            className="text-[11px] font-semibold text-[hsl(var(--cnbc-red))] bg-muted hover:bg-card/10 px-2.5 py-1 rounded-sm transition-colors shrink-0"
+            className="text-[11px] font-semibold text-[hsl(var(--imperialpedia-red))] bg-muted hover:bg-card/10 px-2.5 py-1 rounded-sm transition-colors shrink-0"
           >
             {s.section}
           </a>

@@ -47,7 +47,7 @@ export default function DataProtectionPolicyPage() {
         
         <Section title="1. Purpose &amp; Scope">
           <p className="text-lg text-muted-foreground">
-            This Data Protection Policy outlines the commitment of Baalvion Industries Pvt Ltd ("Baalvion") to protecting personal data processed within our global talent acquisition platform, Jobs.Baalvion.com (the "Platform"). This policy applies to all personal data collected, processed, and stored by Baalvion, including data from candidates, employer clients, and platform users. It forms the foundation of our data governance framework and demonstrates our commitment to operating in a secure, transparent, and compliant manner.
+            This Data Protection Policy outlines the commitment of Baalvion Industries Private Limited ("Baalvion") to protecting personal data processed within our global talent acquisition platform, Jobs.Baalvion.com (the "Platform"). This policy applies to all personal data collected, processed, and stored by Baalvion, including data from candidates, employer clients, and platform users. It forms the foundation of our data governance framework and demonstrates our commitment to operating in a secure, transparent, and compliant manner.
           </p>
         </Section>
 

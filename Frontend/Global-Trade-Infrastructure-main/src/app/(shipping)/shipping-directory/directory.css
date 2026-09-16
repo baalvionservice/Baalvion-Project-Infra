@@ -1,0 +1,184 @@
+/**
+ * World Shipping Directory — house style.
+ *
+ * Scoped to `.wsd` rather than :root because this directory renders INSIDE the Baalvion
+ * OS root layout, whose globals.css paints a near-black body, a 1.5rem radius and a pair
+ * of radial gradients. None of that belongs on a white public reference site, so
+ * everything the directory needs is re-declared here and the wrapper paints its own
+ * ground instead of letting the app's show through.
+ *
+ * The look is modelled on careers.blackrock.com: white ground, near-black type set
+ * tight, hairline rules instead of cards, a 2px radius that reads as "square with the
+ * corners knocked off", and a single saturated violet that is only ever used to mark
+ * something real — never as decoration.
+ */
+
+.wsd {
+  --wsd-radius: 2px;
+
+  /* Type ramp. BlackRock sets headings tight and negative; -0.42px at 42px is roughly
+     -0.01em, and the ratio holds across the ramp. */
+  --wsd-track-display: -0.028em;
+  --wsd-track-heading: -0.018em;
+  --wsd-track-body: -0.006em;
+  --wsd-track-label: 0.08em;
+
+  background-color: #ffffff;
+  color: #141414;
+  font-family: var(--font-blk), Archivo, "Helvetica Neue", Arial, sans-serif;
+  letter-spacing: var(--wsd-track-body);
+  font-feature-settings: "tnum" 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Headings carry the display tracking; the app-wide -0.02em from globals.css is close
+   but is applied to body copy too, which over-tightens 13px text. */
+.wsd h1,
+.wsd h2,
+.wsd h3,
+.wsd h4 {
+  letter-spacing: var(--wsd-track-heading);
+  font-weight: 700;
+}
+
+.wsd h1 {
+  letter-spacing: var(--wsd-track-display);
+}
+
+/* Figures are compared down columns constantly on this site, so every number is lining
+   and tabular by default rather than per-cell. */
+.wsd [data-figure],
+.wsd table {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/**
+ * The eyebrow. BlackRock's section labels are small, condensed, letterspaced and sit on
+ * a rule. It is the single most recognisable piece of the system, so it is a real class
+ * rather than five repeated utilities.
+ */
+.wsd-eyebrow {
+  font-family: var(--font-blk-cond), "Archivo Narrow", "Arial Narrow", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: var(--wsd-track-label);
+  text-transform: uppercase;
+  color: #767676;
+}
+
+/* A section opener: eyebrow above a hairline that runs the full measure. */
+.wsd-rule-top {
+  border-top: 1px solid #141414;
+  padding-top: 0.75rem;
+}
+
+.wsd-hairline {
+  border-top: 1px solid #e4e4e4;
+}
+
+/**
+ * Link underlines that sit below the baseline rather than through the descenders, and
+ * thicken on hover. BlackRock uses this everywhere in body copy.
+ */
+.wsd-link {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: #c2c2c2;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  transition: text-decoration-color 120ms ease, color 120ms ease;
+}
+
+.wsd-link:hover {
+  color: #6f00ef;
+  text-decoration-color: #6f00ef;
+  text-decoration-thickness: 2px;
+}
+
+/**
+ * Row list. The reference site lists results as full-width rows divided by hairlines,
+ * with the whole row a target and a violet edge appearing on hover — not as cards.
+ */
+.wsd-row {
+  position: relative;
+  border-bottom: 1px solid #e4e4e4;
+  transition: background-color 120ms ease;
+}
+
+.wsd-row:hover {
+  background-color: #f7f7f7;
+}
+
+.wsd-row::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: 3px;
+  background-color: #6f00ef;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.wsd-row:hover::before {
+  opacity: 1;
+}
+
+/* Focus ring — violet, offset, square. Visible on the white ground, unlike the app's. */
+.wsd :focus-visible {
+  outline: 2px solid #6f00ef;
+  outline-offset: 2px;
+  border-radius: 0;
+}
+
+/**
+ * The hero's ground. BlackRock's colour arrives through full-bleed photography, which a
+ * reference directory does not have and must not fake with stock imagery. The surface
+ * carries it instead: flat violet with a fine dot lattice, which reads as printed rather
+ * than as a gradient-heavy web hero.
+ */
+.wsd-violet-field {
+  background-color: #6f00ef;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1px);
+  background-size: 14px 14px;
+}
+
+.wsd-ink-field {
+  background-color: #141414;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 14px 14px;
+}
+
+/**
+ * Magnitude bars in distribution tables. The track is the full measure so bars are
+ * comparable by eye down a column; widths are true proportions, never a minimum that
+ * flatters a small value into looking substantial.
+ */
+.wsd-bar-track {
+  height: 6px;
+  background-color: #efefef;
+}
+
+.wsd-bar-fill {
+  height: 6px;
+  background-color: #141414;
+}
+
+.wsd-bar-fill[data-accent="violet"] {
+  background-color: #6f00ef;
+}
+
+/* Print: the fleet tables on a company page are genuinely printed by people in this
+   industry, and the violet fields cost a cartridge to render as flat blocks. */
+@media print {
+  .wsd-violet-field,
+  .wsd-ink-field {
+    background: none !important;
+    color: #000 !important;
+  }
+
+  .wsd-no-print {
+    display: none !important;
+  }
+}

@@ -15,80 +15,30 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 
-const TESTIMONIALS = [
-  {
-    id: '1',
-    name: 'Sarah Chen',
-    role: 'Creator',
-    company: 'TechTalks with Sarah',
-    avatar: 'https://picsum.photos/seed/tc1/100/100',
-    rating: 5,
-    quote: "Baalvion changed my career. The AI matching isn't just a buzzword—it actually found brands that perfectly align with my tech audience. I've seen a 40% increase in my long-term partnerships.",
-  },
-  {
-    id: '2',
-    name: 'David Miller',
-    role: 'Brand',
-    company: 'Lumina Gadgets',
-    avatar: 'https://picsum.photos/seed/tb1/100/100',
-    rating: 5,
-    quote: "We used to spend weeks vetting influencers. With Baalvion, we launched a campaign in 48 hours. The verified ROI tracking is a game-changer for our marketing budget transparency.",
-  },
-  {
-    id: '3',
-    name: 'Elena Rodriguez',
-    role: 'Creator',
-    company: 'StyleByElena',
-    avatar: 'https://picsum.photos/seed/tc2/100/100',
-    rating: 5,
-    quote: "The escrow system gives me peace of mind. I know the funds are secured before I start filming. It makes the professional relationship so much smoother and more respectful.",
-  },
-  {
-    id: '4',
-    name: 'Marcus Thorne',
-    role: 'Brand',
-    company: 'Velocity Sports',
-    avatar: 'https://picsum.photos/seed/tb2/100/100',
-    rating: 4,
-    quote: "Finding high-engagement fitness creators in specific regions used to be a nightmare. Baalvion's location filters and audience data are incredibly accurate. Highly recommended.",
-  },
-  {
-    id: '5',
-    name: 'Priya Kapoor',
-    role: 'Creator',
-    company: 'The Wanderlust Soul',
-    avatar: 'https://picsum.photos/seed/tc3/100/100',
-    rating: 5,
-    quote: "I love the community hub! I've connected with other creators for collaborations and learned so much about pricing my work fairly. It's more than just a marketplace.",
-  },
-  {
-    id: '6',
-    name: 'Jonathan Wu',
-    role: 'Brand',
-    company: 'EcoStream',
-    avatar: 'https://picsum.photos/seed/tb3/100/100',
-    rating: 5,
-    quote: "Our sustainability campaign needed creators who actually cared about the environment. Baalvion's niche targeting helped us find authentic voices that resonated with our core values.",
-  },
-  {
-    id: '7',
-    name: 'Sophie Laurent',
-    role: 'Creator',
-    company: 'Kitchen Stories',
-    avatar: 'https://picsum.photos/seed/tc4/100/100',
-    rating: 5,
-    quote: "The platform is so intuitive. From applying to campaigns to submitting deliverables, everything is streamlined. It allows me to focus on what I do best: creating content.",
-  },
-  {
-    id: '8',
-    name: 'Robert Vance',
-    role: 'Brand',
-    company: 'Modern Home',
-    avatar: 'https://picsum.photos/seed/tb4/100/100',
-    rating: 5,
-    quote: "The analytics dashboard provides insights we never had before. Seeing the direct correlation between creator posts and our sales lift has made influencer marketing our top acquisition channel.",
-  }
-];
+/**
+ * Real endorsements only.
+ *
+ * Eight invented testimonials sat here — "Sarah Chen, TechTalks with Sarah", "David Miller,
+ * Lumina Gadgets" and six more — each with a five-star rating, a verified badge and a
+ * specific results claim ("a 40% increase in my long-term partnerships", "launched a
+ * campaign in 48 hours"). None came from a customer. They rendered on the public landing
+ * page under the heading "Loved by Brands and Creators Alike".
+ *
+ * Invented reviews attributed to named people at named companies are not placeholder copy;
+ * in most jurisdictions they are also false advertising. Populate only from endorsements
+ * that were actually given, with permission. The section renders nothing while empty.
+ */
+type Testimonial = {
+  id: string;
+  name: string;
+  role: string;
+  company: string;
+  avatar?: string;
+  rating: number;
+  quote: string;
+};
+
+const TESTIMONIALS: Testimonial[] = [];
 
 export function Testimonials() {
   const [api, setApi] = useState<CarouselApi>();
@@ -103,6 +53,10 @@ export function Testimonials() {
 
     return () => clearInterval(interval);
   }, [api]);
+
+  // Nothing to show and nothing invented to fill it: the whole band is omitted
+  // rather than rendering a heading over an empty carousel.
+  if (TESTIMONIALS.length === 0) return null;
 
   return (
     <section id="testimonials" className="py-24 bg-slate-900 text-white overflow-hidden">

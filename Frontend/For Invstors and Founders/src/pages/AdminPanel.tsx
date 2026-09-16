@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { supabase } from "@/integrations/supabase/client";
 import MainLayout from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
@@ -756,13 +756,12 @@ export default function AdminPanel() {
       const { data, error } = await supabase
         .from('app_settings' as any)
         .select('value')
+        // maybeSingle, not single: an absent schedule row is the normal state before one is saved,
+        // and single() answers that with a 406 the browser logs as an error on every admin load.
         .eq('key', 'report_schedule')
-        .single();
+        .maybeSingle();
 
-      if (error) {
-        console.log("No schedule setting found, using defaults");
-        return;
-      }
+      if (error || !data) return;
 
       const settingData = data as any;
       if (settingData?.value) {
@@ -1231,12 +1230,32 @@ export default function AdminPanel() {
     <MainLayout>
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-8">
+        <div className="flex items-center gap-3 mb-4">
           <Shield className="w-10 h-10 text-primary" />
           <div>
             <h1 className="text-4xl font-bold">Admin Panel</h1>
             <p className="text-muted-foreground">Manage applications and moderate content</p>
           </div>
+        </div>
+
+        {/* The other admin screens had no entry point anywhere in the app — only their URLs. */}
+        <div className="flex flex-wrap gap-2 mb-8">
+          {[
+            { to: "/admin/investors", label: "Investors" },
+            { to: "/admin/companies", label: "Companies" },
+            { to: "/admin/claims", label: "Claims" },
+            { to: "/admin/members", label: "Members" },
+            { to: "/admin/applications", label: "Applications" },
+            { to: "/admin/analytics", label: "Analytics" },
+          ].map((l) => (
+            <Link
+              key={l.to}
+              to={l.to}
+              className="rounded-full border border-border bg-card px-4 py-1.5 text-sm hover:border-primary/50 transition-colors"
+            >
+              {l.label}
+            </Link>
+          ))}
         </div>
 
         {/* Enhanced Stats */}

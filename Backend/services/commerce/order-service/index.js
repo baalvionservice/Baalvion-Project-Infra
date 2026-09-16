@@ -13,6 +13,7 @@ const createIpRateLimit = require('./middleware/rateLimit');
 const { startReconciliationWorker } = require('./queues/reconciliationQueue');
 const { startLedgerOutboxRelay, stopLedgerOutboxRelay } = require('./service/ledgerOutbox');
 const { startCartEventsOutboxRelay, stopCartEventsOutboxRelay } = require('./service/cartEventsOutbox');
+const { startPaymentOutboxRelay, stopPaymentOutboxRelay } = require('./service/paymentOutbox');
 const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-shutdown');
 
 const app = express();
@@ -61,11 +62,19 @@ async function start() {
         // Same outbox mechanism, draining cart-activity events into orders.cart_events for admin
         // live/abandoned-cart visibility (see service/cartEventsOutbox.js).
         startCartEventsOutboxRelay();
+        // Drains pcl.payment_outbox onto the platform bus as canonical `payment.recorded`
+        // events — the hop that lets one admin panel see every payment across every site.
+        // Opt-in while the producers are migrated: a relay with no producers is harmless, but
+        // the flag keeps it off in environments where the pcl schema has not been migrated yet.
+        if (process.env.PAYMENT_OUTBOX_RELAY === 'true') {
+            startPaymentOutboxRelay();
+        }
         const server = app.listen(config.port, () => {
             console.log(`[Order Service] Running on port ${config.port} (${config.env})`);
         });
         registerShutdown('ledger-outbox-relay', async () => { await stopLedgerOutboxRelay(); });
         registerShutdown('cart-events-outbox-relay', async () => { await stopCartEventsOutboxRelay(); });
+        registerShutdown('payment-outbox-relay', async () => { await stopPaymentOutboxRelay(); });
         registerShutdown('db', async () => { if (sequelize && sequelize.close) await sequelize.close(); });
         initGracefulShutdown(server);
     } catch (err) {

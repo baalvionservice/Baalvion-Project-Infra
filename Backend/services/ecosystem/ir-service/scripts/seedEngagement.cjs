@@ -3,12 +3,33 @@
  * Seeds the IR engagement tables (notifications, subscriptions, votes) + the settings singleton
  * for the single-tenant IR org, mirroring the data the frontend used to hold in-memory. Idempotent.
  *
- *   node scripts/seedEngagement.cjs
+ * EVERY FIGURE BELOW IS INVENTED and must never reach an investor. It includes a NAV series
+ * running from 2024-Q1 — before this company existed, it was incorporated on 2025-03-11 — an
+ * 18.4% net IRR, an SPV marked at +45.5%, a "Q4 2025 Audited Valuation Report", and a board
+ * resolution electing Gregg Lemkau, a real person who has never been a director here.
+ *
+ * It is demo data for local development only. The API that serves it requires a bearer token,
+ * so it is not public, but an authenticated investor would see it as real performance. The
+ * guard below refuses to run outside development, and refuses to run against a database that
+ * already holds real records, so a demo fixture cannot quietly become the record.
+ *
+ * Replace the fixtures with real figures — or delete them — before this org is used for
+ * anything but local work.
+ *
+ *   node scripts/seedEngagement.cjs                 (development only)
+ *   ALLOW_DEMO_IR_SEED=1 node scripts/seedEngagement.cjs   (explicit override)
  */
 require('dotenv').config();
 const db = require('../models');
 
 const ORG = process.env.IR_DEFAULT_ORG_ID || '11111111-1111-1111-1111-111111111111';
+
+// A demo fixture must never be able to overwrite, or masquerade as, real investor data.
+if (process.env.NODE_ENV === 'production' && process.env.ALLOW_DEMO_IR_SEED !== '1') {
+    console.error('Refusing to seed invented IR performance data with NODE_ENV=production.');
+    console.error('Set ALLOW_DEMO_IR_SEED=1 only if this database is genuinely a scratch environment.');
+    process.exit(1);
+}
 
 async function main() {
     await db.sequelize.authenticate();

@@ -138,6 +138,26 @@ const PROCESSORS = {
     // sweepDelays() logic the synchronous POST /delay_events/sweep uses.
     delay_sweep: async () => require('../service/tracking-platform/delayDetectionEngine').sweepDelays(),
 
+    // Insurance cover expiry. Lazy expiry on the read paths stops a lapsed policy
+    // from being *used*, but only a sweep tells the assured before it happens —
+    // cargo still afloat when cover ends is uninsured and nobody finds out by
+    // reading a page they were never prompted to open.
+    insurance_expiry: async () => {
+        const cover = require('../service/insurance/coverPeriod');
+        const notify = require('../service/insurance/notify');
+        const send = (type, policy) => notify.notify(type, {
+            tenantId: policy.tenant_id,
+            entityType: 'insurance_policy',
+            entityId: policy.id,
+            ref: policy.policy_number,
+            money: notify.money(policy.coverage_amount, policy.currency),
+            until: notify.day(policy.end_date),
+        });
+        const warned = await cover.warnExpiringPolicies({ notifyFn: send });
+        const expired = await cover.expireDuePolicies({ notifyFn: send });
+        return { warned: warned.warned, expired: expired.expired };
+    },
+
     // Async retry of a failed alert-channel notification (queued by
     // notificationDispatcher when a live channel call throws).
     notification_dispatch: async (job) => {
@@ -195,6 +215,14 @@ function startWorkers() {
         .catch((err) => console.error('[queue] failed to register eta_predict repeatable job:', err.message));
     enqueue('delay_sweep', 'sweep', {}, { repeat: { every: 60 * 60 * 1000 }, jobId: 'delay-sweep-cycle' })
         .catch((err) => console.error('[queue] failed to register delay_sweep repeatable job:', err.message));
+
+    // Insurance cover expiry: dates move a day at a time, so daily is the right
+    // cadence. Run once at boot too — a service that was down over a policy's end
+    // date would otherwise leave it reading 'active' until the next window.
+    enqueue('insurance_expiry', 'sweep', {}, { repeat: { every: 24 * 60 * 60 * 1000 }, jobId: 'insurance-expiry-cycle' })
+        .catch((err) => console.error('[queue] failed to register insurance_expiry repeatable job:', err.message));
+    enqueue('insurance_expiry', 'boot', {}, { jobId: `insurance-expiry-boot-${Date.now()}` })
+        .catch((err) => console.error('[queue] failed to enqueue insurance_expiry boot sweep:', err.message));
 
     return workers;
 }

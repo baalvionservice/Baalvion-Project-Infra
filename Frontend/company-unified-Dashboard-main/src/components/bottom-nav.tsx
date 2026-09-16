@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Grid3x3, Building, PiggyBank, Users, MoreHorizontal, LogOut, Briefcase } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from './ui/button';
@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 import { navItems } from '@/lib/nav-config';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { getCurrentUser } from '@/lib/auth';
+import { getCurrentUser, logout } from '@/lib/auth';
 import type { User } from '@/lib/types';
 import { useState, useEffect } from 'react';
 
@@ -22,8 +22,14 @@ const mainNav = [
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const role = searchParams.get('role');
+
+  const handleLogout = () => {
+    logout();
+    router.push('/auth/login');
+  };
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   useEffect(() => { setCurrentUser(getCurrentUser()); }, []);
   const userImage = PlaceHolderImages.find(img => img.id === currentUser?.imageId);
@@ -75,10 +81,14 @@ export default function BottomNav() {
                         </Link>
                     ))}
                     <Separator />
-                     <Link href="#" className="flex items-center gap-3 rounded-lg px-3 py-2 text-destructive transition-all hover:bg-destructive/10">
+                     <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-destructive transition-all hover:bg-destructive/10"
+                     >
                         <LogOut className="h-4 w-4" />
                         Log Out
-                    </Link>
+                    </button>
                 </nav>
             </div>
           </SheetContent>

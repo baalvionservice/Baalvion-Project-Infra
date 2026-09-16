@@ -17,24 +17,29 @@ const STANDARDS = [
  */
 export function EditorialStandards() {
   return (
-    <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 border-t border-border/60">
-      <div className="flex flex-wrap items-baseline justify-between gap-3 mb-5">
-        <h2 className="text-sm font-black uppercase tracking-widest text-muted-foreground">
-          Our Editorial Standards
-        </h2>
-        <Link href="/editorial-policy" className="text-sm font-bold text-primary hover:underline underline-offset-2">
-          Full Editorial Policy →
+    <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 border-t-2 border-black dark:border-slate-800">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+        <div className="flex items-center gap-2">
+          <span className="bg-[#c8102e] text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 -skew-x-12">
+            STANDARDS
+          </span>
+          <h2 className="text-xs font-mono font-black uppercase tracking-widest text-black dark:text-white">
+            // OUR EDITORIAL COMMITMENT
+          </h2>
+        </div>
+        <Link href="/editorial-policy" className="text-xs font-mono font-black uppercase text-[#c8102e] hover:underline">
+          FULL EDITORIAL POLICY →
         </Link>
       </div>
       <ul className="flex flex-wrap gap-3">
         {STANDARDS.map(({ icon: Icon, label, body }) => (
           <li
             key={label}
-            className="group flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2"
+            className="group flex items-center gap-2 border-2 border-black dark:border-slate-700 bg-white dark:bg-slate-900 px-3.5 py-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] rounded-xs"
           >
-            <Icon className="h-4 w-4 shrink-0 text-primary" aria-hidden />
-            <span className="text-sm font-bold text-foreground">{label}</span>
-            <span className="hidden sm:inline text-xs text-muted-foreground">— {body}</span>
+            <Icon className="h-4 w-4 shrink-0 text-[#c8102e]" aria-hidden />
+            <span className="text-xs font-black uppercase font-serif text-black dark:text-white">{label}</span>
+            <span className="hidden sm:inline text-xs font-medium text-slate-600 dark:text-slate-400">— {body}</span>
           </li>
         ))}
       </ul>

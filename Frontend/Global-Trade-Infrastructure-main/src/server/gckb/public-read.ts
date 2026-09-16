@@ -45,17 +45,36 @@ function iso(value: Date | null): string | null {
   return value ? value.toISOString() : null;
 }
 
-/** Page through the published global baseline for an entity type / filter. */
-async function fetchAllPublished(filter: RecordSearchFilter): Promise<GckbRecord[]> {
+/**
+ * Page through the published records for an entity type / filter.
+ *
+ * `organizationId` null reads the platform-global baseline only — the public posture.
+ * Passing a tenant reads the baseline PLUS that tenant's own overrides, which is how a
+ * correction made in the registry editor reaches the people who made it without
+ * changing what the public sees.
+ */
+async function fetchAllPublished(filter: RecordSearchFilter, organizationId: string | null = null): Promise<GckbRecord[]> {
   const all: GckbRecord[] = [];
   let page = 1;
   // Hard cap of 50 pages (10k rows) — a defensive bound, never reached in practice.
   for (; page <= 50; page += 1) {
-    const result = await gckbRecordRepository.search(null, { ...filter, status: PUBLISHED }, { page, pageSize: PAGE });
+    const result = await gckbRecordRepository.search(organizationId, { ...filter, status: PUBLISHED }, { page, pageSize: PAGE });
     all.push(...result.items);
     if (page >= result.pages || result.items.length === 0) break;
   }
   return all;
+}
+
+/** One record per natural key, a tenant's own override beating the global baseline. */
+function preferOverrides(records: GckbRecord[]): GckbRecord[] {
+  const byKey = new Map<string, GckbRecord>();
+  for (const record of records) {
+    const existing = byKey.get(record.recordKey);
+    if (!existing || (existing.organizationId === null && record.organizationId !== null)) {
+      byKey.set(record.recordKey, record);
+    }
+  }
+  return [...byKey.values()];
 }
 
 // ── View shapes (lean, serialisable, no internal columns leaked) ─────────────
@@ -124,6 +143,17 @@ export interface PortView {
   latitude?: number;
   longitude?: number;
   capacityNote?: string;
+  // Operational depth. Absent throughout means "not on file", never "unrestricted".
+  maxDraftM?: number;
+  quayLengthM?: number;
+  berths?: number;
+  terminals?: number;
+  reeferPlugs?: number;
+  annualTeu?: number;
+  throughputYear?: number;
+  railConnected?: boolean;
+  timezone?: string;
+  website?: string;
 }
 
 export interface AgreementView {
@@ -229,6 +259,16 @@ function toPortView(record: GckbRecord): PortView {
     latitude: num(a.latitude),
     longitude: num(a.longitude),
     capacityNote: str(a.capacityNote),
+    maxDraftM: num(a.maxDraftM),
+    quayLengthM: num(a.quayLengthM),
+    berths: num(a.berths),
+    terminals: num(a.terminals),
+    reeferPlugs: num(a.reeferPlugs),
+    annualTeu: num(a.annualTeu),
+    throughputYear: num(a.throughputYear),
+    railConnected: typeof a.railConnected === 'boolean' ? a.railConnected : undefined,
+    timezone: str(a.timezone),
+    website: str(a.website),
   };
 }
 
@@ -452,6 +492,10 @@ export async function compareCountries(codes: string[]): Promise<CountryComparis
 export interface DirectoryPort extends PortView {
   countryCode: string;
   countryName: string;
+  /** UN M49 region / subregion of the owning country — the corridor planner groups on these. */
+  region: string;
+  subregion: string;
+  flagEmoji?: string;
 }
 
 export interface DirectoryAuthority extends AuthorityView {
@@ -459,19 +503,48 @@ export interface DirectoryAuthority extends AuthorityView {
   countryName: string;
 }
 
-/** Map of country id → { code, name } over the published global baseline. */
-async function countryIndex(): Promise<Map<string, { code: string; name: string }>> {
-  const countries = await fetchAllPublished({ entityType: 'country' });
-  return new Map(countries.map((c) => [c.id, { code: c.recordKey, name: c.name }]));
+interface CountryIndexEntry {
+  code: string;
+  name: string;
+  region?: string;
+  subregion?: string;
+  flagEmoji?: string;
 }
 
-/** Every published port / point of entry across all countries, country-tagged. */
-export async function listPortsDirectory(): Promise<DirectoryPort[]> {
-  const [records, index] = await Promise.all([fetchAllPublished({ entityType: 'point_of_entry' }), countryIndex()]);
+/** Map of country id → identity + geography over the published global baseline. */
+async function countryIndex(): Promise<Map<string, CountryIndexEntry>> {
+  const countries = await fetchAllPublished({ entityType: 'country' });
+  return new Map(
+    countries.map((c) => {
+      const a = attrs(c);
+      return [c.id, { code: c.recordKey, name: c.name, region: str(a.region), subregion: str(a.subregion), flagEmoji: str(a.flagEmoji) }];
+    }),
+  );
+}
+
+const UNGROUPED = 'Unassigned';
+
+/**
+ * Every published port / point of entry across all countries, country-tagged.
+ * With an `organizationId`, that tenant's registry corrections replace the baseline
+ * rows they override.
+ */
+export async function listPortsDirectory(organizationId: string | null = null): Promise<DirectoryPort[]> {
+  const [records, index] = await Promise.all([
+    fetchAllPublished({ entityType: 'point_of_entry' }, organizationId).then(preferOverrides),
+    countryIndex(),
+  ]);
   return records
     .map((r) => {
       const country = r.countryId ? index.get(r.countryId) : undefined;
-      return { ...toPortView(r), countryCode: country?.code ?? '—', countryName: country?.name ?? '—' };
+      return {
+        ...toPortView(r),
+        countryCode: country?.code ?? '—',
+        countryName: country?.name ?? '—',
+        region: country?.region ?? UNGROUPED,
+        subregion: country?.subregion ?? UNGROUPED,
+        flagEmoji: country?.flagEmoji,
+      };
     })
     .sort((a, b) => a.countryName.localeCompare(b.countryName) || a.name.localeCompare(b.name));
 }

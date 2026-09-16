@@ -1,4 +1,4 @@
-import { Suspense, type SVGProps } from "react";
+import React, {  Suspense, type SVGProps  } from "react";
 import Link from "next/link";
 import { Twitter, Linkedin, Instagram } from "lucide-react";
 import { TrendingNowModule, MoreInCategoryModule } from "@/components/article/ArticleSidebarModules";

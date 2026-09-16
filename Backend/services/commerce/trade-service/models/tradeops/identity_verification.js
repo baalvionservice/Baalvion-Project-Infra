@@ -29,6 +29,12 @@ module.exports = (sequelize, DataTypes) => {
         reviewed_at: { type: DataTypes.DATE },
         rejection_reason: { type: DataTypes.TEXT },
         expires_at: { type: DataTypes.DATE },
+        // KYC/KYB vendor holding this case, and its own reference for it (migration 070).
+        // Empty means the manual queue owns the record — see service/verification/providerCheck.js.
+        provider_name: { type: DataTypes.TEXT },
+        provider_ref: { type: DataTypes.TEXT },
+        provider_submitted_at: { type: DataTypes.DATE },
+        provider_result: { type: DataTypes.JSONB, allowNull: false, defaultValue: {} },
         metadata: { type: DataTypes.JSONB, allowNull: false, defaultValue: {} },
         created_by: { type: DataTypes.TEXT },
         updated_by: { type: DataTypes.TEXT },

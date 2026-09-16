@@ -59,6 +59,11 @@ async function postEntry(entry, opts = {}) {
     try {
         const headers = { 'Content-Type': 'application/json' };
         if (isUuid(entry.tenantId)) headers['X-Tenant-ID'] = entry.tenantId;
+        // The Java services are Spring resource servers: a server-to-server caller with no user
+        // JWT authenticates with the platform shared secret, which InternalServiceAuthFilter turns
+        // into a ROLE_INTERNAL principal. Sent unconditionally — it is ignored while the target
+        // runs with app.security.enabled=false, and is the only thing that works once it doesn't.
+        if (config.internalSecret) headers['x-internal-secret'] = config.internalSecret;
         const res = await fetchImpl(`${url}/api/v1/ledger/entries`, {
             method: 'POST',
             headers,

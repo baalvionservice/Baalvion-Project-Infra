@@ -1,5 +1,6 @@
 'use strict';
 const config = require('./appConfig');
+const authNode = require('@baalvion/auth-node');
 
 let Redis;
 let _client = null;
@@ -164,6 +165,30 @@ async function clearOrgSuspended(orgId) {
     await _del(K.orgSuspended(orgId));
 }
 
+/**
+ * End a SESSION everywhere, immediately.
+ *
+ * Database revocation stops the next refresh; the access token already in the browser keeps
+ * working until it expires. This closes that window, and is the same idea as the org
+ * kill-switch above at a finer grain.
+ *
+ * The key comes from @baalvion/auth-node so the issuer and every verifier agree on one
+ * namespace — the same reason the jti blacklist is defined there rather than here. Best
+ * effort by design: a Redis outage must not prevent a password reset from completing, and
+ * the database revocation still stands. Verification itself fails CLOSED on an outage, so an
+ * unreachable store rejects tokens rather than admitting them.
+ */
+async function revokeSession(sessionId) {
+    if (!sessionId) return false;
+    try {
+        await authNode.revokeSession(getClient(), sessionId);
+        return true;
+    } catch (err) {
+        console.error('[auth-service] session revocation write failed', { message: err.message });
+        return false;
+    }
+}
+
 async function isOrgSuspended(orgId) {
     if (!orgId) return false;
     return (await _get(K.orgSuspended(orgId))) === '1';
@@ -171,6 +196,7 @@ async function isOrgSuspended(orgId) {
 
 module.exports = {
     connect,
+    revokeSession,
     getClient,
     isAvailable,
     TTL,

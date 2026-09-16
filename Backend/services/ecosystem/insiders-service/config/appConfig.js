@@ -42,11 +42,12 @@ module.exports = {
         investor_partner: Number(process.env.TIER_INVESTOR_PARTNER || 499),
     },
     upgradeGraceDays: Number(process.env.UPGRADE_GRACE_DAYS || 5),
-    // Payment gateways — drop real keys here to go live (else providers run in demo mode).
+    // Payments. This service holds NO PSP keys — checkout relays to the JVM payment-service,
+    // which owns the merchant credentials and resolves the provider per site from the CMS vault.
+    // The local adapters that used to read RAZORPAY_*/PAYU_*/STRIPE_*/CRYPTO_* here never called
+    // a provider and verified payment from a client-supplied status field; see payments/index.js.
     payments: {
-        razorpay: { keyId: process.env.RAZORPAY_KEY_ID || '', keySecret: process.env.RAZORPAY_KEY_SECRET || '', webhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET || '' },
-        payu: { merchantKey: process.env.PAYU_MERCHANT_KEY || '', salt: process.env.PAYU_MERCHANT_SALT || '', baseUrl: process.env.PAYU_BASE_URL || 'https://secure.payu.in/_payment' },
-        stripe: { secretKey: process.env.STRIPE_SECRET_KEY || '', publishableKey: process.env.STRIPE_PUBLISHABLE_KEY || '', webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '' },
-        crypto: { apiKey: process.env.CRYPTO_API_KEY || '', webhookSecret: process.env.CRYPTO_WEBHOOK_SECRET || '', baseUrl: process.env.CRYPTO_BASE_URL || 'https://commerce.coinbase.com' },
+        serviceUrl: process.env.PAYMENT_SERVICE_URL || 'http://app-payments:3015',
+        siteSlug: process.env.PAYMENT_SITE_SLUG || 'baalvion-elite-circle',
     },
 };

@@ -7,7 +7,7 @@ module.exports = function (sequelize, DataTypes) {
         country: { type: DataTypes.STRING(2), allowNull: true },
         language: { type: DataTypes.STRING(10), allowNull: false, defaultValue: 'en' },
         default_category: {
-            type: DataTypes.ENUM('AI', 'Technology', 'Business', 'Finance', 'Startups', 'Cybersecurity', 'World', 'Science'),
+            type: DataTypes.ENUM('AI', 'Technology', 'Business', 'Finance', 'Startups', 'Cybersecurity', 'World', 'Science', 'Legal'),
             allowNull: false,
         },
         is_active: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },

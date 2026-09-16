@@ -1,6 +1,7 @@
 import { authClient } from './client';
 import { useAuthStore } from '@/lib/store/authStore';
 import { decodeJwtClaims } from '@/lib/utils/jwt';
+import { roleLevel } from '@/lib/authz/hierarchy';
 import type {
   LoginPayload,
   RegisterPayload,
@@ -25,6 +26,8 @@ interface BackendUser {
   name?: string;
   avatarUrl?: string | null;
   role: string;
+  /** auth-service may send the canonical roles[]; tolerate its absence on older tokens. */
+  roles?: string[];
   status: string;
   mfaEnabled: boolean;
   emailVerified: boolean;
@@ -39,20 +42,37 @@ interface BackendLoginData {
   expiresAt?: string;
 }
 
-const toAuthUser = (raw: BackendUser): AuthUser => ({
-  id: Number(raw.id),
-  email: raw.email,
-  fullName: raw.fullName ?? raw.name ?? '',
-  avatarUrl: raw.avatarUrl ?? null,
-  status: raw.status as AuthUser['status'],
-  emailVerifiedAt: raw.emailVerified ? new Date().toISOString() : null,
-  mfaEnabled: raw.mfaEnabled,
-  role: raw.role as AuthUser['role'],
-  orgId: raw.orgId,
-  permissions: [],
-  sessionId: '',
-  createdAt: new Date().toISOString(),
-});
+/**
+ * Highest-authority role in a list, per auth-node's hierarchy. Picking roles[0] (the previous
+ * behaviour) dropped real authority whenever the token happened to list a lower role first —
+ * a user carrying ['cms_author','admin'] lost admin and watched the sidebar collapse.
+ * Roles outside the hierarchy score -1, so a known role always wins over an unmapped one.
+ */
+const highestRole = (roles: string[], fallback: string): AuthUser['role'] => {
+  if (!roles.length) return fallback as AuthUser['role'];
+  const best = roles.reduce((a, b) => (roleLevel(b) > roleLevel(a) ? b : a));
+  // All roles unmapped → keep whatever the caller had rather than inventing authority.
+  return (roleLevel(best) >= 0 ? best : (fallback ?? best)) as AuthUser['role'];
+};
+
+const toAuthUser = (raw: BackendUser): AuthUser => {
+  const roles = (raw.roles?.length ? raw.roles : raw.role ? [raw.role] : []) as string[];
+  return {
+    id: Number(raw.id),
+    email: raw.email,
+    fullName: raw.fullName ?? raw.name ?? '',
+    avatarUrl: raw.avatarUrl ?? null,
+    status: raw.status as AuthUser['status'],
+    emailVerifiedAt: raw.emailVerified ? new Date().toISOString() : null,
+    mfaEnabled: raw.mfaEnabled,
+    role: highestRole(roles, raw.role),
+    roles: roles as AuthUser['roles'],
+    orgId: raw.orgId,
+    permissions: [],
+    sessionId: '',
+    createdAt: new Date().toISOString(),
+  };
+};
 
 const toExpiresIn = (expiresAt?: string): number => {
   if (!expiresAt) return 900;
@@ -68,10 +88,24 @@ const toExpiresIn = (expiresAt?: string): number => {
 const enrichFromToken = (user: AuthUser): AuthUser => {
   const claims = decodeJwtClaims(useAuthStore.getState().accessToken);
   if (!claims) return user;
-  const role = (user.role ?? claims.role ?? claims.roles?.[0]) as AuthUser['role'];
+
+  // Prefer the token's full roles[] — it is what the backend enforces against.
+  const roles = (
+    user.roles?.length
+      ? user.roles
+      : claims.roles?.length
+        ? claims.roles
+        : claims.role
+          ? [claims.role]
+          : user.role
+            ? [user.role]
+            : []
+  ) as AuthUser['roles'];
+
   return {
     ...user,
-    role,
+    roles,
+    role: highestRole(roles, user.role ?? (claims.role as string)),
     orgId: user.orgId ?? claims.org_id ?? null,
     permissions: user.permissions.length ? user.permissions : (claims.permissions ?? []),
     sessionId: user.sessionId || (claims.sid ?? ''),

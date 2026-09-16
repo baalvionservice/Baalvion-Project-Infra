@@ -35,6 +35,7 @@
 const db = require('../../models');
 const norm = require('./normalize');
 const registry = require('./connectors');
+const connectorConfig = require('./connectors/config');
 const {
     STATUS, FAILURE_KIND, GatewayError, channelForCountry, isTerminal, isRecoverable,
     IN_FLIGHT_STATUSES, ENGINE_VERSION, DEFAULT_MAX_ATTEMPTS,
@@ -255,6 +256,14 @@ async function processSubmission(job) {
             return { submissionId, status: submission.status, accepted: normalized.accepted };
         } catch (err) {
             const ge = err instanceof GatewayError ? err : new GatewayError({ kind: FAILURE_KIND.TRANSIENT, message: String(err && err.message || err) });
+            // A PERMANENT failure that is nonetheless RECOVERABLE — an
+            // unconfigured gateway, expired TLS material — is an environment
+            // problem, not a rejected declaration. It lands in `failed` so it can
+            // be re-driven once the credential is in place, instead of being
+            // written off as a business rejection.
+            if (ge.kind === FAILURE_KIND.PERMANENT && ge.recoverable) {
+                return finalizeFailure(submission, ge, { finalAttempt: true });
+            }
             // Validation / permanent ⇒ business rejection, terminal, never retried.
             if (ge.kind === FAILURE_KIND.VALIDATION || ge.kind === FAILURE_KIND.PERMANENT) {
                 return finalizeFailure(submission, ge, { rejected: true });
@@ -406,9 +415,147 @@ async function listEvents(submissionId, { tenantId = null, limit = 100 } = {}) {
     });
 }
 
+
+// ── Asynchronous decisions ───────────────────────────────────────────────────
+
+/**
+ * Poll one lodged filing for its current status.
+ *
+ * Every one of these gateways is asynchronous. A submission returns an
+ * acknowledgement; the customs decision — the Bill of Entry number, the release,
+ * the rejection — arrives minutes to hours later. Without polling a filing sits
+ * at `submitted` indefinitely, which quietly defeats pre-arrival filing: the
+ * whole point is that the decision has already been made by the time the vessel
+ * docks, and we would never know it had.
+ */
+async function pollSubmission(submissionId, { tenantId = null, actor = 'system' } = {}) {
+    const where = { id: submissionId };
+    if (tenantId) where.tenant_id = tenantId;
+    const submission = await db.CustomsSubmission.findOne({ where });
+    if (!submission) throw new AppError('NOT_FOUND', 'Submission not found', 404);
+
+    if (isTerminal(submission.status)) {
+        return { submissionId, status: submission.status, skipped: true, reason: `already_${submission.status}` };
+    }
+    if (!submission.gateway_reference) {
+        // Nothing to poll against yet — the gateway has not issued a handle.
+        return { submissionId, status: submission.status, skipped: true, reason: 'no_gateway_reference' };
+    }
+
+    const connector = registry.getConnectorByChannel(submission.channel);
+    if (!connector) {
+        return { submissionId, status: submission.status, skipped: true, reason: 'no_connector' };
+    }
+
+    let normalized;
+    try {
+        normalized = await connector.poll(submission.gateway_reference, {
+            tenantId: submission.tenant_id,
+        });
+    } catch (err) {
+        const ge = err instanceof GatewayError ? err : new GatewayError({ kind: FAILURE_KIND.TRANSIENT, message: String((err && err.message) || err) });
+        // A failed poll must NEVER change the filing's status. The declaration is
+        // lodged; our inability to read its status is our problem, not a customs
+        // decision, and marking it failed here would abandon a live filing.
+        await appendEvent(submission, {
+            eventType: 'poll_failed', status: submission.status, attempt: submission.attempts,
+            message: ge.message, detail: { failure_kind: ge.kind, code: ge.code || null }, actor,
+        });
+        return { submissionId, status: submission.status, polled: false, error: ge.message, failure_kind: ge.kind };
+    }
+
+    const changed = normalized.status !== submission.status
+        || normalized.gateway_status !== submission.gateway_status;
+
+    submission.status = normalized.status;
+    submission.gateway_status = normalized.gateway_status;
+    submission.normalized_response = normalized;
+    if (normalized.gateway_reference) submission.gateway_reference = normalized.gateway_reference;
+    if (Array.isArray(normalized.messages) && normalized.messages.length) submission.messages = normalized.messages;
+    if (isTerminal(normalized.status) && !submission.completed_at) submission.completed_at = new Date();
+    await submission.save();
+
+    if (changed) {
+        await appendEvent(submission, {
+            eventType: normalized.status, status: normalized.status, attempt: submission.attempts,
+            message: `gateway status ${normalized.gateway_status || normalized.status}`,
+            detail: { gateway_reference: normalized.gateway_reference, gateway_status: normalized.gateway_status, source: 'poll' },
+            actor,
+        });
+    }
+
+    return {
+        submissionId,
+        status: submission.status,
+        gateway_status: submission.gateway_status,
+        accepted: normalized.accepted,
+        changed,
+        polled: true,
+    };
+}
+
+/**
+ * Sweep every in-flight filing that has a gateway handle.
+ *
+ * Ordered oldest-first so the longest-waiting filing is checked first, and
+ * bounded so a large book does not turn one sweep into a thundering herd against
+ * an authority that rate-limits.
+ */
+async function pollPending({ tenantId = null, limit = 100, channel = null } = {}) {
+    const where = {
+        status: STATUS.SUBMITTED,
+        gateway_reference: { [db.Sequelize.Op.ne]: null },
+    };
+    if (tenantId) where.tenant_id = tenantId;
+    if (channel) where.channel = channel;
+
+    const rows = await db.CustomsSubmission.findAll({
+        where, limit: Math.min(500, Math.max(1, Number(limit) || 100)), order: [['submitted_at', 'ASC']],
+    });
+
+    const results = [];
+    for (const row of rows) {
+        // Sequential rather than parallel: these gateways rate-limit, and a burst
+        // of concurrent status calls is a good way to get a filer throttled.
+        // eslint-disable-next-line no-await-in-loop
+        results.push(await pollSubmission(row.id, { tenantId: row.tenant_id }).catch((err) => ({
+            submissionId: row.id, error: String((err && err.message) || err),
+        })));
+    }
+
+    return {
+        swept: rows.length,
+        changed: results.filter((r) => r.changed).length,
+        accepted: results.filter((r) => r.accepted).length,
+        results,
+    };
+}
+
+/**
+ * Integration readiness across every channel — which gateways can actually file
+ * today, and exactly what is missing on the ones that cannot.
+ */
+function integrationReadiness() {
+    const readiness = connectorConfig.readiness();
+    return {
+        ...readiness,
+        channels: readiness.channels.map((c) => {
+            const connector = registry.getConnectorByChannel(c.channel);
+            return {
+                ...c,
+                connector_present: !!connector,
+                supports_polling: !!(connector && typeof connector.poll === 'function'),
+            };
+        }),
+    };
+}
+
 module.exports = {
     submit,
     processSubmission,
+    pollSubmission,
+    pollPending,
+    integrationReadiness,
     retrySubmission,
     recoverStalled,
     cancel,

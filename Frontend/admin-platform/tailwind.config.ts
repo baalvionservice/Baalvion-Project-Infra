@@ -1,8 +1,10 @@
 import type { Config } from 'tailwindcss';
 import animate from 'tailwindcss-animate';
 import typography from '@tailwindcss/typography';
+import baalvionDesign from '@baalvion/design/tailwind';
 
 const config: Config = {
+  presets: [baalvionDesign],
   darkMode: ['class'],
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',

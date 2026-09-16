@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { Suspense } from "react";
 import { Metadata } from "next";
 import CategoryPageClient from "@/components/category/CategoryPageClient";
 import { getCategorySidebar } from "@/lib/mock-category-data";
@@ -87,6 +87,19 @@ const CATEGORY_LABELS: Record<string, string> = {
   "fendi-bags": "Fendi Bags",
   "loro-piana-bags": "Loro Piana Bags",
 };
+
+/**
+ * Empty on purpose: the ids here are catalog/CMS state, not something to
+ * enumerate at build time. It still has to exist — without a
+ * generateStaticParams export Next treats a dynamic route as fully dynamic and
+ * re-renders it from scratch on every request. Returning [] prerenders nothing
+ * but registers the route as ISR, so a render is reused within its window
+ * instead of repeated per visitor. The window itself is unchanged (catalog
+ * reads stay on lib/catalog.ts's 60s), so nothing gets staler than it is today.
+ */
+export async function generateStaticParams(): Promise<{ country: string; id: string }[]> {
+  return [];
+}
 
 function getCategoryLabel(id: string): string {
   if (!id) return "Collection";
@@ -218,13 +231,17 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(listSchema) }}
         />
       )}
-      <CategoryPageClient
-        id={id}
-        country={country}
-        pageTitle={pageTitle}
-        brandName={brandName}
-        sidebarSections={sidebarSections}
-      />
+      {/* CategoryPageClient -> useFilter() -> useSearchParams(), which bails out of
+          prerendering unless it sits under a boundary. Same reason as track-order. */}
+      <Suspense fallback={null}>
+        <CategoryPageClient
+          id={id}
+          country={country}
+          pageTitle={pageTitle}
+          brandName={brandName}
+          sidebarSections={sidebarSections}
+        />
+      </Suspense>
     </>
   );
 }
