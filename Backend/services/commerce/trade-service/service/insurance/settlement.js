@@ -17,9 +17,15 @@
  */
 const { Op } = require('sequelize');
 const db = require('../../models');
+const { Money } = require('@baalvion/money');
 
 const num = (x) => (x == null ? 0 : Number(x) || 0);
-const money = (n) => Math.round(n * 100) / 100;
+// Settlement amounts are money: exact minor units, not a float rounded after the fact.
+// Insurance settles in the policy's currency; USD is the book currency where none is carried.
+const money = (n, currency = 'USD') => {
+    try { return Number(Money.fromDatabaseValue(n ?? 0, currency).toDecimalString()); }
+    catch { return Math.round(Number(n) * 100) / 100; }
+};
 
 // Claims that have consumed, or are committed to consume, part of the sum insured.
 const CONSUMING_STATUSES = ['approved', 'paid'];

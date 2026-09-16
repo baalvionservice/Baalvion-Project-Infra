@@ -8,12 +8,19 @@
  * Design notes:
  *  - Short timeout + AbortController (no hanging on a down dependency).
  *  - Identity: forwards the inbound user bearer (gateway hybrid mode) + X-Tenant-ID. Java verifies RS256
- *    against auth-service when secured; trusts the header in dev (APP_SECURITY_ENABLED=false).
+ *    against auth-service when secured. With no bearer (gateway strict mode, or a background
+ *    provisioning call) it falls back to the platform shared secret -> ROLE_INTERNAL, for which
+ *    X-Tenant-ID stays authoritative — TenantContext only ignores the header for JWT callers.
  *  - Errors carry .status + .data so the caller can map them to a precise HTTP response (no 500s).
  */
 const config = require('../config/appConfig');
 
 const TIMEOUT_MS = Number(process.env.FINANCE_HTTP_TIMEOUT_MS || 4000);
+// Server-to-server credential for the Java resource servers. Needed because `bearer` is absent
+// on two real paths: gateway strict mode forwards identity headers instead of a token, and the
+// provisioning/background callers have no user request at all. Without it both 401 once the
+// Java side runs with app.security.enabled=true.
+const INTERNAL_SECRET = process.env.INTERNAL_SERVICE_SECRET || '';
 
 async function call(base, path, { method = 'GET', body, tenantId, idempotencyKey, bearer } = {}) {
     if (!base) { const e = new Error('finance base URL not configured'); e.status = 503; throw e; }
@@ -24,6 +31,7 @@ async function call(base, path, { method = 'GET', body, tenantId, idempotencyKey
         if (tenantId) headers['X-Tenant-ID'] = String(tenantId);
         if (idempotencyKey) headers['X-Idempotency-Key'] = String(idempotencyKey);
         if (bearer) headers.Authorization = `Bearer ${bearer}`;
+        else if (INTERNAL_SECRET) headers['x-internal-secret'] = INTERNAL_SECRET;
         const res = await fetch(`${base}${path}`, {
             method,
             headers,

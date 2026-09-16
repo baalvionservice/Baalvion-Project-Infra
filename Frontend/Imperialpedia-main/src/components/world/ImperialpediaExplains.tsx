@@ -2,7 +2,7 @@ import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { categoryImage } from "@/lib/data/categoryImage";
 import type { WorldData } from "@/lib/data/worldRegions";
 
-/** CNBC's "CNBC Explains" module, rebranded — placeholder explainer-teaser
+/** Imperialpedia's "Imperialpedia Explains" module, rebranded — placeholder explainer-teaser
  * grid using self-hosted category photography with a play-icon overlay
  * (same pattern as TopVideos). Real headlines from the live feed; no real
  * video or illustrated artwork is used or claimed. */
@@ -12,7 +12,7 @@ export default function ImperialpediaExplains({ latest }: { latest: WorldData["l
 
   return (
     <div className="border-b border-border px-2 sm:px-4 py-4">
-      <h2 className="world-kicker text-xl font-black tracking-widest text-foreground uppercase border-b-4 border-[hsl(var(--cnbc-gold))] inline-block pb-1 mb-4">
+      <h2 className="world-kicker text-xl font-black tracking-widest text-foreground uppercase border-b-4 border-[hsl(var(--imperialpedia-gold))] inline-block pb-1 mb-4">
         Imperialpedia Explains
       </h2>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">

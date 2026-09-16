@@ -12,6 +12,7 @@ const { AppError } = require('../../utils/errors');
 const { parseListQuery, paginate } = require('../../utils/query');
 const { isStaff, isPlatform } = require('../../utils/authz');
 const investorInvitationService = require('../../service/investorInvitationService');
+const { withPlatformScope } = require('../../models/adminDb');
 
 const requireStaff = (req, res, next) => (isStaff(req.user) ? next() : next(new AppError('FORBIDDEN', 'Compliance/admin role required', 403)));
 
@@ -23,9 +24,28 @@ const adminQuery = (sortable) => ({ sortable, defaultLimit: 50, maxLimit: 200 })
 
 // ── Companies ────────────────────────────────────────────────────────────────
 const COMPANY_SORTABLE = ['created_at', 'updated_at', 'legal_name', 'stage', 'status'];
+// A PLATFORM reviewer's queue is every org's companies, which RLS hides from the app connection —
+// the review list came back empty, so there was nothing to approve. Platform staff read it over
+// the privileged connection; org-scoped staff still read their own through the normal path.
 router.get('/companies', async (req, res, next) => {
     try {
         const { order, limit, offset, page } = parseListQuery(req.query, adminQuery(COMPANY_SORTABLE));
+        if (isPlatform(req.user)) {
+            const status = req.query.status;
+            const result = await withPlatformScope(async (client) => {
+                const params = [];
+                let where = '';
+                if (status) { params.push(status); where = `WHERE status = $${params.length}`; }
+                const total = await client.query(`SELECT count(*)::int AS n FROM marketplace.companies ${where}`, params);
+                params.push(limit, offset);
+                const rows = await client.query(
+                    `SELECT * FROM marketplace.companies ${where} ORDER BY created_at DESC LIMIT $${params.length - 1} OFFSET $${params.length}`,
+                    params,
+                );
+                return { rows: rows.rows, count: total.rows[0].n };
+            });
+            return sendPaginated(req, res, paginate({ ...result, page, limit }));
+        }
         const where = { ...scope(req) };
         if (req.query.status) where.status = req.query.status;
         const { count, rows } = await db.Company.findAndCountAll({ where, order, limit, offset });
@@ -38,17 +58,30 @@ const reviewSchema = z.object({
     kyc_status: z.enum(['pending', 'in_review', 'verified', 'failed']).optional(),
     note: z.string().max(5000).optional(),
 });
+// Approving a company is inherently CROSS-ORG: the reviewer is platform staff, the company is
+// someone else's tenant. On the app connection RLS hides the row entirely, so this reported
+// "Company not found" for a record that plainly exists — the review workflow was impossible, not
+// merely restricted. Runs on the privileged connection (models/adminDb.js); the staff guard above
+// is still what decides who may call it.
 router.patch('/companies/:id/review', validate({ body: reviewSchema }), async (req, res, next) => {
     try {
         const data = req.valid.body;
-        const c = await db.Company.findByPk(req.params.id);
-        if (!c) return next(new AppError('NOT_FOUND', 'Company not found', 404));
-        if (c.status === 'approved' || c.status === 'rejected') return next(new AppError('CONFLICT', `Already ${c.status}`, 409));
-        await c.update({
-            status: data.action === 'approve' ? 'approved' : 'rejected',
-            kyc_status: data.kyc_status || (data.action === 'approve' ? 'verified' : c.kyc_status),
+        const row = await withPlatformScope(async (client) => {
+            const found = await client.query('SELECT id, status, kyc_status FROM marketplace.companies WHERE id = $1', [req.params.id]);
+            if (!found.rows.length) return { notFound: true };
+            const current = found.rows[0];
+            if (current.status === 'approved' || current.status === 'rejected') return { conflict: current.status };
+            const status = data.action === 'approve' ? 'approved' : 'rejected';
+            const kyc = data.kyc_status || (data.action === 'approve' ? 'verified' : current.kyc_status);
+            const updated = await client.query(
+                'UPDATE marketplace.companies SET status = $1, kyc_status = $2, updated_at = now() WHERE id = $3 RETURNING *',
+                [status, kyc, req.params.id],
+            );
+            return { company: updated.rows[0] };
         });
-        return sendSuccess(req, res, c);
+        if (row.notFound) return next(new AppError('NOT_FOUND', 'Company not found', 404));
+        if (row.conflict) return next(new AppError('CONFLICT', `Already ${row.conflict}`, 409));
+        return sendSuccess(req, res, row.company);
     } catch (err) { return next(err); }
 });
 

@@ -4,7 +4,7 @@ const db = require('../models');
 const { AppError } = require('../utils/errors');
 const { sendSuccess } = require('../utils/response');
 
-const CATEGORIES = ['AI', 'Technology', 'Business', 'Finance', 'Startups', 'Cybersecurity', 'World', 'Science'];
+const CATEGORIES = ['AI', 'Technology', 'Business', 'Finance', 'Startups', 'Cybersecurity', 'World', 'Science', 'Legal'];
 
 const createSchema = z.object({
     name: z.string().trim().min(1).max(200),

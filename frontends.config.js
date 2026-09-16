@@ -34,6 +34,7 @@ module.exports = {
     // Absent until 2026-09: CI derives its frontend build matrix from this list,
     // so Imperialpedia was the one production site CI never built.
     next('imperialpedia-web','Imperialpedia-main',               3029),
+    next('canwemarry-web',   'CanWeMarry-main',                  3071),
 
     // --- Vite SPAs ---
     vite('insiders-web',     'For Invstors and Founders',        8080),

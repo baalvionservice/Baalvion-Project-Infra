@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 export default function VotingManagerPage() {
   const [votes, setVotes] = useState<Vote[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [creating, setCreating] = useState(false);
   const { toast } = useToast();
 
   const loadVotes = async () => {
@@ -27,6 +28,30 @@ export default function VotingManagerPage() {
     window.addEventListener('voting-updated', loadVotes);
     return () => window.removeEventListener('voting-updated', loadVotes);
   }, []);
+
+  // Creates a real Draft resolution in ir-service. It opens as a draft on purpose: a resolution
+  // becomes votable through the status controls below, so nothing is put in front of investors by
+  // a single click. This button previously only raised a "Simulation" toast.
+  const handleCreate = async () => {
+    const title = window.prompt('Resolution title');
+    if (!title || !title.trim()) return;
+    setCreating(true);
+    try {
+      const res = await fetch('/api/v1/votes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: title.trim(), status: 'Draft' }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || !json?.success) throw new Error(json?.error?.message || 'The resolution was not created.');
+      toast({ title: 'Resolution created', description: `"${title.trim()}" saved as a draft.` });
+      await loadVotes();
+    } catch (e: unknown) {
+      toast({ variant: 'destructive', title: 'Not created', description: e instanceof Error ? e.message : 'Unknown error' });
+    } finally {
+      setCreating(false);
+    }
+  };
 
   const handleStatusChange = async (id: string, status: VoteStatus) => {
     try {
@@ -46,8 +71,8 @@ export default function VotingManagerPage() {
           <h1 className="text-3xl font-bold tracking-tight">Resolution Manager</h1>
           <p className="text-muted-foreground">Manage institutional voting, proxy resolutions, and board ballots.</p>
         </div>
-        <Button onClick={() => toast({ title: "Simulation", description: "Create Resolution logic triggered." })}>
-          <Plus className="mr-2 h-4 w-4" /> Create Resolution
+        <Button onClick={handleCreate} disabled={creating}>
+          <Plus className="mr-2 h-4 w-4" /> {creating ? 'Creating…' : 'Create Resolution'}
         </Button>
       </div>
 

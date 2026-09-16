@@ -1,29 +1,20 @@
 'use client';
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Activity, ArrowRight, Cpu, Handshake, Landmark, Scale, ShieldCheck, UserRound } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/authStore';
-import BaalvionMark from '@/components/auth/BaalvionMark';
-import { firstNameOf, getRoleWelcome, getTimeGreeting, type RoleWelcome } from '@/lib/auth/roleWelcome';
+import { firstNameOf, getRoleWelcome, getTimeGreeting } from '@/lib/auth/roleWelcome';
 
-const ICONS: Record<RoleWelcome['icon'], LucideIcon> = {
-  ShieldCheck,
-  Landmark,
-  Activity,
-  Cpu,
-  Scale,
-  Handshake,
-  UserRound,
-};
-
-const AUTO_ADVANCE_MS = 3400;
+const AUTO_ADVANCE_MS = 4000;
 
 export default function WelcomePage() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
   const isHydrated = useAuthStore((s) => s.isHydrated);
+  // Rendered after hydration only — a server-rendered clock would mismatch the client.
+  const [signedInAt, setSignedInAt] = useState<string>('');
+  const [secondsLeft, setSecondsLeft] = useState(Math.round(AUTO_ADVANCE_MS / 1000));
 
   const welcome = useMemo(() => getRoleWelcome(user?.role), [user?.role]);
   const greeting = useMemo(() => getTimeGreeting(), []);
@@ -31,65 +22,82 @@ export default function WelcomePage() {
 
   const enter = useCallback(() => router.replace('/dashboard'), [router]);
 
-  // No session in memory after hydration settled → nothing to celebrate, go straight in.
+  useEffect(() => {
+    setSignedInAt(
+      new Date().toLocaleString(undefined, {
+        hour: '2-digit',
+        minute: '2-digit',
+        day: 'numeric',
+        month: 'short',
+      }),
+    );
+  }, []);
+
+  // No session in memory after hydration settled → nothing to summarise, go straight in.
   useEffect(() => {
     if (isHydrated && !user) {
       router.replace('/dashboard');
     }
   }, [isHydrated, user, router]);
 
-  // Auto-advance into the dashboard after the intro plays.
+  // Auto-advance into the dashboard, with the countdown the operator can see.
   useEffect(() => {
     if (!user) return;
     const t = setTimeout(enter, AUTO_ADVANCE_MS);
-    return () => clearTimeout(t);
+    const i = setInterval(() => setSecondsLeft((s) => Math.max(0, s - 1)), 1000);
+    return () => {
+      clearTimeout(t);
+      clearInterval(i);
+    };
   }, [user, enter]);
 
   if (!user) return null;
 
-  const Icon = ICONS[welcome.icon];
-
   return (
-    <div className="bv-content">
-      <div className="bv-reveal mb-10">
-        <BaalvionMark size={46} />
-      </div>
-
-      <div className="bv-reveal bv-reveal-d1 bv-halo mb-7">
-        <div className="bv-halo__inner">
-          <Icon className="h-12 w-12 text-[--bv-blue-soft]" strokeWidth={1.4} />
-        </div>
-      </div>
-
-      <span className="bv-reveal bv-reveal-d1 bv-chip mb-5">
-        <span className="bv-dot-live" /> {welcome.division} · System Online
+    <section className="bv-enter">
+      <span className="bv-rail__eyebrow bv-reveal">
+        <span className="bv-dot-live bv-dot-live--red" />
+        Session established
       </span>
 
-      <h1 className="bv-greet bv-reveal bv-reveal-d2 max-w-3xl text-center">
-        {greeting},{' '}
-        <span className="bv-greet__role">{firstName || welcome.roleName}</span>
+      <h1 className="bv-enter__greet bv-reveal bv-reveal-d1">
+        <span className="bv-enter__greeting">{greeting},</span>{' '}
+        {firstName || welcome.roleName}
       </h1>
 
-      <p className="bv-reveal bv-reveal-d2 mt-3 text-center text-sm font-medium uppercase tracking-[0.2em] text-[--bv-ink-dim]">
-        {welcome.roleName} · {welcome.clearance}
-      </p>
-
-      <p className="bv-reveal bv-reveal-d3 mt-6 max-w-xl text-center text-base leading-relaxed text-[#c3cce6]">
-        {welcome.message}
-      </p>
-
-      <div className="bv-reveal bv-reveal-d4 mt-9 flex flex-col items-center gap-5">
-        <div className="bv-progress" role="presentation">
-          <div className="bv-progress__bar" />
+      <div className="bv-facts bv-reveal bv-reveal-d2">
+        <div className="bv-fact">
+          <div className="bv-fact__label">Role</div>
+          <div className="bv-fact__value">{welcome.roleName}</div>
         </div>
-        <button type="button" onClick={enter} className="bv-ghost-btn">
-          Enter Console <ArrowRight className="h-4 w-4" />
-        </button>
+        <div className="bv-fact">
+          <div className="bv-fact__label">Access</div>
+          <div className="bv-fact__value">{welcome.access}</div>
+        </div>
+        <div className="bv-fact">
+          <div className="bv-fact__label">Division</div>
+          <div className="bv-fact__value">{welcome.division}</div>
+        </div>
+        <div className="bv-fact">
+          <div className="bv-fact__label">Signed in</div>
+          <div className="bv-fact__value">{signedInAt || '—'}</div>
+        </div>
       </div>
 
-      <div className="bv-footer">
-        Establishing secure link to global operations · Trade — Finance — AI — Infrastructure
+      <p className="bv-enter__lede bv-reveal bv-reveal-d3">{welcome.message}</p>
+
+      <div className="bv-enter__actions bv-reveal bv-reveal-d3">
+        <button type="button" onClick={enter} className="bv-biobtn bv-enter__btn">
+          Enter console <ArrowRight className="h-4 w-4" />
+        </button>
+        <span className="bv-enter__auto">
+          {secondsLeft > 0 ? `Continuing automatically in ${secondsLeft}s` : 'Opening console'}
+        </span>
       </div>
-    </div>
+
+      <div className="bv-enter__progress bv-reveal bv-reveal-d3" role="presentation">
+        <div className="bv-enter__bar" />
+      </div>
+    </section>
   );
 }

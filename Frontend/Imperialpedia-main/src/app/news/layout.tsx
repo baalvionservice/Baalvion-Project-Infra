@@ -1,17 +1,17 @@
 import type { ReactNode } from "react";
-import TopNav from "@/components/cnbc/TopNav";
-import Footer from "@/components/cnbc/Footer";
+import TopNav from "@/components/imperialpedia/TopNav";
+import Footer from "@/components/imperialpedia/Footer";
 
 /**
- * CNBC-style shell for /news — same shared masthead/footer as /world and
- * /market-news (src/components/cnbc/*). No webfont loading here (unlike
- * /world's layout.tsx) since this route uses the literal CNBC
- * Arial/Helvetica stack from .cnbc-shell directly, not the softer
+ * Imperialpedia-style shell for /news — same shared masthead/footer as /world and
+ * /market-news (src/components/imperialpedia/*). No webfont loading here (unlike
+ * /world's layout.tsx) since this route uses the literal Imperialpedia
+ * Arial/Helvetica stack from .imperialpedia-shell directly, not the softer
  * Inter/Barlow/Lato system /world carries for historical reasons.
  */
 export default function NewsLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="cnbc-shell flex min-h-screen flex-col bg-black">
+    <div className="imperialpedia-shell flex min-h-screen flex-col bg-black">
       <TopNav />
       <div className="flex-1">{children}</div>
       <Footer />

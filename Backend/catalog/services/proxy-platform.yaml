@@ -36,3 +36,8 @@ spec:
     namespace: baalvion
     minReplicas: 3
     maxReplicas: 50
+  runtime:
+    deployment: consolidated-box
+    port: 4000
+    healthPath: /health
+    container: app-edge-realtime

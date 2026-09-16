@@ -23,6 +23,7 @@
     "@baalvion/auth-node": "workspace:*",
     "@baalvion/events": "workspace:*",
     "@baalvion/graceful-shutdown": "workspace:*",
+    "@baalvion/money": "workspace:*",
     "@baalvion/search": "workspace:*",
     "bcrypt": "^5.1.1",
     "bcryptjs": "2.4.3",

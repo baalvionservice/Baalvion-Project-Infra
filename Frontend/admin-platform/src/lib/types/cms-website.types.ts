@@ -191,3 +191,53 @@ export interface UserSearchResult {
   avatarUrl: string | null;
   isMember: boolean;
 }
+
+/** Grant one person access to several websites in a single action. */
+export interface GrantSiteAccessPayload {
+  email?: string;
+  userId?: number;
+  role: CmsRole;
+  websiteIds: string[];
+  personalNote?: string;
+  /** ISO datetime. Omit for a standing grant; set it and the access lapses on its own. */
+  expiresAt?: string;
+}
+
+/** Outcome of removing one person from every website. */
+export interface RevokeAllResult {
+  revoked: Array<{ websiteId: string; websiteName: string; role: CmsRole }>;
+  failed: Array<{ websiteId: string; websiteName: string; reason: string }>;
+}
+
+/** A site that could not be granted — already a member, archived, not found. */
+export interface GrantSkip {
+  websiteId: string;
+  code: string;
+  reason: string;
+}
+
+/**
+ * Per-site outcome. Sites where the person already had an account are granted immediately;
+ * an unknown email gets a token invite per site instead. Both can occur in one request.
+ */
+export interface GrantSiteAccessResult {
+  granted: Array<{ websiteId: string; kind: 'member'; cmsRole: CmsRole }>;
+  invited: Array<{ websiteId: string; kind: 'invitation'; email: string; emailSent: boolean }>;
+  skipped: GrantSkip[];
+  role: CmsRole;
+}
+
+/** One person's membership on one website, with both sides resolved — for the People view. */
+export interface SiteGrant {
+  id: number;
+  websiteId: string;
+  userId: number;
+  /** cms-service stores this as `role`; kept verbatim here since this endpoint is unmapped. */
+  role: CmsRole;
+  joinedAt: string;
+  /** null for a standing grant; otherwise when this access lapses. */
+  expiresAt: string | null;
+  user: { id: number; fullName: string; email: string; avatarUrl: string | null };
+  website: { id: string; name: string; slug: string; domain: string };
+}
+

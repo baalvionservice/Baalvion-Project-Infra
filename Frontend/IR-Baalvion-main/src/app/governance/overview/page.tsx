@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { FileText, ShieldCheck, Scale, Gavel, UserCheck } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { LEGAL_ENTITY_NAME, REGISTERED_ADDRESS } from "@baalvion/company";
 
 export const metadata: Metadata = {
   title: 'Governance Overview | Baalvion Corporate Governance',
@@ -103,9 +104,9 @@ export default function GovernanceOverviewPage() {
                 <CardContent className="space-y-4 text-sm">
                   <p className="text-gray-600">Correspondence may be sent to the Board of Directors c/o Corporate Communications:</p>
                   <div className="font-bold">
-                    Baalvion, Inc.<br />
-                    Semiliguda, Koraput<br />
-                    Koraput, Orissa
+                    {LEGAL_ENTITY_NAME}<br />
+                    {REGISTERED_ADDRESS.street}<br />
+                    {REGISTERED_ADDRESS.locality}, {REGISTERED_ADDRESS.region} {REGISTERED_ADDRESS.postalCode}
                   </div>
                   <p className="text-primary font-bold hover:underline cursor-pointer">Email: board@baalvion.com</p>
                 </CardContent>

@@ -54,6 +54,11 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { absoluteUrl } from "@/lib/site-url";
 
+// Reads live ControlTheMarket data through @/lib/api, which throws CtmDataError when
+// ctm-service is unreachable rather than showing placeholder data. Prerendering this at
+// build time therefore fails; it is a per-request view, not a static page.
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata({
   params,
 }: {

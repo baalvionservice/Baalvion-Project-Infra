@@ -18,6 +18,7 @@ const serializer = require('../utils/storefrontSerializer');
 const filters = require('../utils/storefrontFilters');
 const { isSupportedMarket } = require('../config/markets');
 const discountService = require('./discountService');
+const { Money } = require('@baalvion/money');
 
 const PUBLIC_WHERE = { status: 'published', visibility: 'public' };
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -336,7 +337,9 @@ async function previewDiscount(storeId, { code, orderAmount = 0 }) {
         valid: true,
         code: discount.code,
         type: discount.type,
-        amount: Math.round(discountAmount * 100) / 100,
+        // The store's base currency — previewDiscount carries no currency of its own, and
+        // inventing one from a request would be worse than using the documented base.
+        amount: Number(Money.fromDatabaseValue(discountAmount, 'USD').toDecimalString()),
         eligibility: {
             minPurchaseAmount: discount.minPurchaseAmount != null ? Number(discount.minPurchaseAmount) : null,
             appliesTo: discount.appliesTo || 'all',

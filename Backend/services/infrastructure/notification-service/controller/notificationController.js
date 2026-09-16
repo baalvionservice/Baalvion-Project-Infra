@@ -172,11 +172,20 @@ exports.enqueuePush = async (req, res, next) => {
 const dispatchSchema = z.object({
     userId:     z.string().optional(),
     recipients: z.object({ email: z.string().email().optional(), phone: z.string().optional() }).optional(),
-    channels:   z.array(z.enum(['email', 'sms', 'push', 'inapp'])).optional(),
+    channels:   z.array(z.enum(['email', 'sms', 'push', 'inapp', 'ntfy'])).optional(),
     email:      z.record(z.unknown()).optional(),
     sms:        z.object({ body: z.string() }).optional(),
     push:       z.object({ title: z.string().optional(), body: z.string().optional(), data: z.record(z.unknown()).optional() }).optional(),
     inapp:      z.object({ title: z.string().optional(), body: z.string().optional(), data: z.record(z.unknown()).optional(), type: z.string().optional() }).optional(),
+    // Topic-addressed ops alert. No userId or recipient needed — see dispatchService.
+    ntfy:       z.object({
+        title:    z.string().optional(),
+        body:     z.string().optional(),
+        severity: z.enum(['critical', 'warning', 'info']).optional(),
+        tags:     z.array(z.string()).optional(),
+        clickUrl: z.string().url().optional(),
+        topic:    z.string().optional(),
+    }).optional(),
     idempotencyKey: z.string().optional(),
 });
 

@@ -148,6 +148,12 @@ export class PaymentStateMachine {
         fromState,
         toState,
         orgId: event.orgId,
+        siteId: event.siteId,
+        tenantId: event.tenantId,
+        rail: event.rail,
+        partyId: event.partyId,
+        feeMinor: event.feeMinor,
+        customer: event.customer,
         occurredAt,
         metadata: { sourceEventType: event.type, ...event.metadata },
       };

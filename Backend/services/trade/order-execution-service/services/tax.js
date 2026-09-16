@@ -23,7 +23,18 @@ const DUTY = Object.freeze({
     GB: { default: 0.04, 72: 0.0, 85: 0.0, 84: 0.0, 87: 0.10, 61: 0.12, 30: 0.0, 9: 0.0 },
 });
 
-const round2 = (n) => Math.round((Number(n) || 0) * 100) / 100;
+const { Money, ratioFromDecimal, divideRound } = require('@baalvion/money');
+
+// Duty and VAT are levied on money, so they are computed on integer minor units with the rate
+// as an exact fraction, and rounded once, explicitly. The old float `round2` hardcoded two
+// decimals, which is wrong for a zero-decimal currency (JPY) and a three-decimal one (KWD).
+const ROUNDING = 'HALF_UP';
+
+/** Apply a decimal rate to a Money exactly. */
+function applyRate(money, rate) {
+    const { numerator, denominator } = ratioFromDecimal(rate);
+    return money.multiplyRatio(numerator, denominator, ROUNDING);
+}
 
 const chapterOf = (hsCode) => Number(String(hsCode || '').replace(/\D/g, '').slice(0, 2)) || 0;
 
@@ -34,14 +45,20 @@ function dutyRate(hsCode, country) {
     return table[ch] !== undefined ? table[ch] : table.default;
 }
 
-/** Compute duty + import VAT for a single customs value. */
+/**
+ * Compute duty + import VAT for a single customs value.
+ *
+ * `value` is a Money. Amounts come back as Money so the caller can keep summing exactly;
+ * conversion to a stored decimal happens once, at the edge.
+ */
 function computeDuty(hsCode, country, value) {
-    const v = Number(value) || 0;
+    const v = value instanceof Money ? value : Money.fromDatabaseValue(value, 'USD');
     const dRate = dutyRate(hsCode, country);
     const tRate = IMPORT_TAX[String(country || '').toUpperCase()] ?? 0;
-    const dutyAmount = round2(v * dRate);
-    const taxAmount = round2((v + dutyAmount) * tRate);
-    return { dutyRate: dRate, dutyAmount, taxRate: tRate, taxAmount, total: round2(dutyAmount + taxAmount) };
+    const dutyAmount = applyRate(v, dRate);
+    // Import VAT is levied on (goods value + duty) — the standard VAT base.
+    const taxAmount = applyRate(v.add(dutyAmount), tRate);
+    return { dutyRate: dRate, dutyAmount, taxRate: tRate, taxAmount, total: dutyAmount.add(taxAmount) };
 }
 
 /**
@@ -49,22 +66,40 @@ function computeDuty(hsCode, country, value) {
  * duty/tax resolved per-line by its hs_code (so a mixed-commodity order is taxed correctly).
  * Returns zeroed totals when no destination country is given (domestic / unknown → no import duty).
  */
-function computeLineTaxes(lines, destinationCountry) {
+function computeLineTaxes(lines, destinationCountry, currency = 'USD') {
     const safe = Array.isArray(lines) ? lines : [];
+    const zero = Money.zero(currency);
     if (!destinationCountry) {
-        return { dutyAmount: 0, taxAmount: 0, total: 0 };
+        return { dutyAmount: zero, taxAmount: zero, total: zero };
     }
-    let dutyAmount = 0;
-    let taxAmount = 0;
+    let dutyAmount = zero;
+    let taxAmount = zero;
     for (const line of safe) {
-        const value = (Number(line.quantity) || 0) * (Number(line.unit_price) || 0);
+        const value = lineValue(line, currency);
         const d = computeDuty(line.hs_code, destinationCountry, value);
-        dutyAmount += d.dutyAmount;
-        taxAmount += d.taxAmount;
+        dutyAmount = dutyAmount.add(d.dutyAmount);
+        taxAmount = taxAmount.add(d.taxAmount);
     }
-    dutyAmount = round2(dutyAmount);
-    taxAmount = round2(taxAmount);
-    return { dutyAmount, taxAmount, total: round2(dutyAmount + taxAmount) };
+    return { dutyAmount, taxAmount, total: dutyAmount.add(taxAmount) };
 }
 
-module.exports = { IMPORT_TAX, DUTY, dutyRate, computeDuty, computeLineTaxes, chapterOf };
+/**
+ * A line's customs value: quantity x unit_price, rounded ONCE at the currency's precision.
+ *
+ * The unit price is deliberately NOT rounded first. Trade prices routinely carry more decimals
+ * than the currency does — $0.333 per unit is a real quote — and rounding that to $0.33 before
+ * multiplying loses $3 on a thousand units. So both factors are taken as exact fractions, the
+ * product is formed in integer arithmetic, and rounding happens once on the line total. This is
+ * the same invoice-line semantics the float version had, without the float.
+ */
+function lineValue(line, currency) {
+    const unit = ratioFromDecimal(line.unit_price ?? 0);
+    const qty = ratioFromDecimal(line.quantity ?? 0);
+    const scale = Money.zero(currency).exponent;
+    // value_minor = (unit x qty) x 10^exponent, rounded once.
+    const numerator = unit.numerator * qty.numerator * 10n ** BigInt(scale);
+    const denominator = unit.denominator * qty.denominator;
+    return Money.of(divideRound(numerator, denominator, ROUNDING), currency);
+}
+
+module.exports = { IMPORT_TAX, DUTY, dutyRate, computeDuty, computeLineTaxes, chapterOf, lineValue, applyRate, ROUNDING };

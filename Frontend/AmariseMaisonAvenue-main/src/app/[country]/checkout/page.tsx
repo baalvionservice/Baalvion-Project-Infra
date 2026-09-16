@@ -120,8 +120,39 @@ function CheckoutPageInner() {
   // Save-to-account: default ON for signed-in shoppers with nothing saved yet.
   const [shouldSaveAddress, setShouldSaveAddress] = useState(false);
 
+  // Razorpay, not Stripe. The default used to be STRIPE, so every shopper on a store without a
+  // Stripe account was preselected onto a gateway that could not charge them and only found out
+  // at the final step. The server-reported `preferred` overrides this once it loads.
   const [selectedGateway, setSelectedGateway] =
-    useState<PaymentGateway>("STRIPE");
+    useState<PaymentGateway>("RAZORPAY");
+  // Gateways with working credentials, resolved server-side. Null while unknown.
+  const [availableGateways, setAvailableGateways] = useState<PaymentGatewaySlug[] | null>(null);
+  // Show a gateway only when the store can charge with it. Until the list loads we show the
+  // conservative default set — never the full list, because an unchargeable option in a payment
+  // form is a dead end, not a graceful fallback.
+  const gatewayOffered = (g: PaymentGateway) =>
+    availableGateways === null
+      ? DEFAULT_GATEWAYS.includes(g)
+      : availableGateways.includes(GATEWAY_SLUG[g]);
+
+  // Ask the store which gateways can actually charge, and adopt its preferred one. A failed read
+  // leaves the safe default in place rather than widening the choice.
+  useEffect(() => {
+    let active = true;
+    orderApi.paymentGateways().then((res) => {
+      if (!active || !res.ok || !res.data?.gateways?.length) return;
+      setAvailableGateways(res.data.gateways);
+      const preferred = res.data.preferred;
+      setSelectedGateway((cur) => {
+        if (res.data!.gateways.includes(GATEWAY_SLUG[cur])) return cur;
+        const match = (Object.keys(GATEWAY_SLUG) as PaymentGateway[])
+          .find((k) => GATEWAY_SLUG[k] === (preferred ?? res.data!.gateways[0]));
+        return match ?? cur;
+      });
+    });
+    return () => { active = false; };
+  }, []);
+
   const [isSettling, setIsSettling] = useState(false);
   const [orderRef, setOrderRef] = useState("");
   // The human-readable order number (ORD-…) shown on the confirmation + used for guest tracking.
@@ -1278,38 +1309,38 @@ function CheckoutPageInner() {
                     )}
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <GatewayCard
+                      {gatewayOffered("STRIPE") && <GatewayCard
                         id="STRIPE"
                         label="Card"
                         desc="Visa, Mastercard, Amex, Apple Pay"
                         icon={<CreditCard className="w-5 h-5" />}
                         active={selectedGateway === "STRIPE"}
                         onClick={() => setSelectedGateway("STRIPE")}
-                      />
-                      <GatewayCard
+                      />}
+                      {gatewayOffered("RAZORPAY") && <GatewayCard
                         id="RAZORPAY"
                         label="UPI & Netbanking"
                         desc="Razorpay · UPI, Netbanking, Cards"
                         icon={<Smartphone className="w-5 h-5" />}
                         active={selectedGateway === "RAZORPAY"}
                         onClick={() => setSelectedGateway("RAZORPAY")}
-                      />
-                      <GatewayCard
+                      />}
+                      {gatewayOffered("PAYU") && <GatewayCard
                         id="PAYU"
                         label="International"
                         desc="PayU · Cards & wallets worldwide"
                         icon={<Globe className="w-5 h-5" />}
                         active={selectedGateway === "PAYU"}
                         onClick={() => setSelectedGateway("PAYU")}
-                      />
-                      <GatewayCard
+                      />}
+                      {gatewayOffered("BANK_TRANSFER") && <GatewayCard
                         id="BANK_TRANSFER"
                         label="Bank Transfer"
                         desc="Wire / ACH · settles in 2–3 days"
                         icon={<Building2 className="w-5 h-5" />}
                         active={selectedGateway === "BANK_TRANSFER"}
                         onClick={() => setSelectedGateway("BANK_TRANSFER")}
-                      />
+                      />}
                     </div>
 
                     <div className="flex flex-col gap-5">
@@ -1629,6 +1660,10 @@ function GatewayCard({
  * never applied. With the storefront statically rendered, the boundary has to be
  * real: the shell prerenders, and this hydrates with the query string.
  */
+// Offered before the store's configured-gateway list arrives. Excludes Stripe: there is no Stripe
+// merchant account on this estate, so it must never be preselected or offered unprompted.
+const DEFAULT_GATEWAYS: PaymentGateway[] = ["RAZORPAY", "PAYU", "BANK_TRANSFER"];
+
 export default function CheckoutPage() {
   return (
     <Suspense fallback={null}>

@@ -54,19 +54,27 @@ function stripTags(s) {
     return String(s).replace(/<[^>]+>/g, '');
 }
 
+const ENTITIES = {
+    '&nbsp;': ' ',
+    '&zwnj;': '',
+    '&amp;': '&',
+    '&lt;': '<',
+    '&gt;': '>',
+    '&quot;': '"',
+    '&#39;': "'",
+    '&#039;': "'",
+    '&#x27;': "'",
+    '&copy;': '©',
+    '&mdash;': '—',
+    '&ndash;': '–',
+};
+
+const ENTITY_RE = /&(?:nbsp|zwnj|amp|lt|gt|quot|copy|mdash|ndash|#0?39|#x27);/gi;
+
+// One pass, not eleven: decoding `&amp;` before `&lt;` turned a stored `&amp;lt;`
+// into a literal `<`, undoing an escape the author meant to keep.
 function decodeEntities(s) {
-    return String(s)
-        .replace(/&nbsp;/gi, ' ')
-        .replace(/&zwnj;/gi, '')
-        .replace(/&amp;/gi, '&')
-        .replace(/&lt;/gi, '<')
-        .replace(/&gt;/gi, '>')
-        .replace(/&quot;/gi, '"')
-        .replace(/&#0?39;/g, "'")
-        .replace(/&#x27;/gi, "'")
-        .replace(/&copy;/gi, '©')
-        .replace(/&mdash;/gi, '—')
-        .replace(/&ndash;/gi, '–');
+    return String(s).replace(ENTITY_RE, (m) => ENTITIES[m.toLowerCase()] ?? m);
 }
 
 module.exports = { htmlToText };

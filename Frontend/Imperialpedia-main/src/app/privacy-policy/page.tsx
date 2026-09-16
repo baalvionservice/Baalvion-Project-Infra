@@ -103,8 +103,8 @@ export default function PrivacyPolicyPage() {
 
           <Block id="who-we-are" title="1. Who we are & how to reach us">
             <P>
-              {env.appName} is operated by <B>Baalvion Industries Private Limited</B>, part of the
-              Baalvion Group ("we", "us", "our"). This policy applies to imperialpedia.com and
+              {env.appName} is operated by <B>Baalvion Industries Private Limited</B> ("we", "us",
+              "our"). This policy applies to imperialpedia.com and
               related services.
             </P>
             <List2>

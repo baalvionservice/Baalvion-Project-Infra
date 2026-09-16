@@ -70,8 +70,8 @@ function OwnershipDisclosureFallback() {
             </Text>
             <Text variant="body" className="text-muted-foreground leading-relaxed">
               {env.appName} is operated by{' '}
-              <strong className="text-foreground">Baalvion Industries Private Limited</strong>,
-              part of the Baalvion Group. This is the legal entity responsible for the content
+              <strong className="text-foreground">Baalvion Industries Private Limited</strong>. This
+              is the legal entity responsible for the content
               published on this site and for its compliance with applicable law.
             </Text>
             <ul className="list-disc pl-6 space-y-2 text-muted-foreground leading-relaxed">

@@ -83,10 +83,24 @@ async function listUsers({ page = 1, limit = 50, search, status }) {
 
     const [users, [{ count }]] = await Promise.all([
         db.sequelize.query(
-            `SELECT id, email, full_name, avatar_url, status, email_verified_at, mfa_enabled, created_at
-             FROM auth.users
+            // `role` comes from the caller's highest org membership. Without it the console had
+            // no role to show and fell back to displaying "Member" for everyone — including
+            // super_admins — which is worse than showing nothing on an access screen.
+            // LEFT JOIN so a user with no membership yields NULL rather than dropping out.
+            `SELECT u.id, u.email, u.full_name, u.avatar_url, u.status, u.email_verified_at,
+                    u.mfa_enabled, u.created_at,
+                    (SELECT tm.role
+                       FROM auth.team_members tm
+                      WHERE tm.user_id = u.id AND tm.status = 'active'
+                      ORDER BY CASE tm.role
+                                 WHEN 'super_admin' THEN 6 WHEN 'owner' THEN 5
+                                 WHEN 'admin'       THEN 4 WHEN 'manager' THEN 3
+                                 WHEN 'editor'      THEN 2 WHEN 'member'  THEN 1
+                                 ELSE 0 END DESC
+                      LIMIT 1) AS role
+             FROM auth.users u
              WHERE ${where.join(' AND ')}
-             ORDER BY created_at DESC
+             ORDER BY u.created_at DESC
              LIMIT $${replacements.length + 1} OFFSET $${replacements.length + 2}`,
             { type: db.Sequelize.QueryTypes.SELECT, bind: [...replacements, limit, offset] }
         ),
@@ -157,6 +171,132 @@ async function unsuspendUser(userId, adminUserId, ipAddress) {
         { bind: [userId, JSON.stringify({ unsuspendedBy: adminUserId }), ip] }
     );
     logger.info({ userId, adminUserId }, 'User unsuspended');
+}
+
+/**
+ * Change a person's ORG ROLE — the role the access token actually carries.
+ *
+ * The console's employee "Permissions" screen wrote to `staff.employees.role`, which nothing
+ * in the authorization path ever reads (authz reads auth.team_members.role). So changing
+ * someone's role from the admin panel silently did nothing, and the only real way to promote
+ * anyone was hand-written SQL. This is that missing operation.
+ *
+ * Guarded against the two ways a role change becomes an escalation:
+ *   • you cannot grant a role above your own  — an admin cannot mint a super_admin
+ *   • you cannot change your own role         — no self-promotion, no self-lockout
+ * and against removing the last super_admin, which would lock everyone out permanently.
+ */
+const ORG_ROLE_RANK = {
+    viewer: 0, member: 1, editor: 2, manager: 3, admin: 4, owner: 5, super_admin: 6,
+};
+
+/**
+ * Pure decision for "may this actor make this role change?" — separated from the DB work so
+ * the rules can be tested exhaustively without a database, and so every guard is visible in
+ * one place rather than interleaved with queries.
+ *
+ * Returns null when allowed, or an AppError to throw.
+ */
+function checkRoleChange({ actorId, actorRoles = [], targetId, previousRole, newRole, superAdminCount }) {
+    if (!Object.prototype.hasOwnProperty.call(ORG_ROLE_RANK, newRole)) {
+        return new AppError('VALIDATION', `Unknown role: ${newRole}`, 422);
+    }
+    if (String(targetId) === String(actorId)) {
+        return new AppError('FORBIDDEN', 'You cannot change your own role', 403);
+    }
+
+    const actorRank = Math.max(-1, ...actorRoles.map((r) => ORG_ROLE_RANK[r] ?? -1));
+
+    if (ORG_ROLE_RANK[newRole] > actorRank) {
+        return new AppError('FORBIDDEN', 'You cannot grant a role higher than your own', 403);
+    }
+    // Taking authority away needs at least as much authority as the target holds, or an admin
+    // could strip an owner.
+    if (previousRole !== undefined && (ORG_ROLE_RANK[previousRole] ?? -1) > actorRank) {
+        return new AppError('FORBIDDEN', 'You cannot change the role of someone above you', 403);
+    }
+    // Belt and braces: unreachable through the API (only a super_admin outranks a super_admin,
+    // and nobody may change their own role), but a direct service call must not empty the tier.
+    if (previousRole === 'super_admin' && newRole !== 'super_admin' && superAdminCount <= 1) {
+        return new AppError('CONFLICT', 'This is the last super admin — promote someone else first', 409);
+    }
+    return null;
+}
+
+async function changeUserRole(userId, newRole, actor, ipAddress) {
+    const db = getDb();
+    const ip = ipAddress || '0.0.0.0';
+
+    // Cheap checks that need no database, before touching one.
+    const early = checkRoleChange({
+        actorId: actor.id, actorRoles: actor.roles || [], targetId: userId, newRole,
+        previousRole: undefined, superAdminCount: Infinity,
+    });
+    if (early) throw early;
+
+    const [membership] = await db.sequelize.query(
+        `SELECT tm.id, tm.role, tm.org_id, u.email
+           FROM auth.team_members tm
+           JOIN auth.users u ON u.id = tm.user_id
+          WHERE tm.user_id = $1 AND tm.status = 'active'
+          ORDER BY CASE tm.role WHEN 'super_admin' THEN 6 WHEN 'owner' THEN 5 WHEN 'admin' THEN 4
+                                WHEN 'manager' THEN 3 WHEN 'editor' THEN 2 WHEN 'member' THEN 1
+                                ELSE 0 END DESC
+          LIMIT 1`,
+        { type: db.Sequelize.QueryTypes.SELECT, bind: [userId] },
+    );
+    if (!membership) throw new AppError('NOT_FOUND', 'This user has no active organization membership', 404);
+
+    const previousRole = membership.role;
+    if (previousRole === newRole) return { userId, role: newRole, unchanged: true };
+
+    let superAdminCount = Infinity;
+    if (previousRole === 'super_admin') {
+        const [{ count }] = await db.sequelize.query(
+            "SELECT COUNT(*)::int AS count FROM auth.team_members WHERE role = 'super_admin' AND status = 'active'",
+            { type: db.Sequelize.QueryTypes.SELECT },
+        );
+        superAdminCount = count;
+    }
+
+    const denied = checkRoleChange({
+        actorId: actor.id, actorRoles: actor.roles || [], targetId: userId,
+        previousRole, newRole, superAdminCount,
+    });
+    if (denied) throw denied;
+
+    await db.sequelize.query(
+        "UPDATE auth.team_members SET role = $1, updated_at = NOW() WHERE id = $2",
+        { bind: [newRole, membership.id] },
+    );
+
+    // A role change takes effect on the NEXT token. Existing access tokens keep the old role
+    // until they expire, so a demotion would otherwise linger — revoke the sessions so the
+    // change is immediate. (Deliberately not done on promotion: no security reason to log
+    // someone out for gaining access, and it would be a surprising side effect.)
+    if ((ORG_ROLE_RANK[newRole] ?? 0) < (ORG_ROLE_RANK[previousRole] ?? 0)) {
+        await db.sequelize.query(
+            "UPDATE auth.sessions SET revoked_at = NOW() WHERE user_id = $1 AND revoked_at IS NULL",
+            { bind: [userId] },
+        );
+        await db.sequelize.query(
+            "UPDATE auth.refresh_tokens SET revoked_at = NOW() WHERE user_id = $1 AND revoked_at IS NULL",
+            { bind: [userId] },
+        );
+    }
+
+    await db.sequelize.query(
+        `INSERT INTO auth.audit_logs (user_id, action, metadata, ip_address)
+         VALUES ($1, 'user.role_changed', $2, $3)`,
+        { bind: [userId, JSON.stringify({ previousRole, newRole, changedBy: actor.id, email: membership.email }), ip] },
+    );
+
+    logger.info(
+        { userId, previousRole, newRole, changedBy: actor.id, event: 'admin.user_role_changed' },
+        'User org role changed by admin',
+    );
+
+    return { userId, previousRole, role: newRole, sessionsRevoked: (ORG_ROLE_RANK[newRole] ?? 0) < (ORG_ROLE_RANK[previousRole] ?? 0) };
 }
 
 // PATCH safe user fields only. NEVER patchable: password_hash, email, email_verified_at,
@@ -836,6 +976,80 @@ async function getAuditLogs({ page = 1, limit = 50, orgId, userId, action, from,
     return { items: logs, total: count, page, limit, hasMore: offset + limit < count };
 }
 
+// ── Sign-in activity, per site ──────────────────────────────────────────────────
+// Reads auth.auth_audit_log, NOT auth.audit_logs: the two streams run in parallel and carry
+// the same events, but only the canonical one has app_id — the column that says WHICH property
+// a sign-in came from. auth-service fills it from the request Origin (see siteFromRequest).
+//
+// A NULL app_id is a real, distinct answer, not missing data: the request carried no Origin at
+// all (server-to-server, OAuth callbacks). It surfaces as 'unknown' rather than being folded
+// into the flagship brand, so the console never claims a sign-in happened on a site it did not.
+const SIGNIN_EVENTS = ['login_success', 'login_failure'];
+
+async function getLoginActivity({ page = 1, limit = 50, site, event, userId, from, to } = {}) {
+    const db     = getDb();
+    const offset = (page - 1) * limit;
+    const events = event && SIGNIN_EVENTS.includes(event) ? [event] : SIGNIN_EVENTS;
+
+    // Two independent (clause, bind) pairs. The rollup runs the SAME filters EXCEPT `site` —
+    // it is what the site picker is built from, so narrowing it to the selected site would
+    // leave the picker with a single option and no way back. They cannot share one bind list:
+    // dropping a clause from the middle would leave every later $n pointing at the wrong value.
+    const build = ({ withSite }) => {
+        const where = ['a.event_type = ANY($1)'];
+        const bind  = [events];
+        const add   = (sql, value) => { where.push(sql(bind.length + 1)); bind.push(value); };
+
+        if (withSite) {
+            // 'unknown' is the UI's label for a NULL app_id — no row ever stores that string.
+            if (site === 'unknown') where.push('a.app_id IS NULL');
+            else if (site)          add((n) => `a.app_id = $${n}`, site);
+        }
+        if (userId) add((n) => `a.user_id = $${n}`, String(userId));
+        if (from)   add((n) => `a.created_at >= $${n}`, from);
+        if (to)     add((n) => `a.created_at <= $${n}`, to);
+
+        return { sql: where.join(' AND '), bind };
+    };
+
+    const scoped = build({ withSite: true });
+    const rollup = build({ withSite: false });
+    const whereSql = scoped.sql;
+    const bind     = scoped.bind;
+
+    const [rows, [{ count }], sites] = await Promise.all([
+        db.sequelize.query(
+            `SELECT a.id, a.event_type, a.app_id, a.user_id, a.org_id, a.session_id,
+                    a.ip_address, a.user_agent, a.severity, a.metadata, a.created_at,
+                    u.email AS user_email, u.full_name AS user_name, u.avatar_url AS user_avatar
+             FROM auth.auth_audit_log a
+             LEFT JOIN auth.users u ON u.id = a.user_id
+             WHERE ${whereSql}
+             ORDER BY a.created_at DESC
+             LIMIT $${bind.length + 1} OFFSET $${bind.length + 2}`,
+            { type: db.Sequelize.QueryTypes.SELECT, bind: [...bind, limit, offset] }
+        ),
+        db.sequelize.query(
+            `SELECT COUNT(*)::int AS count FROM auth.auth_audit_log a WHERE ${whereSql}`,
+            { type: db.Sequelize.QueryTypes.SELECT, bind }
+        ),
+        db.sequelize.query(
+            `SELECT COALESCE(a.app_id, 'unknown') AS site,
+                    COUNT(*) FILTER (WHERE a.event_type = 'login_success')::int AS logins,
+                    COUNT(*) FILTER (WHERE a.event_type = 'login_failure')::int AS failures,
+                    COUNT(DISTINCT a.user_id) FILTER (WHERE a.event_type = 'login_success')::int AS users,
+                    MAX(a.created_at) AS last_seen_at
+             FROM auth.auth_audit_log a
+             WHERE ${rollup.sql}
+             GROUP BY 1
+             ORDER BY logins DESC, site ASC`,
+            { type: db.Sequelize.QueryTypes.SELECT, bind: rollup.bind }
+        ),
+    ]);
+
+    return { items: rows, total: count, page, limit, hasMore: offset + limit < count, sites };
+}
+
 // ── Risk events (derived from the audit log) ────────────────────────────────────
 // admin-service has no dedicated risk engine; the Security console's risk feed is
 // synthesized from security-relevant audit actions so it shows real signal.
@@ -889,6 +1103,7 @@ async function listRiskEvents({ page = 1, limit = 20 }) {
 }
 
 module.exports = {
+    changeUserRole, checkRoleChange, ORG_ROLE_RANK,
     getPlatformStats,
     listUsers, getUserDetail, suspendUser, unsuspendUser,
     updateUser, deleteUser, sendVerification, revokeUserSessions,
@@ -896,5 +1111,6 @@ module.exports = {
     createImpersonationToken,
     listAllSessions, revokeSessionAdmin,
     getAuditLogs,
+    getLoginActivity,
     listRiskEvents,
 };

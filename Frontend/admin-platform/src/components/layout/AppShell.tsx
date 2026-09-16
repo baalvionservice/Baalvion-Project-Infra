@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { Loader2 } from 'lucide-react';
+import BaalvionLoader from '@/components/brand/BaalvionLoader';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 import CommandPalette from './CommandPalette';
@@ -24,16 +24,12 @@ export default function AppShell({ children }: AppShellProps) {
       <div className="flex flex-1 flex-col overflow-hidden">
         <TopBar />
         <main className="flex-1 overflow-y-auto bg-muted/20">
-          <div className="container mx-auto p-6 max-w-screen-2xl">
-            {isHydrated ? (
-              children
-            ) : (
-              <div className="flex h-[60vh] items-center justify-center text-muted-foreground">
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Restoring your session…
-              </div>
-            )}
-          </div>
+          {isHydrated ? (
+            <div className="container mx-auto p-6 max-w-screen-2xl">{children}</div>
+          ) : (
+            // Outside the content container so it centres on the whole area, not the padded box.
+            <BaalvionLoader full label="Restoring your session" />
+          )}
         </main>
       </div>
       <CommandPalette />

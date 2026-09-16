@@ -91,6 +91,15 @@ function normalize(status, ctx) {
     transactionId: ctx.transactionId,
     money: { amountMinor: ctx.amountMinor, currency: ctx.currency },
     orgId: ctx.orgId,
+    // Attribution — what lets this payment appear on the cross-estate panel under the right
+    // property. ControlTheMarket is a single site, so siteId is constant here; tenantId is the
+    // company that earned it.
+    siteId: ctx.siteId,
+    tenantId: ctx.tenantId,
+    rail: ctx.rail,
+    partyId: ctx.partyId,
+    feeMinor: ctx.feeMinor,
+    customer: ctx.customer,
     metadata: { service: 'ctm-service', via: ctx.via || 'webhook' },
   });
 }

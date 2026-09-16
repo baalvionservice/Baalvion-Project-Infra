@@ -1,126 +1,109 @@
 import type { UserRole } from '@/lib/types/auth.types';
 
 /**
- * Maps a platform UserRole to an onboarding "persona" used by the post-login
- * welcome experience: a human-facing role name, a division, a professional
- * congratulatory message, and an accent identity.
+ * Maps a platform UserRole to the post-login session summary: a human-facing role
+ * name, the area of the business it belongs to, what the account can reach, and a
+ * plain statement of what that means. Deliberately factual — this screen is the
+ * first thing an operator sees, so it states access, not atmosphere.
  */
 export interface RoleWelcome {
-  /** Human-facing role name shown in "Welcome back, {roleName}". */
+  /** Human-facing role name, e.g. "Super Administrator". */
   roleName: string;
-  /** Division / mission area chip. */
+  /** Area of the business the role sits in. */
   division: string;
-  /** Professional, corporate congratulatory line. */
+  /** What the account reaches, in a few words. */
+  access: string;
+  /** One plain sentence on what the access means. */
   message: string;
-  /** lucide-react icon name rendered in the halo. */
-  icon: 'ShieldCheck' | 'Landmark' | 'Activity' | 'Cpu' | 'Scale' | 'Handshake' | 'UserRound';
-  /** Status line under the greeting. */
-  clearance: string;
 }
 
-const ADMINISTRATION: Omit<RoleWelcome, 'roleName'> = {
-  division: 'Mission Control',
-  message:
-    'Full command of the Baalvion platform is restored to you. Every market, every system, every team — unified under one console.',
-  icon: 'ShieldCheck',
-  clearance: 'Clearance · Tier 0 — Global',
-};
-
 const ROLE_MAP: Record<UserRole, RoleWelcome> = {
-  super_admin: { roleName: 'Super Administrator', ...ADMINISTRATION },
-  owner: {
-    roleName: 'Proprietor',
-    division: 'Executive Office',
+  super_admin: {
+    roleName: 'Super Administrator',
+    division: 'Platform Administration',
+    access: 'Every site and business',
     message:
-      'The enterprise stands ready. Capital, operations, and intelligence are aligned and reporting to you.',
-    icon: 'ShieldCheck',
-    clearance: 'Clearance · Tier 0 — Executive',
+      'You have platform-wide access. Changes made here apply across every Baalvion site and business.',
   },
-  admin: { roleName: 'Administrator', ...ADMINISTRATION, division: 'Administration', clearance: 'Clearance · Tier 1 — Platform' },
+  owner: {
+    roleName: 'Owner',
+    division: 'Executive',
+    access: 'Organisation-wide',
+    message:
+      'Your organisation’s accounts, operations and reporting are available in one place.',
+  },
+  admin: {
+    roleName: 'Administrator',
+    division: 'Platform Administration',
+    access: 'Granted sites and businesses',
+    message:
+      'Your access covers the sites and businesses granted to your account.',
+  },
   moderator: {
     roleName: 'Compliance Officer',
     division: 'Governance & Trust',
-    message:
-      'Governance, audit, and risk controls are active. The integrity of the enterprise rests in steady hands.',
-    icon: 'Scale',
-    clearance: 'Clearance · Tier 2 — Controls',
+    access: 'Audit and controls',
+    message: 'Audit trails, reviews and regulatory controls are available for sign-off.',
   },
   manager: {
     roleName: 'Operations Lead',
-    division: 'Global Operations',
-    message:
-      'Worldwide operations are synchronized and running nominal. The network is yours to orchestrate.',
-    icon: 'Activity',
-    clearance: 'Clearance · Tier 2 — Operations',
+    division: 'Operations',
+    access: 'Operational systems',
+    message: 'Fulfilment, inventory and day-to-day operations are available to manage.',
   },
   finance: {
     roleName: 'Finance Controller',
     division: 'Finance & Capital',
-    message:
-      'Treasury, settlement, and capital-flow intelligence are live. The numbers are ready for your review.',
-    icon: 'Landmark',
-    clearance: 'Clearance · Tier 2 — Capital',
+    access: 'Treasury and settlement',
+    message: 'Treasury, settlement and payment records are ready for review.',
   },
   analyst: {
     roleName: 'Financial Analyst',
     division: 'Finance & Capital',
-    message:
-      'Market signals and capital dashboards are streaming in real time. Insight is a keystroke away.',
-    icon: 'Landmark',
-    clearance: 'Clearance · Tier 3 — Capital',
+    access: 'Reporting and analytics',
+    message: 'Capital and market reporting is available for review.',
   },
   compliance: {
     roleName: 'Compliance Officer',
     division: 'Governance & Trust',
-    message:
-      'Compliance review, audit trails, and regulatory controls are active. Sign-off authority rests with you.',
-    icon: 'Scale',
-    clearance: 'Clearance · Tier 2 — Compliance',
+    access: 'Audit and compliance',
+    message: 'Compliance reviews, audit trails and regulatory controls are available.',
   },
   developer: {
     roleName: 'Engineering Lead',
     division: 'Engineering & Infrastructure',
-    message:
-      'All infrastructure and AI systems report nominal. Build boldly — the platform is yours to extend.',
-    icon: 'Cpu',
-    clearance: 'Clearance · Tier 2 — Infrastructure',
+    access: 'Infrastructure and integrations',
+    message: 'Service health, integrations and developer tooling are available.',
   },
   editor: {
     roleName: 'Content Lead',
-    division: 'Communications',
-    message:
-      'The publishing and content systems are open. The enterprise narrative is in your hands.',
-    icon: 'UserRound',
-    clearance: 'Clearance · Tier 3 — Editorial',
+    division: 'Editorial',
+    access: 'Granted publications',
+    message: 'Publishing tools for the sites granted to your account are available.',
   },
   support: {
     roleName: 'Partner Success',
     division: 'Partners & Support',
-    message:
-      'Your partnership gateway is open. Shared markets and joint operations await your stewardship.',
-    icon: 'Handshake',
-    clearance: 'Clearance · Tier 3 — Partners',
+    access: 'Partner accounts',
+    message: 'Partner accounts and support queues are available to you.',
   },
   member: {
     roleName: 'Team Member',
     division: 'Operations',
-    message: 'Your workspace is ready. Welcome back to the Baalvion platform.',
-    icon: 'UserRound',
-    clearance: 'Clearance · Tier 4 — Member',
+    access: 'Your workspace',
+    message: 'Your workspace is ready.',
   },
   viewer: {
     roleName: 'Observer',
     division: 'Read-only Access',
-    message: 'Your read-only console is ready. The full picture, at a glance.',
-    icon: 'UserRound',
-    clearance: 'Clearance · Tier 5 — Observer',
+    access: 'Read-only',
+    message: 'You have read-only access to the console.',
   },
   readonly: {
     roleName: 'Observer',
     division: 'Read-only Access',
-    message: 'Your read-only console is ready. The full picture, at a glance.',
-    icon: 'UserRound',
-    clearance: 'Clearance · Tier 5 — Observer',
+    access: 'Read-only',
+    message: 'You have read-only access to the console.',
   },
 };
 

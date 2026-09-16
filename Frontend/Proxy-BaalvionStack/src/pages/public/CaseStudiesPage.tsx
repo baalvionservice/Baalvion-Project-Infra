@@ -18,100 +18,26 @@ import { useQuery } from "@tanstack/react-query";
 import { publicApi } from "@/lib/platformClient";
 import { caseStudies as fallbackCaseStudies } from "@/data/mockData";
 
-const detailedCaseStudies = [
-  {
-    id: 1,
-    title: "E-commerce Price Monitoring at Scale",
-    company: "Global Retail Corp",
-    industry: "Retail",
-    logo: "GRC",
-    improvement: "340%",
-    metric: "Data Collection Speed",
-    description: "Scaled from 10K to 500K daily price checks across 12 countries while maintaining 99.5% accuracy.",
-    challenge: "Manual price monitoring couldn't keep pace with competitor pricing changes across thousands of products and multiple markets.",
-    solution: "Implemented Baalvion's residential proxy network with intelligent rotation and geo-targeting to collect real-time pricing data from competitor websites globally.",
-    results: [
-      { metric: "Daily Price Checks", before: "10,000", after: "500,000" },
-      { metric: "Countries Covered", before: "3", after: "12" },
-      { metric: "Data Accuracy", before: "87%", after: "99.5%" },
-      { metric: "Cost per Check", before: "$0.15", after: "$0.02" },
-    ],
-    testimonial: "Baalvion transformed our competitive intelligence capabilities. We now have real-time visibility into market pricing across all our key regions.",
-    author: "Sarah Chen",
-    role: "VP of Data Analytics",
-    icon: ShoppingCart,
-    color: "primary",
-  },
-  {
-    id: 2,
-    title: "Social Media Data Collection",
-    company: "Digital Agency Pro",
-    industry: "Marketing",
-    logo: "DAP",
-    improvement: "99.2%",
-    metric: "Success Rate",
-    description: "Achieved industry-leading success rates for Instagram and TikTok data collection for brand monitoring.",
-    challenge: "Social platforms aggressive bot detection was blocking data collection attempts, making brand monitoring unreliable.",
-    solution: "Deployed mobile proxies with device fingerprint rotation and human-like request patterns to collect social data without detection.",
-    results: [
-      { metric: "Success Rate", before: "62%", after: "99.2%" },
-      { metric: "Daily Data Points", before: "50,000", after: "2M+" },
-      { metric: "Detection Rate", before: "45%", after: "<1%" },
-      { metric: "Client Retention", before: "72%", after: "94%" },
-    ],
-    testimonial: "The mobile proxy network completely changed our business. Our clients now trust us with their most critical social media intelligence needs.",
-    author: "Marcus Johnson",
-    role: "CTO",
-    icon: Users,
-    color: "accent",
-  },
-  {
-    id: 3,
-    title: "Global SEO Rank Tracking",
-    company: "SEO Masters Inc",
-    industry: "SEO & Marketing",
-    logo: "SMI",
-    improvement: "67%",
-    metric: "Cost Reduction",
-    description: "Reduced infrastructure costs by 67% while improving accuracy and expanding to 50+ countries.",
-    challenge: "Existing proxy infrastructure was expensive, unreliable, and couldn't accurately replicate local search results.",
-    solution: "Migrated to Baalvion's residential network with precise geo-targeting down to city level for authentic local SERP data.",
-    results: [
-      { metric: "Monthly Costs", before: "$45,000", after: "$15,000" },
-      { metric: "Countries Covered", before: "12", after: "50+" },
-      { metric: "Accuracy Rate", before: "78%", after: "99.1%" },
-      { metric: "Query Volume", before: "5M/month", after: "25M/month" },
-    ],
-    testimonial: "We scaled 5x while cutting costs by two-thirds. Baalvion's network accuracy is unmatched for local SEO tracking.",
-    author: "Emily Rodriguez",
-    role: "Head of Product",
-    icon: Search,
-    color: "success",
-  },
-  {
-    id: 4,
-    title: "Financial Data Aggregation",
-    company: "FinTech Analytics Co",
-    industry: "Finance",
-    logo: "FAC",
-    improvement: "15x",
-    metric: "Data Volume Increase",
-    description: "Increased alternative data collection 15x to power ML models for investment insights.",
-    challenge: "Financial websites implement sophisticated anti-bot measures, limiting data access for quantitative analysis.",
-    solution: "Implemented rotating datacenter proxies with session management and request throttling for reliable high-volume data extraction.",
-    results: [
-      { metric: "Data Points/Day", before: "100K", after: "1.5M" },
-      { metric: "Source Coverage", before: "200", after: "3,000+" },
-      { metric: "Uptime", before: "92%", after: "99.9%" },
-      { metric: "Latency (avg)", before: "850ms", after: "120ms" },
-    ],
-    testimonial: "The reliability and speed of Baalvion's infrastructure directly improved our alpha generation capabilities.",
-    author: "David Park",
-    role: "Quant Lead",
-    icon: BarChart3,
-    color: "warning",
-  },
-];
+/**
+ * Real case studies only.
+ *
+ * Invented engagements sat here — "Global Retail Corp", "Digital Agency Pro" and others —
+ * each with a named customer contact ("Sarah Chen, VP of Data Analytics") and before/after
+ * metrics (10,000 to 500,000 daily price checks, 87% to 99.5% accuracy). No such
+ * engagements exist, and the numbers were not measured.
+ *
+ * A case study names a customer and reports their results, so it needs that customer's
+ * agreement. The page renders an honest empty state while this list is empty.
+ */
+type CaseStudy = {
+  company: string;
+  author: string;
+  role: string;
+  metrics: { metric: string; before: string; after: string }[];
+  [k: string]: unknown;
+};
+
+const detailedCaseStudies: CaseStudy[] = [];
 
 const industryLogos = [
   "TechCorp", "GlobalBank", "MediaMax", "RetailPlus", "DataDriven", "CloudFirst", 
@@ -181,6 +107,15 @@ export default function CaseStudiesPage() {
       {/* Featured Case Studies */}
       <section className="py-20">
         <div className="container mx-auto px-4">
+          {detailedCaseStudies.length === 0 && (
+            <div className="mx-auto max-w-2xl py-12 text-center">
+              <p className="text-lg">No case studies are published yet.</p>
+              <p className="mt-3 text-sm text-muted-foreground">
+                A case study names a customer and reports their results, so it is published
+                only with that customer&apos;s agreement.
+              </p>
+            </div>
+          )}
           <div className="space-y-16">
             {detailedCaseStudies.map((study, index) => (
               <Card key={study.id} variant="default" className="overflow-hidden">

@@ -13,14 +13,16 @@
 //   GET /admin/analytics/activity          → recentActivity
 //   GET /admin/analytics/traffic           → trafficByPage
 //
-// Every route is gated by requireSuperAdmin, exactly like adminRoutes.js.
+// Every route is gated at the admin tier, exactly like adminRoutes.js.
 
 const router = require('express').Router();
 const ctrl   = require('../controller/analyticsController');
-const { requireSuperAdmin } = require('../middleware/authMiddleware');
+const { requireStaffAdmin } = require('../middleware/authMiddleware');
 
-// All analytics routes require super_admin (mirrors adminRoutes.js).
-router.use(requireSuperAdmin);
+// Platform-staff tier: EXACT match on admin/super_admin, NOT hierarchical. `owner` is a
+// self-service role (registration makes every user owner of their own org), so a
+// hierarchical admin gate handed these surfaces to the entire public.
+router.use(requireStaffAdmin);
 
 router.get('/kpis',            ctrl.getKpis);
 router.get('/users/growth',    ctrl.getUserGrowth);

@@ -14,6 +14,9 @@ export const REMOVED_ARTICLE_PATHS = new Set<string>([
   "/stocks/dollarcost-averaging-explained",
   "/investing/what-is-dollarcost-averaging",
   "/personal-finance/dollar-cost-averaging",
+  // Linked from the CMS-authored /about page as a "popular guide" long after it
+  // was pulled; 301'd to a path that 404s, so the link was simply broken.
+  "/financial-intelligence/emergency-fund-guide",
   "/financial-intelligence/money-management-for-students",
   "/financial-intelligence/best-money-habits-of-millionaires",
   "/financial-intelligence/debt-snowball-vs-debt-avalanche",

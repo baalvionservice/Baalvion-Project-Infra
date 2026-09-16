@@ -1,7 +1,9 @@
 import tailwindcssAnimate from "tailwindcss-animate";
 import type { Config } from "tailwindcss";
+import baalvionDesign from "@baalvion/design/tailwind";
 
 export default {
+  presets: [baalvionDesign],
   darkMode: ["class"],
   content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
   prefix: "",
@@ -58,6 +60,9 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Helvetica Neue', 'Arial', 'sans-serif'],
       },
       borderRadius: {
         lg: "var(--radius)",

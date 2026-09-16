@@ -54,7 +54,7 @@ export default function PerformanceDashboardPage() {
 
   const addLog = (message: string, actorRole: string = role) => {
     const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
-    setLogs(prev => [{ id: Math.random().toString(36).substr(2, 9), timestamp, role: actorRole, message, action: 'Simulation', documentName: message }, ...prev].slice(0, 30));
+    setLogs(prev => [{ id: Math.random().toString(36).substr(2, 9), timestamp, role: actorRole, message, action: 'Recorded', documentName: message }, ...prev].slice(0, 30));
   };
 
   const handleExecuteAllocation = () => {
@@ -194,8 +194,10 @@ export default function PerformanceDashboardPage() {
                     <InvestorPanel 
                       investors={investors} 
                       role={isAdmin ? 'Admin' : 'Investor'}
-                      onInitiateWire={(id) => { updateWireStatus(id, 'Initiated'); addLog(`Investor ${id} initiated wire.`); }}
-                      onConfirmWire={(id) => { updateWireStatus(id, 'Confirmed'); addLog(`Confirmed receipt for ${id}.`); }}
+                      // Neither handler asserts that money moved. Receipts are recorded against a
+                      // bank settlement reference in Capital Operations; updateWireStatus says so.
+                      onInitiateWire={() => { updateWireStatus(); }}
+                      onConfirmWire={() => { updateWireStatus(); }}
                     />
                   </div>
                 </div>

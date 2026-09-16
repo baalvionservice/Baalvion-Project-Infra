@@ -13,7 +13,7 @@ import { edgeSync } from '@/modules/mobility/services/edge-sync.service';
 import { mobilityGovernance } from '@/modules/mobility/services/mobility-governance.service';
 import { authApi, clearToken } from '@/lib/api-client';
 import { MfaRequiredError } from '@/app/login/_components/mfa-login';
-import { resolveAuthority } from '@/core/authority-mapping';
+import { resolveTradeAuthority } from '@/core/authority-mapping';
 import { getPersona, getPersonaHome } from '@/core/personas';
 import {
   OrgType,
@@ -142,8 +142,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const me = await authApi.me();
         if (cancelled) return;
         if (me) {
-          // Resolve from the FULL role set (highest-ranked wins) — not just roles[0].
-          const resolved = resolveAuthority(me.roles);
+          // An explicit grant made in the admin console wins; the org role is only the
+          // fallback for principals who have none. Resolving from the FULL role set
+          // (highest-ranked wins) — never roles[0].
+          const resolved = resolveTradeAuthority(me.roles, me.businesses);
           setUserId(String(me.userId ?? me.id ?? 'USR-101'));
           if (me.orgId) setTenantId(String(me.orgId));
           setAuthorityRole(resolved);
@@ -178,7 +180,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       body: JSON.stringify({ email, password }),
     });
     const json = await res.json().catch(() => null) as
-      | { user?: { id?: string; userId?: string; roles?: string[]; orgId?: string | null; orgType?: string | null }; csrfToken?: string;
+      | { user?: { id?: string; userId?: string; roles?: string[]; orgId?: string | null; orgType?: string | null; businesses?: Record<string, string> }; csrfToken?: string;
           mfaRequired?: boolean; mfaEnrollmentRequired?: boolean; challengeToken?: string; error?: { code?: string; message?: string } }
       | null;
     if (!res.ok || !json) {
@@ -205,8 +207,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     clearSessionOrgCache();
     setUserId(session.userId || email);
     setTenantId(session.orgId ? String(session.orgId) : 'T-DEMO');
-    // Resolve from the full role set when the gateway returns one; fall back to the primary role.
-    const resolvedRole = resolveAuthority(session.user?.roles ?? [session.role]);
+    // Same rule as the rehydration path above: an explicit console grant wins, the org role
+    // is the fallback. Both call sites must agree, or a grant would only take effect after a
+    // page refresh and not at the moment of signing in.
+    const resolvedRole = resolveTradeAuthority(session.user?.roles ?? [session.role], session.user?.businesses);
     const nextOrgType = resolveOrgType(session.orgType);
     const nextMembershipRole = resolveMembershipRole((session.user?.roles && session.user.roles[0]) ?? session.role);
     // Establish identity directly (NOT via the gated public setRole): both the immutable authority

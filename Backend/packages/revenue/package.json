@@ -1,0 +1,32 @@
+{
+  "name": "@baalvion/revenue",
+  "version": "1.0.0",
+  "description": "Revenue recognition — deferred revenue, recognition schedules and period reporting. Cash received is not revenue earned.",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "type-check": "tsc --noEmit",
+    "test": "node --test test/*.test.mjs",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@baalvion/money": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.7.2",
+    "rimraf": "^6.0.1"
+  }
+}

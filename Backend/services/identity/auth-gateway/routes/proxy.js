@@ -25,6 +25,15 @@ const TARGETS = {
   // Phase 6E-5 — island backends (dual-auth via bffBridge; gateway is the preferred path).
   insiders:       process.env.SVC_INSIDERS     || 'http://localhost:3050',
   trade:          process.env.SVC_TRADE        || 'http://localhost:3025',
+  // Baalvion Invest — the investment marketplace and deal room. Routed here so deal-room traffic
+  // inherits session revocation, CSRF and the gateway's rate limiting instead of being reached
+  // service-direct. It verifies the RS256 Bearer this proxy forwards in hybrid mode; before
+  // BFF_ENFORCEMENT_MODE=strict it needs a bffBridge like insiders/trade, or the Authorization
+  // header is stripped and it sees no identity at all.
+  marketplace:    process.env.SVC_MARKETPLACE  || 'http://localhost:3060',
+  // CanWeMarry — the community support platform. Routed through the BFF so the browser
+  // holds no token and case reads inherit session revocation, CSRF and rate limiting.
+  canwemarry:     process.env.SVC_CANWEMARRY   || 'http://localhost:3070',
   // financial-services-java — system of record for money/KYC/risk (Spring resource servers,
   // base path /api/v1/...). RS256-verified against auth-service when APP_SECURITY_ENABLED=true,
   // gateway-trusted (X-Tenant-ID) in dev. risk moved 3025→3035 to free :3025 for trade.
@@ -122,7 +131,15 @@ const proxy = createProxyMiddleware({
       proxyReq.removeHeader('x-envelope-sig');
       proxyReq.removeHeader('x-tenant-id');         // financial-services-java tenant — gateway-resolved only
       const u = req.user;
-      if (!u) { proxyReq.destroy(new Error('NO_SESSION')); return; }
+      if (!u) {
+        // No identity. Allowed only for a request the allow-list already cleared as a public
+        // read; anything else has slipped past requireSession and is killed rather than
+        // forwarded. The headers stripped above stay stripped, so the backend sees a plainly
+        // anonymous caller and applies its own anonymous rules — it is never told otherwise.
+        if (req._anonymousAllowed) return;
+        proxyReq.destroy(new Error('NO_SESSION'));
+        return;
+      }
       // v1 identity headers — kept for backends that have not yet upgraded to v2 envelope.
       proxyReq.setHeader('x-user-id', String(u.userId));
       proxyReq.setHeader('x-org-id', u.orgId ? String(u.orgId) : '');

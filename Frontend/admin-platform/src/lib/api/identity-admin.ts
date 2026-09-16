@@ -70,6 +70,48 @@ export interface AdminAuditLog {
   created_at:    string;
 }
 
+/**
+ * One sign-in event, from the canonical auth audit stream.
+ *
+ * `site` is the property it happened on. `null` means the request carried no Origin at all
+ * (server-to-server, OAuth callbacks) — genuinely unknown, not "baalvion". Render it as such;
+ * auth-service deliberately does not guess.
+ */
+export interface LoginEvent {
+  id:          string;
+  event_type:  'login_success' | 'login_failure';
+  app_id:      string | null;
+  user_id:     string | null;
+  org_id:      string | null;
+  session_id:  string | null;
+  ip_address:  string | null;
+  user_agent:  string | null;
+  severity:    string | null;
+  metadata:    Record<string, unknown>;
+  created_at:  string;
+  user_email:  string | null;
+  user_name:   string | null;
+  user_avatar: string | null;
+}
+
+/** Per-site totals. `site` is 'unknown' for the NULL bucket — that is the filter value too. */
+export interface LoginSiteRollup {
+  site:          string;
+  logins:        number;
+  failures:      number;
+  users:         number;
+  last_seen_at:  string | null;
+}
+
+export interface LoginActivity {
+  items:   LoginEvent[];
+  total:   number;
+  page:    number;
+  limit:   number;
+  hasMore: boolean;
+  sites:   LoginSiteRollup[];
+}
+
 // ── API ───────────────────────────────────────────────────────────────────────
 
 export const identityAdminApi = {
@@ -104,4 +146,10 @@ export const identityAdminApi = {
     orgId?: string; userId?: string; action?: string; severity?: string; from?: string; to?: string;
   }) =>
     adminApiClient.get<ApiResponse<{ items: AdminAuditLog[]; total: number }>>('/admin/audit-logs', { params }),
+
+  /** Sign-in activity across every property. `site: 'unknown'` selects the no-Origin bucket. */
+  getLoginActivity: (params?: PaginationParams & {
+    site?: string; event?: 'login_success' | 'login_failure'; userId?: string; from?: string; to?: string;
+  }) =>
+    adminApiClient.get<ApiResponse<LoginActivity>>('/admin/login-activity', { params }),
 };

@@ -1,3 +1,4 @@
+@import '@baalvion/design/base.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -11,6 +12,10 @@
 */
 
 :root {
+  /* Tint the shared elevation scale to the page ground, not pure black. */
+  --bv-shadow-rgb: 6 8 11;
+  --bv-accent-rgb: 255 153 0;
+
   /* ── GROUND & SURFACES (stratified like paper stock / cast concrete) ── */
   --ink: 220 25% 5%;          /* #090c11  page ground */
   --ink-deep: 222 28% 3.5%;   /* #06080b  hero void + footer plinth (below grade) */

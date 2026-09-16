@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { Github, Twitter, Linkedin } from 'lucide-react';
+import { copyrightLine } from '@baalvion/company';
+import { Twitter, Linkedin } from 'lucide-react';
 
 const BaalvionLogo = () => (
     <svg
@@ -26,9 +27,8 @@ export default function MarketingFooter() {
             <BaalvionLogo />
             <p className="mt-4 text-sm text-muted-foreground">The Global Business Operating System.</p>
              <div className="mt-4 flex space-x-4">
-                <Link href="#" className="text-muted-foreground hover:text-foreground"><Github /></Link>
-                <Link href="#" className="text-muted-foreground hover:text-foreground"><Twitter /></Link>
-                <Link href="#" className="text-muted-foreground hover:text-foreground"><Linkedin /></Link>
+                <a href="https://twitter.com/baalvion" target="_blank" rel="noopener noreferrer" aria-label="Baalvion on X" className="text-muted-foreground hover:text-foreground"><Twitter /></a>
+                <a href="https://www.linkedin.com/company/baalvion" target="_blank" rel="noopener noreferrer" aria-label="Baalvion on LinkedIn" className="text-muted-foreground hover:text-foreground"><Linkedin /></a>
             </div>
           </div>
           <div>
@@ -36,15 +36,14 @@ export default function MarketingFooter() {
             <ul className="mt-4 space-y-2 text-sm">
               <li><Link href="#features" className="text-muted-foreground hover:text-foreground">Features</Link></li>
               <li><Link href="#pricing" className="text-muted-foreground hover:text-foreground">Pricing</Link></li>
-              <li><Link href="#" className="text-muted-foreground hover:text-foreground">Updates</Link></li>
               <li><Link href="#blog" className="text-muted-foreground hover:text-foreground">Blog</Link></li>
             </ul>
           </div>
           <div>
             <h4 className="font-semibold">Company</h4>
             <ul className="mt-4 space-y-2 text-sm">
-              <li><Link href="#" className="text-muted-foreground hover:text-foreground">About</Link></li>
-              <li><Link href="#" className="text-muted-foreground hover:text-foreground">Careers</Link></li>
+              <li><a href="https://baalvion.com/about" className="text-muted-foreground hover:text-foreground">About</a></li>
+              <li><a href="https://baalvion.com/careers" className="text-muted-foreground hover:text-foreground">Careers</a></li>
               <li><Link href="/marketing/demo" className="text-muted-foreground hover:text-foreground">Contact</Link></li>
             </ul>
           </div>
@@ -53,12 +52,12 @@ export default function MarketingFooter() {
             <ul className="mt-4 space-y-2 text-sm">
               <li><Link href="/docs/api" className="text-muted-foreground hover:text-foreground">API Docs</Link></li>
               <li><Link href="/docs/help" className="text-muted-foreground hover:text-foreground">Help Center</Link></li>
-              <li><Link href="#" className="text-muted-foreground hover:text-foreground">Privacy Policy</Link></li>
+              <li><a href="https://baalvion.com/legal/privacy" className="text-muted-foreground hover:text-foreground">Privacy Policy</a></li>
             </ul>
           </div>
         </div>
         <div className="mt-8 border-t pt-8 text-sm text-muted-foreground text-center">
-          © {new Date().getFullYear()} Baalvion, Inc. All rights reserved.
+          {copyrightLine(new Date().getUTCFullYear())}
         </div>
       </div>
     </footer>

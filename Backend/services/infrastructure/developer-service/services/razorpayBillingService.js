@@ -105,6 +105,9 @@ async function handleWebhookEvent(event) {
     }
     await upgradeOrgKeys(orgId, planSlug);
     if (discounted === 'true') await claimLaunchOfferSlot();
+    // Report onto the cross-estate payment spine. Never throws — the webhook must still 200 so
+    // Razorpay stops redelivering an event whose fulfillment already succeeded.
+    await require('./paymentSpine').reportPlanPayment(entity, { orgId, planSlug });
 }
 
 module.exports = { PLANS, createCheckoutOrder, handleWebhookEvent, launchOfferRemaining, LAUNCH_OFFER_MAX };

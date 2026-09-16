@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "baalvion://events/billing.invoice.generated.v2.json",
+  "title": "BillingInvoiceGeneratedV2",
+  "description": "An invoice was generated. Supersedes v1, which typed `amount` as a JSON number — a double, and therefore the one place the platform's own contract still asked a consumer to parse money into a float. v2 carries money the way every other money event does: an integer count of minor units in a string, with the currency's own exponent. v1 stays published until its producers have migrated; it is not edited in place, because editing a live contract breaks whoever is already reading it.",
+  "allOf": [{ "$ref": "baalvion://events/_envelope.json" }],
+  "properties": {
+    "type": { "const": "billing.invoice.generated" },
+    "siteId": { "type": ["string", "null"] },
+    "payload": {
+      "type": "object",
+      "required": ["invoiceId", "orgId", "periodStart", "periodEnd", "totalGb", "money", "signature"],
+      "additionalProperties": false,
+      "properties": {
+        "invoiceId": { "type": "string" },
+        "orgId": { "type": "string" },
+        "siteId": {
+          "type": ["string", "null"],
+          "description": "Which property billed it. Absent on v1, which is why invoices could not be attributed on the cross-estate panel."
+        },
+        "periodStart": { "type": "string", "format": "date-time" },
+        "periodEnd": { "type": "string", "format": "date-time" },
+        "totalGb": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Usage, not money — a genuine measurement, so a number is correct here."
+        },
+        "money": {
+          "type": "object",
+          "required": ["amount", "currency", "exponent"],
+          "additionalProperties": false,
+          "description": "The invoice total. Matches Money.toJSON() from @baalvion/money.",
+          "properties": {
+            "amount": {
+              "type": "string",
+              "pattern": "^-?[0-9]+$",
+              "description": "Integer count of minor units as a string — a string so a 64-bit value survives JSON."
+            },
+            "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+            "exponent": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4,
+              "description": "Digits after the decimal point for this currency: 2 for INR, 0 for JPY, 3 for KWD."
+            }
+          }
+        },
+        "signature": { "type": "string" }
+      }
+    }
+  }
+}

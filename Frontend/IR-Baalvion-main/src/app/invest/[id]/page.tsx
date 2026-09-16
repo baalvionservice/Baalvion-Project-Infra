@@ -115,7 +115,7 @@ export default async function OpportunityDetailPage({ params }: { params: Promis
             <p className="text-3xl font-bold text-black">{money(o.amount_sought)}</p>
             <p className="mt-1 text-sm text-gray-500">at {money(o.pre_money_valuation)} pre-money · min {money(o.min_ticket)}</p>
             <div className="mt-6 flex flex-col gap-2">
-              <ExpressInterestButton opportunityId={o.id} companyOrg={o.org_id} />
+              <ExpressInterestButton opportunityId={o.id} />
               <Link href="/resources/contact-ir" className="inline-flex items-center justify-center gap-2 rounded-full border border-gray-300 px-4 py-3 text-sm font-semibold transition-colors hover:bg-gray-50">
                 Contact the team
               </Link>

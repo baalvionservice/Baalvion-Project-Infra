@@ -22,7 +22,17 @@ export interface AuthUser {
   status: 'active' | 'suspended' | 'pending';
   emailVerifiedAt: string | null;
   mfaEnabled: boolean;
+  /**
+   * Highest-authority role, kept for existing call sites (sidebar, UserMenu, welcome).
+   * Derived from `roles` — no longer roles[0], which silently dropped a user's real
+   * authority when the token listed a lower role first.
+   */
   role: UserRole;
+  /**
+   * Every role on the access token. This is what the backend enforces against
+   * (auth-node reads req.auth.roles[]), so authz decisions should use this, not `role`.
+   */
+  roles: UserRole[];
   orgId: string | null;
   permissions: string[];
   sessionId: string;

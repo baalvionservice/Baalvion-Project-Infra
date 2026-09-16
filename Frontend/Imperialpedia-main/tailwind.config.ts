@@ -1,24 +1,32 @@
 import type { Config } from "tailwindcss";
 import tailwindcssAnimate from "tailwindcss-animate";
 import tailwindcssTypography from "@tailwindcss/typography";
+import baalvionDesign from "@baalvion/design/tailwind";
 
 export default {
+  presets: [baalvionDesign],
   darkMode: ["class"],
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/modules/**/*.{js,ts,jsx,tsx,mdx}",
+    // src/lib holds shared renderers (article/render-helpers.tsx renders every
+    // news body). It was missing, so a utility used only there generated no CSS
+    // and silently did nothing — the class landed in the HTML and never applied.
+    "./src/lib/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     extend: {
       fontFamily: {
-        // Investopedia-style: neutral Helvetica/Arial sans for body + UI,
+        // Imperialpedia-style: neutral Helvetica/Arial sans for body + UI,
         // editorial transitional serif for headlines.
         body: ["-apple-system", "BlinkMacSystemFont", "Segoe UI", "Helvetica Neue", "Helvetica", "Arial", "sans-serif"],
         headline: ["var(--font-headline)", "Georgia", "Times New Roman", "serif"],
         corinthian: ["var(--font-corinthian)", "Georgia", "Times New Roman", "serif"],
         ui: ["-apple-system", "BlinkMacSystemFont", "Segoe UI", "Helvetica Neue", "Helvetica", "Arial", "sans-serif"],
+        // News template only — the Proxima Nova stand-in. See app/layout.tsx.
+        news: ["var(--font-news)", "-apple-system", "Helvetica Neue", "Helvetica", "Arial", "sans-serif"],
         code: ["monospace"],
       },
       colors: {
@@ -54,12 +62,12 @@ export default {
         },
         // Semantic finance up/down colors — the vars already existed
         // (root + .dark) but were never wired into Tailwind, so nothing
-        // could reference them. Wired here for the CNBC re-theme (see
+        // could reference them. Wired here for the Imperialpedia re-theme (see
         // .cnbc-shell in globals.css), usable sitewide going forward.
         positive: "hsl(var(--positive))",
         negative: "hsl(var(--negative))",
         // BreakingTicker's own accent — defaults to its current red-600 look
-        // everywhere; remapped to the canonical CNBC red only inside
+        // everywhere; remapped to the canonical Imperialpedia red only inside
         // .cnbc-shell (globals.css), so other pages using this component
         // keep today's exact appearance.
         breaking: "hsl(var(--breaking))",

@@ -69,12 +69,18 @@ const start = async () => {
     // 2 — Redis (optional — service stays up without it)
     await redis.connect();
 
-    // 3 — Listen
+    // 3 — Say whether email can actually be delivered.
+    //
+    // Reported at boot rather than discovered when somebody registers and never receives
+    // their verification link. Names the transport and the sender; never a credential.
+    require('./utils/mailer').reportMailerAtStartup();
+
+    // 4 — Listen
     server.listen(config.port, () =>
         console.log(`[Auth] Service running on port ${config.port} (RS256 + Redis=${redis.isAvailable()})`)
     );
 
-    // 4 — Re-engagement cron (finds inactive users, publishes one event per user to the
+    // 5 — Re-engagement cron (finds inactive users, publishes one event per user to the
     // event bus; notification-service sends the actual email — see jobs/reengagementCron.js)
     const reengagementCron = startReengagementCron();
 

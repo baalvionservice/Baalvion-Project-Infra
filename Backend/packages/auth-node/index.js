@@ -324,13 +324,17 @@ function createJwksVerifier(opts = {}) {
   const {
     jwksUri, jwksTtlMs = 300000, issuer, audience,
     staticPublicKey, staticPublicKeyB64, hs256Secret,
-    requiredClaims = [], isBlacklisted, rejectHs256 = false,
+    requiredClaims = [], isBlacklisted, isSessionRevoked, rejectHs256 = false,
     validateRolesPermissions = false, logger = console, redis,
   } = opts;
   let _keys = null, _at = 0;
   // Canonical shared revocation (Phase 9): when a Redis client is injected (and no explicit
   // isBlacklisted fn), check auth:blacklist:<jti> on EVERY verify. One scheme, no per-service stores.
   const _isBlacklisted = isBlacklisted || (redis ? blacklist.createRedisBlacklist(redis, { logger }) : null);
+  // Session-level revocation, from the same store and with the same fail-closed rule. A
+  // password reset can end a whole session without knowing any of its token ids.
+  const _isSessionRevoked = isSessionRevoked
+    || (redis ? blacklist.createRedisSessionRevocation(redis, { logger }) : null);
 
   function fetchJwks() {
     if (!jwksUri) return Promise.reject(new Error('No JWKS URI configured'));
@@ -384,6 +388,22 @@ function createJwksVerifier(opts = {}) {
         // request/audit layer (it carries the X-Baalvion-App header).
         logger.warn('[auth-node] blacklisted token rejected', { jti: payload.jti, iss: payload.iss, sub: payload.sub });
         throw new VerifyError('blacklisted', 'Token has been revoked (jti blacklisted)');
+      }
+    }
+    if (typeof _isSessionRevoked === 'function' && payload.sid) {
+      let sessionGone;
+      try {
+        sessionGone = await _isSessionRevoked(payload.sid);
+      } catch (e) {
+        // Fail CLOSED, exactly as for the jti list: a revocation-store outage must never let a
+        // token from an ended session through.
+        logger.error('[auth-node] session revocation lookup failed:', e.message);
+        throw new VerifyError('revocation_unavailable', 'Revocation check failed');
+      }
+      if (sessionGone) {
+        // Identifiers only — never the token, and never why the session ended.
+        logger.warn('[auth-node] token from a revoked session rejected', { sid: payload.sid, iss: payload.iss, sub: payload.sub });
+        throw new VerifyError('session_revoked', 'The session this token belongs to has been ended');
       }
     }
     return payload;
@@ -444,12 +464,12 @@ function createAuthMiddleware(opts = {}) {
   const {
     jwksUri, issuer, audience,
     requiredClaims = ['sub', 'org_id', 'sid', 'jti'],
-    isBlacklisted, jwksTtlMs, staticPublicKey, staticPublicKeyB64, redis, logger,
+    isBlacklisted, isSessionRevoked, jwksTtlMs, staticPublicKey, staticPublicKeyB64, redis, logger,
   } = opts;
 
   const verifier = createJwksVerifier({
     jwksUri, issuer, audience, jwksTtlMs, staticPublicKey, staticPublicKeyB64,
-    requiredClaims, isBlacklisted, redis, logger,
+    requiredClaims, isBlacklisted, isSessionRevoked, redis, logger,
     rejectHs256: true,
     validateRolesPermissions: true,
   });
@@ -472,6 +492,11 @@ function createAuthMiddleware(opts = {}) {
         sessionId:      c.sid,
         roles,
         permissions:    Array.isArray(c.permissions) ? c.permissions : [],
+        // Email verification, forwarded verbatim from the issuer. Deliberately left
+        // `undefined` when the claim is absent rather than defaulted to false: a service
+        // must be able to distinguish "the issuer says no" from "the issuer did not say",
+        // and defaulting would silently turn every legacy token into an unverified one.
+        emailVerified:  typeof c.email_verified === 'boolean' ? c.email_verified : undefined,
         jti:            c.jti,
         issuer:         c.iss,
         audience:       c.aud,

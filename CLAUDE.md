@@ -40,6 +40,10 @@ pnpm run generate:keys        # local RS256 keypair
   and injected at deploy time. Secret-scanning push protection is enabled.
 - **Auth is centralized:** RS256 via `@baalvion/auth-node` — do not hand-roll
   JWT verification or introduce a second issuer.
+- **Frontend quality bar:** `@baalvion/design` supplies the shared type scale,
+  spacing rhythm, elevation and loading/empty/error primitives. It ships no
+  palette — each property keeps its own colours and personality. Its classes are
+  namespaced `bv-`, so prefer them over inventing new spacing or shadows.
 - **Match surrounding code.** TypeScript-first; Prettier for formatting
   (`.prettierrc`).
 

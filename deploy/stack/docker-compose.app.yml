@@ -1,0 +1,747 @@
+# Generated from docker-compose.prod.yml for the Hostinger box.
+# Runs together with docker-compose.data.yml (same project name).
+name: baalvion
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Baalvion — consolidated backend, PRODUCTION compose (AWS single-host).
+#
+#   45 repo modules → 6 Node app containers + 1 JVM app, supervised by pm2-runtime.
+#   This is the production counterpart of docker-compose.yml. Differences vs the
+#   base file:
+#     • Images are PINNED to ECR tags (no :local builds on the box).
+#     • Neo4j is included on-box (network-graph-service HARD-EXITS without it).
+#     • Kafka + Zookeeper included under the `payments` profile (JVM @EnableKafka).
+#     • app-identity mem_limit raised to 1g (measured 723/768 MiB = 94% in dry-run).
+#     • Secrets come from .env injected at deploy time from SSM/Secrets Manager.
+#
+#   PostgreSQL is AWS RDS (external — DB_HOST in .env). Redis + Neo4j + Caddy on-box.
+#
+#   Run (from REPO ROOT, image already in ECR):
+#     docker compose --env-file deploy/consolidated/.env \
+#       -f deploy/consolidated/docker-compose.prod.yml up -d
+#     ... --profile payments up -d         # to include the JVM + Kafka
+#
+#   ⚠ Do NOT layer docker-compose.dryrun.yml on top of this in production — that file
+#     adds a throwaway Postgres, Mailpit and NODE_TLS_REJECT_UNAUTHORIZED. Prod uses
+#     RDS + Amazon SES. See docs/deployment/production/00-README.md.
+# ─────────────────────────────────────────────────────────────────────────────
+
+x-db: &db
+  DB_HOST: ${DB_HOST}
+  DB_PORT: ${DB_PORT:-5432}
+  DB_NAME: ${DB_NAME}
+  DB_USER: ${DB_USER}
+  DB_PASSWORD: ${DB_PASSWORD}
+  DB_SSL: ${DB_SSL:-true}            # RDS → TLS required
+
+x-redis: &redis
+  REDIS_HOST: ${REDIS_HOST:-redis}
+  REDIS_PORT: ${REDIS_PORT:-6379}
+
+# One image, build-once-in-CI, pulled from ECR. pm2 selects the personality.
+x-node-app: &node-app
+  image: baalvion-backend:local
+  pull_policy: never
+  restart: unless-stopped
+  # Loaded into every container at runtime; marked optional so env-less
+  # `compose config` validation (CI) does not fail when .env is absent.
+  env_file:
+    - path: .env
+      required: false
+  depends_on:
+    redis: { condition: service_healthy }
+
+services:
+
+  # ── Backing services (on-box) ───────────────────────────────────────────────
+  # ── 1. Identity & trust core (5 modules) ────────────────────────────────────
+  app-identity:
+    <<: *node-app
+    command: ["pm2-runtime","start","/app/pm2/identity.config.js"]
+    environment:
+      <<: [*db, *redis]
+      # CanWeMarry sits behind the BFF like every other product surface: the browser holds
+      # no token, and its reads inherit session revocation, CSRF and rate limiting. The
+      # gateway also carries a short allow-list of anonymous GET paths for this service,
+      # so the public pages can be read without a session while everything else still 401s.
+      SVC_CANWEMARRY: http://app-canwemarry:3070
+    mem_limit: 1024m                 # raised from 768m — measured 94% of cap in dry-run
+    mem_reservation: 512m
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:3001/health',r=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  # ── 2. Commerce + marketplace (7 modules) ───────────────────────────────────
+  app-commerce:
+    <<: *node-app
+    command: ["pm2-runtime","start","/app/pm2/commerce.config.js"]
+    environment:
+      <<: [*db, *redis]
+      # order-service runs here and reads PCL_SHADOW. Scoped here, not .env, which every service shares.
+      PCL_SHADOW: "true"
+      # Double-entry mirror into app-ledger. The client is FAIL-OPEN: a ledger outage logs
+      # ledger.post_failed and never blocks a payment, and the reconciliation report surfaces
+      # the resulting gap. LEDGER_API_PREFIX is left unset so the corrected /api/v1 default
+      # applies -- an explicit /v1 here would 404 every call.
+      LEDGER_BASE_URL: http://app-ledger:3014
+      # Presence of this is what ENABLES the client (config.ledger.enabled = !!internalKey).
+      # It is the on-switch, NOT a credential -- ledger-service never reads it. The actual
+      # server-to-server credential is INTERNAL_SERVICE_SECRET, sent as `x-internal-secret`,
+      # which matters now that the Java services run with APP_SECURITY_ENABLED=true.
+      LEDGER_INTERNAL_KEY: ${LEDGER_INTERNAL_KEY:-enabled-internal}
+    mem_limit: 1280m
+    mem_reservation: 640m
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:3012/health',r=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  # ── 3. Global trade platform (6 modules) ────────────────────────────────────
+  app-trade:
+    <<: *node-app
+    command: ["pm2-runtime","start","/app/pm2/trade.config.js"]
+    environment:
+      <<: [*db, *redis]
+      # order-execution-service runs here and reads PAYMENT_SPINE. Scoped here, not .env, which every service shares.
+      PAYMENT_SPINE: "true"
+      NEO4J_URI: ${NEO4J_URI:-bolt://neo4j:7687}
+      NEO4J_USER: ${NEO4J_USER:-neo4j}
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD}
+      NEO4J_DATABASE: ${NEO4J_DATABASE:-neo4j}
+    mem_limit: 1024m
+    mem_reservation: 512m
+    depends_on:
+      redis: { condition: service_healthy }
+      neo4j: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:3048/health',r=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  # ── 4. Ecosystem verticals (10 modules) ─────────────────────────────────────
+  app-ecosystem:
+    <<: *node-app
+    command: ["pm2-runtime","start","/app/pm2/ecosystem.config.js"]
+    environment: { <<: [*db, *redis] }
+    mem_limit: 2048m   # 8 pm2 services: 320+320+448 + 5x192 = 2048M of caps
+    mem_reservation: 768m
+    healthcheck:
+      # ir-service (3008) — the slimmed ecosystem config runs only crm + ir (about-service/3010 removed).
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:3008/health',r=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  # ── 5. Back-office: platform + knowledge + infra utilities (10 modules) ──────
+  app-platform:
+    <<: *node-app
+    command: ["pm2-runtime","start","/app/pm2/platform.config.js"]
+    environment: { <<: [*db, *redis] }
+    mem_limit: 1536m
+    mem_reservation: 768m
+    # cms-service writes uploaded media + generated-art SVGs to a path inside the app
+    # image's own writable layer (UPLOAD_DIR in mediaService.js). Without a named volume
+    # here, every container recreate (every deploy) silently wipes all of it.
+    volumes:
+      - cms_uploads:/app/Backend/services/knowledge/cms-service/uploads
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:3021/health',r=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  # ── 6. Public BFF + websockets + async dispatch (4 modules) ──────────────────
+  app-edge-realtime:
+    <<: *node-app
+    command: ["pm2-runtime","start","/app/pm2/edge-realtime.config.js"]
+    environment:
+      <<: [*db, *redis]
+      # proxy-service runs here and reads PAYMENT_SPINE. Scoped here, not .env, which every service shares.
+      PAYMENT_SPINE: "true"
+      # proxy-service (one of the 4 processes pm2-runtime supervises in this container) uses
+      # this to build its Google/Facebook OAuth redirect target. Pinned here — NOT left to the
+      # shared .env's global APP_URL — because that var is shared across every container in
+      # this stack and belongs to whichever site currently "owns" it (e.g. community.market-
+      # underworld.com); without this override proxy-service silently sends its own users
+      # there instead of back to proxy.baalvionstack.com. See appConfig.js oauth.appUrl.
+      OAUTH_PUBLIC_BASE_URL: https://proxy.baalvionstack.com
+    mem_limit: 896m
+    mem_reservation: 448m
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:4000/health',r=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  # ── 7. Payments (JVM PSP gateway) — profile: payments ────────────────────────
+  # The synchronous /v1/gateway/** vertical (Razorpay/PayU/Stripe/Cashfree create, verify, capture,
+  # refund, webhooks) needs ONLY Postgres (RDS) + Redis — NOT Kafka. So on the 4 GiB single host we
+  # run it with APP_KAFKA_ENABLED=false: the service backs off all Kafka wiring (no producer/consumer/
+  # listener, no broker connection) and outbox rows stay durably PENDING. Kafka + ZooKeeper move to
+  # the OPT-IN `kafka` profile below — bring them up (and set APP_KAFKA_ENABLED=true) only on a host
+  # with the headroom for the event-driven ledger saga.
+  #
+  #   docker compose ... --profile payments up -d app-payments            # lean, no Kafka (default)
+  #   docker compose ... --profile payments --profile kafka up -d         # full event-driven setup
+  app-payments:
+    image: baalvion-payment-service:local
+    pull_policy: never
+    restart: unless-stopped
+    profiles: ["payments"]
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      <<: *db
+      DB_JDBC_PARAMS: ${DB_JDBC_PARAMS:-?sslmode=require}
+      SPRING_PROFILES_ACTIVE: prod
+      # Kafka OFF by default on this host (see note above). Flip to true ONLY alongside --profile kafka.
+      APP_KAFKA_ENABLED: ${APP_KAFKA_ENABLED:-false}
+      # RS256 enforcement on /api/**. The Node callers send the platform shared secret in
+      # `x-internal-secret` (InternalServiceAuthFilter -> ROLE_INTERNAL); JWKS_URI comes from .env
+      # and the resource server refuses to start without it.
+      APP_SECURITY_ENABLED: "true"
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP:-kafka:9092}
+      # PSP keys (RAZORPAY_*/PAYU_*/STRIPE_*) + CMS vault (CMS_BASE_URL/INTERNAL_SERVICE_SECRET) and
+      # PSP_MOCK are read from .env (env_file above) or the per-tenant CMS vault — never hardcoded.
+      JAVA_OPTS: "-Xms64m -Xmx448m -XX:+UseSerialGC -XX:MaxRAMPercentage=70"
+    depends_on:
+      redis: { condition: service_healthy }
+    mem_limit: 640m
+    mem_reservation: 256m
+    healthcheck:
+      test: ["CMD-SHELL","wget -qO- http://127.0.0.1:3015/actuator/health >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+  # community-service (Market Underworld forum/access-tier membership) and
+  # giftcard-service (Reloadly-backed gift card store) are standalone containers —
+  # NOT part of the app-ecosystem PM2 group, which is already memory-capped (about-service
+  # was removed from it for exactly this reason). NOTE: unlike app-payments, no CI workflow
+  # currently builds+pushes these images to their own ECR repos — that pipeline still needs
+  # to be created (mirrors financial-services.yml's payment-service push step, but for a
+  # plain Node/Docker build). Until then, these image refs are ready but unfulfilled.
+  # Double-entry ledger (financial-services-java). Flyway creates its own schema on first
+  # boot (V001-V005, history table flyway_history_ledger), so no manual migration step.
+  # Behind the "ledger" profile: it starts only when explicitly asked for, like app-payments.
+  # Nothing writes to it until order-service's LEDGER_INTERNAL_KEY is set, which is a
+  # separate decision from having the service running.
+  app-ledger:
+    image: baalvion-ledger-service:local
+    pull_policy: never
+    restart: unless-stopped
+    profiles: ["ledger"]
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      <<: *db
+      DB_JDBC_PARAMS: ${DB_JDBC_PARAMS:-?sslmode=disable}
+      SPRING_PROFILES_ACTIVE: prod
+      APP_KAFKA_ENABLED: ${APP_KAFKA_ENABLED:-false}
+      # RS256 enforcement on /api/**. The Node callers send the platform shared secret in
+      # `x-internal-secret` (InternalServiceAuthFilter -> ROLE_INTERNAL); JWKS_URI comes from .env
+      # and the resource server refuses to start without it.
+      APP_SECURITY_ENABLED: "true"
+      PORT: "3014"
+      # Flyway defaults to the connection's default schema (public), finds it full of every
+      # other service's tables, and refuses with "non-empty schema but no history table".
+      # V001 creates and owns a `ledger` schema, so point Flyway at that instead: its history
+      # table then lives beside its own tables and `public` is never touched.
+      SPRING_FLYWAY_SCHEMAS: ledger
+      # 448m heap inside a 640m container: this box already commits more limits than it has
+      # physical RAM, so a second JVM runs leaner than the first.
+      JAVA_OPTS: "-Xms64m -Xmx448m -XX:+UseSerialGC -XX:MaxRAMPercentage=70"
+    depends_on:
+      redis: { condition: service_healthy }
+    mem_limit: 640m
+    mem_reservation: 256m
+    healthcheck:
+      test: ["CMD-SHELL","wget -qO- http://127.0.0.1:3014/actuator/health >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 90s
+
+  # Wallet balances. giftcard-service already expects it at http://app-wallet:3039.
+  # Flyway must be pointed at its own schema: the default is the connection's default schema
+  # (public), which is full of every other service's tables, and Flyway refuses with
+  # "non-empty schema but no history table".
+  app-wallet:
+    image: baalvion-wallet-service:local
+    pull_policy: never
+    restart: unless-stopped
+    profiles: ["wallet"]
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      <<: *db
+      DB_JDBC_PARAMS: ${DB_JDBC_PARAMS:-?sslmode=disable}
+      SPRING_PROFILES_ACTIVE: prod
+      APP_KAFKA_ENABLED: ${APP_KAFKA_ENABLED:-false}
+      # RS256 enforcement on /api/**. The Node callers send the platform shared secret in
+      # `x-internal-secret` (InternalServiceAuthFilter -> ROLE_INTERNAL); JWKS_URI comes from .env
+      # and the resource server refuses to start without it.
+      APP_SECURITY_ENABLED: "true"
+      PORT: "3039"
+      SPRING_FLYWAY_SCHEMAS: wallet
+      JAVA_OPTS: "-Xms64m -Xmx448m -XX:+UseSerialGC -XX:MaxRAMPercentage=70"
+    depends_on:
+      redis: { condition: service_healthy }
+    mem_limit: 640m
+    mem_reservation: 256m
+    healthcheck:
+      test: ["CMD-SHELL","wget -qO- http://127.0.0.1:3039/actuator/health >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 90s
+
+  # Risk scoring. order-execution-service already expects it at port 3035.
+  # Flyway must be pointed at its own schema: the default is the connection's default schema
+  # (public), which is full of every other service's tables, and Flyway refuses with
+  # "non-empty schema but no history table".
+  app-risk:
+    image: baalvion-risk-service:local
+    pull_policy: never
+    restart: unless-stopped
+    profiles: ["risk"]
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      <<: *db
+      DB_JDBC_PARAMS: ${DB_JDBC_PARAMS:-?sslmode=disable}
+      # MUST be "production", not "prod": only application-production.yml exists, and it is
+      # what enables the ofac/un/eu providers. With "prod" no profile file matches, the
+      # providers stay disabled, and the strict fail-safe refuses to boot.
+      SPRING_PROFILES_ACTIVE: production
+      APP_KAFKA_ENABLED: ${APP_KAFKA_ENABLED:-false}
+      # RS256 enforcement on /api/**. The Node callers send the platform shared secret in
+      # `x-internal-secret` (InternalServiceAuthFilter -> ROLE_INTERNAL); JWKS_URI comes from .env
+      # and the resource server refuses to start without it.
+      APP_SECURITY_ENABLED: "true"
+      PORT: "3035"
+      SPRING_FLYWAY_SCHEMAS: risk
+      # Sanctions screening runs on REAL data. The default 'seed' provider is a dev-only
+      # offline list and is forbidden under strict enforcement — the service refuses to boot
+      # rather than screen against it, which is why it crash-looped on first deploy.
+      # 'live' loads the official public feeds the service already ships URLs for:
+      #   OFAC  treasury.gov/ofac/downloads/sdn.csv        (~5.6 MB)
+      #   UN    scsanctions.un.org/.../consolidated.xml    (~2.1 MB)
+      #   EU    webgate.ec.europa.eu/.../content?token=... (~13.4 MB)
+      # All three verified reachable from this box. Enforcement stays 'strict', so a feed that
+      # fails or returns a suspiciously short list still fails the boot rather than screening
+      # against a partial watchlist.
+      SANCTIONS_PROVIDER: live
+      # 448m was not enough: loading OFAC (19,329) + EU (6,234) + UN entities with the alias
+      # index pushed the heap to 94% and the JVM sat at 88% CPU in GC, never reaching the UN
+      # fetch or persisting a single row. Sanctions loading is the peak; steady state is far
+      # lower.
+      JAVA_OPTS: "-Xms128m -Xmx1024m -XX:+UseSerialGC -XX:MaxRAMPercentage=75"
+    depends_on:
+      redis: { condition: service_healthy }
+    mem_limit: 1280m
+    mem_reservation: 384m
+    healthcheck:
+      test: ["CMD-SHELL","wget -qO- http://127.0.0.1:3035/actuator/health >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      # First boot ingests ~26k sanctions entities from OFAC/UN/EU and upserts them one by
+      # one: EU alone took 3m38s for 6,234. 90s marked a perfectly healthy service as
+      # unhealthy while it was still legitimately loading. Steady state restarts are fast
+      # (the watchlist is already in the database).
+      start_period: 1200s
+
+  # The web front end. No env_file on purpose: the shared .env carries variables for every
+  # other app on the box, and this container needs exactly three things.
+  app-canwemarry-web:
+    image: baalvion-canwemarry-web:local
+    pull_policy: never
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: "3071"
+      HOSTNAME: 0.0.0.0
+      SITE_URL: https://canwemarry.baalvion.com
+      # Server-side only — the browser never sees this. Internal address rather than
+      # api.baalvion.com: same docker network, so no TLS handshake and no trip out to the
+      # public internet and back for every server render.
+      GATEWAY_ORIGIN: http://app-identity:3026
+    depends_on: [ app-canwemarry, app-identity ]
+    mem_limit: 384m
+    mem_reservation: 96m
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:3071/',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  # ── CanWeMarry — community support platform (canwemarry.baalvion.com) ────────
+  # Standalone rather than folded into app-ecosystem's pm2 group: it can be restarted
+  # without touching the eight services already in there, and it gets its own memory cap.
+  app-canwemarry:
+    <<: *node-app
+    working_dir: /app/Backend/services/ecosystem/canwemarry-service
+    command: ["node","index.js"]
+    environment:
+      <<: [*db, *redis]
+      NODE_ENV: production
+      PORT: "3070"
+      # Its own schema in the shared database — one bounded context, one schema.
+      DB_SCHEMA: canwemarry
+      BAALVION_JWKS_URI: ${JWKS_URI}
+      AUDIT_HASH_SECRET: ${CANWEMARRY_AUDIT_HASH_SECRET}
+      CORS_ORIGINS: https://canwemarry.baalvion.com
+      # Site-wide public cases stay OFF. Turning this on would let somebody publish a case
+      # about their own family to the open web, which is the single thing this product
+      # must never do by accident.
+      ALLOW_PUBLIC_CASES: "false"
+    mem_limit: 384m
+    mem_reservation: 128m
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:3070/health',r=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  app-community:
+    image: baalvion-community-service:local
+    pull_policy: never
+    restart: unless-stopped
+    profiles: ["community"]
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      <<: [*db, *redis]
+      NODE_ENV: production
+      # Payment spine, scoped to this service. Deliberately NOT in .env: every container
+      # shares that file, so setting it there would switch on giftcard, order-execution
+      # and proxy at the same time instead of one property at a time.
+      PAYMENT_SPINE: "true"
+      # JWT_PUBLIC_KEY, INTERNAL_SERVICE_SECRET, NODEBB_BASE_URL/NODEBB_WRITE_API_TOKEN,
+      # PAYMENT_SERVICE_URL are read from .env (env_file above) — never hardcoded.
+    depends_on:
+      redis: { condition: service_healthy }
+    mem_limit: 320m
+    mem_reservation: 128m
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:3064/health',r=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+  app-giftcard:
+    image: baalvion-giftcard-service:local
+    pull_policy: never
+    restart: unless-stopped
+    profiles: ["giftcard"]
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      <<: [*db, *redis]
+      # giftcard-service reads PAYMENT_SPINE. Scoped here, not .env, which every service shares.
+      PAYMENT_SPINE: "true"
+      NODE_ENV: production
+      # RELOADLY_CLIENT_ID/RELOADLY_CLIENT_SECRET/RELOADLY_ENV, INTERNAL_SERVICE_SECRET,
+      # PAYMENT_SERVICE_URL are read from .env (env_file above) — never hardcoded.
+    depends_on:
+      redis: { condition: service_healthy }
+    mem_limit: 320m
+    mem_reservation: 128m
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:3065/health',r=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+  # ── Kafka + ZooKeeper — OPT-IN profile: kafka (event-driven ledger saga only) ─
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.1
+    profiles: ["kafka"]
+    restart: unless-stopped
+    mem_limit: 384m
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    volumes: [ zkdata:/var/lib/zookeeper/data ]
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.1
+    profiles: ["kafka"]
+    restart: unless-stopped
+    mem_limit: 768m
+    depends_on: [ zookeeper ]
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    volumes: [ kafkadata:/var/lib/kafka/data ]
+    healthcheck:
+      test: ["CMD-SHELL","kafka-topics --bootstrap-server localhost:9092 --list >/dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 40s
+
+  # ── Admin console (Next.js standalone) → admin.baalvion.com ──────────────────
+  # The back-office UI. NEXT_PUBLIC_* are baked at BUILD time in CI (deploy-consolidated.yml),
+  # NOT here — this is its own ECR image (baalvion/admin-web), pulled like the backend image.
+  # Browser only sees same-origin /auth-bff + /api-bff, which Caddy terminates at the edge →
+  # app-identity (auth) / app-platform (cms). Mirrors the proven core-stack admin-web service.
+  admin-web:
+    image: baalvion-admin-web:local
+    pull_policy: never
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      NODE_ENV: production
+      PORT: "3030"
+      HOSTNAME: 0.0.0.0
+      # Consumed SERVER-SIDE by /api/health-check (src/app/api/health-check/route.ts), which
+      # fetches <url>/health for each. AUTH_SERVICE_URL + ADMIN_SERVICE_URL already came in via
+      # .env, which is exactly why those two read "up" while the rest read "down" — the others
+      # fell back to http://localhost:<port>, i.e. the admin-web container itself, where nothing
+      # listens. Runtime vars, not NEXT_PUBLIC_, so no image rebuild is involved.
+      SESSION_SERVICE_URL: http://app-identity:3022
+      OAUTH_SERVICE_URL: http://app-identity:3023
+      NOTIF_SERVICE_URL: http://app-edge-realtime:3031
+      CTM_SERVICE_URL: http://app-ecosystem:3017
+    mem_limit: 384m
+    mem_reservation: 96m
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:3030',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    depends_on: [ app-identity, app-platform ]
+
+  # ── Shared auth surface (Next.js standalone) → auth.baalvion.com ─────────────
+  # Brand-aware passwordless email-OTP sign-in used by every Baalvion site's "Sign in"
+  # link (proxy.baalvionstack.com, Amarisé, about.baalvion.com, …). Its own /auth-bff/*
+  # rewrite (next.config.ts) proxies straight to auth-service — NOT auth-gateway.
+  # NOTE: that rewrite's destination is baked in at IMAGE BUILD time (see the
+  # build-push-auth-web job's AUTH_SERVICE_URL build-arg in deploy-consolidated-box2.yml,
+  # `output: 'standalone'` snapshots next.config.ts into required-server-files.json) — the
+  # AUTH_SERVICE_URL below does NOT affect that rewrite. It's set anyway as defense-in-depth
+  # for any other server-side code path that reads process.env.AUTH_SERVICE_URL live.
+  app-auth-web:
+    image: baalvion-auth-web:local
+    pull_policy: never
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      NODE_ENV: production
+      PORT: "3055"
+      HOSTNAME: 0.0.0.0
+      AUTH_SERVICE_URL: http://app-identity:3001
+    mem_limit: 256m
+    mem_reservation: 96m
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:3055',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    depends_on: [ app-identity ]
+
+  # ── Jobs Portal pilot (Next.js standalone) → jobs.baalvion.com, once proven out ──
+  # Talks to jobs-service (app-ecosystem:3002) via the already-live admin.baalvion.com BFF
+  # carve-out (NEXT_PUBLIC_JOBS_SERVICE_URL baked in at image build time — see Dockerfile).
+  # Host port 8081 is TEMPORARY, for direct IP:port smoke-testing only; not yet wired into
+  # Caddy/DNS on purpose, pending pilot sign-off.
+  app-jobs-portal:
+    image: baalvion-jobs-portal-web:local
+    pull_policy: never
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      NODE_ENV: production
+      PORT: "3026"
+      HOSTNAME: 0.0.0.0
+    ports: ["8081:3026"]
+    mem_limit: 384m
+    mem_reservation: 96m
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:3026',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  # ── World Shipping Directory (ships.baalvion.com) ────────────────────────────
+  # The Global-Trade-Infrastructure Next app. It serves BOTH trade.baalvion.com and
+  # ships.baalvion.com from one process via host-based rewriting in src/middleware.ts, but
+  # only ships is routed here for now: the rest of the trade app needs its own Prisma
+  # database (57 models) which does not exist on this box yet, while the directory needs
+  # none — it reads everything over HTTP from trade-service.
+  app-gti-web:
+    image: baalvion-gti-web:local
+    pull_policy: never
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      NODE_ENV: production
+      PORT: "9003"
+      HOSTNAME: 0.0.0.0
+      # Server-side fetches stay inside the docker network — no TLS handshake, no trip out
+      # to Caddy and back for data the box already has locally.
+      SHIPPING_DIRECTORY_API_URL: http://app-commerce:3025
+      # Tells middleware.ts which Host header means "serve the directory at the site root".
+      SHIPPING_DIRECTORY_HOSTS: ships.baalvion.com
+      # Absolute origin for canonicals, Open Graph, sitemap and JSON-LD @ids.
+      SHIPPING_DIRECTORY_URL: https://ships.baalvion.com
+    mem_limit: 768m
+    mem_reservation: 192m
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get({host:'127.0.0.1',port:9003,path:'/shipping-directory'},r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 8s
+      retries: 5
+      start_period: 60s
+
+  app-amarise-web:
+    image: baalvion-amarise-web:local
+    pull_policy: never
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      NODE_ENV: production
+      PORT: "9004"
+      HOSTNAME: 0.0.0.0
+      # Server-side fetches stay on the docker network — no TLS round-trip out to Caddy
+      # and back for data this box already holds locally. Mirrors app-gti-web.
+      AUTH_PROXY_TARGET: http://app-identity:3001/v1/auth
+    mem_limit: 768m
+    mem_reservation: 192m
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get({host:'127.0.0.1',port:9004,path:'/us'},r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 8s
+      retries: 5
+      start_period: 60s
+
+  # ── Edge: TLS + host/path routing (only this binds 80/443) ───────────────────
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    mem_limit: 96m
+    mem_reservation: 32m
+    ports: ["80:80","443:443"]
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [ app-identity, app-edge-realtime, app-platform, admin-web, app-auth-web ]
+
+  # Baalvion Insiders — the public investor/company directory behind
+  # www.marketunderworld.com. Standalone rather than a pm2 process in app-ecosystem,
+  # per the note in deploy/consolidated/pm2/ecosystem.config.js. Public reads bypass
+  # the auth-gateway: a logged-out visitor has no session cookie, and the service
+  # gates each route itself (/v1/public/* open, everything else needs signed identity).
+  app-insiders:
+    image: baalvion-insiders-service:local
+    pull_policy: never
+    restart: unless-stopped
+    profiles: ["insiders"]
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      <<: [*db, *redis]
+      NODE_ENV: production
+      PORT: "3050"
+      DB_SCHEMA: insiders
+      PUBLIC_BASE_URL: "https://www.marketunderworld.com"
+      CORS_ORIGINS: "https://www.marketunderworld.com"
+    depends_on:
+      redis: { condition: service_healthy }
+    mem_limit: 384m
+    mem_reservation: 160m
+    healthcheck:
+      test: ["CMD","node","-e","require(\"http\").get(\"http://127.0.0.1:3050/health\",r=>process.exit(r.statusCode<400?0:1)).on(\"error\",()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Static build of the Insiders directory SPA (www.marketunderworld.com), served by nginx.
+  # Moved off Vercel: that account is over its free resource limits and every deploy was
+  # rate limited. No build args are baked in — the app's two API bases default to
+  # same-origin paths (/insiders-api, /auth-bff) which the Caddy block resolves on this box.
+  app-insiders-web:
+    image: baalvion-insiders-web:local
+    pull_policy: never
+    restart: unless-stopped
+    profiles: ["insiders"]
+    mem_limit: 128m
+    mem_reservation: 32m
+    healthcheck:
+      test: ["CMD","wget","-qO-","http://127.0.0.1:8080/index.html"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+
+  # Baalvion Stack — the public product index (baalvionstack.com). Static Next build; the
+  # catalogue, nav, sitemap and JSON-LD are generated from @baalvion/sites at BUILD time, so a
+  # newly registered product needs an image rebuild, not a restart.
+  app-stack-web:
+    image: baalvion-stack-web:local
+    pull_policy: never
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      NODE_ENV: production
+      PORT: "3072"
+      HOSTNAME: 0.0.0.0
+    mem_limit: 512m
+    mem_reservation: 128m
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get({host:'127.0.0.1',port:3072,path:'/'},r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 8s
+      retries: 5
+      start_period: 45s
+
+volumes:
+  redisdata:
+  neo4jdata:
+  zkdata:
+  kafkadata:
+  caddy_data:
+  caddy_config:
+  cms_uploads:

@@ -23,6 +23,20 @@ router.get('/public/founders', pub.listFounders);
 router.get('/public/founders/:id', pub.getFounder);
 router.get('/public/investors', pub.listInvestors);
 router.get('/public/investors/:id', pub.getInvestor);
+router.get('/public/companies', pub.listCompanies);
+router.get('/public/companies/:id', pub.getCompany);
+router.get('/public/people', pub.searchPeople);
+router.get('/public/people/:slug', pub.getPerson);
+router.get('/public/articles', pub.listArticles);
+router.get('/public/articles/:slug', pub.getArticle);
+router.get('/public/places', pub.listPlaces);
+const claims = require('../controller/claimController');
+router.post('/public/claims', claims.createClaim);
+router.get('/claims', authMiddleware, requireRole('admin'), claims.listClaims);
+router.patch('/claims/:id', authMiddleware, requireRole('admin'), claims.reviewClaim);
+router.get('/public/render', require('../controller/renderController').render);
+router.get('/public/sitemap.xml', pub.sitemapIndex);
+router.get('/public/sitemap-:section.xml', pub.sitemapSection);
 
 // Generic data layer (replaces PostgREST). Auth is optional at the edge; the
 // engine enforces per-table authorization that replaces RLS.

@@ -10,7 +10,7 @@
     "keywords": ["identity platform", "multi-tenant", "RBAC", "authentication", "row-level security", "Baalvion case study"]
   },
   "customFields": {
-    "client": "The Baalvion Group platform team",
+    "client": "The Baalvion platform team",
     "sector": "Platform Engineering",
     "challenge": "Each property had its own login, roles, and token scheme — a security and UX liability.",
     "solution": "One canonical identity service issuing RS256 tokens, with RBAC and tenant-aware authorization.",

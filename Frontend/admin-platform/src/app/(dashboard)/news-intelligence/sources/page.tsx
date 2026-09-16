@@ -20,9 +20,10 @@ import {
 } from '@/components/ui/dialog';
 import { useUIStore } from '@/lib/store/uiStore';
 import { serviceClients } from '@/lib/api/client';
+import { NEWS_CATEGORIES } from '@/lib/types/news.types';
 import type { NewsCategory, NewsSource, NewsSourceType } from '@/lib/types/news.types';
 
-const CATEGORIES: NewsCategory[] = ['AI', 'Technology', 'Business', 'Finance', 'Startups', 'Cybersecurity', 'World', 'Science'];
+const CATEGORIES = NEWS_CATEGORIES;
 const TYPES: NewsSourceType[] = ['rss', 'press_release', 'government'];
 
 export default function NewsSourcesPage() {
@@ -144,12 +145,18 @@ export default function NewsSourcesPage() {
                     </TableCell>
                     <TableCell>
                       <Switch
+                        aria-label={`${source.is_active ? 'Pause' : 'Activate'} ${source.name}`}
                         checked={source.is_active}
                         onCheckedChange={(checked) => toggleActive.mutate({ id: source.id, is_active: checked })}
                       />
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="sm" onClick={() => removeSource.mutate(source.id)}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        aria-label={`Delete source ${source.name}`}
+                        onClick={() => removeSource.mutate(source.id)}
+                      >
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
                     </TableCell>

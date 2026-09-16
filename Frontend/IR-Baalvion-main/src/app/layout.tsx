@@ -10,6 +10,7 @@ import QuickLinksSection from '@/components/sections/quick-links-section';
 import Script from 'next/script';
 import { AppConfig } from '@/config';
 import { Analytics } from '@/components/seo/Analytics';
+import { CIN, INCORPORATED_ON, IR_EMAIL, IR_PHONE, LEGAL_ENTITY_NAME, OPERATING_ADDRESS } from '@baalvion/company';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -95,14 +96,15 @@ export default function RootLayout({
     '@type': ['Organization', 'FinancialService'],
     '@id': `${AppConfig.baseUrl}/#organization`,
     name: 'Baalvion',
-    alternateName: 'Baalvion Industries Pvt Ltd',
+    legalName: LEGAL_ENTITY_NAME,
+    identifier: { '@type': 'PropertyValue', name: 'CIN', value: CIN },
     url: AppConfig.baseUrl,
     logo: {
       '@type': 'ImageObject',
       url: 'https://baalvion.com/logo.png',
     },
     description: 'Baalvion is an AI-native operating system for global B2B trade, unifying logistics, trade finance and compliance on a single platform.',
-    foundingDate: '2025',
+    foundingDate: INCORPORATED_ON,
     slogan: 'The operating system for global trade.',
     knowsAbout: [
       'Artificial Intelligence',
@@ -117,17 +119,17 @@ export default function RootLayout({
     areaServed: 'Worldwide',
     address: {
       '@type': 'PostalAddress',
-      streetAddress: 'Yeshwant Avenue Building, NX',
-      addressLocality: 'Virar',
-      addressRegion: 'Maharashtra',
-      postalCode: '401303',
-      addressCountry: 'IN',
+      streetAddress: OPERATING_ADDRESS.street,
+      addressLocality: OPERATING_ADDRESS.locality,
+      addressRegion: OPERATING_ADDRESS.region,
+      postalCode: OPERATING_ADDRESS.postalCode,
+      addressCountry: OPERATING_ADDRESS.country,
     },
     contactPoint: {
       '@type': 'ContactPoint',
-      telephone: '+91-8951284770',
+      telephone: IR_PHONE,
       contactType: 'Investor Relations',
-      email: 'invrel@baalvion.com',
+      email: IR_EMAIL,
       areaServed: 'Worldwide',
       availableLanguage: ['English'],
     },
@@ -155,13 +157,17 @@ export default function RootLayout({
         >
           Skip to main content
         </a>
-        <Script
-          id="structured-data-org"
+        {/*
+          Plain <script>, not next/script. next/script injects on the CLIENT, so this JSON-LD was
+          only ever in the RSC payload and never in the server-rendered HTML — invisible to any
+          crawler that does not execute JavaScript, which includes most social scrapers. A plain
+          tag puts it in the initial response, which is the whole point of structured data.
+        */}
+        <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
         />
-        <Script
-          id="structured-data-website"
+        <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />

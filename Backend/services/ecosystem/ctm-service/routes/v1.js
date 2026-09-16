@@ -87,6 +87,9 @@ router.get('/plans',                 optionalAuth,   ctrl.listPlans);
 // scopes by req.auth.orgId so each caller only sees their own subscriptions.
 router.get('/subscriptions',         authMiddleware, ctrl.listSubscriptions);
 router.post('/subscriptions',        authed,         ctrl.createSubscription);
+// Idempotent entitlement convergence — replaces the browser-driven expire+reprovision dance.
+// Declared before '/subscriptions/:id' style routes so 'ensure' is never read as an id.
+router.post('/subscriptions/ensure', authMiddleware, ctrl.ensureSubscription);
 router.patch('/subscriptions/:id',   authMiddleware, ctrl.updateSubscription);
 
 // ── Invoices ──────────────────────────────────────────────────────────────────

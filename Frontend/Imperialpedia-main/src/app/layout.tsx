@@ -2,7 +2,7 @@ import React from "react";
 import "./globals.css";
 import { Metadata } from "next";
 import { env } from "@/config/env";
-import { Source_Serif_4 } from "next/font/google";
+import { Source_Serif_4, Figtree } from "next/font/google";
 import localFont from "next/font/local";
 import { cn } from "@/lib/utils";
 import RootLayoutClient from "@/components/common/RootLayoutClient";
@@ -123,6 +123,19 @@ const corinthian = localFont({
   display: "swap",
 });
 
+// Figtree stands in for Proxima Nova on the news template. Measured against the
+// real thing: headline set width within 0.3% and x-height within two units at
+// 100px, where Montserrat — the usual suggestion — runs 16% wide. Proxima Nova
+// itself is a commercial licence from Mark Simonson; the demo files floating
+// around replace $, %, - and the digit 4 with a watermark glyph, so they cannot
+// be used at all.
+const figtree = Figtree({
+  subsets: ["latin"],
+  weight: ["400", "600", "700", "800"],
+  variable: "--font-news",
+  display: "swap",
+});
+
 const sourceSerif = Source_Serif_4({
   subsets: ["latin"],
   weight: ["400", "600", "700", "900"],
@@ -149,7 +162,7 @@ export default async function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn(sourceSerif.variable, corinthian.variable)}
+      className={cn(sourceSerif.variable, corinthian.variable, figtree.variable)}
     >
       <head>
         {/* Google Consent Mode v2 -- must run BEFORE any ad/analytics script, so no

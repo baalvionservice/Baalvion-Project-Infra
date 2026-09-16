@@ -120,14 +120,18 @@ export function MatchingDemo() {
     <section className="py-24 bg-slate-50 relative overflow-hidden">
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex flex-col items-center text-center mb-16">
+          {/* Labelled a sample, not a "Live Demo": the profiles below are
+              MOCK_DEMO_CREATORS, invented and static. Calling static invented
+              data "live" claims a running engine and real creators. */}
           <Badge className="mb-4 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 px-3 py-1">
-            Live Demo
+            Interactive sample
           </Badge>
           <h2 className="text-3xl font-headline font-bold tracking-tighter sm:text-5xl mb-4">
-            Experience Our AI Matching Engine
+            How Our AI Matching Engine Works
           </h2>
           <p className="text-muted-foreground text-lg max-w-[700px]">
-            Adjust the parameters to see how Baalvion identifies the perfect creator profile for your campaign objectives.
+            Adjust the parameters to see how Baalvion narrows a creator pool against your campaign
+            objectives. The profiles shown are illustrative examples, not real creators.
           </p>
         </div>
 

@@ -6,6 +6,18 @@ import { articleDates } from '@/lib/seo/normalize-date';
 import { articleUrl } from '@/lib/article-url';
 import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
 
+/**
+ * `JSON.stringify` escapes neither `<` nor `/`, so a CMS value containing
+ * `</script>` closes this element early and everything after it parses as
+ * markup -- the FAQ text below is CMS body content with entities decoded.
+ * The escaped form is valid JSON and decodes to the same string.
+ */
+const jsonLdHtml = (data: unknown): string =>
+  JSON.stringify(data)
+    .replace(/</g, '\\u003c')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029');
+
 const titleCase = (s: string) => s.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
 /**
@@ -144,11 +156,11 @@ export function ArticleJsonLd({ article, slug, site }: { article: any | null; sl
   return (
     <>
       {jsonLd && (
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdHtml(jsonLd) }} />
       )}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdHtml(breadcrumbLd) }} />
       {faqLd && (
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdHtml(faqLd) }} />
       )}
     </>
   );

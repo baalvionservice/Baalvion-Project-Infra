@@ -63,7 +63,7 @@ export const EntityListItem = ({ name, type, category, description, slug, logo, 
           </div>
 
           <div className="flex items-center gap-2 text-xs font-bold text-primary opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all uppercase tracking-widest pt-4 border-t border-white/5">
-            Audit Node <ArrowRight size={14} />
+            Read more <ArrowRight size={14} />
           </div>
         </CardContent>
       </Card>

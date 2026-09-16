@@ -1,128 +1,118 @@
 'use client';
 
 import { useEffect } from 'react';
+import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { Database, Radio, Gauge, AlertTriangle } from 'lucide-react';
-import PageHeader from '@/components/common/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
+import { ArrowRight } from 'lucide-react';
 import { useUIStore } from '@/lib/store/uiStore';
 import { serviceClients } from '@/lib/api/client';
-import type { NewsStatsOverview, NewsTrendingItem } from '@/lib/types/news.types';
+import { NICHES, claimedCategories, type NicheDef } from '@/lib/constants/news-niches';
+import type { NewsStatsOverview, NewsSource } from '@/lib/types/news.types';
+import './desks.css';
 
-export default function NewsIntelligenceOverviewPage() {
+const nf = new Intl.NumberFormat('en-US');
+
+export default function NewsIntelligenceDeskPicker() {
   const { setBreadcrumbs } = useUIStore();
   useEffect(() => { setBreadcrumbs([{ label: 'News Intelligence' }]); }, [setBreadcrumbs]);
 
-  const { data: stats, isLoading: statsLoading } = useQuery({
+  const { data: stats } = useQuery({
     queryKey: ['news', 'stats-overview'],
     queryFn: () => serviceClients.news.get('/stats/overview').then((r) => r.data.data as NewsStatsOverview),
     refetchInterval: 60_000,
   });
 
-  const { data: trending, isLoading: trendingLoading } = useQuery({
-    queryKey: ['news', 'trending', 'category'],
-    queryFn: () =>
-      serviceClients.news
-        .get('/news/trending', { params: { dimension: 'category' } })
-        .then((r) => r.data.data.items as NewsTrendingItem[]),
+  // Sources carry their beat as default_category, which is the only way to say
+  // how many feeds a desk actually has — the overview counts them globally.
+  const { data: sources } = useQuery({
+    queryKey: ['news', 'sources'],
+    queryFn: () => serviceClients.news.get('/sources').then((r) => r.data.data as NewsSource[]),
   });
 
+  const byCategory = new Map((stats?.byCategory ?? []).map((c) => [c.category, c.count]));
+
+  const forNiche = (niche: NicheDef) => {
+    const articles = niche.wireCategories.reduce((sum, c) => sum + (byCategory.get(c) ?? 0), 0);
+    const feeds = (sources ?? []).filter((s) => niche.wireCategories.includes(s.default_category));
+    return {
+      articles,
+      feeds: feeds.length,
+      activeFeeds: feeds.filter((s) => s.is_active).length,
+    };
+  };
+
+  // Everything being ingested that no desk publishes. Shown rather than hidden:
+  // it is real ingestion cost against beats nothing covers.
+  const unclaimed = (stats?.byCategory ?? [])
+    .filter((c) => !claimedCategories.has(c.category))
+    .sort((a, b) => b.count - a.count);
+
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="News Intelligence"
-        description="Baalvion Intelligence ingestion pipeline — sources, articles, and trend volume (news-service)"
-      />
+    <div className="bv-desks">
+      <header className="bv-desks__masthead">
+        <span className="bv-desks__wordmark">News <span>Intelligence</span></span>
+        <span className="bv-desks__sub">Choose a desk</span>
+        <span className="bv-desks__feed">
+          {stats ? `${nf.format(stats.totalArticles)} ingested · ${stats.articlesLast24h} in 24h` : 'loading feed'}
+        </span>
+      </header>
 
-      {stats && stats.totalArticles === 0 && (
-        <Card className="border-yellow-500/30 bg-yellow-500/5">
-          <CardContent className="pt-5 flex items-start gap-3 text-sm text-muted-foreground">
-            <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5 text-yellow-500" />
-            <p>
-              0 articles is expected in this environment — it has no outbound network access, so
-              ingestion cannot reach real RSS feeds. Everything shown is live data from the real
-              database; run <code className="font-mono">pnpm --filter news-service dev</code> on a
-              machine with internet access and articles appear automatically.
-            </p>
-          </CardContent>
-        </Card>
-      )}
+      <div className="bv-desks__grid">
+        {NICHES.map((niche) => {
+          const s = forNiche(niche);
+          return (
+            <Link key={niche.id} href={`/news-intelligence/${niche.id}`} className="bv-desk">
+              <span className="bv-desk__k">Desk</span>
+              <p className="bv-desk__name">{niche.label}</p>
+              <p className="bv-desk__site">{niche.site}</p>
+              <p className="bv-desk__blurb">{niche.blurb}</p>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-2 flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-sm font-medium">Total Articles</CardTitle>
-            <Database className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {statsLoading ? <Skeleton className="h-8 w-20" /> : (
-              <>
-                <p className="text-2xl font-bold">{stats?.totalArticles.toLocaleString()}</p>
-                <p className="text-xs text-muted-foreground mt-1">{stats?.articlesLast24h} in the last 24h</p>
-              </>
-            )}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2 flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-sm font-medium">Sources</CardTitle>
-            <Radio className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {statsLoading ? <Skeleton className="h-8 w-20" /> : (
-              <>
-                <p className="text-2xl font-bold">{stats?.activeSources} / {stats?.totalSources}</p>
-                <p className="text-xs text-muted-foreground mt-1">active / total registered</p>
-              </>
-            )}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2 flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-sm font-medium">Last Ingestion</CardTitle>
-            <Gauge className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {statsLoading ? <Skeleton className="h-8 w-32" /> : (
-              <p className="text-lg font-semibold">
-                {stats?.lastIngestedAt ? new Date(stats.lastIngestedAt).toLocaleString() : 'Never'}
-              </p>
-            )}
-          </CardContent>
-        </Card>
+              <div className="bv-desk__stats">
+                <div className="bv-desk__stat">
+                  <span className="bv-desk__stat-k">Articles</span>
+                  <span className="bv-desk__stat-v">{stats ? nf.format(s.articles) : '—'}</span>
+                </div>
+                <div className="bv-desk__stat">
+                  <span className="bv-desk__stat-k">Feeds</span>
+                  <span className="bv-desk__stat-v">{sources ? `${s.activeFeeds}/${s.feeds}` : '—'}</span>
+                </div>
+                <div className="bv-desk__stat">
+                  <span className="bv-desk__stat-k">Beats</span>
+                  <span className="bv-desk__stat-v">{niche.wireCategories.length}</span>
+                </div>
+              </div>
+
+              <div className="bv-desk__cats">
+                {niche.wireCategories.map((c) => (
+                  <span key={c} className="bv-desk__cat">{c}</span>
+                ))}
+              </div>
+
+              <span className="bv-desk__go">
+                Open overview <ArrowRight className="h-3.5 w-3.5" />
+              </span>
+            </Link>
+          );
+        })}
       </div>
 
-      <Card>
-        <CardHeader><CardTitle>Volume by category (24h vs. prior 24h)</CardTitle></CardHeader>
-        <CardContent>
-          {trendingLoading ? (
-            <div className="space-y-2">{Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}</div>
-          ) : !trending || trending.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">No article volume yet.</p>
-          ) : (
-            <div className="space-y-1">
-              {trending.map((item, i) => (
-                <div key={item.value} className="flex items-center justify-between py-2 border-b last:border-0 text-sm">
-                  <span className="flex items-center gap-3">
-                    <span className="w-5 text-muted-foreground font-mono text-xs">{i + 1}</span>
-                    <span className="font-medium">{item.value}</span>
-                  </span>
-                  <span className="flex items-center gap-2">
-                    <Badge variant="secondary">{item.count} articles</Badge>
-                    {item.changePct !== null && (
-                      <span className={item.changePct >= 0 ? 'text-green-500' : 'text-red-500'}>
-                        {item.changePct >= 0 ? '+' : ''}{item.changePct}%
-                      </span>
-                    )}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {unclaimed.length > 0 && (
+        <div className="bv-desks__spare">
+          <span className="bv-desks__spare-k">Ingested, not published</span>
+          <p className="bv-desks__spare-note">
+            These beats are being pulled and stored, but no desk covers them — nothing on the estate
+            publishes from them today. Either give a site an editorial charter that claims the beat,
+            or switch the feeds off to stop paying to store them.
+          </p>
+          <div className="bv-desks__spare-list">
+            {unclaimed.map((c) => (
+              <span key={c.category} className="bv-desks__spare-item">
+                {c.category} · {nf.format(c.count)}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

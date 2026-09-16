@@ -149,7 +149,8 @@ Backend/
     infrastructure/  notification-service · proxy-service · realtime-service
   packages/                        # shared libraries (@baalvion/*)
                      auth-node · auth-sdk · rbac · contracts · events ·
-                     telemetry · logger · errors · security · validation · …
+                     telemetry · logger · errors · security · validation ·
+                     design (shared frontend quality bar) · …
   catalog/                         # service catalog + architecture contract
   gateway/  database/  infra/      # cross-cutting infrastructure
 Frontend/<app>/                    # Next.js / Vite applications

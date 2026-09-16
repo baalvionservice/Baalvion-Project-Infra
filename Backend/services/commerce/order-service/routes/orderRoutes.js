@@ -48,6 +48,9 @@ router.post('/', checkoutLimit, validate(createOrderSchema), ctrl.createOrder);
 // Rate-limited + schema-validated. A distinct literal path, so it never collides with POST '/' or
 // the GET '/:orderId' param route. Lets a returning guest track an order after losing their session.
 router.post('/lookup', orderLookupLimit, validate(lookupOrderSchema), ctrl.lookupOrder);
+// Gateways with working credentials, for the checkout UI. A literal path declared before the
+// GET '/:orderId' param route below, which would otherwise match "payment-gateways" as an id.
+router.get('/payment-gateways', ctrl.listPaymentGateways);
 // Customer-facing "my orders". MUST precede GET '/:orderId' so 'mine' is not parsed as an order id.
 // authMiddleware is re-applied (router is optionalAuth) so a guest is 401'd — there is no "my orders" for a guest.
 router.get('/mine', authMiddleware, ctrl.listMyOrders);

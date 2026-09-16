@@ -27,8 +27,20 @@
   //     Nothing about the site was broken — baalvion.com kept serving the last good
   //     deploy — so it read as harmless red CI while shipping was silently frozen.
   //     Keep the build step here in version control, where review can catch a typo.
+  //
+  // The command builds this app's workspace dependencies before `next build`. Both
+  // @baalvion/company and @baalvion/design resolve their entrypoints through `dist/`, which is
+  // gitignored and only exists once tsup has run. Nothing in the Cloudflare fresh clone runs it,
+  // so from the commit that added the @baalvion/company import onward every build stopped at:
+  //     ./src/components/site-footer.tsx
+  //     Module not found: Can't resolve '@baalvion/company'
+  //     > Build failed because of webpack errors
+  // `<pkg>^...` is pnpm's "dependencies of, excluding the package itself" filter, so a workspace
+  // dependency added later is built without anyone remembering to edit this line.
+  // Deliberately not `turbo run build --filter=...`: that would put `next build` behind Turbo's
+  // strict env mode, which has already silently dropped build-time config on other properties.
   "build": {
-    "command": "npm run build"
+    "command": "pnpm --filter baalvion-com-web^... run build && npm run build"
   },
   "assets": {
     "directory": "./out",
@@ -38,6 +50,17 @@
   "vars": {
     // OPERATOR: set to the real auth-service base reachable from Cloudflare's edge.
     // Override per-env with `wrangler secret put AUTH_SERVICE_URL` if it should not live in source.
-    "AUTH_SERVICE_URL": "https://api.baalvion.com"
+    //
+    // `api.baalvion.com` was wrong: worker.ts appends `/v1/auth`, and `api.baalvion.com/v1/auth/*`
+    // falls through Caddy to the proxy-service BFF — a DIFFERENT service with its own tenant-auth
+    // and its own `email_otps` table that was never created (sql/004_email_otp_login.sql is
+    // unapplied there). Sign-in 500'd with `relation "email_otps" does not exist`.
+    //
+    // `auth-api.baalvion.com` is the central auth-service exposed at root for exactly this
+    // same-origin /auth-bff/* pattern, so `/v1/auth/email/otp/{request,verify}` resolve directly.
+    // NOT the `api.baalvion.com/api/v1/identity/auth/v1/auth` path: Caddy routes that to the
+    // auth-GATEWAY, whose otp/verify answers `{ user, csrfToken }` — auth-api.ts requires the
+    // auth-service `{ success, data: { accessToken } }` envelope and would read `data` as undefined.
+    "AUTH_SERVICE_URL": "https://auth-api.baalvion.com"
   }
 }

@@ -38,6 +38,10 @@ async function screen({ name, country, tenantId }, opts = {}) {
         // X-Tenant-ID must be a UUID for the engine's tenant context; omit otherwise
         // (the watchlist + verdict are global — only the audit row is tenant-scoped).
         if (tenantId && UUID_RE.test(String(tenantId))) headers['X-Tenant-ID'] = String(tenantId);
+        // risk-service is a Spring resource server; a caller with no user JWT authenticates with
+        // the platform shared secret (ROLE_INTERNAL). Screening fails CLOSED, so a 401 here would
+        // block every order rather than fail quietly.
+        if (config.internalSecret) headers['x-internal-secret'] = config.internalSecret;
         const res = await fetch(`${url}/api/v1/sanctions/screen`, {
             method: 'POST',
             headers,

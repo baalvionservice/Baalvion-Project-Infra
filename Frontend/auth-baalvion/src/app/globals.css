@@ -1,3 +1,4 @@
+@import '@baalvion/design/base.css';
 /*
  * Token-driven styles. Every value resolves from a CSS custom property set by the active brand
  * theme (see lib/themes.ts), so the same markup renders natively in any Baalvion brand — dark
