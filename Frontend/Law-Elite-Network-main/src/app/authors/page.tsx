@@ -57,6 +57,10 @@ export default async function AuthorsIndexPage() {
             </p>
           </header>
 
+          {/* `authors` above is already filtered to published-only (line 26) —
+              same zero-article filter sitemap.ts applies, so the directory,
+              the sitemap, and each profile's own noindex logic all agree
+              instead of this page advertising people the sitemap omits. */}
           <AuthorsDirectory authors={authors} counts={counts} />
 
         </div>

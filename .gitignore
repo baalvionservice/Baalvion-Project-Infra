@@ -152,3 +152,8 @@ admin-health.json
 
 .vercel
 .env*.local
+
+# Imperialpedia local scratch: ingest caches and draft/backup dumps.
+# Multi-MB, machine-local, and regenerable — never part of a commit.
+Frontend/Imperialpedia-main/.cache-*.json
+Frontend/Imperialpedia-main/.drafts/

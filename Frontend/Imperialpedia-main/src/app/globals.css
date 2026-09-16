@@ -6,24 +6,20 @@
 @tailwind components;
 @tailwind utilities;
 
-@font-face {
-  font-family: 'Corinthian';
-  src: url('/fonts/Corinthian-Medium.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-/* ── Direct Corinthian font application — bypasses CSS variable chain ── */
-/* Applied to article H1 title and TOC header */
+/* Corinthian is already self-hosted, hashed, and preloaded via next/font/local
+   in layout.tsx (--font-corinthian). A second raw @font-face for the same
+   .ttf here would make the browser fetch the typeface twice — once through
+   next/font's preloaded copy, once through this one, unpreloaded — right on
+   the article H1, which is frequently the LCP element. Route through the
+   next/font variable instead of redeclaring the font. */
 .font-corinthian,
 article h1,
 header h1 {
-  font-family: 'Corinthian', Georgia, 'Times New Roman', serif !important;
+  font-family: var(--font-corinthian), Georgia, 'Times New Roman', serif !important;
 }
 
 .toc-heading {
-  font-family: 'Corinthian', Georgia, 'Times New Roman', serif !important;
+  font-family: var(--font-corinthian), Georgia, 'Times New Roman', serif !important;
 }
 
 @layer base {
@@ -321,21 +317,6 @@ html {
     display: none;
   }
 
-  /* Mobile performance optimizations */
-  .mobile-optimized {
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-    -webkit-perspective: 1000;
-    perspective: 1000;
-  }
-
-  .gpu-accelerated {
-    will-change: transform;
-    transform: translateZ(0);
-  }
-
   /* Touch optimization */
   .touch-optimized {
     -webkit-tap-highlight-color: transparent;
@@ -426,11 +407,6 @@ html {
 
 /* Additional mobile performance optimizations */
 @media (max-width: 768px) {
-  * {
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
-  }
-
   img {
     max-width: 100%;
     height: auto;
@@ -444,12 +420,6 @@ html {
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeSpeed;
   }
-}
-
-/* Mobile-specific optimizations */
-.mobile-optimized * {
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
 }
 
 .mobile-optimized img {

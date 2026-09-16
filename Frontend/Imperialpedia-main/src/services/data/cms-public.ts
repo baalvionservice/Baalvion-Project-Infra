@@ -24,6 +24,7 @@ import type { EntityMention } from '@/lib/entityLinkInjector';
 import { REGIONS } from '@/lib/data/worldRegions';
 import { isRemovedArticlePath } from '@/lib/content/removed-article-paths';
 import { getEditorialGuide } from '@/lib/articles/editorial-guides';
+import { CREATOR_SLUGS, filterCreatorArticlesByTopic } from '@/lib/creator-economy-topics';
 
 // In production default to the API gateway's public delivery host (not localhost,
 // and not an empty string that silently forced the built-in fallback). A deploy
@@ -1052,6 +1053,19 @@ export async function getCategoryArticles(
   limit = 30,
 ): Promise<NewsArticle[]> {
   try {
+    // The 6 Creator Economy subtopics (youtube-monetization, etc.) aren't real
+    // CMS categories — every migrated article lives under the single
+    // "creator-economy" category — so fetch that category and narrow to the
+    // subtopic's genuinely on-topic articles client-side, same as the static
+    // fallback in static-content.ts does.
+    if (CREATOR_SLUGS.has(categorySlug)) {
+      const { items } = await listCmsContent({ categorySlug: 'creator-economy', limit: 100 });
+      const mapped = items.map(cmsContentToNews).filter((a) => !isRemovedArticlePath(a));
+      return categorySlug === 'creator-economy'
+        ? mapped
+        : filterCreatorArticlesByTopic(mapped, categorySlug);
+    }
+
     const { items } = await listCmsContent({ categorySlug, limit });
     // Every category hub (CategoryFeed + the dedicated Investing/Reviews/etc.
     // hubs) reads its feed and featured card through this one function, so

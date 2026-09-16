@@ -472,6 +472,23 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      // Static, hashed build output — safe to cache forever; only matters on the
+      // self-hosted Docker/standalone path (Vercel's CDN already does this for
+      // `_next/static` on its own, but doesn't know about our own `/fonts`/`/images`).
+      {
+        source: '/_next/static/(.*)',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
+      },
+      {
+        source: '/fonts/(.*)',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
+      },
+      // Not content-hashed like /fonts or /_next/static — a redeploy can replace
+      // a file at the same path, so this revalidates rather than going immutable.
+      {
+        source: '/images/(.*)',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=86400, stale-while-revalidate=604800' }],
+      },
     ];
   },
   images: {
@@ -532,6 +549,8 @@ const nextConfig: NextConfig = {
       "recharts",
       "date-fns",
       "@tanstack/react-query",
+      "framer-motion",
+      "embla-carousel-react",
     ],
   },
   // Compression

@@ -29,72 +29,22 @@ export const VERIFIED_AUTHOR_SLUGS = new Set<string>([
   'deepak-kuldeep',
 ]);
 
-/** 28 Weaker or generic stock-definition articles to temporarily hide/noindex */
-export const HIDDEN_STOCK_ARTICLES = new Set<string>([
-  '/stocks/stock-market-circuit-breakers',
-  '/stocks/stock-market-trading-hours',
-  '/stocks/dividend-yield-explained',
-  '/stocks/roa-explained',
-  '/stocks/small-cap-stocks-explained',
-  '/stocks/outstanding-shares-explained',
-  '/stocks/bollinger-bands-explained',
-  '/stocks/what-is-an-order-book',
-  '/stocks/roe-explained',
-  '/stocks/macd-explained',
-  '/stocks/rsi-explained',
-  '/stocks/free-cash-flow-explained',
-  '/stocks/bid-vs-ask-price',
-  '/stocks/public-vs-private-companies',
-  '/stocks/net-income-explained',
-  '/stocks/revenue-explained',
-  '/stocks/penny-stocks-explained',
-  '/stocks/nasdaq-explained',
-  '/stocks/eps-explained',
-  '/stocks/price-to-book-ratio-explained',
-  '/stocks/nyse-explained',
-  '/stocks/price-to-earnings-ratio-explained',
-  '/stocks/how-stock-exchanges-work',
-  '/stocks/what-is-the-stock-market',
-  '/stocks/what-is-a-stock',
-  '/stocks/how-to-sell-stocks',
-  '/stocks/enterprise-value-explained',
-  '/stocks/what-is-market-capitalization',
-]);
+/**
+ * Stock articles to temporarily hide/noindex. Previously listed all 28 pre-trim
+ * articles (including every one of the 10 pillar articles kept when the category
+ * was curated down from 28 to 10 in the CMS on 2026-09-15) — that made this list
+ * hide the exact set of articles the CMS trim was meant to surface. The CMS-level
+ * curation is now the source of truth for this category, so nothing further is
+ * suppressed here.
+ */
+export const HIDDEN_STOCK_ARTICLES = new Set<string>([]);
 
-/** 31 Thin, repetitive, or substantially overlapping budgeting articles to temporarily hide/noindex */
-export const HIDDEN_BUDGETING_ARTICLES = new Set<string>([
-  '/budgeting-basics/annual-budget-planning-guide',
-  '/budgeting-basics/budgeting-during-inflation',
-  '/budgeting-basics/budgeting-for-small-business-owners',
-  '/budgeting-basics/budgeting-for-freelancers',
-  '/budgeting-basics/advanced-budgeting-strategies',
-  '/budgeting-basics/manual-budgeting-without-apps',
-  '/budgeting-basics/best-budget-apps',
-  '/budgeting-basics/when-to-use-emergency-savings',
-  '/budgeting-basics/emergency-fund-calculator-guide',
-  '/budgeting-basics/managing-student-expenses',
-  '/budgeting-basics/budgeting-on-a-part-time-income',
-  '/budgeting-basics/college-budget-guide',
-  '/budgeting-basics/couples-budgeting',
-  '/budgeting-basics/single-parent-budget',
-  '/budgeting-basics/budgeting-with-kids',
-  '/budgeting-basics/family-budget-guide',
-  '/budgeting-basics/frugal-living-tips',
-  '/budgeting-basics/lower-utility-bills',
-  '/budgeting-basics/reduce-grocery-costs',
-  '/budgeting-basics/best-ways-to-cut-expenses',
-  '/budgeting-basics/how-to-save-more-every-month',
-  '/budgeting-basics/reverse-budgeting-explained',
-  '/budgeting-basics/pay-yourself-first-method',
-  '/budgeting-basics/budget-methods-compared',
-  '/budgeting-basics/budget-review-checklist',
-  '/budgeting-basics/budget-calendar-guide',
-  '/budgeting-basics/monthly-budget-checklist',
-  '/budgeting-basics/common-budgeting-mistakes',
-  '/budgeting-basics/why-budgeting-matters',
-  '/budgeting-basics/what-is-a-budget',
-  '/budgeting-basics/budgeting-after-a-major-life-change',
-]);
+/**
+ * Budgeting articles to temporarily hide/noindex. Same history as
+ * HIDDEN_STOCK_ARTICLES: previously overlapped 7 of the 10 pillar articles kept
+ * when Budgeting Basics was curated down from 37 to 10 in the CMS on 2026-09-15.
+ */
+export const HIDDEN_BUDGETING_ARTICLES = new Set<string>([]);
 
 /** 3 Thin financial tools consisting primarily of a calculator with little supporting text */
 export const HIDDEN_FINANCIAL_TOOLS = new Set<string>([
@@ -103,11 +53,12 @@ export const HIDDEN_FINANCIAL_TOOLS = new Set<string>([
   '/financial-tools/profit-loss',
 ]);
 
-/** 2 Thin/weak fraud protection articles */
-export const HIDDEN_FRAUD_ARTICLES = new Set<string>([
-  '/fraud-protection/tracking-cookies-scam-targeting',
-  '/fraud-protection/fake-bank-documents-canva-scams',
-]);
+/**
+ * Fraud protection articles to temporarily hide/noindex. Previously hid 2 of the
+ * category's only 5 live articles; Scams & Fraud Protection is being grown to
+ * 8-10 articles, not trimmed, so nothing is suppressed here.
+ */
+export const HIDDEN_FRAUD_ARTICLES = new Set<string>([]);
 
 /** Dated news articles to temporarily hide/noindex */
 export const HIDDEN_NEWS_ARTICLES = new Set<string>([
