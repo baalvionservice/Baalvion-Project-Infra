@@ -499,18 +499,18 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
-    // Vercel's on-demand Image Optimization API (/_next/image) is metered and
-    // caps out under real traffic — once the quota is hit it returns 402
-    // Payment Required for EVERY image on the site (confirmed live: raw files
-    // at api.baalvion.com/uploads/* return 200, but imperialpedia.com/_next/image
-    // returns 402 OPTIMIZED_IMAGE_REQUEST_PAYMENT_REQUIRED for the same file).
-    // `unoptimized: true` makes next/image render the original src directly —
-    // no resize/reformat pass, no Vercel billing dependency, so images can
-    // never go dark sitewide again regardless of upload volume or traffic.
-    // Uploaded photos are already reasonably sized and generated artwork is
-    // SVG (vector, no benefit from raster resizing), so the loss of on-the-fly
-    // webp/avif conversion here is a non-issue in practice.
-    unoptimized: true,
+    // Previously unoptimized: true — Vercel's on-demand Image Optimization API
+    // is metered and was capping out under real traffic, returning 402
+    // Payment Required for EVERY image sitewide once the quota hit (confirmed
+    // live: raw files at api.baalvion.com/uploads/* returned 200, but
+    // imperialpedia.com/_next/image returned 402 for the same file). That risk
+    // is gone now that this site is self-hosted on the VPS — image
+    // optimization runs on our own server via `sharp`, not a metered Vercel
+    // service, so there's no quota to exhaust. Confirmed via a live Lighthouse
+    // audit that without this, a 1200x675 upload was shipped at full
+    // resolution for a 348x196 display slot (~32KB wasted on that one image
+    // alone).
+    unoptimized: false,
     // Only self (imperialpedia.com) and the cms-service origin that hosts
     // auto-generated article artwork — no stock/placeholder/third-party hosts.
     remotePatterns: [
