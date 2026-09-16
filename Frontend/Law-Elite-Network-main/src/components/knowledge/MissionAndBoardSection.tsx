@@ -46,7 +46,7 @@ export function MissionAndBoardSection({ stats, authors }: { stats: HomeStats; a
               We are an educational publisher, not a law firm. Our purpose is to inform and orient,
               never to replace the judgment of a licensed attorney who knows the facts of your
               situation.{' '}
-              <Link href="/about-us" className="text-blue-600 hover:underline">
+              <Link href="/about-us" className="text-blue-700 underline underline-offset-2">
                 Read our full mission →
               </Link>
             </p>
@@ -64,7 +64,7 @@ export function MissionAndBoardSection({ stats, authors }: { stats: HomeStats; a
             The desk editors who lead each practice-area's coverage and edit guides in their
             subject area, with named, published profiles. Guides are written by our wider
             contributor team — see the full{' '}
-            <Link href="/authors" className="text-blue-600 hover:underline">contributors list</Link>.
+            <Link href="/authors" className="text-blue-700 underline underline-offset-2">contributors list</Link>.
           </p>
           <div className="space-y-4">
             {authors.map((a) => (

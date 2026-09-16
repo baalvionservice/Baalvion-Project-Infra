@@ -92,10 +92,9 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
   // not indexable content.
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${BASE_URL}/` },
-    { url: `${BASE_URL}/news` },
-    { url: `${BASE_URL}/case-law` },
-    { url: `${BASE_URL}/legislation` },
-    { url: `${BASE_URL}/law-changes` },
+    // /news, /case-law, /legislation, /law-changes deliberately omitted:
+    // all four now 301 to / (next.config.ts) -- see retired-links.ts's
+    // RETIRED_SECTIONS for why.
     { url: `${BASE_URL}/about-us` },
     { url: `${BASE_URL}/authors` },
     { url: `${BASE_URL}/editorial-standards` },

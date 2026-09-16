@@ -57,7 +57,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
 
         <div className="mt-3 pt-3 border-t border-slate-100 space-y-2">
           <Byline article={article} />
-          <div className="flex items-center gap-4 text-[12px] text-slate-400 font-medium">
+          <div className="flex items-center gap-4 text-[12px] text-slate-500 font-medium">
             {article.views ? (
               <span className="inline-flex items-center gap-1.5">
                 <Eye className="w-3.5 h-3.5" /> {Number(article.views).toLocaleString()} views

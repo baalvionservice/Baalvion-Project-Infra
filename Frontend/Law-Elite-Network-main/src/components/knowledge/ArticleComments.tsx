@@ -69,7 +69,7 @@ export function ArticleComments({ slug }: { slug: string }) {
       </h2>
 
       {loaded && comments.length === 0 && (
-        <p className="text-[14px] text-slate-400 mb-6">No comments yet. Be the first to share your thoughts.</p>
+        <p className="text-[14px] text-slate-500 mb-6">No comments yet. Be the first to share your thoughts.</p>
       )}
 
       {comments.length > 0 && (

@@ -2345,11 +2345,11 @@ const OVERRIDES: Record<string, TopicCopy> = {
       },
     ],
     relatedReading: [
-      { slug: 'stocks/what-is-a-stock', anchor: 'What owning a share actually entitles you to' },
+      { slug: 'stocks/what-is-market-capitalization', anchor: 'Market Capitalization: The Number That Decides Which Index Must Buy You' },
       { slug: 'stocks/how-stock-exchanges-work', anchor: 'The four systems behind how a trade actually executes' },
-      { slug: 'stocks/public-vs-private-companies', anchor: 'What changes for a company — and its shareholders — when it goes public' },
-      { slug: 'stocks/price-to-earnings-ratio-explained', anchor: 'The P/E ratio, and why a low one isn’t automatically a bargain' },
-      { slug: 'stocks/dividend-yield-explained', anchor: 'How to read a dividend yield without being misled by it' },
+      { slug: 'stocks/what-is-an-order-book', anchor: 'The Order Book: What Sits Behind a Two-Number Quote' },
+      { slug: 'stocks/outstanding-shares-explained', anchor: 'Outstanding Shares: Issued, Float, Treasury, and Why the Count Keeps Moving' },
+      { slug: 'stocks/bid-vs-ask-price', anchor: 'The Bid-Ask Spread: The Trading Cost Nobody Bills You For' },
     ],
     metaTitle: 'What Is a Stock? Stock Investing Explained for Beginners',
     metaDescription:
@@ -3866,10 +3866,10 @@ const OVERRIDES: Record<string, TopicCopy> = {
       },
     ],
     relatedReading: [
-      { slug: 'budgeting-basics/monthly-budget-blueprint', anchor: 'A monthly budget template built to actually last' },
-      { slug: 'budgeting-basics/best-ways-to-cut-expenses', anchor: 'How to cut everyday expenses without feeling deprived' },
-      { slug: 'budgeting-basics/family-budget-guide', anchor: 'Coordinating a household budget across a family' },
-      { slug: 'budgeting-basics/emergency-fund-calculator-guide', anchor: 'A real framework for how big your emergency fund should be' },
+      { slug: 'budgeting-basics/when-to-use-emergency-savings', anchor: 'When to Use Your Emergency Fund (and When Not To)' },
+      { slug: 'budgeting-basics/manual-budgeting-without-apps', anchor: 'Manual Budgeting Without an App: Envelope Method, Kakeibo & the Research Behind Cash' },
+      { slug: 'budgeting-basics/couples-budgeting', anchor: 'Budgeting as a Couple: Joint, Separate, or Both' },
+      { slug: 'budgeting-basics/annual-budget-planning-guide', anchor: 'Annual Budget Planning: A Step-by-Step Guide' },
     ],
     metaTitle: 'Budgeting Basics — Step-by-Step Beginner’s Guide to Budgeting',
     metaDescription:

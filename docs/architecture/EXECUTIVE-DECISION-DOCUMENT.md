@@ -73,7 +73,7 @@
 | amarisemaisonavenue.com | `AmariseMaisonAvenue-main` | `AmariseMaisonAvenue` | Independent (silent ownership) | Luxury maison retail brand |
 | imperialpedia.com | `Imperialpedia-main` | `Imperialpedia` | Independent | Financial knowledge & AI market intelligence |
 | lawelitenetwork.com | `Law-Elite-Network-main` | `LawEliteNetwork` | Independent | Legal knowledge & practitioner discovery |
-| controlthemarket.com | `controlthemarket-main` | `ControlTheMarket` | Independent | Proof-of-skill hiring platform |
+| controlthemarket.com | `testrank-baalvion` | `ControlTheMarket` | Independent | Proof-of-skill hiring platform |
 | proxy.baalvionstack.com (baalvionstack.com) | `Proxy-BaalvionStack` | `BaalvionStack-Web` | Independent (own root domain) | BaalvionStack proxy/infrastructure product UI |
 | admin.baalvion.com | `admin-platform` | `Baalvion-Admin` | Internal (platform ops) | Platform/CMS/RBAC administration console |
 

@@ -14,7 +14,7 @@ All images are multi-stage, `node:20-alpine` (Proxy runner = `nginx-unprivileged
 |-----|----------------|-----------|:---:|----------------|
 | Admin Platform | `admin.baalvion.com` | `admin-web` | 3030 | `/` (HTTP < 500) |
 | Amarisé | `amarisemaisonavenue.com` | `amarise-web` | 3033 | `/` |
-| ControlTheMarket | `controlthemarket.com` | `ctm-web` | 3000 | `/` |
+| ControlTheMarket | `controlthemarket.com` | `testrank-baalvion-web` | 3000 | `/` |
 | Law Elite | `lawelitenetwork.com` | `law-elite-web` | 9002 | `/` |
 | Imperialpedia | `imperialpedia.com` | `imperialpedia-web` | 3029 | `/` |
 | GTI | `trade.baalvion.com` | `gti-web` | 9003 | `/api/health` |
@@ -42,7 +42,7 @@ docker build -f Frontend/AmariseMaisonAvenue-main/Dockerfile -t amarise-web \
   .
 
 # ControlTheMarket
-docker build -f Frontend/controlthemarket-main/Dockerfile -t ctm-web \
+docker build -f Frontend/testrank-baalvion/Dockerfile -t testrank-baalvion-web \
   --build-arg NEXT_PUBLIC_CTM_API_URL=https://api.baalvion.com/api/v1/ecosystem/ctm/api/v1 \
   --build-arg NEXT_PUBLIC_APP_URL=https://controlthemarket.com \
   .

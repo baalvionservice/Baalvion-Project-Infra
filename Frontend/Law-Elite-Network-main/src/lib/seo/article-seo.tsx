@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
-import { getAuthorByName } from '@/data/authors';
+import { buildAuthorLd } from '@/lib/seo/author-ld';
 import { resolveArticleImage } from '@/lib/article-art';
 import { extractFaqFromHtml } from '@/lib/seo/faq-extractor';
-import { toIsoDate } from '@/lib/seo/normalize-date';
+import { articleDates } from '@/lib/seo/normalize-date';
 import { articleUrl } from '@/lib/article-url';
-import { CURRENT_CATEGORY_SLUGS } from '@/lib/category-slugs';
+import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
 
 /**
  * `JSON.stringify` escapes neither `<` nor `/`, so a CMS value containing
@@ -19,6 +19,27 @@ const jsonLdHtml = (data: unknown): string =>
     .replace(/\u2029/g, '\\u2029');
 
 const titleCase = (s: string) => s.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+
+/**
+ * Whether an article still belongs to a category the site actually publishes.
+ *
+ * The AdSense retirement shrank the sitemap to the maritime/injury cluster but
+ * never de-indexed what it dropped: 75 articles across the eight retired
+ * practice areas still resolved at /article/{slug} as `index, follow`, linked
+ * from /case-law, /legislation and /news. The sitemap advertised 55 URLs while
+ * the real indexable surface was about 130, most of it orphaned — no category
+ * hub, no breadcrumb parent, no navigation path to it.
+ *
+ * These stay readable and keep passing link equity (follow), they simply leave
+ * the index, which is what retiring a category was supposed to mean. An
+ * article with no category at all is left indexable: the standalone root-level
+ * guides have none, and they are the content being kept.
+ */
+function isCurrentCategoryArticle(article: any): boolean {
+  const raw = article?.category?.slug;
+  if (!raw) return true;
+  return (CURRENT_CATEGORY_SLUGS as readonly string[]).includes(toNewCategorySlug(raw));
+}
 
 /**
  * Shared metadata builder for every route that can render an article page
@@ -56,15 +77,17 @@ export function buildArticleMetadata(article: any | null, slug: string, site: st
     description,
     keywords: [...(article.tags || []), 'legal guide', 'law', 'legal advice'].filter(Boolean),
     alternates: { canonical: url },
-    robots: { index: true, follow: true },
+    robots: isCurrentCategoryArticle(article)
+      ? { index: true, follow: true }
+      : { index: false, follow: true },
     authors: authorName ? [{ name: authorName }] : undefined,
     openGraph: {
       type: 'article',
       url,
       title,
       description,
-      publishedTime: toIsoDate(article.published_at),
-      modifiedTime: toIsoDate(article.updated_at),
+      publishedTime: articleDates(article).published,
+      modifiedTime: articleDates(article).modified,
       authors: authorName ? [authorName] : undefined,
       images: [{ url: ogImage, alt: title }],
     },
@@ -81,10 +104,7 @@ export function buildArticleMetadata(article: any | null, slug: string, site: st
 export function ArticleJsonLd({ article, slug, site }: { article: any | null; slug: string; site: string }) {
   const url = `${site}${articleUrl(article ? { ...article, slug } : { slug })}`;
   const bylineName = (typeof article?.author === 'string' ? article.author : article?.author?.name) || undefined;
-  const matchedAuthor = bylineName ? getAuthorByName(bylineName) : null;
-  const authorLd = matchedAuthor
-    ? { '@type': 'Person', name: matchedAuthor.name, url: `${site}/author/${matchedAuthor.slug}` }
-    : { '@type': 'Organization', name: 'Law Elite Network' };
+  const authorLd = buildAuthorLd(bylineName, site);
   const articleImage = article ? resolveArticleImage({ ...article, title: article.title, slug }) : undefined;
   const jsonLd = article && {
     '@context': 'https://schema.org',
@@ -92,8 +112,8 @@ export function ArticleJsonLd({ article, slug, site }: { article: any | null; sl
     headline: article.title,
     description: article.excerpt || undefined,
     image: articleImage ? [articleImage] : undefined,
-    datePublished: toIsoDate(article.published_at),
-    dateModified: toIsoDate(article.updated_at) || toIsoDate(article.published_at),
+    datePublished: articleDates(article).published,
+    dateModified: articleDates(article).modified,
     mainEntityOfPage: url,
     author: authorLd,
     publisher: { '@type': 'Organization', name: 'Law Elite Network', logo: { '@type': 'ImageObject', url: `${site}/logo.png` } },
