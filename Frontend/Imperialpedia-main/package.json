@@ -6,6 +6,11 @@
   "engines": {
     "node": ">=20.0.0"
   },
+  "browserslist": [
+    "defaults",
+    "not IE 11",
+    "not dead"
+  ],
   "scripts": {
     "dev": "next dev -p 3029",
     "build": "next build",
