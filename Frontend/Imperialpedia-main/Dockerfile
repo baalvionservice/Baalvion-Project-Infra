@@ -13,7 +13,7 @@
 #     --build-arg NEXT_PUBLIC_SITE_URL=https://imperialpedia.com \
 #     .
 FROM node:26-alpine AS base
-RUN apk add --no-cache libc6-compat && corepack enable
+RUN apk add --no-cache libc6-compat && npm install -g corepack && corepack enable
 WORKDIR /app
 
 # 1) Prune the monorepo to just this app + its workspace deps.
@@ -48,7 +48,11 @@ ENV AUTH_PROXY_TARGET=$AUTH_PROXY_TARGET
 ENV NEXT_TELEMETRY_DISABLED=1 NODE_ENV=production
 COPY --from=pruner /app/out/full/ ./
 # Shared tsconfig chain is not part of the pruned output → copy it for the TS build.
+# Backend/tsconfig.base.json is a SEPARATE file (different compiler target) that
+# @baalvion/design, @baalvion/company and @baalvion/illustrations extend from — without
+# it the pruned build fails with "Cannot read file '/app/Backend/tsconfig.base.json'".
 COPY tsconfig.base.json ./tsconfig.base.json
+COPY Backend/tsconfig.base.json ./Backend/tsconfig.base.json
 RUN pnpm dlx turbo@2.9.14 run build --filter=imperialpedia-web
 
 # 4) Minimal runner (Next standalone server).
@@ -63,5 +67,6 @@ USER nextjs
 EXPOSE 3029
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
     CMD node -e "require('http').get('http://127.0.0.1:'+(process.env.PORT||3029),r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"
-# Standalone server entrypoint is nested under the app path in a monorepo build.
+# Standalone server entrypoint is nested under the app path in a monorepo build (see
+# outputFileTracingRoot in next.config.ts — it now correctly points at the repo root).
 CMD ["node", "Frontend/Imperialpedia-main/server.js"]
