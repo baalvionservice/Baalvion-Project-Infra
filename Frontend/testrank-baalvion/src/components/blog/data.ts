@@ -104,6 +104,16 @@ export function getArticleBySlug(
   return { post, article };
 }
 
+/**
+ * `Article.date` is a display string ("March 2026") — not valid for schema.org's
+ * `datePublished`, which requires ISO 8601 and fails Google's Rich Results validator
+ * otherwise. Parses to the first of that month; falls back to now if unparseable.
+ */
+export function articleDateToISO(date: string): string {
+  const parsed = new Date(`1 ${date}`);
+  return (Number.isNaN(parsed.getTime()) ? new Date() : parsed).toISOString();
+}
+
 export const ARTICLES: Record<string, Article> = {
   "why-verified-skills": {
     cat: "why", catLabel: "Why ControlTheMarket", read: "8 min", date: "March 2026",

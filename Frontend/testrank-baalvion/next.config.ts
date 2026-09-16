@@ -45,7 +45,11 @@ const nextConfig: NextConfig = {
   // Standalone file-tracing recreates the pnpm symlink tree, which throws EPERM on Windows
   // (symlink creation needs Admin/Developer Mode). Production images build on Linux where this
   // works; skip it on win32 so local Windows builds succeed without changing the deploy artifact.
-  output: process.platform === 'win32' ? undefined : 'standalone',
+  // vinext's Cloudflare build also emits a Node "standalone" bundle when it sees this set
+  // (for self-hosted deploys), copying wasm runtime deps that beta @cloudflare/vite-plugin
+  // fails to resolve (`__CLOUDFLARE_MODULE__CompiledWasm__`) — skip it for the Workers build,
+  // which doesn't use dist/standalone at all.
+  output: process.platform === 'win32' || process.env.VINEXT_BUILD ? undefined : 'standalone',
   typescript: {
     ignoreBuildErrors: false,
   },

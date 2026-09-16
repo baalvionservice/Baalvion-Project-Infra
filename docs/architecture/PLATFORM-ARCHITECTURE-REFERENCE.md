@@ -36,7 +36,7 @@
 | 4 | imperialpedia.com | `Imperialpedia-main` | `Imperialpedia` | imperialpedia-service:3004 | Firebase + PM2 | active |
 | 5 | proxy.baalvionstack.com | `Proxy-BaalvionStack` | `BaalvionStack-Web` | proxy-service:4000 | PM2 (Vite SPA) | active |
 | 6 | lawelitenetwork.com | `Law-Elite-Network-main` | `LawEliteNetwork` | law-service:3015 + law-elite-gateway:8090 | Firebase + Docker | active |
-| 7 | controlthemarket.com | `controlthemarket-main` | `ControlTheMarket` | ctm-service:3017 | Firebase + PM2 + CI | active |
+| 7 | controlthemarket.com | `testrank-baalvion` | `ControlTheMarket` | ctm-service:3017 | Firebase + PM2 + CI | active |
 | 8 | mining.baalvion.com | `Mining.Baalvion-main` | `Baalvion-Mining` | mining-service:3003 | Firebase + PM2 | active |
 | 9 | ir.baalvion.com | `IR-Baalvion-main` | `Baalvion-InvestorRelations` | ir-service:3008 | Firebase + PM2 | active |
 | 10 | jobs.baalvion.com | `Baalvion-Jobs-Portal-main` | `Baalvion-Jobs` | jobs-service:3002 | Firebase + PM2 + CI | active |
@@ -57,7 +57,7 @@
 | `Imperialpedia-main` | `imperialpedia-web` | Next 15.5.18 | 3029 | plain |
 | `Proxy-BaalvionStack` | `proxy-baalvionstack-web` | Vite 6 + React 18 | 8080 | plain |
 | `Law-Elite-Network-main` | `law-elite-network-web` | Next 15.5.18 | 9002 | plain |
-| `controlthemarket-main` | `controlthemarket-web` | Next 15.5.18 | 3034 | plain |
+| `testrank-baalvion` | `testrank-baalvion-web` | Next 15.5.18 | 3034 | plain |
 | `Mining.Baalvion-main` | `mining-baalvion-web` | Next 15.5.18 | 3028 | plain |
 | `IR-Baalvion-main` | `ir-baalvion-web` | Next 15.5.18 | 3027 | plain |
 | `Baalvion-Jobs-Portal-main` | `baalvion-jobs-portal-web` | Next 15.5.18 | 3026 | plain |
@@ -121,7 +121,7 @@
 | Firebase App Hosting (`apphosting.yaml`) | Core, Amarise, Imperialpedia, Law, Mining, IR, Jobs, CTM, Connect, Dashboard | Mining scaled (max 10 / min 1) |
 | Docker (Dockerfile) | admin-platform (compose `admin` profile), Amarise (3033), Law (9002) | only admin is compose-wired |
 | PM2 (`pm2.config.js`) | about-web, fe-amarise, fe-jobs, fe-brand, fe-dashboard, fe-market, fe-imperial, fe-ir, fe-mining, fe-proxy, fe-admin | `ecosystem.config.js` also runs admin (`next start`, absolute path `D:/...`) |
-| CI/CD (`.github/workflows/`) | jobs-portal.yml, ctm-frontend.yml, law-service.yml | only these 3 frontends gated |
+| CI/CD (`.github/workflows/`) | jobs-portal.yml, testrank-baalvion-frontend.yml, law-service.yml | only these 3 frontends gated |
 | No deploy config | Baalvion-Insiders (Vite SPA), Baalvion-Insiders-SEO | active apps, no deploy path (R-R5) |
 
 **Env-contract substrate (local defaults):** auth `:3001/v1/auth` or gateway `:3099`; CMS `:3011/api/v1/public` (mining uses `:3018`); realtime WS `:3040`/`:3026`; each app's `NEXT_PUBLIC_APP_URL` = its dev port. `For Invstors and Founders` + `insiders-seo` ship only `.env.example`.
@@ -164,7 +164,7 @@
 | `Imperialpedia-main` | `Imperialpedia` |
 | `Proxy-BaalvionStack` | `BaalvionStack-Web` |
 | `Law-Elite-Network-main` | `LawEliteNetwork` |
-| `controlthemarket-main` | `ControlTheMarket` |
+| `testrank-baalvion` | `ControlTheMarket` |
 | `Mining.Baalvion-main` | `Baalvion-Mining` |
 | `IR-Baalvion-main` | `Baalvion-InvestorRelations` |
 | `company-unified-Dashboard-main` | `Baalvion-Dashboard` |
@@ -180,7 +180,7 @@
 3. Update Docker: `docker-compose.yml` `build.context` (admin only).
 4. Update root scripts: `scripts/install-all.js`, `verify_ai_builds.sh`, `package.json` turbo filter (admin only).
 5. Update `local-env/*.ps1` + `local-env/README.md` (imperialpedia, admin, IR only).
-6. Update CI: `.github/workflows/{jobs-portal,ctm-frontend,law-service,ci}.yml` (affected apps only).
+6. Update CI: `.github/workflows/{jobs-portal,testrank-baalvion-frontend,law-service,ci}.yml` (affected apps only).
 7. Regenerate lockfile: `pnpm install`.
 8. Update docs/runbooks referencing `Frontend/<old>`.
 9. Validate (B4 gate). 10. Commit as one PR per app; merge only on green.

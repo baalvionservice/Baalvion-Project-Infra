@@ -13,7 +13,7 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error('[controlthemarket-main] Unhandled application error:', error);
+    console.error('[testrank-baalvion] Unhandled application error:', error);
   }, [error]);
 
   return (

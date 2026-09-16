@@ -1,6 +1,6 @@
-# ControlTheMarket web — Next 15 standalone image (pnpm + Turborepo monorepo).
+# testrank-baalvion web — Next 15 standalone image (pnpm + Turborepo monorepo).
 # Build context = REPO ROOT:
-#   docker build -f Frontend/controlthemarket-main/Dockerfile -t ctm-web .
+#   docker build -f Frontend/testrank-baalvion/Dockerfile -t testrank-baalvion-web .
 #
 # NEXT_PUBLIC_* are baked at BUILD time — pass them as --build-arg (see ARGs below),
 # NOT as runtime env. Point them at the PUBLIC prod origin. The /auth-bff/* rewrite target
@@ -12,7 +12,7 @@ WORKDIR /app
 # 1) Prune the monorepo to just this app + its workspace deps (@baalvion/auth-sdk).
 FROM base AS pruner
 COPY . .
-RUN npx turbo prune controlthemarket-web --docker
+RUN npx turbo prune testrank-baalvion-web --docker
 
 # 2) Install pruned deps.
 # --no-frozen-lockfile (not --frozen): the root pins a version-selector pnpm override
@@ -41,19 +41,19 @@ COPY --from=pruner /app/out/full/ ./
 # whole build with it. Latent until this app gained a workspace package that needs building
 # — @baalvion/design did exactly that and broke the Amarise image on 2026-09-09.
 COPY tsconfig.base.json ./tsconfig.base.json
-RUN pnpm turbo run build --filter=controlthemarket-web
+RUN pnpm turbo run build --filter=testrank-baalvion-web
 
 # 4) Minimal runner (standalone server).
 FROM base AS runner
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3000 HOSTNAME=0.0.0.0
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
 WORKDIR /app
-COPY --from=installer --chown=nextjs:nodejs /app/Frontend/controlthemarket-main/.next/standalone ./
-COPY --from=installer --chown=nextjs:nodejs /app/Frontend/controlthemarket-main/.next/static ./Frontend/controlthemarket-main/.next/static
-COPY --from=installer --chown=nextjs:nodejs /app/Frontend/controlthemarket-main/public ./Frontend/controlthemarket-main/public
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/testrank-baalvion/.next/standalone ./
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/testrank-baalvion/.next/static ./Frontend/testrank-baalvion/.next/static
+COPY --from=installer --chown=nextjs:nodejs /app/Frontend/testrank-baalvion/public ./Frontend/testrank-baalvion/public
 USER nextjs
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
     CMD node -e "require('http').get('http://127.0.0.1:'+(process.env.PORT||3000),r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"
 # Standalone server entrypoint is nested under the app path in a monorepo build.
-CMD ["node", "Frontend/controlthemarket-main/server.js"]
+CMD ["node", "Frontend/testrank-baalvion/server.js"]

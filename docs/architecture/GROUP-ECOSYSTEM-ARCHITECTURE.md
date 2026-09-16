@@ -62,7 +62,7 @@ Three concentric tiers. Each app belongs to **exactly one** tier — this is the
 | `connect.baalvion.com` | Product | brand-connector-main | brand-connector-service | Brand hub |
 | `admin.baalvion.com` | Internal | admin-platform | admin-service | Ops console |
 | `api.baalvion.com` | Infra | — (gateway) | auth-gateway (:3099) | Single API edge |
-| `controlthemarket.com` | Independent | controlthemarket-main | ctm-service | Standalone brand |
+| `controlthemarket.com` | Independent | testrank-baalvion | ctm-service | Standalone brand |
 | `amarisemaisonavenue.com` | Independent | AmariseMaisonAvenue-main | crm-service, cms-service | Standalone brand |
 | `lawelitenetwork.com` | Independent | Law-Elite-Network-main | law-service, law-elite | Standalone brand |
 | `imperialpedia.com` | Independent | Imperialpedia-main | imperialpedia-service | Knowledge brand |

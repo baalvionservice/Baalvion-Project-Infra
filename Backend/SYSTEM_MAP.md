@@ -174,7 +174,7 @@ Catalog descriptors, mostly event consumers (see `index.json.eventConsumers`):
 | `admin-platform` | Next.js | auth/admin/cms/session/oauth/realtime/+ | 🟡 ~12/25 pages real; ~10 await missing backends |
 | `about-baalvion-main` | Next.js | about + cms | ✅ live CMS-wired |
 | `company-unified-Dashboard-main` | Next.js | dashboard-service (BFF) | ✅ browser-verified; some pages still mock |
-| `controlthemarket-main` | — | ctm-service | ✅ live (keys→.env, commit pending) |
+| `testrank-baalvion` | — | ctm-service | ✅ live (keys→.env, commit pending) |
 | `Global-Trade-Infrastructure-main` | Next.js | trade-service | 🟡 Marketplace+RFQ real; rest mock |
 | `Imperialpedia-main` | Next.js | imperialpedia + cms | ✅ live editorial + structured |
 | `IR-Baalvion-main` | Next.js | ir-service + cms | 🟡 editorial live; KYC/deal-room pending |

@@ -24,13 +24,13 @@
 
 ## Overview
 
-**ControlTheMarket** (package `controlthemarket-web`) is a **proof-of-skill hiring platform**:
+**ControlTheMarket** (package `testrank-baalvion-web`) is a **proof-of-skill hiring platform**:
 companies post real-world tasks, candidates submit work, and a ranking engine surfaces
 verified talent based on performance rather than paper credentials. Production domain:
 **[controlthemarket.com](https://controlthemarket.com)**.
 
 It lives inside the Baalvion **pnpm + Turborepo monorepo** under
-`Frontend/controlthemarket-main` and is the ecosystem-domain frontend for the **`ctm`**
+`Frontend/testrank-baalvion` and is the ecosystem-domain frontend for the **`ctm`**
 backend service (gateway path `/api/v1/ecosystem/ctm`). It consumes the shared workspace
 package `@baalvion/auth-sdk` and routes auth through the central platform gateway — it does
 not stand up its own identity issuer.
@@ -133,7 +133,7 @@ bundled mock data.
 pnpm install
 
 # Dev on http://localhost:3034
-pnpm run dev          # or: pnpm --filter controlthemarket-web dev
+pnpm run dev          # or: pnpm --filter testrank-baalvion-web dev
 
 # Quality gates
 pnpm run typecheck    # tsc --noEmit
@@ -163,7 +163,7 @@ else is server-only. Never commit real secrets. Defaults below come from `next.c
 ## Project Structure
 
 ```
-controlthemarket-main/
+testrank-baalvion/
 ├── src/
 │   ├── app/
 │   │   ├── (public)/        # Marketing + auth + crawlable profiles (home, login, signup, blog, demos…)
@@ -183,8 +183,7 @@ controlthemarket-main/
 ├── Dockerfile               # Next 15 standalone image (turbo prune; build context = repo root)
 ├── next.config.ts           # CSP/security headers, /auth-bff rewrite, standalone output, externals
 ├── tailwind.config.ts · components.json · postcss.config.mjs
-├── apphosting.yaml          # Firebase App Hosting run config (maxInstances: 3) + env
-└── vercel.json              # Vercel turbo-ignore guard (controlthemarket-web)
+└── apphosting.yaml          # Firebase App Hosting run config (maxInstances: 3) + env
 ```
 
 ## Pages & Routes
@@ -240,7 +239,7 @@ The shared `/dashboard` route resolves to the appropriate workspace by role.
 ## Deployment
 
 - **Docker** — `Dockerfile` builds a Next 15 **standalone** image. The build context is the
-  **repo root**; it runs `turbo prune controlthemarket-web --docker`. `NEXT_PUBLIC_*` are
+  **repo root**; it runs `turbo prune testrank-baalvion-web --docker`. `NEXT_PUBLIC_*` are
   baked at **build** time (pass as `--build-arg`), while `AUTH_PROXY_TARGET` is read at server
   **start** (runtime env). Standalone output is enabled on Linux and skipped on Windows
   (`output: process.platform === 'win32' ? undefined : 'standalone'`) to avoid the symlink
@@ -248,8 +247,6 @@ The shared `/dashboard` route resolves to the appropriate workspace by role.
 - **Firebase App Hosting** — `apphosting.yaml` sets `maxInstances: 3` and declares
   `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_USE_MOCK=false`, `NEXT_PUBLIC_CTM_API_URL`, and
   `AUTH_PROXY_TARGET`.
-- **Vercel** — `vercel.json` sets `ignoreCommand: npx turbo-ignore controlthemarket-web` so
-  Vercel skips builds when this workspace hasn't changed.
 
 ## Notes / Gotchas
 

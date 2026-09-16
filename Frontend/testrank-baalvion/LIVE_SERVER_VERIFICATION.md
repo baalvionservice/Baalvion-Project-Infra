@@ -7,7 +7,7 @@
 ## 🚀 Start the Dev Server
 
 ```bash
-cd Frontend/controlthemarket-main
+cd Frontend/testrank-baalvion
 pnpm dev
 # Runs on http://localhost:3034
 
