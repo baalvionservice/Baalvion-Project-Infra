@@ -93,7 +93,11 @@ const securityHeaders = [
       }`,
       // Ad creatives render in iframes served from googleads.g.doubleclick.net and
       // tpc.googlesyndication.com — without these, approved ads simply never paint.
-      "frame-src 'self' https://*.razorpay.com https://api.razorpay.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com",
+      // *.adtrafficquality.google (ep2.adtrafficquality.google specifically) also
+      // opens an iframe, not just fetch/XHR calls -- it was only in connect-src
+      // above, so the browser blocked the frame outright (caught via a live CSP
+      // violation report during a Lighthouse run, not a code read).
+      "frame-src 'self' https://*.razorpay.com https://api.razorpay.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com https://*.adtrafficquality.google",
       "frame-ancestors 'none'",
       "form-action 'self'",
       "base-uri 'self'",
@@ -132,6 +136,12 @@ const nextConfig: NextConfig = {
   // Docker/CI builds run on Linux where standalone is emitted correctly.
   output: process.platform === 'win32' ? undefined : 'standalone',
 
+  // The client bundle is already public (any browser can read the minified
+  // JS) -- a source map doesn't expose anything new, it just makes what's
+  // already shipped legible, which is what Lighthouse's valid-source-maps
+  // audit and any future error-tracking integration (Sentry etc.) both need.
+  productionBrowserSourceMaps: true,
+
   typescript: {
     ignoreBuildErrors: false,
   },
@@ -157,7 +167,21 @@ const nextConfig: NextConfig = {
       // geographic filter (its "cross-border"/"every region" copy wasn't
       // backed by any actual filtering) -- a near-duplicate competing for the
       // same search intent, consolidated the same way as the redirects above.
-      { source: '/world', destination: '/news', permanent: true },
+      // Destination changed from /news to / now that /news is retired too
+      // (see the four-section block below) -- redirecting into another dead
+      // section would just move the soft-404 one hop deeper.
+      { source: '/world', destination: '/', permanent: true },
+      // AdSense second-rejection finding: these four "finished-looking"
+      // sections (an eight-tab newsroom over 3 articles, and two reference
+      // indexes pointing exclusively at articles whose practice areas were
+      // already retired above) read to a reviewer as the site under
+      // construction. retired-links.ts's RETIRED_SECTIONS already declared
+      // the intent to retire them and unwraps any in-prose link into one --
+      // this is the redirect half of that fix, which had never been added.
+      { source: '/news', destination: '/', permanent: true },
+      { source: '/case-law', destination: '/', permanent: true },
+      { source: '/legislation', destination: '/', permanent: true },
+      { source: '/law-changes', destination: '/', permanent: true },
       // Synonym consolidation. "offshore injury lawyer" / "offshore accident
       // lawyer", and the maritime and oil-rig pairs, are the same search intent
       // with a swapped noun -- six pages competing for one query each. The text

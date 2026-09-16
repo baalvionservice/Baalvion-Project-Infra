@@ -24,8 +24,8 @@ export function LatestRail({ articles, title = 'Essential Reads' }: LatestRailPr
       <ul className="divide-y divide-slate-100 dark:divide-slate-800">
         {articles.map((art) => (
           <li key={art.id || art.slug}>
-            <Link href={articleUrl(art)} className="group flex items-start gap-3 py-4">
-              <div className="relative w-16 h-16 shrink-0 overflow-hidden rounded-md bg-slate-100 dark:bg-slate-800">
+            <Link href={articleUrl(art)} className="group flex items-start gap-3 py-3">
+              <div className="relative w-16 h-16 shrink-0 overflow-hidden bg-slate-100 dark:bg-slate-800">
                 <Image
                   src={resolveArticleImage(art)}
                   alt={art.title}

@@ -6,8 +6,8 @@ import Link from 'next/link';
 import { fetchPublicApi } from '@/lib/api/public-fetch';
 import { mergeArticles } from '@/data/law-content';
 import { cmsGetArticles } from '@/lib/cms';
-import { getMergedAuthors } from '@/lib/authors-server';
-import { CURRENT_CATEGORY_SLUGS } from '@/lib/category-slugs';
+import { getMergedAuthors, getPublishedArticleCountsByAuthorSlug } from '@/lib/authors-server';
+import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
 
 // Server component so the platform-overview stats below are computed from
 // the same real data sources the homepage uses, instead of the hardcoded
@@ -28,7 +28,7 @@ const TOC_LINKS = [
 ];
 
 export default async function AdvertisePage() {
-  const [cmsArticles, apiArticles, editorialBoard] = await Promise.all([
+  const [cmsArticles, apiArticles, editorialBoard, publishedCounts] = await Promise.all([
     cmsGetArticles().catch(() => []),
     fetchPublicApi('/articles', { limit: 200, status: 'published' })
       .then((j) => {
@@ -37,6 +37,7 @@ export default async function AdvertisePage() {
       })
       .catch(() => []),
     getMergedAuthors().catch(() => []),
+    getPublishedArticleCountsByAuthorSlug(),
   ]);
 
   const seenSlugs = new Set<string>();
@@ -45,9 +46,20 @@ export default async function AdvertisePage() {
     seenSlugs.add(a.slug);
     return true;
   });
-  const guidesCount = mergeArticles(combinedSource).length;
+  // Same AdSense-readiness filter as everywhere else that counts "how much
+  // content is really here" -- combinedSource still carries retired-category
+  // articles (their CMS rows are unarchived, see category-slugs.ts), and an
+  // unfiltered count previously advertised guides that 301 away.
+  const currentSlugSet = new Set<string>(CURRENT_CATEGORY_SLUGS);
+  const guidesCount = mergeArticles(combinedSource).filter((a) => {
+    const rawSlug = a.category?.slug;
+    return !rawSlug || currentSlugSet.has(toNewCategorySlug(rawSlug));
+  }).length;
   const practiceAreaCount = CURRENT_CATEGORY_SLUGS.length;
-  const contributorCount = editorialBoard.length;
+  // Contributors with at least one article actually reachable on the live
+  // site -- editorialBoard.length previously counted all 24 profiles,
+  // 23 of which show "No published guides yet" (see authors/page.tsx).
+  const contributorCount = editorialBoard.filter((a) => (publishedCounts.get(a.slug) || 0) > 0).length;
 
   return (
     <div className="min-h-screen bg-white">

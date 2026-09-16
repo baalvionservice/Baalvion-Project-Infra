@@ -121,7 +121,7 @@ export function RelatedArticles({ articles }: RelatedArticlesProps) {
                     {art.title}
                   </h3>
 
-                  <p className="mt-auto pt-2 text-[12px] font-medium text-slate-400">
+                  <p className="mt-auto pt-2 text-[12px] font-medium text-slate-500">
                     By <span className="hover:text-slate-600 transition-colors">{art.author}</span>
                   </p>
                 </div>
