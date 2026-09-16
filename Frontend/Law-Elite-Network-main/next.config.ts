@@ -93,7 +93,11 @@ const securityHeaders = [
       }`,
       // Ad creatives render in iframes served from googleads.g.doubleclick.net and
       // tpc.googlesyndication.com — without these, approved ads simply never paint.
-      "frame-src 'self' https://*.razorpay.com https://api.razorpay.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com",
+      // *.adtrafficquality.google (ep2.adtrafficquality.google specifically) also
+      // opens an iframe, not just fetch/XHR calls -- it was only in connect-src
+      // above, so the browser blocked the frame outright (caught via a live CSP
+      // violation report during a Lighthouse run, not a code read).
+      "frame-src 'self' https://*.razorpay.com https://api.razorpay.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com https://*.adtrafficquality.google",
       "frame-ancestors 'none'",
       "form-action 'self'",
       "base-uri 'self'",
@@ -131,6 +135,12 @@ const nextConfig: NextConfig = {
   // Gated off on win32 (Next standalone symlink emission is unreliable on Windows dev boxes);
   // Docker/CI builds run on Linux where standalone is emitted correctly.
   output: process.platform === 'win32' ? undefined : 'standalone',
+
+  // The client bundle is already public (any browser can read the minified
+  // JS) -- a source map doesn't expose anything new, it just makes what's
+  // already shipped legible, which is what Lighthouse's valid-source-maps
+  // audit and any future error-tracking integration (Sentry etc.) both need.
+  productionBrowserSourceMaps: true,
 
   typescript: {
     ignoreBuildErrors: false,

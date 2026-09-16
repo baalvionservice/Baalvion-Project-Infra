@@ -49,7 +49,7 @@ export function WhatYouCanFind() {
             className="group grid grid-cols-[2.25rem_1fr_auto] sm:grid-cols-[4rem_1fr_auto] items-center gap-4 sm:gap-6 py-5 border-b border-slate-200 hover:bg-slate-50/60 transition-colors -mx-4 px-4 sm:-mx-6 sm:px-6"
           >
             <span
-              className="font-serif text-2xl sm:text-4xl italic text-slate-200 group-hover:text-news-600 transition-colors tabular-nums"
+              className="font-serif text-2xl sm:text-4xl italic text-slate-500 group-hover:text-news-600 transition-colors tabular-nums"
               aria-hidden="true"
             >
               {String(i + 1).padStart(2, '0')}

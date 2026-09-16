@@ -240,7 +240,7 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div className="space-y-1.5">
                     <ArticleAuthorByline authorName={authorName} matchedAuthor={matchedAuthor} />
-                    {updatedAt && <p className="text-[12.5px] text-slate-400">Updated {updatedAt}</p>}
+                    {updatedAt && <p className="text-[12.5px] text-slate-500">Updated {updatedAt}</p>}
                   </div>
                   <ArticleShareBar url={canonicalUrl} title={article.title} />
                 </div>
