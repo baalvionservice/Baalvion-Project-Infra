@@ -14,6 +14,7 @@
  * so the existing content-engine components render them unchanged.
  */
 
+import { CMS_CACHE_TAG } from '@/lib/cache-tags';
 import { Article, ArticleStatus } from '@/modules/content-engine/types/article';
 import type { NewsArticle, NewsBodyBlock, NewsCategory } from '@/lib/data.news';
 import { articleArtDataUri } from '@baalvion/illustrations';
@@ -27,10 +28,36 @@ import { getEditorialGuide } from '@/lib/articles/editorial-guides';
 // In production default to the API gateway's public delivery host (not localhost,
 // and not an empty string that silently forced the built-in fallback). A deploy
 // can still override via NEXT_PUBLIC_CMS_PUBLIC_URL.
+const rawCmsUrl = process.env.NEXT_PUBLIC_CMS_PUBLIC_URL?.trim();
+const isProd = process.env.NODE_ENV === 'production';
 export const CMS_PUBLIC_URL =
-  process.env.NEXT_PUBLIC_CMS_PUBLIC_URL ||
-  'https://api.baalvion.com/api/v1/public';
+  (rawCmsUrl && !(isProd && (rawCmsUrl.includes('localhost') || rawCmsUrl.includes('127.0.0.1'))))
+    ? rawCmsUrl
+    : (isProd
+        ? 'https://api.baalvion.com/api/v1/public'
+        : 'http://localhost:3018/api/v1/public');
 export const CMS_SITE_SLUG = process.env.NEXT_PUBLIC_CMS_SITE_SLUG || 'imperialpedia';
+
+// `cache: 'no-store'` (the previous setting) forces full dynamic rendering on
+// EVERY route that calls through this fetcher — silently overriding that
+// route's own `export const revalidate`, with no build warning once the route
+// also sets `revalidate` (Next only errors for routes with no cache config at
+// all). Confirmed directly in a production build: pages that had just been
+// switched off force-dynamic to `revalidate = 3600` still built as fully
+// dynamic (ƒ, no cache window) because of this.
+//
+// The window is also the site's GLOBAL revalidate floor, not just this
+// fetcher's: Next takes the lowest revalidate of any fetch a route touches as
+// that route's own window, and almost every page reaches this fetcher (nav,
+// policy pages, category hubs, /_not-found). At the previous 300s that meant
+// all 155 prerendered routes regenerated every 5 minutes — ~778k ISR writes a
+// month, plus a full React render and a function→edge transfer each, for
+// content that changes a few times a day. Freshness does NOT come from this
+// number: /api/revalidate calls revalidateTag(CMS_CACHE_TAG) on every CMS
+// publish/update/delete, which drops every entry below at once. A day is the
+// safety net for the case where that webhook never fires.
+const CMS_FETCH_REVALIDATE_SECONDS = 86400;
+
 
 // Validates Google's publisher-ID shape ("ca-pub-" + 10–20 digits). Anything else
 // (placeholder text, a stray paste) is treated as "no ad client" so we never emit a
@@ -51,16 +78,16 @@ const DEFAULT_ADSENSE_CLIENT = 'ca-pub-8968452296456450';
  * `GET {CMS_PUBLIC_URL}/{site}` as `config.ads.adsensePublisherId`.
  *
  * Falls back to NEXT_PUBLIC_ADSENSE_CLIENT, then DEFAULT_ADSENSE_CLIENT, when
- * the CMS is unreachable or hasn't been configured yet. Cached for an hour
- * (revalidate) rather than `no-store` so it doesn't opt the whole site into
- * dynamic rendering.
+ * the CMS is unreachable or hasn't been configured yet. Cached on the shared
+ * CMS window/tag rather than `no-store` so it doesn't opt the whole site into
+ * dynamic rendering — this one runs in the root layout, so every page pays it.
  */
 export async function getSiteAdsenseClient(): Promise<string | null> {
   const envFallback = process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim();
   try {
     const res = await fetch(`${CMS_PUBLIC_URL}/${CMS_SITE_SLUG}`, {
       headers: { Accept: 'application/json' },
-      next: { revalidate: 3600 },
+      next: { revalidate: CMS_FETCH_REVALIDATE_SECONDS, tags: [CMS_CACHE_TAG] },
       signal: AbortSignal.timeout(6000),
     });
     if (res.ok) {
@@ -191,24 +218,11 @@ export interface CmsAuthor {
 // 404 (which short-circuits below, before the retry loop).
 const TRANSIENT_RETRY_DELAYS_MS = [400, 1200];
 
-// `cache: 'no-store'` (the previous setting) forces full dynamic rendering on
-// EVERY route that calls through this fetcher — silently overriding that
-// route's own `export const revalidate`, with no build warning once the route
-// also sets `revalidate` (Next only errors for routes with no cache config at
-// all). Confirmed directly in a production build: pages that had just been
-// switched off force-dynamic to `revalidate = 3600` still built as fully
-// dynamic (ƒ, no cache window) because of this. /api/revalidate already
-// calls revalidatePath() on every CMS publish/update/delete — which only has
-// something to invalidate if the underlying fetch is cacheable in the first
-// place. 300s is a safety-net ceiling, not the real freshness mechanism: the
-// webhook still makes edits appear instantly in the normal case.
-const CMS_FETCH_REVALIDATE_SECONDS = 300;
-
 async function cmsFetchOnce<T>(path: string): Promise<T> {
   try {
     const res = await fetch(`${CMS_PUBLIC_URL}/${CMS_SITE_SLUG}${path}`, {
       headers: { Accept: 'application/json' },
-      next: { revalidate: CMS_FETCH_REVALIDATE_SECONDS },
+      next: { revalidate: CMS_FETCH_REVALIDATE_SECONDS, tags: [CMS_CACHE_TAG] },
       signal: AbortSignal.timeout(9000),
     });
     if (!res.ok) {
@@ -226,9 +240,8 @@ async function cmsFetchOnce<T>(path: string): Promise<T> {
     return res.json() as Promise<T>;
   } catch (err) {
     if ((err as { status?: number })?.status === 404) throw err;
-    const fallbackErr = new Error('CMS_NOT_FOUND') as Error & { status?: number };
-    fallbackErr.status = 404;
-    throw fallbackErr;
+    // For non-404 errors, rethrow the original error to avoid masking underlying issues.
+    throw err;
   }
 }
 
@@ -806,9 +819,12 @@ export function cmsContentToArticle(raw: CmsContent, categoryMap?: ReadonlyMap<s
       correctIndex: Number(q.correctIndex),
       explanation: typeof q.explanation === 'string' ? q.explanation : undefined,
     }));
+
   const guide = getEditorialGuide(raw.slug);
-  const body = guide?.bodyHtml || blocksToHtml(raw.contentBlocks, categoryMap) || undefined;
-  const guideWords = guide ? guide.bodyHtml.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length : words;
+  const cfBody = typeof cf.bodyHtml === 'string' ? cf.bodyHtml : typeof cf.body === 'string' ? cf.body : undefined;
+  const body = guide?.bodyHtml || blocksToHtml(raw.contentBlocks, categoryMap) || (raw as any).bodyHtml || (raw as any).body || cfBody || undefined;
+  const bodyText = (body || '').replace(/<[^>]+>/g, ' ');
+  const guideWords = bodyText.trim().split(/\s+/).filter(Boolean).length || words;
 
   return {
     id: raw.id,
@@ -1043,6 +1059,23 @@ export async function getCategoryArticles(
     // those ~10 callers — is what actually keeps a 410'd article from getting
     // picked as a hub's "featured" card (see removed-article-paths.ts; this
     // was previously only enforced for the sitemap and homepage editorial).
+    return items.map(cmsContentToNews).filter((a) => !isRemovedArticlePath(a));
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Recent published content of any type.
+ *
+ * getPublishedNews is news-only and getCategoryArticles needs a category that
+ * actually has content — on a desk that publishes news slowly, both come back
+ * with just the piece being read. This backs the "more from" rail with whatever
+ * the site genuinely has.
+ */
+export async function getRecentContent(limit = 24): Promise<NewsArticle[]> {
+  try {
+    const { items } = await listCmsContent({ limit });
     return items.map(cmsContentToNews).filter((a) => !isRemovedArticlePath(a));
   } catch {
     return [];

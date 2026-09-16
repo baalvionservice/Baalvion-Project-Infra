@@ -34,6 +34,9 @@ import static org.mockito.Mockito.when;
  * tx (synchronously, never swallowing failure), then persist each row's outcome in its OWN short tx
  * ({@code save} per row, so one failure can't roll back another's SENT). FOR UPDATE SKIP LOCKED on
  * the claim means two instances cannot double-publish.
+ *
+ * <p>Also covers the Kafka-disabled path: rows must stay untouched rather than be claimed and
+ * failed against a broker that is not there.
  */
 class LedgerOutboxRelayTest {
 
@@ -48,7 +51,7 @@ class LedgerOutboxRelayTest {
     KafkaTemplate<String, String> template = mock(KafkaTemplate.class);
     kafkaTemplate = template;
 
-    relay = new LedgerOutboxRelay(repository, kafkaTemplate, new SimpleMeterRegistry(), null);
+    relay = new LedgerOutboxRelay(repository, kafkaTemplate, new SimpleMeterRegistry(), null, true);
     // In production `self` is the Spring transactional proxy; in this unit test point it at the
     // real instance so claimBatch()/persistResult() run their actual logic (the proxy only adds
     // the tx boundary, which there is nothing to assert on here).
@@ -179,4 +182,32 @@ class LedgerOutboxRelayTest {
     verify(repository).save(a);
     verify(repository).save(b);
   }
+
+  @Test
+  void leavesRowsAloneWhenKafkaIsDisabled() {
+    LedgerOutboxRelay disabled =
+      new LedgerOutboxRelay(repository, kafkaTemplate, new SimpleMeterRegistry(), null, false);
+    ReflectionTestUtils.setField(disabled, "self", disabled);
+    ReflectionTestUtils.setField(disabled, "batchSize", 100);
+
+    disabled.drain();
+
+    // Not merely "nothing published" — nothing claimed either. Claiming burns the row's attempts
+    // and strands it in FAILED, which is how the one production row was lost.
+    verify(repository, never()).claimDueBatch(anyString(), any(), anyInt());
+    verify(kafkaTemplate, never()).send(anyString(), anyString(), anyString());
+  }
+
+  @Test
+  void leavesRowsAloneWhenNoKafkaTemplateIsWired() {
+    LedgerOutboxRelay noTemplate =
+      new LedgerOutboxRelay(repository, null, new SimpleMeterRegistry(), null, true);
+    ReflectionTestUtils.setField(noTemplate, "self", noTemplate);
+    ReflectionTestUtils.setField(noTemplate, "batchSize", 100);
+
+    noTemplate.drain();
+
+    verify(repository, never()).claimDueBatch(anyString(), any(), anyInt());
+  }
+
 }

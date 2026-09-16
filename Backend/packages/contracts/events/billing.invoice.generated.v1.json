@@ -2,22 +2,60 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "baalvion://events/billing.invoice.generated.v1.json",
   "title": "BillingInvoiceGenerated",
-  "allOf": [{ "$ref": "baalvion://events/_envelope.json" }],
+  "description": "DEPRECATED \u2014 superseded by billing.invoice.generated.v2.json. `amount` here is a JSON number (a double), which is the one remaining place this platform's own contracts ask a consumer to parse money into a float. Kept published and unchanged so existing producers keep validating; migrate them to v2 and then retire this.",
+  "allOf": [
+    {
+      "$ref": "baalvion://events/_envelope.json"
+    }
+  ],
   "properties": {
-    "type": { "const": "billing.invoice.generated" },
+    "type": {
+      "const": "billing.invoice.generated"
+    },
     "payload": {
       "type": "object",
-      "required": ["invoiceId", "orgId", "periodStart", "periodEnd", "totalGb", "amount", "currency", "signature"],
+      "required": [
+        "invoiceId",
+        "orgId",
+        "periodStart",
+        "periodEnd",
+        "totalGb",
+        "amount",
+        "currency",
+        "signature"
+      ],
       "additionalProperties": false,
       "properties": {
-        "invoiceId": { "type": "string" },
-        "orgId": { "type": "string" },
-        "periodStart": { "type": "string", "format": "date-time" },
-        "periodEnd": { "type": "string", "format": "date-time" },
-        "totalGb": { "type": "number", "minimum": 0 },
-        "amount": { "type": "number", "minimum": 0 },
-        "currency": { "type": "string", "minLength": 3, "maxLength": 3 },
-        "signature": { "type": "string" }
+        "invoiceId": {
+          "type": "string"
+        },
+        "orgId": {
+          "type": "string"
+        },
+        "periodStart": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "periodEnd": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "totalGb": {
+          "type": "number",
+          "minimum": 0
+        },
+        "amount": {
+          "type": "number",
+          "minimum": 0
+        },
+        "currency": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 3
+        },
+        "signature": {
+          "type": "string"
+        }
       }
     }
   }

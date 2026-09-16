@@ -20,6 +20,8 @@ interface AuthContextValue {
   role: UserRole;
   loading: boolean;
   login: (email: string, password: string) => Promise<AuthUser | null>;
+  requestEmailCode: (email: string, firstName?: string, lastName?: string) => Promise<void>;
+  loginWithCode: (email: string, code: string) => Promise<AuthUser | null>;
   register: (email: string, password: string, name: string, role?: string) => Promise<void>;
   logout: () => void;
   impersonating: Impersonation | null;
@@ -32,6 +34,8 @@ const AuthContext = createContext<AuthContextValue>({
   role: null,
   loading: true,
   login: async () => null,
+  requestEmailCode: async () => {},
+  loginWithCode: async () => null,
   register: async () => {},
   logout: () => {},
   impersonating: null,
@@ -129,6 +133,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return hydrateFromToken(accessToken);
   };
 
+  const requestEmailCode = async (email: string, firstName?: string, lastName?: string) => {
+    await authLawApi.requestEmailCode(email, firstName, lastName);
+  };
+
+  // Passwordless sign-in. auth-service mints the SAME RS256 pair as password login, so this
+  // reuses setToken + hydrateFromToken verbatim — one session-establishment path, not two.
+  const loginWithCode = async (email: string, code: string): Promise<AuthUser | null> => {
+    const res = await authLawApi.verifyEmailCode(email, code);
+    const accessToken = res.data?.data?.accessToken || res.data?.accessToken;
+    if (!accessToken) return null;
+    setToken(accessToken);
+    return hydrateFromToken(accessToken);
+  };
+
   const register = async (email: string, password: string, name: string, userRole?: string) => {
     const res = await authLawApi.register(email, password, name, userRole);
     const accessToken = res.data?.data?.accessToken || res.data?.accessToken;
@@ -179,7 +197,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, role, loading, login, register, logout, impersonating, startImpersonation, stopImpersonation }}
+      value={{ user, role, loading, login, requestEmailCode, loginWithCode, register, logout, impersonating, startImpersonation, stopImpersonation }}
     >
       {children}
     </AuthContext.Provider>

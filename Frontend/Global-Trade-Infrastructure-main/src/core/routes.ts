@@ -11,7 +11,7 @@ import {
   Landmark, LockKeyhole, BarChart3, Database, Radio, Gavel, Scale, Siren, Server,
   Workflow, Cpu, RefreshCw, Ship, Building2, Radar, Boxes, GitBranch, FileCheck,
   Network, Eye, BadgeCheck, Users, Inbox, ClipboardCheck, Bell, Plug, LifeBuoy, Package,
-  MapPinned, Gauge, Thermometer, FileDown,
+  MapPinned, Gauge, Thermometer, FileDown, CalendarDays, Anchor,
 } from 'lucide-react';
 
 export type RouteCategory =
@@ -101,11 +101,18 @@ export const ROUTE_REGISTRY: RouteMetadata[] = [
   // ── LOGISTICS ──
   { path: '/logistics-shipment', label: 'Global Tracking', icon: Truck, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
   { path: '/logistics-shipment/control-tower', label: 'Control Tower', icon: Radar, roles: ADMIN, category: 'LOGISTICS' },
+  { path: '/logistics-shipment/ports', label: 'Port Network', icon: Anchor, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
+  { path: '/logistics-shipment/ports/manage', label: 'Port Registry', icon: Database, roles: ADMIN, category: 'LOGISTICS' },
+  { path: '/logistics-shipment/booking', label: 'Book a Container', icon: Package, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
   { path: '/shipments', label: 'Shipments', icon: Ship, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
+  { path: '/sailing-schedules', label: 'Sailing Schedules', icon: CalendarDays, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
   { path: '/carriers', label: 'Carriers', icon: Truck, roles: TRADE, category: 'LOGISTICS' },
   { path: '/customs', label: 'Customs', icon: BadgeCheck, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
 
   // ── SHIPMENT TRACKING & GLOBAL VISIBILITY PLATFORM ──
+  // Party-scoped: a buyer/seller sees only trades they are a party to. The
+  // Global Tracking Dashboard below is the tenant-wide operator equivalent.
+  { path: '/logistics-shipment/visibility', label: 'Shipment Visibility', icon: Eye, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
   { path: '/logistics-shipment/global-tracking', label: 'Global Tracking Dashboard', icon: Radar, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
   { path: '/logistics-shipment/geofences', label: 'Geofences', icon: MapPinned, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
   { path: '/logistics-shipment/alerts', label: 'Alert Center', icon: Bell, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },

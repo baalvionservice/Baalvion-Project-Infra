@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Trash2 } from 'lucide-react';
 import PageHeader from '@/components/common/PageHeader';
@@ -14,10 +15,11 @@ import {
 } from '@/components/ui/select';
 import { useUIStore } from '@/lib/store/uiStore';
 import { serviceClients } from '@/lib/api/client';
-import type { NewsCategory, PaginatedNewsArticles } from '@/lib/types/news.types';
+import { NEWS_CATEGORIES } from '@/lib/types/news.types';
+import type { PaginatedNewsArticles } from '@/lib/types/news.types';
 
 const ALL = 'all';
-const CATEGORIES: NewsCategory[] = ['AI', 'Technology', 'Business', 'Finance', 'Startups', 'Cybersecurity', 'World', 'Science'];
+const CATEGORIES = NEWS_CATEGORIES;
 
 export default function NewsArticlesPage() {
   const { setBreadcrumbs } = useUIStore();
@@ -25,7 +27,10 @@ export default function NewsArticlesPage() {
 
   const qc = useQueryClient();
   const [keyword, setKeyword] = useState('');
-  const [category, setCategory] = useState(ALL);
+  // Seeded from ?category= so a desk link lands already filtered to its beat;
+  // still free to change from the control afterwards.
+  const searchParams = useSearchParams();
+  const [category, setCategory] = useState(searchParams.get('category') ?? ALL);
 
   const { data, isLoading } = useQuery({
     queryKey: ['news', 'admin-articles', keyword, category],
@@ -87,7 +92,13 @@ export default function NewsArticlesPage() {
                       {article.source.name} · {new Date(article.published_at).toLocaleString()}
                     </p>
                   </div>
-                  <Button variant="ghost" size="sm" onClick={() => removeArticle.mutate(article.id)} className="shrink-0">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    aria-label={`Delete article ${article.title}`}
+                    onClick={() => removeArticle.mutate(article.id)}
+                    className="shrink-0"
+                  >
                     <Trash2 className="h-4 w-4 text-destructive" />
                   </Button>
                 </div>

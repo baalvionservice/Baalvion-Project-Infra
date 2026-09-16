@@ -1,210 +1,237 @@
-"use client";
+'use client';
 
-import { useState, useMemo } from "react";
-import { CapOpsRole, Investor, CapitalCall, SPV, ActivityLog } from "@/lib/capital-ops/types";
-import { INITIAL_INVESTORS, INITIAL_SPVS } from "@/lib/capital-ops/data";
-import { CapitalOverview } from "@/components/capital-ops/CapitalOverview";
-import { CapitalCallGenerator } from "@/components/capital-ops/CapitalCallGenerator";
-import { InvestorPanel } from "@/components/capital-ops/InvestorPanel";
-import { AllocationEngine } from "@/components/capital-ops/AllocationEngine";
-import { ActivityLogPanel } from "@/components/capital-ops/ActivityLogPanel";
-import { CapitalFlowVisualization } from "@/components/capital-ops/CapitalFlowVisualization";
-import { RoleSwitcher } from "@/components/capital-ops/RoleSwitcher";
-import { Landmark, ShieldCheck, Menu } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Landmark, Loader2, ShieldCheck, AlertTriangle, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+
+/**
+ * Capital Operations — the IR/finance view of the register.
+ *
+ * This page used to run entirely on hardcoded investors held in React state: "issue capital call"
+ * showed a toast and changed nothing, and a wire could be marked Confirmed in the browser with no
+ * money involved. Every figure below now comes from the ir-service capital ledgers, and the two
+ * write actions hit the real endpoints.
+ *
+ * Two things deliberately absent:
+ *  - The role switcher. Authority comes from the session; a control that lets you pick your own
+ *    role is a demo device, and ir-service refuses the staff endpoints regardless of what the
+ *    browser claims.
+ *  - The SPV allocation engine. There is no SPV or allocation domain behind it — rebuilding it on
+ *    invented state would put the same fiction back.
+ */
+
+interface RegisterRow {
+  id: string;
+  investorName: string;
+  currency: string;
+  status: string;
+  commitmentAmount: number;
+  calledToDate: number;
+  paidToDate: number;
+  outstanding: number;
+  remainingCommitment: number;
+}
+
+type Load = 'loading' | 'ready' | 'forbidden' | 'error';
+
+const fmt = (v: number, ccy: string) =>
+  new Intl.NumberFormat('en-IN', { style: 'currency', currency: ccy || 'INR', maximumFractionDigits: 0 }).format(v || 0);
 
 export default function CapitalOperationsPage() {
-  // --- STATE ---
-  const [role, setRole] = useState<CapOpsRole>('Admin');
-  const [investors, setInvestors] = useState<Investor[]>(INITIAL_INVESTORS);
-  const [spvs, setSpvs] = useState<SPV[]>(INITIAL_SPVS);
-  const [logs, setLogs] = useState<ActivityLog[]>([]);
-  const [currentCall, setCurrentCall] = useState<CapitalCall | null>(null);
+  const [rows, setRows] = useState<RegisterRow[]>([]);
+  const [state, setState] = useState<Load>('loading');
+  const [message, setMessage] = useState('');
+  const [busy, setBusy] = useState('');
+  const [pct, setPct] = useState('10');
+  const [purpose, setPurpose] = useState('');
+  const [dueDate, setDueDate] = useState('');
 
-  // --- DERIVED METRICS ---
-  const totalCommitted = useMemo(() => investors.reduce((sum, i) => sum + i.commitmentAmount, 0), [investors]);
-  const totalCalled = useMemo(() => investors.reduce((sum, i) => sum + i.calledToDate, 0), [investors]);
-  const remainingCommitment = totalCommitted - totalCalled;
-  const deployedCapital = useMemo(() => spvs.filter(s => s.id.startsWith('SPV')).reduce((sum, s) => sum + s.allocatedAmount, 0), [spvs]);
-  const liquidityReserve = useMemo(() => spvs.find(s => s.id === 'RES-01')?.allocatedAmount || 0, [spvs]);
+  const load = useCallback(async () => {
+    try {
+      const res = await fetch('/api/v1/capital/register', { cache: 'no-store' });
+      if (res.status === 401 || res.status === 403) { setState('forbidden'); return; }
+      const json = await res.json();
+      if (!res.ok || !json?.success) { setState('error'); return; }
+      setRows(json.data ?? []);
+      setState('ready');
+    } catch { setState('error'); }
+  }, []);
 
-  const canAllocate = useMemo(() => investors.some(i => i.wireStatus === 'Confirmed' && i.pendingCallAmount > 0), [investors]);
+  useEffect(() => { load(); }, [load]);
 
-  // --- ACTIONS ---
-  const addLog = (message: string, actor: CapOpsRole = role) => {
-    const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    setLogs(prev => [{ id: Math.random().toString(36).substr(2, 9), timestamp, role: actor, message }, ...prev].slice(0, 30));
+  const totals = useMemo(() => rows.reduce(
+    (t, r) => ({
+      committed: t.committed + r.commitmentAmount,
+      called: t.called + r.calledToDate,
+      paid: t.paid + r.paidToDate,
+      outstanding: t.outstanding + r.outstanding,
+    }),
+    { committed: 0, called: 0, paid: 0, outstanding: 0 },
+  ), [rows]);
+  const currency = rows[0]?.currency || 'INR';
+
+  const issueCall = async () => {
+    setBusy('call'); setMessage('');
+    try {
+      const res = await fetch('/api/v1/capital/calls', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ callPct: Number(pct), purpose: purpose || undefined, dueDate: dueDate || undefined }),
+      });
+      const json = await res.json().catch(() => ({}));
+      // Surface the service's refusal verbatim — over-calling a commitment is rejected there, and
+      // the operator needs the actual reason, not a generic failure.
+      setMessage(res.ok && json?.success
+        ? `Capital call ${json.data?.reference} issued at ${pct}%. Notices are now visible to investors.`
+        : json?.error?.message || 'The call was not issued.');
+      if (res.ok) { setPurpose(''); await load(); }
+    } catch { setMessage('Could not reach the capital service.'); }
+    finally { setBusy(''); }
   };
 
-  const handleGenerateCall = (pct: number) => {
-    const callAmount = (totalCommitted * pct) / 100;
-    
-    setInvestors(prev => prev.map(inv => {
-      const invCall = (inv.commitmentAmount * pct) / 100;
-      return {
-        ...inv,
-        pendingCallAmount: invCall,
-        wireStatus: 'Not Initiated'
-      };
-    }));
-
-    addLog(`System issued ${pct}% Capital Call issuance totaling ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(callAmount)}`);
-  };
-
-  const handleInitiateWire = (investorId: string) => {
-    setInvestors(prev => prev.map(inv => inv.id === investorId ? { ...inv, wireStatus: 'Initiated' } : inv));
-    const inv = investors.find(i => i.id === investorId);
-    addLog(`${inv?.name} initiated wire transfer for pending call.`, 'Investor');
-  };
-
-  const handleConfirmWire = (investorId: string) => {
-    setInvestors(prev => prev.map(inv => {
-      if (inv.id === investorId) {
-        return {
-          ...inv,
-          wireStatus: 'Confirmed'
-        };
-      }
-      return inv;
-    }));
-    const inv = investors.find(i => i.id === investorId);
-    addLog(`Admin confirmed receipt of funds from ${inv?.name}.`);
-  };
-
-  const handleExecuteAllocation = () => {
-    // Sum up all confirmed pending funds
-    const totalToAllocate = investors.reduce((sum, i) => i.wireStatus === 'Confirmed' ? sum + i.pendingCallAmount : sum, 0);
-    
-    if (totalToAllocate === 0) return;
-
-    // Distribute to SPVs
-    setSpvs(prev => prev.map(spv => ({
-      ...spv,
-      allocatedAmount: spv.allocatedAmount + (totalToAllocate * spv.targetPercentage) / 100
-    })));
-
-    // Settle investors
-    setInvestors(prev => prev.map(inv => {
-      if (inv.wireStatus === 'Confirmed') {
-        return {
-          ...inv,
-          calledToDate: inv.calledToDate + inv.pendingCallAmount,
-          remainingCommitment: inv.remainingCommitment - inv.pendingCallAmount,
-          pendingCallAmount: 0,
-          wireStatus: 'Not Initiated'
-        };
-      }
-      return inv;
-    }));
-
-    addLog(`Strategic Allocation Executed: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(totalToAllocate)} deployed across portfolio.`);
-  };
+  if (state === 'loading') return <Centre><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></Centre>;
+  if (state === 'forbidden') return (
+    <Centre>
+      <div className="max-w-md text-center">
+        <ShieldCheck className="mx-auto h-10 w-10 text-muted-foreground" />
+        <p className="mt-3 font-semibold">Capital operations is restricted</p>
+        <p className="mt-1 text-sm text-muted-foreground">This view is limited to the IR and finance team.</p>
+      </div>
+    </Centre>
+  );
+  if (state === 'error') return (
+    <Centre>
+      <div className="max-w-md text-center">
+        <AlertTriangle className="mx-auto h-10 w-10 text-amber-500" />
+        <p className="mt-3 font-semibold">The register could not be loaded</p>
+        <p className="mt-1 text-sm text-muted-foreground">No figures are shown rather than stale ones. Try again shortly.</p>
+        <Button variant="outline" className="mt-4" onClick={() => { setState('loading'); load(); }}>Retry</Button>
+      </div>
+    </Centre>
+  );
 
   return (
-    <div className="flex flex-col md:flex-row min-h-[calc(100vh-64px)] overflow-hidden bg-background">
-      {/* Main Console Area */}
-      <div className="flex-1 flex flex-col h-full overflow-y-auto">
-        
-        {/* Header / Toolbar */}
-        <header className="sticky top-0 z-20 bg-background/95 backdrop-blur-md border-b border-border/50 p-4 md:p-8">
-          <div className="container mx-auto max-w-6xl">
-            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-8">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <Landmark className="h-5 w-5 text-primary" />
-                  <span className="text-[10px] font-bold text-primary uppercase tracking-[0.2em]">Institutional Console</span>
-                </div>
-                <h1 className="text-2xl md:text-3xl font-bold tracking-tighter">Capital Operations</h1>
-                <p className="text-sm text-muted-foreground mt-1 tracking-tight">Lifecycle management simulation for Baalvion General Partners.</p>
-              </div>
-
-              <div className="flex items-center gap-3 w-full lg:w-auto justify-between lg:justify-start">
-                <RoleSwitcher currentRole={role} onRoleChange={setRole} />
-                <div className="lg:hidden">
-                  <Sheet>
-                    <SheetTrigger asChild>
-                      <Button variant="outline" size="icon" className="h-8 w-8">
-                        <Menu className="h-4 w-4" />
-                      </Button>
-                    </SheetTrigger>
-                    <SheetContent side="right" className="p-0 w-80">
-                      <SheetHeader className="sr-only">
-                        <SheetTitle>Capital Operations Activity Log</SheetTitle>
-                      </SheetHeader>
-                      <ActivityLogPanel logs={logs} />
-                    </SheetContent>
-                  </Sheet>
-                </div>
-              </div>
+    <main className="min-h-screen bg-background">
+      <header className="border-b bg-card/40">
+        <div className="mx-auto flex max-w-[1200px] items-center justify-between px-6 py-5">
+          <div className="flex items-center gap-3">
+            <Landmark className="h-6 w-6 text-primary" />
+            <div>
+              <h1 className="text-xl font-bold tracking-tight">Capital Operations</h1>
+              <p className="text-xs text-muted-foreground">Commitments, drawdowns and receipts — from the ledger.</p>
             </div>
-
-            <CapitalOverview 
-              totalCommitted={totalCommitted}
-              totalCalled={totalCalled}
-              remainingCommitment={remainingCommitment}
-              deployedCapital={deployedCapital}
-              liquidityReserve={liquidityReserve}
-            />
           </div>
-        </header>
+          <Button variant="outline" size="sm" onClick={load}><RefreshCw className="mr-2 h-3.5 w-3.5" /> Refresh</Button>
+        </div>
+      </header>
 
-        {/* Content Body */}
-        <main className="flex-1 p-4 md:p-8 overflow-y-auto">
-          <div className="container mx-auto max-w-6xl space-y-8">
-            
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-              {/* Left Column: Input & Logic */}
-              <div className="space-y-8">
-                <CapitalCallGenerator 
-                  onGenerate={handleGenerateCall} 
-                  disabled={role === 'Investor' || role === 'Board Viewer'} 
-                />
-                
-                <AllocationEngine 
-                  spvs={spvs} 
-                  onExecute={handleExecuteAllocation} 
-                  canExecute={canAllocate}
-                  disabled={role === 'Investor' || role === 'Board Viewer'}
-                />
-              </div>
+      <div className="mx-auto max-w-[1200px] space-y-8 px-6 py-8">
+        <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <Stat label="Total committed" value={fmt(totals.committed, currency)} />
+          <Stat label="Called to date" value={fmt(totals.called, currency)} />
+          <Stat label="Received" value={fmt(totals.paid, currency)} />
+          <Stat label="Outstanding" value={fmt(totals.outstanding, currency)} tone={totals.outstanding > 0 ? 'warn' : 'ok'} />
+        </section>
 
-              {/* Right Column: Visualization */}
-              <div className="space-y-8">
-                <CapitalFlowVisualization 
-                  totalCommitted={totalCommitted}
-                  totalCalled={totalCalled}
-                  totalDeployed={deployedCapital + liquidityReserve}
-                />
-                
-                <div className="p-6 bg-primary/5 border border-primary/20 rounded-xl flex gap-4">
-                  <ShieldCheck className="h-6 w-6 text-primary shrink-0" />
-                  <div className="space-y-1">
-                    <p className="text-xs font-bold uppercase tracking-widest">Fiduciary Safeguard</p>
-                    <p className="text-[11px] leading-relaxed text-muted-foreground italic">
-                      "All capital calls are subject to the Master Partnership Agreement. Allocation logic ensures pro-rata fairness across participating institutional tranches."
-                    </p>
-                  </div>
-                </div>
-              </div>
+        <section className="rounded-xl border bg-card p-6">
+          <h2 className="font-semibold">Issue a drawdown</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Applied pro-rata across every signed commitment. A call that would exceed an investor&apos;s
+            remaining commitment is refused rather than reduced.
+          </p>
+          <div className="mt-4 flex flex-wrap items-end gap-3">
+            <Field label="Percentage of commitment">
+              <input value={pct} onChange={(e) => setPct(e.target.value)} inputMode="decimal"
+                className="w-28 rounded-md border bg-background px-3 py-2 text-sm" />
+            </Field>
+            <Field label="Due date">
+              <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)}
+                className="rounded-md border bg-background px-3 py-2 text-sm" />
+            </Field>
+            <Field label="Purpose (appears on the notice)">
+              <input value={purpose} onChange={(e) => setPurpose(e.target.value)} placeholder="e.g. Phase 2 deployment"
+                className="w-80 rounded-md border bg-background px-3 py-2 text-sm" />
+            </Field>
+            <Button onClick={issueCall} disabled={busy === 'call' || rows.length === 0}>
+              {busy === 'call' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Issue call
+            </Button>
+          </div>
+          {message && <p className="mt-3 text-sm text-muted-foreground">{message}</p>}
+        </section>
+
+        <section className="rounded-xl border bg-card">
+          <div className="border-b px-6 py-4">
+            <h2 className="font-semibold">Register</h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Called and received are summed from the call and settlement ledgers — nothing here is stored on the commitment.
+            </p>
+          </div>
+          {rows.length === 0 ? (
+            <p className="px-6 py-12 text-center text-sm text-muted-foreground">
+              No commitments on the register yet.
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="border-b text-xs uppercase tracking-wider text-muted-foreground">
+                  <tr>
+                    <Th className="text-left">Investor</Th><Th>Status</Th><Th>Committed</Th>
+                    <Th>Called</Th><Th>Received</Th><Th>Outstanding</Th><Th>Uncalled</Th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((r) => (
+                    <tr key={r.id} className="border-b last:border-0">
+                      <td className="px-4 py-3 font-medium">{r.investorName}</td>
+                      <td className="px-4 py-3 text-center">
+                        <span className="rounded-full bg-muted px-2 py-0.5 text-xs capitalize">{r.status}</span>
+                      </td>
+                      <td className="px-4 py-3 text-right tabular-nums">{fmt(r.commitmentAmount, r.currency)}</td>
+                      <td className="px-4 py-3 text-right tabular-nums">{fmt(r.calledToDate, r.currency)}</td>
+                      <td className="px-4 py-3 text-right tabular-nums">{fmt(r.paidToDate, r.currency)}</td>
+                      <td className={`px-4 py-3 text-right tabular-nums ${r.outstanding > 0 ? 'text-amber-600' : ''}`}>
+                        {fmt(r.outstanding, r.currency)}
+                      </td>
+                      <td className="px-4 py-3 text-right tabular-nums text-muted-foreground">{fmt(r.remainingCommitment, r.currency)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
+          )}
+        </section>
 
-            {/* Bottom Row: Detailed Registry */}
-            <InvestorPanel 
-              investors={investors} 
-              role={role}
-              onInitiateWire={handleInitiateWire}
-              onConfirmWire={handleConfirmWire}
-            />
-
-          </div>
-        </main>
+        <p className="text-xs text-muted-foreground">
+          Receipts are recorded against a bank settlement reference through the capital API — a wire is
+          never marked received from this screen alone.
+        </p>
       </div>
+    </main>
+  );
+}
 
-      {/* Audit Ledger Sidebar (Desktop Only) */}
-      <aside className="hidden lg:block w-80 shrink-0 border-l border-border/50">
-        <ActivityLogPanel logs={logs} />
-      </aside>
+function Centre({ children }: { children: React.ReactNode }) {
+  return <div className="flex min-h-[70vh] items-center justify-center px-6">{children}</div>;
+}
+
+function Stat({ label, value, tone }: { label: string; value: string; tone?: 'ok' | 'warn' }) {
+  return (
+    <div className="rounded-xl border bg-card p-5">
+      <p className="text-xs uppercase tracking-wider text-muted-foreground">{label}</p>
+      <p className={`mt-2 text-2xl font-bold tabular-nums ${tone === 'warn' ? 'text-amber-600' : ''}`}>{value}</p>
     </div>
   );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="flex flex-col gap-1">
+      <span className="text-xs font-medium text-muted-foreground">{label}</span>
+      {children}
+    </label>
+  );
+}
+
+function Th({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+  return <th className={`px-4 py-3 font-semibold ${className || 'text-right'}`}>{children}</th>;
 }

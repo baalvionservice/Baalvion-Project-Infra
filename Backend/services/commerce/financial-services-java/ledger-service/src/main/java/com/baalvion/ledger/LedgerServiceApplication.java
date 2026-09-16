@@ -2,7 +2,6 @@ package com.baalvion.ledger;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
@@ -12,7 +11,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * with full multi-tenant isolation via PostgreSQL Row-Level Security.
  */
 @SpringBootApplication
-@EnableKafka
 @EnableScheduling
 public class LedgerServiceApplication {
 

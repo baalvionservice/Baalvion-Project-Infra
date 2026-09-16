@@ -16,7 +16,7 @@ export function Testimonials({ testimonials }: TestimonialsProps) {
           In the Words of Our Clients
         </span>
         <h2 className="font-headline text-4xl font-bold italic text-gray-900 md:text-5xl">
-          A Century of Trust
+          The Basis of Trust
         </h2>
       </div>
 

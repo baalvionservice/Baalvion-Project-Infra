@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import React, {  Suspense  } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -112,6 +112,20 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     },
   };
 }
+
+/**
+ * Empty on purpose — see the root [...slug] route. These country articles render
+ * the same heavy template (CMS article + trending rail + "more in category"),
+ * and without this export Next rebuilt every one of them from scratch on every
+ * request. Nothing is prerendered at build; on-demand renders are cached.
+ */
+export async function generateStaticParams(): Promise<
+  { region: string; country: string; rest: string[] }[]
+> {
+  return [];
+}
+
+export const dynamic = "force-dynamic";
 
 export default async function WorldCountryArticlePage({ params }: { params: Params }) {
   const { region, country, rest } = await params;

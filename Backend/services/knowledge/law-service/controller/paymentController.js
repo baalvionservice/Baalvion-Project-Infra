@@ -7,17 +7,21 @@ const { ensureClient } = require('../utils/provision');
 const razorpay = require('../service/razorpay');
 const mailer = require('../service/mailer');
 const ledger = require('../service/ledger');
+const paymentSpine = require('../service/paymentSpine');
 
 // Single "payment settled" side-effect hook (called from create/verify/webhook):
 // confirm the booking, credit the lawyer's earnings ledger, email a receipt.
 // All side-effects are best-effort and must never fail the payment itself.
-const settleBooking = async (payment) => {
+const settleBooking = async (payment, context = {}) => {
     if (payment.status !== 'succeeded') return;
     if (payment.booking_id) {
         await db.Booking.update({ status: 'confirmed' }, { where: { id: payment.booking_id } });
     }
     // Credit lawyer earnings (net of platform fee). Idempotent per payment.
     await ledger.creditFromPayment(payment).catch(() => {});
+    // Report onto the cross-estate payment spine. Best-effort like the rest of this hook — it
+    // never throws, so a reporting problem cannot fail a payment that already succeeded.
+    await paymentSpine.reportBookingPayment(payment, context);
     // Email receipt to the client.
     try {
         const client = await db.Client.findByPk(payment.client_id, { attributes: ['name', 'email'] });
@@ -188,7 +192,17 @@ const webhookHandler = async (req, res) => {
             const payment = pid
                 ? await db.Payment.findByPk(Number(pid))
                 : (orderId ? await db.Payment.findOne({ where: { provider_tx_id: orderId } }) : null);
-            if (payment) { await payment.update({ status: 'succeeded' }); await settleBooking(payment); }
+            if (payment) {
+                await payment.update({ status: 'succeeded' });
+                // Razorpay reports its cut on the PAYMENT entity as `fee` (GST-inclusive, minor
+                // units). It is absent on an authorization — pass it through as absent rather
+                // than zero, because "no fee" and "fee unknown" are different on a revenue report.
+                await settleBooking(payment, {
+                    feeMinor: entity && entity.fee != null ? Number(entity.fee) : undefined,
+                    email: (entity && entity.email) || null,
+                    provider: 'razorpay',
+                });
+            }
         } else if (type === 'payment.failed') {
             const orderId = entity && entity.order_id;
             if (orderId) await db.Payment.update({ status: 'failed' }, { where: { provider_tx_id: orderId } });

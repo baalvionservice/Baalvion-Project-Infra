@@ -7,7 +7,19 @@ export type NewsCategory =
   | 'Startups'
   | 'Cybersecurity'
   | 'World'
-  | 'Science';
+  | 'Science'
+  | 'Legal';
+
+/**
+ * The single list every category control renders from. It mirrors the ENUM on
+ * news-service's articles.category — the two drifted once already: 'Legal' was
+ * added to the database and 174 articles were ingested under it while the admin
+ * panel's hardcoded copies still listed eight categories, so Legal could be
+ * neither filtered nor assigned to a new source.
+ */
+export const NEWS_CATEGORIES: NewsCategory[] = [
+  'AI', 'Technology', 'Business', 'Finance', 'Startups', 'Cybersecurity', 'World', 'Science', 'Legal',
+];
 export type NewsSentiment = 'positive' | 'neutral' | 'negative';
 
 export interface NewsSource {

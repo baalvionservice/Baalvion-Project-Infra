@@ -6,7 +6,18 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { newsArticles } from "@/lib/data";
+
+/**
+ * Superseded by the CMS-backed pages under /news-and-events, which read real published
+ * content via cmsGetNews() / cmsGetPressReleases(). No page renders this component.
+ *
+ * It used to map over a bundled fixture in @/lib/data that has been removed: an invented
+ * acquisition, partnership, Davos appearance and set of earnings figures. Kept as an empty
+ * shell rather than re-pointed, because the CMS pages already do this properly — wire this
+ * to cmsGet* if it is ever needed again, and never back to a bundled array.
+ */
+const newsArticles: Array<Record<string, any>> = [];
+
 import Link from "next/link";
 import { Button } from "../ui/button";
 import { ArrowRight, Newspaper } from "lucide-react";

@@ -640,6 +640,19 @@ export const orderApi = {
   // a client can never mark itself paid). Mock provider in non-prod; real adapters when configured.
   // `gateway` (stripe|razorpay|payu|bank) is persisted on the order/payment per C1 — non-prod stays
   // mocked but records the choice.
+  /**
+   * Which gateways this store can actually charge with. The checkout used to render a fixed set
+   * of cards and preselect Stripe, so a shopper on a store with no Stripe account chose it by
+   * default and hit the failure at the last step. Names only — never keys.
+   */
+  paymentGateways(): Promise<ApiResult<{ gateways: PaymentGatewaySlug[]; preferred: PaymentGatewaySlug | null }>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<{ gateways: PaymentGatewaySlug[]; preferred: PaymentGatewaySlug | null }>();
+    return apiFetch<{ gateways: PaymentGatewaySlug[]; preferred: PaymentGatewaySlug | null }>(
+      `${ORDER_URL}/orders/stores/${storeId}/orders/payment-gateways`,
+    );
+  },
+
   createPaymentIntent(orderId: string, gateway?: PaymentGatewaySlug): Promise<ApiResult<PaymentIntent>> {
     const storeId = getStoreId();
     if (!storeId) return missingStore<PaymentIntent>();

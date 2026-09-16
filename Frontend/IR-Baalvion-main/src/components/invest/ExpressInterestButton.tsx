@@ -23,7 +23,7 @@ function formatRemaining(ms: number): string {
 // Opens a deal for an eligible, signed-in investor and routes into the deal room. Eligibility
 // (approved application + corporate email + post-approval cool-down) is enforced server-side in
 // the BFF; here we mirror it for clear UX so the user knows why the button is gated.
-export default function ExpressInterestButton({ opportunityId, companyOrg }: { opportunityId: string; companyOrg?: string }) {
+export default function ExpressInterestButton({ opportunityId }: { opportunityId: string }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -63,7 +63,8 @@ export default function ExpressInterestButton({ opportunityId, companyOrg }: { o
       const res = await fetch('/api/mp/deals', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ opportunity_id: opportunityId, org_id_company: companyOrg }),
+        // The counterparty org is derived server-side from the opportunity — never sent from here.
+        body: JSON.stringify({ opportunity_id: opportunityId }),
       });
       if (res.status === 401) {
         window.location.href = `/invest/${opportunityId}?login=1`;
@@ -81,7 +82,7 @@ export default function ExpressInterestButton({ opportunityId, companyOrg }: { o
       setError(e instanceof Error ? e.message : 'Something went wrong.');
       setLoading(false);
     }
-  }, [opportunityId, companyOrg, router]);
+  }, [opportunityId, router]);
 
   // Gated states with a clear explanation instead of the open-deal button.
   const reason = elig?.reason;

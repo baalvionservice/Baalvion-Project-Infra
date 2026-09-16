@@ -47,7 +47,7 @@ export default function NewsSeoPage() {
         <Card>
           <CardContent className="pt-5 pb-4">
             <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">Articles Audited</p>
-            <p className="text-2xl font-bold">{isLoading ? <Skeleton className="h-7 w-14" /> : data?.articlesAudited ?? 0}</p>
+            <div className="text-2xl font-bold">{isLoading ? <Skeleton className="h-7 w-14" /> : data?.articlesAudited ?? 0}</div>
           </CardContent>
         </Card>
         <Card>
@@ -55,7 +55,7 @@ export default function NewsSeoPage() {
             <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1">
               <CheckCircle2 className="h-3.5 w-3.5 text-green-500" /> Clean
             </p>
-            <p className="text-2xl font-bold">{isLoading ? <Skeleton className="h-7 w-14" /> : data?.cleanArticles ?? 0}</p>
+            <div className="text-2xl font-bold">{isLoading ? <Skeleton className="h-7 w-14" /> : data?.cleanArticles ?? 0}</div>
           </CardContent>
         </Card>
         <Card>
@@ -63,7 +63,7 @@ export default function NewsSeoPage() {
             <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1">
               <AlertTriangle className="h-3.5 w-3.5 text-yellow-500" /> Flagged
             </p>
-            <p className="text-2xl font-bold">{isLoading ? <Skeleton className="h-7 w-14" /> : (data?.flagged?.length ?? 0)}</p>
+            <div className="text-2xl font-bold">{isLoading ? <Skeleton className="h-7 w-14" /> : (data?.flagged?.length ?? 0)}</div>
           </CardContent>
         </Card>
       </div>

@@ -9,6 +9,7 @@
 // order-service — see Backend/services/ecosystem/ctm-service/service/payments.js.
 const crypto = require('crypto');
 const db = require('../models');
+const { Money } = require('@baalvion/money');
 
 const SITE_SLUG = process.env.PAYMENT_SITE_SLUG || 'imperialpedia';
 const CMS_BASE_URL = process.env.CMS_BASE_URL || '';
@@ -63,7 +64,8 @@ const isConfigured = async () => Boolean(await resolveConfig());
 async function createCheckout({ amount, currency = 'USD', planName, notes }) {
     const cfg = await resolveConfig();
     if (!cfg) throw new Error('Razorpay is not configured');
-    const amountMinor = Math.round(Number(amount) * 100);
+    // Exponent from the currency, not a hardcoded 100.
+    const amountMinor = Number(Money.fromDatabaseValue(amount, currency).minor);
     if (!Number.isInteger(amountMinor) || amountMinor <= 0) throw new Error('amount must be a positive number');
 
     const Razorpay = require('razorpay');

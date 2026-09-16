@@ -5,7 +5,7 @@
 # NEXT_PUBLIC_* are baked at BUILD time — pass them as --build-arg (see ARGs below),
 # NOT as runtime env. Point them at the PUBLIC prod origin. The /auth-bff/* rewrite target
 # (AUTH_PROXY_TARGET) is read from next.config at server start, so it stays a RUNTIME env.
-FROM node:20-alpine AS base
+FROM node:26-alpine AS base
 RUN apk add --no-cache libc6-compat && corepack enable
 WORKDIR /app
 
@@ -29,8 +29,18 @@ ARG NEXT_PUBLIC_CTM_API_URL
 ARG NEXT_PUBLIC_APP_URL
 ARG NEXT_PUBLIC_USE_MOCK=false
 ARG NEXT_PUBLIC_GA_ID
+# Build inputs, not runtime: next.config resolves rewrites() at build time and bakes the
+# destinations into routes-manifest.json, so setting these on the running container is a
+# no-op. Unset, the config silently falls back to its hardcoded default.
+ARG AUTH_PROXY_TARGET
+ENV AUTH_PROXY_TARGET=$AUTH_PROXY_TARGET
 ENV NEXT_TELEMETRY_DISABLED=1 NODE_ENV=production
 COPY --from=pruner /app/out/full/ ./
+# turbo prune does not carry the root tsconfig.base.json, which every package tsconfig
+# extends. Without it tsup's DTS step fails "Cannot find base config file" and takes the
+# whole build with it. Latent until this app gained a workspace package that needs building
+# — @baalvion/design did exactly that and broke the Amarise image on 2026-09-09.
+COPY tsconfig.base.json ./tsconfig.base.json
 RUN pnpm turbo run build --filter=controlthemarket-web
 
 # 4) Minimal runner (standalone server).

@@ -129,6 +129,26 @@ const pointOfEntrySchema = z.object({
   capacityNote: z.string().optional(),
   contactPhone: z.string().optional(),
   contactEmail: z.string().email().optional(),
+  // Operational depth. Every field is optional and absent means "not on file" — the
+  // corridor planner reports an unchecked constraint rather than assuming a pass.
+  /** Deepest draft workable alongside, in metres. Governs which vessel classes can call. */
+  maxDraftM: z.number().positive().max(40).optional(),
+  /** Total quay length across container berths, in metres. */
+  quayLengthM: z.number().positive().optional(),
+  /** Number of container berths. */
+  berths: z.number().int().positive().optional(),
+  /** Number of container terminals. */
+  terminals: z.number().int().positive().optional(),
+  /** Reefer plug positions on the terminal. 0 means the port cannot take powered equipment. */
+  reeferPlugs: z.number().int().nonnegative().optional(),
+  /** Published annual container throughput, in TEU. Meaningless without `throughputYear`. */
+  annualTeu: z.number().nonnegative().optional(),
+  throughputYear: z.number().int().min(1950).max(2100).optional(),
+  /** Whether the terminal has an on-dock or near-dock rail connection. */
+  railConnected: z.boolean().optional(),
+  /** IANA timezone of the terminal, when it differs from the country's primary zone. */
+  timezone: z.string().optional(),
+  website: z.string().url().optional(),
 });
 
 const tradeAgreementSchema = z.object({
@@ -224,6 +244,16 @@ const pointOfEntryFormFields: FormFieldDescriptor[] = [
   { name: 'latitude', label: 'Latitude', type: 'number', placement: 'attributes' },
   { name: 'longitude', label: 'Longitude', type: 'number', placement: 'attributes' },
   { name: 'capacityNote', label: 'Capacity', type: 'text', placement: 'attributes' },
+  { name: 'maxDraftM', label: 'Maximum draft (m)', type: 'number', placement: 'attributes', description: 'Deepest draft workable alongside. Drives the corridor planner vessel check — leave blank rather than guessing.' },
+  { name: 'quayLengthM', label: 'Quay length (m)', type: 'number', placement: 'attributes' },
+  { name: 'berths', label: 'Container berths', type: 'number', placement: 'attributes' },
+  { name: 'terminals', label: 'Container terminals', type: 'number', placement: 'attributes' },
+  { name: 'reeferPlugs', label: 'Reefer plugs', type: 'number', placement: 'attributes', description: 'Powered slots on the terminal. Enter 0 only if the port genuinely cannot take reefers.' },
+  { name: 'annualTeu', label: 'Annual throughput (TEU)', type: 'number', placement: 'attributes' },
+  { name: 'throughputYear', label: 'Throughput year', type: 'number', placement: 'attributes', description: 'The year the throughput figure belongs to. Required for the figure to be shown.' },
+  { name: 'railConnected', label: 'Rail connected', type: 'boolean', placement: 'attributes' },
+  { name: 'timezone', label: 'Timezone (IANA)', type: 'string', placement: 'attributes' },
+  { name: 'website', label: 'Website', type: 'string', placement: 'attributes' },
   { name: 'contactPhone', label: 'Contact phone', type: 'string', placement: 'attributes' },
   { name: 'contactEmail', label: 'Contact email', type: 'string', placement: 'attributes' },
 ];

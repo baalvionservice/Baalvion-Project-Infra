@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { seoConfig } from '@/config/seo';
 import { env } from '@/config/env';
+import { isPathHiddenByAdsenseCleanup } from '@/config/adsense-cleanup';
 
 interface MetadataProps {
   title?: string;
@@ -30,21 +31,11 @@ export function buildMetadata({
   absoluteTitle = false,
 }: MetadataProps = {}): Metadata {
   const siteName = 'Imperialpedia';
-  // The root layout (src/app/layout.tsx) already sets `title.template = '%s | Imperialpedia'`,
-  // which Next.js applies to every string `title` returned by a page/segment below it.
-  // Appending the suffix here too doubles it (triples it when a CMS-stored seoTitle
-  // already has it baked in) -- verified live: every page using buildMetadata() was
-  // shipping "<Title> | Imperialpedia | Imperialpedia" in its actual <title> tag. Strip any
-  // existing trailing suffix defensively (handles both cases) and let the root template
-  // add it back exactly once.
   const suffixPattern = new RegExp(`\\s*\\|\\s*${siteName}\\s*$`, 'i');
   let cleanTitle = title?.trim();
   while (cleanTitle && suffixPattern.test(cleanTitle)) {
     cleanTitle = cleanTitle.replace(suffixPattern, '').trim();
   }
-  // `metadata.title` is left un-suffixed so the root template applies it once; OG/Twitter
-  // titles aren't auto-templated by Next, so they need the full "<Title> | Imperialpedia"
-  // form explicitly.
   const finalTitle = cleanTitle || seoConfig.defaultTitle;
   const socialTitle = !cleanTitle
     ? seoConfig.defaultTitle
@@ -61,6 +52,9 @@ export function buildMetadata({
       ? canonical
       : `${baseUrl}${canonical.startsWith('/') ? canonical : `/${canonical}`}`
     : undefined;
+
+  const isHiddenByCleanup = canonical ? isPathHiddenByAdsenseCleanup(canonical) : false;
+  const effectiveNoIndex = noIndex || isHiddenByCleanup;
 
   const metadata: Metadata = {
     title: absoluteTitle ? { absolute: finalTitle } : finalTitle,
@@ -92,11 +86,11 @@ export function buildMetadata({
       site: '@imperialpedia',
     },
     robots: {
-      index: !noIndex,
-      follow: !noIndex,
+      index: !effectiveNoIndex,
+      follow: true,
       googleBot: {
-        index: !noIndex,
-        follow: !noIndex,
+        index: !effectiveNoIndex,
+        follow: true,
         'max-video-preview': -1,
         'max-image-preview': 'large',
         'max-snippet': -1,
@@ -112,4 +106,5 @@ export function buildMetadata({
 
   return metadata;
 }
+
 

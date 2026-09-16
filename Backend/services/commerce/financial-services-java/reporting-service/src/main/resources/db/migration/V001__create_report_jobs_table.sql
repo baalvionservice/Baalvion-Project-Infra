@@ -1,6 +1,12 @@
 CREATE SCHEMA IF NOT EXISTS reporting;
 
-ALTER SCHEMA reporting OWNER TO postgres;
+-- Schema owner. Must be the role that actually RUNS the migration, not a hardcoded name:
+-- `postgres` does not exist on every deployment (the consolidated box's superuser is
+-- baalvion_app), and an unguarded ALTER fails the migration outright with
+-- "42704 role does not exist", leaving the service unable to start at all.
+-- CURRENT_USER is spring.flyway.user, which defaults to the same DB_USER the app connects as,
+-- so the RLS policies that assume "the app connects as the owner" still hold.
+ALTER SCHEMA reporting OWNER TO CURRENT_USER;
 
 CREATE TABLE reporting.report_jobs (
   id uuid PRIMARY KEY,

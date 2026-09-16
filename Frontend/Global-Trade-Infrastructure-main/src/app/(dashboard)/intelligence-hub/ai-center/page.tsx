@@ -41,13 +41,16 @@ export default function AICenterPage() {
   const { toast } = useToast();
 
   const fetchData = async () => {
-    const [agentList, actions] = await Promise.all([
-      aiOrchestration.getActiveAgents(),
-      (aiOrchestration as any).getStagedActions()
-    ]);
-    setAgents(agentList as any);
-    setStagedActions(actions);
-    setLoading(false);
+    try {
+      const [agentList, actions] = await Promise.all([
+        aiOrchestration.getActiveAgents(),
+        (aiOrchestration as any).getStagedActions()
+      ]);
+      setAgents(agentList as any);
+      setStagedActions(actions);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {

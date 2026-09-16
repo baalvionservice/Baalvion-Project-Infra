@@ -21,7 +21,7 @@ export function CategoryBadge({
 }
 
 /**
- * Investopedia-style article card:
+ * Imperialpedia-style article card:
  * High-quality 16:9 image, blue uppercase tag, bold headline with hover state,
  * excerpt, and author byline.
  */

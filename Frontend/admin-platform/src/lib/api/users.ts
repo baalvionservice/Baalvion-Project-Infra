@@ -70,6 +70,17 @@ export const usersApi = {
     return { ...res, data: body };
   },
 
+  /**
+   * Change a person's ORG role — the one the access token carries and authz reads.
+   * The server enforces the rank guards; the UI only narrows the choices it offers.
+   */
+  changeRole: async (id: number, role: string) => {
+    const res = await adminApiClient.patch<
+      ApiResponse<{ userId: string; previousRole?: string; role: string; sessionsRevoked?: boolean }>
+    >(`/admin/users/${id}/role`, { role });
+    return res.data.data;
+  },
+
   get: async (id: number) => {
     const res = await adminApiClient.get<ApiResponse<RawUser>>(`/admin/users/${id}`);
     const u = res.data.data;

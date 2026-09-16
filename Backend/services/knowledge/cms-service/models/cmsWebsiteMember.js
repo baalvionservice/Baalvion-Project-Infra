@@ -13,6 +13,9 @@ module.exports = function (sequelize, DataTypes) {
         },
         invitedBy: { type: DataTypes.BIGINT, allowNull: true },
         joinedAt: { type: DataTypes.DATE, allowNull: false, defaultValue: DataTypes.NOW },
+        // NULL = a standing grant. A timestamp makes the grant lapse on its own, so
+        // time-boxed access (contractors, agencies) does not depend on anyone remembering.
+        expiresAt: { type: DataTypes.DATE, allowNull: true },
     }, {
         sequelize,
         tableName: 'cms_website_members',
@@ -24,6 +27,7 @@ module.exports = function (sequelize, DataTypes) {
             { fields: ['website_id'] },
             { fields: ['user_id'] },
             { fields: ['role'] },
+            { fields: ['expires_at'] },
         ],
     });
 };

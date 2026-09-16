@@ -83,7 +83,8 @@ export function TeamManagementCard() {
       isActive: true,
       isVerified: false,
       profile: {
-        avatarUrl: `https://picsum.photos/seed/${Date.now()}/100/100`,
+        // Initials until they upload a real one — never a random stock photograph.
+        avatarUrl: undefined,
       },
     });
 

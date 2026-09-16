@@ -1,115 +1,231 @@
 'use strict';
 /**
- * UAEConnector — Dubai Customs Mirsal 2 gateway (PLACEHOLDER) (Prompt 9).
+ * UAEConnector — Dubai Customs Mirsal 2 (real integration).
  *
- * Maps a canonical declaration to a Dubai Customs (Mirsal 2) declaration and
- * submits it. The UAE keys the trader on a Customs Business Code / TRN, so the
- * jurisdiction rule is "the trading party must carry a tax_id (TRN) or a business
- * code in metadata". Mirsal returns a `declarationNumber` and a `mirsalStatus`
- * (CLEARED / PENDING / REJECTED), collapsed by parseResponse into the normalized
- * shape.
+ * Lodges an import, export or transit declaration as XML over mutual TLS,
+ * authenticated additionally by the Dubai Trade integration account.
  *
- * The live channel needs Dubai Trade portal credentials, so `transmit()` only
- * calls the real endpoint when MIRSAL_ENDPOINT + MIRSAL_API_KEY are set; otherwise
- * it falls back to the deterministic simulator.
+ * The account credentials travel in the message header rather than as an HTTP
+ * Authorization header, which is how the channel is specified — so they are
+ * carried in the envelope below and never logged. Mutual TLS still authenticates
+ * the connection; the account identifies the filing business.
+ *
+ * SPEC BINDING. Element names live in ELEMENTS and the declaration-type codes in
+ * DECLARATION_TYPE — reconcile both against the Dubai Trade integration pack for
+ * the version you are provisioned against.
  */
 
 const { CustomsConnector } = require('./baseConnector');
-const { httpTransmit } = require('./transport');
-const { decideOutcome, deterministicRef } = require('./simulate');
+const transport = require('./transport');
+const xml = require('./xml');
 const { CHANNEL, STATUS } = require('../schema');
 
-// Mirsal native status → normalized status.
-const MIRSAL_STATUS_MAP = {
+const ELEMENTS = Object.freeze({
+    envelope: 'MirsalDeclaration',
+    header: 'Header',
+    declaration: 'DeclarationDetails',
+    invoice: 'InvoiceDetails',
+    item: 'GoodsDetails',
+});
+
+/**
+ * Mirsal declaration types. The right code decides duty treatment entirely —
+ * a free-zone transfer assessed as an import would attract duty that is not due.
+ */
+const DECLARATION_TYPE = Object.freeze({
+    IMPORT_FOR_HOME: '101',
+    IMPORT_FOR_REEXPORT: '103',
+    EXPORT: '201',
+    FREE_ZONE_TRANSFER: '301',
+    TRANSIT: '401',
+});
+
+const MIRSAL_STATUS = Object.freeze({
+    SUBMITTED: STATUS.SUBMITTED,
+    RECEIVED: STATUS.SUBMITTED,
+    UNDER_PROCESSING: STATUS.SUBMITTED,
+    PENDING_PAYMENT: STATUS.SUBMITTED,
+    INSPECTION: STATUS.SUBMITTED,
     CLEARED: STATUS.ACCEPTED,
     APPROVED: STATUS.ACCEPTED,
-    PENDING: STATUS.SUBMITTED,
-    UNDER_INSPECTION: STATUS.SUBMITTED,
+    RELEASED: STATUS.ACCEPTED,
     REJECTED: STATUS.REJECTED,
-    CANCELLED: STATUS.REJECTED,
-};
+    CANCELLED: STATUS.CANCELLED,
+});
 
 class UAEConnector extends CustomsConnector {
     constructor(opts = {}) {
         super({ channel: CHANNEL.UAE_MIRSAL, gatewayName: 'Mirsal 2', ...opts });
-        this.endpoint = opts.endpoint || process.env.MIRSAL_ENDPOINT || null;
-        this.apiKey = opts.apiKey || process.env.MIRSAL_API_KEY || null;
+        this.messageVersion = opts.messageVersion || process.env.MIRSAL_MESSAGE_VERSION || '2.0';
     }
 
     validateDeclaration(declaration) {
         const errors = [];
-        const trader = declaration.entry_type === 'export' ? declaration.exporter : declaration.importer;
-        const businessCode = trader && (trader.tax_id || (declaration.metadata && declaration.metadata.business_code));
-        if (!businessCode) {
-            errors.push({ code: 'AE_MISSING_BUSINESS_CODE', level: 'error', text: 'Mirsal requires a Customs Business Code / TRN on the trading party' });
+        const meta = declaration.metadata || {};
+
+        for (const line of declaration.line_items || []) {
+            const hs = String(line.hs_code || '').replace(/\D/g, '');
+            // The UAE applies the GCC common tariff at 8 digits.
+            if (hs.length < 8) {
+                errors.push({
+                    code: 'AE_HS_TOO_SHORT',
+                    level: 'error',
+                    text: `Line ${line.line_no}: Mirsal assesses on the 8-digit GCC tariff code; "${line.hs_code}" has ${hs.length} digits`,
+                });
+            }
+            if (!line.origin_country) {
+                errors.push({ code: 'AE_MISSING_ORIGIN', level: 'error', text: `Line ${line.line_no}: country of origin is required` });
+            }
+            if (!Number(line.quantity)) {
+                errors.push({ code: 'AE_MISSING_QUANTITY', level: 'error', text: `Line ${line.line_no}: quantity must be greater than zero` });
+            }
         }
+
+        if (!meta.declaration_type) {
+            errors.push({
+                code: 'AE_MISSING_DECLARATION_TYPE',
+                level: 'error',
+                text: `metadata.declaration_type is required (one of ${Object.values(DECLARATION_TYPE).join(', ')}). It decides duty treatment, so it cannot be defaulted.`,
+            });
+        } else if (!Object.values(DECLARATION_TYPE).includes(String(meta.declaration_type))) {
+            errors.push({
+                code: 'AE_BAD_DECLARATION_TYPE',
+                level: 'error',
+                text: `declaration_type "${meta.declaration_type}" is not a recognised Mirsal type`,
+            });
+        }
+        if (!meta.total_packages) {
+            errors.push({ code: 'AE_MISSING_PACKAGES', level: 'error', text: 'metadata.total_packages is required on a Mirsal declaration' });
+        }
+
         return errors;
     }
 
-    buildPayload(declaration) {
-        const isExport = declaration.entry_type === 'export';
-        const trader = (isExport ? declaration.exporter : declaration.importer) || {};
+    buildPayload(declaration, ctx = {}) {
+        const cfg = ctx.cfg || {};
+        const meta = declaration.metadata || {};
+
+        const items = (declaration.line_items || []).map((line) => xml.el(ELEMENTS.item, {
+            LineNumber: line.line_no,
+            HSCode: String(line.hs_code || '').replace(/\D/g, ''),
+            GoodsDescription: line.description,
+            CountryOfOrigin: line.origin_country,
+            Quantity: Number(line.quantity || 0).toFixed(3),
+            UnitOfMeasure: line.unit,
+            UnitPrice: Number(line.unit_value || 0).toFixed(2),
+            LineValue: Number(line.value || 0).toFixed(2),
+            NetWeight: line.net_weight_kg ? Number(line.net_weight_kg).toFixed(3) : null,
+        }));
+
+        const body = xml.build(xml.el(ELEMENTS.envelope, {
+            children: [
+                // Account credentials belong to the message, not to an HTTP
+                // header, on this channel.
+                xml.el(ELEMENTS.header, {
+                    MessageVersion: this.messageVersion,
+                    BusinessCode: cfg.businessCode,
+                    UserName: cfg.username,
+                    Password: cfg.password,
+                    MessageId: ctx.idempotencyKey || null,
+                    MessageDateTime: new Date().toISOString(),
+                }),
+                xml.el(ELEMENTS.declaration, {
+                    DeclarationType: meta.declaration_type,
+                    Regime: meta.regime || null,
+                    PortOfEntry: meta.port_of_entry || null,
+                    ImporterCode: cfg.businessCode,
+                    ImporterName: (declaration.importer || {}).name,
+                    ExporterName: (declaration.exporter || {}).name,
+                    ExporterCountry: declaration.origin_country,
+                    CountryOfDeparture: declaration.origin_country,
+                    CountryOfDestination: declaration.destination_country,
+                    TotalPackages: meta.total_packages,
+                    PackageType: meta.package_type || null,
+                    GrossWeight: meta.gross_mass_kg ? Number(meta.gross_mass_kg).toFixed(3) : null,
+                    TransportMode: meta.transport_mode_code || null,
+                    BillOfLadingNumber: meta.bill_of_lading_no || null,
+                    Invoice: xml.el(ELEMENTS.invoice, {
+                        InvoiceNumber: meta.invoice_no || null,
+                        InvoiceDate: meta.invoice_date || null,
+                        InvoiceCurrency: declaration.currency,
+                        InvoiceValue: Number(declaration.customs_value || 0).toFixed(2),
+                        IncoTerm: String(declaration.incoterm || '').toUpperCase() || null,
+                        FreightAmount: meta.freight_amount ? Number(meta.freight_amount).toFixed(2) : null,
+                        InsuranceAmount: meta.insurance_amount ? Number(meta.insurance_amount).toFixed(2) : null,
+                    }),
+                    Goods: items,
+                }),
+            ],
+        }));
+
         return {
-            declarationType: isExport ? 'EX' : 'IM', // Export / Import
-            regime: (declaration.metadata && declaration.metadata.regime) || 'IMPORT_FOR_HOME_CONSUMPTION',
-            businessCode: trader.tax_id || (declaration.metadata && declaration.metadata.business_code) || null,
-            customsOffice: (declaration.metadata && declaration.metadata.port_code) || 'JEBEL_ALI',
-            totalValue: declaration.customs_value,
-            currency: declaration.currency,
-            goods: declaration.line_items.map((l) => ({
-                hsCode: l.hs_code,
-                description: l.description,
-                quantity: l.quantity,
-                unit: l.unit,
-                origin: l.origin_country,
-                value: l.value,
-            })),
+            contentType: transport.CONTENT_TYPE.XML,
+            body,
+            headers: { 'X-Mirsal-Business-Code': cfg.businessCode },
+            meta: {
+                message_version: this.messageVersion,
+                declaration_type: meta.declaration_type,
+                // Never echo the account password into audit metadata.
+                credentials_in_envelope: true,
+            },
         };
     }
 
-    async transmit(payload, ctx) {
-        if (this.endpoint && this.apiKey) {
-            return httpTransmit(this, {
-                url: this.endpoint,
-                headers: { 'X-Mirsal-Key': this.apiKey },
-                payload,
-            });
-        }
-        return this._simulate(ctx.declaration, ctx);
+    async transmit(payload, ctx = {}) {
+        const cfg = ctx.cfg || this.assertConfigured();
+        const res = await transport.transmit(this, {
+            url: cfg.endpoint, headers: payload.headers, body: payload.body,
+            contentType: payload.contentType, cfg,
+        });
+        return { ...res, payloadMeta: payload.meta };
     }
 
-    _simulate(declaration, ctx) {
-        const outcome = decideOutcome(declaration, ctx);
-        if (!outcome.ok) {
-            const err = outcome.kind === 'permanent'
-                ? this.failPermanent(outcome.reason, { code: outcome.code })
-                : this.failTransient(outcome.reason, { code: outcome.code });
-            err.raw = { declarationNumber: null, mirsalStatus: 'REJECTED', reason: outcome.code };
-            throw err;
-        }
-        const pending = outcome.mode === 'pending';
-        return {
-            declarationNumber: deterministicRef('DXB', declaration),
-            mirsalStatus: pending ? 'PENDING' : 'CLEARED',
-            reason: null,
-        };
+    async poll(gatewayReference, ctx = {}) {
+        const cfg = ctx.cfg || this.assertConfigured();
+        const url = new URL(cfg.statusEndpoint || cfg.endpoint);
+        url.searchParams.set('businessCode', cfg.businessCode);
+        url.searchParams.set('declarationNumber', String(gatewayReference));
+        const res = await transport.transmit(this, {
+            url: url.toString(), method: 'GET', cfg, contentType: transport.CONTENT_TYPE.XML,
+        });
+        return this.parseResponse(res, { ...ctx, cfg, polled: true });
     }
 
     parseResponse(raw) {
-        const s = String((raw && raw.mirsalStatus) || 'PENDING').toUpperCase();
-        const status = MIRSAL_STATUS_MAP[s] || STATUS.SUBMITTED;
+        let doc;
+        try {
+            doc = xml.parse(raw.body);
+        } catch (err) {
+            throw this.failTransient(`Mirsal returned an unparseable response: ${err.message}`, {
+                code: 'BAD_RESPONSE', raw: { body: String(raw.body || '').slice(0, 500) },
+            });
+        }
+
+        const native = (xml.textAny(doc, ['Status', 'DeclarationStatus', 'StatusCode']) || 'SUBMITTED')
+            .toUpperCase().replace(/\s+/g, '_');
+        const status = MIRSAL_STATUS[native] || STATUS.SUBMITTED;
+
+        const messages = xml.findAll(doc, 'Error').map((node) => ({
+            code: xml.textAny(node, ['ErrorCode', 'Code']) || 'MIRSAL_ERROR',
+            level: 'error',
+            text: xml.textAny(node, ['ErrorDescription', 'Message', 'Description']) || node.text || 'Mirsal reported an error',
+        }));
+
         return this.normalize({
             status,
             accepted: status === STATUS.ACCEPTED,
-            gateway_reference: (raw && raw.declarationNumber) || null,
-            gateway_status: s,
-            messages: status === STATUS.REJECTED
-                ? [{ code: (raw && raw.reason) || 'REJECTED', level: 'error', text: `Mirsal: ${(raw && raw.reason) || 'rejected'}` }]
-                : [],
+            gateway_reference: xml.textAny(doc, ['DeclarationNumber', 'DeclarationNo', 'CustomsDeclarationNumber', 'RequestNumber']),
+            gateway_status: native,
+            messages,
             retryable: false,
-            raw: raw || {},
+            raw: {
+                http_status: raw.status,
+                audit: raw.audit,
+                payload_meta: raw.payloadMeta || null,
+                document: xml.toObject(doc),
+            },
         });
     }
 }
 
-module.exports = { UAEConnector };
+module.exports = { UAEConnector, ELEMENTS, DECLARATION_TYPE, MIRSAL_STATUS };

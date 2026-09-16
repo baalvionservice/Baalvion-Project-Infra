@@ -23,12 +23,16 @@ import { isAllowedImageHost } from '@/lib/safe-image';
 // the real gateway host in production for exactly this reason; this module
 // was the one holdout still defaulting to ''.
 const IS_PROD = process.env.NODE_ENV === 'production';
+const envImpApi = process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL?.trim();
+const envCmsPublic = process.env.NEXT_PUBLIC_CMS_PUBLIC_URL?.trim();
 const IMP_API =
-  process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL ||
-  (IS_PROD ? 'https://api.baalvion.com/api/v1/knowledge/imperialpedia/api/v1' : 'http://localhost:3004/api/v1');
+  (envImpApi && !(IS_PROD && (envImpApi.includes('localhost') || envImpApi.includes('127.0.0.1'))))
+    ? envImpApi
+    : (IS_PROD ? 'https://api.baalvion.com/api/v1/knowledge/imperialpedia/api/v1' : 'http://localhost:3004/api/v1');
 const CMS_PUBLIC =
-  process.env.NEXT_PUBLIC_CMS_PUBLIC_URL ||
-  (IS_PROD ? 'https://api.baalvion.com/api/v1/knowledge/cms/api/v1/public' : 'http://localhost:3018/api/v1/public');
+  (envCmsPublic && !(IS_PROD && (envCmsPublic.includes('localhost') || envCmsPublic.includes('127.0.0.1'))))
+    ? envCmsPublic
+    : (IS_PROD ? 'https://api.baalvion.com/api/v1/public' : 'http://localhost:3018/api/v1/public');
 const SITE = process.env.NEXT_PUBLIC_CMS_SITE_SLUG || 'imperialpedia';
 
 const TYPE_MAP: Record<string, SearchResultType> = {

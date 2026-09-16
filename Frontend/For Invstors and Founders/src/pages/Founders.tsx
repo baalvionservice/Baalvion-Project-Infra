@@ -1,115 +1,368 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router";
-import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
+import { Link, useParams, useSearchParams } from "react-router";
 import MainLayout from "@/components/layout/MainLayout";
+import PageSeo from "@/components/seo/PageSeo";
+import PageHeader, { type Crumb } from "@/components/directory/PageHeader";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, Users, Layers, Globe, ChevronRight, Building2 } from "lucide-react";
-import { useActivityTracking } from "@/hooks/useActivityTracking";
+import { Search, MapPin, X, ChevronRight, ChevronLeft, SlidersHorizontal, ChevronDown, Users, UserCheck } from "lucide-react";
+import { listPublicCompanies, listPublicFounders, searchPeople, type CompanyPage, type Facet, type PersonHit, type PublicFounder } from "@/lib/publicApi";
+import { money } from "@/lib/investor";
+import { isRegistryRecord, sourceInfo } from "@/lib/company-source";
+import { facetPath, founderPath, memberPath, personPath, placePath, titleCasePlace } from "@/lib/directory-url";
 
-export type Founder = {
-  id: string; username: string; full_name: string | null; avatar_url: string | null;
-  company_name: string | null; company_about: string | null; idea: string | null;
-  region: string | null; sector: string | null; stage: string | null;
+const SORTS: Record<string, string> = {
+  recent: "Most recent filing",
+  raised: "Most capital raised (US filings)",
+  name: "A–Z",
 };
 
-const initials = (n = "?") => n.split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase();
-const StatChip = ({ icon: Icon, label, value }: { icon: any; label: string; value: string | number }) => (
-  <div className="flex items-center gap-3 rounded-xl border border-border bg-card/60 px-4 py-3">
-    <div className="w-9 h-9 rounded-lg bg-primary/15 flex items-center justify-center"><Icon className="w-4 h-4 text-primary" /></div>
-    <div><div className="text-xl font-bold leading-none">{value}</div><div className="text-xs text-muted-foreground">{label}</div></div>
-  </div>
-);
+const fmtDate = (d: string | null | undefined) =>
+  d ? new Date(d).toLocaleDateString(undefined, { year: "numeric", month: "short" }) : "—";
+
+const placeOf = (c: { city?: string | null; state?: string | null; country?: string | null; location?: string | null }) =>
+  [c.city, c.state, c.country].filter(Boolean).join(", ") || c.location || "—";
+
+function FacetGroup({ label, options, active, onPick }: {
+  label: string; options: Facet[]; active?: string; onPick: (v: string | null) => void;
+}) {
+  if (!options.length) return null;
+  return (
+    <details open className="group border-b border-border py-3">
+      <summary className="flex items-center justify-between cursor-pointer list-none select-none">
+        <span className="text-sm font-medium">{label}</span>
+        <ChevronDown className="w-4 h-4 text-muted-foreground transition-transform group-open:rotate-180" />
+      </summary>
+      <ul className="mt-2.5 space-y-1.5 max-h-72 overflow-y-auto pr-1">
+        {options.map((o) => {
+          const on = active === o.value;
+          return (
+            <li key={o.value}>
+              <button onClick={() => onPick(on ? null : o.value)} className="w-full flex items-baseline justify-between gap-3 text-left text-sm group/opt">
+                <span className={`${on ? "font-semibold text-primary" : "text-foreground/85"} group-hover/opt:text-primary truncate`}>{o.value}</span>
+                <span className="text-xs tabular-nums text-muted-foreground shrink-0">{o.n.toLocaleString()}</span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </details>
+  );
+}
 
 export default function Founders() {
-  const [founders, setFounders] = useState<Founder[]>([]);
+  const { country, state, city, facet } = useParams();
+  const [params, setParams] = useSearchParams();
+  const [data, setData] = useState<CompanyPage | null>(null);
+  const [people, setPeople] = useState<PersonHit[]>([]);
+  const [members, setMembers] = useState<PublicFounder[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [region, setRegion] = useState("all");
-  const [sector, setSector] = useState("all");
-  const { trackPageView } = useActivityTracking();
+  const [failed, setFailed] = useState(false);
+  const [draft, setDraft] = useState(params.get("q") || "");
+  const [mobileFilters, setMobileFilters] = useState(false);
 
-  useEffect(() => { trackPageView("Founders"); }, [trackPageView]);
+  const q = params.get("q") || "";
+  const industry = params.get("industry") || "";
+  const sort = params.get("sort") || "recent";
+  const page = Math.max(parseInt(params.get("page") || "1", 10), 1);
+
+  useEffect(() => { setDraft(q); }, [q]);
 
   useEffect(() => {
-    (async () => {
-      const { data } = await supabase.from("profiles").select("id, username, full_name, avatar_url, company_name, company_about, idea, region, sector, stage").eq("role", "founder");
-      // Show founders who have set up a company profile.
-      setFounders(((data as Founder[]) || []).filter((f) => f.company_name));
-      setLoading(false);
-    })();
-  }, []);
+    setLoading(true);
+    setFailed(false);
+    listPublicCompanies({ country, state, city, q, industry, industry_slug: facet, sort, page, limit: 25 })
+      .then(setData)
+      .catch(() => setFailed(true))
+      .finally(() => setLoading(false));
+  }, [country, state, city, facet, q, industry, sort, page]);
 
-  const regions = useMemo(() => ["all", ...[...new Set(founders.map((f) => f.region).filter(Boolean) as string[])].sort()], [founders]);
-  const sectors = useMemo(() => ["all", ...[...new Set(founders.map((f) => f.sector).filter(Boolean) as string[])].sort()], [founders]);
+  // Members who listed their own company. Replacing this page's data source with the compiled
+  // companies table made these disappear from the public site entirely — they are a different
+  // record type (someone chose to be here), so they get their own block rather than a union.
+  useEffect(() => {
+    listPublicFounders({ country, state, city }).then(setMembers).catch(() => setMembers([]));
+  }, [country, state, city]);
 
-  const filtered = useMemo(() => founders.filter((f) => {
-    const q = search.toLowerCase();
-    const matchQ = !q || (f.company_name || "").toLowerCase().includes(q) || (f.full_name || "").toLowerCase().includes(q) || (f.idea || "").toLowerCase().includes(q);
-    return matchQ && (region === "all" || f.region === region) && (sector === "all" || f.sector === sector);
-  }), [founders, search, region, sector]);
+  // A name typed into the box is just as likely to be a founder as a company, so both are answered.
+  useEffect(() => {
+    if (!q) { setPeople([]); return; }
+    searchPeople(q, 8).then(setPeople).catch(() => setPeople([]));
+  }, [q]);
+
+  const setParam = (key: string, value: string | null) => {
+    const next = new URLSearchParams(params);
+    if (value) next.set(key, value); else next.delete(key);
+    if (key !== "page") next.delete("page");
+    setParams(next);
+  };
+
+  const rows = data?.companies || [];
+  const total = data?.total ?? 0;
+  const facets = data?.facets;
+
+  const placeName = city || state || country ? titleCasePlace(city || state || country!) : null;
+  // Display value comes from the results, so the heading always matches the data's own wording.
+  const facetName = facet ? (rows[0]?.industry_group || titleCasePlace(facet)) : null;
+  const scope = [facetName ? `${facetName} companies` : "Companies", placeName ? `in ${placeName}` : null].filter(Boolean).join(" ");
+  const here = (p: { country?: string; state?: string; city?: string }) =>
+    facet ? facetPath("founders", facet, p) : placePath("founders", p);
+  const crumbs: Crumb[] = [{ label: "Home", to: "/" }, { label: "Companies", to: (country || facet) ? "/founders" : undefined }];
+  if (facet) crumbs.push({ label: facetName || titleCasePlace(facet), to: country ? facetPath("founders", facet) : undefined });
+  if (country) crumbs.push({ label: titleCasePlace(country), to: state || city ? here({ country }) : undefined });
+  if (state) crumbs.push({ label: titleCasePlace(state), to: city ? here({ country, state }) : undefined });
+  if (city) crumbs.push({ label: titleCasePlace(city) });
 
   return (
     <MainLayout>
+      <PageSeo
+        title={`${scope} — ${total.toLocaleString()} businesses | Baalvion`}
+        description={
+          `${total.toLocaleString()} ${facetName ? `${facetName.toLowerCase()} companies` : "companies"}` +
+          `${placeName ? ` based in ${placeName}` : ""}, compiled from public filings and company registers, with the founders and officers named alongside them.`
+        }
+        path={here({ country, state, city })}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: scope,
+          numberOfItems: total,
+          isPartOf: { "@type": "WebSite", name: "Baalvion Insiders" },
+        }}
+      />
+
+      <PageHeader
+        eyebrow="Directory"
+        title={facetName || placeName ? scope : "Companies & founders"}
+        lede="Companies compiled from public records — US Form D filings and national company registers — with what they do, where they are, and the people named alongside them."
+        crumbs={crumbs}
+        facts={loading && !data ? undefined : [
+          { label: "Companies", value: total.toLocaleString() },
+          { label: "Sectors", value: (data?.counts.sectors ?? 0).toLocaleString() },
+          // On a country page "countries: 1" is noise; cities is the useful next level down.
+          ...(country
+            ? [{ label: "Cities", value: (data?.counts.cities ?? 0).toLocaleString() }]
+            : [{ label: "Countries", value: (data?.counts.countries ?? 0).toLocaleString() },
+               { label: "Cities", value: (data?.counts.cities ?? 0).toLocaleString() }]),
+        ]}
+      />
+
+      <div className="border-b border-border">
+        <div className="container mx-auto px-4 py-4 max-w-6xl flex flex-col sm:flex-row gap-3">
+          <form className="relative flex-1" onSubmit={(e) => { e.preventDefault(); setParam("q", draft.trim() || null); }}>
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input className="pl-9 h-11" placeholder="Search by company, founder name or city" value={draft}
+              onChange={(e) => setDraft(e.target.value)} aria-label="Search companies and founders" />
+          </form>
+          <Button variant="outline" className="h-11 lg:hidden" onClick={() => setMobileFilters((v) => !v)}>
+            <SlidersHorizontal className="w-4 h-4 mr-2" />Filters
+          </Button>
+          <Link to="/directory" className="hidden sm:inline-flex">
+            <Button variant="outline" className="h-11"><MapPin className="w-4 h-4 mr-2" />Browse by location</Button>
+          </Link>
+        </div>
+      </div>
+
       <div className="container mx-auto px-4 py-8 max-w-6xl">
-        <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary/10 via-card to-card p-8 mb-6">
-          <Badge className="mb-3 bg-primary/15 text-primary hover:bg-primary/15">Founder Network</Badge>
-          <h1 className="text-4xl font-bold tracking-tight">Founders</h1>
-          <p className="text-muted-foreground text-lg mt-1">Discover and connect with founders building across sectors and regions.</p>
-          <div className="grid grid-cols-3 gap-3 mt-6">
-            <StatChip icon={Users} label="Founders" value={founders.length} />
-            <StatChip icon={Layers} label="Sectors" value={sectors.length - 1} />
-            <StatChip icon={Globe} label="Regions" value={regions.length - 1} />
-          </div>
-        </div>
+        <div className="flex flex-col lg:flex-row gap-10">
+          <aside className={`w-full lg:w-64 shrink-0 ${mobileFilters ? "block" : "hidden lg:block"}`}>
+            <div className="flex items-baseline justify-between pb-3 border-b border-foreground/80">
+              <h2 className="text-sm font-semibold uppercase tracking-wide">Refine</h2>
+              {(q || industry) && <button onClick={() => setParams(new URLSearchParams())} className="text-xs text-primary hover:underline">Clear all</button>}
+            </div>
+            {facet ? (
+              <div className="border-b border-border py-3">
+                <div className="text-sm font-medium">Sector</div>
+                <p className="mt-2 text-sm">
+                  <span className="font-semibold text-primary">{facetName}</span>{" "}
+                  <Link to={placePath("founders", { country, state, city })} className="text-muted-foreground hover:text-primary hover:underline">· show all sectors</Link>
+                </p>
+              </div>
+            ) : (
+              <details open className="group border-b border-border py-3">
+                <summary className="flex items-center justify-between cursor-pointer list-none select-none">
+                  <span className="text-sm font-medium">Sector</span>
+                  <ChevronDown className="w-4 h-4 text-muted-foreground transition-transform group-open:rotate-180" />
+                </summary>
+                <ul className="mt-2.5 space-y-1.5 max-h-72 overflow-y-auto pr-1">
+                  {(facets?.industries || []).map((o) => (
+                    <li key={o.value}>
+                      <Link to={facetPath("founders", o.value, { country, state, city })}
+                        className="w-full flex items-baseline justify-between gap-3 text-left text-sm group/opt">
+                        <span className="text-foreground/85 group-hover/opt:text-primary truncate">{o.value}</span>
+                        <span className="text-xs tabular-nums text-muted-foreground shrink-0">{o.n.toLocaleString()}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            )}
+            {!country && <FacetGroup label="Country" options={facets?.countries || []} onPick={(v) => { if (v) window.location.assign(placePath("founders", { country: slugOf(v) })); }} />}
+            {country && !state && <FacetGroup label="State / region" options={facets?.states || []} onPick={(v) => { if (v) window.location.assign(placePath("founders", { country, state: slugOf(v) })); }} />}
+            {!city && <FacetGroup label="City" options={facets?.cities || []} onPick={(v) => {
+              const hit = rows.find((r) => r.city === v);
+              if (v) window.location.assign(placePath("founders", { country: country || slugOf(hit?.country || ""), state: state || slugOf(hit?.state || "") || undefined, city: slugOf(v) }));
+            }} />}
+          </aside>
 
-        <div className="relative mb-4">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-          <Input placeholder="Search founders, companies, ideas…" className="pl-12 h-12 text-base" value={search} onChange={(e) => setSearch(e.target.value)} />
-        </div>
-
-        <div className="flex flex-wrap gap-2 mb-2">
-          {regions.map((r) => <button key={r} onClick={() => setRegion(r)} className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${region === r ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:text-foreground hover:border-primary/40"}`}>{r === "all" ? "All regions" : r}</button>)}
-        </div>
-        <div className="flex flex-wrap gap-2 mb-6">
-          {sectors.map((s) => <button key={s} onClick={() => setSector(s)} className={`px-3 py-1.5 rounded-full text-xs border transition-colors ${sector === s ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:text-foreground hover:border-primary/40"}`}>{s === "all" ? "All sectors" : s}</button>)}
-        </div>
-
-        {loading ? (
-          <div className="grid sm:grid-cols-2 gap-4">{[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-44 rounded-xl" />)}</div>
-        ) : filtered.length === 0 ? (
-          <Card><CardContent className="py-12 text-center text-muted-foreground">No founders match your filters.</CardContent></Card>
-        ) : (
-          <div className="grid sm:grid-cols-2 gap-4">
-            {filtered.map((f) => (
-              <Link key={f.id} to={`/founders/${f.id}`} className="block group">
-                <Card className="h-full border-border transition-all hover:border-primary/40 hover:shadow-lg">
-                  <CardContent className="p-5">
-                    <div className="flex items-start gap-4">
-                      {f.avatar_url
-                        ? <img src={f.avatar_url} alt={f.full_name || ""} className="w-14 h-14 rounded-full object-cover ring-2 ring-primary/20 shrink-0" />
-                        : <div className="w-14 h-14 rounded-full bg-primary/15 text-primary font-semibold flex items-center justify-center shrink-0">{initials(f.full_name || f.username)}</div>}
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-lg font-semibold truncate group-hover:text-primary transition-colors">{f.full_name || f.username}</h3>
-                        <p className="text-sm text-muted-foreground flex items-center gap-1 truncate"><Building2 className="w-3.5 h-3.5" />{f.company_name}</p>
-                        <div className="flex flex-wrap gap-1.5 mt-2">
-                          {f.sector && <Badge variant="secondary">{f.sector}</Badge>}
-                          {f.stage && <Badge variant="outline" className="border-primary/40 text-primary">{f.stage}</Badge>}
-                          {f.region && <Badge variant="outline" className="text-muted-foreground"><Globe className="w-3 h-3 mr-1" />{f.region}</Badge>}
+          <div className="flex-1 min-w-0">
+            {members.length > 0 && !q && !industry && (
+              <section className="mb-8">
+                <h2 className="text-sm font-semibold uppercase tracking-wide pb-2 border-b border-foreground/80 flex items-center gap-2">
+                  <UserCheck className="w-4 h-4" />Listed by their founders
+                </h2>
+                <ul className="rule-list">
+                  {members.map((m) => (
+                    <li key={m.id}>
+                      <Link to={memberPath(m)} className="group flex items-start justify-between gap-6 py-4">
+                        <div className="min-w-0">
+                          <h3 className="font-semibold text-primary group-hover:underline">{m.company_name || m.full_name}</h3>
+                          {m.headline && <p className="text-sm text-muted-foreground mt-0.5">{m.headline}</p>}
+                          {m.full_name && <p className="text-sm text-muted-foreground mt-0.5">Founder · {m.full_name}</p>}
                         </div>
-                      </div>
-                      <ChevronRight className="w-5 h-5 text-muted-foreground/40 group-hover:text-primary transition-colors" />
-                    </div>
-                    <p className="text-sm text-muted-foreground line-clamp-2 mt-3">{f.company_about || f.idea}</p>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+                        <div className="hidden sm:flex items-start gap-8 shrink-0 text-right">
+                          <div><div className="label-eyebrow">Sector</div><div className="text-sm font-semibold mt-0.5">{m.sector || "—"}</div></div>
+                          <div><div className="label-eyebrow">Stage</div><div className="text-sm font-semibold mt-0.5">{m.stage || "—"}</div></div>
+                          <ChevronRight className="w-5 h-5 text-muted-foreground self-center group-hover:text-primary" />
+                        </div>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {people.length > 0 && (
+              <section className="mb-8">
+                <h2 className="text-sm font-semibold uppercase tracking-wide pb-2 border-b border-foreground/80 flex items-center gap-2">
+                  <Users className="w-4 h-4" />People matching "{q}"
+                </h2>
+                <ul className="rule-list">
+                  {people.map((p, i) => (
+                    <li key={`${p.side}-${p.entity_id}-${p.full_name}-${i}`}>
+                      <Link
+                        to={personPath(p.full_name)}
+                        className="flex items-baseline justify-between gap-4 py-2.5 group"
+                      >
+                        <span className="text-sm">
+                          <span className="font-medium">{p.full_name}</span>
+                          <span className="text-muted-foreground"> · {(p.relationships || []).join(", ") || "named on filing"}</span>
+                        </span>
+                        <span className="text-sm text-primary group-hover:underline truncate max-w-[45%] text-right">{p.entity_name}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-foreground/80">
+              <p className="text-sm">
+                <span className="font-semibold tabular-nums">{loading && !data ? "…" : total.toLocaleString()}</span>{" "}
+                <span className="text-muted-foreground">compan{total === 1 ? "y" : "ies"}{placeName ? ` in ${placeName}` : ""}</span>
+              </p>
+              <label className="flex items-center gap-2 text-sm">
+                <span className="text-muted-foreground">Sort</span>
+                <select value={sort} onChange={(e) => setParam("sort", e.target.value)} className="h-9 rounded-md border border-input bg-background px-2 text-sm">
+                  {Object.entries(SORTS).map(([k, l]) => <option key={k} value={k}>{l}</option>)}
+                </select>
+              </label>
+            </div>
+
+            {(q || industry) && (
+              <div className="flex flex-wrap gap-2 pt-3">
+                {q && <button onClick={() => setParam("q", null)} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary px-3 py-1 text-xs hover:border-primary"><span className="text-muted-foreground">Search:</span>{q}<X className="w-3 h-3" /></button>}
+                {industry && <button onClick={() => setParam("industry", null)} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary px-3 py-1 text-xs hover:border-primary"><span className="text-muted-foreground">Sector:</span>{industry}<X className="w-3 h-3" /></button>}
+              </div>
+            )}
+
+            {loading ? (
+              <div className="space-y-6 pt-6">{[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-20 w-full" />)}</div>
+            ) : failed ? (
+              <p className="py-20 text-center text-muted-foreground">The directory could not be loaded. Please try again.</p>
+            ) : rows.length === 0 ? (
+              <div className="py-20 text-center space-y-3">
+                <p className="text-muted-foreground">No companies match this search.</p>
+                <Button variant="outline" onClick={() => setParams(new URLSearchParams())}>Clear filters</Button>
+              </div>
+            ) : (
+              <>
+                <ul className="rule-list">
+                  {rows.map((c) => (
+                    <li key={c.id}>
+                      <Link to={founderPath(c)} className="group block py-5 -mx-3 px-3 hover:bg-secondary/60 transition-colors">
+                        <div className="flex items-start justify-between gap-6">
+                          <div className="min-w-0">
+                            <h3 className="text-lg font-semibold text-primary group-hover:underline">{c.name}</h3>
+                            <p className="text-sm mt-0.5 text-muted-foreground">
+                              {c.industry_group || "Sector not stated"}
+                              {c.entity_type && <span> · {c.entity_type}</span>}
+                              {c.year_founded ? <span> · formed {c.year_founded}</span> : null}
+                            </p>
+                            <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1.5">
+                              <MapPin className="w-3.5 h-3.5 shrink-0" />{placeOf(c)}
+                            </p>
+                          </div>
+                          <div className="hidden sm:flex items-start gap-8 shrink-0 text-right">
+                            {isRegistryRecord(c.source) ? (
+                              <>
+                                <div>
+                                  <div className="label-eyebrow">Founded</div>
+                                  <div className="text-sm font-semibold mt-0.5 tabular-nums">{c.founded_on ? c.founded_on.slice(0, 4) : "—"}</div>
+                                </div>
+                                <div>
+                                  <div className="label-eyebrow">Staff</div>
+                                  <div className="text-sm font-semibold mt-0.5 tabular-nums">{c.employees ?? "—"}</div>
+                                </div>
+                                <div>
+                                  <div className="label-eyebrow">Register</div>
+                                  <div className="text-sm font-semibold mt-0.5 whitespace-nowrap">{sourceInfo(c.source).label}</div>
+                                </div>
+                              </>
+                            ) : (
+                              <>
+                                <div>
+                                  <div className="label-eyebrow">Raised</div>
+                                  <div className="text-sm font-semibold mt-0.5 tabular-nums">{money(c.total_raised_usd)}</div>
+                                </div>
+                                <div>
+                                  <div className="label-eyebrow">Rounds</div>
+                                  <div className="text-sm font-semibold mt-0.5 tabular-nums">{c.filing_count ?? 0}</div>
+                                </div>
+                                <div>
+                                  <div className="label-eyebrow">Last filing</div>
+                                  <div className="text-sm font-semibold mt-0.5 whitespace-nowrap">{fmtDate(c.last_filing_date)}</div>
+                                </div>
+                              </>
+                            )}
+                            <ChevronRight className="w-5 h-5 text-muted-foreground self-center group-hover:text-primary" />
+                          </div>
+                        </div>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+
+                {data && data.pages > 1 && (
+                  <nav className="flex items-center justify-between gap-4 pt-6 mt-2 border-t border-border" aria-label="Pagination">
+                    <Button variant="outline" disabled={page <= 1} onClick={() => setParam("page", String(page - 1))}>
+                      <ChevronLeft className="w-4 h-4 mr-1" />Previous
+                    </Button>
+                    <span className="text-sm text-muted-foreground tabular-nums">Page {page.toLocaleString()} of {data.pages.toLocaleString()}</span>
+                    <Button variant="outline" disabled={page >= data.pages} onClick={() => setParam("page", String(page + 1))}>
+                      Next<ChevronRight className="w-4 h-4 ml-1" />
+                    </Button>
+                  </nav>
+                )}
+              </>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </MainLayout>
   );
 }
+
+const slugOf = (s: string) =>
+  s.toLowerCase().trim().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");

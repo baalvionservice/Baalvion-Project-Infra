@@ -31,19 +31,21 @@ export default function OrderDetailPage() {
     if (typeof id !== 'string') return;
     
     const fetchData = async () => {
-      const [orderData, docData, escrows] = await Promise.all([
-        getOrderById(id),
-        getOrderDocuments(id),
-        getEscrows()
-      ]);
-      
-      setOrder(orderData);
-      setDocs(docData);
-      
-      const linkedEscrow = escrows.find(e => e.orderId === id);
-      if (linkedEscrow) setEscrowId(linkedEscrow.id);
-      
-      setLoading(false);
+      try {
+        const [orderData, docData, escrows] = await Promise.all([
+          getOrderById(id),
+          getOrderDocuments(id),
+          getEscrows()
+        ]);
+
+        setOrder(orderData);
+        setDocs(docData);
+
+        const linkedEscrow = escrows.find(e => e.orderId === id);
+        if (linkedEscrow) setEscrowId(linkedEscrow.id);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchData();

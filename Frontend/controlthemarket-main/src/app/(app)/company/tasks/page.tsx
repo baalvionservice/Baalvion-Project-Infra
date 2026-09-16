@@ -7,6 +7,11 @@ import { getTasksByCompany, getSubmissions, getUsers } from "@/lib/api";
 import { CompanyTaskList } from "./task-list";
 import type { TaskWithSubmissionCount } from './task-list';
 
+// Reads live ControlTheMarket data through @/lib/api, which throws CtmDataError when
+// ctm-service is unreachable rather than showing placeholder data. Prerendering this at
+// build time therefore fails; it is a per-request view, not a static page.
+export const dynamic = 'force-dynamic';
+
 export default async function ManageTasksPage() {
   // In a real app, user would be derived from session.
   // We are mocking getting the current user, then their tasks.

@@ -20,3 +20,5 @@ spec:
   apis: ["/api/v1/settlement"]
   slo: { availability: 0.99, latencyP95Ms: 500 }
   deploy: { chart: baalvion-financial, namespace: financial, minReplicas: 2, maxReplicas: 6 }
+  runtime:
+    deployment: not-deployed

@@ -16,7 +16,11 @@ module.exports = (sequelize, DataTypes) => {
         quote_id: { type: DataTypes.UUID }, // links back to the persisted freight_quotes row (Phase 3, Prompt 2), if any
         carrier: {
             type: DataTypes.TEXT,
-            validate: { isIn: [['dhl', 'fedex', 'ups', 'maersk']] },
+            // Which carriers exist is the Carrier Directory's business (migration 047),
+            // not this model's — a coded connector and a directory-onboarded one are
+            // equally bookable. The shape stays constrained so this remains a carrier
+            // code rather than free text. See migration 085.
+            validate: { is: /^[a-z0-9][a-z0-9_-]{1,31}$/ },
         },
         service_level: { type: DataTypes.TEXT },
         mode: {

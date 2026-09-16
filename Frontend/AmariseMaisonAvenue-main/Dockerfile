@@ -3,7 +3,7 @@
 #
 # NEXT_PUBLIC_* are baked at BUILD time — pass them as --build-arg (see ARGs below),
 # not as runtime env. Point them at the PUBLIC prod API origin + media/CDN host.
-FROM node:20-alpine AS base
+FROM node:26-alpine AS base
 RUN apk add --no-cache libc6-compat && corepack enable
 WORKDIR /app
 
@@ -30,12 +30,19 @@ ARG NEXT_PUBLIC_COMMERCE_API_URL
 ARG NEXT_PUBLIC_ORDER_URL
 ARG NEXT_PUBLIC_INVENTORY_URL
 ARG NEXT_PUBLIC_CMS_URL
+ARG NEXT_PUBLIC_CRM_URL
+ARG NEXT_PUBLIC_SHARED_AUTH_URL
 ARG NEXT_PUBLIC_CMS_WEBSITE_SLUG
 ARG NEXT_PUBLIC_STORE_ID
 ARG NEXT_PUBLIC_APP_URL
 ARG NEXT_PUBLIC_SITE_URL
 ARG NEXT_PUBLIC_MEDIA_HOST
 ARG NEXT_PUBLIC_GA_ID
+# Build inputs, not runtime: next.config resolves rewrites() at build time and bakes the
+# destinations into routes-manifest.json, so setting these on the running container is a
+# no-op. Unset, the config silently falls back to its hardcoded default.
+ARG AUTH_PROXY_TARGET
+ENV AUTH_PROXY_TARGET=$AUTH_PROXY_TARGET
 # CRITICAL: ARG alone is NOT visible to `next build`. Each value must be re-exported as a
 # NEXT_PUBLIC_* ENV so Next inlines it into the client bundle. Without these ENV lines the
 # build bakes the localhost code-defaults regardless of --build-arg.
@@ -45,6 +52,8 @@ ENV NEXT_TELEMETRY_DISABLED=1 NODE_ENV=production \
     NEXT_PUBLIC_ORDER_URL=${NEXT_PUBLIC_ORDER_URL} \
     NEXT_PUBLIC_INVENTORY_URL=${NEXT_PUBLIC_INVENTORY_URL} \
     NEXT_PUBLIC_CMS_URL=${NEXT_PUBLIC_CMS_URL} \
+    NEXT_PUBLIC_CRM_URL=${NEXT_PUBLIC_CRM_URL} \
+    NEXT_PUBLIC_SHARED_AUTH_URL=${NEXT_PUBLIC_SHARED_AUTH_URL} \
     NEXT_PUBLIC_CMS_WEBSITE_SLUG=${NEXT_PUBLIC_CMS_WEBSITE_SLUG} \
     NEXT_PUBLIC_STORE_ID=${NEXT_PUBLIC_STORE_ID} \
     NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL} \
@@ -52,6 +61,11 @@ ENV NEXT_TELEMETRY_DISABLED=1 NODE_ENV=production \
     NEXT_PUBLIC_MEDIA_HOST=${NEXT_PUBLIC_MEDIA_HOST} \
     NEXT_PUBLIC_GA_ID=${NEXT_PUBLIC_GA_ID}
 COPY --from=pruner /app/out/full/ ./
+# turbo prune does not carry the root tsconfig.base.json, which every package tsconfig
+# extends. Without it tsup's DTS step fails "Cannot find base config file" and takes the
+# whole build with it. Latent until this app gained a workspace package that needs building
+# — @baalvion/design did exactly that and broke the Amarise image on 2026-09-09.
+COPY tsconfig.base.json ./tsconfig.base.json
 RUN pnpm turbo run build --filter=amarise-maison-avenue-web
 
 # 4) Minimal runner (standalone server)

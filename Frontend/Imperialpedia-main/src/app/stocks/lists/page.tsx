@@ -6,12 +6,14 @@ import { Text } from '@/design-system/typography/text';
 import { Badge } from '@/components/ui/badge';
 import { ListChecks } from 'lucide-react';
 import { buildMetadata } from '@/lib/seo';
+import { STOCK_REFERENCE_PAGES_LIVE } from '@/config/sections';
 import stockLists from '@/data/stock-lists/stock-lists.json';
 
 export const metadata: Metadata = buildMetadata({
   canonical: '/stocks/lists',
   title: 'Stock Lists | Dividend, Growth, AI, Tech & Sector Stocks',
   description: 'Browse curated stock lists by theme and sector, including dividend stocks, AI stocks, technology stocks, and more.',
+  noIndex: !STOCK_REFERENCE_PAGES_LIVE,
 });
 
 export default function StockListsIndexPage() {

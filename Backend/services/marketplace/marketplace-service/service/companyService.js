@@ -2,7 +2,6 @@
 // Company domain logic. Controllers stay thin: they validate, call these functions, and shape
 // the response. All persistence, business rules and authorization live here.
 const db = require('../models');
-const config = require('../config/appConfig');
 const { AppError } = require('../utils/errors');
 const { parseListQuery, paginate } = require('../utils/query');
 const { assertOwnerOrStaff } = require('../utils/authz');
@@ -30,8 +29,10 @@ async function getById(id) {
 }
 
 async function create({ data, user }) {
-    const org_id = user?.orgId || config.defaultOrgId;
-    return db.Company.create({ ...data, org_id, created_by: user?.id || 'self' });
+    // No shared fallback org. Under RLS a default org does not merely mislabel the row — it makes
+    // every company that lands in it mutually visible, and their deal rooms with it.
+    if (!user?.orgId) throw new AppError('NO_ORG', 'Your account is not linked to an organisation', 403);
+    return db.Company.create({ ...data, org_id: user.orgId, created_by: user?.id || 'self' });
 }
 
 async function update({ id, data, user }) {

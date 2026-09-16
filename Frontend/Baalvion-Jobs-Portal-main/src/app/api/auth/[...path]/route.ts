@@ -11,12 +11,18 @@ import { NextRequest, NextResponse } from 'next/server';
  * In production this proxy is a no-op cookie-wise (HTTPS), and the upstream is the gateway.
  */
 // Upstream auth-service. Explicit AUTH_SERVICE_URL always wins (Docker/nginx hosts set it).
-// On Vercel (serverless — no localhost backend) default to the live consolidated edge gateway,
-// which proxies /v1/auth/* → auth-service. Locally default to the dev auth container.
+// On Vercel (serverless — no localhost backend) default to the auth-service surface exposed at
+// root for exactly this same-origin BFF pattern. Locally default to the dev auth container.
+//
+// NOT api.baalvion.com/v1/auth, which this used to point at. That host has no Caddy carve-out
+// for the bare /v1/auth prefix, so it falls through to the proxy-service BFF — a DIFFERENT
+// service with its own tenant auth and its own user table. Sign-in "worked" there against the
+// wrong database, and /email/otp/request 500'd with 'relation "email_otps" does not exist',
+// because proxy-service's sql/004 was never applied. baalvion.com had the identical bug.
 const AUTH_UPSTREAM =
   process.env.AUTH_SERVICE_URL ||
   (process.env.VERCEL
-    ? 'https://api.baalvion.com/v1/auth'
+    ? 'https://auth-api.baalvion.com/v1/auth'
     : 'http://localhost:3001/v1/auth');
 
 const IS_HTTPS = (process.env.NEXT_PUBLIC_APP_URL || '').startsWith('https://');

@@ -1,7 +1,7 @@
 import type { WorldData } from "@/lib/data/worldRegions";
 import { StoryLink } from "@/components/common/StoryLink";
 
-/** CNBC-style "Trending Now" rail — top of the live "latest" feed, numbered. */
+/** Imperialpedia-style "Trending Now" rail — top of the live "latest" feed, numbered. */
 export default function TrendingNow({ latest }: { latest: WorldData["latest"] }) {
   const items = latest.slice(0, 5);
   if (items.length === 0) return null;
@@ -23,7 +23,7 @@ export default function TrendingNow({ latest }: { latest: WorldData["latest"] })
               <span className="world-kicker text-lg font-black text-white/20 leading-none w-5 shrink-0">
                 {i + 1}
               </span>
-              <span className="text-xs font-semibold leading-snug text-foreground group-hover:text-[hsl(var(--cnbc-red))] transition-colors line-clamp-2">
+              <span className="text-xs font-semibold leading-snug text-foreground group-hover:text-[hsl(var(--imperialpedia-red))] transition-colors line-clamp-2">
                 {item.headline}
               </span>
             </StoryLink>

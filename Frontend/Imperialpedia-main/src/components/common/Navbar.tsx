@@ -9,6 +9,9 @@ import { SearchModal } from "@/components/search/SearchModal";
 import { cn } from "@/lib/utils";
 import { useShortcutHint, shortcutLabel } from "@/hooks/use-shortcut-hint";
 
+import { isRetiredPath, withoutRetired } from "@/lib/content/retired-paths";
+import { isPathHiddenByAdsenseCleanup, withoutAdsenseHidden } from "@/config/adsense-cleanup";
+
 type NavLink = { label: string; href: string };
 type NavCategory = {
   id: string;
@@ -18,10 +21,10 @@ type NavCategory = {
 };
 
 /**
- * Investopedia-style editorial header: serif wordmark, horizontal category
+ * Imperialpedia-style editorial header: serif wordmark, horizontal category
  * nav with hover mega-menus, global search, and a signature gold Subscribe CTA.
  */
-const NAV: NavCategory[] = [
+const ALL_NAV: NavCategory[] = [
   {
     id: "investing",
     label: "Investing",
@@ -59,7 +62,31 @@ const NAV: NavCategory[] = [
       { label: "Scams & Fraud Protection", href: "/fraud-protection" },
     ],
   },
+  {
+    id: "creator-economy",
+    label: "Creator Economy",
+    // Added 2026-09-11 — top-level hub for YouTube/Instagram/website earnings,
+    // monetization guides, and platform policy coverage.
+    href: "/creator-economy",
+    links: [
+      { label: "Creator Economy Hub", href: "/creator-economy" },
+      { label: "YouTube Earnings & Monetization", href: "/youtube-monetization" },
+      { label: "Instagram Earnings & Monetization", href: "/instagram-monetization" },
+      { label: "Website Earnings & Monetization", href: "/website-monetization" },
+      { label: "Social Media Earnings", href: "/social-media-earnings" },
+      { label: "Creator Business Guides", href: "/creator-guides" },
+      { label: "Tools & Calculators", href: "/creator-tools" },
+    ],
+  },
 ];
+
+const NAV: NavCategory[] = ALL_NAV
+  .filter((cat) => !isRetiredPath(cat.href) && !isPathHiddenByAdsenseCleanup(cat.href))
+  .map((cat) => ({
+    ...cat,
+    links: withoutAdsenseHidden(withoutRetired(cat.links)),
+  }))
+  .filter((cat) => cat.links.length > 0);
 
 export const Navbar = () => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);

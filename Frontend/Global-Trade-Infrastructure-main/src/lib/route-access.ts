@@ -48,6 +48,7 @@ export const AUTH_REQUIRED_PREFIXES: readonly string[] = [
   '/customs',
   '/sourcing',
   '/shipments',
+  '/sailing-schedules', // carrier sailing schedules: lane search, port board, vessel tracking
   '/carriers',
   '/field',
   '/suppliers',
@@ -118,6 +119,20 @@ const matchesPrefix = (prefixes: readonly string[], pathname: string): boolean =
   prefixes.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 
 /** Governance / sovereign-command area. */
+/**
+ * The World Shipping Directory — a separate, wholly anonymous public property served on
+ * its own subdomain (middleware.ts rewrites that host onto this prefix).
+ *
+ * Nothing under it has a session, so the client must not try to rehydrate one there. It
+ * is not merely wasted work: `authApi.me()` answers 401 for an anonymous caller, which
+ * surfaces as a console error on every page of a public reference site.
+ */
+export const SHIPPING_DIRECTORY_PREFIX = '/shipping-directory';
+
+export function isAnonymousProperty(pathname: string): boolean {
+  return pathname === SHIPPING_DIRECTORY_PREFIX || pathname.startsWith(`${SHIPPING_DIRECTORY_PREFIX}/`);
+}
+
 export function isAdminPath(pathname: string): boolean {
   return matchesPrefix(ADMIN_PREFIXES, pathname);
 }

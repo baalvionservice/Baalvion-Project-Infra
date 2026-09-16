@@ -17,11 +17,10 @@ interface TableOfContentsProps {
 
 /**
  * Generate a clean slug ID from heading text.
- * Strips leading numbers like "1." "2." etc., then slugifies.
  */
 function toSlug(text: string, index: number): string {
   const cleaned = text
-    .replace(/^\d+[\.\)]\s*/, "") // strip leading "1." or "1)" numbering
+    .replace(/^\d+[\.\)]\s*/, "")
     .toLowerCase()
     .replace(/[^a-z0-9\s-]/g, "")
     .trim()
@@ -33,8 +32,7 @@ function toSlug(text: string, index: number): string {
 
 function extractHeadingsFromString(html?: string): TocItem[] {
   if (!html) return [];
-  // Only extract primary H2 sections for a clean editorial TOC
-  const headingRegex = /<h2[^>]*>(.*?)<\/h2>/gi;
+  const headingRegex = /<h[23][^>]*>(.*?)<\/h[23]>/gi;
   const list: TocItem[] = [];
   let match;
   let index = 0;
@@ -43,9 +41,7 @@ function extractHeadingsFromString(html?: string): TocItem[] {
     const rawText = match[1].replace(/<[^>]+>/g, "").trim();
     if (!rawText) continue;
 
-    // Display text: strip leading numbering
     const displayText = rawText.replace(/^\d+[\.\)]\s*/, "").trim();
-
     const id = toSlug(rawText, index);
     list.push({ id, text: displayText, level: 2 });
     index++;
@@ -70,14 +66,12 @@ export function TableOfContents({
       if (!activeId) setActiveId(initialItems[0].id);
     }
 
-    // Find ALL H2 headings across the article body
     const allArticleBodies = document.querySelectorAll(".article-body");
     const allHeadings: HTMLElement[] = [];
     allArticleBodies.forEach((body) => {
       body.querySelectorAll("h2").forEach((h) => allHeadings.push(h as HTMLElement));
     });
 
-    // Assign IDs in DOM order to match TOC slugs
     allHeadings.forEach((h, index) => {
       const tocItem = initialItems[index];
       if (tocItem) {
@@ -85,7 +79,6 @@ export function TableOfContents({
       }
     });
 
-    // Real-time scroll listener to track active section with small triangle
     const handleScroll = () => {
       if (allHeadings.length === 0) return;
       const scrollY = window.scrollY;
@@ -120,7 +113,7 @@ export function TableOfContents({
       });
     }
     if (target) {
-      const offset = 85; // navbar height compensation
+      const offset = 85;
       const elementPosition = target.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.pageYOffset - offset;
       window.scrollTo({ top: offsetPosition, behavior: "smooth" });
@@ -129,34 +122,38 @@ export function TableOfContents({
     }
   }, []);
 
-  if (items.length < 2) return null;
+  if (items.length < 1) return null;
 
   if (variant === "left-rail") {
     return (
-      <aside aria-label="Table of Contents" className={`w-full ${className}`}>
-        {/* ── DESKTOP TOC ── */}
-        <div className="hidden lg:block">
+      <aside aria-label="Imperialpedia Table of Contents" className={`w-full ${className}`}>
+        {/* ── Imperialpedia Heavy Left-Rail Box ── */}
+        <div className="hidden lg:block bg-white dark:bg-slate-900 border-3 border-black dark:border-slate-700 p-4 rounded-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden">
+          <div className="h-1.5 bg-[#c8102e] absolute top-0 left-0 right-0" />
+          
           {/* Header row */}
-          <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-300 dark:border-gray-700">
-            <span
-              className="toc-heading text-[13px] sm:text-[13.5px] font-bold uppercase text-[#121212] dark:text-white"
-              style={{ fontFamily: "'Corinthian', Georgia, serif", letterSpacing: "0.08em" }}
-            >
-              TABLE OF CONTENTS
-            </span>
+          <div className="flex items-center justify-between mb-3 pt-1 border-b-2 border-black dark:border-slate-800 pb-2">
+            <div className="flex items-center gap-1.5">
+              <span className="bg-[#c8102e] text-white text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 -skew-x-6">
+                IMP INDEX
+              </span>
+              <span className="text-[11px] font-black uppercase tracking-wider text-black dark:text-white font-mono">
+                ON THIS PAGE
+              </span>
+            </div>
             <button
               type="button"
               onClick={() => setIsExpanded(!isExpanded)}
-              className="text-[11.5px] font-semibold text-[#1d4fc4] dark:text-blue-400 hover:underline ml-2 shrink-0 cursor-pointer"
+              className="text-[10px] font-black uppercase tracking-wider text-[#c8102e] hover:underline cursor-pointer"
             >
-              {isExpanded ? "Collapse" : "Expand"}
+              {isExpanded ? "HIDE" : "SHOW"}
             </button>
           </div>
 
-          {/* Link list with Small Triangle Arrow Indicator */}
+          {/* Link list */}
           {isExpanded && (
             <nav>
-              <ul className="space-y-0.5">
+              <ul className="space-y-1">
                 {items.map((item, i) => {
                   const isActive = activeId === item.id;
                   return (
@@ -164,23 +161,20 @@ export function TableOfContents({
                       <button
                         type="button"
                         onClick={() => scrollTo(item.id)}
-                        className={`w-full text-left flex items-start py-[6px] text-[13px] leading-[1.4] transition-all font-sans cursor-pointer group ${
+                        className={`w-full text-left flex items-start py-1.5 px-2 rounded-xs text-xs transition-all font-sans cursor-pointer ${
                           isActive
-                            ? "font-bold text-[#121212] dark:text-white"
-                            : "text-[#555555] dark:text-gray-400 hover:text-[#121212] dark:hover:text-white font-normal"
+                            ? "bg-black text-white font-bold dark:bg-slate-800"
+                            : "text-slate-800 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold"
                         }`}
                       >
-                        {/* Small Left Triangle Indicator */}
                         <span
-                          className={`inline-flex items-center justify-center shrink-0 w-3.5 h-4 mr-1 text-[8.5px] leading-none transition-all ${
-                            isActive
-                              ? "opacity-100 text-[#121212] dark:text-white translate-x-0"
-                              : "opacity-0 text-transparent -translate-x-1"
+                          className={`inline-block shrink-0 mr-1.5 text-[10px] font-mono ${
+                            isActive ? "text-[#c8102e]" : "text-slate-400"
                           }`}
                         >
-                          ▶
+                          0{i + 1}.
                         </span>
-                        <span className="flex-1">{item.text}</span>
+                        <span className="flex-1 leading-snug line-clamp-2">{item.text}</span>
                       </button>
                     </li>
                   );
@@ -191,25 +185,24 @@ export function TableOfContents({
         </div>
 
         {/* ── MOBILE ACCORDION ── */}
-        <div className="lg:hidden my-5 border border-gray-200 dark:border-gray-700 rounded-sm">
+        <div className="lg:hidden my-5 border-3 border-black dark:border-slate-700 bg-white dark:bg-slate-900 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
           <button
             type="button"
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="flex items-center justify-between w-full px-4 py-3 bg-gray-50 dark:bg-gray-900"
+            className="flex items-center justify-between w-full px-4 py-3 bg-black text-white"
           >
-            <span
-              className="toc-heading text-[13px] font-bold uppercase text-[#121212] dark:text-white"
-              style={{ fontFamily: "'Corinthian', Georgia, serif", letterSpacing: "0.08em" }}
-            >
-              TABLE OF CONTENTS
-            </span>
-            {mobileOpen
-              ? <ChevronUp className="h-4 w-4 text-gray-500" />
-              : <ChevronDown className="h-4 w-4 text-gray-500" />
-            }
+            <div className="flex items-center gap-2">
+              <span className="bg-[#c8102e] text-white text-[10px] font-black px-2 py-0.5 -skew-x-6">
+                IMPERIALPEDIA
+              </span>
+              <span className="text-xs font-black uppercase tracking-widest font-mono">
+                ARTICLE INDEX ({items.length})
+              </span>
+            </div>
+            {mobileOpen ? <ChevronUp className="h-4 w-4 text-white" /> : <ChevronDown className="h-4 w-4 text-white" />}
           </button>
           {mobileOpen && (
-            <ul className="px-4 py-2 space-y-0 divide-y divide-gray-100 dark:divide-gray-800">
+            <ul className="px-4 py-3 space-y-1.5 bg-white dark:bg-slate-900">
               {items.map((item, i) => {
                 const isActive = activeId === item.id;
                 return (
@@ -217,15 +210,13 @@ export function TableOfContents({
                     <button
                       type="button"
                       onClick={() => { scrollTo(item.id); setMobileOpen(false); }}
-                      className={`w-full text-left flex items-center py-2.5 text-[13px] font-sans ${
+                      className={`w-full text-left flex items-center py-2 px-2 text-xs font-bold ${
                         isActive
-                          ? "font-bold text-[#121212] dark:text-white"
-                          : "text-[#555] dark:text-gray-300 hover:text-[#121212] dark:hover:text-white"
+                          ? "bg-black text-white"
+                          : "text-slate-900 dark:text-slate-200 hover:bg-slate-100"
                       }`}
                     >
-                      <span className={`inline-block mr-2 text-[8px] ${isActive ? "text-[#121212] dark:text-white" : "opacity-0"}`}>
-                        ▶
-                      </span>
+                      <span className="text-[#c8102e] font-mono mr-2">0{i + 1}.</span>
                       {item.text}
                     </button>
                   </li>
@@ -240,14 +231,16 @@ export function TableOfContents({
 
   // Inline fallback
   return (
-    <nav className={`my-6 border-y border-gray-200 dark:border-gray-800 py-4 ${className}`}>
-      <h3
-        className="toc-heading text-[13px] font-bold uppercase text-[#121212] dark:text-white mb-3"
-        style={{ fontFamily: "'Corinthian', Georgia, serif", letterSpacing: "0.08em" }}
-      >
-        TABLE OF CONTENTS
-      </h3>
-      <ul className="space-y-0.5 font-sans">
+    <nav className={`my-8 border-3 border-black dark:border-slate-700 bg-white dark:bg-slate-900 p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] ${className}`}>
+      <div className="flex items-center gap-2 mb-3 border-b-2 border-black pb-2">
+        <span className="bg-[#c8102e] text-white text-[10px] font-black px-2 py-0.5 -skew-x-6">
+          IMPERIALPEDIA
+        </span>
+        <h3 className="text-xs font-black uppercase tracking-widest text-black dark:text-white font-mono">
+          ARTICLE INDEX
+        </h3>
+      </div>
+      <ul className="space-y-1.5 font-sans">
         {items.map((item, i) => {
           const isActive = activeId === item.id;
           return (
@@ -255,13 +248,11 @@ export function TableOfContents({
               <button
                 type="button"
                 onClick={() => scrollTo(item.id)}
-                className={`w-full text-left flex items-center py-1.5 text-[13px] ${
-                  isActive ? "font-bold text-[#121212] dark:text-white" : "text-[#555] dark:text-gray-400 hover:text-[#121212] dark:hover:text-white"
+                className={`w-full text-left flex items-center py-1.5 px-2 text-xs font-bold ${
+                  isActive ? "bg-black text-white" : "text-slate-900 dark:text-slate-300 hover:bg-slate-100"
                 }`}
               >
-                <span className={`inline-block mr-2 text-[8px] ${isActive ? "text-[#121212] dark:text-white" : "opacity-0"}`}>
-                  ▶
-                </span>
+                <span className="text-[#c8102e] font-mono mr-2">0{i + 1}.</span>
                 {item.text}
               </button>
             </li>

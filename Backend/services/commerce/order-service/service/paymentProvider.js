@@ -16,6 +16,11 @@ const crypto = require('crypto');
 // Central key vault — resolves PSP keys from the CMS "Integrations & Keys" store (managed in the
 // admin panel, encrypted at rest). Returns null → fall back to env, so a vault outage never breaks pay.
 const { getPaymentCreds } = require('./cmsVault');
+// Money crosses the PSP boundary as an exact integer count of minor units. The old
+// `Math.round(Number(amount) * 100)` hardcoded a 2-decimal world: correct for the five
+// markets live today, a 100x overcharge the day a zero-decimal currency (JPY, KRW) is
+// added to config/markets.js.
+const { Money, toRazorpayAmount, toStripeAmount, toPayUAmount } = require('@baalvion/money');
 
 // In-memory intent store for the MOCK provider — NON-PRODUCTION (not durable, single-process).
 const mockIntents = new Map();
@@ -32,8 +37,8 @@ const mockProvider = {
     // Defense-in-depth: the mock provider performs NO signature verification, so reaching this
     // path in production would let a caller confirm with no real payment. getProvider() already
     // blocks mock in production, but guard the capture path independently so it always fails closed.
-    if (process.env.NODE_ENV === 'production' && process.env.ALLOW_MOCK_PAYMENTS !== 'true') {
-      return { status: 'failed', transactionId: null, reason: 'mock_disabled_in_production' };
+    if (process.env.NODE_ENV === 'production' || process.env.ALLOW_MOCK_PAYMENTS !== 'true') {
+      return { status: 'failed', transactionId: null, reason: 'mock_payments_not_enabled' };
     }
     const intent = mockIntents.get(intentId);
     if (!intent) return { status: 'failed', transactionId: null, reason: 'unknown_intent' };
@@ -102,8 +107,8 @@ const razorpayProvider = {
   async createPaymentIntent({ orderId, amount, currencyCode }) {
     const keys = await razorpayKeys();
     // Razorpay amount is in the smallest currency unit (paise/cents). receipt max 40 chars (orderId UUID fits).
-    const minor = Math.round(Number(amount) * 100);
-    if (!Number.isFinite(minor) || minor < 1) throw new Error('razorpay: invalid order amount');
+    const minor = toRazorpayAmount(Money.fromDatabaseValue(amount, currencyCode || 'INR'));
+    if (minor < 1) throw new Error('razorpay: invalid order amount');
     const order = await razorpayFetch('/orders', keys, {
       method: 'POST',
       body: JSON.stringify({
@@ -154,14 +159,19 @@ const razorpayProvider = {
       transactionId: captured ? captured.id : null,
       amountMinor: order.amount_paid != null ? Number(order.amount_paid) : null,
       currency: (order.currency || '').toUpperCase() || null,
+      // The payment object we already fetched carries what Razorpay kept. Dropping it here made
+      // a payment settled by the sweep look fee-free while the same payment settled by webhook
+      // carried one — the same money reported two different ways depending on which path won.
+      // `fee` is already inclusive of GST for a payment entity, so `tax` must not be added.
+      feeMinor: captured && captured.fee != null ? Number(captured.fee) : null,
     };
   },
   async failPayment() { return { status: 'failed' }; },
   async cancelPayment() { return { status: 'voided' }; },
-  async refundPayment({ transactionId, amount, reason }) {
+  async refundPayment({ transactionId, amount, currencyCode, reason }) {
     const keys = await razorpayKeys();
     if (!transactionId) throw new Error('razorpay: refund requires the captured payment id');
-    const minor = amount != null ? Math.round(Number(amount) * 100) : undefined;
+    const minor = amount != null ? toRazorpayAmount(Money.fromDatabaseValue(amount, currencyCode || 'INR')) : undefined;
     const data = await razorpayFetch(`/payments/${transactionId}/refund`, keys, {
       method: 'POST',
       body: JSON.stringify({ ...(minor != null ? { amount: minor } : {}), notes: { reason: reason || 'refund' } }),
@@ -240,8 +250,8 @@ const stripeProvider = {
   name: 'stripe',
   PRODUCTION: true,
   async createPaymentIntent({ orderId, amount, currencyCode, country, returnUrl }) {
-    const minor = Math.round(Number(amount) * 100); // Stripe amount = smallest currency unit
-    if (!Number.isFinite(minor) || minor < 1) throw new Error('stripe: invalid order amount');
+    const minor = toStripeAmount(Money.fromDatabaseValue(amount, currencyCode)); // smallest currency unit
+    if (minor < 1) throw new Error('stripe: invalid order amount');
     const base = stripeReturnBase(returnUrl, country);
     const form = toForm({
       mode: 'payment',
@@ -296,9 +306,9 @@ const stripeProvider = {
   },
   async failPayment() { return { status: 'failed' }; },
   async cancelPayment() { return { status: 'voided' }; },
-  async refundPayment({ transactionId, amount, reason }) {
+  async refundPayment({ transactionId, amount, currencyCode, reason }) {
     if (!transactionId) throw new Error('stripe: refund requires the captured payment_intent id');
-    const minor = amount != null ? Math.round(Number(amount) * 100) : undefined;
+    const minor = amount != null ? toStripeAmount(Money.fromDatabaseValue(amount, currencyCode || 'USD')) : undefined;
     const form = toForm({ payment_intent: transactionId, ...(minor != null ? { amount: minor } : {}), metadata: { reason: reason || 'refund' } });
     const data = await stripeFetch('/refunds', { method: 'POST', form });
     return { status: 'refunded', provider: 'stripe', refundId: data.id, amount };
@@ -313,7 +323,7 @@ const stripeProvider = {
 function bankInstructions({ amount, currencyCode, orderId }) {
   const tmpl = process.env.BANK_TRANSFER_INSTRUCTIONS;
   const ref = String(orderId);
-  const amt = `${currencyCode} ${Number(amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+  const amt = Money.fromDatabaseValue(amount, currencyCode).format();
   if (tmpl) return tmpl.replace(/\{amount\}/g, amt).replace(/\{reference\}/g, ref).replace(/\{currency\}/g, currencyCode);
   const beneficiary = process.env.BANK_TRANSFER_BENEFICIARY || 'Amarisé Maison Escrow (FCA Regulated)';
   return [
@@ -360,7 +370,7 @@ const CRYPTO_WALLETS = {
 function cryptoInstructions({ amount, currencyCode, orderId }) {
   const tmpl = process.env.CRYPTO_PAYMENT_INSTRUCTIONS;
   const ref = String(orderId);
-  const amt = `${currencyCode} ${Number(amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+  const amt = Money.fromDatabaseValue(amount, currencyCode).format();
   if (tmpl) return tmpl.replace(/\{amount\}/g, amt).replace(/\{reference\}/g, ref).replace(/\{currency\}/g, currencyCode);
   return [
     `Send the equivalent of ${amt} in crypto to one of the wallet addresses below.`,
@@ -426,8 +436,9 @@ const payuProvider = {
   PRODUCTION: true,
   async createPaymentIntent({ orderId, amount, currencyCode }) {
     const { key, salt, base } = await payuCreds();
-    const amountStr = Number(amount).toFixed(2); // PayU uses major units, 2 decimals
-    if (!(Number(amountStr) > 0)) throw new Error('payu: invalid order amount');
+    const amountMoney = Money.fromDatabaseValue(amount, currencyCode || 'INR');
+    if (!amountMoney.isPositive()) throw new Error('payu: invalid order amount');
+    const amountStr = toPayUAmount(amountMoney); // PayU signs the exact major-unit string
     const txnid = `txn${crypto.randomBytes(11).toString('hex')}`.slice(0, 25); // unique, ≤25 chars
     const productinfo = String(orderId);
     const firstname = process.env.PAYU_DEFAULT_FIRSTNAME || 'Maison Client';
@@ -494,7 +505,14 @@ const unconfigured = (name) => ({
  * 'mock' is still blocked in production unless explicitly opted in, so a client can't force it.
  */
 function getProvider(selectedGateway = null) {
-  const id = String(selectedGateway || process.env.PAYMENT_PROVIDER || 'mock').toLowerCase();
+  // No implicit 'mock'. It used to be the final fallback, so a service with PAYMENT_PROVIDER
+  // unset silently captured orders against a provider that verifies nothing — real orders marked
+  // paid with no money. Mock is now reachable only by naming it AND opting in, in every
+  // environment, so a misconfiguration fails loudly instead of taking fake payments quietly.
+  const id = String(selectedGateway || process.env.PAYMENT_PROVIDER || '').toLowerCase();
+  if (!id) {
+    throw new Error('PAYMENT_PROVIDER is not set and no gateway was selected — refusing to guess a payment provider');
+  }
   switch (id) {
     case 'stripe':                  return stripeProvider;
     case 'razorpay':                return razorpayProvider;
@@ -503,13 +521,57 @@ function getProvider(selectedGateway = null) {
     case 'payu':                    return payuProvider;
     case 'paypal':                  return unconfigured('paypal');
     case 'mock':
-    default:
-      // Never silently use mock payments in production unless explicitly opted in.
-      if (process.env.NODE_ENV === 'production' && process.env.ALLOW_MOCK_PAYMENTS !== 'true') {
-        throw new Error('PAYMENT_PROVIDER not configured for production (mock requires ALLOW_MOCK_PAYMENTS=true)');
+      // Explicit opt-in required everywhere. A developer who wants it says so; nobody gets it by
+      // omission, and no environment inherits it from an unset variable.
+      if (process.env.ALLOW_MOCK_PAYMENTS !== 'true') {
+        throw new Error("payment provider 'mock' requires ALLOW_MOCK_PAYMENTS=true and must never be enabled in production");
+      }
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error("payment provider 'mock' is forbidden in production");
       }
       return mockProvider;
+    default:
+      throw new Error(`unknown payment provider '${id}'`);
   }
 }
 
-module.exports = { getProvider, payuVerifyReturn, payuParseReturn };
+/**
+ * Which gateways can actually take a payment right now.
+ *
+ * The storefront used to render a fixed set of four gateway cards and default to Stripe, so a
+ * shopper on a site with no Stripe account picked it by default and only discovered the problem
+ * at the last step of checkout. Each entry below is proved by resolving the SAME credentials the
+ * charge would use, so "offered" and "chargeable" cannot drift apart.
+ *
+ * Bank transfer needs no credentials — it issues instructions and settles out of band — so it is
+ * always available. `mock` is never advertised.
+ */
+async function configuredGateways() {
+  const checks = [
+    ['razorpay', razorpayKeys],
+    ['stripe', stripeCreds],
+    ['payu', payuCreds],
+  ];
+  const available = [];
+  for (const [name, resolve] of checks) {
+    try {
+      await resolve();
+      available.push(name);
+    } catch {
+      // Unconfigured — simply not offered. Never surface the reason to a storefront caller.
+    }
+  }
+  available.push('bank');
+  if (CRYPTO_WALLETS && Object.values(CRYPTO_WALLETS).some(Boolean)) available.push('crypto');
+
+  // The service default, when it is one we can actually charge with, is the best "preferred".
+  const fallbackOrder = ['razorpay', 'payu', 'stripe', 'bank'];
+  const envDefault = String(process.env.PAYMENT_PROVIDER || '').toLowerCase();
+  const preferred = available.includes(envDefault)
+    ? envDefault
+    : fallbackOrder.find((g) => available.includes(g)) || null;
+
+  return { gateways: available, preferred };
+}
+
+module.exports = { getProvider, payuVerifyReturn, payuParseReturn, configuredGateways };

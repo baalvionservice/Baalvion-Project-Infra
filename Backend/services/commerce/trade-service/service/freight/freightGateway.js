@@ -33,6 +33,7 @@ const db = require('../../models');
 const norm = require('./normalize');
 const engine = require('./quoteEngine');
 const registry = require('./connectors');
+const directory = require('./directoryConnectors');
 const {
     STATUS, FAILURE_KIND, FreightError, isTerminal, isRecoverable, isFallbackKind,
     IN_FLIGHT_STATUSES, ENGINE_VERSION, DEFAULT_MAX_FALLBACKS,
@@ -122,7 +123,7 @@ async function quote(input = {}) {
  * Build the ordered list of { connector, quote } candidates to attempt, honoring a
  * preferred carrier (booked first) then the ranked fallbacks.
  */
-function buildCandidates(comparison, { preferredCarrier = null, maxFallbacks = DEFAULT_MAX_FALLBACKS } = {}) {
+async function buildCandidates(comparison, { preferredCarrier = null, maxFallbacks = DEFAULT_MAX_FALLBACKS } = {}) {
     const ranked = comparison.ranked || [];
     let ordered = ranked;
     if (preferredCarrier) {
@@ -130,10 +131,14 @@ function buildCandidates(comparison, { preferredCarrier = null, maxFallbacks = D
         const rest = ranked.filter((q) => q.carrier !== preferredCarrier);
         ordered = [...chosen, ...rest];
     }
-    return ordered
-        .slice(0, Math.max(1, maxFallbacks + 1)) // primary + up to N fallbacks
-        .map((q) => ({ connector: registry.getConnectorByCarrier(q.carrier), quote: q }))
-        .filter((c) => c.connector);
+    // Resolution spans the coded connectors AND the Carrier Directory: a quote can now
+    // come from a carrier that was onboarded as data, and it has to be bookable too.
+    const candidates = await Promise.all(
+        ordered
+            .slice(0, Math.max(1, maxFallbacks + 1)) // primary + up to N fallbacks
+            .map(async (q) => ({ connector: await directory.resolveConnector(q.carrier), quote: q })),
+    );
+    return candidates.filter((c) => c.connector);
 }
 
 /**
@@ -172,7 +177,7 @@ async function book(input = {}) {
         ? input.comparison
         : await engine.compareQuotes(request, { now: input.now, weights: input.weights });
 
-    const candidates = buildCandidates(comparison, {
+    const candidates = await buildCandidates(comparison, {
         preferredCarrier: input.preferredCarrier || null,
         maxFallbacks: input.maxFallbacks != null ? Number(input.maxFallbacks) : DEFAULT_MAX_FALLBACKS,
     });
@@ -284,6 +289,25 @@ async function finalizeSuccess(record, booking, quote, { attempted = [], actor =
         detail: { tracking_number: record.tracking_number, amount: record.amount, currency: record.currency, fell_back: attempted.length > 1 },
         actor,
     });
+
+    // Materialise the tradeops shipment this booking represents. Until now the
+    // booking's own shipment_id/trade_operation_id columns were never filled, so a
+    // booked container existed nowhere the tracking, customs, incident or insurance
+    // layers could see it. A failure here is reported, not fatal — the carrier has
+    // already accepted the booking.
+    try {
+        const { materialiseShipment } = require('./materialiseShipment');
+        await materialiseShipment(record, { actor });
+    } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error(`[freight] booking ${record.id} booked but no shipment was materialised: ${err.message}`,
+            (err.errors || []).map((e) => `${e.path}: ${e.message}`).join('; '));
+        await appendEvent(record, {
+            eventType: 'warning', status: STATUS.BOOKED, carrier: booking.carrier,
+            message: `shipment record could not be created: ${err.message}`, actor,
+        }).catch(() => {});
+    }
+
     return { record, view: toView(record) };
 }
 
@@ -333,7 +357,7 @@ async function retryBooking(bookingId, { actor = 'system', tenantId = null, now 
     }
     const request = Object.assign({ ...booking.request }, { __normalized: true });
     const comparison = await engine.compareQuotes(request, { now });
-    const candidates = buildCandidates(comparison, { maxFallbacks: booking.max_fallbacks != null ? booking.max_fallbacks : DEFAULT_MAX_FALLBACKS });
+    const candidates = await buildCandidates(comparison, { maxFallbacks: booking.max_fallbacks != null ? booking.max_fallbacks : DEFAULT_MAX_FALLBACKS });
 
     booking.status = STATUS.BOOKING;
     booking.quotes = comparison.ranked || [];
@@ -365,7 +389,7 @@ async function recoverStalled({ olderThanMs = STALLED_AFTER_MS, limit = 100, now
             await runAs({ tenantId: row.tenant_id || null, bypass: !row.tenant_id }, async () => {
                 const request = Object.assign({ ...row.request }, { __normalized: true });
                 const comparison = await engine.compareQuotes(request);
-                const candidates = buildCandidates(comparison, { maxFallbacks: row.max_fallbacks != null ? row.max_fallbacks : DEFAULT_MAX_FALLBACKS });
+                const candidates = await buildCandidates(comparison, { maxFallbacks: row.max_fallbacks != null ? row.max_fallbacks : DEFAULT_MAX_FALLBACKS });
                 row.quotes = comparison.ranked || [];
                 await row.save();
                 await appendEvent(row, { eventType: 'recovered', status: STATUS.BOOKING, message: 'stalled booking re-driven' });

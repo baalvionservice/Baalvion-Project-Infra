@@ -3,6 +3,7 @@
 // (Phase 2, Step 3). Owns recompute of the 'company' and 'directors' checklist
 // categories.
 const db = require('../../models');
+const config = require('../../config/appConfig');
 const checklist = require('./checklist');
 const fraud = require('./fraud');
 
@@ -11,6 +12,8 @@ async function recomputeCompany(orgId, tenantId) {
     return checklist.recomputeCategory({
         orgId, tenantId, category: 'company', childStatuses: record ? [record.status] : [],
         reviewedBy: record ? record.reviewed_by : null, rejectionReason: record ? record.rejection_reason : null,
+        // Feed the renewal date into the checklist rollup so monitor.js's expiry sweep sees it.
+        expiresAt: record ? record.renewal_due_at : null,
     });
 }
 
@@ -37,17 +40,45 @@ async function submitCompanyVerification({ orgId, tenantId, actor, ...fields }) 
     if (record.registration_number) {
         fraud.checkDuplicateCompany(orgId, tenantId, record.registration_number).catch((err) => console.error('[fraud] checkDuplicateCompany failed:', err.message));
     }
+
+    // Hand the case to the configured KYB vendor, if one is configured. With none,
+    // this is a no-op and the record stays in the human queue — see providerCheck.js.
+    await require('./providerCheck').dispatch('company', record, {
+        recordId: record.id, orgId, tenantId,
+        legalCompanyName: record.legal_company_name,
+        registrationNumber: record.registration_number,
+        incorporationDate: record.incorporation_date,
+        businessType: record.business_type,
+        companyWebsite: record.company_website,
+    });
+
     await recomputeCompany(orgId, tenantId);
     return record;
 }
 
-async function reviewCompanyVerification({ record, decision, reviewedBy, rejectionReason = null, renewalDueAt = null }) {
+/**
+ * Approving without an explicit renewal date applies the configured KYB validity
+ * window (config.verification.companyValidityMonths) — annual re-verification is the
+ * usual baseline for business verification. Pass `renewalDueAt` to override, or set
+ * the config to 0 months to disable renewal for this track.
+ */
+function defaultRenewalFor(decision) {
+    if (decision !== 'approved') return null;
+    const months = config.verification.companyValidityMonths;
+    if (!months || months <= 0) return null;
+    const due = new Date();
+    due.setMonth(due.getMonth() + months);
+    return due;
+}
+
+async function reviewCompanyVerification({ record, decision, reviewedBy, rejectionReason = null, renewalDueAt = undefined }) {
+    const resolvedRenewal = renewalDueAt === undefined ? defaultRenewalFor(decision) : renewalDueAt;
     await record.update({
         status: decision,
         reviewed_by: reviewedBy,
         reviewed_at: new Date(),
         rejection_reason: decision === 'rejected' ? rejectionReason : null,
-        renewal_due_at: renewalDueAt,
+        renewal_due_at: resolvedRenewal,
         updated_by: reviewedBy,
     });
     await recomputeCompany(record.org_id, record.tenant_id);

@@ -62,6 +62,14 @@ const start = async () => {
     server.listen(config.port, () => console.log(`[law-service] running on port ${config.port}`));
     startBillingWorker();
 
+    // Drain this service's payment outbox onto the event bus. Each service owns its own `pcl`
+    // schema in its own database, so each needs its own relay — without it, payments record
+    // correctly and reach nobody. A no-op unless PAYMENT_SPINE=true, and a relay that fails to
+    // start must never block boot: the outbox is durable, so it drains once the cause is fixed.
+    const paymentSpine = require('./service/paymentSpine');
+    paymentSpine.startPaymentRelay();
+
+    registerShutdown('payment-outbox', async () => { await paymentSpine.stopPaymentRelay(); });
     registerShutdown('billing-worker', async () => { stopBillingWorker(); });
     registerShutdown('db', async () => {
         if (db.sequelize && db.sequelize.close) await db.sequelize.close();

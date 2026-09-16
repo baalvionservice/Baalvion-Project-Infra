@@ -141,6 +141,15 @@ const startServer = async () => {
     try {
         await db.sequelize.authenticate();
     } catch (error) {
+        // Say WHY. Exiting silently on a database failure means an operator sees a service that
+        // will not start and has nothing to go on — no host, no database name, no reason.
+        // eslint-disable-next-line no-console
+        console.error(JSON.stringify({
+            evt: 'startup.db_unreachable',
+            msg: error.message,
+            host: (config.db && config.db.host) || process.env.DB_HOST || null,
+            database: (config.db && config.db.name) || process.env.DB_NAME || null,
+        }));
         process.exit(1);
     }
 
@@ -149,6 +158,15 @@ const startServer = async () => {
 
     store.ensureSeed().catch(() => {});
 
+    // Drain this service's payment outbox onto the platform bus. Each service owns its own
+    // `pcl` schema, so each runs its own relay; without it payments record locally and never
+    // reach the cross-estate panel. Flag-gated and never fatal.
+    try {
+        const { startPaymentRelay } = require('./service/paymentSpine');
+        startPaymentRelay();
+    } catch (err) {
+        console.error(JSON.stringify({ evt: 'payment_outbox.wire_failed', msg: err.message }));
+    }
     server.listen(config.port, () => {
         // port is logged by the process manager / container runtime
     });

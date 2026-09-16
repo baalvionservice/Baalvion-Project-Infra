@@ -81,6 +81,15 @@ public class SanctionsProperties {
   @Min(value = 1, message = "cache-ttl-seconds must be >= 1")
   private long cacheTtlSeconds = 300;
 
+  /**
+   * Records committed per transaction during ingest. The full consolidated load is ~26k entities and
+   * each one writes an entity, a source-map row and its alias rows, so a single transaction both holds
+   * locks for the whole run and grows the persistence context until every flush has to dirty-check tens
+   * of thousands of managed objects. Batching bounds both.
+   */
+  @Min(value = 1, message = "ingest-batch-size must be >= 1")
+  private int ingestBatchSize = 500;
+
   /** Periodic watchlist refresh from the active provider. */
   private Refresh refresh = new Refresh();
 

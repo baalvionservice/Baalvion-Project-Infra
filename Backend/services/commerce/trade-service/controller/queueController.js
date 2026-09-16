@@ -2,6 +2,16 @@
 const queue = require('../queue');
 const { workerMetrics } = require('../queue/workers');
 const { sendSuccess } = require('../utils/response');
+const { AppError } = require('../utils/errors');
+
+// :name is a URL segment — reject an unregistered queue as a 400 rather than letting
+// the registry's fail-closed throw surface as a 500.
+const knownQueue = (name) => {
+    if (![...queue.QUEUE_NAMES, queue.DLQ].includes(name)) {
+        throw new AppError('VALIDATION_ERROR', `Unknown queue: ${name}`, 400, { known: queue.QUEUE_NAMES });
+    }
+    return name;
+};
 
 const health = async (req, res, next) => {
     try {
@@ -19,11 +29,11 @@ const replay = async (req, res, next) => {
 };
 
 const pause = async (req, res, next) => {
-    try { await queue.pause(req.params.name); return sendSuccess(req, res, { paused: req.params.name }); }
+    try { await queue.pause(knownQueue(req.params.name)); return sendSuccess(req, res, { paused: req.params.name }); }
     catch (err) { return next(err); }
 };
 const resume = async (req, res, next) => {
-    try { await queue.resume(req.params.name); return sendSuccess(req, res, { resumed: req.params.name }); }
+    try { await queue.resume(knownQueue(req.params.name)); return sendSuccess(req, res, { resumed: req.params.name }); }
     catch (err) { return next(err); }
 };
 

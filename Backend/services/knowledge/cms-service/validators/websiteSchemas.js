@@ -69,6 +69,22 @@ const updateWebsiteSchema = z.object({
 
 const cmsRoleEnum = z.enum(['cms_admin', 'cms_editor', 'cms_publisher', 'cms_compliance', 'cms_reviewer', 'cms_seo_manager', 'cms_author', 'cms_contributor', 'cms_viewer']);
 
+
+/**
+ * Optional end date for a grant. Must be in the FUTURE — accepting a past date would create
+ * access that is already dead on arrival, which reads as a silent failure. Bounded at ~2 years
+ * so a typo (2999) cannot produce a grant nobody will ever review.
+ */
+const expiresAtSchema = z
+    .string()
+    .datetime({ offset: true })
+    .refine((v) => {
+        const t = Date.parse(v);
+        const TWO_YEARS_MS = 2 * 365 * 24 * 60 * 60 * 1000;
+        return t > Date.now() && t < Date.now() + TWO_YEARS_MS;
+    }, { message: 'expiresAt must be a future date within two years' })
+    .optional();
+
 const addMemberSchema = z
     .object({
         userId: z.number().int().positive().optional(),
@@ -78,6 +94,7 @@ const addMemberSchema = z
         // end-to-end (see cmsInvitation.personalNote) — this schema just needs to stop
         // stripping the field before it reaches the controller.
         personalNote: z.string().max(600).optional(),
+        expiresAt: expiresAtSchema,
     })
     .refine((d) => d.userId != null || (d.email != null && d.email !== ''), {
         message: 'Provide an email (or userId) of the person to invite',
@@ -88,4 +105,22 @@ const updateMemberRoleSchema = z.object({
     role: cmsRoleEnum,
 });
 
-module.exports = { createWebsiteSchema, updateWebsiteSchema, addMemberSchema, updateMemberRoleSchema };
+/**
+ * Grant one person access to several websites at once. Same person + same role across the
+ * chosen sites — the common case when hiring a writer for two or three publications.
+ */
+const grantAccessSchema = z
+    .object({
+        userId: z.number().int().positive().optional(),
+        email: z.string().email().optional(),
+        role: cmsRoleEnum.default('cms_author'),
+        websiteIds: z.array(z.string().uuid()).min(1).max(50),
+        personalNote: z.string().max(600).optional(),
+        expiresAt: expiresAtSchema,
+    })
+    .refine((d) => d.userId != null || (d.email != null && d.email !== ''), {
+        message: 'Provide an email (or userId) of the person to grant access to',
+        path: ['email'],
+    });
+
+module.exports = { createWebsiteSchema, updateWebsiteSchema, addMemberSchema, updateMemberRoleSchema, grantAccessSchema };

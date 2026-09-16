@@ -56,6 +56,7 @@ const clientCredentials = z.object({
 });
 
 const forgotPassword = z.object({ email: z.string().email() });
+const resendVerification = z.object({ email: z.string().email() });
 
 const resetPassword = z.object({
     token: z.string().min(1),
@@ -143,7 +144,7 @@ const updateOrg = z.object({
 const setOrgStatus = z.object({ status: orgStatusEnum });
 
 module.exports = {
-    register, login, clientCredentials, forgotPassword, resetPassword, verifyEmail, updateMe, mfaVerify, mfaChallenge,
+    register, login, clientCredentials, forgotPassword, resetPassword, verifyEmail, resendVerification, updateMe, mfaVerify, mfaChallenge,
     mfaEnrollStart, mfaEnroll, phoneOtpRequest, phoneOtpVerify, emailOtpRequest, emailOtpVerify,
     createOrg, inviteMember, bulkInvite, updateMemberRole, acceptInvite, transferOwnership,
     platformCreateOrg, updateOrg, setOrgStatus,

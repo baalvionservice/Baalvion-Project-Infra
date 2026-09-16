@@ -20,6 +20,10 @@ import { PaymentForms, emptyPayment, type PaymentState } from "@/components/bill
 import { validateCard } from "@/lib/payment/cards";
 import { cn } from "@/lib/utils";
 
+// Gateways offered when the configured-provider list cannot be read. Excludes Stripe: there is no
+// Stripe merchant account on this estate, so showing it can only produce a dead end.
+const FALLBACK_GATEWAYS: GatewayProvider[] = ["razorpay", "payu", "cashfree"];
+
 /** Branch validation on the selected payment method. Empty map = valid. */
 function validatePayment(payment: PaymentState): Record<string, string> {
   switch (payment.method) {
@@ -86,12 +90,18 @@ export default function BillingCheckout() {
   const { data: plans, isLoading: loadingPlans } = usePlans();
 
   // Only offer gateways with keys configured in the admin vault; default to the card-capable one.
+  //
+  // When the list cannot be read we fall back to FALLBACK_GATEWAYS rather than showing every
+  // gateway. Offering one that has no keys is not a graceful degradation for a payment form — it
+  // routes the customer into a checkout that fails at the last step. Stripe is deliberately not in
+  // the fallback: it appears only when the server positively reports it as configured.
   useEffect(() => {
     let active = true;
     fetchConfiguredGateways().then(({ providers, preferred }) => {
-      if (!active || !providers.length) return; // empty → leave null (show all) as a graceful fallback
-      setAvailableGateways(providers);
-      setGateway((cur) => (providers.includes(cur) ? cur : (preferred ?? providers[0])));
+      if (!active) return;
+      const offered = providers.length ? providers : FALLBACK_GATEWAYS;
+      setAvailableGateways(offered);
+      setGateway((cur) => (offered.includes(cur) ? cur : (preferred ?? offered[0])));
     });
     return () => { active = false; };
   }, []);

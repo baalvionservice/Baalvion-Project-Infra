@@ -16,6 +16,14 @@ const COMMERCE_URL = process.env.NEXT_PUBLIC_COMMERCE_URL || 'http://localhost:3
 const MARKETS_URL = `${COMMERCE_URL}/commerce/markets`;
 const REVALIDATE_SECONDS = 300;
 
+// The browser is CORS-blocked from commerce-service (api.baalvion.com sends no
+// Access-Control-Allow-Origin for this site), and a blocked read here silently downgrades
+// checkout to build-time tax rates. Client reads go through the same-origin proxy instead;
+// the server keeps calling commerce-service directly and skips the hop.
+function marketsEndpoint(): string {
+  return typeof window === 'undefined' ? MARKETS_URL : '/api/markets';
+}
+
 /** One market row, normalized to the FE CountryCode + TaxType vocabulary. */
 export interface Market {
   country: CountryCode;
@@ -104,7 +112,7 @@ const EMPTY: MarketsRegistry = { baseCurrency: 'USD', defaultMarket: 'us', marke
  */
 export async function getMarkets(): Promise<MarketsRegistry> {
   try {
-    const res = await fetch(MARKETS_URL, { next: { revalidate: REVALIDATE_SECONDS } });
+    const res = await fetch(marketsEndpoint(), { next: { revalidate: REVALIDATE_SECONDS } });
     if (!res.ok) return EMPTY;
     const json = (await res.json()) as { data?: RawMarketsResponse } | RawMarketsResponse;
     const payload =

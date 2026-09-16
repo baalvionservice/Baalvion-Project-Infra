@@ -50,7 +50,7 @@ export function AlertTriggerPanel({ role }: { role: UserRole }) {
     <Card className="bg-card/30 border-border/50">
       <CardHeader>
         <CardTitle className="text-lg font-bold flex items-center gap-2">
-          <Megaphone className="h-5 w-5 text-primary" /> Strategic Broadcast Simulation
+          <Megaphone className="h-5 w-5 text-primary" /> Strategic Broadcast
         </CardTitle>
         <CardDescription>Initiate platform-wide investor alerts for operational milestones.</CardDescription>
       </CardHeader>

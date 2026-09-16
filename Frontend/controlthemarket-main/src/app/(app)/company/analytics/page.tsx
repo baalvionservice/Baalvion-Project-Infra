@@ -10,6 +10,11 @@ import {
 import { getScopedUserId } from "@/lib/server-auth";
 import type { Submission, Evaluation } from "@/lib/types";
 
+// Reads live ControlTheMarket data through @/lib/api, which throws CtmDataError when
+// ctm-service is unreachable rather than showing placeholder data. Prerendering this at
+// build time therefore fails; it is a per-request view, not a static page.
+export const dynamic = 'force-dynamic';
+
 export default async function AnalyticsPage() {
   const allUsers = await getUsers();
   const scopedId = await getScopedUserId();

@@ -12,8 +12,8 @@
 #     --build-arg NEXT_PUBLIC_CMS_PUBLIC_URL=https://api.baalvion.com/api/v1/knowledge/cms/api/v1/public \
 #     --build-arg NEXT_PUBLIC_SITE_URL=https://imperialpedia.com \
 #     .
-FROM node:20-alpine AS base
-RUN apk add --no-cache libc6-compat && corepack enable
+FROM node:26-alpine AS base
+RUN apk add --no-cache libc6-compat && npm install -g corepack && corepack enable
 WORKDIR /app
 
 # 1) Prune the monorepo to just this app + its workspace deps.
@@ -40,10 +40,19 @@ ARG NEXT_PUBLIC_ADMIN_PLATFORM_URL
 ARG NEXT_PUBLIC_GA_ID
 ARG NEXT_PUBLIC_GTM_ID
 ARG NEXT_PUBLIC_ADSENSE_CLIENT
+# Build inputs, not runtime: next.config resolves rewrites() at build time and bakes the
+# destinations into routes-manifest.json, so setting these on the running container is a
+# no-op. Unset, the config silently falls back to its hardcoded default.
+ARG AUTH_PROXY_TARGET
+ENV AUTH_PROXY_TARGET=$AUTH_PROXY_TARGET
 ENV NEXT_TELEMETRY_DISABLED=1 NODE_ENV=production
 COPY --from=pruner /app/out/full/ ./
 # Shared tsconfig chain is not part of the pruned output → copy it for the TS build.
+# Backend/tsconfig.base.json is a SEPARATE file (different compiler target) that
+# @baalvion/design, @baalvion/company and @baalvion/illustrations extend from — without
+# it the pruned build fails with "Cannot read file '/app/Backend/tsconfig.base.json'".
 COPY tsconfig.base.json ./tsconfig.base.json
+COPY Backend/tsconfig.base.json ./Backend/tsconfig.base.json
 RUN pnpm dlx turbo@2.9.14 run build --filter=imperialpedia-web
 
 # 4) Minimal runner (Next standalone server).
@@ -58,5 +67,6 @@ USER nextjs
 EXPOSE 3029
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
     CMD node -e "require('http').get('http://127.0.0.1:'+(process.env.PORT||3029),r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"
-# Standalone server entrypoint is nested under the app path in a monorepo build.
+# Standalone server entrypoint is nested under the app path in a monorepo build (see
+# outputFileTracingRoot in next.config.ts — it now correctly points at the repo root).
 CMD ["node", "Frontend/Imperialpedia-main/server.js"]

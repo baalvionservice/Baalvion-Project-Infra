@@ -152,141 +152,195 @@ const chinaDecl = (simulate) => ({
     });
 
     // ── connector jurisdiction validation ─────────────────────────────────────
+    //
+    // Exercised through validate(), not submit(). submit() now refuses before it
+    // validates anything when credentials are absent, which is correct — there is
+    // no point checking a message we cannot send. validate() exists precisely so
+    // a declaration can still be checked during the enrolment period, which is
+    // most of an integration's life.
     section('jurisdiction validation');
-    await t('ICEGATE requires IEC', async () => {
+
+    const codes = (connector, decl) => connector.validate(decl).map((e) => e.code);
+
+    await t('ICEGATE requires the IEC', () => {
         const d = indiaDecl(); delete d.importer.iec;
-        await assert.rejects(india.submit(d), (e) => e.kind === schema.FAILURE_KIND.VALIDATION && e.messages.some((m) => m.code === 'IN_MISSING_IEC'));
+        assert.ok(codes(india, d).includes('IN_MISSING_IEC'));
     });
-    await t('ACE requires importer id + 8-digit HTS', async () => {
-        const d = usDecl(); d.line_items[0].hs_code = '8471'; // too short
-        await assert.rejects(us.submit(d), (e) => e.kind === schema.FAILURE_KIND.VALIDATION && e.messages.some((m) => m.code === 'US_SHORT_HTS'));
+    await t('ICEGATE requires the 8-digit CTSH, not the 6-digit subheading', () => {
+        const d = indiaDecl(); d.line_items[0].hs_code = '620520';
+        assert.ok(codes(india, d).includes('IN_CTSH_TOO_SHORT'));
     });
-    await t('CDS requires EORI', async () => {
-        const d = euDecl(); delete d.declarant; delete d.importer.eori;
-        await assert.rejects(eu.submit(d), (e) => e.kind === schema.FAILURE_KIND.VALIDATION && e.messages.some((m) => m.code === 'EU_MISSING_EORI'));
+    await t('ACE requires an importer of record number', () => {
+        const d = usDecl(); delete d.importer.tax_id;
+        assert.ok(codes(us, d).includes('US_MISSING_IOR'));
     });
-    await t('Mirsal requires business code / TRN', async () => {
-        const d = uaeDecl(); delete d.importer.tax_id;
-        await assert.rejects(uae.submit(d), (e) => e.kind === schema.FAILURE_KIND.VALIDATION && e.messages.some((m) => m.code === 'AE_MISSING_BUSINESS_CODE'));
+    await t('ACE demands the full ISF element set', () => {
+        assert.ok(codes(us, usDecl()).some((c) => c.startsWith('US_ISF_MISSING_')));
     });
-    await t('China Single Window requires USCC + 10-digit HS', async () => {
-        const d = chinaDecl(); delete d.importer.tax_id;
-        await assert.rejects(china.submit(d), (e) => e.kind === schema.FAILURE_KIND.VALIDATION && e.messages.some((m) => m.code === 'CN_MISSING_USCC'));
-        const d2 = chinaDecl(); d2.line_items[0].hs_code = '847130'; // too short (6 digits)
-        await assert.rejects(china.submit(d2), (e) => e.kind === schema.FAILURE_KIND.VALIDATION && e.messages.some((m) => m.code === 'CN_SHORT_HS'));
+    await t('the EU declaration requires an EORI', () => {
+        const d = euDecl(); delete d.declarant; delete d.importer.eori; delete d.importer.tax_id;
+        assert.ok(codes(eu, d).includes('EU_MISSING_EORI'));
+    });
+    await t('the EU import declaration requires the 10-digit TARIC code', () => {
+        const d = euDecl(); d.line_items[0].hs_code = '84713000';
+        assert.ok(codes(eu, d).includes('EU_COMMODITY_CODE_TOO_SHORT'));
+    });
+    await t('Mirsal requires a declaration type — it decides duty treatment', () => {
+        const d = uaeDecl();
+        assert.ok(codes(uae, d).includes('AE_MISSING_DECLARATION_TYPE'));
+    });
+    await t('China requires the trade mode and the 10-digit tariff line', () => {
+        const d = chinaDecl(); d.line_items[0].hs_code = '847130';
+        const found = codes(china, d);
+        assert.ok(found.includes('CN_MISSING_TRADE_MODE'));
+        assert.ok(found.includes('CN_HS_TOO_SHORT'));
+    });
+    await t('validate() works without any credentials at all', () => {
+        assert.strictEqual(india.isConfigured(), false);
+        assert.doesNotThrow(() => india.validate(indiaDecl()));
     });
 
     // ── happy-path submission + response normalization ────────────────────────
-    section('submission + normalization');
-    await t('ICEGATE accepts → normalized accepted with BE reference', async () => {
-        const { normalized, attempts } = await india.submit(indiaDecl());
-        assert.strictEqual(normalized.channel, 'icegate');
-        assert.strictEqual(normalized.status, schema.STATUS.ACCEPTED);
+    // ── the pipeline, exercised with a test double ───────────────────────────
+    //
+    // These properties used to be tested through a simulator that lived inside
+    // the production connectors. That simulator is gone: a fake gateway shipped
+    // in the filing path is a standing risk that a real filing silently succeeds
+    // against nothing. The pipeline is still worth testing, so the double lives
+    // here in the test file, which is where a fake belongs.
+    section('submission pipeline (test double)');
+
+    const CFG = { endpoint: 'https://gateway.test/submit', icegateId: 'X', locationCode: 'INNSA1' };
+
+    /** A connector whose transmit() is scripted by the test. */
+    class ScriptedConnector extends CustomsConnector {
+        constructor(script, opts = {}) {
+            super({ channel: schema.CHANNEL.ICEGATE, gatewayName: 'Scripted', sleep: noop, ...opts });
+            this.script = script;
+            this.attempts = [];
+        }
+
+        // Configuration is not what these tests are about.
+        // eslint-disable-next-line class-methods-use-this
+        assertConfigured() { return CFG; }
+
+        // eslint-disable-next-line class-methods-use-this
+        validateDeclaration() { return []; }
+
+        // eslint-disable-next-line class-methods-use-this
+        buildPayload(declaration) { return { body: 'payload', declaration }; }
+
+        async transmit(payload, ctx) {
+            this.attempts.push(ctx.attempt);
+            return this.script(ctx.attempt, this);
+        }
+
+        parseResponse(raw) {
+            return this.normalize({
+                status: raw.status,
+                accepted: raw.status === schema.STATUS.ACCEPTED,
+                gateway_reference: raw.reference || null,
+                gateway_status: raw.native || null,
+                messages: raw.messages || [],
+                raw,
+            });
+        }
+    }
+
+    const DECL = {
+        entry_type: 'import', origin_country: 'CN', destination_country: 'IN',
+        currency: 'USD', customs_value: 1000, incoterm: 'CIF',
+        importer: { name: 'X', iec: 'ABCDE1234F' },
+        line_items: [{ hs_code: '62052000', description: 'Shirts', quantity: 1, unit: 'PCS', origin_country: 'CN', unit_value: 1000 }],
+    };
+
+    await t('an accepted response normalizes to accepted with its reference', async () => {
+        const c = new ScriptedConnector(() => ({ status: schema.STATUS.ACCEPTED, reference: 'BE-1', native: 'OOC' }));
+        const { normalized, attempts } = await c.submit(DECL);
         assert.strictEqual(normalized.accepted, true);
-        assert.ok(/^BE/.test(normalized.gateway_reference));
-        assert.strictEqual(normalized.gateway_status, 'REGISTERED');
+        assert.strictEqual(normalized.gateway_reference, 'BE-1');
         assert.strictEqual(attempts, 1);
     });
-    await t('ACE accepts → normalized accepted with entry number', async () => {
-        const { normalized } = await us.submit(usDecl());
-        assert.strictEqual(normalized.channel, 'ace');
-        assert.strictEqual(normalized.accepted, true);
-        assert.ok(/^ENT/.test(normalized.gateway_reference));
-    });
-    await t('CDS accepts → normalized accepted with MRN', async () => {
-        const { normalized } = await eu.submit(euDecl());
-        assert.strictEqual(normalized.channel, 'eu_cds');
-        assert.strictEqual(normalized.accepted, true);
-        assert.ok(/^MRN/.test(normalized.gateway_reference));
-    });
-    await t('Mirsal accepts → normalized accepted with declaration number', async () => {
-        const { normalized } = await uae.submit(uaeDecl());
-        assert.strictEqual(normalized.channel, 'mirsal');
-        assert.strictEqual(normalized.accepted, true);
-        assert.ok(/^DXB/.test(normalized.gateway_reference));
-    });
-    await t('China Single Window accepts → normalized accepted with declaration number', async () => {
-        const { normalized } = await china.submit(chinaDecl());
-        assert.strictEqual(normalized.channel, 'china_single_window');
-        assert.strictEqual(normalized.accepted, true);
-        assert.ok(/^CN/.test(normalized.gateway_reference));
-    });
-    await t('all five gateways normalize to the SAME shape', async () => {
-        const keys = ['channel', 'status', 'accepted', 'gateway_reference', 'gateway_status', 'messages', 'retryable', 'received_at', 'raw'];
-        for (const [c, d] of [[india, indiaDecl()], [us, usDecl()], [eu, euDecl()], [uae, uaeDecl()], [china, chinaDecl()]]) {
-            const { normalized } = await c.submit(d);
-            assert.deepStrictEqual(Object.keys(normalized).sort(), [...keys].sort());
-        }
-    });
-    await t('pending acknowledgement → status submitted, not accepted', async () => {
-        const { normalized } = await india.submit(indiaDecl('pending'));
+
+    await t('an async acknowledgement is submitted, not accepted', async () => {
+        const c = new ScriptedConnector(() => ({ status: schema.STATUS.SUBMITTED, native: 'RECEIVED' }));
+        const { normalized } = await c.submit(DECL);
         assert.strictEqual(normalized.status, schema.STATUS.SUBMITTED);
         assert.strictEqual(normalized.accepted, false);
     });
 
-    // ── retry mechanism ───────────────────────────────────────────────────────
     section('retry mechanism');
-    await t('flaky gateway succeeds after retrying (3 attempts)', async () => {
-        const attemptsSeen = [];
-        const c = new IndiaConnector({ sleep: noop, maxAttempts: 3, onAttempt: (a) => attemptsSeen.push(a) });
-        const { normalized, attempts } = await c.submit(indiaDecl('flaky:2'));
+
+    await t('a transient failure is retried and can succeed mid-burst', async () => {
+        const c = new ScriptedConnector((attempt, self) => {
+            if (attempt < 3) throw self.failTransient('gateway timeout');
+            return { status: schema.STATUS.ACCEPTED, reference: 'BE-2', native: 'OOC' };
+        });
+        const { attempts } = await c.submit(DECL);
         assert.strictEqual(attempts, 3);
-        assert.deepStrictEqual(attemptsSeen, [1, 2, 3]);
-        assert.strictEqual(normalized.accepted, true);
-    });
-    await t('persistent transient failure exhausts retries then throws transient', async () => {
-        const c = new USConnector({ sleep: noop, maxAttempts: 3 });
-        let captured = null;
-        try { await c.submit(usDecl('transient')); } catch (e) { captured = e; }
-        assert.ok(captured, 'expected a throw');
-        assert.strictEqual(captured.kind, schema.FAILURE_KIND.TRANSIENT);
-    });
-    await t('permanent rejection is NOT retried (single attempt)', async () => {
-        const attemptsSeen = [];
-        const c = new EUConnector({ sleep: noop, maxAttempts: 5, onAttempt: (a) => attemptsSeen.push(a) });
-        let captured = null;
-        try { await c.submit(euDecl('reject')); } catch (e) { captured = e; }
-        assert.ok(captured);
-        assert.strictEqual(captured.kind, schema.FAILURE_KIND.PERMANENT);
-        assert.deepStrictEqual(attemptsSeen, [1]); // no retry burst
-    });
-    await t('classifyTransport maps HTTP status to the right kind', () => {
-        assert.strictEqual(us.classifyTransport(new Error('x'), { status: 503 }).kind, schema.FAILURE_KIND.TRANSIENT);
-        assert.strictEqual(us.classifyTransport(new Error('x'), { status: 429 }).kind, schema.FAILURE_KIND.TRANSIENT);
-        assert.strictEqual(us.classifyTransport(new Error('x'), { status: 400 }).kind, schema.FAILURE_KIND.PERMANENT);
-        const abort = Object.assign(new Error('aborted'), { name: 'AbortError' });
-        assert.strictEqual(us.classifyTransport(abort).kind, schema.FAILURE_KIND.TRANSIENT);
+        assert.deepStrictEqual(c.attempts, [1, 2, 3]);
     });
 
-    // ── registry ──────────────────────────────────────────────────────────────
+    await t('persistent transient failure exhausts the budget then throws transient', async () => {
+        const c = new ScriptedConnector((attempt, self) => { throw self.failTransient('always down'); });
+        await assert.rejects(() => c.submit(DECL), (err) => err.kind === schema.FAILURE_KIND.TRANSIENT);
+        assert.deepStrictEqual(c.attempts, [1, 2, 3]);
+    });
+
+    await t('a permanent rejection is never retried', async () => {
+        const c = new ScriptedConnector((attempt, self) => { throw self.failPermanent('bad HS code'); });
+        await assert.rejects(() => c.submit(DECL), (err) => err.kind === schema.FAILURE_KIND.PERMANENT);
+        assert.deepStrictEqual(c.attempts, [1], 'a permanent rejection must cost exactly one attempt');
+    });
+
+    await t('a validation failure never reaches the wire at all', async () => {
+        class Invalid extends ScriptedConnector {
+            // eslint-disable-next-line class-methods-use-this
+            validateDeclaration() { return [{ code: 'X', level: 'error', text: 'nope' }]; }
+        }
+        const c = new Invalid(() => ({ status: schema.STATUS.ACCEPTED }));
+        await assert.rejects(() => c.submit(DECL), (err) => err.kind === schema.FAILURE_KIND.VALIDATION);
+        assert.deepStrictEqual(c.attempts, [], 'nothing should have been transmitted');
+    });
+
+    await t('the retry budget is configurable', async () => {
+        const c = new ScriptedConnector((attempt, self) => { throw self.failTransient('down'); }, { maxAttempts: 5 });
+        await assert.rejects(() => c.submit(DECL));
+        assert.deepStrictEqual(c.attempts, [1, 2, 3, 4, 5]);
+    });
+
     section('registry');
-    await t('getConnectorForCountry resolves the right connector', () => {
-        assert.ok(registry.getConnectorForCountry('IN') instanceof IndiaConnector);
-        assert.ok(registry.getConnectorForCountry('US') instanceof USConnector);
-        assert.ok(registry.getConnectorForCountry('NL') instanceof EUConnector);
-        assert.ok(registry.getConnectorForCountry('AE') instanceof UAEConnector);
-        assert.ok(registry.getConnectorForCountry('CN') instanceof ChinaConnector);
-    });
-    await t('registry is pluggable — register + reset an override', () => {
-        const fake = new USConnector({ gatewayName: 'FAKE' });
-        registry.registerConnector(schema.CHANNEL.ACE, fake);
-        assert.strictEqual(registry.getConnectorByChannel(schema.CHANNEL.ACE), fake);
-        registry.resetConnectors();
-        assert.notStrictEqual(registry.getConnectorByChannel(schema.CHANNEL.ACE), fake);
-        assert.ok(registry.getConnectorByChannel(schema.CHANNEL.ACE) instanceof USConnector);
-    });
-    await t('supportedChannels lists all five gateways', () => {
-        const chans = registry.supportedChannels().sort();
-        assert.deepStrictEqual(chans, ['ace', 'china_single_window', 'eu_cds', 'icegate', 'mirsal']);
+
+    await t('every channel resolves to a connector', () => {
+        for (const channel of Object.values(schema.CHANNEL)) {
+            assert.ok(registry.getConnectorByChannel(channel), `no connector for ${channel}`);
+        }
     });
 
-    // ── summary ───────────────────────────────────────────────────────────────
-    console.log(`\n${'─'.repeat(60)}`);
-    console.log(`customs-gateway.verify — ${pass} passed, ${fail} failed (${pass + fail} total)`);
+    await t('country routing reaches the right gateway', () => {
+        assert.strictEqual(registry.getConnectorForCountry('IN').channel, schema.CHANNEL.ICEGATE);
+        assert.strictEqual(registry.getConnectorForCountry('US').channel, schema.CHANNEL.ACE);
+        assert.strictEqual(registry.getConnectorForCountry('NL').channel, schema.CHANNEL.EU_CDS);
+        assert.strictEqual(registry.getConnectorForCountry('AE').channel, schema.CHANNEL.UAE_MIRSAL);
+        assert.strictEqual(registry.getConnectorForCountry('CN').channel, schema.CHANNEL.CHINA_SINGLE_WINDOW);
+    });
+
+    await t('an unsupported jurisdiction resolves to nothing, not to a default', () => {
+        assert.strictEqual(registry.getConnectorForCountry('ZZ'), null);
+    });
+
+    await t('every production connector refuses to file without credentials', () => {
+        for (const channel of Object.values(schema.CHANNEL)) {
+            const c = registry.getConnectorByChannel(channel);
+            assert.strictEqual(c.isConfigured(), false, `${channel} claims to be configured in a bare test environment`);
+        }
+    });
+
+    // ── summary ──────────────────────────────────────────────────────────────
+    console.log(`\n${pass} passed, ${fail} failed`);
     if (fail) {
         console.log('\nFailures:');
         failures.forEach((f) => console.log(`  • ${f.name}: ${f.message}`));
         process.exit(1);
     }
-    process.exit(0);
 })();

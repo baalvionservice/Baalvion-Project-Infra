@@ -22,7 +22,7 @@ export const CMS_ROLE_OPTIONS: CmsRoleOption[] = [
   { value: 'cms_publisher', label: 'Publisher', description: 'Publish and unpublish approved content', primary: true },
   { value: 'cms_reviewer', label: 'Reviewer', description: 'Review & approve submitted content', primary: true },
   { value: 'cms_compliance', label: 'Compliance', description: 'Compliance review & sign-off before publish', primary: false },
-  { value: 'cms_author', label: 'Writer', description: 'Create & edit their own content', primary: true },
+  { value: 'cms_author', label: 'Writer', description: 'Create, edit & publish content on their sites', primary: true },
   { value: 'cms_seo_manager', label: 'SEO Manager', description: 'Manage SEO metadata & redirects', primary: false },
   { value: 'cms_contributor', label: 'Contributor', description: 'Draft content for review (cannot publish)', primary: false },
   { value: 'cms_viewer', label: 'Viewer', description: 'Read-only access', primary: false },
@@ -83,7 +83,9 @@ export function resolveCmsPermissions({ myRole, platformRole }: ResolveArgs): Cm
     myRole,
     isManager,
     canReview: isManager || level >= CMS_ROLE_LEVEL.cms_reviewer,
-    canPublish: isManager || level >= CMS_ROLE_LEVEL.cms_publisher,
+    // Writers publish on the sites they are granted — matches workflowService's TRANSITIONS
+    // (publish/schedule/unpublish at level 40). Contributors (20) still cannot.
+    canPublish: isManager || level >= CMS_ROLE_LEVEL.cms_author,
     canEditContent: isManager || level >= CMS_ROLE_LEVEL.cms_author,
     canManageMedia: isManager || level >= CMS_ROLE_LEVEL.cms_author,
     canDelete: platformAdmin || level >= CMS_ROLE_LEVEL.cms_editor,

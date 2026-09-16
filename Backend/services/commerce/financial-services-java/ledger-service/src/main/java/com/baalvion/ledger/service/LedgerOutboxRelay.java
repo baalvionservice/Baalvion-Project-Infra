@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -45,7 +46,15 @@ import java.util.concurrent.TimeUnit;
 public class LedgerOutboxRelay {
 
   private final LedgerOutboxRepository repository;
+  /**
+   * Nullable: with {@code app.kafka.enabled=false} the Kafka wiring backs off and no
+   * {@link KafkaTemplate} bean exists, so {@link #drain()} short-circuits and rows stay durably
+   * PENDING. Claiming rows we cannot publish would burn their attempts and strand them in FAILED.
+   */
+  @Nullable
   private final KafkaTemplate<String, String> kafkaTemplate;
+
+  private final boolean kafkaEnabled;
   /**
    * Self-reference so the {@code REQUIRES_NEW} boundaries on {@code claimBatch}/{@code persistResult}
    * actually go through the Spring transactional proxy. Calling them via plain {@code this} would
@@ -75,12 +84,14 @@ public class LedgerOutboxRelay {
 
   public LedgerOutboxRelay(
     LedgerOutboxRepository repository,
-    KafkaTemplate<String, String> kafkaTemplate,
+    @Nullable KafkaTemplate<String, String> kafkaTemplate,
     MeterRegistry meterRegistry,
-    @Lazy LedgerOutboxRelay self
+    @Lazy LedgerOutboxRelay self,
+    @Value("${app.kafka.enabled:true}") boolean kafkaEnabled
   ) {
     this.repository = repository;
     this.kafkaTemplate = kafkaTemplate;
+    this.kafkaEnabled = kafkaEnabled;
     this.self = self;
     Gauge.builder("ledger.outbox.pending", repository, r -> (double) r.countByStatus(OutboxStatus.PENDING))
       .description("Ledger outbox events awaiting publication")
@@ -93,6 +104,11 @@ public class LedgerOutboxRelay {
    */
   @Scheduled(fixedDelayString = "${app.outbox.poll-ms:2000}")
   public void drain() {
+    // Kafka disabled (or no template wired): leave rows PENDING. They are durable and get published
+    // once Kafka is back — never claim a row we have no way to publish.
+    if (!kafkaEnabled || kafkaTemplate == null) {
+      return;
+    }
     // Via `self` so the REQUIRES_NEW proxy boundary is honored (not self-invocation).
     List<LedgerOutbox> batch = self.claimBatch();
     if (batch.isEmpty()) {

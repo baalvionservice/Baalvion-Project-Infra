@@ -1,7 +1,7 @@
 # Baalvion — Brand Brief & Content Contract (READ FULLY BEFORE WRITING)
 
 You are writing authoritative content for **about.baalvion.com**, the corporate site of
-**Baalvion Industries** (the Baalvion Group). Every piece must be factually consistent with
+**Baalvion Industries Private Limited** (brand: Baalvion). Every piece must be factually consistent with
 the brand facts below, written for a senior enterprise audience, and **free of generic AI fluff**.
 
 ## Who Baalvion is (ground truth — do not contradict)

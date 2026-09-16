@@ -3,6 +3,10 @@ import { getLeaderboard } from '@/lib/ranking-engine';
 import type { User, RoleCategory } from '@/lib/types';
 import { CandidateRankingClientPage } from './ranking-client-page';
 
+// Reaches ctm-service transitively (ranking-engine -> @/lib/api), which throws CtmDataError
+// when the service is unreachable. Prerendering this at build time therefore fails.
+export const dynamic = 'force-dynamic';
+
 export type CandidateRanking = {
   rank: number;
   candidate: User;

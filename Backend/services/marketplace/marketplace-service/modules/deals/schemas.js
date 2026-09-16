@@ -3,9 +3,11 @@ const { z } = require('zod');
 
 const DEAL_STATUSES = ['open', 'dd', 'negotiating', 'term_sheet', 'signing', 'funding', 'closed', 'withdrawn'];
 
+// org_id_company is accepted for back-compat but IGNORED — the counterparty is derived from
+// the opportunity, so a caller cannot open a deal against an org of its choosing.
 const createSchema = z.object({
     opportunity_id: z.string().uuid(),
-    org_id_company: z.string().uuid(),
+    org_id_company: z.string().uuid().optional(),
     lead_investor_id: z.string().uuid().optional(),
 });
 
@@ -29,8 +31,11 @@ const documentRequestSchema = z.object({
 
 const documentRequestStatusSchema = z.object({ status: z.enum(['requested', 'uploaded', 'approved', 'rejected']) });
 
+const DOC_CATEGORIES = ['financial', 'legal', 'operational', 'compliance', 'tax'];
+
 const dataRoomDocSchema = z.object({
     file_url: z.string().min(1).max(600),
+    category: z.enum(DOC_CATEGORIES).optional(),
     document_request_id: z.string().uuid().optional(),
     version: z.coerce.number().int().optional(),
 });
@@ -75,14 +80,17 @@ const signatureSchema = z.object({
     provider: z.enum(['aadhaar_esign', 'docusign', 'adobe_sign']).default('docusign'),
 });
 
+// amount is optional and, when given, must still equal the accepted term sheet — the service
+// derives it from those terms. The economics of a deal are not a client-supplied number.
 const escrowSchema = z.object({
-    amount: z.coerce.number().positive(),
+    amount: z.coerce.number().positive().optional(),
     currency: z.string().length(3).default('USD'),
     release_conditions_json: z.record(z.any()).optional(),
 });
 
 module.exports = {
     DEAL_STATUSES,
+    DOC_CATEGORIES,
     createSchema,
     statusSchema,
     messageSchema,

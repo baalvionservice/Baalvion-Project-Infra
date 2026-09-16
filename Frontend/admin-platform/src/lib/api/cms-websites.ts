@@ -11,8 +11,19 @@ import type {
   AddWebsiteInvitationResult,
   WebsiteInvitation,
   UserSearchResult,
+  GrantSiteAccessPayload,
+  GrantSiteAccessResult,
+  SiteGrant,
+  RevokeAllResult,
 } from '@/lib/types/cms-website.types';
 import type { ApiResponse, PaginatedResponse } from '@/lib/types/common.types';
+
+/** Wire shape of a grant: BIGINT ids arrive as strings. */
+type RawSiteGrant = Omit<SiteGrant, 'id' | 'userId' | 'user'> & {
+  id: string | number;
+  userId: string | number;
+  user: Omit<SiteGrant['user'], 'id'> & { id: string | number };
+};
 
 // cms-service stores the CMS role as `role`; the console renders it as `cmsRole`.
 interface RawMember {
@@ -132,6 +143,52 @@ export const websitesApi = {
   },
 
   // Members
+  /**
+   * Every site grant across every website (platform admins only). The staff directory knows
+   * departments and the CMS knows site access; this is the half needed to join them.
+   */
+  listAllGrants: async (params?: { userId?: number; userIds?: number[]; websiteId?: string }) => {
+    const res = await cmsApiClient.get<ApiResponse<RawSiteGrant[]>>(
+      '/cms/websites/access-grants',
+      // userIds goes over the wire comma-separated — annotating one page of people rather
+      // than pulling every grant on the platform.
+      { params: { ...params, userIds: params?.userIds?.join(',') || undefined } },
+    );
+    // user_id is a Postgres BIGINT, which serialises as a STRING ("16"), not a number.
+    // Left as-is it silently breaks any join keyed on the numeric user id — the values look
+    // identical in a log and never match. Coerced here so SiteGrant's declared types are true.
+    return (res.data.data ?? []).map<SiteGrant>((g) => ({
+      ...g,
+      id: Number(g.id),
+      userId: Number(g.userId),
+      user: { ...g.user, id: Number(g.user.id) },
+    }));
+  },
+
+  /**
+   * Remove one person from EVERY website in a single action (platform admins only).
+   * Each site is audited separately, so the trail names exactly what was taken away.
+   */
+  revokeAllAccess: async (userId: number) => {
+    const res = await cmsApiClient.delete<ApiResponse<RevokeAllResult>>(
+      '/cms/websites/access-grants',
+      { params: { userId } },
+    );
+    return res.data.data;
+  },
+
+  /**
+   * Grant one person access to several websites at once (platform admins only).
+   * Returns a per-site outcome — some may be granted, some invited, some skipped.
+   */
+  grantAccess: async (payload: GrantSiteAccessPayload) => {
+    const res = await cmsApiClient.post<ApiResponse<GrantSiteAccessResult>>(
+      '/websites/access-grants',
+      payload,
+    );
+    return res.data.data;
+  },
+
   members: {
     list: async (websiteId: string) => {
       const res = await cmsApiClient.get<ApiResponse<RawMember[]>>(`/cms/websites/${websiteId}/members`);

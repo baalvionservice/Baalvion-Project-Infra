@@ -6,4 +6,5 @@ module.exports = {
     rtRepo:         require('./RefreshTokenRepository'),
     inviteRepo:     require('./InvitationRepository'),
     auditRepo:      require('./AuditLogRepository'),
+    bizGrantRepo:   require('./BusinessGrantRepository'),
 };

@@ -1,0 +1,1517 @@
+[
+  {
+    "route": "/",
+    "total": 3,
+    "clicked": 0,
+    "skipped": {
+      "unnamed": 1,
+      "navigation": 2
+    },
+    "issues": [
+      {
+        "control": "#0",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      }
+    ]
+  },
+  {
+    "route": "/ai",
+    "total": 6,
+    "clicked": 6,
+    "skipped": {},
+    "issues": []
+  },
+  {
+    "route": "/analytics",
+    "total": 8,
+    "clicked": 8,
+    "skipped": {},
+    "issues": []
+  },
+  {
+    "route": "/audit-center",
+    "total": 9,
+    "clicked": 4,
+    "skipped": {
+      "mutating": 2,
+      "navigation": 3
+    },
+    "issues": []
+  },
+  {
+    "route": "/audit-logs",
+    "total": 9,
+    "clicked": 4,
+    "skipped": {
+      "mutating": 1,
+      "disabled": 2,
+      "unnamed": 2
+    },
+    "issues": [
+      {
+        "control": "#7",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#8",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      }
+    ]
+  },
+  {
+    "route": "/billing",
+    "total": 1,
+    "clicked": 0,
+    "skipped": {
+      "mutating": 1
+    },
+    "issues": []
+  },
+  {
+    "route": "/cms",
+    "total": 4,
+    "clicked": 0,
+    "skipped": {
+      "navigation": 4
+    },
+    "issues": []
+  },
+  {
+    "route": "/cms/categories",
+    "total": 2,
+    "clicked": 0,
+    "skipped": {
+      "navigation": 2
+    },
+    "issues": []
+  },
+  {
+    "route": "/cms/pages",
+    "total": 9,
+    "clicked": 3,
+    "skipped": {
+      "mutating": 2,
+      "disabled": 4
+    },
+    "issues": []
+  },
+  {
+    "route": "/cms/posts",
+    "total": 10,
+    "clicked": 4,
+    "skipped": {
+      "mutating": 2,
+      "disabled": 4
+    },
+    "issues": []
+  },
+  {
+    "route": "/cms/tags",
+    "total": 2,
+    "clicked": 0,
+    "skipped": {
+      "navigation": 2
+    },
+    "issues": []
+  },
+  {
+    "route": "/cms/websites",
+    "total": 6,
+    "clicked": 1,
+    "skipped": {
+      "mutating": 1,
+      "unnamed": 2,
+      "navigation": 2
+    },
+    "issues": [
+      {
+        "control": "#2",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#4",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      }
+    ]
+  },
+  {
+    "route": "/cms/workflows",
+    "total": 8,
+    "clicked": 4,
+    "skipped": {
+      "disabled": 4
+    },
+    "issues": []
+  },
+  {
+    "route": "/commerce",
+    "total": 8,
+    "clicked": 0,
+    "skipped": {
+      "navigation": 7,
+      "mutating": 1
+    },
+    "issues": []
+  },
+  {
+    "route": "/commerce/analytics",
+    "total": 1,
+    "clicked": 0,
+    "skipped": {
+      "navigation": 1
+    },
+    "issues": []
+  },
+  {
+    "route": "/commerce/categories",
+    "total": 2,
+    "clicked": 0,
+    "skipped": {
+      "disabled": 2
+    },
+    "issues": []
+  },
+  {
+    "route": "/commerce/customers",
+    "total": 1,
+    "clicked": 0,
+    "skipped": {
+      "navigation": 1
+    },
+    "issues": []
+  },
+  {
+    "route": "/commerce/discounts",
+    "total": 1,
+    "clicked": 0,
+    "skipped": {
+      "navigation": 1
+    },
+    "issues": []
+  },
+  {
+    "route": "/commerce/inventory",
+    "total": 1,
+    "clicked": 0,
+    "skipped": {
+      "navigation": 1
+    },
+    "issues": []
+  },
+  {
+    "route": "/commerce/markets",
+    "total": 0,
+    "clicked": 0,
+    "skipped": {},
+    "issues": []
+  },
+  {
+    "route": "/commerce/orders",
+    "total": 1,
+    "clicked": 0,
+    "skipped": {
+      "navigation": 1
+    },
+    "issues": []
+  },
+  {
+    "route": "/commerce/products",
+    "total": 1,
+    "clicked": 0,
+    "skipped": {
+      "navigation": 1
+    },
+    "issues": []
+  },
+  {
+    "route": "/commerce/returns",
+    "total": 1,
+    "clicked": 0,
+    "skipped": {
+      "navigation": 1
+    },
+    "issues": []
+  },
+  {
+    "route": "/commerce/revenue",
+    "total": 1,
+    "clicked": 1,
+    "skipped": {},
+    "issues": []
+  },
+  {
+    "route": "/commerce/reviews",
+    "total": 1,
+    "clicked": 0,
+    "skipped": {
+      "navigation": 1
+    },
+    "issues": []
+  },
+  {
+    "route": "/commerce/settings",
+    "total": 4,
+    "clicked": 2,
+    "skipped": {
+      "mutating": 2
+    },
+    "issues": []
+  },
+  {
+    "route": "/commerce/shipping",
+    "total": 1,
+    "clicked": 0,
+    "skipped": {
+      "navigation": 1
+    },
+    "issues": []
+  },
+  {
+    "route": "/commerce/warehouses",
+    "total": 1,
+    "clicked": 0,
+    "skipped": {
+      "navigation": 1
+    },
+    "issues": []
+  },
+  {
+    "route": "/crm",
+    "total": 8,
+    "clicked": 0,
+    "skipped": {
+      "navigation": 8
+    },
+    "issues": []
+  },
+  {
+    "route": "/crm/affiliates",
+    "total": 3,
+    "clicked": 1,
+    "skipped": {
+      "mutating": 2
+    },
+    "issues": []
+  },
+  {
+    "route": "/crm/appointments",
+    "total": 3,
+    "clicked": 1,
+    "skipped": {
+      "mutating": 2
+    },
+    "issues": []
+  },
+  {
+    "route": "/crm/campaigns",
+    "total": 3,
+    "clicked": 1,
+    "skipped": {
+      "mutating": 2
+    },
+    "issues": []
+  },
+  {
+    "route": "/crm/inquiries",
+    "total": 1,
+    "clicked": 1,
+    "skipped": {},
+    "issues": []
+  },
+  {
+    "route": "/crm/segments",
+    "total": 2,
+    "clicked": 0,
+    "skipped": {
+      "mutating": 2
+    },
+    "issues": []
+  },
+  {
+    "route": "/crm/support-tickets",
+    "total": 3,
+    "clicked": 1,
+    "skipped": {
+      "mutating": 2
+    },
+    "issues": []
+  },
+  {
+    "route": "/crm/vendors",
+    "total": 3,
+    "clicked": 1,
+    "skipped": {
+      "mutating": 2
+    },
+    "issues": []
+  },
+  {
+    "route": "/crm/vip-clients",
+    "total": 3,
+    "clicked": 1,
+    "skipped": {
+      "mutating": 2
+    },
+    "issues": []
+  },
+  {
+    "route": "/ctm",
+    "total": 0,
+    "clicked": 0,
+    "skipped": {},
+    "issues": []
+  },
+  {
+    "route": "/dashboard",
+    "total": 3,
+    "clicked": 0,
+    "skipped": {
+      "unnamed": 1,
+      "navigation": 2
+    },
+    "issues": [
+      {
+        "control": "#0",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      }
+    ]
+  },
+  {
+    "route": "/developers",
+    "total": 5,
+    "clicked": 5,
+    "skipped": {},
+    "issues": []
+  },
+  {
+    "route": "/feature-flags",
+    "total": 2,
+    "clicked": 0,
+    "skipped": {
+      "mutating": 2
+    },
+    "issues": []
+  },
+  {
+    "route": "/identity",
+    "total": 34,
+    "clicked": 5,
+    "skipped": {},
+    "issues": []
+  },
+  {
+    "route": "/imperialpedia",
+    "total": 10,
+    "clicked": 0,
+    "skipped": {
+      "navigation": 8,
+      "mutating": 2
+    },
+    "issues": []
+  },
+  {
+    "route": "/imperialpedia/affiliate",
+    "total": 2,
+    "clicked": 0,
+    "skipped": {
+      "navigation": 1,
+      "mutating": 1
+    },
+    "issues": []
+  },
+  {
+    "route": "/imperialpedia/affiliate/new",
+    "total": 2,
+    "clicked": 0,
+    "skipped": {
+      "destructive": 1,
+      "mutating": 1
+    },
+    "issues": []
+  },
+  {
+    "route": "/imperialpedia/affiliate/report",
+    "total": 2,
+    "clicked": 1,
+    "skipped": {
+      "mutating": 1
+    },
+    "issues": []
+  },
+  {
+    "route": "/imperialpedia/articles",
+    "total": 2,
+    "clicked": 1,
+    "skipped": {
+      "mutating": 1
+    },
+    "issues": []
+  },
+  {
+    "route": "/imperialpedia/articles/new",
+    "total": 3,
+    "clicked": 0,
+    "skipped": {
+      "unnamed": 1,
+      "destructive": 1,
+      "mutating": 1
+    },
+    "issues": [
+      {
+        "control": "#0",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      }
+    ]
+  },
+  {
+    "route": "/imperialpedia/entities",
+    "total": 1,
+    "clicked": 0,
+    "skipped": {
+      "mutating": 1
+    },
+    "issues": []
+  },
+  {
+    "route": "/imperialpedia/entities/new",
+    "total": 8,
+    "clicked": 5,
+    "skipped": {
+      "mutating": 2,
+      "destructive": 1
+    },
+    "issues": []
+  },
+  {
+    "route": "/imperialpedia/glossary",
+    "total": 3,
+    "clicked": 2,
+    "skipped": {
+      "mutating": 1
+    },
+    "issues": []
+  },
+  {
+    "route": "/imperialpedia/glossary/new",
+    "total": 6,
+    "clicked": 2,
+    "skipped": {
+      "mutating": 3,
+      "destructive": 1
+    },
+    "issues": []
+  },
+  {
+    "route": "/imperialpedia/market-data",
+    "total": 1,
+    "clicked": 0,
+    "skipped": {
+      "mutating": 1
+    },
+    "issues": []
+  },
+  {
+    "route": "/imperialpedia/site-content",
+    "total": 2,
+    "clicked": 1,
+    "skipped": {
+      "mutating": 1
+    },
+    "issues": []
+  },
+  {
+    "route": "/imperialpedia/site-content/new",
+    "total": 3,
+    "clicked": 1,
+    "skipped": {
+      "destructive": 1,
+      "mutating": 1
+    },
+    "issues": []
+  },
+  {
+    "route": "/imperialpedia/world",
+    "total": 0,
+    "clicked": 0,
+    "skipped": {},
+    "issues": []
+  },
+  {
+    "route": "/infrastructure",
+    "total": 5,
+    "clicked": 5,
+    "skipped": {},
+    "issues": []
+  },
+  {
+    "route": "/ir",
+    "total": 16,
+    "clicked": 0,
+    "skipped": {
+      "mutating": 4,
+      "navigation": 12
+    },
+    "issues": []
+  },
+  {
+    "route": "/ir/analytics",
+    "total": 2,
+    "clicked": 0,
+    "skipped": {
+      "navigation": 2
+    },
+    "issues": []
+  },
+  {
+    "route": "/ir/applications",
+    "total": 11,
+    "clicked": 4,
+    "skipped": {
+      "navigation": 1,
+      "mutating": 2,
+      "disabled": 4
+    },
+    "issues": []
+  },
+  {
+    "route": "/ir/documents",
+    "total": 8,
+    "clicked": 2,
+    "skipped": {
+      "navigation": 1,
+      "mutating": 1,
+      "disabled": 4
+    },
+    "issues": []
+  },
+  {
+    "route": "/ir/earnings",
+    "total": 9,
+    "clicked": 3,
+    "skipped": {
+      "navigation": 1,
+      "mutating": 1,
+      "disabled": 4
+    },
+    "issues": []
+  },
+  {
+    "route": "/ir/events",
+    "total": 9,
+    "clicked": 3,
+    "skipped": {
+      "navigation": 1,
+      "mutating": 1,
+      "disabled": 4
+    },
+    "issues": []
+  },
+  {
+    "route": "/ir/filings",
+    "total": 9,
+    "clicked": 3,
+    "skipped": {
+      "navigation": 1,
+      "mutating": 1,
+      "disabled": 4
+    },
+    "issues": []
+  },
+  {
+    "route": "/ir/financials",
+    "total": 11,
+    "clicked": 4,
+    "skipped": {
+      "navigation": 1,
+      "mutating": 2,
+      "disabled": 4
+    },
+    "issues": []
+  },
+  {
+    "route": "/ir/market",
+    "total": 3,
+    "clicked": 1,
+    "skipped": {
+      "navigation": 1,
+      "mutating": 1
+    },
+    "issues": []
+  },
+  {
+    "route": "/ir/performance",
+    "total": 2,
+    "clicked": 1,
+    "skipped": {
+      "navigation": 1
+    },
+    "issues": []
+  },
+  {
+    "route": "/ir/shareholders",
+    "total": 10,
+    "clicked": 4,
+    "skipped": {
+      "navigation": 1,
+      "mutating": 1,
+      "disabled": 4
+    },
+    "issues": []
+  },
+  {
+    "route": "/jobs",
+    "total": 0,
+    "clicked": 0,
+    "skipped": {},
+    "issues": []
+  },
+  {
+    "route": "/law",
+    "total": 0,
+    "clicked": 0,
+    "skipped": {},
+    "issues": []
+  },
+  {
+    "route": "/marketplace/companies",
+    "total": 10,
+    "clicked": 3,
+    "skipped": {
+      "mutating": 3,
+      "disabled": 4
+    },
+    "issues": []
+  },
+  {
+    "route": "/marketplace/deals",
+    "total": 5,
+    "clicked": 1,
+    "skipped": {
+      "disabled": 4
+    },
+    "issues": []
+  },
+  {
+    "route": "/marketplace/investors",
+    "total": 11,
+    "clicked": 3,
+    "skipped": {
+      "mutating": 4,
+      "disabled": 4
+    },
+    "issues": []
+  },
+  {
+    "route": "/marketplace/opportunities",
+    "total": 5,
+    "clicked": 1,
+    "skipped": {
+      "disabled": 4
+    },
+    "issues": []
+  },
+  {
+    "route": "/media",
+    "total": 3,
+    "clicked": 0,
+    "skipped": {
+      "mutating": 3
+    },
+    "issues": []
+  },
+  {
+    "route": "/news-intelligence",
+    "total": 0,
+    "clicked": 0,
+    "skipped": {},
+    "issues": []
+  },
+  {
+    "route": "/news-intelligence/ai",
+    "total": 1,
+    "clicked": 0,
+    "skipped": {
+      "mutating": 1
+    },
+    "issues": []
+  },
+  {
+    "route": "/news-intelligence/articles",
+    "total": 31,
+    "clicked": 1,
+    "skipped": {
+      "unnamed": 30
+    },
+    "issues": [
+      {
+        "control": "#1",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#2",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#3",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#4",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#5",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#6",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#7",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#8",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#9",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#10",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#11",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#12",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#13",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#14",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#15",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#16",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#17",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#18",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#19",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#20",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#21",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#22",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#23",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#24",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#25",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#26",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#27",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#28",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#29",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#30",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      }
+    ]
+  },
+  {
+    "route": "/news-intelligence/images",
+    "total": 0,
+    "clicked": 0,
+    "skipped": {},
+    "issues": []
+  },
+  {
+    "route": "/news-intelligence/seo",
+    "total": 0,
+    "clicked": 0,
+    "skipped": {},
+    "issues": []
+  },
+  {
+    "route": "/news-intelligence/sources",
+    "total": 53,
+    "clicked": 0,
+    "skipped": {
+      "mutating": 1,
+      "unnamed": 52
+    },
+    "issues": [
+      {
+        "control": "#1",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#2",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#3",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#4",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#5",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#6",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#7",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#8",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#9",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#10",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#11",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#12",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#13",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#14",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#15",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#16",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#17",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#18",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#19",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#20",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#21",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#22",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#23",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#24",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#25",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#26",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#27",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#28",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#29",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#30",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#31",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#32",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#33",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#34",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#35",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#36",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#37",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#38",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#39",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#40",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#41",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#42",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#43",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#44",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#45",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#46",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#47",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#48",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#49",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#50",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#51",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#52",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      }
+    ]
+  },
+  {
+    "route": "/news-intelligence/trending",
+    "total": 3,
+    "clicked": 3,
+    "skipped": {},
+    "issues": []
+  },
+  {
+    "route": "/notifications",
+    "total": 1,
+    "clicked": 0,
+    "skipped": {
+      "navigation": 1
+    },
+    "issues": []
+  },
+  {
+    "route": "/notifications/logs",
+    "total": 8,
+    "clicked": 3,
+    "skipped": {
+      "navigation": 1,
+      "disabled": 4
+    },
+    "issues": []
+  },
+  {
+    "route": "/notifications/templates",
+    "total": 6,
+    "clicked": 1,
+    "skipped": {
+      "navigation": 1,
+      "disabled": 4
+    },
+    "issues": []
+  },
+  {
+    "route": "/oauth",
+    "total": 6,
+    "clicked": 1,
+    "skipped": {
+      "mutating": 1,
+      "disabled": 4
+    },
+    "issues": []
+  },
+  {
+    "route": "/operations",
+    "total": 4,
+    "clicked": 4,
+    "skipped": {},
+    "issues": []
+  },
+  {
+    "route": "/organizations",
+    "total": 27,
+    "clicked": 4,
+    "skipped": {
+      "mutating": 2,
+      "unnamed": 17,
+      "disabled": 4
+    },
+    "issues": [
+      {
+        "control": "#5",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#6",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#7",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#8",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#9",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#10",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#11",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#12",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#13",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#14",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#15",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#16",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#17",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#18",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#19",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#20",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#21",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      }
+    ]
+  },
+  {
+    "route": "/payments",
+    "total": 12,
+    "clicked": 5,
+    "skipped": {
+      "navigation": 3,
+      "disabled": 4
+    },
+    "issues": []
+  },
+  {
+    "route": "/payments/invoices",
+    "total": 9,
+    "clicked": 4,
+    "skipped": {
+      "navigation": 1,
+      "disabled": 4
+    },
+    "issues": []
+  },
+  {
+    "route": "/payments/parties",
+    "total": 0,
+    "clicked": 0,
+    "skipped": {},
+    "issues": []
+  },
+  {
+    "route": "/payments/records",
+    "total": 7,
+    "clicked": 2,
+    "skipped": {
+      "unnamed": 1,
+      "disabled": 4
+    },
+    "issues": [
+      {
+        "control": "#2",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      }
+    ]
+  },
+  {
+    "route": "/payments/subscriptions",
+    "total": 8,
+    "clicked": 3,
+    "skipped": {
+      "navigation": 1,
+      "disabled": 4
+    },
+    "issues": []
+  },
+  {
+    "route": "/payments/webhooks",
+    "total": 10,
+    "clicked": 5,
+    "skipped": {
+      "navigation": 1,
+      "disabled": 4
+    },
+    "issues": []
+  },
+  {
+    "route": "/platform-management",
+    "total": 5,
+    "clicked": 4,
+    "skipped": {
+      "disabled": 1
+    },
+    "issues": []
+  },
+  {
+    "route": "/rbac",
+    "total": 0,
+    "clicked": 0,
+    "skipped": {},
+    "issues": []
+  },
+  {
+    "route": "/revenue",
+    "total": 0,
+    "clicked": 0,
+    "skipped": {},
+    "issues": []
+  },
+  {
+    "route": "/security",
+    "total": 6,
+    "clicked": 5,
+    "skipped": {
+      "navigation": 1
+    },
+    "issues": []
+  },
+  {
+    "route": "/sessions",
+    "total": 33,
+    "clicked": 4,
+    "skipped": {
+      "destructive": 25,
+      "disabled": 2,
+      "unnamed": 2
+    },
+    "issues": [
+      {
+        "control": "#31",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      },
+      {
+        "control": "#32",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      }
+    ]
+  },
+  {
+    "route": "/settings",
+    "total": 0,
+    "clicked": 0,
+    "skipped": {},
+    "issues": []
+  },
+  {
+    "route": "/settings/profile",
+    "total": 1,
+    "clicked": 0,
+    "skipped": {
+      "unnamed": 1
+    },
+    "issues": [
+      {
+        "control": "#0",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      }
+    ]
+  },
+  {
+    "route": "/staff",
+    "error": "could not load route"
+  },
+  {
+    "route": "/status",
+    "total": 1,
+    "clicked": 0,
+    "skipped": {
+      "unnamed": 1
+    },
+    "issues": [
+      {
+        "control": "#0",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      }
+    ]
+  },
+  {
+    "route": "/support",
+    "error": "could not load route"
+  },
+  {
+    "route": "/users",
+    "total": 1,
+    "clicked": 0,
+    "skipped": {
+      "unnamed": 1
+    },
+    "issues": [
+      {
+        "control": "#0",
+        "kind": "unnamed-control",
+        "detail": "no accessible name"
+      }
+    ]
+  }
+]

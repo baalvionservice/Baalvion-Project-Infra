@@ -46,7 +46,14 @@ export const metadata: Metadata = {
     template: "%s | Market Underworld"
   },
   description: "The world's premier secure intelligence node for global knowledge exchange and commodity trade. Verified operators only.",
-  metadataBase: new URL('https://marketunderworld.com'),
+  // This app deploys to community.marketunderworld.com (wrangler worker
+  // `market-underworld-community`). The apex marketunderworld.com is a DIFFERENT property —
+  // Baalvion Insiders, served by the Vite app — so basing absolute URLs on it pointed this
+  // site's OpenGraph and canonicals at someone else's domain.
+  metadataBase: new URL('https://community.marketunderworld.com'),
+  // Without an explicit canonical Next emits none at all, which is why this page had no
+  // canonical link and search engines were left to guess which URL is authoritative.
+  alternates: { canonical: '/' },
   icons: {
     icon: '/favicon.svg',
     apple: '/apple-icon.png',
@@ -55,7 +62,7 @@ export const metadata: Metadata = {
     title: "Market Underworld",
     description: "Secure Trade & Intelligence Node",
     type: "website",
-    url: "https://marketunderworld.com",
+    url: "https://community.marketunderworld.com",
     siteName: "Market Underworld",
   },
 };

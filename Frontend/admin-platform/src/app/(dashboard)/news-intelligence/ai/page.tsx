@@ -61,13 +61,13 @@ export default function NewsAiPage() {
         <Card>
           <CardContent className="pt-5 pb-4">
             <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">Enriched</p>
-            <p className="text-2xl font-bold">{isLoading ? <Skeleton className="h-7 w-14" /> : formatNumber(data?.enrichedArticles ?? 0)}</p>
+            <div className="text-2xl font-bold">{isLoading ? <Skeleton className="h-7 w-14" /> : formatNumber(data?.enrichedArticles ?? 0)}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-5 pb-4">
             <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">Pending</p>
-            <p className="text-2xl font-bold">{isLoading ? <Skeleton className="h-7 w-14" /> : formatNumber(data?.pendingEnrichment ?? 0)}</p>
+            <div className="text-2xl font-bold">{isLoading ? <Skeleton className="h-7 w-14" /> : formatNumber(data?.pendingEnrichment ?? 0)}</div>
           </CardContent>
         </Card>
         <Card className="col-span-2">

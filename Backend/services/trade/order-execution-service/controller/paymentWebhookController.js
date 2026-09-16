@@ -14,6 +14,7 @@
 const crypto = require('crypto');
 const config = require('../config/appConfig');
 const internal = require('./internalController');
+const paymentSpine = require('../services/paymentSpine');
 const { verifyRazorpayWebhook, parsePayoutEvent } = require('../integrations/payment/webhook');
 
 // Normalized PAYMENT_STATUS / raw payout status -> the saga's terminal event.
@@ -79,6 +80,16 @@ async function handleRazorpayWebhook(input, deps) {
             );
             return { status: 200, json: { ok: true, rejected: result.rejected } };
         }
+        // Report onto the platform spine so this settlement appears on the cross-estate panel
+        // attributed to GTI. Post-guard and never fatal: a spine failure must not turn a real
+        // settlement into a 500 that RazorpayX retries.
+        await paymentSpine.reportSettlement({
+            eventType, orderId, parsed,
+            tenantId: result && result.tenantId,
+            buyerOrgId: result && result.buyerOrgId,
+        }).catch((err) => {
+            console.error(`[${config.service}] payment spine report failed: ${sanitizeLog(err.message)}`);
+        });
         return { status: 200, json: { ok: true, event: eventType, result } };
     } catch (err) {
         if (err && err.name === 'SequelizeUniqueConstraintError') {

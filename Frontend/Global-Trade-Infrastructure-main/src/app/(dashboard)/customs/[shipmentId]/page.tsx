@@ -52,23 +52,26 @@ export default function CustomsDetailPage() {
 
   const fetchData = async () => {
     if (typeof shipmentId !== 'string') return;
-    const [cData, sData] = await Promise.all([
-      getCustomsData(shipmentId),
-      getShipmentById(shipmentId)
-    ]);
-
-    setCustoms(cData);
-    setShipment(sData);
-
-    if (cData) {
-      const [oR, dR] = await Promise.all([
-        getCountryRules(cData.originCountry),
-        getCountryRules(cData.destinationCountry)
+    try {
+      const [cData, sData] = await Promise.all([
+        getCustomsData(shipmentId),
+        getShipmentById(shipmentId)
       ]);
-      setOriginRules(oR);
-      setDestRules(dR);
+
+      setCustoms(cData);
+      setShipment(sData);
+
+      if (cData) {
+        const [oR, dR] = await Promise.all([
+          getCountryRules(cData.originCountry),
+          getCountryRules(cData.destinationCountry)
+        ]);
+        setOriginRules(oR);
+        setDestRules(dR);
+      }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {

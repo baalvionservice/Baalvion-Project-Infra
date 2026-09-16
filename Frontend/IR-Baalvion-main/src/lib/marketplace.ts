@@ -1,7 +1,7 @@
-// Server-side reader for the investment marketplace (marketplace-service :3062). Public
+// Server-side reader for the investment marketplace (marketplace-service :3060). Public
 // discovery only (live opportunities). Runs in RSC / route handlers so the service URL
 // stays private. Falls back to an empty list if the service is unreachable.
-const MARKETPLACE_URL = process.env.MARKETPLACE_SERVICE_URL || 'http://127.0.0.1:3062';
+const MARKETPLACE_URL = process.env.MARKETPLACE_SERVICE_URL || 'http://127.0.0.1:3060';
 
 export interface Opportunity {
   id: string;

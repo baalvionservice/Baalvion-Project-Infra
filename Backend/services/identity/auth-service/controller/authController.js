@@ -175,6 +175,18 @@ exports.resetPassword = async (req, res, next) => {
     } catch (err) { next(err); }
 };
 
+// Non-enumerating by construction: the service returns silently for unknown and
+// already-verified addresses alike, and this always answers with the one message.
+exports.resendVerification = async (req, res, next) => {
+    try {
+        const parsed = schemas.resendVerification.safeParse(req.body);
+        if (!parsed.success) throw new AppError('VALIDATION_ERROR', 'Invalid input', 400, parsed.error.flatten());
+        await authService.resendVerification({ email: parsed.data.email, ipAddress: req.ip, brand: brandFromRequest(req) });
+        req.audit?.log('verification_resend_requested', { metadata: { email: parsed.data.email } });
+        sendSuccess(req, res, { message: 'If that account exists and is not yet verified, a new link was sent' });
+    } catch (err) { next(err); }
+};
+
 exports.verifyEmail = async (req, res, next) => {
     try {
         const token = req.query.token || req.body.token;

@@ -21,18 +21,29 @@ const TRANSITIONS = {
     submit_for_compliance: { from: ['approved', 'pending_review'],        to: 'compliance_review',    requiredLevel: 60 },
     compliance_approve: { from: ['compliance_review'],                    to: 'approved',             requiredLevel: 65 },
     compliance_reject:  { from: ['compliance_review'],                    to: 'changes_requested',    requiredLevel: 65, requiresNote: true },
-    publish:            { from: ['approved', 'draft'],                    to: 'published',            requiredLevel: 70 },
-    schedule:           { from: ['approved'],                             to: 'scheduled',            requiredLevel: 70, requiresScheduledAt: true },
-    unpublish:          { from: ['published'],                            to: 'draft',                requiredLevel: 70 },
+    // Writers (cms_author, 40) publish, schedule and unpublish on the sites they are granted.
+    // Owner's decision — a writer hired for a publication takes their own work live there.
+    // Unpublish is held at the SAME level as publish deliberately: a writer who can put a
+    // page up must be able to take it back down without chasing an editor.
+    // cms_contributor (20) still cannot publish — that remains the draft-for-review tier.
+    publish:            { from: ['approved', 'draft'],                    to: 'published',            requiredLevel: 40 },
+    schedule:           { from: ['approved'],                             to: 'scheduled',            requiredLevel: 40, requiresScheduledAt: true },
+    unpublish:          { from: ['published'],                            to: 'draft',                requiredLevel: 40 },
     archive:            { from: ['published', 'draft', 'changes_requested', 'approved', 'scheduled', 'compliance_review'], to: 'archived', requiredLevel: 80 },
     restore_to_draft:   { from: ['archived', 'changes_requested'],       to: 'draft',                requiredLevel: 40 },
 };
 
 const CMS_ROLE_LEVEL = { cms_admin: 100, cms_editor: 80, cms_publisher: 70, cms_compliance: 65, cms_reviewer: 60, cms_seo_manager: 50, cms_author: 40, cms_contributor: 20, cms_viewer: 10 };
 
+const PLATFORM_BYPASS_ROLES = ['super_admin', 'owner', 'admin'];
+
 function resolveLevel(req) {
-    // Platform admins bypass — assigned max level
-    if (['super_admin', 'owner', 'admin'].includes(req.user?.role)) return 100;
+    // Platform admins bypass — assigned max level. Reads roles[] because authMiddleware sets
+    // `req.user = { id, orgId, roles }` and never a scalar `role`; the old `req.user?.role`
+    // check was therefore always false. Harmless while loadCmsRole runs first (it already
+    // assigns cms_admin to platform principals), but wrong the moment it doesn't.
+    const roles = Array.isArray(req.user?.roles) ? req.user.roles : [];
+    if (roles.some((r) => PLATFORM_BYPASS_ROLES.includes(r))) return 100;
     return CMS_ROLE_LEVEL[req.cmsRole] || 0;
 }
 

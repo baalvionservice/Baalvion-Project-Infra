@@ -10,7 +10,7 @@ export default function KeyTermsBanner({ terms }: Props) {
       {terms.map((term, idx) => (
         <span
           key={idx}
-          className="px-3 py-1 text-sm font-medium text-white bg-[hsl(var(--cnbc-red))] rounded-full"
+          className="px-3 py-1 text-sm font-medium text-white bg-[hsl(var(--imperialpedia-red))] rounded-full"
         >
           {term}
         </span>

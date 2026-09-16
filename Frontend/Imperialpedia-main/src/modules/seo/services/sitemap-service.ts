@@ -13,6 +13,15 @@ import { logger } from "@/lib/errors/logger";
 import { GLOSSARY_LIVE } from "@/config/glossary";
 import { categoryHasLiveContent } from "@/components/pages/CategoryFeed";
 import { REMOVED_ARTICLE_PATHS } from "@/lib/content/removed-article-paths";
+import { isRetiredPath } from "@/lib/content/retired-paths";
+import { isPathHiddenByAdsenseCleanup } from "@/config/adsense-cleanup";
+import {
+  MARKETS_SECTION_LIVE,
+  REVIEWS_SECTION_LIVE,
+  STOCK_REFERENCE_PAGES_LIVE,
+  newsHubIsLive,
+} from "@/config/sections";
+import { getPublicAuthors } from "@/services/data/cms-public";
 import { MARKET_QUOTES_LIVE } from "@/config/market-quotes";
 import stockIndexes from "@/data/indexes/indexes.json";
 import stockLists from "@/data/stock-lists/stock-lists.json";
@@ -106,9 +115,18 @@ export const sitemapService = {
     // review (see the redirect block in next.config.ts and Navbar.tsx), so
     // submitting them here would list URLs that now just 301 to /. Restore
     // once each category's articles are republished.
+    // 2026-09-10: "/reviews" removed — the hub has published zero reviews and
+    // rendered "No reviews published yet" under a "0 + Reviews & Comparisons"
+    // counter, so this was submitting an under-construction page. It comes back
+    // automatically via REVIEWS_SECTION_LIVE (config/sections.ts), which also
+    // drives the page's own noindex, so the two can't disagree.
+    // "/authors" added in the same pass: 34 real contributor profiles were
+    // crawlable and linked from the footer but had never been submitted, which
+    // held back the site's strongest expertise signal.
     const corePages = [
       "",
       "/about",
+      "/authors",
       "/financial-intelligence",
       // /budgeting removed 2026-09-04: not a real category (0 articles, was
       // serving bundled demo content), now redirects to /budgeting-basics,
@@ -119,9 +137,14 @@ export const sitemapService = {
       "/financial-tools/inflation",
       "/financial-tools/investment",
       "/financial-tools/loan",
-      "/market-news",
+      // "/market-news" is submitted below instead, gated on the same content
+      // check the page's own generateMetadata uses. It was listed here
+      // unconditionally while self-noindexing (its CMS category, "markets",
+      // has no published content), so the sitemap was submitting a noindexed
+      // URL — the exact contradiction Search Console reports as "Submitted URL
+      // marked noindex", and the reason the rest of this list is conditional.
       "/privacy-policy",
-      "/reviews",
+      ...(REVIEWS_SECTION_LIVE ? ["/reviews"] : []),
       "/stocks",
       "/terms-of-service",
       "/transparency",
@@ -160,7 +183,7 @@ export const sitemapService = {
     };
     const lettersWithTerms = new Set(glossaryTerms.map((t) => letterOf(t.title)));
 
-    // A–Z dictionary hubs (Investopedia-style listing pages). Only letters with at
+    // A–Z dictionary hubs (Imperialpedia-style listing pages). Only letters with at
     // least one real glossary entry are submitted so empty hubs aren't indexed.
     // Skipped entirely while the glossary is offline (see GLOSSARY_LIVE above).
     ["num", ..."abcdefghijklmnopqrstuvwxyz".split("")].forEach((l) => {
@@ -198,10 +221,19 @@ export const sitemapService = {
         return [];
       }
     };
-    const [articles, calcs] = await Promise.all([
+    const [cmsArticles, calcs] = await Promise.all([
       listAllPages(articlesService.getArticles),
       listSafe(calculatorsService.getCalculatorList()),
     ]);
+
+    // Live CMS only — no merge with staticArticleList()'s 478-article backup
+    // catalog. That catalog exists purely as an offline/CMS-down fallback for
+    // page rendering; submitting it to the sitemap meant every article ever
+    // unpublished from the CMS (e.g. the September 2026 Stocks/Budgeting trim
+    // to a curated 10 each) stayed listed forever, since nothing in the static
+    // snapshot ever shrinks. A sitemap is a crawl invitation, not a historical
+    // archive — pre-AdSense-resubmission, it must reflect exactly what's live.
+    const articles = cmsArticles;
 
     // Thin/duplicate articles permanently killed in the 2026-08 SEO cleanup pass (see
     // REMOVED_PATHS in middleware.ts) — excluded here too so a still-published CMS row
@@ -236,6 +268,9 @@ export const sitemapService = {
       "advanced-budgeting", "app-reviews", "auto-loans", "banking-reviews",
       "brokers", "budget-rules", "budgeting-apps", "budgeting-basics", "calendar",
       "cd-rates", "checking", "credit-cards", "crypto",
+      // New category & subtopics (2026-09-11) — Creator Economy hub & subcategories.
+      "creator-economy", "youtube-monetization", "instagram-monetization",
+      "website-monetization", "social-media-earnings", "creator-guides", "creator-tools",
       "cryptocurrency", "debt", "earnings", "emergency-fund",
       "family-budget", "fed", "financial-calculators", "financial-independence",
       // New category (2026-09-04), no articles published yet — gated the same
@@ -254,8 +289,25 @@ export const sitemapService = {
       "saving-money", "savings", "student-budget", "student-loans",
       "tax-software", "unemployment",
     ] as const;
+    // categoryHasLiveContent answers "does the CMS still have articles filed
+    // under this slug", which is not the same question as "does this URL still
+    // resolve". Eight of the slugs above (advanced-budgeting, budget-rules,
+    // budgeting-apps, emergency-fund, family-budget, monthly-budget,
+    // saving-money, student-budget) were consolidated into budgeting-basics and
+    // now 301 to /, yet still passed the content check — so the sitemap was
+    // submitting ten redirects, which Search Console reports as "Page with
+    // redirect" and a reviewer following one lands back on the homepage. Filter
+    // against the redirect table first; the content check only decides among
+    // slugs that still resolve.
+    // /market-news renders the "markets" CMS category under a different route
+    // path, so it can't just be a TOPIC_HUB_SLUGS entry — gated on MARKETS_SECTION_LIVE.
+    if (MARKETS_SECTION_LIVE && !isRetiredPath("/market-news") && (await safe(categoryHasLiveContent("markets"), false))) {
+      entries.push({ loc: `${base}/market-news`, lastmod: today, changefreq: "weekly", priority: 0.7 });
+    }
+
+    const liveTopicHubSlugs = TOPIC_HUB_SLUGS.filter((slug) => !isRetiredPath(`/${slug}`));
     const topicHubResults = await Promise.all(
-      TOPIC_HUB_SLUGS.map(async (slug) => ({ slug, hasContent: await safe(categoryHasLiveContent(slug), false) })),
+      liveTopicHubSlugs.map(async (slug) => ({ slug, hasContent: await safe(categoryHasLiveContent(slug), false) })),
     );
     topicHubResults.forEach(({ slug, hasContent }) => {
       if (hasContent) {
@@ -275,24 +327,47 @@ export const sitemapService = {
       });
     });
 
+    // The calculator service still lists `portfolio` and `retirement`, both of
+    // which were pulled from the /financial-tools hub and now 301 to / — two
+    // more redirects that were being submitted as if they were pages.
     calcs.forEach((calc) => {
-      entries.push({ loc: `${base}/financial-tools/${calc.slug}`, changefreq: "monthly", priority: 0.9 });
+      const path = `/financial-tools/${calc.slug}`;
+      if (isRetiredPath(path)) return;
+      entries.push({ loc: `${base}${path}`, changefreq: "monthly", priority: 0.9 });
     });
 
     // Hand-curated index/stock-list guides (data/indexes, data/stock-lists) —
-    // small, real editorial sets, not auto-generated per-symbol pages.
-    stockIndexes.forEach((idx) => {
-      entries.push({ loc: `${base}/stocks/indexes/${idx.slug}`, changefreq: "monthly", priority: 0.7 });
-    });
-    stockLists.forEach((list) => {
-      entries.push({ loc: `${base}/stocks/lists/${list.slug}`, changefreq: "monthly", priority: 0.7 });
-    });
+    // small, real editorial sets, not auto-generated per-symbol pages. Held back
+    // while STOCK_REFERENCE_PAGES_LIVE is false: nothing on the live site links
+    // to any of the 19 (their only entry point, StocksHub.tsx, stopped being
+    // imported when /stocks moved to CategoryFeed), so these were orphan pages
+    // being submitted to Google. Each page self-noindexes off the same flag.
+    if (STOCK_REFERENCE_PAGES_LIVE) {
+      stockIndexes.forEach((idx) => {
+        entries.push({ loc: `${base}/stocks/indexes/${idx.slug}`, changefreq: "monthly", priority: 0.7 });
+      });
+      stockLists.forEach((list) => {
+        entries.push({ loc: `${base}/stocks/lists/${list.slug}`, changefreq: "monthly", priority: 0.7 });
+      });
+    }
 
     // 3. Structured entities + review guides + published news.
-    const [countries, news] = await Promise.all([
+    const [countries, news, authors] = await Promise.all([
       safe(loadCountries(), []),
       safe(getPublishedNews(1000), []),
+      safe(getPublicAuthors(), []),
     ]);
+
+    // Individual contributor profiles. /authors and every /authors/{slug} page
+    // renders and is crawlable, and the footer links the index from every page,
+    // but none of it had ever been submitted. On a finance site the masthead is
+    // the expertise signal reviewers look for, so leaving it out of the sitemap
+    // was withholding the site's best evidence for its own credibility.
+    authors.forEach((author) => {
+      if (author?.slug) {
+        entries.push({ loc: `${base}/authors/${author.slug}`, changefreq: "monthly", priority: 0.6 });
+      }
+    });
     // 3 country entity pages permanently killed in the 2026-08 SEO cleanup pass
     // (REMOVED_PATHS in middleware.ts) — pushEntities is keyed by slug alone so
     // these need their own exclusion. Companies and technologies aren't submitted
@@ -306,9 +381,12 @@ export const sitemapService = {
     pushEntities(countries, "/countries", 0.7, REMOVED_COUNTRY_SLUGS);
 
     // "/news" and "/latest" are the same empty-hub case as the topic pages
-    // above, just keyed on published `news` content instead of a category —
-    // submit them only once at least one news item is actually published.
-    if (news.length > 0) {
+    // above, just keyed on published `news` content instead of a category. The
+    // old "at least one" threshold let an eight-tab newsroom fronting two
+    // stories into the sitemap — newsHubIsLive holds them back until the
+    // section is real, and each hub's own generateMetadata reads the same
+    // helper so robots meta and sitemap can't contradict each other.
+    if (newsHubIsLive(news.length)) {
       entries.push({ loc: `${base}/news`, lastmod: today, changefreq: "daily", priority: 0.7 });
       entries.push({ loc: `${base}/latest`, lastmod: today, changefreq: "daily", priority: 0.7 });
     }
@@ -348,11 +426,12 @@ export const sitemapService = {
       if (n?.slug) entries.push({ loc: `${base}${newsArticleHref(n)}`, lastmod: n.publishedAt?.split("T")[0], changefreq: "daily", priority: 0.8 });
     });
 
-    // Dedupe by URL.
+    // Dedupe by URL and filter out paths hidden by AdSense cleanup mode
     const seen = new Set<string>();
     const unique = entries.filter((e) => (seen.has(e.loc) ? false : (seen.add(e.loc), true)));
-    logger.info(`Sitemap collected ${unique.length} URLs in ${Date.now() - start}ms`);
-    return unique;
+    const filtered = unique.filter((e) => !isPathHiddenByAdsenseCleanup(e.loc));
+    logger.info(`Sitemap collected ${filtered.length} URLs in ${Date.now() - start}ms`);
+    return filtered;
   },
 
   /** Cached entry snapshot shared by the index and all shards. */

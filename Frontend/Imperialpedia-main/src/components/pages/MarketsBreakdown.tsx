@@ -57,15 +57,15 @@ interface Props {
   bonds: MarketAssetRow[];
 }
 
-/** The full CNBC-depth market breakdown, embedded in the /market-news hub —
+/** The full Imperialpedia-depth market breakdown, embedded in the /market-news hub —
  * this codebase's next.config.ts already redirects the old standalone /markets
  * and /market URLs here ("removed in favour of the dynamic /market-news hub"),
  * so this IS the site's markets homepage; it previously only showed a static
  * 8-indicator snapshot. Now themed via semantic tokens (bg-card/border-border/
  * text-muted-foreground/text-positive/text-negative) that resolve to the
- * literal CNBC black/red look inside .cnbc-shell (globals.css) — matching the
+ * literal Imperialpedia black/red look inside .imperialpedia-shell (globals.css) — matching the
  * standalone /markets/quote/[symbol] pages, not a separate light-editorial
- * clone as this component originally was before the CNBC re-theme. */
+ * clone as this component originally was before the Imperialpedia re-theme. */
 export function MarketsBreakdown(props: Props) {
   return (
     <section>

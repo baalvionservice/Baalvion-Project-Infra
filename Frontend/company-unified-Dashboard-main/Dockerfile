@@ -6,7 +6,7 @@
 # (see ARGs below), pointed at the PUBLIC prod origin. The /auth-bff + /api-bff rewrite target
 # (NEXT_PUBLIC_GATEWAY_URL) is read by next.config at SERVER START, so it stays a RUNTIME env
 # (set it to the internal gateway, e.g. http://auth-gateway:3099, in docker-compose).
-FROM node:20-alpine AS base
+FROM node:26-alpine AS base
 RUN apk add --no-cache libc6-compat && corepack enable
 WORKDIR /app
 
@@ -30,8 +30,18 @@ ARG NEXT_PUBLIC_APP_URL
 ARG NEXT_PUBLIC_REALTIME_WS_URL
 # Must equal the gateway's COOKIE_REFRESH_NAME, else the route-gate middleware 307-loops to /login.
 ARG NEXT_PUBLIC_REFRESH_COOKIE_NAME=baalvion_refresh
+# Build inputs, not runtime: next.config resolves rewrites() at build time and bakes the
+# destinations into routes-manifest.json, so setting these on the running container is a
+# no-op. Unset, the config silently falls back to its hardcoded default.
+ARG DASHBOARD_API_URL
+ENV DASHBOARD_API_URL=$DASHBOARD_API_URL
 ENV NEXT_TELEMETRY_DISABLED=1 NODE_ENV=production
 COPY --from=pruner /app/out/full/ ./
+# turbo prune does not carry the root tsconfig.base.json, which every package tsconfig
+# extends. Without it tsup's DTS step fails "Cannot find base config file" and takes the
+# whole build with it. Latent until this app gained a workspace package that needs building
+# — @baalvion/design did exactly that and broke the Amarise image on 2026-09-09.
+COPY tsconfig.base.json ./tsconfig.base.json
 RUN pnpm turbo run build --filter=company-unified-dashboard-web
 
 # 4) Minimal runner (standalone server).

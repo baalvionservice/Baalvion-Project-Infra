@@ -81,6 +81,12 @@ export default function robots(): MetadataRoute.Robots {
           '/mfa',
           '/api/',
           '/trade-bff/',
+          // The World Shipping Directory is a separate public property served on its own
+          // subdomain; middleware.ts rewrites that host onto this internal prefix. Every
+          // directory page self-canonicalises to the subdomain, but the internal form is
+          // still reachable here, so it is kept out of the crawl rather than left to
+          // compete with itself for 100,000 URLs.
+          '/shipping-directory',
         ],
       },
     ],

@@ -233,11 +233,13 @@ const MEGA_MENU_DATA: Record<string, any> = {
   },
 };
 
-// Promo ticker slides
+// Promo ticker slides. Kept to claims that are actually true today: the shipping-delay
+// notice described disruption to orders that have never shipped, and the showroom line named
+// an NYC location the business has no address for.
 const TICKER_SLIDES = [
-  "Special Notice - Shipments to the Middle East are Running with Delays",
+  "Every Piece Authenticated In-House Before It Is Listed",
   "Read Our 100% Authenticity Guarantee",
-  "Call to schedule an appointment in our NYC Showroom or Virtually via FaceTime",
+  "Book a Private Appointment — Virtually or by Arrangement",
 ];
 
 export const Header = () => {

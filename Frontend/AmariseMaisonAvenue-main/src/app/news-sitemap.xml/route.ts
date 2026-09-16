@@ -1,5 +1,6 @@
 import { getEditorials } from "@/lib/cms";
 import { COUNTRIES } from "@/lib/mock-data";
+import { SUPPORTED_COUNTRIES } from "@/lib/i18n/countries";
 
 /**
  * Google News sitemap (https://www.google.com/schemas/sitemap-news/0.9).
@@ -25,7 +26,7 @@ function escapeXml(value: string): string {
 
 export async function GET() {
   const baseUrl = "https://www.amarisemaisonavenue.com";
-  const countryCodes = Object.keys(COUNTRIES);
+  const countryCodes = SUPPORTED_COUNTRIES;
   const editorials = await getEditorials();
 
   const now = Date.now();

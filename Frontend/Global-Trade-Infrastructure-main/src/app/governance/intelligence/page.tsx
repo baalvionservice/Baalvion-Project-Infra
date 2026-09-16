@@ -51,13 +51,16 @@ export default function StrategicIntelligenceObservatory() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const [sData, fData] = await Promise.all([
-        singularityOracle.getPulse(),
-        stochasticForecaster.forecastLiquidity('CORR_GLOBAL')
-      ]);
-      setSignals(sData);
-      setForecast(fData);
-      setLoading(false);
+      try {
+        const [sData, fData] = await Promise.all([
+          singularityOracle.getPulse(),
+          stochasticForecaster.forecastLiquidity('CORR_GLOBAL')
+        ]);
+        setSignals(sData);
+        setForecast(fData);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchData();
     const interval = setInterval(fetchData, 10000);

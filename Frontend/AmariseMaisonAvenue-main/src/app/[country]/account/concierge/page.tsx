@@ -84,7 +84,7 @@ export default function ConciergeTicketsPage() {
               <div className="space-y-6">
                  <div className="space-y-2">
                     <Label className="text-[10px] uppercase font-bold tracking-widest text-slate-500">Inquiry Subject</Label>
-                    <Input required className="rounded-none border-slate-200 h-12 text-sm italic font-light" placeholder="e.g., Provenance request for 1924 series..." />
+                    <Input required className="rounded-none border-slate-200 h-12 text-sm italic font-light" placeholder="e.g., Sourcing request for a Birkin 30 in black togo..." />
                  </div>
                  <div className="space-y-2">
                     <Label className="text-[10px] uppercase font-bold tracking-widest text-slate-500">Service Category</Label>

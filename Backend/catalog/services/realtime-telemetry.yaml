@@ -1,0 +1,37 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: realtime-telemetry
+  description: >-
+    Hand-rolled RFC6455 WebSocket telemetry for the admin console — infra metrics, service
+    health, platform stats, queue stats — plus a Prometheus /metrics endpoint exposing
+    baalvion_service_up / baalvion_service_latency_ms. Lives at Backend/services/platform/
+    realtime-service and is supervised as pm2 process `realtime-platform` on :3046 (remapped
+    off its code default of :3026, which is auth-gateway's port).
+    Distinct from `realtime-service`, the socket.io event fan-out at
+    Backend/services/infrastructure/realtime-service on :3040 — two different processes with
+    the same directory name, which is why this descriptor could not reuse that name. It ran
+    for months with no catalog entry at all; the status prober's address book is derived from
+    this catalog, so an undeclared process is an unmonitored one.
+  domain: platform
+  division: platform-core
+  context: telemetry
+  owner: "@baalvion/platform-core"
+  tier: tier-2
+  repo: baalvion-platform
+  path: Backend/services/platform/realtime-service
+spec:
+  lifecycle: production
+  language: node
+  datastores: [postgres, redis]
+  dependsOn: [auth-service]
+  consumesEvents: []
+  producesEvents: []
+  apis: ["/api/v1/infrastructure/snapshot", "/metrics"]
+  slo: { availability: 0.99, latencyP95Ms: 400 }
+  deploy: { chart: baalvion-service, namespace: baalvion-platform, minReplicas: 1, maxReplicas: 2 }
+  runtime:
+    deployment: consolidated-box
+    port: 3046
+    healthPath: /health
+    container: app-edge-realtime

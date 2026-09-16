@@ -61,6 +61,15 @@ const start = async () => {
     } catch (err) {
         console.warn(`[${config.service}] SDK/background init degraded:`, err.message);
     }
+    // Drain this service's payment outbox onto the platform bus. Each service owns its own
+    // `pcl` schema, so each runs its own relay; without it payments record locally and never
+    // reach the cross-estate panel. Flag-gated and never fatal.
+    try {
+        const { startPaymentRelay } = require('./services/paymentSpine');
+        startPaymentRelay();
+    } catch (err) {
+        console.error(JSON.stringify({ evt: 'payment_outbox.wire_failed', msg: err.message }));
+    }
     const server = app.listen(config.port, () => console.log(`[${config.service}] running on port ${config.port}`));
     registerShutdown('event-consumer', async () => {
         const { stopEventConsumer } = require('./workers/eventConsumer');

@@ -25,6 +25,10 @@ const { Op } = require('sequelize');
 const db = require('../../models');
 const cache = require('../../cache');
 const readiness = require('./readiness');
+const rbac = require('./rbac');
+// Party-scope policy lives in rbac.js so the clearance ledger enforces the same
+// rule from the same source; re-exported at the bottom for existing callers.
+const { isOperationInScope } = rbac;
 
 const MAX_LIMIT = 100;
 const DEFAULT_LIMIT = 20;
@@ -125,17 +129,6 @@ async function getShipmentScoped(id, { access, partyOrgIds = [] } = {}) {
     if (!shipment) return null;
     if (!isOperationInScope(shipment.tradeOperation, access, partyOrgIds)) return null;
     return shipment;
-}
-
-function isOperationInScope(operation, access, partyOrgIds = []) {
-    if (!operation) return access.scope === 'all'; // orphan shipment: only tenant-wide roles
-    if (access.scope === 'all') return true;
-    const ids = (partyOrgIds || []).filter(Boolean);
-    if (!ids.length) return false; // fail-closed
-    if (access.scope === 'buyer') return ids.includes(operation.buyer_org_id);
-    if (access.scope === 'seller') return ids.includes(operation.seller_org_id);
-    if (access.scope === 'party') return ids.includes(operation.buyer_org_id) || ids.includes(operation.seller_org_id);
-    return false;
 }
 
 /**

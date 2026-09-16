@@ -19,12 +19,17 @@ export const metadata: Metadata = {
   },
 };
 
-const stats = [
-  { value: '2,400+', label: 'Companies hiring' },
-  { value: '180,000+', label: 'Skills assessments run' },
-  { value: '41%', label: 'Faster time-to-hire' },
-  { value: '94%', label: 'Would hire this way again' },
-];
+/**
+ * Real measurements only.
+ *
+ * Four invented figures sat here — "2,400+ companies hiring", "180,000+ skills assessments
+ * run", "41% faster time-to-hire", "94% would hire this way again" — presented as this
+ * company's results. None were measured; the platform currently has no companies at all.
+ *
+ * Populate from real telemetry when there is some. The band renders nothing while empty.
+ */
+type Stat = { value: string; label: string };
+const stats: Stat[] = [];
 
 const values = [
   { icon: Target, title: 'Proof over pedigree', body: 'A resume tells you where someone has been. A real task shows you what they can do. We score the work, not the wording.' },
@@ -33,12 +38,19 @@ const values = [
   { icon: Zap, title: 'Hire in days, not months', body: 'Send a task, review ranked submissions, make an offer. Teams cut weeks of screening calls down to a single afternoon.' },
 ];
 
-const team = [
-  { name: 'Maya Rodriguez', role: 'Co-founder & CEO', avatar: 'https://picsum.photos/seed/ctm-maya/120/120' },
-  { name: 'David Chen', role: 'Co-founder & CTO', avatar: 'https://picsum.photos/seed/ctm-david/120/120' },
-  { name: 'Aisha Okafor', role: 'VP of Product', avatar: 'https://picsum.photos/seed/ctm-aisha/120/120' },
-  { name: 'Liam Walsh', role: 'Head of Talent Science', avatar: 'https://picsum.photos/seed/ctm-liam/120/120' },
-];
+/**
+ * Real people only.
+ *
+ * This previously listed four invented executives — "Maya Rodriguez, Co-founder & CEO" and
+ * three colleagues — with picsum.photos placeholder headshots, presented on a public,
+ * crawlable page as the actual leadership of the company. Naming fictional officers is not a
+ * placeholder problem; it is a claim about who runs the business.
+ *
+ * Empty until real names, roles and photographs are supplied. The section below renders
+ * nothing while this list is empty rather than showing a gap or a stand-in.
+ */
+type TeamMember = { name: string; role: string; avatar: string };
+const team: TeamMember[] = [];
 
 export default function AboutPage() {
   return (
@@ -65,6 +77,7 @@ export default function AboutPage() {
       </section>
 
       {/* Stats */}
+      {stats.length > 0 && (
       <section className="border-b">
         <div className="container py-10">
           <dl className="grid grid-cols-2 gap-8 md:grid-cols-4">
@@ -77,14 +90,16 @@ export default function AboutPage() {
           </dl>
         </div>
       </section>
+      )}
 
       <div className="container py-16 md:py-24">
         {/* Story */}
         <div className="grid grid-cols-1 items-center gap-12 md:grid-cols-2">
-          <div className="relative aspect-[4/3] overflow-hidden rounded-xl border">
-            <Image src="https://picsum.photos/seed/ctm-team/700/520" alt="The ControlTheMarket team at work" fill style={{ objectFit: 'cover' }} />
-          </div>
-          <div>
+          {/* A stock photograph from picsum.photos used to sit here, captioned "The
+              ControlTheMarket team at work" — a random image presented as this company's own
+              people. Removed rather than swapped for another stand-in; restore it when there
+              is a real photograph to show. The story column now spans the full width. */}
+          <div className="md:col-span-2">
             <h2 className="font-headline text-3xl font-bold">Why we built this</h2>
             <p className="mt-4 text-muted-foreground">
               We were hiring managers ourselves — and tired of resumes that said everything and proved nothing. Great
@@ -92,9 +107,8 @@ export default function AboutPage() {
             </p>
             <p className="mt-4 text-muted-foreground">
               So we flipped the process. Instead of asking people what they&apos;ve done, we let them show it: a focused,
-              realistic task, scored against a consistent rubric. Today thousands of teams use ControlTheMarket to make
-              their hardest hires with confidence — and tens of thousands of candidates have been hired on the strength
-              of their work, not their wording.
+              realistic task, scored against a consistent rubric — so a hiring decision rests on
+              what someone produced, not on how well they wrote about it.
             </p>
           </div>
         </div>
@@ -120,7 +134,11 @@ export default function AboutPage() {
           </div>
         </div>
 
-        {/* Testimonial */}
+        {/* A fabricated testimonial sat here: "Priya Nair, VP Talent, Northwind Labs", quoting
+            a drop in time-to-hire "from six weeks to nine days" beside a stock headshot.
+            Neither the person, the company, nor the figures are real. Removed rather than
+            softened — restore it when a real customer says something on the record. */}
+        {false && (
         <figure className="mx-auto mt-24 max-w-3xl rounded-2xl border bg-muted/30 p-8 text-center md:p-12">
           <Quote className="mx-auto h-8 w-8 text-primary" />
           <blockquote className="mt-4 font-headline text-xl font-medium leading-relaxed md:text-2xl">
@@ -135,8 +153,10 @@ export default function AboutPage() {
             </div>
           </figcaption>
         </figure>
+        )}
 
         {/* Team */}
+        {team.length > 0 && (
         <div className="mt-24">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="font-headline text-3xl font-bold tracking-tight">Meet the team</h2>
@@ -157,6 +177,7 @@ export default function AboutPage() {
             ))}
           </div>
         </div>
+        )}
 
         {/* CTA */}
         <div className="mt-24 rounded-2xl bg-primary px-8 py-12 text-center text-primary-foreground md:py-16">

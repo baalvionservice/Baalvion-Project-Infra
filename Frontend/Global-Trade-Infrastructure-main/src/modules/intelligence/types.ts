@@ -7,13 +7,24 @@ import { RiskLevel } from '@/types/institutional';
 
 export type IntelligenceType = 'MARITIME' | 'GEOPOLITICAL' | 'TRADE_SIGNAL' | 'DISRUPTION' | 'FORECAST';
 
+/** Real trade-service alert types (tradeops.shipment_alerts.alert_type) — the taxonomy the
+ *  tracking-platform's geofence/IoT/delay/ETA engines actually emit, not a fictional set. */
+export type ShipmentAlertType =
+  | 'gps_lost' | 'offline' | 'geofence_enter' | 'geofence_exit' | 'delay'
+  | 'route_deviation' | 'temperature' | 'humidity' | 'shock' | 'unauthorized_opening'
+  | 'container_tampering' | 'battery_low' | 'eta_changed' | 'late_delivery'
+  | 'customs_hold' | 'delivered';
+
 export interface MaritimeEvent {
   id: string;
+  /** The shipment id — no separate vessel/IMO registry exists, so this IS the real vessel key. */
   vesselId: string;
+  /** Real vessel_name when the shipment has one (sea mode); falls back to the shipment number. */
   vesselName: string;
-  type: 'PORT_ARRIVAL' | 'PORT_DEPARTURE' | 'COURSE_DEVIATION' | 'LOITERING_DETECTED';
-  location: string;
-  corridorId: string;
+  type: ShipmentAlertType;
+  /** Origin/destination port pair when known; null when the shipment doesn't carry lane data. */
+  location: string | null;
+  mode: 'sea' | 'air' | 'road' | 'rail' | 'multimodal' | null;
   timestamp: string;
   severity: RiskLevel;
 }

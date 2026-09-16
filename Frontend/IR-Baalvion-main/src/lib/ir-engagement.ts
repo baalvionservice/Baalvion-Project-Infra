@@ -7,7 +7,11 @@
  */
 import irAuthClient from './auth-client';
 
-const IR_URL = process.env.NEXT_PUBLIC_IR_API_URL || 'https://api.baalvion.com/api/v1/ecosystem/ir';
+// SAME-ORIGIN by default. These run in the BROWSER, so pointing them at the remote API meant a
+// cross-origin request that CORS rejected outright — /governance/my-voting threw an unhandled
+// "Failed to fetch" on every load. The same-origin /api/v1/* routes proxy to ir-service and
+// resolve identity from the session cookie server-side, so no token leaves the page either.
+const IR_URL = process.env.NEXT_PUBLIC_IR_API_URL || '';
 
 async function irReq<T>(path: string, opts: RequestInit & { auth?: boolean } = {}): Promise<T> {
   const { auth, headers: extra, ...rest } = opts as any;

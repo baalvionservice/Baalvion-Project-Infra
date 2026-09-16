@@ -10,7 +10,7 @@
     "keywords": ["data lakehouse", "analytics", "data governance", "data platform", "Baalvion case study", "data warehouse"]
   },
   "customFields": {
-    "client": "The Baalvion Group data and analytics function",
+    "client": "The Baalvion data and analytics function",
     "sector": "Data & Analytics",
     "challenge": "Every team had its own extracts and dashboards, and no two agreed on the numbers.",
     "solution": "A governed lakehouse with a single semantic layer, lineage, and access controls.",

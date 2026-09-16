@@ -51,13 +51,16 @@ export default function ArbitrationWorkspacePage() {
 
   const fetchData = async () => {
     if (typeof id !== 'string') return;
-    const [caseData, evidenceData] = await Promise.all([
-      disputeService.getDisputeById(id),
-      evidenceService.getEvidenceForCase(id)
-    ]);
-    setDispute(caseData);
-    setEvidence(evidenceData);
-    setLoading(false);
+    try {
+      const [caseData, evidenceData] = await Promise.all([
+        disputeService.getDisputeById(id),
+        evidenceService.getEvidenceForCase(id)
+      ]);
+      setDispute(caseData);
+      setEvidence(evidenceData);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {

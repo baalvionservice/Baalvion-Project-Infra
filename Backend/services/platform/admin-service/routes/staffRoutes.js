@@ -4,7 +4,7 @@
 // match the rest of the admin console.
 const router = require('express').Router();
 const ctrl   = require('../controller/staffController');
-const { requireSuperAdmin } = require('../middleware/authMiddleware');
+const { requireStaffAdmin } = require('../middleware/authMiddleware');
 const { validateBody } = require('../middleware/validate');
 const {
     createDepartmentSchema,
@@ -12,7 +12,10 @@ const {
     sendInvitationSchema,
 } = require('../validation/staffSchemas');
 
-router.use(requireSuperAdmin);
+// Platform-staff tier: EXACT match on admin/super_admin, NOT hierarchical. `owner` is a
+// self-service role (registration makes every user owner of their own org), so a
+// hierarchical admin gate handed these surfaces to the entire public.
+router.use(requireStaffAdmin);
 
 // Departments
 router.get('/departments',         ctrl.listDepartments);

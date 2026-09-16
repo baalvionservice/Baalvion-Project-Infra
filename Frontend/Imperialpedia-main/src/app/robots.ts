@@ -3,7 +3,7 @@ import { env } from '@/config/env';
 
 /**
  * robots.txt configuration for search engine crawlers.
- * Engineered to maximize discovery of intelligence nodes while shielding governance clusters.
+ * Opens the public site to crawlers and keeps admin, auth and API routes out.
  */
 
 const ALLOW = [
@@ -48,26 +48,27 @@ const DISALLOW = [
 ];
 
 // AI crawlers explicitly allowed (same allow/disallow scope as regular search
-// engines — private routes stay protected from AI bots too). Covers both
-// training crawlers (GPTBot, CCBot, Bytespider, Google-Extended, Amazonbot)
-// and live citation/search bots (OAI-SearchBot, ChatGPT-User, PerplexityBot,
-// ClaudeBot, Applebot-Extended) so content can surface — and be cited — in
-// AI answer engines (ChatGPT, Perplexity, Google AI Overviews, Copilot).
+// engines — private routes stay protected from AI bots too), so content can
+// surface — and be cited — in AI answer engines (ChatGPT, Perplexity,
+// Copilot). Deliberately excludes GPTBot, ClaudeBot, Google-Extended,
+// Amazonbot, Applebot-Extended, Bytespider, CCBot and meta-externalagent:
+// Cloudflare's zone-level AI Bot Management injects a `Disallow: /` block for
+// exactly those 8 user-agents ahead of this file at the edge (visible by
+// diffing an origin-direct fetch against the public response — this file's
+// own output never contains it). Listing them here with `Allow` created a
+// literal contradiction — the same user-agent Disallowed then Allowed in one
+// served robots.txt — which is confusing to any parser and was flagged by
+// Search Console. It's also functionally void: Cloudflare blocks those 8 at
+// the HTTP layer regardless of what robots.txt says, so an Allow rule here
+// was never actually letting them through. Only the Cloudflare dashboard
+// (Security > Bots / AI Crawl Control) can change that.
 const AI_USER_AGENTS = [
-  'GPTBot',
   'ChatGPT-User',
   'OAI-SearchBot',
-  'ClaudeBot',
   'Claude-Web',
   'anthropic-ai',
   'PerplexityBot',
-  'Google-Extended',
-  'Applebot-Extended',
-  'CCBot',
-  'Bytespider',
-  'Amazonbot',
   'Diffbot',
-  'meta-externalagent',
 ];
 
 export default function robots(): MetadataRoute.Robots {

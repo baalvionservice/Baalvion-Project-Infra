@@ -20,3 +20,8 @@ spec:
   apis: ["/api/v1/payments"]
   slo: { availability: 0.999, latencyP95Ms: 400 }
   deploy: { chart: baalvion-financial, namespace: financial, minReplicas: 2, maxReplicas: 8 }
+  runtime:
+    deployment: standalone
+    port: 3015
+    healthPath: /actuator/health
+    container: app-payments

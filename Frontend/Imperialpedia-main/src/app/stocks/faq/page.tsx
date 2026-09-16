@@ -28,7 +28,12 @@ export default async function StocksFaqPage() {
   if (!faqSource.some((a) => a.faq?.length)) {
     // Ensure the CMS category exists at all before falling back to the static snapshot.
     await getCategoryArticles("stocks", 1);
-    faqSource = staticArticleList().filter((a) => a.category === "Stocks");
+    faqSource = staticArticleList().filter((a) => {
+      const cat = a.category;
+      if (typeof cat === "string") return cat.toLowerCase() === "stocks";
+      if (typeof cat === "object" && cat !== null) return (cat as { slug?: string; name?: string }).slug === "stocks" || (cat as { slug?: string; name?: string }).name?.toLowerCase() === "stocks";
+      return false;
+    });
   }
 
   const seen = new Set<string>();

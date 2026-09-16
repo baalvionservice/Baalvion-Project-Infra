@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { REFRESH_COOKIE, isLocalAuthEnabled } from '@/lib/auth/local-auth';
+import { REFRESH_COOKIE, SESSION_HINT_COOKIE, isLocalAuthEnabled } from '@/lib/auth/local-auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,5 +22,7 @@ export async function POST() {
     path: '/',
     maxAge: 0,
   });
+  // Drop the presence hint too, or the client keeps attempting a refresh it no longer has.
+  res.cookies.set(SESSION_HINT_COOKIE, '', { httpOnly: false, sameSite: 'lax', path: '/', maxAge: 0 });
   return res;
 }

@@ -6,7 +6,9 @@ import { articleUrl } from '@/lib/article-url';
 import { getArticleBySlug } from '@/data/law-content';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
-export const revalidate = 300;
+// Raised off the 5-minute clock: /api/revalidate's revalidateTag() refreshes
+// this on publish, so the window is only the no-webhook safety net.
+export const revalidate = 86400;
 
 export const metadata: Metadata = {
   title: { absolute: 'Law Changes | Law Elite Network' },

@@ -11,6 +11,7 @@ const redis = require('./lib/redis');
 const authTrace = require('./observability/authTrace');
 const burnIn    = require('./observability/burnIn');
 const { requireSession, attachUser, requireCsrf } = require('./middleware/session');
+const { isAnonymousAllowed } = require('./middleware/anonymousAllowList');
 const { geoFence } = require('./middleware/geoFence');
 const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-shutdown');
 
@@ -139,7 +140,22 @@ app.use('/auth', express.json({ limit: '1mb' }), authRoutes);
 
 // /api/* — TRUST BOUNDARY. NO express.json here (the proxy must stream the body to the backend).
 //   requireSession → attachUser → requireCsrf → geoFence → signed-identity proxy.
-app.use('/api', requireSession(), attachUser, requireCsrf, geoFence(), apiProxy);
+//
+// A short, explicit list of upstream READ endpoints may be reached without a session (see
+// middleware/anonymousAllowList.js). The decision is made here, from the method and path
+// only, and it selects between two FIXED middleware instances — the optional flag is never
+// derived from anything a caller sends, so a header or cookie cannot steer a request onto
+// the permissive branch. Everything after this point is identical for both.
+const strictSession = requireSession();
+const optionalSession = requireSession({ optional: true });
+
+app.use('/api', (req, res, next) => {
+  const anonymousOk = isAnonymousAllowed(req.method, req.url);
+  // Read by the proxy, which must not attach identity headers to a request that has no
+  // identity, and must not destroy it either.
+  req._anonymousAllowed = anonymousOk;
+  return (anonymousOk ? optionalSession : strictSession)(req, res, next);
+}, attachUser, requireCsrf, geoFence(), apiProxy);
 
 app.use((_req, res) => res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Route not found' } }));
 

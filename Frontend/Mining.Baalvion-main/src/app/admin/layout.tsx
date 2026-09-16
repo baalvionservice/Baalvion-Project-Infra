@@ -8,7 +8,7 @@ import { Search, Bell, ShieldCheck, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import Link from "next/link";
-import { authApi } from "@/lib/api-client";
+import { authApi, currentRoles } from "@/lib/api-client";
 
 export default function AdminLayout({
   children,
@@ -30,12 +30,16 @@ export default function AdminLayout({
         router.replace('/login');
         return;
       }
-      const userRole = String(result.data.role || '').toLowerCase();
-      if (!ADMIN_ROLES.includes(userRole)) {
+      // Roles come from the access token, NOT from /me — that endpoint returns identity fields
+      // only and has no role key, so `result.data.role` was always undefined and this check
+      // redirected every administrator (super_admin included) away from the admin panel.
+      const roles = currentRoles().map((r) => String(r).toLowerCase());
+      const matched = roles.find((r) => ADMIN_ROLES.includes(r));
+      if (!matched) {
         router.replace('/'); // authenticated but not an admin
         return;
       }
-      setRole(userRole.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase()));
+      setRole(matched.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase()));
       setIsReady(true);
     })();
     return () => { cancelled = true; };

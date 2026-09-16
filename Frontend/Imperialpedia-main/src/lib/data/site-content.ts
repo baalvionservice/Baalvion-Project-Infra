@@ -13,11 +13,16 @@
  * getAssetDetail's Yahoo fallback and fetchTermsByLetter's static fallback.
  */
 
+import { CMS_CACHE_TAG } from "@/lib/cache-tags";
+
+const envImpApi = process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL?.trim();
+const isProd = process.env.NODE_ENV === 'production';
 const IMP_API =
-  process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL ||
-  (process.env.NODE_ENV === "production"
-    ? "https://api.baalvion.com/api/v1/knowledge/imperialpedia/api/v1"
-    : "http://localhost:3004/api/v1");
+  (envImpApi && !(isProd && (envImpApi.includes('localhost') || envImpApi.includes('127.0.0.1'))))
+    ? envImpApi
+    : (isProd
+        ? 'https://api.baalvion.com/api/v1/knowledge/imperialpedia/api/v1'
+        : 'http://localhost:3004/api/v1');
 
 export type SiteContentType =
   | "financial-tool"
@@ -30,6 +35,14 @@ const BASE_ENTITY_FIELDS = new Set([
   "id", "type", "name", "slug", "description", "category", "country",
   "industry", "image", "tags", "aliases", "created_at", "updated_at",
 ]);
+
+// Admin-authored site copy — section intros, explainer blurbs, hub descriptions,
+// edited by hand every few weeks. The previous 300s window was the revalidate
+// floor for ~85 prerendered routes (every CategoryFeed hub, /latest/[category],
+// /stocks/lists/[slug], /stocks/indexes/[slug], the financial-tools explainers),
+// so all of them regenerated every 5 minutes to re-fetch copy that had not
+// changed. Tagged so /api/revalidate busts it with the CMS content beside it.
+const SITE_CONTENT_REVALIDATE_SECONDS = 86400;
 
 /**
  * Fetches one admin-managed content record and returns only its type-specific
@@ -45,7 +58,7 @@ export async function getSiteContent<T extends Record<string, unknown>>(
 ): Promise<T | null> {
   try {
     const res = await fetch(`${IMP_API}/entities/${encodeURIComponent(type)}/${encodeURIComponent(slug)}`, {
-      next: { revalidate: 300 },
+      next: { revalidate: SITE_CONTENT_REVALIDATE_SECONDS, tags: [CMS_CACHE_TAG] },
       signal: AbortSignal.timeout(6000),
     });
     if (!res.ok) return null;

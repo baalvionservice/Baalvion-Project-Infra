@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Container } from '@/design-system/layout/container';
 import { Section } from '@/design-system/layout/section';
-import { Text } from '@/design-system/typography/text';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { ArticleList } from '@/modules/content-engine/components';
@@ -47,7 +46,7 @@ export async function generateMetadata({ params }: AuthorPageProps): Promise<Met
   }
 
   return buildMetadata({
-    title: `${author.name} — ${author.title}`,
+    title: `${author.name} — Imperialpedia Author Profile`,
     description: author.bio,
     ogImage: author.avatarUrl,
     ogType: 'profile',
@@ -56,11 +55,7 @@ export async function generateMetadata({ params }: AuthorPageProps): Promise<Met
 }
 
 /**
- * Author profile page. Sourced from the admin-managed cms_authors record when one
- * exists (photo, video, bio, socials — editable from admin-platform's CMS → Authors
- * screen), with the static roster as an offline fallback. Articles are matched via
- * customFields.authorSlug on each content item; until editors tag content per author,
- * we fall back to the full published library so the page is never empty.
+ * Imperialpedia Tabloid Style Individual Author Profile Page
  */
 export default async function AuthorPage({ params }: AuthorPageProps) {
   const { slug } = await params;
@@ -107,7 +102,6 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
   const breadcrumb = breadcrumbService.generateBreadcrumbForAuthor(author.name, author.slug);
   const firstName = author.name.split(' ')[0];
 
-  // "a bachelor's" / "a bachelor's and a master's" / "a bachelor's, a master's, and a PhD"
   const joinNatural = (items: string[]) =>
     items.length <= 1
       ? (items[0] ?? '')
@@ -115,8 +109,6 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
         ? items.join(' and ')
         : `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`;
 
-  // Short highlight bullets built only from fields this author actually has on
-  // record — never invented tenure/stats, per the site's real-data-only policy.
   const highlights: string[] = [];
   if (articles.length > 0) {
     highlights.push(`Has published ${articles.length} article${articles.length === 1 ? '' : 's'} for Imperialpedia.`);
@@ -135,66 +127,81 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
   }
 
   return (
-    <main className="min-h-screen bg-background pt-16">
+    <main className="min-h-screen bg-[#f9f9fb] dark:bg-black pt-12 pb-20">
       <JsonLd data={personSchema} />
 
-      <div className="w-full bg-primary/10 border-b border-primary/15">
+      {/* ── Imperialpedia Heavy Header Banner ── */}
+      <div className="w-full bg-black text-white border-b-6 border-[#c8102e] shadow-xl">
         <Container>
           <div className="pt-6">
-            <Breadcrumbs breadcrumb={breadcrumb} className="mb-0" />
+            <Breadcrumbs breadcrumb={breadcrumb} className="mb-0 text-slate-300" />
           </div>
           <div className="flex flex-col sm:flex-row sm:items-center gap-6 py-10 lg:py-12">
-            <Avatar className="h-32 w-32 sm:h-36 sm:w-36 shrink-0 rounded-md grayscale">
+            <Avatar className="h-32 w-32 sm:h-36 sm:w-36 shrink-0 rounded-full border-4 border-white shadow-xl">
               {author.avatarUrl && (
-                <AvatarImage src={author.avatarUrl} alt={author.name} className="rounded-md" />
+                <AvatarImage src={author.avatarUrl} alt={author.name} className="object-cover" />
               )}
-              <AvatarFallback className="rounded-md text-3xl font-bold bg-primary/10 text-primary">
+              <AvatarFallback className="text-3xl font-black bg-[#c8102e] text-white">
                 {initials(author.name)}
               </AvatarFallback>
             </Avatar>
 
-            <div>
-              <Text variant="h1" as="h1" className="tracking-tight">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="bg-[#c8102e] text-white text-xs font-black uppercase tracking-tighter px-3 py-1 -skew-x-12 inline-block shadow-sm">
+                  IMPERIALPEDIA AUTHOR
+                </span>
+                <span className="bg-[#ffcc00] text-black text-[11px] font-black uppercase tracking-widest px-2.5 py-0.5">
+                  VERIFIED ANALYST
+                </span>
+              </div>
+              
+              <h1 className="text-4xl sm:text-5xl font-black text-white font-serif uppercase tracking-tighter">
                 {author.name}
-              </Text>
-              <div className="flex flex-wrap items-center gap-2 mt-3">
+              </h1>
+
+              <p className="text-sm font-mono font-bold uppercase tracking-wider text-[#ffcc00]">
+                {author.title}
+              </p>
+
+              <div className="flex flex-wrap items-center gap-2 pt-2">
                 {author.social.linkedin && (
-                  <Button variant="outline" size="icon" className="rounded-full bg-background" asChild>
+                  <Button variant="outline" size="icon" className="rounded-full bg-white text-black hover:bg-[#c8102e] hover:text-white border-2 border-black" asChild>
                     <a href={author.social.linkedin} target="_blank" rel="noopener noreferrer" title="LinkedIn">
                       <Linkedin className="h-4 w-4" />
                     </a>
                   </Button>
                 )}
                 {author.social.twitter && (
-                  <Button variant="outline" size="icon" className="rounded-full bg-background" asChild>
+                  <Button variant="outline" size="icon" className="rounded-full bg-white text-black hover:bg-[#c8102e] hover:text-white border-2 border-black" asChild>
                     <a href={author.social.twitter} target="_blank" rel="noopener noreferrer" title="X (Twitter)">
                       <Twitter className="h-4 w-4" />
                     </a>
                   </Button>
                 )}
                 {author.social.website && (
-                  <Button variant="outline" size="icon" className="rounded-full bg-background" asChild>
+                  <Button variant="outline" size="icon" className="rounded-full bg-white text-black hover:bg-[#c8102e] hover:text-white border-2 border-black" asChild>
                     <a href={author.social.website} target="_blank" rel="noopener noreferrer" title="Website">
                       <Globe className="h-4 w-4" />
                     </a>
                   </Button>
                 )}
                 {author.social.facebook && (
-                  <Button variant="outline" size="icon" className="rounded-full bg-background" asChild>
+                  <Button variant="outline" size="icon" className="rounded-full bg-white text-black hover:bg-[#c8102e] hover:text-white border-2 border-black" asChild>
                     <a href={author.social.facebook} target="_blank" rel="noopener noreferrer" title="Facebook">
                       <Facebook className="h-4 w-4" />
                     </a>
                   </Button>
                 )}
                 {author.social.instagram && (
-                  <Button variant="outline" size="icon" className="rounded-full bg-background" asChild>
+                  <Button variant="outline" size="icon" className="rounded-full bg-white text-black hover:bg-[#c8102e] hover:text-white border-2 border-black" asChild>
                     <a href={author.social.instagram} target="_blank" rel="noopener noreferrer" title="Instagram">
                       <Instagram className="h-4 w-4" />
                     </a>
                   </Button>
                 )}
                 {author.videoUrl && (
-                  <Button variant="outline" size="icon" className="rounded-full bg-background" asChild>
+                  <Button variant="outline" size="icon" className="rounded-full bg-white text-black hover:bg-[#c8102e] hover:text-white border-2 border-black" asChild>
                     <a href={author.videoUrl} target="_blank" rel="noopener noreferrer" title="Watch intro">
                       <PlayCircle className="h-4 w-4" />
                     </a>
@@ -208,87 +215,94 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
 
       <Section spacing="md">
         <Container>
-          <div className="max-w-2xl space-y-6 pb-14 mb-14 border-b border-border">
-            <dl className="space-y-1.5 text-sm">
+          {/* ── Imperialpedia Profile Details Box ── */}
+          <div className="bg-white dark:bg-slate-900 border-3 border-black dark:border-slate-700 p-6 sm:p-10 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(200,16,46,0.3)] space-y-6 pb-10 mb-14 relative rounded-xs">
+            <div className="absolute top-0 left-0 right-0 h-2 bg-[#c8102e]" />
+            
+            <div className="flex items-center gap-2 border-b-2 border-black dark:border-slate-800 pb-3 pt-1">
+              <span className="bg-[#c8102e] text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 -skew-x-6">
+                IMPERIALPEDIA DOSSIER
+              </span>
+              <h2 className="text-sm font-black uppercase tracking-widest text-black dark:text-white font-mono">
+                AUTHOR CREDENTIALS &amp; VERIFICATION
+              </h2>
+            </div>
+
+            <dl className="space-y-2 text-sm font-semibold">
               <div>
-                <dt className="inline font-bold text-foreground">Title: </dt>
-                <dd className="inline text-muted-foreground">{author.title}</dd>
+                <dt className="inline font-mono uppercase text-[#c8102e] font-black">TITLE: </dt>
+                <dd className="inline text-slate-900 dark:text-slate-100 font-bold">{author.title}</dd>
               </div>
               {author.education?.length ? (
                 <div>
-                  <dt className="inline font-bold text-foreground">Education: </dt>
-                  <dd className="inline text-muted-foreground">{author.education.join(' · ')}</dd>
+                  <dt className="inline font-mono uppercase text-[#c8102e] font-black">EDUCATION: </dt>
+                  <dd className="inline text-slate-900 dark:text-slate-100 font-bold">{author.education.join(' · ')}</dd>
                 </div>
               ) : null}
               {author.expertise?.length ? (
                 <div>
-                  <dt className="inline font-bold text-foreground">Expertise: </dt>
-                  <dd className="inline text-muted-foreground">{author.expertise.join(', ')}</dd>
+                  <dt className="inline font-mono uppercase text-[#c8102e] font-black">EXPERTISE: </dt>
+                  <dd className="inline text-slate-900 dark:text-slate-100 font-bold">{author.expertise.join(', ')}</dd>
                 </div>
               ) : null}
             </dl>
 
             {highlights.length > 0 && (
-              <ul className="list-disc pl-5 space-y-1.5 text-sm text-muted-foreground">
-                {highlights.map((point) => (
-                  <li key={point}>{point}</li>
-                ))}
-              </ul>
+              <div className="bg-slate-50 dark:bg-slate-800 p-5 border-2 border-black dark:border-slate-700 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                <p className="text-[10px] font-mono font-black uppercase tracking-widest text-[#c8102e] mb-2">
+                  EDITORIAL HIGHLIGHTS
+                </p>
+                <ul className="space-y-2 text-xs sm:text-sm font-bold text-black dark:text-slate-100">
+                  {highlights.map((point, i) => (
+                    <li key={point} className="flex items-start gap-2">
+                      <span className="text-[#c8102e] font-mono font-black">0{i + 1}.</span>
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
 
             {author.bio && (
               <div className="space-y-3 pt-2">
-                <Text variant="h4" as="h2" className="font-bold">
-                  Experience
-                </Text>
-                <Text variant="body" className="text-muted-foreground leading-relaxed">
+                <h3 className="text-xl font-black uppercase font-serif text-black dark:text-white border-b border-slate-200 dark:border-slate-800 pb-2">
+                  BIOGRAPHY &amp; EXPERIENCE
+                </h3>
+                <p className="text-sm sm:text-base font-medium text-slate-800 dark:text-slate-200 leading-relaxed">
                   {author.bio}
-                </Text>
+                </p>
               </div>
             )}
 
-            {author.education?.length ? (
-              <div className="space-y-3">
-                <Text variant="h4" as="h2" className="font-bold">
-                  Education
-                </Text>
-                <Text variant="body" className="text-muted-foreground leading-relaxed">
-                  {firstName} holds {joinNatural(author.education)}.
-                </Text>
-              </div>
-            ) : null}
-
-            <div className="space-y-3">
-              <Text variant="h4" as="h2" className="font-bold">
-                About Imperialpedia
-              </Text>
-              <Text variant="body" className="text-muted-foreground leading-relaxed">
+            <div className="space-y-3 pt-2">
+              <h3 className="text-xl font-black uppercase font-serif text-black dark:text-white border-b border-slate-200 dark:border-slate-800 pb-2">
+                EDITORIAL INTEGRITY
+              </h3>
+              <p className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 leading-relaxed">
                 Imperialpedia helps readers understand personal finance, investing, and markets.
                 Every published article names a writer, an editorial reviewer, and a fact-checker,
                 and claims are checked against primary sources before publication. Learn more in
                 our{' '}
-                <Link href="/editorial-policy" className="text-primary hover:underline">
-                  editorial policy
-                </Link>{' '}
-                and{' '}
-                <Link href="/fact-checking" className="text-primary hover:underline">
-                  fact-checking policy
+                <Link href="/editorial-policy" className="text-[#c8102e] font-black hover:underline">
+                  editorial policy →
                 </Link>
-                .
-              </Text>
+              </p>
             </div>
           </div>
 
-          <header className="mb-10 flex flex-wrap items-end justify-between gap-4 border-b pb-6">
-            <div>
-              <Text variant="label" className="text-primary mb-2 flex items-center gap-1.5">
-                <Newspaper className="h-3.5 w-3.5" /> Full Archive
-              </Text>
-              <Text variant="h2">Latest From {firstName}</Text>
+          {/* ── Articles Archive Header ── */}
+          <header className="mb-10 flex flex-wrap items-center justify-between gap-4 border-b-4 border-black dark:border-slate-800 pb-4">
+            <div className="flex items-center gap-3">
+              <span className="bg-[#c8102e] text-white text-xs font-black uppercase tracking-widest px-3 py-1 -skew-x-12">
+                IMPERIALPEDIA ARCHIVE
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-black text-black dark:text-white uppercase font-serif">
+                LATEST ARTICLES BY {firstName.toUpperCase()}
+              </h2>
             </div>
-            <Text variant="bodySmall" className="text-muted-foreground font-semibold">
-              {articles.length} articles
-            </Text>
+            <span className="bg-black text-white text-xs font-mono font-bold px-3 py-1 uppercase">
+              {articles.length} ARTICLES PUBLISHED
+            </span>
           </header>
 
           <ArticleList articles={articles} />

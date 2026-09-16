@@ -6,6 +6,7 @@ import './globals.css';
 import { SubmissionsProvider } from '@/contexts/submissions-context';
 import { getSiteUrl } from '@/lib/site-url';
 import { GoogleAnalytics } from '@/components/GoogleAnalytics';
+import { CIN, LEGAL_ENTITY_NAME } from '@baalvion/company';
 
 const siteUrl = getSiteUrl();
 
@@ -81,6 +82,8 @@ const jsonLd = {
       '@type': 'Organization',
       '@id': `${siteUrl}/#organization`,
       name: 'ControlTheMarket',
+      legalName: LEGAL_ENTITY_NAME,
+      identifier: { '@type': 'PropertyValue', name: 'CIN', value: CIN },
       url: siteUrl,
       description:
         'The proof-of-skill hiring platform where top companies discover verified talent based on real-world performance.',

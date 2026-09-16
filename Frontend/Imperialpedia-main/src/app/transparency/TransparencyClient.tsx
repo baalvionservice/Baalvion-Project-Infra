@@ -67,22 +67,30 @@ export function TransparencyClient({ data }: { data: TransparencyData }) {
     <div className="space-y-16 pb-32 animate-in fade-in duration-700">
       {header}
 
-      {/* REAL METRICS — only figures with an actual data source behind them */}
+      {/* REAL METRICS — only figures with an actual data source behind them.
+          A zero here always means the backend didn't answer (the outage
+          fallback in system-service.ts returns fixed 0/0), never that the site
+          genuinely has no articles or no contributors. Publishing that zero on
+          the page whose whole purpose is trust reads as a site with nothing in
+          it, so an unavailable figure is omitted rather than reported as none. */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl">
         {[
           {
             label: "Published Articles",
-            value: data.metrics.articles_published.toLocaleString(),
+            count: data.metrics.articles_published,
             icon: FileText,
             color: "text-primary",
           },
           {
             label: "Contributors",
-            value: data.metrics.contributors.toLocaleString(),
+            count: data.metrics.contributors,
             icon: Users,
             color: "text-secondary",
           },
-        ].map((m) => (
+        ]
+          .filter((m) => m.count > 0)
+          .map((m) => ({ ...m, value: m.count.toLocaleString() }))
+          .map((m) => (
           <Card
             key={m.label}
             className="glass-card border-none shadow-xl group hover:border-primary/20 transition-all"

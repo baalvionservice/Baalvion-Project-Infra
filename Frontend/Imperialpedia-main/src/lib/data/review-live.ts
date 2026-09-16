@@ -12,11 +12,12 @@ import { ReviewArticle } from '@/types/Review';
 
 const REGISTRY: Record<string, ReviewArticle> = {};
 
+const envImpApi = process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL?.trim();
+const isProd = process.env.NODE_ENV === 'production';
 const IMP_API =
-  process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL ||
-  (process.env.NODE_ENV === 'production'
-    ? 'https://api.baalvion.com/api/v1/knowledge/imperialpedia/api/v1'
-    : 'http://localhost:3004/api/v1');
+  (envImpApi && !(isProd && (envImpApi.includes('localhost') || envImpApi.includes('127.0.0.1'))))
+    ? envImpApi
+    : (isProd ? 'https://api.baalvion.com/api/v1/knowledge/imperialpedia/api/v1' : 'http://localhost:3004/api/v1');
 
 export const reviewSlugs = Object.keys(REGISTRY);
 
@@ -26,8 +27,13 @@ export async function fetchReviewBySlug(slug: string): Promise<ReviewArticle | u
     // ENTITY_REVALIDATE_SECONDS — no-store here forced full dynamic rendering
     // on every review page for zero real freshness benefit (the 9 known
     // reviews change on the order of weeks, not requests).
+    //
+    // The window follows the same reasoning, which the original 60s did not:
+    // the catch-all route calls this on every slug it resolves, to find out
+    // whether that slug is a review, so 60s here was the ISR window for the
+    // whole article template. A day is still far fresher than "weeks".
     const res = await fetch(`${IMP_API}/entities/review/${encodeURIComponent(slug)}`, {
-      next: { revalidate: 60 },
+      next: { revalidate: 86400 },
       signal: AbortSignal.timeout(6000),
     });
     if (res.ok) {

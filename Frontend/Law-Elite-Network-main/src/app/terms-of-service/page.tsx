@@ -189,7 +189,7 @@ export default function TermsOfServicePage() {
                 All content on the Service — including articles, text, graphics, logos, illustrations, the &quot;Law
                 Elite Network&quot; name and marks, page layouts, and the selection and arrangement of content — is owned
                 by or licensed to Law Elite Network and is protected by copyright, trademark, and other intellectual
-                property laws. Baalvion Industries Private Limited, part of the Baalvion Group, and its licensors retain all rights not
+                property laws. Baalvion Industries Private Limited and its licensors retain all rights not
                 expressly granted.
               </p>
               <p>

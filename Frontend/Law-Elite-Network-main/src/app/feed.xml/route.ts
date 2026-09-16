@@ -1,7 +1,9 @@
 import { cmsGetArticles, cmsGetNews, type CmsArticle } from "@/lib/cms";
 import { articleUrl } from "@/lib/article-url";
 
-export const revalidate = 300;
+// Raised off the 5-minute clock: /api/revalidate's revalidateTag() refreshes
+// this on publish, so the window is only the no-webhook safety net.
+export const revalidate = 86400;
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || "https://lawelitenetwork.com";
 

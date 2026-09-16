@@ -11,93 +11,40 @@ import {
   Users, 
   TrendingUp, 
   Zap,
-  CheckCircle2
+  CheckCircle2,
+  type LucideIcon,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
-const TOP_CREATORS = [
-  {
-    id: '1',
-    name: 'Alex Rivers',
-    handle: '@alex_gaming',
-    niche: ['Gaming', 'Tech'],
-    followers: '520k',
-    er: '6.2%',
-    platform: 'YouTube',
-    icon: Youtube,
-    image: 'https://picsum.photos/seed/cre-1/400/500',
-    matchScore: 98,
-    color: 'text-red-500'
-  },
-  {
-    id: '2',
-    name: 'Sarah Chen',
-    handle: '@sarah_style',
-    niche: ['Fashion', 'Lifestyle'],
-    followers: '1.2M',
-    er: '4.8%',
-    platform: 'Instagram',
-    icon: Instagram,
-    image: 'https://picsum.photos/seed/cre-2/400/600',
-    matchScore: 96,
-    color: 'text-pink-500'
-  },
-  {
-    id: '3',
-    name: 'Marcus Thorne',
-    handle: '@mike_fit',
-    niche: ['Fitness', 'Wellness'],
-    followers: '310k',
-    er: '8.5%',
-    platform: 'TikTok',
-    icon: Music2,
-    image: 'https://picsum.photos/seed/cre-3/400/450',
-    matchScore: 94,
-    color: 'text-slate-900'
-  },
-  {
-    id: '4',
-    name: 'Elena Rodriguez',
-    handle: '@elena_travels',
-    niche: ['Travel', 'Photography'],
-    followers: '750k',
-    er: '5.2%',
-    platform: 'Instagram',
-    icon: Instagram,
-    image: 'https://picsum.photos/seed/cre-4/400/550',
-    matchScore: 92,
-    color: 'text-pink-500'
-  },
-  {
-    id: '5',
-    name: 'Pablo Ortiz',
-    handle: '@chef_pablo',
-    niche: ['Food', 'Cooking'],
-    followers: '450k',
-    er: '7.1%',
-    platform: 'YouTube',
-    icon: Youtube,
-    image: 'https://picsum.photos/seed/cre-5/400/480',
-    matchScore: 91,
-    color: 'text-red-500'
-  },
-  {
-    id: '6',
-    name: 'Steve Jobs',
-    handle: '@startup_steve',
-    niche: ['Business', 'Tech'],
-    followers: '150k',
-    er: '9.8%',
-    platform: 'LinkedIn',
-    icon: Linkedin,
-    image: 'https://picsum.photos/seed/cre-6/400/520',
-    matchScore: 95,
-    color: 'text-blue-600'
-  }
-];
+/**
+ * Real creators only.
+ *
+ * Six invented profiles sat here — "Alex Rivers @alex_gaming" and five more — with
+ * follower counts, engagement rates, match scores and picsum placeholder headshots,
+ * presented on the public landing page as "Featured Talent" and described as "verified
+ * creators who have a proven track record". None are on the platform.
+ *
+ * That is a claim about who you can hire here, so it is emptied rather than relabelled.
+ * The section renders nothing until real, consenting creators can be listed.
+ */
+type ShowcaseCreator = {
+  id: string;
+  name: string;
+  handle: string;
+  niche: string[];
+  followers: string;
+  er: string;
+  platform: string;
+  icon: LucideIcon;
+  image: string;
+  matchScore: number;
+  color: string;
+};
 
-const CreatorItem = memo(({ creator, index }: { creator: typeof TOP_CREATORS[0], index: number }) => (
+const TOP_CREATORS: ShowcaseCreator[] = [];
+
+const CreatorItem = memo(({ creator, index }: { creator: ShowcaseCreator, index: number }) => (
   <motion.div 
     initial={{ opacity: 0, y: 20 }}
     whileInView={{ opacity: 1, y: 0 }}
@@ -175,6 +122,9 @@ const CreatorItem = memo(({ creator, index }: { creator: typeof TOP_CREATORS[0],
 CreatorItem.displayName = 'CreatorItem';
 
 export function CreatorShowcase() {
+  // Omitted entirely while there is no real talent to feature.
+  if (TOP_CREATORS.length === 0) return null;
+
   return (
     <section className="py-24 bg-white overflow-hidden">
       <div className="container mx-auto px-4 md:px-6">

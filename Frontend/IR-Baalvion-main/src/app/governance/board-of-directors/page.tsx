@@ -33,13 +33,29 @@ export default async function BoardOfDirectorsPage() {
       </section>
       <section className="py-16 md:py-24 bg-white text-black">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <Link href="#" className="text-sm text-gray-600 hover:underline">
-              Click here to read about Baalvion's approach to Board diversity
-            </Link>
-          </div>
+          {members.length > 0 ? (
+            <>
+              <div className="text-center mb-16">
+                <Link href="#" className="text-sm text-gray-600 hover:underline">
+                  Click here to read about Baalvion&apos;s approach to Board diversity
+                </Link>
+              </div>
 
-          <BoardGrid members={members} />
+              <BoardGrid members={members} />
+            </>
+          ) : (
+            /* Says the roster is not published rather than filling the page with
+               names. Board composition is a representation to investors. */
+            <div className="mx-auto max-w-2xl py-12 text-center">
+              <p className="text-lg text-gray-700">
+                The composition of the Board is not published here yet.
+              </p>
+              <p className="mt-3 text-sm text-gray-600">
+                Directors are recorded in the company&apos;s filings with the Ministry of
+                Corporate Affairs. For governance enquiries, contact investor relations.
+              </p>
+            </div>
+          )}
         </div>
       </section>
     </>
