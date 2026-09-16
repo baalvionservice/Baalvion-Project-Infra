@@ -6,6 +6,7 @@ import { authorNameToSlug } from '@/data/authors';
 import { articleUrl, ROOT_FLAT_ARTICLE_SLUGS } from '@/lib/article-url';
 import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
 import { cmsGetArticles } from '@/lib/cms';
+import { CONTENT_CACHE_TAG } from '@/lib/cache-tags';
 
 // Render at request time, never at build time. This route fetches from law-service,
 // and a build-time fetch against an unreachable API blocks `next build` (CI timeout).
@@ -270,10 +271,16 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
   ];
 }
 
+// Tagged with the same CONTENT_CACHE_TAG every other CMS-backed read uses, so
+// the publish webhook's revalidateTag() (see /api/revalidate) busts this
+// cache immediately on publish instead of leaving the sitemap to catch up on
+// its own 5-minute window -- it was untagged before, so a CMS publish only
+// looked instant for the pages it directly names; the sitemap itself quietly
+// kept serving up to 30 (now 5) stale minutes regardless.
 const getCachedSitemapEntries = unstable_cache(
   buildSitemapEntries,
   ['law-elite-network-sitemap-entries'],
-  { revalidate: 300 },
+  { revalidate: 300, tags: [CONTENT_CACHE_TAG] },
 );
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
