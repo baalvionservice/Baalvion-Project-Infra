@@ -26,7 +26,10 @@ const REGISTRY = [
     adminUrl: 'https://controlthemarket.com',
     // No default: ctm-service is off-box and its own frontend's documented production
     // default (`https://api.baalvion.com/api/v1/ecosystem/ctm/api/v1`, see
-    // controlthemarket-main/README.md) routes through api.baalvion.com's gateway — but that
+    // Frontend/testrank-baalvion/README.md — that app folder was renamed from
+    // controlthemarket-main; the registry key/domain/adminUrl here describe the real
+    // controlthemarket.com production site and are intentionally untouched by that rename)
+    // routes through api.baalvion.com's gateway — but that
     // gateway is documented elsewhere in this platform as 404ing for non-public management
     // routes (see cms_content_migrated_admin_routing notes: "api.baalvion.com/api/v1/<domain>/
     // <service>/* 404s for management routes"). Guessing that default here risks a false

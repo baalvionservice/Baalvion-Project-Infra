@@ -98,7 +98,7 @@ Real routes under `src/app/admin/*` (~28). Backed by `brand-connector-service`. 
 
 ---
 
-## E. ControlTheMarket (CTM) — `controlthemarket-main` (→ `/admin/products/ctm/*`)
+## E. ControlTheMarket (CTM) — `testrank-baalvion` (→ `/admin/products/ctm/*`)
 
 Real routes under `src/app/(app)/admin/*` (~33). Backed by `ctm-service` + `market-service`. **Reconcile vs MarketUnderworld (spec).**
 

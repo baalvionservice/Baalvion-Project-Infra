@@ -432,7 +432,7 @@ export default function DataDeletionPage() {
 
 ### 4. Update Navigation to Include New Pages
 
-**Edit:** `Frontend/controlthemarket-main/src/components/layout/Footer.tsx`
+**Edit:** `Frontend/testrank-baalvion/src/components/layout/Footer.tsx`
 
 Add these links:
 ```tsx
