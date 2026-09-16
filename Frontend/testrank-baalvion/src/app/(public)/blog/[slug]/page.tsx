@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import {
   getArticleBySlug,
   getFullArticleSlugs,
+  articleDateToISO,
   CAT_LABELS,
   CAT_STYLES,
   POSTS,
@@ -71,7 +72,7 @@ export default async function BlogArticlePage({
     '@type': 'Article',
     headline: article.title,
     description: article.excerpt,
-    datePublished: article.date,
+    datePublished: articleDateToISO(article.date),
     articleSection: article.catLabel,
     mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
     author: {

@@ -3,7 +3,7 @@
 **Start servers first:**
 ```bash
 # Terminal 1:
-cd Frontend/controlthemarket-main && pnpm dev  # http://localhost:3034
+cd Frontend/testrank-baalvion && pnpm dev  # http://localhost:3034
 
 # Terminal 2:
 cd Backend/services/ecosystem/ctm-service && pnpm dev  # http://localhost:3001

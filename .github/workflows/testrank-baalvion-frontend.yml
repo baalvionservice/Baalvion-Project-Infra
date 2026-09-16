@@ -1,20 +1,20 @@
-name: CTM Frontend CI/CD
+name: testrank-baalvion Frontend CI/CD
 
 on:
   push:
     branches: [main, develop]
     paths:
-      - 'Frontend/controlthemarket-main/**'
-      - '.github/workflows/ctm-frontend.yml'
+      - 'Frontend/testrank-baalvion/**'
+      - '.github/workflows/testrank-baalvion-frontend.yml'
   pull_request:
     branches: [main]
     paths:
-      - 'Frontend/controlthemarket-main/**'
-      - '.github/workflows/ctm-frontend.yml'
+      - 'Frontend/testrank-baalvion/**'
+      - '.github/workflows/testrank-baalvion-frontend.yml'
 
 defaults:
   run:
-    working-directory: Frontend/controlthemarket-main
+    working-directory: Frontend/testrank-baalvion
 
 jobs:
   lint-typecheck:
@@ -46,11 +46,11 @@ jobs:
       - name: Type check
         # tsc --noEmit is clean (next.config no longer ignores build type errors),
         # so this is a real gate — no error filtering.
-        run: pnpm --filter controlthemarket-web typecheck
+        run: pnpm --filter testrank-baalvion-web typecheck
 
       - name: Run tests
         working-directory: .
-        run: pnpm --filter controlthemarket-web test --if-present
+        run: pnpm --filter testrank-baalvion-web test --if-present
 
   build:
     name: Build
@@ -85,13 +85,13 @@ jobs:
 
       - name: Build
         working-directory: .
-        run: pnpm --filter controlthemarket-web build
+        run: pnpm --filter testrank-baalvion-web build
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: ctm-build
-          path: Frontend/controlthemarket-main/.next
+          name: testrank-baalvion-build
+          path: Frontend/testrank-baalvion/.next
           retention-days: 7
 
   notify-ci-failure:
@@ -107,4 +107,4 @@ jobs:
         with:
           webhook-url: ${{ secrets.SLACK_CI_WEBHOOK }}
           status: failure
-          title: 'CTM Frontend CI/CD'
+          title: 'testrank-baalvion Frontend CI/CD'

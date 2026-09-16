@@ -150,7 +150,7 @@ curl http://localhost:3001/api/v1/payments/health
 ## File Structure Overview
 
 ```
-Frontend/controlthemarket-main/src/
+Frontend/testrank-baalvion/src/
 ├── app/
 │   ├── (public)/              # Public pages (no auth required)
 │   │   ├── login/
