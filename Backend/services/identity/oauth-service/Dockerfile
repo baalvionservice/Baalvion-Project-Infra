@@ -2,7 +2,7 @@
 # BUILD CONTEXT MUST BE THE REPO ROOT:
 #   docker build -f Backend/services/identity/oauth-service/Dockerfile -t oauth-service .
 FROM node:26-alpine AS base
-RUN corepack enable
+RUN npm install -g corepack && corepack enable
 WORKDIR /repo
 
 FROM base AS pruner

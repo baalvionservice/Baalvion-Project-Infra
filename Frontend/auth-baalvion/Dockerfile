@@ -1,7 +1,7 @@
 # Multi-stage build for the shared auth surface (Next.js standalone output).
 # Built from the repo ROOT so the pnpm workspace lockfile is available.
 FROM node:26-alpine AS base
-RUN corepack enable
+RUN npm install -g corepack && corepack enable
 WORKDIR /app
 
 # Install workspace deps for auth-baalvion AND build in ONE stage, so the package's node_modules

@@ -6,7 +6,7 @@
 
 # ── base: Node 20 + corepack-pinned pnpm (root packageManager = pnpm@9.15.0) ──
 FROM node:26.8-alpine AS base
-RUN corepack enable
+RUN npm install -g corepack && corepack enable
 WORKDIR /repo
 
 # ── prune: extract about-service + its workspace deps + a pruned lockfile ─────

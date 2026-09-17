@@ -13,7 +13,7 @@
 #     --build-arg VITE_GATEWAY_URL=https://api.baalvion.com \
 #     .
 FROM node:26-alpine AS base
-RUN apk add --no-cache libc6-compat && corepack enable
+RUN apk add --no-cache libc6-compat && npm install -g corepack && corepack enable
 WORKDIR /app
 
 # 1) Prune the monorepo to just this app + its workspace deps.
