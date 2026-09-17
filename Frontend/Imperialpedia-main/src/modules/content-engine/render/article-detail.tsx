@@ -21,6 +21,7 @@ import { canonicalService } from "@/modules/seo/services/canonical-service";
 import { resolveAuthor, getContentRedirectSlug, getArticleFeedback, listArticleComments, getArticlePoll } from "@/services/data/cms-public";
 import { isAllowedImageHost } from "@/lib/safe-image";
 import { getRelatedArticles } from "@/modules/content-engine/services/content-service";
+import { env } from "@/config/env";
 
 /**
  * @fileOverview Shared article-detail resolution + rendering, used by both the
@@ -106,7 +107,7 @@ export async function buildArticleDetailMetadata(slug: string): Promise<Metadata
       });
     }
     const canonical = canonicalService.getCanonicalTag(slug, "article", article.categorySlug);
-    return buildMetadata({
+    const base = buildMetadata({
       title: article.title,
       description: article.description,
       keywords: article.tags,
@@ -114,6 +115,25 @@ export async function buildArticleDetailMetadata(slug: string): Promise<Metadata
       ogType: "article",
       canonical,
     });
+
+    // buildMetadata() never sets `authors` — Next.js then inherits the root
+    // layout's hardcoded 3-person default (see app/layout.tsx) for every
+    // article, regardless of who actually wrote it. Overriding it here with
+    // the real byline is what makes <meta name="author">/rel="author" agree
+    // with the visible "By {name}" credit instead of always naming the
+    // site's original 3 house writers.
+    if (!article.authorName) return base;
+    const baseUrl = (env.siteUrl || "https://imperialpedia.com").replace(/\/$/, "");
+    const authorUrl = article.authorSlug ? `${baseUrl}/authors/${article.authorSlug}` : undefined;
+    return {
+      ...base,
+      authors: [{ name: article.authorName, url: authorUrl }],
+      openGraph: {
+        ...base.openGraph,
+        type: "article",
+        authors: [article.authorName],
+      },
+    };
   } catch {
     return buildMetadata({
       title: "Article Not Found",
