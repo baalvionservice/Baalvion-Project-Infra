@@ -45,6 +45,7 @@ db.CmsContentPoll     = require('./cmsContentPoll')(sequelize, DataTypes);
 db.CmsPollVote        = require('./cmsPollVote')(sequelize, DataTypes);
 db.CmsSeoRedirect     = require('./cmsSeoRedirect')(sequelize, DataTypes);
 db.CmsAuthor          = require('./cmsAuthor')(sequelize, DataTypes);
+db.CmsAuthorMessage   = require('./cmsAuthorMessage')(sequelize, DataTypes);
 db.MarketAsset        = require('./marketAsset')(sequelize, DataTypes);
 
 // ── Editorial pipeline (schema `cms`) ─────────────────────────────────────────
@@ -80,6 +81,7 @@ db.CmsWebsite.hasMany(db.CmsContent,       { foreignKey: 'websiteId', as: 'conte
 db.CmsWebsite.hasMany(db.CmsWebsiteMember, { foreignKey: 'websiteId', as: 'members' });
 db.CmsWebsite.hasMany(db.CmsSeoRedirect,   { foreignKey: 'websiteId', as: 'redirects' });
 db.CmsWebsite.hasMany(db.CmsAuthor,        { foreignKey: 'websiteId', as: 'authors' });
+db.CmsWebsite.hasMany(db.CmsAuthorMessage, { foreignKey: 'websiteId', as: 'authorMessages' });
 db.CmsWebsite.hasOne(db.CmsEditorialCharter, { foreignKey: 'websiteId', as: 'charter' });
 db.CmsWebsite.hasOne(db.CmsPublicationPolicy, { foreignKey: 'websiteId', as: 'publicationPolicy' });
 db.CmsWebsite.hasMany(db.CmsStorySignal,     { foreignKey: 'websiteId', as: 'storySignals' });

@@ -66,4 +66,53 @@ async function sendContributorInvitation({
     }
 }
 
-module.exports = { sendContributorInvitation };
+// Same real inbox every "mailto:" link on the public site already points at
+// (Frontend/Imperialpedia-main/src/config/env.ts's contactEmail default) — kept
+// separately configurable here since the recipient is a business decision, not
+// a code constant.
+const AUTHOR_CONTACT_RECIPIENT = process.env.AUTHOR_CONTACT_EMAIL || 'Founder@baalvion.com';
+
+function _escapeHtml(s) {
+    return String(s ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+/**
+ * "Contact the author" form on /authors/[slug] — relays the reader's message by
+ * email rather than writing to a moderated table (there's no author-inquiry
+ * model/admin review UI yet; email is the real, working channel that already
+ * exists). Never throws — a mail failure must not fail the submit request.
+ */
+async function sendAuthorContactMessage({ authorSlug, authorName, fromName, fromEmail, message }) {
+    try {
+        if (!sesEnabled()) {
+            log.info({ authorSlug, fromEmail }, '[mailer] SES not configured — author contact message logged, not sent');
+            return { sent: false, logged: true };
+        }
+        const html = `
+            <p>New message from the "${_escapeHtml(authorName)}" author page (<code>/authors/${_escapeHtml(authorSlug)}</code>):</p>
+            <p><strong>From:</strong> ${_escapeHtml(fromName)} &lt;${_escapeHtml(fromEmail)}&gt;</p>
+            <p><strong>Message:</strong></p>
+            <p>${_escapeHtml(message).replace(/\n/g, '<br/>')}</p>
+        `;
+        const res = await emailService().sendRaw({
+            to: AUTHOR_CONTACT_RECIPIENT,
+            subject: `New message for ${authorName} via Imperialpedia`,
+            html,
+            category: 'support',
+            replyTo: fromEmail,
+        });
+        if (res.status === 'sent') return { sent: true, messageId: res.messageId };
+        log.warn({ authorSlug, status: res.status, error: res.error }, '[mailer] author contact message not sent');
+        return { sent: false, error: res.error };
+    } catch (err) {
+        log.error({ err: err.message, authorSlug }, '[mailer] author contact message send failed');
+        return { sent: false, error: err.message };
+    }
+}
+
+module.exports = { sendContributorInvitation, sendAuthorContactMessage };

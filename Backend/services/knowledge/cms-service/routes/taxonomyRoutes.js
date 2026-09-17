@@ -28,4 +28,9 @@ router.post('/authors', loadCmsRole, requireCmsRole('cms_editor'), validate(crea
 router.patch('/authors/:authorId', loadCmsRole, requireCmsRole('cms_editor'), validate(updateAuthorSchema), authorCtrl.updateAuthor);
 router.delete('/authors/:authorId', loadCmsRole, requireCmsRole('cms_editor'), authorCtrl.deleteAuthor);
 
+// "Contact the Author" submissions — /cms/websites/:websiteId/author-messages
+router.get('/author-messages', loadCmsRole, requireCmsRole('cms_viewer'), authorCtrl.listAuthorMessages);
+router.patch('/author-messages/:messageId/read', loadCmsRole, requireCmsRole('cms_viewer'), authorCtrl.markAuthorMessageRead);
+router.patch('/author-messages/:messageId/unread', loadCmsRole, requireCmsRole('cms_viewer'), authorCtrl.markAuthorMessageUnread);
+
 module.exports = router;

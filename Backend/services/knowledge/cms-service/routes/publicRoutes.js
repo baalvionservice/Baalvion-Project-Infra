@@ -4,6 +4,7 @@ const ctrl = require('../controller/publicController');
 const { optionalAuth } = require('../middleware/authMiddleware');
 const { validate } = require('../middleware/validate');
 const { submitCommentSchema, submitFeedbackSchema, submitPollVoteSchema } = require('../validators/engagementSchemas');
+const { contactAuthorSchema } = require('../validators/authorSchemas');
 
 const router = Router();
 
@@ -20,6 +21,7 @@ router.get('/:websiteSlug/content/:slug/preview', ctrl.getPreviewContent);
 router.get('/:websiteSlug/categories/:categorySlug', ctrl.getCategory);
 router.get('/:websiteSlug/authors', ctrl.listAuthors);
 router.get('/:websiteSlug/authors/:slug', ctrl.getAuthor);
+router.post('/:websiteSlug/authors/:slug/contact', validate(contactAuthorSchema), ctrl.contactAuthor);
 
 // Reader engagement -- approved-only comment list/submit (held for moderation,
 // see controller/commentModerationController.js) and "was this helpful?" voting.

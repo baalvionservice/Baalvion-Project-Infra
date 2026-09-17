@@ -2,13 +2,14 @@
 const { Op } = require('sequelize');
 const { hmacSign, safeCompare } = require('@baalvion/crypto');
 const { decideAccess } = require('@baalvion/entitlements');
-const { CmsWebsite, CmsContent, CmsCategory, CmsTag, CmsAuthor, CmsContentEntityMention, CmsSeoRedirect } = require('../models');
+const { CmsWebsite, CmsContent, CmsCategory, CmsTag, CmsAuthor, CmsAuthorMessage, CmsContentEntityMention, CmsSeoRedirect } = require('../models');
 const { AppError } = require('../utils/errors');
 const cache = require('./cacheService');
 const config = require('../config/appConfig');
 const contentService = require('./contentService');
 const contentEvents = require('./analytics/contentEvents');
 const entitlementClient = require('./entitlementClient');
+const mailer = require('./mailer');
 const { parsePagination, buildPaginated } = require('../utils/pagination');
 
 // In-process cache, mirrors entitlementClient.js's _subscriptionCache — a site's config
@@ -349,10 +350,35 @@ async function getPublicAuthor(websiteSlug, slug) {
     return author.toJSON();
 }
 
+// Deliberately does not require a matching CmsAuthor row: the site's byline
+// system currently resolves an author from either the live cms_authors table
+// OR the frontend's static roster (config/authors.ts) — see resolveAuthor() in
+// Frontend/Imperialpedia-main/src/services/data/cms-public.ts — and several
+// real, published authors only exist in the static half today. Gating this on
+// CmsAuthor would 404 for exactly those authors' own contact forms.
+//
+// The DB row is the durable record (visible in the admin console under
+// Websites → [site] → Author Messages) — the email is a best-effort, timely
+// notification on top of it, so a mail outage never loses a submission.
+async function contactAuthor(websiteSlug, authorSlug, { authorName, name, email, message }) {
+    const website = await _resolveWebsite(websiteSlug); // 404s for an unknown/inactive site
+    const row = await CmsAuthorMessage.create({
+        websiteId: website.id,
+        authorSlug,
+        authorName,
+        senderName: name,
+        senderEmail: email,
+        message,
+    });
+    const result = await mailer.sendAuthorContactMessage({ authorSlug, authorName, fromName: name, fromEmail: email, message });
+    if (result.sent) await row.update({ emailDelivered: true });
+    return { success: true, delivered: result.sent === true };
+}
+
 async function getPublicWebsiteInfo(websiteSlug) {
     const website = await _resolveWebsite(websiteSlug);
     const { id, name, slug, domain, description, config: cfg, branding, modules } = website.toJSON();
     return { id, name, slug, domain, description, config: cfg, branding, modules };
 }
 
-module.exports = { getPublicContent, getPreviewContent, listPublicContent, getPublicCategory, getPublicWebsiteInfo, listPublicAuthors, getPublicAuthor };
+module.exports = { getPublicContent, getPreviewContent, listPublicContent, getPublicCategory, getPublicWebsiteInfo, listPublicAuthors, getPublicAuthor, contactAuthor };
