@@ -25,6 +25,15 @@ const bodyHtml = `
 <h2>Qualifying for monetization</h2>
 <p>To join the YouTube Partner Program, a channel needs 1,000 subscribers plus either 4,000 public watch hours in the trailing 12 months (long-form path) or 10 million valid Shorts views in the trailing 90 days (Shorts path). Both paths also require two-factor verification and a clean strikes record. YouTube has confirmed these thresholds rise to 8,000 watch hours or 20 million Shorts views on February 1, 2027.</p>
 
+<h2>Why your RPM swings so much — even on your own channel</h2>
+<p>Three factors move RPM far more than most creators expect, independent of the video itself:</p>
+<ul>
+<li><strong>Audience geography.</strong> Advertisers pay dramatically more to reach viewers in high-ad-spend markets. Aggregated rate trackers put U.S. and Australian viewers in the roughly $10–$15 CPM range against roughly $0.50–$1.50 for audiences concentrated in South Asia — a gap of 10–20x on otherwise identical content. Two channels with the same view count can post RPMs that far apart purely on where their audience lives.</li>
+<li><strong>Seasonality.</strong> Q4 (October–December) reliably produces the highest CPMs of the year as advertisers spend down annual budgets around Black Friday and the holidays; creators commonly report CPMs 40–60% above their yearly average in that window, followed by a sharp drop — often 30–60% below the December peak — in January.</li>
+<li><strong>Ad blockers.</strong> Estimates put ad-blocker usage among desktop viewers at roughly 25–40%, meaningfully lower on mobile and connected TV. Every blocked impression counts toward your view total but earns nothing, which is baked into why RPM sits so far below CPM in the first place.</li>
+</ul>
+<p>None of this is something a creator controls video-by-video, which is why comparing your RPM against a generic "average" is often misleading — the honest comparison is against your own channel's trend over time, adjusted for the month and where your views actually came from.</p>
+
 <h2>Use the calculator</h2>
 <p>Enter your monthly view count below to estimate a realistic earnings range for long-form, Shorts, or TikTok Creator Rewards — using the same published rate ranges cited on this page, not a single invented number.</p>
 `.trim();
@@ -45,6 +54,11 @@ const faq = [
     answer:
       '1,000 subscribers plus 4,000 public watch hours in the past 12 months (or 10 million Shorts views in the past 90 days as an alternative path). YouTube has announced these thresholds increase to 8,000 watch hours or 20 million Shorts views starting February 1, 2027.',
   },
+  {
+    question: 'Why did my RPM drop in January after a strong December?',
+    answer:
+      'This is normal seasonality, not a problem with your channel. Q4 advertiser spending (Black Friday, holidays) pushes CPMs 40–60% above the yearly average in October–December; that demand drops off sharply once the new year starts, often 30–60% below the December peak in January.',
+  },
 ];
 
 const keyTakeaways = [
@@ -52,12 +66,15 @@ const keyTakeaways = [
   'Long-form YouTube RPM runs roughly $2–$10 per 1,000 views; Shorts RPM runs $0.03–$0.10 per 1,000 views because Shorts revenue comes from a separate, lower-paying pooled fund.',
   'YouTube Partner Program eligibility is 1,000 subscribers plus 4,000 watch hours (12 months) or 10 million Shorts views (90 days) today, rising to 8,000 hours or 20 million Shorts views on February 1, 2027.',
   'Long-form ad revenue pays creators a fixed 55% share; Shorts revenue is allocated by your proportional share of total Shorts watch time, not a fixed per-view rate.',
+  'RPM varies as much by audience geography (roughly a 10–20x gap between top-paying and lowest-paying markets), season (Q4 CPMs run 40–60% above average, then drop just as sharply in January), and ad-blocker usage (25–40% of desktop viewers) as it does by niche.',
 ];
 
 const citations = [
   { title: 'YouTube Partner Program — official requirements (YouTube for Creators)', url: 'https://www.youtube.com/creators/earn/youtube-partner-program/' },
   { title: 'YouTube Shorts Monetization 2026: Requirements, RPM (vidIQ)', url: 'https://vidiq.com/blog/post/youtube-shorts-monetization/' },
   { title: 'Average YouTube RPM 2026: Real Data by Niche, Country & Format', url: 'https://ytmoneycalculator.com/blog/average-youtube-rpm/' },
+  { title: 'YouTube CPM Rates by Country 2026 (ytmoneycalculator)', url: 'https://ytmoneycalculator.com/blog/youtube-cpm-rates-by-country/' },
+  { title: 'YouTube RPM by Month 2026: December vs. January (fluxnote)', url: 'https://fluxnote.io/guides/youtube-rpm-by-month-2026' },
 ];
 
 module.exports = {
