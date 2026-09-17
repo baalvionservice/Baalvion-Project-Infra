@@ -39,6 +39,7 @@ const CommentsSection = dynamic(() => import("@/components/article/ArticleEngage
 const RelatedArticles = dynamic(() => import("./ArticleFooterBundle").then((m) => m.RelatedArticles));
 const WeeklyDigestSignup = dynamic(() => import("./ArticleFooterBundle").then((m) => m.WeeklyDigestSignup));
 const SavingsGoalWidget = dynamic(() => import("@/components/article/SavingsGoalWidget").then((m) => m.SavingsGoalWidget));
+const CreatorEarningsCalculator = dynamic(() => import("@/components/tools/CreatorEarningsCalculator").then((m) => m.CreatorEarningsCalculator));
 
 interface ArticlePageProps {
   slug: string;
@@ -329,6 +330,9 @@ export const ArticlePage = ({
             {isSavingsOrBudgeting && (
               <SavingsGoalWidget defaultGoal={5000} defaultMonths={12} className="my-8" />
             )}
+
+            {/* CREATOR ECONOMY RPM/CPM ESTIMATOR — opt-in via CMS customFields.tool.type */}
+            {effectiveArticle.toolType === "creator-rpm-calculator" && <CreatorEarningsCalculator />}
 
             {/* 4. REMAINING ARTICLE BODY WITH IMPERIALPEDIA-GRADE PROSE TYPOGRAPHY */}
             {restHtml ? (
