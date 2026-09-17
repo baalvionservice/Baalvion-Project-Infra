@@ -40,6 +40,8 @@ const RelatedArticles = dynamic(() => import("./ArticleFooterBundle").then((m) =
 const WeeklyDigestSignup = dynamic(() => import("./ArticleFooterBundle").then((m) => m.WeeklyDigestSignup));
 const SavingsGoalWidget = dynamic(() => import("@/components/article/SavingsGoalWidget").then((m) => m.SavingsGoalWidget));
 const CreatorEarningsCalculator = dynamic(() => import("@/components/tools/CreatorEarningsCalculator").then((m) => m.CreatorEarningsCalculator));
+const SponsorshipRateCalculator = dynamic(() => import("@/components/tools/SponsorshipRateCalculator").then((m) => m.SponsorshipRateCalculator));
+const PageRpmCalculator = dynamic(() => import("@/components/tools/PageRpmCalculator").then((m) => m.PageRpmCalculator));
 
 interface ArticlePageProps {
   slug: string;
@@ -331,8 +333,10 @@ export const ArticlePage = ({
               <SavingsGoalWidget defaultGoal={5000} defaultMonths={12} className="my-8" />
             )}
 
-            {/* CREATOR ECONOMY RPM/CPM ESTIMATOR — opt-in via CMS customFields.tool.type */}
+            {/* CREATOR ECONOMY TOOLS — opt-in via CMS customFields.tool.type */}
             {effectiveArticle.toolType === "creator-rpm-calculator" && <CreatorEarningsCalculator />}
+            {effectiveArticle.toolType === "sponsorship-rate-calculator" && <SponsorshipRateCalculator />}
+            {effectiveArticle.toolType === "page-rpm-calculator" && <PageRpmCalculator />}
 
             {/* 4. REMAINING ARTICLE BODY WITH IMPERIALPEDIA-GRADE PROSE TYPOGRAPHY */}
             {restHtml ? (

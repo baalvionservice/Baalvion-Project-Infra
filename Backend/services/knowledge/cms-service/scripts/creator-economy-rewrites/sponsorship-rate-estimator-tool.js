@@ -1,10 +1,9 @@
 'use strict';
 /*
  * De-templated rewrite for /creator-economy/sponsorship-rate-estimator-tool.
- * No dedicated interactive sponsorship-rate widget exists yet (only the
- * platform RPM calculator does) — rather than fake one, this gives a real,
- * usable formula-based methodology plus the actual benchmark ranges to
- * apply it against.
+ * Now paired with a real SponsorshipRateCalculator embed (Instagram/YouTube,
+ * tier-based, using the same benchmark ranges walked through in the prose)
+ * rather than prose-only methodology.
  */
 
 const bodyHtml = `
@@ -35,6 +34,9 @@ const bodyHtml = `
 
 <h2>A worked example</h2>
 <p>A creator with 40,000 Instagram followers and 6% engagement (above the typical micro-tier average) offering a Reel: start from the micro-tier Reel anchor ($300–$800), and given above-average engagement, price toward the top of that range or slightly above — landing somewhere around $700–$900 is a defensible, benchmark-anchored number, not a guess.</p>
+
+<h2>Try it with your own numbers</h2>
+<p>The estimator below applies steps 1–2 automatically for Instagram and YouTube — enter your platform, format, and follower count to see the same benchmark-anchored range this walkthrough describes.</p>
 `.trim();
 
 const faq = [
@@ -79,4 +81,5 @@ module.exports = {
   faq,
   keyTakeaways,
   citations,
+  tool: { type: 'sponsorship-rate-calculator' },
 };

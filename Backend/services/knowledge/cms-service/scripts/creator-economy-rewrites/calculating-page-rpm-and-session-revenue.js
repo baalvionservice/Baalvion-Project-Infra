@@ -24,6 +24,9 @@ const bodyHtml = `
 
 <h2>Building your own session-revenue estimate</h2>
 <p>To estimate monthly revenue from a target session RPM: (monthly sessions ÷ 1,000) × RPM. A site with 200,000 monthly sessions at a $25 session RPM would project roughly $5,000/month — useful for comparing "is switching ad networks worth it" scenarios, as long as both sides of the comparison use the same traffic metric. Run the same formula against your current network's actual reported RPM and a prospective network's typical range for sites like yours before assuming a switch is worth the transition effort — the projected gain, not just the headline RPM difference, is what should drive the decision.</p>
+
+<h2>Run the numbers for your own site</h2>
+<p>Enter your monthly sessions below to see a real revenue estimate at Mediavine's and Raptive's published RPM ranges.</p>
 `.trim();
 
 const faq = [
@@ -67,4 +70,5 @@ module.exports = {
   faq,
   keyTakeaways,
   citations,
+  tool: { type: 'page-rpm-calculator' },
 };

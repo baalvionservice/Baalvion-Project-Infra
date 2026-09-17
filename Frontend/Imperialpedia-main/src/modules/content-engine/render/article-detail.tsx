@@ -196,6 +196,33 @@ export async function ArticleDetailContent({ article }: { article: Article }) {
       canonicalUrl = undefined;
     }
 
+    // SoftwareApplication schema for the embedded calculator, if this article
+    // has one — points at this article's own URL (where the tool actually
+    // lives), not a separate /calculators/ route that doesn't exist.
+    let toolSchema: any = null;
+    try {
+      const toolMeta: Record<string, { name: string; description: string }> = {
+        "creator-rpm-calculator": {
+          name: "Creator RPM & CPM Calculator",
+          description: "Estimate YouTube, YouTube Shorts, and TikTok Creator Rewards earnings from monthly views using published 2026 RPM ranges.",
+        },
+        "sponsorship-rate-calculator": {
+          name: "Sponsorship Rate Estimator",
+          description: "Estimate a fair Instagram or YouTube sponsorship rate from follower count, platform, and content format using published 2026 benchmark ranges.",
+        },
+        "page-rpm-calculator": {
+          name: "Website Page RPM Calculator",
+          description: "Estimate monthly website ad revenue from session count and ad-network RPM ranges (Mediavine, Raptive).",
+        },
+      };
+      const meta = article.toolType ? toolMeta[article.toolType] : undefined;
+      toolSchema = meta && canonicalUrl
+        ? structuredData.softwareApp({ ...meta, url: canonicalUrl, category: "FinanceApplication" })
+        : null;
+    } catch {
+      toolSchema = null;
+    }
+
     let trackedCompanies: any[] = [];
     try {
       trackedCompanies = trackedCompaniesFromMentions(article.entityMentions);
@@ -220,9 +247,10 @@ export async function ArticleDetailContent({ article }: { article: Article }) {
       <div className="bg-background min-h-screen">
         {articleSchema && <JsonLd data={articleSchema} />}
         {faqSchema && <JsonLd data={faqSchema} />}
+        {toolSchema && <JsonLd data={toolSchema} />}
         <Container className="py-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            {breadcrumbs && breadcrumbs.length > 0 && <Breadcrumbs breadcrumb={breadcrumbs} />}
+            {breadcrumbs?.items?.length > 0 && <Breadcrumbs breadcrumb={breadcrumbs} />}
             {article.categorySlug && (
               <FollowTopicButton categorySlug={article.categorySlug} categoryName={article.category || article.categorySlug} />
             )}
