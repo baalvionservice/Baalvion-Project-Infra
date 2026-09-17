@@ -11,6 +11,7 @@ import { useWorkflowStats } from '@/lib/queries/cms-workflow.queries';
 import { useWebsiteCategories } from '@/lib/queries/cms-taxonomy.queries';
 import { useContentList } from '@/lib/queries/cms-content.queries';
 import type { ContentItem } from '@/lib/types/cms-content.types';
+import type { WebsiteCategory } from '@/lib/types/cms-taxonomy.types';
 import type { CmsRole, Website, WebsiteMember } from '@/lib/types/cms-website.types';
 
 // Roles that primarily produce content vs. review/ship it. SEO managers sit with
@@ -31,7 +32,10 @@ export interface DashboardMetrics {
   draftContent: number;
   scheduledContent: number;
   pendingApprovals: number;
+  archivedContent: number;
   totalCategories: number;
+  /** status === 'active' — what "how many categories are live" actually means. */
+  liveCategories: number;
   totalSubcategories: number;
   totalMedia: number;
   totalUsers: number;
@@ -103,6 +107,21 @@ const ROLE_LABEL: Partial<Record<CmsRole, string>> = {
   cms_viewer: 'Viewer',
 };
 
+// useWebsiteCategories returns a TREE (only root categories at the top level, each
+// with nested `children`) — counting `cats.length` directly only ever counts roots,
+// so a flat count (or a live/active count) needs every node walked, not just the top.
+function flattenCategories(tree: WebsiteCategory[]): WebsiteCategory[] {
+  const out: WebsiteCategory[] = [];
+  const walk = (nodes: WebsiteCategory[]) => {
+    for (const n of nodes) {
+      out.push(n);
+      if (n.children?.length) walk(n.children);
+    }
+  };
+  walk(tree);
+  return out;
+}
+
 function isWithin(iso: string | null | undefined, ms: number, now: number): boolean {
   if (!iso) return false;
   const t = Date.parse(iso);
@@ -140,8 +159,12 @@ export function useDashboardData({ canonicalId, website }: Args): DashboardData 
 
     // Always derive from real sources — no fabricated data. An empty site shows real
     // zeros / empty states, never placeholder names or numbers.
-    const rootCats = cats.filter((c) => !c.parentId).length;
-    const subCats = cats.length - rootCats;
+    // `cats` is the tree's root level only — flatten it to count every category
+    // (root + nested) instead of silently reporting 0 subcategories always.
+    const flatCats = flattenCategories(cats);
+    const rootCats = flatCats.filter((c) => !c.parentId).length;
+    const subCats = flatCats.length - rootCats;
+    const liveCats = flatCats.filter((c) => c.status === 'active').length;
 
     const roleCount = (roles: CmsRole[]) =>
       team.filter((m) => roles.includes(m.cmsRole)).length;
@@ -153,7 +176,9 @@ export function useDashboardData({ canonicalId, website }: Args): DashboardData 
       scheduledContent:
         s?.scheduledContent ?? wf?.scheduled ?? items.filter((i) => i.status === 'scheduled').length,
       pendingApprovals: wf?.pending ?? s?.pendingReview ?? 0,
+      archivedContent: s?.archivedContent ?? items.filter((i) => i.status === 'archived').length,
       totalCategories: rootCats,
+      liveCategories: liveCats,
       totalSubcategories: subCats,
       totalMedia: s?.totalMedia ?? 0,
       totalUsers: team.length || (website?.memberCount ?? 0),
