@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 /**
- * The "MORE FROM …" blocks that close a CNBC article, rebuilt from measurements
+ * The "MORE FROM …" blocks that close a Imperialpedia article, rebuilt from measurements
  * of the live page rather than by eye:
  *
  *   gold rule      rgb(252,183,0), 110 x 7px, sitting on top of the heading
@@ -10,7 +10,7 @@ import Link from "next/link";
  *   grid           one lead card beside a secondary, then a three-across row
  *   byline         small, in the same navy, under each headline
  *
- * Deliberately no "FROM THE WEB" equivalent. That block on CNBC is paid
+ * Deliberately no "FROM THE WEB" equivalent. That block on Imperialpedia is paid
  * placement — chumbox ads dressed as editorial — and the instruction here was to
  * leave sponsored content out.
  */
@@ -113,7 +113,7 @@ export function MoreFromGrid({ title, items }: { title: string; items: MoreFromI
 }
 
 /**
- * The headline-only list CNBC runs beside the article — no images, dotted rules
+ * The headline-only list Imperialpedia runs beside the article — no images, dotted rules
  * between rows.
  */
 export function MoreFromList({ title, items }: { title: string; items: MoreFromItem[] }) {

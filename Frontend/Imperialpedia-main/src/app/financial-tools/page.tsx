@@ -1,5 +1,6 @@
 import React from 'react';
 import { withoutRetired } from '@/lib/content/retired-paths';
+import { withoutAdsenseHidden } from '@/config/adsense-cleanup';
 import Link from 'next/link';
 import { getCalculatorList } from '@/services/mock-api/calculators';
 import { CalculatorCard } from '@/modules/calculators/components/CalculatorCard';
@@ -39,7 +40,7 @@ const LIVE_SLUGS = new Set([
 /** Goal → calculator map. Real editorial content answering the question a
  * reader actually has before they know a calculator's name — every entry
  * points at a real, working tool (see LIVE_SLUGS). */
-const CHOOSER: { question: string; slug: string; label: string }[] = [
+const RAW_CHOOSER: { question: string; slug: string; label: string }[] = [
   { question: 'How much will my savings actually grow over time?', slug: 'compound-interest', label: 'Compound Interest Calculator' },
   { question: 'What will this loan really cost me, total?', slug: 'loan', label: 'Loan Payment Calculator' },
   { question: 'Will my contributions get me to my investing goal?', slug: 'investment', label: 'Investment Growth Calculator' },
@@ -50,10 +51,13 @@ const CHOOSER: { question: string; slug: string; label: string }[] = [
   { question: 'Did I actually profit on that trade, after fees?', slug: 'profit-loss', label: 'Profit/Loss Calculator' },
 ];
 
+const CHOOSER = withoutAdsenseHidden(RAW_CHOOSER.map((c) => ({ ...c, href: `/financial-tools/${c.slug}` })));
+
 export default async function FinancialToolsDashboard() {
   const response = await getCalculatorList();
   const allTools = response.data;
-  const tools = allTools.filter((t) => LIVE_SLUGS.has(t.slug));
+  const rawTools = allTools.filter((t) => LIVE_SLUGS.has(t.slug)).map((t) => ({ ...t, href: `/financial-tools/${t.slug}` }));
+  const tools = withoutAdsenseHidden(rawTools);
   const categories = Array.from(new Set(tools.map((t) => t.category)));
   const startHere = START_HERE_SLUGS.map((slug) => tools.find((t) => t.slug === slug)).filter(
     (t): t is (typeof tools)[number] => Boolean(t)

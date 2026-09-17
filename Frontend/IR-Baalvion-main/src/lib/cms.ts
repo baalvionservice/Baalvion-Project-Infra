@@ -173,8 +173,11 @@ function firstParagraph(c: CmsContent): string | undefined {
   return p?.content?.text as string | undefined;
 }
 
+// Quotes too: several call sites below interpolate into a double-quoted attribute
+// (img src/alt, a href), where a bare `"` breaks out into a live event handler.
 const escapeHtml = (s: string) =>
-  String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
 // Neutralise junk that comes from pasting (e.g. from ChatGPT/Word/another site): inline
 // `style` (which can set near-white text colours that vanish on a white page), foreign

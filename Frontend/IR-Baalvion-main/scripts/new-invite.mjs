@@ -31,12 +31,22 @@ if (expires !== null && !/^\d{4}-\d{2}-\d{2}$/.test(expires)) {
 
 // Unambiguous alphabet: no O/0, I/l/1. These get read aloud and retyped from emails.
 const ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
-const code = Array.from(randomBytes(20))
-  // Rejection-free bias is irrelevant at 20 chars of a 31-symbol alphabet (~99 bits); the modulo
-  // skew here is far below any practical guessing advantage.
-  .map((b) => ALPHABET[b % ALPHABET.length])
-  .join('')
-  .replace(/(.{5})(?=.)/g, '$1-');
+// 256 is not a multiple of 31, so a plain `b % 31` favours the first eight symbols.
+// The skew is small, but rejection sampling costs one loop and makes the code uniform,
+// which is the property an invitation token is supposed to have.
+const LIMIT = 256 - (256 % ALPHABET.length); // 248
+function pickChars(n) {
+  let out = '';
+  while (out.length < n) {
+    for (const b of randomBytes(n)) {
+      if (b >= LIMIT) continue;
+      out += ALPHABET[b % ALPHABET.length];
+      if (out.length === n) break;
+    }
+  }
+  return out;
+}
+const code = pickChars(20).replace(/(.{5})(?=.)/g, '$1-');
 
 const sha256 = createHash('sha256').update(code).digest('hex');
 

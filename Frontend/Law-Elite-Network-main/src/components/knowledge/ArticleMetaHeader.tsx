@@ -15,7 +15,7 @@ interface ArticleMetaHeaderProps {
 function MetaItem({ label, value }: { label: string; value: string }) {
   return (
     <div className="text-[12.5px] leading-tight">
-      <span className="text-slate-400">{label}: </span>
+      <span className="text-slate-500">{label}: </span>
       <span className="font-semibold text-slate-700">{value}</span>
     </div>
   );

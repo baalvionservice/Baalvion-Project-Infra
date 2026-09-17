@@ -45,10 +45,7 @@ export const ROOT_FLAT_ARTICLE_SLUGS = new Set([
   // Category A -- Offshore & Maritime Injury Law (page 1 renders at the
   // category hub URL itself; see cms-only-categories.ts pillarTitle/descriptionHtml).
   'offshore-accident-lawyer',
-  'offshore-injury-lawyer',
   'maritime-accident-lawyer',
-  'maritime-injury-lawyer',
-  'oil-rig-injury-lawyer',
   'oil-rig-accident-lawyer',
   'jones-act-seamans-injury-rights',
   'houston-offshore-accident-attorney',

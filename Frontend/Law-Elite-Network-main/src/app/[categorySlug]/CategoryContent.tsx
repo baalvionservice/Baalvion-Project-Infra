@@ -55,7 +55,7 @@ export function CategoryContent({ categorySlug, categoryId, cmsArticles = [], ex
             Guides &amp; Explainers
           </h2>
         </div>
-        <span className="text-[12px] font-bold uppercase tracking-wider text-slate-400">
+        <span className="text-[12px] font-bold uppercase tracking-wider text-slate-500">
           {articles.length} {articles.length === 1 ? 'article' : 'articles'}
         </span>
       </div>

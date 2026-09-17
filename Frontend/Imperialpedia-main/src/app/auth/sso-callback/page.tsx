@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import React, {  useEffect  } from "react";
 
 /**
  * Shared-auth SSO landing. The user verified on auth.baalvion.com; the auth surface redirects back here

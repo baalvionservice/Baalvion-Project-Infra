@@ -29,10 +29,15 @@ export function toNewCategorySlug(oldSlug: string): string {
 // tech-ip, disputes, us-law-and-constitution, religion-law-and-weird-laws,
 // legal-education-and-history) -- none deleted, this list is what to restore
 // once resubmission succeeds.
+// 'law-school-success' added September 2026 -- a new evergreen vertical
+// aimed at law students (study skills, casebook reading, exam prep), not
+// part of the AdSense-retirement narrowing above -- kept separate from that
+// list's restore-later intent.
 export const CURRENT_CATEGORY_SLUGS = [
   'maritime-offshore-injury-law',
   'cruise-ship-passenger-vessel-accidents',
   'personal-injury-lawyer',
+  'law-school-success',
 ] as const;
 
 /** Every slug the /law/{slug} URL shape ever used, for validating old redirect requests. */

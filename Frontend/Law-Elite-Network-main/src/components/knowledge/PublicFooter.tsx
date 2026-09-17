@@ -12,12 +12,10 @@ import { AD_PLACEMENTS } from '@/components/ads/AdManager';
  * @fileOverview High-Fidelity Editorial Footer
  * Matches the Investopedia-style layout with dark navy aesthetics and A-Z strip.
  */
-const EXPLORE_LINKS = [
-  { href: '/news', label: 'Legal News' },
-  { href: '/case-law', label: 'Case Law' },
-  { href: '/legislation', label: 'Legislation' },
-  { href: '/law-changes', label: 'Law Changes' },
-];
+// AdSense second-rejection retirement: /news, /case-law, /legislation and
+// /law-changes all now 301 to / (see next.config.ts + retired-links.ts's
+// RETIRED_SECTIONS) -- the "Explore" link column that pointed at them is
+// gone rather than left linking into redirects.
 
 // AdSense-readiness retirement (see category-slugs.ts's CURRENT_CATEGORY_SLUGS
 // comment): shrunk to the 3 live practice areas -- the other 13 are retired
@@ -86,11 +84,8 @@ export function PublicFooter() {
 
             <FooterLinkColumn
               colSpan="md:col-span-3"
-              title="Explore"
-              sections={[
-                { heading: 'Explore', links: EXPLORE_LINKS },
-                { heading: 'Practice Areas (Legal Guides)', links: PRACTICE_AREA_LINKS },
-              ]}
+              title="Practice Areas"
+              sections={[{ heading: 'Practice Areas (Legal Guides)', links: PRACTICE_AREA_LINKS }]}
             />
 
             <FooterLinkColumn

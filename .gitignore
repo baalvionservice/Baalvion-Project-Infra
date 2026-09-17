@@ -21,6 +21,8 @@ credentials.json
 service-account.json
 # Local env backups & editor cruft (Phase 0 cleanup — keep these out of the tree)
 *.bak
+# a timestamped copy (`cp x x.bak-$(date +%s)`) is not matched by *.bak
+*.bak-*
 *.old
 
 # ──────────────────────────────────────────────
@@ -155,3 +157,8 @@ admin-health.json
 # awaiting validation, and which service is mid-rollout. Machine-written, box-local.
 # See docs/progressive-delivery.md.
 deploy/consolidated/caddy/.bluegreen/
+
+# Imperialpedia local scratch: ingest caches and draft/backup dumps.
+# Multi-MB, machine-local, and regenerable — never part of a commit.
+Frontend/Imperialpedia-main/.cache-*.json
+Frontend/Imperialpedia-main/.drafts/

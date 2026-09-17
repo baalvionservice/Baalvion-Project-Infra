@@ -23,7 +23,7 @@ export default function NewsGrid({ sections }: { sections: WorldData["sections"]
                 {item.image ? (
                   <div className="flex items-start justify-between w-full gap-3 sm:gap-4">
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-sm sm:text-lg font-bold leading-snug text-foreground group-hover:text-[hsl(var(--cnbc-red))] group-hover:underline mt-0.5 line-clamp-3">
+                      <h3 className="text-sm sm:text-lg font-bold leading-snug text-foreground group-hover:text-[hsl(var(--imperialpedia-red))] group-hover:underline mt-0.5 line-clamp-3">
                         {item.headline}
                       </h3>
                       <span className="text-[9px] sm:text-[10px] font-black text-muted-foreground tracking-wide mt-1 block">
@@ -42,7 +42,7 @@ export default function NewsGrid({ sections }: { sections: WorldData["sections"]
                   </div>
                 ) : (
                   <div className="w-full">
-                    <h3 className="text-sm sm:text-lg font-bold leading-snug text-foreground group-hover:text-[hsl(var(--cnbc-red))] group-hover:underline line-clamp-3">
+                    <h3 className="text-sm sm:text-lg font-bold leading-snug text-foreground group-hover:text-[hsl(var(--imperialpedia-red))] group-hover:underline line-clamp-3">
                       {item.headline}
                     </h3>
                     <span className="text-[9px] sm:text-[10px] font-black text-muted-foreground tracking-wide mt-1 block">

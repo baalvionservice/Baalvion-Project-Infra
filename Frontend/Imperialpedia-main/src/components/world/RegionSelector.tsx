@@ -2,7 +2,7 @@ import Link from "next/link";
 import { REGIONS, regionPath, type RegionId } from "@/lib/data/worldRegions";
 
 /**
- * CNBC-style region tab bar that drives the `?region=` query param
+ * Imperialpedia-style region tab bar that drives the `?region=` query param
  * (e.g. /world/?region=europe). Server component — pure links, the active
  * region is highlighted with the signature red underline.
  */
@@ -33,8 +33,8 @@ export default function RegionSelector({
                 aria-current={active ? "page" : undefined}
                 className={`world-kicker whitespace-nowrap text-[11px] sm:text-xs font-bold tracking-wide uppercase px-3 py-3 border-b-[3px] transition-all ${
                   active
-                    ? "border-[hsl(var(--cnbc-red))] text-[hsl(var(--cnbc-red))]"
-                    : "border-transparent text-muted-foreground hover:text-[hsl(var(--cnbc-red))] hover:border-border"
+                    ? "border-[hsl(var(--imperialpedia-red))] text-[hsl(var(--imperialpedia-red))]"
+                    : "border-transparent text-muted-foreground hover:text-[hsl(var(--imperialpedia-red))] hover:border-border"
                 }`}
               >
                 <span className="sm:hidden">{r.short}</span>

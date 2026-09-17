@@ -27,14 +27,14 @@ function MoverRow({
           {ticker} <span className="font-normal text-muted-foreground">{name}</span>
         </span>
         <span
-          className={`font-mono font-bold shrink-0 ${positive ? "text-[hsl(var(--cnbc-green))]" : "text-[hsl(var(--cnbc-red))]"}`}
+          className={`font-mono font-bold shrink-0 ${positive ? "text-[hsl(var(--imperialpedia-green))]" : "text-[hsl(var(--imperialpedia-red))]"}`}
         >
           {change}
         </span>
       </div>
       <div className="h-1.5 bg-muted rounded-sm overflow-hidden">
         <div
-          className={`h-full ${positive ? "bg-[hsl(var(--cnbc-green))]" : "bg-[hsl(var(--cnbc-red))]"}`}
+          className={`h-full ${positive ? "bg-[hsl(var(--imperialpedia-green))]" : "bg-[hsl(var(--imperialpedia-red))]"}`}
           style={{ width: `${width}%` }}
         />
       </div>
@@ -42,7 +42,7 @@ function MoverRow({
   );
 }
 
-/** CNBC-style dedicated "MARKETS" module — bar-chart Market Movers +
+/** Imperialpedia-style dedicated "MARKETS" module — bar-chart Market Movers +
  * Most Active table, both from the same real, live watchlist data already
  * fetched for the sidebar (Yahoo Finance, including real volume). */
 export default function MarketsSection({ watchlist }: { watchlist: WorldData["watchlist"] }) {
@@ -55,7 +55,7 @@ export default function MarketsSection({ watchlist }: { watchlist: WorldData["wa
 
   return (
     <div className="border-b border-border px-2 sm:px-4 py-5">
-      <h2 className="world-kicker text-xl font-black tracking-widest text-foreground uppercase border-b-4 border-[hsl(var(--cnbc-gold))] inline-block pb-1 mb-4">
+      <h2 className="world-kicker text-xl font-black tracking-widest text-foreground uppercase border-b-4 border-[hsl(var(--imperialpedia-gold))] inline-block pb-1 mb-4">
         Markets
       </h2>
 

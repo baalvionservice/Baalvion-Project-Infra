@@ -18,7 +18,7 @@ const frontends = [
     'Frontend/Baalvion-Jobs-Portal-main',
     'Frontend/brand-connector-main',
     'Frontend/company-unified-Dashboard-main',
-    'Frontend/controlthemarket-main',
+    'Frontend/testrank-baalvion',
     'Frontend/Imperialpedia-main',
     'Frontend/IR-Baalvion-main',
     'Frontend/Mining.Baalvion-main',
