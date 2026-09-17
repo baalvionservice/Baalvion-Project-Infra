@@ -41,7 +41,11 @@ async function safeFetch<T>(url: string): Promise<T[]> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
-    const res = await fetch(url, { next: { revalidate: 300 }, signal: controller.signal });
+    // 900s is the repo-wide floor (see scripts/check-cache-hygiene.mjs) — this
+    // window becoming the ISR floor for every route reaching this fetcher is
+    // exactly the bug that check exists to catch. Real freshness comes from
+    // the outer unstable_cache's tag below, not this number.
+    const res = await fetch(url, { next: { revalidate: 900 }, signal: controller.signal });
     if (!res.ok) return [];
     const json = await res.json();
     const d = json?.data;
