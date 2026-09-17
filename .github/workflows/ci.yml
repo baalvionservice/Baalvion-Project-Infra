@@ -806,7 +806,7 @@ jobs:
           file: ${{ matrix.file }}
           push: false
           load: true
-          tags: baalvion/${{ matrix.name }}:ci
+          tags: baalvion/${{ matrix.tag }}:ci
           cache-from: type=gha,scope=ci-${{ matrix.name }}
           cache-to: type=gha,mode=max,scope=ci-${{ matrix.name }}
 
@@ -828,7 +828,7 @@ jobs:
           TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
           TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
         with:
-          image-ref: baalvion/${{ matrix.name }}:ci
+          image-ref: baalvion/${{ matrix.tag }}:ci
           format: table
           severity: ${{ env.TRIVY_SEVERITY }}
           vuln-type: os,library

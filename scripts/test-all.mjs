@@ -32,7 +32,7 @@ const FILTER = fi > -1 ? args[fi + 1] : null;
 const BASELINE = '.test-baseline.json';
 
 const SKIP = new Set(['node_modules', 'dist', '.next', '.turbo', '.git', 'build', 'coverage']);
-const PLACEHOLDER = /^\s*(echo|exit 0|true)\b|no test specified/i;
+const PLACEHOLDER = /^\s*(?:(?:echo|exit 0|true)\b|no test specified)/i;
 
 function discover(roots) {
   const found = [];

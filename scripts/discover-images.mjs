@@ -66,7 +66,9 @@ const images = files.map((file) => {
   // A repo-root build context is required by any Dockerfile that prunes the pnpm
   // workspace; those cannot build from their own directory.
   const needsRootContext = /turbo\s+prune|COPY\s+pnpm-lock\.yaml|COPY\s+pnpm-workspace/.test(body);
-  return { name, file, context: needsRootContext ? '.' : dir };
+  // Docker tags must be lowercase; several service directories (e.g. Imperialpedia-main)
+  // are not, so the tag CI builds under has to be derived rather than reused as `name`.
+  return { name, tag: name.toLowerCase(), file, context: needsRootContext ? '.' : dir };
 });
 
 // Building all 60 images on every PR would cost more CI time than the whole rest of

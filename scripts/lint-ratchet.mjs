@@ -88,7 +88,14 @@ const packages = discover(['Frontend', 'Backend/packages', 'Backend/services'])
   .filter((p) => !ONLY || ONLY.has(typeof p === "string" ? p : p.dir))
   .filter((p) => !FILTER || p.includes(FILTER));
 
-const baseline = existsSync(BASELINE) ? JSON.parse(readFileSync(BASELINE, 'utf8')) : {};
+const baseline = (() => {
+  try {
+    return JSON.parse(readFileSync(BASELINE, 'utf8'));
+  } catch (err) {
+    if (err.code === 'ENOENT') return {};
+    throw err;
+  }
+})();
 const next = {};
 const regressed = [];
 const improved = [];
