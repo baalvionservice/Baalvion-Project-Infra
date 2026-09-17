@@ -6,7 +6,7 @@
 # NOT as runtime env. Point them at the PUBLIC prod origin. The /auth-bff/* rewrite target
 # (AUTH_PROXY_TARGET) is read from next.config at server start, so it stays a RUNTIME env.
 FROM node:26-alpine AS base
-RUN apk add --no-cache libc6-compat && corepack enable
+RUN apk add --no-cache libc6-compat && npm install -g corepack && corepack enable
 WORKDIR /app
 
 # 1) Prune the monorepo to just this app + its workspace deps (@baalvion/auth-sdk).

@@ -1,7 +1,7 @@
 # BUILD CONTEXT MUST BE THE REPO ROOT:
 #   docker build -f Backend/services/trade/supplier-lifecycle-service/Dockerfile -t supplier-lifecycle-service .
 FROM node:26-alpine AS base
-RUN corepack enable
+RUN npm install -g corepack && corepack enable
 WORKDIR /repo
 
 FROM base AS pruner

@@ -14,7 +14,7 @@
 #     --build-arg NEXT_PUBLIC_APP_URL=https://jobs.baalvion.com \
 #     .
 FROM node:26-alpine AS base
-RUN apk add --no-cache libc6-compat && corepack enable
+RUN apk add --no-cache libc6-compat && npm install -g corepack && corepack enable
 WORKDIR /app
 
 # 1) Prune the monorepo to just this app + its workspace deps.
