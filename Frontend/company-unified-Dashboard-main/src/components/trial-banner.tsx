@@ -32,7 +32,7 @@ export default function TrialBanner() {
     <Alert className="flex w-full items-center justify-center gap-4 rounded-none border-x-0 border-t-0 border-orange-300 bg-orange-50 text-orange-800 dark:border-orange-700 dark:bg-orange-950 dark:text-orange-300 [&>svg]:text-orange-800 dark:[&>svg]:text-orange-300">
       <Target className="h-5 w-5" />
       <div className="flex-1">
-        <AlertTitle className="font-bold">You're on a 14-day free trial.</AlertTitle>
+        <AlertTitle className="font-bold">You&apos;re on a 14-day free trial.</AlertTitle>
         <div className="flex flex-col items-start gap-2">
             <Progress value={progress} className="w-32 h-1.5 [&>div]:bg-orange-500" />
             <AlertDescription className="text-xs">

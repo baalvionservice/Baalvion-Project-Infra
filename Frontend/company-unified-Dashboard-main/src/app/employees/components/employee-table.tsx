@@ -270,7 +270,7 @@ export default function EmployeeTable({ searchParams }: EmployeeTableProps) {
       <CardHeader>
         <CardTitle>Employee Directory</CardTitle>
         <CardDescription>
-          Browse and manage your organization's personnel.
+          Browse and manage your organization&apos;s personnel.
         </CardDescription>
       </CardHeader>
       <CardContent>

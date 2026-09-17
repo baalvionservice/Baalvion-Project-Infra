@@ -34,7 +34,7 @@ export default function OnlineVsOfflinePieChart({ onlineRevenue, offlineRevenue 
     <Card>
       <CardHeader>
         <CardTitle>Online vs Offline Revenue</CardTitle>
-        <CardDescription>Today's revenue breakdown</CardDescription>
+        <CardDescription>Today&apos;s revenue breakdown</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[250px]">

@@ -1,10 +1,36 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
+
+  // Shared build cache. 114 workspace projects, and a single PR re-runs
+  // `pnpm install` + `pnpm --filter "./Backend/packages/*" run build` in about six
+  // separate CI jobs, each from cold — plus once more on every developer machine.
+  // With this on, the first machine to build a task uploads the artifact and every
+  // other machine (and every later CI job) downloads it instead of rebuilding.
+  //
+  // signature: true makes turbo HMAC every artifact with
+  // TURBO_REMOTE_CACHE_SIGNATURE_KEY and reject anything that does not verify, so a
+  // compromised or misconfigured cache cannot inject a build output. Without a
+  // remote cache configured (no TURBO_TOKEN) turbo just uses the local cache and
+  // neither field does anything, so this is inert until the secrets exist.
+  //
+  // Requires, in CI and locally: TURBO_TOKEN, TURBO_TEAM,
+  // TURBO_REMOTE_CACHE_SIGNATURE_KEY.
+  "remoteCache": {
+    "enabled": true,
+    "signature": true
+  },
   "globalDependencies": [
     "**/.env",
     "**/.env.local",
-    "tsconfig.base.json"
+    "tsconfig.base.json",
+    // .npmrc controls RESOLUTION for the whole workspace — engine-strict,
+    // auto-install-peers, hoisting, the workspace link protocol. pnpm-workspace.yaml
+    // defines which directories are packages at all. Neither was listed, so a PR
+    // changing either selected ZERO packages and built nothing, while changing
+    // tsconfig.base.json correctly selected 110. Measured, not assumed.
+    ".npmrc",
+    "pnpm-workspace.yaml"
   ],
   "globalEnv": [
     "NODE_ENV",

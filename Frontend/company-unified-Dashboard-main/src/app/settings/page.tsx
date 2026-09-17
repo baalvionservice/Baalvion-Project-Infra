@@ -17,7 +17,7 @@ export default function SettingsPage() {
        <div>
         <h1 className="text-3xl font-bold tracking-tight">Platform Settings</h1>
         <p className="text-muted-foreground">
-          Manage your platform's configuration, users, and businesses.
+          Manage your platform&apos;s configuration, users, and businesses.
         </p>
       </div>
 

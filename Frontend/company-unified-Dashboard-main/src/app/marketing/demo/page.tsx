@@ -36,7 +36,7 @@ export default function DemoPage() {
                             <CheckCircle className="h-10 w-10 text-green-600" />
                         </div>
                         <CardTitle className="mt-4">Thank You!</CardTitle>
-                        <CardDescription>We've received your demo request and will be in touch within 24 hours to schedule a time that works for you.</CardDescription>
+                        <CardDescription>We&apos;ve received your demo request and will be in touch within 24 hours to schedule a time that works for you.</CardDescription>
                     </CardHeader>
                 </Card>
             </div>

@@ -1,5 +1,9 @@
 {
   "name": "@baalvion/party",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "description": "The party graph — one identity for a human across every Baalvion property. Normalisation, deterministic match keys and merge rules for resolving per-site customers to a single party.",
   "private": true,
@@ -21,9 +25,9 @@
     "clean": "rimraf dist"
   },
   "devDependencies": {
-    "@types/node": "^20.19.0",
+    "@types/node": "^24.13.4",
     "tsup": "^8.3.0",
-    "typescript": "^5.7.2",
+    "typescript": "^5.9.3",
     "rimraf": "^6.0.1"
   }
 }

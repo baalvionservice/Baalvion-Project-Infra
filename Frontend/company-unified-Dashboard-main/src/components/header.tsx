@@ -257,7 +257,7 @@ export function Header() {
                     </DropdownMenuTrigger>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>We'll notify you here when something needs attention</p>
+                    <p>We&apos;ll notify you here when something needs attention</p>
                   </TooltipContent>
                 </Tooltip>
                 <DropdownMenuContent

@@ -13,7 +13,7 @@ export default function HowItWorks() {
             <div className="container mx-auto px-4">
                 <div className="text-center mb-12">
                     <h2 className="text-3xl lg:text-4xl font-bold tracking-tight">Get started in minutes.</h2>
-                    <p className="mt-2 text-lg text-muted-foreground">It's never been easier to manage a global portfolio.</p>
+                    <p className="mt-2 text-lg text-muted-foreground">It&apos;s never been easier to manage a global portfolio.</p>
                 </div>
                 <div className="relative grid md:grid-cols-3 gap-8 items-center">
                     {steps.map((step, index) => (

@@ -21,7 +21,7 @@ export default function InstallPage() {
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold">1</div>
                         <div>
                             <p className="font-medium">Tap the Share button</p>
-                            <p className="text-sm text-muted-foreground">It's in the bottom toolbar of Safari.</p>
+                            <p className="text-sm text-muted-foreground">It&apos;s in the bottom toolbar of Safari.</p>
                         </div>
                         <Share className="h-8 w-8 ml-auto text-primary" />
                     </div>
@@ -29,7 +29,7 @@ export default function InstallPage() {
                      <div className="flex items-center gap-4">
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold">2</div>
                         <div>
-                            <p className="font-medium">Find "Add to Home Screen"</p>
+                            <p className="font-medium">Find &quot;Add to Home Screen&quot;</p>
                             <p className="text-sm text-muted-foreground">Scroll down in the share sheet and tap on it.</p>
                         </div>
                         <PlusSquare className="h-8 w-8 ml-auto text-primary" />
@@ -39,7 +39,7 @@ export default function InstallPage() {
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold">3</div>
                         <div>
                             <p className="font-medium">Confirm the name</p>
-                            <p className="text-sm text-muted-foreground">Tap "Add" in the top-right corner.</p>
+                            <p className="text-sm text-muted-foreground">Tap &quot;Add&quot; in the top-right corner.</p>
                         </div>
                          <Image src="/icons/icon-192x192.png" alt="Baalvion Logo" width={40} height={40} className="rounded-md ml-auto" data-ai-hint="logo" />
                     </div>

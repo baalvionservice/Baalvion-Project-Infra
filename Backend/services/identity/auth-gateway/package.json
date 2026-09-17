@@ -1,5 +1,9 @@
 {
   "name": "@baalvion/auth-gateway",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "private": true,
   "description": "BFF / cookie gateway + trust boundary — HttpOnly cookie sessions backed by auth-service RS256, signed identity injection to backends. No JWT reaches the browser.",
@@ -13,7 +17,7 @@
     "@baalvion/graceful-shutdown": "workspace:*",
     "express-rate-limit": "^7.5.0",
     "@baalvion/auth-node": "workspace:*",
-    "express": "^4.21.2",
+    "express": "^5.2.1",
     "cookie-parser": "^1.4.7",
     "helmet": "^8.0.0",
     "cors": "^2.8.5",

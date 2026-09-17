@@ -1,5 +1,9 @@
 {
   "name": "@baalvion/tenancy",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "description": "Platform-wide multi-tenant isolation via Postgres Row-Level Security: RLS policy builders, per-request tenant context, and Sequelize/pg transaction helpers.",
   "private": true,

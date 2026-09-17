@@ -45,7 +45,7 @@ export default function AttendanceOverview() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Today's Attendance Snapshot</CardTitle>
+        <CardTitle>Today&apos;s Attendance Snapshot</CardTitle>
         <CardDescription>As of the current time</CardDescription>
       </CardHeader>
       <CardContent>

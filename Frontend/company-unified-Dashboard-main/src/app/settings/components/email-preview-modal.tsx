@@ -42,7 +42,7 @@ export default function EmailPreviewModal({ isOpen, onOpenChange, branding, emai
                 {/* Email Body */}
                 <main>
                     <h2 className="text-2xl font-semibold mb-4">Welcome Aboard!</h2>
-                    <p className="text-muted-foreground mb-6">We're thrilled to have you join the {branding.platformName} family. To get started, please click the button below to verify your email address and set up your account.</p>
+                    <p className="text-muted-foreground mb-6">We&apos;re thrilled to have you join the {branding.platformName} family. To get started, please click the button below to verify your email address and set up your account.</p>
                     <div className="text-center">
                         <Button style={{ backgroundColor: branding.accent }}>Verify Your Email</Button>
                     </div>

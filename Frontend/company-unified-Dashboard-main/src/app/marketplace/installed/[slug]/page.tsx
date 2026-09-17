@@ -47,13 +47,12 @@ export default function AppSettingsPage({
   const app = appsData.find((a) => a.slug === slug);
   const router = useRouter();
   const { toast } = useToast();
+  const [isActive, setIsActive] = useState(true);
 
   if (loading) return null;
   if (!app) {
     return <div className="p-12 text-center text-muted-foreground">App not found.</div>;
   }
-
-  const [isActive, setIsActive] = useState(true);
 
   const handleSaveChanges = () => {
     toast({

@@ -16,15 +16,17 @@ on:
 
 env:
   MODULE_DIR: Backend/services/commerce/financial-services-java
-  # Local-only image tag prefix used for the Trivy scan below. Production images are
-  # built + pushed to Amazon ECR by the canonical pipeline (.github/workflows/deploy.yml).
-  # This workflow no longer pushes to any registry — it builds + scans only.
+  # Local-only image tag prefix used for the Trivy scan below. The deployed image
+  # (baalvion/payment-service) is built + pushed to Amazon ECR by
+  # deploy-consolidated-box2.yml — deploy.yml, named here before, was deleted
+  # 2026-07-02. This workflow no longer pushes to any registry — it builds + scans only.
   IMAGE_PREFIX: baalvion-financial
 
 jobs:
   build-test:
     name: Build & Test
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
       - name: Set up JDK 17
@@ -46,6 +48,7 @@ jobs:
   trivy-fs:
     name: Trivy filesystem scan
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
       - name: Trivy FS (vuln + secret + misconfig)
@@ -62,6 +65,7 @@ jobs:
     name: Build & scan images
     needs: [build-test, trivy-fs]
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
     strategy:
@@ -84,9 +88,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
       - name: Build image (${{ matrix.service }})
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: ${{ env.MODULE_DIR }}
           file: ${{ env.MODULE_DIR }}/Dockerfile
@@ -102,8 +106,8 @@ jobs:
           ignore-unfixed: "true"
       # GHCR login + push removed during the ECR consolidation. The deployed Java
       # payment-service is built + pushed to Amazon ECR (repo baalvion/payment-service,
-      # build-arg SERVICE=payment-service) by the canonical pipeline
-      # .github/workflows/deploy.yml. This job now builds + Trivy-scans only.
+      # build-arg SERVICE=payment-service) by deploy-consolidated-box2.yml — deploy.yml,
+      # named here before, was deleted 2026-07-02. This job builds + Trivy-scans only.
 
   # build-test / trivy-fs / images are NOT continue-on-error here (unlike ci.yml's
   # report-only docker-build-scan), so a Trivy finding fails the job directly and is
@@ -114,6 +118,7 @@ jobs:
     needs: [build-test, trivy-fs, images]
     if: always() && contains(needs.*.result, 'failure')
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/slack-notify

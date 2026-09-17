@@ -41,7 +41,7 @@ export default function SetupChecklist() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Let's get you set up</CardTitle>
+        <CardTitle>Let&apos;s get you set up</CardTitle>
         <CardDescription>Your setup is {Math.round(progress)}% complete. Complete the steps below to get the most out of Baalvion.</CardDescription>
         <Progress value={progress} className="w-full mt-2" />
       </CardHeader>

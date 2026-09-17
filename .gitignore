@@ -153,6 +153,11 @@ admin-health.json
 .vercel
 .env*.local
 
+# Progressive delivery working state: the pre-rollout Caddyfile snapshot, the candidate
+# awaiting validation, and which service is mid-rollout. Machine-written, box-local.
+# See docs/progressive-delivery.md.
+deploy/consolidated/caddy/.bluegreen/
+
 # Imperialpedia local scratch: ingest caches and draft/backup dumps.
 # Multi-MB, machine-local, and regenerable — never part of a commit.
 Frontend/Imperialpedia-main/.cache-*.json

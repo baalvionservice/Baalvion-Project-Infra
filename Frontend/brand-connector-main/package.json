@@ -1,5 +1,9 @@
 {
   "name": "brand-connector-web",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -8,7 +12,7 @@
     "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
     "build": "next build",
     "start": "next start -p 3035",
-    "lint": "next lint",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "email": "email dev",
     "seed": "tsx src/scripts/seed.ts"
@@ -76,7 +80,7 @@
     "zustand": "^5.0.3"
   },
   "devDependencies": {
-    "@types/node": "^20",
+    "@types/node": "^24.13.4",
     "@types/react": "^19.2.1",
     "@types/react-dom": "^19.2.1",
     "@types/react-simple-maps": "^3.0.6",
@@ -84,7 +88,7 @@
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "tsx": "^4.7.1",
-    "typescript": "^5"
+    "typescript": "^5.9.3"
   },
   "overrides": {
     "react": "^19.2.1",

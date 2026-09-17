@@ -18,7 +18,7 @@ export default function UpgradeModal({ isOpen, onOpenChange }: UpgradeModalProps
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>You've reached your plan limit</DialogTitle>
+          <DialogTitle>You&apos;ve reached your plan limit</DialogTitle>
           <DialogDescription>
             You have 5/5 businesses on your Pro plan. Upgrade to Enterprise to add more.
           </DialogDescription>

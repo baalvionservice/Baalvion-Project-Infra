@@ -1,5 +1,9 @@
 {
   "name": "baalvion-ctm-service",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "description": "Baalvion Control The Market \u2014 Talent Challenge Platform Service",
   "main": "index.js",

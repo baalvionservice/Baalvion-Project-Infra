@@ -28,7 +28,7 @@ export default function TestimonialsSection() {
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl lg:text-4xl font-bold tracking-tight">Loved by Founders Worldwide</h2>
-          <p className="mt-2 text-lg text-muted-foreground">Don't just take our word for it. Here's what they're saying.</p>
+          <p className="mt-2 text-lg text-muted-foreground">Don&apos;t just take our word for it. Here&apos;s what they&apos;re saying.</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {testimonials.map((testimonial, index) => {
@@ -41,7 +41,7 @@ export default function TestimonialsSection() {
                       <Star key={i} className="h-5 w-5 text-yellow-400 fill-yellow-400" />
                     ))}
                   </div>
-                  <blockquote className="text-lg font-medium">"{testimonial.quote}"</blockquote>
+                  <blockquote className="text-lg font-medium">&quot;{testimonial.quote}&quot;</blockquote>
                 </CardContent>
                 <CardHeader className="flex-row gap-4 items-center pt-0">
                   <Avatar>

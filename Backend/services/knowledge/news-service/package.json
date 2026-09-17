@@ -1,5 +1,9 @@
 {
   "name": "news-service",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "description": "Baalvion Intelligence — news ingestion + public News API",
   "license": "ISC",

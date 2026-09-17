@@ -1,5 +1,9 @@
 {
   "name": "order-service",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "description": "Baalvion Enterprise Order Management Service",
   "main": "index.js",

@@ -1,5 +1,9 @@
 {
   "name": "fulfillment-service",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=9"
+  },
   "version": "1.0.0",
   "description": "Baalvion Enterprise Fulfillment & Shipping Service",
   "main": "index.js",

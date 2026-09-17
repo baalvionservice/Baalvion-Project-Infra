@@ -11,7 +11,7 @@ export default function HeroSection() {
     <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32">
         <div className="container mx-auto px-4">
             <div className="text-center">
-                <h1 className="text-4xl lg:text-6xl font-bold tracking-tight">The World's First Global Business Operating System</h1>
+                <h1 className="text-4xl lg:text-6xl font-bold tracking-tight">The World&apos;s First Global Business Operating System</h1>
                 <p className="mt-4 text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto">
                     Manage all your businesses, employees, finances, and equity — across every country — from one intelligent dashboard.
                 </p>
