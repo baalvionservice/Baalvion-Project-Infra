@@ -5,7 +5,7 @@
 # so it needs no NEXT_PUBLIC_* baked in beyond the public app URL. CMS_PUBLIC_URL /
 # CMS_WEBSITE_SLUG are read at request time (server components), passed as runtime env.
 FROM node:26-alpine AS base
-RUN apk add --no-cache libc6-compat && corepack enable
+RUN apk add --no-cache libc6-compat && npm install -g corepack && corepack enable
 WORKDIR /app
 
 # 1) Prune the monorepo to just this app + its workspace deps

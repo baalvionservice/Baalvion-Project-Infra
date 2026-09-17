@@ -7,7 +7,7 @@
 # (NEXT_PUBLIC_GATEWAY_URL) is read by next.config at SERVER START, so it stays a RUNTIME env
 # (set it to the internal gateway, e.g. http://auth-gateway:3099, in docker-compose).
 FROM node:26-alpine AS base
-RUN apk add --no-cache libc6-compat && corepack enable
+RUN apk add --no-cache libc6-compat && npm install -g corepack && corepack enable
 WORKDIR /app
 
 # 1) Prune the monorepo to just this app + its workspace deps (@baalvion/auth-sdk).

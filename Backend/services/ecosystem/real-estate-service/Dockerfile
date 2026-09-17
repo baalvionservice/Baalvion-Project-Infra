@@ -2,7 +2,7 @@
 # BUILD CONTEXT MUST BE THE REPO ROOT:
 #   docker build -f Backend/services/ecosystem/real-estate-service/Dockerfile -t real-estate-service .
 FROM node:26.8-alpine AS base
-RUN corepack enable
+RUN npm install -g corepack && corepack enable
 WORKDIR /repo
 
 FROM base AS pruner

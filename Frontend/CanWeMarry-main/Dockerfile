@@ -15,7 +15,7 @@
 # variable and points at the gateway over the docker network — no TLS handshake, no trip out
 # to the public internet and back.
 FROM node:26-alpine AS base
-RUN apk add --no-cache libc6-compat && corepack enable
+RUN apk add --no-cache libc6-compat && npm install -g corepack && corepack enable
 WORKDIR /app
 
 # 1) Prune the monorepo down to this app and the workspace packages it actually uses.

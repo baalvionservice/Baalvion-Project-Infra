@@ -10,7 +10,7 @@
 # snapshot of the registry at build time, and registering a new product means rebuilding this
 # image. That is the intended trade: one source of truth, no runtime lookup, no drift.
 FROM node:26-alpine AS base
-RUN apk add --no-cache libc6-compat && corepack enable
+RUN apk add --no-cache libc6-compat && npm install -g corepack && corepack enable
 WORKDIR /app
 
 # 1) Prune the monorepo down to this app and the workspace packages it actually uses.

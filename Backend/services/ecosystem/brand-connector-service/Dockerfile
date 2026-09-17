@@ -2,7 +2,7 @@
 # BUILD CONTEXT MUST BE THE REPO ROOT:
 #   docker build -f Backend/services/ecosystem/brand-connector-service/Dockerfile -t brand-connector-service .
 FROM node:26.8-alpine AS base
-RUN corepack enable
+RUN npm install -g corepack && corepack enable
 WORKDIR /repo
 
 FROM base AS pruner
