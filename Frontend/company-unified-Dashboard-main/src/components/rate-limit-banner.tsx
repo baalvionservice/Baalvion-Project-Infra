@@ -21,7 +21,7 @@ export default function RateLimitBanner() {
             <div className="flex-1">
                 <AlertTitle className="font-bold">API Rate Limit Approaching</AlertTitle>
                 <AlertDescription className="text-xs">
-                    You've used {usage.toFixed(0)}% of your monthly API calls.
+                    You&apos;ve used {usage.toFixed(0)}% of your monthly API calls.
                 </AlertDescription>
             </div>
             <Link href="/settings/billing">

@@ -38,7 +38,7 @@ export default function CompletionStep({ onFinish }: CompletionStepProps) {
   return (
     <div className="text-center py-8">
         <h2 className="text-3xl font-bold tracking-tight mb-4">Your Baalvion OS is ready! 🎉</h2>
-        <p className="text-muted-foreground mb-8">We're just putting the finishing touches on your new workspace.</p>
+        <p className="text-muted-foreground mb-8">We&apos;re just putting the finishing touches on your new workspace.</p>
         
         <div className="space-y-4 text-left max-w-sm mx-auto mb-8">
             {setupSteps.map((step, index) => (

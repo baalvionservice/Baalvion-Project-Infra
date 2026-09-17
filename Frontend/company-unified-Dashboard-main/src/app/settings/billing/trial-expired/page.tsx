@@ -45,7 +45,7 @@ export default function TrialExpiredPage() {
           <Card className="bg-background">
             <CardHeader>
               <CardTitle className="text-xl">
-                Here's what you accomplished:
+                Here&apos;s what you accomplished:
               </CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">

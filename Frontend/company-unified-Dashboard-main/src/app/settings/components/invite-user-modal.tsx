@@ -71,7 +71,7 @@ export default function InviteUserModal({
         <DialogHeader>
           <DialogTitle>Invite New User</DialogTitle>
           <DialogDescription>
-            Enter the user's details to send them an invitation.
+            Enter the user&apos;s details to send them an invitation.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="grid gap-4 py-4">

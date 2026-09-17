@@ -87,7 +87,7 @@ export default function SyncPage() {
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
               <div>
-                <p className="text-sm text-muted-foreground">Today's Revenue</p>
+                <p className="text-sm text-muted-foreground">Today&apos;s Revenue</p>
                 <p className="text-2xl font-bold">
                   ${onlineSalesData.todaysRevenue.toLocaleString()}
                 </p>
@@ -145,7 +145,7 @@ export default function SyncPage() {
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
               <div>
-                <p className="text-sm text-muted-foreground">Today's Revenue</p>
+                <p className="text-sm text-muted-foreground">Today&apos;s Revenue</p>
                 <p className="text-2xl font-bold">
                   ${offlineSalesData.todaysRevenue.toLocaleString()}
                 </p>
@@ -197,7 +197,7 @@ export default function SyncPage() {
         <CardHeader>
           <CardTitle>Combined Summary</CardTitle>
           <CardDescription>
-            A complete overview of today's sales performance across all
+            A complete overview of today&apos;s sales performance across all
             channels.
           </CardDescription>
         </CardHeader>

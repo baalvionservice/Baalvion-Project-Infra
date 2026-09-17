@@ -82,7 +82,7 @@ export default function WhiteLabelSettings() {
                     <Card>
                         <CardHeader>
                             <CardTitle>Branding</CardTitle>
-                            <CardDescription>Set your platform's name, logos, and brand colors.</CardDescription>
+                            <CardDescription>Set your platform&apos;s name, logos, and brand colors.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
                             <div className="space-y-2">

@@ -215,7 +215,7 @@ export default function EmployeeProfilePage() {
                 <CardHeader>
                   <CardTitle>Performance Metrics</CardTitle>
                   <CardDescription>
-                    This quarter's performance summary.
+                    This quarter&apos;s performance summary.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -331,7 +331,7 @@ export default function EmployeeProfilePage() {
                     <li className="flex items-center gap-3">
                       <CheckCircle className="h-4 w-4 text-muted-foreground" />{" "}
                       <span className="text-sm">
-                        Completed task 'Finalize Q3 Budget'
+                        Completed task &apos;Finalize Q3 Budget&apos;
                       </span>{" "}
                       <span className="text-xs text-muted-foreground ml-auto">
                         3 days ago

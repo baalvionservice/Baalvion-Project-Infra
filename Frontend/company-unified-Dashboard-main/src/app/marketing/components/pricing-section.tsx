@@ -45,7 +45,7 @@ export default function PricingSection() {
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl lg:text-4xl font-bold tracking-tight">Simple, transparent pricing</h2>
-          <p className="mt-2 text-lg text-muted-foreground">Choose the plan that's right for your empire.</p>
+          <p className="mt-2 text-lg text-muted-foreground">Choose the plan that&apos;s right for your empire.</p>
         </div>
 
         <div className="flex items-center justify-center gap-4 mb-8">

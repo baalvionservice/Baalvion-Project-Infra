@@ -40,7 +40,7 @@ export default function OfflineBanner() {
   return (
     <div className="flex w-full items-center justify-center gap-4 bg-yellow-100 p-2 text-sm text-yellow-800 dark:bg-yellow-950 dark:text-yellow-300">
       <WifiOff className="h-4 w-4" />
-      <span>You're offline. Showing cached data from {lastOnline ? formatDistanceToNow(lastOnline, { addSuffix: true }) : 'a while ago'}.</span>
+      <span>You&apos;re offline. Showing cached data from {lastOnline ? formatDistanceToNow(lastOnline, { addSuffix: true }) : 'a while ago'}.</span>
     </div>
   );
 }
