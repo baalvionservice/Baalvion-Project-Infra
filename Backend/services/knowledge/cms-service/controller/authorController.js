@@ -1,7 +1,7 @@
 'use strict';
 const authorService = require('../service/authorService');
 const revalidateService = require('../service/revalidateService');
-const { sendSuccess } = require('../utils/response');
+const { sendSuccess, sendPaginated } = require('../utils/response');
 
 // Author edits never triggered a revalidation, so on an ISR frontend a corrected
 // bio sat behind the cache until the route's TTL expired — a day on
@@ -48,4 +48,28 @@ const deleteAuthor = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
-module.exports = { listAuthors, createAuthor, updateAuthor, deleteAuthor };
+const listAuthorMessages = async (req, res, next) => {
+    try {
+        const result = await authorService.listAuthorMessages(req.params.websiteId, req.query);
+        return sendPaginated(req, res, result);
+    } catch (err) { return next(err); }
+};
+
+const markAuthorMessageRead = async (req, res, next) => {
+    try {
+        const message = await authorService.markAuthorMessageRead(req.params.websiteId, req.params.messageId, 'read');
+        return sendSuccess(req, res, message);
+    } catch (err) { return next(err); }
+};
+
+const markAuthorMessageUnread = async (req, res, next) => {
+    try {
+        const message = await authorService.markAuthorMessageRead(req.params.websiteId, req.params.messageId, 'unread');
+        return sendSuccess(req, res, message);
+    } catch (err) { return next(err); }
+};
+
+module.exports = {
+    listAuthors, createAuthor, updateAuthor, deleteAuthor,
+    listAuthorMessages, markAuthorMessageRead, markAuthorMessageUnread,
+};

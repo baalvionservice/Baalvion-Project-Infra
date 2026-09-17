@@ -757,6 +757,13 @@ export function blocksToHtml(blocks?: CmsBlock[], categoryMap?: ReadonlyMap<stri
     .join('\n');
 }
 
+// Standing rule: 120 words = 1 minute, everywhere reading time is computed or
+// displayed. The backend persists the authoritative value on every article at
+// save time (contentService's _estimateReadingTime, same constant) — this is
+// only the client-side fallback for rows saved before that existed, or for
+// list payloads that don't carry the full body.
+const WORDS_PER_MINUTE = 120;
+
 function plainTextLength(blocks?: CmsBlock[], excerpt?: string | null): number {
   if (blocks?.length) {
     return blocks.reduce((n, b) => {
@@ -826,6 +833,11 @@ export function cmsContentToArticle(raw: CmsContent, categoryMap?: ReadonlyMap<s
   const body = guide?.bodyHtml || blocksToHtml(raw.contentBlocks, categoryMap) || (raw as any).bodyHtml || (raw as any).body || cfBody || undefined;
   const bodyText = (body || '').replace(/<[^>]+>/g, ' ');
   const guideWords = bodyText.trim().split(/\s+/).filter(Boolean).length || words;
+  // Prefer the value the backend persisted at save time (real body, 120 wpm,
+  // present on every article going forward) — a client-side estimate off a
+  // list payload's word count (or worse, just its excerpt when contentBlocks
+  // wasn't included in the response) is only a fallback for legacy rows.
+  const readingTime = raw.readingTimeMinutes ?? Math.max(1, Math.round(guideWords / WORDS_PER_MINUTE));
 
   return {
     id: raw.id,
@@ -848,7 +860,7 @@ export function cmsContentToArticle(raw: CmsContent, categoryMap?: ReadonlyMap<s
     tags: raw.tagIds ?? [],
     status: 'published' as ArticleStatus,
     contentType: raw.contentType,
-    readingTime: Math.max(1, Math.round(guideWords / 200)),
+    readingTime,
     // The CMS never falls back to stock/placeholder imagery — cms-service generates
     // real original artwork on create/update (@baalvion/illustrations); this inline
     // data-URI is only a safety net for rows that somehow still have none.
@@ -972,9 +984,9 @@ export function cmsContentToNews(raw: CmsContent): NewsArticle {
     publishedAt: raw.publishedAt ?? raw.updatedAt ?? new Date().toISOString(),
     updatedAt: raw.updatedAt ?? undefined,
     // The backend now computes this from the real article body (contentService's
-    // _estimateReadingTime) — only fall back to a client-side word-count estimate
-    // for rows written before that field existed.
-    readTimeMinutes: raw.readingTimeMinutes ?? Math.max(1, Math.round(words / 200)),
+    // _estimateReadingTime, 120 words/minute) — only fall back to a client-side
+    // word-count estimate for rows written before that field existed.
+    readTimeMinutes: raw.readingTimeMinutes ?? Math.max(1, Math.round(words / WORDS_PER_MINUTE)),
     imageUrl: safeImageUrl(
       raw.featuredImage,
       articleArtDataUri({ title: raw.title, category: raw.category?.name, tags: raw.tagIds, excerpt: raw.excerpt, seed: raw.id }),

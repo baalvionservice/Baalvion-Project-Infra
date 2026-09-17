@@ -36,14 +36,24 @@ function _generateArtwork({ id, title, excerpt, categoryName, tagNames }) {
     return `${PUBLIC_BASE}${GENERATED_ART_PREFIX}${id}.svg`;
 }
 
-const WORDS_PER_MINUTE = 200;
+// Standing rule: 120 words = 1 minute for every article, computed once from the
+// real body at save time and stored — not re-estimated per request from
+// whatever partial payload a given API happened to return (list endpoints don't
+// carry the full body, so anything computed from them undercounts to ~1 min).
+const WORDS_PER_MINUTE = 120;
 
 // Best-effort text extraction from block content — pulls the common text-bearing
 // fields off each block type rather than requiring a full block-type switch.
+// `html`/`code` blocks (a raw-HTML body stored as a single block, as generated
+// content commonly is) must be included and tag-stripped, or a whole article's
+// word count silently comes out as zero.
 function _extractBlockText(block) {
     const c = block?.content;
     if (!c) return '';
-    return [c.text, c.caption, c.title, c.subtitle].filter((v) => typeof v === 'string').join(' ');
+    const htmlText = typeof c.html === 'string' ? c.html.replace(/<[^>]+>/g, ' ') : '';
+    return [c.text, c.caption, c.title, c.subtitle, htmlText, c.code]
+        .filter((v) => typeof v === 'string')
+        .join(' ');
 }
 
 function _estimateReadingTime(contentBlocks) {

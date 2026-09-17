@@ -52,4 +52,13 @@ const updateAuthorSchema = z.object({
     sortOrder: z.number().int().min(0).optional(),
 });
 
-module.exports = { createAuthorSchema, updateAuthorSchema };
+// "Contact the author" form on /authors/[slug] — authorSlug comes from the URL
+// param, not the body (never trust a client-supplied slug over the route it hit).
+const contactAuthorSchema = z.object({
+    authorName: z.string().min(1).max(200),
+    name: z.string().min(1).max(200),
+    email: z.string().email().max(255),
+    message: z.string().min(10).max(4000),
+});
+
+module.exports = { createAuthorSchema, updateAuthorSchema, contactAuthorSchema };

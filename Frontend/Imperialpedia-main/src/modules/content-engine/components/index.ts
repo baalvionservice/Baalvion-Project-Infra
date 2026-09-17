@@ -9,6 +9,7 @@ export * from './ArticleSection';
 export * from './ContentBlockRenderer';
 export * from './ArticleList';
 export * from './ArticleCard';
+export * from './AuthorArticleList';
 export * from './CategoryHeader';
 export * from './RelatedArticles';
 export * from './TagList';

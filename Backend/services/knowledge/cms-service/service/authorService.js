@@ -1,8 +1,9 @@
 'use strict';
 const { Op, fn, col, literal } = require('sequelize');
-const { CmsAuthor, CmsContent } = require('../models');
+const { CmsAuthor, CmsContent, CmsAuthorMessage } = require('../models');
 const { AppError } = require('../utils/errors');
 const { slugify } = require('../utils/slugify');
+const { parsePagination, buildPaginated } = require('../utils/pagination');
 
 // Content links to an author profile only loosely, via customFields.authorSlug (there is
 // no FK — see cmsAuthor.js) — so unlike categories/tags, contentCount can't be kept in
@@ -75,4 +76,25 @@ async function deleteAuthor(websiteId, authorId) {
     await author.destroy();
 }
 
-module.exports = { listAuthors, createAuthor, updateAuthor, deleteAuthor };
+/** Admin console — "Contact the Author" submissions for this website, newest first. */
+async function listAuthorMessages(websiteId, query = {}) {
+    const { page, limit, offset } = parsePagination(query);
+    const where = { websiteId };
+    if (query.status === 'unread' || query.status === 'read') where.status = query.status;
+    const { rows, count } = await CmsAuthorMessage.findAndCountAll({
+        where,
+        order: [['createdAt', 'DESC']],
+        limit,
+        offset,
+    });
+    return buildPaginated(rows.map((r) => r.toJSON()), count, { page, limit });
+}
+
+async function markAuthorMessageRead(websiteId, messageId, status) {
+    const message = await CmsAuthorMessage.findOne({ where: { id: messageId, websiteId } });
+    if (!message) throw new AppError('NOT_FOUND', 'Message not found', 404);
+    await message.update({ status });
+    return message.toJSON();
+}
+
+module.exports = { listAuthors, createAuthor, updateAuthor, deleteAuthor, listAuthorMessages, markAuthorMessageRead };

@@ -22,6 +22,7 @@ import {
   Power,
   PowerOff,
   Newspaper,
+  Mail,
 } from 'lucide-react';
 import PageHeader from '@/components/common/PageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -120,6 +121,13 @@ const LINK_GROUPS: { heading: string; blurb: string; links: ToolLink[] }[] = [
         icon: BarChart3,
         segment: 'analytics',
         color: 'text-indigo-500',
+      },
+      {
+        title: 'Author Messages',
+        description: 'Messages readers sent through the "Contact the Author" form on an author’s page.',
+        icon: Mail,
+        segment: 'author-messages',
+        color: 'text-orange-500',
       },
     ],
   },
