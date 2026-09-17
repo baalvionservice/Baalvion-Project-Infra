@@ -465,12 +465,17 @@ async function searchUsers(websiteId, scope, q) {
 // Real per-website content/media counts for the dashboard (replaces the prior 404).
 async function getStats(websiteId) {
     const C = db.CmsContent;
-    const [totalContent, publishedContent, draftContent, scheduledContent, pendingReview] = await Promise.all([
+    // archivedContent was missing entirely — the dashboard had no way to show how much
+    // content is archived vs. just not-yet-published, and totalContent (all statuses)
+    // never lined up with published+draft+scheduled+pendingReview because archived
+    // (and approved / changes_requested) items were counted in the total but nowhere else.
+    const [totalContent, publishedContent, draftContent, scheduledContent, pendingReview, archivedContent] = await Promise.all([
         C.count({ where: { websiteId } }),
         C.count({ where: { websiteId, status: 'published' } }),
         C.count({ where: { websiteId, status: 'draft' } }),
         C.count({ where: { websiteId, status: 'scheduled' } }),
         C.count({ where: { websiteId, status: ['pending_review', 'compliance_review'] } }),
+        C.count({ where: { websiteId, status: 'archived' } }),
     ]);
     let totalMedia = 0;
     try {
@@ -480,7 +485,7 @@ async function getStats(websiteId) {
         );
         totalMedia = rows[0]?.n ?? 0;
     } catch { /* media references optional */ }
-    return { totalContent, publishedContent, draftContent, scheduledContent, pendingReview, totalMedia, mediaStorageUsedMb: 0 };
+    return { totalContent, publishedContent, draftContent, scheduledContent, pendingReview, archivedContent, totalMedia, mediaStorageUsedMb: 0 };
 }
 
 module.exports = {
