@@ -7,6 +7,7 @@ import {
 import { useCallback, useRef } from 'react';
 import { toast } from 'sonner';
 import { cmsContentApi } from '@/lib/api/cms-content';
+import { websiteKeys } from './cms-websites.queries';
 import { useCmsStore } from '@/lib/store/cmsStore';
 import type {
   CreateContentPayload,
@@ -51,6 +52,8 @@ export const useCreateContent = () => {
     mutationFn: (payload: CreateContentPayload) => cmsContentApi.create(payload),
     onSuccess: (res) => {
       qc.invalidateQueries({ queryKey: contentKeys.all });
+      // New content changes the website dashboard's total/draft counts.
+      qc.invalidateQueries({ queryKey: websiteKeys.all });
       toast.success('Content created');
       return res.data.data;
     },
@@ -83,6 +86,7 @@ export const useDeleteContent = () => {
     mutationFn: (id: string) => cmsContentApi.delete(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: contentKeys.all });
+      qc.invalidateQueries({ queryKey: websiteKeys.all });
       toast.success('Content deleted');
     },
     onError: (e: { message: string }) => toast.error(e.message),
@@ -95,6 +99,7 @@ export const useDuplicateContent = () => {
     mutationFn: (id: string) => cmsContentApi.duplicate(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: contentKeys.all });
+      qc.invalidateQueries({ queryKey: websiteKeys.all });
       toast.success('Content duplicated');
     },
     onError: (e: { message: string }) => toast.error(e.message),
@@ -120,6 +125,7 @@ export const useBulkDeleteContent = () => {
     mutationFn: (ids: string[]) => cmsContentApi.bulkDelete(ids),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: contentKeys.all });
+      qc.invalidateQueries({ queryKey: websiteKeys.all });
       toast.success('Items deleted');
     },
     onError: (e: { message: string }) => toast.error(e.message),
@@ -132,6 +138,7 @@ export const useImportWireNews = () => {
     mutationFn: (websiteId: string) => cmsContentApi.importWire(websiteId).then((r) => r.data.data),
     onSuccess: (result) => {
       qc.invalidateQueries({ queryKey: contentKeys.all });
+      qc.invalidateQueries({ queryKey: websiteKeys.all });
       if (!result.configured) {
         toast.error('Wire import is not configured on the server yet (missing INTERNAL_API_KEY on cms-service)');
       } else if (result.error) {
