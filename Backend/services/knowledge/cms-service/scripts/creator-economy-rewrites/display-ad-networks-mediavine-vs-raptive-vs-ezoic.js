@@ -26,6 +26,9 @@ const bodyHtml = `
 
 <h2>What this means for a publisher choosing a network today</h2>
 <p>The practical ranking has flipped from a year ago: Raptive is now the easiest of the three to qualify for by traffic volume, Mediavine sits in the middle, and Ezoic — previously the network built for small sites — now requires more traffic than either of the other two. A publisher choosing where to apply should check current thresholds directly before assuming last year's advice still holds, since two of the three networks moved their bar within the past several months.</p>
+
+<h2>Estimate the revenue difference</h2>
+<p>Use the calculator below to see how your own traffic translates into Mediavine's and Raptive's published RPM ranges.</p>
 `.trim();
 
 const faq = [
@@ -70,4 +73,5 @@ module.exports = {
   faq,
   keyTakeaways,
   citations,
+  tool: { type: 'page-rpm-calculator' },
 };
