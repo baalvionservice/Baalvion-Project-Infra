@@ -21,6 +21,7 @@ import { canonicalService } from "@/modules/seo/services/canonical-service";
 import { resolveAuthor, getContentRedirectSlug, getArticleFeedback, listArticleComments, getArticlePoll } from "@/services/data/cms-public";
 import { isAllowedImageHost } from "@/lib/safe-image";
 import { getRelatedArticles } from "@/modules/content-engine/services/content-service";
+import { env } from "@/config/env";
 
 /**
  * @fileOverview Shared article-detail resolution + rendering, used by both the
@@ -106,7 +107,7 @@ export async function buildArticleDetailMetadata(slug: string): Promise<Metadata
       });
     }
     const canonical = canonicalService.getCanonicalTag(slug, "article", article.categorySlug);
-    return buildMetadata({
+    const base = buildMetadata({
       title: article.title,
       description: article.description,
       keywords: article.tags,
@@ -114,6 +115,25 @@ export async function buildArticleDetailMetadata(slug: string): Promise<Metadata
       ogType: "article",
       canonical,
     });
+
+    // buildMetadata() never sets `authors` — Next.js then inherits the root
+    // layout's hardcoded 3-person default (see app/layout.tsx) for every
+    // article, regardless of who actually wrote it. Overriding it here with
+    // the real byline is what makes <meta name="author">/rel="author" agree
+    // with the visible "By {name}" credit instead of always naming the
+    // site's original 3 house writers.
+    if (!article.authorName) return base;
+    const baseUrl = (env.siteUrl || "https://imperialpedia.com").replace(/\/$/, "");
+    const authorUrl = article.authorSlug ? `${baseUrl}/authors/${article.authorSlug}` : undefined;
+    return {
+      ...base,
+      authors: [{ name: article.authorName, url: authorUrl }],
+      openGraph: {
+        ...base.openGraph,
+        type: "article",
+        authors: [article.authorName],
+      },
+    };
   } catch {
     return buildMetadata({
       title: "Article Not Found",
@@ -176,6 +196,33 @@ export async function ArticleDetailContent({ article }: { article: Article }) {
       canonicalUrl = undefined;
     }
 
+    // SoftwareApplication schema for the embedded calculator, if this article
+    // has one — points at this article's own URL (where the tool actually
+    // lives), not a separate /calculators/ route that doesn't exist.
+    let toolSchema: any = null;
+    try {
+      const toolMeta: Record<string, { name: string; description: string }> = {
+        "creator-rpm-calculator": {
+          name: "Creator RPM & CPM Calculator",
+          description: "Estimate YouTube, YouTube Shorts, and TikTok Creator Rewards earnings from monthly views using published 2026 RPM ranges.",
+        },
+        "sponsorship-rate-calculator": {
+          name: "Sponsorship Rate Estimator",
+          description: "Estimate a fair Instagram or YouTube sponsorship rate from follower count, platform, and content format using published 2026 benchmark ranges.",
+        },
+        "page-rpm-calculator": {
+          name: "Website Page RPM Calculator",
+          description: "Estimate monthly website ad revenue from session count and ad-network RPM ranges (Mediavine, Raptive).",
+        },
+      };
+      const meta = article.toolType ? toolMeta[article.toolType] : undefined;
+      toolSchema = meta && canonicalUrl
+        ? structuredData.softwareApp({ ...meta, url: canonicalUrl, category: "FinanceApplication" })
+        : null;
+    } catch {
+      toolSchema = null;
+    }
+
     let trackedCompanies: any[] = [];
     try {
       trackedCompanies = trackedCompaniesFromMentions(article.entityMentions);
@@ -200,9 +247,10 @@ export async function ArticleDetailContent({ article }: { article: Article }) {
       <div className="bg-background min-h-screen">
         {articleSchema && <JsonLd data={articleSchema} />}
         {faqSchema && <JsonLd data={faqSchema} />}
+        {toolSchema && <JsonLd data={toolSchema} />}
         <Container className="py-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            {breadcrumbs && breadcrumbs.length > 0 && <Breadcrumbs breadcrumb={breadcrumbs} />}
+            {breadcrumbs?.items?.length > 0 && <Breadcrumbs breadcrumb={breadcrumbs} />}
             {article.categorySlug && (
               <FollowTopicButton categorySlug={article.categorySlug} categoryName={article.category || article.categorySlug} />
             )}

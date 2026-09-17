@@ -47,6 +47,10 @@ export interface Article {
   /** Optional end-of-article knowledge check — CMS customFields.quiz. Opt-in per
    *  article; the widget renders nothing when this is empty. */
   quiz?: { question: string; options: string[]; correctIndex: number; explanation?: string }[];
+  /** Opt-in embedded interactive tool — CMS customFields.tool.type. Renders a
+   *  real calculator (see CreatorEarningsCalculator) instead of static prose
+   *  for articles whose title promises one. Undefined renders nothing. */
+  toolType?: string;
 }
 
 /**

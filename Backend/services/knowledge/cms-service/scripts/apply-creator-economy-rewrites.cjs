@@ -93,7 +93,7 @@ async function main() {
     };
 
     const nextContentBlocks = [
-      { type: 'html', order: 0, content: { html: rewrite.bodyHtml } },
+      { id: require('crypto').randomUUID(), type: 'html', order: 0, content: { html: rewrite.bodyHtml } },
     ];
 
     if (DRY_RUN) {
