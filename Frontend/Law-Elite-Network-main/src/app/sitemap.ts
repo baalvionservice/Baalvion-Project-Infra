@@ -6,6 +6,7 @@ import { authorNameToSlug } from '@/data/authors';
 import { articleUrl, ROOT_FLAT_ARTICLE_SLUGS } from '@/lib/article-url';
 import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
 import { cmsGetArticles } from '@/lib/cms';
+import { CONTENT_CACHE_TAG } from '@/lib/cache-tags';
 
 // Render at request time, never at build time. This route fetches from law-service,
 // and a build-time fetch against an unreachable API blocks `next build` (CI timeout).
@@ -40,7 +41,11 @@ async function safeFetch<T>(url: string): Promise<T[]> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
-    const res = await fetch(url, { next: { revalidate: 1800 }, signal: controller.signal });
+    // 900s is the repo-wide floor (see scripts/check-cache-hygiene.mjs) — this
+    // window becoming the ISR floor for every route reaching this fetcher is
+    // exactly the bug that check exists to catch. Real freshness comes from
+    // the outer unstable_cache's tag below, not this number.
+    const res = await fetch(url, { next: { revalidate: 900 }, signal: controller.signal });
     if (!res.ok) return [];
     const json = await res.json();
     const d = json?.data;
@@ -270,10 +275,16 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
   ];
 }
 
+// Tagged with the same CONTENT_CACHE_TAG every other CMS-backed read uses, so
+// the publish webhook's revalidateTag() (see /api/revalidate) busts this
+// cache immediately on publish instead of leaving the sitemap to catch up on
+// its own 5-minute window -- it was untagged before, so a CMS publish only
+// looked instant for the pages it directly names; the sitemap itself quietly
+// kept serving up to 30 (now 5) stale minutes regardless.
 const getCachedSitemapEntries = unstable_cache(
   buildSitemapEntries,
   ['law-elite-network-sitemap-entries'],
-  { revalidate: 1800 },
+  { revalidate: 300, tags: [CONTENT_CACHE_TAG] },
 );
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
