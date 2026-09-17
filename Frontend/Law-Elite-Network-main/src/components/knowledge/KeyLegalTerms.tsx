@@ -45,7 +45,7 @@ export function KeyLegalTerms({ title = "Key Legal Terms", terms }: KeyLegalTerm
               <h3 className="font-headline text-2xl sm:text-3xl font-extrabold text-slate-950">
                 {current.term}
               </h3>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
+              <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
                 Definition
               </p>
               <p className="text-sm sm:text-base text-slate-700 leading-relaxed min-h-[90px]">
@@ -56,6 +56,9 @@ export function KeyLegalTerms({ title = "Key Legal Terms", terms }: KeyLegalTerm
                   href={current.href}
                   className="text-sm font-semibold text-elite-600 hover:underline"
                 >
+                  {/* See FeaturedGuideSpotlight.tsx's comment: textContent,
+                      not aria-label, is what the SEO link-text audit reads. */}
+                  <span className="sr-only">{current.term}: </span>
                   Learn More
                 </Link>
               </div>

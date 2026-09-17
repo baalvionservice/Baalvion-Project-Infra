@@ -5,7 +5,8 @@ import type { Article as ContentArticle } from "@/modules/content-engine/types/a
 import { getPublicCategoryBySlug, getCategoryDirectory } from "@/services/data/cms-public";
 import { newsArticleHref } from "@/lib/data/article-url";
 import { isRemovedArticlePath } from "@/lib/content/removed-article-paths";
-import type { Article as LandingArticle, TopicGroup } from "@/components/landing/investopedia/types";
+import { isRetiredPath } from "@/lib/content/retired-paths";
+import type { Article as LandingArticle, TopicGroup } from "@/components/landing/imperialpedia/types";
 
 // cms-service caps page size at 100 server-side regardless of what's
 // requested (see getArticleCategoryMap's comment in cms-public.ts), so 100
@@ -56,8 +57,9 @@ const CATEGORY_HREF_MAP: Record<string, string> = {
 
 function topicHref(categoryName: string, categorySlug?: string): string {
   const known = CATEGORY_HREF_MAP[categoryName.trim().toLowerCase()];
-  if (known) return known;
-  return categorySlug ? `/${categorySlug}` : "/financial-intelligence";
+  if (known && !isRetiredPath(known)) return known;
+  if (categorySlug && !isRetiredPath(`/${categorySlug}`)) return `/${categorySlug}`;
+  return "/financial-intelligence";
 }
 
 function toLandingArticle(article: ContentArticle): LandingArticle {
@@ -82,10 +84,10 @@ export interface HomeEditorial {
   lead: LandingArticle;
   /** Same-category articles related to `lead` — omitted (not padded with unrelated ones) when there aren't any. */
   leadRelated: LandingArticle[];
-  /** Second hero story, Investopedia-style two-up header — absent when the CMS has only one article. */
+  /** Second hero story, Imperialpedia-style two-up header — absent when the CMS has only one article. */
   secondaryLead: LandingArticle | null;
   secondaryLeadRelated: LandingArticle[];
-  /** Headline-only list below the two leads, no images — Investopedia's "Other Top Stories". */
+  /** Headline-only list below the two leads, no images — Imperialpedia's "Other Top Stories". */
   otherTopStories: LandingArticle[];
   topicGroups: TopicGroup[];
   /** Next freshest articles not already used above — feeds the "Latest Articles" rail so it never repeats the lead/topic picks. */
@@ -104,7 +106,7 @@ export interface PersonalFinanceSpotlight {
 
 /**
  * Real, CMS-backed replacement for the old hardcoded LEAD_STORY/TOP_STORIES/
- * TOPIC_GROUPS mock content (see git history of `landing/investopedia/content.ts`)
+ * TOPIC_GROUPS mock content (see git history of `landing/imperialpedia/content.ts`)
  * — that file's own comment admitted it was a stand-in "until a CMS/API feed is
  * wired." Follows the same real-data pattern already proven by `LatestArticles.tsx`:
  * `getArticles()` already resolves each article's image to a real uploaded photo

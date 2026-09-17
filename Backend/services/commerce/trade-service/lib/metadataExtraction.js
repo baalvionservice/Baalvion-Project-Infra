@@ -67,12 +67,16 @@ function extractJpeg(buf) {
  * @returns {object} extracted_metadata payload (always includes sha256 + byteSize)
  */
 function extract({ buffer, mimeType, detectedMime, fileName } = {}) {
+    // Exported, so it cannot lean on validateUpload having run first: every reader
+    // below indexes raw bytes, and an array or string would silently mis-parse
+    // rather than fail.
+    if (!Buffer.isBuffer(buffer)) throw new TypeError('extract(): buffer must be a Buffer');
     const effective = detectedMime || mimeType || '';
     const base = {
         sha256: sha256(buffer),
         byteSize: buffer.length,
         detectedMime: detectedMime || null,
-        extension: fileName && fileName.includes('.') ? fileName.split('.').pop().toLowerCase().slice(0, 12) : null,
+        extension: typeof fileName === 'string' && fileName.includes('.') ? fileName.split('.').pop().toLowerCase().slice(0, 12) : null,
     };
     try {
         if (effective === 'application/pdf') return { ...base, ...extractPdf(buffer) };

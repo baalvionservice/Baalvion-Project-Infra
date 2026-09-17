@@ -5,9 +5,9 @@ import { buildMetadata } from "@/lib/seo/metadata-builder";
 import { structuredData } from "@/lib/seo/structuredData";
 import { LabeledAdSlot } from "@/components/common/LabeledAdSlot";
 
-import { TermOfDay } from "@/components/landing/investopedia/TermOfDay";
-import { NewsletterBand } from "@/components/landing/investopedia/NewsletterBand";
-import { TERM_OF_DAY } from "@/components/landing/investopedia/content";
+import { TermOfDay } from "@/components/landing/imperialpedia/TermOfDay";
+import { NewsletterBand } from "@/components/landing/imperialpedia/NewsletterBand";
+import { TERM_OF_DAY } from "@/components/landing/imperialpedia/content";
 
 import { HomeIntro, homeFaqItems } from "@/components/home/HomeIntro";
 import { HomeEditorial } from "@/components/home/HomeEditorial";

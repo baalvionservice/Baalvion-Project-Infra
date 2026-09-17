@@ -295,4 +295,13 @@ export const CMS_ONLY_CATEGORIES: Record<string, CmsOnlyCategory> = {
 <p><em>Last updated August 11, 2026. This page provides general educational information and does not constitute legal or career advice. Read our full <a href="/terms-of-service#disclaimers">legal disclaimer</a>.</em></p>
 `.trim(),
   },
+  'law-school-success': {
+    id: 'cms-cat-law-school-success',
+    name: 'Law School Success',
+    slug: 'law-school-success',
+    description: 'Practical, sourced guides for law students -- how to read a casebook, how many hours to actually study, and the study skills nobody explains clearly.',
+    pillarTitle: 'Law School Success',
+    metaTitle: 'Law School Success: Study Guides for Law Students',
+    metaDescription: 'Sourced, practical guides for law students -- study hours, casebook reading, and the skills that actually matter, backed by real data instead of generic advice.',
+  },
 };

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, {  useEffect, useState  } from "react";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/design-system/typography/text";
 import { getStoredConsent, setConsent, hasGlobalPrivacyControl } from "@/lib/consent";

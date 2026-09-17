@@ -32,31 +32,33 @@ const STEPS = [
  */
 export function HowToUse() {
   return (
-    <div>
-      <h3 className="text-sm font-black uppercase tracking-widest text-primary/70">
-        For Readers
-      </h3>
-      <p className="mt-1 text-base font-bold text-foreground">How to use Imperialpedia</p>
-      <div className="relative mt-6">
-        <ol className="grid grid-cols-1 gap-6">
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <span className="bg-black text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5">
+          FOR READERS
+        </span>
+        <h3 className="text-xs font-mono font-black uppercase tracking-widest text-[#c8102e]">
+          // READER DISCOVERY ROADMAP
+        </h3>
+      </div>
+      <h4 className="text-xl font-black uppercase font-serif text-black dark:text-white">
+        How to Use Imperialpedia
+      </h4>
+
+      <div className="relative mt-4">
+        <ol className="grid grid-cols-1 gap-4">
           {STEPS.map(({ icon: Icon, title, body }, i) => (
-            <li key={title} className="relative flex gap-4">
-              <div className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-primary bg-background">
-                <Icon className="h-4 w-4 text-primary" aria-hidden />
+            <li key={title} className="relative flex gap-4 bg-white dark:bg-slate-900 border-2 border-black dark:border-slate-700 p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <div className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center bg-[#c8102e] text-white font-black text-xs font-mono -skew-x-6 border-2 border-black">
+                0{i + 1}
               </div>
-              <div>
-                <span className="text-[11px] font-black uppercase tracking-widest text-primary/70">
-                  Step {i + 1}
-                </span>
-                <h4 className="mt-0.5 text-sm font-bold text-foreground">{title}</h4>
-                <p className="mt-1 text-sm text-muted-foreground leading-relaxed">{body}</p>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <Icon className="h-4 w-4 text-[#c8102e]" aria-hidden />
+                  <h5 className="text-sm font-black uppercase font-serif text-black dark:text-white">{title}</h5>
+                </div>
+                <p className="text-xs font-medium text-slate-700 dark:text-slate-300 leading-relaxed">{body}</p>
               </div>
-              {i < STEPS.length - 1 && (
-                <ChevronRight
-                  className="absolute left-[15px] top-11 h-4 w-4 rotate-90 text-border"
-                  aria-hidden
-                />
-              )}
             </li>
           ))}
         </ol>

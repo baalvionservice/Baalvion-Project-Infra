@@ -10,9 +10,19 @@ let _sesEnabled = null;
 // Auth mail (OTP, verification, invitations) is sent from the verified `auth` sender
 // (noreply@baalvion.com) via the centralized SES service. Falls back to SMTP, then to a
 // dev console logger, so local development without AWS credentials still runs.
-
+//
+// MAIL_PROVIDER lets a deploy pin the transport instead of auto-detecting: 'smtp' forces
+// the generic SMTP path below even when SES credentials happen to be present (e.g. this
+// box's SMTP_* still point at SES's own SMTP interface — see .env), 'ses' forces SES.
+// Unset/anything else keeps the original auto behavior (SES if configured, else SMTP),
+// so the AWS deployment's .env needs no change.
 function sesEnabled() {
-    if (_sesEnabled === null) _sesEnabled = isSesConfigured(loadConfig());
+    if (_sesEnabled === null) {
+        const forced = (process.env.MAIL_PROVIDER || '').toLowerCase();
+        _sesEnabled = forced === 'smtp' ? false
+            : forced === 'ses' ? true
+            : isSesConfigured(loadConfig());
+    }
     return _sesEnabled;
 }
 

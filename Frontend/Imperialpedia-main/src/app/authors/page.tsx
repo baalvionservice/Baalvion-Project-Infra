@@ -2,20 +2,17 @@ import React from 'react';
 import Link from 'next/link';
 import { Container } from '@/design-system/layout/container';
 import { Section } from '@/design-system/layout/section';
-import { Text } from '@/design-system/typography/text';
-import { Grid } from '@/design-system/layout/grid';
-import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getPublicAuthors, CmsAuthor } from '@/services/data/cms-public';
 import { getAllAuthors, AuthorProfile } from '@/config/authors';
+import { isAuthorHiddenInCleanupMode } from '@/config/adsense-cleanup';
 import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
-import { ArrowRight } from 'lucide-react';
 
 export const metadata: Metadata = buildMetadata({
   canonical: '/authors',
-  title: 'Our Authors',
-  description: "Meet the writers and analysts behind Imperialpedia's financial intelligence coverage.",
+  title: 'Editorial Board & Authors — Imperialpedia Masthead',
+  description: "Meet the certified financial writers, reviewers, and analysts behind Imperialpedia's intelligence coverage.",
   ogType: 'website',
 });
 
@@ -52,59 +49,82 @@ const fromStatic = (a: AuthorProfile): AuthorCardData => ({
 });
 
 /**
- * Editorial masthead. Sourced from the admin-managed cms_authors roster (see
- * admin-platform's CMS → Websites → Authors screen — add up to any number of
- * contributors there, each with a photo/video/bio), falling back to the small
- * static roster in src/config/authors.ts when the CMS has none yet.
+ * Imperialpedia Editorial Masthead Directory Page
  */
 export default async function AuthorsPage() {
   const live = await getPublicAuthors();
-  const authors: AuthorCardData[] = live.length ? live.map(fromCms) : getAllAuthors().map(fromStatic);
+  const rawAuthors: AuthorCardData[] = live.length ? live.map(fromCms) : getAllAuthors().map(fromStatic);
+  const authors = rawAuthors.filter((a) => !isAuthorHiddenInCleanupMode(a.slug));
 
   return (
-    <main className="min-h-screen bg-background pt-16">
+    <main className="min-h-screen bg-[#f9f9fb] dark:bg-black pt-12 pb-20">
       <Section spacing="md">
         <Container>
-          <header className="mb-12 max-w-3xl">
-            <Text variant="label" className="text-primary mb-4">Masthead</Text>
-            <Text variant="h1" as="h1" className="mb-6">Our Authors</Text>
-            <Text variant="body" className="text-muted-foreground text-lg">
-              The writers and analysts researching, reporting, and fact-checking every piece of financial intelligence on Imperialpedia.
-            </Text>
+          {/* ── Imperialpedia Header ── */}
+          <header className="mb-12 max-w-4xl space-y-4">
+            <div className="flex items-center gap-2.5">
+              <span className="bg-[#c8102e] text-white text-xs font-black uppercase tracking-tighter px-3 py-1 -skew-x-12 inline-block shadow-xs">
+                IMPERIALPEDIA MASTHEAD
+              </span>
+              <span className="text-xs font-mono font-black uppercase tracking-widest text-[#c8102e]">
+                // EDITORIAL BOARD &amp; AUTHORS
+              </span>
+            </div>
+
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-black dark:text-white tracking-tighter uppercase font-serif leading-none">
+              OUR AUTHORS &amp; ANALYSTS
+            </h1>
+
+            <div className="border-l-6 border-[#c8102e] bg-white dark:bg-slate-900 p-5 border-3 border-black dark:border-slate-700 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] dark:shadow-[6px_6px_0px_0px_rgba(200,16,46,0.3)]">
+              <p className="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100 leading-relaxed font-sans">
+                The certified financial experts, CFPs, economists, and market analysts researching, reporting, and fact-checking every piece of intelligence on Imperialpedia.
+              </p>
+            </div>
           </header>
 
-          <Grid columns={{ sm: 1, md: 2, lg: 3 }} gap="lg">
+          {/* ── Author Cards Grid ── */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {authors.map((author) => (
               <Link key={author.slug} href={`/authors/${author.slug}`} className="group block h-full">
-                <Card className="glass-card h-full transition-all duration-300 hover:translate-y-[-4px] hover:shadow-xl hover:border-primary/40">
-                  <CardContent className="p-8 flex flex-col items-center text-center gap-4">
-                    <Avatar className="h-24 w-24">
-                      {author.avatarUrl && <AvatarImage src={author.avatarUrl} alt={author.name} />}
-                      <AvatarFallback className="text-xl font-bold bg-primary/10 text-primary">
+                <div className="bg-white dark:bg-slate-900 border-3 border-black dark:border-slate-700 p-6 sm:p-8 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] dark:shadow-[6px_6px_0px_0px_rgba(200,16,46,0.3)] hover:-translate-y-1 transition-all h-full flex flex-col justify-between relative overflow-hidden">
+                  <div className="absolute top-0 left-0 right-0 h-2 bg-[#c8102e]" />
+
+                  <div className="flex flex-col items-center text-center gap-4 pt-2">
+                    <Avatar className="h-24 w-24 border-3 border-black dark:border-white shadow-md">
+                      {author.avatarUrl && <AvatarImage src={author.avatarUrl} alt={author.name} className="object-cover" />}
+                      <AvatarFallback className="text-xl font-black bg-black text-[#c8102e]">
                         {initials(author.name)}
                       </AvatarFallback>
                     </Avatar>
-                    <div>
-                      <Text variant="h4" className="group-hover:text-primary transition-colors">
+                    
+                    <div className="space-y-1">
+                      <span className="bg-black text-white text-[9px] font-mono font-black uppercase tracking-widest px-2 py-0.5 inline-block mb-1">
+                        AUTHOR PROFILE
+                      </span>
+                      <h2 className="text-xl font-black text-black dark:text-white uppercase font-serif group-hover:text-[#c8102e] transition-colors leading-snug">
                         {author.name}
-                      </Text>
-                      <Text variant="bodySmall" className="text-primary font-semibold uppercase tracking-widest text-xs mt-1">
+                      </h2>
+                      <p className="text-xs font-mono font-bold uppercase tracking-wider text-[#c8102e]">
                         {author.title}
-                      </Text>
+                      </p>
                     </div>
+
                     {author.bio && (
-                      <Text variant="bodySmall" className="text-muted-foreground line-clamp-3">
+                      <p className="text-xs text-slate-700 dark:text-slate-300 font-medium leading-relaxed line-clamp-3">
                         {author.bio}
-                      </Text>
+                      </p>
                     )}
-                    <div className="flex items-center gap-1.5 text-primary text-sm font-semibold opacity-0 group-hover:opacity-100 transition-opacity">
-                      View profile <ArrowRight className="w-3.5 h-3.5" />
-                    </div>
-                  </CardContent>
-                </Card>
+                  </div>
+
+                  <div className="mt-6 pt-3 border-t-2 border-slate-200 dark:border-slate-800 text-center">
+                    <span className="text-[11px] font-black uppercase tracking-wider text-[#c8102e] group-hover:text-black dark:group-hover:text-white transition-colors">
+                      VIEW FULL PROFILE →
+                    </span>
+                  </div>
+                </div>
               </Link>
             ))}
-          </Grid>
+          </div>
         </Container>
       </Section>
     </main>

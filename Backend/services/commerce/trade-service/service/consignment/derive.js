@@ -249,7 +249,9 @@ const BUILDERS = Object.freeze({
  * staleness detectable.
  */
 function deriveOne(consignmentInput, docType, { generatedAt = null } = {}) {
-    if (!BUILDERS[docType]) {
+    // Own-property only: `toString`/`constructor` are inherited truthy members of
+    // BUILDERS, so a plain lookup passes this guard and dispatches to them.
+    if (!Object.hasOwn(BUILDERS, docType)) {
         throw new Error(`Unknown derived document type: ${docType}`);
     }
     const c = consignmentInput.schema_version ? consignmentInput : schema.normalize(consignmentInput);
@@ -269,7 +271,7 @@ function deriveOne(consignmentInput, docType, { generatedAt = null } = {}) {
 /** Derive the whole document set from one canonical record. */
 function deriveAll(consignmentInput, { generatedAt = null, only = null } = {}) {
     const c = consignmentInput.schema_version ? consignmentInput : schema.normalize(consignmentInput);
-    const types = only && only.length ? only.filter((t) => BUILDERS[t]) : DOC_TYPES;
+    const types = only && only.length ? only.filter((t) => Object.hasOwn(BUILDERS, t)) : DOC_TYPES;
     return {
         source_hash: sourceHash(c),
         deriver_version: DERIVER_VERSION,

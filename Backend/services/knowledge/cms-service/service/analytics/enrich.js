@@ -16,8 +16,11 @@ function parseUserAgent(ua) {
     if (!s) return { type: 'unknown', os: 'unknown', browser: 'unknown' };
 
     const isBot = /bot|crawler|spider|crawling|facebookexternalhit|slurp|bingpreview/i.test(s);
-    const isTablet = /ipad|tablet|playbook|silk|(android(?!.*mobile))/i.test(s);
-    const isMobile = /mobi|iphone|ipod|android.*mobile|windows phone/i.test(s);
+    // Two separate linear tests rather than `android(?!.*mobile)` / `android.*mobile`:
+    // both rescanned the tail once per "android" occurrence, which is quadratic on a
+    // header the caller sets freely. `mobi` already subsumes `mobile`.
+    const isTablet = /ipad|tablet|playbook|silk/i.test(s) || (/android/i.test(s) && !/mobile/i.test(s));
+    const isMobile = /mobi|iphone|ipod|windows phone/i.test(s);
     const type = isBot ? 'bot' : isTablet ? 'tablet' : isMobile ? 'mobile' : 'desktop';
 
     const os =

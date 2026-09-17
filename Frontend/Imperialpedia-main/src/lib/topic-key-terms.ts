@@ -1,8 +1,8 @@
-import type { KeyTermItem } from "@/components/pages/InvestopediaKeyTerms";
+import type { KeyTermItem } from "@/components/pages/ImperialpediaKeyTerms";
 
 /**
  * Topic-specific, unique financial key terms for each hub.
- * Matching the exact Investopedia interactive glossary architecture.
+ * Matching the exact Imperialpedia interactive glossary architecture.
  */
 export const TOPIC_KEY_TERMS: Record<string, KeyTermItem[]> = {
   // ── 1. BANKING & CREDIT ──
@@ -930,6 +930,203 @@ export const TOPIC_KEY_TERMS: Record<string, KeyTermItem[]> = {
       term: "Data Broker",
       definition: "A company that collects personal information — often from browser cookies, tracking pixels, and app permissions — and sells or licenses it to advertisers, lead generators, or other third parties.",
       href: "/fraud-protection/tracking-cookies-scam-targeting",
+    },
+  ],
+
+  // ── 5. CREATOR ECONOMY ──
+  "creator-economy": [
+    {
+      term: "RPM (Revenue Per Mille)",
+      definition: "The actual net revenue a content creator earns per 1,000 video views or page views after platform fees and unmonetized impressions are deducted.",
+      href: "/youtube-rpm-vs-cpm-explained",
+    },
+    {
+      term: "CPM (Cost Per Mille)",
+      definition: "The gross price advertisers pay per 1,000 ad impressions before platform revenue splits are calculated.",
+      href: "/youtube-rpm-vs-cpm-explained",
+    },
+    {
+      term: "Creator Monetization Split",
+      definition: "The contractual percentage distribution of ad revenue between a hosting platform and the content creator (e.g. YouTube's 55/45 split).",
+      href: "/how-much-does-youtube-pay-per-1000-views",
+    },
+    {
+      term: "Multiple Income Streams",
+      definition: "Diversifying revenue across ad revenue share, direct sponsorships, affiliate marketing, digital products, and recurring fan subscriptions.",
+      href: "/how-to-build-multiple-creator-income-streams",
+    },
+    {
+      term: "Audience Demographics Multiplier",
+      definition: "The variance in ad rates driven by the geographic origin, age, and purchasing power of a creator's audience (e.g., US/UK vs lower-CPM markets).",
+      href: "/creator-economy/calculator",
+    },
+  ],
+
+  "youtube-monetization": [
+    {
+      term: "YouTube Partner Program (YPP)",
+      definition: "YouTube's official monetization program giving creators access to ad revenue sharing, Channel Memberships, Super Chat, and Shorts creator pool funds.",
+      href: "/how-to-qualify-for-youtube-monetization",
+    },
+    {
+      term: "RPM (Revenue Per Mille)",
+      definition: "The metric reflecting what YouTube creators earn per 1,000 total channel views after YouTube takes its ~45% ad revenue share.",
+      href: "/youtube-rpm-vs-cpm-explained",
+    },
+    {
+      term: "CPM (Cost Per Mille)",
+      definition: "The fee advertisers bid per 1,000 ad impressions on a YouTube video, heavily influenced by video niche and advertiser demand.",
+      href: "/youtube-rpm-vs-cpm-explained",
+    },
+    {
+      term: "YouTube Shorts Creator Pool",
+      definition: "A dedicated revenue pool where ad revenue from the Shorts Feed is distributed to eligible creators based on overall view share and music licensing costs.",
+      href: "/how-much-do-youtube-shorts-pay",
+    },
+    {
+      term: "Channel Memberships",
+      definition: "A fan funding feature enabling creators to offer monthly paid subscription tiers ($0.99–$499/mo) in exchange for exclusive badges and members-only perks.",
+      href: "/how-youtube-channel-memberships-work",
+    },
+  ],
+
+  "instagram-monetization": [
+    {
+      term: "Creator Subscriptions",
+      definition: "A native Instagram feature allowing creators to charge followers a monthly fee for exclusive Reels, subscriber-only Posts, Stories, and subscriber badges.",
+      href: "/how-instagram-subscriptions-work-for-creators",
+    },
+    {
+      term: "Sponsored Post / Brand Deal",
+      definition: "A paid agreement between a brand and an Instagram creator to produce dedicated posts, Reels, or Stories promoting a product or service.",
+      href: "/how-creator-sponsorships-and-brand-deals-work",
+    },
+    {
+      term: "Instagram Gifts & Stars",
+      definition: "Virtual micropayment items purchased by followers during Instagram Reels or Live broadcasts that creators convert into cash payouts.",
+      href: "/how-instagram-pays-creators",
+    },
+    {
+      term: "Affiliate Product Tags",
+      definition: "Native shopping features allowing creators to tag commissionable products directly in Reels and Feed posts with automated tracking.",
+      href: "/how-affiliate-marketing-works-for-content-creators",
+    },
+    {
+      term: "Engagement Rate",
+      definition: "The percentage of a creator's follower base that actively likes, comments, saves, or shares content—a primary metric used by brands to calculate deal rates.",
+      href: "/how-instagram-pays-creators",
+    },
+  ],
+
+  "website-monetization": [
+    {
+      term: "Google AdSense",
+      definition: "Google's publisher ad network that places contextual display and native ads on websites, paying publishers ~68% of total advertiser spend.",
+      href: "/how-google-adsense-works",
+    },
+    {
+      term: "Page RPM",
+      definition: "Total estimated ad earnings generated per 1,000 pageviews across all ad placements on a website.",
+      href: "/how-google-adsense-page-rpm-is-calculated",
+    },
+    {
+      term: "Header Bidding",
+      definition: "An advanced programmatic advertising technique where publishers offer ad inventory to multiple ad exchanges simultaneously before calling their primary ad server.",
+      href: "/how-much-can-a-website-earn-from-100000-monthly-visitors",
+    },
+    {
+      term: "Viewability Rate",
+      definition: "The percentage of served ads that actually enter a website visitor's viewport for at least one second, directly affecting advertiser CPM bids.",
+      href: "/how-google-adsense-page-rpm-is-calculated",
+    },
+    {
+      term: "Display Ad Network",
+      definition: "Managed advertising networks (such as Mediavine or Raptive) that manage direct and programmatic ad sales for high-traffic websites.",
+      href: "/how-much-can-a-website-earn-from-100000-monthly-visitors",
+    },
+  ],
+
+  "social-media-earnings": [
+    {
+      term: "TikTok Creator Rewards Program",
+      definition: "TikTok's monetization program that pays creators for original, high-quality videos over 1 minute long based on qualified views and watch time.",
+      href: "/how-much-do-tiktok-creators-make",
+    },
+    {
+      term: "X (Twitter) Creator Revenue Sharing",
+      definition: "A program distributing ad revenue from ads served in replies to verified X Premium subscribers based on organic impression thresholds.",
+      href: "/social-media-earnings",
+    },
+    {
+      term: "Facebook In-Stream Ads",
+      definition: "Ads inserted directly before, during, or after public Facebook videos, sharing ad revenue with creators who meet page eligibility rules.",
+      href: "/how-much-do-facebook-creators-earn",
+    },
+    {
+      term: "Creator Fund",
+      definition: "A fixed pool of money distributed to creators based on relative view volume—historically replaced by dynamic RPM models on major platforms.",
+      href: "/how-much-do-tiktok-creators-make",
+    },
+    {
+      term: "Micropayments & Virtual Tipping",
+      definition: "Platform-native digital currency (e.g. TikTok Coins, X Tips) bought by fans and sent to creators during live streams or on posts.",
+      href: "/social-media-earnings",
+    },
+  ],
+
+  "creator-guides": [
+    {
+      term: "FTC Link Disclosure",
+      definition: "Federal Trade Commission guidelines requiring creators to clearly and conspicuously disclose paid sponsorships, free gifted products, and affiliate links.",
+      href: "/how-creator-sponsorships-and-brand-deals-work",
+    },
+    {
+      term: "Cookie Window",
+      definition: "The designated duration (e.g. 24 hours to 90 days) during which an affiliate link stays active to attribute a customer purchase to the creator.",
+      href: "/how-affiliate-marketing-works-for-content-creators",
+    },
+    {
+      term: "Scope of Work (SOW)",
+      definition: "A formal contract clause in sponsorship agreements specifying exact deliverable counts, formats, posting schedules, and revision rights.",
+      href: "/how-creator-sponsorships-and-brand-deals-work",
+    },
+    {
+      term: "Digital Product Margin",
+      definition: "The profit percentage earned on digital assets (e.g. eBooks, templates, courses) after payment processing fees, usually 90%+.",
+      href: "/how-to-price-digital-products-as-a-creator",
+    },
+    {
+      term: "Media Kit",
+      definition: "A professional summary document highlighting a creator's audience demographics, reach across platforms, engagement metrics, and baseline sponsorship rates.",
+      href: "/how-to-build-multiple-creator-income-streams",
+    },
+  ],
+
+  "creator-tools": [
+    {
+      term: "RPM Calculator",
+      definition: "An interactive tool calculating estimated creator earnings by combining view volume, niche CPM estimates, and platform revenue splits.",
+      href: "/creator-economy/calculator",
+    },
+    {
+      term: "Audience Geography Multiplier",
+      definition: "A weighting algorithm that adjusts estimated ad revenue based on the percentage of views coming from high-CPM countries.",
+      href: "/creator-economy/calculator",
+    },
+    {
+      term: "Monetization Benchmark",
+      definition: "Industry standard baseline numbers used by creators to compare performance against average RPMs and click-through rates.",
+      href: "/creator-tools",
+    },
+    {
+      term: "Ad Impression Rate",
+      definition: "The ratio of views that actually display an ad versus total unmonetized views (e.g., due to ad blockers or inventory limits).",
+      href: "/youtube-rpm-vs-cpm-explained",
+    },
+    {
+      term: "Net Payout Threshold",
+      definition: "The minimum earnings accumulated in a creator account (e.g., $100 for AdSense and YouTube) before a direct deposit is issued.",
+      href: "/how-google-adsense-works",
     },
   ],
 };

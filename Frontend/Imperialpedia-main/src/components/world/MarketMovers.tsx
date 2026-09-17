@@ -5,7 +5,7 @@ function pctAbs(percent: string): number {
   return Number.isFinite(n) ? Math.abs(n) : 0;
 }
 
-/** CNBC-style "Market Movers" strip — the indicators with the biggest
+/** Imperialpedia-style "Market Movers" strip — the indicators with the biggest
  * absolute move, sorted from real live data (no separate fetch needed). */
 export default function MarketMovers({ indicators }: { indicators: Indicator[] }) {
   const movers = [...indicators].sort((a, b) => pctAbs(b.percent) - pctAbs(a.percent)).slice(0, 6);
@@ -30,7 +30,7 @@ export default function MarketMovers({ indicators }: { indicators: Indicator[] }
             </span>
             <span
               className={`text-[10px] sm:text-[11px] font-bold font-mono ${
-                m.positive ? "text-[hsl(var(--cnbc-green))]" : "text-[hsl(var(--cnbc-red))]"
+                m.positive ? "text-[hsl(var(--imperialpedia-green))]" : "text-[hsl(var(--imperialpedia-red))]"
               }`}
             >
               {m.positive ? "▲" : "▼"} {m.percent}

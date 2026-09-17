@@ -27,8 +27,20 @@
   //     Nothing about the site was broken — baalvion.com kept serving the last good
   //     deploy — so it read as harmless red CI while shipping was silently frozen.
   //     Keep the build step here in version control, where review can catch a typo.
+  //
+  // The command builds this app's workspace dependencies before `next build`. Both
+  // @baalvion/company and @baalvion/design resolve their entrypoints through `dist/`, which is
+  // gitignored and only exists once tsup has run. Nothing in the Cloudflare fresh clone runs it,
+  // so from the commit that added the @baalvion/company import onward every build stopped at:
+  //     ./src/components/site-footer.tsx
+  //     Module not found: Can't resolve '@baalvion/company'
+  //     > Build failed because of webpack errors
+  // `<pkg>^...` is pnpm's "dependencies of, excluding the package itself" filter, so a workspace
+  // dependency added later is built without anyone remembering to edit this line.
+  // Deliberately not `turbo run build --filter=...`: that would put `next build` behind Turbo's
+  // strict env mode, which has already silently dropped build-time config on other properties.
   "build": {
-    "command": "npm run build"
+    "command": "pnpm --filter baalvion-com-web^... run build && npm run build"
   },
   "assets": {
     "directory": "./out",

@@ -14,7 +14,7 @@ interface BylineAuthor {
   credentials?: string;
 }
 
-// Shared by every article template — CNBC-style byline: avatar (when the
+// Shared by every article template — Imperialpedia-style byline: avatar (when the
 // author profile has one) + name/title + a caller-supplied published/updated
 // line. Renders without an avatar slot at all when the profile has none, so
 // unstaffed/CMS-only bylines don't leave an empty circle.

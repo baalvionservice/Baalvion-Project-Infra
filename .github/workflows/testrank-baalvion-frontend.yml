@@ -1,0 +1,110 @@
+name: testrank-baalvion Frontend CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'Frontend/testrank-baalvion/**'
+      - '.github/workflows/testrank-baalvion-frontend.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'Frontend/testrank-baalvion/**'
+      - '.github/workflows/testrank-baalvion-frontend.yml'
+
+defaults:
+  run:
+    working-directory: Frontend/testrank-baalvion
+
+jobs:
+  lint-typecheck:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6.1.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        working-directory: .
+        run: pnpm install --frozen-lockfile
+
+      # Workspace packages (e.g. @baalvion/auth-sdk) compile to dist/; build them
+      # so the app typecheck can resolve their published types (mirrors ci.yml).
+      - name: Build workspace packages
+        working-directory: .
+        run: pnpm --filter "./Backend/packages/*" run build
+
+      - name: Type check
+        # tsc --noEmit is clean (next.config no longer ignores build type errors),
+        # so this is a real gate — no error filtering.
+        run: pnpm --filter testrank-baalvion-web typecheck
+
+      - name: Run tests
+        working-directory: .
+        run: pnpm --filter testrank-baalvion-web test --if-present
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: lint-typecheck
+    if: github.ref == 'refs/heads/main'
+
+    env:
+      NEXT_PUBLIC_USE_MOCK: 'false'
+      NEXT_PUBLIC_CTM_API_URL: ${{ secrets.CTM_API_URL || 'http://localhost:3017/api/v1' }}
+      NEXT_PUBLIC_APP_URL: ${{ secrets.CTM_APP_URL || 'http://localhost:3034' }}
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6.1.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        working-directory: .
+        run: pnpm install --frozen-lockfile
+
+      - name: Build workspace packages
+        working-directory: .
+        run: pnpm --filter "./Backend/packages/*" run build
+
+      - name: Build
+        working-directory: .
+        run: pnpm --filter testrank-baalvion-web build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: testrank-baalvion-build
+          path: Frontend/testrank-baalvion/.next
+          retention-days: 7
+
+  notify-ci-failure:
+    name: Notify Slack (CI failure)
+    needs: [lint-typecheck, build]
+    # build only runs on main (if: github.ref == 'refs/heads/main'), so it can be
+    # legitimately 'skipped' on a PR run — only 'failure' should page.
+    if: always() && (needs.lint-typecheck.result == 'failure' || needs.build.result == 'failure')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/slack-notify
+        with:
+          webhook-url: ${{ secrets.SLACK_CI_WEBHOOK }}
+          status: failure
+          title: 'testrank-baalvion Frontend CI/CD'

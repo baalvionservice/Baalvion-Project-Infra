@@ -306,7 +306,7 @@ export const NETWORK_DETAILS: Record<string, NetworkDetail> = {
       { q: 'How are candidates ranked?', a: 'By a dedicated ranking engine that scores real-world task performance, not resume content.' },
       { q: 'Is production data ever mocked?', a: 'No — the hybrid data/mock layer is a local-development convenience only; production sets NEXT_PUBLIC_USE_MOCK=false.' },
     ],
-    sourceNote: 'Sourced from the controlthemarket-main repository README and the live site at controlthemarket.com.',
+    sourceNote: 'Sourced from the testrank-baalvion repository README (formerly controlthemarket-main) and the live site at controlthemarket.com.',
   },
 
   'law-elite-network': {

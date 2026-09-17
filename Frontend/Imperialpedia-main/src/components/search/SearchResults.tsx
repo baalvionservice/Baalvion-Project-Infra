@@ -22,13 +22,13 @@ export const SearchResults = ({ results, loading, onItemClick, query }: SearchRe
   }
 
   if (query && results.length === 0) {
-    // CNBC-style no-results state: plain editorial text behind a red rule,
+    // Imperialpedia-style no-results state: plain editorial text behind a red rule,
     // not a rounded dashed-border card with a big icon — matches the rest
-    // of the site's CNBC re-theme (see components/cnbc/TopNav.tsx) instead
+    // of the site's Imperialpedia re-theme (see components/cnbc/TopNav.tsx) instead
     // of reading like a generic SaaS empty state.
     return (
-      <div className="px-4 py-10 border-t-2 border-[hsl(var(--cnbc-red))]">
-        <Text variant="label" className="text-[hsl(var(--cnbc-red))] text-[10px] font-bold uppercase tracking-[0.2em]">
+      <div className="px-4 py-10 border-t-2 border-[hsl(var(--imperialpedia-red))]">
+        <Text variant="label" className="text-[hsl(var(--imperialpedia-red))] text-[10px] font-bold uppercase tracking-[0.2em]">
           No Results
         </Text>
         <Text variant="bodySmall" weight="bold" className="mt-2">

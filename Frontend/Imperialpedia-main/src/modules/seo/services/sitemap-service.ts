@@ -14,7 +14,9 @@ import { GLOSSARY_LIVE } from "@/config/glossary";
 import { categoryHasLiveContent } from "@/components/pages/CategoryFeed";
 import { REMOVED_ARTICLE_PATHS } from "@/lib/content/removed-article-paths";
 import { isRetiredPath } from "@/lib/content/retired-paths";
+import { isPathHiddenByAdsenseCleanup } from "@/config/adsense-cleanup";
 import {
+  MARKETS_SECTION_LIVE,
   REVIEWS_SECTION_LIVE,
   STOCK_REFERENCE_PAGES_LIVE,
   newsHubIsLive,
@@ -181,7 +183,7 @@ export const sitemapService = {
     };
     const lettersWithTerms = new Set(glossaryTerms.map((t) => letterOf(t.title)));
 
-    // A–Z dictionary hubs (Investopedia-style listing pages). Only letters with at
+    // A–Z dictionary hubs (Imperialpedia-style listing pages). Only letters with at
     // least one real glossary entry are submitted so empty hubs aren't indexed.
     // Skipped entirely while the glossary is offline (see GLOSSARY_LIVE above).
     ["num", ..."abcdefghijklmnopqrstuvwxyz".split("")].forEach((l) => {
@@ -219,10 +221,19 @@ export const sitemapService = {
         return [];
       }
     };
-    const [articles, calcs] = await Promise.all([
+    const [cmsArticles, calcs] = await Promise.all([
       listAllPages(articlesService.getArticles),
       listSafe(calculatorsService.getCalculatorList()),
     ]);
+
+    // Live CMS only — no merge with staticArticleList()'s 478-article backup
+    // catalog. That catalog exists purely as an offline/CMS-down fallback for
+    // page rendering; submitting it to the sitemap meant every article ever
+    // unpublished from the CMS (e.g. the September 2026 Stocks/Budgeting trim
+    // to a curated 10 each) stayed listed forever, since nothing in the static
+    // snapshot ever shrinks. A sitemap is a crawl invitation, not a historical
+    // archive — pre-AdSense-resubmission, it must reflect exactly what's live.
+    const articles = cmsArticles;
 
     // Thin/duplicate articles permanently killed in the 2026-08 SEO cleanup pass (see
     // REMOVED_PATHS in middleware.ts) — excluded here too so a still-published CMS row
@@ -257,6 +268,9 @@ export const sitemapService = {
       "advanced-budgeting", "app-reviews", "auto-loans", "banking-reviews",
       "brokers", "budget-rules", "budgeting-apps", "budgeting-basics", "calendar",
       "cd-rates", "checking", "credit-cards", "crypto",
+      // New category & subtopics (2026-09-11) — Creator Economy hub & subcategories.
+      "creator-economy", "youtube-monetization", "instagram-monetization",
+      "website-monetization", "social-media-earnings", "creator-guides", "creator-tools",
       "cryptocurrency", "debt", "earnings", "emergency-fund",
       "family-budget", "fed", "financial-calculators", "financial-independence",
       // New category (2026-09-04), no articles published yet — gated the same
@@ -286,9 +300,8 @@ export const sitemapService = {
     // against the redirect table first; the content check only decides among
     // slugs that still resolve.
     // /market-news renders the "markets" CMS category under a different route
-    // path, so it can't just be a TOPIC_HUB_SLUGS entry — same gate, resolved
-    // separately.
-    if (await safe(categoryHasLiveContent("markets"), false)) {
+    // path, so it can't just be a TOPIC_HUB_SLUGS entry — gated on MARKETS_SECTION_LIVE.
+    if (MARKETS_SECTION_LIVE && !isRetiredPath("/market-news") && (await safe(categoryHasLiveContent("markets"), false))) {
       entries.push({ loc: `${base}/market-news`, lastmod: today, changefreq: "weekly", priority: 0.7 });
     }
 
@@ -413,11 +426,12 @@ export const sitemapService = {
       if (n?.slug) entries.push({ loc: `${base}${newsArticleHref(n)}`, lastmod: n.publishedAt?.split("T")[0], changefreq: "daily", priority: 0.8 });
     });
 
-    // Dedupe by URL.
+    // Dedupe by URL and filter out paths hidden by AdSense cleanup mode
     const seen = new Set<string>();
     const unique = entries.filter((e) => (seen.has(e.loc) ? false : (seen.add(e.loc), true)));
-    logger.info(`Sitemap collected ${unique.length} URLs in ${Date.now() - start}ms`);
-    return unique;
+    const filtered = unique.filter((e) => !isPathHiddenByAdsenseCleanup(e.loc));
+    logger.info(`Sitemap collected ${filtered.length} URLs in ${Date.now() - start}ms`);
+    return filtered;
   },
 
   /** Cached entry snapshot shared by the index and all shards. */

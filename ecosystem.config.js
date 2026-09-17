@@ -187,7 +187,7 @@ module.exports = {
       GATEWAY_ORIGIN: process.env.GATEWAY_ORIGIN || 'http://localhost:3099',
     }),
     nextApp('brand-web', './Frontend/brand-connector-main', 3035),
-    nextApp('ctm-web', './Frontend/controlthemarket-main', 3034),
+    nextApp('testrank-baalvion-web', './Frontend/testrank-baalvion', 3034),
     nextApp('dashboard-web', './Frontend/company-unified-Dashboard-main', 3024),
     nextApp('gti-web', './Frontend/Global-Trade-Infrastructure-main', 9003),
     nextApp('imperialpedia-web', './Frontend/Imperialpedia-main', 3029),

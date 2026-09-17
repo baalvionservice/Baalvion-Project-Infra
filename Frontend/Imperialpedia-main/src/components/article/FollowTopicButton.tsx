@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Plus, Check } from "lucide-react";
 import { isFollowingTopic, toggleFollowTopic } from "@/lib/followed-topics";
 import { getTopicColor } from "@/lib/topic-colors";

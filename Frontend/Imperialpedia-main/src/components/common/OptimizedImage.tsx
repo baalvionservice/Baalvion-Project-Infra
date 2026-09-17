@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useEffect, useRef } from "react";
+import React, {  useState, useEffect, useRef  } from "react";
 import { getOptimizedImageSizes } from "@/lib/performance";
 
 interface OptimizedImageProps {

@@ -8,8 +8,9 @@
     "start": "next start -p 3070",
     "lint": "eslint .",
     "type-check": "tsc --noEmit",
-    "cf:preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "cf:deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
+    "cf:build": "pnpm --filter baalvion-intelligence-web^... run build && opennextjs-cloudflare build",
+    "cf:preview": "pnpm --filter baalvion-intelligence-web^... run build && opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "cf:deploy": "pnpm --filter baalvion-intelligence-web^... run build && opennextjs-cloudflare build && opennextjs-cloudflare deploy"
   },
   "dependencies": {
     "@baalvion/auth-sdk": "workspace:*",

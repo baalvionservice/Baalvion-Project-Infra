@@ -9,7 +9,7 @@ import {
 import { categoryImage } from "./categoryImage";
 
 /**
- * Region-aware data for the CNBC-style World page
+ * Region-aware data for the Imperialpedia-style World page
  * (imperialpedia.com/world/?region=world).
  *
  * Each region scopes the markets ticker, the dark "Markets Overview" strip,

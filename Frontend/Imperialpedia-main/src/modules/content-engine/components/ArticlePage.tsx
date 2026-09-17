@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, use, Suspense } from "react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import { sanitizeRichHtml } from "@/lib/sanitize";
 import { Container } from "@/design-system/layout/container";
@@ -8,26 +9,36 @@ import { Article } from "../types";
 import { getArticleBySlug } from "../services/content-service";
 import { ArticleHeader } from "./ArticleHeader";
 import { ArticleBody } from "./ArticleBody";
-import { RelatedArticles } from "./RelatedArticles";
 import { SourcesCited } from "./SourcesCited";
 import { Loader2, AlertCircle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import type { ResolvedAuthor, ArticleFeedbackSummary, ArticleComment, ArticlePoll as ArticlePollData } from "@/services/data/cms-public";
-import { HelpfulVote } from "@/components/article/HelpfulVote";
-import { CommentsSection } from "@/components/article/CommentsSection";
 import { RelatedCalculators } from "@/components/article/RelatedCalculators";
-import { WeeklyDigestSignup } from "@/components/article/WeeklyDigestSignup";
-import { ArticleQuiz } from "@/components/article/ArticleQuiz";
-import { ArticlePoll } from "@/components/article/ArticlePoll";
-import { ReadingProgressBar } from "@/components/article/ReadingProgressBar";
-import { StickyShareBar } from "@/components/article/StickyShareBar";
 import { KeyTakeawaysBox } from "@/components/pages/KeyTakeawaysBox";
 import { TableOfContents } from "@/components/article/TableOfContents";
-import { SavingsGoalWidget } from "@/components/article/SavingsGoalWidget";
 import { KeyTermsCallout } from "@/components/article/KeyTermsCallout";
+import { ArticleTopicMesh } from "@/components/article/ArticleTopicMesh";
+import { InlineTopicCallout } from "@/components/article/InlineTopicCallout";
 import { getEditorialGuide } from "@/lib/articles/editorial-guides";
+import { ReadingProgressBar } from "@/components/article/ReadingProgressBar";
+import { StickyShareBar } from "@/components/article/StickyShareBar";
+
+// Below-the-fold / purely-interactive widgets: not needed for first paint or
+// LCP, so they're split out of the article route's initial JS chunk. Grouped
+// into 3 bundles by where they sit in the page rather than one chunk per
+// component — 9 separate chunks for components under ~150 lines each was
+// mostly per-chunk request/parse/hydrate overhead, not payload savings, and
+// measurably increased Total Blocking Time (verified via a live Lighthouse
+// run: 670ms -> 1580ms after the 9-way split).
+const ArticleQuiz = dynamic(() => import("@/components/article/ArticleToolsBundle").then((m) => m.ArticleQuiz));
+const ArticlePoll = dynamic(() => import("@/components/article/ArticleToolsBundle").then((m) => m.ArticlePoll));
+const HelpfulVote = dynamic(() => import("@/components/article/ArticleEngagementBundle").then((m) => m.HelpfulVote));
+const CommentsSection = dynamic(() => import("@/components/article/ArticleEngagementBundle").then((m) => m.CommentsSection));
+const RelatedArticles = dynamic(() => import("./ArticleFooterBundle").then((m) => m.RelatedArticles));
+const WeeklyDigestSignup = dynamic(() => import("./ArticleFooterBundle").then((m) => m.WeeklyDigestSignup));
+const SavingsGoalWidget = dynamic(() => import("@/components/article/SavingsGoalWidget").then((m) => m.SavingsGoalWidget));
 
 interface ArticlePageProps {
   slug: string;
@@ -36,12 +47,41 @@ interface ArticlePageProps {
   reviewer?: ResolvedAuthor | null;
   factChecker?: ResolvedAuthor | null;
   canonicalUrl?: string;
-  feedback?: ArticleFeedbackSummary;
-  comments?: ArticleComment[];
-  poll?: ArticlePollData | null;
+  // Below-the-fold sections stream in independently via Suspense instead of
+  // gating the whole page on their (slower, per-article) CMS round trips.
+  feedback?: Promise<ArticleFeedbackSummary>;
+  comments?: Promise<ArticleComment[]>;
+  poll?: Promise<ArticlePollData | null>;
+  relatedArticles?: Promise<Article[]>;
   marketWidget?: React.ReactNode;
   inlineChart?: React.ReactNode;
   sidebar?: React.ReactNode;
+}
+
+const DEFAULT_FEEDBACK = Promise.resolve<ArticleFeedbackSummary>({ helpful: 0, notHelpful: 0 });
+const DEFAULT_COMMENTS = Promise.resolve<ArticleComment[]>([]);
+const DEFAULT_POLL = Promise.resolve<ArticlePollData | null>(null);
+const DEFAULT_RELATED: Promise<Article[]> = Promise.resolve([]);
+
+function RelatedArticlesSlot({ promise }: { promise: Promise<Article[]> }) {
+  const articles = use(promise);
+  return <RelatedArticles articles={articles} />;
+}
+
+function FeedbackSlot({ promise, slug, categoryName }: { promise: Promise<ArticleFeedbackSummary>; slug: string; categoryName?: string }) {
+  const feedback = use(promise);
+  return <HelpfulVote slug={slug} initialSummary={feedback} categoryName={categoryName} />;
+}
+
+function CommentsSlot({ promise, slug }: { promise: Promise<ArticleComment[]>; slug: string }) {
+  const comments = use(promise);
+  return <CommentsSection slug={slug} initialComments={comments} />;
+}
+
+function PollSlot({ promise, slug, categoryName }: { promise: Promise<ArticlePollData | null>; slug: string; categoryName?: string }) {
+  const poll = use(promise);
+  if (!poll) return null;
+  return <ArticlePoll slug={slug} initialPoll={poll} categoryName={categoryName} />;
 }
 
 const DEFAULT_TAKEAWAYS: Record<string, string[]> = {
@@ -94,7 +134,7 @@ function splitLeadAndBody(html?: string): { leadHtml: string; restHtml: string }
 }
 
 /**
- * Main article page component with Investopedia layout & typography:
+ * Main article page component with Imperialpedia layout & typography:
  * [Sticky Left Table of Contents] | [Center Editorial Content] | [Right Sidebar]
  * Sequence: Title & Byline -> Photo -> 2 Lead Paragraphs -> Key Takeaways -> Body -> Tools
  */
@@ -105,9 +145,10 @@ export const ArticlePage = ({
   reviewer,
   factChecker,
   canonicalUrl,
-  feedback,
-  comments,
-  poll,
+  feedback = DEFAULT_FEEDBACK,
+  comments = DEFAULT_COMMENTS,
+  poll = DEFAULT_POLL,
+  relatedArticles = DEFAULT_RELATED,
   marketWidget,
   inlineChart,
   sidebar,
@@ -273,6 +314,12 @@ export const ArticlePage = ({
               />
             ) : null}
 
+            {/* WIN 3: Inline "Read more on [Topic]" callout — injected mid-article after lead */}
+            <InlineTopicCallout
+              categorySlug={effectiveArticle.categorySlug}
+              categoryName={effectiveArticle.category}
+            />
+
             {/* 3. KEY TAKEAWAYS CALLOUT BOX (Positioned after first 2 paragraphs) */}
             {takeaways && takeaways.length > 0 && (
               <KeyTakeawaysBox items={takeaways} className="my-8" />
@@ -283,7 +330,7 @@ export const ArticlePage = ({
               <SavingsGoalWidget defaultGoal={5000} defaultMonths={12} className="my-8" />
             )}
 
-            {/* 4. REMAINING ARTICLE BODY WITH INVESTOPEDIA-GRADE PROSE TYPOGRAPHY */}
+            {/* 4. REMAINING ARTICLE BODY WITH IMPERIALPEDIA-GRADE PROSE TYPOGRAPHY */}
             {restHtml ? (
               <div
                 className="article-body prose prose-lg dark:prose-invert max-w-none mb-12
@@ -311,19 +358,21 @@ export const ArticlePage = ({
             {/* TOOLS & QUIZZES */}
             <div className="mb-8 space-y-4">
               <RelatedCalculators categorySlug={effectiveArticle.categorySlug} />
-              {poll && <ArticlePoll slug={effectiveArticle.slug} initialPoll={poll} categoryName={effectiveArticle.category} />}
+              <Suspense fallback={null}>
+                <PollSlot promise={poll} slug={effectiveArticle.slug} categoryName={effectiveArticle.category} />
+              </Suspense>
               <ArticleQuiz quiz={effectiveArticle.quiz} categoryName={effectiveArticle.category} />
             </div>
 
             {/* HELPFUL VOTE & COMMENTS */}
-            <HelpfulVote
-              slug={effectiveArticle.slug}
-              initialSummary={feedback ?? { helpful: 0, notHelpful: 0 }}
-              categoryName={effectiveArticle.category}
-            />
+            <Suspense fallback={null}>
+              <FeedbackSlot promise={feedback} slug={effectiveArticle.slug} categoryName={effectiveArticle.category} />
+            </Suspense>
 
             <div className="mt-16 ml-4 lg:ml-8 xl:ml-12">
-              <CommentsSection slug={effectiveArticle.slug} initialComments={comments ?? []} />
+              <Suspense fallback={null}>
+                <CommentsSlot promise={comments} slug={effectiveArticle.slug} />
+              </Suspense>
             </div>
           </div>
 
@@ -335,12 +384,14 @@ export const ArticlePage = ({
           )}
         </div>
 
-        <RelatedArticles
-          currentArticleId={effectiveArticle.id}
-          category={effectiveArticle.category}
-          tags={effectiveArticle.tags}
+        <ArticleTopicMesh
           categorySlug={effectiveArticle.categorySlug}
+          categoryName={effectiveArticle.category}
         />
+
+        <Suspense fallback={null}>
+          <RelatedArticlesSlot promise={relatedArticles} />
+        </Suspense>
 
         <div className="mt-12">
           <WeeklyDigestSignup categoryName={effectiveArticle.category} />

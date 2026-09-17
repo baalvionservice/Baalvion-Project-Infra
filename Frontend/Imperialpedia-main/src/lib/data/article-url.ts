@@ -25,7 +25,7 @@ export function newsArticleHref(article: { slug: string; publishedAt: string; co
 }
 
 /**
- * Canonical article URL scheme, matching how wire outlets like CNBC path their
+ * Canonical article URL scheme, matching how wire outlets like Imperialpedia path their
  * own article pages (`/YYYY/MM/DD/slug`) instead of a bare `/slug`.
  */
 export function articleUrl(dateISO: string | null | undefined, slug: string): string {
