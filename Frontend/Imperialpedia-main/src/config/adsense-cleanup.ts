@@ -27,6 +27,10 @@ export const VERIFIED_AUTHOR_SLUGS = new Set<string>([
   'allen-krewzz',
   'tamanna-shaikh',
   'deepak-kuldeep',
+  // Creator Economy writers (real, name/title/LinkedIn confirmed 2026-09-17).
+  'vishal-mankare',
+  'sasmita-gamel',
+  'bismita-kar',
 ]);
 
 /**

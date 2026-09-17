@@ -53,7 +53,16 @@ const fromStatic = (a: AuthorProfile): AuthorCardData => ({
  */
 export default async function AuthorsPage() {
   const live = await getPublicAuthors();
-  const rawAuthors: AuthorCardData[] = live.length ? live.map(fromCms) : getAllAuthors().map(fromStatic);
+  // Live CMS authors (cms_authors) and the static roster (config/authors.ts) are
+  // two disjoint sources today — see resolveAuthor()/generateStaticParams in
+  // /authors/[slug] for the same merge. A slug present in both prefers the live
+  // record; this previously used the CMS list OR the static list, never both, so
+  // every static-only writer (house writers plus any newly added contributor who
+  // hasn't been mirrored into the CMS) silently never appeared here even though
+  // their own /authors/[slug] page rendered fine.
+  const liveSlugs = new Set(live.map((a) => a.slug));
+  const staticOnly = getAllAuthors().filter((a) => !liveSlugs.has(a.slug));
+  const rawAuthors: AuthorCardData[] = [...live.map(fromCms), ...staticOnly.map(fromStatic)];
   const authors = rawAuthors.filter((a) => !isAuthorHiddenInCleanupMode(a.slug));
 
   return (

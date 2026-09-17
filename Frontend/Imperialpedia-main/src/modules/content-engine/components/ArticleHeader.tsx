@@ -77,9 +77,17 @@ export const ArticleHeader = ({
 
   const readTime = formatReadTime(article.readingTime);
 
+  // Creator Economy runs a single-writer byline with no reviewer/fact-checker —
+  // the generic DEFAULT_REVIEWER/DEFAULT_FACT_CHECKER below exist so older
+  // articles without an explicit reviewerSlug/factCheckerSlug still show a real
+  // named person for E-E-A-T, but forcing them onto this vertical would credit
+  // Julius Mansa/Yarilet Perez with reviewing/fact-checking pieces they never
+  // touched — exactly the fabricated-attribution problem this site is trying to
+  // stop making.
+  const isCreatorEconomy = article.categorySlug === 'creator-economy';
   const effectiveAuthor = author || DEFAULT_AUTHOR;
-  const effectiveReviewer = reviewer || DEFAULT_REVIEWER;
-  const effectiveFactChecker = factChecker || DEFAULT_FACT_CHECKER;
+  const effectiveReviewer = reviewer || (isCreatorEconomy ? null : DEFAULT_REVIEWER);
+  const effectiveFactChecker = factChecker || (isCreatorEconomy ? null : DEFAULT_FACT_CHECKER);
 
   const categoryTitle = (article.category || 'CREATOR ECONOMY').toUpperCase();
 

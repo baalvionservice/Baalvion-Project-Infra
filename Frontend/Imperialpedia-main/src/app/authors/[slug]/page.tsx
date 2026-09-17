@@ -5,9 +5,9 @@ import { Container } from '@/design-system/layout/container';
 import { Section } from '@/design-system/layout/section';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { ArticleList } from '@/modules/content-engine/components';
-import { getArticles, getArticlesByAuthor } from '@/modules/content-engine/services';
-import { staticArticleList } from '@/services/data/static-content';
+import { ContactAuthorModal } from '@/components/article/ContactAuthorModal';
+import { AuthorArticleList } from '@/modules/content-engine/components';
+import { getArticlesByAuthor } from '@/modules/content-engine/services';
 import { getPublicAuthors, resolveAuthor } from '@/services/data/cms-public';
 import { getAllAuthors } from '@/config/authors';
 import { buildMetadata } from '@/lib/seo';
@@ -17,7 +17,7 @@ import { breadcrumbService } from '@/modules/seo-engine/services/breadcrumb-serv
 import { structuredData } from '@/lib/seo/structured-data';
 import { env } from '@/config/env';
 import { Metadata } from 'next';
-import { Twitter, Linkedin, Globe, Facebook, Instagram, PlayCircle, Newspaper } from 'lucide-react';
+import { Twitter, Linkedin, Globe, Facebook, Instagram, PlayCircle, Rss } from 'lucide-react';
 
 interface AuthorPageProps {
   params: Promise<{ slug: string }>;
@@ -66,17 +66,7 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
   }
 
   const byAuthor = await getArticlesByAuthor(author.slug, 1, 100);
-  let articles = byAuthor.data ?? [];
-
-  if (articles.length === 0) {
-    const response = await getArticles(1, 100);
-    const live = response.data ?? [];
-    const bySlug = new Map(staticArticleList().map((a) => [a.slug, a]));
-    for (const a of live) if (!bySlug.has(a.slug)) bySlug.set(a.slug, a);
-    articles = [...bySlug.values()];
-  }
-
-  articles = articles.sort((a, b) => {
+  const articles = (byAuthor.data ?? []).sort((a, b) => {
     const aDate = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
     const bDate = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
     return bDate - aDate;
@@ -151,11 +141,8 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
                 <span className="bg-[#c8102e] text-white text-xs font-black uppercase tracking-tighter px-3 py-1 -skew-x-12 inline-block shadow-sm">
                   IMPERIALPEDIA AUTHOR
                 </span>
-                <span className="bg-[#ffcc00] text-black text-[11px] font-black uppercase tracking-widest px-2.5 py-0.5">
-                  VERIFIED ANALYST
-                </span>
               </div>
-              
+
               <h1 className="text-4xl sm:text-5xl font-black text-white font-serif uppercase tracking-tighter">
                 {author.name}
               </h1>
@@ -207,6 +194,12 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
                     </a>
                   </Button>
                 )}
+                <ContactAuthorModal authorSlug={author.slug} authorName={author.name} />
+                <Button variant="outline" size="icon" className="rounded-full bg-white text-black hover:bg-[#c8102e] hover:text-white border-2 border-black" asChild>
+                  <a href={`/authors/${author.slug}/feed.xml`} title={`RSS feed for ${author.name}`}>
+                    <Rss className="h-4 w-4" />
+                  </a>
+                </Button>
               </div>
             </div>
           </div>
@@ -218,7 +211,7 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
           {/* ── Imperialpedia Profile Details Box ── */}
           <div className="bg-white dark:bg-slate-900 border-3 border-black dark:border-slate-700 p-6 sm:p-10 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(200,16,46,0.3)] space-y-6 pb-10 mb-14 relative rounded-xs">
             <div className="absolute top-0 left-0 right-0 h-2 bg-[#c8102e]" />
-            
+
             <div className="flex items-center gap-2 border-b-2 border-black dark:border-slate-800 pb-3 pt-1">
               <span className="bg-[#c8102e] text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 -skew-x-6">
                 IMPERIALPEDIA DOSSIER
@@ -305,7 +298,7 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
             </span>
           </header>
 
-          <ArticleList articles={articles} />
+          <AuthorArticleList articles={articles} />
         </Container>
       </Section>
     </main>

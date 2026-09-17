@@ -1,10 +1,11 @@
 /**
  * @fileOverview Editorial author registry.
- * Imperialpedia's CMS does not yet attribute individual articles to an author record
- * (see cms-public.ts — content rows carry no reliable author link today), so this is a
- * small static roster rather than a CMS-backed list. Every published article on the site
- * is written, reviewed, or fact-checked by this roster; /authors/[slug] currently shows
- * the full library.
+ * Articles ARE attributed to a real author via CMS `customFields.authorSlug` (see
+ * cms-public.ts's `resolveAuthor`/`getArticlesByAuthor`) — this file is the fallback
+ * roster `resolveAuthor` uses when a slug has no live `cms_authors` record yet, not
+ * the source of truth. Every entry here must correspond to a real person; every
+ * published article on the site is written, reviewed, or fact-checked by someone on
+ * this roster.
  *
  * Three-role editorial byline (E-E-A-T): every article names a writer (`authorSlug`),
  * an editorial reviewer (`reviewerSlug`), and a fact-checker (`factCheckerSlug`) — see
@@ -89,6 +90,39 @@ export const authors: AuthorProfile[] = [
     role: 'fact-checker',
     credentials: 'Editorial Accuracy & Sourcing',
     bio: "Deepak Kuldeep is Imperialpedia's Fact-Checking Editor. He verifies data points, statistics, and cited sources in published articles — rates, figures, and claims are checked against primary sources rather than taken at face value, and anything that can't be verified is corrected or removed before an article is marked fact-checked.",
+  },
+  // Creator Economy vertical writers. Only name, title, and LinkedIn are asserted
+  // here because that's all that's been verified — no education/employer/awards/
+  // follower-count claims are made per the site's content-integrity rule.
+  {
+    slug: 'vishal-mankare',
+    name: 'Vishal Mankare',
+    title: 'Digital Media & Technology Writer',
+    role: 'writer',
+    bio: 'Vishal Mankare is a Digital Media & Technology Writer contributing to Imperialpedia’s Creator Economy coverage, writing about platform monetization, creator income, and digital-media business models.',
+    social: {
+      linkedin: 'https://www.linkedin.com/in/vishal-mankare-137b7641a/',
+    },
+  },
+  {
+    slug: 'sasmita-gamel',
+    name: 'Sasmita Gamel',
+    title: 'Digital Media & Social Media Writer',
+    role: 'writer',
+    bio: 'Sasmita Gamel is a Digital Media & Social Media Writer contributing to Imperialpedia’s Creator Economy coverage, writing about social platform monetization and creator income.',
+    social: {
+      linkedin: 'https://www.linkedin.com/in/sasmitagamel/',
+    },
+  },
+  {
+    slug: 'bismita-kar',
+    name: 'Bismita Kar',
+    title: 'Digital Media & Social Media Writer',
+    role: 'writer',
+    bio: 'Bismita Kar is a Digital Media & Social Media Writer contributing to Imperialpedia’s Creator Economy coverage, writing about social platform monetization and creator income.',
+    social: {
+      linkedin: 'https://www.linkedin.com/in/bismitakar/',
+    },
   },
 ];
 
