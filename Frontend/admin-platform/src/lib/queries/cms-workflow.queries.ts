@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tansta
 import { toast } from 'sonner';
 import { cmsWorkflowApi } from '@/lib/api/cms-workflow';
 import { contentKeys } from './cms-content.queries';
+import { websiteKeys } from './cms-websites.queries';
 import { useCmsStore } from '@/lib/store/cmsStore';
 import type { WorkflowTransitionPayload } from '@/lib/types/cms-workflow.types';
 
@@ -53,6 +54,11 @@ export const useWorkflowTransition = () => {
       qc.invalidateQueries({ queryKey: contentKeys.detail(vars.contentId) });
       qc.invalidateQueries({ queryKey: contentKeys.all });
       qc.invalidateQueries({ queryKey: workflowKeys.all });
+      // Every transition (publish/archive/restore/unpublish/schedule) changes the
+      // published/draft/archived counts the website dashboard shows — without this
+      // the dashboard silently keeps showing pre-transition numbers for up to its
+      // 2-minute staleTime, even right after the action that just changed them.
+      qc.invalidateQueries({ queryKey: websiteKeys.all });
       toast.success('Status updated');
     },
     onError: (e: { message: string }) => toast.error(e.message),
@@ -67,6 +73,7 @@ export const useApproveRequest = () => {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: workflowKeys.all });
       qc.invalidateQueries({ queryKey: contentKeys.all });
+      qc.invalidateQueries({ queryKey: websiteKeys.all });
       toast.success('Request approved');
     },
     onError: (e: { message: string }) => toast.error(e.message),
@@ -81,6 +88,7 @@ export const useRejectRequest = () => {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: workflowKeys.all });
       qc.invalidateQueries({ queryKey: contentKeys.all });
+      qc.invalidateQueries({ queryKey: websiteKeys.all });
       toast.success('Request rejected');
     },
     onError: (e: { message: string }) => toast.error(e.message),

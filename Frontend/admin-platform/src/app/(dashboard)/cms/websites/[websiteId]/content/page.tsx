@@ -1,6 +1,7 @@
 'use client';
 
 import { use, useState, useEffect, useRef, useMemo } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { ColumnDef } from '@tanstack/react-table';
 import {
@@ -58,7 +59,7 @@ import {
   useDismissDeletionRequest,
 } from '@/lib/queries/cms-content.queries';
 import { useWorkflowTransition } from '@/lib/queries/cms-workflow.queries';
-import { useWebsite } from '@/lib/queries/cms-websites.queries';
+import { useWebsite, websiteKeys } from '@/lib/queries/cms-websites.queries';
 import { useCmsPermissions } from '@/lib/queries/cms-permissions.queries';
 import { useWebsiteCategories } from '@/lib/queries/cms-taxonomy.queries';
 import CategoryFilterCombobox from '@/components/cms/CategoryFilterCombobox';
@@ -76,6 +77,7 @@ export default function WebsiteContentPage({
   const { websiteId } = use(params);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const qc = useQueryClient();
   const { setBreadcrumbs } = useUIStore();
   const setActiveWebsiteId = useCmsStore((s) => s.setActiveWebsiteId);
   const setLastContentListUrl = useCmsStore((s) => s.setLastContentListUrl);
@@ -232,6 +234,10 @@ export default function WebsiteContentPage({
         `${ids.length} item${ids.length === 1 ? '' : 's'} ${action === 'publish' ? 'published' : action === 'archive' ? 'archived' : 'deleted'}`,
       );
       await refetch();
+      // Bulk publish/archive/delete change the website dashboard's status counts —
+      // these calls go straight through cmsContentApi (not a mutation hook), so
+      // nothing else invalidates the stats query for them.
+      qc.invalidateQueries({ queryKey: websiteKeys.all });
       setSelectedIds([]);
       setSelectAllMatchingMode(false);
     } catch (e) {
