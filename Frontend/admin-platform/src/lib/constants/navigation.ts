@@ -445,6 +445,12 @@ export const NAVIGATION: NavGroup[] = [
         roles: ['super_admin', 'owner'],
       },
       {
+        title: 'Pending Features',
+        href: '/pending-features',
+        iconName: 'ListTodo',
+        roles: ['super_admin', 'owner', 'admin'],
+      },
+      {
         title: 'Settings',
         href: '/settings',
         iconName: 'Settings',
