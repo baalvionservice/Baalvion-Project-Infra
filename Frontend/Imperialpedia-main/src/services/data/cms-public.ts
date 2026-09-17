@@ -827,6 +827,8 @@ export function cmsContentToArticle(raw: CmsContent, categoryMap?: ReadonlyMap<s
       correctIndex: Number(q.correctIndex),
       explanation: typeof q.explanation === 'string' ? q.explanation : undefined,
     }));
+  const toolField = cf.tool as { type?: unknown } | undefined;
+  const toolType = toolField && typeof toolField.type === 'string' ? toolField.type : undefined;
 
   const guide = getEditorialGuide(raw.slug);
   const cfBody = typeof cf.bodyHtml === 'string' ? cf.bodyHtml : typeof cf.body === 'string' ? cf.body : undefined;
@@ -879,6 +881,7 @@ export function cmsContentToArticle(raw: CmsContent, categoryMap?: ReadonlyMap<s
     faq: faq.length ? faq : undefined,
     entityMentions: raw.entityMentions?.length ? raw.entityMentions : undefined,
     quiz: quiz.length ? quiz : undefined,
+    toolType,
   };
 }
 
