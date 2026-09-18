@@ -30,6 +30,9 @@ interface AuthorCardData {
   title: string;
   bio: string;
   avatarUrl?: string;
+  credentials?: string;
+  education?: string[];
+  certifications?: string[];
 }
 
 const fromCms = (a: CmsAuthor): AuthorCardData => ({
@@ -38,6 +41,9 @@ const fromCms = (a: CmsAuthor): AuthorCardData => ({
   title: a.title || 'Contributor',
   bio: a.bio || '',
   avatarUrl: a.avatarUrl || undefined,
+  credentials: a.credentials || undefined,
+  education: a.education?.length ? a.education : undefined,
+  certifications: a.certifications?.length ? a.certifications : undefined,
 });
 
 const fromStatic = (a: AuthorProfile): AuthorCardData => ({
@@ -116,7 +122,29 @@ export default async function AuthorsPage() {
                       <p className="text-xs font-mono font-bold uppercase tracking-wider text-[#c8102e]">
                         {author.title}
                       </p>
+                      {author.credentials && (
+                        <p className="text-[11px] font-bold text-slate-600 dark:text-slate-400">
+                          {author.credentials}
+                        </p>
+                      )}
                     </div>
+
+                    {(author.education?.length || author.certifications?.length) && (
+                      <div className="w-full space-y-1 text-left border-t border-slate-200 dark:border-slate-800 pt-3">
+                        {author.education?.length ? (
+                          <p className="text-[10px] font-mono text-slate-500 dark:text-slate-500">
+                            <span className="font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">Education: </span>
+                            {author.education.join(' · ')}
+                          </p>
+                        ) : null}
+                        {author.certifications?.length ? (
+                          <p className="text-[10px] font-mono text-slate-500 dark:text-slate-500">
+                            <span className="font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">Certifications: </span>
+                            {author.certifications.join(' · ')}
+                          </p>
+                        ) : null}
+                      </div>
+                    )}
 
                     {author.bio && (
                       <p className="text-xs text-slate-700 dark:text-slate-300 font-medium leading-relaxed line-clamp-3">
