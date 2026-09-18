@@ -30,21 +30,20 @@ export const metadata: Metadata = {
   },
 
   title: {
-    default: "Imperialpedia — The Financial Intelligence Network",
+    default: "Imperialpedia — Personal Finance & Creator Economy Explained",
     template: "%s | Imperialpedia",
   },
 
   description:
-    'Imperialpedia is a financial intelligence and reference platform: an encyclopedic knowledge graph of companies, countries, industries, and technologies alongside live market data and editorially reviewed articles.',
+    'Imperialpedia is an independent financial education platform covering personal finance, stock market investing fundamentals, fraud protection, and the creator economy — written by named contributors with cited sources.',
   keywords: [
-    "financial intelligence",
-    "market analysis",
-    "investment research",
-    "stock market",
-    "economic indicators",
+    "personal finance",
+    "stock market investing",
+    "budgeting",
+    "fraud protection",
+    "creator economy",
     "financial glossary",
     "investing",
-    "personal finance",
     "Imperialpedia",
   ],
 
@@ -71,15 +70,15 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: env.siteUrl,
     siteName: "Imperialpedia",
-    title: "Imperialpedia — The Financial Intelligence Network",
+    title: "Imperialpedia — Personal Finance & Creator Economy Explained",
     description:
-      'An encyclopedic knowledge graph of companies, countries, industries, and technologies, alongside live market data and editorially reviewed articles.',
+      'Independent, reviewed articles on personal finance, stock market investing fundamentals, fraud protection, and the creator economy.',
     images: [
       {
         url: `${env.siteUrl}/og-image.png`,
         width: 1200,
         height: 630,
-        alt: "Imperialpedia — Financial Intelligence",
+        alt: "Imperialpedia — Financial Education",
       },
     ],
   },
@@ -88,9 +87,9 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     site: "@imperialpedia",
     creator: "@imperialpedia",
-    title: "Imperialpedia — The Financial Intelligence Network",
+    title: "Imperialpedia — Personal Finance & Creator Economy Explained",
     description:
-      'An encyclopedic knowledge graph of companies, countries, industries, and technologies, alongside live market data and editorially reviewed articles.',
+      'Independent, reviewed articles on personal finance, stock market investing fundamentals, fraud protection, and the creator economy.',
     images: [`${env.siteUrl}/og-image.png`],
   },
 
