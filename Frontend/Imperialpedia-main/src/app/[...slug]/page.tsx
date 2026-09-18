@@ -487,7 +487,7 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
                 points/byline so it never interrupts the opening read, same
                 "post-content" philosophy as the content-engine article template. */}
             <div className="my-6">
-              <AdSenseUnit slot="8362925887" format="auto" responsive={true} />
+              <AdSenseUnit slot="8086915093" format="auto" responsive={true} />
             </div>
 
             <div className="prose-none">
@@ -499,7 +499,7 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
             {bodyBlocksBottom.length > 0 && (
               <>
                 <div className="my-8">
-                  <AdSenseUnit slot="8362925887" format="auto" responsive={true} />
+                  <AdSenseUnit slot="4123172240" format="auto" responsive={true} />
                 </div>
                 <div className="prose-none">
                   {bodyBlocksBottom.map((block, i) => (
@@ -510,7 +510,7 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
             )}
 
             <div className="my-8">
-              <AdSenseUnit slot="8362925887" format="auto" responsive={true} />
+              <AdSenseUnit slot="7967495593" format="auto" responsive={true} />
             </div>
 
             {article.galleryImages && article.galleryImages.length > 0 && (
@@ -853,7 +853,7 @@ async function BareSlugPage({ slug }: { slug: string }) {
             {/* Post-content unit, same slot/placement pattern used sitewide —
                 never interrupts the primary reading flow. */}
             <div className="my-8">
-              <AdSenseUnit slot="8362925887" format="auto" responsive={true} />
+              <AdSenseUnit slot="7967495593" format="auto" responsive={true} />
             </div>
 
             {article.galleryImages && article.galleryImages.length > 0 && (
