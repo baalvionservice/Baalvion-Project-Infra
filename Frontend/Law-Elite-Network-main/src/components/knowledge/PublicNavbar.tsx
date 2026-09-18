@@ -209,7 +209,7 @@ export function PublicNavbar() {
               <Link href="/maritime-offshore-injury-law" className="hover:text-[#E13131] transition-colors">MARITIME INJURY</Link>
               <Link href="/cruise-ship-passenger-vessel-accidents" className="hover:text-[#E13131] transition-colors">CRUISE SHIP ACCIDENTS</Link>
               <Link href="/personal-injury-lawyer" className="hover:text-[#E13131] transition-colors">PERSONAL INJURY</Link>
-              <Link href="/courtroom" className="hover:text-[#E13131] transition-colors">COURTROOM</Link>
+              <Link href="/law-school-success" className="hover:text-[#E13131] transition-colors">LAW SCHOOL SUCCESS</Link>
             </nav>
           </div>
 
