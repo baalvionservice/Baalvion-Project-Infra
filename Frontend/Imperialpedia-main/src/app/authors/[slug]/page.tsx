@@ -226,10 +226,22 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
                 <dt className="inline font-mono uppercase text-[#c8102e] font-black">TITLE: </dt>
                 <dd className="inline text-slate-900 dark:text-slate-100 font-bold">{author.title}</dd>
               </div>
+              {author.credentials && (
+                <div>
+                  <dt className="inline font-mono uppercase text-[#c8102e] font-black">CREDENTIALS: </dt>
+                  <dd className="inline text-slate-900 dark:text-slate-100 font-bold">{author.credentials}</dd>
+                </div>
+              )}
               {author.education?.length ? (
                 <div>
                   <dt className="inline font-mono uppercase text-[#c8102e] font-black">EDUCATION: </dt>
                   <dd className="inline text-slate-900 dark:text-slate-100 font-bold">{author.education.join(' · ')}</dd>
+                </div>
+              ) : null}
+              {author.certifications?.length ? (
+                <div>
+                  <dt className="inline font-mono uppercase text-[#c8102e] font-black">CERTIFICATIONS: </dt>
+                  <dd className="inline text-slate-900 dark:text-slate-100 font-bold">{author.certifications.join(' · ')}</dd>
                 </div>
               ) : null}
               {author.expertise?.length ? (
