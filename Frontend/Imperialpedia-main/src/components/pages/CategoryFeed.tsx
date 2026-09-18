@@ -13,6 +13,7 @@ import { EditorialArticleGuide } from "@/components/pages/EditorialArticleGuide"
 import { ImperialpediaKeyTerms } from "@/components/pages/ImperialpediaKeyTerms";
 import { ImperialpediaFaqBox } from "@/components/pages/ImperialpediaFaqBox";
 import { ArticleTopicMesh } from "@/components/article/ArticleTopicMesh";
+import { getMeshGroupForSlug, MAJOR_CATEGORY_HUBS } from "@/lib/topic-mesh";
 import { getKeyTermsForTopic } from "@/lib/topic-key-terms";
 import { env } from "@/config/env";
 import { newsArticleHref } from "@/lib/data/article-url";
@@ -217,7 +218,12 @@ export async function CategoryFeed({ slug }: Props) {
         />
 
         {/* 360-Degree Internal Link Mesh for SEO Indexation */}
-        <ArticleTopicMesh categorySlug={slug} categoryName={copy.title} />
+        <ArticleTopicMesh
+          group={getMeshGroupForSlug(slug)}
+          majorHubs={MAJOR_CATEGORY_HUBS}
+          categorySlug={slug}
+          categoryName={copy.title}
+        />
 
         {(() => {
           const liveRelatedReading = (copy.relatedReading ?? []).filter(

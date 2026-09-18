@@ -1,11 +1,14 @@
 import React from "react";
 import Link from "next/link";
-import { SUBTOPIC_FEATURED_GUIDES } from "@/lib/topic-mesh";
-import { topicCopy } from "@/lib/topic-config";
+import type { FeaturedGuide } from "@/lib/topic-mesh";
 
 interface InlineTopicCalloutProps {
-  categorySlug?: string;
-  categoryName?: string;
+  /** Pre-computed server-side (SUBTOPIC_FEATURED_GUIDES[categorySlug]) — see
+   *  ArticleTopicMesh.tsx for why topic-mesh/topic-config never get imported
+   *  directly by this component. */
+  guides?: FeaturedGuide[];
+  label: string;
+  topicHref: string;
 }
 
 /**
@@ -13,16 +16,8 @@ interface InlineTopicCalloutProps {
  * Shows 3 curated guide links. Injected after the lead paragraphs
  * (between paragraphs 2-3).
  */
-export function InlineTopicCallout({
-  categorySlug = "creator-economy",
-  categoryName,
-}: InlineTopicCalloutProps) {
-  const guides = SUBTOPIC_FEATURED_GUIDES[categorySlug];
+export function InlineTopicCallout({ guides, label, topicHref }: InlineTopicCalloutProps) {
   if (!guides || guides.length === 0) return null;
-
-  const copy = topicCopy(categorySlug);
-  const label = categoryName || copy.title;
-  const topicHref = `/${categorySlug}`;
 
   return (
     <aside

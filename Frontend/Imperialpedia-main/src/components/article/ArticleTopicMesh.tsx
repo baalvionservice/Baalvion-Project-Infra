@@ -1,21 +1,35 @@
-"use client";
-
 import React from "react";
 import Link from "next/link";
-import { getMeshGroupForSlug, MAJOR_CATEGORY_HUBS } from "@/lib/topic-mesh";
+import type { MeshGroup } from "@/lib/topic-mesh";
+
+interface MajorHub {
+  label: string;
+  href: string;
+  desc: string;
+}
 
 interface ArticleTopicMeshProps {
+  /** Pre-computed server-side (getMeshGroupForSlug) — never imported/computed
+   *  here. This file has no client-only interactivity (no state, no handlers),
+   *  so it must stay a plain Server-renderable component: the topic-mesh/
+   *  topic-config modules it used to import are ~180KB gzipped of every
+   *  topic's full editorial copy, and pulling that into a "use client" file
+   *  (this used to be one) ships it in the JS bundle of every page site-wide,
+   *  not just the ones that render this component. */
+  group: MeshGroup;
+  majorHubs: MajorHub[];
   categorySlug?: string;
   categoryName?: string;
   className?: string;
 }
 
 export function ArticleTopicMesh({
+  group,
+  majorHubs,
   categorySlug = "creator-economy",
   categoryName,
   className = "",
 }: ArticleTopicMeshProps) {
-  const group = getMeshGroupForSlug(categorySlug);
   const displayLabel = categoryName || group.label;
 
   return (
@@ -152,7 +166,7 @@ export function ArticleTopicMesh({
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            {MAJOR_CATEGORY_HUBS.map((hub) => (
+            {majorHubs.map((hub) => (
               <Link
                 key={hub.href}
                 href={hub.href}

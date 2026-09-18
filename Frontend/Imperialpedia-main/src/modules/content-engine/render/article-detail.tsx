@@ -18,6 +18,8 @@ import { structuredData } from "@/lib/seo/structured-data";
 import { extractFaqFromHtml } from "@/lib/seo/faq-extractor";
 import { staticArticleBySlug } from "@/services/data/static-content";
 import { canonicalService } from "@/modules/seo/services/canonical-service";
+import { getMeshGroupForSlug, MAJOR_CATEGORY_HUBS, SUBTOPIC_FEATURED_GUIDES } from "@/lib/topic-mesh";
+import { topicCopy } from "@/lib/topic-config";
 import { resolveAuthor, getContentRedirectSlug, getArticleFeedback, listArticleComments, getArticlePoll } from "@/services/data/cms-public";
 import { isAllowedImageHost } from "@/lib/safe-image";
 import { getRelatedArticles } from "@/modules/content-engine/services/content-service";
@@ -243,6 +245,17 @@ export async function ArticleDetailContent({ article }: { article: Article }) {
         </Suspense>
       ) : null;
 
+    // Computed server-side and passed down as plain props — ArticlePage.tsx
+    // is a "use client" component, so anything it imports directly (rather
+    // than receiving as a prop) ships to every visitor's browser. topic-mesh/
+    // topic-config hold every category's full editorial copy (~180KB
+    // gzipped); ArticleTopicMesh/InlineTopicCallout only ever needed the
+    // small computed result, not the source data.
+    const meshTopicSlug = article.categorySlug || "creator-economy";
+    const meshGroup = getMeshGroupForSlug(meshTopicSlug);
+    const inlineTopicGuides = SUBTOPIC_FEATURED_GUIDES[meshTopicSlug];
+    const inlineTopicLabel = article.category || topicCopy(meshTopicSlug).title;
+
     return (
       <div className="bg-background min-h-screen">
         {articleSchema && <JsonLd data={articleSchema} />}
@@ -268,6 +281,11 @@ export async function ArticleDetailContent({ article }: { article: Article }) {
             relatedArticles={relatedArticles}
             marketWidget={marketWidget}
             inlineChart={inlineChart}
+            meshGroup={meshGroup}
+            majorHubs={MAJOR_CATEGORY_HUBS}
+            inlineTopicGuides={inlineTopicGuides}
+            inlineTopicLabel={inlineTopicLabel}
+            inlineTopicHref={`/${meshTopicSlug}`}
             sidebar={
               <ArticleSidebar categorySlug={article.categorySlug} categoryLabel={article.category || article.categorySlug || "Finance"} excludeSlug={article.slug} />
             }
