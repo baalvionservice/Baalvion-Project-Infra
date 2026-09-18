@@ -6,7 +6,7 @@ import { getAllAuthors } from "@/config/authors";
 import { isAuthorHiddenInCleanupMode } from "@/config/adsense-cleanup";
 import { HomeSectionHeading } from "./HomeSectionHeading";
 
-const MAX_SHOWN = 6;
+const MAX_SHOWN = 10;
 
 const initials = (name: string) =>
   name
