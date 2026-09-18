@@ -25,6 +25,7 @@ import { getEditorialGuide } from "@/lib/articles/editorial-guides";
 import { ReadingProgressBar } from "@/components/article/ReadingProgressBar";
 import { StickyShareBar } from "@/components/article/StickyShareBar";
 import { AuthorBioCard } from "@/components/article/AuthorBioCard";
+import type { MeshGroup, FeaturedGuide } from "@/lib/topic-mesh";
 
 // Below-the-fold / purely-interactive widgets: not needed for first paint or
 // LCP, so they're split out of the article route's initial JS chunk. Grouped
@@ -59,6 +60,15 @@ interface ArticlePageProps {
   relatedArticles?: Promise<Article[]>;
   marketWidget?: React.ReactNode;
   inlineChart?: React.ReactNode;
+  // Computed server-side in article-detail.tsx and passed down as plain
+  // data — this file is "use client", so importing topic-mesh/topic-config
+  // directly here (rather than receiving their already-computed output)
+  // would ship every category's full editorial copy to every visitor.
+  meshGroup?: MeshGroup;
+  majorHubs?: { label: string; href: string; desc: string }[];
+  inlineTopicGuides?: FeaturedGuide[];
+  inlineTopicLabel?: string;
+  inlineTopicHref?: string;
   sidebar?: React.ReactNode;
 }
 
@@ -155,6 +165,11 @@ export const ArticlePage = ({
   relatedArticles = DEFAULT_RELATED,
   marketWidget,
   inlineChart,
+  meshGroup,
+  majorHubs,
+  inlineTopicGuides,
+  inlineTopicLabel,
+  inlineTopicHref,
   sidebar,
 }: ArticlePageProps) => {
   const [article, setArticle] = useState<Article | null>(
@@ -320,8 +335,9 @@ export const ArticlePage = ({
 
             {/* WIN 3: Inline "Read more on [Topic]" callout — injected mid-article after lead */}
             <InlineTopicCallout
-              categorySlug={effectiveArticle.categorySlug}
-              categoryName={effectiveArticle.category}
+              guides={inlineTopicGuides}
+              label={inlineTopicLabel || effectiveArticle.category || "Imperialpedia"}
+              topicHref={inlineTopicHref || `/${effectiveArticle.categorySlug || ""}`}
             />
 
             {/* 3. KEY TAKEAWAYS CALLOUT BOX (Positioned after first 2 paragraphs) */}
@@ -396,10 +412,14 @@ export const ArticlePage = ({
           )}
         </div>
 
-        <ArticleTopicMesh
-          categorySlug={effectiveArticle.categorySlug}
-          categoryName={effectiveArticle.category}
-        />
+        {meshGroup && (
+          <ArticleTopicMesh
+            group={meshGroup}
+            majorHubs={majorHubs || []}
+            categorySlug={effectiveArticle.categorySlug}
+            categoryName={effectiveArticle.category}
+          />
+        )}
 
         <Suspense fallback={null}>
           <RelatedArticlesSlot promise={relatedArticles} />
