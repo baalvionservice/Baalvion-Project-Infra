@@ -5,6 +5,7 @@
  */
 
 import { siblingsFor, parentFor, topicCopy } from './topic-config';
+import { isRetiredPath } from './content/retired-paths';
 
 export interface FeaturedGuide {
   title: string;
@@ -107,10 +108,9 @@ export const MAJOR_CATEGORY_HUBS: { label: string; href: string; desc: string }[
   { label: 'Investing & Markets', href: '/investing', desc: 'Stocks, ETFs, options & retirement guides.' },
   { label: 'Personal Finance', href: '/personal-finance', desc: 'Budgeting, credit & debt management.' },
   { label: 'Market News', href: '/market-news', desc: 'Daily markets, company earnings & trends.' },
-  { label: 'Economy & Indicators', href: '/economy', desc: 'Fed rates, inflation, GDP & fiscal policy.' },
   { label: 'Product Reviews', href: '/reviews', desc: 'Independent reviews of banks, apps & cards.' },
   { label: 'Budgeting Basics', href: '/budgeting-basics', desc: 'Simple money management frameworks.' },
-];
+].filter((hub) => !isRetiredPath(hub.href));
 
 /**
  * Builds the full internal link mesh (topic cluster + site directory) for a given slug.
@@ -128,9 +128,11 @@ export function getMeshGroupForSlug(categorySlug?: string): MeshGroup {
     const FALLBACK_GROUPS: Record<string, string[]> = {
       'creator-economy': ['creator-economy', 'youtube-monetization', 'instagram-monetization', 'website-monetization', 'social-media-earnings', 'creator-guides', 'creator-tools'],
       banking: ['savings', 'checking', 'cd-rates', 'money-market', 'credit-cards', 'loans', 'mortgages', 'auto-loans', 'student-loans'],
-      'personal-finance': ['budgeting', 'debt', 'credit', 'planning'],
+      'personal-finance': ['budgeting-basics', 'debt', 'credit', 'planning'],
     };
-    const fallbackChildren = FALLBACK_GROUPS[slug] || FALLBACK_GROUPS['creator-economy'];
+    const fallbackChildren = (FALLBACK_GROUPS[slug] || FALLBACK_GROUPS['creator-economy']).filter(
+      (s) => !isRetiredPath(`/${s}`),
+    );
     siblings = fallbackChildren.map((s) => ({ slug: s, label: topicCopy(s).title }));
     parentInfo = { label: topicCopy(slug).title, href: `/${slug}` };
   }
@@ -141,7 +143,10 @@ export function getMeshGroupForSlug(categorySlug?: string): MeshGroup {
   const items: SubcategoryMeshItem[] = siblings.map((sibling) => {
     const copy = topicCopy(sibling.slug);
     const href = `/${sibling.slug}`;
-    const guides = SUBTOPIC_FEATURED_GUIDES[sibling.slug] ?? [
+    const configuredGuides = (SUBTOPIC_FEATURED_GUIDES[sibling.slug] ?? []).filter(
+      (guide) => !isRetiredPath(guide.href),
+    );
+    const guides = configuredGuides.length > 0 ? configuredGuides : [
       {
         title: `${copy.title} Guide & Key Concepts`,
         href,

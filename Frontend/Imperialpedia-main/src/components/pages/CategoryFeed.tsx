@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles } from "@/services/data/cms-public";
-import { staticCategoryNews } from "@/services/data/static-content";
+import { staticCategoryNews, hasMatchedStaticContent } from "@/services/data/static-content";
 import { topicCopy, staticCategoryFor, parentFor, siblingsFor } from "@/lib/topic-config";
 import { getSiteContent } from "@/lib/data/site-content";
 import { ExploreNewsSection } from "@/app/news/ExploreNewsSection";
@@ -17,6 +17,7 @@ import { getKeyTermsForTopic } from "@/lib/topic-key-terms";
 import { env } from "@/config/env";
 import { newsArticleHref } from "@/lib/data/article-url";
 import { isPathHiddenByAdsenseCleanup } from "@/config/adsense-cleanup";
+import { isRetiredPath } from "@/lib/content/retired-paths";
 import Link from "next/link";
 import { FileText } from "lucide-react";
 
@@ -39,7 +40,7 @@ type Props = {
 export async function categoryHasLiveContent(slug: string): Promise<boolean> {
   const live = await getCategoryArticles(slug, 1);
   if (live.length > 0) return true;
-  return staticCategoryNews(slug).length > 0;
+  return hasMatchedStaticContent(slug);
 }
 
 /**
@@ -218,22 +219,27 @@ export async function CategoryFeed({ slug }: Props) {
         {/* 360-Degree Internal Link Mesh for SEO Indexation */}
         <ArticleTopicMesh categorySlug={slug} categoryName={copy.title} />
 
-        {copy.relatedReading && copy.relatedReading.length > 0 && (
-          <div className="mt-10 rounded-2xl border border-border p-6 bg-muted/20">
-            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">
-              Related Reading
-            </p>
-            <ul className="space-y-2">
-              {copy.relatedReading.map((link) => (
-                <li key={link.slug}>
-                  <Link href={`/${link.slug}`} className="text-sm font-semibold text-[#1d4fc4] hover:underline">
-                    {link.anchor}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        {(() => {
+          const liveRelatedReading = (copy.relatedReading ?? []).filter(
+            (link) => !isRetiredPath(`/${link.slug}`),
+          );
+          return liveRelatedReading.length > 0 ? (
+            <div className="mt-10 rounded-2xl border border-border p-6 bg-muted/20">
+              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">
+                Related Reading
+              </p>
+              <ul className="space-y-2">
+                {liveRelatedReading.map((link) => (
+                  <li key={link.slug}>
+                    <Link href={`/${link.slug}`} className="text-sm font-semibold text-[#1d4fc4] hover:underline">
+                      {link.anchor}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null;
+        })()}
 
         {!featured && (
           <div className="py-20 flex flex-col items-center gap-4 text-center">
