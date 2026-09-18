@@ -20,6 +20,7 @@ import { staticArticleBySlug } from "@/services/data/static-content";
 import { canonicalService } from "@/modules/seo/services/canonical-service";
 import { getMeshGroupForSlug, MAJOR_CATEGORY_HUBS, SUBTOPIC_FEATURED_GUIDES } from "@/lib/topic-mesh";
 import { topicCopy } from "@/lib/topic-config";
+import { sanitizeRichHtml } from "@/lib/sanitize";
 import { resolveAuthor, getContentRedirectSlug, getArticleFeedback, listArticleComments, getArticlePoll } from "@/services/data/cms-public";
 import { isAllowedImageHost } from "@/lib/safe-image";
 import { getRelatedArticles } from "@/modules/content-engine/services/content-service";
@@ -39,7 +40,16 @@ export async function resolveArticleForDetail(slug: string): Promise<Article | n
     const response = await articlesService.getArticleBySlug(slug).catch(() => ({ data: null }));
     // Live CMS first; baked snapshot keeps the article available when the CMS is offline.
     const article = (response?.data ?? staticArticleBySlug(slug)) as unknown as Article | null;
-    if (article) return article;
+    if (article) {
+      // Sanitize once, here, server-side. ArticlePage.tsx (a "use client"
+      // component) used to call sanitizeRichHtml() itself at render time —
+      // sanitize-html pulls in htmlparser2 + postcss, ~50KB gzipped of
+      // Node-oriented HTML parsing code with zero reason to ever reach a
+      // browser, and it was shipping on every article page as a result
+      // (confirmed via a live Lighthouse "reduce unused JavaScript" audit).
+      // Every resolveArticleForDetail() caller gets pre-sanitized HTML now.
+      return { ...article, body: article.body ? sanitizeRichHtml(article.body) : article.body };
+    }
 
     // Check editorial masterclass guides
     const editorial = getEditorialGuide(slug);
@@ -49,7 +59,7 @@ export async function resolveArticleForDetail(slug: string): Promise<Article | n
         slug: editorial.slug,
         title: editorial.title,
         description: editorial.description,
-        body: editorial.bodyHtml,
+        body: editorial.bodyHtml ? sanitizeRichHtml(editorial.bodyHtml) : editorial.bodyHtml,
         category: editorial.category ?? "Savings & Budgeting",
         categorySlug: editorial.categorySlug ?? "savings",
         tags: editorial.categorySlug
