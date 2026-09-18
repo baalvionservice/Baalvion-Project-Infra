@@ -40,10 +40,26 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function AboutPage() {
-  return <CmsPage slug="about" eyebrow="About ImperialPedia" fallback={<AboutFallback />} />;
+  return (
+    <CmsPage slug="about" eyebrow="About ImperialPedia" fallback={<AboutFallback />}>
+      <AboutEditorialTeamSection />
+    </CmsPage>
+  );
 }
 
-async function AboutFallback() {
+// Self-contained (own Container/spacing) rather than relying on a parent
+// layout: CmsPage only wraps `children` in its own Container on the
+// live-CMS-content path, not on the `fallback` path (they're mutually
+// exclusive branches), so this needs to look right sitting after either one.
+function AboutEditorialTeamSection() {
+  return (
+    <Container isNarrow className="mt-4 pt-12 pb-8 border-t border-white/10">
+      <AboutEditorialTeam />
+    </Container>
+  );
+}
+
+function AboutFallback() {
   return (
     <main className="min-h-screen bg-background pt-24 pb-32">
       <Container isNarrow>
@@ -121,8 +137,6 @@ async function AboutFallback() {
               </a>
             </div>
           </div>
-
-          <AboutEditorialTeam />
 
           <div className="rounded-3xl border border-primary/20 bg-primary/5 p-8 md:p-10 space-y-4">
             <Text variant="h3" className="text-xl font-bold">
