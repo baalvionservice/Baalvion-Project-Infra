@@ -213,13 +213,28 @@ export function PublicNavbar() {
             </nav>
           </div>
 
-          {/* Center: Logo LAW ELITE NETWORK */}
-          <Link href="/" className="flex items-center gap-2 shrink-0">
-            <span className="font-headline text-2xl font-black tracking-tight text-slate-900 uppercase">
-              LAW ELITE
-            </span>
-            <span className="bg-[#E13131] text-white text-[10px] font-black uppercase tracking-widest px-2 py-0.5">
-              NETWORK
+          {/* Center: Logo — scales mark + LAW ELITE NETWORK wordmark */}
+          <Link href="/" className="flex items-center gap-2.5 shrink-0" aria-label="Law Elite Network – Home">
+            {/* Scales of Justice mark */}
+            <svg viewBox="0 0 64 64" className="h-9 w-9 flex-shrink-0" aria-hidden="true">
+              <rect x="0" y="0" width="64" height="64" fill="#0F2440" rx="4"/>
+              <rect x="8" y="17" width="48" height="6" fill="#F6F4EF"/>
+              <rect x="29" y="23" width="6" height="14" fill="#F6F4EF"/>
+              <polygon points="20,52 44,52 32,37" fill="#F6F4EF"/>
+              <rect x="10" y="23" width="3" height="10" fill="#F6F4EF"/>
+              <rect x="51" y="23" width="3" height="10" fill="#F6F4EF"/>
+              <circle cx="11.5" cy="38" r="9" fill="#C8A24A"/>
+              <circle cx="52.5" cy="38" r="9" fill="#C8A24A"/>
+              <rect x="0" y="57" width="64" height="7" fill="#E13131"/>
+            </svg>
+            {/* Wordmark */}
+            <span className="flex flex-col leading-none">
+              <span className="font-headline text-xl font-black tracking-tight text-[#0F2440] uppercase leading-none">
+                LAW ELITE
+              </span>
+              <span className="bg-[#E13131] text-white text-[9px] font-black uppercase tracking-[0.18em] px-1.5 py-[2px] mt-0.5 leading-none">
+                NETWORK
+              </span>
             </span>
           </Link>
 

@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 100" role="img" aria-label="Law Elite Network">
+  <title>Law Elite Network</title>
+  <!-- Icon: Navy square bg -->
+  <rect x="0" y="0" width="100" height="100" fill="#0F2440" rx="4"/>
+  <!-- Balance beam (horizontal bar) -->
+  <rect x="14" y="26" width="72" height="7" fill="#F6F4EF"/>
+  <!-- Vertical post -->
+  <rect x="46" y="33" width="8" height="18" fill="#F6F4EF"/>
+  <!-- Fulcrum (downward triangle) -->
+  <polygon points="38,72 62,72 50,58" fill="#F6F4EF"/>
+  <!-- Left chain -->
+  <rect x="18" y="33" width="3" height="13" fill="#F6F4EF"/>
+  <!-- Right chain -->
+  <rect x="79" y="33" width="3" height="13" fill="#F6F4EF"/>
+  <!-- Left pan (gold circle) -->
+  <circle cx="19.5" cy="53" r="12" fill="#C8A24A"/>
+  <!-- Right pan (gold circle) -->
+  <circle cx="80.5" cy="53" r="12" fill="#C8A24A"/>
+
+  <!-- Wordmark: LAW ELITE -->
+  <text
+    x="118"
+    y="52"
+    font-family="'Libre Franklin', 'Franklin Gothic Medium', Arial Narrow, Arial, sans-serif"
+    font-size="34"
+    font-weight="900"
+    fill="#0F2440"
+    letter-spacing="-0.5"
+    dominant-baseline="auto"
+  >LAW ELITE</text>
+
+  <!-- NETWORK red badge -->
+  <rect x="118" y="60" width="298" height="30" fill="#E13131" rx="2"/>
+  <text
+    x="267"
+    y="81"
+    font-family="'Libre Franklin', 'Franklin Gothic Medium', Arial Narrow, Arial, sans-serif"
+    font-size="17"
+    font-weight="900"
+    fill="#FFFFFF"
+    letter-spacing="3"
+    text-anchor="middle"
+    dominant-baseline="auto"
+  >NETWORK</text>
+</svg>

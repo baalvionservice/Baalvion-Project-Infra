@@ -58,14 +58,30 @@ export function PublicFooter() {
 
             {/* Left: Branding & Newsletter */}
             <div className="md:col-span-4 space-y-6 md:space-y-10">
-              <Link href="/" className="flex items-center gap-3 group">
-                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-2xl">
-                  <LawEliteMark className="w-6 h-6" />
-                </div>
-                <span className="text-3xl font-bold tracking-tighter font-serif">
-                  Law <span className="text-white/90">Elite</span>
+              <Link href="/" className="flex items-center gap-2.5 group" aria-label="Law Elite Network – Home">
+                {/* Scales of Justice mark */}
+                <svg viewBox="0 0 64 64" className="h-10 w-10 flex-shrink-0" aria-hidden="true">
+                  <rect x="0" y="0" width="64" height="64" fill="#0F2440" rx="4"/>
+                  <rect x="8" y="17" width="48" height="6" fill="#F6F4EF"/>
+                  <rect x="29" y="23" width="6" height="14" fill="#F6F4EF"/>
+                  <polygon points="20,52 44,52 32,37" fill="#F6F4EF"/>
+                  <rect x="10" y="23" width="3" height="10" fill="#F6F4EF"/>
+                  <rect x="51" y="23" width="3" height="10" fill="#F6F4EF"/>
+                  <circle cx="11.5" cy="38" r="9" fill="#C8A24A"/>
+                  <circle cx="52.5" cy="38" r="9" fill="#C8A24A"/>
+                  <rect x="0" y="57" width="64" height="7" fill="#E13131"/>
+                </svg>
+                {/* Wordmark */}
+                <span className="flex flex-col leading-none">
+                  <span className="font-headline text-xl font-black tracking-tight text-white uppercase leading-none">
+                    LAW ELITE
+                  </span>
+                  <span className="bg-[#E13131] text-white text-[9px] font-black uppercase tracking-[0.18em] px-1.5 py-[2px] mt-0.5 leading-none">
+                    NETWORK
+                  </span>
                 </span>
               </Link>
+
 
               <div className="space-y-6">
                 <FooterNewsletterForm />
