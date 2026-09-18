@@ -1,3 +1,5 @@
+import { isRetiredPath } from "@/lib/content/retired-paths";
+
 /**
  * Resolves the real canonical href for a `NewsArticle`-shaped card. The same
  * shape is used for both dated news (canonical `/YYYY/MM/DD/slug`) and
@@ -12,8 +14,12 @@ export function newsArticleHref(article: { slug: string; publishedAt: string; co
     // A guide's permalink lives under its real CMS category (e.g. /bonds/<slug>)
     // so browsing from /bonds and opening an article stays under /bonds, not a
     // flat /financial-intelligence/ bucket disconnected from the topic hub.
-    // Falls back to the legacy bucket only for rows with no category assigned.
-    return article.categorySlug ? `/${article.categorySlug}/${article.slug}` : `/financial-intelligence/${article.slug}`;
+    // Falls back to the legacy bucket for rows with no category, or whose CMS
+    // category is a slug we've since retired — the CMS record was never
+    // re-categorized when the category was consolidated away, so building the
+    // URL from it verbatim would 30x straight back to the homepage.
+    const category = article.categorySlug && !isRetiredPath(`/${article.categorySlug}`) ? article.categorySlug : null;
+    return category ? `/${category}/${article.slug}` : `/financial-intelligence/${article.slug}`;
   }
   // Country-level world news (both region + country tagged) gets the nested
   // permalink, one level deeper again when a state/province is also tagged;
