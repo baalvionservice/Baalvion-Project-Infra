@@ -135,18 +135,18 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
                 </div>
 
                 {/* Main Headline */}
-                <h1 className="font-headline text-3xl md:text-5xl font-black text-slate-900 tracking-tight leading-[1.08] my-3">
+                <h1 className="font-headline text-[2rem] md:text-[2.75rem] lg:text-[3rem] font-black text-slate-900 tracking-[-0.02em] leading-[1.07] my-3">
                   {article.title}
                 </h1>
 
                 {/* Byline & Metadata Bar */}
                 <div className="flex flex-wrap items-center justify-between gap-4 py-3 border-y border-slate-200">
-                  <div className="flex flex-wrap items-center gap-2 text-xs md:text-sm text-slate-900">
-                    <span className="font-bold">By {authorName}</span>
+                  <div className="flex flex-wrap items-center gap-2 text-[12px] text-slate-700">
+                    <span className="font-bold uppercase tracking-wide">By {authorName}</span>
                     {updatedAt && (
                       <>
                         <span className="text-slate-300">|</span>
-                        <span className="text-slate-500">Published {updatedAt}</span>
+                        <span className="text-slate-500">{updatedAt}</span>
                       </>
                     )}
                     <span className="text-slate-300">|</span>

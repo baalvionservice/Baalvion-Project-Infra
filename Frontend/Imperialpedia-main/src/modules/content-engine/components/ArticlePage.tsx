@@ -24,6 +24,7 @@ import { InlineTopicCallout } from "@/components/article/InlineTopicCallout";
 import { getEditorialGuide } from "@/lib/articles/editorial-guides";
 import { ReadingProgressBar } from "@/components/article/ReadingProgressBar";
 import { StickyShareBar } from "@/components/article/StickyShareBar";
+import { AuthorBioCard } from "@/components/article/AuthorBioCard";
 
 // Below-the-fold / purely-interactive widgets: not needed for first paint or
 // LCP, so they're split out of the article route's initial JS chunk. Grouped
@@ -376,6 +377,9 @@ export const ArticlePage = ({
             <Suspense fallback={null}>
               <FeedbackSlot promise={feedback} slug={effectiveArticle.slug} categoryName={effectiveArticle.category} />
             </Suspense>
+
+            {/* ABOUT THE AUTHOR — E-E-A-T: who wrote this, and who reviewed/fact-checked it */}
+            <AuthorBioCard author={author} reviewer={reviewer} factChecker={factChecker} />
 
             <div className="mt-16 ml-4 lg:ml-8 xl:ml-12">
               <Suspense fallback={null}>

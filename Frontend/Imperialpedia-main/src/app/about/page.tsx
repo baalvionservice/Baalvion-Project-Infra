@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Target, BookOpen, Sparkles, Mail } from 'lucide-react';
 import { CmsPage } from '@/components/pages/CmsPage';
 import { getCmsPage } from '@/services/data/cms-public';
+import { AboutEditorialTeam } from '@/components/about/AboutEditorialTeam';
 
 // Managed in the CMS (admin-platform). ISR instead of force-dynamic: content here
 // changes on the order of months, not requests, and the on-publish webhook
@@ -42,7 +43,7 @@ export default async function AboutPage() {
   return <CmsPage slug="about" eyebrow="About ImperialPedia" fallback={<AboutFallback />} />;
 }
 
-function AboutFallback() {
+async function AboutFallback() {
   return (
     <main className="min-h-screen bg-background pt-24 pb-32">
       <Container isNarrow>
@@ -120,6 +121,8 @@ function AboutFallback() {
               </a>
             </div>
           </div>
+
+          <AboutEditorialTeam />
 
           <div className="rounded-3xl border border-primary/20 bg-primary/5 p-8 md:p-10 space-y-4">
             <Text variant="h3" className="text-xl font-bold">

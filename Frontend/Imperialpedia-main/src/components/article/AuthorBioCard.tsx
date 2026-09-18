@@ -73,6 +73,33 @@ export function AuthorBioCard({
         </div>
       </div>
 
+      {/* Credentials — the concrete, checkable expertise signal (certifications,
+          academic background) that separates a named author from an anonymous
+          byline; author.credentials/.education/.certifications come straight
+          from the CMS author record, never invented here. */}
+      {author && (author.credentials || author.education?.length || author.certifications?.length) && (
+        <dl className="grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-3 pt-5 border-t-2 border-black dark:border-slate-800 text-xs">
+          {author.credentials && (
+            <div>
+              <dt className="font-mono font-bold text-slate-500 uppercase text-[10px] tracking-wider">Credentials</dt>
+              <dd className="font-bold text-black dark:text-white mt-0.5">{author.credentials}</dd>
+            </div>
+          )}
+          {author.education?.length ? (
+            <div>
+              <dt className="font-mono font-bold text-slate-500 uppercase text-[10px] tracking-wider">Education</dt>
+              <dd className="font-bold text-black dark:text-white mt-0.5">{author.education.join(" · ")}</dd>
+            </div>
+          ) : null}
+          {author.certifications?.length ? (
+            <div>
+              <dt className="font-mono font-bold text-slate-500 uppercase text-[10px] tracking-wider">Certifications</dt>
+              <dd className="font-bold text-black dark:text-white mt-0.5">{author.certifications.join(" · ")}</dd>
+            </div>
+          ) : null}
+        </dl>
+      )}
+
       {/* Reviewer and Fact-Checker Badges (E-E-A-T) */}
       {(reviewer || factChecker) && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-5 border-t-2 border-black dark:border-slate-800">

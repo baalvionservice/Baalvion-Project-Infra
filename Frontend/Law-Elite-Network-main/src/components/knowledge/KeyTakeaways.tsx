@@ -1,22 +1,46 @@
 import React from 'react';
 
 /**
- * Renders the editor-authored key-takeaways list (see
- * `src/lib/seo/key-takeaways-extractor.ts`) as its own top-level section
- * after the article body, using the existing Investopedia-style
- * `.key-takeaways` box from globals.css. Only ever shows bullets an editor
- * actually wrote -- never generated from the surrounding prose -- so an
- * article with no such block simply renders nothing here.
+ * Page Six Editorial Key Takeaways Module.
+ * Black header bar with white uppercase label + red top-border rule.
+ * Numbered badges with serif body text, divider lines between items.
  */
 export function KeyTakeaways({ items }: { items: string[] }) {
   if (items.length === 0) return null;
 
   return (
-    <section className="key-takeaways scroll-mt-32" id="key-takeaways" aria-labelledby="key-takeaways-heading">
-      <h2 id="key-takeaways-heading">Key Takeaways</h2>
+    <section
+      className="key-takeaways scroll-mt-32"
+      id="key-takeaways"
+      aria-labelledby="key-takeaways-heading"
+    >
+      <h2 id="key-takeaways-heading">KEY TAKEAWAYS</h2>
+
       <ul>
         {items.map((item, i) => (
-          <li key={i}>{item}</li>
+          <li key={i}>
+            {/* Numbered badge */}
+            <span
+              aria-hidden="true"
+              style={{
+                flexShrink: 0,
+                width: '1.375rem',
+                height: '1.375rem',
+                background: '#E13131',
+                color: '#fff',
+                fontFamily: 'var(--font-headline)',
+                fontSize: '0.625rem',
+                fontWeight: 900,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginTop: '0.2rem',
+              }}
+            >
+              {i + 1}
+            </span>
+            <span>{item}</span>
+          </li>
         ))}
       </ul>
     </section>
