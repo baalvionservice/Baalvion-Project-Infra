@@ -1,6 +1,6 @@
 import React from "react";
 import "./globals.css";
-import { Metadata } from "next";
+import { Metadata, Viewport } from "next";
 import { env } from "@/config/env";
 import { Source_Serif_4, Figtree } from "next/font/google";
 import localFont from "next/font/local";
@@ -17,6 +17,18 @@ import { structuredData } from "@/lib/seo/structuredData";
 
 const CMS_SLUG =
   process.env.NEXT_PUBLIC_CMS_SITE_SLUG || "imperialpedia";
+
+// Next.js always emits its own default <meta name="viewport"> tag for the
+// App Router regardless of whether one is configured here — the manual
+// <meta name="viewport"> that used to sit in this file's <head> JSX (below)
+// meant the page shipped two conflicting viewport tags. Declaring it here
+// instead makes this the one source Next dedupes against.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#ffffff",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.siteUrl),
@@ -256,13 +268,6 @@ export default async function RootLayout({
             script. See PreferredSourceButton for where the matching
             [google-add-preferred-source-btn] element renders. */}
         <script async src="https://news.google.com/swg/js/v1/publisher.js" />
-
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1, viewport-fit=cover"
-        />
-
-        <meta name="theme-color" content="#ffffff" />
       </head>
 
       <body className="font-ui bg-background text-foreground antialiased min-h-screen flex flex-col">
