@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { Container } from '@/design-system/layout/container';
 import { Text } from '@/design-system/typography/text';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -18,15 +19,13 @@ import { CalculatorResultModal } from '@/modules/calculators/components/Calculat
 import { CalculatorHeader } from '@/components/financial-tools/CalculatorHeader';
 import { PieChart as PieIcon, TrendingUp, CheckCircle2, Loader2, HelpCircle } from 'lucide-react';
 import { useCalculatorStore } from '@/lib/state/calculator-store';
-import { 
-  AreaChart, 
-  Area, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip as RechartsTooltip, 
-  ResponsiveContainer 
-} from 'recharts';
+
+// recharts is heavy (~100KB gzipped) — dynamic() splits it into its own
+// chunk instead of shipping it in every page's shared bundle (see
+// InvestmentGrowthChart.tsx for why this matters).
+const InvestmentGrowthChart = dynamic(() =>
+  import('./InvestmentGrowthChart').then((m) => m.InvestmentGrowthChart),
+);
 
 export default function InvestmentClient() {
   const { investment, updateInvestment, resetCalculator } = useCalculatorStore();
@@ -248,21 +247,7 @@ export default function InvestmentClient() {
                   <Skeleton className="h-[350px] w-full" />
                 ) : chartData.length > 0 ? (
                   <div className="h-[350px] w-full pt-4">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={chartData}>
-                        <defs>
-                          <linearGradient id="colorBalance" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#1d4fc4" stopOpacity={0.25}/>
-                            <stop offset="95%" stopColor="#1d4fc4" stopOpacity={0}/>
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
-                        <XAxis dataKey="year" stroke="#9ca3af" fontSize={10} tickLine={false} axisLine={false} label={{ value: 'Years', position: 'insideBottom', offset: -5, fontSize: 10 }} />
-                        <YAxis stroke="#9ca3af" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(val) => `$${val / 1000}k`} />
-                        <RechartsTooltip contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #f3f4f6', borderRadius: '12px' }} formatter={(value: number) => [formatCurrency(value), 'Capital Maturity']} />
-                        <Area type="monotone" dataKey="balance" stroke="#1d4fc4" fillOpacity={1} fill="url(#colorBalance)" strokeWidth={2.5} />
-                      </AreaChart>
-                    </ResponsiveContainer>
+                    <InvestmentGrowthChart data={chartData} formatCurrency={formatCurrency} />
                   </div>
                 ) : (
                   <div className="text-center space-y-4 opacity-50">
