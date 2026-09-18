@@ -12,7 +12,7 @@ export function KeyTakeaways({ items }: { items: string[] }) {
   if (items.length === 0) return null;
 
   return (
-    <section className="key-takeaways" aria-labelledby="key-takeaways-heading">
+    <section className="key-takeaways scroll-mt-32" id="key-takeaways" aria-labelledby="key-takeaways-heading">
       <h2 id="key-takeaways-heading">Key Takeaways</h2>
       <ul>
         {items.map((item, i) => (

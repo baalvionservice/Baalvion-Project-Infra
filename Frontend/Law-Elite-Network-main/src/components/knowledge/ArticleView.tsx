@@ -264,14 +264,14 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
                 </figure>
               </header>
 
+              <KeyTakeaways items={keyTakeaways} />
+
               <ArticleAdWrapper wordCount={wordCount} enableAds={true}>
                 <div
                   className="prose-legal max-w-none pt-8"
                   dangerouslySetInnerHTML={{ __html: bodyHtml }}
                 />
               </ArticleAdWrapper>
-
-              <KeyTakeaways items={keyTakeaways} />
 
               <ImportantNotice />
 

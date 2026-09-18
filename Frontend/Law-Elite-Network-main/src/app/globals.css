@@ -152,7 +152,7 @@
   left: 0;
   width: 40%;
   height: 3px;
-  background-color: #ff6b6b; /* signature coral */
+  background-color: #E13131; /* Page Six signature red */
 }
 
 .key-takeaways::after {
@@ -162,7 +162,7 @@
   right: 0;
   width: 40%;
   height: 3px;
-  background-color: #ff6b6b;
+  background-color: #E13131;
 }
 
 .key-takeaways h2 {
