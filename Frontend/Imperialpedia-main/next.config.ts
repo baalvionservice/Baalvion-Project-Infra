@@ -551,7 +551,13 @@ const nextConfig: NextConfig = {
     formats: ["image/webp", "image/avif"],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    minimumCacheTTL: 60,
+    // Was 60s — article artwork is generated once at publish time and rarely
+    // changes after, so a 1-minute TTL bought nothing for freshness while
+    // actively working against search-engine image indexing: a crawler that
+    // re-fetches a "stale" /_next/image URL every visit gets deprioritized
+    // relative to one with stable, cacheable image URLs. Matches the
+    // /images/* Cache-Control policy above.
+    minimumCacheTTL: 86400,
     // Every SVG served through next/image here is our own deterministically generated
     // artwork (@baalvion/illustrations) — never user-uploaded — so it's safe to allow;
     // `contentSecurityPolicy` below still sandboxes the optimized-image response.

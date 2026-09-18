@@ -49,6 +49,15 @@ export interface SitemapEntry {
     | "yearly"
     | "never";
   priority?: number;
+  /**
+   * The real, direct image URL (never a data: URI, never the /_next/image
+   * proxy) for the Google Images sitemap extension. Pages render images
+   * through /_next/image?url=...&w=...&q=..., a dynamically parameterized
+   * URL Google's own docs call out as unreliable for image discovery —
+   * this is the documented fix: point the image sitemap at the stable
+   * origin file instead.
+   */
+  image?: { loc: string; title?: string };
 }
 
 /** Max URLs per shard. Google's hard limit is 50,000 / 50MB — stay safely under. */
@@ -60,6 +69,17 @@ let entriesCache: { at: number; entries: SitemapEntry[] } | null = null;
 
 function baseUrl(): string {
   return env.siteUrl.endsWith("/") ? env.siteUrl.slice(0, -1) : env.siteUrl;
+}
+
+/**
+ * The image sitemap extension needs a real, absolute, directly-fetchable
+ * image URL — never the generated data: URI fallback (safeImageUrl's
+ * last resort for a row with no uploaded artwork; meaningless in a sitemap,
+ * since it isn't a URL Google can crawl at all).
+ */
+function articleImage(url: string | undefined | null, title: string | undefined): { loc: string; title?: string } | undefined {
+  if (!url || url.startsWith("data:")) return undefined;
+  return { loc: url, title: title || undefined };
 }
 
 function escapeXml(s: string): string {
@@ -252,6 +272,7 @@ export const sitemapService = {
         lastmod: article.publishedAt?.split("T")[0] || today,
         changefreq: "weekly",
         priority: 0.8,
+        image: articleImage(article.featuredImage, article.title),
       });
     });
 
@@ -437,7 +458,13 @@ export const sitemapService = {
       // the homepage, the exact "page with redirect" pattern that has
       // already caused an AdSense rejection once.
       if (isRetiredPath(href)) return;
-      entries.push({ loc: `${base}${href}`, lastmod: n.publishedAt?.split("T")[0], changefreq: "daily", priority: 0.8 });
+      entries.push({
+        loc: `${base}${href}`,
+        lastmod: n.publishedAt?.split("T")[0],
+        changefreq: "daily",
+        priority: 0.8,
+        image: articleImage(n.imageUrl, n.title),
+      });
     });
 
     // Dedupe by URL and filter out paths hidden by AdSense cleanup mode
@@ -492,11 +519,11 @@ export const sitemapService = {
     const xmlEntries = entries
       .map(
         (entry) => `  <url>
-    <loc>${escapeXml(entry.loc)}</loc>${entry.lastmod ? `\n    <lastmod>${entry.lastmod}</lastmod>` : ""}${entry.changefreq ? `\n    <changefreq>${entry.changefreq}</changefreq>` : ""}${entry.priority != null ? `\n    <priority>${entry.priority.toFixed(1)}</priority>` : ""}
+    <loc>${escapeXml(entry.loc)}</loc>${entry.lastmod ? `\n    <lastmod>${entry.lastmod}</lastmod>` : ""}${entry.changefreq ? `\n    <changefreq>${entry.changefreq}</changefreq>` : ""}${entry.priority != null ? `\n    <priority>${entry.priority.toFixed(1)}</priority>` : ""}${entry.image ? `\n    <image:image>\n      <image:loc>${escapeXml(entry.image.loc)}</image:loc>${entry.image.title ? `\n      <image:title>${escapeXml(entry.image.title)}</image:title>` : ""}\n    </image:image>` : ""}
   </url>`,
       )
       .join("\n");
-    return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${xmlEntries}\n</urlset>`;
+    return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${xmlEntries}\n</urlset>`;
   },
 
   /** Back-compat: full flat urlset (unused by the sharded routes). */
