@@ -187,61 +187,73 @@ export function PublicNavbar() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-[9999] bg-white shadow-[0_1px_0_rgba(15,23,42,0.08)]">
-      {/* Brand accent hairline — zero-height overlay so the header stays 96px. */}
-      <div className="absolute top-0 inset-x-0 h-[3px] z-20 bg-gradient-to-r from-[#0B1F3A] via-blue-700 to-news-600" />
+      {/* Brand accent hairline */}
+      <div className="absolute top-0 inset-x-0 h-[3px] z-20 bg-[#E13131]" />
 
       {/* ── Tier 1: brand + utilities ─────────────────────────────── */}
-      <div className="border-b border-slate-100">
+      <div className="border-b border-slate-200">
         <div className="container mx-auto px-4 sm:px-6 max-w-7xl h-[60px] flex items-center justify-between gap-4">
-          <Link href="/" className="flex items-center gap-3 shrink-0 group">
-            <div className="w-10 h-10 rounded-md bg-[#0F2440] flex items-center justify-center shadow-sm group-hover:bg-blue-900 transition-colors">
-              <LawEliteMark variant="white" className="w-6 h-6" />
-            </div>
-            <div className="flex flex-col -space-y-0.5">
-              <span className="font-headline text-[1.35rem] font-extrabold tracking-tight text-slate-900 leading-none">
-                Law Elite
-              </span>
-              <span className="text-[9px] font-bold uppercase tracking-[0.34em] text-news-600">
-                Network
-              </span>
-            </div>
-          </Link>
-
-          <div className="hidden md:block flex-1 max-w-md mx-4">
-            <SearchBar variant="navbar" />
+          
+          {/* Left: SECTIONS + links */}
+          <div className="flex items-center gap-5 shrink-0">
+            <button
+              onClick={() => (isMobileMenuOpen ? closeMobileMenu() : setIsMobileMenuOpen(true))}
+              className="flex items-center gap-2 text-slate-900 hover:text-[#E13131] transition-colors"
+              aria-label="Sections menu"
+            >
+              <Menu className="w-5 h-5 text-slate-900" />
+              <span className="text-xs font-black uppercase tracking-wider">SECTIONS</span>
+            </button>
+            <nav className="hidden xl:flex items-center gap-4 text-xs font-black uppercase tracking-tight text-slate-900">
+              <Link href="/news" className="hover:text-[#E13131] transition-colors">NEWS</Link>
+              <Link href="/maritime-offshore-injury-law" className="hover:text-[#E13131] transition-colors">MARITIME INJURY</Link>
+              <Link href="/cruise-ship-passenger-vessel-accidents" className="hover:text-[#E13131] transition-colors">CRUISE SHIP ACCIDENTS</Link>
+              <Link href="/personal-injury-lawyer" className="hover:text-[#E13131] transition-colors">PERSONAL INJURY</Link>
+              <Link href="/courtroom" className="hover:text-[#E13131] transition-colors">COURTROOM</Link>
+            </nav>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          {/* Center: Logo LAW ELITE NETWORK */}
+          <Link href="/" className="flex items-center gap-2 shrink-0">
+            <span className="font-headline text-2xl font-black tracking-tight text-slate-900 uppercase">
+              LAW ELITE
+            </span>
+            <span className="bg-[#E13131] text-white text-[10px] font-black uppercase tracking-widest px-2 py-0.5">
+              NETWORK
+            </span>
+          </Link>
+
+          {/* Right: Search, TIPS, SIGN IN */}
+          <div className="flex items-center gap-3 shrink-0">
+            <button
+              onClick={() => setMobileSearchOpen((v) => !v)}
+              className="w-8 h-8 flex items-center justify-center text-slate-800 hover:text-[#E13131] transition-colors"
+              aria-label="Search"
+            >
+              <SearchIcon className="w-4 h-4" />
+            </button>
+
+            <Link
+              href="/tips"
+              className="bg-[#E13131] hover:bg-red-700 text-white font-black text-xs uppercase px-4 py-1.5 tracking-wider transition-colors"
+            >
+              TIPS
+            </Link>
+
             {isAuthenticated ? (
               <Link href={dashboardHref}>
-                <button className="inline-flex items-center gap-2 px-4 h-9 rounded-md bg-[#0B1F3A] text-white text-[12px] font-bold tracking-wide hover:bg-blue-800 transition-colors">
-                  <LayoutDashboard className="w-4 h-4" /> Dashboard
+                <button className="border border-slate-300 hover:border-slate-900 text-slate-900 font-bold text-xs uppercase px-3 py-1.5 tracking-wider transition-colors">
+                  DASHBOARD
                 </button>
               </Link>
             ) : (
               <button
                 onClick={() => window.location.assign(sharedSignInUrl())}
-                className="hidden sm:inline-flex items-center gap-2 px-4 h-9 rounded-md bg-[#0B1F3A] text-white text-[12px] font-bold tracking-wide hover:bg-blue-800 transition-colors"
+                className="border border-slate-300 hover:border-slate-900 text-slate-900 font-bold text-xs uppercase px-3 py-1.5 tracking-wider transition-colors"
               >
-                <UserPlus className="w-4 h-4" /> Sign In
+                SIGN IN
               </button>
             )}
-
-            <button
-              onClick={() => setMobileSearchOpen((v) => !v)}
-              className="md:hidden w-9 h-9 flex items-center justify-center text-slate-700"
-              aria-label="Toggle search"
-            >
-              <SearchIcon className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => (isMobileMenuOpen ? closeMobileMenu() : setIsMobileMenuOpen(true))}
-              className="lg:hidden w-9 h-9 flex items-center justify-center text-slate-900"
-              aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
-              aria-expanded={isMobileMenuOpen}
-            >
-              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
           </div>
         </div>
 
@@ -252,40 +264,54 @@ export function PublicNavbar() {
         )}
       </div>
 
-      {/* ── Tier 2: black section bar (desktop) ───────────────────────
-          Page Six's own masthead formula: a true-black bar (not navy) under
-          the white brand row, tight uppercase links, a red underline on
-          hover/active -- swapped in here for that same tabloid-masthead
-          punch, on Law Elite's own red (news-600) rather than Page Six's. */}
-      <nav className="hidden lg:block bg-black" aria-label="Topic sections">
-        <div className="container mx-auto px-6 max-w-7xl h-11 flex items-center overflow-x-auto no-scrollbar">
+      {/* ── Tier 2: black section bar (desktop) ─────────────────────── */}
+      <nav className="hidden lg:block bg-black text-white" aria-label="Topic sections">
+        <div className="container mx-auto px-6 max-w-7xl h-10 flex items-center gap-6 overflow-x-auto no-scrollbar">
           <Link
             href="/"
-            className="flex items-center h-full px-3.5 shrink-0 whitespace-nowrap text-[13px] font-extrabold uppercase tracking-[-0.01em] text-white/90 hover:text-white border-b-[3px] border-transparent hover:border-news-600 transition-colors"
+            className="flex items-center h-full whitespace-nowrap text-xs font-black uppercase tracking-wider text-white hover:text-[#E13131] transition-colors"
           >
-            Home
+            HOME
           </Link>
-          {categories.slice(0, 8).map((cat) => (
-            <div
-              key={cat.id}
-              className="h-full flex items-center shrink-0"
-              onMouseEnter={() => setActiveCategory(cat.id)}
-              onMouseLeave={() => setActiveCategory(null)}
-            >
+          <Link
+            href="/maritime-offshore-injury-law"
+            className="flex items-center h-full whitespace-nowrap text-xs font-black uppercase tracking-wider text-white hover:text-[#E13131] transition-colors"
+          >
+            MARITIME INJURY
+          </Link>
+          <Link
+            href="/cruise-ship-passenger-vessel-accidents"
+            className="flex items-center h-full whitespace-nowrap text-xs font-black uppercase tracking-wider text-white hover:text-[#E13131] transition-colors"
+          >
+            CRUISE SHIP ACCIDENTS
+          </Link>
+          <Link
+            href="/personal-injury-lawyer"
+            className="flex items-center h-full whitespace-nowrap text-xs font-black uppercase tracking-wider text-white hover:text-[#E13131] transition-colors"
+          >
+            PERSONAL INJURY
+          </Link>
+          <Link
+            href="/law-school-success"
+            className="flex items-center h-full whitespace-nowrap text-xs font-black uppercase tracking-wider text-white hover:text-[#E13131] transition-colors"
+          >
+            LAW SCHOOL SUCCESS
+          </Link>
+          {categories
+            .filter((cat) => !['maritime-offshore-injury-law', 'cruise-ship-passenger-vessel-accidents', 'personal-injury-lawyer', 'law-school-success'].includes(cat.slug))
+            .slice(0, 4)
+            .map((cat) => (
               <Link
+                key={cat.id}
                 href={`/${cat.slug}`}
-                className={cn(
-                  'flex items-center gap-1 h-full px-3.5 whitespace-nowrap text-[13px] font-extrabold uppercase tracking-[-0.01em] border-b-[3px] transition-colors',
-                  activeCategory === cat.id
-                    ? 'text-white border-news-600'
-                    : 'text-white/80 hover:text-white border-transparent hover:border-news-600/60',
-                )}
+                className="flex items-center h-full whitespace-nowrap text-xs font-black uppercase tracking-wider text-white hover:text-[#E13131] transition-colors"
               >
-                {NAV_SHORT_LABEL[cat.slug] || cat.name}
+                {NAV_SHORT_LABEL[cat.slug] || cat.name.toUpperCase()}
               </Link>
-            </div>
-          ))}
+            ))}
         </div>
+      </nav>
+
 
         {/* Mega-menu */}
         {activeCategory && activeCategoryData && (
@@ -342,7 +368,6 @@ export function PublicNavbar() {
             </div>
           </div>
         )}
-      </nav>
 
       {/* ── Mobile drawer: full-screen, two-screen (list -> drill in) ── */}
       {isMobileMenuOpen && (
