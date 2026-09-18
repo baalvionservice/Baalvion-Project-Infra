@@ -29,7 +29,7 @@ export async function CmsPage({ slug, eyebrow, fallback, children }: CmsPageProp
   // Live CMS takes precedence; baked snapshot keeps the page populated when the CMS
   // is offline (e.g. on Vercel); the route's static fallback is the last resort.
   const page = (await getCmsPage(slug)) ?? staticPageBySlug(slug);
-  if (!page) return <>{fallback}</>;
+  if (!page) return <>{fallback}{children}</>;
 
   return (
     <main className="min-h-screen bg-background pt-24 pb-32">
