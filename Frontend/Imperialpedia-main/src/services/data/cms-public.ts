@@ -828,7 +828,17 @@ export function cmsContentToArticle(raw: CmsContent, categoryMap?: ReadonlyMap<s
       explanation: typeof q.explanation === 'string' ? q.explanation : undefined,
     }));
   const toolField = cf.tool as { type?: unknown } | undefined;
-  const toolType = toolField && typeof toolField.type === 'string' ? toolField.type : undefined;
+  // Slug fallback for articles whose title/URL already promises an embedded
+  // calculator (built and wired below via ArticlePage's toolType switch) but
+  // whose CMS record predates the `customFields.tool.type` field ever being
+  // set — keeps the page's title an honest promise without needing a CMS edit.
+  const TOOL_TYPE_BY_SLUG: Record<string, string> = {
+    'rpm-and-cpm-calculator-for-youtube-and-web-creators': 'creator-rpm-calculator',
+    'sponsorship-rate-estimator-tool': 'sponsorship-rate-calculator',
+  };
+  const toolType =
+    (toolField && typeof toolField.type === 'string' ? toolField.type : undefined) ??
+    TOOL_TYPE_BY_SLUG[raw.slug];
 
   const guide = getEditorialGuide(raw.slug);
   const cfBody = typeof cf.bodyHtml === 'string' ? cf.bodyHtml : typeof cf.body === 'string' ? cf.body : undefined;

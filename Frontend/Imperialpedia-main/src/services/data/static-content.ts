@@ -53,20 +53,24 @@ export function staticNewsBySlug(slug: string): NewsArticle | null {
   return allStaticNewsArticles.find((a) => a.slug === targetSlug) || null;
 }
 
-export function staticCategoryNews(categorySlug?: string): NewsArticle[] {
-  if (!categorySlug) return [];
-
-  // Creator economy specific flow
+/**
+ * Matches `staticCategoryNews`' own logic (exact category match, then keyword
+ * fallback) but stops short of its final `.slice(0, 15)` grab-bag — that grab-bag
+ * exists so a category page is never blank to a visitor, but it means "this
+ * category has real static content" was previously always true, for every slug,
+ * including ones with zero genuine articles. `categoryHasLiveContent` (used to
+ * gate noindex/sitemap inclusion) needs the honest answer, so it calls this
+ * instead of `staticCategoryNews`.
+ */
+function matchedStaticNews(categorySlug: string): NewsArticle[] {
   if (CREATOR_SLUGS.has(categorySlug)) {
     const creatorNews = allStaticNewsArticles.filter(
       (a) => (a.categorySlug === 'creator-economy' || a.tags?.includes('creator'))
     );
     if (categorySlug === 'creator-economy') return creatorNews;
-
     return filterCreatorArticlesByTopic(creatorNews, categorySlug);
   }
 
-  // General category mapping & aliases
   const aliasMap: Record<string, string> = {
     'scams-and-fraud-protection': 'fraud-protection',
     'cryptocurrency': 'crypto',
@@ -74,7 +78,6 @@ export function staticCategoryNews(categorySlug?: string): NewsArticle[] {
   };
   const targetSlug = aliasMap[categorySlug] || categorySlug;
 
-  // 1. Direct category slug match
   const exactMatches = allStaticNewsArticles.filter((article) => {
     const catSlug =
       article.categorySlug ||
@@ -87,7 +90,6 @@ export function staticCategoryNews(categorySlug?: string): NewsArticle[] {
     return exactMatches;
   }
 
-  // 2. Keyword fallback for subtopics / fraud / budgeting / stock subpages
   const keywordMap: Record<string, string[]> = {
     'scams-and-fraud-protection': ['fraud', 'scam', 'security', 'protect', 'freeze', 'lock', 'custody', 'safety', 'risk'],
     'fraud-protection': ['fraud', 'scam', 'security', 'protect', 'freeze', 'lock', 'custody', 'safety', 'risk'],
@@ -109,6 +111,18 @@ export function staticCategoryNews(categorySlug?: string): NewsArticle[] {
     }
   }
 
+  return matched;
+}
+
+/** True only if this category has a genuine exact or keyword match — never the grab-bag fallback. */
+export function hasMatchedStaticContent(categorySlug?: string): boolean {
+  if (!categorySlug) return false;
+  return matchedStaticNews(categorySlug).length > 0;
+}
+
+export function staticCategoryNews(categorySlug?: string): NewsArticle[] {
+  if (!categorySlug) return [];
+  const matched = matchedStaticNews(categorySlug);
   return matched.length > 0 ? matched : allStaticNewsArticles.slice(0, 15);
 }
 
