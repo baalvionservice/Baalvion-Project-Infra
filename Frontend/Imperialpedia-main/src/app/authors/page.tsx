@@ -8,6 +8,7 @@ import { getAllAuthors, AuthorProfile } from '@/config/authors';
 import { isAuthorHiddenInCleanupMode } from '@/config/adsense-cleanup';
 import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
+import { LabeledAdSlot } from '@/components/common/LabeledAdSlot';
 
 export const metadata: Metadata = buildMetadata({
   canonical: '/authors',
@@ -96,6 +97,8 @@ export default async function AuthorsPage() {
               </p>
             </div>
           </header>
+
+          <LabeledAdSlot slot="8362925887" className="mb-10" />
 
           {/* ── Author Cards Grid ── */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">

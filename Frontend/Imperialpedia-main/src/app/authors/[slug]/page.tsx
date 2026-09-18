@@ -18,6 +18,7 @@ import { structuredData } from '@/lib/seo/structured-data';
 import { env } from '@/config/env';
 import { Metadata } from 'next';
 import { Twitter, Linkedin, Globe, Facebook, Instagram, PlayCircle, Rss } from 'lucide-react';
+import { LabeledAdSlot } from '@/components/common/LabeledAdSlot';
 
 interface AuthorPageProps {
   params: Promise<{ slug: string }>;
@@ -294,6 +295,8 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
               </p>
             </div>
           </div>
+
+          <LabeledAdSlot slot="8362925887" className="mb-10" />
 
           {/* ── Articles Archive Header ── */}
           <header className="mb-10 flex flex-wrap items-center justify-between gap-4 border-b-4 border-black dark:border-slate-800 pb-4">
