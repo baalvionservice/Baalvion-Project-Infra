@@ -3,7 +3,15 @@
 import React, { useEffect, useState, useMemo, use, Suspense } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { sanitizeRichHtml } from "@/lib/sanitize";
+// sanitize-html (via @/lib/sanitize) pulls in htmlparser2 + postcss —
+// ~50KB gzipped of Node-oriented HTML parsing with no reason to reach a
+// browser. resolveArticleForDetail() (article-detail.tsx, server-side)
+// already sanitizes article.body before this component ever sees it, for
+// every real page load. The only path that could still hand this component
+// unsanitized HTML is the client-side fetch fallback below (used only when
+// no initialArticle was provided at all) — that path lazy-imports the
+// sanitizer itself instead of a static import here, so the common case
+// ships none of it.
 import { Container } from "@/design-system/layout/container";
 import { Article } from "../types";
 import { getArticleBySlug } from "../services/content-service";
@@ -191,7 +199,15 @@ export const ArticlePage = ({
         const response = await getArticleBySlug(slug);
 
         if (response.data) {
-          setArticle(response.data);
+          // This client-fetched article bypassed article-detail.tsx's
+          // server-side sanitizeRichHtml() call — lazy-import it only for
+          // this rare fallback path (no initialArticle from SSR at all)
+          // instead of a static top-level import, so the common SSR case
+          // never pays for it.
+          const body = response.data.body
+            ? (await import("@/lib/sanitize")).sanitizeRichHtml(response.data.body)
+            : response.data.body;
+          setArticle({ ...response.data, body });
         } else {
           setError(response.message || "Article not found");
         }
@@ -329,7 +345,7 @@ export const ArticlePage = ({
                   prose-p:text-[17px] sm:prose-p:text-[17.5px] prose-p:leading-[1.85] prose-p:text-[#222222] dark:prose-p:text-gray-200 prose-p:mb-6
                   prose-a:text-[#1d4fc4] dark:prose-a:text-blue-400 prose-a:font-semibold prose-a:underline-offset-2 hover:prose-a:underline
                   prose-strong:text-gray-900 dark:prose-strong:text-white prose-strong:font-bold"
-                dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(leadHtml) }}
+                dangerouslySetInnerHTML={{ __html: leadHtml }}
               />
             ) : null}
 
@@ -368,7 +384,7 @@ export const ArticlePage = ({
                   prose-ul:my-5 prose-ul:space-y-3 prose-li:text-[17px] prose-li:leading-[1.78] prose-li:marker:text-gray-800
                   prose-ol:my-5 prose-ol:space-y-3 prose-ol:text-[17px]
                   prose-img:rounded-xl prose-img:border prose-img:border-gray-100 dark:prose-img:border-gray-800"
-                dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(restHtml) }}
+                dangerouslySetInnerHTML={{ __html: restHtml }}
               />
             ) : !leadHtml ? (
               <ArticleBody sections={[]} />
