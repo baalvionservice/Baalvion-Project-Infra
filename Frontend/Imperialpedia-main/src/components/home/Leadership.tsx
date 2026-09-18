@@ -68,7 +68,7 @@ export async function Leadership() {
   const articleCount = categories.reduce((sum, c) => sum + c.articleCount, 0);
 
   const stats = [
-    { value: "2022", label: "FOUNDED" },
+    { value: "2025", label: "FOUNDED" },
     { value: `${articleCount}+`, label: "ARTICLES PUBLISHED" },
     { value: `${categories.length}+`, label: "TOPICS COVERED" },
     { value: `${authors.length}+`, label: "CONTRIBUTORS" },
@@ -93,13 +93,11 @@ export async function Leadership() {
               </div>
               
               <p className="text-base font-medium text-slate-800 dark:text-slate-200 leading-relaxed font-sans">
-                Imperialpedia began as an independent project on March 26, 2022, built on a simple
-                idea: financial information shouldn&apos;t be confusing. As the platform grew, it found
-                a permanent home under Baalvion Industries Private Limited, incorporated on March 11,
-                2025 — giving the work behind Imperialpedia a real legal foundation and the resources
-                to keep building. Today, we connect readers with trustworthy, organized information on
-                investing, personal finance, and the wider economy — with transparent sourcing and a
-                focus on education, not hype.
+                Imperialpedia was founded in 2025 under Baalvion Industries Private Limited
+                (incorporated March 11, 2025), built on a simple idea: financial information
+                shouldn&apos;t be confusing. Today, we connect readers with trustworthy, organized
+                information on investing, personal finance, and the creator economy — with
+                transparent sourcing and a focus on education, not hype.
               </p>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t-2 border-black dark:border-slate-800">

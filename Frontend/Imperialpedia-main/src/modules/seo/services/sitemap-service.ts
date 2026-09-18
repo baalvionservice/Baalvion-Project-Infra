@@ -423,7 +423,17 @@ export const sitemapService = {
       // that immediately redirects instead of the real one. Submitting the
       // flat path for a world-tagged article was the same problem one hop
       // shorter: that page self-redirects to the nested one too.
-      if (n?.slug) entries.push({ loc: `${base}${newsArticleHref(n)}`, lastmod: n.publishedAt?.split("T")[0], changefreq: "daily", priority: 0.8 });
+      if (!n?.slug) return;
+      const href = newsArticleHref(n);
+      // An article's stored CMS category can go stale after a category
+      // consolidation/retirement (the article itself keeps rendering under
+      // its real category via slug lookup, but newsArticleHref derives the
+      // URL from the — now wrong — category field). Without this check a
+      // single miscategorized article submits a URL that 308s straight to
+      // the homepage, the exact "page with redirect" pattern that has
+      // already caused an AdSense rejection once.
+      if (isRetiredPath(href)) return;
+      entries.push({ loc: `${base}${href}`, lastmod: n.publishedAt?.split("T")[0], changefreq: "daily", priority: 0.8 });
     });
 
     // Dedupe by URL and filter out paths hidden by AdSense cleanup mode
