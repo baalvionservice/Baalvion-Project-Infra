@@ -5,12 +5,9 @@ import { BookOpen } from 'lucide-react';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { RelatedArticles, fetchRelatedArticles } from '@/components/knowledge/RelatedArticles';
 import { Breadcrumbs } from '@/components/knowledge/Breadcrumbs';
-import { ArticleTOC } from '@/app/[categorySlug]/[articleSlug]/ArticleTOC';
-import { ArticleAuthorByline } from '@/app/[categorySlug]/[articleSlug]/ArticleAuthorByline';
 import { ArticleAdWrapper } from '@/components/knowledge/ArticleAdWrapper';
 import { PrimarySources } from '@/components/knowledge/PrimarySources';
 import { SeriesNotice } from '@/components/knowledge/SeriesNotice';
-import { ArticleMetaHeader } from '@/components/knowledge/ArticleMetaHeader';
 import { ImportantNotice } from '@/components/knowledge/ImportantNotice';
 import { KeyTakeaways } from '@/components/knowledge/KeyTakeaways';
 import { FrequentlyAskedQuestions } from '@/components/knowledge/FrequentlyAskedQuestions';
@@ -20,11 +17,8 @@ import { ArticleComments } from '@/components/knowledge/ArticleComments';
 import { ReadingProgressBar } from '@/components/knowledge/ReadingProgressBar';
 import { StickyShareBar } from '@/components/knowledge/StickyShareBar';
 import { ArticleShareBar } from '@/components/knowledge/ArticleShareBar';
-import { ArticleTrustBadge } from '@/components/knowledge/ArticleTrustBadge';
-import { ArticleTagPills } from '@/components/knowledge/ArticleTagPills';
 import { ArticleSidebar } from '@/components/knowledge/ArticleSidebar';
 import { AdSlot } from '@/components/ads/AdSlot';
-import { getMergedAuthorByName } from '@/lib/authors-server';
 import { resolveArticleImage } from '@/lib/article-art';
 import { formatArticleDate } from '@/lib/format-date';
 import { extractKeyTakeaways } from '@/lib/seo/key-takeaways-extractor';
@@ -35,18 +29,8 @@ import { unwrapRetiredLinks } from '@/lib/content/retired-links';
 import type { SeriesInfo } from '@/components/knowledge/SeriesNotice';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
-
-// Same literal-vs-import note as ArticleSidebar.tsx's SIDEBAR_AD_SLOT_ID.
 const AD_SLOT_ID = '4123514154';
 
-/**
- * Resolves this article's series siblings by matching `seriesSlug` (set via
- * admin SeriesPanel) against every other CMS article -- never fabricated.
- * Returns undefined both when the article isn't in a series at all, and when
- * it nominally is but no sibling shares the slug yet: a "series" of one
- * reader-facing article isn't a series, and showing the panel then would be
- * a dead-end disclosure box with nothing else to link to.
- */
 async function resolveSeriesInfo(article: any): Promise<SeriesInfo | undefined> {
   if (!article.seriesSlug || !article.seriesTitle) return undefined;
 
@@ -68,9 +52,6 @@ async function resolveSeriesInfo(article: any): Promise<SeriesInfo | undefined> 
       current: a.slug === article.slug,
     }));
 
-  // The current article may not come back from cmsGetArticles() in
-  // preview/draft states -- include it explicitly so it's never missing
-  // from its own series list.
   if (!entries.some((e) => e.current) && article.slug) {
     entries.push({
       slug: article.slug,
@@ -88,190 +69,154 @@ async function resolveSeriesInfo(article: any): Promise<SeriesInfo | undefined> 
   return { title: article.seriesTitle, entries };
 }
 
-interface TOCItem {
-  id: string;
-  text: string;
-  level: number;
-}
-
-/** Mirrors the previous client-side heading-id injection so in-page TOC anchors keep working. */
-function injectHeadingIds(html: string): string {
-  return html.replace(/<(h[1-3])>(.*?)<\/h[1-3]>/gi, (_match: string, tag: string, text: string) => {
-    const id = text.toLowerCase().replace(/\W/g, '-');
-    return `<${tag} id="${id}" class="scroll-mt-32">${text}</${tag}>`;
-  });
-}
-
-/**
- * Count words in HTML/text content
- * Used to determine if ads should be placed
- */
 function countWords(html: string): number {
-  // Strip HTML tags and count words
   const text = html.replace(/<[^>]+>/g, '');
   return text.split(/\s+/).filter((word) => word.length > 0).length;
 }
 
-/**
- * A single non-looped `.replace(/<[^>]+>/g, '')` pass can leave a crafted tag
- * behind (e.g. "<scri" + "<x>" + "pt>" reassembling into "<script>" after one
- * pass removes only the middle span) -- CodeQL flags this as incomplete
- * multi-character sanitization. Looping until the string stops changing closes
- * that gap. TOC labels render via plain JSX text interpolation (never
- * dangerouslySetInnerHTML), so this was never actually exploitable here, but
- * the sanitizer should be correct on its own terms rather than relying on that.
- */
-function stripTags(value: string): string {
-  let previous: string;
-  let current = value;
-  do {
-    previous = current;
-    current = previous.replace(/<[^>]+>/g, '');
-  } while (current !== previous);
-  return current;
-}
-
-function extractToc(html: string): TOCItem[] {
-  const headingRe = /<(h[1-3]) id="([^"]+)"[^>]*>(.*?)<\/h[1-3]>/gi;
-  const items: TOCItem[] = [];
-  let match: RegExpExecArray | null;
-  while ((match = headingRe.exec(html))) {
-    items.push({
-      id: match[2],
-      text: stripTags(match[3]),
-      level: Number(match[1].substring(1)),
-    });
-  }
-  return items;
-}
-
-/**
- * Full article render (breadcrumbs, H1, TOC, hero image, body, related
- * articles). Shared by the canonical /{categorySlug}/{articleSlug} route and
- * the legacy flat /article/{slug} route (which falls back to rendering this
- * directly for articles with no category, instead of a URL it can't build)
- * so the two never visually drift apart.
- */
 export async function ArticleView({ article, slug }: { article: any; slug: string }) {
   const category = article.category;
-  const authorName: string = (typeof article.author === 'string' ? article.author : article.author?.name) || 'Law Elite Editorial';
-  const [matchedAuthor, seriesInfo] = await Promise.all([
-    getMergedAuthorByName(authorName),
-    resolveSeriesInfo(article),
-  ]);
-  // No hardcoded fallback date here: if a record genuinely has no real
-  // timestamp, ArticleMetaHeader omits the Published/Last Updated chips
-  // rather than show a fabricated date. Neither the bundled data nor the
-  // live CMS delivery API track a distinct "first published" timestamp
-  // separate from "last updated" today (see ArticleMetaHeader.tsx's doc
-  // comment) -- both chips show the same real date rather than inventing a
-  // second one.
+  const authorName: string = (typeof article.author === 'string' ? article.author : article.author?.name) || 'Law Elite Editorial Team';
+  const seriesInfo = await resolveSeriesInfo(article);
+
   const updatedAt = formatArticleDate(article.updatedAt || article.updated_at);
-  // Strips anchors into retired sections/categories before anything else
-  // touches the body -- CMS prose is the one surface nobody re-edits after a
-  // retirement, so five in-article links were still landing on the homepage
-  // (see retired-links.ts) until this was wired in.
-  const processedContent = injectHeadingIds(unwrapRetiredLinks(article.content || ''));
-  // Real word count from the full rendered body (before Key Takeaways/FAQ are
-  // split out below) drives both ad placement and reading time -- not the
-  // stored `readingTime` field, which the admin UI defaults to a flat guess
-  // (see ArticleEditorModal.tsx) rather than anything measured.
+  const processedContent = unwrapRetiredLinks(article.content || '');
   const wordCount = countWords(processedContent);
   const readingTimeMinutes = Math.max(1, Math.round(wordCount / 200));
 
   const { items: keyTakeaways, html: contentWithoutKeyTakeaways } = extractKeyTakeaways(processedContent);
   const { pairs: faqPairs, html: bodyHtml } = extractFaqSection(contentWithoutKeyTakeaways);
-  // TOC built from the final body so every anchor it lists still exists on
-  // the page -- the Key Takeaways/FAQ headings removed above get their own
-  // dedicated sections instead, not a sidebar anchor.
-  const toc = extractToc(bodyHtml);
 
   const relatedArticles = await fetchRelatedArticles(slug, category?.slug, category?.name, article.subcategory?.slug);
   const canonicalUrl = `${SITE}${articleUrl({ slug, category })}`;
 
-  const tagPills = [
-    category?.name ? { label: category.name, href: category.slug ? `/${category.slug}` : undefined } : null,
-    article.subcategory?.name ? { label: article.subcategory.name } : null,
-    article.country ? { label: article.country } : null,
-  ].filter((p): p is { label: string; href?: string } => !!p);
+  const readAlsoArticle = relatedArticles.length > 0 ? relatedArticles[0] : {
+    title: 'How Many Hours Should You Actually Study in Law School?',
+    slug: 'how-many-hours-should-you-study-in-law-school',
+    category: { slug: 'law-school-success' },
+  };
 
   return (
-    <div className="min-h-screen bg-white selection:bg-blue-100 selection:text-blue-900">
+    <div className="min-h-screen bg-white text-slate-900 selection:bg-[#E13131] selection:text-white font-sans">
       <ReadingProgressBar />
       <StickyShareBar url={canonicalUrl} title={article.title} />
-      <main className="pt-32 pb-24">
-        <div className="container mx-auto px-6 max-w-7xl">
 
-          <Breadcrumbs
-            category={category}
-            subcategory={article.subcategory}
-            articleTitle={article.title}
-          />
+      <main className="pt-32 pb-20">
+        <div className="container mx-auto px-4 md:px-6 max-w-7xl">
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 xl:gap-14 items-start">
+          {/* ── Breadcrumbs ────────────────────────────────────────── */}
+          <div className="mb-6">
+            <Breadcrumbs
+              category={category}
+              subcategory={article.subcategory}
+              articleTitle={article.title}
+            />
+          </div>
 
-            <aside className="hidden lg:block lg:col-span-2 sticky top-32 max-h-[calc(100vh-160px)] pr-4">
-              <ArticleTOC items={toc} />
-            </aside>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 xl:gap-12 items-start">
 
-            <article className="lg:col-span-7 space-y-8">
+            {/* ── Left Article Column (8 Cols) ────────────────────── */}
+            <article className="lg:col-span-8 space-y-6">
 
-              <header className="space-y-6">
-                <ArticleTagPills pills={tagPills} />
+              <header className="space-y-4">
+                {/* Badges: Red Category + Black EXCLUSIVE */}
+                <div className="flex items-center gap-2">
+                  {category?.name && (
+                    <Link
+                      href={category.slug ? `/${category.slug}` : '#'}
+                      className="bg-[#E13131] text-white font-black text-[11px] uppercase tracking-wider px-2.5 py-1 hover:bg-red-700 transition-colors"
+                    >
+                      {category.name}
+                    </Link>
+                  )}
+                  <span className="bg-black text-white font-black text-[11px] uppercase tracking-wider px-2.5 py-1">
+                    EXCLUSIVE
+                  </span>
+                </div>
 
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tighter leading-[0.98]">
+                {/* Main Headline */}
+                <h1 className="font-headline text-[2rem] md:text-[2.75rem] lg:text-[3rem] font-black text-slate-900 tracking-[-0.02em] leading-[1.07] my-3">
                   {article.title}
                 </h1>
 
-                {article.excerpt && (
-                  <p className="text-lg lg:text-xl text-slate-500 font-medium leading-relaxed">
-                    {article.excerpt}
-                  </p>
-                )}
-
-                <ArticleMetaHeader
-                  jurisdiction={article.country}
-                  practiceArea={category?.name}
-                  published={updatedAt}
-                  updated={updatedAt}
-                  readingTimeMinutes={readingTimeMinutes}
-                />
-
-                <div className="flex flex-wrap items-center justify-between gap-4">
-                  <div className="space-y-1.5">
-                    <ArticleAuthorByline authorName={authorName} matchedAuthor={matchedAuthor} />
-                    {updatedAt && <p className="text-[12.5px] text-slate-500">Updated {updatedAt}</p>}
+                {/* Byline & Metadata Bar */}
+                <div className="flex flex-wrap items-center justify-between gap-4 py-3 border-y border-slate-200">
+                  <div className="flex flex-wrap items-center gap-2 text-[12px] text-slate-700">
+                    <span className="font-bold uppercase tracking-wide">By {authorName}</span>
+                    {updatedAt && (
+                      <>
+                        <span className="text-slate-300">|</span>
+                        <span className="text-slate-500">{updatedAt}</span>
+                      </>
+                    )}
+                    <span className="text-slate-300">|</span>
+                    <span className="text-slate-500">{readingTimeMinutes} min read</span>
                   </div>
-                  <ArticleShareBar url={canonicalUrl} title={article.title} />
-                </div>
 
-                <div className="border-t border-slate-100 pt-4">
-                  <ArticleTrustBadge />
+                  {/* Social Icons */}
+                  <ArticleShareBar url={canonicalUrl} title={article.title} />
                 </div>
 
                 <SeriesNotice series={seriesInfo ?? null} />
 
-                <figure className="pt-6">
-                  <div className="aspect-[16/9] relative overflow-hidden bg-slate-50 rounded-2xl border border-slate-100 shadow-xl group">
+                {/* Featured Hero Image */}
+                <figure className="my-4">
+                  <div className="aspect-[16/9] relative overflow-hidden bg-slate-900 rounded-none border border-slate-200">
                     <Image
                       src={resolveArticleImage(article)}
                       alt={article.title}
                       fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                      className="object-cover"
                       priority
                     />
                   </div>
+                  <div className="flex items-center justify-between text-[11px] text-slate-500 py-1.5 border-b border-slate-100">
+                    <span className="truncate max-w-[70%]">{article.title}</span>
+                    <span className="text-slate-400 shrink-0">Law Elite Newsroom</span>
+                  </div>
                 </figure>
+
+                {/* Follow on Google News Box */}
+                <div className="border border-slate-200 p-3.5 my-4 flex flex-wrap items-center justify-between gap-3 bg-white">
+                  <span className="text-xs md:text-sm font-bold text-slate-900">
+                    Stay informed — get Law Elite legal intelligence in your news feed.
+                  </span>
+                  <a
+                    href="https://news.google.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="border-2 border-black text-black font-black uppercase text-[10.5px] tracking-wider px-3.5 py-1.5 hover:bg-black hover:text-white transition-colors shrink-0"
+                  >
+                    FOLLOW ON GOOGLE NEWS
+                  </a>
+                </div>
               </header>
 
+              {/* Inline READ ALSO module */}
+              {readAlsoArticle && (
+                <div className="my-6 p-4 border-l-4 border-[#E13131] bg-slate-50">
+                  <span className="text-[#E13131] font-black text-[11px] uppercase tracking-widest block mb-1">
+                    READ ALSO
+                  </span>
+                  <Link
+                    href={articleUrl({ slug: readAlsoArticle.slug, category: (readAlsoArticle as any).category })}
+                    className="font-headline font-bold text-base md:text-lg text-slate-900 hover:text-[#E13131] transition-colors leading-snug"
+                  >
+                    {readAlsoArticle.title}
+                  </Link>
+                </div>
+              )}
+
+              {/* Key Takeaways */}
+              <KeyTakeaways items={keyTakeaways} />
+
+              {/* Article Content Prose */}
               <ArticleAdWrapper wordCount={wordCount} enableAds={true}>
                 <div
-                  className="prose-legal max-w-none pt-8"
+                  className="prose-legal max-w-none pt-4 drop-cap"
                   dangerouslySetInnerHTML={{ __html: bodyHtml }}
                 />
               </ArticleAdWrapper>
-
-              <KeyTakeaways items={keyTakeaways} />
 
               <ImportantNotice />
 
@@ -284,28 +229,33 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
               <ArticleComments slug={slug} />
             </article>
 
-            <div className="hidden lg:block lg:col-span-3">
-              <ArticleSidebar categorySlug={category?.slug} categoryLabel={category?.name || 'Law Elite Network'} excludeSlug={slug} />
-            </div>
+            {/* ── Right Sidebar Column (4 Cols) ───────────────────── */}
+            <aside className="lg:col-span-4 sticky top-32">
+              <ArticleSidebar
+                categorySlug={category?.slug}
+                categoryLabel={category?.name || 'Law Elite Network'}
+                excludeSlug={slug}
+              />
+            </aside>
 
           </div>
 
-          {/* Ad sits before Related Articles, not right above PublicFooter's
-              nav-heavy footer -- Google's placement guidance discourages an
-              ad immediately adjacent to a site's persistent navigation. */}
-          <div className="grid grid-cols-1 lg:grid-cols-12">
-            <div className="lg:col-start-3 lg:col-span-7 pt-8 border-t border-slate-100">
-              <AdSlot slotId={AD_SLOT_ID} format="horizontal" placement="article-footer" fullWidthResponsive minHeight="100px" />
-            </div>
+          {/* Bottom Ad & Related Articles */}
+          <div className="mt-12 pt-8 border-t border-slate-200">
+            <AdSlot
+              slotId={AD_SLOT_ID}
+              format="horizontal"
+              placement="article-footer"
+              fullWidthResponsive
+              minHeight="100px"
+            />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12">
-            <div className="lg:col-start-3 lg:col-span-7">
-              <RelatedArticles articles={relatedArticles} />
-
-              <ReportAnError title={article.title} url={canonicalUrl} />
-            </div>
+          <div className="mt-8">
+            <RelatedArticles articles={relatedArticles} />
+            <ReportAnError title={article.title} url={canonicalUrl} />
           </div>
+
         </div>
       </main>
 
@@ -317,15 +267,15 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
 export function ArticleNotFound() {
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center">
-      <div className="w-24 h-24 rounded-3xl bg-slate-50 flex items-center justify-center text-slate-200 mb-8 border border-slate-100 shadow-inner">
-        <BookOpen className="w-12 h-12" />
+      <div className="w-20 h-20 bg-slate-100 flex items-center justify-center text-slate-400 mb-6 border border-slate-200">
+        <BookOpen className="w-10 h-10 text-[#E13131]" />
       </div>
-      <h2 className="text-3xl font-bold text-slate-900 mb-4">Guide Not Found</h2>
-      <p className="text-slate-500 mb-10 max-w-sm mx-auto leading-relaxed">
+      <h2 className="text-3xl font-black text-slate-900 mb-3 uppercase tracking-tight">Guide Not Found</h2>
+      <p className="text-slate-600 mb-8 max-w-sm mx-auto leading-relaxed text-sm">
         We couldn't find the guide you're looking for. It may have been moved, retitled, or isn't published yet.
       </p>
       <Link href="/">
-        <button className="bg-slate-900 text-white px-10 h-14 rounded-2xl font-bold text-[10px] uppercase tracking-[0.2em] shadow-2xl hover:bg-blue-600 transition-all interactive-lift">
+        <button className="bg-[#E13131] hover:bg-slate-900 text-white px-8 h-12 font-bold text-xs uppercase tracking-widest transition-colors">
           Return to Homepage
         </button>
       </Link>
