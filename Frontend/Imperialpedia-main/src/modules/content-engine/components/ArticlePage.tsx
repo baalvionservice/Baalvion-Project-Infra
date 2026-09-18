@@ -33,6 +33,7 @@ import { getEditorialGuide } from "@/lib/articles/editorial-guides";
 import { ReadingProgressBar } from "@/components/article/ReadingProgressBar";
 import { StickyShareBar } from "@/components/article/StickyShareBar";
 import { AuthorBioCard } from "@/components/article/AuthorBioCard";
+import { LabeledAdSlot } from "@/components/common/LabeledAdSlot";
 import type { MeshGroup, FeaturedGuide } from "@/lib/topic-mesh";
 
 // Below-the-fold / purely-interactive widgets: not needed for first paint or
@@ -349,6 +350,10 @@ export const ArticlePage = ({
               />
             ) : null}
 
+            {/* Top-of-article ad unit — after the opening paragraphs, never
+                interrupting the lede itself. */}
+            <LabeledAdSlot slot="8086915093" className="my-8" />
+
             {/* WIN 3: Inline "Read more on [Topic]" callout — injected mid-article after lead */}
             <InlineTopicCallout
               guides={inlineTopicGuides}
@@ -371,6 +376,10 @@ export const ArticlePage = ({
             {effectiveArticle.toolType === "sponsorship-rate-calculator" && <SponsorshipRateCalculator />}
             {effectiveArticle.toolType === "page-rpm-calculator" && <PageRpmCalculator />}
 
+            {/* Mid-article ad unit — between the opening section and the
+                remaining body, roughly the article's midpoint. */}
+            {restHtml ? <LabeledAdSlot slot="4123172240" className="my-8" /> : null}
+
             {/* 4. REMAINING ARTICLE BODY WITH IMPERIALPEDIA-GRADE PROSE TYPOGRAPHY */}
             {restHtml ? (
               <div
@@ -389,6 +398,10 @@ export const ArticlePage = ({
             ) : !leadHtml ? (
               <ArticleBody sections={[]} />
             ) : null}
+
+            {/* Bottom-of-article ad unit — right after the core body ends,
+                before the supplementary tools/citations/comments sections. */}
+            <LabeledAdSlot slot="7967495593" className="my-8" />
 
             {/* KEY FINANCIAL TERMS DEFINED */}
             <KeyTermsCallout categorySlug={effectiveArticle.categorySlug || "savings"} />
