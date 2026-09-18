@@ -243,6 +243,10 @@ export const sitemapService = {
     articles.forEach((article) => {
       const path = article.categorySlug ? `/${article.categorySlug}/${article.slug}` : `/financial-intelligence/${article.slug}`;
       if (REMOVED_ARTICLE_PATHS.has(path)) return;
+      // Same stale-category guard as the news loop below: an article's stored
+      // CMS category can point at a since-retired slug even though the page
+      // itself still renders fine under its real category elsewhere.
+      if (isRetiredPath(path)) return;
       entries.push({
         loc: `${base}${path}`,
         lastmod: article.publishedAt?.split("T")[0] || today,
