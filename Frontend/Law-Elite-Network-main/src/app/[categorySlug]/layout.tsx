@@ -58,17 +58,26 @@ export async function generateMetadata(
   // dataset only has 8 entries and the practitioner directory isn't verified).
   const bundledCat = (seedData as any).categories?.find((c: any) => c.slug === categorySlug);
   const name = cat?.name || cmsOnly?.name || bundledCat?.name || titleCase(categorySlug);
+  const isEntertainment = cmsOnly?.pillar === 'entertainment';
   // Root layout's metadata.title.template ('%s | Law Elite Network') already
   // appends the site name -- a fallback ending in "| Law Elite Network" here
   // used to render as "... | Law Elite Network | Law Elite Network".
-  const title = cmsOnly?.metaTitle || `${name} Legal Guides`;
+  const title = cmsOnly?.metaTitle || (isEntertainment ? name : `${name} Legal Guides`);
   const description = cat?.description || cmsOnly?.metaDescription || cmsOnly?.description || bundledCat?.description
-    || `Plain-language ${name} guides on Law Elite Network -- understand the law before you call a lawyer.`;
+    || (isEntertainment
+      ? `${name} coverage on Law Elite Network.`
+      : `Plain-language ${name} guides on Law Elite Network -- understand the law before you call a lawyer.`);
   const url = `${SITE}/${categorySlug}`;
+  // "{name} lawyer"/"{name} attorney"/"find a lawyer" only make sense for the
+  // legal pillar (see cms-only-categories.ts's `pillar` field) -- an
+  // Entertainment hub gets its own, non-legal keyword set instead.
+  const keywords = isEntertainment
+    ? [name, `${name} news`, 'entertainment news', 'law elite network']
+    : [name, `${name} lawyer`, `${name} attorney`, 'legal advice', 'find a lawyer'];
   return {
     title,
     description,
-    keywords: [name, `${name} lawyer`, `${name} attorney`, 'legal advice', 'find a lawyer'],
+    keywords,
     alternates: { canonical: url },
     robots: { index: true, follow: true },
     openGraph: { type: 'website', url, title, description },

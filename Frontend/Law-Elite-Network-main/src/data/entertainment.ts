@@ -1,0 +1,293 @@
+/**
+ * @fileOverview LEN Entertainment — bundled seed entities for the reusable
+ * EntertainmentEntity shape (see @/types/entertainment.ts). Every entity
+ * below is real and long-settled public record, and every `personSlug` in
+ * `peopleInvolved` points at a real profile already seeded in
+ * @/data/people.ts — this is what makes the actor↔movie / artist↔album
+ * relationships in the prompt concrete rather than illustrative.
+ *
+ * Same content-integrity posture as people.ts: no invented plot summaries,
+ * no box-office/financial figures (also excluded on principle — this isn't a
+ * business-intelligence layer), `images`/`videos`/`relatedArticleSlugs` left
+ * empty where no rights-cleared asset or real article exists yet.
+ */
+
+import type { EntertainmentEntity } from '@/types/entertainment';
+
+export const ENTERTAINMENT_ENTITIES: EntertainmentEntity[] = [
+  // ── Movies ──────────────────────────────────────────────────────
+  {
+    slug: 'forrest-gump',
+    title: 'Forrest Gump',
+    type: 'movie',
+    releaseDate: '1994-07-06',
+    description: 'A 1994 American film following the life of Forrest Gump, a slow-witted but kind-hearted Alabama man, as he witnesses and unwittingly influences several defining events of the late 20th century.',
+    peopleInvolved: [
+      { personSlug: 'tom-hanks', role: 'Actor', character: 'Forrest Gump' },
+    ],
+    relatedEntities: [{ slug: 'academy-award-best-actor-1995', relationship: 'Won Best Actor for this role' }],
+    verification: { verified: true, sourceNote: 'Long-settled public record — independent reference entry, not affiliated with the studio or rights holders.' },
+    seo: { metaTitle: 'Forrest Gump (1994)', metaDescription: 'Forrest Gump (1994): cast, release date, and related entertainment coverage.' },
+  },
+  {
+    slug: 'saving-private-ryan',
+    title: 'Saving Private Ryan',
+    type: 'movie',
+    releaseDate: '1998-07-24',
+    description: 'A 1998 American war film set during the invasion of Normandy in World War II, following a squad of U.S. soldiers sent to find and bring home a paratrooper.',
+    peopleInvolved: [
+      { personSlug: 'tom-hanks', role: 'Actor', character: 'Captain John H. Miller' },
+      { personSlug: 'steven-spielberg', role: 'Director' },
+    ],
+    verification: { verified: true, sourceNote: 'Long-settled public record — independent reference entry.' },
+    seo: { metaTitle: 'Saving Private Ryan (1998)', metaDescription: 'Saving Private Ryan (1998): cast, director, and related entertainment coverage.' },
+  },
+  {
+    slug: 'jaws',
+    title: 'Jaws',
+    type: 'movie',
+    releaseDate: '1975-06-20',
+    description: 'A 1975 American thriller film about a giant man-eating great white shark that attacks beachgoers on a resort town, and the efforts to hunt it down.',
+    peopleInvolved: [
+      { personSlug: 'steven-spielberg', role: 'Director' },
+    ],
+    verification: { verified: true, sourceNote: 'Long-settled public record — independent reference entry.' },
+    seo: { metaTitle: 'Jaws (1975)', metaDescription: 'Jaws (1975): director, release date, and related entertainment coverage.' },
+  },
+  {
+    slug: 'et-the-extra-terrestrial',
+    title: 'E.T. the Extra-Terrestrial',
+    type: 'movie',
+    releaseDate: '1982-06-11',
+    description: 'A 1982 American science fiction film about a young boy who befriends a stranded extraterrestrial and helps him find a way to return home.',
+    peopleInvolved: [
+      { personSlug: 'steven-spielberg', role: 'Director' },
+      { personSlug: 'kathleen-kennedy', role: 'Producer' },
+    ],
+    verification: { verified: true, sourceNote: 'Long-settled public record — independent reference entry.' },
+    seo: { metaTitle: 'E.T. the Extra-Terrestrial (1982)', metaDescription: 'E.T. the Extra-Terrestrial (1982): director, producer, and related entertainment coverage.' },
+  },
+  {
+    slug: 'jurassic-park',
+    title: 'Jurassic Park',
+    type: 'movie',
+    releaseDate: '1993-06-11',
+    description: 'A 1993 American science fiction film in which a theme park showcasing genetically recreated dinosaurs suffers a catastrophic systems failure.',
+    peopleInvolved: [
+      { personSlug: 'steven-spielberg', role: 'Director' },
+      { personSlug: 'kathleen-kennedy', role: 'Producer' },
+    ],
+    verification: { verified: true, sourceNote: 'Long-settled public record — independent reference entry.' },
+    seo: { metaTitle: 'Jurassic Park (1993)', metaDescription: 'Jurassic Park (1993): director, producer, and related entertainment coverage.' },
+  },
+  {
+    slug: 'schindlers-list',
+    title: 'Schindler’s List',
+    type: 'movie',
+    releaseDate: '1993-12-15',
+    description: 'A 1993 American historical drama film about Oskar Schindler, a German industrialist who saved more than a thousand Jewish refugees during the Holocaust by employing them in his factories.',
+    peopleInvolved: [
+      { personSlug: 'steven-spielberg', role: 'Director' },
+    ],
+    relatedEntities: [
+      { slug: 'academy-award-best-director-1994', relationship: 'Won Best Director for this film' },
+      { slug: '66th-academy-awards', relationship: 'Won Best Picture and Best Director at this ceremony' },
+    ],
+    verification: { verified: true, sourceNote: 'Long-settled public record — independent reference entry.' },
+    seo: { metaTitle: 'Schindler’s List (1993)', metaDescription: 'Schindler’s List (1993): director, awards, and related entertainment coverage.' },
+  },
+
+  // ── TV shows ────────────────────────────────────────────────────
+  {
+    slug: 'the-oprah-winfrey-show',
+    title: 'The Oprah Winfrey Show',
+    type: 'tv-show',
+    releaseDate: '1986-09-08',
+    description: 'An American syndicated talk show that aired for 25 seasons, hosted by Oprah Winfrey, becoming one of the highest-rated programs of its kind in U.S. television history.',
+    peopleInvolved: [
+      { personSlug: 'oprah-winfrey', role: 'Host' },
+    ],
+    verification: { verified: true, sourceNote: 'Long-settled public record — independent reference entry.' },
+    seo: { metaTitle: 'The Oprah Winfrey Show', metaDescription: 'The Oprah Winfrey Show: host, run dates, and related entertainment coverage.' },
+  },
+  {
+    slug: 'life-on-earth',
+    title: 'Life on Earth',
+    type: 'tv-show',
+    releaseDate: '1979-01-16',
+    description: 'A 1979 BBC natural history documentary series surveying the evolution and diversity of life on Earth, presented by David Attenborough.',
+    peopleInvolved: [
+      { personSlug: 'david-attenborough', role: 'Presenter' },
+    ],
+    verification: { verified: true, sourceNote: 'Long-settled public record — independent reference entry.' },
+    seo: { metaTitle: 'Life on Earth (1979)', metaDescription: 'Life on Earth (1979): presenter, release date, and related entertainment coverage.' },
+  },
+
+  // ── Streaming shows ─────────────────────────────────────────────
+  {
+    slug: 'our-planet',
+    title: 'Our Planet',
+    type: 'streaming-show',
+    releaseDate: '2019-04-05',
+    description: 'A 2019 nature documentary series produced for Netflix, narrated by David Attenborough, covering the diversity of habitats around the world.',
+    peopleInvolved: [
+      { personSlug: 'david-attenborough', role: 'Narrator' },
+    ],
+    verification: { verified: true, sourceNote: 'Long-settled public record — independent reference entry.' },
+    seo: { metaTitle: 'Our Planet (2019)', metaDescription: 'Our Planet (2019): narrator, streaming platform, and related entertainment coverage.' },
+  },
+
+  // ── Albums ──────────────────────────────────────────────────────
+  {
+    slug: 'lemonade',
+    title: 'Lemonade',
+    type: 'album',
+    releaseDate: '2016-04-23',
+    description: 'The sixth studio album by Beyoncé, released in 2016 alongside an accompanying visual film.',
+    peopleInvolved: [
+      { personSlug: 'beyonce', role: 'Artist' },
+    ],
+    verification: { verified: true, sourceNote: 'Long-settled public record — independent reference entry.' },
+    seo: { metaTitle: 'Lemonade (2016) — Beyoncé', metaDescription: 'Lemonade (2016) by Beyoncé: release date and related entertainment coverage.' },
+  },
+  {
+    slug: 'renaissance',
+    title: 'Renaissance',
+    type: 'album',
+    releaseDate: '2022-07-29',
+    description: 'The seventh studio album by Beyoncé, released in 2022, the first act of a planned three-act project.',
+    peopleInvolved: [
+      { personSlug: 'beyonce', role: 'Artist' },
+    ],
+    verification: { verified: true, sourceNote: 'Long-settled public record — independent reference entry.' },
+    seo: { metaTitle: 'Renaissance (2022) — Beyoncé', metaDescription: 'Renaissance (2022) by Beyoncé: release date and related entertainment coverage.' },
+  },
+
+  // ── Songs ───────────────────────────────────────────────────────
+  {
+    slug: 'halo',
+    title: 'Halo',
+    type: 'song',
+    releaseDate: '2009-01-20',
+    description: 'A song by Beyoncé released as a single from her 2008 album I Am... Sasha Fierce.',
+    peopleInvolved: [
+      { personSlug: 'beyonce', role: 'Artist' },
+    ],
+    relatedEntities: [{ slug: 'i-am-sasha-fierce', relationship: 'From this album' }],
+    verification: { verified: true, sourceNote: 'Long-settled public record — independent reference entry.' },
+    seo: { metaTitle: 'Halo — Beyoncé', metaDescription: 'Halo by Beyoncé: release date and related entertainment coverage.' },
+  },
+
+  // ── Music releases (distinct from a full solo studio album) ────
+  {
+    slug: 'i-am-sasha-fierce',
+    title: 'I Am... Sasha Fierce',
+    type: 'music-release',
+    releaseDate: '2008-11-18',
+    description: 'The third studio album by Beyoncé, released in 2008 as a double album split into two discs.',
+    peopleInvolved: [
+      { personSlug: 'beyonce', role: 'Artist' },
+    ],
+    verification: { verified: true, sourceNote: 'Long-settled public record — independent reference entry.' },
+    seo: { metaTitle: 'I Am... Sasha Fierce (2008) — Beyoncé', metaDescription: 'I Am... Sasha Fierce (2008) by Beyoncé: release date and related entertainment coverage.' },
+  },
+  {
+    slug: 'the-lion-king-the-gift',
+    title: 'The Lion King: The Gift',
+    type: 'music-release',
+    releaseDate: '2019-07-19',
+    description: 'A 2019 companion album curated and executive-produced by Beyoncé, inspired by and released alongside Disney’s The Lion King.',
+    peopleInvolved: [
+      { personSlug: 'beyonce', role: 'Curator / Executive Producer' },
+    ],
+    verification: { verified: true, sourceNote: 'Long-settled public record — independent reference entry.' },
+    seo: { metaTitle: 'The Lion King: The Gift (2019)', metaDescription: 'The Lion King: The Gift (2019): curator, release date, and related entertainment coverage.' },
+  },
+
+  // ── Awards ──────────────────────────────────────────────────────
+  {
+    slug: 'academy-award-best-actor-1994',
+    title: 'Academy Award for Best Actor (1994 ceremony)',
+    type: 'award',
+    releaseDate: '1994-03-21',
+    description: 'Tom Hanks won the Academy Award for Best Actor at the 66th Academy Awards for his role in Philadelphia (1993).',
+    peopleInvolved: [
+      { personSlug: 'tom-hanks', role: 'Recipient' },
+    ],
+    relatedEntities: [{ slug: '66th-academy-awards', relationship: 'Awarded at this ceremony' }],
+    verification: { verified: true, sourceNote: 'Long-settled public record — independent reference entry.' },
+    seo: { metaTitle: 'Academy Award for Best Actor — 1994', metaDescription: 'Tom Hanks’s 1994 Academy Award for Best Actor: recipient, film, and related coverage.' },
+  },
+  {
+    slug: 'academy-award-best-actor-1995',
+    title: 'Academy Award for Best Actor (1995 ceremony)',
+    type: 'award',
+    releaseDate: '1995-03-27',
+    description: 'Tom Hanks won the Academy Award for Best Actor at the 67th Academy Awards for his role in Forrest Gump (1994), making him the second actor in Academy history to win the award in consecutive years.',
+    peopleInvolved: [
+      { personSlug: 'tom-hanks', role: 'Recipient' },
+    ],
+    relatedEntities: [{ slug: 'forrest-gump', relationship: 'Awarded for this film' }],
+    verification: { verified: true, sourceNote: 'Long-settled public record — independent reference entry.' },
+    seo: { metaTitle: 'Academy Award for Best Actor — 1995', metaDescription: 'Tom Hanks’s 1995 Academy Award for Best Actor: recipient, film, and related coverage.' },
+  },
+  {
+    slug: 'academy-award-best-director-1994',
+    title: 'Academy Award for Best Director (1994 ceremony)',
+    type: 'award',
+    releaseDate: '1994-03-21',
+    description: 'Steven Spielberg won the Academy Award for Best Director at the 66th Academy Awards for Schindler’s List (1993), his first competitive directing Oscar.',
+    peopleInvolved: [
+      { personSlug: 'steven-spielberg', role: 'Recipient' },
+    ],
+    relatedEntities: [
+      { slug: 'schindlers-list', relationship: 'Awarded for this film' },
+      { slug: '66th-academy-awards', relationship: 'Awarded at this ceremony' },
+    ],
+    verification: { verified: true, sourceNote: 'Long-settled public record — independent reference entry.' },
+    seo: { metaTitle: 'Academy Award for Best Director — 1994', metaDescription: 'Steven Spielberg’s 1994 Academy Award for Best Director: recipient, film, and related coverage.' },
+  },
+
+  // ── Entertainment events ────────────────────────────────────────
+  {
+    slug: '66th-academy-awards',
+    title: '66th Academy Awards',
+    type: 'event',
+    releaseDate: '1994-03-21',
+    description: 'The 66th Academy Awards ceremony, held March 21, 1994, honoring films released in 1993. Schindler’s List won seven awards including Best Picture and Best Director.',
+    peopleInvolved: [
+      { personSlug: 'steven-spielberg', role: 'Best Director winner' },
+    ],
+    relatedEntities: [
+      { slug: 'schindlers-list', relationship: 'Best Picture winner' },
+      { slug: 'academy-award-best-director-1994', relationship: 'Awarded at this ceremony' },
+    ],
+    verification: { verified: true, sourceNote: 'Long-settled public record — independent reference entry.' },
+    seo: { metaTitle: '66th Academy Awards (1994)', metaDescription: 'The 66th Academy Awards (1994): winners, ceremony date, and related entertainment coverage.' },
+  },
+];
+
+export function getAllEntertainmentEntities(): EntertainmentEntity[] {
+  return ENTERTAINMENT_ENTITIES;
+}
+
+export function getEntertainmentEntityBySlug(slug: string): EntertainmentEntity | null {
+  const target = slug.toLowerCase();
+  return ENTERTAINMENT_ENTITIES.find((e) => e.slug === target) ?? null;
+}
+
+export function getEntertainmentByType(type: EntertainmentEntity['type']): EntertainmentEntity[] {
+  return ENTERTAINMENT_ENTITIES.filter((e) => e.type === type);
+}
+
+/** Every entity a given person is credited on — the reverse direction of `peopleInvolved`. */
+export function getEntertainmentForPerson(personSlug: string): EntertainmentEntity[] {
+  return ENTERTAINMENT_ENTITIES.filter((e) => e.peopleInvolved.some((p) => p.personSlug === personSlug));
+}
+
+export function getRelatedEntertainmentEntities(entity: EntertainmentEntity): EntertainmentEntity[] {
+  if (!entity.relatedEntities?.length) return [];
+  return entity.relatedEntities
+    .map((rel) => getEntertainmentEntityBySlug(rel.slug))
+    .filter((e): e is EntertainmentEntity => e !== null);
+}

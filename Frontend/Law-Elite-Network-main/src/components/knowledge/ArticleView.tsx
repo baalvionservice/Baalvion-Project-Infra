@@ -9,6 +9,9 @@ import { ArticleAdWrapper } from '@/components/knowledge/ArticleAdWrapper';
 import { PrimarySources } from '@/components/knowledge/PrimarySources';
 import { SeriesNotice } from '@/components/knowledge/SeriesNotice';
 import { ImportantNotice } from '@/components/knowledge/ImportantNotice';
+import { ArticleEntityConnections } from '@/components/knowledge/ArticleEntityConnections';
+import { getEntitiesForArticle } from '@/lib/entity-articles';
+import { resolveEntityReferences } from '@/lib/entity-reference-resolver';
 import { KeyTakeaways } from '@/components/knowledge/KeyTakeaways';
 import { FrequentlyAskedQuestions } from '@/components/knowledge/FrequentlyAskedQuestions';
 import { ReportAnError } from '@/components/knowledge/ReportAnError';
@@ -88,6 +91,7 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
   const { pairs: faqPairs, html: bodyHtml } = extractFaqSection(contentWithoutKeyTakeaways);
 
   const relatedArticles = await fetchRelatedArticles(slug, category?.slug, category?.name, article.subcategory?.slug);
+  const connectedEntities = resolveEntityReferences(await getEntitiesForArticle(article));
   const canonicalUrl = `${SITE}${articleUrl({ slug, category })}`;
 
   const readAlsoArticle = relatedArticles.length > 0 ? relatedArticles[0] : {
@@ -221,6 +225,8 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
               <ImportantNotice />
 
               <PrimarySources sources={article.primarySources} />
+
+              <ArticleEntityConnections entities={connectedEntities} />
 
               <FrequentlyAskedQuestions pairs={faqPairs} />
 

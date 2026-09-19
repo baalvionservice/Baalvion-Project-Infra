@@ -21,6 +21,23 @@ import { getKeyLegalTermsForCategory } from '@/lib/category-key-terms';
 import { StoryCard } from '@/components/knowledge/news/StoryCard';
 import { LatestRail } from '@/components/knowledge/news/LatestRail';
 import { Breadcrumbs } from '@/components/knowledge/Breadcrumbs';
+import { EntertainmentTypeHub } from '@/components/entertainment/EntertainmentTypeHub';
+import { getMergedEntertainmentEntities } from '@/lib/entertainment-server';
+import type { EntertainmentTypeSlug } from '@/types/entertainment';
+
+// This is where /movies, /television, /streaming, /music actually live (they
+// are entertainment-pillar entries in CMS_ONLY_CATEGORIES, not separate
+// routes) -- mapping a category slug to the EntertainmentEntity `type`(s) it
+// covers lets this one page show "browse the movies/shows/albums themselves"
+// above the usual article list, satisfying the directory-page ask without a
+// second, competing route at the same URL. /celebrity-news intentionally has
+// no mapping -- it's news coverage, not a catalog of entities.
+const ENTERTAINMENT_ENTITY_TYPE_MAP: Record<string, EntertainmentTypeSlug[]> = {
+  movies: ['movie'],
+  television: ['tv-show'],
+  streaming: ['streaming-show'],
+  music: ['music-release', 'album', 'song'],
+};
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 // Same AdSense slot as AD_PLACEMENTS.CATEGORY_HERO (AdManager.tsx) -- literal
@@ -128,6 +145,11 @@ export default async function CategoryPage(
   // cms.ts's env vars are server-only, then handed down as a prop.
   const cmsArticles = await cmsGetArticles(undefined, categorySlug).catch(() => []);
 
+  const entityTypes = ENTERTAINMENT_ENTITY_TYPE_MAP[categorySlug];
+  const entities = entityTypes
+    ? (await getMergedEntertainmentEntities()).filter((e) => entityTypes.includes(e.type))
+    : [];
+
   // Investopedia-style "spotlight" split for this practice area: one lead
   // story with a full photo on the left, a thumbnail-led rail of the next
   // few most-viewed guides on the right -- same lead+rail pattern the
@@ -155,11 +177,18 @@ export default async function CategoryPage(
     .filter(Boolean)
     .map((a: any) => a.slug);
 
+  // Only the legal pillar's hubs are framed as a lawyer/practice-area
+  // resource -- an Entertainment hub (Movies, Music, ...) using the same
+  // "{name} Lawyers" wording would be nonsensical (see cms-only-categories.ts's
+  // `pillar` field).
+  const isEntertainment = category.pillar === 'entertainment';
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
-    name: `${category.name} Lawyers`,
-    description: category.description || `Verified ${category.name} lawyers and legal resources.`,
+    name: isEntertainment ? category.name : `${category.name} Lawyers`,
+    description: category.description || (isEntertainment
+      ? `${category.name} coverage on Law Elite Network.`
+      : `Verified ${category.name} lawyers and legal resources.`),
     url: `${SITE}/${categorySlug}`,
     isPartOf: { '@type': 'WebSite', name: 'Law Elite Network', url: SITE },
   };
@@ -195,7 +224,7 @@ export default async function CategoryPage(
               categoryIsCurrentPage
               hideBackLink
             />
-            <span className="kicker">Practice Area</span>
+            <span className="kicker">{isEntertainment ? 'Entertainment' : 'Practice Area'}</span>
             <h1 className="font-headline text-4xl md:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.02] mt-3">
               {category.pillarTitle || category.name}
             </h1>
@@ -216,6 +245,18 @@ export default async function CategoryPage(
             </div>
           )}
         </section>
+
+        {entityTypes && (
+          <div className="container mx-auto px-4 sm:px-6 max-w-7xl py-10 border-b border-slate-100">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-headline text-2xl font-bold text-slate-900 tracking-tight">Browse {category.name}</h2>
+              <Link href="/entertainment" className="text-[12px] font-bold uppercase tracking-wider text-blue-600 hover:text-blue-700 transition-colors">
+                Full Directory
+              </Link>
+            </div>
+            <EntertainmentTypeHub entities={entities} />
+          </div>
+        )}
 
         <div className="container mx-auto px-4 sm:px-6 max-w-7xl py-6">
           <AdSlot slotId={CATEGORY_AD_SLOT_ID} format="horizontal" placement="category-hero" fullWidthResponsive minHeight="100px" />

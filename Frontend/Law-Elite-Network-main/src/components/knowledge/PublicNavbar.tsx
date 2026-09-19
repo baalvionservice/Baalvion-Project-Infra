@@ -206,6 +206,10 @@ export function PublicNavbar() {
             </button>
             <nav className="hidden xl:flex items-center gap-4 text-xs font-black uppercase tracking-tight text-slate-900">
               <Link href="/news" className="hover:text-[#E13131] transition-colors">NEWS</Link>
+              <Link href="/people" className="hover:text-[#E13131] transition-colors">PEOPLE</Link>
+              <Link href="/entertainment" className="hover:text-[#E13131] transition-colors">ENTERTAINMENT</Link>
+              <Link href="/legal/cases" className="hover:text-[#E13131] transition-colors">CASES</Link>
+              <Link href="/sports" className="hover:text-[#E13131] transition-colors">SPORTS</Link>
               <Link href="/maritime-offshore-injury-law" className="hover:text-[#E13131] transition-colors">MARITIME INJURY</Link>
               <Link href="/cruise-ship-passenger-vessel-accidents" className="hover:text-[#E13131] transition-colors">CRUISE SHIP ACCIDENTS</Link>
               <Link href="/personal-injury-lawyer" className="hover:text-[#E13131] transition-colors">PERSONAL INJURY</Link>
@@ -289,6 +293,30 @@ export function PublicNavbar() {
             HOME
           </Link>
           <Link
+            href="/people"
+            className="flex items-center h-full whitespace-nowrap text-xs font-black uppercase tracking-wider text-white hover:text-[#E13131] transition-colors"
+          >
+            PEOPLE
+          </Link>
+          <Link
+            href="/entertainment"
+            className="flex items-center h-full whitespace-nowrap text-xs font-black uppercase tracking-wider text-white hover:text-[#E13131] transition-colors"
+          >
+            ENTERTAINMENT
+          </Link>
+          <Link
+            href="/legal/cases"
+            className="flex items-center h-full whitespace-nowrap text-xs font-black uppercase tracking-wider text-white hover:text-[#E13131] transition-colors"
+          >
+            CASES
+          </Link>
+          <Link
+            href="/sports"
+            className="flex items-center h-full whitespace-nowrap text-xs font-black uppercase tracking-wider text-white hover:text-[#E13131] transition-colors"
+          >
+            SPORTS
+          </Link>
+          <Link
             href="/maritime-offshore-injury-law"
             className="flex items-center h-full whitespace-nowrap text-xs font-black uppercase tracking-wider text-white hover:text-[#E13131] transition-colors"
           >
@@ -314,7 +342,12 @@ export function PublicNavbar() {
           </Link>
           {categories
             .filter((cat) => !['maritime-offshore-injury-law', 'cruise-ship-passenger-vessel-accidents', 'personal-injury-lawyer', 'law-school-success'].includes(cat.slug))
-            .slice(0, 4)
+            // Was capped at 4 when this only ever needed to top up a live-API
+            // gap; the Entertainment pillar's 5 new hubs (movies, music,
+            // television, streaming, celebrity-news) all belong here too, and
+            // this bar already scrolls horizontally (overflow-x-auto above),
+            // so there's no layout reason to hide any of them.
+            .slice(0, 12)
             .map((cat) => (
               <Link
                 key={cat.id}
@@ -416,6 +449,10 @@ export function PublicNavbar() {
               <nav aria-label="Mobile navigation">
                 {[
                   { label: 'Home', href: '/' },
+                  { label: 'People', href: '/people' },
+                  { label: 'Entertainment', href: '/entertainment' },
+                  { label: 'Legal Cases', href: '/legal/cases' },
+                  { label: 'Sports', href: '/sports' },
                 ].map((item) => (
                   <Link
                     key={item.href}

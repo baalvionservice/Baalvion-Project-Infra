@@ -33,11 +33,20 @@ export function toNewCategorySlug(oldSlug: string): string {
 // aimed at law students (study skills, casebook reading, exam prep), not
 // part of the AdSense-retirement narrowing above -- kept separate from that
 // list's restore-later intent.
+// Entertainment pillar (LEN master IA, September 2026) -- 5 new hubs added
+// alongside the 4 legal ones above, not part of the AdSense-retirement
+// narrowing or its restore-later list. See cms-only-categories.ts for each
+// one's copy and `pillar: 'entertainment'` marker.
 export const CURRENT_CATEGORY_SLUGS = [
   'maritime-offshore-injury-law',
   'cruise-ship-passenger-vessel-accidents',
   'personal-injury-lawyer',
   'law-school-success',
+  'movies',
+  'music',
+  'television',
+  'streaming',
+  'celebrity-news',
 ] as const;
 
 /** Every slug the /law/{slug} URL shape ever used, for validating old redirect requests. */

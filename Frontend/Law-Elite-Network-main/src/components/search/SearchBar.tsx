@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, X } from 'lucide-react';
 import SearchSuggestions from './SearchSuggestions';
+import type { SearchResultItem } from '@/lib/global-search';
 
 interface SearchBarProps {
   initialValue?: string;
@@ -13,7 +14,7 @@ interface SearchBarProps {
 export default function SearchBar({ initialValue = "", variant = 'hero' }: SearchBarProps) {
   const [queryText, setQueryText] = useState(initialValue);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [suggestions, setSuggestions] = useState<SearchResultItem[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -29,7 +30,7 @@ export default function SearchBar({ initialValue = "", variant = 'hero' }: Searc
     setIsSearching(true);
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
-      fetch(`/api/search?q=${encodeURIComponent(queryText)}&limit=6`)
+      fetch(`/api/search?q=${encodeURIComponent(queryText)}&limit=7`)
         .then(res => res.json())
         .then(json => {
           const items = json?.data?.items || [];
@@ -91,9 +92,9 @@ export default function SearchBar({ initialValue = "", variant = 'hero' }: Searc
             suggestions={suggestions}
             query={queryText}
             isSearching={isSearching}
-            onSelect={(slug) => {
+            onSelect={(url) => {
               setShowSuggestions(false);
-              router.push(`/article/${slug}`);
+              router.push(url);
             }}
           />
         )}
@@ -131,9 +132,9 @@ export default function SearchBar({ initialValue = "", variant = 'hero' }: Searc
           suggestions={suggestions}
           query={queryText}
           isSearching={isSearching}
-          onSelect={(slug) => {
+          onSelect={(url) => {
             setShowSuggestions(false);
-            router.push(`/article/${slug}`);
+            router.push(url);
           }}
         />
       )}

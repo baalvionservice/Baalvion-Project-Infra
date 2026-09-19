@@ -163,6 +163,11 @@ const nextConfig: NextConfig = {
       { source: '/copyright-policy', destination: '/editorial-disclosure-policy', permanent: true },
       { source: '/affiliate-disclosure', destination: '/editorial-disclosure-policy', permanent: true },
       { source: '/disclaimer', destination: '/terms-of-service', permanent: true },
+      // The Television entertainment hub lives at /television (see
+      // cms-only-categories.ts) -- /tv is the shorter form readers actually
+      // type/link, so it redirects rather than existing as a second,
+      // competing route to the same content.
+      { source: '/tv', destination: '/television', permanent: true },
       // /world pulled the exact same cmsGetNews() feed as /news with no real
       // geographic filter (its "cross-border"/"every region" copy wasn't
       // backed by any actual filtering) -- a near-duplicate competing for the

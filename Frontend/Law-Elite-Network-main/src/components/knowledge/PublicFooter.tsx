@@ -25,10 +25,38 @@ const PRACTICE_AREA_LINKS = [
   { href: '/maritime-offshore-injury-law', label: 'Maritime & Offshore Injury' },
   { href: '/cruise-ship-passenger-vessel-accidents', label: 'Cruise Ship & Vessel Accidents' },
   { href: '/personal-injury-lawyer', label: 'Personal Injury Law' },
+  { href: '/legal/cases', label: 'Legal Cases' },
+  { href: '/legal/courts', label: 'Courts' },
+];
+
+const ENTERTAINMENT_LINKS = [
+  { href: '/entertainment', label: 'Entertainment Hub' },
+  { href: '/movies', label: 'Movies' },
+  { href: '/music', label: 'Music' },
+  { href: '/television', label: 'Television' },
+  { href: '/streaming', label: 'Streaming' },
+  { href: '/celebrity-news', label: 'Celebrity News' },
+];
+
+const SPORTS_LINKS = [
+  { href: '/sports', label: 'Sports Hub' },
+  { href: '/sports/teams', label: 'Teams' },
+  { href: '/sports/competitions', label: 'Competitions' },
+];
+
+const PEOPLE_LINKS = [
+  { href: '/people', label: 'All People' },
+  { href: '/people/actors', label: 'Actors' },
+  { href: '/people/musicians', label: 'Musicians' },
+  { href: '/people/athletes', label: 'Athletes' },
+  { href: '/people/lawyers', label: 'Lawyers' },
+  { href: '/people/creators', label: 'Creators' },
 ];
 
 const ABOUT_LINKS = [
   { href: '/about-us', label: 'About Us' },
+  { href: '/topics', label: 'Topics' },
+  { href: '/countries', label: 'Countries' },
   { href: '/authors', label: 'Contributors' },
   { href: '/editorial-standards', label: 'Editorial Standards' },
   { href: '/editorial-process', label: 'Editorial Process' },
@@ -102,6 +130,16 @@ export function PublicFooter() {
               colSpan="md:col-span-3"
               title="Practice Areas"
               sections={[{ heading: 'Practice Areas (Legal Guides)', links: PRACTICE_AREA_LINKS }]}
+            />
+
+            <FooterLinkColumn
+              colSpan="md:col-span-2"
+              title="Entertainment & Sports"
+              sections={[
+                { heading: 'Entertainment', links: ENTERTAINMENT_LINKS },
+                { heading: 'Sports', links: SPORTS_LINKS },
+                { heading: 'People', links: PEOPLE_LINKS },
+              ]}
             />
 
             <FooterLinkColumn

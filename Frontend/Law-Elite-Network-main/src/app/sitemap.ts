@@ -7,6 +7,15 @@ import { articleUrl, ROOT_FLAT_ARTICLE_SLUGS } from '@/lib/article-url';
 import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
 import { cmsGetArticles } from '@/lib/cms';
 import { CONTENT_CACHE_TAG } from '@/lib/cache-tags';
+import { getAllPeople } from '@/data/people';
+import { getAllEntertainmentEntities } from '@/data/entertainment';
+import { getAllLegalCases } from '@/data/legal-cases';
+import { getAllCourts } from '@/data/courts';
+import { getAllSportsTeams } from '@/data/sports-teams';
+import { getAllSportsCompetitions } from '@/data/sports-competitions';
+import { getAllTopics } from '@/data/topics';
+import { COUNTRIES } from '@/lib/countries';
+import { PERSON_CATEGORIES } from '@/types/person';
 
 // Render at request time, never at build time. This route fetches from law-service,
 // and a build-time fetch against an unreachable API blocks `next build` (CI timeout).
@@ -101,6 +110,15 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
     // all four now 301 to / (next.config.ts) -- see retired-links.ts's
     // RETIRED_SECTIONS for why.
     { url: `${BASE_URL}/about-us` },
+    { url: `${BASE_URL}/people` },
+    { url: `${BASE_URL}/entertainment` },
+    { url: `${BASE_URL}/legal/cases` },
+    { url: `${BASE_URL}/legal/courts` },
+    { url: `${BASE_URL}/sports` },
+    { url: `${BASE_URL}/sports/teams` },
+    { url: `${BASE_URL}/sports/competitions` },
+    { url: `${BASE_URL}/topics` },
+    { url: `${BASE_URL}/countries` },
     { url: `${BASE_URL}/authors` },
     { url: `${BASE_URL}/editorial-standards` },
     { url: `${BASE_URL}/corrections` },
@@ -267,11 +285,65 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
       };
     });
 
+  // Every bundled Person is a fully authored, real profile from launch (no
+  // "0 published articles" empty-directory-entry problem like /authors had),
+  // so all of them are sitemap-eligible unconditionally.
+  const peopleRoutes: MetadataRoute.Sitemap = getAllPeople().map((p) => ({
+    url: `${BASE_URL}/people/${p.slug}`,
+  }));
+
+  // Category directories (/people/actors, /people/lawyers, ...) -- only ones
+  // with at least one real profile, same no-thin-pages rule as /countries.
+  const activePersonCategories = new Set(getAllPeople().map((p) => p.category));
+  const personCategoryRoutes: MetadataRoute.Sitemap = PERSON_CATEGORIES.filter((c) =>
+    activePersonCategories.has(c.slug),
+  ).map((c) => ({ url: `${BASE_URL}/people/${c.slug}` }));
+
+  const entertainmentRoutes: MetadataRoute.Sitemap = getAllEntertainmentEntities().map((e) => ({
+    url: `${BASE_URL}/entertainment/${e.slug}`,
+  }));
+
+  const legalCaseRoutes: MetadataRoute.Sitemap = getAllLegalCases().map((c) => ({
+    url: `${BASE_URL}/legal/cases/${c.slug}`,
+  }));
+
+  const courtRoutes: MetadataRoute.Sitemap = getAllCourts().map((c) => ({
+    url: `${BASE_URL}/legal/courts/${c.slug}`,
+  }));
+
+  const teamRoutes: MetadataRoute.Sitemap = getAllSportsTeams().map((t) => ({
+    url: `${BASE_URL}/sports/teams/${t.slug}`,
+  }));
+
+  const competitionRoutes: MetadataRoute.Sitemap = getAllSportsCompetitions().map((c) => ({
+    url: `${BASE_URL}/sports/competitions/${c.slug}`,
+  }));
+
+  const topicRoutes: MetadataRoute.Sitemap = getAllTopics().map((t) => ({
+    url: `${BASE_URL}/topics/${t.slug}`,
+  }));
+
+  // Only countries something on the network is actually connected to — same
+  // reasoning as src/app/countries/page.tsx: no thin, empty country pages.
+  const activeCountryCodes = new Set(getAllPeople().map((p) => p.countryCode).filter(Boolean));
+  const countryRoutes: MetadataRoute.Sitemap = COUNTRIES.filter((c) => activeCountryCodes.has(c.code)).map((c) => ({
+    url: `${BASE_URL}/countries/${c.code.toLowerCase()}`,
+  }));
+
   return [
     ...staticRoutes,
     ...articleRoutes,
     ...categoryRoutes,
     ...authorRoutes,
+    ...peopleRoutes,
+    ...personCategoryRoutes,
+    ...entertainmentRoutes,
+    ...legalCaseRoutes,
+    ...courtRoutes,
+    ...teamRoutes,
+    ...competitionRoutes,
+    ...topicRoutes,
+    ...countryRoutes,
   ];
 }
 

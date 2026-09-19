@@ -1,16 +1,20 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
-import { ArticleCard } from '@/components/knowledge/ArticleCard';
 import SearchBar from '@/components/search/SearchBar';
+import { SearchResultCard } from '@/components/search/SearchResultCard';
+import { SEARCH_TYPE_META } from '@/lib/search-type-meta';
+import type { SearchResultItem, SearchResultType } from '@/lib/global-search';
 import {
   Search,
   ShieldCheck,
   SearchX
 } from 'lucide-react';
 import Link from 'next/link';
+
+type SortOrder = 'relevance' | 'az';
 
 export default function SearchResultsPage() {
   return (
@@ -23,10 +27,13 @@ export default function SearchResultsPage() {
 function SearchContent() {
   const searchParams = useSearchParams();
   const rawQuery = searchParams.get('q') || "";
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<SearchResultItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [activeType, setActiveType] = useState<SearchResultType | 'all'>('all');
+  const [sort, setSort] = useState<SortOrder>('relevance');
 
   useEffect(() => {
+    setActiveType('all');
     if (!rawQuery) { setResults([]); return; }
     setLoading(true);
     fetch(`/api/search?q=${encodeURIComponent(rawQuery)}&limit=100`)
@@ -36,12 +43,29 @@ function SearchContent() {
       .finally(() => setLoading(false));
   }, [rawQuery]);
 
+  const counts = useMemo(() => {
+    const map = new Map<SearchResultType, number>();
+    results.forEach((r) => map.set(r.type, (map.get(r.type) || 0) + 1));
+    return map;
+  }, [results]);
+
+  const availableTypes = useMemo(
+    () => (Object.keys(SEARCH_TYPE_META) as SearchResultType[]).filter((t) => (counts.get(t) || 0) > 0),
+    [counts],
+  );
+
+  const visible = useMemo(() => {
+    const filtered = activeType === 'all' ? results : results.filter((r) => r.type === activeType);
+    if (sort === 'az') return [...filtered].sort((a, b) => a.title.localeCompare(b.title));
+    return filtered; // already relevance-sorted server-side
+  }, [results, activeType, sort]);
+
   return (
     <div className="min-h-screen bg-white">
       <main className="pt-32 pb-24">
         <div className="container mx-auto px-6 max-w-7xl">
 
-          <header className="mb-20 space-y-12">
+          <header className="mb-16 space-y-12">
             <div className="max-w-3xl mx-auto space-y-6 text-center">
               <div className="flex justify-center">
                 <span className="px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-[10px] font-bold uppercase tracking-[0.3em] flex items-center gap-2">
@@ -58,24 +82,66 @@ function SearchContent() {
             </div>
           </header>
 
-          <div className="space-y-12">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-6">
-              <h2 className="text-xl font-bold text-slate-900 font-serif flex items-center gap-3">
-                <Search className="w-5 h-5 text-blue-600" />
-                {loading ? 'Searching…' : `${results.length} ${results.length === 1 ? 'result' : 'results'} found`}
-              </h2>
+          <div className="space-y-8">
+            <div className="flex flex-col gap-6 border-b border-slate-100 pb-6">
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                <h2 className="text-xl font-bold text-slate-900 font-serif flex items-center gap-3">
+                  <Search className="w-5 h-5 text-blue-600" />
+                  {loading ? 'Searching…' : `${visible.length} ${visible.length === 1 ? 'result' : 'results'} found`}
+                </h2>
+
+                {!loading && results.length > 0 && (
+                  <label className="flex items-center gap-2 text-[12px] font-bold text-slate-500 uppercase tracking-wide">
+                    Sort
+                    <select
+                      value={sort}
+                      onChange={(e) => setSort(e.target.value as SortOrder)}
+                      className="border border-slate-200 rounded-lg px-3 py-1.5 text-[13px] font-semibold text-slate-700 bg-white focus:outline-none focus:border-blue-400"
+                    >
+                      <option value="relevance">Relevance</option>
+                      <option value="az">A–Z</option>
+                    </select>
+                  </label>
+                )}
+              </div>
+
+              {!loading && availableTypes.length > 1 && (
+                <div className="flex flex-wrap gap-2" role="tablist" aria-label="Filter by entity type">
+                  <button
+                    onClick={() => setActiveType('all')}
+                    aria-pressed={activeType === 'all'}
+                    className={`px-4 py-1.5 rounded-full text-[13px] font-bold uppercase tracking-tight transition-colors ${
+                      activeType === 'all' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    All ({results.length})
+                  </button>
+                  {availableTypes.map((t) => (
+                    <button
+                      key={t}
+                      onClick={() => setActiveType(t)}
+                      aria-pressed={activeType === t}
+                      className={`px-4 py-1.5 rounded-full text-[13px] font-bold uppercase tracking-tight transition-colors ${
+                        activeType === t ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                    >
+                      {SEARCH_TYPE_META[t].label} ({counts.get(t)})
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {loading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {[1, 2, 3, 4, 5, 6].map(i => (
-                  <div key={i} className="h-64 rounded-[2.5rem] bg-slate-50 animate-pulse border border-slate-100" />
+                  <div key={i} className="h-40 rounded-2xl bg-slate-50 animate-pulse border border-slate-100" />
                 ))}
               </div>
-            ) : results.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                {results.map((art) => (
-                  <ArticleCard key={art.id} article={art} />
+            ) : visible.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {visible.map((item) => (
+                  <SearchResultCard key={item.id} item={item} />
                 ))}
               </div>
             ) : (
@@ -84,13 +150,13 @@ function SearchContent() {
                 <div className="space-y-2">
                   <h4 className="text-2xl font-bold text-slate-900">No results found</h4>
                   <p className="text-slate-500 max-w-sm mx-auto leading-relaxed">
-                    We couldn't find any guides matching <span className="text-slate-900 font-bold">"{rawQuery}"</span>. Try a different term or browse our legal guides instead.
+                    We couldn't find anything matching <span className="text-slate-900 font-bold">"{rawQuery}"</span>. Try a different term, or browse People, Entertainment, Legal, or Sports instead.
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
                   <Link href="/">
                     <button className="bg-slate-900 text-white px-8 h-12 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl shadow-slate-200">
-                      Browse Legal Guides
+                      Browse Law Elite Network
                     </button>
                   </Link>
                 </div>
