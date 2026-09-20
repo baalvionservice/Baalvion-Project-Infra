@@ -4,6 +4,11 @@ import { cmsGetArticles } from '@/lib/cms';
 import { fetchArticleForRender } from '@/lib/article-fetch';
 import { getArticleEntities } from '@/lib/entity-mentions';
 import { buildEntityRegistry } from '@/lib/entity-registry';
+import { getMergedPeople } from '@/lib/people-server';
+import { getMergedLegalCases, getMergedCourts } from '@/lib/legal-server';
+import { getMergedEntertainmentEntities } from '@/lib/entertainment-server';
+import { getMergedSportsTeams, getMergedSportsCompetitions } from '@/lib/sports-server';
+import { getMergedTopics } from '@/lib/topics-server';
 import { CONTENT_CACHE_TAG } from '@/lib/cache-tags';
 import type { EntityType, EntityReference } from '@/types/entity-tagging';
 
@@ -22,15 +27,26 @@ import type { EntityType, EntityReference } from '@/types/entity-tagging';
 async function buildTaggedArticleIndex() {
   const cmsArticles = await cmsGetArticles().catch(() => []);
   const articles = mergeArticles(cmsArticles);
-  const registry = buildEntityRegistry();
+  const [people, cases, courts, entertainment, teams, competitions, topics] = await Promise.all([getMergedPeople(), getMergedLegalCases(), getMergedCourts(), getMergedEntertainmentEntities(), getMergedSportsTeams(), getMergedSportsCompetitions(), getMergedTopics()]);
+  const registry = buildEntityRegistry(people, { cases, courts }, entertainment, { teams, competitions }, topics);
   return articles.map((article) => ({
     article,
     entities: getArticleEntities(article, registry),
   }));
 }
 
+// unstable_cache does not de-duplicate concurrent misses, and a page calls this
+// several times at once (articles, people, entertainment, legal matters) -- at
+// build time every static page in a worker did, each rebuilding the whole
+// index. Sharing the in-flight promise makes those calls one computation.
+let inFlight: Promise<Awaited<ReturnType<typeof buildTaggedArticleIndex>>> | null = null;
+const shareInFlight = () => {
+  inFlight ??= buildTaggedArticleIndex().finally(() => { inFlight = null; });
+  return inFlight;
+};
+
 const getCachedTaggedIndex = unstable_cache(
-  buildTaggedArticleIndex,
+  shareInFlight,
   ['len-entity-tagged-articles'],
   { revalidate: 900, tags: [CONTENT_CACHE_TAG] },
 );

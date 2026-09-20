@@ -45,4 +45,15 @@ export const COUNTRIES: Country[] = [
   { code: 'ZM', name: 'Zambia' }, { code: 'ZW', name: 'Zimbabwe' },
 ];
 
-export const countryNameByCode = (code?: string) => COUNTRIES.find((c) => c.code === code)?.name || code || '';
+/**
+ * Names for countries and territories that appear only as a person's country
+ * of origin. Kept out of COUNTRIES on purpose: everything in that list gets a
+ * /countries/{code} page and is matched against article text, which these
+ * don't need.
+ */
+export const ORIGIN_ONLY_COUNTRIES: Record<string, string> = {
+  BB: 'Barbados', BJ: 'Benin', CU: 'Cuba', GM: 'The Gambia', PR: 'Puerto Rico', PS: 'Palestine', SN: 'Senegal', SO: 'Somalia', TT: 'Trinidad and Tobago',
+};
+
+export const countryNameByCode = (code?: string) =>
+  COUNTRIES.find((c) => c.code === code)?.name || (code && ORIGIN_ONLY_COUNTRIES[code]) || code || '';

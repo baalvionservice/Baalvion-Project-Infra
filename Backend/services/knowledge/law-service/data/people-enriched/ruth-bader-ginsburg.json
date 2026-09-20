@@ -1,0 +1,141 @@
+{
+  "slug": "ruth-bader-ginsburg",
+  "category": "judges",
+  "wikidata_id": "Q11116",
+  "full_name": "Ruth Bader Ginsburg",
+  "description": "American lawyer and jurist (1933–2020)",
+  "birth_date": "1933-03-15",
+  "birth_place": "Brooklyn",
+  "death_date": "2020-09-18",
+  "death_place": "Washington, D.C.",
+  "status": "deceased",
+  "country_code": "US",
+  "citizenship": [
+    "United States"
+  ],
+  "occupations": [
+    "judge",
+    "lawyer",
+    "jurist",
+    "Member of the Constitutional Court of Austria"
+  ],
+  "education": [
+    {
+      "institution": "Cornell University"
+    },
+    {
+      "institution": "Harvard Law School"
+    },
+    {
+      "institution": "Columbia Law School"
+    },
+    {
+      "institution": "James Madison High School"
+    }
+  ],
+  "positions": [
+    {
+      "title": "Judge of the United States Court of Appeals for the D.C. Circuit",
+      "start": 1980,
+      "end": 1993
+    },
+    {
+      "title": "Associate Justice of the Supreme Court of the United States",
+      "start": 1993,
+      "end": 2020
+    }
+  ],
+  "awards": [
+    {
+      "title": "Brandeis Medal",
+      "year": 2003
+    },
+    {
+      "title": "National Women's Hall of Fame",
+      "year": 2002
+    },
+    {
+      "title": "honorary doctor of the Ohio State University",
+      "year": 2009
+    },
+    {
+      "title": "Fellow of the American Academy of Arts and Sciences"
+    },
+    {
+      "title": "honorary doctor of Harvard University",
+      "year": 2011
+    },
+    {
+      "title": "Forbes list of The World's 100 Most Powerful Women",
+      "year": 2004
+    },
+    {
+      "title": "Time 100",
+      "year": 2015
+    },
+    {
+      "title": "honorary doctorate from Princeton University",
+      "year": 2010
+    },
+    {
+      "title": "Four Freedoms Award – Freedom Medal",
+      "year": 2015
+    },
+    {
+      "title": "Jefferson Awards for Public Service",
+      "year": 2011
+    },
+    {
+      "title": "Golden Plate Award",
+      "year": 1995
+    },
+    {
+      "title": "Genesis Prize",
+      "year": 2018
+    },
+    {
+      "title": "Margaret Brent Award",
+      "year": 1993
+    },
+    {
+      "title": "Berggruen Prize",
+      "year": 2019
+    },
+    {
+      "title": "honorary doctorate of Lund University",
+      "year": 1969
+    },
+    {
+      "title": "honorary doctor of the Willamette University",
+      "year": 2009
+    },
+    {
+      "title": "Radcliffe Medal",
+      "year": 2015
+    },
+    {
+      "title": "Elizabeth Blackwell Award",
+      "year": 2021
+    }
+  ],
+  "notable_works": [],
+  "social": {},
+  "official_website": null,
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q11116"
+    }
+  ],
+  "photo": {
+    "file": "ruth-bader-ginsburg.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1189,
+    "credit": "Steve Petteway, Collection of the Supreme Court of the United States / Wikimedia Commons",
+    "license": "Public domain",
+    "license_url": null,
+    "source_url": "https://commons.wikimedia.org/wiki/File:Ruth_Bader_Ginsburg_official_SCOTUS_portrait_(cropped).jpg"
+  },
+  "fetched_at": "2026-09-20T06:00:54.432Z"
+}

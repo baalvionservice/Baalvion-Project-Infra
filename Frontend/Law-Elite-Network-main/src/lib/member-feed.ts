@@ -88,8 +88,8 @@ function entityUrl(type: EntityType, slug: string): string {
 }
 
 /** Name + link for each followed entity, so the UI never shows a raw slug. Entities that no longer exist are omitted. */
-export function describeEntities(refs: EntityReference[]) {
-  const names = new Map(buildEntityRegistry().map((e) => [`${e.entityType}:${e.slug}`, e.names[0]]));
+export function describeEntities(refs: EntityReference[], registry = buildEntityRegistry()) {
+  const names = new Map(registry.map((e) => [`${e.entityType}:${e.slug}`, e.names[0]]));
   return refs.flatMap((r) => {
     const name = names.get(`${r.entityType}:${r.slug}`);
     return name ? [{ ...r, name, kind: ENTITY_LABEL[r.entityType], url: entityUrl(r.entityType, r.slug) }] : [];

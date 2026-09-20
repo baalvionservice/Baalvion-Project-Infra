@@ -4,16 +4,15 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Navbar } from '@/components/navbar';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
-import { getTopicBySlug } from '@/data/topics';
+import { getMergedTopicBySlug, getMergedTopics } from '@/lib/topics-server';
 import { getArticlesForEntity, getCoOccurringEntities } from '@/lib/entity-articles';
 import { resolveEntityReferences } from '@/lib/entity-reference-resolver';
 import { articleUrl } from '@/lib/article-url';
-import { getAllTopics } from '@/data/topics';
 
 export const revalidate = 86400;
 
-export function generateStaticParams() {
-  return getAllTopics().map((t) => ({ slug: t.slug }));
+export async function generateStaticParams() {
+  return (await getMergedTopics()).map((t) => ({ slug: t.slug }));
 }
 
 function ChipSection({ title, chips }: { title: string; chips: { name: string; url: string }[] }) {
@@ -34,7 +33,7 @@ function ChipSection({ title, chips }: { title: string; chips: { name: string; u
 
 export default async function TopicPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const topic = getTopicBySlug(slug);
+  const topic = await getMergedTopicBySlug(slug);
   if (!topic) notFound();
 
   // Relevance rule: a person/entertainment entity/legal case is "related to"
@@ -59,6 +58,13 @@ export default async function TopicPage({ params }: { params: Promise<{ slug: st
             <span className="text-[12px] font-bold text-blue-600 uppercase tracking-tight">Topic</span>
             <h1 className="text-[44px] md:text-[56px] font-bold text-slate-900 tracking-tight font-serif mb-6 leading-tight mt-2">{topic.name}</h1>
 <div className="mt-4"><FollowButton entityType="topic" slug={topic.slug} /></div>
+            {topic.description && (
+              <div className="mt-6 space-y-4">
+                {topic.description.split(/\n{2,}/).map((para, i) => (
+                  <p key={i} className="text-[17px] leading-relaxed text-slate-700 font-serif">{para}</p>
+                ))}
+              </div>
+            )}
           </header>
 
           <section className="mb-12">
@@ -80,9 +86,9 @@ export default async function TopicPage({ params }: { params: Promise<{ slug: st
             )}
           </section>
 
-          <ChipSection title="People" chips={resolveEntityReferences(people)} />
-          <ChipSection title="Entertainment" chips={resolveEntityReferences(entertainment)} />
-          <ChipSection title="Legal Matters" chips={resolveEntityReferences(legalMatters)} />
+          <ChipSection title="People" chips={await resolveEntityReferences(people)} />
+          <ChipSection title="Entertainment" chips={await resolveEntityReferences(entertainment)} />
+          <ChipSection title="Legal Matters" chips={await resolveEntityReferences(legalMatters)} />
         </div>
       </main>
       <PublicFooter />

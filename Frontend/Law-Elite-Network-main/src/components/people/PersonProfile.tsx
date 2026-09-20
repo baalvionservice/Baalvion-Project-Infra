@@ -8,6 +8,8 @@ import { countryNameByCode } from '@/lib/countries';
 import { articleUrl } from '@/lib/article-url';
 import { personCategoryLabel } from '@/types/person';
 import { entertainmentUrl } from '@/lib/entertainment-url';
+import { topicUrl } from '@/lib/topic-url';
+import type { Topic } from '@/data/topics';
 import { legalCaseUrl } from '@/lib/legal-case-url';
 import { relatedWorkUrl } from '@/lib/related-work-url';
 import { teamUrl, competitionUrl } from '@/lib/sports-url';
@@ -82,11 +84,13 @@ export function PersonProfile({
   relatedPeople,
   latestNews,
   legalCases = [],
+  topics,
 }: {
   person: Person;
   relatedPeople: Person[];
   latestNews: any[];
   legalCases?: LegalCase[];
+  topics?: Topic[];
 }) {
   const name = person.displayName || person.fullName;
   const born = person.birthDate ? new Date(person.birthDate).getFullYear() : null;
@@ -103,17 +107,48 @@ export function PersonProfile({
       <section className="border-b border-slate-200 bg-slate-50/60">
         <div className="container mx-auto px-4 sm:px-6 max-w-7xl py-12 md:py-16">
           <div className="flex flex-col sm:flex-row gap-8 items-center sm:items-start text-center sm:text-left">
-            <div className="relative w-36 h-36 md:w-44 md:h-44 shrink-0 overflow-hidden rounded-2xl bg-slate-100 shadow-sm ring-1 ring-slate-200">
-              <Image
-                src={resolvePersonImage({ avatarUrl: person.avatarUrl, name, avatarSeed: person.avatarSeed || person.slug })}
-                alt={name}
-                fill
-                unoptimized={!person.avatarUrl}
-                priority
-                sizes="176px"
-                className="object-cover"
-              />
-            </div>
+            <figure className="shrink-0 w-36 md:w-44">
+              <div className="relative w-36 h-36 md:w-44 md:h-44 overflow-hidden rounded-2xl bg-slate-100 shadow-sm ring-1 ring-slate-200">
+                {person.photo ? (
+                  // Same-origin, LEN-hosted photo: the route resizes it, so skip the generic loader.
+                  <Image
+                    src={`${person.photo.url}?w=480`}
+                    alt={person.photo.alt}
+                    fill
+                    unoptimized
+                    priority
+                    sizes="176px"
+                    className="object-cover object-top"
+                  />
+                ) : (
+                  <Image
+                    src={resolvePersonImage({ avatarUrl: person.avatarUrl, name, avatarSeed: person.avatarSeed || person.slug })}
+                    alt={name}
+                    fill
+                    unoptimized={!person.avatarUrl}
+                    priority
+                    sizes="176px"
+                    className="object-cover"
+                  />
+                )}
+              </div>
+              {person.photo && (
+                <figcaption className="mt-2 text-[11px] leading-snug text-slate-500">
+                  Photo: {person.photo.credit}.{' '}
+                  {person.photo.licenseUrl ? (
+                    <a href={person.photo.licenseUrl} target="_blank" rel="noopener noreferrer" className="underline">{person.photo.license}</a>
+                  ) : (
+                    person.photo.license
+                  )}
+                  {person.photo.sourceUrl && (
+                    <>
+                      {' · '}
+                      <a href={person.photo.sourceUrl} target="_blank" rel="noopener noreferrer nofollow" className="underline">Source</a>
+                    </>
+                  )}
+                </figcaption>
+              )}
+            </figure>
 
             <div className="flex-1">
               <span className="kicker mb-2 inline-block">{personCategoryLabel(person.category)}</span>
@@ -158,7 +193,11 @@ export function PersonProfile({
             {/* About */}
             <section className="mb-12">
               <SectionHeading>About</SectionHeading>
-              <p className="text-[16px] leading-relaxed text-slate-700 font-serif">{person.biography}</p>
+              <div className="space-y-4">
+                {person.biography.split(/\n{2,}/).map((para, i) => (
+                  <p key={i} className="text-[16px] leading-relaxed text-slate-700 font-serif">{para}</p>
+                ))}
+              </div>
             </section>
 
             {/* Career */}
@@ -291,6 +330,21 @@ export function PersonProfile({
               </section>
             )}
 
+            {/* Awards */}
+            {person.awards && person.awards.length > 0 && (
+              <section className="mb-12">
+                <SectionHeading>Awards &amp; Honors</SectionHeading>
+                <ul className="space-y-2">
+                  {[...person.awards].sort((a, b) => (a.year ?? 0) - (b.year ?? 0)).map((a, i) => (
+                    <li key={i} className="text-[15px] text-slate-700">
+                      <span className="font-semibold text-slate-900">{a.title}</span>
+                      {a.year ? ` (${a.year})` : ''}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
             {/* Related Entertainment */}
             {entertainmentWorks.length > 0 && (
               <section className="mb-12">
@@ -399,6 +453,23 @@ export function PersonProfile({
               </section>
             )}
 
+            {/* Topics editors tagged this profile with */}
+            {person.topicSlugs && person.topicSlugs.length > 0 && (
+              <section className="mb-12">
+                <SectionHeading>Topics</SectionHeading>
+                <div className="flex flex-wrap gap-2">
+                  {person.topicSlugs.map((slug) => {
+                    const topic = topics?.find((t) => t.slug === slug);
+                    return topic ? (
+                      <Link key={slug} href={topicUrl(slug)} className="px-3 py-1.5 border border-slate-300 text-[13px] font-bold text-slate-800 hover:border-slate-900 transition-colors">
+                        {topic.name}
+                      </Link>
+                    ) : null;
+                  })}
+                </div>
+              </section>
+            )}
+
             {/* Latest News */}
             <section className="mb-12">
               <SectionHeading>Latest News</SectionHeading>
@@ -419,6 +490,23 @@ export function PersonProfile({
                 </ul>
               )}
             </section>
+
+            {/* Sources */}
+            {person.sources && person.sources.length > 0 && (
+              <section className="mb-12">
+                <SectionHeading>Sources</SectionHeading>
+                <ul className="space-y-1.5 text-[14px]">
+                  {person.sources.map((src) => (
+                    <li key={src.url}>
+                      <a href={src.url} target="_blank" rel="noopener noreferrer nofollow" className="text-blue-700 hover:underline">{src.label}</a>
+                    </li>
+                  ))}
+                </ul>
+                {person.verification.lastReviewedAt && (
+                  <p className="mt-3 text-[12px] text-slate-500">Last reviewed {person.verification.lastReviewedAt.slice(0, 10)}.</p>
+                )}
+              </section>
+            )}
 
             {/* Videos */}
             <section className="mb-12">

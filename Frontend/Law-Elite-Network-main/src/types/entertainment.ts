@@ -49,6 +49,11 @@ export interface EntertainmentImage {
   alt: string;
   /** e.g. "poster", "still", "cover art" — free-text caption of what the image is. */
   caption?: string;
+  /** Attribution required by the image's licence, shown under the image. */
+  credit?: string;
+  license?: string;
+  licenseUrl?: string;
+  sourceUrl?: string;
 }
 
 export interface RelatedEntertainmentEntity {
@@ -92,4 +97,6 @@ export interface EntertainmentEntity {
 
   seo?: EntertainmentSeoFields;
   verification: EntertainmentVerification;
+  /** Explicit override from the admin panel; bundled entries are indexable. */
+  indexable?: boolean;
 }

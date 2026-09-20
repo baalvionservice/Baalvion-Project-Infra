@@ -1,0 +1,127 @@
+{
+  "display_name": null,
+  "short_bio": "Litigator, law professor and Supreme Court justice who served on the nation's highest court from 1993 to 2020.",
+  "biography": "Ruth Bader Ginsburg sat on the US Supreme Court for 27 years, from 1993 until she died in 2020. Only one woman, Sandra Day O’Connor, had served on the Court before her. She had first made her name as a lawyer who took sex-discrimination cases to court.\n\nShe was born in Brooklyn on March 15, 1933. After an undergraduate degree at Cornell she enrolled at Harvard Law School, then moved to Columbia, where she tied for first in her class.\n\nTeaching came before the bench. She joined Rutgers Law School in 1963, gained tenure there six years later, and afterwards taught at Columbia. In 1972 she helped found the ACLU’s Women’s Rights Project, and between 1973 and 1976 she took six sex-discrimination cases to the Supreme Court and won five.\n\nJimmy Carter put her on the federal appeals court in Washington, D.C., in 1980. Thirteen years later Bill Clinton chose her for the Supreme Court, where she filled the seat left by the retiring Byron White. Her opinions for the Court include United States v. Virginia (1996) and Olmstead v. L.C. (1999).\n\nShe died in Washington on September 18, 2020, aged 87, of complications from pancreatic cancer.",
+  "occupations": [
+    "judge",
+    "lawyer",
+    "jurist"
+  ],
+  "awards": [
+    {
+      "title": "Margaret Brent Award",
+      "year": 1993
+    },
+    {
+      "title": "National Women's Hall of Fame",
+      "year": 2002
+    },
+    {
+      "title": "Brandeis Medal",
+      "year": 2003
+    },
+    {
+      "title": "Jefferson Awards for Public Service",
+      "year": 2011
+    },
+    {
+      "title": "Time 100",
+      "year": 2015
+    },
+    {
+      "title": "Four Freedoms Award – Freedom Medal",
+      "year": 2015
+    },
+    {
+      "title": "Radcliffe Medal",
+      "year": 2015
+    },
+    {
+      "title": "Genesis Prize",
+      "year": 2018
+    },
+    {
+      "title": "Berggruen Prize",
+      "year": 2019
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "United States v. Virginia",
+      "year": 1996,
+      "note": "Wrote the majority opinion"
+    },
+    {
+      "title": "Olmstead v. L.C.",
+      "year": 1999,
+      "note": "Wrote the majority opinion"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1933-03-15",
+      "title": "Born in Brooklyn, New York"
+    },
+    {
+      "date": "1963",
+      "title": "Joins the Rutgers Law School faculty"
+    },
+    {
+      "date": "1972",
+      "title": "Co-founds the ACLU Women's Rights Project"
+    },
+    {
+      "date": "1973",
+      "title": "Begins arguing gender-discrimination cases before the Supreme Court"
+    },
+    {
+      "date": "1980",
+      "title": "Appointed to the U.S. Court of Appeals for the D.C. Circuit"
+    },
+    {
+      "date": "1993",
+      "title": "Becomes an associate justice of the Supreme Court"
+    },
+    {
+      "date": "1996",
+      "title": "Writes the majority opinion in United States v. Virginia"
+    },
+    {
+      "date": "2020-09-18",
+      "title": "Dies in Washington, D.C."
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q11116"
+    },
+    {
+      "label": "Wikipedia: Ruth Bader Ginsburg",
+      "url": "https://en.wikipedia.org/wiki/Ruth_Bader_Ginsburg"
+    }
+  ],
+  "links": [
+    {
+      "kind": "legal-case",
+      "target_slug": "united-states-v-virginia",
+      "relationship": "Wrote the majority opinion"
+    },
+    {
+      "kind": "court",
+      "target_slug": "supreme-court-of-the-united-states",
+      "relationship": "Associate Justice, 1993–2020"
+    },
+    {
+      "kind": "topic",
+      "target_slug": "constitutional-law"
+    },
+    {
+      "kind": "topic",
+      "target_slug": "equal-protection"
+    }
+  ],
+  "source_note": "Facts from Wikidata, cross-checked against Wikipedia; photo is a public-domain portrait from the Collection of the Supreme Court of the United States.",
+  "published": true,
+  "indexable": true
+}

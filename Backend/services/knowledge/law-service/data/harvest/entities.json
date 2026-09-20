@@ -1,0 +1,7838 @@
+[
+  {
+    "type": "person",
+    "slug": "tom-hanks",
+    "name": "Tom Hanks",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "beyonce",
+    "name": "Beyoncé",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "steven-spielberg",
+    "name": "Steven Allan Spielberg",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "kathleen-kennedy",
+    "name": "Kathleen Kennedy",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "oprah-winfrey",
+    "name": "Oprah Winfrey",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "khaby-lame",
+    "name": "Khaby Lame",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "mrbeast",
+    "name": "MrBeast",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "lebron-james",
+    "name": "LeBron James",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "amal-clooney",
+    "name": "Amal Clooney",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "ruth-bader-ginsburg",
+    "name": "Ruth Bader Ginsburg",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "david-attenborough",
+    "name": "David Frederick Attenborough",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "meryl-streep",
+    "name": "Meryl Streep",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "denzel-washington",
+    "name": "Denzel Washington",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "leonardo-dicaprio",
+    "name": "Leonardo DiCaprio",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "brad-pitt",
+    "name": "Brad Pitt",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "robert-de-niro",
+    "name": "Robert De Niro",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "al-pacino",
+    "name": "Al Pacino",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "jack-nicholson",
+    "name": "Jack Nicholson",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "morgan-freeman",
+    "name": "Morgan Freeman",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "anthony-hopkins",
+    "name": "Anthony Hopkins",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "judi-dench",
+    "name": "Judi Dench",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "cate-blanchett",
+    "name": "Cate Blanchett",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "nicole-kidman",
+    "name": "Nicole Kidman",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "hugh-jackman",
+    "name": "Hugh Jackman",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "russell-crowe",
+    "name": "Russell Crowe",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "kate-winslet",
+    "name": "Kate Winslet",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "emma-thompson",
+    "name": "Emma Thompson",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "daniel-day-lewis",
+    "name": "Daniel Day-Lewis",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "christian-bale",
+    "name": "Christian Bale",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "joaquin-phoenix",
+    "name": "Joaquin Phoenix",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "matt-damon",
+    "name": "Matt Damon",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "ben-affleck",
+    "name": "Ben Affleck",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "george-clooney",
+    "name": "George Clooney",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "julia-roberts",
+    "name": "Julia Roberts",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "sandra-bullock",
+    "name": "Sandra Bullock",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "angelina-jolie",
+    "name": "Angelina Jolie",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "jennifer-lawrence",
+    "name": "Jennifer Lawrence",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "emma-stone",
+    "name": "Emma Stone",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "scarlett-johansson",
+    "name": "Scarlett Johansson",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "natalie-portman",
+    "name": "Natalie Portman",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "viola-davis",
+    "name": "Viola Davis",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "octavia-spencer",
+    "name": "Octavia Spencer",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "lupita-nyongo",
+    "name": "Lupita Nyong’o",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "chadwick-boseman",
+    "name": "Chadwick Boseman",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "michael-b-jordan",
+    "name": "Michael B. Jordan",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "will-smith",
+    "name": "Will Smith",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "eddie-murphy",
+    "name": "Eddie Murphy",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "samuel-l-jackson",
+    "name": "Samuel L. Jackson",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "robert-downey-jr",
+    "name": "Robert Downey Jr.",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "chris-evans",
+    "name": "Chris Evans",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "chris-hemsworth",
+    "name": "Chris Hemsworth",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "ryan-gosling",
+    "name": "Ryan Gosling",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "ryan-reynolds",
+    "name": "Ryan Reynolds",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "keanu-reeves",
+    "name": "Keanu Reeves",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "jim-carrey",
+    "name": "Jim Carrey",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "sean-penn",
+    "name": "Sean Penn",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "tommy-lee-jones",
+    "name": "Tommy Lee Jones",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "harrison-ford",
+    "name": "Harrison Ford",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "sylvester-stallone",
+    "name": "Sylvester Stallone",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "bruce-willis",
+    "name": "Bruce Willis",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "dwayne-johnson",
+    "name": "Dwayne Johnson",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "vin-diesel",
+    "name": "Vin Diesel",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "jason-statham",
+    "name": "Jason Statham",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "idris-elba",
+    "name": "Idris Elba",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "benedict-cumberbatch",
+    "name": "Benedict Cumberbatch",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "tom-hardy",
+    "name": "Tom Hardy",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "daniel-craig",
+    "name": "Daniel Craig",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "ian-mckellen",
+    "name": "Ian McKellen",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "patrick-stewart",
+    "name": "Patrick Stewart",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "helen-mirren",
+    "name": "Helen Mirren",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "maggie-smith",
+    "name": "Maggie Smith",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "michael-caine",
+    "name": "Michael Caine",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "sean-connery",
+    "name": "Sean Connery",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "ralph-fiennes",
+    "name": "Ralph Fiennes",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "colin-firth",
+    "name": "Colin Firth",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "hugh-grant",
+    "name": "Hugh Grant",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "emma-watson",
+    "name": "Emma Watson",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "daniel-radcliffe",
+    "name": "Daniel Radcliffe",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "robert-pattinson",
+    "name": "Robert Pattinson",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "kristen-stewart",
+    "name": "Kristen Stewart",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "zendaya",
+    "name": "Zendaya",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "timothee-chalamet",
+    "name": "Timothée Chalamet",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "florence-pugh",
+    "name": "Florence Pugh",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "margot-robbie",
+    "name": "Margot Robbie",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "saoirse-ronan",
+    "name": "Saoirse Ronan",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "cillian-murphy",
+    "name": "Cillian Murphy",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "liam-neeson",
+    "name": "Liam Neeson",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "colin-farrell",
+    "name": "Colin Farrell",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "brendan-gleeson",
+    "name": "Brendan Gleeson",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "javier-bardem",
+    "name": "Javier Bardem",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "penelope-cruz",
+    "name": "Penélope Cruz",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "antonio-banderas",
+    "name": "Antonio Banderas",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "gael-garcia-bernal",
+    "name": "Gael García Bernal",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "salma-hayek",
+    "name": "Salma Hayek",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "diego-luna",
+    "name": "Diego Luna",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "marion-cotillard",
+    "name": "Marion Cotillard",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "juliette-binoche",
+    "name": "Juliette Binoche",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "jean-reno",
+    "name": "Jean Reno",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "omar-sy",
+    "name": "Omar Sy",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "christoph-waltz",
+    "name": "Christoph Waltz",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "lea-seydoux",
+    "name": "Léa Seydoux",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "priyanka-chopra",
+    "name": "Priyanka Chopra",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "shah-rukh-khan",
+    "name": "Shah Rukh Khan",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "amitabh-bachchan",
+    "name": "Amitabh Bachchan",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "aamir-khan",
+    "name": "Aamir Khan",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "deepika-padukone",
+    "name": "Deepika Padukone",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "aishwarya-rai-bachchan",
+    "name": "Aishwarya Rai Bachchan",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "rajinikanth",
+    "name": "Rajinikanth",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "irrfan-khan",
+    "name": "Irrfan Khan",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "ken-watanabe",
+    "name": "Ken Watanabe",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "jackie-chan",
+    "name": "Jackie Chan",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "jet-li",
+    "name": "Jet Li",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "michelle-yeoh",
+    "name": "Michelle Yeoh",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "gong-li",
+    "name": "Gong Li",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "song-kang-ho",
+    "name": "Song Kang-ho",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "youn-yuh-jung",
+    "name": "Youn Yuh-jung",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "lee-jung-jae",
+    "name": "Lee Jung-jae",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "nicolas-cage",
+    "name": "Nicolas Cage",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "adam-sandler",
+    "name": "Adam Sandler",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "steve-carell",
+    "name": "Steve Carell",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "tom-cruise",
+    "name": "Tom Cruise",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "johnny-depp",
+    "name": "Johnny Depp",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "kevin-costner",
+    "name": "Kevin Costner",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "michael-douglas",
+    "name": "Michael Douglas",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "susan-sarandon",
+    "name": "Susan Sarandon",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "glenn-close",
+    "name": "Glenn Close",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "sigourney-weaver",
+    "name": "Sigourney Weaver",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "charlize-theron",
+    "name": "Charlize Theron",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "halle-berry",
+    "name": "Halle Berry",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "jamie-foxx",
+    "name": "Jamie Foxx",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "forest-whitaker",
+    "name": "Forest Whitaker",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "anne-hathaway",
+    "name": "Anne Hathaway",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "reese-witherspoon",
+    "name": "Reese Witherspoon",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "cynthia-erivo",
+    "name": "Cynthia Erivo",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "pedro-pascal",
+    "name": "Pedro Pascal",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "oscar-isaac",
+    "name": "Oscar Isaac",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "jeff-bridges",
+    "name": "Jeff Bridges",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "christopher-walken",
+    "name": "Christopher Walken",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "willem-dafoe",
+    "name": "Willem Dafoe",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "gary-oldman",
+    "name": "Gary Oldman",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "mark-ruffalo",
+    "name": "Mark Ruffalo",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "dustin-hoffman",
+    "name": "Dustin Hoffman",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "robin-williams",
+    "name": "Robin Williams",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "paul-newman",
+    "name": "Paul Newman",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "marlon-brando",
+    "name": "Marlon Brando",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "audrey-hepburn",
+    "name": "Audrey Hepburn",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "sidney-poitier",
+    "name": "Sidney Poitier",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "james-earl-jones",
+    "name": "James Earl Jones",
+    "category": "actors"
+  },
+  {
+    "type": "person",
+    "slug": "taylor-swift",
+    "name": "Taylor Swift",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "rihanna",
+    "name": "Rihanna",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "adele",
+    "name": "Adele",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "ed-sheeran",
+    "name": "Ed Sheeran",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "bruno-mars",
+    "name": "Bruno Mars",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "lady-gaga",
+    "name": "Lady Gaga",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "madonna",
+    "name": "Madonna",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "mariah-carey",
+    "name": "Mariah Carey",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "whitney-houston",
+    "name": "Whitney Houston",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "celine-dion",
+    "name": "Celine Dion",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "shakira",
+    "name": "Shakira",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "katy-perry",
+    "name": "Katy Perry",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "ariana-grande",
+    "name": "Ariana Grande",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "billie-eilish",
+    "name": "Billie Eilish",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "dua-lipa",
+    "name": "Dua Lipa",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "olivia-rodrigo",
+    "name": "Olivia Rodrigo",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "harry-styles",
+    "name": "Harry Styles",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "the-weeknd",
+    "name": "The Weeknd",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "justin-bieber",
+    "name": "Justin Bieber",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "justin-timberlake",
+    "name": "Justin Timberlake",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "kanye-west",
+    "name": "Kanye West",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "jay-z",
+    "name": "Jay-Z",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "kendrick-lamar",
+    "name": "Kendrick Lamar",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "eminem",
+    "name": "Eminem",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "snoop-dogg",
+    "name": "Snoop Dogg",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "dr-dre",
+    "name": "Dr. Dre",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "nas",
+    "name": "Nas",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "tupac-shakur",
+    "name": "Tupac Shakur",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "the-notorious-big",
+    "name": "The Notorious B.I.G.",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "lil-wayne",
+    "name": "Lil Wayne",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "nicki-minaj",
+    "name": "Nicki Minaj",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "cardi-b",
+    "name": "Cardi B",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "megan-thee-stallion",
+    "name": "Megan Thee Stallion",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "travis-scott",
+    "name": "Travis Scott",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "post-malone",
+    "name": "Post Malone",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "bad-bunny",
+    "name": "Bad Bunny",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "j-balvin",
+    "name": "J Balvin",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "karol-g",
+    "name": "Karol G",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "rosalia",
+    "name": "Rosalía",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "burna-boy",
+    "name": "Burna Boy",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "wizkid",
+    "name": "Wizkid",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "davido",
+    "name": "Davido",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "tems",
+    "name": "Tems",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "angelique-kidjo",
+    "name": "Angélique Kidjo",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "youssou-ndour",
+    "name": "Youssou N’Dour",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "fela-kuti",
+    "name": "Fela Kuti",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "miriam-makeba",
+    "name": "Miriam Makeba",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "bob-marley",
+    "name": "Bob Marley",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "michael-jackson",
+    "name": "Michael Jackson",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "elvis-presley",
+    "name": "Elvis Presley",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "frank-sinatra",
+    "name": "Frank Sinatra",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "aretha-franklin",
+    "name": "Aretha Franklin",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "stevie-wonder",
+    "name": "Stevie Wonder",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "ray-charles",
+    "name": "Ray Charles",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "louis-armstrong",
+    "name": "Louis Armstrong",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "ella-fitzgerald",
+    "name": "Ella Fitzgerald",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "miles-davis",
+    "name": "Miles Davis",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "john-coltrane",
+    "name": "John Coltrane",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "duke-ellington",
+    "name": "Duke Ellington",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "bob-dylan",
+    "name": "Bob Dylan",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "bruce-springsteen",
+    "name": "Bruce Springsteen",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "paul-mccartney",
+    "name": "Paul McCartney",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "john-lennon",
+    "name": "John Lennon",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "george-harrison",
+    "name": "George Harrison",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "ringo-starr",
+    "name": "Ringo Starr",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "mick-jagger",
+    "name": "Mick Jagger",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "keith-richards",
+    "name": "Keith Richards",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "david-bowie",
+    "name": "David Bowie",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "elton-john",
+    "name": "Elton John",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "freddie-mercury",
+    "name": "Freddie Mercury",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "robert-plant",
+    "name": "Robert Plant",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "jimmy-page",
+    "name": "Jimmy Page",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "roger-waters",
+    "name": "Roger Waters",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "david-gilmour",
+    "name": "David Gilmour",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "eric-clapton",
+    "name": "Eric Clapton",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "rod-stewart",
+    "name": "Rod Stewart",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "annie-lennox",
+    "name": "Annie Lennox",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "amy-winehouse",
+    "name": "Amy Winehouse",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "george-michael",
+    "name": "George Michael",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "robbie-williams",
+    "name": "Robbie Williams",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "bono",
+    "name": "Bono",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "van-morrison",
+    "name": "Van Morrison",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "enya",
+    "name": "Enya",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "bjork",
+    "name": "Björk",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "kylie-minogue",
+    "name": "Kylie Minogue",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "sia",
+    "name": "Sia",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "shania-twain",
+    "name": "Shania Twain",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "joni-mitchell",
+    "name": "Joni Mitchell",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "leonard-cohen",
+    "name": "Leonard Cohen",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "neil-young",
+    "name": "Neil Young",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "drake",
+    "name": "Drake",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "dolly-parton",
+    "name": "Dolly Parton",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "johnny-cash",
+    "name": "Johnny Cash",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "willie-nelson",
+    "name": "Willie Nelson",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "garth-brooks",
+    "name": "Garth Brooks",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "jennifer-lopez",
+    "name": "Jennifer Lopez",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "selena-quintanilla",
+    "name": "Selena Quintanilla",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "ricky-martin",
+    "name": "Ricky Martin",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "gloria-estefan",
+    "name": "Gloria Estefan",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "juanes",
+    "name": "Juanes",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "luciano-pavarotti",
+    "name": "Luciano Pavarotti",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "andrea-bocelli",
+    "name": "Andrea Bocelli",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "yo-yo-ma",
+    "name": "Yo-Yo Ma",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "ludwig-van-beethoven",
+    "name": "Ludwig van Beethoven",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "wolfgang-amadeus-mozart",
+    "name": "Wolfgang Amadeus Mozart",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "johann-sebastian-bach",
+    "name": "Johann Sebastian Bach",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "ravi-shankar",
+    "name": "Ravi Shankar",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "a-r-rahman",
+    "name": "A. R. Rahman",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "lata-mangeshkar",
+    "name": "Lata Mangeshkar",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "psy",
+    "name": "PSY",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "ryuichi-sakamoto",
+    "name": "Ryuichi Sakamoto",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "jay-chou",
+    "name": "Jay Chou",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "teresa-teng",
+    "name": "Teresa Teng",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "chris-martin",
+    "name": "Chris Martin",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "thom-yorke",
+    "name": "Thom Yorke",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "noel-gallagher",
+    "name": "Noel Gallagher",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "liam-gallagher",
+    "name": "Liam Gallagher",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "bjorn-ulvaeus",
+    "name": "Björn Ulvaeus",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "benny-andersson",
+    "name": "Benny Andersson",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "angus-young",
+    "name": "Angus Young",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "jungkook",
+    "name": "Jungkook",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "jimin",
+    "name": "Jimin",
+    "category": "musicians"
+  },
+  {
+    "type": "person",
+    "slug": "martin-scorsese",
+    "name": "Martin Scorsese",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "francis-ford-coppola",
+    "name": "Francis Ford Coppola",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "christopher-nolan",
+    "name": "Christopher Nolan",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "quentin-tarantino",
+    "name": "Quentin Tarantino",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "james-cameron",
+    "name": "James Cameron",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "ridley-scott",
+    "name": "Ridley Scott",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "stanley-kubrick",
+    "name": "Stanley Kubrick",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "alfred-hitchcock",
+    "name": "Alfred Hitchcock",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "akira-kurosawa",
+    "name": "Akira Kurosawa",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "orson-welles",
+    "name": "Orson Welles",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "billy-wilder",
+    "name": "Billy Wilder",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "david-lynch",
+    "name": "David Lynch",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "clint-eastwood",
+    "name": "Clint Eastwood",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "woody-allen",
+    "name": "Woody Allen",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "spike-lee",
+    "name": "Spike Lee",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "kathryn-bigelow",
+    "name": "Kathryn Bigelow",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "sofia-coppola",
+    "name": "Sofia Coppola",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "greta-gerwig",
+    "name": "Greta Gerwig",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "jordan-peele",
+    "name": "Jordan Peele",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "denis-villeneuve",
+    "name": "Denis Villeneuve",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "guillermo-del-toro",
+    "name": "Guillermo del Toro",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "alejandro-gonzalez-inarritu",
+    "name": "Alejandro González Iñárritu",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "alfonso-cuaron",
+    "name": "Alfonso Cuarón",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "pedro-almodovar",
+    "name": "Pedro Almodóvar",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "bong-joon-ho",
+    "name": "Bong Joon-ho",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "park-chan-wook",
+    "name": "Park Chan-wook",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "hayao-miyazaki",
+    "name": "Hayao Miyazaki",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "wong-kar-wai",
+    "name": "Wong Kar-wai",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "ang-lee",
+    "name": "Ang Lee",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "zhang-yimou",
+    "name": "Zhang Yimou",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "satyajit-ray",
+    "name": "Satyajit Ray",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "mira-nair",
+    "name": "Mira Nair",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "federico-fellini",
+    "name": "Federico Fellini",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "sergio-leone",
+    "name": "Sergio Leone",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "paolo-sorrentino",
+    "name": "Paolo Sorrentino",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "ingmar-bergman",
+    "name": "Ingmar Bergman",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "lars-von-trier",
+    "name": "Lars von Trier",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "michael-haneke",
+    "name": "Michael Haneke",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "werner-herzog",
+    "name": "Werner Herzog",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "wim-wenders",
+    "name": "Wim Wenders",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "jean-luc-godard",
+    "name": "Jean-Luc Godard",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "francois-truffaut",
+    "name": "François Truffaut",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "agnes-varda",
+    "name": "Agnès Varda",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "luc-besson",
+    "name": "Luc Besson",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "jean-pierre-jeunet",
+    "name": "Jean-Pierre Jeunet",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "celine-sciamma",
+    "name": "Céline Sciamma",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "steve-mcqueen",
+    "name": "Steve McQueen",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "danny-boyle",
+    "name": "Danny Boyle",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "guy-ritchie",
+    "name": "Guy Ritchie",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "edgar-wright",
+    "name": "Edgar Wright",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "ken-loach",
+    "name": "Ken Loach",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "mike-leigh",
+    "name": "Mike Leigh",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "peter-jackson",
+    "name": "Peter Jackson",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "taika-waititi",
+    "name": "Taika Waititi",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "jane-campion",
+    "name": "Jane Campion",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "george-miller",
+    "name": "George Miller",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "baz-luhrmann",
+    "name": "Baz Luhrmann",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "peter-weir",
+    "name": "Peter Weir",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "chloe-zhao",
+    "name": "Chloé Zhao",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "barry-jenkins",
+    "name": "Barry Jenkins",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "ava-duvernay",
+    "name": "Ava DuVernay",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "ryan-coogler",
+    "name": "Ryan Coogler",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "damien-chazelle",
+    "name": "Damien Chazelle",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "paul-thomas-anderson",
+    "name": "Paul Thomas Anderson",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "wes-anderson",
+    "name": "Wes Anderson",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "joel-coen",
+    "name": "Joel Coen",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "david-fincher",
+    "name": "David Fincher",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "darren-aronofsky",
+    "name": "Darren Aronofsky",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "michael-mann",
+    "name": "Michael Mann",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "oliver-stone",
+    "name": "Oliver Stone",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "brian-de-palma",
+    "name": "Brian De Palma",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "john-carpenter",
+    "name": "John Carpenter",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "tim-burton",
+    "name": "Tim Burton",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "robert-zemeckis",
+    "name": "Robert Zemeckis",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "ron-howard",
+    "name": "Ron Howard",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "rob-reiner",
+    "name": "Rob Reiner",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "richard-linklater",
+    "name": "Richard Linklater",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "steven-soderbergh",
+    "name": "Steven Soderbergh",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "sam-mendes",
+    "name": "Sam Mendes",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "alexander-payne",
+    "name": "Alexander Payne",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "todd-haynes",
+    "name": "Todd Haynes",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "yorgos-lanthimos",
+    "name": "Yorgos Lanthimos",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "ruben-ostlund",
+    "name": "Ruben Östlund",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "asghar-farhadi",
+    "name": "Asghar Farhadi",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "abbas-kiarostami",
+    "name": "Abbas Kiarostami",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "andrei-tarkovsky",
+    "name": "Andrei Tarkovsky",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "krzysztof-kieslowski",
+    "name": "Krzysztof Kieślowski",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "roman-polanski",
+    "name": "Roman Polanski",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "andrzej-wajda",
+    "name": "Andrzej Wajda",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "theo-angelopoulos",
+    "name": "Theo Angelopoulos",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "emir-kusturica",
+    "name": "Emir Kusturica",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "walter-salles",
+    "name": "Walter Salles",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "fernando-meirelles",
+    "name": "Fernando Meirelles",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "lucrecia-martel",
+    "name": "Lucrecia Martel",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "ousmane-sembene",
+    "name": "Ousmane Sembène",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "mati-diop",
+    "name": "Mati Diop",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "nadine-labaki",
+    "name": "Nadine Labaki",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "hirokazu-kore-eda",
+    "name": "Hirokazu Kore-eda",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "yasujiro-ozu",
+    "name": "Yasujirō Ozu",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "takeshi-kitano",
+    "name": "Takeshi Kitano",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "mel-brooks",
+    "name": "Mel Brooks",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "frank-capra",
+    "name": "Frank Capra",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "john-ford",
+    "name": "John Ford",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "david-lean",
+    "name": "David Lean",
+    "category": "directors"
+  },
+  {
+    "type": "person",
+    "slug": "jerry-bruckheimer",
+    "name": "Jerry Bruckheimer",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "kevin-feige",
+    "name": "Kevin Feige",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "frank-marshall",
+    "name": "Frank Marshall",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "brian-grazer",
+    "name": "Brian Grazer",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "jason-blum",
+    "name": "Jason Blum",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "megan-ellison",
+    "name": "Megan Ellison",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "amy-pascal",
+    "name": "Amy Pascal",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "lorne-michaels",
+    "name": "Lorne Michaels",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "norman-lear",
+    "name": "Norman Lear",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "shonda-rhimes",
+    "name": "Shonda Rhimes",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "ryan-murphy",
+    "name": "Ryan Murphy",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "dick-wolf",
+    "name": "Dick Wolf",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "chuck-lorre",
+    "name": "Chuck Lorre",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "mark-burnett",
+    "name": "Mark Burnett",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "simon-cowell",
+    "name": "Simon Cowell",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "greg-berlanti",
+    "name": "Greg Berlanti",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "david-e-kelley",
+    "name": "David E. Kelley",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "aaron-sorkin",
+    "name": "Aaron Sorkin",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "vince-gilligan",
+    "name": "Vince Gilligan",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "matthew-weiner",
+    "name": "Matthew Weiner",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "david-benioff",
+    "name": "David Benioff",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "d-b-weiss",
+    "name": "D. B. Weiss",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "gale-anne-hurd",
+    "name": "Gale Anne Hurd",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "emma-thomas",
+    "name": "Emma Thomas",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "charles-roven",
+    "name": "Charles Roven",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "lawrence-bender",
+    "name": "Lawrence Bender",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "hal-roach",
+    "name": "Hal Roach",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "irving-thalberg",
+    "name": "Irving Thalberg",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "david-o-selznick",
+    "name": "David O. Selznick",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "walt-disney",
+    "name": "Walt Disney",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "samuel-goldwyn",
+    "name": "Samuel Goldwyn",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "darryl-f-zanuck",
+    "name": "Darryl F. Zanuck",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "dino-de-laurentiis",
+    "name": "Dino De Laurentiis",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "carlo-ponti",
+    "name": "Carlo Ponti",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "alexander-korda",
+    "name": "Alexander Korda",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "cubby-broccoli",
+    "name": "Cubby Broccoli",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "barbara-broccoli",
+    "name": "Barbara Broccoli",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "tim-bevan",
+    "name": "Tim Bevan",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "eric-fellner",
+    "name": "Eric Fellner",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "david-heyman",
+    "name": "David Heyman",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "christine-vachon",
+    "name": "Christine Vachon",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "jeremy-thomas",
+    "name": "Jeremy Thomas",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "jon-landau",
+    "name": "Jon Landau",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "gary-kurtz",
+    "name": "Gary Kurtz",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "george-lucas",
+    "name": "George Lucas",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "arnon-milchan",
+    "name": "Arnon Milchan",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "michael-de-luca",
+    "name": "Michael De Luca",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "karan-johar",
+    "name": "Karan Johar",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "aditya-chopra",
+    "name": "Aditya Chopra",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "yash-chopra",
+    "name": "Yash Chopra",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "ekta-kapoor",
+    "name": "Ekta Kapoor",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "ronnie-screwvala",
+    "name": "Ronnie Screwvala",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "zoya-akhtar",
+    "name": "Zoya Akhtar",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "farhan-akhtar",
+    "name": "Farhan Akhtar",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "quincy-jones",
+    "name": "Quincy Jones",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "george-martin",
+    "name": "George Martin",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "rick-rubin",
+    "name": "Rick Rubin",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "timbaland",
+    "name": "Timbaland",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "pharrell-williams",
+    "name": "Pharrell Williams",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "max-martin",
+    "name": "Max Martin",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "mark-ronson",
+    "name": "Mark Ronson",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "brian-eno",
+    "name": "Brian Eno",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "nile-rodgers",
+    "name": "Nile Rodgers",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "berry-gordy",
+    "name": "Berry Gordy",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "clive-davis",
+    "name": "Clive Davis",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "jimmy-iovine",
+    "name": "Jimmy Iovine",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "calvin-harris",
+    "name": "Calvin Harris",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "david-guetta",
+    "name": "David Guetta",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "tiesto",
+    "name": "Tiësto",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "hans-zimmer",
+    "name": "Hans Zimmer",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "john-williams",
+    "name": "John Williams",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "ennio-morricone",
+    "name": "Ennio Morricone",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "howard-shore",
+    "name": "Howard Shore",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "danny-elfman",
+    "name": "Danny Elfman",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "ludwig-goransson",
+    "name": "Ludwig Göransson",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "joel-silver",
+    "name": "Joel Silver",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "neal-h-moritz",
+    "name": "Neal H. Moritz",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "jeffrey-katzenberg",
+    "name": "Jeffrey Katzenberg",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "sherry-lansing",
+    "name": "Sherry Lansing",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "ivan-reitman",
+    "name": "Ivan Reitman",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "jim-henson",
+    "name": "Jim Henson",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "steve-tisch",
+    "name": "Steve Tisch",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "jerry-weintraub",
+    "name": "Jerry Weintraub",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "dana-brunetti",
+    "name": "Dana Brunetti",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "steven-bochco",
+    "name": "Steven Bochco",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "aaron-spelling",
+    "name": "Aaron Spelling",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "garry-marshall",
+    "name": "Garry Marshall",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "thomas-schlamme",
+    "name": "Thomas Schlamme",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "john-wells",
+    "name": "John Wells",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "jenji-kohan",
+    "name": "Jenji Kohan",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "michael-schur",
+    "name": "Michael Schur",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "tyler-perry",
+    "name": "Tyler Perry",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "issa-rae",
+    "name": "Issa Rae",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "chris-meledandri",
+    "name": "Chris Meledandri",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "ed-catmull",
+    "name": "Ed Catmull",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "butch-vig",
+    "name": "Butch Vig",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "steve-albini",
+    "name": "Steve Albini",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "jack-antonoff",
+    "name": "Jack Antonoff",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "finneas-oconnell",
+    "name": "Finneas O’Connell",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "babyface",
+    "name": "Babyface",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "jimmy-jam",
+    "name": "Jimmy Jam",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "terry-lewis",
+    "name": "Terry Lewis",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "danger-mouse",
+    "name": "Danger Mouse",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "ryan-tedder",
+    "name": "Ryan Tedder",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "swizz-beatz",
+    "name": "Swizz Beatz",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "just-blaze",
+    "name": "Just Blaze",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "steve-lillywhite",
+    "name": "Steve Lillywhite",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "trevor-horn",
+    "name": "Trevor Horn",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "giorgio-moroder",
+    "name": "Giorgio Moroder",
+    "category": "producers"
+  },
+  {
+    "type": "person",
+    "slug": "ellen-degeneres",
+    "name": "Ellen DeGeneres",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "jimmy-fallon",
+    "name": "Jimmy Fallon",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "jimmy-kimmel",
+    "name": "Jimmy Kimmel",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "stephen-colbert",
+    "name": "Stephen Colbert",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "conan-obrien",
+    "name": "Conan O’Brien",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "jay-leno",
+    "name": "Jay Leno",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "david-letterman",
+    "name": "David Letterman",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "johnny-carson",
+    "name": "Johnny Carson",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "trevor-noah",
+    "name": "Trevor Noah",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "jon-stewart",
+    "name": "Jon Stewart",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "john-oliver",
+    "name": "John Oliver",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "seth-meyers",
+    "name": "Seth Meyers",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "james-corden",
+    "name": "James Corden",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "graham-norton",
+    "name": "Graham Norton",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "jonathan-ross",
+    "name": "Jonathan Ross",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "ant-mcpartlin",
+    "name": "Ant McPartlin",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "declan-donnelly",
+    "name": "Declan Donnelly",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "holly-willoughby",
+    "name": "Holly Willoughby",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "davina-mccall",
+    "name": "Davina McCall",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "paul-ogrady",
+    "name": "Paul O’Grady",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "terry-wogan",
+    "name": "Terry Wogan",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "michael-parkinson",
+    "name": "Michael Parkinson",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "jeremy-clarkson",
+    "name": "Jeremy Clarkson",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "richard-hammond",
+    "name": "Richard Hammond",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "james-may",
+    "name": "James May",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "gordon-ramsay",
+    "name": "Gordon Ramsay",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "jamie-oliver",
+    "name": "Jamie Oliver",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "nigella-lawson",
+    "name": "Nigella Lawson",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "mary-berry",
+    "name": "Mary Berry",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "paul-hollywood",
+    "name": "Paul Hollywood",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "anthony-bourdain",
+    "name": "Anthony Bourdain",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "guy-fieri",
+    "name": "Guy Fieri",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "rachael-ray",
+    "name": "Rachael Ray",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "martha-stewart",
+    "name": "Martha Stewart",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "bobby-flay",
+    "name": "Bobby Flay",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "julia-child",
+    "name": "Julia Child",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "emeril-lagasse",
+    "name": "Emeril Lagasse",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "ina-garten",
+    "name": "Ina Garten",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "padma-lakshmi",
+    "name": "Padma Lakshmi",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "tom-colicchio",
+    "name": "Tom Colicchio",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "ryan-seacrest",
+    "name": "Ryan Seacrest",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "steve-harvey",
+    "name": "Steve Harvey",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "alex-trebek",
+    "name": "Alex Trebek",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "pat-sajak",
+    "name": "Pat Sajak",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "vanna-white",
+    "name": "Vanna White",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "regis-philbin",
+    "name": "Regis Philbin",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "bob-barker",
+    "name": "Bob Barker",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "howie-mandel",
+    "name": "Howie Mandel",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "heidi-klum",
+    "name": "Heidi Klum",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "tyra-banks",
+    "name": "Tyra Banks",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "tim-gunn",
+    "name": "Tim Gunn",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "rupaul",
+    "name": "RuPaul",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "kelly-ripa",
+    "name": "Kelly Ripa",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "michael-strahan",
+    "name": "Michael Strahan",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "robin-roberts",
+    "name": "Robin Roberts",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "katie-couric",
+    "name": "Katie Couric",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "barbara-walters",
+    "name": "Barbara Walters",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "diane-sawyer",
+    "name": "Diane Sawyer",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "anderson-cooper",
+    "name": "Anderson Cooper",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "gayle-king",
+    "name": "Gayle King",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "hoda-kotb",
+    "name": "Hoda Kotb",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "savannah-guthrie",
+    "name": "Savannah Guthrie",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "al-roker",
+    "name": "Al Roker",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "lester-holt",
+    "name": "Lester Holt",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "maury-povich",
+    "name": "Maury Povich",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "montel-williams",
+    "name": "Montel Williams",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "larry-king",
+    "name": "Larry King",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "bear-grylls",
+    "name": "Bear Grylls",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "steve-irwin",
+    "name": "Steve Irwin",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "brian-cox",
+    "name": "Brian Cox",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "neil-degrasse-tyson",
+    "name": "Neil deGrasse Tyson",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "bill-nye",
+    "name": "Bill Nye",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "carl-sagan",
+    "name": "Carl Sagan",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "mike-rowe",
+    "name": "Mike Rowe",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "bob-ross",
+    "name": "Bob Ross",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "fred-rogers",
+    "name": "Fred Rogers",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "trixie-mattel",
+    "name": "Trixie Mattel",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "ben-shephard",
+    "name": "Ben Shephard",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "lorraine-kelly",
+    "name": "Lorraine Kelly",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "claudia-winkleman",
+    "name": "Claudia Winkleman",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "tess-daly",
+    "name": "Tess Daly",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "alan-carr",
+    "name": "Alan Carr",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "bruce-forsyth",
+    "name": "Bruce Forsyth",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "cilla-black",
+    "name": "Cilla Black",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "noel-edmonds",
+    "name": "Noel Edmonds",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "ruth-langsford",
+    "name": "Ruth Langsford",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "sara-cox",
+    "name": "Sara Cox",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "zoe-ball",
+    "name": "Zoe Ball",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "fearne-cotton",
+    "name": "Fearne Cotton",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "stacey-dooley",
+    "name": "Stacey Dooley",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "louis-theroux",
+    "name": "Louis Theroux",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "michael-palin",
+    "name": "Michael Palin",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "joanna-lumley",
+    "name": "Joanna Lumley",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "stephen-fry",
+    "name": "Stephen Fry",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "alan-titchmarsh",
+    "name": "Alan Titchmarsh",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "judith-sheindlin",
+    "name": "Judith Sheindlin",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "phil-mcgraw",
+    "name": "Phil McGraw",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "mehmet-oz",
+    "name": "Mehmet Oz",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "tom-bergeron",
+    "name": "Tom Bergeron",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "nick-cannon",
+    "name": "Nick Cannon",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "cat-deeley",
+    "name": "Cat Deeley",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "alison-hammond",
+    "name": "Alison Hammond",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "dermot-oleary",
+    "name": "Dermot O’Leary",
+    "category": "tv-personalities"
+  },
+  {
+    "type": "person",
+    "slug": "kylie-jenner",
+    "name": "Kylie Jenner",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "kim-kardashian",
+    "name": "Kim Kardashian",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "kendall-jenner",
+    "name": "Kendall Jenner",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "khloe-kardashian",
+    "name": "Khloé Kardashian",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "kourtney-kardashian",
+    "name": "Kourtney Kardashian",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "hailey-bieber",
+    "name": "Hailey Bieber",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "gigi-hadid",
+    "name": "Gigi Hadid",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "bella-hadid",
+    "name": "Bella Hadid",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "chiara-ferragni",
+    "name": "Chiara Ferragni",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "huda-kattan",
+    "name": "Huda Kattan",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "emma-chamberlain",
+    "name": "Emma Chamberlain",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "charli-damelio",
+    "name": "Charli D’Amelio",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "dixie-damelio",
+    "name": "Dixie D’Amelio",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "addison-rae",
+    "name": "Addison Rae",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "bella-poarch",
+    "name": "Bella Poarch",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "zach-king",
+    "name": "Zach King",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "lele-pons",
+    "name": "Lele Pons",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "zoe-sugg",
+    "name": "Zoe Sugg",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "alfie-deyes",
+    "name": "Alfie Deyes",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "tanya-burr",
+    "name": "Tanya Burr",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "jaclyn-hill",
+    "name": "Jaclyn Hill",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "nikkie-de-jager",
+    "name": "Nikkie de Jager",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "michelle-phan",
+    "name": "Michelle Phan",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "manny-gutierrez",
+    "name": "Manny Gutierrez",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "bethany-mota",
+    "name": "Bethany Mota",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "liza-koshy",
+    "name": "Liza Koshy",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "lilly-singh",
+    "name": "Lilly Singh",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "prajakta-koli",
+    "name": "Prajakta Koli",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "bhuvan-bam",
+    "name": "Bhuvan Bam",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "ashish-chanchlani",
+    "name": "Ashish Chanchlani",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "carryminati",
+    "name": "CarryMinati",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "masoom-minawala",
+    "name": "Masoom Minawala",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "kusha-kapila",
+    "name": "Kusha Kapila",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "camila-coelho",
+    "name": "Camila Coelho",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "whindersson-nunes",
+    "name": "Whindersson Nunes",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "luisito-comunica",
+    "name": "Luisito Comunica",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "dulceida",
+    "name": "Dulceida",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "aimee-song",
+    "name": "Aimee Song",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "leandra-medine-cohen",
+    "name": "Leandra Medine Cohen",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "negin-mirsalehi",
+    "name": "Negin Mirsalehi",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "olivia-culpo",
+    "name": "Olivia Culpo",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "kayla-itsines",
+    "name": "Kayla Itsines",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "joe-wicks",
+    "name": "Joe Wicks",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "chloe-ting",
+    "name": "Chloe Ting",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "cassey-ho",
+    "name": "Cassey Ho",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "wengie",
+    "name": "Wengie",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "hannah-stocking",
+    "name": "Hannah Stocking",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "brittany-broski",
+    "name": "Brittany Broski",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "elle-mills",
+    "name": "Elle Mills",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "grace-helbig",
+    "name": "Grace Helbig",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "hannah-hart",
+    "name": "Hannah Hart",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "rosanna-pansino",
+    "name": "Rosanna Pansino",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "jenna-marbles",
+    "name": "Jenna Marbles",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "tyler-oakley",
+    "name": "Tyler Oakley",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "connor-franta",
+    "name": "Connor Franta",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "joey-graceffa",
+    "name": "Joey Graceffa",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "troye-sivan",
+    "name": "Troye Sivan",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "alix-earle",
+    "name": "Alix Earle",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "mikayla-nogueira",
+    "name": "Mikayla Nogueira",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "alex-cooper",
+    "name": "Alex Cooper",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "noah-beck",
+    "name": "Noah Beck",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "josh-richards",
+    "name": "Josh Richards",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "loren-gray",
+    "name": "Loren Gray",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "baby-ariel",
+    "name": "Baby Ariel",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "jojo-siwa",
+    "name": "Jojo Siwa",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "kai-cenat",
+    "name": "Kai Cenat",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "pokimane",
+    "name": "Pokimane",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "valkyrae",
+    "name": "Valkyrae",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "ibai-llanos",
+    "name": "Ibai Llanos",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "auronplay",
+    "name": "AuronPlay",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "rubius",
+    "name": "Rubius",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "atta-halilintar",
+    "name": "Atta Halilintar",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "danielle-bernstein",
+    "name": "Danielle Bernstein",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "camille-charriere",
+    "name": "Camille Charrière",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "jeanne-damas",
+    "name": "Jeanne Damas",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "caroline-daur",
+    "name": "Caroline Daur",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "lena-gercke",
+    "name": "Lena Gercke",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "pamela-reif",
+    "name": "Pamela Reif",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "bianca-andrade",
+    "name": "Bianca Andrade",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "virginia-fonseca",
+    "name": "Virginia Fonseca",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "kris-jenner",
+    "name": "Kris Jenner",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "olivia-palermo",
+    "name": "Olivia Palermo",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "julie-sarinana",
+    "name": "Julie Sarinana",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "lauren-conrad",
+    "name": "Lauren Conrad",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "rachel-zoe",
+    "name": "Rachel Zoe",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "tati-westbrook",
+    "name": "Tati Westbrook",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "natacha-oceane",
+    "name": "Natacha Océane",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "jeff-cavaliere",
+    "name": "Jeff Cavaliere",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "whitney-simmons",
+    "name": "Whitney Simmons",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "ree-drummond",
+    "name": "Ree Drummond",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "joshua-weissman",
+    "name": "Joshua Weissman",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "nagi-maehashi",
+    "name": "Nagi Maehashi",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "tieghan-gerard",
+    "name": "Tieghan Gerard",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "nick-digiovanni",
+    "name": "Nick DiGiovanni",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "murad-osmann",
+    "name": "Murad Osmann",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "lauren-bullen",
+    "name": "Lauren Bullen",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "toke-makinwa",
+    "name": "Toke Makinwa",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "naomi-watanabe",
+    "name": "Naomi Watanabe",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "nadia-aboulhosn",
+    "name": "Nadia Aboulhosn",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "dolly-singh",
+    "name": "Dolly Singh",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "neelofa",
+    "name": "Neelofa",
+    "category": "influencers"
+  },
+  {
+    "type": "person",
+    "slug": "pewdiepie",
+    "name": "PewDiePie",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "markiplier",
+    "name": "Markiplier",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "jacksepticeye",
+    "name": "Jacksepticeye",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "ryan-kaji",
+    "name": "Ryan Kaji",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "mark-rober",
+    "name": "Mark Rober",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "casey-neistat",
+    "name": "Casey Neistat",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "marques-brownlee",
+    "name": "Marques Brownlee",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "linus-sebastian",
+    "name": "Linus Sebastian",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "michael-stevens",
+    "name": "Michael Stevens",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "hank-green",
+    "name": "Hank Green",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "john-green",
+    "name": "John Green",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "derek-muller",
+    "name": "Derek Muller",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "grant-sanderson",
+    "name": "Grant Sanderson",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "destin-sandlin",
+    "name": "Destin Sandlin",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "adam-savage",
+    "name": "Adam Savage",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "matt-parker",
+    "name": "Matt Parker",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "simone-giertz",
+    "name": "Simone Giertz",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "anthony-padilla",
+    "name": "Anthony Padilla",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "rhett-mclaughlin",
+    "name": "Rhett McLaughlin",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "link-neal",
+    "name": "Link Neal",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "joe-rogan",
+    "name": "Joe Rogan",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "lex-fridman",
+    "name": "Lex Fridman",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "tim-ferriss",
+    "name": "Tim Ferriss",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "marc-maron",
+    "name": "Marc Maron",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "ira-glass",
+    "name": "Ira Glass",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "sarah-koenig",
+    "name": "Sarah Koenig",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "guy-raz",
+    "name": "Guy Raz",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "dax-shepard",
+    "name": "Dax Shepard",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "technoblade",
+    "name": "Technoblade",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "tommyinnit",
+    "name": "TommyInnit",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "tyler1",
+    "name": "Tyler1",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "xqc",
+    "name": "xQc",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "lilypichu",
+    "name": "Lilypichu",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "ludwig-ahgren",
+    "name": "Ludwig Ahgren",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "dhar-mann",
+    "name": "Dhar Mann",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "chris-williamson",
+    "name": "Chris Williamson",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "steven-bartlett",
+    "name": "Steven Bartlett",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "rick-beato",
+    "name": "Rick Beato",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "adam-neely",
+    "name": "Adam Neely",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "tom-scott",
+    "name": "Tom Scott",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "cgp-grey",
+    "name": "CGP Grey",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "johnny-harris",
+    "name": "Johnny Harris",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "cleo-abram",
+    "name": "Cleo Abram",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "ali-abdaal",
+    "name": "Ali Abdaal",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "thomas-frank",
+    "name": "Thomas Frank",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "matt-davella",
+    "name": "Matt D’Avella",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "peter-mckinnon",
+    "name": "Peter McKinnon",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "natalie-wynn",
+    "name": "Natalie Wynn",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "nerdwriter-evan-puschak",
+    "name": "Nerdwriter Evan Puschak",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "ryan-higa",
+    "name": "Ryan Higa",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "alan-becker",
+    "name": "Alan Becker",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "jaiden-dittfach",
+    "name": "Jaiden Dittfach",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "abigail-thorn",
+    "name": "Abigail Thorn",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "vi-hart",
+    "name": "Vi Hart",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "cory-cotton",
+    "name": "Cory Cotton",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "coby-cotton",
+    "name": "Coby Cotton",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "tyler-toney",
+    "name": "Tyler Toney",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "garrett-hilbert",
+    "name": "Garrett Hilbert",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "cody-jones",
+    "name": "Cody Jones",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "colin-furze",
+    "name": "Colin Furze",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "steve-mould",
+    "name": "Steve Mould",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "henry-reich",
+    "name": "Henry Reich",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "dianna-cowern",
+    "name": "Dianna Cowern",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "emily-graslie",
+    "name": "Emily Graslie",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "sal-khan",
+    "name": "Sal Khan",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "ryan-trahan",
+    "name": "Ryan Trahan",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "eric-decker",
+    "name": "Eric Decker",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "michelle-khare",
+    "name": "Michelle Khare",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "dan-howell",
+    "name": "Dan Howell",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "phil-lester",
+    "name": "Phil Lester",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "joe-sugg",
+    "name": "Joe Sugg",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "caspar-lee",
+    "name": "Caspar Lee",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "ksi",
+    "name": "KSI",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "simon-minter",
+    "name": "Simon Minter",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "ethan-payne",
+    "name": "Ethan Payne",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "vik-barn",
+    "name": "Vik Barn",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "josh-bradley",
+    "name": "Josh Bradley",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "tobi-brown",
+    "name": "Tobi Brown",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "harry-lewis",
+    "name": "Harry Lewis",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "lazarbeam",
+    "name": "LazarBeam",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "timthetatman",
+    "name": "TimTheTatman",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "drlupo",
+    "name": "DrLupo",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "summit1g",
+    "name": "Summit1g",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "asmongold",
+    "name": "Asmongold",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "sodapoppin",
+    "name": "Sodapoppin",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "forsen",
+    "name": "Forsen",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "thegrefg",
+    "name": "TheGrefg",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "vegetta777",
+    "name": "Vegetta777",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "willyrex",
+    "name": "Willyrex",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "hikakin",
+    "name": "Hikakin",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "li-ziqi",
+    "name": "Li Ziqi",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "papi-jiang",
+    "name": "Papi Jiang",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "felipe-neto",
+    "name": "Felipe Neto",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "luccas-neto",
+    "name": "Luccas Neto",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "yuya",
+    "name": "Yuya",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "german-garmendia",
+    "name": "Germán Garmendia",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "technical-guruji",
+    "name": "Technical Guruji",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "sandeep-maheshwari",
+    "name": "Sandeep Maheshwari",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "amit-bhadana",
+    "name": "Amit Bhadana",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "harsh-beniwal",
+    "name": "Harsh Beniwal",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "tanmay-bhat",
+    "name": "Tanmay Bhat",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "theo-von",
+    "name": "Theo Von",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "andrew-schulz",
+    "name": "Andrew Schulz",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "shane-gillis",
+    "name": "Shane Gillis",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "bill-simmons",
+    "name": "Bill Simmons",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "jay-shetty",
+    "name": "Jay Shetty",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "mel-robbins",
+    "name": "Mel Robbins",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "kurt-hugo-schneider",
+    "name": "Kurt Hugo Schneider",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "peter-hollens",
+    "name": "Peter Hollens",
+    "category": "creators"
+  },
+  {
+    "type": "person",
+    "slug": "michael-jordan",
+    "name": "Michael Jordan",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "kobe-bryant",
+    "name": "Kobe Bryant",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "stephen-curry",
+    "name": "Stephen Curry",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "kevin-durant",
+    "name": "Kevin Durant",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "giannis-antetokounmpo",
+    "name": "Giannis Antetokounmpo",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "magic-johnson",
+    "name": "Magic Johnson",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "larry-bird",
+    "name": "Larry Bird",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "shaquille-oneal",
+    "name": "Shaquille O’Neal",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "tim-duncan",
+    "name": "Tim Duncan",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "kareem-abdul-jabbar",
+    "name": "Kareem Abdul-Jabbar",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "bill-russell",
+    "name": "Bill Russell",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "wilt-chamberlain",
+    "name": "Wilt Chamberlain",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "dirk-nowitzki",
+    "name": "Dirk Nowitzki",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "nikola-jokic",
+    "name": "Nikola Jokić",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "luka-doncic",
+    "name": "Luka Dončić",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "yao-ming",
+    "name": "Yao Ming",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "sue-bird",
+    "name": "Sue Bird",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "diana-taurasi",
+    "name": "Diana Taurasi",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "caitlin-clark",
+    "name": "Caitlin Clark",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "tom-brady",
+    "name": "Tom Brady",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "patrick-mahomes",
+    "name": "Patrick Mahomes",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "peyton-manning",
+    "name": "Peyton Manning",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "jerry-rice",
+    "name": "Jerry Rice",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "joe-montana",
+    "name": "Joe Montana",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "serena-williams",
+    "name": "Serena Williams",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "venus-williams",
+    "name": "Venus Williams",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "roger-federer",
+    "name": "Roger Federer",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "rafael-nadal",
+    "name": "Rafael Nadal",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "novak-djokovic",
+    "name": "Novak Djokovic",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "andy-murray",
+    "name": "Andy Murray",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "naomi-osaka",
+    "name": "Naomi Osaka",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "steffi-graf",
+    "name": "Steffi Graf",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "martina-navratilova",
+    "name": "Martina Navratilova",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "billie-jean-king",
+    "name": "Billie Jean King",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "pete-sampras",
+    "name": "Pete Sampras",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "andre-agassi",
+    "name": "Andre Agassi",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "bjorn-borg",
+    "name": "Björn Borg",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "carlos-alcaraz",
+    "name": "Carlos Alcaraz",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "jannik-sinner",
+    "name": "Jannik Sinner",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "lionel-messi",
+    "name": "Lionel Messi",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "cristiano-ronaldo",
+    "name": "Cristiano Ronaldo",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "pele",
+    "name": "Pelé",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "diego-maradona",
+    "name": "Diego Maradona",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "johan-cruyff",
+    "name": "Johan Cruyff",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "zinedine-zidane",
+    "name": "Zinedine Zidane",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "ronaldo-nazario",
+    "name": "Ronaldo Nazário",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "ronaldinho",
+    "name": "Ronaldinho",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "neymar",
+    "name": "Neymar",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "kylian-mbappe",
+    "name": "Kylian Mbappé",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "erling-haaland",
+    "name": "Erling Haaland",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "kevin-de-bruyne",
+    "name": "Kevin De Bruyne",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "mohamed-salah",
+    "name": "Mohamed Salah",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "sadio-mane",
+    "name": "Sadio Mané",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "didier-drogba",
+    "name": "Didier Drogba",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "samuel-etoo",
+    "name": "Samuel Eto’o",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "david-beckham",
+    "name": "David Beckham",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "wayne-rooney",
+    "name": "Wayne Rooney",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "thierry-henry",
+    "name": "Thierry Henry",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "zlatan-ibrahimovic",
+    "name": "Zlatan Ibrahimović",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "luka-modric",
+    "name": "Luka Modrić",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "robert-lewandowski",
+    "name": "Robert Lewandowski",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "marta-vieira-da-silva",
+    "name": "Marta Vieira da Silva",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "megan-rapinoe",
+    "name": "Megan Rapinoe",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "alex-morgan",
+    "name": "Alex Morgan",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "mia-hamm",
+    "name": "Mia Hamm",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "sam-kerr",
+    "name": "Sam Kerr",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "usain-bolt",
+    "name": "Usain Bolt",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "carl-lewis",
+    "name": "Carl Lewis",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "michael-johnson",
+    "name": "Michael Johnson",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "jesse-owens",
+    "name": "Jesse Owens",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "florence-griffith-joyner",
+    "name": "Florence Griffith Joyner",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "simone-biles",
+    "name": "Simone Biles",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "nadia-comaneci",
+    "name": "Nadia Comăneci",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "mo-farah",
+    "name": "Mo Farah",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "eliud-kipchoge",
+    "name": "Eliud Kipchoge",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "haile-gebrselassie",
+    "name": "Haile Gebrselassie",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "allyson-felix",
+    "name": "Allyson Felix",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "shelly-ann-fraser-pryce",
+    "name": "Shelly-Ann Fraser-Pryce",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "michael-phelps",
+    "name": "Michael Phelps",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "ian-thorpe",
+    "name": "Ian Thorpe",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "katie-ledecky",
+    "name": "Katie Ledecky",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "mark-spitz",
+    "name": "Mark Spitz",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "tom-daley",
+    "name": "Tom Daley",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "muhammad-ali",
+    "name": "Muhammad Ali",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "mike-tyson",
+    "name": "Mike Tyson",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "floyd-mayweather-jr",
+    "name": "Floyd Mayweather Jr.",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "sugar-ray-leonard",
+    "name": "Sugar Ray Leonard",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "oscar-de-la-hoya",
+    "name": "Oscar De La Hoya",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "canelo-alvarez",
+    "name": "Canelo Álvarez",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "anthony-joshua",
+    "name": "Anthony Joshua",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "tyson-fury",
+    "name": "Tyson Fury",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "lennox-lewis",
+    "name": "Lennox Lewis",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "joe-frazier",
+    "name": "Joe Frazier",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "lewis-hamilton",
+    "name": "Lewis Hamilton",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "michael-schumacher",
+    "name": "Michael Schumacher",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "ayrton-senna",
+    "name": "Ayrton Senna",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "max-verstappen",
+    "name": "Max Verstappen",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "sebastian-vettel",
+    "name": "Sebastian Vettel",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "fernando-alonso",
+    "name": "Fernando Alonso",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "valentino-rossi",
+    "name": "Valentino Rossi",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "tiger-woods",
+    "name": "Tiger Woods",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "jack-nicklaus",
+    "name": "Jack Nicklaus",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "arnold-palmer",
+    "name": "Arnold Palmer",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "rory-mcilroy",
+    "name": "Rory McIlroy",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "phil-mickelson",
+    "name": "Phil Mickelson",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "annika-sorenstam",
+    "name": "Annika Sörenstam",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "babe-ruth",
+    "name": "Babe Ruth",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "jackie-robinson",
+    "name": "Jackie Robinson",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "derek-jeter",
+    "name": "Derek Jeter",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "shohei-ohtani",
+    "name": "Shohei Ohtani",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "ichiro-suzuki",
+    "name": "Ichiro Suzuki",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "hank-aaron",
+    "name": "Hank Aaron",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "wayne-gretzky",
+    "name": "Wayne Gretzky",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "sidney-crosby",
+    "name": "Sidney Crosby",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "alex-ovechkin",
+    "name": "Alex Ovechkin",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "mario-lemieux",
+    "name": "Mario Lemieux",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "bobby-orr",
+    "name": "Bobby Orr",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "virat-kohli",
+    "name": "Virat Kohli",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "sachin-tendulkar",
+    "name": "Sachin Tendulkar",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "ms-dhoni",
+    "name": "MS Dhoni",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "don-bradman",
+    "name": "Don Bradman",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "shane-warne",
+    "name": "Shane Warne",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "brian-lara",
+    "name": "Brian Lara",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "wasim-akram",
+    "name": "Wasim Akram",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "jonny-wilkinson",
+    "name": "Jonny Wilkinson",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "richie-mccaw",
+    "name": "Richie McCaw",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "jonah-lomu",
+    "name": "Jonah Lomu",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "eddy-merckx",
+    "name": "Eddy Merckx",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "tadej-pogacar",
+    "name": "Tadej Pogačar",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "kelly-slater",
+    "name": "Kelly Slater",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "tony-hawk",
+    "name": "Tony Hawk",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "conor-mcgregor",
+    "name": "Conor McGregor",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "khabib-nurmagomedov",
+    "name": "Khabib Nurmagomedov",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "ronda-rousey",
+    "name": "Ronda Rousey",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "georges-st-pierre",
+    "name": "Georges St-Pierre",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "mikaela-shiffrin",
+    "name": "Mikaela Shiffrin",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "lindsey-vonn",
+    "name": "Lindsey Vonn",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "shaun-white",
+    "name": "Shaun White",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "marcel-hirscher",
+    "name": "Marcel Hirscher",
+    "category": "athletes"
+  },
+  {
+    "type": "person",
+    "slug": "clarence-darrow",
+    "name": "Clarence Darrow",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "johnnie-cochran",
+    "name": "Johnnie Cochran",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "f-lee-bailey",
+    "name": "F. Lee Bailey",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "alan-dershowitz",
+    "name": "Alan Dershowitz",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "gloria-allred",
+    "name": "Gloria Allred",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "robert-shapiro",
+    "name": "Robert Shapiro",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "robert-kardashian",
+    "name": "Robert Kardashian",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "barry-scheck",
+    "name": "Barry Scheck",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "peter-neufeld",
+    "name": "Peter Neufeld",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "ben-crump",
+    "name": "Ben Crump",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "lisa-bloom",
+    "name": "Lisa Bloom",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "mark-geragos",
+    "name": "Mark Geragos",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "benjamin-brafman",
+    "name": "Benjamin Brafman",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "vincent-bugliosi",
+    "name": "Vincent Bugliosi",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "melvin-belli",
+    "name": "Melvin Belli",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "william-kunstler",
+    "name": "William Kunstler",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "charles-hamilton-houston",
+    "name": "Charles Hamilton Houston",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "bryan-stevenson",
+    "name": "Bryan Stevenson",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "sherrilyn-ifill",
+    "name": "Sherrilyn Ifill",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "marcia-clark",
+    "name": "Marcia Clark",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "christopher-darden",
+    "name": "Christopher Darden",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "david-boies",
+    "name": "David Boies",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "neal-katyal",
+    "name": "Neal Katyal",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "paul-clement",
+    "name": "Paul Clement",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "seth-waxman",
+    "name": "Seth Waxman",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "laurence-tribe",
+    "name": "Laurence Tribe",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "erwin-chemerinsky",
+    "name": "Erwin Chemerinsky",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "lawrence-lessig",
+    "name": "Lawrence Lessig",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "kimberle-crenshaw",
+    "name": "Kimberlé Crenshaw",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "catharine-mackinnon",
+    "name": "Catharine MacKinnon",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "anita-hill",
+    "name": "Anita Hill",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "randall-kennedy",
+    "name": "Randall Kennedy",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "richard-epstein",
+    "name": "Richard Epstein",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "akhil-reed-amar",
+    "name": "Akhil Reed Amar",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "noah-feldman",
+    "name": "Noah Feldman",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "mary-bonauto",
+    "name": "Mary Bonauto",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "evan-wolfson",
+    "name": "Evan Wolfson",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "roberta-kaplan",
+    "name": "Roberta Kaplan",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "kenneth-feinberg",
+    "name": "Kenneth Feinberg",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "devin-stone",
+    "name": "Devin Stone",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "benjamin-b-ferencz",
+    "name": "Benjamin B. Ferencz",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "telford-taylor",
+    "name": "Telford Taylor",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "louis-nizer",
+    "name": "Louis Nizer",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "cherie-blair",
+    "name": "Cherie Blair",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "helena-kennedy",
+    "name": "Helena Kennedy",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "geoffrey-robertson",
+    "name": "Geoffrey Robertson",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "michael-mansfield",
+    "name": "Michael Mansfield",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "gareth-peirce",
+    "name": "Gareth Peirce",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "philippe-sands",
+    "name": "Philippe Sands",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "payam-akhavan",
+    "name": "Payam Akhavan",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "luis-moreno-ocampo",
+    "name": "Luis Moreno Ocampo",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "fatou-bensouda",
+    "name": "Fatou Bensouda",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "carla-del-ponte",
+    "name": "Carla Del Ponte",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "jacques-verges",
+    "name": "Jacques Vergès",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "gisele-halimi",
+    "name": "Gisèle Halimi",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "bram-fischer",
+    "name": "Bram Fischer",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "george-bizos",
+    "name": "George Bizos",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "thuli-madonsela",
+    "name": "Thuli Madonsela",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "harish-salve",
+    "name": "Harish Salve",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "fali-nariman",
+    "name": "Fali Nariman",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "soli-sorabjee",
+    "name": "Soli Sorabjee",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "nani-palkhivala",
+    "name": "Nani Palkhivala",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "indira-jaising",
+    "name": "Indira Jaising",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "prashant-bhushan",
+    "name": "Prashant Bhushan",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "mukul-rohatgi",
+    "name": "Mukul Rohatgi",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "menaka-guruswamy",
+    "name": "Menaka Guruswamy",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "asma-jahangir",
+    "name": "Asma Jahangir",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "shirin-ebadi",
+    "name": "Shirin Ebadi",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "nasrin-sotoudeh",
+    "name": "Nasrin Sotoudeh",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "gillian-triggs",
+    "name": "Gillian Triggs",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "julian-burnside",
+    "name": "Julian Burnside",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "clayton-ruby",
+    "name": "Clayton Ruby",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "edward-greenspan",
+    "name": "Edward Greenspan",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "femi-falana",
+    "name": "Femi Falana",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "gani-fawehinmi",
+    "name": "Gani Fawehinmi",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "dikgang-moseneke",
+    "name": "Dikgang Moseneke",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "joseph-flom",
+    "name": "Joseph Flom",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "lloyd-cutler",
+    "name": "Lloyd Cutler",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "arthur-liman",
+    "name": "Arthur Liman",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "floyd-abrams",
+    "name": "Floyd Abrams",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "nadine-strossen",
+    "name": "Nadine Strossen",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "nancy-grace",
+    "name": "Nancy Grace",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "thomas-mesereau",
+    "name": "Thomas Mesereau",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "alex-spiro",
+    "name": "Alex Spiro",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "kathleen-zellner",
+    "name": "Kathleen Zellner",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "dean-strang",
+    "name": "Dean Strang",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "jerry-buting",
+    "name": "Jerry Buting",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "stephen-bright",
+    "name": "Stephen Bright",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "clive-stafford-smith",
+    "name": "Clive Stafford Smith",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "jonathan-turley",
+    "name": "Jonathan Turley",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "mark-lanier",
+    "name": "Mark Lanier",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "joseph-jamail",
+    "name": "Joseph Jamail",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "sarah-weddington",
+    "name": "Sarah Weddington",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "pauli-murray",
+    "name": "Pauli Murray",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "florynce-kennedy",
+    "name": "Florynce Kennedy",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "elaine-jones",
+    "name": "Elaine Jones",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "jack-greenberg",
+    "name": "Jack Greenberg",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "michael-sfard",
+    "name": "Michael Sfard",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "raji-sourani",
+    "name": "Raji Sourani",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "lea-tsemel",
+    "name": "Lea Tsemel",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "sanjay-hegde",
+    "name": "Sanjay Hegde",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "gopal-subramanium",
+    "name": "Gopal Subramanium",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "k-k-venugopal",
+    "name": "K. K. Venugopal",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "hina-jilani",
+    "name": "Hina Jilani",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "sara-hossain",
+    "name": "Sara Hossain",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "nicholas-opiyo",
+    "name": "Nicholas Opiyo",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "beatrice-mtetwa",
+    "name": "Beatrice Mtetwa",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "olisa-agbakoba",
+    "name": "Olisa Agbakoba",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "negad-el-borai",
+    "name": "Negad El-Borai",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "julio-strassera",
+    "name": "Julio Strassera",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "digna-ochoa",
+    "name": "Digna Ochoa",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "marlys-edwardh",
+    "name": "Marlys Edwardh",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "brian-greenspan",
+    "name": "Brian Greenspan",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "mark-stephens",
+    "name": "Mark Stephens",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "anthony-julius",
+    "name": "Anthony Julius",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "david-pannick",
+    "name": "David Pannick",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "geoffrey-bindman",
+    "name": "Geoffrey Bindman",
+    "category": "lawyers"
+  },
+  {
+    "type": "person",
+    "slug": "john-marshall",
+    "name": "John Marshall",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "roger-b-taney",
+    "name": "Roger B. Taney",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "joseph-story",
+    "name": "Joseph Story",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "john-marshall-harlan",
+    "name": "John Marshall Harlan",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "oliver-wendell-holmes-jr",
+    "name": "Oliver Wendell Holmes Jr.",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "louis-brandeis",
+    "name": "Louis Brandeis",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "benjamin-n-cardozo",
+    "name": "Benjamin N. Cardozo",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "learned-hand",
+    "name": "Learned Hand",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "hugo-black",
+    "name": "Hugo Black",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "felix-frankfurter",
+    "name": "Felix Frankfurter",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "william-o-douglas",
+    "name": "William O. Douglas",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "robert-h-jackson",
+    "name": "Robert H. Jackson",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "earl-warren",
+    "name": "Earl Warren",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "william-j-brennan-jr",
+    "name": "William J. Brennan Jr.",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "thurgood-marshall",
+    "name": "Thurgood Marshall",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "potter-stewart",
+    "name": "Potter Stewart",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "byron-white",
+    "name": "Byron White",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "warren-e-burger",
+    "name": "Warren E. Burger",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "harry-blackmun",
+    "name": "Harry Blackmun",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "lewis-f-powell-jr",
+    "name": "Lewis F. Powell Jr.",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "william-rehnquist",
+    "name": "William Rehnquist",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "john-paul-stevens",
+    "name": "John Paul Stevens",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "sandra-day-oconnor",
+    "name": "Sandra Day O’Connor",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "antonin-scalia",
+    "name": "Antonin Scalia",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "anthony-kennedy",
+    "name": "Anthony Kennedy",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "clarence-thomas",
+    "name": "Clarence Thomas",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "stephen-breyer",
+    "name": "Stephen Breyer",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "john-roberts",
+    "name": "John Roberts",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "samuel-alito",
+    "name": "Samuel Alito",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "sonia-sotomayor",
+    "name": "Sonia Sotomayor",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "elena-kagan",
+    "name": "Elena Kagan",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "neil-gorsuch",
+    "name": "Neil Gorsuch",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "brett-kavanaugh",
+    "name": "Brett Kavanaugh",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "amy-coney-barrett",
+    "name": "Amy Coney Barrett",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "ketanji-brown-jackson",
+    "name": "Ketanji Brown Jackson",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "richard-posner",
+    "name": "Richard Posner",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "guido-calabresi",
+    "name": "Guido Calabresi",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "robert-bork",
+    "name": "Robert Bork",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "frank-easterbrook",
+    "name": "Frank Easterbrook",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "constance-baker-motley",
+    "name": "Constance Baker Motley",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "damon-keith",
+    "name": "Damon Keith",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "lord-denning",
+    "name": "Lord Denning",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "lord-bingham-of-cornhill",
+    "name": "Lord Bingham of Cornhill",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "lady-hale",
+    "name": "Lady Hale",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "lord-neuberger",
+    "name": "Lord Neuberger",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "lord-reed",
+    "name": "Lord Reed",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "lord-sumption",
+    "name": "Lord Sumption",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "lord-hoffmann",
+    "name": "Lord Hoffmann",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "lord-judge",
+    "name": "Lord Judge",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "lord-woolf",
+    "name": "Lord Woolf",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "lord-atkin",
+    "name": "Lord Atkin",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "lord-diplock",
+    "name": "Lord Diplock",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "lord-wilberforce",
+    "name": "Lord Wilberforce",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "lord-scarman",
+    "name": "Lord Scarman",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "beverley-mclachlin",
+    "name": "Beverley McLachlin",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "rosalie-abella",
+    "name": "Rosalie Abella",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "bora-laskin",
+    "name": "Bora Laskin",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "bertha-wilson",
+    "name": "Bertha Wilson",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "michael-kirby",
+    "name": "Michael Kirby",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "anthony-mason",
+    "name": "Anthony Mason",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "owen-dixon",
+    "name": "Owen Dixon",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "sian-elias",
+    "name": "Sian Elias",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "arthur-chaskalson",
+    "name": "Arthur Chaskalson",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "albie-sachs",
+    "name": "Albie Sachs",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "pius-langa",
+    "name": "Pius Langa",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "edwin-cameron",
+    "name": "Edwin Cameron",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "richard-goldstone",
+    "name": "Richard Goldstone",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "navi-pillay",
+    "name": "Navi Pillay",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "kate-oregan",
+    "name": "Kate O’Regan",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "aharon-barak",
+    "name": "Aharon Barak",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "d-y-chandrachud",
+    "name": "D. Y. Chandrachud",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "y-v-chandrachud",
+    "name": "Y. V. Chandrachud",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "p-n-bhagwati",
+    "name": "P. N. Bhagwati",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "v-r-krishna-iyer",
+    "name": "V. R. Krishna Iyer",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "h-r-khanna",
+    "name": "H. R. Khanna",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "fathima-beevi",
+    "name": "Fathima Beevi",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "willy-mutunga",
+    "name": "Willy Mutunga",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "david-maraga",
+    "name": "David Maraga",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "joaquim-barbosa",
+    "name": "Joaquim Barbosa",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "arturo-zaldivar",
+    "name": "Arturo Zaldívar",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "rosalyn-higgins",
+    "name": "Rosalyn Higgins",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "hisashi-owada",
+    "name": "Hisashi Owada",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "abdulqawi-yusuf",
+    "name": "Abdulqawi Yusuf",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "joan-donoghue",
+    "name": "Joan Donoghue",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "peter-tomka",
+    "name": "Peter Tomka",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "bruno-simma",
+    "name": "Bruno Simma",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "hersch-lauterpacht",
+    "name": "Hersch Lauterpacht",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "antonio-cassese",
+    "name": "Antonio Cassese",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "theodor-meron",
+    "name": "Theodor Meron",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "fausto-pocar",
+    "name": "Fausto Pocar",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "gabrielle-kirk-mcdonald",
+    "name": "Gabrielle Kirk McDonald",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "chile-eboe-osuji",
+    "name": "Chile Eboe-Osuji",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "sang-hyun-song",
+    "name": "Sang-Hyun Song",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "silvia-fernandez-de-gurmendi",
+    "name": "Silvia Fernández de Gurmendi",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "piotr-hofmanski",
+    "name": "Piotr Hofmański",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "andreas-vo-kuhle",
+    "name": "Andreas Voßkuhle",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "stephan-harbarth",
+    "name": "Stephan Harbarth",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "jutta-limbach",
+    "name": "Jutta Limbach",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "robert-badinter",
+    "name": "Robert Badinter",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "sophia-akuffo",
+    "name": "Sophia Akuffo",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "susan-denham",
+    "name": "Susan Denham",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "ronan-keane",
+    "name": "Ronan Keane",
+    "category": "judges"
+  },
+  {
+    "type": "person",
+    "slug": "j-k-rowling",
+    "name": "J. K. Rowling",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "stephen-king",
+    "name": "Stephen King",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "george-r-r-martin",
+    "name": "George R. R. Martin",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "margaret-atwood",
+    "name": "Margaret Atwood",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "haruki-murakami",
+    "name": "Haruki Murakami",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "chimamanda-ngozi-adichie",
+    "name": "Chimamanda Ngozi Adichie",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "gabriel-garcia-marquez",
+    "name": "Gabriel García Márquez",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "toni-morrison",
+    "name": "Toni Morrison",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "maya-angelou",
+    "name": "Maya Angelou",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "salman-rushdie",
+    "name": "Salman Rushdie",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "paulo-coelho",
+    "name": "Paulo Coelho",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "dan-brown",
+    "name": "Dan Brown",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "john-grisham",
+    "name": "John Grisham",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "james-patterson",
+    "name": "James Patterson",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "agatha-christie",
+    "name": "Agatha Christie",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "roald-dahl",
+    "name": "Roald Dahl",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "j-r-r-tolkien",
+    "name": "J. R. R. Tolkien",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "ernest-hemingway",
+    "name": "Ernest Hemingway",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "jane-austen",
+    "name": "Jane Austen",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "william-shakespeare",
+    "name": "William Shakespeare",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "charles-dickens",
+    "name": "Charles Dickens",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "mark-twain",
+    "name": "Mark Twain",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "virginia-woolf",
+    "name": "Virginia Woolf",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "leo-tolstoy",
+    "name": "Leo Tolstoy",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "fyodor-dostoevsky",
+    "name": "Fyodor Dostoevsky",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "victor-hugo",
+    "name": "Victor Hugo",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "wole-soyinka",
+    "name": "Wole Soyinka",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "chinua-achebe",
+    "name": "Chinua Achebe",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "orhan-pamuk",
+    "name": "Orhan Pamuk",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "isabel-allende",
+    "name": "Isabel Allende",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "jhumpa-lahiri",
+    "name": "Jhumpa Lahiri",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "arundhati-roy",
+    "name": "Arundhati Roy",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "khaled-hosseini",
+    "name": "Khaled Hosseini",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "kazuo-ishiguro",
+    "name": "Kazuo Ishiguro",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "ta-nehisi-coates",
+    "name": "Ta-Nehisi Coates",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "malcolm-gladwell",
+    "name": "Malcolm Gladwell",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "yuval-noah-harari",
+    "name": "Yuval Noah Harari",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "stephen-hawking",
+    "name": "Stephen Hawking",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "albert-einstein",
+    "name": "Albert Einstein",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "marie-curie",
+    "name": "Marie Curie",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "isaac-newton",
+    "name": "Isaac Newton",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "charles-darwin",
+    "name": "Charles Darwin",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "galileo-galilei",
+    "name": "Galileo Galilei",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "nikola-tesla",
+    "name": "Nikola Tesla",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "richard-feynman",
+    "name": "Richard Feynman",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "ada-lovelace",
+    "name": "Ada Lovelace",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "alan-turing",
+    "name": "Alan Turing",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "rosalind-franklin",
+    "name": "Rosalind Franklin",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "jennifer-doudna",
+    "name": "Jennifer Doudna",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "katalin-kariko",
+    "name": "Katalin Karikó",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "tim-berners-lee",
+    "name": "Tim Berners-Lee",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "neil-armstrong",
+    "name": "Neil Armstrong",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "buzz-aldrin",
+    "name": "Buzz Aldrin",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "yuri-gagarin",
+    "name": "Yuri Gagarin",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "sally-ride",
+    "name": "Sally Ride",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "chris-hadfield",
+    "name": "Chris Hadfield",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "mae-jemison",
+    "name": "Mae Jemison",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "katherine-johnson",
+    "name": "Katherine Johnson",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "malala-yousafzai",
+    "name": "Malala Yousafzai",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "temple-grandin",
+    "name": "Temple Grandin",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "oliver-sacks",
+    "name": "Oliver Sacks",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "pablo-picasso",
+    "name": "Pablo Picasso",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "frida-kahlo",
+    "name": "Frida Kahlo",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "vincent-van-gogh",
+    "name": "Vincent van Gogh",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "leonardo-da-vinci",
+    "name": "Leonardo da Vinci",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "michelangelo",
+    "name": "Michelangelo",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "claude-monet",
+    "name": "Claude Monet",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "andy-warhol",
+    "name": "Andy Warhol",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "banksy",
+    "name": "Banksy",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "yayoi-kusama",
+    "name": "Yayoi Kusama",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "jeff-koons",
+    "name": "Jeff Koons",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "damien-hirst",
+    "name": "Damien Hirst",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "david-hockney",
+    "name": "David Hockney",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "georgia-okeeffe",
+    "name": "Georgia O’Keeffe",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "jean-michel-basquiat",
+    "name": "Jean-Michel Basquiat",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "marina-abramovic",
+    "name": "Marina Abramović",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "takashi-murakami",
+    "name": "Takashi Murakami",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "kehinde-wiley",
+    "name": "Kehinde Wiley",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "zaha-hadid",
+    "name": "Zaha Hadid",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "frank-gehry",
+    "name": "Frank Gehry",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "i-m-pei",
+    "name": "I. M. Pei",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "norman-foster",
+    "name": "Norman Foster",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "renzo-piano",
+    "name": "Renzo Piano",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "tadao-ando",
+    "name": "Tadao Ando",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "le-corbusier",
+    "name": "Le Corbusier",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "dave-chappelle",
+    "name": "Dave Chappelle",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "kevin-hart",
+    "name": "Kevin Hart",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "chris-rock",
+    "name": "Chris Rock",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "jerry-seinfeld",
+    "name": "Jerry Seinfeld",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "eddie-izzard",
+    "name": "Eddie Izzard",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "ricky-gervais",
+    "name": "Ricky Gervais",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "sarah-silverman",
+    "name": "Sarah Silverman",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "amy-schumer",
+    "name": "Amy Schumer",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "tina-fey",
+    "name": "Tina Fey",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "amy-poehler",
+    "name": "Amy Poehler",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "tiffany-haddish",
+    "name": "Tiffany Haddish",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "russell-peters",
+    "name": "Russell Peters",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "bill-burr",
+    "name": "Bill Burr",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "richard-pryor",
+    "name": "Richard Pryor",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "george-carlin",
+    "name": "George Carlin",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "joan-rivers",
+    "name": "Joan Rivers",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "rowan-atkinson",
+    "name": "Rowan Atkinson",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "john-cleese",
+    "name": "John Cleese",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "eric-idle",
+    "name": "Eric Idle",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "billy-connolly",
+    "name": "Billy Connolly",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "sacha-baron-cohen",
+    "name": "Sacha Baron Cohen",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "hasan-minhaj",
+    "name": "Hasan Minhaj",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "hannah-gadsby",
+    "name": "Hannah Gadsby",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "ali-wong",
+    "name": "Ali Wong",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "vir-das",
+    "name": "Vir Das",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "zakir-khan",
+    "name": "Zakir Khan",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "kapil-sharma",
+    "name": "Kapil Sharma",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "jo-koy",
+    "name": "Jo Koy",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "gabriel-iglesias",
+    "name": "Gabriel Iglesias",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "bo-burnham",
+    "name": "Bo Burnham",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "steve-martin",
+    "name": "Steve Martin",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "rene-redzepi",
+    "name": "René Redzepi",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "massimo-bottura",
+    "name": "Massimo Bottura",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "ferran-adria",
+    "name": "Ferran Adrià",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "alain-ducasse",
+    "name": "Alain Ducasse",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "thomas-keller",
+    "name": "Thomas Keller",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "wolfgang-puck",
+    "name": "Wolfgang Puck",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "nobu-matsuhisa",
+    "name": "Nobu Matsuhisa",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "yotam-ottolenghi",
+    "name": "Yotam Ottolenghi",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "jose-andres",
+    "name": "José Andrés",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "david-chang",
+    "name": "David Chang",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "alice-waters",
+    "name": "Alice Waters",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "marco-pierre-white",
+    "name": "Marco Pierre White",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "heston-blumenthal",
+    "name": "Heston Blumenthal",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "paul-bocuse",
+    "name": "Paul Bocuse",
+    "category": "other"
+  },
+  {
+    "type": "person",
+    "slug": "joel-robuchon",
+    "name": "Joël Robuchon",
+    "category": "other"
+  },
+  {
+    "type": "entertainment",
+    "slug": "forrest-gump",
+    "name": "Forrest Gump",
+    "year": 1994,
+    "category": "movie"
+  },
+  {
+    "type": "entertainment",
+    "slug": "saving-private-ryan",
+    "name": "Saving Private Ryan",
+    "year": 1998,
+    "category": "movie"
+  },
+  {
+    "type": "entertainment",
+    "slug": "jaws",
+    "name": "Jaws",
+    "year": 1975,
+    "category": "movie"
+  },
+  {
+    "type": "entertainment",
+    "slug": "et-the-extra-terrestrial",
+    "name": "E.T. the Extra-Terrestrial",
+    "year": 1982,
+    "category": "movie"
+  },
+  {
+    "type": "entertainment",
+    "slug": "jurassic-park",
+    "name": "Jurassic Park",
+    "year": 1993,
+    "category": "movie"
+  },
+  {
+    "type": "entertainment",
+    "slug": "schindlers-list",
+    "name": "Schindler’s List",
+    "year": 1993,
+    "category": "movie"
+  },
+  {
+    "type": "entertainment",
+    "slug": "the-oprah-winfrey-show",
+    "name": "The Oprah Winfrey Show",
+    "year": 1986,
+    "category": "tv-show"
+  },
+  {
+    "type": "entertainment",
+    "slug": "life-on-earth",
+    "name": "Life on Earth",
+    "year": 1979,
+    "category": "tv-show"
+  },
+  {
+    "type": "entertainment",
+    "slug": "our-planet",
+    "name": "Our Planet",
+    "year": 2019,
+    "category": "streaming-show"
+  },
+  {
+    "type": "entertainment",
+    "slug": "lemonade",
+    "name": "Lemonade",
+    "year": 2016,
+    "category": "album"
+  },
+  {
+    "type": "entertainment",
+    "slug": "renaissance",
+    "name": "Renaissance",
+    "year": 2022,
+    "category": "album"
+  },
+  {
+    "type": "entertainment",
+    "slug": "halo",
+    "name": "Halo",
+    "year": 2009,
+    "category": "song"
+  },
+  {
+    "type": "entertainment",
+    "slug": "i-am-sasha-fierce",
+    "name": "I Am... Sasha Fierce",
+    "year": 2008,
+    "category": "music-release"
+  },
+  {
+    "type": "entertainment",
+    "slug": "the-lion-king-the-gift",
+    "name": "The Lion King: The Gift",
+    "year": 2019,
+    "category": "music-release"
+  },
+  {
+    "type": "entertainment",
+    "slug": "academy-award-best-actor-1994",
+    "name": "Academy Award for Best Actor (1994 ceremony)",
+    "year": 1994,
+    "category": "award"
+  },
+  {
+    "type": "entertainment",
+    "slug": "academy-award-best-actor-1995",
+    "name": "Academy Award for Best Actor (1995 ceremony)",
+    "year": 1995,
+    "category": "award"
+  },
+  {
+    "type": "entertainment",
+    "slug": "academy-award-best-director-1994",
+    "name": "Academy Award for Best Director (1994 ceremony)",
+    "year": 1994,
+    "category": "award"
+  },
+  {
+    "type": "entertainment",
+    "slug": "66th-academy-awards",
+    "name": "66th Academy Awards",
+    "year": 1994,
+    "category": "event"
+  }
+]

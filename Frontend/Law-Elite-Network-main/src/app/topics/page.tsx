@@ -3,13 +3,13 @@ import Link from 'next/link';
 import { Tag } from 'lucide-react';
 import { Navbar } from '@/components/navbar';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
-import { getAllTopics } from '@/data/topics';
+import { getMergedTopics } from '@/lib/topics-server';
 import { topicUrl } from '@/lib/topic-url';
 
 export const revalidate = 86400;
 
-export default function TopicsPage() {
-  const topics = getAllTopics();
+export default async function TopicsPage() {
+  const topics = await getMergedTopics();
 
   return (
     <div className="min-h-screen bg-white">

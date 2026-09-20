@@ -55,7 +55,9 @@ export function EntertainmentProfile({
   relatedEntities: EntertainmentEntity[];
   latestNews: any[];
 }) {
-  const heroImage = entity.images?.[0]?.url
+  const photo = entity.images?.[0];
+  const ownPhoto = !!photo?.url && photo.url.startsWith('/media/');
+  const heroImage = (ownPhoto ? `${photo!.url}?w=800` : photo?.url)
     || articleArtDataUri({ title: entity.title, category: entertainmentTypeLabel(entity.type), seed: entity.slug });
 
   return (
@@ -64,17 +66,27 @@ export function EntertainmentProfile({
       <section className="border-b border-slate-200 bg-slate-50/60">
         <div className="container mx-auto px-4 sm:px-6 max-w-7xl py-12 md:py-16">
           <div className="flex flex-col sm:flex-row gap-8 items-center sm:items-start text-center sm:text-left">
-            <div className="relative w-full sm:w-56 aspect-[16/10] sm:aspect-square shrink-0 overflow-hidden rounded-2xl bg-slate-100 shadow-sm ring-1 ring-slate-200">
+            <figure className="shrink-0 w-full sm:w-56">
+            <div className="relative w-full aspect-[16/10] sm:aspect-square overflow-hidden rounded-2xl bg-slate-100 shadow-sm ring-1 ring-slate-200">
               <Image
                 src={heroImage}
                 alt={entity.title}
                 fill
-                unoptimized={!entity.images?.[0]?.url}
+                // /media/... is resized by its own route; the generic loader needs an absolute URL.
+                unoptimized={!photo?.url || ownPhoto}
                 priority
                 sizes="(max-width: 640px) 100vw, 224px"
                 className="object-cover"
               />
             </div>
+            {photo?.credit && (
+              <figcaption className="mt-2 text-[11px] leading-snug text-slate-500 text-left">
+                Image: {photo.credit}.{' '}
+                {photo.licenseUrl ? <a href={photo.licenseUrl} target="_blank" rel="noopener noreferrer" className="underline">{photo.license}</a> : photo.license}
+                {photo.sourceUrl && <> · <a href={photo.sourceUrl} target="_blank" rel="noopener noreferrer nofollow" className="underline">Source</a></>}
+              </figcaption>
+            )}
+            </figure>
 
             <div className="flex-1">
               <span className="kicker mb-2 inline-block">{entertainmentTypeLabel(entity.type)}</span>
@@ -111,10 +123,11 @@ export function EntertainmentProfile({
                     {person && (
                       <div className="relative w-10 h-10 shrink-0 overflow-hidden rounded-full bg-slate-100">
                         <Image
-                          src={resolvePersonImage({ avatarUrl: person.avatarUrl, name: person.displayName || person.fullName, avatarSeed: person.avatarSeed || person.slug })}
+                          src={person.avatarUrl?.startsWith('/media/') ? `${person.avatarUrl}?w=240` : resolvePersonImage({ avatarUrl: person.avatarUrl, name: person.displayName || person.fullName, avatarSeed: person.avatarSeed || person.slug })}
                           alt={person.displayName || person.fullName}
                           fill
-                          unoptimized={!person.avatarUrl}
+                          // /media/... is resized by its own route; the generic loader needs an absolute URL.
+                          unoptimized={!person.avatarUrl || person.avatarUrl.startsWith('/')}
                           sizes="40px"
                           className="object-cover"
                         />

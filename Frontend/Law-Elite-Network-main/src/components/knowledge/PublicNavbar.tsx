@@ -102,7 +102,7 @@ export function PublicNavbar() {
             </button>
 
             <Link
-              href="/tips"
+              href="/contact-us"
               className="bg-[#E13131] hover:bg-red-700 text-white font-black text-xs uppercase px-4 py-1.5 tracking-wider transition-colors"
             >
               TIPS

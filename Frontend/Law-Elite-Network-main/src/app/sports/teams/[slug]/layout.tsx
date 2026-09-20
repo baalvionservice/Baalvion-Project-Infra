@@ -21,7 +21,7 @@ export async function generateMetadata(
     title: { absolute: brandTitle(`${team.name} — Team Profile`) },
     description: clampDescription(team.description),
     alternates: { canonical: url },
-    robots: { index: true, follow: true },
+    robots: { index: team.indexable !== false, follow: true },
     openGraph: { type: 'website', url, title: team.name, description: team.description },
     twitter: { card: 'summary', title: team.name, description: team.description },
   };

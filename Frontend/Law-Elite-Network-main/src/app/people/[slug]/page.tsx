@@ -3,18 +3,24 @@ import { notFound } from 'next/navigation';
 import { Navbar } from '@/components/navbar';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { PersonProfile } from '@/components/people/PersonProfile';
-import { PeopleDirectory } from '@/components/people/PeopleDirectory';
+import { PeopleTabs } from '@/components/people/PeopleTabs';
+import { PeopleGrid } from '@/components/people/PeopleGrid';
+import { toCardData } from '@/components/people/PersonCard';
 import { PersonDisclaimer } from '@/components/people/PersonDisclaimer';
+import { getMergedTopics } from '@/lib/topics-server';
 import { getMergedPersonBySlug, getMergedPeople, getLatestNewsForPerson } from '@/lib/people-server';
-import { getRelatedPeople, PEOPLE } from '@/data/people';
+import { getRelatedPeople } from '@/data/people';
 import { getLegalCasesForPerson } from '@/lib/legal-server';
+import { getCreditedWorksForPerson } from '@/lib/entertainment-server';
+import { getCompetitionWorksForPerson } from '@/lib/sports-server';
 import { isPersonCategorySlug, personCategoryLabel, PERSON_CATEGORIES } from '@/types/person';
 
 export const revalidate = 86400;
 
 // Pre-render every bundled profile and category directory; anything added later still renders on demand.
-export function generateStaticParams() {
-  return [...PEOPLE.map((p) => ({ slug: p.slug })), ...PERSON_CATEGORIES.map((c) => ({ slug: c.slug }))];
+export async function generateStaticParams() {
+  const people = await getMergedPeople();
+  return [...people.map((p) => ({ slug: p.slug })), ...PERSON_CATEGORIES.map((c) => ({ slug: c.slug }))];
 }
 
 /**
@@ -28,6 +34,8 @@ export default async function PersonOrCategoryPage({ params }: { params: Promise
 
   if (isPersonCategorySlug(slug)) {
     const people = await getMergedPeople();
+    const counts: Record<string, number> = {};
+    people.forEach((p) => { counts[p.category] = (counts[p.category] || 0) + 1; });
     return (
       <div className="min-h-screen bg-white">
         <Navbar />
@@ -42,7 +50,8 @@ export default async function PersonOrCategoryPage({ params }: { params: Promise
             <div className="mb-10">
               <PersonDisclaimer />
             </div>
-            <PeopleDirectory people={people} initialCategory={slug} />
+            <PeopleTabs counts={counts} active={slug} />
+            <PeopleGrid people={people.filter((p) => p.category === slug).map(toCardData)} />
           </div>
         </main>
         <PublicFooter />
@@ -50,18 +59,24 @@ export default async function PersonOrCategoryPage({ params }: { params: Promise
     );
   }
 
+  const topics = await getMergedTopics();
   const person = await getMergedPersonBySlug(slug);
   if (!person) notFound();
 
   const relatedPeople = getRelatedPeople(person);
   const latestNews = await getLatestNewsForPerson(person);
-  const legalCases = getLegalCasesForPerson(person.slug);
+  const legalCases = await getLegalCasesForPerson(person.slug);
+
+  // Works the person is credited on (from the entertainment entries) join any curated ones, without duplicates.
+  const credited = [...(await getCreditedWorksForPerson(person.slug)), ...(await getCompetitionWorksForPerson(person.slug))];
+  const known = new Set((person.relatedWorks ?? []).map((w) => w.entitySlug).filter(Boolean));
+  const profile = credited.length ? { ...person, relatedWorks: [...(person.relatedWorks ?? []), ...credited.filter((w) => !known.has(w.entitySlug))] } : person;
 
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
       <main>
-        <PersonProfile person={person} relatedPeople={relatedPeople} latestNews={latestNews} legalCases={legalCases} />
+        <PersonProfile person={profile} relatedPeople={relatedPeople} latestNews={latestNews} legalCases={legalCases} topics={topics} />
       </main>
       <PublicFooter />
     </div>

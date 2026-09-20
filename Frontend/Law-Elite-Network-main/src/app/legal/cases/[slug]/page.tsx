@@ -3,13 +3,13 @@ import { notFound } from 'next/navigation';
 import { Navbar } from '@/components/navbar';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { CaseProfile } from '@/components/legal/CaseProfile';
-import { getMergedLegalCaseBySlug, getMergedCourtBySlug, getLatestNewsForCase, getResolvedCaseParticipants } from '@/lib/legal-server';
-import { getAllLegalCases } from '@/data/legal-cases';
+import { getMergedPeople } from '@/lib/people-server';
+import { getMergedLegalCaseBySlug, getMergedLegalCases, getMergedCourtBySlug, getLatestNewsForCase, getResolvedCaseParticipants } from '@/lib/legal-server';
 
 export const revalidate = 86400;
 
-export function generateStaticParams() {
-  return getAllLegalCases().map((c) => ({ slug: c.slug }));
+export async function generateStaticParams() {
+  return (await getMergedLegalCases()).map((c) => ({ slug: c.slug }));
 }
 
 export default async function LegalCasePage({ params }: { params: Promise<{ slug: string }> }) {
@@ -21,7 +21,7 @@ export default async function LegalCasePage({ params }: { params: Promise<{ slug
     getMergedCourtBySlug(legalCase.courtSlug),
     getLatestNewsForCase(legalCase),
   ]);
-  const peopleBySlug = getResolvedCaseParticipants(legalCase);
+  const peopleBySlug = getResolvedCaseParticipants(legalCase, await getMergedPeople());
 
   return (
     <div className="min-h-screen bg-white">

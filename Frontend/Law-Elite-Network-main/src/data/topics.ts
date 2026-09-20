@@ -11,6 +11,10 @@ export interface Topic {
   pillar?: 'legal' | 'entertainment' | 'sports' | 'general';
   /** Alternate phrasings the tagging engine should also match, e.g. "Olympics" / "Olympic Games". */
   aliases?: string[];
+  /** Editor-written introduction shown on the topic page (admin panel). */
+  description?: string;
+  /** Explicit override from the admin panel. */
+  indexable?: boolean;
 }
 
 export const TOPICS: Topic[] = [

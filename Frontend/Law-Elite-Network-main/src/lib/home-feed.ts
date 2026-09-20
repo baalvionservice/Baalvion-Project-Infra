@@ -1,6 +1,6 @@
 import { getTaggedArticleIndex } from '@/lib/entity-articles';
 import { getMergedPeople } from '@/lib/people-server';
-import { getAllTopics } from '@/data/topics';
+import { getMergedTopics } from '@/lib/topics-server';
 import { CMS_ONLY_CATEGORIES } from '@/lib/cms-only-categories';
 import type { Person } from '@/types/person';
 import type { Topic } from '@/data/topics';
@@ -120,7 +120,7 @@ export async function getHomeFeed(pool: Article[]): Promise<HomeFeed> {
     .sort((a, b) => Number(!!b.featured) - Number(!!a.featured))
     .slice(0, 6);
 
-  const popularTopics = getAllTopics()
+  const popularTopics = (await getMergedTopics())
     .map((topic) => ({ topic, articleCount: topicCounts.get(topic.slug) || 0 }))
     .filter((t) => t.articleCount > 0)
     .sort((a, b) => b.articleCount - a.articleCount || a.topic.name.localeCompare(b.topic.name))

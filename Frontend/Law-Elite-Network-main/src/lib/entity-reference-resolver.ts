@@ -1,10 +1,9 @@
-import { getPersonBySlug } from '@/data/people';
-import { getEntertainmentEntityBySlug } from '@/data/entertainment';
-import { getLegalCaseBySlug } from '@/data/legal-cases';
-import { getCourtBySlug } from '@/data/courts';
-import { getSportsTeamBySlug } from '@/data/sports-teams';
-import { getSportsCompetitionBySlug } from '@/data/sports-competitions';
-import { getTopicBySlug } from '@/data/topics';
+import { getMergedPeople } from '@/lib/people-server';
+import { getMergedLegalCases, getMergedCourts } from '@/lib/legal-server';
+import { getMergedEntertainmentEntities } from '@/lib/entertainment-server';
+import { getMergedSportsTeams, getMergedSportsCompetitions } from '@/lib/sports-server';
+import { getMergedTopics } from '@/lib/topics-server';
+import type { Topic } from '@/data/topics';
 import { countryNameByCode } from '@/lib/countries';
 import { personUrl } from '@/lib/person-url';
 import { entertainmentUrl } from '@/lib/entertainment-url';
@@ -13,11 +12,17 @@ import { teamUrl, competitionUrl } from '@/lib/sports-url';
 import { countryUrl } from '@/lib/country-url';
 import { topicUrl } from '@/lib/topic-url';
 import type { EntityReference } from '@/types/entity-tagging';
+import type { Person } from '@/types/person';
+import type { Court, LegalCase } from '@/types/legal';
+import type { EntertainmentEntity } from '@/types/entertainment';
+import type { SportsCompetition, SportsTeam } from '@/types/sports';
 
 export interface ResolvedEntityReference extends EntityReference {
   name: string;
   url: string;
 }
+
+interface Lookups { topics: Map<string, Topic>; people: Map<string, Person>; entertainment: Map<string, EntertainmentEntity>; teams: Map<string, SportsTeam>; competitions: Map<string, SportsCompetition>; cases: Map<string, LegalCase>; courts: Map<string, Court> }
 
 /**
  * The one place that turns an EntityReference (just {entityType, slug}) into
@@ -25,30 +30,30 @@ export interface ResolvedEntityReference extends EntityReference {
  * "Connections" list on an article page. Returns null for a slug that no
  * longer resolves (e.g. an entity later removed) rather than a broken link.
  */
-export function resolveEntityReference(ref: EntityReference): ResolvedEntityReference | null {
+function resolveWith(ref: EntityReference, lk: Lookups): ResolvedEntityReference | null {
   switch (ref.entityType) {
     case 'person': {
-      const p = getPersonBySlug(ref.slug);
+      const p = lk.people.get(ref.slug);
       return p ? { ...ref, name: p.displayName || p.fullName, url: personUrl(p.slug) } : null;
     }
     case 'entertainment': {
-      const e = getEntertainmentEntityBySlug(ref.slug);
+      const e = lk.entertainment.get(ref.slug);
       return e ? { ...ref, name: e.title, url: entertainmentUrl(e.slug) } : null;
     }
     case 'legal-case': {
-      const c = getLegalCaseBySlug(ref.slug);
+      const c = lk.cases.get(ref.slug);
       return c ? { ...ref, name: c.caseName, url: legalCaseUrl(c.slug) } : null;
     }
     case 'court': {
-      const c = getCourtBySlug(ref.slug);
+      const c = lk.courts.get(ref.slug);
       return c ? { ...ref, name: c.name, url: courtUrl(c.slug) } : null;
     }
     case 'sports-team': {
-      const t = getSportsTeamBySlug(ref.slug);
+      const t = lk.teams.get(ref.slug);
       return t ? { ...ref, name: t.name, url: teamUrl(t.slug) } : null;
     }
     case 'sports-competition': {
-      const c = getSportsCompetitionBySlug(ref.slug);
+      const c = lk.competitions.get(ref.slug);
       return c ? { ...ref, name: c.name, url: competitionUrl(c.slug) } : null;
     }
     case 'country': {
@@ -56,7 +61,7 @@ export function resolveEntityReference(ref: EntityReference): ResolvedEntityRefe
       return name ? { ...ref, name, url: countryUrl(ref.slug) } : null;
     }
     case 'topic': {
-      const t = getTopicBySlug(ref.slug);
+      const t = lk.topics.get(ref.slug);
       return t ? { ...ref, name: t.name, url: topicUrl(t.slug) } : null;
     }
     default:
@@ -64,6 +69,9 @@ export function resolveEntityReference(ref: EntityReference): ResolvedEntityRefe
   }
 }
 
-export function resolveEntityReferences(refs: EntityReference[]): ResolvedEntityReference[] {
-  return refs.map(resolveEntityReference).filter((r): r is ResolvedEntityReference => r !== null);
+/** Resolves against the merged (bundled + admin-managed) people, cases and courts, so an editor-created entity links correctly. */
+export async function resolveEntityReferences(refs: EntityReference[]): Promise<ResolvedEntityReference[]> {
+  const [people, cases, courts, entertainment, teams, competitions, topics] = await Promise.all([getMergedPeople(), getMergedLegalCases(), getMergedCourts(), getMergedEntertainmentEntities(), getMergedSportsTeams(), getMergedSportsCompetitions(), getMergedTopics()]);
+  const lk: Lookups = { topics: new Map(topics.map((t) => [t.slug, t])), teams: new Map(teams.map((t) => [t.slug, t])), competitions: new Map(competitions.map((c) => [c.slug, c])), entertainment: new Map(entertainment.map((e) => [e.slug, e])), people: new Map(people.map((p) => [p.slug, p])), cases: new Map(cases.map((c) => [c.slug, c])), courts: new Map(courts.map((c) => [c.slug, c])) };
+  return refs.map((r) => resolveWith(r, lk)).filter((r): r is ResolvedEntityReference => r !== null);
 }

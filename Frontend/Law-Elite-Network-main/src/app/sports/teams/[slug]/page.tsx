@@ -3,14 +3,13 @@ import { notFound } from 'next/navigation';
 import { Navbar } from '@/components/navbar';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { TeamProfile } from '@/components/sports/TeamProfile';
-import { getMergedSportsTeamBySlug, getLatestNewsForTeam } from '@/lib/sports-server';
-import { getAllPeople } from '@/data/people';
-import { getAllSportsTeams } from '@/data/sports-teams';
+import { getMergedSportsTeamBySlug, getMergedSportsTeams, getLatestNewsForTeam } from '@/lib/sports-server';
+import { getMergedAthletesForTeam } from '@/lib/people-server';
 
 export const revalidate = 86400;
 
-export function generateStaticParams() {
-  return getAllSportsTeams().map((t) => ({ slug: t.slug }));
+export async function generateStaticParams() {
+  return (await getMergedSportsTeams()).map((t) => ({ slug: t.slug }));
 }
 
 export default async function TeamPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -18,8 +17,8 @@ export default async function TeamPage({ params }: { params: Promise<{ slug: str
   const team = await getMergedSportsTeamBySlug(slug);
   if (!team) notFound();
 
-  const athletes = getAllPeople().filter((p) => p.sportsInfo?.teamSlug === slug);
-  const latestNews = await getLatestNewsForTeam(slug);
+  const athletes = await getMergedAthletesForTeam(slug);
+  const latestNews = await getLatestNewsForTeam(slug, athletes);
 
   return (
     <div className="min-h-screen bg-white">

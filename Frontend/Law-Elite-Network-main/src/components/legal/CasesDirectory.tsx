@@ -9,8 +9,8 @@ const STATUS_LABEL: Record<CaseStatus, string> = {
   ongoing: 'Ongoing', concluded: 'Concluded', settled: 'Settled', dismissed: 'Dismissed', appealed: 'Appealed',
 };
 
-/** Client-side status filter over the full case list — mirrors PeopleDirectory/EntertainmentDirectory. */
-export function CasesDirectory({ cases }: { cases: LegalCase[] }) {
+/** Client-side status filter over the full case list — same pattern as the other directories. */
+export function CasesDirectory({ cases, courtNames = {} }: { cases: LegalCase[]; courtNames?: Record<string, string> }) {
   const [active, setActive] = useState<CaseStatus | 'all'>('all');
 
   const counts = useMemo(() => {
@@ -55,7 +55,7 @@ export function CasesDirectory({ cases }: { cases: LegalCase[] }) {
         <p className="text-slate-500 text-sm">No cases in this status yet.</p>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {visible.map((c) => <CaseCard key={c.slug} legalCase={c} />)}
+          {visible.map((c) => <CaseCard key={c.slug} legalCase={c} courtName={courtNames[c.courtSlug]} />)}
         </div>
       )}
     </div>

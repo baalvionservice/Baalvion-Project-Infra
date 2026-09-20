@@ -14,19 +14,17 @@ import { getAllArticles, type LawArticle } from '@/data/law-content';
 import { cmsGetArticles } from '@/lib/cms';
 import { scoreArticle } from '@/lib/search-score';
 import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
-import { getAllPeople } from '@/data/people';
+import { getMergedPeople } from '@/lib/people-server';
 import { personCategoryLabel } from '@/types/person';
 import { personUrl } from '@/lib/person-url';
-import { getAllEntertainmentEntities } from '@/data/entertainment';
+import { getMergedEntertainmentEntities } from '@/lib/entertainment-server';
 import { entertainmentTypeLabel } from '@/types/entertainment';
 import { entertainmentUrl } from '@/lib/entertainment-url';
-import { getAllLegalCases } from '@/data/legal-cases';
-import { getAllCourts } from '@/data/courts';
+import { getMergedLegalCases, getMergedCourts } from '@/lib/legal-server';
 import { legalCaseUrl, courtUrl } from '@/lib/legal-case-url';
-import { getAllSportsTeams } from '@/data/sports-teams';
-import { getAllSportsCompetitions } from '@/data/sports-competitions';
+import { getMergedSportsTeams, getMergedSportsCompetitions } from '@/lib/sports-server';
 import { teamUrl, competitionUrl } from '@/lib/sports-url';
-import { getAllTopics } from '@/data/topics';
+import { getMergedTopics } from '@/lib/topics-server';
 import { topicUrl } from '@/lib/topic-url';
 import { articleUrl } from '@/lib/article-url';
 
@@ -117,7 +115,7 @@ async function buildSearchCorpus(): Promise<Array<{ item: Omit<SearchResultItem,
     });
   });
 
-  getAllPeople().forEach((p) => {
+  (await getMergedPeople()).forEach((p) => {
     corpus.push({
       item: { id: `person:${p.slug}`, type: 'person', title: p.displayName || p.fullName, subtitle: personCategoryLabel(p.category), url: personUrl(p.slug) },
       title: p.displayName || p.fullName,
@@ -126,7 +124,7 @@ async function buildSearchCorpus(): Promise<Array<{ item: Omit<SearchResultItem,
     });
   });
 
-  getAllEntertainmentEntities().forEach((e) => {
+  (await getMergedEntertainmentEntities()).forEach((e) => {
     corpus.push({
       item: { id: `entertainment:${e.slug}`, type: e.type, title: e.title, subtitle: entertainmentTypeLabel(e.type), url: entertainmentUrl(e.slug) },
       title: e.title,
@@ -135,7 +133,7 @@ async function buildSearchCorpus(): Promise<Array<{ item: Omit<SearchResultItem,
     });
   });
 
-  getAllLegalCases().forEach((c) => {
+  (await getMergedLegalCases()).forEach((c) => {
     corpus.push({
       item: { id: `legal-case:${c.slug}`, type: 'legal-case', title: c.caseName, subtitle: 'Legal Case', url: legalCaseUrl(c.slug) },
       title: c.caseName,
@@ -144,7 +142,7 @@ async function buildSearchCorpus(): Promise<Array<{ item: Omit<SearchResultItem,
     });
   });
 
-  getAllCourts().forEach((c) => {
+  (await getMergedCourts()).forEach((c) => {
     corpus.push({
       item: { id: `court:${c.slug}`, type: 'court', title: c.name, subtitle: c.level, url: courtUrl(c.slug) },
       title: c.name,
@@ -153,7 +151,7 @@ async function buildSearchCorpus(): Promise<Array<{ item: Omit<SearchResultItem,
     });
   });
 
-  getAllSportsTeams().forEach((t) => {
+  (await getMergedSportsTeams()).forEach((t) => {
     corpus.push({
       item: { id: `sports-team:${t.slug}`, type: 'sports-team', title: t.name, subtitle: t.sport, url: teamUrl(t.slug) },
       title: t.name,
@@ -162,7 +160,7 @@ async function buildSearchCorpus(): Promise<Array<{ item: Omit<SearchResultItem,
     });
   });
 
-  getAllSportsCompetitions().forEach((c) => {
+  (await getMergedSportsCompetitions()).forEach((c) => {
     corpus.push({
       item: { id: `sports-competition:${c.slug}`, type: 'sports-competition', title: c.name, subtitle: c.sport, url: competitionUrl(c.slug) },
       title: c.name,
@@ -171,7 +169,7 @@ async function buildSearchCorpus(): Promise<Array<{ item: Omit<SearchResultItem,
     });
   });
 
-  getAllTopics().forEach((t) => {
+  (await getMergedTopics()).forEach((t) => {
     corpus.push({
       item: { id: `topic:${t.slug}`, type: 'topic', title: t.name, subtitle: 'Topic', url: topicUrl(t.slug) },
       title: t.name,

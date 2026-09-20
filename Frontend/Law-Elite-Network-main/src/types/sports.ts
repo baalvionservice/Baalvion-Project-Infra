@@ -38,6 +38,8 @@ export interface SportsTeam {
   description: string;
   url?: string;
   verification: SportsTeamVerification;
+  /** Explicit override from the admin panel; bundled teams are indexable. */
+  indexable?: boolean;
 }
 
 export const COMPETITION_LEVELS = ['olympic', 'championship', 'tournament', 'league', 'other'] as const;
@@ -63,4 +65,6 @@ export interface SportsCompetition {
   relatedArticleSlugs?: string[];
   videos?: MediaItem[];
   verification: SportsTeamVerification;
+  /** Explicit override from the admin panel; bundled competitions are indexable. */
+  indexable?: boolean;
 }

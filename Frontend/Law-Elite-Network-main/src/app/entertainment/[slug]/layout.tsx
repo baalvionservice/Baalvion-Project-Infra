@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { brandTitle } from '@/lib/seo/brand-title';
 import { getMergedEntertainmentEntityBySlug } from '@/lib/entertainment-server';
-import { getPersonBySlug } from '@/data/people';
+import { getMergedPeople } from '@/lib/people-server';
 import { entertainmentTypeLabel } from '@/types/entertainment';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
@@ -36,14 +36,15 @@ export async function generateMetadata(
 
   const title = entity.seo?.metaTitle || entity.title;
   const description = entity.seo?.metaDescription || entity.description.slice(0, 200);
-  const image = entity.images?.[0]?.url || `${SITE}/opengraph-image`;
+  const first = entity.images?.[0];
+  const image = first?.url ? (first.url.startsWith('/') ? `${SITE}${first.url}?w=1000` : first.url) : `${SITE}/opengraph-image`;
 
   return {
     title: { absolute: brandTitle(title) },
     description,
     keywords: [entity.title, entertainmentTypeLabel(entity.type), 'law elite network entertainment'],
     alternates: { canonical: entity.seo?.canonicalPath ? `${SITE}${entity.seo.canonicalPath}` : url },
-    robots: { index: true, follow: true },
+    robots: { index: entity.indexable !== false, follow: true },
     openGraph: { type: 'website', url, title, description, images: [{ url: image, alt: entity.title }] },
     twitter: { card: 'summary', title, description, images: [image] },
   };
@@ -58,12 +59,16 @@ export default async function EntertainmentEntityLayout(
 
   if (!entity) return <>{children}</>;
 
+  const first = entity.images?.[0];
+  const image = first?.url ? (first.url.startsWith('/') ? `${SITE}${first.url}?w=1000` : first.url) : undefined;
+  const peopleBySlug = new Map((await getMergedPeople()).map((p) => [p.slug, p]));
+
   const entityLd = {
     '@context': 'https://schema.org',
     '@type': SCHEMA_TYPE[entity.type] || 'CreativeWork',
     name: entity.title,
     url,
-    image: entity.images?.[0]?.url,
+    image: image && first ? { '@type': 'ImageObject', contentUrl: image, creditText: first.credit, license: first.licenseUrl, acquireLicensePage: first.sourceUrl } : undefined,
     description: entity.description,
     datePublished: entity.releaseDate || undefined,
     // schema.org's cast/director/musicBy fields differ per @type -- rather
@@ -71,7 +76,7 @@ export default async function EntertainmentEntityLayout(
     // byArtist vs director), a plain `creator` list is honest and valid
     // across all of them without a false claim of, say, "actor" on an award.
     creator: entity.peopleInvolved.map((credit) => {
-      const person = getPersonBySlug(credit.personSlug);
+      const person = peopleBySlug.get(credit.personSlug);
       return {
         '@type': 'Person',
         name: person?.displayName || person?.fullName || credit.personSlug,

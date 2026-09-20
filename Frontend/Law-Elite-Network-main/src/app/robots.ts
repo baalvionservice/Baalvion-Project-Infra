@@ -68,6 +68,7 @@ const DISALLOW = [
   '/notifications',
   '/following',
   '/saved',
+  '/studio',
   '/my-counsel',
   '/referral',
   '/onboarding',

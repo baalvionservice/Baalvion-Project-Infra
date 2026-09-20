@@ -7,13 +7,13 @@ import { articleUrl, ROOT_FLAT_ARTICLE_SLUGS } from '@/lib/article-url';
 import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
 import { cmsGetArticles } from '@/lib/cms';
 import { CONTENT_CACHE_TAG } from '@/lib/cache-tags';
-import { getAllPeople } from '@/data/people';
-import { getAllEntertainmentEntities } from '@/data/entertainment';
-import { getAllLegalCases } from '@/data/legal-cases';
-import { getAllCourts } from '@/data/courts';
-import { getAllSportsTeams } from '@/data/sports-teams';
-import { getAllSportsCompetitions } from '@/data/sports-competitions';
-import { getAllTopics } from '@/data/topics';
+import { getMergedPeople } from '@/lib/people-server';
+import { isPersonIndexable } from '@/lib/person-indexing';
+import { getMergedEntertainmentEntities } from '@/lib/entertainment-server';
+import { getMergedLegalCases, getMergedCourts } from '@/lib/legal-server';
+import { getMergedSportsTeams, getMergedSportsCompetitions } from '@/lib/sports-server';
+import { getMergedTopics } from '@/lib/topics-server';
+import { getTopicSlugsWithArticles, isTopicIndexable } from '@/lib/topics-indexing';
 import { COUNTRIES } from '@/lib/countries';
 import { PERSON_CATEGORIES } from '@/types/person';
 
@@ -285,47 +285,49 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
       };
     });
 
-  // Every bundled Person is a fully authored, real profile from launch (no
-  // "0 published articles" empty-directory-entry problem like /authors had),
-  // so all of them are sitemap-eligible unconditionally.
-  const peopleRoutes: MetadataRoute.Sitemap = getAllPeople().map((p) => ({
+  // Only profiles with real depth are submitted. Discovery stubs (one
+  // sentence, no photo) stay reachable and searchable but out of the sitemap
+  // and noindex; see isPersonIndexable.
+  const allPeople = await getMergedPeople();
+  const peopleRoutes: MetadataRoute.Sitemap = allPeople.filter(isPersonIndexable).map((p) => ({
     url: `${BASE_URL}/people/${p.slug}`,
   }));
 
   // Category directories (/people/actors, /people/lawyers, ...) -- only ones
-  // with at least one real profile, same no-thin-pages rule as /countries.
-  const activePersonCategories = new Set(getAllPeople().map((p) => p.category));
+  // with at least one profile.
+  const activePersonCategories = new Set(allPeople.map((p) => p.category));
   const personCategoryRoutes: MetadataRoute.Sitemap = PERSON_CATEGORIES.filter((c) =>
     activePersonCategories.has(c.slug),
   ).map((c) => ({ url: `${BASE_URL}/people/${c.slug}` }));
 
-  const entertainmentRoutes: MetadataRoute.Sitemap = getAllEntertainmentEntities().map((e) => ({
+  const entertainmentRoutes: MetadataRoute.Sitemap = (await getMergedEntertainmentEntities()).filter((e) => e.indexable !== false).map((e) => ({
     url: `${BASE_URL}/entertainment/${e.slug}`,
   }));
 
-  const legalCaseRoutes: MetadataRoute.Sitemap = getAllLegalCases().map((c) => ({
+  const legalCaseRoutes: MetadataRoute.Sitemap = (await getMergedLegalCases()).filter((c) => c.indexable !== false).map((c) => ({
     url: `${BASE_URL}/legal/cases/${c.slug}`,
   }));
 
-  const courtRoutes: MetadataRoute.Sitemap = getAllCourts().map((c) => ({
+  const courtRoutes: MetadataRoute.Sitemap = (await getMergedCourts()).filter((c) => c.indexable !== false).map((c) => ({
     url: `${BASE_URL}/legal/courts/${c.slug}`,
   }));
 
-  const teamRoutes: MetadataRoute.Sitemap = getAllSportsTeams().map((t) => ({
+  const teamRoutes: MetadataRoute.Sitemap = (await getMergedSportsTeams()).filter((t) => t.indexable !== false).map((t) => ({
     url: `${BASE_URL}/sports/teams/${t.slug}`,
   }));
 
-  const competitionRoutes: MetadataRoute.Sitemap = getAllSportsCompetitions().map((c) => ({
+  const competitionRoutes: MetadataRoute.Sitemap = (await getMergedSportsCompetitions()).filter((c) => c.indexable !== false).map((c) => ({
     url: `${BASE_URL}/sports/competitions/${c.slug}`,
   }));
 
-  const topicRoutes: MetadataRoute.Sitemap = getAllTopics().map((t) => ({
+  const topicsWithArticles = await getTopicSlugsWithArticles();
+  const topicRoutes: MetadataRoute.Sitemap = (await getMergedTopics()).filter((t) => isTopicIndexable(t, topicsWithArticles)).map((t) => ({
     url: `${BASE_URL}/topics/${t.slug}`,
   }));
 
   // Only countries something on the network is actually connected to — same
   // reasoning as src/app/countries/page.tsx: no thin, empty country pages.
-  const activeCountryCodes = new Set(getAllPeople().map((p) => p.countryCode).filter(Boolean));
+  const activeCountryCodes = new Set(allPeople.map((p) => p.countryCode).filter(Boolean));
   const countryRoutes: MetadataRoute.Sitemap = COUNTRIES.filter((c) => activeCountryCodes.has(c.code)).map((c) => ({
     url: `${BASE_URL}/countries/${c.code.toLowerCase()}`,
   }));

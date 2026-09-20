@@ -21,7 +21,7 @@ export async function generateMetadata(
     title: { absolute: brandTitle(court.name) },
     description: clampDescription(court.description),
     alternates: { canonical: url },
-    robots: { index: true, follow: true },
+    robots: { index: court.indexable !== false, follow: true },
     openGraph: { type: 'website', url, title: court.name, description: court.description },
     twitter: { card: 'summary', title: court.name, description: court.description },
   };

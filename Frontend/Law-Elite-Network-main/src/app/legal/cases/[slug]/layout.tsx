@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
 import { brandTitle } from '@/lib/seo/brand-title';
-import { getMergedLegalCaseBySlug } from '@/lib/legal-server';
+import { getMergedLegalCaseBySlug, getMergedCourtBySlug } from '@/lib/legal-server';
 import { getPersonBySlug } from '@/data/people';
-import { getCourtBySlug } from '@/data/courts';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 
@@ -28,7 +27,7 @@ export async function generateMetadata(
     description,
     keywords: [legalCase.caseName, 'legal case', 'law elite network legal'],
     alternates: { canonical: legalCase.seo?.canonicalPath ? `${SITE}${legalCase.seo.canonicalPath}` : url },
-    robots: { index: true, follow: true },
+    robots: { index: legalCase.indexable !== false, follow: true },
     openGraph: { type: 'website', url, title, description },
     twitter: { card: 'summary', title, description },
   };
@@ -43,7 +42,7 @@ export default async function LegalCaseLayout(
 
   if (!legalCase) return <>{children}</>;
 
-  const court = getCourtBySlug(legalCase.courtSlug);
+  const court = await getMergedCourtBySlug(legalCase.courtSlug);
 
   // schema.org has no dedicated "court case" type, and the closest-sounding
   // one (Legislation) means statutory law, not case law -- asserting it here

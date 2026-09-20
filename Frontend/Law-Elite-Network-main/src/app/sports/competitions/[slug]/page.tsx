@@ -3,15 +3,14 @@ import { notFound } from 'next/navigation';
 import { Navbar } from '@/components/navbar';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { CompetitionProfile } from '@/components/sports/CompetitionProfile';
-import { getMergedSportsCompetitionBySlug, getLatestNewsForCompetition } from '@/lib/sports-server';
-import { getPersonBySlug } from '@/data/people';
+import { getMergedSportsCompetitionBySlug, getMergedSportsCompetitions, getLatestNewsForCompetition } from '@/lib/sports-server';
+import { getMergedPeople } from '@/lib/people-server';
 import type { Person } from '@/types/person';
-import { getAllSportsCompetitions } from '@/data/sports-competitions';
 
 export const revalidate = 86400;
 
-export function generateStaticParams() {
-  return getAllSportsCompetitions().map((c) => ({ slug: c.slug }));
+export async function generateStaticParams() {
+  return (await getMergedSportsCompetitions()).map((c) => ({ slug: c.slug }));
 }
 
 export default async function CompetitionPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -22,8 +21,9 @@ export default async function CompetitionPage({ params }: { params: Promise<{ sl
   const latestNews = await getLatestNewsForCompetition(competition);
 
   const peopleBySlug = new Map<string, Person>();
+  const allPeople = new Map((await getMergedPeople()).map((p) => [p.slug, p]));
   competition.peopleInvolved?.forEach((credit) => {
-    const person = getPersonBySlug(credit.personSlug);
+    const person = allPeople.get(credit.personSlug);
     if (person) peopleBySlug.set(credit.personSlug, person);
   });
 

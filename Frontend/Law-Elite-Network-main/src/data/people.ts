@@ -18,8 +18,9 @@
  */
 
 import type { Person, PersonCategorySlug } from '@/types/person';
+import { ROSTER_PEOPLE } from './people-roster';
 
-export const PEOPLE: Person[] = [
+const CURATED_PEOPLE: Person[] = [
   {
     slug: 'tom-hanks',
     fullName: 'Thomas Jeffrey Hanks',
@@ -351,6 +352,25 @@ export const PEOPLE: Person[] = [
     seo: { metaTitle: 'David Attenborough — Biography & Career', metaDescription: 'Profile of broadcaster and natural historian David Attenborough.' },
   },
 ];
+
+/**
+ * Hand-written profiles first, then the discovery roster. A roster entry is
+ * dropped when its slug or name is already taken, so a curated profile is
+ * never shadowed and one person never appears under two slugs.
+ */
+export const PEOPLE: Person[] = (() => {
+  const slugs = new Set(CURATED_PEOPLE.map((p) => p.slug));
+  const names = new Set(CURATED_PEOPLE.map((p) => (p.displayName || p.fullName).toLowerCase()));
+  const roster = ROSTER_PEOPLE.filter((p) => {
+    const name = p.fullName.toLowerCase();
+    if (slugs.has(p.slug) || names.has(name)) return false;
+    slugs.add(p.slug);
+    names.add(name);
+    return true;
+  });
+  return [...CURATED_PEOPLE, ...roster];
+})();
+
 
 /** Normalize a free-text name ("Tom Hanks") to a profile slug ("tom-hanks") — mirrors @/data/authors.ts's authorNameToSlug. */
 export function personNameToSlug(name: string | null | undefined): string {

@@ -51,6 +51,16 @@ db.AuditLog     = require('./auditLogs')(sequelize, Sequelize.DataTypes);
 db.Complaint    = require('./complaints')(sequelize, Sequelize.DataTypes);
 db.LawyerLedger = require('./lawyerLedger')(sequelize, Sequelize.DataTypes);
 db.Payout       = require('./payouts')(sequelize, Sequelize.DataTypes);
+db.Person       = require('./people')(sequelize, Sequelize.DataTypes);
+db.PersonPhoto  = require('./personPhotos')(sequelize, Sequelize.DataTypes);
+db.PersonLink   = require('./personLinks')(sequelize, Sequelize.DataTypes);
+db.CourtProfile  = require('./courtProfiles')(sequelize, Sequelize.DataTypes);
+db.CaseProfile   = require('./caseProfiles')(sequelize, Sequelize.DataTypes);
+db.EntertainmentEntity = require('./entertainmentEntities')(sequelize, Sequelize.DataTypes);
+db.EntityPhoto = require('./entityPhotos')(sequelize, Sequelize.DataTypes);
+db.SportsTeam = require('./sportsTeams')(sequelize, Sequelize.DataTypes);
+db.SportsCompetition = require('./sportsCompetitions')(sequelize, Sequelize.DataTypes);
+db.Topic = require('./topics')(sequelize, Sequelize.DataTypes);
 db.MemberFollow       = require('./memberFollows')(sequelize, Sequelize.DataTypes);
 db.MemberSavedArticle = require('./memberSavedArticles')(sequelize, Sequelize.DataTypes);
 

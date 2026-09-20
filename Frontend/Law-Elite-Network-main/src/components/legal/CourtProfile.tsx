@@ -32,7 +32,7 @@ export function CourtProfile({ court, cases, latestNews = [] }: { court: Court; 
           </p>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {cases.map((c) => <CaseCard key={c.slug} legalCase={c} />)}
+            {cases.map((c) => <CaseCard key={c.slug} legalCase={c} courtName={court.name} />)}
           </div>
         )}
       </section>

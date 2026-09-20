@@ -264,7 +264,20 @@ export const NAVIGATION: NavGroup[] = [
   {
     label: 'Ecosystem',
     items: [
-      { title: 'Law Elite',         href: '/law',           iconName: 'Scale'   },
+      {
+        title: 'Law Elite', href: '/law', iconName: 'Scale',
+        children: [
+          { title: 'Overview', href: '/law',        iconName: 'Scale' },
+          { title: 'People',   href: '/law/people', iconName: 'Users' },
+          { title: 'Cases',    href: '/law/cases',  iconName: 'Gavel' },
+          { title: 'Courts',   href: '/law/courts', iconName: 'Landmark' },
+          { title: 'Entertainment', href: '/law/entertainment', iconName: 'Clapperboard' },
+          { title: 'Sports teams', href: '/law/sports-teams', iconName: 'Shield' },
+          { title: 'Competitions', href: '/law/sports-competitions', iconName: 'Trophy' },
+          { title: 'Topics', href: '/law/topics', iconName: 'Tag' },
+          { title: 'Images',   href: '/law/images', iconName: 'Image' },
+        ],
+      },
       // ControlTheMarket runs as its own deployment (controlthemarket.com) with its
       // own admin — open it directly rather than a (non-routable) console panel.
       { title: 'ControlTheMarket',  href: 'https://controlthemarket.com', iconName: 'Trophy', external: true },

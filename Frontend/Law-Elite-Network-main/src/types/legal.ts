@@ -23,6 +23,8 @@ export interface Court {
   description: string;
   /** Official court website, when one exists. */
   url?: string;
+  /** Explicit override from the admin panel; bundled courts are indexable. */
+  indexable?: boolean;
 }
 
 /**
@@ -95,4 +97,6 @@ export interface LegalCase {
   relatedArticleSlugs?: string[];
   seo?: CaseSeoFields;
   verification: CaseVerification;
+  /** Explicit override from the admin panel; bundled cases are indexable. */
+  indexable?: boolean;
 }

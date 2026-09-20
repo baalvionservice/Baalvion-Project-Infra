@@ -2,12 +2,13 @@ import React from 'react';
 import { Navbar } from '@/components/navbar';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { CasesDirectory } from '@/components/legal/CasesDirectory';
-import { getMergedLegalCases } from '@/lib/legal-server';
+import { getMergedLegalCases, getMergedCourts } from '@/lib/legal-server';
 
 export const revalidate = 86400;
 
 export default async function LegalCasesPage() {
   const cases = await getMergedLegalCases();
+  const courtNames = Object.fromEntries((await getMergedCourts()).map((c) => [c.slug, c.name]));
 
   return (
     <div className="min-h-screen bg-white">
@@ -27,7 +28,7 @@ export default async function LegalCasesPage() {
             </p>
           </header>
 
-          <CasesDirectory cases={cases} />
+          <CasesDirectory cases={cases} courtNames={courtNames} />
 
         </div>
       </main>

@@ -3,11 +3,11 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Navbar } from '@/components/navbar';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
-import { PersonCard } from '@/components/people/PersonCard';
+import { PersonCard, toCardData } from '@/components/people/PersonCard';
 import { CaseCard } from '@/components/legal/CaseCard';
 import { COUNTRIES } from '@/lib/countries';
-import { getAllPeople } from '@/data/people';
-import { getAllLegalCases } from '@/data/legal-cases';
+import { getMergedPeople } from '@/lib/people-server';
+import { getMergedLegalCases, getMergedCourts } from '@/lib/legal-server';
 import { getArticlesForEntity } from '@/lib/entity-articles';
 import { articleUrl } from '@/lib/article-url';
 
@@ -19,8 +19,11 @@ export default async function CountryPage({ params }: { params: Promise<{ code: 
   const country = COUNTRIES.find((c) => c.code === upperCode);
   if (!country) notFound();
 
-  const people = getAllPeople().filter((p) => p.countryCode === upperCode);
-  const cases = getAllLegalCases().filter((c) => c.countryCode === upperCode);
+  // Enriched profiles first, and a cap: with over a thousand profiles a big country would otherwise list hundreds of stubs.
+  const everyone = (await getMergedPeople()).filter((p) => p.countryCode === upperCode).sort((a, b) => Number(!!a.thin) - Number(!!b.thin));
+  const people = everyone.slice(0, 30);
+  const cases = (await getMergedLegalCases()).filter((c) => c.countryCode === upperCode);
+  const courtNames = Object.fromEntries((await getMergedCourts()).map((c) => [c.slug, c.name]));
   const articles = await getArticlesForEntity('country', upperCode);
 
   return (
@@ -39,8 +42,11 @@ export default async function CountryPage({ params }: { params: Promise<{ code: 
               <p className="text-slate-500 text-sm">No profiled people connected to {country.name} yet.</p>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-10">
-                {people.map((p) => <PersonCard key={p.slug} person={p} />)}
+                {people.map((p) => <PersonCard key={p.slug} person={toCardData(p)} />)}
               </div>
+            )}
+            {everyone.length > people.length && (
+              <p className="mt-6 text-sm text-slate-500">Showing {people.length} of {everyone.length} profiles. <Link href="/people" className="underline">Browse all people</Link>.</p>
             )}
           </section>
 
@@ -48,7 +54,7 @@ export default async function CountryPage({ params }: { params: Promise<{ code: 
             <section className="mb-16">
               <h2 className="font-headline text-xl font-bold text-slate-900 tracking-tight mb-6">Legal Cases</h2>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {cases.map((c) => <CaseCard key={c.slug} legalCase={c} />)}
+                {cases.map((c) => <CaseCard key={c.slug} legalCase={c} courtName={courtNames[c.courtSlug]} />)}
               </div>
             </section>
           )}

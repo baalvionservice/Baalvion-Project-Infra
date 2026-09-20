@@ -35,7 +35,11 @@ function levenshtein(a: string, b: string): number {
  * by length so short tokens ("aple") still tolerate 1 typo without matching everything. */
 function isFuzzyMatch(word: string, token: string): boolean {
   if (Math.abs(word.length - token.length) > 2) return false;
-  const maxDistance = token.length <= 4 ? 1 : token.length <= 8 ? 2 : 3;
+  // Typos almost never change the first letter, and with over a thousand
+  // person names in the corpus a looser rule matched unrelated names
+  // ("messi" -> "tess"). One edit up to 6 letters, two up to 11, three beyond.
+  if (word[0] !== token[0]) return false;
+  const maxDistance = token.length <= 6 ? 1 : token.length <= 11 ? 2 : 3;
   return levenshtein(word, token) <= maxDistance;
 }
 

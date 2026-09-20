@@ -152,6 +152,28 @@ export interface PersonSportsInfo {
 
 export type PersonStatus = 'active' | 'retired' | 'inactive' | 'deceased';
 
+/** A photo LEN holds and may display, with the credit and licence that make that legal. */
+export interface PersonPhotoInfo {
+  /** Same-origin URL (/media/people/{id}), served from LEN's own storage. */
+  url: string;
+  alt: string;
+  credit: string;
+  license: string;
+  licenseUrl?: string;
+  /** Where the original came from (e.g. the Commons file page). */
+  sourceUrl?: string;
+}
+
+export interface PersonAward {
+  title: string;
+  year?: number;
+}
+
+export interface PersonSource {
+  label: string;
+  url: string;
+}
+
 export interface PersonVerification {
   verified: boolean;
   /** Free-text note on provenance, e.g. "Public biographical record — independent reference profile." */
@@ -201,6 +223,21 @@ export interface Person {
   seo?: PersonSeoFields;
   status: PersonStatus;
   verification: PersonVerification;
+  /** Admin-managed photo (see PersonPhotoInfo). Absent until one with a usable licence is attached. */
+  photo?: PersonPhotoInfo;
+  awards?: PersonAward[];
+  /** Where the facts on this page came from, shown on the page. */
+  sources?: PersonSource[];
+  /** Topic slugs an editor tagged this person with. */
+  topicSlugs?: string[];
+  /**
+   * A discovery-only stub (one sentence, no photo). Stubs stay out of the
+   * sitemap and are noindex until enriched; indexing thin pages by the
+   * hundred is what gets a site demoted.
+   */
+  thin?: boolean;
+  /** Explicit override from the admin panel; otherwise a profile is indexable unless it is a stub. */
+  indexable?: boolean;
   /** Editorial pick for the homepage "Featured people" rail. Without it, any verified profile qualifies. */
   featured?: boolean;
 

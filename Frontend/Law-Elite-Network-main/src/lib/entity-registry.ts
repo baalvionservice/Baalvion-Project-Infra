@@ -5,8 +5,13 @@ import { getAllCourts } from '@/data/courts';
 import { getAllSportsTeams } from '@/data/sports-teams';
 import { getAllSportsCompetitions } from '@/data/sports-competitions';
 import { getAllTopics } from '@/data/topics';
+import type { Topic } from '@/data/topics';
 import { COUNTRIES } from '@/lib/countries';
 import type { EntityType } from '@/types/entity-tagging';
+import type { Person } from '@/types/person';
+import type { Court, LegalCase } from '@/types/legal';
+import type { EntertainmentEntity } from '@/types/entertainment';
+import type { SportsCompetition, SportsTeam } from '@/types/sports';
 
 export interface EntityRegistryEntry {
   entityType: EntityType;
@@ -37,31 +42,37 @@ function withParentheticalAlias(name: string): string[] {
  * rebuilding is cheap; callers that need it cached wrap it, same as
  * unstable_cache wraps @/lib/entity-mentions.ts's article index).
  */
-export function buildEntityRegistry(): EntityRegistryEntry[] {
+export function buildEntityRegistry(
+  people: Person[] = getAllPeople(),
+  legal: { cases: LegalCase[]; courts: Court[] } = { cases: getAllLegalCases(), courts: getAllCourts() },
+  entertainment: EntertainmentEntity[] = getAllEntertainmentEntities(),
+  sports: { teams: SportsTeam[]; competitions: SportsCompetition[] } = { teams: getAllSportsTeams(), competitions: getAllSportsCompetitions() },
+  topics: Topic[] = getAllTopics(),
+): EntityRegistryEntry[] {
   const entries: EntityRegistryEntry[] = [];
 
-  getAllPeople().forEach((p) => {
+  people.forEach((p) => {
     const names = [p.displayName, p.fullName].filter((n): n is string => Boolean(n));
     entries.push({ entityType: 'person', slug: p.slug, names });
   });
 
-  getAllEntertainmentEntities().forEach((e) => {
+  entertainment.forEach((e) => {
     entries.push({ entityType: 'entertainment', slug: e.slug, names: [e.title] });
   });
 
-  getAllLegalCases().forEach((c) => {
+  legal.cases.forEach((c) => {
     entries.push({ entityType: 'legal-case', slug: c.slug, names: withParentheticalAlias(c.caseName) });
   });
 
-  getAllCourts().forEach((c) => {
+  legal.courts.forEach((c) => {
     entries.push({ entityType: 'court', slug: c.slug, names: withParentheticalAlias(c.name) });
   });
 
-  getAllSportsTeams().forEach((t) => {
+  sports.teams.forEach((t) => {
     entries.push({ entityType: 'sports-team', slug: t.slug, names: withParentheticalAlias(t.name) });
   });
 
-  getAllSportsCompetitions().forEach((c) => {
+  sports.competitions.forEach((c) => {
     entries.push({ entityType: 'sports-competition', slug: c.slug, names: withParentheticalAlias(c.name) });
   });
 
@@ -69,7 +80,7 @@ export function buildEntityRegistry(): EntityRegistryEntry[] {
     entries.push({ entityType: 'country', slug: c.code, names: [c.name] });
   });
 
-  getAllTopics().forEach((t) => {
+  topics.forEach((t) => {
     entries.push({ entityType: 'topic', slug: t.slug, names: [t.name, ...(t.aliases || [])] });
   });
 

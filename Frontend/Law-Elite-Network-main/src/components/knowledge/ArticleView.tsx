@@ -92,7 +92,7 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
   const { pairs: faqPairs, html: bodyHtml } = extractFaqSection(contentWithoutKeyTakeaways);
 
   const relatedArticles = await fetchRelatedArticles(slug, category?.slug, category?.name, article.subcategory?.slug);
-  const connectedEntities = resolveEntityReferences(await getEntitiesForArticle(article));
+  const connectedEntities = await resolveEntityReferences(await getEntitiesForArticle(article));
   const canonicalUrl = `${SITE}${articleUrl({ slug, category })}`;
 
   const readAlsoArticle = relatedArticles.length > 0 ? relatedArticles[0] : {

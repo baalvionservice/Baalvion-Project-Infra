@@ -1,7 +1,17 @@
 'use strict';
 const router = require('express').Router();
 const { authMiddleware, adminOnly } = require('../middleware/authMiddleware');
+const multer = require('multer');
 const ctrl = require('../controller/adminController');
+const peopleCtrl = require('../controller/peopleController');
+const photosCtrl = require('../controller/entityPhotosController');
+
+// Photos only, 6 MB; the service re-checks magic bytes and licence.
+const photoUpload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 6 * 1024 * 1024, files: 1 },
+    fileFilter: (req, file, cb) => cb(null, /^image\/(jpeg|png|webp)$/i.test(file.mimetype || '')),
+});
 
 // Every admin route requires a valid token AND an admin role.
 router.use(authMiddleware, adminOnly);
@@ -24,6 +34,11 @@ router.patch('/subscriptions/:id/cancel',    ctrl.cancelSubscription);
 router.post ('/payouts/:id/process',         ctrl.processPayout);
 router.post ('/notifications/broadcast',     ctrl.broadcast);
 router.get  ('/impersonate/:userId',         ctrl.impersonate);
+
+router.get  ('/entity-photos/:id/blob',   photosCtrl.getPhotoAdmin);
+router.post ('/entity-photos',            photoUpload.single('file'), photosCtrl.uploadPhoto);
+router.get  ('/people/photos/:id',        peopleCtrl.getPhotoAdmin);
+router.post ('/people/:id/photos',         photoUpload.single('file'), peopleCtrl.uploadPhoto);
 
 // ── Generic resource CRUD ("admin to everything") ───────────────────────────
 router.get   ('/:resource',      ctrl.listResource);

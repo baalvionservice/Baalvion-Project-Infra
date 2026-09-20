@@ -5,7 +5,7 @@ import { EntertainmentCard } from './EntertainmentCard';
 import { ENTERTAINMENT_TYPES } from '@/types/entertainment';
 import type { EntertainmentEntity, EntertainmentTypeSlug } from '@/types/entertainment';
 
-/** Client-side type filter over the full entity list — mirrors PeopleDirectory.tsx. */
+/** Client-side type filter over the full entity list — same pattern as the other directories. */
 export function EntertainmentDirectory({ entities }: { entities: EntertainmentEntity[] }) {
   const [active, setActive] = useState<EntertainmentTypeSlug | 'all'>('all');
 

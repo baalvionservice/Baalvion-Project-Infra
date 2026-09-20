@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 import { brandTitle } from '@/lib/seo/brand-title';
-import { getMergedPersonBySlug } from '@/lib/people-server';
+import { getMergedPeopleByCategory, getMergedPersonBySlug } from '@/lib/people-server';
 import { resolvePersonImage } from '@/lib/article-art';
 import { isPersonCategorySlug, personCategoryLabel } from '@/types/person';
+import { isPersonIndexable } from '@/lib/person-indexing';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 
@@ -18,12 +19,14 @@ export async function generateMetadata(
     const label = personCategoryLabel(slug);
     const title = `${label} — Law Elite Network`;
     const description = `Reference profiles for notable ${label.toLowerCase()} covered across Law Elite Network.`;
+    // An empty directory is a thin page: keep it out of the index until it has a profile (the sitemap already omits it).
+    const hasProfiles = (await getMergedPeopleByCategory(slug)).length > 0;
     return {
       title: { absolute: brandTitle(title) },
       description,
       keywords: [label.toLowerCase(), 'law elite network people'],
       alternates: { canonical: url },
-      robots: { index: true, follow: true },
+      robots: { index: hasProfiles, follow: true },
       openGraph: { type: 'website', url, title, description },
       twitter: { card: 'summary_large_image', title, description },
     };
@@ -38,8 +41,8 @@ export async function generateMetadata(
 
   const name = person.displayName || person.fullName;
   const title = person.seo?.metaTitle || `${name} — ${personCategoryLabel(person.category).replace(/s$/, '')} Profile`;
-  const description = person.seo?.metaDescription || person.biography.slice(0, 200);
-  const personImage = resolvePersonImage({ avatarUrl: person.avatarUrl, name, avatarSeed: person.avatarSeed || slug });
+  const description = person.seo?.metaDescription || person.shortBio || person.biography.slice(0, 200);
+  const personImage = person.photo ? `${SITE}${person.photo.url}?w=1000` : resolvePersonImage({ avatarUrl: person.avatarUrl, name, avatarSeed: person.avatarSeed || slug });
   // Same reasoning as /author/[slug]/layout.tsx: social crawlers don't fetch
   // data: URIs for og:image, so a profile with no real photo yet falls back
   // to the site's branded share image instead of a blank preview.
@@ -50,7 +53,8 @@ export async function generateMetadata(
     description,
     keywords: [name, personCategoryLabel(person.category), 'law elite network people'],
     alternates: { canonical: person.seo?.canonicalPath ? `${SITE}${person.seo.canonicalPath}` : url },
-    robots: { index: true, follow: true },
+    // Discovery stubs stay out of the index until they are enriched.
+    robots: { index: isPersonIndexable(person), follow: true },
     openGraph: { type: 'profile', url, title, description, images: [{ url: image, alt: name }] },
     twitter: { card: 'summary', title, description, images: [image] },
   };
@@ -68,8 +72,22 @@ export default async function PersonLayout(
   const name = person.displayName || person.fullName;
   const rawImage = resolvePersonImage({ avatarUrl: person.avatarUrl, name, avatarSeed: person.avatarSeed || slug });
   // A generated silhouette is a data: URI, which is not a valid schema.org image; omit it.
-  const image = rawImage.startsWith('data:') ? undefined : rawImage;
-  const sameAs = person.social ? Object.values(person.social).filter(Boolean) : undefined;
+  const image = person.photo
+    ? {
+        '@type': 'ImageObject',
+        contentUrl: `${SITE}${person.photo.url}?w=1000`,
+        creditText: person.photo.credit,
+        license: person.photo.licenseUrl,
+        acquireLicensePage: person.photo.sourceUrl,
+      }
+    : rawImage.startsWith('data:')
+      ? undefined
+      : rawImage;
+  // Wikidata/Wikipedia links in `sources` double as sameAs: they tie this page to the entity search engines already know.
+  const sameAs = [
+    ...(person.social ? Object.values(person.social).filter(Boolean) : []),
+    ...(person.sources || []).filter((src) => /wikidata\.org|wikipedia\.org/.test(src.url)).map((src) => src.url),
+  ];
 
   const personLd = {
     '@context': 'https://schema.org',
@@ -77,13 +95,16 @@ export default async function PersonLayout(
     name,
     alternateName: person.displayName ? person.fullName : undefined,
     url,
+    mainEntityOfPage: url,
     image,
     birthDate: person.birthDate || undefined,
     birthPlace: person.birthPlace || undefined,
     deathDate: person.deathDate || undefined,
     nationality: person.countryCode || undefined,
-    description: person.biography,
-    sameAs: sameAs && sameAs.length ? sameAs : undefined,
+    description: person.shortBio || person.biography,
+    award: person.awards && person.awards.length ? person.awards.map((a) => a.title) : undefined,
+    alumniOf: person.education && person.education.length ? person.education.map((e) => ({ '@type': 'EducationalOrganization', name: e.institution })) : undefined,
+    sameAs: sameAs.length ? sameAs : undefined,
   };
 
   const breadcrumbLd = {

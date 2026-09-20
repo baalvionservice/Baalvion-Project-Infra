@@ -9,7 +9,9 @@ import type { EntertainmentEntity } from '@/types/entertainment';
 
 /** Directory-grid card for an EntertainmentEntity, styled to match PersonCard/ArticleCard. */
 export function EntertainmentCard({ entity }: { entity: EntertainmentEntity }) {
-  const image = entity.images?.[0]?.url
+  const photoUrl = entity.images?.[0]?.url;
+  const ownPhoto = !!photoUrl && photoUrl.startsWith('/media/');
+  const image = (ownPhoto ? `${photoUrl}?w=480` : photoUrl)
     || articleArtDataUri({ title: entity.title, category: entertainmentTypeLabel(entity.type), seed: entity.slug });
 
   return (
@@ -19,7 +21,8 @@ export function EntertainmentCard({ entity }: { entity: EntertainmentEntity }) {
           src={image}
           alt={entity.title}
           fill
-          unoptimized={!entity.images?.[0]?.url}
+          // /media/... is resized by its own route; the generic loader needs an absolute URL.
+          unoptimized={!photoUrl || ownPhoto}
           sizes="(max-width: 768px) 100vw, 33vw"
           className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
         />

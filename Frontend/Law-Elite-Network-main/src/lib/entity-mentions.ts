@@ -19,6 +19,18 @@ function escapeRegExp(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+// One compiled pattern per name: the registry is >1,400 names and is matched against every article.
+const patternCache = new Map<string, RegExp>();
+function patternFor(name: string, flags: string): RegExp {
+  const key = `${flags}:${name}`;
+  let re = patternCache.get(key);
+  if (!re) {
+    re = new RegExp(`\\b${escapeRegExp(name)}\\b`, flags);
+    patternCache.set(key, re);
+  }
+  return re;
+}
+
 function isAmbiguousShortName(name: string): boolean {
   return !name.includes(' ') && name.length <= CASE_SENSITIVE_MAX_LENGTH;
 }
@@ -35,11 +47,17 @@ export function detectEntitiesInText(text: string, registry: ReturnType<typeof b
   if (!text) return [];
   const found = new Map<string, EntityReference>();
 
+  const lowerText = text.toLowerCase();
+
   for (const entry of registry) {
     const matchable = entry.names.filter((n) => n && n.length >= MIN_NAME_LENGTH);
     const hit = matchable.some((name) => {
-      const flags = isAmbiguousShortName(name) ? '' : 'i';
-      return new RegExp(`\\b${escapeRegExp(name)}\\b`, flags).test(text);
+      const ambiguous = isAmbiguousShortName(name);
+      // A plain substring check rules out nearly every name before the (much
+      // slower) whole-word regex runs; with >1,400 names per article it is
+      // what keeps the tagged index cheap to build.
+      if (ambiguous ? !text.includes(name) : !lowerText.includes(name.toLowerCase())) return false;
+      return patternFor(name, ambiguous ? '' : 'i').test(text);
     });
     if (hit) {
       found.set(`${entry.entityType}:${entry.slug}`, { entityType: entry.entityType, slug: entry.slug });
@@ -47,6 +65,27 @@ export function detectEntitiesInText(text: string, registry: ReturnType<typeof b
   }
 
   return Array.from(found.values());
+}
+
+export interface NameMatch { index: number; length: number; name: string }
+
+/**
+ * Where a set of names occurs in a text, using exactly the tagger's rules
+ * (minimum length, case-sensitive for short one-word names, whole words).
+ * The editorial tools use this so "what the tagger will connect" and "what
+ * the editor sees highlighted" can never disagree.
+ */
+export function findNameMatches(text: string, names: string[]): NameMatch[] {
+  const lower = text.toLowerCase();
+  const out: NameMatch[] = [];
+  for (const name of names) {
+    if (!name || name.length < MIN_NAME_LENGTH) continue;
+    const ambiguous = isAmbiguousShortName(name);
+    if (ambiguous ? !text.includes(name) : !lower.includes(name.toLowerCase())) continue;
+    const re = new RegExp(`\\b${escapeRegExp(name)}\\b`, ambiguous ? 'g' : 'gi');
+    for (let m = re.exec(text); m; m = re.exec(text)) out.push({ index: m.index, length: m[0].length, name });
+  }
+  return out.sort((a, b) => a.index - b.index);
 }
 
 /** Strips HTML before matching -- an article's `content` is rendered HTML, and tag soup ("<p>Tom</p><p>Hanks</p>") would otherwise defeat whole-phrase matching. */

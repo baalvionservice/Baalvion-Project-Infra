@@ -3,16 +3,14 @@ import { notFound } from 'next/navigation';
 import { Navbar } from '@/components/navbar';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { EntertainmentProfile } from '@/components/entertainment/EntertainmentProfile';
-import { getMergedEntertainmentEntityBySlug, getLatestNewsForEntity } from '@/lib/entertainment-server';
-import { getRelatedEntertainmentEntities } from '@/data/entertainment';
-import { getPersonBySlug } from '@/data/people';
+import { getMergedEntertainmentEntityBySlug, getMergedEntertainmentEntities, getMergedRelatedEntertainment, getLatestNewsForEntity } from '@/lib/entertainment-server';
+import { getMergedPeople } from '@/lib/people-server';
 import type { Person } from '@/types/person';
-import { getAllEntertainmentEntities } from '@/data/entertainment';
 
 export const revalidate = 86400;
 
-export function generateStaticParams() {
-  return getAllEntertainmentEntities().map((e) => ({ slug: e.slug }));
+export async function generateStaticParams() {
+  return (await getMergedEntertainmentEntities()).map((e) => ({ slug: e.slug }));
 }
 
 export default async function EntertainmentEntityPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -20,12 +18,13 @@ export default async function EntertainmentEntityPage({ params }: { params: Prom
   const entity = await getMergedEntertainmentEntityBySlug(slug);
   if (!entity) notFound();
 
-  const relatedEntities = getRelatedEntertainmentEntities(entity);
+  const relatedEntities = await getMergedRelatedEntertainment(entity);
   const latestNews = await getLatestNewsForEntity(entity);
 
   const peopleBySlug = new Map<string, Person>();
+  const allPeople = new Map((await getMergedPeople()).map((p) => [p.slug, p]));
   entity.peopleInvolved.forEach((credit) => {
-    const person = getPersonBySlug(credit.personSlug);
+    const person = allPeople.get(credit.personSlug);
     if (person) peopleBySlug.set(credit.personSlug, person);
   });
 
