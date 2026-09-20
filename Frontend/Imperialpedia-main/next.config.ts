@@ -513,6 +513,10 @@ const nextConfig: NextConfig = {
       // Not content-hashed like /fonts or /_next/static — a redeploy can replace
       // a file at the same path, so this revalidates rather than going immutable.
       {
+        source: '/leadership/(.*)',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=86400, stale-while-revalidate=604800' }],
+      },
+      {
         source: '/images/(.*)',
         headers: [{ key: 'Cache-Control', value: 'public, max-age=86400, stale-while-revalidate=604800' }],
       },
