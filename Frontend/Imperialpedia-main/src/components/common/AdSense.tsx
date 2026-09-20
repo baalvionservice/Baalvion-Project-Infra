@@ -42,26 +42,51 @@ export function AdSenseUnit({
   const insRef = useRef<HTMLModElement | null>(null);
   // null = undecided (reserve space), true = filled, false = collapse.
   const [filled, setFilled] = useState<boolean | null>(null);
+  const [requested, setRequested] = useState(false);
 
   useEffect(() => {
-    // Wait for adsbygoogle script to load, then push ad unit
+    const el = insRef.current;
+    if (!el) return undefined;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let pushed = false;
+
     const loadAd = () => {
       try {
         if (window.adsbygoogle && typeof window.adsbygoogle.push === 'function') {
           window.adsbygoogle.push({});
         } else {
-          // Script not loaded yet, retry after a delay
-          setTimeout(loadAd, 100);
+          timer = setTimeout(loadAd, 100);
         }
       } catch (e) {
         console.error('AdSense error:', e);
       }
     };
 
-    // Small delay to ensure script is available
-    const timer = setTimeout(loadAd, 50);
-    return () => clearTimeout(timer);
-  }, [slot]); // Reload when slot changes
+    // Request the ad only once the slot is near the viewport: on a long page the
+    // below-the-fold units were all fetching and running Google's auction code during
+    // load, which is most of the main-thread blocking time on mobile.
+    const start = () => {
+      if (pushed) return;
+      pushed = true;
+      setRequested(true);
+      timer = setTimeout(loadAd, 50);
+    };
+    if (typeof IntersectionObserver === 'undefined') {
+      start();
+      return () => clearTimeout(timer);
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          io.disconnect();
+          start();
+        }
+      },
+      { rootMargin: '400px 0px' },
+    );
+    io.observe(el);
+    return () => { io.disconnect(); clearTimeout(timer); };
+  }, [slot]);
 
   // Collapse the reserved space when no ad arrives.
   //
@@ -89,12 +114,13 @@ export function AdSenseUnit({
     const observer = new MutationObserver(read);
     observer.observe(el, { attributes: true, attributeFilter: ['data-ad-status'] });
 
-    const giveUp = setTimeout(() => {
+    // Only start the give-up clock once the ad has actually been requested.
+    const giveUp = requested ? setTimeout(() => {
       if (!el.getAttribute('data-ad-status')) setFilled(false);
-    }, 4000);
+    }, 4000) : undefined;
 
     return () => { observer.disconnect(); clearTimeout(giveUp); };
-  }, [slot]);
+  }, [slot, requested]);
 
   if (!clientId) {
     if (process.env.NODE_ENV === 'development') {
