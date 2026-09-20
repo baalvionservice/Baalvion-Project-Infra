@@ -1,4 +1,5 @@
 import React from 'react';
+import { FollowButton } from '@/components/member/FollowButton';
 import Image from 'next/image';
 import Link from 'next/link';
 import { BadgeCheck, Clapperboard, Gavel, Trophy } from 'lucide-react';
@@ -123,6 +124,7 @@ export function PersonProfile({
                 )}
                 <StatusPill status={person.status} />
               </h1>
+<div className="mt-4"><FollowButton entityType="person" slug={person.slug} /></div>
               {person.displayName && person.displayName !== person.fullName && (
                 <p className="text-sm text-slate-500 mt-1.5">{person.fullName}</p>
               )}

@@ -4,6 +4,7 @@ import React from "react";
 import { markAsRead } from "@/services/notificationService";
 import { Bell, ShieldCheck, CalendarCheck, MessageSquare, Clock } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import Link from "next/link";
 
 interface NotificationListProps {
   notifications: any[];
@@ -51,6 +52,11 @@ export default function NotificationList({ notifications, onUpdate }: Notificati
               </span>
             </div>
             <p className="text-[10px] text-slate-500 leading-tight mt-0.5 italic">{n.message}</p>
+            {n.url && (
+              <Link href={n.url} onClick={(e) => e.stopPropagation()} className="inline-block mt-1 text-[10px] font-bold text-blue-700 hover:underline">
+                Read story
+              </Link>
+            )}
           </div>
           {!n.isRead && (
             <div className="absolute right-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />

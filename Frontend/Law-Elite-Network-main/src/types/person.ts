@@ -201,6 +201,8 @@ export interface Person {
   seo?: PersonSeoFields;
   status: PersonStatus;
   verification: PersonVerification;
+  /** Editorial pick for the homepage "Featured people" rail. Without it, any verified profile qualifies. */
+  featured?: boolean;
 
   /** Only set for `category: 'athletes'` (or anyone else with a real sporting career) — see PersonSportsInfo. */
   sportsInfo?: PersonSportsInfo;

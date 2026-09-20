@@ -35,6 +35,9 @@ const getCachedTaggedIndex = unstable_cache(
   { revalidate: 900, tags: [CONTENT_CACHE_TAG] },
 );
 
+/** The whole tagged pool (article + the entities it names) — for site-wide rollups like the homepage's trending people/topics. */
+export const getTaggedArticleIndex = getCachedTaggedIndex;
+
 /**
  * Every article connected to one entity — auto-detected matches unioned with
  * any manually pinned slugs (a precision override for the rare case where

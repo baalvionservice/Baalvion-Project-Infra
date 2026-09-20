@@ -1,13 +1,11 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { categoriesPublicApi, subcategoriesPublicApi } from '@/lib/api/client';
 import {
   Menu,
   X,
-  ChevronRight,
-  ChevronLeft,
+  ChevronDown,
   Search as SearchIcon,
   UserPlus,
   LayoutDashboard,
@@ -15,72 +13,20 @@ import {
 } from 'lucide-react';
 import { LawEliteMark } from '@/components/icons/LawEliteMark';
 import SearchBar from '../search/SearchBar';
-import { cn } from '@/lib/utils';
-import { isSubcategoryPopulated } from '@/lib/subcategory-or-article';
-import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
-import { CMS_ONLY_CATEGORIES } from '@/lib/cms-only-categories';
 import { useAuth } from '@/hooks/useAuth';
 import { sharedSignInUrl } from '@/lib/shared-auth';
-
-// The top nav bar has room for ~11 items (Home/News/World + up to 8 topics) inside
-// a max-w-7xl container. Full category names ("Property & Real Estate", "Employment
-// & Labor") don't fit there even at wide viewports -- the row would need ~1400px of
-// text alone -- so they wrapped to two cramped lines. Short labels here are for this
-// bar ONLY; the mega-menu heading, page H1, and breadcrumbs still use the full name.
-// AdSense-readiness retirement (see category-slugs.ts's CURRENT_CATEGORY_SLUGS
-// comment): shrunk to the 3 live practice areas -- `categories` below is
-// already filtered to CURRENT_CATEGORY_SLUGS, so the retired 13 never reach
-// this map, but their entries were removed rather than left as dead weight.
-const NAV_SHORT_LABEL: Record<string, string> = {
-  'maritime-offshore-injury-law': 'Maritime Injury',
-  'cruise-ship-passenger-vessel-accidents': 'Cruise Ship Accidents',
-  'personal-injury-lawyer': 'Personal Injury',
-};
+import { PRIMARY_NAV } from '@/lib/site-nav';
 
 /**
- * seed-data.json's `categories` array predates the AdSense-readiness
- * retirement and still lists all 8 now-retired practice areas -- none of the
- * 3 currently-live ones, which were created directly in the CMS (see
- * cms-only-categories.ts) and were never in law-service's /categories API or
- * this bundled seed file to begin with. That's not just an outage fallback
- * gap: law-service's live /categories response ALSO never contains these 3
- * (they don't exist there, hiccup or not), so the old "live API -> else
- * seedCategories()" logic left the desktop topic bar and mobile drawer
- * permanently empty -- every path converged on zero categories, which is
- * what made the nav look broken/under-construction after the retirement
- * narrowed the live set down to only CMS-only categories.
- *
- * localCategories() is the guaranteed-non-empty baseline now: every entry
- * CURRENT_CATEGORY_SLUGS lists that has a CMS_ONLY_CATEGORIES record (today,
- * all 3 do). Real law-service categories (if the live set ever includes one
- * again) still load and merge in via the effect below -- this baseline is
- * what renders immediately and what a live-API failure/empty-response
- * degrades to, replacing the old, permanently-empty seedCategories() path.
- */
-function localCategories(): any[] {
-  return CURRENT_CATEGORY_SLUGS
-    .map((slug) => CMS_ONLY_CATEGORIES[slug])
-    .filter((c): c is NonNullable<typeof c> => Boolean(c));
-}
-
-/**
- * @fileOverview Public masthead — editorial newsroom navigation.
- * Two-tier layout: a white brand/utility row over a navy section bar with a
- * subcategory mega-menu. Typographic + structural cues borrow from
- * Investopedia (clean black-on-white masthead) and CNBC (dark section bar).
+ * @fileOverview Public masthead. Two tiers: a white brand/utility row over a
+ * black section bar. The sections, their dropdowns and the mobile drawer all
+ * render from PRIMARY_NAV (src/lib/site-nav.ts), so nothing here changes when
+ * a section is added.
  */
 export function PublicNavbar() {
   const { isAuthenticated, role } = useAuth();
-  const [categories, setCategories] = useState<any[]>(localCategories());
-  const [subcategories, setSubcategories] = useState<any[]>([]);
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
-  // Which top-level category the full-screen mobile drawer has drilled into --
-  // null shows the flat category list (drawer "home"), matching the two-screen
-  // pattern of simple mobile nav menus (list -> tap -> subtopics) instead of
-  // every category accordion-expanding in place at once.
-  const [mobileDrawerCategory, setMobileDrawerCategory] = useState<string | null>(null);
 
   // Full-screen overlay: lock background scroll while it's open.
   useEffect(() => {
@@ -94,93 +40,7 @@ export function PublicNavbar() {
 
   function closeMobileMenu() {
     setIsMobileMenuOpen(false);
-    setMobileDrawerCategory(null);
   }
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const [catRes, subRes] = await Promise.all([
-          categoriesPublicApi.list(),
-          subcategoriesPublicApi.list(),
-        ]);
-        const rawCats = catRes.data?.data || [];
-        const subs = subRes.data?.data || [];
-        // law-service's bulk /categories list can include stray/legacy/pre-rename
-        // rows that have no real page (they 404 -- see [categorySlug]/page.tsx's
-        // fetchCategory). This nav renders every one it's given as a clickable
-        // link site-wide, so restrict to the curated practice-area hubs and
-        // normalize old slugs the same way sitemap.ts/article-url.ts already do.
-        const currentSlugSet = new Set<string>(CURRENT_CATEGORY_SLUGS);
-        const liveCats = rawCats
-          .map((c: any) => ({ ...c, slug: toNewCategorySlug(c.slug) }))
-          .filter((c: any) => currentSlugSet.has(c.slug));
-        // Merge live law-service categories over the local CMS_ONLY_CATEGORIES
-        // baseline (by slug) rather than replacing it outright -- today none of
-        // the 3 live categories exist in law-service at all, so liveCats is
-        // always empty and this is a no-op, but a real law-service category
-        // among the live set in the future gets its live id/description
-        // without the nav ever regressing to empty in the meantime.
-        const bySlug = new Map(localCategories().map((c) => [c.slug, c]));
-        liveCats.forEach((c: any) => bySlug.set(c.slug, c));
-        setCategories(Array.from(bySlug.values()));
-        setSubcategories(subs);
-      } catch {
-        // Live law-service/subcategories fetch failed -- categories state
-        // already holds the localCategories() baseline from useState's
-        // initializer, so leave it as-is rather than re-setting it. No
-        // subcategory data source exists locally, so the mega-menu just shows
-        // no subtopics for now, same as a category with none populated.
-      }
-    };
-    load();
-  }, []);
-
-  const activeCategoryData = useMemo(
-    () => categories.find((c) => c.id === activeCategory),
-    [activeCategory, categories],
-  );
-
-  // Hide subcategories with no articles yet -- otherwise every menu click leads
-  // to a dead end ("No articles yet"); see docs/empty-subcategories.md for the
-  // content backlog these represent.
-  const filteredSubcategories = useMemo(() => {
-    if (!activeCategory || !activeCategoryData) return [];
-    return subcategories.filter(
-      (sub) =>
-        String(sub.category_id || sub.categoryId) === String(activeCategory) &&
-        isSubcategoryPopulated(activeCategoryData.slug, sub.slug),
-    );
-  }, [activeCategory, activeCategoryData, subcategories]);
-
-  // Same "hide empty topics" rule as the desktop mega-menu, applied per
-  // category so the mobile drawer's top-level list only shows a drill-down
-  // chevron on categories that actually have somewhere to drill into.
-  const categoriesWithSubcategories = useMemo(() => {
-    const set = new Set<string>();
-    for (const cat of categories) {
-      const has = subcategories.some(
-        (sub) =>
-          String(sub.category_id || sub.categoryId) === String(cat.id) &&
-          isSubcategoryPopulated(cat.slug, sub.slug),
-      );
-      if (has) set.add(cat.id);
-    }
-    return set;
-  }, [categories, subcategories]);
-
-  const mobileDrawerCategoryData = useMemo(
-    () => categories.find((c) => c.id === mobileDrawerCategory),
-    [mobileDrawerCategory, categories],
-  );
-  const mobileDrawerSubcategories = useMemo(() => {
-    if (!mobileDrawerCategory || !mobileDrawerCategoryData) return [];
-    return subcategories.filter(
-      (sub) =>
-        String(sub.category_id || sub.categoryId) === String(mobileDrawerCategory) &&
-        isSubcategoryPopulated(mobileDrawerCategoryData.slug, sub.slug),
-    );
-  }, [mobileDrawerCategory, mobileDrawerCategoryData, subcategories]);
 
   const dashboardHref =
     role === 'admin' ? '/admin/dashboard' : role === 'lawyer' ? '/lawyer/dashboard' : '/dashboard';
@@ -204,17 +64,6 @@ export function PublicNavbar() {
               <Menu className="w-5 h-5 text-slate-900" />
               <span className="text-xs font-black uppercase tracking-wider">SECTIONS</span>
             </button>
-            <nav className="hidden xl:flex items-center gap-4 text-xs font-black uppercase tracking-tight text-slate-900">
-              <Link href="/news" className="hover:text-[#E13131] transition-colors">NEWS</Link>
-              <Link href="/people" className="hover:text-[#E13131] transition-colors">PEOPLE</Link>
-              <Link href="/entertainment" className="hover:text-[#E13131] transition-colors">ENTERTAINMENT</Link>
-              <Link href="/legal/cases" className="hover:text-[#E13131] transition-colors">CASES</Link>
-              <Link href="/sports" className="hover:text-[#E13131] transition-colors">SPORTS</Link>
-              <Link href="/maritime-offshore-injury-law" className="hover:text-[#E13131] transition-colors">MARITIME INJURY</Link>
-              <Link href="/cruise-ship-passenger-vessel-accidents" className="hover:text-[#E13131] transition-colors">CRUISE SHIP ACCIDENTS</Link>
-              <Link href="/personal-injury-lawyer" className="hover:text-[#E13131] transition-colors">PERSONAL INJURY</Link>
-              <Link href="/law-school-success" className="hover:text-[#E13131] transition-colors">LAW SCHOOL SUCCESS</Link>
-            </nav>
           </div>
 
           {/* Center: Logo — scales mark + LAW ELITE NETWORK wordmark */}
@@ -259,6 +108,15 @@ export function PublicNavbar() {
               TIPS
             </Link>
 
+            {isAuthenticated && (
+              <Link
+                href="/following"
+                className="hidden md:inline text-xs font-black uppercase tracking-wider text-slate-900 hover:text-[#E13131] transition-colors"
+              >
+                Following
+              </Link>
+            )}
+
             {isAuthenticated ? (
               <Link href={dashboardHref}>
                 <button className="border border-slate-300 hover:border-slate-900 text-slate-900 font-bold text-xs uppercase px-3 py-1.5 tracking-wider transition-colors">
@@ -284,138 +142,34 @@ export function PublicNavbar() {
       </div>
 
       {/* ── Tier 2: black section bar (desktop) ─────────────────────── */}
-      <nav className="hidden lg:block bg-black text-white" aria-label="Topic sections">
-        <div className="container mx-auto px-6 max-w-7xl h-10 flex items-center gap-6 overflow-x-auto no-scrollbar">
-          <Link
-            href="/"
-            className="flex items-center h-full whitespace-nowrap text-xs font-black uppercase tracking-wider text-white hover:text-[#E13131] transition-colors"
-          >
-            HOME
-          </Link>
-          <Link
-            href="/people"
-            className="flex items-center h-full whitespace-nowrap text-xs font-black uppercase tracking-wider text-white hover:text-[#E13131] transition-colors"
-          >
-            PEOPLE
-          </Link>
-          <Link
-            href="/entertainment"
-            className="flex items-center h-full whitespace-nowrap text-xs font-black uppercase tracking-wider text-white hover:text-[#E13131] transition-colors"
-          >
-            ENTERTAINMENT
-          </Link>
-          <Link
-            href="/legal/cases"
-            className="flex items-center h-full whitespace-nowrap text-xs font-black uppercase tracking-wider text-white hover:text-[#E13131] transition-colors"
-          >
-            CASES
-          </Link>
-          <Link
-            href="/sports"
-            className="flex items-center h-full whitespace-nowrap text-xs font-black uppercase tracking-wider text-white hover:text-[#E13131] transition-colors"
-          >
-            SPORTS
-          </Link>
-          <Link
-            href="/maritime-offshore-injury-law"
-            className="flex items-center h-full whitespace-nowrap text-xs font-black uppercase tracking-wider text-white hover:text-[#E13131] transition-colors"
-          >
-            MARITIME INJURY
-          </Link>
-          <Link
-            href="/cruise-ship-passenger-vessel-accidents"
-            className="flex items-center h-full whitespace-nowrap text-xs font-black uppercase tracking-wider text-white hover:text-[#E13131] transition-colors"
-          >
-            CRUISE SHIP ACCIDENTS
-          </Link>
-          <Link
-            href="/personal-injury-lawyer"
-            className="flex items-center h-full whitespace-nowrap text-xs font-black uppercase tracking-wider text-white hover:text-[#E13131] transition-colors"
-          >
-            PERSONAL INJURY
-          </Link>
-          <Link
-            href="/law-school-success"
-            className="flex items-center h-full whitespace-nowrap text-xs font-black uppercase tracking-wider text-white hover:text-[#E13131] transition-colors"
-          >
-            LAW SCHOOL SUCCESS
-          </Link>
-          {categories
-            .filter((cat) => !['maritime-offshore-injury-law', 'cruise-ship-passenger-vessel-accidents', 'personal-injury-lawyer', 'law-school-success'].includes(cat.slug))
-            // Was capped at 4 when this only ever needed to top up a live-API
-            // gap; the Entertainment pillar's 5 new hubs (movies, music,
-            // television, streaming, celebrity-news) all belong here too, and
-            // this bar already scrolls horizontally (overflow-x-auto above),
-            // so there's no layout reason to hide any of them.
-            .slice(0, 12)
-            .map((cat) => (
+      <nav className="hidden lg:block bg-black text-white" aria-label="Sections">
+        <ul className="container mx-auto px-6 max-w-7xl h-10 flex items-stretch gap-7">
+          {PRIMARY_NAV.map((section) => (
+            <li key={section.label} className="group relative flex items-stretch">
               <Link
-                key={cat.id}
-                href={`/${cat.slug}`}
-                className="flex items-center h-full whitespace-nowrap text-xs font-black uppercase tracking-wider text-white hover:text-[#E13131] transition-colors"
+                href={section.href}
+                className="flex items-center gap-1 whitespace-nowrap text-xs font-black uppercase tracking-wider text-white group-hover:text-[#E13131] group-focus-within:text-[#E13131] transition-colors"
               >
-                {NAV_SHORT_LABEL[cat.slug] || cat.name.toUpperCase()}
+                {section.label}
+                {section.children && <ChevronDown className="w-3 h-3 opacity-60" aria-hidden="true" />}
               </Link>
-            ))}
-        </div>
+              {section.children && (
+                <div className="invisible opacity-0 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 transition-opacity duration-150 absolute left-0 top-full min-w-[220px] bg-white text-slate-900 border-t-2 border-[#E13131] shadow-xl py-2">
+                  {section.children.map((child) => (
+                    <Link
+                      key={child.href + child.label}
+                      href={child.href}
+                      className="block px-5 py-2 text-[13px] font-semibold hover:bg-slate-50 hover:text-[#E13131] transition-colors"
+                    >
+                      {child.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
       </nav>
-
-
-        {/* Mega-menu */}
-        {activeCategory && activeCategoryData && (
-          <div
-            className="absolute top-full left-0 right-0 bg-white border-b border-slate-200 shadow-xl animate-in fade-in slide-in-from-top-1 duration-150"
-            onMouseEnter={() => setActiveCategory(activeCategory)}
-            onMouseLeave={() => setActiveCategory(null)}
-          >
-            <div className="container mx-auto max-w-7xl px-6 py-8">
-              <div className="grid grid-cols-12 gap-10">
-                <div className="col-span-3 border-r border-slate-100 pr-8">
-                  <span className="kicker">Browse Topic</span>
-                  <h3 className="font-headline text-2xl font-extrabold text-slate-900 mt-3 mb-2">
-                    {activeCategoryData.name}
-                  </h3>
-                  <p className="text-sm text-slate-500 leading-relaxed mb-5">
-                    {activeCategoryData.description ||
-                      'Plain-language guides and explainers across this practice area.'}
-                  </p>
-                  <Link
-                    href={`/${activeCategoryData.slug}`}
-                    onClick={() => setActiveCategory(null)}
-                    className="inline-flex items-center gap-1.5 text-[13px] font-bold text-blue-700 hover:text-news-600 transition-colors"
-                  >
-                    View all {filteredSubcategories.length} guides
-                    <ChevronRight className="w-4 h-4" />
-                  </Link>
-                </div>
-
-                <div className="col-span-9">
-                  <div className="grid grid-cols-3 gap-x-8 gap-y-1 max-h-[320px] overflow-y-auto pr-2">
-                    {filteredSubcategories.length > 0 ? (
-                      filteredSubcategories.map((sub) => (
-                        <Link
-                          key={sub.id}
-                          href={`/${activeCategoryData.slug}?sub=${sub.slug}`}
-                          onClick={() => setActiveCategory(null)}
-                          className="group flex items-center justify-between py-2.5 border-b border-slate-50 hover:border-slate-200 transition-colors"
-                        >
-                          <span className="text-[14px] font-semibold text-slate-700 group-hover:text-news-600 transition-colors">
-                            {sub.name}
-                          </span>
-                          <ChevronRight className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </Link>
-                      ))
-                    ) : (
-                      <p className="col-span-3 py-8 text-sm text-slate-500">
-                        Guides for this topic are being added.
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
       {/* ── Mobile drawer: full-screen, two-screen (list -> drill in) ── */}
       {isMobileMenuOpen && (
@@ -444,77 +198,53 @@ export function PublicNavbar() {
           </div>
 
           <div className="flex-1 overflow-y-auto overscroll-contain">
-            {!mobileDrawerCategory ? (
-              // ── Screen 1: flat top-level list ──
-              <nav aria-label="Mobile navigation">
-                {[
-                  { label: 'Home', href: '/' },
-                  { label: 'People', href: '/people' },
-                  { label: 'Entertainment', href: '/entertainment' },
-                  { label: 'Legal Cases', href: '/legal/cases' },
-                  { label: 'Sports', href: '/sports' },
-                ].map((item) => (
+            <nav aria-label="Mobile navigation">
+              <Link
+                href="/"
+                onClick={closeMobileMenu}
+                className="flex items-center h-14 px-5 text-[15px] font-bold text-slate-900 border-b border-slate-100 active:bg-slate-50"
+              >
+                Home
+              </Link>
+              {PRIMARY_NAV.map((section) =>
+                section.children ? (
+                  <details key={section.label} className="group border-b border-slate-100">
+                    <summary className="flex items-center justify-between h-14 px-5 text-[15px] font-bold text-slate-900 cursor-pointer list-none active:bg-slate-50 [&::-webkit-details-marker]:hidden">
+                      {section.label}
+                      <ChevronDown className="w-5 h-5 text-slate-300 transition-transform group-open:rotate-180" />
+                    </summary>
+                    <div className="bg-slate-50 pb-2">
+                      <Link
+                        href={section.href}
+                        onClick={closeMobileMenu}
+                        className="flex items-center h-11 px-8 text-[13px] font-bold text-blue-700"
+                      >
+                        All {section.label}
+                      </Link>
+                      {section.children.map((child) => (
+                        <Link
+                          key={child.href + child.label}
+                          href={child.href}
+                          onClick={closeMobileMenu}
+                          className="flex items-center h-11 px-8 text-[14px] font-semibold text-slate-700 active:bg-slate-100"
+                        >
+                          {child.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </details>
+                ) : (
                   <Link
-                    key={item.href}
-                    href={item.href}
+                    key={section.label}
+                    href={section.href}
                     onClick={closeMobileMenu}
-                    className="flex items-center justify-between h-14 px-5 text-[15px] font-bold text-slate-900 border-b border-slate-100 active:bg-slate-50"
+                    className="flex items-center h-14 px-5 text-[15px] font-bold text-slate-900 border-b border-slate-100 active:bg-slate-50"
                   >
-                    {item.label}
+                    {section.label}
                   </Link>
-                ))}
-                {categories.map((cat) =>
-                  categoriesWithSubcategories.has(cat.id) ? (
-                    <button
-                      key={cat.id}
-                      onClick={() => setMobileDrawerCategory(cat.id)}
-                      className="w-full flex items-center justify-between h-14 px-5 text-[15px] font-bold text-slate-900 border-b border-slate-100 active:bg-slate-50"
-                    >
-                      {cat.name}
-                      <ChevronRight className="w-5 h-5 text-slate-300" />
-                    </button>
-                  ) : (
-                    <Link
-                      key={cat.id}
-                      href={`/${cat.slug}`}
-                      onClick={closeMobileMenu}
-                      className="flex items-center justify-between h-14 px-5 text-[15px] font-bold text-slate-900 border-b border-slate-100 active:bg-slate-50"
-                    >
-                      {cat.name}
-                    </Link>
-                  ),
-                )}
-              </nav>
-            ) : (
-              // ── Screen 2: subtopics of the tapped category ──
-              <nav aria-label={`${mobileDrawerCategoryData?.name} topics`}>
-                <button
-                  onClick={() => setMobileDrawerCategory(null)}
-                  className="w-full flex items-center gap-2 h-14 px-5 text-[15px] font-bold text-slate-900 border-b border-slate-100 active:bg-slate-50"
-                >
-                  <ChevronLeft className="w-5 h-5 text-slate-400" />
-                  {mobileDrawerCategoryData?.name}
-                </button>
-                <Link
-                  href={`/${mobileDrawerCategoryData?.slug}`}
-                  onClick={closeMobileMenu}
-                  className="flex items-center justify-between h-12 px-5 text-[13px] font-bold text-blue-700 border-b border-slate-100 active:bg-slate-50"
-                >
-                  View all {mobileDrawerCategoryData?.name} guides
-                  <ChevronRight className="w-4 h-4" />
-                </Link>
-                {mobileDrawerSubcategories.map((sub) => (
-                  <Link
-                    key={sub.id}
-                    href={`/${mobileDrawerCategoryData?.slug}?sub=${sub.slug}`}
-                    onClick={closeMobileMenu}
-                    className="flex items-center h-12 px-5 text-[14px] font-semibold text-slate-700 border-b border-slate-50 active:bg-slate-50"
-                  >
-                    {sub.name}
-                  </Link>
-                ))}
-              </nav>
-            )}
+                ),
+              )}
+            </nav>
           </div>
 
           {/* Drawer footer: sign-in (hidden sm:inline-flex in the tier-1 row above, so
@@ -539,6 +269,11 @@ export function PublicNavbar() {
               >
                 <UserPlus className="w-4 h-4" /> Sign In
               </button>
+            )}
+            {isAuthenticated && (
+              <Link href="/following" onClick={closeMobileMenu} className="text-sm font-bold text-slate-900">
+                Following
+              </Link>
             )}
             <div className="flex items-center gap-4">
               <Link

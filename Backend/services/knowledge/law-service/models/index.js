@@ -51,6 +51,8 @@ db.AuditLog     = require('./auditLogs')(sequelize, Sequelize.DataTypes);
 db.Complaint    = require('./complaints')(sequelize, Sequelize.DataTypes);
 db.LawyerLedger = require('./lawyerLedger')(sequelize, Sequelize.DataTypes);
 db.Payout       = require('./payouts')(sequelize, Sequelize.DataTypes);
+db.MemberFollow       = require('./memberFollows')(sequelize, Sequelize.DataTypes);
+db.MemberSavedArticle = require('./memberSavedArticles')(sequelize, Sequelize.DataTypes);
 
 Object.values(db).forEach(model => {
     if (model && model.associate) model.associate(db);

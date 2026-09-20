@@ -8,5 +8,7 @@ export interface Notification {
   title: string;
   message: string;
   read: boolean;
+  /** Same-site path the notification links to, when it has one. */
+  url?: string;
   createdAt: number;
 }

@@ -1,4 +1,5 @@
 import React from 'react';
+import { FollowButton } from '@/components/member/FollowButton';
 import Link from 'next/link';
 import { BadgeCheck, Gavel, ExternalLink } from 'lucide-react';
 import { articleUrl } from '@/lib/article-url';
@@ -70,6 +71,7 @@ export function CaseProfile({
               <BadgeCheck className="w-6 h-6 text-blue-600 shrink-0" aria-label="Verified reference entry" />
             )}
           </h1>
+<div className="mt-4"><FollowButton entityType="legal-case" slug={legalCase.slug} /></div>
 
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-4 text-[13.5px] text-slate-600 font-medium">
             {court && (

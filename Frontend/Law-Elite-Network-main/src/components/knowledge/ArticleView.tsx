@@ -20,6 +20,7 @@ import { ArticleComments } from '@/components/knowledge/ArticleComments';
 import { ReadingProgressBar } from '@/components/knowledge/ReadingProgressBar';
 import { StickyShareBar } from '@/components/knowledge/StickyShareBar';
 import { ArticleShareBar } from '@/components/knowledge/ArticleShareBar';
+import { SaveArticleButton } from '@/components/member/FollowButton';
 import { ArticleSidebar } from '@/components/knowledge/ArticleSidebar';
 import { AdSlot } from '@/components/ads/AdSlot';
 import { resolveArticleImage } from '@/lib/article-art';
@@ -158,7 +159,10 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
                   </div>
 
                   {/* Social Icons */}
-                  <ArticleShareBar url={canonicalUrl} title={article.title} />
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <SaveArticleButton slug={article.slug} />
+                    <ArticleShareBar url={canonicalUrl} title={article.title} />
+                  </div>
                 </div>
 
                 <SeriesNotice series={seriesInfo ?? null} />

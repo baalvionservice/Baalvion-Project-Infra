@@ -1,4 +1,5 @@
 import React from 'react';
+import { FollowButton } from '@/components/member/FollowButton';
 import Image from 'next/image';
 import Link from 'next/link';
 import { BadgeCheck } from 'lucide-react';
@@ -83,6 +84,7 @@ export function EntertainmentProfile({
                   <BadgeCheck className="w-7 h-7 text-blue-600 shrink-0" aria-label="Verified reference entry" />
                 )}
               </h1>
+<div className="mt-4"><FollowButton entityType="entertainment" slug={entity.slug} /></div>
 
               <p className="text-lg md:text-xl text-slate-500 max-w-2xl leading-relaxed mt-4">{entity.description}</p>
 

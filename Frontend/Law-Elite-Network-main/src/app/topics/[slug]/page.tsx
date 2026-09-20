@@ -1,4 +1,5 @@
 import React from 'react';
+import { FollowButton } from '@/components/member/FollowButton';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Navbar } from '@/components/navbar';
@@ -52,6 +53,7 @@ export default async function TopicPage({ params }: { params: Promise<{ slug: st
           <header className="mb-10 max-w-3xl">
             <span className="text-[12px] font-bold text-blue-600 uppercase tracking-tight">Topic</span>
             <h1 className="text-[44px] md:text-[56px] font-bold text-slate-900 tracking-tight font-serif mb-6 leading-tight mt-2">{topic.name}</h1>
+<div className="mt-4"><FollowButton entityType="topic" slug={topic.slug} /></div>
           </header>
 
           <section className="mb-12">

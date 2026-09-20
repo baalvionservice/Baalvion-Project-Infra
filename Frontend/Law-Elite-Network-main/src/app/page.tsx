@@ -3,58 +3,46 @@ import { fetchPublicApi } from '@/lib/api/public-fetch';
 import { mergeArticles } from '@/data/law-content';
 import { cmsGetArticles } from '@/lib/cms';
 import { getMergedAuthors, getPublishedArticleCountsByAuthorSlug } from '@/lib/authors-server';
-import { authorNameToSlug, isEditorRole } from '@/data/authors';
+import { isEditorRole } from '@/data/authors';
 import { TopicTicker } from '@/components/knowledge/news/TopicTicker';
-import { StoryCard } from '@/components/knowledge/news/StoryCard';
-import { LatestRail } from '@/components/knowledge/news/LatestRail';
-import { CategorySection } from '@/components/knowledge/news/CategorySection';
-import { LatestGuidesGrid } from '@/components/knowledge/LatestGuidesGrid';
-import { PracticeAreaChart } from '@/components/knowledge/PracticeAreaChart';
-import { FeaturedGuideSpotlight } from '@/components/knowledge/FeaturedGuideSpotlight';
-import { ForProfessionalsSection } from '@/components/knowledge/ForProfessionalsSection';
 import { MissionAndBoardSection } from '@/components/knowledge/MissionAndBoardSection';
 import { TrustSection } from '@/components/knowledge/TrustSection';
-import { PlatformIntro } from '@/components/knowledge/PlatformIntro';
-import { WhatYouCanFind } from '@/components/knowledge/WhatYouCanFind';
-import { WhoIsThisFor } from '@/components/knowledge/WhoIsThisFor';
 import { HomepageDisclaimer } from '@/components/knowledge/HomepageDisclaimer';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { AdSlot } from '@/components/ads/AdSlot';
-import { ShieldCheck, ArrowRight } from 'lucide-react';
-import Link from 'next/link';
+import {
+  BreakingStrip,
+  ExploreBand,
+  FrontPage,
+  MediaRail,
+  PeopleRail,
+  PillarColumn,
+  PopularTopics,
+  TrendingList,
+} from '@/components/home/HomeSections';
+import { getHomeFeed } from '@/lib/home-feed';
+import { getAllMedia } from '@/lib/media-server';
 import type { Metadata } from 'next';
 import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+const TITLE = 'Law Elite Network | News on People, Entertainment, Sports and the Law';
+const DESCRIPTION =
+  'Law Elite Network covers the people, entertainment, sports and legal stories that matter, with profiles, cases, courts and interviews in one place.';
 
 // Same literal-vs-import note as ArticleSidebar.tsx's SIDEBAR_AD_SLOT_ID.
 const AD_SLOT_ID = '4123514154';
 
-// Serve a cached page and refresh it in the background every 5 minutes,
-// instead of re-rendering (and re-fetching from the CMS/law-service) on
-// every single visitor/Googlebot request.
-// Raised off the 5-minute clock: /api/revalidate's revalidateTag() refreshes
-// this on publish, so the window is only the no-webhook safety net.
+// /api/revalidate's revalidateTag() refreshes this on publish, so the window
+// is only the no-webhook safety net.
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: 'Law Elite Network | Plain-Language Legal Guides, Worldwide',
-  description:
-    'Understand your rights before you call a lawyer. Free, plain-language guides to family, criminal, employment, business, tax and property law — written for a general audience, covering every jurisdiction.',
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: { canonical: SITE },
-  openGraph: {
-    type: 'website',
-    url: SITE,
-    title: 'Law Elite Network | Plain-Language Legal Guides, Worldwide',
-    description:
-      'Understand your rights before you call a lawyer. Free, plain-language guides to family, criminal, employment, business, tax and property law.',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Law Elite Network | Plain-Language Legal Guides, Worldwide',
-    description:
-      'Understand your rights before you call a lawyer. Free, plain-language guides to family, criminal, employment, business, tax and property law.',
-  },
+  openGraph: { type: 'website', url: SITE, title: TITLE, description: DESCRIPTION },
+  twitter: { card: 'summary_large_image', title: TITLE, description: DESCRIPTION },
 };
 
 function categoryIdOf(a: any): string {
@@ -119,42 +107,12 @@ export default async function KnowledgeHomePage() {
   });
   const pool = mergeArticles(combinedSource).filter(isKeptCategoryArticle);
 
-  // Editor's-picks first, not raw popularity -- a "trending by views" sort is
-  // the newsroom pattern /news already owns. The homepage is an evergreen
-  // library, so it leads with `featured` (an editorial curation flag already
-  // set in the CMS) and only falls back to the full pool when too few guides
-  // are flagged, mirroring the same fallback used by law-content.ts's own
-  // getFeaturedArticles().
-  const featuredPool = pool.filter((a: any) => a.featured);
-  const spotlightSource = featuredPool.length >= 7 ? featuredPool : pool;
-  const spotlight = [...spotlightSource].sort((a, b) => (b.views || 0) - (a.views || 0));
+  const feed = await getHomeFeed(pool);
+  const [videos, interviews] = await Promise.all([getAllMedia('video'), getAllMedia('interview')]);
+  const trendingCounts = new Map(feed.trendingPeople.map((t) => [t.person.slug, t.articleCount]));
 
-  const lead = spotlight[0];
-  const heroSecondary = spotlight.slice(1, 3);
-  const latest = spotlight.slice(3, 7);
-
-  const usedSlugs = new Set<string>();
-  if (lead) usedSlugs.add(lead.slug);
-  heroSecondary.forEach((a) => usedSlugs.add(a.slug));
-  latest.forEach((a) => usedSlugs.add(a.slug));
-
-  // Editor's Pick spotlight (Investopedia's "Making Sense of Modern Crypto"
-  // slot) -- one real featured guide, not already shown above, paired with
-  // its actual byline's author profile.
-  const spotlightGuide =
-    spotlight.find((a: any) => a?.featured && a?.slug && !usedSlugs.has(a.slug)) ||
-    spotlight.find((a: any) => a?.slug && !usedSlugs.has(a.slug)) ||
-    null;
-  if (spotlightGuide) usedSlugs.add(spotlightGuide.slug);
-  const spotlightAuthor = spotlightGuide?.author
-    ? editorialBoard.find((a: any) => a.slug === authorNameToSlug(spotlightGuide.author)) || null
-    : null;
-
-  // Both sources (live law-service categories and CMS-derived article categories)
-  // can surface stray/legacy/subcategory slugs that have no real page -- e.g.
-  // `family-law-child-custody`, `legal-guides`. TopicTicker links every entry
-  // here unconditionally, so an unfiltered list turns into dead links straight
-  // off the homepage. Restrict to the site's curated practice-area hubs.
+  // TopicTicker links every entry unconditionally, so restrict to the curated
+  // practice-area hubs (stray CMS/API slugs would be dead links).
   const currentSlugSet = new Set<string>(CURRENT_CATEGORY_SLUGS);
   const rawCategories = apiCategories.length > 0
     ? apiCategories.map((c: any) => ({ id: c.id, name: c.name, slug: toNewCategorySlug(c.slug) }))
@@ -163,68 +121,8 @@ export default async function KnowledgeHomePage() {
     currentSlugSet.has(c.slug),
   );
 
-  // Full (unsliced) per-category counts for the homepage's "Guides by
-  // Practice Area" chart -- deliberately computed from the whole `pool`, not
-  // the already-excludes-hero-slugs filter below, since a library snapshot
-  // should reflect real totals rather than "what's left to show."
-  const categoryCounts = categories.map((cat: any) => ({
-    name: cat.name,
-    slug: cat.slug,
-    count: pool.filter((a: any) => categoryIdOf(a) === String(cat.id) || categorySlugOf(a) === cat.slug).length,
-  }));
-
-  // "Latest Guides" grid: prefer the CMS's own date-sorted feed (real
-  // publishedAt-derived dates) and only fall back to the merged pool when the
-  // CMS is sparse, mirroring the same threshold used for `spotlightSource`.
-  // Capped at 2-per-category so a single practice area with a recent content
-  // batch (e.g. Dispute Resolution) can't dominate every slot -- backfills
-  // from the overflow (still most-recent-first) if the cap leaves the grid
-  // short of 8, so sparse days never render fewer than the source supports.
-  const latestGuidesSource = cmsArticlesKept.length >= 8 ? cmsArticlesKept : pool;
-  const latestGuidesSorted = [...latestGuidesSource]
-    .filter((a: any) => a?.slug && !usedSlugs.has(a.slug))
-    .sort((a: any, b: any) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
-
-  const MAX_PER_CATEGORY = 2;
-  const perCategoryCount = new Map<string, number>();
-  const latestGuides: any[] = [];
-  const latestGuidesOverflow: any[] = [];
-  for (const a of latestGuidesSorted) {
-    const catKey = categorySlugOf(a) || categoryIdOf(a) || 'uncategorized';
-    const count = perCategoryCount.get(catKey) || 0;
-    if (count < MAX_PER_CATEGORY) {
-      latestGuides.push(a);
-      perCategoryCount.set(catKey, count + 1);
-    } else {
-      latestGuidesOverflow.push(a);
-    }
-    if (latestGuides.length >= 8) break;
-  }
-  for (const a of latestGuidesOverflow) {
-    if (latestGuides.length >= 8) break;
-    latestGuides.push(a);
-  }
-  latestGuides.forEach((a: any) => usedSlugs.add(a.slug));
-
-  const homeStats = {
-    guides: pool.length,
-    practiceAreas: categories.length,
-  };
-  // "Editorial Board" means desk editors specifically (the real "...Editor"
-  // vs. "...Contributor" role already encoded in each profile's `title`, see
-  // isEditorRole()) -- not an arbitrary slice of the full contributor list,
-  // which previously could show names that don't match who's actually
-  // bylining articles on this same page.
-  //
-  // AdSense second-rejection finding, confirmed live on this exact section:
-  // none of the 4 names the homepage showed (eleanor-whitfield, elena-rossi,
-  // marcus-hale, sofia-almeida) had any article reachable on the live site --
-  // isEditorRole() found zero real "...Editor" titles among the bundled/CMS
-  // roster, so the "editors.length > 0 ? editors : editorialBoard" fallback
-  // was taking the first 4 profiles in insertion order regardless of whether
-  // they'd published anything. Filtering to published authors first, same
-  // published-count source as /authors and /advertise, fixes the fallback
-  // without touching the (correct) preference for real editors when one exists.
+  // Only published authors: the fallback used to list profiles with no
+  // reachable article (AdSense second-rejection finding).
   const publishedAuthorSlugs = new Set(
     Array.from((await getPublishedArticleCountsByAuthorSlug()).entries())
       .filter(([, count]) => count > 0)
@@ -233,100 +131,54 @@ export default async function KnowledgeHomePage() {
   const publishedBoard = editorialBoard.filter((a: any) => publishedAuthorSlugs.has(a.slug));
   const editors = publishedBoard.filter((a: any) => isEditorRole(a.title));
   const editorialBoardPreview = (editors.length > 0 ? editors : publishedBoard).slice(0, 4);
-
-  const articlesByCategory = categories.map((cat: any) => ({
-    ...cat,
-    articles: pool
-      .filter((a) => !usedSlugs.has(a.slug))
-      .filter(
-        (a) => categoryIdOf(a) === String(cat.id) || categorySlugOf(a) === cat.slug,
-      )
-      .slice(0, 3),
-  }));
+  const homeStats = { guides: pool.length, practiceAreas: categories.length };
 
   return (
-    <div className="min-h-screen bg-white pt-[60px] lg:pt-[96px]">
-      {/* Masthead strip -- search lives once, in the persistent header above;
-          duplicating it here read as broken/unpolished to reviewers. */}
-      <section className="border-b border-slate-100 bg-white">
-        <div className="container mx-auto px-4 sm:px-6 max-w-7xl py-6 md:py-8">
-          <span className="kicker">
-            <ShieldCheck className="w-3.5 h-3.5" /> Global Legal Education
-          </span>
-          <h1 className="font-headline text-3xl md:text-[2.9rem] font-extrabold tracking-[-0.02em] text-slate-900 leading-[0.98] mt-2">
-            Plain-language legal information
-            <br className="hidden md:block" /> for a global audience.
-          </h1>
-          <p className="text-base md:text-lg text-slate-500 max-w-2xl leading-relaxed mt-3">
-            Law Elite Network is an independent legal-information platform helping people understand
-            laws, legal procedures, rights, regulations, and legal concepts across different
-            jurisdictions.
-          </p>
-          <div className="flex flex-wrap items-center gap-3 mt-6">
-            <a
-              href="#legal-guides"
-              className="inline-flex items-center gap-2 px-5 h-11 rounded-md bg-[#0B1F3A] text-white text-[13px] font-bold tracking-wide hover:bg-blue-800 transition-colors"
-            >
-              Explore Legal Guides <ArrowRight className="w-4 h-4" />
-            </a>
-          </div>
-        </div>
-      </section>
-
-      <div id="practice-areas">
-        <TopicTicker categories={categories} />
-      </div>
+    <div className="min-h-screen bg-white pt-[60px] lg:pt-[100px]">
+      <BreakingStrip articles={feed.breaking} />
 
       <main className="container mx-auto px-4 sm:px-6 max-w-7xl">
-        {/* Hero: lead + secondary + latest rail */}
-        <section className="py-8 md:py-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
-            <div className="lg:col-span-8 space-y-9">
-              {lead && <StoryCard article={lead} variant="lead" priority />}
-              {heroSecondary.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-7 pt-2 border-t border-slate-100">
-                  {heroSecondary.map((a) => (
-                    <StoryCard key={a.id || a.slug} article={a} variant="default" />
-                  ))}
-                </div>
-              )}
+        <h1 className="sr-only">Law Elite Network: people, entertainment, sports and legal news</h1>
+
+        <FrontPage articles={feed.latest} />
+
+        {(feed.trending.length > 0 || feed.celebrity.length > 0) && (
+          <section className="py-8 border-t border-slate-200 grid grid-cols-1 lg:grid-cols-12 gap-10">
+            <div className="lg:col-span-5">
+              <TrendingList articles={feed.trending} />
             </div>
-            <div className="lg:col-span-4 space-y-9">
-              <LatestRail articles={latest} />
+            <div className="lg:col-span-7">
+              <PillarColumn title="Celebrity news" href="/celebrity-news" articles={feed.celebrity} />
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         <div className="py-6">
           <AdSlot slotId={AD_SLOT_ID} format="horizontal" placement="homepage-mid-feed" fullWidthResponsive minHeight="100px" />
         </div>
 
-        {/* Latest Guides grid */}
-        <LatestGuidesGrid articles={latestGuides} />
+        {(feed.entertainment.length > 0 || feed.sports.length > 0 || feed.legal.length > 0) && (
+          <section className="py-8 border-t border-slate-200 grid grid-cols-1 lg:grid-cols-3 gap-10">
+            <PillarColumn title="Entertainment" href="/entertainment" articles={feed.entertainment} />
+            <PillarColumn title="Sports" href="/sports" articles={feed.sports} />
+            <PillarColumn title="Legal" href="/legal/cases" articles={feed.legal} />
+          </section>
+        )}
 
-        {/* Library snapshot + editor's pick. Newsroom widget removed with
-            /news (AdSense second-rejection retirement, see next.config.ts). */}
-        <section className="py-8 border-t border-slate-200">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <PracticeAreaChart data={categoryCounts} />
-            <FeaturedGuideSpotlight article={spotlightGuide} author={spotlightAuthor} />
-          </div>
-        </section>
+        <PeopleRail title="Trending people" href="/people" people={feed.trendingPeople.map((t) => t.person)} counts={trendingCounts} />
+        <PeopleRail title="Featured people" href="/people" people={feed.featuredPeople} />
+        <MediaRail title="Videos" href="/videos" items={videos.slice(0, 4)} />
+        <MediaRail title="Interviews" href="/interviews" items={interviews.slice(0, 4)} />
+        <PopularTopics topics={feed.popularTopics} />
 
-        {/* Category sections */}
-        <div id="legal-guides" className="py-8 border-t border-slate-200 scroll-mt-24">
-          {articlesByCategory.map((cat: { id: string; name: string; slug: string; articles: any[] }) => (
-            <CategorySection key={cat.slug} name={cat.name} slug={cat.slug} articles={cat.articles} />
-          ))}
+        <div id="practice-areas" className="border-t border-slate-200 py-4">
+          <TopicTicker categories={categories} />
         </div>
 
-        <WhatYouCanFind />
-        <PlatformIntro />
-        <WhoIsThisFor />
-
-        <ForProfessionalsSection />
         <MissionAndBoardSection stats={homeStats} authors={editorialBoardPreview} />
       </main>
+
+      <ExploreBand />
 
       <section className="border-t border-slate-100">
         <div className="container mx-auto px-4 sm:px-6 max-w-7xl py-12">

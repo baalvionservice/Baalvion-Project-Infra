@@ -1,4 +1,5 @@
 import React from 'react';
+import { FollowButton } from '@/components/member/FollowButton';
 import Link from 'next/link';
 import { Trophy } from 'lucide-react';
 import { articleUrl } from '@/lib/article-url';
@@ -28,6 +29,7 @@ export function CompetitionProfile({
     <div className="container mx-auto px-4 sm:px-6 max-w-5xl pt-32 pb-24">
       <span className="kicker mb-2 inline-flex items-center gap-1.5"><Trophy className="w-3.5 h-3.5" /> {LEVEL_LABEL[competition.level]} · {competition.sport}</span>
       <h1 className="font-headline text-3xl md:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.05]">{competition.name}</h1>
+<div className="mt-4"><FollowButton entityType="sports-competition" slug={competition.slug} /></div>
       {competition.date && <p className="mt-3 text-[13.5px] text-slate-600 font-medium">{formatArticleDate(competition.date) || competition.date}</p>}
       <p className="text-lg text-slate-500 max-w-2xl leading-relaxed mt-4">{competition.description}</p>
 

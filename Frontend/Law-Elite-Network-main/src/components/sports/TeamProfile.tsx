@@ -1,4 +1,5 @@
 import React from 'react';
+import { FollowButton } from '@/components/member/FollowButton';
 import Link from 'next/link';
 import { Shield, ExternalLink } from 'lucide-react';
 import { PersonCard } from '@/components/people/PersonCard';
@@ -11,6 +12,7 @@ export function TeamProfile({ team, athletes, latestNews = [] }: { team: SportsT
     <div className="container mx-auto px-4 sm:px-6 max-w-5xl pt-32 pb-24">
       <span className="kicker mb-2 inline-flex items-center gap-1.5"><Shield className="w-3.5 h-3.5" /> {team.sport} Team</span>
       <h1 className="font-headline text-3xl md:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.05]">{team.name}</h1>
+<div className="mt-4"><FollowButton entityType="sports-team" slug={team.slug} /></div>
       <p className="text-lg text-slate-500 max-w-2xl leading-relaxed mt-4">{team.description}</p>
       {team.url && (
         <a href={team.url} target="_blank" rel="noopener noreferrer nofollow" className="inline-flex items-center gap-1.5 mt-4 text-[14px] font-semibold text-blue-600 hover:underline">

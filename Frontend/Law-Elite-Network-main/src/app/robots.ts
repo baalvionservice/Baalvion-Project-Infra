@@ -66,6 +66,8 @@ const DISALLOW = [
   '/transactions',
   '/billing',
   '/notifications',
+  '/following',
+  '/saved',
   '/my-counsel',
   '/referral',
   '/onboarding',

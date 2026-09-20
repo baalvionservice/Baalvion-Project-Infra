@@ -97,7 +97,7 @@ const securityHeaders = [
       // opens an iframe, not just fetch/XHR calls -- it was only in connect-src
       // above, so the browser blocked the frame outright (caught via a live CSP
       // violation report during a Lighthouse run, not a code read).
-      "frame-src 'self' https://*.razorpay.com https://api.razorpay.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com https://*.adtrafficquality.google",
+      "frame-src 'self' https://*.razorpay.com https://api.razorpay.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com https://*.adtrafficquality.google https://www.youtube-nocookie.com https://player.vimeo.com",
       "frame-ancestors 'none'",
       "form-action 'self'",
       "base-uri 'self'",
@@ -168,6 +168,10 @@ const nextConfig: NextConfig = {
       // type/link, so it redirects rather than existing as a second,
       // competing route to the same content.
       { source: '/tv', destination: '/television', permanent: true },
+      // Public case/court directories live under /legal (/cases is the
+      // signed-in client dashboard, so it is deliberately not redirected).
+      { source: '/courts', destination: '/legal/courts', permanent: true },
+      { source: '/legal', destination: '/legal/cases', permanent: true },
       // /world pulled the exact same cmsGetNews() feed as /news with no real
       // geographic filter (its "cross-border"/"every region" copy wasn't
       // backed by any actual filtering) -- a near-duplicate competing for the
