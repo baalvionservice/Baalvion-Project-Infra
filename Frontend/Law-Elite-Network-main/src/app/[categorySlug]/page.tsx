@@ -287,6 +287,7 @@ export default async function CategoryPage(
           categorySlug={categorySlug}
           categoryId={category.id}
           cmsArticles={cmsArticles}
+          bundledArticles={bundledForSpotlight.map(({ content, ...card }: any) => card)}
           excludeSlugs={spotlightExcludeSlugs}
         />
       </main>

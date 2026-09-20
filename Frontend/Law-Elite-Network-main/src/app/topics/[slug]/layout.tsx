@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import { brandTitle } from '@/lib/seo/brand-title';
+import { JsonLd, breadcrumbLd } from '@/lib/seo/json-ld';
 import { getTopicBySlug } from '@/data/topics';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
@@ -19,7 +21,7 @@ export async function generateMetadata(
   const description = `Articles tagged ${topic.name} on Law Elite Network.`;
 
   return {
-    title,
+    title: { absolute: brandTitle(`${title} — News & Coverage`) },
     description,
     alternates: { canonical: url },
     robots: { index: true, follow: true },
@@ -28,6 +30,24 @@ export async function generateMetadata(
   };
 }
 
-export default function TopicLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+export default async function TopicLayout(
+  { children, params }: { children: React.ReactNode; params: Promise<{ slug: string }> },
+) {
+  const { slug } = await params;
+  const topic = getTopicBySlug(slug);
+  if (!topic) return <>{children}</>;
+  return (
+    <>
+      <JsonLd
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'CollectionPage',
+          name: topic.name,
+          url: `${SITE}/topics/${slug}`,
+        }}
+      />
+      <JsonLd data={breadcrumbLd([{ name: 'Topics', path: '/topics' }, { name: topic.name, path: `/topics/${slug}` }])} />
+      {children}
+    </>
+  );
 }

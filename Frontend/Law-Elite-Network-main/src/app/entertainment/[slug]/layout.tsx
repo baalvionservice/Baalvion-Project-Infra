@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { brandTitle } from '@/lib/seo/brand-title';
 import { getMergedEntertainmentEntityBySlug } from '@/lib/entertainment-server';
 import { getPersonBySlug } from '@/data/people';
 import { entertainmentTypeLabel } from '@/types/entertainment';
@@ -38,7 +39,7 @@ export async function generateMetadata(
   const image = entity.images?.[0]?.url || `${SITE}/opengraph-image`;
 
   return {
-    title,
+    title: { absolute: brandTitle(title) },
     description,
     keywords: [entity.title, entertainmentTypeLabel(entity.type), 'law elite network entertainment'],
     alternates: { canonical: entity.seo?.canonicalPath ? `${SITE}${entity.seo.canonicalPath}` : url },

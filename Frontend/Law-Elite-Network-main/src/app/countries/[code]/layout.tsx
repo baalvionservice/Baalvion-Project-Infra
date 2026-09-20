@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { brandTitle } from '@/lib/seo/brand-title';
 import { COUNTRIES } from '@/lib/countries';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
@@ -18,7 +19,7 @@ export async function generateMetadata(
   const description = `People, cases, and coverage connected to ${country.name} on Law Elite Network.`;
 
   return {
-    title,
+    title: { absolute: brandTitle(title) },
     description,
     alternates: { canonical: url },
     robots: { index: true, follow: true },

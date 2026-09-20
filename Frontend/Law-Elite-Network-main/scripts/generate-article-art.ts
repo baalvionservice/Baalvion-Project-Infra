@@ -10,7 +10,7 @@
  * generated deterministically from each article's imageSeed/title/category —
  * safe to re-run any time; it just overwrites with the same output.
  */
-import { mkdirSync } from 'fs';
+import { mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { writeArticleArtRaster } from '@baalvion/illustrations';
 import { getAllArticles } from '../src/data/law-content';
@@ -33,6 +33,14 @@ async function main(): Promise<void> {
     );
     count += 1;
   }
+
+  // src/lib/article-art.ts needs only the slug set, and importing the whole
+  // article corpus there put ~240 kB gzipped of article bodies in the client
+  // bundle of every page that renders a story card.
+  writeFileSync(
+    join(__dirname, '..', 'src', 'data', 'bundled-article-slugs.json'),
+    JSON.stringify(articles.map((a) => a.slug).sort(), null, 2) + '\n',
+  );
 
   console.log(`Generated ${count} article art PNGs into ${outDir}`);
 }

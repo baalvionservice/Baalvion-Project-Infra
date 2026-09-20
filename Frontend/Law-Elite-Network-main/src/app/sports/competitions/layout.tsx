@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
+import { brandTitle } from '@/lib/seo/brand-title';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
-const title = 'Competitions';
+const title = 'Sports Competitions';
 const description = 'Competitions and events referenced across Law Elite Network’s sports coverage.';
 
 export const metadata: Metadata = {
-  title,
+  title: { absolute: brandTitle(title) },
   description,
   alternates: { canonical: `${SITE}/sports/competitions` },
   robots: { index: true, follow: true },

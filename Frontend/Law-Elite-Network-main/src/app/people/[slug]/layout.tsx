@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { brandTitle } from '@/lib/seo/brand-title';
 import { getMergedPersonBySlug } from '@/lib/people-server';
 import { resolvePersonImage } from '@/lib/article-art';
 import { isPersonCategorySlug, personCategoryLabel } from '@/types/person';
@@ -18,7 +19,7 @@ export async function generateMetadata(
     const title = `${label} — Law Elite Network`;
     const description = `Reference profiles for notable ${label.toLowerCase()} covered across Law Elite Network.`;
     return {
-      title,
+      title: { absolute: brandTitle(title) },
       description,
       keywords: [label.toLowerCase(), 'law elite network people'],
       alternates: { canonical: url },
@@ -45,7 +46,7 @@ export async function generateMetadata(
   const image = personImage.startsWith('data:') ? `${SITE}/opengraph-image` : personImage;
 
   return {
-    title,
+    title: { absolute: brandTitle(title) },
     description,
     keywords: [name, personCategoryLabel(person.category), 'law elite network people'],
     alternates: { canonical: person.seo?.canonicalPath ? `${SITE}${person.seo.canonicalPath}` : url },
@@ -65,7 +66,9 @@ export default async function PersonLayout(
   if (!person) return <>{children}</>;
 
   const name = person.displayName || person.fullName;
-  const image = resolvePersonImage({ avatarUrl: person.avatarUrl, name, avatarSeed: person.avatarSeed || slug });
+  const rawImage = resolvePersonImage({ avatarUrl: person.avatarUrl, name, avatarSeed: person.avatarSeed || slug });
+  // A generated silhouette is a data: URI, which is not a valid schema.org image; omit it.
+  const image = rawImage.startsWith('data:') ? undefined : rawImage;
   const sameAs = person.social ? Object.values(person.social).filter(Boolean) : undefined;
 
   const personLd = {

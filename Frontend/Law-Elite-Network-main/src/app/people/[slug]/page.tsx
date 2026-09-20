@@ -6,11 +6,16 @@ import { PersonProfile } from '@/components/people/PersonProfile';
 import { PeopleDirectory } from '@/components/people/PeopleDirectory';
 import { PersonDisclaimer } from '@/components/people/PersonDisclaimer';
 import { getMergedPersonBySlug, getMergedPeople, getLatestNewsForPerson } from '@/lib/people-server';
-import { getRelatedPeople } from '@/data/people';
+import { getRelatedPeople, PEOPLE } from '@/data/people';
 import { getLegalCasesForPerson } from '@/lib/legal-server';
-import { isPersonCategorySlug, personCategoryLabel } from '@/types/person';
+import { isPersonCategorySlug, personCategoryLabel, PERSON_CATEGORIES } from '@/types/person';
 
 export const revalidate = 86400;
+
+// Pre-render every bundled profile and category directory; anything added later still renders on demand.
+export function generateStaticParams() {
+  return [...PEOPLE.map((p) => ({ slug: p.slug })), ...PERSON_CATEGORIES.map((c) => ({ slug: c.slug }))];
+}
 
 /**
  * Shares one route segment for two things: a category directory

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { brandTitle } from '@/lib/seo/brand-title';
 import { getMergedLegalCaseBySlug } from '@/lib/legal-server';
 import { getPersonBySlug } from '@/data/people';
 import { getCourtBySlug } from '@/data/courts';
@@ -23,7 +24,7 @@ export async function generateMetadata(
   const description = legalCase.seo?.metaDescription || legalCase.summary.slice(0, 200);
 
   return {
-    title,
+    title: { absolute: brandTitle(title) },
     description,
     keywords: [legalCase.caseName, 'legal case', 'law elite network legal'],
     alternates: { canonical: legalCase.seo?.canonicalPath ? `${SITE}${legalCase.seo.canonicalPath}` : url },

@@ -4,8 +4,13 @@ import { Navbar } from '@/components/navbar';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { CaseProfile } from '@/components/legal/CaseProfile';
 import { getMergedLegalCaseBySlug, getMergedCourtBySlug, getLatestNewsForCase, getResolvedCaseParticipants } from '@/lib/legal-server';
+import { getAllLegalCases } from '@/data/legal-cases';
 
 export const revalidate = 86400;
+
+export function generateStaticParams() {
+  return getAllLegalCases().map((c) => ({ slug: c.slug }));
+}
 
 export default async function LegalCasePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

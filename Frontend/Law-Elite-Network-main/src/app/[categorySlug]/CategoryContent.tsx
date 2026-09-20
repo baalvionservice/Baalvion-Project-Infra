@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { articlesPublicApi } from '@/lib/api/client';
 import { ArticleCard } from '@/components/knowledge/ArticleCard';
-import { getArticlesByCategorySlug } from '@/data/law-content';
 import { FileText } from 'lucide-react';
 
 interface CategoryContentProps {
@@ -11,6 +10,8 @@ interface CategoryContentProps {
   categoryId: string;
   /** CMS-authored articles for this category, fetched server-side by the parent page (see [categorySlug]/page.tsx). */
   cmsArticles?: any[];
+  /** Bundled articles for this category, resolved server-side: importing the article corpus here would ship every article body to the browser. */
+  bundledArticles?: any[];
   /** Slugs already shown in the page's lead+rail spotlight above this grid — excluded here so the same guide never appears twice on one page. */
   excludeSlugs?: string[];
 }
@@ -20,7 +21,7 @@ interface CategoryContentProps {
  * rendered server-side by the parent page — this piece stays client-only
  * because it merges in the live law-service article list on mount.
  */
-export function CategoryContent({ categorySlug, categoryId, cmsArticles = [], excludeSlugs = [] }: CategoryContentProps) {
+export function CategoryContent({ categorySlug, categoryId, cmsArticles = [], bundledArticles = [], excludeSlugs = [] }: CategoryContentProps) {
   const [apiArticles, setApiArticles] = useState<any[]>([]);
   const [articlesLoading, setArticlesLoading] = useState(true);
 
@@ -35,7 +36,7 @@ export function CategoryContent({ categorySlug, categoryId, cmsArticles = [], ex
   // Bundled articles for this category are the baseline; CMS (admin-authored, incl.
   // uploaded featured images) wins on a slug collision, then law-service results.
   const articles = useMemo(() => {
-    const bundled = getArticlesByCategorySlug(categorySlug);
+    const bundled = bundledArticles;
     const seen = new Set<string>();
     const exclude = new Set(excludeSlugs);
     const combined = [...cmsArticles, ...apiArticles, ...bundled].filter((a) => {
@@ -44,7 +45,7 @@ export function CategoryContent({ categorySlug, categoryId, cmsArticles = [], ex
       return true;
     });
     return combined;
-  }, [cmsArticles, apiArticles, categorySlug, excludeSlugs]);
+  }, [cmsArticles, apiArticles, bundledArticles, excludeSlugs]);
 
   return (
     <div className="container mx-auto px-4 sm:px-6 max-w-7xl pt-10">

@@ -8,8 +8,13 @@ import { getTopicBySlug } from '@/data/topics';
 import { getArticlesForEntity, getCoOccurringEntities } from '@/lib/entity-articles';
 import { resolveEntityReferences } from '@/lib/entity-reference-resolver';
 import { articleUrl } from '@/lib/article-url';
+import { getAllTopics } from '@/data/topics';
 
 export const revalidate = 86400;
+
+export function generateStaticParams() {
+  return getAllTopics().map((t) => ({ slug: t.slug }));
+}
 
 function ChipSection({ title, chips }: { title: string; chips: { name: string; url: string }[] }) {
   if (chips.length === 0) return null;

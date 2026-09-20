@@ -6,8 +6,13 @@ import { CompetitionProfile } from '@/components/sports/CompetitionProfile';
 import { getMergedSportsCompetitionBySlug, getLatestNewsForCompetition } from '@/lib/sports-server';
 import { getPersonBySlug } from '@/data/people';
 import type { Person } from '@/types/person';
+import { getAllSportsCompetitions } from '@/data/sports-competitions';
 
 export const revalidate = 86400;
+
+export function generateStaticParams() {
+  return getAllSportsCompetitions().map((c) => ({ slug: c.slug }));
+}
 
 export default async function CompetitionPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

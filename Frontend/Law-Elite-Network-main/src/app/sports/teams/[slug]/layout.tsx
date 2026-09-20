@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import { brandTitle, clampDescription } from '@/lib/seo/brand-title';
+import { JsonLd, breadcrumbLd } from '@/lib/seo/json-ld';
 import { getMergedSportsTeamBySlug } from '@/lib/sports-server';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
@@ -16,8 +18,8 @@ export async function generateMetadata(
   }
 
   return {
-    title: team.name,
-    description: team.description,
+    title: { absolute: brandTitle(`${team.name} — Team Profile`) },
+    description: clampDescription(team.description),
     alternates: { canonical: url },
     robots: { index: true, follow: true },
     openGraph: { type: 'website', url, title: team.name, description: team.description },
@@ -25,6 +27,28 @@ export async function generateMetadata(
   };
 }
 
-export default function TeamLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+export default async function TeamLayout(
+  { children, params }: { children: React.ReactNode; params: Promise<{ slug: string }> },
+) {
+  const { slug } = await params;
+  const team = await getMergedSportsTeamBySlug(slug);
+  if (!team) return <>{children}</>;
+  const path = `/sports/teams/${slug}`;
+  return (
+    <>
+      <JsonLd
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'SportsTeam',
+          name: team.name,
+          sport: team.sport,
+          description: team.description,
+          url: `${SITE}${path}`,
+          sameAs: team.url ? [team.url] : undefined,
+        }}
+      />
+      <JsonLd data={breadcrumbLd([{ name: 'Sports', path: '/sports' }, { name: 'Teams', path: '/sports/teams' }, { name: team.name, path }])} />
+      {children}
+    </>
+  );
 }
