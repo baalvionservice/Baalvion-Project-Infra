@@ -579,9 +579,6 @@ const nextConfig: NextConfig = {
   // "pkg"`) into direct per-module imports, so a route that uses one icon or one chart
   // type doesn't pull the whole package's module graph into its chunk.
   experimental: {
-    // Inlines the two render-blocking stylesheets (~30 KiB) into the HTML; Lighthouse
-    // measured ~350 ms of blocked first paint on mobile.
-    inlineCss: true,
     optimizePackageImports: [
       "@/components",
       "@/lib",
