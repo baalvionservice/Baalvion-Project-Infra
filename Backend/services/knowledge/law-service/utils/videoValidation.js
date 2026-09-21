@@ -19,6 +19,19 @@ function validateVideoShow(data, isCreate) {
     common(data, isCreate, ['name']);
     for (const f of ['cover_url']) if (!blank(data[f]) && !isHttps(data[f])) fail(`${f} must be a full https:// address`);
     if (!blank(data.cover_url) && blank(data.cover_credit)) fail('cover_credit is required when a cover image is set');
+    if ('faq' in data && (!Array.isArray(data.faq) || data.faq.some((f) => !f || blank(f.q) || blank(f.a)))) fail('each FAQ needs a question and an answer');
+    if ('facts' in data && (!Array.isArray(data.facts) || data.facts.some((f) => !f || blank(f.label) || blank(f.value)))) fail('each fact needs a label and a value');
+    if ('sources' in data && (!Array.isArray(data.sources) || data.sources.some((x) => !x || blank(x.label) || !isHttps(x.url)))) fail('each source needs a label and a full https:// address');
+    if ('seasons' in data) {
+        const ss = data.seasons;
+        if (!Array.isArray(ss) || ss.length > 80) fail('seasons must be a list of at most 80');
+        for (const x of ss) {
+            if (!x || !Number.isInteger(Number(x.number))) fail('each season needs a number');
+            if (x.participants !== undefined && (!Array.isArray(x.participants) || x.participants.length > 120 || x.participants.some((p) => !p || blank(p.name)))) fail('each participant needs a name');
+            if (!blank(x.source) && !isHttps(x.source)) fail('a season source must be a full https:// address');
+        }
+    }
+    if (data.indexable === true && data.overview !== undefined && String(data.overview).trim().split(/\s+/).length < 80) fail('write at least about 80 words of overview before making the page indexable');
 }
 
 function validateVideoItem(data, isCreate) {

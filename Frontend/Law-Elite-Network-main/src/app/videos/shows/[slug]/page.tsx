@@ -18,10 +18,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const show = hub.shows.find((s) => s.slug === slug);
   if (!show) return { robots: { index: false } };
   return {
-    title: `${show.name}: video`,
-    description: show.description || `Watch ${show.name} on Law Elite Network.`,
+    title: show.seoTitle || `${show.name}: video`,
+    description: show.seoDescription || show.description || `Watch ${show.name} on Law Elite Network.`,
     alternates: { canonical: `${SITE}/videos/shows/${show.slug}` },
-    robots: { index: hub.videos.some((v) => v.showSlug === show.slug), follow: true },
+    // No thin pages: a show is indexed once it has videos or a finished write-up.
+    robots: { index: show.indexable || hub.videos.some((v) => v.showSlug === show.slug), follow: true },
   };
 }
 
@@ -30,5 +31,16 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
   const { slug } = await params;
   const show = hub.shows.find((s) => s.slug === slug);
   if (!show) notFound();
-  return <VideoHubView hub={hub} show={show} />;
+  const ld = show.overview ? {
+    '@context': 'https://schema.org', '@type': 'TVSeries', name: show.name, url: `${SITE}/videos/shows/${show.slug}`, description: show.description || undefined,
+    ...(show.seasons.length ? { numberOfSeasons: show.seasons.length } : {}), ...(show.countryCode ? { countryOfOrigin: { '@type': 'Country', name: show.countryCode } } : {}),
+  } : null;
+  const faq = show.faq.length ? { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: show.faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) } : null;
+  return (
+    <>
+      {ld && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />}
+      {faq && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faq) }} />}
+      <VideoHubView hub={hub} show={show} />
+    </>
+  );
 }

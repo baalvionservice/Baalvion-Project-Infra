@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { Story, Row, LinedHeading, MoreLink } from '@/components/videos/VideoBits';
+import { ShowDetails, ShowIntro } from '@/components/videos/ShowProfile';
 import { showUrl, type HubShow, type VideoHub, type VideoScope } from '@/lib/videos-hub';
 
 type Tab = 'all' | VideoScope;
@@ -54,6 +55,7 @@ export function VideoHubView({ hub, show, title = 'Video' }: { hub: VideoHub; sh
           </nav>
         </div>
         {show?.description && <p className="mt-3 max-w-2xl text-neutral-600">{show.description}</p>}
+        {show && <ShowIntro show={show} />}
 
         {videos.length === 0 ? (
           <p className="mt-10 border border-neutral-200 p-8 text-neutral-500">{hub.videos.length === 0 ? 'No videos have been published yet. They appear here as soon as one is.' : 'No videos in this region yet.'}</p>
@@ -102,6 +104,7 @@ export function VideoHubView({ hub, show, title = 'Video' }: { hub: VideoHub; sh
                   </ul>
                 </section>
               )}
+              {show && <ShowDetails show={show} />}
             </div>
 
             <aside aria-label="Latest videos" className="hidden lg:block">

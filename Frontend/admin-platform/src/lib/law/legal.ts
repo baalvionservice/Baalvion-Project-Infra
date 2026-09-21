@@ -80,6 +80,12 @@ export const topicsApi = resource<TopicRecord>('topics');
 export interface VideoShowRecord {
   id: number; slug: string; name: string; description: string; scope: 'national' | 'international'; country_code?: string | null; network?: string | null;
   cover_url?: string | null; cover_credit?: string | null; sort_order: number; featured: boolean; published: boolean; archived: boolean; updated_at?: string;
+  overview?: string; facts?: { label: string; value: string }[]; faq?: { q: string; a: string }[]; sources?: { label: string; url: string }[];
+  seasons?: ShowSeason[]; seo_title?: string | null; seo_description?: string | null; reviewed_at?: string | null; indexable?: boolean;
+}
+export interface ShowSeason {
+  number: number; year?: number | null; first_aired?: string | null; host?: string | null; network?: string | null; days?: number | null; housemates?: number | null;
+  winner?: string | null; runner_up?: string | null; notes?: string | null; source?: string | null; participants: { name: string; result?: string }[];
 }
 export interface VideoItemRecord {
   id: number; slug: string; title: string; description: string; video_url: string; thumbnail_url?: string | null; thumbnail_credit?: string | null;

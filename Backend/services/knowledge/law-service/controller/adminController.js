@@ -71,7 +71,7 @@ const ADMIN_FIELDS = {
     person_photos: ['alt_text', 'credit', 'license', 'license_url', 'source_url', 'is_primary', 'is_active'],
     person_links:  ['person_id', 'kind', 'target_slug', 'relationship'],
     podcast_shows: ['slug', 'title', 'host', 'publisher', 'description', 'category', 'country_code', 'language', 'listen_url', 'website_url', 'cover_url', 'cover_credit', 'rank', 'ranking_note', 'overview', 'first_aired', 'frequency', 'format', 'best_for', 'faq', 'sources', 'seo_title', 'seo_description', 'reviewed_at', 'indexable', 'listen_links', 'hosts', 'related_article_slugs', 'videos', 'episodes', 'published', 'archived'],
-    video_shows: ['slug', 'name', 'description', 'scope', 'country_code', 'network', 'cover_url', 'cover_credit', 'sort_order', 'featured', 'published', 'archived'],
+    video_shows: ['slug', 'name', 'description', 'scope', 'country_code', 'network', 'cover_url', 'cover_credit', 'overview', 'facts', 'seasons', 'faq', 'sources', 'seo_title', 'seo_description', 'reviewed_at', 'indexable', 'sort_order', 'featured', 'published', 'archived'],
     video_items: ['slug', 'title', 'description', 'video_url', 'thumbnail_url', 'thumbnail_credit', 'source_name', 'show_slug', 'category', 'scope', 'country_code', 'duration_seconds', 'published_at', 'people_slugs', 'sort_order', 'featured', 'published', 'archived'],
     topics: ['slug', 'name', 'pillar', 'aliases', 'description', 'published', 'indexable', 'archived'],
     sports_teams: ['slug', 'name', 'sport', 'country_code', 'description', 'url', 'verified', 'source_note', 'published', 'indexable', 'archived'],

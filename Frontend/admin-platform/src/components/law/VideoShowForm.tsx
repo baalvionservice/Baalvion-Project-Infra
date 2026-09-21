@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { REGION_NAMES, slugify, videoShowsApi, type VideoShowRecord } from '@/lib/law/legal';
+import { REGION_NAMES, slugify, videoShowsApi, type ShowSeason, type VideoShowRecord } from '@/lib/law/legal';
 
 const SELECT = 'h-9 w-full rounded-md border border-input bg-background px-3 text-sm';
 
@@ -29,7 +29,12 @@ export function VideoShowForm({ item }: { item?: VideoShowRecord }) {
     mutationFn: () => {
       const body: Partial<VideoShowRecord> = { ...v };
       delete (body as { id?: number }).id; delete body.updated_at;
-      for (const k of ['country_code', 'network', 'cover_url', 'cover_credit'] as const) if (body[k] === '') body[k] = null;
+      body.facts = (v.facts ?? []).filter((x) => x.label.trim() && x.value.trim());
+      body.faq = (v.faq ?? []).filter((x) => x.q.trim() && x.a.trim());
+      body.sources = (v.sources ?? []).filter((x) => x.label.trim() && x.url.trim());
+      body.seasons = (v.seasons ?? []).filter((x) => Number.isFinite(x.number));
+      if (String(v.overview ?? '').trim()) body.reviewed_at = new Date().toISOString();
+      for (const k of ['country_code', 'network', 'cover_url', 'cover_credit', 'seo_title', 'seo_description'] as const) if (body[k] === '') body[k] = null;
       return isNew ? videoShowsApi.create(body) : videoShowsApi.update(item!.id, body);
     },
     onSuccess: (row) => { setError(null); setSaved(true); qc.invalidateQueries({ queryKey: ['law', 'video-shows'] }); if (isNew) router.replace(`/law/video-shows/${row.id}`); },
@@ -58,9 +63,67 @@ export function VideoShowForm({ item }: { item?: VideoShowRecord }) {
         </CardContent>
       </Card>
       <Card>
+        <CardHeader><CardTitle>Its own page</CardTitle></CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-1.5"><Label htmlFor="overview">Write-up</Label><Textarea id="overview" rows={10} value={v.overview ?? ''} onChange={(e) => set('overview', e.target.value)} />
+            <p className="text-xs text-muted-foreground">{(v.overview ?? '').trim().split(/\s+/).filter(Boolean).length} words. Separate paragraphs with a blank line. Write it in your own words and only state facts you can check. Under about 80 words, keep the page hidden from search.</p></div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-1.5"><Label htmlFor="st">Search title (optional)</Label><Input id="st" maxLength={200} value={text('seo_title')} onChange={(e) => set('seo_title', e.target.value)} /></div>
+            <div className="space-y-1.5"><Label htmlFor="sd">Search description (optional)</Label><Input id="sd" maxLength={320} value={text('seo_description')} onChange={(e) => set('seo_description', e.target.value)} /></div>
+          </div>
+          <div className="space-y-2"><Label>At a glance (label and value)</Label>
+            {(v.facts ?? []).map((f, i) => (
+              <div key={i} className="grid gap-2 md:grid-cols-[1fr_2fr]">
+                <Input aria-label="Label" placeholder="e.g. Host" value={f.label} onChange={(e) => set('facts', (v.facts ?? []).map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))} />
+                <Input aria-label="Value" placeholder="e.g. Salman Khan" value={f.value} onChange={(e) => set('facts', (v.facts ?? []).map((x, j) => (j === i ? { ...x, value: e.target.value } : x)))} />
+              </div>
+            ))}
+            <Button type="button" variant="outline" size="sm" onClick={() => set('facts', [...(v.facts ?? []), { label: '', value: '' }])}>Add a fact</Button></div>
+          <div className="space-y-2"><Label>Seasons and who took part</Label>
+            {(v.seasons ?? []).map((sn, i) => {
+              const upd = (patch: Partial<ShowSeason>) => set('seasons', (v.seasons ?? []).map((x, j) => (j === i ? { ...x, ...patch } : x)));
+              return (
+                <div key={i} className="space-y-2 rounded-md border p-3">
+                  <div className="grid gap-2 md:grid-cols-4">
+                    <Input aria-label="Season number" type="number" placeholder="Season no." value={sn.number ?? ''} onChange={(e) => upd({ number: Number(e.target.value) })} />
+                    <Input aria-label="Year" type="number" placeholder="Year" value={sn.year ?? ''} onChange={(e) => upd({ year: e.target.value ? Number(e.target.value) : null })} />
+                    <Input aria-label="Host" placeholder="Host" value={sn.host ?? ''} onChange={(e) => upd({ host: e.target.value })} />
+                    <Input aria-label="Channel" placeholder="Channel" value={sn.network ?? ''} onChange={(e) => upd({ network: e.target.value })} />
+                    <Input aria-label="Winner" placeholder="Winner" value={sn.winner ?? ''} onChange={(e) => upd({ winner: e.target.value })} />
+                    <Input aria-label="Runner-up" placeholder="Runner-up" value={sn.runner_up ?? ''} onChange={(e) => upd({ runner_up: e.target.value })} />
+                    <Input aria-label="Days" type="number" placeholder="Days" value={sn.days ?? ''} onChange={(e) => upd({ days: e.target.value ? Number(e.target.value) : null })} />
+                    <Input aria-label="Housemates" type="number" placeholder="Housemates" value={sn.housemates ?? ''} onChange={(e) => upd({ housemates: e.target.value ? Number(e.target.value) : null })} />
+                  </div>
+                  <Input aria-label="Notes" placeholder="Note about this season (optional)" value={sn.notes ?? ''} onChange={(e) => upd({ notes: e.target.value })} />
+                  <Textarea aria-label="Participants" rows={5} placeholder={'One person per line, in the order they entered. Add | Winner or | Runner-up after a name.'}
+                    value={(sn.participants ?? []).map((p) => (p.result ? `${p.name} | ${p.result}` : p.name)).join('\n')}
+                    onChange={(e) => upd({ participants: e.target.value.split('\n').map((l) => l.trim()).filter(Boolean).map((l) => { const [name, result] = l.split('|').map((x) => x.trim()); return result ? { name, result } : { name }; }) })} />
+                </div>
+              );
+            })}
+            <Button type="button" variant="outline" size="sm" onClick={() => set('seasons', [...(v.seasons ?? []), { number: (v.seasons?.length ?? 0) + 1, participants: [] }])}>Add a season</Button></div>
+          <div className="space-y-2"><Label>Quick answers</Label>
+            {(v.faq ?? []).map((f, i) => (
+              <div key={i} className="grid gap-2 md:grid-cols-2">
+                <Input aria-label="Question" placeholder="Question" value={f.q} onChange={(e) => set('faq', (v.faq ?? []).map((x, j) => (j === i ? { ...x, q: e.target.value } : x)))} />
+                <Input aria-label="Answer" placeholder="Answer" value={f.a} onChange={(e) => set('faq', (v.faq ?? []).map((x, j) => (j === i ? { ...x, a: e.target.value } : x)))} />
+              </div>
+            ))}
+            <Button type="button" variant="outline" size="sm" onClick={() => set('faq', [...(v.faq ?? []), { q: '', a: '' }])}>Add a question</Button></div>
+          <div className="space-y-2"><Label>Sources</Label>
+            {(v.sources ?? []).map((x, i) => (
+              <div key={i} className="grid gap-2 md:grid-cols-2">
+                <Input aria-label="Source name" placeholder="Name" value={x.label} onChange={(e) => set('sources', (v.sources ?? []).map((y, j) => (j === i ? { ...y, label: e.target.value } : y)))} />
+                <Input aria-label="Source address" type="url" placeholder="https://" value={x.url} onChange={(e) => set('sources', (v.sources ?? []).map((y, j) => (j === i ? { ...y, url: e.target.value } : y)))} />
+              </div>
+            ))}
+            <Button type="button" variant="outline" size="sm" onClick={() => set('sources', [...(v.sources ?? []), { label: '', url: '' }])}>Add a source</Button></div>
+        </CardContent>
+      </Card>
+      <Card>
         <CardHeader><CardTitle>Publishing</CardTitle></CardHeader>
         <CardContent className="space-y-4">
-          {([['published', 'Published', 'Shown on /videos.'], ['featured', 'Featured', 'Prefer this show in highlighted spots.'], ['archived', 'Archived', 'Takes it offline without deleting it.']] as const).map(([k, l, d]) => (
+          {([['published', 'Published', 'Shown on /videos.'], ['indexable', 'Let search engines index its page', 'Turn on only when the write-up is finished and checked.'], ['featured', 'Featured', 'Prefer this show in highlighted spots.'], ['archived', 'Archived', 'Takes it offline without deleting it.']] as const).map(([k, l, d]) => (
             <div key={k} className="flex items-center justify-between gap-4"><div><p className="text-sm font-medium">{l}</p><p className="text-xs text-muted-foreground">{d}</p></div><Switch checked={!!v[k]} onCheckedChange={(c) => set(k, c)} aria-label={l} /></div>
           ))}
         </CardContent>

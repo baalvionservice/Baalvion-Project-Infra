@@ -13,6 +13,30 @@ export interface HubShow {
   coverUrl?: string;
   coverCredit?: string;
   featured: boolean;
+  overview: string;
+  facts: { label: string; value: string }[];
+  seasons: HubSeason[];
+  faq: { q: string; a: string }[];
+  sources: { label: string; url: string }[];
+  seoTitle?: string;
+  seoDescription?: string;
+  reviewedAt?: string;
+  indexable: boolean;
+}
+
+export interface HubSeason {
+  number: number;
+  year?: number;
+  firstAired?: string;
+  host?: string;
+  network?: string;
+  days?: number;
+  housemates?: number;
+  winner?: string;
+  runnerUp?: string;
+  notes?: string;
+  source?: string;
+  participants: { name: string; result?: string }[];
 }
 
 export interface HubVideo {
@@ -46,6 +70,17 @@ export async function getVideoHub(): Promise<VideoHub> {
   const shows: HubShow[] = (Array.isArray(d?.shows) ? d.shows : []).map((s: any) => ({
     slug: s.slug, name: s.name, description: s.description || '', scope: s.scope === 'international' ? 'international' : 'national',
     countryCode: clean(s.country_code), network: clean(s.network), coverUrl: clean(s.cover_url), coverCredit: clean(s.cover_credit), featured: !!s.featured,
+    overview: typeof s.overview === 'string' ? s.overview : '',
+    facts: Array.isArray(s.facts) ? s.facts.filter((f: any) => f?.label && f?.value) : [],
+    faq: Array.isArray(s.faq) ? s.faq.filter((f: any) => f?.q && f?.a) : [],
+    sources: Array.isArray(s.sources) ? s.sources.filter((x: any) => x?.label && x?.url) : [],
+    seasons: Array.isArray(s.seasons) ? s.seasons.map((x: any): HubSeason => ({
+      number: Number(x.number), year: typeof x.year === 'number' ? x.year : undefined, firstAired: clean(x.first_aired), host: clean(x.host), network: clean(x.network),
+      days: typeof x.days === 'number' ? x.days : undefined, housemates: typeof x.housemates === 'number' ? x.housemates : undefined,
+      winner: clean(x.winner), runnerUp: clean(x.runner_up), notes: clean(x.notes), source: clean(x.source),
+      participants: Array.isArray(x.participants) ? x.participants.filter((p: any) => p?.name).map((p: any) => ({ name: p.name, result: clean(p.result) })) : [],
+    })).sort((a: HubSeason, b: HubSeason) => a.number - b.number) : [],
+    seoTitle: clean(s.seo_title), seoDescription: clean(s.seo_description), reviewedAt: clean(s.reviewed_at), indexable: !!s.indexable,
   }));
   const videos: HubVideo[] = (Array.isArray(d?.videos) ? d.videos : []).map((v: any) => ({
     slug: v.slug, title: v.title, description: v.description || '', url: v.video_url, thumbnailUrl: clean(v.thumbnail_url) ?? autoThumbnail(v.video_url),
