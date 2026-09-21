@@ -218,7 +218,15 @@ function scoreArticle(charter, article) {
 async function runIntake(websiteId, { limit = 200, sinceHours = 72, acceptThreshold = DEFAULT_ACCEPT_THRESHOLD } = {}) {
     const charter = await charterService.requireCharter(websiteId);
     const { articles, error } = await fetchWire({ limit, sinceHours });
+    const counts = await ingestArticles(websiteId, charter, articles, acceptThreshold);
+    return { scanned: articles.length, ...counts, wireError: error };
+}
 
+/**
+ * Scores wire-shaped items against the charter and records each verdict as a signal. Shared by wire intake and
+ * trend intake, so a trending topic is judged by exactly the same rules as any other story.
+ */
+async function ingestArticles(websiteId, charter, articles, acceptThreshold = DEFAULT_ACCEPT_THRESHOLD) {
     let created = 0;
     let rescored = 0;
     let accepted = 0;
@@ -241,6 +249,7 @@ async function runIntake(websiteId, { limit = 200, sinceHours = 72, acceptThresh
                 title: decodeEntities(article.title),
                 summary: decodeEntities(article.summary_ai || article.summary_raw || '') || null,
                 sourceType: (article.source && article.source.type) || existing.sourceType,
+                topicKey: article.topicKey || existing.topicKey || null,
                 relevanceScore: score, scoreReasons: reasons, decision, rejectionReason,
             });
             rescored += 1;
@@ -248,6 +257,7 @@ async function runIntake(websiteId, { limit = 200, sinceHours = 72, acceptThresh
             await CmsStorySignal.create({
                 websiteId,
                 wireArticleId: article.id || null,
+                topicKey: article.topicKey || null,
                 title: decodeEntities(article.title),
                 url: article.url,
                 sourceName: (article.source && article.source.name) || null,
@@ -266,7 +276,7 @@ async function runIntake(websiteId, { limit = 200, sinceHours = 72, acceptThresh
         if (decision === 'accepted') accepted += 1; else rejected += 1;
     }
 
-    return { scanned: articles.length, created, rescored, accepted, rejected, wireError: error };
+    return { created, rescored, accepted, rejected };
 }
 
 /** Accepted signals not yet gathered into a cluster, newest first. */
@@ -282,4 +292,4 @@ async function listAccepted(websiteId, { sinceHours = 72, limit = 500 } = {}) {
     });
 }
 
-module.exports = { runIntake, scoreArticle, listAccepted, decodeEntities, MAX_AGE_HOURS, DEFAULT_ACCEPT_THRESHOLD, MIN_DISTINCT_HITS_WITHOUT_CATEGORY };
+module.exports = { runIntake, ingestArticles, scoreArticle, listAccepted, decodeEntities, MAX_AGE_HOURS, DEFAULT_ACCEPT_THRESHOLD, MIN_DISTINCT_HITS_WITHOUT_CATEGORY };

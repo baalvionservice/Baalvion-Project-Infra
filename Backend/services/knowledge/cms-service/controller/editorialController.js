@@ -13,6 +13,9 @@
 const charterService = require('../service/editorial/charterService');
 const policyService = require('../service/editorial/policyService');
 const intakeService = require('../service/editorial/intakeService');
+const trendIntakeService = require('../service/editorial/trendIntakeService');
+const photoCommons = require('../service/editorial/photoCommons');
+const photoService = require('../service/editorial/photoService');
 const clusterService = require('../service/editorial/clusterService');
 const briefService = require('../service/editorial/briefService');
 const draftService = require('../service/editorial/draftService');
@@ -122,6 +125,48 @@ exports.runIntake = async (req, res, next) => {
     } catch (e) { next(e); }
 };
 
+/** Trending entertainment topics into the same signal queue as wire news. Slow (several public APIs), so it is its own button. */
+exports.runTrends = async (req, res, next) => {
+    try {
+        const geos = Array.isArray(req.body && req.body.geos) ? req.body.geos.filter((g) => /^[A-Z]{2}$/.test(g)).slice(0, 8) : undefined;
+        sendSuccess(req, res, await trendIntakeService.runTrendIntake(siteOf(req), { ...(geos && geos.length ? { geos } : {}), feeds: !(req.body && req.body.feeds === false) }));
+    } catch (e) { next(e); }
+};
+
+/** Free-licensed photo candidates from Wikimedia Commons (CC0, public domain, CC BY, CC BY-SA only). */
+exports.searchPhotos = async (req, res, next) => {
+    try {
+        const candidates = await photoCommons.searchCommons(String(req.query.q || ''), { getJson: require('../service/editorial/trends/http').getJson });
+        sendSuccess(req, res, candidates);
+    } catch (e) { next(e); }
+};
+
+exports.listDraftArt = async (req, res, next) => {
+    try { sendSuccess(req, res, await photoService.listArt(siteOf(req), req.params.draftId)); } catch (e) { next(e); }
+};
+
+/** Attach one Commons photo to a draft. The licence is re-checked here, whatever the client sent. */
+exports.attachPhoto = async (req, res, next) => {
+    try {
+        const b = req.body || {};
+        const art = await photoService.attachCommonsPhoto(siteOf(req), req.params.draftId, {
+            title: b.title, subject: b.subject, altText: b.altText, confirmedDepictsSubject: b.confirmedDepictsSubject === true,
+        });
+        sendSuccess(req, res, art, 201);
+    } catch (e) { next(e); }
+};
+
+/** Sentence-by-sentence: what each claim in a draft is backed by, on the same rule the citation gate uses. */
+exports.claimCheck = async (req, res, next) => {
+    try {
+        const { CmsArticleDraft } = require('../models');
+        const draft = await CmsArticleDraft.findOne({ where: { id: req.params.draftId, websiteId: siteOf(req) } });
+        if (!draft) return next(new (require('../utils/errors').AppError)('NOT_FOUND', 'Draft not found', 404));
+        const metrics = require('../service/editorial/textMetrics');
+        sendSuccess(req, res, require('../service/editorial/claimCheck').claimReport(metrics.blocksToText((draft.contentBlocks || []).filter((b) => b && b.type !== 'heading')), draft.citations));
+    } catch (e) { next(e); }
+};
+
 exports.runClustering = async (req, res, next) => {
     try {
         const clusters = await clusterService.clusterSignals(siteOf(req), {
@@ -180,14 +225,14 @@ exports.runDrafting = async (req, res, next) => {
         // A brief id drafts exactly that story; without one the stage works the queue.
         if (body.briefId) {
             const draft = await draftService.buildDraft(siteOf(req), body.briefId, {
-                format: body.format || 'news',
+                format: ['news', 'brief'].includes(body.format) ? body.format : 'news',
                 authorSlug: body.authorSlug || null,
             });
             return sendSuccess(req, res, draft, 201);
         }
         sendSuccess(req, res, await draftService.runDrafting(siteOf(req), {
             limit: Number(body.limit) || 5,
-            format: body.format || 'news',
+            format: ['news', 'brief'].includes(body.format) ? body.format : 'news',
             authorSlug: body.authorSlug || null,
         }));
     } catch (e) { next(e); }
