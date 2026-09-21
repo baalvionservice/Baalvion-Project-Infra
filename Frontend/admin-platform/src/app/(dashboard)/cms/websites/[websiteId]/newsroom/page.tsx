@@ -11,11 +11,14 @@ import {
   useDraft,
   useRunPipeline,
   useRunDrafting,
+  useRunTrends,
   useGateDraft,
   useApproveDraft,
   useRejectDraft,
   useCoverage,
 } from '@/lib/queries/editorial.queries';
+import { PhotoFinder } from '@/components/newsroom/PhotoFinder';
+import { ClaimCheck } from '@/components/newsroom/ClaimCheck';
 import type { ArticleDraft, ContentBlock, CoverageRow, GateResult, StoryBrief } from '@/lib/types/editorial.types';
 import './newsroom.css';
 
@@ -120,6 +123,7 @@ export default function NewsroomPage({ params }: { params: Promise<{ websiteId: 
   const { data: coverage } = useCoverage(websiteId);
 
   const runPipeline = useRunPipeline(websiteId);
+  const runTrends = useRunTrends(websiteId);
   const runDrafting = useRunDrafting(websiteId);
   const gateDraft = useGateDraft(websiteId);
   const approveDraft = useApproveDraft(websiteId);
@@ -155,7 +159,7 @@ export default function NewsroomPage({ params }: { params: Promise<{ websiteId: 
   const lastRun = runPipeline.data;
   const blockers = (preflight?.problems ?? []).filter((p) => p.blocks !== 'intake');
   const gates = openDraft ? sortGates(openDraft.gateResults ?? []) : [];
-  const busy = runPipeline.isPending || runDrafting.isPending;
+  const busy = runPipeline.isPending || runDrafting.isPending || runTrends.isPending;
 
   return (
     <div className="bv-newsroom">
@@ -262,6 +266,8 @@ export default function NewsroomPage({ params }: { params: Promise<{ websiteId: 
                   <span>{openDraft.citations?.length ?? 0} citations</span>
                   <span>{new Date(openDraft.createdAt).toLocaleString()}</span>
                 </p>
+                <PhotoFinder key={openDraft.id} websiteId={websiteId} draftId={openDraft.id} defaultQuery={openDraft.title.split(/[:—–-]/)[0].trim()} />
+                <ClaimCheck key={`c-${openDraft.id}`} websiteId={websiteId} draftId={openDraft.id} />
                 <DraftBody blocks={openDraft.contentBlocks} />
               </article>
             )}
@@ -340,10 +346,28 @@ export default function NewsroomPage({ params }: { params: Promise<{ websiteId: 
             <button
               type="button"
               className="bv-nr-btn"
+              disabled={busy}
+              title="Finds what is trending in entertainment (Google Trends, Wikipedia, TMDB) and adds it to the intake queue. Takes up to a minute."
+              onClick={() => runTrends.mutate()}
+            >
+              {runTrends.isPending ? 'Finding trends…' : 'Fetch trending topics'}
+            </button>
+            <button
+              type="button"
+              className="bv-nr-btn"
               disabled={busy || counts.briefsReady === 0}
               onClick={() => runDrafting.mutate({ limit: 5 })}
             >
               Draft {counts.briefsReady} ready brief{counts.briefsReady === 1 ? '' : 's'}
+            </button>
+            <button
+              type="button"
+              className="bv-nr-btn"
+              disabled={busy || counts.briefsReady === 0}
+              title="A short news item of 150 to 350 words, for stories with only a few sourced facts. Judged against its own shorter word budget; never padded."
+              onClick={() => runDrafting.mutate({ limit: 5, format: 'brief' })}
+            >
+              Draft short briefs
             </button>
             <button
               type="button"

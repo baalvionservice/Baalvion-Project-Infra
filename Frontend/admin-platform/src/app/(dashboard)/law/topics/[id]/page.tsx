@@ -23,7 +23,7 @@ export default function EditTopicPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title={record.name} description={`/sports/competitions/${record.slug}`} />
+      <PageHeader title={record.name} description={`/topics/${record.slug}`} />
       {/* key: reload the form when a different record (or a fresh save) arrives */}
       <TopicForm key={`${record.id}-${record.updated_at}`} topic={record} />
     </div>
