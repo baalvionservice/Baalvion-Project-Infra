@@ -14,6 +14,7 @@ const { errorHandler, notFoundHandler } = require('./middleware/errorMiddleware'
 const db = require('./models');
 const { runMigrations } = require('./db/migrate');
 const { startBillingWorker, stopBillingWorker } = require('./service/billingWorker');
+const { startIngestWorker, stopIngestWorker } = require('./service/ingestWorker');
 const realtime = require('./service/realtime');
 const { metricsMiddleware, metricsHandler } = require('./middleware/metrics');
 const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-shutdown');
@@ -61,6 +62,7 @@ const start = async () => {
     realtime.attach(server);
     server.listen(config.port, () => console.log(`[law-service] running on port ${config.port}`));
     startBillingWorker();
+    startIngestWorker();
 
     // Drain this service's payment outbox onto the event bus. Each service owns its own `pcl`
     // schema in its own database, so each needs its own relay — without it, payments record
@@ -71,6 +73,7 @@ const start = async () => {
 
     registerShutdown('payment-outbox', async () => { await paymentSpine.stopPaymentRelay(); });
     registerShutdown('billing-worker', async () => { stopBillingWorker(); });
+    registerShutdown('ingest-worker', async () => { stopIngestWorker(); });
     registerShutdown('db', async () => {
         if (db.sequelize && db.sequelize.close) await db.sequelize.close();
     });
