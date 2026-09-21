@@ -1,0 +1,27 @@
+'use client';
+
+import { useEffect } from 'react';
+import { useParams } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
+import PageHeader from '@/components/common/PageHeader';
+import { Skeleton } from '@/components/ui/skeleton';
+import { VideoItemForm } from '@/components/law/VideoItemForm';
+import { useUIStore } from '@/lib/store/uiStore';
+import { videoItemsApi } from '@/lib/law/legal';
+
+export default function EditVideoItemFormPage() {
+  const { id } = useParams<{ id: string }>();
+  const { setBreadcrumbs } = useUIStore();
+  const { data: record, isLoading, isError } = useQuery({ queryKey: ['law', 'videos', 'one', id], queryFn: () => videoItemsApi.get(id) });
+  const label: string = record?.title ?? 'Edit';
+  useEffect(() => { setBreadcrumbs([{ label: 'Law Elite', href: '/law' }, { label: 'Videos', href: '/law/videos' }, { label }]); }, [setBreadcrumbs, label]);
+
+  if (isLoading) return <Skeleton className="h-96 w-full" />;
+  if (isError || !record) return <p className="py-16 text-center text-sm text-red-600">Not found.</p>;
+  return (
+    <div className="space-y-6">
+      <PageHeader title={label} description="video" />
+      <VideoItemForm key={`${record.id}-${record.updated_at}`} item={record} />
+    </div>
+  );
+}
