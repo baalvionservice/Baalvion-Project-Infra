@@ -36,11 +36,27 @@ const VERIFIED_PRIMARY_COVERAGE_BONUS = 10;
 const violation = (rule, message) => ({ rule, status: 'failed', message });
 const pass = (rule, message) => ({ rule, status: 'passed', message });
 
-/** Quoted spans in the body, straight and curly. */
+/**
+ * Quoted spans in the body, straight and curly, paired in reading order.
+ *
+ * A single regex over straight quotes mispairs as soon as one quoted span is too short to match: in
+ * `"Have It All" in 2024, and "Prodigal Daughter"` the closing quote of the first title was taken as an opener,
+ * and the words between the two titles were reported as an unverified quotation.
+ */
 function quotedSpans(text) {
-    return (String(text || '').match(/["“]([^"”]{12,400})["”]/g) || [])
-        .map((q) => metrics.plainText(q).replace(/^["“]|["”]$/g, '').trim())
-        .filter(Boolean);
+    const s = String(text || '');
+    const spans = [];
+    let open = null;
+    for (let i = 0; i < s.length; i += 1) {
+        const ch = s[i];
+        if (ch === '\u201c') open = i;
+        else if (ch === '\u201d') { if (open !== null) { spans.push(s.slice(open + 1, i)); open = null; } }
+        else if (ch === '"') {
+            if (open === null) open = i;
+            else { spans.push(s.slice(open + 1, i)); open = null; }
+        }
+    }
+    return spans.map((q) => metrics.plainText(q).trim()).filter((q) => q.length >= 12 && q.length <= 400);
 }
 
 /**
@@ -112,9 +128,15 @@ function evaluateCharterGates(charter, brief, draft) {
     // 6 — quote verification.
     if (charter.requireQuoteVerification) {
         const briefQuotes = (brief.quotes || []).map((q) => metrics.plainText(q.text).toLowerCase());
+        // A title in quotation marks ("Nobody Asked You To Do That") is not speech, and an entertainment piece is full
+        // of them. It is verified when those exact words already stand in the brief's own sourced facts or source
+        // headlines: they came from a source, they were not invented. Words that appear nowhere in the brief still fail.
+        const briefText = [...(brief.facts || []).map((f) => f && f.statement), ...(brief.sources || []).map((src) => src && src.title)]
+            .filter(Boolean).map((t) => metrics.plainText(t).toLowerCase());
         const unverified = quotedSpans(bodyText).filter((span) => {
-            const needle = span.toLowerCase();
-            return !briefQuotes.some((bq) => bq.includes(needle) || needle.includes(bq));
+            // Trailing punctuation inside the marks ("After Midnight.") is style, not different words.
+            const needle = span.toLowerCase().replace(/[\s.,;:!?\u2026]+$/, '');
+            return !briefQuotes.some((bq) => bq.includes(needle) || needle.includes(bq)) && !briefText.some((t) => t.includes(needle));
         });
         results.push(unverified.length
             ? violation('quoteVerification', `${unverified.length} quotation(s) do not appear in the brief's verbatim quotes: "${unverified[0].slice(0, 80)}…".`)
@@ -208,7 +230,7 @@ async function evaluateDraft(websiteId, draftId, { reviewerSlug = null, at = new
         authorSlug: draft.authorSlug,
         reviewerSlug: reviewerSlug || draft.reviewerSlug,
         contentBlocks: draft.contentBlocks,
-        format: 'news',
+        format: draft.format || 'news',
         hasOriginalArt: Boolean(art),
         outputContentType: charter.outputContentType,
         at,
@@ -220,7 +242,7 @@ async function evaluateDraft(websiteId, draftId, { reviewerSlug = null, at = new
     // reviewer needs to see them as such rather than as silence.
     const firedRules = new Set(policyVerdict.violations.map((v) => v.rule));
     for (const [rule, message] of [
-        ['wordCount', `${policyVerdict.words} words, inside the budget for news.`],
+        ['wordCount', `${policyVerdict.words} words, inside the budget for ${draft.format || 'news'}.`],
         ['reviewerDistinct', 'Reviewer differs from the byline.'],
         ['requireOriginalArt', art ? 'Original art attached.' : 'Art not required by policy.'],
         ['rateLimits', 'Inside the daily ceiling, hourly cap and minimum spacing.'],
@@ -307,6 +329,11 @@ async function approveDraft(websiteId, draftId, userId, { reviewerSlug = null, o
             sourcingBasis: brief ? brief.sourcingBasis : null,
             regionSlug: region ? region.slug : null,
             citations: draft.citations || [],
+            // A licensed photo's credit must appear with it (CC BY and BY-SA require attribution).
+            ...(art && art.kind === 'photo' ? {
+                featuredImageCredit: art.attribution, featuredImageSourceUrl: art.sourcePageUrl,
+                featuredImageLicense: art.licenseName, featuredImageLicenseUrl: art.licenseUrl,
+            } : {}),
         },
         externalSourceName: brief && brief.sources && brief.sources[0] ? brief.sources[0].name : null,
         externalSourceUrl: brief && brief.sources && brief.sources[0] ? brief.sources[0].url : null,

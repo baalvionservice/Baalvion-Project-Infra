@@ -20,6 +20,7 @@ module.exports = function (sequelize, DataTypes) {
         title: { type: DataTypes.TEXT, allowNull: false },
         dek: { type: DataTypes.TEXT, allowNull: true },
         slug: { type: DataTypes.STRING(500), allowNull: true },
+        format: { type: DataTypes.STRING(16), allowNull: false, defaultValue: 'news' },
         contentBlocks: { type: DataTypes.JSONB, allowNull: false, defaultValue: [] },
         citations: { type: DataTypes.JSONB, allowNull: false, defaultValue: [] },
         seoMetadata: { type: DataTypes.JSONB, allowNull: false, defaultValue: {} },

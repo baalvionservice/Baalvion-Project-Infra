@@ -19,6 +19,7 @@ const charterService = require('./charterService');
 const policyService = require('./policyService');
 const llmClient = require('./llmClient');
 const metrics = require('./textMetrics');
+const wordBudgets = require('./wordBudgets');
 const { slugify } = require('../../utils/slugify');
 const { AppError } = require('../../utils/errors');
 const { logger } = require('../../platform/logger');
@@ -62,8 +63,8 @@ const DRAFT_SCHEMA = {
 
 /** The word budget for this format, from the publication policy. */
 function wordBudget(policy, format) {
-    const rule = (Array.isArray(policy.wordCountRules) ? policy.wordCountRules : []).find((r) => r.format === format);
-    return { min: Number(rule && rule.min) || 350, max: Number(rule && rule.max) || 1600 };
+    const rule = wordBudgets.ruleFor(policy.wordCountRules, format);
+    return { min: (rule && rule.min) || 350, max: (rule && rule.max) || 1600 };
 }
 
 /**
@@ -283,6 +284,7 @@ async function buildDraft(websiteId, briefId, { format = 'news', authorSlug = nu
         title: String(data.title || brief.workingTitle).trim(),
         dek: data.dek ? String(data.dek).trim() : null,
         slug: slugify(String(data.title || brief.workingTitle)),
+        format,
         contentBlocks,
         citations,
         seoMetadata: {

@@ -14,6 +14,8 @@ module.exports = function (sequelize, DataTypes) {
         websiteId: { type: DataTypes.UUID, allowNull: false },
         wireArticleId: { type: DataTypes.UUID, allowNull: true },
         clusterKey: { type: DataTypes.TEXT, allowNull: true },
+        // Set by a source that already knows which items belong together (trend intake). See 20260043.
+        topicKey: { type: DataTypes.TEXT, allowNull: true },
         title: { type: DataTypes.TEXT, allowNull: false },
         url: { type: DataTypes.TEXT, allowNull: false },
         sourceName: { type: DataTypes.TEXT, allowNull: true },
