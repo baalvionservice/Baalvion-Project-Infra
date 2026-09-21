@@ -14,11 +14,13 @@ const LEGAL_RESOURCES = new Set(['court_profiles', 'case_profiles']);
 const ENTERTAINMENT_RESOURCES = new Set(['entertainment_entities', 'entity_photos']);
 const SPORTS_RESOURCES = new Set(['sports_teams', 'sports_competitions']);
 const TOPIC_RESOURCES = new Set(['topics']);
+const HOME_WIDGET_RESOURCES = new Set(['home_widget_items']);
 const { validatePerson, validatePhoto, validateLink } = require('../utils/peopleValidation');
 const { validateCourt, validateCase } = require('../utils/legalValidation');
 const { validateEntertainment } = require('../utils/entertainmentValidation');
 const { validateTeam, validateCompetition } = require('../utils/sportsValidation');
 const { validateTopic } = require('../utils/topicValidation');
+const { validateHomeWidgetItem } = require('../utils/homeWidgetValidation');
 const mailer = require('../service/mailer');
 const ledger = require('../service/ledger');
 const { maybeActivateLawyer } = require('../service/lawyerActivation');
@@ -68,6 +70,7 @@ const ADMIN_FIELDS = {
     person_photos: ['alt_text', 'credit', 'license', 'license_url', 'source_url', 'is_primary', 'is_active'],
     person_links:  ['person_id', 'kind', 'target_slug', 'relationship'],
     topics: ['slug', 'name', 'pillar', 'aliases', 'description', 'published', 'indexable', 'archived'],
+    home_widget_items: ['widget', 'title', 'summary', 'source_name', 'url', 'image_url', 'credit', 'value', 'extra', 'event_at', 'expires_at', 'sort_order', 'published', 'archived', 'region'],
     sports_teams: ['slug', 'name', 'sport', 'country_code', 'description', 'url', 'verified', 'source_note', 'published', 'indexable', 'archived'],
     sports_competitions: ['slug', 'name', 'sport', 'level', 'country_code', 'description', 'event_date', 'people_involved', 'related_article_slugs', 'videos', 'verified', 'source_note', 'published', 'indexable', 'archived'],
     entity_photos: ['alt_text', 'credit', 'license', 'license_url', 'source_url', 'is_primary', 'is_active'],
@@ -121,6 +124,8 @@ const RESOURCES = {
     // Legal pillar: public case and court reference profiles (not a client's private legal.cases matter).
     // Entertainment pillar: movies, TV, music, awards and events (editorial reference data only).
     // Topics: cross-cutting tags the site matches in article text by name and alias.
+    // Homepage widgets: breaking bar, ticker, audio, docket, gallery, shorts. Archived, never deleted.
+    home_widget_items: { model: 'HomeWidgetItem', search: ['title', 'source_name'], filters: ['widget', 'region', 'published', 'archived'], order: [['updated_at', 'DESC']], noDelete: true, validate: validateHomeWidgetItem },
     topics: { model: 'Topic', search: ['name', 'slug'], filters: ['pillar', 'published', 'indexable', 'archived'], order: [['name', 'ASC']], noDelete: true, validate: validateTopic },
     // Sports pillar: team and competition reference profiles (no scores, standings or schedules).
     sports_teams: { model: 'SportsTeam', search: ['name', 'slug', 'sport'], filters: ['sport', 'country_code', 'published', 'indexable', 'archived', 'verified'], order: [['name', 'ASC']], noDelete: true, validate: validateTeam },
@@ -206,6 +211,7 @@ const createResource = async (req, res, next) => {
         if (ENTERTAINMENT_RESOURCES.has(req.params.resource)) notifySite(['/entertainment']);
         if (SPORTS_RESOURCES.has(req.params.resource)) notifySite(['/sports']);
         if (TOPIC_RESOURCES.has(req.params.resource)) notifySite(['/topics']);
+        if (HOME_WIDGET_RESOURCES.has(req.params.resource)) notifySite(['/']);
         return sendSuccess(req, res, row, 201);
     } catch (err) { return next(err); }
 };
@@ -234,6 +240,7 @@ const updateResource = async (req, res, next) => {
         if (ENTERTAINMENT_RESOURCES.has(req.params.resource)) notifySite(['/entertainment']);
         if (SPORTS_RESOURCES.has(req.params.resource)) notifySite(['/sports']);
         if (TOPIC_RESOURCES.has(req.params.resource)) notifySite(['/topics']);
+        if (HOME_WIDGET_RESOURCES.has(req.params.resource)) notifySite(['/']);
         return sendSuccess(req, res, row);
     } catch (err) { return next(err); }
 };

@@ -5,6 +5,8 @@ const multer = require('multer');
 const ctrl = require('../controller/adminController');
 const peopleCtrl = require('../controller/peopleController');
 const photosCtrl = require('../controller/entityPhotosController');
+const overviewCtrl = require('../controller/lawOverviewController');
+const widgetsCtrl = require('../controller/homeWidgetsController');
 
 // Photos only, 6 MB; the service re-checks magic bytes and licence.
 const photoUpload = multer({
@@ -20,6 +22,9 @@ router.use(authMiddleware, adminOnly);
 router.get('/dashboard', ctrl.getDashboardStats);
 router.get('/stats',     ctrl.getDashboardStats); // alias (back-compat)
 router.get('/analytics', ctrl.getAnalytics);
+router.get('/law-overview', overviewCtrl.overview); // before the generic /:resource routes
+router.post('/home-widget-ingest', widgetsCtrl.ingestNow);
+router.get('/home-widget-sources', overviewCtrl.sourcesBreakdown);
 
 // ── Moderation / lifecycle actions (declared before the generic catch-all) ──
 router.patch('/users/:id/status',           ctrl.setUserStatus);
