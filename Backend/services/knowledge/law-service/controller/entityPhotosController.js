@@ -16,6 +16,18 @@ const listPrimary = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
+/** Every active photo of one entity (metadata only), main image first: for a page's gallery. */
+const listForEntity = async (req, res, next) => {
+    try {
+        const rows = await db.EntityPhoto.findAll({
+            where: { entity_type: req.params.type, entity_slug: req.params.slug, is_active: true },
+            attributes: META, order: [['is_primary', 'DESC'], ['id', 'ASC']], limit: 60,
+        });
+        res.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
+        return sendSuccess(req, res, rows);
+    } catch (err) { return next(err); }
+};
+
 const send = (res, photo, cache) => {
     res.set({
         'Content-Type': photo.content_type,
@@ -67,4 +79,27 @@ const uploadPhoto = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
-module.exports = { listPrimary, getPhoto, getPhotoAdmin, uploadPhoto };
+const commonsSvc = require('../service/commonsSearch');
+
+/** Admin: search Wikimedia Commons for freely licensed photos. */
+const commonsSearch = async (req, res, next) => {
+    try { return sendSuccess(req, res, await commonsSvc.search(req.query.q)); } catch (err) { return next(err); }
+};
+
+/** Admin: import one Commons photo for an entity, with the credit and licence Commons records. */
+const commonsImport = async (req, res, next) => {
+    try {
+        const { entity_type: type, entity_slug: slug, title, alt_text: alt } = req.body || {};
+        const { photo, created } = await commonsSvc.importFile(type, slug, title, alt);
+        await db.AuditLog.create({
+            actor_id: req.auth ? String(req.auth.userId) : null, actor_email: req.auth ? req.auth.email : null,
+            action: 'import', resource: 'entity_photos', resource_id: String(photo.id),
+            changes: { entity_type: type, entity_slug: slug, source: photo.source_url, license: photo.license },
+        }).catch(() => {});
+        notifySite(['/people', '/entertainment', '/podcasts']);
+        const { data, ...safe } = photo.toJSON();
+        return sendSuccess(req, res, safe, created ? 201 : 200);
+    } catch (err) { return next(err); }
+};
+
+module.exports = { commonsSearch, commonsImport, listPrimary, listForEntity, getPhoto, getPhotoAdmin, uploadPhoto };

@@ -6,7 +6,7 @@ const { guardUpload } = require('@baalvion/upload/validate.js');
 const { isAllowedLicense, SLUG_RE } = require('../utils/peopleValidation');
 
 const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-const ENTITY_TYPES = ['person', 'entertainment', 'legal-case', 'court', 'sports-team', 'sports-competition'];
+const ENTITY_TYPES = ['person', 'entertainment', 'legal-case', 'court', 'sports-team', 'sports-competition', 'podcast'];
 const MAX_BYTES = 6 * 1024 * 1024;
 
 /**

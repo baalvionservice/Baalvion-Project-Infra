@@ -1,0 +1,17 @@
+'use strict';
+module.exports = (sequelize, DataTypes) =>
+    sequelize.define('VideoShow', {
+        id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+        slug: { type: DataTypes.STRING(200), allowNull: false, unique: true },
+        name: { type: DataTypes.STRING(200), allowNull: false },
+        description: { type: DataTypes.TEXT, defaultValue: '' },
+        scope: { type: DataTypes.STRING(15), defaultValue: 'national' },
+        country_code: { type: DataTypes.STRING(10) },
+        network: { type: DataTypes.STRING(200) },
+        cover_url: { type: DataTypes.TEXT },
+        cover_credit: { type: DataTypes.TEXT },
+        sort_order: { type: DataTypes.INTEGER, defaultValue: 0 },
+        featured: { type: DataTypes.BOOLEAN, defaultValue: false },
+        published: { type: DataTypes.BOOLEAN, defaultValue: false },
+        archived: { type: DataTypes.BOOLEAN, defaultValue: false },
+    }, { schema: 'legal', tableName: 'video_shows', underscored: true, timestamps: true });

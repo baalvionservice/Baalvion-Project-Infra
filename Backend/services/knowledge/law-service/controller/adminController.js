@@ -14,11 +14,14 @@ const LEGAL_RESOURCES = new Set(['court_profiles', 'case_profiles']);
 const ENTERTAINMENT_RESOURCES = new Set(['entertainment_entities', 'entity_photos']);
 const SPORTS_RESOURCES = new Set(['sports_teams', 'sports_competitions']);
 const TOPIC_RESOURCES = new Set(['topics']);
+const VIDEO_RESOURCES = new Set(['video_shows', 'video_items']);
+const PODCAST_RESOURCES = new Set(['podcast_shows']);
 const { validatePerson, validatePhoto, validateLink } = require('../utils/peopleValidation');
 const { validateCourt, validateCase } = require('../utils/legalValidation');
 const { validateEntertainment } = require('../utils/entertainmentValidation');
 const { validateTeam, validateCompetition } = require('../utils/sportsValidation');
 const { validateTopic } = require('../utils/topicValidation');
+const { validateVideoShow, validateVideoItem, validatePodcastShow } = require('../utils/videoValidation');
 const mailer = require('../service/mailer');
 const ledger = require('../service/ledger');
 const { maybeActivateLawyer } = require('../service/lawyerActivation');
@@ -67,6 +70,9 @@ const ADMIN_FIELDS = {
     people:        ['slug', 'full_name', 'display_name', 'category', 'country_code', 'status', 'birth_date', 'birth_place', 'death_date', 'short_bio', 'biography', 'career', 'education', 'awards', 'notable_works', 'timeline', 'social', 'sports_info', 'official_website', 'sources', 'wikidata_id', 'seo_title', 'seo_description', 'verified', 'source_note', 'published', 'indexable', 'featured', 'archived', 'last_reviewed_at'],
     person_photos: ['alt_text', 'credit', 'license', 'license_url', 'source_url', 'is_primary', 'is_active'],
     person_links:  ['person_id', 'kind', 'target_slug', 'relationship'],
+    podcast_shows: ['slug', 'title', 'host', 'publisher', 'description', 'category', 'country_code', 'language', 'listen_url', 'website_url', 'cover_url', 'cover_credit', 'rank', 'ranking_note', 'overview', 'first_aired', 'frequency', 'format', 'best_for', 'faq', 'sources', 'seo_title', 'seo_description', 'reviewed_at', 'indexable', 'listen_links', 'hosts', 'related_article_slugs', 'videos', 'episodes', 'published', 'archived'],
+    video_shows: ['slug', 'name', 'description', 'scope', 'country_code', 'network', 'cover_url', 'cover_credit', 'sort_order', 'featured', 'published', 'archived'],
+    video_items: ['slug', 'title', 'description', 'video_url', 'thumbnail_url', 'thumbnail_credit', 'source_name', 'show_slug', 'category', 'scope', 'country_code', 'duration_seconds', 'published_at', 'people_slugs', 'sort_order', 'featured', 'published', 'archived'],
     topics: ['slug', 'name', 'pillar', 'aliases', 'description', 'published', 'indexable', 'archived'],
     sports_teams: ['slug', 'name', 'sport', 'country_code', 'description', 'url', 'verified', 'source_note', 'published', 'indexable', 'archived'],
     sports_competitions: ['slug', 'name', 'sport', 'level', 'country_code', 'description', 'event_date', 'people_involved', 'related_article_slugs', 'videos', 'verified', 'source_note', 'published', 'indexable', 'archived'],
@@ -121,6 +127,10 @@ const RESOURCES = {
     // Legal pillar: public case and court reference profiles (not a client's private legal.cases matter).
     // Entertainment pillar: movies, TV, music, awards and events (editorial reference data only).
     // Topics: cross-cutting tags the site matches in article text by name and alias.
+    // Video hub (/videos) and podcasts (/podcasts): shows, videos and podcast profiles. Archived, never deleted.
+    podcast_shows: { model: 'PodcastShow', search: ['title', 'slug', 'host', 'publisher'], filters: ['category', 'country_code', 'published', 'archived'], order: [['rank', 'ASC NULLS LAST'], ['title', 'ASC']], noDelete: true, validate: validatePodcastShow },
+    video_shows: { model: 'VideoShow', search: ['name', 'slug', 'network'], filters: ['scope', 'country_code', 'featured', 'published', 'archived'], order: [['sort_order', 'ASC'], ['name', 'ASC']], noDelete: true, validate: validateVideoShow },
+    video_items: { model: 'VideoItem', search: ['title', 'slug', 'source_name'], filters: ['scope', 'country_code', 'show_slug', 'category', 'featured', 'published', 'archived'], order: [['published_at', 'DESC NULLS LAST'], ['id', 'DESC']], noDelete: true, validate: validateVideoItem },
     topics: { model: 'Topic', search: ['name', 'slug'], filters: ['pillar', 'published', 'indexable', 'archived'], order: [['name', 'ASC']], noDelete: true, validate: validateTopic },
     // Sports pillar: team and competition reference profiles (no scores, standings or schedules).
     sports_teams: { model: 'SportsTeam', search: ['name', 'slug', 'sport'], filters: ['sport', 'country_code', 'published', 'indexable', 'archived', 'verified'], order: [['name', 'ASC']], noDelete: true, validate: validateTeam },
@@ -206,6 +216,8 @@ const createResource = async (req, res, next) => {
         if (ENTERTAINMENT_RESOURCES.has(req.params.resource)) notifySite(['/entertainment']);
         if (SPORTS_RESOURCES.has(req.params.resource)) notifySite(['/sports']);
         if (TOPIC_RESOURCES.has(req.params.resource)) notifySite(['/topics']);
+        if (VIDEO_RESOURCES.has(req.params.resource)) notifySite(['/videos']);
+        if (PODCAST_RESOURCES.has(req.params.resource)) notifySite(['/podcasts']);
         return sendSuccess(req, res, row, 201);
     } catch (err) { return next(err); }
 };
@@ -234,6 +246,8 @@ const updateResource = async (req, res, next) => {
         if (ENTERTAINMENT_RESOURCES.has(req.params.resource)) notifySite(['/entertainment']);
         if (SPORTS_RESOURCES.has(req.params.resource)) notifySite(['/sports']);
         if (TOPIC_RESOURCES.has(req.params.resource)) notifySite(['/topics']);
+        if (VIDEO_RESOURCES.has(req.params.resource)) notifySite(['/videos']);
+        if (PODCAST_RESOURCES.has(req.params.resource)) notifySite(['/podcasts']);
         return sendSuccess(req, res, row);
     } catch (err) { return next(err); }
 };
