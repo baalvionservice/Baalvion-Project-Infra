@@ -26,9 +26,9 @@ export default function ContactUsPage() {
             <ContactCard
               icon={<Mail className="w-6 h-6" />}
               title="Email"
-              contact="Founder@baalvion.com"
-              contactHref="mailto:Founder@baalvion.com"
-              desc="General, membership, editorial, press, and privacy/legal inquiries — one team reads and routes every message."
+              contact="editorial@lawelitenetwork.com"
+              contactHref="mailto:editorial@lawelitenetwork.com"
+              desc="General, membership, editorial, press, and privacy inquiries — one team reads and routes every message."
             />
             <ContactCard
               icon={<MessageSquare className="w-6 h-6" />}
@@ -57,7 +57,8 @@ export default function ContactUsPage() {
                    C/o Dilip Kumar Kuldeep, Upper Mania<br />
                    Po- Pakjhola, Semiliguda<br />
                    Koraput, Odisha 764036, India<br />
-                   CIN: U43121OD2025PTC048479
+                   CIN: U43121OD2025PTC048479<br />
+                   Legal: <a href="mailto:legal@baalvion.com" className="hover:text-white transition-colors">legal@baalvion.com</a>
                  </p>
                </div>
              </div>

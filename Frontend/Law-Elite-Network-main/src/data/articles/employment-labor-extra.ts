@@ -20,6 +20,7 @@ export const employmentLaborExtraArticles: LawArticle[] = [
       'A non-compete agreement restricts an employee from joining competitors or starting a rival business for a set time — but courts only enforce reasonable limits.',
     author: 'Priya Nair',
     updatedAt: 'June 15, 2026',
+    modifiedAt: '2026-09-21',
     readingTime: 9,
     views: 0,
     featured: true,
@@ -64,7 +65,7 @@ export const employmentLaborExtraArticles: LawArticle[] = [
 </ul>
 
 <h2>The Recent Shift Away from Non-Competes</h2>
-<p>Regulatory attitudes toward non-competes have shifted markedly in recent years, generally trending toward restriction rather than expansion. Several U.S. states have banned or sharply limited non-competes for most workers, and federal regulators have periodically proposed broader bans, reflecting a growing view that these clauses suppress wages and mobility more than they protect genuine trade secrets. The practical effect is that employers increasingly rely on narrower, more defensible tools — confidentiality agreements, non-solicitation clauses, and garden-leave provisions (paid notice periods that keep a departing employee away from a competitor temporarily without an outright post-employment ban) — rather than broad non-competes that face a rising risk of being struck down or banned outright.</p>
+<p>Regulatory attitudes toward non-competes have shifted markedly in recent years, generally trending toward restriction rather than expansion. Several U.S. states have banned or sharply limited non-competes for most workers, and the Federal Trade Commission adopted a rule in 2024 to ban most non-competes nationwide, though a federal court in Texas set that rule aside in August 2024 and the FTC dropped its appeal in September 2025, so no federal ban is in force; the attempt reflects a growing view that these clauses suppress wages and mobility more than they protect genuine trade secrets. The practical effect is that employers increasingly rely on narrower, more defensible tools — confidentiality agreements, non-solicitation clauses, and garden-leave provisions (paid notice periods that keep a departing employee away from a competitor temporarily without an outright post-employment ban) — rather than broad non-competes that face a rising risk of being struck down or banned outright.</p>
 
 <h2>Frequently Asked Questions</h2>
 <p><strong>Is a non-compete enforceable if I was laid off, not fired for cause?</strong> In many jurisdictions this matters — some courts are less willing to enforce a non-compete against an employee terminated through no fault of their own, viewing it as unfair to both block someone from working and deny them the job that funded their livelihood.</p>
@@ -85,7 +86,8 @@ export const employmentLaborExtraArticles: LawArticle[] = [
 
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
     primarySources: [
-      { label: 'FTC, Noncompete Rule', url: 'https://www.ftc.gov/legal-library/browse/rules/noncompete-rule' },
+      { label: 'FTC, Noncompete Rule (set aside by a federal court in 2024; FTC acceded to the vacatur in September 2025)', url: 'https://www.ftc.gov/legal-library/browse/rules/noncompete-rule' },
+      { label: 'FTC press release: FTC files to accede to vacatur of the Non-Compete Clause Rule (September 2025)', url: 'https://www.ftc.gov/news-events/news/press-releases/2025/09/federal-trade-commission-files-accede-vacatur-non-compete-clause-rule' },
       { label: 'GOV.UK, working paper on options for reform of non-compete clauses in employment contracts', url: 'https://www.gov.uk/government/publications/reform-of-non-compete-clauses-in-employment-contracts-working-paper/working-paper-on-options-for-reform-of-non-compete-clauses-in-employment-contracts' },
       { label: 'India, Indian Contract Act 1872, Section 27 — restraint of trade', url: 'https://indiankanoon.org/doc/1431516/' },
       { label: 'OECD Indicators of Employment Protection', url: 'https://www.oecd.org/en/data/datasets/oecd-indicators-of-employment-protection.html' },

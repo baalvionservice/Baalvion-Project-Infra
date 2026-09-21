@@ -123,7 +123,7 @@ export const LEGAL_CASES: LegalCase[] = [
     judges: [],
     status: 'concluded',
     importantDates: [
-      { date: '1991-01-08', label: 'Oral argument' },
+      { date: '1991-01-15', label: 'Oral argument' },
       { date: '1991-04-17', label: 'Decision issued' },
     ],
     summary:
@@ -167,6 +167,37 @@ export const LEGAL_CASES: LegalCase[] = [
     verification: { verified: true, sourceNote: 'Widely reported public record — independent reference entry. Dates reflect the most commonly reported timeline; consult primary news sources for full procedural detail.' },
     seo: { metaTitle: 'Egypt v. Fahmy and Mohamed — Case Profile', metaDescription: 'The Al Jazeera journalists case: charges, international counsel, and outcome.' },
   },
+  {
+    slug: 'cristiano-ronaldo-v-juventus-arbitration',
+    caseName: 'Cristiano Ronaldo v. Juventus Football Club S.p.A. (deferred-wage dispute)',
+    courtSlug: 'turin-labour-court',
+    jurisdiction: 'Italy',
+    countryCode: 'IT',
+    parties: [
+      { name: 'Cristiano Ronaldo', personSlug: 'cristiano-ronaldo', role: 'Claimant' },
+      { name: 'Juventus Football Club S.p.A.', role: 'Respondent' },
+    ],
+    lawyers: [],
+    judges: [],
+    status: 'concluded',
+    importantDates: [
+      { date: '2023-06', label: 'Ronaldo begins arbitration proceedings (as reported)' },
+      { date: '2024-04', label: 'Arbitration tribunal awards Ronaldo about €9.7M' },
+      { date: '2026-01-20', label: 'Turin Labour Court rejects Juventus’s appeal' },
+    ],
+    summary:
+      'Cristiano Ronaldo claimed about €19.5 million from Juventus in wages deferred under pandemic-era salary agreements. ' +
+      'An arbitration tribunal decided in April 2024 that he was owed about half of that, roughly €9.7 million plus interest. ' +
+      'Juventus appealed to the Turin Labour Court, which rejected the appeal on 20 January 2026, so Ronaldo keeps the sum he had already received.',
+    timeline: [
+      { date: '2020-03', title: 'Wage deferral agreements', description: 'Juventus and its players agree to defer part of their salaries during the Covid-19 pandemic.' },
+      { date: '2024-04', title: 'Arbitration award', description: 'The tribunal awards Ronaldo about €9.7 million, half of what he claimed.' },
+      { date: '2026-01-20', title: 'Appeal rejected', description: 'The Turin Labour Court dismisses Juventus’s appeal.' },
+    ],
+    verification: { verified: false, sourceNote: 'Cross-checked against press reports (Fox Sports, Reuters-syndicated coverage, Goal). The arbitration tribunal’s exact name and the award document have not been located; needs primary-source confirmation before marking verified.' },
+    seo: { metaTitle: 'Ronaldo v. Juventus Deferred-Wage Dispute — Case Profile', metaDescription: 'How Cristiano Ronaldo’s claim for deferred wages against Juventus was decided by arbitration and upheld on appeal.' },
+  },
+
 ];
 
 export function getAllLegalCases(): LegalCase[] {

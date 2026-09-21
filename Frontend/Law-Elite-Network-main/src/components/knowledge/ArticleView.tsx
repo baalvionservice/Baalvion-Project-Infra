@@ -29,6 +29,9 @@ import { extractKeyTakeaways } from '@/lib/seo/key-takeaways-extractor';
 import { extractFaqSection } from '@/lib/seo/faq-section-extractor';
 import { articleUrl } from '@/lib/article-url';
 import { cmsGetArticles } from '@/lib/cms';
+import { getMergedAuthorByName } from '@/lib/authors-server';
+import { isNonPersonByline } from '@/lib/seo/author-ld';
+import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
 import { unwrapRetiredLinks } from '@/lib/content/retired-links';
 import type { SeriesInfo } from '@/components/knowledge/SeriesNotice';
 
@@ -81,9 +84,16 @@ function countWords(html: string): number {
 export async function ArticleView({ article, slug }: { article: any; slug: string }) {
   const category = article.category;
   const authorName: string = (typeof article.author === 'string' ? article.author : article.author?.name) || 'Law Elite Editorial Team';
+  // Link the byline only when a real profile exists AND that profile lists this article
+  // (the profile page hides retired-category work), so every link has a link back.
+  const rawCategorySlug = category?.slug;
+  const inLiveCategory = !rawCategorySlug || (CURRENT_CATEGORY_SLUGS as readonly string[]).includes(toNewCategorySlug(rawCategorySlug));
+  const bylineProfile = inLiveCategory && !isNonPersonByline(authorName)
+    ? await getMergedAuthorByName(authorName).catch(() => null)
+    : null;
   const seriesInfo = await resolveSeriesInfo(article);
 
-  const updatedAt = formatArticleDate(article.updatedAt || article.updated_at);
+  const updatedAt = formatArticleDate(article.modifiedAt || article.updatedAt || article.updated_at);
   const processedContent = unwrapRetiredLinks(article.content || '');
   const wordCount = countWords(processedContent);
   const readingTimeMinutes = Math.max(1, Math.round(wordCount / 200));
@@ -147,7 +157,12 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
                 {/* Byline & Metadata Bar */}
                 <div className="flex flex-wrap items-center justify-between gap-4 py-3 border-y border-slate-200">
                   <div className="flex flex-wrap items-center gap-2 text-[12px] text-slate-700">
-                    <span className="font-bold uppercase tracking-wide">By {authorName}</span>
+                    <span className="font-bold uppercase tracking-wide">
+                      By{' '}
+                      {bylineProfile ? (
+                        <Link href={`/author/${bylineProfile.slug}`} rel="author" className="hover:underline">{authorName}</Link>
+                      ) : authorName}
+                    </span>
                     {updatedAt && (
                       <>
                         <span className="text-slate-300">|</span>
@@ -180,7 +195,19 @@ export async function ArticleView({ article, slug }: { article: any; slug: strin
                   </div>
                   <div className="flex items-center justify-between text-[11px] text-slate-500 py-1.5 border-b border-slate-100">
                     <span className="truncate max-w-[70%]">{article.title}</span>
-                    <span className="text-slate-400 shrink-0">Law Elite Newsroom</span>
+                    {typeof article.customFields?.featuredImageCredit === 'string' && article.customFields.featuredImageCredit ? (
+                      // A licensed photo's credit is a licence condition (CC BY / BY-SA), so it is shown with the photo.
+                      <span className="text-slate-500 shrink-0 text-right">
+                        Photo:{' '}
+                        {/^https:\/\//.test(article.customFields.featuredImageSourceUrl ?? '') ? (
+                          <a href={article.customFields.featuredImageSourceUrl} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">
+                            {article.customFields.featuredImageCredit}
+                          </a>
+                        ) : article.customFields.featuredImageCredit}
+                      </span>
+                    ) : (
+                      <span className="text-slate-400 shrink-0">Law Elite Newsroom</span>
+                    )}
                   </div>
                 </figure>
 

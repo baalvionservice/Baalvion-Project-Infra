@@ -77,7 +77,7 @@ export function buildArticleMetadata(article: any | null, slug: string, site: st
     description,
     keywords: [...(article.tags || []), 'legal guide', 'law', 'legal advice'].filter(Boolean),
     alternates: { canonical: url },
-    robots: isCurrentCategoryArticle(article)
+    robots: isCurrentCategoryArticle(article) && !article.noindex
       ? { index: true, follow: true }
       : { index: false, follow: true },
     authors: authorName ? [{ name: authorName }] : undefined,

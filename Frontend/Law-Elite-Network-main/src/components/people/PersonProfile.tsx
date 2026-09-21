@@ -16,6 +16,9 @@ import { teamUrl, competitionUrl } from '@/lib/sports-url';
 import { PersonDisclaimer } from './PersonDisclaimer';
 import { PersonCard } from './PersonCard';
 import { PersonSidebar } from './PersonSidebar';
+import { NetWorthLegalCalculator } from './NetWorthLegalCalculator';
+import { CaseTimelineRoadmap } from './CaseTimelineRoadmap';
+import { CourtDocumentViewer } from '@/components/legal/CourtDocumentViewer';
 import type { Person, RelatedWork } from '@/types/person';
 import type { LegalCase } from '@/types/legal';
 
@@ -110,9 +113,8 @@ export function PersonProfile({
             <figure className="shrink-0 w-36 md:w-44">
               <div className="relative w-36 h-36 md:w-44 md:h-44 overflow-hidden rounded-2xl bg-slate-100 shadow-sm ring-1 ring-slate-200">
                 {person.photo ? (
-                  // Same-origin, LEN-hosted photo: the route resizes it, so skip the generic loader.
                   <Image
-                    src={`${person.photo.url}?w=480`}
+                    src={person.photo.url.startsWith('/media/') ? `${person.photo.url}?w=480` : person.photo.url}
                     alt={person.photo.alt}
                     fill
                     unoptimized
@@ -151,7 +153,10 @@ export function PersonProfile({
             </figure>
 
             <div className="flex-1">
-              <span className="kicker mb-2 inline-block">{personCategoryLabel(person.category)}</span>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="kicker">{personCategoryLabel(person.category)}</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 bg-slate-100 px-2 py-0.5 rounded">Topic Hub</span>
+              </div>
               <h1 className="font-headline text-4xl md:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.02] flex flex-wrap items-center justify-center sm:justify-start gap-2.5">
                 {name}
                 {person.verification.verified && (
@@ -329,6 +334,18 @@ export function PersonProfile({
                 </ol>
               </section>
             )}
+
+            {/* Financial Net Worth & Legal Exposure Module */}
+            <NetWorthLegalCalculator personSlug={person.slug} personName={name} />
+
+            {/* Interactive Docket Roadmap */}
+            <CaseTimelineRoadmap personName={name} caseTitle={`${name}: Key Judicial & Court Milestones`} />
+
+            {/* Primary Certified Court Filings */}
+            <section className="mb-12">
+              <SectionHeading>Certified Court Filings &amp; Evidentiary Motions</SectionHeading>
+              <CourtDocumentViewer compact />
+            </section>
 
             {/* Awards */}
             {person.awards && person.awards.length > 0 && (

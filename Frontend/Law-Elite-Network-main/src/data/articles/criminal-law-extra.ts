@@ -20,6 +20,7 @@ export const criminalLawExtraArticles: LawArticle[] = [
       "If you are arrested, you generally have the right to stay silent, know why you're held, and have a lawyer — knowing these rights protects you.",
     author: 'Aisha Rahman',
     updatedAt: 'June 16, 2026',
+    modifiedAt: '2026-09-21',
     readingTime: 9,
     views: 0,
     featured: true,
@@ -65,7 +66,7 @@ export const criminalLawExtraArticles: LawArticle[] = [
 <p>A rights violation does not automatically end a case, but it can have real consequences. In many jurisdictions, evidence or a confession obtained after a valid request for a lawyer was ignored, or after questioning continued despite an invocation of silence, can be excluded from trial under an "exclusionary rule" or its local equivalent. Separately, unlawful arrest or detention can itself support a civil claim against the police or a formal complaint to an oversight body. None of this is automatic — it depends on the specific facts being documented and raised by defence counsel at the right procedural moment, which is one more reason detailed notes taken as soon as possible after release are valuable.</p>
 
 <h2>Frequently Asked Questions</h2>
-<p><strong>Do I have to answer basic questions like my name and address?</strong> In most jurisdictions, yes — the right to silence covers questions that could incriminate you in the offence under investigation, not basic identification, and refusing to identify yourself can itself be an offence in some places.</p>
+<p><strong>Do I have to answer basic questions like my name and address?</strong> It depends on where you are — the right to silence covers questions that could incriminate you in the offence under investigation, not basic identification, and some places (including a number of US states with stop-and-identify laws) make refusing to identify yourself an offence in certain circumstances, while others impose no general duty to give your name to police.</p>
 <p><strong>Can I be arrested without being told any reason at all?</strong> Generally no — some jurisdictions allow the specific reason to be given shortly after the physical arrest rather than at the exact moment of restraint, but an arrest with no explanation at any point is a strong basis to challenge its lawfulness.</p>
 <p><strong>What if I can't afford a lawyer?</strong> Most systems provide some form of publicly funded legal aid or a duty solicitor/public defender for anyone in custody who cannot pay — ask for this explicitly; it is a right, not a favor.</p>
 

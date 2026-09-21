@@ -96,13 +96,13 @@ export const businessCorporateJurisdictionArticles: LawArticle[] = [
 </ul>
 
 <h2>Practical Next Steps</h2>
-<p>Before electing S-corp status, confirm your business and its owners actually meet every eligibility requirement — shareholder count, shareholder type, residency, and the single-class-of-stock rule — since a disqualifying event can terminate the election unexpectedly. If you do elect, set a defensible, market-based salary for any shareholder-employee before taking additional distributions, and keep documentation supporting how that figure was chosen. A tax professional or CPA can model whether the self-employment tax savings actually outweigh the added payroll and compliance costs for your specific numbers before you file Form 2553. For the underlying choice between forming an LLC or a corporation in the first place, see <a href="/business/llc-vs-corporation">LLC vs Corporation: Which Business Structure Should You Choose?</a></p>
+<p>Before electing S-corp status, confirm your business and its owners actually meet every eligibility requirement — shareholder count, shareholder type, residency, and the single-class-of-stock rule — since a disqualifying event can terminate the election unexpectedly. If you do elect, set a defensible, market-based salary for any shareholder-employee before taking additional distributions, and keep documentation supporting how that figure was chosen. A tax professional or CPA can model whether the self-employment tax savings actually outweigh the added payroll and compliance costs for your specific numbers before you file Form 2553. For the underlying choice between forming an LLC or a corporation in the first place, see <a href="/article/llc-vs-corporation">LLC vs Corporation: Which Business Structure Should You Choose?</a></p>
 
 <p><em>This article is general legal information, not legal or tax advice. US federal tax law changes over time, and state-level treatment of S-corps varies separately — consult a CPA or tax attorney before electing S-corp status.</em></p>`,
   },
   {
     id: 'bc-302',
-    title: 'Forming a UK Private Limited Company via Companies House',
+    title: 'Forming a UK Private Limited Company',
     slug: 'uk-company-formation-companies-house',
     alphabet: 'F',
     categoryId: 'cat_business_corporate',
@@ -173,7 +173,7 @@ export const businessCorporateJurisdictionArticles: LawArticle[] = [
 </ul>
 
 <h2>Practical Next Steps</h2>
-<p>Before filing, confirm the current registration fee and the current registered-office and identity-verification requirements directly on GOV.UK, since all three have changed within the past two years and are likely to change again. If you'll be a director or a person with significant control, plan to complete identity verification at the same time as incorporation rather than treating it as a later formality. Once registered, set calendar reminders for your Corporation Tax registration, confirmation statement, and first accounts deadlines immediately — missing any of them is one of the most common (and most avoidable) ways a new UK company runs into trouble with Companies House or HMRC. For the general, worldwide picture of how company formation works, see <a href="/business/company-formation-overview">How to Form a Company: A Practical Overview</a>.</p>
+<p>Before filing, confirm the current registration fee and the current registered-office and identity-verification requirements directly on GOV.UK, since all three have changed within the past two years and are likely to change again. If you'll be a director or a person with significant control, plan to complete identity verification at the same time as incorporation rather than treating it as a later formality. Once registered, set calendar reminders for your Corporation Tax registration, confirmation statement, and first accounts deadlines immediately — missing any of them is one of the most common (and most avoidable) ways a new UK company runs into trouble with Companies House or HMRC. For the general, worldwide picture of how company formation works, see <a href="/article/company-formation-overview">How to Form a Company: A Practical Overview</a>.</p>
 
 <p><em>This article is general legal information, not legal advice. UK company law and Companies House fees and procedures change frequently — confirm the current requirements on GOV.UK and consult a UK solicitor or accountant before incorporating.</em></p>`,
     primarySources: [
@@ -246,7 +246,7 @@ export const businessCorporateJurisdictionArticles: LawArticle[] = [
 </ul>
 
 <h2>Practical Next Steps</h2>
-<p>Start by mapping out where your business will actually operate in its first few years, not just where it's headquartered — that answer usually settles the federal-versus-provincial question faster than comparing fees. If your board includes people who aren't Canadian residents, check the current director-residency rule for the specific jurisdiction you're considering before you file, since it can quietly rule out federal incorporation or a particular province. And whichever route you choose, budget for the possibility of extra-provincial registration elsewhere as the business grows — it's a near-certainty for any company that expands beyond its home jurisdiction. For the general, worldwide picture of how company formation works, see <a href="/business/company-formation-overview">How to Form a Company: A Practical Overview</a>.</p>
+<p>Start by mapping out where your business will actually operate in its first few years, not just where it's headquartered — that answer usually settles the federal-versus-provincial question faster than comparing fees. If your board includes people who aren't Canadian residents, check the current director-residency rule for the specific jurisdiction you're considering before you file, since it can quietly rule out federal incorporation or a particular province. And whichever route you choose, budget for the possibility of extra-provincial registration elsewhere as the business grows — it's a near-certainty for any company that expands beyond its home jurisdiction. For the general, worldwide picture of how company formation works, see <a href="/article/company-formation-overview">How to Form a Company: A Practical Overview</a>.</p>
 
 <p><em>This article is general legal information, not legal advice. Incorporation rules and fees vary by jurisdiction and change over time — consult a lawyer or accountant licensed in the relevant Canadian jurisdiction before incorporating.</em></p>`,
     primarySources: [
@@ -326,12 +326,13 @@ export const businessCorporateJurisdictionArticles: LawArticle[] = [
 </ul>
 
 <h2>Practical Next Steps</h2>
-<p>Before you apply, confirm that at least one proposed director meets the Australian residency requirement and that every director has applied for their Director ID — both are common early stumbling blocks. Budget for the current registration fee and the recurring annual review fee using the figures published on asic.gov.au at the time you file, not a number from an older guide. Once registered, calendar your annual review date immediately, since the solvency resolution and fee both run on a clock that starts the moment ASIC approves your company. For the general, worldwide picture of how company formation works, see <a href="/business/company-formation-overview">How to Form a Company: A Practical Overview</a>.</p>
+<p>Before you apply, confirm that at least one proposed director meets the Australian residency requirement and that every director has applied for their Director ID — both are common early stumbling blocks. Budget for the current registration fee and the recurring annual review fee using the figures published on asic.gov.au at the time you file, not a number from an older guide. Once registered, calendar your annual review date immediately, since the solvency resolution and fee both run on a clock that starts the moment ASIC approves your company. For the general, worldwide picture of how company formation works, see <a href="/article/company-formation-overview">How to Form a Company: A Practical Overview</a>.</p>
 
 <p><em>This article is general legal information, not legal advice. Australian company registration fees and requirements are updated periodically — confirm the current position on asic.gov.au and consult an Australian lawyer or accountant before registering.</em></p>`,
     primarySources: [
       { label: 'Corporations Act 2001 (Cth)', url: 'https://www.legislation.gov.au/C2004A00818/latest' },
       { label: 'ASIC, register a company', url: 'https://www.asic.gov.au/for-business-and-companies/companies/register-a-company' },
+      { label: 'ASIC, fees for commonly lodged documents', url: 'https://www.asic.gov.au/for-business-and-companies/forms-and-fees/all-fees/fees-for-commonly-lodged-documents' },
       { label: 'Australian Business Registry Services, director identification number', url: 'https://www.abrs.gov.au/director-identification-number' },
       { label: 'Business Registration Service (Australian Government)', url: 'https://register.business.gov.au/' },
     ],

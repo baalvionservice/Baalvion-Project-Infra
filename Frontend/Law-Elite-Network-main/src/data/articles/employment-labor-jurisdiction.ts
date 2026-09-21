@@ -35,7 +35,7 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
     country: 'United States',
     primarySources: [
       { label: 'Montana Code Annotated § 39-2-904 — elements of wrongful discharge', url: 'https://law.justia.com/codes/montana/title-39/chapter-2/part-9/section-39-2-904/' },
-      { label: 'U.S. Equal Employment Opportunity Commission — federal anti-discrimination and anti-retaliation protections', url: 'https://www.eeoc.gov/' },
+      { label: 'U.S. Equal Employment Opportunity Commission — Prohibited Employment Policies/Practices', url: 'https://www.eeoc.gov/prohibited-employment-policiespractices' },
     ],
     content: `<p>At-will employment is the default rule in every U.S. state but one. In plain terms, it means your employer can end your job at any time, without warning and without giving a reason — and you can quit the same way. But "at-will" has never meant "no rules at all." Over the last several decades, state courts and legislatures have carved out real exceptions that limit when a firing is actually lawful, and one state has rejected the doctrine outright. Knowing which exceptions your state recognizes — and which it doesn't — is the difference between a firing that merely feels unfair and one you may be able to legally challenge.</p>
 
@@ -92,7 +92,7 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
 </ul>
 
 <h2>Practical Next Steps</h2>
-<p>If you believe you were fired unlawfully, start by writing down the timeline while it's fresh, gathering your offer letter and handbook, and noting anything you did shortly before the dismissal that could look like the exercise of a legal right. Because the applicable exception — and the deadline to act — depends on your specific state, a consultation with an employment lawyer licensed there is the most reliable next step. For the general, worldwide framework this guide builds on, see <a href="/employment-law/what-is-at-will-employment">What Is At-Will Employment?</a> and <a href="/employment-law/when-is-a-dismissal-wrongful-termination">When Is a Dismissal Considered Wrongful Termination?</a></p>
+<p>If you believe you were fired unlawfully, start by writing down the timeline while it's fresh, gathering your offer letter and handbook, and noting anything you did shortly before the dismissal that could look like the exercise of a legal right. Because the applicable exception — and the deadline to act — depends on your specific state, a consultation with an employment lawyer licensed there is the most reliable next step. For the general, worldwide framework this guide builds on, see <a href="/article/what-is-at-will-employment">What Is At-Will Employment?</a> and <a href="/article/when-is-a-dismissal-wrongful-termination">When Is a Dismissal Considered Wrongful Termination?</a></p>
 
 <p><em>This article is general legal information, not legal advice. Employment law varies by state and changes over time — consult a lawyer licensed in your state before acting.</em></p>`,
   },
@@ -109,6 +109,7 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
       "UK employees currently need two years' service to claim unfair dismissal — falling to six months from January 2027 under the Employment Rights Act 2025.",
     author: 'Daniel Okoro',
     updatedAt: 'August 9, 2026',
+    modifiedAt: '2026-09-21',
     readingTime: 9,
     views: 0,
     featured: false,
@@ -122,7 +123,7 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
 <p>Under the current law, most employees need two years of continuous service with their employer before they can bring an ordinary unfair dismissal claim to an Employment Tribunal. This two-year qualifying period has been in place since April 2012. If you have less than two years of service and none of the "automatically unfair" exceptions below apply to your situation, you generally cannot bring this specific claim today — though you may have other options, such as a discrimination or breach-of-contract claim.</p>
 
 <h2>What Changes on 1 January 2027 — And What Doesn't Yet</h2>
-<p>The Employment Rights Act 2025 reduces the qualifying period from two years to six months. According to Acas, this change is expected to take effect from January 2027 and is not yet in force. Anyone continuously employed on or before 1 July 2026 will already have accrued six months' service by the time the new rule starts, meaning many current employees will move straight into the new, shorter qualifying period once it commences. The same reforms are also expected to remove the current cap on unfair dismissal compensation. <strong>Because this is a live legislative transition, always check the current commencement date on gov.uk or Acas before relying on either the "two years" or "six months" figure for a specific decision.</strong></p>
+<p>The Employment Rights Act 2025 reduces the qualifying period from two years to six months. According to Acas, this change is expected to take effect from January 2027 and is not yet in force (secondary reports indicate commencement regulations were made in June 2026). Anyone continuously employed on or before 1 July 2026 will already have accrued six months' service by the time the new rule starts, meaning many current employees will move straight into the new, shorter qualifying period once it commences. The same reforms are also expected to remove the current cap on unfair dismissal compensation. <strong>Because this is a live legislative transition, always check the current commencement date on gov.uk or Acas before relying on either the "two years" or "six months" figure for a specific decision.</strong></p>
 
 <h2>Dismissals That Are Unfair From Day One</h2>
 <p>Regardless of the qualifying period — today or after the 2027 change — certain dismissals are treated as automatically unfair without any minimum service requirement. These commonly include dismissal for:</p>
@@ -140,7 +141,7 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
 <h2>How a Claim Actually Proceeds</h2>
 <ol>
 <li><strong>Early conciliation:</strong> before filing a tribunal claim, an employee must notify Acas, which offers free, confidential conciliation to try to resolve the dispute without a hearing.</li>
-<li><strong>Tribunal claim:</strong> if conciliation doesn't resolve it, the employee can file an Employment Tribunal claim, generally within three months less one day of the dismissal — a short deadline that is strictly enforced.</li>
+<li><strong>Tribunal claim:</strong> if conciliation doesn't resolve it, the employee can file an Employment Tribunal claim, generally within three months less one day of the dismissal, a short deadline that is strictly enforced. Regulations approved in 2026 extend most tribunal time limits to six months (less one day) from 1 October 2026, so check which limit and transitional rules apply to your dismissal date.</li>
 <li><strong>Hearing and remedy:</strong> if the claim succeeds, the tribunal can order reinstatement, re-engagement, or — far more commonly — compensation, currently made up of a basic award and a compensatory award.</li>
 </ol>
 
@@ -160,7 +161,7 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
 </ul>
 
 <h2>Practical Next Steps</h2>
-<p>If you've been dismissed and are unsure whether you qualify, the safest first step is contacting Acas for free early guidance — they can confirm the current position and the applicable time limit for your specific dates of employment. Because the qualifying period is changing on a fixed future date, an employee close to either threshold should get their exact service dates checked rather than relying on a rule of thumb. For the general, worldwide picture of what makes a dismissal unlawful, see <a href="/employment-law/when-is-a-dismissal-wrongful-termination">When Is a Dismissal Considered Wrongful Termination?</a></p>
+<p>If you've been dismissed and are unsure whether you qualify, the safest first step is contacting Acas for free early guidance — they can confirm the current position and the applicable time limit for your specific dates of employment. Because the qualifying period is changing on a fixed future date, an employee close to either threshold should get their exact service dates checked rather than relying on a rule of thumb. For the general, worldwide picture of what makes a dismissal unlawful, see <a href="/article/when-is-a-dismissal-wrongful-termination">When Is a Dismissal Considered Wrongful Termination?</a></p>
 
 <p><em>This article is general legal information, not legal advice, and reflects the law as understood at the time of writing during an active legislative transition. Confirm the current qualifying period and any commencement dates with Acas or gov.uk before acting, and consult a solicitor for advice on your specific situation.</em></p>`,
     primarySources: [
@@ -182,6 +183,7 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
       'Canada has no true at-will employment — every non-federal employee is owed notice or pay in lieu, calculated case-by-case using the Bardal factors.',
     author: 'Daniel Okoro',
     updatedAt: 'August 9, 2026',
+    modifiedAt: '2026-09-21',
     readingTime: 9,
     views: 0,
     featured: false,
@@ -198,7 +200,7 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
 <p>Every province and territory sets a statutory minimum notice period (or pay in lieu) based on length of service through its employment standards legislation. These minimums are a floor, not a ceiling. In a wrongful dismissal claim without an enforceable written notice clause, courts award common-law "reasonable notice," which is very often substantially longer than the statutory minimum — sometimes multiple times longer for long-service or senior employees. Satisfying the statutory minimum does not, on its own, satisfy the common-law obligation.</p>
 
 <h2>The Bardal Factors</h2>
-<p>The leading case, <em>Bardal v. Globe & Mail Ltd.</em> (1960), set out the factors Canadian courts still use today: the character of the employment, the length of service, the age of the employee, and the availability of similar employment given their experience, training, and qualifications. The Supreme Court of Canada has endorsed this approach, and lower courts have treated the list as non-exhaustive — meaning judges can and do weigh additional circumstances specific to the case. There is no fixed multiplier; two employees with similar tenure can receive meaningfully different notice periods depending on age, seniority, and how easily they could realistically find comparable work.</p>
+<p>The leading case, <em>Bardal v. Globe & Mail Ltd.</em> (1960), set out the factors Canadian courts still use today: the character of the employment, the length of service, the age of the employee, and the availability of similar employment given their experience, training, and qualifications. The Supreme Court of Canada has endorsed this approach, and lower courts have treated the list as non-exhaustive — meaning judges can and do weigh additional circumstances specific to the case. This common-law framework applies outside Quebec; Quebec, a civil-law jurisdiction, has its own rules under the Civil Code of Québec and the Act respecting labour standards. There is no fixed multiplier; two employees with similar tenure can receive meaningfully different notice periods depending on age, seniority, and how easily they could realistically find comparable work.</p>
 
 <h2>Why "Rule of Thumb" Calculators Can Mislead</h2>
 <p>You will find plenty of informal shortcuts online, most commonly some version of "one month of notice per year of service." Treat these cautiously. They can be a rough starting intuition, but they are not a rule any court is bound to apply, and Canadian employment lawyers routinely caution that they can understate what a senior, older, or hard-to-replace employee is actually entitled to — or overstate what a short-tenure, junior employee would receive. The Bardal factors, not a multiplier, are what a court will actually apply.</p>
@@ -225,7 +227,7 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
 </ul>
 
 <h2>Practical Next Steps</h2>
-<p>If you've been let go without cause, start by identifying whether you're provincially or federally regulated, checking whether your contract has an enforceable notice clause, and gathering your length of service, age, and role details — the exact inputs a court would weigh under Bardal. Because the gap between statutory minimums and what a court might actually award can be substantial, a consultation with an employment lawyer before signing any severance offer is usually worthwhile. For the general, worldwide picture of what makes a dismissal unlawful, see <a href="/employment-law/when-is-a-dismissal-wrongful-termination">When Is a Dismissal Considered Wrongful Termination?</a></p>
+<p>If you've been let go without cause, start by identifying whether you're provincially or federally regulated, checking whether your contract has an enforceable notice clause, and gathering your length of service, age, and role details — the exact inputs a court would weigh under Bardal. Because the gap between statutory minimums and what a court might actually award can be substantial, a consultation with an employment lawyer before signing any severance offer is usually worthwhile. For the general, worldwide picture of what makes a dismissal unlawful, see <a href="/article/when-is-a-dismissal-wrongful-termination">When Is a Dismissal Considered Wrongful Termination?</a></p>
 
 <p><em>This article is general legal information, not legal advice. Employment law varies by province and territory and changes over time — consult a lawyer licensed in the relevant jurisdiction before acting.</em></p>`,
     primarySources: [
@@ -254,6 +256,7 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
     primarySources: [
       { label: 'Fair Work Act 2009 (Cth), section 394 — application for unfair dismissal remedy, 21-day deadline', url: 'https://www.austlii.edu.au/cgi-bin/viewdoc/au/legis/cth/consol_act/fwa2009114/s394.html' },
       { label: 'Fair Work Act 2009 (Cth), section 382 — when a person is protected from unfair dismissal', url: 'http://www.austlii.edu.au/au/legis/cth/consol_act/fwa2009114/s382.html' },
+      { label: 'Fair Work Ombudsman — high income threshold amounts', url: 'https://www.fairwork.gov.au/tools-and-resources/library/K600486_High-income-threshold-amounts' },
       { label: 'Fair Work Commission — unfair dismissal guidance and current high income threshold', url: 'https://www.fwc.gov.au/unfair-dismissals' },
     ],
     content: `<p>Under the Fair Work Act 2009 (Cth), a dismissal in Australia is "unfair" if it was harsh, unjust, or unreasonable. Unlike a breach-of-contract claim, unfair dismissal is a statutory right enforced through the Fair Work Commission (FWC), Australia's national workplace tribunal — and it comes with strict eligibility rules and one of the shortest filing deadlines in employment law anywhere: 21 calendar days.</p>
@@ -313,7 +316,7 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
 <p>Sometimes — a resignation that was genuinely forced by an employer's conduct (sometimes called constructive dismissal) can still count as a dismissal for Fair Work Act purposes, but this is a fact-specific and often harder claim to establish than a straightforward termination, since the employee bears the burden of showing the resignation wasn't truly voluntary.</p>
 
 <h2>Practical Next Steps</h2>
-<p>If you've just been dismissed and think it may have been unfair, calculate your 21-day deadline first — it runs from the date the dismissal took effect, not from your last physical day at work in every case, so confirm the exact trigger date. From there, check your length of service against the minimum employment period and your earnings against the current high income threshold before assessing the substance of your case. For the general, worldwide picture of what makes a dismissal unlawful, see <a href="/employment-law/when-is-a-dismissal-wrongful-termination">When Is a Dismissal Considered Wrongful Termination?</a></p>
+<p>If you've just been dismissed and think it may have been unfair, calculate your 21-day deadline first — it runs from the date the dismissal took effect, not from your last physical day at work in every case, so confirm the exact trigger date. From there, check your length of service against the minimum employment period and your earnings against the current high income threshold before assessing the substance of your case. For the general, worldwide picture of what makes a dismissal unlawful, see <a href="/article/when-is-a-dismissal-wrongful-termination">When Is a Dismissal Considered Wrongful Termination?</a></p>
 
 <details><summary>Article Sources</summary>
 <ul>
@@ -327,7 +330,7 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
   },
   {
     id: 'el-305',
-    title: 'Non-Compete Enforceability by State in the US',
+    title: 'Non-Compete Enforceability by State in the U.S.',
     slug: 'non-compete-enforceability-by-state-us',
     alphabet: 'N',
     categoryId: 'cat_employment_labor',
@@ -347,7 +350,7 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
       { label: 'Ryan LLC v. FTC, N.D. Tex. (2024) — vacatur of the FTC non-compete rule', url: 'https://law.justia.com/cases/federal/district-courts/texas/txndce/3:2024cv00986/389064/211/' },
       { label: 'Federal Trade Commission, press release on acceding to vacatur of the Non-Compete Clause Rule (Sept. 2025)', url: 'https://www.ftc.gov/news-events/news/press-releases/2025/09/federal-trade-commission-files-accede-vacatur-non-compete-clause-rule' },
       { label: 'Federal Register — removal of the FTC Non-Compete Rule from the CFR (Feb. 2026)', url: 'https://www.federalregister.gov/documents/2026/02/12/2026-02866/revision-of-the-negative-option-rule-withdrawal-of-the-cars-rule-removal-of-the-non-compete-rule-to' },
-      { label: 'Cal. Bus. & Prof. Code § 16600' },
+      { label: 'Cal. Bus. & Prof. Code § 16600', url: 'https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=BPC&sectionNum=16600' },
     ],
     content: `<p>Ask whether non-compete agreements are enforceable in the United States, and the honest answer is: it depends entirely on which state you're standing in. There is no federal non-compete law today — a rule that would have created one was finalized, then struck down, then formally abandoned. In its absence, the fifty states have gone in sharply different directions: a handful now void non-competes almost entirely, a growing group bans them only below a wage threshold, and the rest still apply a case-by-case reasonableness test that can uphold or kill the exact same clause depending on how it's drafted. This guide maps that current landscape — not a rewrite of the general worldwide explainer, but the specific, fast-moving U.S. state-by-state picture as it stands today.</p>
 
@@ -406,7 +409,7 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
 </ul>
 
 <h2>Practical Next Steps</h2>
-<p>Start by identifying which category your state falls into — outright ban, wage threshold, or common-law reasonableness — since that alone determines what question actually matters for your situation. If your state uses a wage threshold, confirm the current figure directly with the state labor agency rather than an older printed source, since these numbers change annually. If you're being asked to sign a new non-compete, or your employer is trying to enforce an existing one, the state-specific rules above are a starting point, not a substitute for a consultation with an employment lawyer licensed in that state, particularly given how quickly this area of law is moving. For the general, worldwide framework this guide builds on, see <a href="/employment-law/what-is-a-non-compete-agreement">What Is a Non-Compete Agreement?</a> and, for the related question of when a U.S. dismissal itself is unlawful, <a href="/employment-law/at-will-employment-exceptions-by-state">At-Will Employment Exceptions in the U.S.: A State-by-State Guide</a>.</p>
+<p>Start by identifying which category your state falls into — outright ban, wage threshold, or common-law reasonableness — since that alone determines what question actually matters for your situation. If your state uses a wage threshold, confirm the current figure directly with the state labor agency rather than an older printed source, since these numbers change annually. If you're being asked to sign a new non-compete, or your employer is trying to enforce an existing one, the state-specific rules above are a starting point, not a substitute for a consultation with an employment lawyer licensed in that state, particularly given how quickly this area of law is moving. For the general, worldwide framework this guide builds on, see <a href="/article/what-is-a-non-compete-agreement">What Is a Non-Compete Agreement?</a> and, for the related question of when a U.S. dismissal itself is unlawful, <a href="/article/at-will-employment-exceptions-by-state">At-Will Employment Exceptions in the U.S.: A State-by-State Guide</a>.</p>
 
 <p><em>This article is general legal information, not legal advice. Non-compete law varies by state and changes frequently — confirm the current rule in the applicable state and consult a lawyer licensed there before signing, relying on, or attempting to enforce a non-compete agreement.</em></p>`,
   },
@@ -423,6 +426,7 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
       "Ontario has banned most employee non-competes by statute since 2021. Elsewhere in Canada the common-law reasonableness test applies; Quebec has its own rules.",
     author: 'Daniel Okoro',
     updatedAt: 'August 9, 2026',
+    modifiedAt: '2026-09-21',
     readingTime: 10,
     views: 0,
     featured: false,
@@ -459,7 +463,7 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
 
 <h2>Federally Regulated Employees: A Change That May Be Coming</h2>
 <p>Employees of federally regulated industries — banking, telecommunications, interprovincial transportation, and similar sectors — fall under the Canada Labour Code for matters like hours and termination, but the Code currently has no non-compete-specific provision at all. Their restrictive covenants are governed by the same common-law (or, in Quebec, civil-law) principles that apply to provincially regulated employees in the same province.</p>
-<p>That may be about to change. Bill C-31, the Budget 2025 Implementation Act, No. 2, introduced in the House of Commons on May 6, 2026, would add a new division to the Canada Labour Code explicitly modeled on Ontario's ESA framework — prohibiting non-competes for federally regulated employees with the same two categories of exception (business sale, senior executives), and including a one-year transition period before existing clauses would become void. As of this writing, the bill is at second reading in the House of Commons and has not been passed into law. <strong>Treat this as a proposal to watch, not a rule currently in force</strong> — federally regulated employees today have the same common-law protection (and the same burden on the employer to justify a restriction) as other non-Ontario, non-Quebec employees, unless and until Bill C-31 or similar legislation is actually enacted.</p>
+<p>That may be about to change. Bill C-31, the Budget 2025 Implementation Act, No. 2, introduced in the House of Commons on May 6, 2026, would add a new division to the Canada Labour Code explicitly modeled on Ontario's ESA framework — prohibiting non-competes for federally regulated employees with the same two categories of exception (business sale, senior executives), and including a one-year transition period before existing clauses would become void. According to law-firm reports, the bill passed second reading in the House of Commons on 3 June 2026 and was referred to the Standing Committee on Finance; it has not been passed into law, and the proposed Canada Labour Code amendments would not take effect on Royal Assent. <strong>Treat this as a proposal to watch, not a rule currently in force</strong> — federally regulated employees today have the same common-law protection (and the same burden on the employer to justify a restriction) as other non-Ontario, non-Quebec employees, unless and until Bill C-31 or similar legislation is actually enacted.</p>
 
 <h2>Frequently Asked Questions</h2>
 <h3>Does Ontario's non-compete ban apply to me if I work for a federally regulated employer in Ontario?</h3>
@@ -479,7 +483,7 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
 </ul>
 
 <h2>Practical Next Steps</h2>
-<p>If you're an Ontario employee, start by checking the signature date on your non-compete against October 25, 2021 — that single fact determines whether the statutory ban or the older common-law test applies to your clause. If you're outside Ontario, or federally regulated, assume your non-compete must clear the common-law reasonableness bar, and remember the burden of proving that falls on your employer, not you. Because the exceptions, the Quebec civil-law rules, and the federal bill's progress can all shift the analysis, a short consultation with an employment lawyer licensed in the relevant province is the safest way to know where you actually stand. For the general, worldwide framework this guide builds on, see <a href="/employment-law/what-is-a-non-compete-agreement">What Is a Non-Compete Agreement?</a> and, for what happens when a Canadian employment relationship ends more broadly, <a href="/employment-law/wrongful-dismissal-canada-reasonable-notice">Wrongful Dismissal in Canada: How 'Reasonable Notice' Is Calculated</a>.</p>
+<p>If you're an Ontario employee, start by checking the signature date on your non-compete against October 25, 2021 — that single fact determines whether the statutory ban or the older common-law test applies to your clause. If you're outside Ontario, or federally regulated, assume your non-compete must clear the common-law reasonableness bar, and remember the burden of proving that falls on your employer, not you. Because the exceptions, the Quebec civil-law rules, and the federal bill's progress can all shift the analysis, a short consultation with an employment lawyer licensed in the relevant province is the safest way to know where you actually stand. For the general, worldwide framework this guide builds on, see <a href="/article/what-is-a-non-compete-agreement">What Is a Non-Compete Agreement?</a> and, for what happens when a Canadian employment relationship ends more broadly, <a href="/article/wrongful-dismissal-canada-reasonable-notice">Wrongful Dismissal in Canada: How 'Reasonable Notice' Is Calculated</a>.</p>
 
 <p><em>This article is general legal information, not legal advice. Employment law varies by province and territory and changes over time — consult a lawyer licensed in the relevant jurisdiction before acting.</em></p>`,
     primarySources: [
@@ -488,11 +492,12 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
       { label: 'Shafron v. KRG Insurance Brokers (Western) Inc., 2009 SCC 6', url: 'https://www.canlii.org/en/ca/scc/doc/2009/2009scc6/2009scc6.html' },
       { label: 'Civil Code of Québec, articles 2089 and 2095', url: 'https://www.legisquebec.gouv.qc.ca/en/document/cs/ccq-1991' },
       { label: 'Bill C-31, Budget 2025 Implementation Act, No. 2 (not yet enacted)' },
+      { label: 'Blakes: Canada moves to restrict non-competes in federally regulated workplaces (summary of Bill C-31)', url: 'https://www.blakes.com/insights/canada-moves-to-restrict-non-competes-in-federally-regulated-workplaces/' },
     ],
   },
   {
     id: 'el-307',
-    title: "Australia's Incoming Non-Compete Ban Explained",
+    title: 'Australia Non-Compete Ban Explained',
     slug: 'australia-non-compete-ban-sub-threshold-workers',
     alphabet: 'A',
     categoryId: 'cat_employment_labor',
@@ -500,9 +505,10 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
     category: EMPLOYMENT_LABOR_CATEGORY,
     subcategory: { id: 'sub_el_contracts', name: 'Employment Contracts', slug: 'employment-contracts' },
     summary:
-      'Australia has proposed banning non-competes below a high-income threshold from 2027, but no bill exists yet — the common-law test still applies today.',
+      'Australia has proposed banning non-competes below a high-income threshold from 2027; only an exposure draft has been published (September 2026) and no bill is law — the common-law test still applies today.',
     author: 'Daniel Okoro',
     updatedAt: 'August 9, 2026',
+    modifiedAt: '2026-09-21',
     readingTime: 9,
     views: 0,
     featured: false,
@@ -515,8 +521,10 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
 <h2>What Has Actually Been Announced</h2>
 <p>The proposal traces back to a Treasury issues paper published in April 2024, examining non-compete clauses and other worker restraints as part of a broader competition policy review. That consultation fed directly into the 2025-26 Federal Budget, handed down on 25 March 2025, in which the government announced its intention to ban non-compete clauses for most workers earning below the Fair Work Act's high-income threshold, targeting a start date of 2027. Treasury then ran a further public consultation specifically on the reform's design between July and September 2025, drawing dozens of submissions, with the stated purpose of helping the government finalize the policy's details.</p>
 
+<h2>Update: An Exposure Draft Has Now Been Published</h2>
+<p>After this article was first written, the government published an exposure draft on 7 September 2026 — the Competition and Fair Work Legislation Amendment (Banning Unfair Non-Competes) Bill 2026 — with public submissions open until 2 October 2026, according to the Australian Industry Group and other commentators (check the Treasury consultation page for the authoritative text). As reported, the draft would ban non-compete terms for employees earning at or below the high income threshold (currently $190,100) and for all casual employees and pieceworkers, ban co-worker non-solicitation terms, prohibit "cascading" restraints, restrict the non-competes still allowed for high-income employees, and extend cartel laws to no-poach and wage-fixing agreements, with a reported target start of 1 July 2027. An exposure draft is a consultation document: it is not a bill before Parliament, and its terms may change.</p>
 <h2>The Most Important Fact: This Is Not Yet Law</h2>
-<p><strong>As of today, no bill implementing this ban has been introduced into the Australian Parliament.</strong> The Fair Work Ombudsman's own current guidance confirms this directly, stating plainly that the Fair Work Act doesn't set any rules for non-compete clauses in employment contracts and that it cannot advise on them — a clear signal that the announced reform has not yet become operative law. The government has announced the policy, consulted on it, and stated a target commencement year, but design work on the details was reportedly still ongoing as of mid-2026, with no exposure draft of legislation formally introduced. Treat any claim that Australia "has banned" non-competes, or that a specific bill is already before Parliament, with real skepticism until you can confirm it against Treasury's own consultation page or the Australian Parliament's official bill register — this is a fast-moving policy area, and secondary sources have not always kept pace accurately with where the reform actually stands.</p>
+<p><strong>As of today, no bill implementing this ban has been introduced into the Australian Parliament.</strong> The Fair Work Ombudsman's own current guidance confirms this directly, stating plainly that the Fair Work Act doesn't set any rules for non-compete clauses in employment contracts and that it cannot advise on them — a clear signal that the announced reform has not yet become operative law. The government has announced the policy, consulted on it, and stated a target commencement year, but design work on the details was reportedly still ongoing as of mid-2026, with no bill introduced into Parliament when this article was first written. Treat any claim that Australia "has banned" non-competes, or that a specific bill is already before Parliament, with real skepticism until you can confirm it against Treasury's own consultation page or the Australian Parliament's official bill register — this is a fast-moving policy area, and secondary sources have not always kept pace accurately with where the reform actually stands.</p>
 
 <h2>What the Ban Is Expected to Cover</h2>
 <p>Based on the government's own announcements and consultation materials, the proposal targets non-compete clauses specifically — restrictions on working for a competitor or starting a competing business after employment ends — for workers earning below the high-income threshold. That threshold is itself indexed annually: it was $175,000 at the time of the original Budget announcement, rose to $183,100 from 1 July 2025, and stands at $190,100 for the 2026-27 financial year from 1 July 2026. Because the ban's proposed design and its target date both sit in the future, and because this threshold moves every year regardless of the reform's progress, don't assume today's figure will still be the relevant one once any ban actually takes effect.</p>
@@ -546,11 +554,12 @@ export const employmentLaborJurisdictionArticles: LawArticle[] = [
 </ul>
 
 <h2>Practical Next Steps</h2>
-<p>If you're being asked to sign a non-compete in Australia today, assess it under the law that actually applies right now — the common-law reasonableness test, plus the NSW-specific statute if that's the relevant state — not the reform that's still being designed. If you're an employer planning restrictive covenants with an eye on the next few years, keep an eye on Treasury's consultation outcomes and the parliamentary bill register rather than assuming any specific reported detail is final. Because this is a genuinely fast-moving area with real potential for the rules to change materially before 2027, a consultation with an employment lawyer is the most reliable way to get both today's answer and a read on how exposed a given clause might be to the coming reform. For the general, worldwide framework this guide builds on, see <a href="/employment-law/what-is-a-non-compete-agreement">What Is a Non-Compete Agreement?</a> and, for how Australian dismissals themselves are challenged, <a href="/employment-law/unfair-dismissal-australia-fair-work-commission">Unfair Dismissal in Australia: Eligibility and the Fair Work Commission Process</a>.</p>
+<p>If you're being asked to sign a non-compete in Australia today, assess it under the law that actually applies right now — the common-law reasonableness test, plus the NSW-specific statute if that's the relevant state — not the reform that's still being designed. If you're an employer planning restrictive covenants with an eye on the next few years, keep an eye on Treasury's consultation outcomes and the parliamentary bill register rather than assuming any specific reported detail is final. Because this is a genuinely fast-moving area with real potential for the rules to change materially before 2027, a consultation with an employment lawyer is the most reliable way to get both today's answer and a read on how exposed a given clause might be to the coming reform. For the general, worldwide framework this guide builds on, see <a href="/article/what-is-a-non-compete-agreement">What Is a Non-Compete Agreement?</a> and, for how Australian dismissals themselves are challenged, <a href="/article/unfair-dismissal-australia-fair-work-commission">Unfair Dismissal in Australia: Eligibility and the Fair Work Commission Process</a>.</p>
 
 <p><em>This article is general legal information, not legal advice, and describes a law reform that had not been enacted as of publication. Confirm the current status with the Fair Work Ombudsman or Treasury, and consult an Australian employment lawyer before signing or relying on a non-compete agreement.</em></p>`,
     primarySources: [
       { label: 'Australian Treasury, reform to non-compete clauses and other restraints on workers', url: 'https://treasury.gov.au/consultation/c2025-681950' },
+      { label: 'Australian Industry Group: exposure draft legislation to ban unfair non-competes (NAT 044/26)', url: 'https://www.australianindustrygroup.com.au/news/member-advices/2026/workplace-relations/nat-04426-exposure-draft-legislation-to-ban-unfair-non-competes-and-related-restraints' },
       { label: 'Fair Work Ombudsman, employment contracts', url: 'https://www.fairwork.gov.au/employment-conditions/employment-contracts/get-help-with-employment-contracts' },
       { label: 'Restraints of Trade Act 1976 (NSW)', url: 'https://legislation.nsw.gov.au/view/whole/pdf/inforce/2024-05-07/act-1976-067' },
     ],

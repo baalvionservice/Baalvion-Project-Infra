@@ -81,6 +81,8 @@ const securityHeaders = [
       // script, so allowing any https host carries no XSS risk, only a
       // hotlinking one we accept for this public content site).
       "img-src 'self' data: blob: https:",
+      // Admin-published audio briefings and video shorts are plain https files.
+      "media-src 'self' https:",
       "font-src 'self' data: https://fonts.gstatic.com",
       // *.adtrafficquality.google is Google's ad-traffic-quality/fraud check (sodar) that
       // AdSense pings from the page; *.googlesyndication.com/*.doubleclick.net/*.google.com

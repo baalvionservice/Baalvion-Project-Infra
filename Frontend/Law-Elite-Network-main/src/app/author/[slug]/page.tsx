@@ -5,7 +5,8 @@ import Image from 'next/image';
 import { Navbar } from '@/components/navbar';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { Linkedin, Twitter, Facebook, Instagram, Mail, Rss, Home, ChevronRight } from 'lucide-react';
-import { authorNameToSlug, getAllAuthors } from '@/data/authors';
+import { authorNameToSlug, getAllAuthors, isEditorRole } from '@/data/authors';
+import { credentialStatus, credentialNotice } from '@/lib/author-credentials';
 import { getMergedAuthorBySlug } from '@/lib/authors-server';
 import { mergeArticles, type LawArticle } from '@/data/law-content';
 import { cmsGetArticles } from '@/lib/cms';
@@ -61,9 +62,11 @@ export default async function AuthorProfilePage(
   const firstName = author.name.split(' ')[0].toUpperCase();
   const bioParagraphs = author.bio.split('\n').map((p) => p.trim()).filter(Boolean);
 
+  const credStatus = credentialStatus(author);
+
   const metaRows: { label: string; value: string }[] = [
     author.title && { label: 'TITLE', value: author.title },
-    author.credentials && { label: 'AFFILIATION', value: author.credentials },
+    author.credentials && { label: credStatus === 'supplied' ? 'CREDENTIALS (AS SUPPLIED, NOT VERIFIED)' : 'AFFILIATION', value: author.credentials },
     author.education?.length && { label: 'EDUCATION', value: author.education.join(', ') },
     author.certifications?.length && { label: 'CERTIFICATIONS', value: author.certifications.join(', ') },
     author.expertise.length > 0 && { label: 'EXPERTISE', value: author.expertise.join(', ') },
@@ -242,6 +245,18 @@ export default async function AuthorProfilePage(
                   </dl>
                 )}
 
+                {/* Verification status: only what the data supports */}
+                <div className="mt-5 border-2 border-black bg-slate-50 p-5 text-xs sm:text-sm font-bold text-slate-800 space-y-2">
+                  <p className="text-[10px] font-mono font-black uppercase tracking-widest text-[#E13131]">
+                    VERIFICATION STATUS
+                  </p>
+                  <p>Confirmed: {author.name} is a Law Elite Network {isEditorRole(author.title) ? 'editor' : 'contributor'}.</p>
+                  <p>
+                    {credentialNotice(credStatus)}
+                  </p>
+                  <p>Articles are general legal education, not legal advice.</p>
+                </div>
+
                 {/* Editorial highlights */}
                 {articles.length > 0 && (
                   <div className="mt-5 bg-slate-50 p-5 border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
@@ -298,7 +313,7 @@ export default async function AuthorProfilePage(
                     EDITORIAL INTEGRITY
                   </h3>
                   <p className="text-xs sm:text-sm font-bold text-slate-700 leading-relaxed">
-                    Law Elite Network publishes plain-language legal guides for a worldwide audience. Every article names its author and is edited and fact-checked before publication.
+                    Law Elite Network publishes plain-language legal guides for a worldwide audience. Every article names its author.
                     Learn more in our{' '}
                     <Link href="/editorial-standards" className="text-[#E13131] hover:underline">
                       editorial standards →

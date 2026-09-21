@@ -169,7 +169,8 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
   // article temporarily reachable only at /article/{slug}, not something to
   // actively resubmit to Google.
   const currentSlugSetForArticles = new Set<string>(CURRENT_CATEGORY_SLUGS);
-  const isSitemapEligible = (a: ArticleEntry): boolean => {
+  const isSitemapEligible = (a: ArticleEntry & { noindex?: boolean }): boolean => {
+    if (a.noindex) return false;
     const rawSlug = a.category?.slug;
     if (rawSlug) return currentSlugSetForArticles.has(toNewCategorySlug(rawSlug));
     return !!a.slug && ROOT_FLAT_ARTICLE_SLUGS.has(a.slug);

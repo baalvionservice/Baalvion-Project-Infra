@@ -72,3 +72,27 @@ test('a byline that slugifies to nothing does not emit a broken profile link', (
   const ld = buildAuthorLd('   ', SITE) as Record<string, string>;
   assert.equal(ld['@type'], 'Organization');
 });
+
+test('an article held with noindex is not indexed even in a live category', () => {
+  const m = buildArticleMetadata({ title: 'Held', category: { slug: 'music' }, noindex: true }, 'held', SITE);
+  assert.deepEqual(m.robots, { index: false, follow: true });
+});
+
+test('house bylines and a DRAFT placeholder are the Organization, not a Person', () => {
+  for (const name of ['Law Elite Network Editorial Board', 'Law Elite Editorial Team', 'Editorial Team', 'DRAFT — pending editor review']) {
+    const ld = buildAuthorLd(name, SITE) as Record<string, string>;
+    assert.equal(ld['@type'], 'Organization', name);
+    assert.equal(ld.url, undefined, name);
+  }
+});
+
+test('an ordinary human byline is still a Person', () => {
+  assert.equal((buildAuthorLd('Elena Rossi', SITE) as Record<string, string>)['@type'], 'Person');
+});
+
+test('an unresolved byline keeps its name but emits no dead profile URL', () => {
+  const ld = buildAuthorLd('Elena Rostova', SITE) as Record<string, string>;
+  assert.equal(ld['@type'], 'Person');
+  assert.equal(ld.name, 'Elena Rostova');
+  assert.equal(ld.url, undefined);
+});

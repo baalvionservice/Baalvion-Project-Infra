@@ -92,7 +92,8 @@ export async function fetchArticleForMetadata(slug: string): Promise<any | null>
       category: bundled.category,
       subcategory: bundled.subcategory,
       author: bundled.author,
-      updated_at: bundled.updatedAt,
+      noindex: bundled.noindex,
+      updated_at: bundled.modifiedAt ?? bundled.updatedAt,
       published_at: bundled.updatedAt,
       body: bundled.content,
     };

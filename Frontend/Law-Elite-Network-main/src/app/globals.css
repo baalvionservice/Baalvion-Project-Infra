@@ -310,3 +310,8 @@
 .article-sources details[open] summary::after { transform: rotate(180deg); }
 .article-sources-intro { @apply mt-3 text-[14px] leading-relaxed text-slate-600; }
 .article-sources ol { @apply list-decimal pl-5 marker:text-slate-400 marker:font-normal; }
+
+/* Touch devices: footer links were ~14px tall. Grow the hit area without changing how the columns look on desktop. */
+@media (pointer: coarse) {
+  footer a { display: inline-flex; align-items: center; min-height: 40px; }
+}
