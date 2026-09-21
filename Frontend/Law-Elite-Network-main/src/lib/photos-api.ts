@@ -10,7 +10,7 @@ export interface EntityPhotoInfo {
   sourceUrl?: string;
 }
 
-type EntityKind = 'person' | 'entertainment' | 'legal-case' | 'court' | 'sports-team' | 'sports-competition';
+type EntityKind = 'person' | 'entertainment' | 'legal-case' | 'court' | 'sports-team' | 'sports-competition' | 'podcast';
 
 interface ApiPhoto {
   id: number; entity_type: EntityKind; entity_slug: string; alt_text?: string | null;
@@ -39,4 +39,14 @@ export async function fetchEntityPhotos(): Promise<Map<string, EntityPhotoInfo>>
       },
     ]),
   );
+}
+
+/** Every active photo of one entity, main image first. Empty when law-service is unreachable. */
+export async function fetchPhotosFor(type: EntityKind, slug: string): Promise<EntityPhotoInfo[]> {
+  const json = await fetchPublicApi(`/photos/entity/${type}/${slug}`);
+  const rows = Array.isArray(json?.data) ? (json.data as ApiPhoto[]) : [];
+  return rows.map((r) => ({
+    url: `/media/photos/${r.id}`, alt: r.alt_text || r.entity_slug, credit: r.credit, license: r.license,
+    licenseUrl: r.license_url ?? undefined, sourceUrl: r.source_url ?? undefined,
+  }));
 }
