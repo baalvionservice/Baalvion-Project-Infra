@@ -144,6 +144,15 @@ export interface StorySignal {
   clusterKey: string | null;
 }
 
+export interface TrendIntakeResult extends Omit<IntakeResult, 'wireError'> {
+  report: {
+    google: { topics: number; entertainment: number; errors: { geo: string; error: string }[] };
+    wikipedia: { checked: number; entertainment: number; error: string | null };
+    tmdb: { items: number; skipped: string | null; error: string | null };
+    topics: { topic: string; kind: string; sources: string[]; countries: string[]; newsLinks: number; hasBackground: boolean }[];
+  };
+}
+
 export interface IntakeResult {
   scanned: number;
   created: number;
@@ -310,3 +319,17 @@ export interface Coverage {
   plan: { slug: string; label: string; targetPct: number }[];
   staleAfterDays: number;
 }
+
+export interface PhotoCandidate {
+  title: string; pageUrl: string; thumbUrl: string; width: number; height: number; mime: string;
+  license: { name: string; url: string | null }; artist: string | null; description: string;
+  personalityRights: boolean; credit: string;
+}
+
+export interface DraftArt {
+  id: string; kind: string; provider: string | null; licenseName: string | null; attribution: string | null;
+  subject: string | null; depictsNamedSubject: boolean; altText: string | null; url: string | null; status: string; isPrimary: boolean; sourcePageUrl: string | null;
+}
+
+export interface ClaimRow { text: string; checkable: boolean; disclaimer: boolean; source: { name: string | null; url: string | null } | null }
+export interface ClaimReport { sentences: ClaimRow[]; checkable: number; uncited: number; unsourced: number }

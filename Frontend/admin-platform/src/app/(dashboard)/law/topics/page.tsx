@@ -82,7 +82,7 @@ export default function LawTopicsPage() {
               <TableBody>
                 {rows.map((r) => (
                   <TableRow key={r.id}>
-                    <TableCell><div className="font-medium">{r.name}</div><div className="font-mono text-xs text-muted-foreground">/sports/competitions/{r.slug}</div></TableCell>
+                    <TableCell><div className="font-medium">{r.name}</div><div className="font-mono text-xs text-muted-foreground">/topics/{r.slug}</div></TableCell>
                     <TableCell className="text-muted-foreground">{r.pillar}</TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
