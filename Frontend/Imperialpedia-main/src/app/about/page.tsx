@@ -120,7 +120,7 @@ function AboutFallback() {
           <div className="rounded-2xl border border-white/10 bg-card/40 p-6 md:p-8 flex flex-col md:flex-row md:items-center gap-6">
             <div className="space-y-1.5">
               <Text variant="h3" className="text-lg font-bold">
-                Deepak Kumar Kuldeep — Founder
+                Deepak Kumar Kuldeep — Founder &amp; Director, Baalvion Industries Private Limited
               </Text>
               <Text variant="bodySmall" className="text-muted-foreground leading-relaxed">
                 Imperialpedia began as an independent project on March 26, 2022, and found a legal
