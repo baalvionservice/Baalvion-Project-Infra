@@ -76,8 +76,6 @@ export const PRIMARY_NAV: NavSection[] = [
     href: '/videos',
     children: [
       { label: 'Podcasts', href: '/podcasts' },
-      { label: 'Photo galleries', href: '/galleries' },
     ],
   },
-  { label: 'Interviews', href: '/interviews' },
 ];

@@ -214,7 +214,7 @@ export function PodcastProfile({ show, related, articles = [], linkedPeople = {}
         </div>
 
         <p className="mt-10 border-t border-neutral-300 pt-4 text-[14px] text-neutral-600">
-          Browse all <Link href="/podcasts" className="font-bold underline">Top 10 podcast lists</Link>, watch <Link href="/videos" className="font-bold underline">video</Link> or read our <Link href="/interviews" className="font-bold underline">interviews</Link>.
+          Browse all <Link href="/podcasts" className="font-bold underline">Top 10 podcast lists</Link> or <Link href="/videos" className="font-bold underline">watch video</Link>.
         </p>
 
         {related.length > 0 && (
