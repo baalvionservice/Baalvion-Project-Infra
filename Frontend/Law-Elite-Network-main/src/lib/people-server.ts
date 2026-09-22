@@ -35,7 +35,11 @@ export async function getMergedPeople(): Promise<Person[]> {
   // A stored photo lights up the card and the profile; it does not make a stub any deeper, so `thin` is untouched.
   return [...merged, ...apiBySlug.values()].map((p) => {
     const photo = p.photo ?? photos.get(`person:${p.slug}`);
-    return photo && !p.photo ? { ...p, photo, avatarUrl: p.avatarUrl ?? photo.url } : p;
+    // Previously only ran when `!p.photo`, so a bundled profile that already had a
+    // hardcoded `photo` object (a direct Wikimedia hotlink, e.g. Taylor Swift) never
+    // got `avatarUrl` set at all -- PersonCard reads `avatarUrl`, not `photo.url`, so
+    // that card silently fell back to initials despite having a real, licensed photo.
+    return photo ? { ...p, photo, avatarUrl: p.avatarUrl ?? photo.url } : p;
   });
 }
 
