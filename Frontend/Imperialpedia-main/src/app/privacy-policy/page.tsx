@@ -194,7 +194,7 @@ export default function PrivacyPolicyPage() {
             <List2>
               <li><B>Google Analytics (GA4)</B> — traffic and content-performance analytics, when configured for the current environment. Loads only after you accept analytics cookies.</li>
               <li><B>Google Tag Manager</B> — a tag-management container we use to load the scripts above, when configured. It does not itself collect additional data beyond what the tags it loads collect.</li>
-              <li><B>Google AdSense</B> — serves the advertising shown on this site. See <a href="#advertising" className="text-primary hover:underline">Advertising</a> below.</li>
+              <li><B>Google AdSense</B> — we have applied to display advertising through this network; it is not yet live on the site. See <a href="#advertising" className="text-primary hover:underline">Advertising</a> below.</li>
               <li><B>Vercel</B> — hosts and serves the website (frontend hosting/CDN).</li>
               <li><B>Amazon Web Services (AWS)</B> — hosts our own backend services (including the servers behind api.baalvion.com) and sends transactional/contact-form and newsletter emails via Amazon SES, under our own AWS account. This is our infrastructure, not a third-party marketing platform.</li>
             </List2>
@@ -220,14 +220,15 @@ export default function PrivacyPolicyPage() {
 
           <Block id="advertising" title="7. Advertising">
             <P>
-              This site displays advertising served by <B>Google AdSense</B>. When you have
-              consented to advertising cookies, Google may collect your IP address, cookie
-              identifiers, and browsing activity on this and other sites to show <B>personalized</B>{' '}
-              ads and measure their performance. If you decline, or send a Global Privacy Control
-              signal, ads may still show but are <B>non-personalized</B> — based on the page's
-              content and your approximate location, not your browsing history.
+              We have applied to display advertising through <B>Google AdSense</B> but have not
+              yet launched any ads on this site. Once advertising goes live, this section will
+              describe exactly how it works: when you consent to advertising cookies, Google may
+              collect your IP address, cookie identifiers, and browsing activity on this and other
+              sites to show <B>personalized</B> ads and measure their performance; if you decline,
+              or send a Global Privacy Control signal, any ads shown would be <B>non-personalized</B>{' '}
+              — based on the page's content and your approximate location, not your browsing history.
             </P>
-            <P>You can opt out of personalized advertising at any time:</P>
+            <P>Once advertising is live, you will be able to opt out of personalized advertising at any time:</P>
             <List2>
               <li>Using the <a href="#privacy-choices" className="text-primary hover:underline">Do Not Sell or Share</a> control on this page, or the cookie banner's "Decline" option;</li>
               <li>Through <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Google Ads Settings</a>;</li>
