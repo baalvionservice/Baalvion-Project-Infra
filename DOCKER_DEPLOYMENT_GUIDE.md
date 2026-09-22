@@ -4,7 +4,7 @@
 
 All images are multi-stage, `node:20-alpine` (Proxy runner = `nginx-unprivileged:alpine`), non-root, with a `HEALTHCHECK`. Six Next apps emit `standalone` server bundles; Proxy emits a static SPA served by nginx.
 
-> **Build context = the REPO ROOT** for every app except Law Elite (single-dir context). This is required so `turbo prune` can resolve `@baalvion/auth-sdk` (`workspace:*`) and the shared lockfile. Each repo-root Dockerfile ships a `Dockerfile.dockerignore` because the root `.dockerignore` excludes `Frontend/`.
+> **Build context = the REPO ROOT for every app**, Law Elite included as of 2026-09-22 (it used to be documented as a single-dir-context exception here, but that command could never actually work — `Frontend/Law-Elite-Network-main/package.json` depends on `@baalvion/eslint-config`, `@baalvion/company`, `@baalvion/design` and `@baalvion/illustrations`, all `workspace:*`, which only resolve from the repo root; a single-dir `npm install` fails outright with `EUNSUPPORTEDPROTOCOL`). Root context is required so `turbo prune` can resolve every app's `workspace:*` deps and the shared lockfile. Each repo-root Dockerfile ships a `Dockerfile.dockerignore` because the root `.dockerignore` excludes `Frontend/`.
 
 ---
 
@@ -47,11 +47,12 @@ docker build -f Frontend/testrank-baalvion/Dockerfile -t testrank-baalvion-web \
   --build-arg NEXT_PUBLIC_APP_URL=https://controlthemarket.com \
   .
 
-# Law Elite (single-dir context — note the trailing path, NOT '.')
-docker build -t law-elite-web \
+# Law Elite (repo-root context, same as every other app above — see the
+# note at the top of this file for why the old single-dir command never worked)
+docker build -f Frontend/Law-Elite-Network-main/Dockerfile -t law-elite-web \
   --build-arg NEXT_PUBLIC_API_BASE_URL=https://api.baalvion.com/api/v1/knowledge/law/v1 \
   --build-arg NEXT_PUBLIC_APP_URL=https://lawelitenetwork.com \
-  Frontend/Law-Elite-Network-main
+  .
 
 # Imperialpedia
 docker build -f Frontend/Imperialpedia-main/Dockerfile -t imperialpedia-web \
@@ -112,6 +113,16 @@ Pull secrets from **AWS Secrets Manager / SSM Parameter Store** via the ECS task
 - GTI additionally needs network reach to Postgres (RDS) and a one-time `prisma migrate deploy` (run as an ECS task using the `prisma/` dir baked into the image).
 
 ### Per-Dockerfile notes
-- **Standalone server.js path is nested** in the monorepo builds (`Frontend/<app>/server.js`) — already handled in each `CMD`.
+- **Standalone server.js path, and a real bug in two of these images**:
+  admin-platform's and Law Elite's Dockerfiles both set the runner stage's
+  final `WORKDIR` to the nested `/app/Frontend/<app>` path AND repeated that
+  same `Frontend/<app>/` prefix in `CMD` -- the resulting doubled path
+  (`/app/Frontend/<app>/Frontend/<app>/server.js`) doesn't exist, so neither
+  container could actually start. Fixed in both as of 2026-09-22 (`CMD`
+  is now just `["node", "server.js"]`, relative to that already-nested
+  `WORKDIR`). Checked every other app's Dockerfile in this guide against the
+  same pattern: none of them has it -- their runner `WORKDIR` stays plain
+  `/app`, so their `CMD`'s `Frontend/<app>/server.js` (or the equivalent
+  absolute path some of them use) was already correct.
 - **Proxy** runs as nginx uid 101 on 8080; if fronted directly by ALB, point the target group at 8080.
 - **GTI** base image adds `openssl` for the Prisma query engine; builder & runner are both alpine so the `linux-musl` engine matches.
