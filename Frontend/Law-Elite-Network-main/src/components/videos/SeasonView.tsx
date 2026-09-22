@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { formatArticleDate } from '@/lib/format-date';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { Story } from '@/components/videos/VideoBits';
+import { NewsBlock } from '@/components/videos/NewsBlock';
 import { personUrl, resultFor, seasonUrl, showUrl, type HubPerson, type HubSeason, type HubShow, type HubVideo } from '@/lib/videos-hub';
 
 const CHIP: Record<string, string> = { Winner: 'bg-black text-white', 'Runner-up': 'border border-black text-black' };
@@ -16,7 +17,7 @@ function Fact({ label, value }: { label: string; value?: string | number | null 
   );
 }
 
-export function SeasonView({ show, season, all, people, videos, updatedAt }: { show: HubShow; season: HubSeason; all: HubSeason[]; people: HubPerson[]; videos: HubVideo[]; updatedAt?: string }) {
+export function SeasonView({ show, season, all, people, videos, updatedAt, news = [] }: { show: HubShow; season: HubSeason; all: HubSeason[]; people: HubPerson[]; videos: HubVideo[]; updatedAt?: string; news?: any[] }) {
   const prev = all.find((s) => s.number === season.number - 1);
   const next = all.find((s) => s.number === season.number + 1);
   const bySlug = new Map(people.map((p) => [p.name.toLowerCase(), p]));
@@ -75,6 +76,8 @@ export function SeasonView({ show, season, all, people, videos, updatedAt }: { s
                 <div className="mt-4 grid gap-6 sm:grid-cols-2">{videos.map((v) => <Story key={v.slug} v={v} />)}</div>
               </section>
             )}
+
+            <NewsBlock articles={news} title={`Latest ${show.name} news`} />
 
             <div className="mt-12 flex flex-wrap justify-between gap-3 border-t border-neutral-300 pt-4 text-[14px] font-bold uppercase tracking-wider">
               {prev ? <Link href={seasonUrl(show.slug, prev.number)} className="underline">← {show.name} {prev.number}</Link> : <span />}

@@ -1,13 +1,14 @@
 import Link from 'next/link';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { Story } from '@/components/videos/VideoBits';
+import { NewsBlock } from '@/components/videos/NewsBlock';
 import { formatArticleDate } from '@/lib/format-date';
 import type { EntityPhotoInfo } from '@/lib/photos-api';
 import { personUrl, resultFor, seasonUrl, showUrl, type HubPerson, type HubShow, type HubVideo } from '@/lib/videos-hub';
 
 const CHIP: Record<string, string> = { Winner: 'bg-black text-white', 'Runner-up': 'border border-black text-black' };
 
-export function PersonView({ show: showIn, person: personIn, photos, videos, costars }: { show: HubShow; person: HubPerson; photos: EntityPhotoInfo[]; videos: HubVideo[]; costars: { season: number; people: HubPerson[] }[] }) {
+export function PersonView({ show: showIn, person: personIn, photos, videos, costars, news = [] }: { show: HubShow; person: HubPerson; photos: EntityPhotoInfo[]; videos: HubVideo[]; news?: any[]; costars: { season: number; people: HubPerson[] }[] }) {
   const show = showIn;
   // Results come from the season data, so setting a season's winner updates every person page.
   const person = { ...personIn, appearances: personIn.appearances.map((a) => ({ ...a, result: resultFor(show.seasons.find((x) => x.number === a.season), personIn.name, a.result) })) };
@@ -52,6 +53,8 @@ export function PersonView({ show: showIn, person: personIn, photos, videos, cos
                 <div className="mt-4 grid gap-6 sm:grid-cols-2">{videos.map((v) => <Story key={v.slug} v={v} />)}</div>
               </section>
             )}
+
+            <NewsBlock articles={news} title={`Latest news on ${person.name}`} />
 
             {more.length > 0 && (
               <section className="mt-10" aria-label="Photos">

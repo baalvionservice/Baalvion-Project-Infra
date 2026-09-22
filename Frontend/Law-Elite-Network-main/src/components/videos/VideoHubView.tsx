@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { Story, Row, LinedHeading, MoreLink } from '@/components/videos/VideoBits';
+import { NewsBlock } from '@/components/videos/NewsBlock';
 import { ShowDetails, ShowIntro } from '@/components/videos/ShowProfile';
 import { showUrl, type HubPerson, type HubShow, type VideoHub, type VideoScope } from '@/lib/videos-hub';
 
@@ -14,7 +15,7 @@ const TABS: { key: Tab; label: string }[] = [
   { key: 'international', label: 'International' },
 ];
 
-export function VideoHubView({ hub, show, title = 'Video', people = [] }: { hub: VideoHub; show?: HubShow; title?: string; people?: HubPerson[] }) {
+export function VideoHubView({ hub, show, title = 'Video', people = [], news = [] }: { hub: VideoHub; show?: HubShow; title?: string; people?: HubPerson[]; news?: any[] }) {
   const [tab, setTab] = useState<Tab>('all');
   const ok = (s: VideoScope) => tab === 'all' || tab === s;
   const videos = useMemo(() => hub.videos.filter((v) => ok(v.scope) && (!show || v.showSlug === show.slug)), [hub.videos, tab, show]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -104,6 +105,7 @@ export function VideoHubView({ hub, show, title = 'Video', people = [] }: { hub:
                   </ul>
                 </section>
               )}
+              {show && <NewsBlock articles={news} title={`Latest ${show.name} news`} />}
               {show && <ShowDetails show={show} people={people} />}
             </div>
 

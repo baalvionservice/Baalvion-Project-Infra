@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { PersonView } from '@/components/videos/PersonView';
 import { fetchPhotosFor } from '@/lib/photos-api';
+import { getArticlesForEntity } from '@/lib/entity-articles';
+import { showPersonKey } from '@/lib/videos-tagging';
 import { getShowPeople, getShowPerson, getVideoHub, personUrl } from '@/lib/videos-hub';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
@@ -39,6 +41,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string;
   if (!show || !person) notFound();
   const [photos] = await Promise.all([fetchPhotosFor('show-participant', `${slug}-${person.slug}`)]);
   const videos = hub.videos.filter((v) => v.showSlug === slug && v.peopleSlugs.includes(person.slug));
+  const news = await getArticlesForEntity('show-person', showPersonKey(slug, person.slug)).catch(() => []);
   const costars = person.appearances.map((a) => ({
     season: a.season,
     people: everyone.filter((p) => p.slug !== person.slug && p.appearances.some((x) => x.season === a.season)).sort((x, y) => Number(y.hasProfile) - Number(x.hasProfile)).slice(0, 12),
@@ -49,7 +52,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string;
     <>
       {person.overview && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />}
       {faq && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faq) }} />}
-      <PersonView show={show} person={person} photos={photos} videos={videos} costars={costars} />
+      <PersonView show={show} person={person} photos={photos} videos={videos} costars={costars} news={news} />
     </>
   );
 }

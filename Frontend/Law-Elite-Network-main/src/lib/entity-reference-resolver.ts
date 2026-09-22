@@ -11,6 +11,7 @@ import { legalCaseUrl, courtUrl } from '@/lib/legal-case-url';
 import { teamUrl, competitionUrl } from '@/lib/sports-url';
 import { countryUrl } from '@/lib/country-url';
 import { topicUrl } from '@/lib/topic-url';
+import { getShowTaggingLookups } from '@/lib/videos-tagging';
 import type { EntityReference } from '@/types/entity-tagging';
 import type { Person } from '@/types/person';
 import type { Court, LegalCase } from '@/types/legal';
@@ -22,7 +23,7 @@ export interface ResolvedEntityReference extends EntityReference {
   url: string;
 }
 
-interface Lookups { topics: Map<string, Topic>; people: Map<string, Person>; entertainment: Map<string, EntertainmentEntity>; teams: Map<string, SportsTeam>; competitions: Map<string, SportsCompetition>; cases: Map<string, LegalCase>; courts: Map<string, Court> }
+interface Lookups { showRefs: Map<string, { name: string; url: string }>; topics: Map<string, Topic>; people: Map<string, Person>; entertainment: Map<string, EntertainmentEntity>; teams: Map<string, SportsTeam>; competitions: Map<string, SportsCompetition>; cases: Map<string, LegalCase>; courts: Map<string, Court> }
 
 /**
  * The one place that turns an EntityReference (just {entityType, slug}) into
@@ -64,6 +65,11 @@ function resolveWith(ref: EntityReference, lk: Lookups): ResolvedEntityReference
       const t = lk.topics.get(ref.slug);
       return t ? { ...ref, name: t.name, url: topicUrl(t.slug) } : null;
     }
+    case 'video-show':
+    case 'show-person': {
+      const r = lk.showRefs.get(`${ref.entityType}:${ref.slug}`);
+      return r ? { ...ref, ...r } : null;
+    }
     default:
       return null;
   }
@@ -72,6 +78,7 @@ function resolveWith(ref: EntityReference, lk: Lookups): ResolvedEntityReference
 /** Resolves against the merged (bundled + admin-managed) people, cases and courts, so an editor-created entity links correctly. */
 export async function resolveEntityReferences(refs: EntityReference[]): Promise<ResolvedEntityReference[]> {
   const [people, cases, courts, entertainment, teams, competitions, topics] = await Promise.all([getMergedPeople(), getMergedLegalCases(), getMergedCourts(), getMergedEntertainmentEntities(), getMergedSportsTeams(), getMergedSportsCompetitions(), getMergedTopics()]);
-  const lk: Lookups = { topics: new Map(topics.map((t) => [t.slug, t])), teams: new Map(teams.map((t) => [t.slug, t])), competitions: new Map(competitions.map((c) => [c.slug, c])), entertainment: new Map(entertainment.map((e) => [e.slug, e])), people: new Map(people.map((p) => [p.slug, p])), cases: new Map(cases.map((c) => [c.slug, c])), courts: new Map(courts.map((c) => [c.slug, c])) };
+  const showRefs = await getShowTaggingLookups().catch(() => new Map<string, { name: string; url: string }>());
+  const lk: Lookups = { showRefs, topics: new Map(topics.map((t) => [t.slug, t])), teams: new Map(teams.map((t) => [t.slug, t])), competitions: new Map(competitions.map((c) => [c.slug, c])), entertainment: new Map(entertainment.map((e) => [e.slug, e])), people: new Map(people.map((p) => [p.slug, p])), cases: new Map(cases.map((c) => [c.slug, c])), courts: new Map(courts.map((c) => [c.slug, c])) };
   return refs.map((r) => resolveWith(r, lk)).filter((r): r is ResolvedEntityReference => r !== null);
 }

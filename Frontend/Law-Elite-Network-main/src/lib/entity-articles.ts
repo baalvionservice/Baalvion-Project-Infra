@@ -10,6 +10,7 @@ import { getMergedEntertainmentEntities } from '@/lib/entertainment-server';
 import { getMergedSportsTeams, getMergedSportsCompetitions } from '@/lib/sports-server';
 import { getMergedTopics } from '@/lib/topics-server';
 import { CONTENT_CACHE_TAG } from '@/lib/cache-tags';
+import { getShowTaggingEntries } from '@/lib/videos-tagging';
 import type { EntityType, EntityReference } from '@/types/entity-tagging';
 
 /**
@@ -28,7 +29,8 @@ async function buildTaggedArticleIndex() {
   const cmsArticles = await cmsGetArticles().catch(() => []);
   const articles = mergeArticles(cmsArticles);
   const [people, cases, courts, entertainment, teams, competitions, topics] = await Promise.all([getMergedPeople(), getMergedLegalCases(), getMergedCourts(), getMergedEntertainmentEntities(), getMergedSportsTeams(), getMergedSportsCompetitions(), getMergedTopics()]);
-  const registry = buildEntityRegistry(people, { cases, courts }, entertainment, { teams, competitions }, topics);
+  const showEntries = await getShowTaggingEntries().catch(() => []);
+  const registry = buildEntityRegistry(people, { cases, courts }, entertainment, { teams, competitions }, topics, showEntries);
   return articles.map((article) => ({
     article,
     entities: getArticleEntities(article, registry),

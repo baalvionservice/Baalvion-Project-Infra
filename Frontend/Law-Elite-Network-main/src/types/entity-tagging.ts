@@ -21,6 +21,8 @@ export const ENTITY_TYPES = [
   'sports-competition',
   'country',
   'topic',
+  'video-show',
+  'show-person',
 ] as const;
 
 export type EntityType = (typeof ENTITY_TYPES)[number];

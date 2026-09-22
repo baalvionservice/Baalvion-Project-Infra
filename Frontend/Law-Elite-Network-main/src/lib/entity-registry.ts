@@ -48,6 +48,7 @@ export function buildEntityRegistry(
   entertainment: EntertainmentEntity[] = getAllEntertainmentEntities(),
   sports: { teams: SportsTeam[]; competitions: SportsCompetition[] } = { teams: getAllSportsTeams(), competitions: getAllSportsCompetitions() },
   topics: Topic[] = getAllTopics(),
+  extra: EntityRegistryEntry[] = [],
 ): EntityRegistryEntry[] {
   const entries: EntityRegistryEntry[] = [];
 
@@ -83,6 +84,8 @@ export function buildEntityRegistry(
   topics.forEach((t) => {
     entries.push({ entityType: 'topic', slug: t.slug, names: [t.name, ...(t.aliases || [])] });
   });
+
+  entries.push(...extra);
 
   return entries;
 }

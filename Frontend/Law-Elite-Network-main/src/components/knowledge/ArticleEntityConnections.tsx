@@ -13,6 +13,8 @@ const TYPE_META: Record<EntityType, { label: string; icon: LucideIcon }> = {
   'sports-competition': { label: 'Competitions', icon: Trophy },
   country: { label: 'Countries', icon: Globe2 },
   topic: { label: 'Topics', icon: Tag },
+  'video-show': { label: 'Shows', icon: Clapperboard },
+  'show-person': { label: 'Show people', icon: User },
 };
 
 /**

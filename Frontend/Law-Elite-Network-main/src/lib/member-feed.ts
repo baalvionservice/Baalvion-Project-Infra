@@ -6,6 +6,7 @@ import { legalCaseUrl, courtUrl } from '@/lib/legal-case-url';
 import { teamUrl, competitionUrl } from '@/lib/sports-url';
 import { countryUrl } from '@/lib/country-url';
 import { topicUrl } from '@/lib/topic-url';
+import { personUrl as showPersonUrl, showUrl } from '@/lib/videos-hub';
 import { ENTITY_TYPES, type EntityReference, type EntityType } from '@/types/entity-tagging';
 
 const SLUG_RE = /^[a-z0-9][a-z0-9-]{0,199}$/;
@@ -72,6 +73,8 @@ const ENTITY_LABEL: Record<EntityType, string> = {
   'sports-competition': 'Competition',
   country: 'Country',
   topic: 'Topic',
+  'video-show': 'Show',
+  'show-person': 'Show person',
 };
 
 function entityUrl(type: EntityType, slug: string): string {
@@ -84,6 +87,9 @@ function entityUrl(type: EntityType, slug: string): string {
     case 'sports-competition': return competitionUrl(slug);
     case 'country': return countryUrl(slug);
     case 'topic': return topicUrl(slug);
+    case 'video-show': return showUrl(slug);
+    // slug is "<show>/<person>"
+    case 'show-person': { const [show, person] = slug.split('/'); return showPersonUrl(show, person); }
   }
 }
 

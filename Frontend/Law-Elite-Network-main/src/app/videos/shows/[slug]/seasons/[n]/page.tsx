@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SeasonView } from '@/components/videos/SeasonView';
+import { getArticlesForEntity } from '@/lib/entity-articles';
 import { getShowPeople, getVideoHub, seasonUrl } from '@/lib/videos-hub';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
@@ -43,7 +44,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string;
   const { slug, n } = await params;
   const { hub, show, season } = await load(slug, n);
   if (!show || !season) notFound();
-  const people = await getShowPeople(slug);
+  const [people, news] = await Promise.all([getShowPeople(slug), getArticlesForEntity('video-show', slug).catch(() => [])]);
   const videos = hub.videos.filter((v) => v.showSlug === slug && v.category === `Season ${season.number}`);
   const ld = {
     '@context': 'https://schema.org', '@type': 'TVSeason', name: `${show.name} ${season.number}`, seasonNumber: season.number,
@@ -54,7 +55,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string;
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
-      <SeasonView show={show} season={season} all={show.seasons} people={people} videos={videos} updatedAt={show.updatedAt} />
+      <SeasonView show={show} season={season} all={show.seasons} people={people} videos={videos} updatedAt={show.updatedAt} news={news} />
     </>
   );
 }
