@@ -24,7 +24,7 @@ ENV PNPM_HOME=/pnpm \
     NODE_ENV=production
 
 # pnpm (workspace install) + pm2 (per-container process supervisor) + tini (PID 1).
-RUN corepack enable && corepack prepare pnpm@9 --activate \
+RUN npm install -g corepack@latest && corepack enable && corepack prepare pnpm@9 --activate \
  && npm install -g pm2@5 \
  && apt-get update && apt-get install -y --no-install-recommends tini ca-certificates \
  && rm -rf /var/lib/apt/lists/*
