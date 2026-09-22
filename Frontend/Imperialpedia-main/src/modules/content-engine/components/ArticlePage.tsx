@@ -27,14 +27,13 @@ import { RelatedCalculators } from "@/components/article/RelatedCalculators";
 import { KeyTakeawaysBox } from "@/components/pages/KeyTakeawaysBox";
 import { TableOfContents } from "@/components/article/TableOfContents";
 import { KeyTermsCallout } from "@/components/article/KeyTermsCallout";
-import { ArticleTopicMesh } from "@/components/article/ArticleTopicMesh";
 import { InlineTopicCallout } from "@/components/article/InlineTopicCallout";
 import { getEditorialGuide } from "@/lib/articles/editorial-guides";
 import { ReadingProgressBar } from "@/components/article/ReadingProgressBar";
 import { StickyShareBar } from "@/components/article/StickyShareBar";
 import { AuthorBioCard } from "@/components/article/AuthorBioCard";
 import { LabeledAdSlot } from "@/components/common/LabeledAdSlot";
-import type { MeshGroup, FeaturedGuide } from "@/lib/topic-mesh";
+import type { FeaturedGuide } from "@/lib/topic-mesh";
 
 // Below-the-fold / purely-interactive widgets: not needed for first paint or
 // LCP, so they're split out of the article route's initial JS chunk. Grouped
@@ -73,8 +72,6 @@ interface ArticlePageProps {
   // data — this file is "use client", so importing topic-mesh/topic-config
   // directly here (rather than receiving their already-computed output)
   // would ship every category's full editorial copy to every visitor.
-  meshGroup?: MeshGroup;
-  majorHubs?: { label: string; href: string; desc: string }[];
   inlineTopicGuides?: FeaturedGuide[];
   inlineTopicLabel?: string;
   inlineTopicHref?: string;
@@ -174,8 +171,6 @@ export const ArticlePage = ({
   relatedArticles = DEFAULT_RELATED,
   marketWidget,
   inlineChart,
-  meshGroup,
-  majorHubs,
   inlineTopicGuides,
   inlineTopicLabel,
   inlineTopicHref,
@@ -440,15 +435,6 @@ export const ArticlePage = ({
             </div>
           )}
         </div>
-
-        {meshGroup && (
-          <ArticleTopicMesh
-            group={meshGroup}
-            majorHubs={majorHubs || []}
-            categorySlug={effectiveArticle.categorySlug}
-            categoryName={effectiveArticle.category}
-          />
-        )}
 
         <Suspense fallback={null}>
           <RelatedArticlesSlot promise={relatedArticles} />
