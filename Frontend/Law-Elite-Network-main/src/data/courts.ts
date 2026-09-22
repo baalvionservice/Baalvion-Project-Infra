@@ -38,6 +38,37 @@ export const COURTS: Court[] = [
     countryCode: 'EG',
     description: 'A criminal trial court in Cairo, Egypt.',
   },
+  {
+    slug: 'delaware-court-of-chancery',
+    name: 'Delaware Court of Chancery',
+    level: 'other',
+    countryCode: 'US',
+    description: 'The nation’s premier business equity court, establishing foundational corporate governance precedents for Fortune 500 corporations.',
+    url: 'https://courts.delaware.gov/chancery/',
+  },
+  {
+    slug: 'us-district-court-southern-district-of-new-york',
+    name: 'U.S. District Court for the Southern District of New York (SDNY)',
+    level: 'trial',
+    countryCode: 'US',
+    description: 'The historic federal trial court in Manhattan, handling major Wall Street financial litigation, copyright disputes, and high-profile criminal cases.',
+    url: 'https://www.nysd.uscourts.gov/',
+  },
+  {
+    slug: 'court-of-arbitration-for-sport',
+    name: 'Court of Arbitration for Sport (CAS / TAS)',
+    level: 'international',
+    countryCode: 'CH',
+    description: 'The supreme international tribunal headquartered in Lausanne, Switzerland, rendering binding arbitration decisions on global sports disputes.',
+    url: 'https://www.tas-cas.org/',
+  },
+  {
+    slug: 'turin-labour-court',
+    name: 'Turin Labour Court',
+    level: 'trial',
+    countryCode: 'IT',
+    description: 'The Italian court in Turin that hears employment and labour disputes, including the appeal in Ronaldo v. Juventus.',
+  },
 ];
 
 export function getAllCourts(): Court[] {

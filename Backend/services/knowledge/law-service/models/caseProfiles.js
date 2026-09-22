@@ -4,7 +4,9 @@ module.exports = (sequelize, DataTypes) =>
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
         slug: { type: DataTypes.STRING(200), allowNull: false, unique: true },
         case_name: { type: DataTypes.STRING(400), allowNull: false },
-        court_slug: { type: DataTypes.STRING(200), allowNull: false },
+        // Optional: a case can exist the moment something newsworthy
+        // happens (e.g. an arrest) before any court is on record.
+        court_slug: { type: DataTypes.STRING(200), allowNull: true },
         jurisdiction: { type: DataTypes.STRING(300), defaultValue: '' },
         country_code: DataTypes.STRING(2),
         status: { type: DataTypes.STRING(20), defaultValue: 'concluded' },

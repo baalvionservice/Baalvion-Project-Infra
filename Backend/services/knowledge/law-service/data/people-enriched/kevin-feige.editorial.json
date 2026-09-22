@@ -1,0 +1,68 @@
+{
+  "display_name": null,
+  "short_bio": "Producer who has led Marvel Studios and the Marvel Cinematic Universe since Iron Man.",
+  "biography": "Kevin Feige was born in Boston, studied at the University of Southern California and started as an assistant to the producer Lauren Shuler Donner. He worked on You’ve Got Mail (1998) and X-Men (2000).\n\nHe joined Marvel Studios in 2000 and produced Iron Man (2008), the first film of the Marvel Cinematic Universe. He was named president of the studio in 2007.\n\nHe oversaw the interlocking series of films that led to The Avengers (2012) and Avengers: Endgame (2019).",
+  "awards": [
+    {
+      "title": "Inkpot Award",
+      "year": 2017
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "Iron Man",
+      "year": 2008,
+      "note": "Producer"
+    },
+    {
+      "title": "The Avengers",
+      "year": 2012,
+      "note": "Producer"
+    },
+    {
+      "title": "Black Panther",
+      "year": 2018,
+      "note": "Producer"
+    },
+    {
+      "title": "Avengers: Endgame",
+      "year": 2019,
+      "note": "Producer"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1973-06-02",
+      "title": "Born in Boston, Massachusetts"
+    },
+    {
+      "date": "2000",
+      "title": "Joins Marvel Studios"
+    },
+    {
+      "date": "2007",
+      "title": "Named president of Marvel Studios"
+    },
+    {
+      "date": "2008",
+      "title": "Produces Iron Man"
+    },
+    {
+      "date": "2019",
+      "title": "Produces Avengers: Endgame"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q515161"
+    },
+    {
+      "label": "Wikipedia: Kevin Feige",
+      "url": "https://en.wikipedia.org/wiki/Kevin_Feige"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

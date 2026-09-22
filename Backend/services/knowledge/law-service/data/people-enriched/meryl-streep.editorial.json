@@ -1,0 +1,132 @@
+{
+  "display_name": null,
+  "short_bio": "Actor with more Academy Award nominations than any other performer and three wins.",
+  "biography": "Meryl Streep was born in Summit, New Jersey, studied at Vassar College and took an MFA at the Yale School of Drama, finishing in 1975. She worked on stage in New York before her first major film part in The Deer Hunter (1978), which brought an Oscar nomination.\n\nShe won Best Supporting Actress for Kramer vs. Kramer (1979) and Best Actress for Sophie’s Choice (1982) and The Iron Lady (2011). Her nomination total stands at twenty-one, the most of any performer.\n\nHer range runs from Out of Africa and The Devil Wears Prada to the musical Mamma Mia! She received the Presidential Medal of Freedom in 2014.",
+  "awards": [
+    {
+      "title": "Theatre World Award",
+      "year": 1976
+    },
+    {
+      "title": "Academy Award for Best Supporting Actress",
+      "year": 1980
+    },
+    {
+      "title": "Academy Award for Best Actress",
+      "year": 1983
+    },
+    {
+      "title": "AACTA Award for Best Actress in a Leading Role",
+      "year": 1989
+    },
+    {
+      "title": "Rungstedlund Award",
+      "year": 1993
+    },
+    {
+      "title": "AFI Life Achievement Award",
+      "year": 2004
+    },
+    {
+      "title": "Golden Globe Award for Best Actress in a Motion Picture – Musical or Comedy",
+      "year": 2006
+    },
+    {
+      "title": "Satellite Award for Best Actress – Motion Picture Musical or Comedy",
+      "year": 2006
+    },
+    {
+      "title": "London Film Critics Circle Award for Actress of the Year",
+      "year": 2006
+    },
+    {
+      "title": "Donostia Award",
+      "year": 2008
+    },
+    {
+      "title": "Golden Globe Award for Best Actress in a Motion Picture – Musical or Comedy",
+      "year": 2009
+    },
+    {
+      "title": "Screen Actors Guild Award for Outstanding Performance by a Female Actor in a Leading Role",
+      "year": 2009
+    },
+    {
+      "title": "Academy Award for Best Actress",
+      "year": 2012
+    },
+    {
+      "title": "Presidential Medal of Freedom",
+      "year": 2014
+    },
+    {
+      "title": "Golden Globe Cecil B. DeMille Award",
+      "year": 2017
+    },
+    {
+      "title": "New Jersey Hall of Fame",
+      "year": 2024
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "Kramer vs. Kramer",
+      "year": 1979,
+      "note": "Won Best Supporting Actress"
+    },
+    {
+      "title": "Sophie’s Choice",
+      "year": 1982,
+      "note": "Won Best Actress"
+    },
+    {
+      "title": "The Devil Wears Prada",
+      "year": 2006,
+      "note": "Played Miranda Priestly"
+    },
+    {
+      "title": "The Iron Lady",
+      "year": 2011,
+      "note": "Won Best Actress as Margaret Thatcher"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1949-06-22",
+      "title": "Born in Summit, New Jersey"
+    },
+    {
+      "date": "1975",
+      "title": "Completes her MFA at the Yale School of Drama"
+    },
+    {
+      "date": "1979",
+      "title": "Wins the Oscar for Best Supporting Actress for Kramer vs. Kramer"
+    },
+    {
+      "date": "1982",
+      "title": "Wins the Oscar for Best Actress for Sophie’s Choice"
+    },
+    {
+      "date": "2011",
+      "title": "Wins a third Oscar for The Iron Lady"
+    },
+    {
+      "date": "2014",
+      "title": "Receives the Presidential Medal of Freedom"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q873"
+    },
+    {
+      "label": "Wikipedia: Meryl Streep",
+      "url": "https://en.wikipedia.org/wiki/Meryl_Streep"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

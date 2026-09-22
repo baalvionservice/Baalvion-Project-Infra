@@ -1,0 +1,76 @@
+{
+  "display_name": null,
+  "short_bio": "Actor and narrator, Oscar winner for Million Dollar Baby and star of The Shawshank Redemption.",
+  "biography": "Morgan Freeman was born in Memphis, Tennessee, and served in the United States Air Force before turning to acting. Children’s television gave him early exposure: he played Easy Reader on The Electric Company in the 1970s.\n\nFilm roles in Street Smart, Driving Miss Daisy and Glory brought Oscar nominations, and The Shawshank Redemption (1994) followed. He won Best Supporting Actor for Million Dollar Baby (2004) and played Nelson Mandela in Invictus (2009).\n\nHis voice is one of the most recognisable in cinema; he narrated March of the Penguins and many documentaries. He received the AFI Life Achievement Award in 2011.",
+  "awards": [
+    {
+      "title": "Academy Award for Best Supporting Actor",
+      "year": 2005
+    },
+    {
+      "title": "AFI Life Achievement Award",
+      "year": 2011
+    },
+    {
+      "title": "National Medal of Arts",
+      "year": 2015
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "Driving Miss Daisy",
+      "year": 1989,
+      "note": "Oscar-nominated performance"
+    },
+    {
+      "title": "The Shawshank Redemption",
+      "year": 1994,
+      "note": "Played Ellis “Red” Redding"
+    },
+    {
+      "title": "Million Dollar Baby",
+      "year": 2004,
+      "note": "Won Best Supporting Actor"
+    },
+    {
+      "title": "Invictus",
+      "year": 2009,
+      "note": "Played Nelson Mandela"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1937-06-01",
+      "title": "Born in Memphis, Tennessee"
+    },
+    {
+      "date": "1989",
+      "title": "Nominated for an Oscar for Street Smart and stars in Driving Miss Daisy"
+    },
+    {
+      "date": "1994",
+      "title": "Stars in The Shawshank Redemption"
+    },
+    {
+      "date": "2004",
+      "title": "Wins the Oscar for Best Supporting Actor for Million Dollar Baby"
+    },
+    {
+      "date": "2011",
+      "title": "Receives the AFI Life Achievement Award"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q48337"
+    },
+    {
+      "label": "Wikipedia: Morgan Freeman",
+      "url": "https://en.wikipedia.org/wiki/Morgan_Freeman"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

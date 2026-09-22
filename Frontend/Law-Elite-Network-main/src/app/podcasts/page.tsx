@@ -3,20 +3,28 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { getAllPodcasts } from '@/lib/media-server';
+import { PodcastDirectory } from '@/components/podcasts/PodcastDirectory';
+import { getPodcastHub } from '@/lib/podcasts-hub';
+import { fetchEntityPhotos } from '@/lib/photos-api';
+
+export const revalidate = 900;
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 
-export function generateMetadata(): Metadata {
+export async function generateMetadata(): Promise<Metadata> {
+  const hub = await getPodcastHub();
   return {
     title: 'Podcasts',
     description: 'Podcasts on people, entertainment, sports and the law, listed by Law Elite Network.',
     alternates: { canonical: `${SITE}/podcasts` },
     // No thin pages: unindexed until at least one show is listed.
-    robots: { index: getAllPodcasts().length > 0, follow: true },
+    robots: { index: hub.length + getAllPodcasts().length > 0, follow: true },
   };
 }
 
-export default function PodcastsPage() {
+export default async function PodcastsPage() {
+  const [hub, photos] = await Promise.all([getPodcastHub(), fetchEntityPhotos()]);
+  if (hub.length > 0) return <PodcastDirectory shows={hub.map((h) => ({ ...h, photo: photos.get(`podcast:${h.slug}`) }))} />;
   const shows = getAllPodcasts();
   return (
     <div className="min-h-screen bg-white pt-[60px] lg:pt-[100px]">

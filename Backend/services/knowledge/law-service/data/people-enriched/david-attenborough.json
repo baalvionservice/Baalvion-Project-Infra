@@ -1,0 +1,144 @@
+{
+  "slug": "david-attenborough",
+  "category": "other",
+  "wikidata_id": "Q183337",
+  "full_name": "David Attenborough",
+  "description": "British broadcaster and naturalist (born 1926)",
+  "birth_date": "1926-05-08",
+  "birth_place": "Isleworth",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "GB",
+  "citizenship": [
+    "United Kingdom"
+  ],
+  "occupations": [
+    "biologist",
+    "television producer",
+    "television presenter",
+    "environmentalist",
+    "naturalist",
+    "nature photographer",
+    "writer",
+    "science communicator",
+    "television writer",
+    "film screenwriter",
+    "television actor",
+    "film actor",
+    "film producer",
+    "television director",
+    "narrator",
+    "screenwriter"
+  ],
+  "education": [
+    {
+      "institution": "University College London"
+    },
+    {
+      "institution": "Clare College"
+    },
+    {
+      "institution": "Wyggeston Grammar School for Boys"
+    }
+  ],
+  "positions": [],
+  "awards": [
+    {
+      "title": "Commander of the Order of the British Empire",
+      "year": 1974
+    },
+    {
+      "title": "Commander of the Royal Victorian Order",
+      "year": 1991
+    },
+    {
+      "title": "Kalinga Prize",
+      "year": 1981
+    },
+    {
+      "title": "Princess of Asturias Award for Social Sciences",
+      "year": 2009
+    },
+    {
+      "title": "Bodley Medal",
+      "year": 2015
+    },
+    {
+      "title": "Founder’s Medal",
+      "year": 1985
+    },
+    {
+      "title": "Cherry Kearton Medal and Award",
+      "year": 1972
+    },
+    {
+      "title": "Nierenberg Prize",
+      "year": 2005
+    },
+    {
+      "title": "International Cosmos Prize",
+      "year": 2000
+    },
+    {
+      "title": "Linnean Tercentenary Medal",
+      "year": 2007
+    },
+    {
+      "title": "Natural World Book Prize",
+      "year": 1998
+    },
+    {
+      "title": "Benjamin Franklin Medal",
+      "year": 1990
+    },
+    {
+      "title": "Order of Merit",
+      "year": 2005
+    },
+    {
+      "title": "Companion of Honour",
+      "year": 1996
+    },
+    {
+      "title": "Michael Faraday Prize",
+      "year": 2003
+    },
+    {
+      "title": "Fellow of the Zoological Society of London",
+      "year": 1998
+    },
+    {
+      "title": "Corresponding Member of the Australian Academy of Science",
+      "year": 2008
+    },
+    {
+      "title": "Fellow of the Society of Antiquaries",
+      "year": 2007
+    },
+    {
+      "title": "Fellow of the Royal Society of Biology",
+      "year": 2000
+    },
+    {
+      "title": "Fellow of the Linnean Society of London",
+      "year": 1999
+    }
+  ],
+  "notable_works": [],
+  "social": {
+    "x": "https://x.com/SirDavidBBC",
+    "instagram": "https://www.instagram.com/davidattenborough"
+  },
+  "official_website": null,
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q183337"
+    }
+  ],
+  "photo": {
+    "skipped": "licence not usable: \"OGL 3\""
+  },
+  "fetched_at": "2026-09-21T19:22:07.618Z"
+}

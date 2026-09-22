@@ -20,6 +20,7 @@ export const familyPersonalExtraArticles: LawArticle[] = [
       "A prenuptial agreement lets a couple decide in advance how property is handled in divorce, but courts won't enforce terms that are unfair or harm children.",
     author: 'Sofia Almeida',
     updatedAt: 'June 14, 2026',
+    modifiedAt: '2026-09-21',
     readingTime: 9,
     views: 0,
     featured: false,
@@ -54,7 +55,7 @@ export const familyPersonalExtraArticles: LawArticle[] = [
 <p>Recognition ranges from binding to merely influential.</p>
 <ul>
 <li><strong>United States:</strong> Prenups are widely enforced when properly made, though standards differ by state and unconscionable terms are rejected.</li>
-<li><strong>United Kingdom:</strong> Prenups are not automatically binding but are given significant weight if freely entered with disclosure and advice, and if fair.</li>
+<li><strong>England and Wales:</strong> Prenups are not automatically binding but are given significant weight if freely entered with disclosure and advice, and if fair (Radmacher v Granatino); Scotland has its own separate rules.</li>
 <li><strong>European Union:</strong> Many civil-law countries use formal marital property regimes, and agreements before a notary can be strongly binding.</li>
 <li><strong>India:</strong> Prenups are not traditionally recognised as binding contracts and are generally treated as persuasive rather than enforceable.</li>
 </ul>

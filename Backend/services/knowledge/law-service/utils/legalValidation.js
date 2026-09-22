@@ -24,6 +24,10 @@ const participant = (r, where) => {
 const dated = (r, where) => {
     if (!r || !/^\d{4}(-\d{2}(-\d{2})?)?$/.test(String(r.date || ''))) fail(`${where}: date must be YYYY, YYYY-MM or YYYY-MM-DD`);
     if (!isText(r.label || r.title, 300)) fail(`${where}: description is required`);
+    // Timeline rows only (important-dates rows never set this) -- which court
+    // this specific step happened at, when it's not (or not only) the case's
+    // primary court_slug.
+    if (r.courtSlug && !SLUG_RE.test(r.courtSlug)) fail(`${where}: court slug is not valid`);
 };
 const document = (r, where) => {
     if (!r || !isText(r.title, 300)) fail(`${where}: title is required`);
@@ -37,13 +41,17 @@ function validateCourt(data, isCreate) {
     if ('level' in data && !COURT_LEVELS.includes(data.level)) fail(`level must be one of ${COURT_LEVELS.join(', ')}`);
     if (data.country_code != null && data.country_code !== '' && !/^[A-Z]{2}$/.test(data.country_code)) fail('country_code must be a 2-letter ISO code');
     if (data.url && !/^https:\/\//i.test(data.url)) fail('url must be an https URL');
+    if (data.appeals_from_court_slug && !SLUG_RE.test(data.appeals_from_court_slug)) fail('appeals_from_court_slug is not valid');
     if (data.indexable === true && data.published === false) fail('an unpublished court cannot be indexable');
 }
 
 function validateCase(data, isCreate) {
     if (isCreate || 'slug' in data) if (!SLUG_RE.test(String(data.slug || ''))) fail('slug must be lowercase words separated by hyphens');
     if (isCreate || 'case_name' in data) if (!isText(data.case_name, 400)) fail('case_name is required');
-    if (isCreate || 'court_slug' in data) if (!SLUG_RE.test(String(data.court_slug || ''))) fail('court_slug is required');
+    // Optional: a case can exist before any court is on record (e.g. an
+    // arrest, before charges/venue are known). When a value IS given it
+    // still has to be a real slug, not free text.
+    if (data.court_slug != null && data.court_slug !== '' && !SLUG_RE.test(String(data.court_slug))) fail('court_slug is not valid');
     if ('status' in data && !CASE_STATUSES.includes(data.status)) fail(`status must be one of ${CASE_STATUSES.join(', ')}`);
     if (data.country_code != null && data.country_code !== '' && !/^[A-Z]{2}$/.test(data.country_code)) fail('country_code must be a 2-letter ISO code');
     checkArray(data, 'parties', 'parties', participant);

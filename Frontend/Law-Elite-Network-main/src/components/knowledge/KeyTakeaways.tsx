@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * Page Six Editorial Key Takeaways Module.
+ * Law Elite Editorial Key Takeaways Module.
  * Black header bar with white uppercase label + red top-border rule.
  * Numbered badges with serif body text, divider lines between items.
  */

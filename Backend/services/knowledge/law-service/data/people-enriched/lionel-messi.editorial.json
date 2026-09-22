@@ -1,0 +1,140 @@
+{
+  "display_name": null,
+  "short_bio": "Argentine footballer, eight-time Ballon d’Or winner and captain of the 2022 World Cup winners.",
+  "biography": "Lionel Messi was born in Rosario, Argentina. At 13 he moved to Spain to join Barcelona’s academy, La Masia, which paid for treatment of his growth hormone deficiency.\n\nHe played for Barcelona’s first team from 2004 to 2021 and won the Ballon d’Or in 2009, 2010, 2011, 2012, 2015, 2019 and 2021. He then spent two seasons with Paris Saint-Germain and joined Inter Miami in 2023, the year of his eighth Ballon d’Or.\n\nWith Argentina he won the Olympic gold medal in 2008, the Copa América in 2021 and 2024, and the 2022 World Cup in Qatar, where he was named the tournament’s best player.",
+  "awards": [
+    {
+      "title": "Footballer of the Year of Argentina",
+      "year": 2005
+    },
+    {
+      "title": "Alejandro buceta",
+      "year": 2005
+    },
+    {
+      "title": "Bravo Award",
+      "year": 2007
+    },
+    {
+      "title": "Premios Protagonistas",
+      "year": 2008
+    },
+    {
+      "title": "Ballon d'Or",
+      "year": 2009
+    },
+    {
+      "title": "FIFA World Player of the Year",
+      "year": 2009
+    },
+    {
+      "title": "Onze d'Or",
+      "year": 2009
+    },
+    {
+      "title": "Trofeo Alfredo Di Stéfano",
+      "year": 2009
+    },
+    {
+      "title": "UEFA Club Footballer of the Year",
+      "year": 2009
+    },
+    {
+      "title": "FIFA Ballon d'Or",
+      "year": 2010
+    },
+    {
+      "title": "European Golden Shoe",
+      "year": 2010
+    },
+    {
+      "title": "Pichichi Trophy",
+      "year": 2010
+    },
+    {
+      "title": "L'Équipe Champion of Champions",
+      "year": 2011
+    },
+    {
+      "title": "Best International Athlete ESPY Award",
+      "year": 2012
+    },
+    {
+      "title": "World Cup Golden Ball",
+      "year": 2014
+    },
+    {
+      "title": "Saint George's Cross",
+      "year": 2019
+    },
+    {
+      "title": "The Best FIFA Men's Player",
+      "year": 2019
+    },
+    {
+      "title": "Laureus World Sports Award for Sportsman of the Year",
+      "year": 2020
+    },
+    {
+      "title": "Ballon d'Or Dream Team",
+      "year": 2020
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "Olympic football gold",
+      "year": 2008,
+      "note": "With Argentina"
+    },
+    {
+      "title": "Copa América",
+      "year": 2021,
+      "note": "With Argentina"
+    },
+    {
+      "title": "FIFA World Cup",
+      "year": 2022,
+      "note": "Captain of Argentina"
+    },
+    {
+      "title": "Ballon d’Or",
+      "year": 2023,
+      "note": "Eighth award"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1987-06-24",
+      "title": "Born in Rosario, Argentina"
+    },
+    {
+      "date": "2004",
+      "title": "Makes his Barcelona first-team debut"
+    },
+    {
+      "date": "2021",
+      "title": "Leaves Barcelona for Paris Saint-Germain"
+    },
+    {
+      "date": "2022-12-18",
+      "title": "Argentina wins the World Cup"
+    },
+    {
+      "date": "2023",
+      "title": "Joins Inter Miami"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q615"
+    },
+    {
+      "label": "Wikipedia: Lionel Messi",
+      "url": "https://en.wikipedia.org/wiki/Lionel_Messi"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

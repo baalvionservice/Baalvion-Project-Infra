@@ -23,6 +23,14 @@ export interface Court {
   description: string;
   /** Official court website, when one exists. */
   url?: string;
+  /**
+   * The court whose rulings this one reviews on appeal, e.g. a state supreme
+   * court's `appealsFromCourtSlug` names the intermediate appellate court
+   * below it. Optional and one level at a time (walk it repeatedly for a
+   * full trial → appellate → supreme chain) -- most courts, including every
+   * trial court, have nothing here.
+   */
+  appealsFromCourtSlug?: string;
   /** Explicit override from the admin panel; bundled courts are indexable. */
   indexable?: boolean;
 }
@@ -55,6 +63,15 @@ export interface CaseTimelineEntry {
   date: string;
   title: string;
   description?: string;
+  /**
+   * Which court this specific step happened in/at, when it differs from (or
+   * simply confirms) the case's primary `courtSlug` -- e.g. "Appeal filed"
+   * at the appellate court, "Cert. granted" at the supreme court. This is
+   * what makes a case's real path through multiple courts a structured
+   * fact (queryable via getMergedCasesForCourt) rather than only readable
+   * inside `description` prose.
+   */
+  courtSlug?: string;
 }
 
 /** A judgment, ruling, filing, or other case document — only ever a real, hosted, publicly available source. */
@@ -81,7 +98,15 @@ export interface LegalCase {
   /** URL slug — /legal/cases/{slug}. */
   slug: string;
   caseName: string;
-  courtSlug: string;
+  /**
+   * The case's primary/current court. Optional so a case can exist the
+   * moment something newsworthy happens (e.g. an arrest, before any court
+   * is on record) with `status: 'ongoing'` and this filled in once real —
+   * a case is never blocked on inventing a court just to satisfy the type.
+   * Once the case moves between courts, add each step to `timeline` with
+   * its own `courtSlug` rather than overwriting this field.
+   */
+  courtSlug?: string;
   /** Free-text jurisdiction description, e.g. "United States — Federal", "Egypt". */
   jurisdiction: string;
   countryCode?: string;

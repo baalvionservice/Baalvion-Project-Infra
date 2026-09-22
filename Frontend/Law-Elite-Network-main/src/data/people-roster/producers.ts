@@ -65,7 +65,7 @@ export const PRODUCERS = buildRoster('producers', [
   'Brian Eno|GB|English record producer and musician',
   'Nile Rodgers|US|American record producer and guitarist of Chic',
   'Berry Gordy|US|American record producer and founder of Motown',
-  'Clive Davis|US|American record producer and music executive',
+  'Clive Davis|US|American record producer and music executive|d',
   'Jimmy Iovine|US|American record producer and co-founder of Interscope Records and Beats',
   'Calvin Harris|GB|Scottish DJ and record producer',
   'David Guetta|FR|French DJ and record producer',

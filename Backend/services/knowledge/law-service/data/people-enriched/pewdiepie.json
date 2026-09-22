@@ -1,0 +1,97 @@
+{
+  "slug": "pewdiepie",
+  "category": "creators",
+  "wikidata_id": "Q13423853",
+  "full_name": "PewDiePie",
+  "description": "Swedish YouTuber (born 1989)",
+  "birth_date": "1989-10-24",
+  "birth_place": "Gothenburg",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "SE",
+  "citizenship": [
+    "Sweden"
+  ],
+  "occupations": [
+    "YouTuber",
+    "writer",
+    "gamer",
+    "Internet celebrity",
+    "television producer",
+    "Japan Enthusiast"
+  ],
+  "education": [
+    {
+      "institution": "Chalmers University of Technology"
+    },
+    {
+      "institution": "Göteborgs Högre Samskola"
+    }
+  ],
+  "positions": [],
+  "awards": [
+    {
+      "title": "Shorty Awards",
+      "year": 1989
+    },
+    {
+      "title": "Silver Play Button",
+      "year": 2012
+    },
+    {
+      "title": "Gold Play Button",
+      "year": 2012
+    },
+    {
+      "title": "Diamond Play Button",
+      "year": 2013
+    },
+    {
+      "title": "Teen Choice Award for Choice Web Star - Gaming",
+      "year": 2014
+    },
+    {
+      "title": "Custom Play Button",
+      "year": 2016
+    },
+    {
+      "title": "Red Diamond Creator Award",
+      "year": 2019
+    },
+    {
+      "title": "Guldtuben Award"
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "Scare PewDiePie"
+    },
+    {
+      "title": "This Book Loves You"
+    }
+  ],
+  "social": {
+    "x": "https://x.com/PewDiePie",
+    "instagram": "https://www.instagram.com/pewdiepie",
+    "facebook": "https://www.facebook.com/PewDiePie"
+  },
+  "official_website": "http://www.pewdiepie.com/",
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q13423853"
+    }
+  ],
+  "photo": {
+    "file": "pewdiepie.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1071,
+    "credit": "Cold Ones Clips / Wikimedia Commons",
+    "license": "CC BY 3.0",
+    "license_url": "https://creativecommons.org/licenses/by/3.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Pewdiepie_head_shot.jpg"
+  },
+  "fetched_at": "2026-09-21T19:20:13.904Z"
+}

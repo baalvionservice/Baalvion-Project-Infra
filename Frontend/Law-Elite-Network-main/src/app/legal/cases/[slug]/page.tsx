@@ -18,7 +18,7 @@ export default async function LegalCasePage({ params }: { params: Promise<{ slug
   if (!legalCase) notFound();
 
   const [court, latestNews] = await Promise.all([
-    getMergedCourtBySlug(legalCase.courtSlug),
+    legalCase.courtSlug ? getMergedCourtBySlug(legalCase.courtSlug) : Promise.resolve(null),
     getLatestNewsForCase(legalCase),
   ]);
   const peopleBySlug = getResolvedCaseParticipants(legalCase, await getMergedPeople());

@@ -55,7 +55,7 @@ export function CasesDirectory({ cases, courtNames = {} }: { cases: LegalCase[];
         <p className="text-slate-500 text-sm">No cases in this status yet.</p>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {visible.map((c) => <CaseCard key={c.slug} legalCase={c} courtName={courtNames[c.courtSlug]} />)}
+          {visible.map((c) => <CaseCard key={c.slug} legalCase={c} courtName={c.courtSlug ? courtNames[c.courtSlug] : undefined} />)}
         </div>
       )}
     </div>

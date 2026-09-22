@@ -52,6 +52,19 @@ export interface LawArticle {
    */
   primarySources?: { label: string; url?: string }[];
   /**
+   * Date (ISO, YYYY-MM-DD) of the last substantive editorial correction
+   * recorded in content-plan/AUDIT-2026-09-21.md. Emitted as dateModified and
+   * shown as the updated date; `updatedAt` stays the original date. Omit when
+   * no correction date is documented.
+   */
+  modifiedAt?: string;
+  /**
+   * Keep this guide out of the index (robots noindex, follow) and the sitemap
+   * while it stays reachable. For articles held pending editorial work; record
+   * the reason in content-plan/AUDIT-2026-09-21.md.
+   */
+  noindex?: boolean;
+  /**
    * Set only once a real, named legal professional has actually reviewed this
    * guide -- see the "Reviewed by" policy in editorial-process. Never
    * populate with an invented name or unverified bar/license number.

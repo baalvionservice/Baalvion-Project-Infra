@@ -1,0 +1,112 @@
+{
+  "display_name": null,
+  "short_bio": "Musician and songwriter, co-writer and bassist of the Beatles.",
+  "biography": "Paul McCartney was born in Liverpool in 1942. He met John Lennon in 1957, and the pair wrote most of the Beatles’ songs, among them Yesterday, Hey Jude and Let It Be. The group split in 1970.\n\nHe formed Wings in 1971; Band on the Run (1973) was their best-known album. Later projects included the classical piece Liverpool Oratorio (1991).\n\nHe was knighted in 1997 and made a Companion of Honour. He headlined Glastonbury in 2022, and the 2021 documentary The Beatles: Get Back revisited the group’s final years.",
+  "awards": [
+    {
+      "title": "Member of the Order of the British Empire",
+      "year": 1965
+    },
+    {
+      "title": "Academy Award for Best Original Score",
+      "year": 1971
+    },
+    {
+      "title": "Grammy Lifetime Achievement Award",
+      "year": 1990
+    },
+    {
+      "title": "Knight Bachelor",
+      "year": 1997
+    },
+    {
+      "title": "Rock and Roll Hall of Fame",
+      "year": 1999
+    },
+    {
+      "title": "Gershwin Prize",
+      "year": 2010
+    },
+    {
+      "title": "Grammy Award for Best Historical Album",
+      "year": 2011
+    },
+    {
+      "title": "MusiCares Person of the Year",
+      "year": 2012
+    },
+    {
+      "title": "Officer of the Legion of Honour",
+      "year": 2012
+    },
+    {
+      "title": "Companion of Honour",
+      "year": 2017
+    },
+    {
+      "title": "Wolf Prize in Arts",
+      "year": 2018
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "Yesterday",
+      "year": 1965,
+      "note": "Written and recorded with the Beatles"
+    },
+    {
+      "title": "Band on the Run",
+      "year": 1973,
+      "note": "Wings album"
+    },
+    {
+      "title": "Liverpool Oratorio",
+      "year": 1991,
+      "note": "Choral work with Carl Davis"
+    },
+    {
+      "title": "Egypt Station",
+      "year": 2018,
+      "note": "Solo album"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1942-06-18",
+      "title": "Born in Liverpool"
+    },
+    {
+      "date": "1957",
+      "title": "Meets John Lennon"
+    },
+    {
+      "date": "1970",
+      "title": "The Beatles split"
+    },
+    {
+      "date": "1971",
+      "title": "Forms Wings"
+    },
+    {
+      "date": "1997",
+      "title": "Knighted"
+    },
+    {
+      "date": "2022",
+      "title": "Headlines Glastonbury"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q2599"
+    },
+    {
+      "label": "Wikipedia: Paul McCartney",
+      "url": "https://en.wikipedia.org/wiki/Paul_McCartney"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

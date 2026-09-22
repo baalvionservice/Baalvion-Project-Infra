@@ -1,0 +1,96 @@
+{
+  "slug": "greta-gerwig",
+  "category": "directors",
+  "wikidata_id": "Q271967",
+  "full_name": "Greta Gerwig",
+  "description": "American actress and filmmaker (born 1983)",
+  "birth_date": "1983-08-04",
+  "birth_place": "Sacramento",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "US",
+  "citizenship": [
+    "United States"
+  ],
+  "occupations": [
+    "film director",
+    "playwright",
+    "film actor",
+    "writer",
+    "voice actor",
+    "film screenwriter",
+    "film producer"
+  ],
+  "education": [
+    {
+      "institution": "Barnard College"
+    }
+  ],
+  "positions": [
+    {
+      "title": "President of the Jury at the Cannes Festival",
+      "start": 2024,
+      "end": 2024
+    }
+  ],
+  "awards": [
+    {
+      "title": "National Board of Review Award for Best Director",
+      "year": 2017
+    },
+    {
+      "title": "Independent Spirit Award for Best Screenplay",
+      "year": 2018
+    },
+    {
+      "title": "Time 100",
+      "year": 2018
+    },
+    {
+      "title": "Critics' Choice Movie Award for Best Original and Adapted Screenplay",
+      "year": 2020
+    },
+    {
+      "title": "Critics' Choice Movie Award for Best Original and Adapted Screenplay",
+      "year": 2024
+    },
+    {
+      "title": "Women of the Year",
+      "year": 2024
+    },
+    {
+      "title": "Bradbury Award"
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "Lady Bird"
+    },
+    {
+      "title": "Little Women"
+    },
+    {
+      "title": "Barbie"
+    }
+  ],
+  "social": {},
+  "official_website": null,
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q271967"
+    }
+  ],
+  "photo": {
+    "file": "greta-gerwig.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1259,
+    "credit": "Raph_PH / Wikimedia Commons",
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Greta_Gerwig.jpg"
+  },
+  "fetched_at": "2026-09-21T19:18:13.563Z"
+}

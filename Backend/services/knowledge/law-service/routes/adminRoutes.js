@@ -42,6 +42,8 @@ router.get  ('/impersonate/:userId',         ctrl.impersonate);
 
 router.get  ('/entity-photos/:id/blob',   photosCtrl.getPhotoAdmin);
 router.post ('/entity-photos',            photoUpload.single('file'), photosCtrl.uploadPhoto);
+router.get  ('/commons/search',           photosCtrl.commonsSearch);
+router.post ('/commons/import',           photosCtrl.commonsImport);
 router.get  ('/people/photos/:id',        peopleCtrl.getPhotoAdmin);
 router.post ('/people/:id/photos',         photoUpload.single('file'), peopleCtrl.uploadPhoto);
 

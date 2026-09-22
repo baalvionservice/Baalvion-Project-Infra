@@ -12,27 +12,25 @@ interface ArticleCardProps {
 }
 
 function Byline({ article }: { article: any }) {
-  const author = article?.author;
-  if (!author) return null;
+  const author = article?.author || 'Law Elite Editorial';
   return (
-    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-slate-500 font-medium">
-      <span className="text-slate-700 font-semibold">By {author}</span>
+    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11.5px] font-semibold text-slate-500 uppercase tracking-wider">
+      <span className="text-[#E13131] font-bold">By {author}</span>
     </div>
   );
 }
 
 /**
  * Editorial article card used on category and search result grids.
- * Image-led, with a category kicker, Franklin headline and clean metadata —
- * matching the newsroom homepage aesthetic.
+ * Styled in a high-impact tabloid media layout.
  */
 export function ArticleCard({ article }: ArticleCardProps) {
   if (!article) return null;
-  const categoryName = article?.category?.name || article?.subcategory?.name;
+  const categoryName = article?.category?.name || article?.subcategory?.name || 'NEWS';
 
   return (
-    <Link href={articleUrl(article)} className="group flex flex-col h-full">
-      <div className="relative aspect-[16/10] w-full overflow-hidden rounded-lg bg-slate-100">
+    <Link href={articleUrl(article)} className="group flex flex-col h-full border border-slate-200 hover:border-[#E13131] hover:shadow-md transition-all p-3.5 bg-white rounded-sm">
+      <div className="relative aspect-[16/10] w-full overflow-hidden rounded-sm bg-slate-900">
         <Image
           src={resolveArticleImage(article)}
           alt={article.title}
@@ -40,30 +38,31 @@ export function ArticleCard({ article }: ArticleCardProps) {
           sizes="(max-width: 768px) 100vw, 33vw"
           className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
         />
+        <div className="absolute top-2 left-2 z-10">
+          <span className="bg-[#E13131] text-white text-[9.5px] font-black uppercase tracking-[0.16em] px-2 py-0.5 rounded-xs shadow-sm">
+            {categoryName}
+          </span>
+        </div>
       </div>
 
-      <div className="pt-4 flex flex-col flex-1">
-        {categoryName && <span className="kicker mb-2">{categoryName}</span>}
-
-        <h3 className="font-headline text-lg md:text-xl font-bold leading-snug text-slate-900 group-hover:text-news-600 transition-colors line-clamp-3">
+      <div className="pt-3.5 flex flex-col flex-1">
+        <h3 className="font-serif text-lg md:text-[1.25rem] font-bold leading-snug text-slate-900 group-hover:text-[#E13131] transition-colors line-clamp-3">
           {article.title}
         </h3>
 
         {article.summary && (
-          <p className="mt-2 text-[14px] leading-relaxed text-slate-500 line-clamp-2 flex-1">
+          <p className="mt-2 text-[13.5px] leading-relaxed text-slate-600 font-serif line-clamp-2 flex-1">
             {article.summary}
           </p>
         )}
 
-        <div className="mt-3 pt-3 border-t border-slate-100 space-y-2">
+        <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
           <Byline article={article} />
-          <div className="flex items-center gap-4 text-[12px] text-slate-500 font-medium">
-            {article.views ? (
-              <span className="inline-flex items-center gap-1.5">
-                <Eye className="w-3.5 h-3.5" /> {Number(article.views).toLocaleString()} views
-              </span>
-            ) : null}
-          </div>
+          {article.views ? (
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-xs">
+              <Eye className="w-3 h-3 text-[#E13131]" /> {Number(article.views).toLocaleString()}
+            </span>
+          ) : null}
         </div>
       </div>
     </Link>

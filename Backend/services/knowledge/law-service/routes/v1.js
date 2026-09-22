@@ -25,6 +25,8 @@ router.use('/connections',    require('./connectionRoutes'));
 router.use('/groups',         require('./groupRoutes'));
 router.use('/complaints',     require('./complaintRoutes'));
 router.use('/topics',         require('./topicsRoutes'));
+router.use('/podcasts',       require('./podcastsRoutes'));
+router.use('/videos',         require('./videosRoutes'));
 router.use('/home-widgets',   require('./homeWidgetsRoutes'));
 router.use('/sports',         require('./sportsRoutes'));
 router.use('/photos',         require('./photoRoutes'));

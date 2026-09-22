@@ -5,6 +5,7 @@ import { getMergedEntertainmentEntities } from '@/lib/entertainment-server';
 import { getMergedSportsTeams, getMergedSportsCompetitions } from '@/lib/sports-server';
 import { getMergedTopics } from '@/lib/topics-server';
 import { buildEntityRegistry } from '@/lib/entity-registry';
+import { getShowTaggingEntries } from '@/lib/videos-tagging';
 import { describeEntities } from '@/lib/member-feed';
 import { articleUrl } from '@/lib/article-url';
 import { buildRelations } from '@/lib/editorial/relations';
@@ -17,7 +18,8 @@ const stripHtml = (html: string) => html.replace(/<[^>]+>/g, ' ');
 
 async function build(): Promise<Catalog> {
   const [people, cases, courts, entertainment, teams, competitions, topics] = await Promise.all([getMergedPeople(), getMergedLegalCases(), getMergedCourts(), getMergedEntertainmentEntities(), getMergedSportsTeams(), getMergedSportsCompetitions(), getMergedTopics()]);
-  const registry = buildEntityRegistry(people, { cases, courts }, entertainment, { teams, competitions }, topics);
+  const showEntries = await getShowTaggingEntries().catch(() => []);
+  const registry = buildEntityRegistry(people, { cases, courts }, entertainment, { teams, competitions }, topics, showEntries);
   const described = new Map(describeEntities(registry.map((r) => ({ entityType: r.entityType, slug: r.slug })), registry).map((d) => [`${d.entityType}:${d.slug}`, d]));
 
   const entities = registry.flatMap((r) => {

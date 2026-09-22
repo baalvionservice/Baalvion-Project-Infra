@@ -44,10 +44,6 @@ function StatusPill({ status }: { status: Person['status'] }) {
   );
 }
 
-function EmptyState({ children }: { children: React.ReactNode }) {
-  return <p className="text-[14px] text-slate-500 bg-slate-50 border border-dashed border-slate-200 rounded-lg px-4 py-6 text-center">{children}</p>;
-}
-
 function MediaGrid({ items }: { items: NonNullable<Person['videos']> }) {
   return (
     <div className="grid sm:grid-cols-3 gap-4">
@@ -110,9 +106,8 @@ export function PersonProfile({
             <figure className="shrink-0 w-36 md:w-44">
               <div className="relative w-36 h-36 md:w-44 md:h-44 overflow-hidden rounded-2xl bg-slate-100 shadow-sm ring-1 ring-slate-200">
                 {person.photo ? (
-                  // Same-origin, LEN-hosted photo: the route resizes it, so skip the generic loader.
                   <Image
-                    src={`${person.photo.url}?w=480`}
+                    src={person.photo.url.startsWith('/media/') ? `${person.photo.url}?w=480` : person.photo.url}
                     alt={person.photo.alt}
                     fill
                     unoptimized
@@ -471,11 +466,10 @@ export function PersonProfile({
             )}
 
             {/* Latest News */}
+            {latestNews.length > 0 && (
             <section className="mb-12">
               <SectionHeading>Latest News</SectionHeading>
-              {latestNews.length === 0 ? (
-                <EmptyState>No published articles mention {name} yet.</EmptyState>
-              ) : (
+              {(
                 <ul className="space-y-4">
                   {latestNews.map((article) => (
                     <li key={article.slug}>
@@ -490,6 +484,7 @@ export function PersonProfile({
                 </ul>
               )}
             </section>
+            )}
 
             {/* Sources */}
             {person.sources && person.sources.length > 0 && (
@@ -509,22 +504,28 @@ export function PersonProfile({
             )}
 
             {/* Videos */}
-            <section className="mb-12">
-              <SectionHeading>Videos</SectionHeading>
-              {person.videos?.length ? <MediaGrid items={person.videos} /> : <EmptyState>No videos published for this profile yet.</EmptyState>}
-            </section>
+            {person.videos?.length ? (
+              <section className="mb-12">
+                <SectionHeading>Videos</SectionHeading>
+                <MediaGrid items={person.videos} />
+              </section>
+            ) : null}
 
             {/* Interviews */}
-            <section className="mb-12">
-              <SectionHeading>Interviews</SectionHeading>
-              {person.interviews?.length ? <MediaGrid items={person.interviews} /> : <EmptyState>No interviews published for this profile yet.</EmptyState>}
-            </section>
+            {person.interviews?.length ? (
+              <section className="mb-12">
+                <SectionHeading>Interviews</SectionHeading>
+                <MediaGrid items={person.interviews} />
+              </section>
+            ) : null}
 
             {/* Photos */}
-            <section className="mb-12">
-              <SectionHeading>Photos</SectionHeading>
-              {person.photos?.length ? <MediaGrid items={person.photos} /> : <EmptyState>No photo gallery published for this profile yet.</EmptyState>}
-            </section>
+            {person.photos?.length ? (
+              <section className="mb-12">
+                <SectionHeading>Photos</SectionHeading>
+                <MediaGrid items={person.photos} />
+              </section>
+            ) : null}
 
             {/* Related people */}
             {relatedPeople.length > 0 && (

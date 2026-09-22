@@ -76,7 +76,7 @@ export const DIRECTORS = buildRoster('directors', [
   'Tim Burton|US|American film director known for Beetlejuice and Edward Scissorhands',
   'Robert Zemeckis|US|American film director known for Back to the Future and Forrest Gump',
   'Ron Howard|US|American film director and actor known for Apollo 13 and A Beautiful Mind',
-  'Rob Reiner|US|American film director known for This Is Spinal Tap and When Harry Met Sally...',
+  'Rob Reiner|US|American film director known for This Is Spinal Tap and When Harry Met Sally...|d',
   'Richard Linklater|US|American film director known for Boyhood and the Before trilogy',
   'Steven Soderbergh|US|American film director known for Traffic and Ocean’s Eleven',
   'Sam Mendes|GB|English film director known for American Beauty and Skyfall',

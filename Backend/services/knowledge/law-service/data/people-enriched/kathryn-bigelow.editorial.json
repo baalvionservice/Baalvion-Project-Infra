@@ -1,0 +1,80 @@
+{
+  "display_name": null,
+  "short_bio": "Director of The Hurt Locker, which won her the Oscar for directing, a first for a woman.",
+  "biography": "Kathryn Bigelow was born in San Carlos, California, studied painting at the San Francisco Art Institute and film at Columbia University. Her early features were genre films: Near Dark (1987) and Point Break (1991).\n\nShe directed Strange Days (1995) and K-19: The Widowmaker (2002). The Hurt Locker (2008), about a US bomb-disposal team in Iraq, won six Oscars, among them Best Picture and Best Director; no woman had won the directing prize before her.\n\nShe followed it with Zero Dark Thirty (2012), on the hunt for Osama bin Laden, and Detroit (2017).",
+  "awards": [
+    {
+      "title": "Academy Award for Best Director",
+      "year": 2010
+    },
+    {
+      "title": "Academy Award for Best Picture",
+      "year": 2010
+    },
+    {
+      "title": "BAFTA Award for Best Direction",
+      "year": 2010
+    },
+    {
+      "title": "Dallas-Fort Worth Film Critics Association Award for Best Director",
+      "year": 2012
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "Point Break",
+      "year": 1991,
+      "note": "Directed"
+    },
+    {
+      "title": "The Hurt Locker",
+      "year": 2008,
+      "note": "Won Best Picture and Best Director"
+    },
+    {
+      "title": "Zero Dark Thirty",
+      "year": 2012,
+      "note": "Directed"
+    },
+    {
+      "title": "Detroit",
+      "year": 2017,
+      "note": "Directed"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1951-11-27",
+      "title": "Born in San Carlos, California"
+    },
+    {
+      "date": "1987",
+      "title": "Directs Near Dark"
+    },
+    {
+      "date": "1991",
+      "title": "Directs Point Break"
+    },
+    {
+      "date": "2010-03-07",
+      "title": "Becomes the first woman to win the Oscar for Best Director"
+    },
+    {
+      "date": "2012",
+      "title": "Directs Zero Dark Thirty"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q34816"
+    },
+    {
+      "label": "Wikipedia: Kathryn Bigelow",
+      "url": "https://en.wikipedia.org/wiki/Kathryn_Bigelow"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

@@ -1,0 +1,88 @@
+{
+  "display_name": null,
+  "short_bio": "Lawyer and founder of the Equal Justice Initiative, author of Just Mercy.",
+  "biography": "Bryan Stevenson was born in Milton, Delaware, and studied at Eastern University before earning law and public-policy degrees at Harvard. In 1989 he founded the Equal Justice Initiative in Montgomery, Alabama, to defend people on death row and those sentenced as children.\n\nIn 1993 he won the release of Walter McMillian, a man wrongly sentenced to death, the case at the centre of his book Just Mercy (2014); a film adaptation followed in 2019. He argued Miller v. Alabama (2012), in which the Supreme Court barred mandatory life-without-parole sentences for juveniles.\n\nIn 2018 his organisation opened the Legacy Museum and the National Memorial for Peace and Justice in Montgomery.",
+  "awards": [
+    {
+      "title": "Reebok Human Rights Award",
+      "year": 1989
+    },
+    {
+      "title": "MacArthur Fellows Program",
+      "year": 1995
+    },
+    {
+      "title": "Olof Palme Prize",
+      "year": 2000
+    },
+    {
+      "title": "Gruber Prize for Justice",
+      "year": 2009
+    },
+    {
+      "title": "Lannan Cultural Freedom Prize",
+      "year": 2014
+    },
+    {
+      "title": "Right Livelihood Award",
+      "year": 2020
+    },
+    {
+      "title": "National Humanities Medal",
+      "year": 2021
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "Just Mercy",
+      "year": 2014,
+      "note": "Book"
+    },
+    {
+      "title": "Miller v. Alabama",
+      "year": 2012,
+      "note": "Argued before the Supreme Court"
+    },
+    {
+      "title": "National Memorial for Peace and Justice",
+      "year": 2018,
+      "note": "Opened by the Equal Justice Initiative"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1959-11-14",
+      "title": "Born in Milton, Delaware"
+    },
+    {
+      "date": "1989",
+      "title": "Founds the Equal Justice Initiative"
+    },
+    {
+      "date": "1993",
+      "title": "Wins the release of Walter McMillian"
+    },
+    {
+      "date": "2012",
+      "title": "Argues Miller v. Alabama"
+    },
+    {
+      "date": "2018",
+      "title": "Opens the National Memorial for Peace and Justice"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q2698978"
+    },
+    {
+      "label": "Wikipedia: Bryan Stevenson",
+      "url": "https://en.wikipedia.org/wiki/Bryan_Stevenson"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true,
+  "official_website": ""
+}

@@ -1,6 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
 import { PEOPLE } from '../people';
+import { ROSTER_PEOPLE } from './index';
+import { SHOWCASE_ONLY, SHOWCASE_PEOPLE } from '../people-showcase';
 import { PERSON_CATEGORIES } from '../../types/person';
 import { COUNTRIES, ORIGIN_ONLY_COUNTRIES } from '../../lib/countries';
 
@@ -39,7 +41,15 @@ test('roster profiles are never marked verified and have a non-trivial biography
 
 test('every category has at least 75 profiles', () => {
   for (const c of PERSON_CATEGORIES) {
-    const n = PEOPLE.filter((p) => p.category === c.slug).length;
+    const n = ROSTER_PEOPLE.filter((p) => p.category === c.slug).length;
     assert.ok(n >= 75, `${c.slug} has only ${n}`);
+  }
+});
+
+test('the site shows only the researched showcase, five per category', () => {
+  if (!SHOWCASE_ONLY) return;
+  assert.ok(PEOPLE.every((p) => SHOWCASE_PEOPLE.has(p.slug)));
+  for (const c of PERSON_CATEGORIES) {
+    assert.equal(PEOPLE.filter((p) => p.category === c.slug).length, 5, c.slug);
   }
 });

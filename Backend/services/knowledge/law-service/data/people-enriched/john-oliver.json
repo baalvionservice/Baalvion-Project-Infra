@@ -1,0 +1,85 @@
+{
+  "slug": "john-oliver",
+  "category": "tv-personalities",
+  "wikidata_id": "Q1701254",
+  "full_name": "John Oliver",
+  "description": "British-American comedian and television host",
+  "birth_date": "1977-04-23",
+  "birth_place": "Erdington",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "GB",
+  "citizenship": [
+    "United Kingdom",
+    "United States"
+  ],
+  "occupations": [
+    "actor",
+    "comedian",
+    "journalist",
+    "television presenter",
+    "writer",
+    "film actor",
+    "screenwriter",
+    "television actor",
+    "television producer"
+  ],
+  "education": [
+    {
+      "institution": "Christ's College"
+    },
+    {
+      "institution": "Mark Rutherford School"
+    },
+    {
+      "institution": "University of Cambridge"
+    }
+  ],
+  "positions": [],
+  "awards": [
+    {
+      "title": "Primetime Emmy Award for Outstanding Writing for a Variety Series"
+    },
+    {
+      "title": "Great Immigrants Award",
+      "year": 2021
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "The Bugle"
+    },
+    {
+      "title": "Last Week Tonight with John Oliver"
+    },
+    {
+      "title": "The Daily Show"
+    },
+    {
+      "title": "The Lion King"
+    }
+  ],
+  "social": {
+    "x": "https://x.com/iamjohnoliver",
+    "facebook": "https://www.facebook.com/iamjohnoliver"
+  },
+  "official_website": "https://iamjohnoliver.com",
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q1701254"
+    }
+  ],
+  "photo": {
+    "file": "john-oliver.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1402,
+    "credit": "Neil Grabowsky / Montclair Film Festival / Wikimedia Commons",
+    "license": "CC BY 2.0",
+    "license_url": "https://creativecommons.org/licenses/by/2.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:John_Oliver_November_2016.jpg"
+  },
+  "fetched_at": "2026-09-21T19:23:47.020Z"
+}

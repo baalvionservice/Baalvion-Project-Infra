@@ -1,0 +1,136 @@
+{
+  "display_name": null,
+  "short_bio": "Australian actor who has won two Academy Awards, for The Aviator and Blue Jasmine.",
+  "biography": "Cate Blanchett was born in Melbourne and trained at the National Institute of Dramatic Art in Sydney, graduating in 1992. Her early career was on Australian stage; Elizabeth (1998) made her an international film name.\n\nShe won the Best Supporting Actress Oscar for playing Katharine Hepburn in The Aviator (2004) and Best Actress for Blue Jasmine (2013). She appeared as Galadriel in Peter Jackson’s The Lord of the Rings films from 2001, and in Tár (2022) played a conductor at the height and collapse of her career.\n\nFrom 2008 to 2013 she ran the Sydney Theatre Company as co-artistic director with her husband Andrew Upton.",
+  "awards": [
+    {
+      "title": "Golden Globe Award for Best Actress – Motion Picture Drama",
+      "year": 1999
+    },
+    {
+      "title": "BAFTA Award for Best Actress in a Leading Role",
+      "year": 1999
+    },
+    {
+      "title": "Empire Award for Best Actress",
+      "year": 1999
+    },
+    {
+      "title": "Academy Award for Best Supporting Actress",
+      "year": 2005
+    },
+    {
+      "title": "Screen Actors Guild Award for Outstanding Performance by a Female Actor in a Supporting Role",
+      "year": 2005
+    },
+    {
+      "title": "Volpi Cup for Best Actress",
+      "year": 2007
+    },
+    {
+      "title": "Independent Spirit Award for Best Supporting Female",
+      "year": 2008
+    },
+    {
+      "title": "star on Hollywood Walk of Fame",
+      "year": 2008
+    },
+    {
+      "title": "Academy Award for Best Actress",
+      "year": 2014
+    },
+    {
+      "title": "Crystal Award",
+      "year": 2014
+    },
+    {
+      "title": "Screen Actors Guild Award for Outstanding Performance by a Female Actor in a Leading Role",
+      "year": 2014
+    },
+    {
+      "title": "Independent Spirit Award for Best Female Lead",
+      "year": 2014
+    },
+    {
+      "title": "BAFTA Award for Best Actress in a Leading Role",
+      "year": 2014
+    },
+    {
+      "title": "Companion of the Order of Australia",
+      "year": 2017
+    },
+    {
+      "title": "Crystal Award",
+      "year": 2018
+    },
+    {
+      "title": "International Goya Award",
+      "year": 2022
+    },
+    {
+      "title": "Golden Globe Award for Best Actress – Motion Picture Drama",
+      "year": 2023
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "Elizabeth",
+      "year": 1998,
+      "note": "Title role"
+    },
+    {
+      "title": "The Aviator",
+      "year": 2004,
+      "note": "Won Best Supporting Actress"
+    },
+    {
+      "title": "Blue Jasmine",
+      "year": 2013,
+      "note": "Won Best Actress"
+    },
+    {
+      "title": "Tár",
+      "year": 2022,
+      "note": "Lead role"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1969-05-14",
+      "title": "Born in Melbourne"
+    },
+    {
+      "date": "1992",
+      "title": "Graduates from the National Institute of Dramatic Art"
+    },
+    {
+      "date": "1998",
+      "title": "Stars in Elizabeth"
+    },
+    {
+      "date": "2004",
+      "title": "Wins the Oscar for Best Supporting Actress for The Aviator"
+    },
+    {
+      "date": "2008",
+      "title": "Becomes co-artistic director of Sydney Theatre Company"
+    },
+    {
+      "date": "2013",
+      "title": "Wins the Oscar for Best Actress for Blue Jasmine"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q80966"
+    },
+    {
+      "label": "Wikipedia: Cate Blanchett",
+      "url": "https://en.wikipedia.org/wiki/Cate_Blanchett"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

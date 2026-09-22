@@ -1,0 +1,309 @@
+[
+ {
+  "rank": 1,
+  "slug": "the-joe-rogan-experience",
+  "title": "The Joe Rogan Experience",
+  "host": "Joe Rogan",
+  "category": "Interviews",
+  "country_code": "US",
+  "language": "English",
+  "description": "Long, unscripted conversations with comedians, scientists, athletes, politicians and other guests."
+ },
+ {
+  "rank": 2,
+  "slug": "the-daily",
+  "title": "The Daily",
+  "host": "Michael Barbaro",
+  "category": "News",
+  "country_code": "US",
+  "language": "English",
+  "description": "A weekday news podcast that takes one story and explains it in about half an hour.",
+  "publisher": "The New York Times"
+ },
+ {
+  "rank": 3,
+  "slug": "call-her-daddy",
+  "title": "Call Her Daddy",
+  "host": "Alex Cooper",
+  "category": "Culture",
+  "country_code": "US",
+  "language": "English",
+  "description": "Candid interviews and conversations about relationships, celebrity and pop culture."
+ },
+ {
+  "rank": 4,
+  "slug": "crime-junkie",
+  "title": "Crime Junkie",
+  "host": "Ashley Flowers and Brit Prince",
+  "category": "True crime",
+  "country_code": "US",
+  "language": "English",
+  "description": "Weekly true-crime episodes on murders, disappearances and cold cases, told by two hosts."
+ },
+ {
+  "rank": 5,
+  "slug": "the-mel-robbins-podcast",
+  "title": "The Mel Robbins Podcast",
+  "host": "Mel Robbins",
+  "category": "Self-improvement",
+  "country_code": "US",
+  "language": "English",
+  "description": "Practical advice on motivation, confidence and habits from the author and speaker."
+ },
+ {
+  "rank": 6,
+  "slug": "huberman-lab",
+  "title": "Huberman Lab",
+  "host": "Andrew Huberman",
+  "category": "Health",
+  "country_code": "US",
+  "language": "English",
+  "description": "A Stanford neuroscientist's long-form episodes on the brain, sleep, fitness and health."
+ },
+ {
+  "rank": 7,
+  "slug": "this-american-life",
+  "title": "This American Life",
+  "host": "Ira Glass",
+  "category": "Storytelling",
+  "country_code": "US",
+  "language": "English",
+  "description": "A long-running radio and podcast series built around a weekly theme, with several true stories per episode."
+ },
+ {
+  "rank": 8,
+  "slug": "armchair-expert",
+  "title": "Armchair Expert",
+  "host": "Dax Shepard",
+  "category": "Interviews",
+  "country_code": "US",
+  "language": "English",
+  "description": "Conversations with actors, writers, scientists and other guests, hosted by an actor."
+ },
+ {
+  "rank": 9,
+  "slug": "stuff-you-should-know",
+  "title": "Stuff You Should Know",
+  "host": "Josh Clark and Chuck Bryant",
+  "category": "Education",
+  "country_code": "US",
+  "language": "English",
+  "description": "Two hosts explain how everyday things, places and events work."
+ },
+ {
+  "rank": 10,
+  "slug": "my-favorite-murder",
+  "title": "My Favorite Murder",
+  "host": "Karen Kilgariff and Georgia Hardstark",
+  "category": "True crime",
+  "country_code": "US",
+  "language": "English",
+  "description": "Two comedians swap true-crime stories and talk about them with humour."
+ },
+ {
+  "rank": 1,
+  "slug": "the-diary-of-a-ceo",
+  "title": "The Diary of a CEO",
+  "host": "Steven Bartlett",
+  "category": "Business",
+  "country_code": "GB",
+  "language": "English",
+  "description": "Interviews on business, psychology, health and relationships, hosted by a British entrepreneur."
+ },
+ {
+  "rank": 2,
+  "slug": "the-rest-is-politics",
+  "title": "The Rest Is Politics",
+  "host": "Alastair Campbell and Rory Stewart",
+  "category": "Politics",
+  "country_code": "GB",
+  "language": "English",
+  "description": "Two former British political figures discuss UK and world politics.",
+  "publisher": "Goalhanger"
+ },
+ {
+  "rank": 3,
+  "slug": "the-rest-is-history",
+  "title": "The Rest Is History",
+  "host": "Tom Holland and Dominic Sandbrook",
+  "category": "History",
+  "country_code": "GB",
+  "language": "English",
+  "description": "Two historians tell stories from across ancient, medieval and modern history.",
+  "publisher": "Goalhanger"
+ },
+ {
+  "rank": 4,
+  "slug": "the-news-agents",
+  "title": "The News Agents",
+  "host": "Emily Maitlis, Jon Sopel and Lewis Goodall",
+  "category": "News",
+  "country_code": "GB",
+  "language": "English",
+  "description": "A daily news podcast from three British journalists."
+ },
+ {
+  "rank": 5,
+  "slug": "the-rest-is-football",
+  "title": "The Rest Is Football",
+  "host": "Gary Lineker, Alan Shearer and Micah Richards",
+  "category": "Sport",
+  "country_code": "GB",
+  "language": "English",
+  "description": "Football talk and analysis from three former players.",
+  "publisher": "Goalhanger"
+ },
+ {
+  "rank": 6,
+  "slug": "off-menu",
+  "title": "Off Menu with Ed Gamble and James Acaster",
+  "host": "Ed Gamble and James Acaster",
+  "category": "Comedy",
+  "country_code": "GB",
+  "language": "English",
+  "description": "Two comedians ask a guest to describe their dream meal, from starter to drink."
+ },
+ {
+  "rank": 7,
+  "slug": "table-manners",
+  "title": "Table Manners with Jessie Ware",
+  "host": "Jessie Ware and Lennie Ware",
+  "category": "Culture",
+  "country_code": "GB",
+  "language": "English",
+  "description": "A singer and her mother host guests for a meal and a chat."
+ },
+ {
+  "rank": 8,
+  "slug": "desert-island-discs",
+  "title": "Desert Island Discs",
+  "host": "Lauren Laverne",
+  "category": "Interviews",
+  "country_code": "GB",
+  "language": "English",
+  "description": "Guests choose the music they would take to a desert island and talk about their lives.",
+  "publisher": "BBC Radio 4"
+ },
+ {
+  "rank": 9,
+  "slug": "in-our-time",
+  "title": "In Our Time",
+  "host": "Melvyn Bragg",
+  "category": "Education",
+  "country_code": "GB",
+  "language": "English",
+  "description": "A discussion of a big idea from history, science, culture or religion with three academics.",
+  "publisher": "BBC Radio 4"
+ },
+ {
+  "rank": 10,
+  "slug": "the-adam-buxton-podcast",
+  "title": "The Adam Buxton Podcast",
+  "host": "Adam Buxton",
+  "category": "Interviews",
+  "country_code": "GB",
+  "language": "English",
+  "description": "Long, relaxed conversations with writers, musicians, comedians and other guests."
+ },
+ {
+  "rank": 1,
+  "slug": "the-ranveer-show",
+  "title": "The Ranveer Show",
+  "host": "Ranveer Allahbadia",
+  "category": "Interviews",
+  "country_code": "IN",
+  "language": "Hindi and English",
+  "description": "Interviews with Indian entrepreneurs, athletes, spiritual teachers and creators."
+ },
+ {
+  "rank": 2,
+  "slug": "figuring-out-with-raj-shamani",
+  "title": "Figuring Out with Raj Shamani",
+  "host": "Raj Shamani",
+  "category": "Business",
+  "country_code": "IN",
+  "language": "Hindi and English",
+  "description": "Conversations with founders, creators and other guests about work and money."
+ },
+ {
+  "rank": 3,
+  "slug": "wtf-is-with-nikhil-kamath",
+  "title": "WTF Is with Nikhil Kamath",
+  "host": "Nikhil Kamath",
+  "category": "Business",
+  "country_code": "IN",
+  "language": "English",
+  "description": "An Indian investor and entrepreneur interviews business leaders and other guests."
+ },
+ {
+  "rank": 4,
+  "slug": "the-seen-and-the-unseen",
+  "title": "The Seen and the Unseen",
+  "host": "Amit Varma",
+  "category": "Society",
+  "country_code": "IN",
+  "language": "English",
+  "description": "Long conversations on Indian society, economics, culture and ideas."
+ },
+ {
+  "rank": 5,
+  "slug": "cyrus-says",
+  "title": "Cyrus Says",
+  "host": "Cyrus Broacha",
+  "category": "Comedy",
+  "country_code": "IN",
+  "language": "English",
+  "description": "A humorist talks to public figures from politics, film, media and sport."
+ },
+ {
+  "rank": 6,
+  "slug": "puliyabaazi",
+  "title": "Puliyabaazi",
+  "host": "Saurabh Chandra",
+  "category": "Society",
+  "country_code": "IN",
+  "language": "Hindi",
+  "description": "Hindi-language conversations on public policy, economics and society."
+ },
+ {
+  "rank": 7,
+  "slug": "ideas-of-india",
+  "title": "Ideas of India",
+  "host": "Shruti Rajagopalan",
+  "category": "Politics",
+  "country_code": "IN",
+  "language": "English",
+  "description": "Interviews on Indian economics, politics and public policy."
+ },
+ {
+  "rank": 8,
+  "slug": "unfiltered-by-samdish",
+  "title": "Unfiltered by Samdish",
+  "host": "Samdish Bhatia",
+  "category": "Interviews",
+  "country_code": "IN",
+  "language": "Hindi and English",
+  "description": "Conversations with entertainers, athletes and other Indian public figures."
+ },
+ {
+  "rank": 9,
+  "slug": "yaadon-ka-idiot-box",
+  "title": "Yaadon Ka Idiot Box with Neelesh Misra",
+  "host": "Neelesh Misra",
+  "category": "Storytelling",
+  "country_code": "IN",
+  "language": "Hindi",
+  "description": "Stories and memories told in Hindi by a writer and radio storyteller."
+ },
+ {
+  "rank": 10,
+  "slug": "orbital-gadgets-360",
+  "title": "Orbital",
+  "host": "NDTV Gadgets 360 team",
+  "category": "Technology",
+  "country_code": "IN",
+  "language": "English",
+  "description": "A weekly technology podcast covering gadgets and the tech industry from an Indian view.",
+  "publisher": "NDTV Gadgets 360"
+ }
+]

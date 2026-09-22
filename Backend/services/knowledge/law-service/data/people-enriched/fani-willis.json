@@ -1,0 +1,57 @@
+{
+  "slug": "fani-willis",
+  "category": "lawyers",
+  "wikidata_id": "Q105459066",
+  "full_name": "Fani Willis",
+  "description": "American attorney and District Attorney of Fulton County (born 1971)",
+  "birth_date": "1971-10-27",
+  "birth_place": "Inglewood",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "US",
+  "citizenship": [
+    "United States"
+  ],
+  "occupations": [
+    "lawyer",
+    "judge"
+  ],
+  "education": [
+    {
+      "institution": "Howard University"
+    },
+    {
+      "institution": "Emory University School of Law"
+    }
+  ],
+  "positions": [
+    {
+      "title": "district attorney",
+      "start": 2021
+    }
+  ],
+  "awards": [],
+  "notable_works": [],
+  "social": {
+    "x": "https://x.com/electfaniwillis"
+  },
+  "official_website": "https://fultoncountyga.gov/inside-fulton-county/fulton-county-departments/district-attorney/da-executive-team/fani-willis",
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q105459066"
+    }
+  ],
+  "photo": {
+    "file": "fani-willis.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1422,
+    "credit": "Yedaman54 / Wikimedia Commons",
+    "license": "CC0",
+    "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Fani_Willis_and_Patrick_Labat.jpg"
+  },
+  "fetched_at": "2026-09-21T19:21:40.743Z"
+}

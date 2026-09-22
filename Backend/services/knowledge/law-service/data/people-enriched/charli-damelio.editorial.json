@@ -1,0 +1,54 @@
+{
+  "display_name": null,
+  "short_bio": "American TikTok dancer, the first creator to reach 100 million followers on the platform.",
+  "biography": "Charli D’Amelio was born in Norwalk, Connecticut, and trained as a competitive dancer. She began posting dance videos on TikTok in 2019.\n\nHer following grew quickly and in 2020 she became the first person to reach 100 million followers on the app. She and her sister Dixie appeared in the Hulu series The D’Amelio Show (2021).\n\nIn 2022 she won the thirty-first season of Dancing with the Stars.",
+  "awards": [
+    {
+      "title": "Forbes 30 Under 30",
+      "year": 2021
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "The D’Amelio Show",
+      "year": 2021,
+      "note": "Hulu reality series"
+    },
+    {
+      "title": "Dancing with the Stars, season 31",
+      "year": 2022,
+      "note": "Winner with Mark Ballas"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "2004-05-01",
+      "title": "Born in Norwalk, Connecticut"
+    },
+    {
+      "date": "2019",
+      "title": "Begins posting on TikTok"
+    },
+    {
+      "date": "2021",
+      "title": "The D’Amelio Show premieres on Hulu"
+    },
+    {
+      "date": "2022",
+      "title": "Wins Dancing with the Stars"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q83648587"
+    },
+    {
+      "label": "Wikipedia: Charli D'Amelio",
+      "url": "https://en.wikipedia.org/wiki/Charli_D'Amelio"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

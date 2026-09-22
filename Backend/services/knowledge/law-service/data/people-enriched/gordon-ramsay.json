@@ -1,0 +1,72 @@
+{
+  "slug": "gordon-ramsay",
+  "category": "tv-personalities",
+  "wikidata_id": "Q15280",
+  "full_name": "Gordon Ramsay",
+  "description": "British chef, restaurateur, and television personality (born 1966)",
+  "birth_date": "1966-11-08",
+  "birth_place": "Johnstone",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "GB",
+  "citizenship": [
+    "United Kingdom"
+  ],
+  "occupations": [
+    "television presenter",
+    "chef",
+    "writer",
+    "businessperson",
+    "YouTuber",
+    "television producer",
+    "restaurateur",
+    "television celebrity chef",
+    "cook"
+  ],
+  "education": [
+    {
+      "institution": "Stratford-upon-Avon High School"
+    },
+    {
+      "institution": "Activate Learning"
+    },
+    {
+      "institution": "North Oxfordshire Academy"
+    }
+  ],
+  "positions": [],
+  "awards": [
+    {
+      "title": "Officer of the Order of the British Empire",
+      "year": 2006
+    },
+    {
+      "title": "Diamond Play Button"
+    }
+  ],
+  "notable_works": [],
+  "social": {
+    "x": "https://x.com/GordonRamsay",
+    "instagram": "https://www.instagram.com/gordongram",
+    "facebook": "https://www.facebook.com/gordonramsay"
+  },
+  "official_website": "https://www.gordonramsay.com",
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q15280"
+    }
+  ],
+  "photo": {
+    "file": "gordon-ramsay.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1129,
+    "credit": "Allan warren / Wikimedia Commons",
+    "license": "CC BY-SA 3.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Gordon_Ramsay_colour_Allan_Warren.jpg"
+  },
+  "fetched_at": "2026-09-21T19:23:52.080Z"
+}

@@ -81,6 +81,8 @@ const securityHeaders = [
       // script, so allowing any https host carries no XSS risk, only a
       // hotlinking one we accept for this public content site).
       "img-src 'self' data: blob: https:",
+      // Admin-published audio briefings and video shorts are plain https files.
+      "media-src 'self' https:",
       "font-src 'self' data: https://fonts.gstatic.com",
       // *.adtrafficquality.google is Google's ad-traffic-quality/fraud check (sodar) that
       // AdSense pings from the page; *.googlesyndication.com/*.doubleclick.net/*.google.com
@@ -163,6 +165,11 @@ const nextConfig: NextConfig = {
       { source: '/copyright-policy', destination: '/editorial-disclosure-policy', permanent: true },
       { source: '/affiliate-disclosure', destination: '/editorial-disclosure-policy', permanent: true },
       { source: '/disclaimer', destination: '/terms-of-service', permanent: true },
+      // Retitled/re-slugged to drop a borrowed outlet's brand name from our
+      // own editorial byline -- the article itself didn't change.
+      { source: '/celebrity-news/page-six-legal-analysis-defamation-right-of-publicity-paparazzi-litigation', destination: '/celebrity-news/law-elite-legal-analysis-defamation-right-of-publicity-paparazzi-litigation', permanent: true },
+      { source: '/article/page-six-legal-analysis-defamation-right-of-publicity-paparazzi-litigation', destination: '/celebrity-news/law-elite-legal-analysis-defamation-right-of-publicity-paparazzi-litigation', permanent: true },
+      { source: '/galleries/page-six-spotted-celebrity-legal-desk', destination: '/galleries/law-elite-spotted-celebrity-legal-desk', permanent: true },
       // The Television entertainment hub lives at /television (see
       // cms-only-categories.ts) -- /tv is the shorter form readers actually
       // type/link, so it redirects rather than existing as a second,

@@ -1,0 +1,40 @@
+{
+  "display_name": null,
+  "short_bio": "American digital illusionist known for short videos with apparent magic tricks made with editing.",
+  "biography": "Zach King makes short videos with visual effects. His trademark is the seamless jump-cut illusion: a shoe becomes a pair of pliers, a person steps through a screen.\n\nHe began posting on YouTube in 2008, gained wide recognition on Vine in 2013 with six-second “magic vines”, and later moved to TikTok. The tricks are made with video editing rather than sleight of hand, and the videos loop cleanly.",
+  "awards": [],
+  "notable_works": [
+    {
+      "title": "Magic Vines",
+      "year": 2013,
+      "note": "Vine videos"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1990-02-04",
+      "title": "Born on 4 February"
+    },
+    {
+      "date": "2008",
+      "title": "Begins posting on YouTube"
+    },
+    {
+      "date": "2013",
+      "title": "Gains wide recognition on Vine"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q15734051"
+    },
+    {
+      "label": "Wikipedia: Zach King",
+      "url": "https://en.wikipedia.org/wiki/Zach_King"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

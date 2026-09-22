@@ -1,0 +1,49 @@
+{
+  "display_name": null,
+  "short_bio": "Associate Justice of the Supreme Court since 2010 and a former Solicitor General.",
+  "biography": "Elena Kagan was born in New York City and studied at Princeton, Worcester College, Oxford and Harvard Law School. She clerked for Judge Abner Mikva and then for Justice Thurgood Marshall.\n\nShe taught at the University of Chicago and Harvard, served in the Clinton White House and was Dean of Harvard Law School from 2003 to 2009. In 2009 Barack Obama made her the first woman Solicitor General.\n\nHe nominated her to the Supreme Court in 2010, and the Senate confirmed her 63–37.",
+  "awards": [],
+  "notable_works": [
+    {
+      "title": "Dean of Harvard Law School",
+      "year": 2003,
+      "note": "Served until 2009"
+    },
+    {
+      "title": "Solicitor General of the United States",
+      "year": 2009,
+      "note": "First woman in the role"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1960-04-28",
+      "title": "Born in New York City"
+    },
+    {
+      "date": "2003",
+      "title": "Becomes Dean of Harvard Law School"
+    },
+    {
+      "date": "2009",
+      "title": "Becomes Solicitor General"
+    },
+    {
+      "date": "2010-08-07",
+      "title": "Sworn in as a Supreme Court justice"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q11105"
+    },
+    {
+      "label": "Wikipedia: Elena Kagan",
+      "url": "https://en.wikipedia.org/wiki/Elena_Kagan"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

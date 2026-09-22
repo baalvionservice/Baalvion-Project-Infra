@@ -18,17 +18,75 @@ export interface Topic {
 }
 
 export const TOPICS: Topic[] = [
-  { slug: 'legal-dispute', name: 'Legal Dispute', pillar: 'legal' },
-  { slug: 'defamation-law', name: 'Defamation Law', pillar: 'legal', aliases: ['Defamation'] },
-  { slug: 'constitutional-law', name: 'Constitutional Law', pillar: 'legal' },
-  { slug: 'equal-protection', name: 'Equal Protection', pillar: 'legal' },
-  { slug: 'press-freedom', name: 'Press Freedom', pillar: 'legal' },
-  { slug: 'maritime-law', name: 'Maritime Law', pillar: 'legal', aliases: ['Jones Act'] },
-  { slug: 'entertainment-news', name: 'Entertainment News', pillar: 'entertainment' },
-  { slug: 'film-industry', name: 'Film Industry', pillar: 'entertainment' },
-  { slug: 'music-industry', name: 'Music Industry', pillar: 'entertainment' },
-  { slug: 'sports-news', name: 'Sports News', pillar: 'sports' },
-  { slug: 'olympics', name: 'Olympics', pillar: 'sports', aliases: ['Olympic Games'] },
+  {
+    slug: 'legal-dispute',
+    name: 'Legal Dispute',
+    pillar: 'legal',
+    description: 'Comprehensive analysis of high-stakes civil litigation, breach of contract arbitration, and multi-jurisdictional commercial disputes across federal and state courts.',
+  },
+  {
+    slug: 'defamation-law',
+    name: 'Defamation Law',
+    pillar: 'legal',
+    aliases: ['Defamation'],
+    description: 'Legal standards governing libel, slander, public figure actual malice burdens under New York Times v. Sullivan, and media privacy tort enforcement.',
+  },
+  {
+    slug: 'constitutional-law',
+    name: 'Constitutional Law',
+    pillar: 'legal',
+    description: 'In-depth coverage of Supreme Court jurisprudence, Article II executive privilege, First Amendment press protections, and Fourteenth Amendment equal protection doctrines.',
+  },
+  {
+    slug: 'equal-protection',
+    name: 'Equal Protection',
+    pillar: 'legal',
+    description: 'Constitutional equal protection litigation, heightened scrutiny standards, and federal civil rights enforcement.',
+  },
+  {
+    slug: 'press-freedom',
+    name: 'Press Freedom',
+    pillar: 'legal',
+    description: 'First Amendment protections for investigative journalism, confidential source privilege, anti-SLAPP legislation, and international press safety.',
+  },
+  {
+    slug: 'maritime-law',
+    name: 'Maritime Law',
+    pillar: 'legal',
+    aliases: ['Jones Act'],
+    description: 'Admiralty jurisdiction, Jones Act seaman injury claims, cruise ship liability, and international maritime safety regulations.',
+  },
+  {
+    slug: 'entertainment-news',
+    name: 'Entertainment News',
+    pillar: 'entertainment',
+    description: 'Breaking news and legal analysis covering Hollywood studio arbitrations, talent agency regulations, SAG-AFTRA labor agreements, and celebrity litigation.',
+  },
+  {
+    slug: 'film-industry',
+    name: 'Film Industry',
+    pillar: 'entertainment',
+    description: 'Motion picture financing, distribution window licensing, synthetic AI performance rights, and studio union contract developments.',
+  },
+  {
+    slug: 'music-industry',
+    name: 'Music Industry',
+    pillar: 'entertainment',
+    description: 'Master recording ownership, Section 203 statutory copyright terminations, streaming royalty auditing, and music catalog valuation deals.',
+  },
+  {
+    slug: 'sports-news',
+    name: 'Sports News',
+    pillar: 'sports',
+    description: 'Professional sports legal coverage, Collective Bargaining Agreement (CBA) salary cap mechanics, NCAA NIL regulations, and athlete endorsement disputes.',
+  },
+  {
+    slug: 'olympics',
+    name: 'Olympics',
+    pillar: 'sports',
+    aliases: ['Olympic Games'],
+    description: 'Court of Arbitration for Sport (CAS) decisions, emergency ad-hoc eligibility panels, anti-doping code enforcement, and Olympic committee governance.',
+  },
 ];
 
 export function getAllTopics(): Topic[] {

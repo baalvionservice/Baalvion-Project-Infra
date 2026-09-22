@@ -12,10 +12,22 @@ test('a court needs a clean slug, a name and a known level', () => {
     assert.throws(() => validateCourt({ slug: 'a', name: 'A', url: 'http://insecure.example' }, true));
 });
 
-test('a case needs a slug, name and court, and a known status', () => {
+test('a court can name the court it appeals from, but only as a real slug', () => {
+    assert.doesNotThrow(() => validateCourt({ slug: 'a', name: 'A', appeals_from_court_slug: 'some-appellate-court' }, true));
+    assert.throws(() => validateCourt({ slug: 'a', name: 'A', appeals_from_court_slug: 'Not A Slug' }, true));
+});
+
+test('a case needs a slug and name and a known status, but its court is optional (e.g. an arrest before any court is on record)', () => {
     assert.doesNotThrow(() => validateCase(okCase, true));
-    assert.throws(() => validateCase({ ...okCase, court_slug: '' }, true));
+    assert.doesNotThrow(() => validateCase({ ...okCase, court_slug: '' }, true));
+    assert.doesNotThrow(() => validateCase({ ...okCase, court_slug: undefined }, true));
+    assert.throws(() => validateCase({ ...okCase, court_slug: 'Not A Slug' }, true));
     assert.throws(() => validateCase({ ...okCase, status: 'won' }, true));
+});
+
+test('a timeline row can name the court that step happened at, but only as a real slug', () => {
+    assert.doesNotThrow(() => validateCase({ ...okCase, timeline: [{ date: '1803', title: 'Appeal filed', courtSlug: 'some-appellate-court' }] }, true));
+    assert.throws(() => validateCase({ ...okCase, timeline: [{ date: '1803', title: 'Appeal filed', courtSlug: 'Not A Slug' }] }, true));
 });
 
 test('participants, dates and documents are checked row by row', () => {

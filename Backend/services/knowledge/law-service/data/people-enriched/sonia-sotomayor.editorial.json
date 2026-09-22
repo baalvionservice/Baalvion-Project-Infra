@@ -1,0 +1,54 @@
+{
+  "display_name": null,
+  "short_bio": "Associate Justice of the Supreme Court since 2009, the first Hispanic justice.",
+  "biography": "Sonia Sotomayor grew up in a public housing project in the Bronx and studied at Princeton University and Yale Law School. She worked as a prosecutor in the Manhattan District Attorney’s office and then in private practice.\n\nGeorge H. W. Bush nominated her to the federal district court in Manhattan in 1992. In 1995 she issued the injunction that ended the major league baseball strike. Bill Clinton elevated her to the Second Circuit in 1998.\n\nBarack Obama nominated her to the Supreme Court in 2009 and she was confirmed 68–31. She wrote the memoir My Beloved World (2013).",
+  "awards": [
+    {
+      "title": "Schneider Family Book Award",
+      "year": 2020
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "My Beloved World",
+      "year": 2013,
+      "note": "Memoir"
+    },
+    {
+      "title": "Injunction ending the baseball strike",
+      "year": 1995,
+      "note": "Ruling as a district judge"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1954-06-25",
+      "title": "Born in the Bronx, New York"
+    },
+    {
+      "date": "1992",
+      "title": "Appointed to the federal district court in Manhattan"
+    },
+    {
+      "date": "1998",
+      "title": "Appointed to the Second Circuit"
+    },
+    {
+      "date": "2009-08-08",
+      "title": "Sworn in as a Supreme Court justice"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q11107"
+    },
+    {
+      "label": "Wikipedia: Sonia Sotomayor",
+      "url": "https://en.wikipedia.org/wiki/Sonia_Sotomayor"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

@@ -1,0 +1,2059 @@
+{
+ "show": {
+  "slug": "bigg-boss",
+  "name": "Bigg Boss",
+  "description": "India's biggest reality show: housemates, weekly nominations, evictions and the host's Weekend Ka Vaar.",
+  "scope": "national",
+  "country_code": "IN",
+  "network": "Colors TV and JioHotstar",
+  "overview": "Bigg Boss is India's version of the Big Brother format. A group of housemates, mostly people already known from television, film, music, sport or social media, move into one house for about three months. Cameras follow them all day, they have no contact with the outside world, and they take on weekly tasks that decide who gets privileges and who is at risk.\n\nEach week the housemates nominate each other, viewers vote, and someone leaves the house. The last one standing wins the trophy. That mix of living together, alliances that shift and public voting is why the show keeps starting arguments online long after an episode airs.\n\nThe Hindi version began on 3 November 2006 on SET, hosted by Arshad Warsi, and moved to Colors TV from the second season, which Shilpa Shetty hosted. Amitabh Bachchan hosted the third. Salman Khan has been the face of the show since the fourth season in 2010, and Sanjay Dutt co-hosted the fifth alongside him.\n\nSeason 19 began on 24 August 2025 and Gaurav Khanna won it, with Farrhana Bhatt as runner-up. Season 20, subtitled Tathas-two, premiered on 6 September 2026 on Colors TV and JioHotstar with 16 housemates, and is on air now. There are also Bigg Boss versions in Kannada, Telugu, Tamil, Malayalam, Marathi and Bengali, and a streaming spin-off, Bigg Boss OTT.",
+  "facts": [
+   {
+    "label": "Format",
+    "value": "Reality TV, adapted from Big Brother"
+   },
+   {
+    "label": "Country",
+    "value": "India"
+   },
+   {
+    "label": "Language",
+    "value": "Hindi, with versions in other Indian languages"
+   },
+   {
+    "label": "First aired",
+    "value": "3 November 2006"
+   },
+   {
+    "label": "Hindi seasons",
+    "value": "20 so far (season 20 is on air)"
+   },
+   {
+    "label": "Host",
+    "value": "Salman Khan (since season 4)"
+   },
+   {
+    "label": "Channel",
+    "value": "Colors TV and JioHotstar (recent seasons)"
+   },
+   {
+    "label": "Latest winner",
+    "value": "Gaurav Khanna (season 19)"
+   },
+   {
+    "label": "Now airing",
+    "value": "Season 20, premiered 6 September 2026"
+   }
+  ],
+  "faq": [
+   {
+    "q": "Who hosts Bigg Boss?",
+    "a": "Salman Khan has hosted the Hindi version since season 4 in 2010. Earlier seasons were hosted by Arshad Warsi (1), Shilpa Shetty (2) and Amitabh Bachchan (3), and Sanjay Dutt co-hosted season 5."
+   },
+   {
+    "q": "Who won Bigg Boss 19?",
+    "a": "Gaurav Khanna won season 19. Farrhana Bhatt was the runner-up."
+   },
+   {
+    "q": "When did Bigg Boss 20 start?",
+    "a": "Season 20 premiered on 6 September 2026 on Colors TV and JioHotstar, with 16 housemates."
+   },
+   {
+    "q": "When did Bigg Boss start in India?",
+    "a": "The first Hindi season began on 3 November 2006 on SET, with Rahul Roy winning it."
+   },
+   {
+    "q": "Which season had the most housemates?",
+    "a": "Of the Hindi seasons listed here, season 15 had the most, with 24 housemates."
+   },
+   {
+    "q": "Where can I watch Bigg Boss?",
+    "a": "Recent seasons air on Colors TV and stream on JioHotstar. Official clips are on the Colors TV and JioHotstar YouTube channels."
+   }
+  ],
+  "sources": [
+   {
+    "label": "Wikipedia: Bigg Boss (Hindi TV series)",
+    "url": "https://en.wikipedia.org/wiki/Bigg_Boss_(Hindi_TV_series)"
+   },
+   {
+    "label": "Wikipedia: Bigg Boss 20",
+    "url": "https://en.wikipedia.org/wiki/Bigg_Boss_(Hindi_TV_series)_season_20"
+   },
+   {
+    "label": "Wikipedia: Bigg Boss 19",
+    "url": "https://en.wikipedia.org/wiki/Bigg_Boss_(Hindi_TV_series)_season_19"
+   },
+   {
+    "label": "Colors TV on YouTube",
+    "url": "https://www.youtube.com/@ColorsTV"
+   },
+   {
+    "label": "JioHotstar on YouTube",
+    "url": "https://www.youtube.com/@JioHotstar"
+   }
+  ],
+  "seasons": [
+   {
+    "number": 1,
+    "year": 2006,
+    "first_aired": "2006-11-03",
+    "last_aired": "2007-01-26",
+    "host": "Arshad Warsi",
+    "network": "SET",
+    "days": 86,
+    "housemates": 15,
+    "winner": "Rahul Roy",
+    "runner_up": "Carol Gracias",
+    "notes": "",
+    "participants": [
+     {
+      "name": "Rahul Roy",
+      "result": "Winner"
+     },
+     {
+      "name": "Carol Gracias",
+      "result": "Runner-up"
+     },
+     {
+      "name": "Ravi Kishan",
+      "result": ""
+     },
+     {
+      "name": "Rakhi Sawant",
+      "result": ""
+     },
+     {
+      "name": "Amit Sadh",
+      "result": ""
+     },
+     {
+      "name": "Rupali Ganguly",
+      "result": ""
+     },
+     {
+      "name": "Baba Sehgal",
+      "result": ""
+     },
+     {
+      "name": "Ragini Shetty",
+      "result": ""
+     },
+     {
+      "name": "Deepak Tijori",
+      "result": ""
+     },
+     {
+      "name": "Anupama Verma",
+      "result": ""
+     },
+     {
+      "name": "Aryan Vaid",
+      "result": ""
+     },
+     {
+      "name": "Kashmera Shah",
+      "result": ""
+     },
+     {
+      "name": "Deepak Parashar",
+      "result": ""
+     },
+     {
+      "name": "Bobby Darling",
+      "result": ""
+     },
+     {
+      "name": "Salil Ankola",
+      "result": ""
+     }
+    ],
+    "source": "https://en.wikipedia.org/wiki/Bigg_Boss_(Hindi_TV_series)_season_1"
+   },
+   {
+    "number": 2,
+    "year": 2008,
+    "first_aired": "2008-08-17",
+    "last_aired": "2008-11-22",
+    "host": "Shilpa Shetty",
+    "network": "Colors TV",
+    "days": 97,
+    "housemates": 15,
+    "winner": "Ashutosh Kaushik",
+    "runner_up": "Raja Chaudhary",
+    "notes": "",
+    "participants": [
+     {
+      "name": "Ashutosh Kaushik",
+      "result": "Winner"
+     },
+     {
+      "name": "Raja Chaudhary",
+      "result": "Runner-up"
+     },
+     {
+      "name": "Zulfi Syed",
+      "result": ""
+     },
+     {
+      "name": "Rahul Mahajan",
+      "result": ""
+     },
+     {
+      "name": "Monica Bedi",
+      "result": ""
+     },
+     {
+      "name": "Diana Hayden",
+      "result": ""
+     },
+     {
+      "name": "Debojit Saha",
+      "result": ""
+     },
+     {
+      "name": "Ehsaan Qureshi",
+      "result": ""
+     },
+     {
+      "name": "Payal Rohatgi",
+      "result": ""
+     },
+     {
+      "name": "Sambhavna Seth",
+      "result": ""
+     },
+     {
+      "name": "Alina Wadiwala",
+      "result": ""
+     },
+     {
+      "name": "Ketki Dave",
+      "result": ""
+     },
+     {
+      "name": "Rakhi Vijan",
+      "result": ""
+     },
+     {
+      "name": "Sanjay Nirupam",
+      "result": ""
+     },
+     {
+      "name": "Jade Goody",
+      "result": ""
+     }
+    ],
+    "source": "https://en.wikipedia.org/wiki/Bigg_Boss_(Hindi_TV_series)_season_2"
+   },
+   {
+    "number": 3,
+    "year": 2009,
+    "first_aired": "2009-10-04",
+    "last_aired": "2009-12-26",
+    "host": "Amitabh Bachchan",
+    "network": "Colors TV",
+    "days": 83,
+    "housemates": 15,
+    "winner": "Vindu Dara Singh",
+    "runner_up": "Pravesh Rana",
+    "notes": "",
+    "participants": [
+     {
+      "name": "Vindu Dara Singh",
+      "result": "Winner"
+     },
+     {
+      "name": "Pravesh Rana",
+      "result": "Runner-up"
+     },
+     {
+      "name": "Poonam Dhillon",
+      "result": ""
+     },
+     {
+      "name": "Bhakhtyar Irani",
+      "result": ""
+     },
+     {
+      "name": "Aditi Govitrikar",
+      "result": ""
+     },
+     {
+      "name": "Claudia Ciesla",
+      "result": ""
+     },
+     {
+      "name": "Raju Srivastav",
+      "result": ""
+     },
+     {
+      "name": "Rohit Verma",
+      "result": ""
+     },
+     {
+      "name": "Vinod Kambli",
+      "result": ""
+     },
+     {
+      "name": "Shamita Shetty",
+      "result": ""
+     },
+     {
+      "name": "Tannaz Irani",
+      "result": ""
+     },
+     {
+      "name": "Ismail Darbar",
+      "result": ""
+     },
+     {
+      "name": "Sherlyn Chopra",
+      "result": ""
+     },
+     {
+      "name": "Kamaal Rashid Khan",
+      "result": ""
+     },
+     {
+      "name": "Jaya Sawant",
+      "result": ""
+     }
+    ],
+    "source": "https://en.wikipedia.org/wiki/Bigg_Boss_(Hindi_TV_series)_season_3"
+   },
+   {
+    "number": 4,
+    "year": 2010,
+    "first_aired": "2010-10-03",
+    "last_aired": "2011-01-08",
+    "host": "Salman Khan",
+    "network": "Colors TV",
+    "days": 97,
+    "housemates": 16,
+    "winner": "Shweta Tiwari",
+    "runner_up": "Dalip Singh Rana",
+    "notes": "",
+    "participants": [
+     {
+      "name": "Shweta Tiwari",
+      "result": "Winner"
+     },
+     {
+      "name": "Dalip Singh Rana (The Great Khali)",
+      "result": "Runner-up"
+     },
+     {
+      "name": "Ashmit Patel",
+      "result": ""
+     },
+     {
+      "name": "Dolly Bindra",
+      "result": ""
+     },
+     {
+      "name": "Samir Soni",
+      "result": ""
+     },
+     {
+      "name": "Veena Malik",
+      "result": ""
+     },
+     {
+      "name": "Seema Parihar",
+      "result": ""
+     },
+     {
+      "name": "Sara Khan",
+      "result": ""
+     },
+     {
+      "name": "Manoj Tiwari",
+      "result": ""
+     },
+     {
+      "name": "Hrishant Goswami",
+      "result": ""
+     },
+     {
+      "name": "Anchal Kumar",
+      "result": ""
+     },
+     {
+      "name": "Rahul Bhatt",
+      "result": ""
+     },
+     {
+      "name": "Begum",
+      "result": ""
+     },
+     {
+      "name": "Sakshi Pradhan",
+      "result": ""
+     },
+     {
+      "name": "Abbas Kazmi",
+      "result": ""
+     },
+     {
+      "name": "Devender Singh",
+      "result": ""
+     }
+    ],
+    "source": "https://en.wikipedia.org/wiki/Bigg_Boss_(Hindi_TV_series)_season_4"
+   },
+   {
+    "number": 5,
+    "year": 2011,
+    "first_aired": "2011-10-02",
+    "last_aired": "2012-01-07",
+    "host": "Sanjay Dutt and Salman Khan",
+    "network": "Colors TV",
+    "days": 98,
+    "housemates": 20,
+    "winner": "Juhi Parmar",
+    "runner_up": "Mahek Chahal",
+    "notes": "Co-hosted by Sanjay Dutt and Salman Khan.",
+    "participants": [
+     {
+      "name": "Juhi Parmar",
+      "result": "Winner"
+     },
+     {
+      "name": "Mahek Chahal",
+      "result": "Runner-up"
+     },
+     {
+      "name": "Sidharth Bhardwaj",
+      "result": ""
+     },
+     {
+      "name": "Akashdeep Saigal",
+      "result": ""
+     },
+     {
+      "name": "Amar Upadhyay",
+      "result": ""
+     },
+     {
+      "name": "Sunny Leone",
+      "result": ""
+     },
+     {
+      "name": "Shonali Nagrani",
+      "result": ""
+     },
+     {
+      "name": "Pooja Misrra",
+      "result": ""
+     },
+     {
+      "name": "Shraddha Sharma",
+      "result": ""
+     },
+     {
+      "name": "Pooja Bedi",
+      "result": ""
+     },
+     {
+      "name": "Vida Samadzai",
+      "result": ""
+     },
+     {
+      "name": "Laxmi Tripathi",
+      "result": ""
+     },
+     {
+      "name": "Mandeep Bevli",
+      "result": ""
+     },
+     {
+      "name": "Shakti Kapoor",
+      "result": ""
+     },
+     {
+      "name": "Raageshwari Loomba",
+      "result": ""
+     },
+     {
+      "name": "Gulabo Sapera",
+      "result": ""
+     },
+     {
+      "name": "Sonika Kaliraman",
+      "result": ""
+     },
+     {
+      "name": "Nihita Biswas",
+      "result": ""
+     }
+    ],
+    "source": "https://en.wikipedia.org/wiki/Bigg_Boss_(Hindi_TV_series)_season_5"
+   },
+   {
+    "number": 6,
+    "year": 2012,
+    "first_aired": "2012-10-07",
+    "last_aired": "2013-01-12",
+    "host": "Salman Khan",
+    "network": "Colors TV",
+    "days": 97,
+    "housemates": 19,
+    "winner": "Urvashi Dholakia",
+    "runner_up": "Imam Siddique",
+    "notes": "",
+    "participants": [
+     {
+      "name": "Urvashi Dholakia",
+      "result": "Winner"
+     },
+     {
+      "name": "Imam Siddique",
+      "result": "Runner-up"
+     },
+     {
+      "name": "Sana Khan",
+      "result": ""
+     },
+     {
+      "name": "Niketan Madhok",
+      "result": ""
+     },
+     {
+      "name": "Rajeev Paul",
+      "result": ""
+     },
+     {
+      "name": "Delnaaz Irani",
+      "result": ""
+     },
+     {
+      "name": "Sapna Bhavnani",
+      "result": ""
+     },
+     {
+      "name": "Aashka Goradia",
+      "result": ""
+     },
+     {
+      "name": "Karishma Kotak",
+      "result": ""
+     },
+     {
+      "name": "Vishal Karwal",
+      "result": ""
+     },
+     {
+      "name": "Santosh Shukla",
+      "result": ""
+     },
+     {
+      "name": "Dinesh Lal Yadav",
+      "result": ""
+     },
+     {
+      "name": "Mink Brar",
+      "result": ""
+     },
+     {
+      "name": "Vrajesh Hirjee",
+      "result": ""
+     },
+     {
+      "name": "Sampat Pal Devi",
+      "result": ""
+     },
+     {
+      "name": "Sidhu",
+      "result": ""
+     },
+     {
+      "name": "Aseem Trivedi",
+      "result": ""
+     },
+     {
+      "name": "Sayantani Ghosh",
+      "result": ""
+     },
+     {
+      "name": "Kashif Qureshi",
+      "result": ""
+     },
+     {
+      "name": "Divya Vasudev",
+      "result": ""
+     },
+     {
+      "name": "Rohin Robert",
+      "result": ""
+     }
+    ],
+    "source": "https://en.wikipedia.org/wiki/Bigg_Boss_(Hindi_TV_series)_season_6"
+   },
+   {
+    "number": 7,
+    "year": 2013,
+    "first_aired": "2013-09-15",
+    "last_aired": "2013-12-28",
+    "host": "Salman Khan",
+    "network": "Colors TV",
+    "days": 104,
+    "housemates": 20,
+    "winner": "Gauahar Khan",
+    "runner_up": "Tanishaa",
+    "notes": "",
+    "participants": [
+     {
+      "name": "Gauahar",
+      "result": "Winner"
+     },
+     {
+      "name": "Tanishaa",
+      "result": "Runner-up"
+     },
+     {
+      "name": "Ajaz Khan",
+      "result": ""
+     },
+     {
+      "name": "Sangram Singh",
+      "result": ""
+     },
+     {
+      "name": "Candy Brar",
+      "result": ""
+     },
+     {
+      "name": "Armaan Kohli",
+      "result": ""
+     },
+     {
+      "name": "Kushal Tandon",
+      "result": ""
+     },
+     {
+      "name": "Kamya Panjabi",
+      "result": ""
+     },
+     {
+      "name": "Sofia Hayat",
+      "result": ""
+     },
+     {
+      "name": "Elli Avram",
+      "result": ""
+     },
+     {
+      "name": "Pratyusha Banerjee",
+      "result": ""
+     },
+     {
+      "name": "Candy Brar",
+      "result": ""
+     },
+     {
+      "name": "Apurva Agnihotri",
+      "result": ""
+     },
+     {
+      "name": "Asif Azim",
+      "result": ""
+     },
+     {
+      "name": "Vivek Mishra",
+      "result": ""
+     },
+     {
+      "name": "Shilpa Saklani",
+      "result": ""
+     },
+     {
+      "name": "Ratan Rajput",
+      "result": ""
+     },
+     {
+      "name": "Anita Advani",
+      "result": ""
+     },
+     {
+      "name": "Rajat Rawail",
+      "result": ""
+     },
+     {
+      "name": "Hazel Keech",
+      "result": ""
+     }
+    ],
+    "source": "https://en.wikipedia.org/wiki/Bigg_Boss_(Hindi_TV_series)_season_7"
+   },
+   {
+    "number": 8,
+    "year": 2014,
+    "first_aired": "2014-09-21",
+    "last_aired": "2015-01-03",
+    "host": "Salman Khan",
+    "network": "Colors TV",
+    "days": 104,
+    "housemates": 19,
+    "winner": "Gautam Gulati",
+    "runner_up": "Karishma Tanna",
+    "notes": "The finale used an unusual format in which several finalists were named on stage before the winner was announced.",
+    "participants": [
+     {
+      "name": "Karishma Tanna",
+      "result": "Runner-up"
+     },
+     {
+      "name": "Dimpy Ganguly",
+      "result": ""
+     },
+     {
+      "name": "Ali Quli Mirza",
+      "result": ""
+     },
+     {
+      "name": "Gautam Gulati",
+      "result": "Winner"
+     },
+     {
+      "name": "Pritam Singh",
+      "result": ""
+     },
+     {
+      "name": "Puneet Issar",
+      "result": ""
+     },
+     {
+      "name": "Sonali Raut",
+      "result": ""
+     },
+     {
+      "name": "Upen Patel",
+      "result": ""
+     },
+     {
+      "name": "Praneet Bhat",
+      "result": ""
+     },
+     {
+      "name": "Diandra Soares",
+      "result": ""
+     },
+     {
+      "name": "Renee Dhyani",
+      "result": ""
+     },
+     {
+      "name": "Nigaar Khan",
+      "result": ""
+     },
+     {
+      "name": "Arya Babbar",
+      "result": ""
+     },
+     {
+      "name": "Sushant Divgikar",
+      "result": ""
+     },
+     {
+      "name": "Minissha Lamba",
+      "result": ""
+     },
+     {
+      "name": "Soni Singh",
+      "result": ""
+     },
+     {
+      "name": "Natasa Stankovic",
+      "result": ""
+     },
+     {
+      "name": "Deepshikha Nagpal",
+      "result": ""
+     },
+     {
+      "name": "Sukirti Kandpal",
+      "result": ""
+     },
+     {
+      "name": "Sargun Mehta",
+      "result": ""
+     }
+    ],
+    "source": "https://en.wikipedia.org/wiki/Bigg_Boss_(Hindi_TV_series)_season_8"
+   },
+   {
+    "number": 9,
+    "year": 2015,
+    "first_aired": "2015-10-11",
+    "last_aired": "2016-01-23",
+    "host": "Salman Khan",
+    "network": "Colors TV",
+    "days": 104,
+    "housemates": 20,
+    "winner": "Prince Narula",
+    "runner_up": "Rishabh Sinha",
+    "notes": "",
+    "participants": [
+     {
+      "name": "Prince Narula",
+      "result": "Winner"
+     },
+     {
+      "name": "Rishabh Sinha",
+      "result": "Runner-up"
+     },
+     {
+      "name": "Mandana Karimi",
+      "result": ""
+     },
+     {
+      "name": "Rochelle Rao",
+      "result": ""
+     },
+     {
+      "name": "Keith Sequeira",
+      "result": ""
+     },
+     {
+      "name": "Priya Malik",
+      "result": ""
+     },
+     {
+      "name": "Kishwer Merchant",
+      "result": ""
+     },
+     {
+      "name": "Suyyash Rai",
+      "result": ""
+     },
+     {
+      "name": "Nora Fatehi",
+      "result": ""
+     },
+     {
+      "name": "Gizele Thakral",
+      "result": ""
+     },
+     {
+      "name": "Kawaljit Singh",
+      "result": ""
+     },
+     {
+      "name": "Digangana Suryavanshi",
+      "result": ""
+     },
+     {
+      "name": "Rimi Sen",
+      "result": ""
+     },
+     {
+      "name": "Aman Verma",
+      "result": ""
+     },
+     {
+      "name": "Puneet Vashist",
+      "result": ""
+     },
+     {
+      "name": "Yuvika Chaudhary",
+      "result": ""
+     },
+     {
+      "name": "Vikas Bhalla",
+      "result": ""
+     },
+     {
+      "name": "Arvind Vegda",
+      "result": ""
+     },
+     {
+      "name": "Roopal Tyagi",
+      "result": ""
+     },
+     {
+      "name": "Ankit Gera",
+      "result": ""
+     }
+    ],
+    "source": "https://en.wikipedia.org/wiki/Bigg_Boss_(Hindi_TV_series)_season_9"
+   },
+   {
+    "number": 10,
+    "year": 2016,
+    "first_aired": "2016-10-16",
+    "last_aired": "2017-01-29",
+    "host": "Salman Khan",
+    "network": "Colors TV",
+    "days": 105,
+    "housemates": 18,
+    "winner": "Manveer Gurjar",
+    "runner_up": "Bani Judge",
+    "notes": "",
+    "participants": [
+     {
+      "name": "Manveer Gurjar",
+      "result": "Winner"
+     },
+     {
+      "name": "Bani",
+      "result": "Runner-up"
+     },
+     {
+      "name": "Lopamudra Raut",
+      "result": ""
+     },
+     {
+      "name": "Manu Punjabi",
+      "result": ""
+     },
+     {
+      "name": "Rohan Mehra",
+      "result": ""
+     },
+     {
+      "name": "Antara Biswas",
+      "result": ""
+     },
+     {
+      "name": "Nitibha Kaul",
+      "result": ""
+     },
+     {
+      "name": "Swami Om",
+      "result": ""
+     },
+     {
+      "name": "Gaurav Chopra",
+      "result": ""
+     },
+     {
+      "name": "Priyanka Jagga",
+      "result": ""
+     },
+     {
+      "name": "Rahul Dev",
+      "result": ""
+     },
+     {
+      "name": "Sahil Anand",
+      "result": ""
+     },
+     {
+      "name": "Jason Shah",
+      "result": ""
+     },
+     {
+      "name": "Elena Kazan",
+      "result": ""
+     },
+     {
+      "name": "Lokesh Sharma",
+      "result": ""
+     },
+     {
+      "name": "Karan Mehra",
+      "result": ""
+     },
+     {
+      "name": "Navin Prakash",
+      "result": ""
+     },
+     {
+      "name": "Akanksha Sharma",
+      "result": ""
+     }
+    ],
+    "source": "https://en.wikipedia.org/wiki/Bigg_Boss_(Hindi_TV_series)_season_10"
+   },
+   {
+    "number": 11,
+    "year": 2017,
+    "first_aired": "2017-10-01",
+    "last_aired": "2018-01-14",
+    "host": "Salman Khan",
+    "network": "Colors TV",
+    "days": 106,
+    "housemates": 19,
+    "winner": "Shilpa Shinde",
+    "runner_up": "Hina Khan",
+    "notes": "",
+    "participants": [
+     {
+      "name": "Shilpa Shinde",
+      "result": "Winner"
+     },
+     {
+      "name": "Hina Khan",
+      "result": "Runner-up"
+     },
+     {
+      "name": "Vikas Gupta",
+      "result": ""
+     },
+     {
+      "name": "Puneesh Sharma",
+      "result": ""
+     },
+     {
+      "name": "Akash Dadlani",
+      "result": ""
+     },
+     {
+      "name": "Luv Tyagi",
+      "result": ""
+     },
+     {
+      "name": "Priyank Sharma",
+      "result": ""
+     },
+     {
+      "name": "Arshi Khan",
+      "result": ""
+     },
+     {
+      "name": "Hiten Tejwani",
+      "result": ""
+     },
+     {
+      "name": "Bandgi Kalra",
+      "result": ""
+     },
+     {
+      "name": "Sapna Choudhary",
+      "result": ""
+     },
+     {
+      "name": "Benafsha Soonawalla",
+      "result": ""
+     },
+     {
+      "name": "Mehjabi Siddiqui",
+      "result": ""
+     },
+     {
+      "name": "Sabyasachi Satpathy",
+      "result": ""
+     },
+     {
+      "name": "Pooja",
+      "result": ""
+     },
+     {
+      "name": "Jyoti Kumari",
+      "result": ""
+     },
+     {
+      "name": "Lucinda Nicholas",
+      "result": ""
+     },
+     {
+      "name": "Sshivani Durga",
+      "result": ""
+     },
+     {
+      "name": "Zubair Khan",
+      "result": ""
+     }
+    ],
+    "source": "https://en.wikipedia.org/wiki/Bigg_Boss_(Hindi_TV_series)_season_11"
+   },
+   {
+    "number": 12,
+    "year": 2018,
+    "first_aired": "2018-09-16",
+    "last_aired": "2018-12-30",
+    "host": "Salman Khan",
+    "network": "Colors TV",
+    "days": 105,
+    "housemates": 20,
+    "winner": "Dipika Kakar",
+    "runner_up": "Sreesanth Nair",
+    "notes": "",
+    "participants": [
+     {
+      "name": "Dipika Kakar",
+      "result": "Winner"
+     },
+     {
+      "name": "Sreesanth Nair",
+      "result": "Runner-up"
+     },
+     {
+      "name": "Deepak Thakur",
+      "result": ""
+     },
+     {
+      "name": "Romil Chaudhary",
+      "result": ""
+     },
+     {
+      "name": "Karanvir Bohra",
+      "result": ""
+     },
+     {
+      "name": "Surbhi Rana",
+      "result": ""
+     },
+     {
+      "name": "Somi Khan",
+      "result": ""
+     },
+     {
+      "name": "Rohit Suchanti",
+      "result": ""
+     },
+     {
+      "name": "Jasleen Matharu",
+      "result": ""
+     },
+     {
+      "name": "Megha Dhade",
+      "result": ""
+     },
+     {
+      "name": "Srishty Rode",
+      "result": ""
+     },
+     {
+      "name": "Shivashish Mishra",
+      "result": ""
+     },
+     {
+      "name": "Urvashi Vani",
+      "result": ""
+     },
+     {
+      "name": "Saba Khan",
+      "result": ""
+     },
+     {
+      "name": "Anup Jalota",
+      "result": ""
+     },
+     {
+      "name": "Sourabh Patel",
+      "result": ""
+     },
+     {
+      "name": "Neha Pendse",
+      "result": ""
+     },
+     {
+      "name": "Nirmal Singh",
+      "result": ""
+     },
+     {
+      "name": "Kriti Verma",
+      "result": ""
+     },
+     {
+      "name": "Roshmi Banik",
+      "result": ""
+     }
+    ],
+    "source": "https://en.wikipedia.org/wiki/Bigg_Boss_(Hindi_TV_series)_season_12"
+   },
+   {
+    "number": 13,
+    "year": 2019,
+    "first_aired": "2019-09-29",
+    "last_aired": "2020-02-16",
+    "host": "Salman Khan",
+    "network": "Colors TV",
+    "days": 141,
+    "housemates": null,
+    "winner": "Sidharth Shukla",
+    "runner_up": "Asim Riaz",
+    "notes": "The longest Hindi season so far, at 141 days.",
+    "participants": [
+     {
+      "name": "Sidharth Shukla",
+      "result": "Winner"
+     },
+     {
+      "name": "Asim Riaz",
+      "result": "Runner-up"
+     },
+     {
+      "name": "Shehnaaz Gill",
+      "result": ""
+     },
+     {
+      "name": "Rashami Desai",
+      "result": ""
+     },
+     {
+      "name": "Arti Singh",
+      "result": ""
+     },
+     {
+      "name": "Paras Chhabra",
+      "result": ""
+     },
+     {
+      "name": "Mahira Sharma",
+      "result": ""
+     },
+     {
+      "name": "Vishal Aditya Singh",
+      "result": ""
+     },
+     {
+      "name": "Shefali Jariwala",
+      "result": ""
+     },
+     {
+      "name": "Madhurima Tuli",
+      "result": ""
+     },
+     {
+      "name": "Shefali Bagga",
+      "result": ""
+     },
+     {
+      "name": "Arhaan Khan",
+      "result": ""
+     },
+     {
+      "name": "Devoleena Bhattacharjee",
+      "result": ""
+     },
+     {
+      "name": "Vikas Pathak",
+      "result": ""
+     },
+     {
+      "name": "Himanshi Khurana",
+      "result": ""
+     },
+     {
+      "name": "Khesari Lal Yadav",
+      "result": ""
+     },
+     {
+      "name": "Tehseen Poonawalla",
+      "result": ""
+     },
+     {
+      "name": "Siddhartha Dey",
+      "result": ""
+     },
+     {
+      "name": "Abu Malik",
+      "result": ""
+     },
+     {
+      "name": "Koena Mitra",
+      "result": ""
+     },
+     {
+      "name": "Dalljiet Kaur",
+      "result": ""
+     }
+    ],
+    "source": "https://en.wikipedia.org/wiki/Bigg_Boss_(Hindi_TV_series)_season_13"
+   },
+   {
+    "number": 14,
+    "year": 2020,
+    "first_aired": "2020-10-03",
+    "last_aired": "2021-02-21",
+    "host": "Salman Khan",
+    "network": "Colors TV",
+    "days": 140,
+    "housemates": 22,
+    "winner": "Rubina Dilaik",
+    "runner_up": "Rahul Vaidya",
+    "notes": "",
+    "participants": [
+     {
+      "name": "Rubina Dilaik",
+      "result": "Winner"
+     },
+     {
+      "name": "Rahul Vaidya",
+      "result": "Runner-up"
+     },
+     {
+      "name": "Nikki Tamboli",
+      "result": ""
+     },
+     {
+      "name": "Aly Goni",
+      "result": ""
+     },
+     {
+      "name": "Rakhi Sawant",
+      "result": ""
+     },
+     {
+      "name": "Eijaz/Devoleena",
+      "result": ""
+     },
+     {
+      "name": "Abhinav Shukla",
+      "result": ""
+     },
+     {
+      "name": "Arshi Khan",
+      "result": ""
+     },
+     {
+      "name": "Vikas Gupta",
+      "result": ""
+     },
+     {
+      "name": "Sonali Phogat",
+      "result": ""
+     },
+     {
+      "name": "Jasmin Bhasin",
+      "result": ""
+     },
+     {
+      "name": "Rahul Mahajan",
+      "result": ""
+     },
+     {
+      "name": "Manu Punjabi",
+      "result": ""
+     },
+     {
+      "name": "Kashmera Shah",
+      "result": ""
+     },
+     {
+      "name": "Kavita Kaushik",
+      "result": ""
+     },
+     {
+      "name": "Pavitra Punia",
+      "result": ""
+     },
+     {
+      "name": "Jaan Kumar Sanu",
+      "result": ""
+     },
+     {
+      "name": "Shardul Pandit",
+      "result": ""
+     },
+     {
+      "name": "Naina Singh",
+      "result": ""
+     },
+     {
+      "name": "Nishant Singh Malkani",
+      "result": ""
+     },
+     {
+      "name": "Shehzad Deol",
+      "result": ""
+     },
+     {
+      "name": "Sara Gurpal",
+      "result": ""
+     }
+    ],
+    "source": "https://en.wikipedia.org/wiki/Bigg_Boss_(Hindi_TV_series)_season_14"
+   },
+   {
+    "number": 15,
+    "year": 2021,
+    "first_aired": "2021-10-02",
+    "last_aired": "2022-01-30",
+    "host": "Salman Khan",
+    "network": "Colors TV",
+    "days": 120,
+    "housemates": 24,
+    "winner": "Tejasswi Prakash",
+    "runner_up": "Pratik Sehajpal",
+    "notes": "",
+    "participants": [
+     {
+      "name": "Tejasswi Prakash",
+      "result": "Winner"
+     },
+     {
+      "name": "Pratik Sehajpal",
+      "result": "Runner-up"
+     },
+     {
+      "name": "Karan Kundrra",
+      "result": ""
+     },
+     {
+      "name": "Shamita Shetty",
+      "result": ""
+     },
+     {
+      "name": "Nishant Bhat",
+      "result": ""
+     },
+     {
+      "name": "Rashami Desai",
+      "result": ""
+     },
+     {
+      "name": "Rakhi Sawant",
+      "result": ""
+     },
+     {
+      "name": "Devoleena Bhattacharjee",
+      "result": ""
+     },
+     {
+      "name": "Abhijit Bichukale",
+      "result": ""
+     },
+     {
+      "name": "Umar Riaz",
+      "result": ""
+     },
+     {
+      "name": "Rajiv Adatia",
+      "result": ""
+     },
+     {
+      "name": "Ritesh Kumar",
+      "result": ""
+     },
+     {
+      "name": "Neha Bhasin",
+      "result": ""
+     },
+     {
+      "name": "Jay Bhanushali",
+      "result": ""
+     },
+     {
+      "name": "Vishal Kotian",
+      "result": ""
+     },
+     {
+      "name": "Simba Nagpal",
+      "result": ""
+     },
+     {
+      "name": "Afsana Khan",
+      "result": ""
+     },
+     {
+      "name": "Raqesh Bapat",
+      "result": ""
+     },
+     {
+      "name": "Ieshaan Sehgal",
+      "result": ""
+     },
+     {
+      "name": "Miesha Iyer",
+      "result": ""
+     },
+     {
+      "name": "Akasa Singh",
+      "result": ""
+     },
+     {
+      "name": "Donal Bisht",
+      "result": ""
+     },
+     {
+      "name": "Vidhi Pandya",
+      "result": ""
+     },
+     {
+      "name": "Sahil Shroff",
+      "result": ""
+     }
+    ],
+    "source": "https://en.wikipedia.org/wiki/Bigg_Boss_(Hindi_TV_series)_season_15"
+   },
+   {
+    "number": 16,
+    "year": 2022,
+    "first_aired": "2022-10-01",
+    "last_aired": "2023-02-12",
+    "host": "Salman Khan",
+    "network": "Colors TV",
+    "days": 134,
+    "housemates": 17,
+    "winner": "MC Stan",
+    "runner_up": "Shiv Thakare",
+    "notes": "",
+    "participants": [
+     {
+      "name": "MC Stan",
+      "result": "Winner"
+     },
+     {
+      "name": "Shiv Thakare",
+      "result": "Runner-up"
+     },
+     {
+      "name": "Priyanka Chahar Choudhary",
+      "result": ""
+     },
+     {
+      "name": "Archana Gautam",
+      "result": ""
+     },
+     {
+      "name": "Shalin Bhanot",
+      "result": ""
+     },
+     {
+      "name": "Nimrit Kaur Ahluwalia",
+      "result": ""
+     },
+     {
+      "name": "Sumbul Touqeer",
+      "result": ""
+     },
+     {
+      "name": "Tina Datta",
+      "result": ""
+     },
+     {
+      "name": "Soundarya Sharma",
+      "result": ""
+     },
+     {
+      "name": "Sajid Khan",
+      "result": ""
+     },
+     {
+      "name": "Abdu Rozik",
+      "result": ""
+     },
+     {
+      "name": "Sreejita De",
+      "result": ""
+     },
+     {
+      "name": "Vikkas Manaktala",
+      "result": ""
+     },
+     {
+      "name": "Ankit Gupta",
+      "result": ""
+     },
+     {
+      "name": "Gautam Vig",
+      "result": ""
+     },
+     {
+      "name": "Gori Nagori",
+      "result": ""
+     },
+     {
+      "name": "Manya Singh",
+      "result": ""
+     }
+    ],
+    "source": "https://en.wikipedia.org/wiki/Bigg_Boss_(Hindi_TV_series)_season_16"
+   },
+   {
+    "number": 17,
+    "year": 2023,
+    "first_aired": "2023-10-15",
+    "last_aired": "2024-01-28",
+    "host": "Salman Khan",
+    "network": "Colors TV",
+    "days": 105,
+    "housemates": 21,
+    "winner": "Munawar Faruqui",
+    "runner_up": "Abhishek Kumar",
+    "notes": "",
+    "participants": [
+     {
+      "name": "Munawar Faruqui",
+      "result": "Winner"
+     },
+     {
+      "name": "Abhishek Kumar",
+      "result": "Runner-up"
+     },
+     {
+      "name": "Mannara Chopra",
+      "result": ""
+     },
+     {
+      "name": "Ankita Lokhande",
+      "result": ""
+     },
+     {
+      "name": "Arun Srikanth Mashettey",
+      "result": ""
+     },
+     {
+      "name": "Vicky Jain",
+      "result": ""
+     },
+     {
+      "name": "Isha Malviya",
+      "result": ""
+     },
+     {
+      "name": "Ayesha Khan",
+      "result": ""
+     },
+     {
+      "name": "Samarth Jurel",
+      "result": ""
+     },
+     {
+      "name": "Aoora Park",
+      "result": ""
+     },
+     {
+      "name": "Anurag Dobhal",
+      "result": ""
+     },
+     {
+      "name": "Neil Bhatt",
+      "result": ""
+     },
+     {
+      "name": "Rinku Dhawan",
+      "result": ""
+     },
+     {
+      "name": "Aishwarya Sharma",
+      "result": ""
+     },
+     {
+      "name": "Firoza Khan",
+      "result": ""
+     },
+     {
+      "name": "Sana Raees Khan",
+      "result": ""
+     },
+     {
+      "name": "Sunny Arya",
+      "result": ""
+     },
+     {
+      "name": "Jigna Vora",
+      "result": ""
+     },
+     {
+      "name": "Navid Sole",
+      "result": ""
+     },
+     {
+      "name": "Manasvi Mamgai",
+      "result": ""
+     },
+     {
+      "name": "Soniya Bansal",
+      "result": ""
+     }
+    ],
+    "source": "https://en.wikipedia.org/wiki/Bigg_Boss_(Hindi_TV_series)_season_17"
+   },
+   {
+    "number": 18,
+    "year": 2024,
+    "first_aired": "2024-10-06",
+    "last_aired": "2025-01-19",
+    "host": "Salman Khan",
+    "network": "Colors TV",
+    "days": 105,
+    "housemates": 23,
+    "winner": "Karanveer Mehra",
+    "runner_up": "Vivian Dsena",
+    "notes": "",
+    "participants": [
+     {
+      "name": "Karanveer Mehra",
+      "result": "Winner"
+     },
+     {
+      "name": "Vivian Dsena",
+      "result": "Runner-up"
+     },
+     {
+      "name": "Rajat Dalal",
+      "result": ""
+     },
+     {
+      "name": "Avinash Mishra",
+      "result": ""
+     },
+     {
+      "name": "Chum Darang",
+      "result": ""
+     },
+     {
+      "name": "Eisha Singh",
+      "result": ""
+     },
+     {
+      "name": "Shilpa Shirodkar",
+      "result": ""
+     },
+     {
+      "name": "Chahat Pandey",
+      "result": ""
+     },
+     {
+      "name": "Shrutika Arjun",
+      "result": ""
+     },
+     {
+      "name": "Kashish Kapoor",
+      "result": ""
+     },
+     {
+      "name": "Sara Khan",
+      "result": ""
+     },
+     {
+      "name": "Edin Rose",
+      "result": ""
+     },
+     {
+      "name": "Yamini Malhotra",
+      "result": ""
+     },
+     {
+      "name": "Digvijay Singh Rathee",
+      "result": ""
+     },
+     {
+      "name": "Tajinder Bagga",
+      "result": ""
+     },
+     {
+      "name": "Aditi Mistry",
+      "result": ""
+     },
+     {
+      "name": "Alice Kaushik",
+      "result": ""
+     },
+     {
+      "name": "Arfeen Khan",
+      "result": ""
+     },
+     {
+      "name": "Shehzada Dhami",
+      "result": ""
+     },
+     {
+      "name": "Nyrraa Banerjee",
+      "result": ""
+     },
+     {
+      "name": "Muskan Bamne",
+      "result": ""
+     },
+     {
+      "name": "Hema Sharma",
+      "result": ""
+     },
+     {
+      "name": "Gunratan Sadavarte",
+      "result": ""
+     }
+    ],
+    "source": "https://en.wikipedia.org/wiki/Bigg_Boss_(Hindi_TV_series)_season_18"
+   },
+   {
+    "number": 19,
+    "year": 2025,
+    "first_aired": "2025-08-24",
+    "last_aired": null,
+    "host": "Salman Khan",
+    "network": "Colors TV and JioHotstar",
+    "days": 105,
+    "housemates": 18,
+    "winner": "Gaurav Khanna",
+    "runner_up": "Farrhana Bhatt",
+    "notes": "Sixteen housemates entered on premiere night; two wildcard entrants joined later.",
+    "participants": [
+     {
+      "name": "Gaurav Khanna",
+      "result": "Winner"
+     },
+     {
+      "name": "Farrhana Bhatt",
+      "result": "Runner-up"
+     },
+     {
+      "name": "Pranit More",
+      "result": ""
+     },
+     {
+      "name": "Tanya Mittal",
+      "result": ""
+     },
+     {
+      "name": "Amaal Mallik",
+      "result": ""
+     },
+     {
+      "name": "Malti Chahar",
+      "result": ""
+     },
+     {
+      "name": "Shehbaz Badesha",
+      "result": ""
+     },
+     {
+      "name": "Ashnoor Kaur",
+      "result": ""
+     },
+     {
+      "name": "Kunickaa Sadanand",
+      "result": ""
+     },
+     {
+      "name": "Mridul Tiwari",
+      "result": ""
+     },
+     {
+      "name": "Neelam Giri",
+      "result": ""
+     },
+     {
+      "name": "Abhishek Bajaj",
+      "result": ""
+     },
+     {
+      "name": "Baseer Ali",
+      "result": ""
+     },
+     {
+      "name": "Nehal Chudasama",
+      "result": ""
+     },
+     {
+      "name": "Zeishan Quadri",
+      "result": ""
+     },
+     {
+      "name": "Awez Darbar",
+      "result": ""
+     },
+     {
+      "name": "Nagma Mirajkar",
+      "result": ""
+     },
+     {
+      "name": "Natalia Janoszek",
+      "result": ""
+     }
+    ],
+    "source": "https://en.wikipedia.org/wiki/Bigg_Boss_(Hindi_TV_series)_season_19"
+   },
+   {
+    "number": 20,
+    "year": 2026,
+    "first_aired": "2026-09-06",
+    "last_aired": null,
+    "host": "Salman Khan",
+    "network": "Colors TV and JioHotstar",
+    "days": null,
+    "housemates": 16,
+    "winner": "",
+    "runner_up": "",
+    "notes": "The twist this year is called Tathas-two: every housemate begins with two lives, and an eviction or a twist costs one of them. That means a vote-out does not always end a stay, as Uditi found on Day 6.\n\nIt started on 6 September 2026 with the grand premiere, hosted by Salman Khan. The last place in the house went to Love Gill after viewers picked her over Rhiya Ahir in the Fans Ka Faisla vote; Rhiya was not chosen and was out before the season began.\n\nWeek one was about captaincy. Kanika Mann was asked to name the housemate she liked least and chose Qazi Touqeer, who was then kept out of the captaincy task. Aasif, Gullu and Yung DSA became the nominees, and Yung DSA won the captaincy on Day 4. Arishfa, Kanika, Love and Uditi were nominated on Day 3, and Uditi was voted out on Day 6, losing a life.\n\nIn week two, Bigg Boss cancelled the nominations the housemates had made and named Aasif, Rohed and Scout directly for talking about nominations. Rohed was evicted through public voting on Day 14.\n\nBased on the latest update we have (22 September 2026, about two and a half weeks in), Isha and Yung DSA are up for eviction. This page is updated as the season airs.",
+    "participants": [
+     {
+      "name": "Aasif Khan",
+      "result": ""
+     },
+     {
+      "name": "Aman Gandhi",
+      "result": ""
+     },
+     {
+      "name": "Amrapali Dubey",
+      "result": ""
+     },
+     {
+      "name": "Arishfa Khan",
+      "result": ""
+     },
+     {
+      "name": "Kushal Tanwar (Gullu)",
+      "result": ""
+     },
+     {
+      "name": "Isha Rikhi",
+      "result": ""
+     },
+     {
+      "name": "Kanika Mann",
+      "result": ""
+     },
+     {
+      "name": "Love Gill",
+      "result": ""
+     },
+     {
+      "name": "Mahhi Vij",
+      "result": ""
+     },
+     {
+      "name": "Mary Kom",
+      "result": ""
+     },
+     {
+      "name": "Qazi Touqeer",
+      "result": ""
+     },
+     {
+      "name": "Rhiti Tiwari",
+      "result": ""
+     },
+     {
+      "name": "Tanmay Singh (Scout)",
+      "result": ""
+     },
+     {
+      "name": "Uditi Singh",
+      "result": "Voted out on Day 6, lost a life"
+     },
+     {
+      "name": "Yung DSA",
+      "result": ""
+     },
+     {
+      "name": "Rohed Khan",
+      "result": "Evicted on Day 14"
+     }
+    ],
+    "source": "https://en.wikipedia.org/wiki/Bigg_Boss_(Hindi_TV_series)_season_20"
+   }
+  ],
+  "seo_title": "Bigg Boss: all seasons, winners and housemates",
+  "seo_description": "Every Hindi season of Bigg Boss in one place: host, winner, runner-up and the full list of housemates, plus season 20 as it airs."
+ },
+ "videos": [
+  {
+   "id": "1DTqjN7oq9s",
+   "title": "Grand Premiere With Salman Khan | Bigg Boss 20",
+   "channel": "Colors TV",
+   "published_at": "2026-09-06T08:00:29-07:00",
+   "duration_seconds": 20,
+   "category": "Season 20",
+   "description": "Official clip from the Season 20 grand premiere.",
+   "featured": true
+  },
+  {
+   "id": "QbuRBmaL6vA",
+   "title": "Bigg Boss 20 | House Tour | 6th September",
+   "channel": "JioHotstar",
+   "published_at": "2026-09-03T07:28:45-07:00",
+   "duration_seconds": 86,
+   "category": "Season 20",
+   "description": "A look around the Season 20 house before the premiere.",
+   "featured": false
+  },
+  {
+   "id": "hsAD8fOlTjo",
+   "title": "The Salman Khan Style | Bigg Boss 20",
+   "channel": "Colors TV",
+   "published_at": "2026-09-20T09:17:33-07:00",
+   "duration_seconds": 68,
+   "category": "Season 20",
+   "description": "Official Season 20 clip featuring the host.",
+   "featured": false
+  },
+  {
+   "id": "FDQnFW9R_NA",
+   "title": "Ultimate Panga Test | Bigg Boss 20",
+   "channel": "Colors TV",
+   "published_at": "2026-09-20T04:57:20-07:00",
+   "duration_seconds": 74,
+   "category": "Season 20",
+   "description": "Official Season 20 clip: a task that tests the housemates.",
+   "featured": false
+  },
+  {
+   "id": "AOpIQLHWv0c",
+   "title": "Gaurav Wins The Trophy | Bigg Boss 19",
+   "channel": "JioHotstar",
+   "published_at": "2025-12-11T05:20:07-08:00",
+   "duration_seconds": 74,
+   "category": "Season 19",
+   "description": "The moment Season 19 was won.",
+   "featured": false
+  },
+  {
+   "id": "LuUxAI03gns",
+   "title": "Gaurav’s Journey | Bigg Boss 19",
+   "channel": "Colors TV",
+   "published_at": "2025-12-05T02:40:58-08:00",
+   "duration_seconds": 51,
+   "category": "Season 19",
+   "description": "Look back at the Season 19 winner's time in the house.",
+   "featured": false
+  },
+  {
+   "id": "NJiodZnMIag",
+   "title": "Top 5 finalists | Bigg Boss 19",
+   "channel": "Colors TV",
+   "published_at": "2025-12-03T10:28:54-08:00",
+   "duration_seconds": 25,
+   "category": "Season 19",
+   "description": "The five Season 19 finalists.",
+   "featured": false
+  },
+  {
+   "id": "5KKU2BzLFXo",
+   "title": "Salman Roasts Top 5 Contestants | Bigg Boss 19",
+   "channel": "Colors TV",
+   "published_at": "2025-12-07T06:48:35-08:00",
+   "duration_seconds": 30,
+   "category": "Season 19",
+   "description": "The host ribs the Season 19 top five.",
+   "featured": false
+  },
+  {
+   "id": "i76v7CRCHVY",
+   "title": "Farhana Watching Her Journey | Bigg Boss 19",
+   "channel": "Colors TV",
+   "published_at": "2025-12-05T02:50:28-08:00",
+   "duration_seconds": 55,
+   "category": "Season 19",
+   "description": "A Season 19 finalist watches her own journey.",
+   "featured": false
+  },
+  {
+   "id": "K1JFKZOxTq8",
+   "title": "Who Will Win Bigg Boss 19? | Bigg Boss 19",
+   "channel": "Colors TV",
+   "published_at": "2025-12-05T23:02:54-08:00",
+   "duration_seconds": 15,
+   "category": "Season 19",
+   "description": "A short Season 19 finale-week teaser.",
+   "featured": false
+  },
+  {
+   "id": "6PTJRIIuajo",
+   "title": "Top 5 Performances | Bigg Boss 19 | Grand Finale | 7th December",
+   "channel": "JioHotstar",
+   "published_at": "2025-12-07T00:16:36-08:00",
+   "duration_seconds": 35,
+   "category": "Season 19",
+   "description": "Season 19 finale performances by the top five.",
+   "featured": false
+  },
+  {
+   "id": "2ouSaWwkwR0",
+   "title": "Elimination Night | Bigg Boss 19 | Now Streaming | JioHotstar",
+   "channel": "JioHotstar",
+   "published_at": "2025-09-21T03:21:24-07:00",
+   "duration_seconds": 30,
+   "category": "Season 19",
+   "description": "A Season 19 elimination night.",
+   "featured": false
+  }
+ ]
+}

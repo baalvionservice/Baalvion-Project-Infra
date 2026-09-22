@@ -1,0 +1,44 @@
+{
+  "display_name": null,
+  "short_bio": "District Attorney of Fulton County, Georgia, who brought the state election-interference case against Donald Trump.",
+  "biography": "Fani Willis was born in Inglewood, California, and studied at Howard University and Emory University School of Law. She worked as a prosecutor in Fulton County, Georgia, before entering private practice.\n\nShe was elected Fulton County District Attorney in 2020 and took office in 2021. In August 2023 a grand jury she convened indicted Donald Trump and eighteen others under Georgia’s racketeering law over efforts to overturn the 2020 result in the state.\n\nIn December 2024 the Georgia Court of Appeals disqualified her from the case over her relationship with a lawyer she had hired.",
+  "awards": [],
+  "notable_works": [
+    {
+      "title": "Fulton County election-interference indictment",
+      "year": 2023,
+      "note": "Lead prosecutor"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1971-10-27",
+      "title": "Born in Inglewood, California"
+    },
+    {
+      "date": "2021-01",
+      "title": "Takes office as Fulton County District Attorney"
+    },
+    {
+      "date": "2023-08",
+      "title": "Grand jury indicts Donald Trump and eighteen others"
+    },
+    {
+      "date": "2024-12",
+      "title": "Georgia Court of Appeals disqualifies her from the case"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q105459066"
+    },
+    {
+      "label": "Wikipedia: Fani Willis",
+      "url": "https://en.wikipedia.org/wiki/Fani_Willis"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

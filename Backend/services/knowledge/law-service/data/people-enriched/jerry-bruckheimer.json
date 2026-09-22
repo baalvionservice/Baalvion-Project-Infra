@@ -1,0 +1,79 @@
+{
+  "slug": "jerry-bruckheimer",
+  "category": "producers",
+  "wikidata_id": "Q217037",
+  "full_name": "Jerry Bruckheimer",
+  "description": "American film and television producer (born 1943)",
+  "birth_date": "1943-09-21",
+  "birth_place": "Detroit",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "US",
+  "citizenship": [
+    "United States"
+  ],
+  "occupations": [
+    "film producer",
+    "film director",
+    "television producer",
+    "executive producer",
+    "producer"
+  ],
+  "education": [
+    {
+      "institution": "University of Arizona"
+    },
+    {
+      "institution": "Mumford High School"
+    }
+  ],
+  "positions": [],
+  "awards": [
+    {
+      "title": "Primetime Emmy Award for Outstanding Reality-Competition Program",
+      "year": 2003
+    },
+    {
+      "title": "Primetime Emmy Award for Outstanding Reality-Competition Program",
+      "year": 2004
+    },
+    {
+      "title": "Primetime Emmy Award for Outstanding Reality-Competition Program",
+      "year": 2005
+    },
+    {
+      "title": "Primetime Emmy Award for Outstanding Reality-Competition Program",
+      "year": 2006
+    },
+    {
+      "title": "Primetime Emmy Award for Outstanding Reality-Competition Program",
+      "year": 2007
+    },
+    {
+      "title": "star on Hollywood Walk of Fame"
+    }
+  ],
+  "notable_works": [],
+  "social": {
+    "x": "https://x.com/BRUCKHEIMERJB"
+  },
+  "official_website": "http://www.jbfilms.com",
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q217037"
+    }
+  ],
+  "photo": {
+    "file": "jerry-bruckheimer.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1197,
+    "credit": "Angela George / Wikimedia Commons",
+    "license": "CC BY-SA 3.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:JerryBruckheimerHWOFJune2013.jpg"
+  },
+  "fetched_at": "2026-09-21T19:26:30.034Z"
+}

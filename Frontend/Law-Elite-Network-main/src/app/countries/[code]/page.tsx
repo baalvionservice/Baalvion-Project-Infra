@@ -54,7 +54,7 @@ export default async function CountryPage({ params }: { params: Promise<{ code: 
             <section className="mb-16">
               <h2 className="font-headline text-xl font-bold text-slate-900 tracking-tight mb-6">Legal Cases</h2>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {cases.map((c) => <CaseCard key={c.slug} legalCase={c} courtName={courtNames[c.courtSlug]} />)}
+                {cases.map((c) => <CaseCard key={c.slug} legalCase={c} courtName={c.courtSlug ? courtNames[c.courtSlug] : undefined} />)}
               </div>
             </section>
           )}

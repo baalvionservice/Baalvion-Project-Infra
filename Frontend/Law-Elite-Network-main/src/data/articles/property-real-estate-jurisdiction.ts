@@ -17,7 +17,7 @@ const PROPERTY_REAL_ESTATE_CATEGORY = {
 export const propertyRealEstateJurisdictionArticles: LawArticle[] = [
   {
     id: 'pr-301',
-    title: 'Tenancy Deposit Protection in England and Wales',
+    title: 'Tenancy Deposit Protection in England',
     slug: 'tenancy-deposit-protection-uk',
     alphabet: 'T',
     categoryId: 'cat_property_real_estate',
@@ -25,15 +25,16 @@ export const propertyRealEstateJurisdictionArticles: LawArticle[] = [
     category: PROPERTY_REAL_ESTATE_CATEGORY,
     subcategory: { id: 'sub_pr_rental', name: 'Rental Agreements', slug: 'rental-agreements' },
     summary:
-      'A landlord in England and Wales must protect a deposit in an approved scheme within 30 days or face a penalty of up to three times its value.',
+      'A landlord in England must protect a deposit in an approved scheme within 30 days or face a penalty of up to three times its value.',
     author: 'Daniel Okafor',
     updatedAt: 'August 9, 2026',
+    modifiedAt: '2026-09-21',
     readingTime: 9,
     views: 0,
     featured: false,
     imageSeed: 'tenancy-deposit-protection-scheme-uk',
     country: 'United Kingdom',
-    content: `<p>In England and Wales, a landlord who takes a deposit for an assured shorthold tenancy — or, since 1 May 2026, the assured periodic tenancy that has effectively replaced it — must place that money in one of three government-approved schemes within 30 days, or face a court-ordered penalty worth up to three times the deposit. This isn't a technicality landlords can afford to overlook: it's a strict statutory duty under the Housing Act 2004, with real financial consequences and no discretion to simply "get around to it."</p>
+    content: `<p>In England, a landlord who takes a deposit for an assured shorthold tenancy — or, since 1 May 2026, the assured periodic tenancy that has effectively replaced it — must place that money in one of three government-approved schemes within 30 days, or face a court-ordered penalty worth up to three times the deposit. This isn't a technicality landlords can afford to overlook: it's a strict statutory duty under the Housing Act 2004, with real financial consequences and no discretion to simply "get around to it."</p>
 
 <div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>Deposits must be protected in one of three approved schemes — the Deposit Protection Service, MyDeposits, or the Tenancy Deposit Scheme — within 30 days of receipt.</li><li>Landlords must also give tenants "prescribed information" about the scheme and their rights, separately, within the same 30-day window.</li><li>A court can order a penalty of between one and three times the deposit amount, payable to the tenant, if a landlord fails to comply.</li><li>Deposits are capped at 5 weeks' rent (6 weeks' if the total annual rent exceeds £50,000) under the Tenant Fees Act 2019.</li><li>The Renters' Rights Act 2025, in force since 1 May 2026, converted existing fixed-term tenancies into periodic assured tenancies without requiring deposits to be re-registered.</li></ul></div>
 
@@ -69,9 +70,9 @@ export const propertyRealEstateJurisdictionArticles: LawArticle[] = [
 </ul>
 
 <h2>Practical Next Steps</h2>
-<p>If you're a landlord taking a new deposit, protect it with an approved scheme and send the prescribed information within 30 days of receiving the money — set a calendar reminder rather than relying on memory, since both obligations run on the same short clock and missing either one exposes you to a court penalty. If you're a tenant and you're not sure whether your deposit was ever protected, each of the three schemes offers a free online search tool to check. For the broader, worldwide picture of tenant rights around deposits, repairs, and eviction, see <a href="/real-estate-law/understanding-your-rights-as-a-tenant">Understanding Your Rights as a Tenant</a></p>
+<p>If you're a landlord taking a new deposit, protect it with an approved scheme and send the prescribed information within 30 days of receiving the money — set a calendar reminder rather than relying on memory, since both obligations run on the same short clock and missing either one exposes you to a court penalty. If you're a tenant and you're not sure whether your deposit was ever protected, each of the three schemes offers a free online search tool to check. For the broader, worldwide picture of tenant rights around deposits, repairs, and eviction, see <a href="/article/understanding-your-rights-as-a-tenant">Understanding Your Rights as a Tenant</a></p>
 
-<p><em>This article is general legal information, not legal advice, and covers England and Wales specifically — Scotland and Northern Ireland run separate tenancy deposit schemes under their own legislation. Consult a solicitor or a housing advice service before acting.</em></p>`,
+<p><em>This article is general legal information, not legal advice, and covers England specifically — Wales (where assured shorthold tenancies were replaced by occupation contracts under the Renting Homes (Wales) Act 2016 from December 2022), Scotland and Northern Ireland run separate tenancy deposit schemes under their own legislation. Consult a solicitor or a housing advice service before acting.</em></p>`,
     primarySources: [
       { label: 'Housing Act 2004, section 212 (UK) — tenancy deposit schemes', url: 'https://www.legislation.gov.uk/ukpga/2004/34/section/212' },
       { label: 'Tenant Fees Act 2019 (UK)', url: 'https://www.legislation.gov.uk/ukpga/2019/4/contents' },

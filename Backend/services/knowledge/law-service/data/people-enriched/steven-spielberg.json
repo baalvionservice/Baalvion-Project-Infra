@@ -1,0 +1,144 @@
+{
+  "slug": "steven-spielberg",
+  "category": "directors",
+  "wikidata_id": "Q8877",
+  "full_name": "Steven Spielberg",
+  "description": "American filmmaker (born 1946)",
+  "birth_date": "1946-12-18",
+  "birth_place": "Cincinnati",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "US",
+  "citizenship": [
+    "United States"
+  ],
+  "occupations": [
+    "film director",
+    "film producer",
+    "actor",
+    "art collector",
+    "science fiction writer",
+    "film actor",
+    "executive producer",
+    "film editor",
+    "television producer",
+    "director",
+    "writer",
+    "film screenwriter"
+  ],
+  "education": [
+    {
+      "institution": "California State University, Long Beach"
+    },
+    {
+      "institution": "Saratoga High School"
+    },
+    {
+      "institution": "Arcadia High School"
+    }
+  ],
+  "positions": [
+    {
+      "title": "President of the Jury at the Cannes Festival"
+    }
+  ],
+  "awards": [
+    {
+      "title": "Honorary Knight Commander of the Order of the British Empire",
+      "year": 2001
+    },
+    {
+      "title": "Commander of the Order of the Crown"
+    },
+    {
+      "title": "Knight Commander's Cross of the Order of Merit of the Federal Republic of Germany",
+      "year": 1998
+    },
+    {
+      "title": "Directors Guild of America Award"
+    },
+    {
+      "title": "National Humanities Medal",
+      "year": 1999
+    },
+    {
+      "title": "Philadelphia Liberty Medal"
+    },
+    {
+      "title": "Academy Award for Best Director",
+      "year": 1994
+    },
+    {
+      "title": "Academy Award for Best Director",
+      "year": 1999
+    },
+    {
+      "title": "Academy Award for Best Picture",
+      "year": 1994
+    },
+    {
+      "title": "New York Film Critics Circle Award for Best Animated Film"
+    },
+    {
+      "title": "BAFTA Award for Best Film",
+      "year": 1993
+    },
+    {
+      "title": "Kennedy Center Honors",
+      "year": 2006
+    },
+    {
+      "title": "New York Film Critics Circle Award for Best Film",
+      "year": 1993
+    },
+    {
+      "title": "National Society of Film Critics Award for Best Director",
+      "year": 1982
+    },
+    {
+      "title": "National Society of Film Critics Award for Best Director",
+      "year": 1993
+    },
+    {
+      "title": "Saturn Award for Best Director",
+      "year": 2003
+    },
+    {
+      "title": "Golden Globe Award for Best Director",
+      "year": 1998
+    },
+    {
+      "title": "Boston Society of Film Critics Award for Best Director",
+      "year": 1983
+    },
+    {
+      "title": "Saturn Award for Best Director",
+      "year": 1994
+    },
+    {
+      "title": "Critics' Choice Movie Award for Best Director",
+      "year": 2002
+    }
+  ],
+  "notable_works": [],
+  "social": {},
+  "official_website": "https://amblin.com/steven-spielberg/",
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q8877"
+    }
+  ],
+  "photo": {
+    "file": "steven-spielberg.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1288,
+    "credit": "Raph_PH / Wikimedia Commons",
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Steven_Spielberg_2025.jpg"
+  },
+  "fetched_at": "2026-09-21T19:17:47.541Z"
+}

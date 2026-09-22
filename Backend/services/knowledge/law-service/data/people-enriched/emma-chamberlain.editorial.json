@@ -1,0 +1,54 @@
+{
+  "display_name": null,
+  "short_bio": "American YouTuber, podcaster and founder of Chamberlain Coffee.",
+  "biography": "Emma Chamberlain was born in San Mateo County, California, and grew up in the Bay Area. She started posting videos on YouTube in 2016, known for their quick jump-cut editing.\n\nIn 2019 she launched the podcast Anything Goes and founded Chamberlain Coffee, which began selling coffee that year.\n\nShe won the 2018 Streamy Award for Breakout Creator, and Time named her one of the most influential teens of 2019.",
+  "awards": [
+    {
+      "title": "Streamy Awards",
+      "year": 2018
+    },
+    {
+      "title": "Forbes 30 Under 30",
+      "year": 2021
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "Anything Goes",
+      "year": 2019,
+      "note": "Podcast"
+    },
+    {
+      "title": "Chamberlain Coffee",
+      "year": 2019,
+      "note": "Founder"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "2001-05-22",
+      "title": "Born in San Mateo County, California"
+    },
+    {
+      "date": "2016",
+      "title": "Begins her YouTube channel"
+    },
+    {
+      "date": "2019",
+      "title": "Launches Anything Goes and Chamberlain Coffee"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q63349606"
+    },
+    {
+      "label": "Wikipedia: Emma Chamberlain",
+      "url": "https://en.wikipedia.org/wiki/Emma_Chamberlain"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

@@ -70,11 +70,12 @@ export const articleHowToBriefACase: LawArticle[] = [
 <h3>Should every brief use the same five headings?</h3>
 <p>Yes. The mistake is treating all five as equally important every time; which one needs the most detail changes with what the case is arguing about, as the four examples above show.</p>
 <h3>How long should a case brief be?</h3>
-<p>Short enough to review before class without rereading the case. Each brief above runs under 150 words and still covers what a professor would cold-call on -- length isn't what makes a brief useful, coverage of the dispute is.</p>
+<p>Short enough to review before class without rereading the case. Each brief above runs roughly 165 to 240 words and still covers what a professor would cold-call on -- length isn't what makes a brief useful, coverage of the dispute is.</p>
 <h3>Do I need to include dissenting opinions in my brief?</h3>
 <p>Only when the dissent explains why the case is taught, the way Andrews's dissent in Palsgraf does -- it's the alternative rule that shows up in later exam hypotheticals. A dissent that just disagrees on the facts usually isn't worth the space.</p>`,
     author: 'Law Elite Editorial Team',
     updatedAt: 'September 16, 2026',
+    modifiedAt: '2026-09-21',
     readingTime: 7,
     views: 0,
     featured: false,

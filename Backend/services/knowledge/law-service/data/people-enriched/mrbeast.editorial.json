@@ -1,0 +1,80 @@
+{
+  "display_name": null,
+  "short_bio": "American YouTuber, born Jimmy Donaldson, known for large-scale challenge and giveaway videos.",
+  "biography": "Jimmy Donaldson was born in Wichita, Kansas, and grew up in Greenville, North Carolina. He began posting on YouTube at 13. A 2017 video in which he counted to 100,000 brought his first large audience.\n\nIn 2019 he and Mark Rober launched Team Trees, which raised money to plant twenty million trees. He founded the charity Beast Philanthropy in 2020 and the snack brand Feastables in 2022.\n\nIn 2024 his main channel passed T-Series as the most-subscribed on YouTube. His competition series Beast Games premiered on Prime Video in December 2024.",
+  "awards": [
+    {
+      "title": "Silver Play Button",
+      "year": 2016
+    },
+    {
+      "title": "Gold Play Button",
+      "year": 2017
+    },
+    {
+      "title": "Diamond Play Button",
+      "year": 2018
+    },
+    {
+      "title": "Custom Play Button",
+      "year": 2021
+    },
+    {
+      "title": "Forbes 30 Under 30",
+      "year": 2021
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "Team Trees",
+      "year": 2019,
+      "note": "Fundraising campaign with Mark Rober"
+    },
+    {
+      "title": "Beast Philanthropy",
+      "year": 2020,
+      "note": "Charity channel"
+    },
+    {
+      "title": "Feastables",
+      "year": 2022,
+      "note": "Snack brand"
+    },
+    {
+      "title": "Beast Games",
+      "year": 2024,
+      "note": "Competition series on Prime Video"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1998-05-07",
+      "title": "Born in Wichita, Kansas"
+    },
+    {
+      "date": "2017",
+      "title": "A video counting to 100,000 gains a large audience"
+    },
+    {
+      "date": "2019",
+      "title": "Co-launches Team Trees"
+    },
+    {
+      "date": "2024",
+      "title": "His main channel becomes the most-subscribed on YouTube"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q57618112"
+    },
+    {
+      "label": "Wikipedia: MrBeast",
+      "url": "https://en.wikipedia.org/wiki/MrBeast"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

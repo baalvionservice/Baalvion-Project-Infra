@@ -1,0 +1,178 @@
+{
+  "slug": "toni-morrison",
+  "category": "other",
+  "wikidata_id": "Q72334",
+  "full_name": "Toni Morrison",
+  "description": "African American novelist, essayist, and academic (1931–2019)",
+  "birth_date": "1931-02-18",
+  "birth_place": "Lorain",
+  "death_date": "2019-08-05",
+  "death_place": "The Bronx",
+  "status": "deceased",
+  "country_code": "US",
+  "citizenship": [
+    "United States"
+  ],
+  "occupations": [
+    "writer",
+    "novelist",
+    "librettist",
+    "university teacher",
+    "poet",
+    "children's writer",
+    "audiobook narrator",
+    "editing staff",
+    "young adult author",
+    "essayist"
+  ],
+  "education": [
+    {
+      "institution": "Lorain High School"
+    },
+    {
+      "institution": "Howard University"
+    },
+    {
+      "institution": "Cornell University"
+    }
+  ],
+  "positions": [
+    {
+      "title": "Robert F. Goheen Professor in the Humanities",
+      "start": 1989
+    }
+  ],
+  "awards": [
+    {
+      "title": "Nobel Prize in Literature",
+      "year": 1993
+    },
+    {
+      "title": "Knight of the Legion of Honour"
+    },
+    {
+      "title": "Commandeur des Arts et des Lettres‎"
+    },
+    {
+      "title": "Norman Mailer Prize",
+      "year": 2009
+    },
+    {
+      "title": "National Humanities Medal",
+      "year": 2000
+    },
+    {
+      "title": "The Nichols-Chancellor's Medal",
+      "year": 2013
+    },
+    {
+      "title": "PEN Oakland/Josephine Miles Literary Award",
+      "year": 2013
+    },
+    {
+      "title": "Janet Heidinger Kafka Prize",
+      "year": 1977
+    },
+    {
+      "title": "American Book Awards",
+      "year": 1988
+    },
+    {
+      "title": "Anisfield-Wolf Book Awards",
+      "year": 1988
+    },
+    {
+      "title": "Pulitzer Prize for Fiction",
+      "year": 1988
+    },
+    {
+      "title": "Helmerich Award",
+      "year": 1988
+    },
+    {
+      "title": "Common Wealth Award of Distinguished Service",
+      "year": 1989
+    },
+    {
+      "title": "Jefferson Lecture",
+      "year": 1996
+    },
+    {
+      "title": "NAACP Image Award for Outstanding Literary Work, Fiction",
+      "year": 2004
+    },
+    {
+      "title": "Presidential Medal of Freedom",
+      "year": 2012
+    },
+    {
+      "title": "Library of Congress Living Legend"
+    },
+    {
+      "title": "Ohio Women's Hall of Fame",
+      "year": 1982
+    },
+    {
+      "title": "Langston Hughes Medal",
+      "year": 1981
+    },
+    {
+      "title": "New Jersey Hall of Fame",
+      "year": 2008
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "The Bluest Eye"
+    },
+    {
+      "title": "Sula"
+    },
+    {
+      "title": "Song of Solomon"
+    },
+    {
+      "title": "Beloved"
+    },
+    {
+      "title": "Tar Baby"
+    },
+    {
+      "title": "Jazz"
+    },
+    {
+      "title": "Paradise"
+    },
+    {
+      "title": "Love"
+    },
+    {
+      "title": "A Mercy"
+    },
+    {
+      "title": "Home"
+    },
+    {
+      "title": "God Help the Child"
+    }
+  ],
+  "social": {},
+  "official_website": "https://tonimorrisonsociety.org",
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q72334"
+    }
+  ],
+  "photo": {
+    "file": "toni-morrison.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1425,
+    "credit": "John Mathew Smith (celebrity-photos.com) / Wikimedia Commons",
+    "license": "CC BY-SA 2.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Toni_Morrison.jpg"
+  },
+  "fetched_at": "2026-09-21T19:22:36.794Z"
+}

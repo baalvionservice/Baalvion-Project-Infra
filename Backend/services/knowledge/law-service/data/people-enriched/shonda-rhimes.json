@@ -1,0 +1,102 @@
+{
+  "slug": "shonda-rhimes",
+  "category": "producers",
+  "wikidata_id": "Q242329",
+  "full_name": "Shonda Rhimes",
+  "description": "American television producer, television and film writer, and author",
+  "birth_date": "1970-01-13",
+  "birth_place": "Chicago",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "US",
+  "citizenship": [
+    "United States"
+  ],
+  "occupations": [
+    "screenwriter",
+    "writer",
+    "film producer",
+    "showrunner",
+    "television producer",
+    "film director"
+  ],
+  "education": [
+    {
+      "institution": "Dartmouth College"
+    },
+    {
+      "institution": "University of Southern California"
+    },
+    {
+      "institution": "USC School of Cinematic Arts"
+    },
+    {
+      "institution": "Marian Catholic High School"
+    }
+  ],
+  "positions": [],
+  "awards": [
+    {
+      "title": "Writers Guild of America Award"
+    },
+    {
+      "title": "International Emmy Founders Award",
+      "year": 2016
+    },
+    {
+      "title": "Lucy Award",
+      "year": 2007
+    },
+    {
+      "title": "Time 100",
+      "year": 2021
+    },
+    {
+      "title": "Fellow of the American Academy of Arts and Sciences",
+      "year": 2023
+    },
+    {
+      "title": "Commander of the Order of the British Empire",
+      "year": 2023
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "Grey's Anatomy"
+    },
+    {
+      "title": "Scandal"
+    },
+    {
+      "title": "How to Get Away with Murder"
+    },
+    {
+      "title": "Bridgerton"
+    },
+    {
+      "title": "Inventing Anna"
+    }
+  ],
+  "social": {
+    "x": "https://x.com/shondarhimes"
+  },
+  "official_website": null,
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q242329"
+    }
+  ],
+  "photo": {
+    "file": "shonda-rhimes.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1287,
+    "credit": "UKinUSA / Wikimedia Commons",
+    "license": "CC BY-SA 2.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Shonda_Rhimes_2024.jpg"
+  },
+  "fetched_at": "2026-09-21T19:18:47.140Z"
+}

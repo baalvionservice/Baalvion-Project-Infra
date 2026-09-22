@@ -7,8 +7,10 @@ import { Input } from '@/components/ui/input';
 export interface ListColumn {
   key: string;
   label: string;
-  type?: 'text' | 'number' | 'url';
+  type?: 'text' | 'number' | 'url' | 'select';
   width?: string;
+  /** Required when type is 'select' -- the choices, e.g. every known court for a timeline row's "which court" column. */
+  options?: { value: string; label: string }[];
 }
 
 type Row = Record<string, unknown>;
@@ -37,15 +39,28 @@ export function ListEditor({
       {rows.map((row, i) => (
         <div key={i} className="flex items-center gap-2">
           {columns.map((c) => (
-            <Input
-              key={c.key}
-              className={c.width ?? 'flex-1'}
-              type={c.type === 'number' ? 'number' : 'text'}
-              placeholder={c.label}
-              aria-label={`${label} ${c.label} ${i + 1}`}
-              value={(row[c.key] as string | number | undefined) ?? ''}
-              onChange={(e) => set(i, c.key, e.target.value, c.type)}
-            />
+            c.type === 'select' ? (
+              <select
+                key={c.key}
+                className={`h-9 rounded-md border border-input bg-background px-3 text-sm ${c.width ?? 'flex-1'}`}
+                aria-label={`${label} ${c.label} ${i + 1}`}
+                value={(row[c.key] as string | undefined) ?? ''}
+                onChange={(e) => set(i, c.key, e.target.value)}
+              >
+                <option value="">{c.label}</option>
+                {c.options?.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
+            ) : (
+              <Input
+                key={c.key}
+                className={c.width ?? 'flex-1'}
+                type={c.type === 'number' ? 'number' : 'text'}
+                placeholder={c.label}
+                aria-label={`${label} ${c.label} ${i + 1}`}
+                value={(row[c.key] as string | number | undefined) ?? ''}
+                onChange={(e) => set(i, c.key, e.target.value, c.type)}
+              />
+            )
           ))}
           <Button type="button" variant="ghost" size="icon" aria-label={`Remove ${label} row ${i + 1}`} onClick={() => onChange(rows.filter((_, idx) => idx !== i))}>
             <X className="h-4 w-4" />

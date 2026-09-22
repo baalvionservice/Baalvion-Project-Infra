@@ -1,0 +1,54 @@
+{
+  "slug": "chiara-ferragni",
+  "category": "influencers",
+  "wikidata_id": "Q8933801",
+  "full_name": "Chiara Ferragni",
+  "description": "Italian fashion blogger and influencer (1987-)",
+  "birth_date": "1987-05-07",
+  "birth_place": "Cremona",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "IT",
+  "citizenship": [
+    "Italy"
+  ],
+  "occupations": [
+    "fashion blogger",
+    "fashion designer",
+    "entrepreneur",
+    "blogger",
+    "influencer",
+    "actor"
+  ],
+  "education": [
+    {
+      "institution": "Bocconi University"
+    }
+  ],
+  "positions": [],
+  "awards": [],
+  "notable_works": [],
+  "social": {
+    "x": "https://x.com/ChiaraFerragni",
+    "instagram": "https://www.instagram.com/chiaraferragni"
+  },
+  "official_website": "https://www.theblondesalad.com",
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q8933801"
+    }
+  ],
+  "photo": {
+    "file": "chiara-ferragni.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1082,
+    "credit": "Pedro J Pacheco / Wikimedia Commons",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Goyas_2025_-_Chiara_Ferragni_(cropped).jpg"
+  },
+  "fetched_at": "2026-09-21T19:19:42.919Z"
+}

@@ -151,7 +151,7 @@ export const businessCorporateExtraArticles: LawArticle[] = [
 </ul>
 
 <h2>Remedies When an NDA Is Breached</h2>
-<p>When confidential information leaks, damages alone are often inadequate — by the time a court awards compensation, a competitor may already have used the secret to launch a rival product. For that reason, NDAs typically state that the disclosing party may seek injunctive relief (a court order to stop further use or disclosure) in addition to monetary damages, and many include a acknowledgment that breach causes irreparable harm to support a fast injunction application. Some agreements also specify liquidated damages — a pre-agreed dollar figure — to avoid the difficulty of proving the actual financial loss caused by a leak, though courts in several jurisdictions will strike down a liquidated-damages clause that functions as a penalty rather than a genuine pre-estimate of loss.</p>
+<p>When confidential information leaks, damages alone are often inadequate — by the time a court awards compensation, a competitor may already have used the secret to launch a rival product. For that reason, NDAs typically state that the disclosing party may seek injunctive relief (a court order to stop further use or disclosure) in addition to monetary damages, and many include a acknowledgment that breach causes irreparable harm to support a fast injunction application. Some agreements also specify liquidated damages — a pre-agreed dollar figure — to avoid the difficulty of proving the actual financial loss caused by a leak, though courts in several jurisdictions will strike down a liquidated-damages clause that functions as a penalty; the precise test differs by jurisdiction (for example, England and Wales applies a legitimate-interest and proportionality test rather than a pure pre-estimate test).</p>
 
 <h2>Frequently Asked Questions</h2>
 <p><strong>Is a verbal NDA enforceable?</strong> In many jurisdictions a verbal confidentiality promise can be legally binding, but it is far harder to prove what was actually agreed — a signed written NDA remains the standard for anything commercially significant.</p>
@@ -172,6 +172,7 @@ export const businessCorporateExtraArticles: LawArticle[] = [
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
     primarySources: [
       { label: '18 U.S.C. § 1836 — Defend Trade Secrets Act of 2016', url: 'https://www.law.cornell.edu/uscode/text/18/1836' },
+      { label: '18 U.S.C. § 1833(b) — immunity for whistleblower disclosures of trade secrets (notice requirement)', url: 'https://www.law.cornell.edu/uscode/text/18/1833' },
       { label: 'The Trade Secrets (Enforcement, etc.) Regulations 2018 (UK)', url: 'https://www.legislation.gov.uk/uksi/2018/597/made' },
       { label: 'Directive (EU) 2016/943 on the protection of trade secrets', url: 'https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32016L0943' },
       { label: 'India, Indian Contract Act 1872, sections on restraint of trade' },

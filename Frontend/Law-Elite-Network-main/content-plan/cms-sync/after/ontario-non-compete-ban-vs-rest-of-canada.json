@@ -1,0 +1,100 @@
+{
+  "id": "ddb58c52-202b-4125-a35a-9592c70afc6e",
+  "websiteId": "0fd4ebf5-9570-4b9a-806b-e41dbc391cb1",
+  "categoryId": "66b14603-4b88-4ed3-b48d-66c8d6ba8cfb",
+  "categoryIds": [
+    "66b14603-4b88-4ed3-b48d-66c8d6ba8cfb"
+  ],
+  "authorId": "1",
+  "lastEditedBy": "14",
+  "title": "Ontario's Non-Compete Ban vs. the Rest of Canada",
+  "slug": "ontario-non-compete-ban-vs-rest-of-canada",
+  "excerpt": "Ontario has banned most employee non-competes by statute since 2021. Elsewhere in Canada the common-law reasonableness test applies; Quebec has its own rules.",
+  "featuredImage": "http://localhost:3011/uploads/generated-art/ddb58c52-202b-4125-a35a-9592c70afc6e.svg",
+  "galleryImages": [],
+  "videoUrl": null,
+  "readingTimeMinutes": 16,
+  "isFeatured": false,
+  "isBreaking": false,
+  "isTrending": false,
+  "isEditorsPick": false,
+  "isPremium": false,
+  "newsLabels": [],
+  "externalSourceName": null,
+  "externalSourceUrl": null,
+  "contentType": "article",
+  "contentBlocks": [
+    {
+      "id": "block-1",
+      "type": "html",
+      "order": 0,
+      "content": {
+        "html": "<p>Ontario is the only Canadian province that has banned non-compete agreements by statute. Everywhere else in Canada, a non-compete clause lives or dies under the common law's demanding \"reasonableness\" test — and Quebec applies its own distinct civil-law framework on top of that. The result is a patchwork that catches many employees and employers by surprise: a clause that would be automatically void in Toronto can still be argued over, and sometimes enforced, in Calgary or Halifax. A federal bill introduced in 2026 could extend Ontario's approach to federally regulated workers, but as of today it remains a proposal, not law.</p>\n\n<div class=\"key-takeaways\"><h4>Key Takeaways</h4><ul><li>Ontario's Employment Standards Act, 2000 has banned most employee non-compete agreements since October 25, 2021, with narrow exceptions for senior executives and sellers of a business.</li><li>Non-competes signed in Ontario before October 25, 2021 are not automatically void — they remain subject to the ordinary common-law reasonableness test, as confirmed in <em>Parekh v. Schecter</em> (2022).</li><li>Outside Ontario, Canadian courts apply a strict reasonableness test to non-competes and, unlike courts in some U.S. states, will not \"blue-pencil\" (rewrite) an overbroad clause to make it enforceable — an unreasonable clause is simply void.</li><li>Quebec governs non-competes through Civil Code article 2089, a written-contract regime distinct from the common law, and puts the burden of proving the clause is reasonable on the employer.</li><li>Federally regulated employees currently have no non-compete-specific protection in the Canada Labour Code, though a 2026 federal bill would change that if passed.</li></ul></div>\n\n<h2>Ontario's Statutory Ban</h2>\n<p>Ontario added Part XV.1 to the Employment Standards Act, 2000 (\"ESA\") through the Working for Workers Act, 2021, and the government confirms it \"was deemed to have come into force on October 25, 2021.\" Section 67.1 defines a non-compete agreement broadly, as any agreement — or any part of one — that prohibits an employee \"from engaging in any business, work, occupation, profession, project or other activity that is in competition with the employer's business after the employment relationship between the employee and the employer ends.\" Section 67.2 then makes any such agreement void, subject to two exceptions. The definition catches a clause regardless of how it's labelled, and it applies whether or not the restriction is limited by time or geography — Ontario didn't narrow non-competes, it removed them for almost every employee.</p>\n\n<h2>The Two Exceptions</h2>\n<h3>Senior Executives</h3>\n<p>The ban does not apply to an \"executive,\" a term the ESA defines by naming specific C-suite titles: Chief Executive Officer, President, Chief Administrative Officer, Chief Operating Officer, Chief Financial Officer, Chief Information Officer, Chief Legal Officer, Chief Human Resources Officer, Chief Corporate Development Officer, \"or any other chief executive position.\" Employment lawyers have flagged real ambiguity around this list — it's unclear whether it's exhaustive or whether a title like Executive Vice President would qualify — and Ontario courts have not yet fully settled the question. An employer relying on the executive exception for anyone other than a clearly listed C-suite role should not assume the exception applies without legal advice.</p>\n<h3>Sale of a Business</h3>\n<p>The ban also does not apply where a business — or part of one — is sold or leased and the seller becomes an employee of the purchaser immediately after the sale, provided the non-compete is contained in the purchase agreement itself. This exception recognizes that a business buyer typically needs the seller's promise not to immediately re-enter the market and compete with the very business just sold, which is a different transaction from an ordinary employer restricting an ordinary employee.</p>\n\n<h2>What About Clauses Signed Before October 25, 2021?</h2>\n<p>A common misconception is that Ontario's ban retroactively voided every existing non-compete. It didn't. The Ontario government's own guidance confirms Part XV.1 \"does not prohibit or void non-compete agreements that were entered into prior to October 25, 2021\" — those older clauses remain subject to ordinary common-law scrutiny, exactly as they would have been before the ESA amendment. The Ontario Superior Court confirmed this directly in <em>Parekh v. Schecter</em> (2022), enforcing a non-compete tied to a $5.6 million dental practice sale because the agreement predated the statutory cutoff, even though the same clause would likely be void if signed today. Anyone reviewing an older Ontario non-compete needs to check the signature date against October 25, 2021 before assuming either that it's automatically void or automatically enforceable.</p>\n\n<h2>Non-Solicitation and Confidentiality Clauses Are Different</h2>\n<p>Ontario's ban targets non-compete clauses specifically — it does not touch non-solicitation agreements (which stop a departing employee from poaching clients or colleagues without banning them from the field entirely) or confidentiality agreements, provided those clauses are genuinely what they claim to be. A non-solicitation clause drafted so broadly that it functions as a disguised non-compete — for example, one that effectively bars an employee from working in their field at all — risks being recharacterized by a court as a non-compete in substance, and struck down under the same statutory ban despite its label.</p>\n\n<h2>Everywhere Else in Canada: The Common-Law Reasonableness Test</h2>\n<p>No other Canadian province or territory has enacted an Ontario-style statutory ban. Outside Ontario, a non-compete is presumed unenforceable as an unlawful restraint of trade unless the employer can show it is reasonable — a burden the employer carries, not the employee. Courts weigh whether the restriction's duration, geographic scope, and the activities it restricts go no further than necessary to protect a legitimate business interest, such as trade secrets or genuine client relationships, rather than simply suppressing ordinary competition.</p>\n<p>The leading authority is the Supreme Court of Canada's decision in <em>Shafron v. KRG Insurance Brokers (Western) Inc.</em>, 2009 SCC 6. Shafron had sold his insurance agency to KRG and continued working for the buyer under a covenant restricting him from competing within the \"Metropolitan City of Vancouver\" for three years after leaving — a phrase with no fixed legal meaning. The Court found the clause ambiguous and therefore unenforceable, and — critically for how Canadian courts approach these clauses generally — declined to simply delete the offending word and enforce what remained.</p>\n\n<h3>Why Canadian Courts Rarely Rewrite an Overbroad Clause</h3>\n<p>This is one of the sharpest contrasts with the United States, where some states' courts will \"blue-pencil\" an overbroad non-compete — narrowing it to a reasonable scope and enforcing what's left. Canadian courts generally will not. <em>Shafron</em> held that judicial severance is available only in rare cases where the offending part is trivial and not part of the covenant's main purpose, which is a high bar the facts in that case didn't meet. In practice, this means a Canadian employer largely gets one attempt to draft an enforceable clause — an overreaching non-compete is far more likely to be struck down entirely than narrowed and saved, which is exactly why careful, conservative drafting matters more in Canada than it might elsewhere.</p>\n\n<h2>Quebec's Distinct Civil-Law Framework</h2>\n<p>Quebec does not follow the common law at all — non-competes there are governed by the Civil Code of Québec, a written-contract regime. Article 2089 requires that a non-competition stipulation be in writing and expressed in clear terms, and be \"limited, as to time, place and type of employment, to what is necessary for the protection of the legitimate interests of the employer.\" The Civil Code puts the burden of proving the stipulation is valid squarely on the employer. A related provision, article 2095, makes a non-compete unenforceable if the employer terminated the employee without a serious reason, or gave the employee just cause to resign — reflecting a principle that an employer that ended the relationship unfairly cannot also restrict what the employee does next.</p>\n\n<h2>Federally Regulated Employees: A Change That May Be Coming</h2>\n<p>Employees of federally regulated industries — banking, telecommunications, interprovincial transportation, and similar sectors — fall under the Canada Labour Code for matters like hours and termination, but the Code currently has no non-compete-specific provision at all. Their restrictive covenants are governed by the same common-law (or, in Quebec, civil-law) principles that apply to provincially regulated employees in the same province.</p>\n<p>That may be about to change. Bill C-31, the Budget 2025 Implementation Act, No. 2, introduced in the House of Commons on May 6, 2026, would add a new division to the Canada Labour Code explicitly modeled on Ontario's ESA framework — prohibiting non-competes for federally regulated employees with the same two categories of exception (business sale, senior executives), and including a one-year transition period before existing clauses would become void. According to law-firm reports, the bill passed second reading in the House of Commons on 3 June 2026 and was referred to the Standing Committee on Finance; it has not been passed into law, and the proposed Canada Labour Code amendments would not take effect on Royal Assent. <strong>Treat this as a proposal to watch, not a rule currently in force</strong> — federally regulated employees today have the same common-law protection (and the same burden on the employer to justify a restriction) as other non-Ontario, non-Quebec employees, unless and until Bill C-31 or similar legislation is actually enacted.</p>\n\n<h2>Frequently Asked Questions</h2>\n<h3>Does Ontario's non-compete ban apply to me if I work for a federally regulated employer in Ontario?</h3>\n<p>Generally no — the ESA is provincial employment standards legislation and does not apply to federally regulated employers (banks, telecoms, airlines, and similar sectors) even if they operate in Ontario. Those employees currently rely on the common-law reasonableness test unless a federal law like the proposed Bill C-31 is enacted.</p>\n<h3>If my non-compete is void under Ontario's ESA, can my employer still enforce a non-solicitation clause in the same contract?</h3>\n<p>Often yes, provided the non-solicitation clause is genuinely limited to protecting client and colleague relationships rather than functioning as a disguised ban on working in the field. Courts assess what the clause actually does, not just what it's labelled.</p>\n<h3>Will a Canadian court narrow my overbroad non-compete instead of striking it down completely?</h3>\n<p>Outside narrow circumstances, no. Following the Supreme Court's approach in <em>Shafron</em>, Canadian courts generally refuse to \"blue-pencil\" an unreasonable restraint into a reasonable one — an overbroad clause is typically void in its entirety, which is a real risk for employers relying on broadly worded restrictions.</p>\n\n<h2>Sources &amp; Further Reading</h2>\n<ul>\n<li>Employment Standards Act, 2000, S.O. 2000, c. 41, Part XV.1 (ss. 67.1–67.2), as added by the Working for Workers Act, 2021 — Government of Ontario</li>\n<li><em>Parekh et al. v. Schecter et al.</em>, 2022 ONSC 302 (Ont. Sup. Ct. J.)</li>\n<li><em>Shafron v. KRG Insurance Brokers (Western) Inc.</em>, 2009 SCC 6</li>\n<li>Civil Code of Québec, arts. 2089 and 2095</li>\n<li>Bill C-31, Budget 2025 Implementation Act, No. 2, House of Commons of Canada (introduced May 6, 2026; not yet enacted)</li>\n</ul>\n\n<h2>Practical Next Steps</h2>\n<p>If you're an Ontario employee, start by checking the signature date on your non-compete against October 25, 2021 — that single fact determines whether the statutory ban or the older common-law test applies to your clause. If you're outside Ontario, or federally regulated, assume your non-compete must clear the common-law reasonableness bar, and remember the burden of proving that falls on your employer, not you. Because the exceptions, the Quebec civil-law rules, and the federal bill's progress can all shift the analysis, a short consultation with an employment lawyer licensed in the relevant province is the safest way to know where you actually stand. For the general, worldwide framework this guide builds on, see <a href=\"/article/what-is-a-non-compete-agreement\">What Is a Non-Compete Agreement?</a> and, for what happens when a Canadian employment relationship ends more broadly, <a href=\"/article/wrongful-dismissal-canada-reasonable-notice\">Wrongful Dismissal in Canada: How 'Reasonable Notice' Is Calculated</a>.</p>\n\n<p><em>This article is general legal information, not legal advice. Employment law varies by province and territory and changes over time — consult a lawyer licensed in the relevant jurisdiction before acting.</em></p>"
+      }
+    }
+  ],
+  "tagIds": [],
+  "seoMetadata": {
+    "description": "Ontario has banned most employee non-competes by statute since 2021. Elsewhere in Canada the common-law reasonableness test applies; Quebec has its own rules."
+  },
+  "status": "published",
+  "visibility": "public",
+  "publishedAt": "2026-08-24T21:53:26.537Z",
+  "scheduledAt": "2026-08-11T09:00:00.000Z",
+  "viewCount": "10",
+  "revisionCount": 2,
+  "customFields": {
+    "author": "Daniel Okoro",
+    "country": "Canada",
+    "alphabet": "O",
+    "citations": [
+      {
+        "url": "https://www.ontario.ca/document/employment-standard-act-policy-and-interpretation-manual/part-xv1-non-compete-agreements",
+        "title": "Employment Standards Act, 2000, Part XV.1 (Ontario) — non-compete agreements"
+      },
+      {
+        "title": "Parekh et al. v. Schecter et al., 2022 ONSC 302"
+      },
+      {
+        "url": "https://www.canlii.org/en/ca/scc/doc/2009/2009scc6/2009scc6.html",
+        "title": "Shafron v. KRG Insurance Brokers (Western) Inc., 2009 SCC 6"
+      },
+      {
+        "url": "https://www.legisquebec.gouv.qc.ca/en/document/cs/ccq-1991",
+        "title": "Civil Code of Québec, articles 2089 and 2095"
+      },
+      {
+        "title": "Bill C-31, Budget 2025 Implementation Act, No. 2 (not yet enacted)"
+      },
+      {
+        "url": "https://www.blakes.com/insights/canada-moves-to-restrict-non-competes-in-federally-regulated-workplaces/",
+        "title": "Blakes: Canada moves to restrict non-competes in federally regulated workplaces (summary of Bill C-31)"
+      }
+    ],
+    "authorSlug": "daniel-okoro",
+    "readingTime": "10"
+  },
+  "deletionRequestedBy": null,
+  "deletionRequestedAt": null,
+  "deletionRequestNote": null,
+  "createdAt": "2026-08-09T09:54:28.954Z",
+  "updatedAt": "2026-09-21T00:12:27.702Z",
+  "workflow": {
+    "id": "7d68167d-ea6f-462b-8c4e-502169e1ba3e",
+    "contentId": "ddb58c52-202b-4125-a35a-9592c70afc6e",
+    "currentState": "published",
+    "submittedBy": "1",
+    "reviewedBy": null,
+    "approvedBy": "1",
+    "publishedBy": null,
+    "submittedAt": "2026-08-09T09:54:28.993Z",
+    "reviewedAt": null,
+    "approvedAt": "2026-08-09T09:54:29.025Z",
+    "publishedAt": "2026-08-24T21:53:26.537Z",
+    "comments": null,
+    "scheduledPublishAt": "2026-08-11T09:00:00.000Z",
+    "scheduleJobId": null,
+    "createdAt": "2026-08-09T09:54:28.965Z",
+    "updatedAt": "2026-08-24T21:53:26.612Z"
+  }
+}

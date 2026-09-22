@@ -1,0 +1,70 @@
+{
+  "slug": "mark-rober",
+  "category": "creators",
+  "wikidata_id": "Q24088544",
+  "full_name": "Mark Rober",
+  "description": "American YouTuber, engineer and inventor",
+  "birth_date": null,
+  "birth_place": "Orange County",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "US",
+  "citizenship": [
+    "United States"
+  ],
+  "occupations": [
+    "YouTuber",
+    "mechanical engineer",
+    "inventor",
+    "science communicator",
+    "web video producer"
+  ],
+  "education": [
+    {
+      "institution": "Brigham Young University"
+    },
+    {
+      "institution": "University of Southern California"
+    }
+  ],
+  "positions": [],
+  "awards": [
+    {
+      "title": "Silver Play Button",
+      "year": 2014
+    },
+    {
+      "title": "Gold Play Button",
+      "year": 2016
+    },
+    {
+      "title": "Diamond Play Button",
+      "year": 2019
+    }
+  ],
+  "notable_works": [],
+  "social": {
+    "x": "https://x.com/MarkRober",
+    "instagram": "https://www.instagram.com/markrober",
+    "facebook": "https://www.facebook.com/MarkRoberYouTube"
+  },
+  "official_website": null,
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q24088544"
+    }
+  ],
+  "photo": {
+    "file": "mark-rober.png",
+    "mime": "image/png",
+    "width": 1000,
+    "height": 1250,
+    "credit": "Mark Rober / Wikimedia Commons",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Mark_Rober_profile_picture_(cropped).png"
+  },
+  "fetched_at": "2026-09-21T19:20:27.029Z"
+}

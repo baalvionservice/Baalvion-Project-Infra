@@ -1,0 +1,138 @@
+{
+  "slug": "malala-yousafzai",
+  "category": "other",
+  "wikidata_id": "Q32732",
+  "full_name": "Malala Yousafzai",
+  "description": "Pakistani children's education activist",
+  "birth_date": "1997-07-12",
+  "birth_place": "Mingora",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "PK",
+  "citizenship": [
+    "Pakistan"
+  ],
+  "occupations": [
+    "blogger",
+    "human rights defender",
+    "memoirist",
+    "writer",
+    "women's rights activist",
+    "activist"
+  ],
+  "education": [
+    {
+      "institution": "Edgbaston High School"
+    },
+    {
+      "institution": "Lady Margaret Hall"
+    }
+  ],
+  "positions": [],
+  "awards": [
+    {
+      "title": "Nobel Peace Prize",
+      "year": 2014
+    },
+    {
+      "title": "Sakharov Prize",
+      "year": 2013
+    },
+    {
+      "title": "Simone de Beauvoir Prize",
+      "year": 2013
+    },
+    {
+      "title": "National Malala Peace Prize",
+      "year": 2011
+    },
+    {
+      "title": "Anna Politkovskaya Award",
+      "year": 2013
+    },
+    {
+      "title": "United Nations Prize in the Field of Human Rights",
+      "year": 2013
+    },
+    {
+      "title": "European Human Rights Prize",
+      "year": 2013
+    },
+    {
+      "title": "Four Freedoms Award – Freedom from Fear"
+    },
+    {
+      "title": "Philadelphia Liberty Medal",
+      "year": 2014
+    },
+    {
+      "title": "International Children's Peace Prize",
+      "year": 2013
+    },
+    {
+      "title": "Index Award",
+      "year": 2013
+    },
+    {
+      "title": "Ambassador of Conscience Award",
+      "year": 2013
+    },
+    {
+      "title": "Secularist of the Year",
+      "year": 2013
+    },
+    {
+      "title": "Catalonia International Prize",
+      "year": 2013
+    },
+    {
+      "title": "Humanitarian of the Year",
+      "year": 2013
+    },
+    {
+      "title": "honorary Canadian citizenship",
+      "year": 2013
+    },
+    {
+      "title": "Order of the Smile",
+      "year": 2016
+    },
+    {
+      "title": "Ellis Island Medal of Honor",
+      "year": 2017
+    },
+    {
+      "title": "BBC 100 Women",
+      "year": 2021
+    },
+    {
+      "title": "Commander of the Order of Bravery",
+      "year": 2012
+    }
+  ],
+  "notable_works": [],
+  "social": {
+    "x": "https://x.com/Malala",
+    "instagram": "https://www.instagram.com/malala",
+    "facebook": "https://www.facebook.com/MalalaFund"
+  },
+  "official_website": "https://www.malala.org/",
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q32732"
+    }
+  ],
+  "photo": {
+    "file": "malala-yousafzai.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1000,
+    "credit": "DFID - UK Department for International Development / Wikimedia Commons",
+    "license": "CC BY 2.0",
+    "license_url": "https://creativecommons.org/licenses/by/2.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Malala_Yousafzai_2015.jpg"
+  },
+  "fetched_at": "2026-09-21T19:22:27.832Z"
+}

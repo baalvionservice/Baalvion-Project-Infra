@@ -42,7 +42,7 @@ export default async function LegalCaseLayout(
 
   if (!legalCase) return <>{children}</>;
 
-  const court = await getMergedCourtBySlug(legalCase.courtSlug);
+  const court = legalCase.courtSlug ? await getMergedCourtBySlug(legalCase.courtSlug) : null;
 
   // schema.org has no dedicated "court case" type, and the closest-sounding
   // one (Legislation) means statutory law, not case law -- asserting it here

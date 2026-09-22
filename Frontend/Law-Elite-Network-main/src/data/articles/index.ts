@@ -35,10 +35,17 @@ import { technologyIpJurisdictionArticles } from './technology-ip-jurisdiction';
 import { disputeResolutionArticles } from './dispute-resolution';
 import { disputeResolutionExtra2Articles } from './dispute-resolution-extra2';
 import { lciaArbitrationSeriesArticles } from './lcia-arbitration-series';
-// New vertical: Law School Success -- launched September 2026.
 import { lawSchoolSuccessArticles } from './law-school-success';
+import { highProfileNewsArticles } from './high-profile-cases-news';
+import { entertainmentNewsArticles } from './entertainment-news';
+import { celebrityProfilesNewsArticles } from './celebrity-profiles-news';
+import { sportsNewsArticles } from './sports-news';
 
 export const LAW_ARTICLES: LawArticle[] = [
+  ...highProfileNewsArticles,
+  ...entertainmentNewsArticles,
+  ...celebrityProfilesNewsArticles,
+  ...sportsNewsArticles,
   ...lawSchoolSuccessArticles,
   ...businessCorporateArticles,
   ...businessCorporateExtraArticles,

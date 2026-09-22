@@ -25,7 +25,7 @@ export const article1LSurvivalGuide: LawArticle[] = [
 <p>Orientation runs for roughly a week to ten days before classes start, and it's mostly logistics -- ID cards, section assignments, a welcome from the dean. The part that matters is smaller and easier to miss: an "Introduction to the Study of Law" reading packet or a first case assigned before day one. Read it. Your first cold call can land on day one or two, and the students who look prepared are usually just the ones who did that packet instead of skimming the syllabus. Most schools also give a short add/drop window in the first week -- use it to fix a scheduling conflict, not to chase a rumor about which professor is "easier."</p>
 
 <h2>September: The Casebook Volume Turns Up</h2>
-<p>This is when the actual workload lands -- briefing cases most nights across four or five courses. The outlining habits you build now are the ones you'll still be using in April. Career services programming starts here too, resume and cover letter workshops mostly, worth attending even though summer feels irrelevant in week three. Legal Research and Writing starts assigning smaller exercises before the first graded memo comes due, so don't let it slide because it isn't doctrinal.</p>
+<p>This is when the actual workload lands -- briefing cases most nights across four or five courses. The outlining habits you build now are the ones you'll still be using in April. Some schools start career programming this early, resume and cover letter workshops mostly, worth attending even though summer feels irrelevant in week three. (NALP's published guidelines have said law schools should not offer individual career services to first-semester 1Ls before November 1, so timing varies by school.) Legal Research and Writing starts assigning smaller exercises before the first graded memo comes due, so don't let it slide because it isn't doctrinal.</p>
 
 <h2>October: Midterms (Sometimes) and the First Deadline That Isn't an Exam</h2>
 <p>Some 1L courses give a practice or low-stakes midterm around this point -- not all of them, and not every school, but treat one as free information about your exam-writing weaknesses rather than a grade to stress over. Your first graded legal writing memo is usually due sometime in October, and mid-October is a common point for career offices to start pushing 1Ls to book a first meeting about summer plans. You don't need a plan yet, you need to be on their radar.</p>
@@ -69,9 +69,10 @@ export const article1LSurvivalGuide: LawArticle[] = [
 <h3>Do all 1Ls take Constitutional Law in the first year?</h3>
 <p>Most schools include it alongside Civil Procedure, Contracts, Torts, Criminal Law, Property, and Legal Research and Writing, but some teach it partly or entirely in the second year instead. Check your own school's 1L course list rather than assuming.</p>
 <h3>When should I actually start thinking about 1L summer jobs?</h3>
-<p>Career offices typically start programming -- resume workshops, initial advising meetings -- in September, and formal applications for many 1L summer positions open December 1st. Public-interest and government fair sign-ups often close in mid-January for a February fair, so "early spring" is already late for those tracks.</p>`,
+<p>Career offices typically start general programming -- resume workshops, and later initial advising meetings -- in the fall (individual advising for first-semester 1Ls often waits until November under NALP's guidelines), and formal applications for many 1L summer positions open December 1st. Public-interest and government fair sign-ups often close in mid-January for a February fair, so "early spring" is already late for those tracks.</p>`,
     author: 'Law Elite Editorial Team',
     updatedAt: 'September 16, 2026',
+    modifiedAt: '2026-09-21',
     readingTime: 7,
     views: 0,
     featured: false,

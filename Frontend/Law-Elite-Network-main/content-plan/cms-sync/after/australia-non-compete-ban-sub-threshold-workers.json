@@ -1,0 +1,94 @@
+{
+  "id": "7ce8e61c-8c4c-41df-a1c4-07995f63b379",
+  "websiteId": "0fd4ebf5-9570-4b9a-806b-e41dbc391cb1",
+  "categoryId": "66b14603-4b88-4ed3-b48d-66c8d6ba8cfb",
+  "categoryIds": [
+    "66b14603-4b88-4ed3-b48d-66c8d6ba8cfb"
+  ],
+  "authorId": "1",
+  "lastEditedBy": "14",
+  "title": "Australia Non-Compete Ban Explained",
+  "slug": "australia-non-compete-ban-sub-threshold-workers",
+  "excerpt": "Australia has proposed banning non-competes below a high-income threshold from 2027; only an exposure draft has been published (September 2026) and no bill is law — the common-law test still applies today.",
+  "featuredImage": "http://localhost:3011/uploads/generated-art/7ce8e61c-8c4c-41df-a1c4-07995f63b379.svg",
+  "galleryImages": [],
+  "videoUrl": null,
+  "readingTimeMinutes": 14,
+  "isFeatured": false,
+  "isBreaking": false,
+  "isTrending": false,
+  "isEditorsPick": false,
+  "isPremium": false,
+  "newsLabels": [],
+  "externalSourceName": null,
+  "externalSourceUrl": null,
+  "contentType": "article",
+  "contentBlocks": [
+    {
+      "id": "block-1",
+      "type": "html",
+      "order": 0,
+      "content": {
+        "html": "<p>If you've read that Australia has banned non-compete clauses for most workers, that's ahead of where the law actually stands. The federal government has announced the policy, run a full public consultation on how it should work, and set a target start date — but as of today, no bill has been introduced into Parliament, and no non-compete ban is in force anywhere in Australia. This guide separates what has actually been announced and consulted on from what remains to be legislated, and explains the rule that governs non-competes right now, while the reform is still being designed.</p>\n\n<div class=\"key-takeaways\"><h4>Key Takeaways</h4><ul><li>The government announced its intention to ban non-compete clauses for workers earning below the Fair Work Act high-income threshold in the 2025-26 Federal Budget, handed down on 25 March 2025, with a target start of 2027.</li><li>As of today, this remains a policy proposal, not law: no bill has been introduced into the Australian Parliament, and Treasury's public consultation on the reform's design closed in September 2025 with the details still being finalized.</li><li>The current high-income threshold, which the ban would use as its cutoff, is $190,100 for the 2026-27 financial year (from 1 July 2026) — a figure that is itself adjusted every year and would need to be checked again by the time any ban actually commences.</li><li>Until a ban is enacted, non-competes in Australia remain governed by the ordinary common-law restraint-of-trade doctrine: void unless the employer proves the restriction is reasonable.</li><li>New South Wales has its own statute, the Restraints of Trade Act 1976 (NSW), letting courts partially enforce an unreasonable restraint rather than strike it out entirely — a state-specific rule, not a national one.</li></ul></div>\n\n<h2>What Has Actually Been Announced</h2>\n<p>The proposal traces back to a Treasury issues paper published in April 2024, examining non-compete clauses and other worker restraints as part of a broader competition policy review. That consultation fed directly into the 2025-26 Federal Budget, handed down on 25 March 2025, in which the government announced its intention to ban non-compete clauses for most workers earning below the Fair Work Act's high-income threshold, targeting a start date of 2027. Treasury then ran a further public consultation specifically on the reform's design between July and September 2025, drawing dozens of submissions, with the stated purpose of helping the government finalize the policy's details.</p>\n\n<h2>Update: An Exposure Draft Has Now Been Published</h2>\n<p>After this article was first written, the government published an exposure draft on 7 September 2026 — the Competition and Fair Work Legislation Amendment (Banning Unfair Non-Competes) Bill 2026 — with public submissions open until 2 October 2026, according to the Australian Industry Group and other commentators (check the Treasury consultation page for the authoritative text). As reported, the draft would ban non-compete terms for employees earning at or below the high income threshold (currently $190,100) and for all casual employees and pieceworkers, ban co-worker non-solicitation terms, prohibit \"cascading\" restraints, restrict the non-competes still allowed for high-income employees, and extend cartel laws to no-poach and wage-fixing agreements, with a reported target start of 1 July 2027. An exposure draft is a consultation document: it is not a bill before Parliament, and its terms may change.</p>\n<h2>The Most Important Fact: This Is Not Yet Law</h2>\n<p><strong>As of today, no bill implementing this ban has been introduced into the Australian Parliament.</strong> The Fair Work Ombudsman's own current guidance confirms this directly, stating plainly that the Fair Work Act doesn't set any rules for non-compete clauses in employment contracts and that it cannot advise on them — a clear signal that the announced reform has not yet become operative law. The government has announced the policy, consulted on it, and stated a target commencement year, but design work on the details was reportedly still ongoing as of mid-2026, with no bill introduced into Parliament when this article was first written. Treat any claim that Australia \"has banned\" non-competes, or that a specific bill is already before Parliament, with real skepticism until you can confirm it against Treasury's own consultation page or the Australian Parliament's official bill register — this is a fast-moving policy area, and secondary sources have not always kept pace accurately with where the reform actually stands.</p>\n\n<h2>What the Ban Is Expected to Cover</h2>\n<p>Based on the government's own announcements and consultation materials, the proposal targets non-compete clauses specifically — restrictions on working for a competitor or starting a competing business after employment ends — for workers earning below the high-income threshold. That threshold is itself indexed annually: it was $175,000 at the time of the original Budget announcement, rose to $183,100 from 1 July 2025, and stands at $190,100 for the 2026-27 financial year from 1 July 2026. Because the ban's proposed design and its target date both sit in the future, and because this threshold moves every year regardless of the reform's progress, don't assume today's figure will still be the relevant one once any ban actually takes effect.</p>\n<p>A sale-of-business exception has been consistently discussed as likely to survive into any final version of the reform, on the same logic used in other jurisdictions — a business buyer typically needs some assurance the seller won't immediately re-enter the market and compete. Beyond that, Treasury's own consultation has left open questions genuinely undecided as of this writing, including whether non-solicitation clauses (as distinct from non-competes) would be swept into any new restriction, and what carve-outs, if any, would apply for senior executives or equity holders. Some specific numeric figures — particular restraint-length caps or equity-ownership thresholds — circulate in secondary commentary online, but could not be confirmed against an official government source at the time of writing; treat any such specific figure as unverified until Treasury or an introduced bill confirms it.</p>\n\n<h2>A Related but Separate Reform: No-Poach and Wage-Fixing Agreements</h2>\n<p>Bundled into the same general policy conversation, but legally distinct, is a separate proposal to restrict \"no-poach\" and wage-fixing agreements — arrangements between <em>businesses</em> not to hire each other's staff or to coordinate on wages, as opposed to a restriction between an employer and its own employee. This strand would work through the Competition and Consumer Act 2010 rather than the Fair Work Act, shares the same April 2024 Treasury origin and the same 2025-26 Budget announcement, but is a separate mechanism from the employee non-compete ban discussed above, and sits at a similar not-yet-enacted stage.</p>\n\n<h2>What Governs Non-Competes in Australia Right Now</h2>\n<p>Until any ban actually passes into law, non-compete clauses in Australia are governed by the ordinary common-law restraint-of-trade doctrine, applied consistently across the country: a restraint is presumed void unless the party trying to enforce it — almost always the employer — proves it is reasonable, meaning no broader than necessary to protect a legitimate business interest such as confidential information, trade connections, or client goodwill, and reasonable in its duration, geographic scope, and the activities it restricts.</p>\n<p>New South Wales has its own additional statute layered on top of this general common-law rule: the Restraints of Trade Act 1976 (NSW) provides that a restraint of trade is valid to the extent it is not against public policy, which lets NSW courts read down or partially enforce an unreasonable restraint rather than voiding it outright — a more flexible approach than the stricter severance principles that apply under the general common law elsewhere in Australia. This is a New South Wales-specific rule; no other state or territory has an equivalent statute, so the same overly broad non-compete clause could be partially rescued by a NSW court while being struck down entirely in another state.</p>\n\n<h2>Frequently Asked Questions</h2>\n<h3>Has Australia banned non-compete clauses for lower-paid workers?</h3>\n<p>Not yet. The government has announced this as a policy goal and consulted on how it would work, targeting 2027, but no bill has been introduced into Parliament and no ban is currently in force anywhere in Australia.</p>\n<h3>If I'm asked to sign a non-compete today, does the proposed ban protect me?</h3>\n<p>No — a proposal that hasn't been enacted has no legal effect. A non-compete signed today is governed by the existing common-law reasonableness test (and, in New South Wales, the Restraints of Trade Act 1976), not by the reform that's still being designed.</p>\n<h3>When will the ban actually take effect?</h3>\n<p>The government's target has been 2027, but that target predates a bill even being introduced, and the exact commencement date isn't fixed until legislation is actually passed. Check Treasury's consultation page or the Australian Parliament's bill register for the current status before relying on any specific date.</p>\n\n<h2>Sources &amp; Further Reading</h2>\n<ul>\n<li>Australian Government, 2025-26 Federal Budget (25 March 2025), non-compete clause reform announcement</li>\n<li>Australian Treasury, consultation on non-compete clauses and other restraints on workers (2024 issues paper; 2025 design consultation)</li>\n<li>Fair Work Ombudsman (fairwork.gov.au) — current guidance confirming no statutory non-compete rules are yet in force</li>\n<li>Restraints of Trade Act 1976 (NSW)</li>\n</ul>\n\n<h2>Practical Next Steps</h2>\n<p>If you're being asked to sign a non-compete in Australia today, assess it under the law that actually applies right now — the common-law reasonableness test, plus the NSW-specific statute if that's the relevant state — not the reform that's still being designed. If you're an employer planning restrictive covenants with an eye on the next few years, keep an eye on Treasury's consultation outcomes and the parliamentary bill register rather than assuming any specific reported detail is final. Because this is a genuinely fast-moving area with real potential for the rules to change materially before 2027, a consultation with an employment lawyer is the most reliable way to get both today's answer and a read on how exposed a given clause might be to the coming reform. For the general, worldwide framework this guide builds on, see <a href=\"/article/what-is-a-non-compete-agreement\">What Is a Non-Compete Agreement?</a> and, for how Australian dismissals themselves are challenged, <a href=\"/article/unfair-dismissal-australia-fair-work-commission\">Unfair Dismissal in Australia: Eligibility and the Fair Work Commission Process</a>.</p>\n\n<p><em>This article is general legal information, not legal advice, and describes a law reform that had not been enacted as of publication. Confirm the current status with the Fair Work Ombudsman or Treasury, and consult an Australian employment lawyer before signing or relying on a non-compete agreement.</em></p>"
+      }
+    }
+  ],
+  "tagIds": [],
+  "seoMetadata": {
+    "description": "Australia has proposed banning non-competes below a high-income threshold from 2027; only an exposure draft has been published (September 2026) and no bill is law — the common-law test still applies today."
+  },
+  "status": "published",
+  "visibility": "public",
+  "publishedAt": "2026-08-24T21:53:26.837Z",
+  "scheduledAt": "2026-08-11T09:15:00.000Z",
+  "viewCount": "29",
+  "revisionCount": 2,
+  "customFields": {
+    "author": "Daniel Okoro",
+    "country": "Australia",
+    "alphabet": "A",
+    "citations": [
+      {
+        "url": "https://treasury.gov.au/consultation/c2025-681950",
+        "title": "Australian Treasury, reform to non-compete clauses and other restraints on workers"
+      },
+      {
+        "url": "https://www.australianindustrygroup.com.au/news/member-advices/2026/workplace-relations/nat-04426-exposure-draft-legislation-to-ban-unfair-non-competes-and-related-restraints",
+        "title": "Australian Industry Group: exposure draft legislation to ban unfair non-competes (NAT 044/26)"
+      },
+      {
+        "url": "https://www.fairwork.gov.au/employment-conditions/employment-contracts/get-help-with-employment-contracts",
+        "title": "Fair Work Ombudsman, employment contracts"
+      },
+      {
+        "url": "https://legislation.nsw.gov.au/view/whole/pdf/inforce/2024-05-07/act-1976-067",
+        "title": "Restraints of Trade Act 1976 (NSW)"
+      }
+    ],
+    "authorSlug": "daniel-okoro",
+    "readingTime": "9"
+  },
+  "deletionRequestedBy": null,
+  "deletionRequestedAt": null,
+  "deletionRequestNote": null,
+  "createdAt": "2026-08-09T09:54:29.089Z",
+  "updatedAt": "2026-09-21T00:12:27.747Z",
+  "workflow": {
+    "id": "e76beb93-71e0-4f4a-be9b-7dd20aee6089",
+    "contentId": "7ce8e61c-8c4c-41df-a1c4-07995f63b379",
+    "currentState": "published",
+    "submittedBy": "1",
+    "reviewedBy": null,
+    "approvedBy": "1",
+    "publishedBy": null,
+    "submittedAt": "2026-08-09T09:54:29.120Z",
+    "reviewedAt": null,
+    "approvedAt": "2026-08-09T09:54:29.153Z",
+    "publishedAt": "2026-08-24T21:53:26.837Z",
+    "comments": null,
+    "scheduledPublishAt": "2026-08-11T09:15:00.000Z",
+    "scheduleJobId": null,
+    "createdAt": "2026-08-09T09:54:29.098Z",
+    "updatedAt": "2026-08-24T21:53:26.840Z"
+  }
+}

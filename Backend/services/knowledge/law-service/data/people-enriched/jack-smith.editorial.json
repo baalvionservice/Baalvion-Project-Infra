@@ -1,0 +1,49 @@
+{
+  "display_name": null,
+  "short_bio": "Federal prosecutor who served as special counsel investigating Donald Trump from 2022 to 2025.",
+  "biography": "Jack Smith studied at Harvard Law School and began as a prosecutor in the Manhattan District Attorney’s office. He later worked in the US Attorney’s Office in Brooklyn and headed the Justice Department’s Public Integrity Section.\n\nFrom 2018 to 2022 he was chief prosecutor of the Kosovo Specialist Chambers at The Hague, which tries crimes from the Kosovo war.\n\nIn November 2022 Attorney General Merrick Garland appointed him special counsel to oversee the investigations into Donald Trump’s handling of classified documents and efforts to overturn the 2020 election. He resigned in January 2025.",
+  "awards": [],
+  "notable_works": [
+    {
+      "title": "Kosovo Specialist Chambers",
+      "year": 2018,
+      "note": "Chief prosecutor"
+    },
+    {
+      "title": "Special counsel investigations of Donald Trump",
+      "year": 2022,
+      "note": "Appointed by Merrick Garland"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1969-06-05",
+      "title": "Born"
+    },
+    {
+      "date": "2018",
+      "title": "Becomes chief prosecutor of the Kosovo Specialist Chambers"
+    },
+    {
+      "date": "2022-11",
+      "title": "Appointed special counsel by Merrick Garland"
+    },
+    {
+      "date": "2025-01",
+      "title": "Resigns as special counsel"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q115271256"
+    },
+    {
+      "label": "Wikipedia: Jack Smith (lawyer)",
+      "url": "https://en.wikipedia.org/wiki/Jack_Smith_(lawyer)"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

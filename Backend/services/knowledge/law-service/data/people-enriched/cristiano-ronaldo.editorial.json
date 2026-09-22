@@ -1,0 +1,135 @@
+{
+  "display_name": null,
+  "short_bio": "Portuguese footballer, five-time Ballon d’Or winner and the all-time leading scorer in men’s international football.",
+  "biography": "Cristiano Ronaldo was born in Funchal on the island of Madeira and started at Sporting CP before joining Manchester United in 2003. He won the Champions League with United in 2008 and the Ballon d’Or that year.\n\nHe moved to Real Madrid in 2009 and won four more Champions League titles, in 2014, 2016, 2017 and 2018, before joining Juventus (2018–2021). He returned to Manchester United in 2021 and joined Al Nassr in Saudi Arabia in 2023.\n\nWith Portugal he won the European Championship in 2016 and the UEFA Nations League in 2019. He holds the men’s record for international goals.",
+  "awards": [
+    {
+      "title": "UEFA Team of the Year",
+      "year": 2004
+    },
+    {
+      "title": "Bravo Award",
+      "year": 2004
+    },
+    {
+      "title": "PFA Team of the Year",
+      "year": 2005
+    },
+    {
+      "title": "Premier League Player of the Month",
+      "year": 2006
+    },
+    {
+      "title": "PFA Players' Player of the Year",
+      "year": 2006
+    },
+    {
+      "title": "Sir Matt Busby Player of the Year",
+      "year": 2006
+    },
+    {
+      "title": "PFA Team of the Year",
+      "year": 2006
+    },
+    {
+      "title": "Footballer of the Year in England",
+      "year": 2006
+    },
+    {
+      "title": "PFA Young Player of the Year",
+      "year": 2006
+    },
+    {
+      "title": "Premier League Player of the Season",
+      "year": 2006
+    },
+    {
+      "title": "FWA Footballer of the Year",
+      "year": 2006
+    },
+    {
+      "title": "UEFA Club Footballer of the Year",
+      "year": 2007
+    },
+    {
+      "title": "Premier League Player of the Season",
+      "year": 2007
+    },
+    {
+      "title": "FWA Footballer of the Year",
+      "year": 2007
+    },
+    {
+      "title": "Sir Matt Busby Player of the Year",
+      "year": 2007
+    },
+    {
+      "title": "PFA Players' Player of the Year",
+      "year": 2007
+    },
+    {
+      "title": "Ballon d'Or",
+      "year": 2008
+    },
+    {
+      "title": "FIFA Ballon d'Or",
+      "year": 2013
+    },
+    {
+      "title": "FIFA Ballon d'Or",
+      "year": 2014
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "UEFA Champions League",
+      "year": 2008,
+      "note": "With Manchester United"
+    },
+    {
+      "title": "UEFA European Championship",
+      "year": 2016,
+      "note": "Captain of Portugal"
+    },
+    {
+      "title": "UEFA Nations League",
+      "year": 2019,
+      "note": "With Portugal"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1985-02-05",
+      "title": "Born in Funchal, Madeira"
+    },
+    {
+      "date": "2003",
+      "title": "Joins Manchester United"
+    },
+    {
+      "date": "2009",
+      "title": "Joins Real Madrid"
+    },
+    {
+      "date": "2016",
+      "title": "Wins the European Championship with Portugal"
+    },
+    {
+      "date": "2023",
+      "title": "Joins Al Nassr"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q11571"
+    },
+    {
+      "label": "Wikipedia: Cristiano Ronaldo",
+      "url": "https://en.wikipedia.org/wiki/Cristiano_Ronaldo"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

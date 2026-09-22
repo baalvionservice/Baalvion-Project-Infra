@@ -35,6 +35,16 @@ Frontend/Baalvion-Jobs-Portal-main/.turbo
 Frontend/baalvion-stack/node_modules
 Frontend/baalvion-stack/.next
 Frontend/baalvion-stack/.turbo
+# lawelitenetwork.com is built from the repo root too (its Dockerfile is monorepo-aware —
+# turbo prune + pnpm — same as admin-platform), so its source must be re-included or
+# `turbo prune law-elite-network-web` fails with "package not found" — exactly the failure
+# the note above describes. This is the one that was actually missing: the app's own
+# Dockerfile ran a bare `npm install` against workspace:* deps it could never resolve, so
+# no build ever caught the missing entry here until the Dockerfile itself was fixed.
+!Frontend/Law-Elite-Network-main
+Frontend/Law-Elite-Network-main/node_modules
+Frontend/Law-Elite-Network-main/.next
+Frontend/Law-Elite-Network-main/.turbo
 Frontend/auth-baalvion/node_modules
 Frontend/auth-baalvion/.next
 Frontend/auth-baalvion/.turbo

@@ -1,0 +1,85 @@
+{
+  "display_name": null,
+  "short_bio": "Producer of Top Gun, Pirates of the Caribbean and the CSI franchise.",
+  "biography": "Jerry Bruckheimer was born in Detroit and studied psychology at the University of Arizona. He moved from advertising into film and, with Don Simpson, produced Flashdance (1983), Beverly Hills Cop (1984) and Top Gun (1986).\n\nAfter Simpson’s death in 1996 he continued alone with Con Air, Armageddon (1998) and Pirates of the Caribbean: The Curse of the Black Pearl (2003).\n\nOn television his company launched CSI: Crime Scene Investigation in 2000 and produced The Amazing Race, which began in 2001.",
+  "awards": [
+    {
+      "title": "Primetime Emmy Award for Outstanding Reality-Competition Program",
+      "year": 2003
+    },
+    {
+      "title": "Primetime Emmy Award for Outstanding Reality-Competition Program",
+      "year": 2004
+    },
+    {
+      "title": "Primetime Emmy Award for Outstanding Reality-Competition Program",
+      "year": 2005
+    },
+    {
+      "title": "Primetime Emmy Award for Outstanding Reality-Competition Program",
+      "year": 2006
+    },
+    {
+      "title": "Primetime Emmy Award for Outstanding Reality-Competition Program",
+      "year": 2007
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "Top Gun",
+      "year": 1986,
+      "note": "Producer with Don Simpson"
+    },
+    {
+      "title": "Armageddon",
+      "year": 1998,
+      "note": "Producer"
+    },
+    {
+      "title": "CSI: Crime Scene Investigation",
+      "year": 2000,
+      "note": "Executive producer"
+    },
+    {
+      "title": "Pirates of the Caribbean: The Curse of the Black Pearl",
+      "year": 2003,
+      "note": "Producer"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1943-09-21",
+      "title": "Born in Detroit, Michigan"
+    },
+    {
+      "date": "1986",
+      "title": "Produces Top Gun with Don Simpson"
+    },
+    {
+      "date": "1996",
+      "title": "Don Simpson dies"
+    },
+    {
+      "date": "2000",
+      "title": "CSI: Crime Scene Investigation premieres on CBS"
+    },
+    {
+      "date": "2003",
+      "title": "Produces Pirates of the Caribbean"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q217037"
+    },
+    {
+      "label": "Wikipedia: Jerry Bruckheimer",
+      "url": "https://en.wikipedia.org/wiki/Jerry_Bruckheimer"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true,
+  "official_website": ""
+}

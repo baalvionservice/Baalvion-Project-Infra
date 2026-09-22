@@ -1,0 +1,63 @@
+{
+  "display_name": null,
+  "short_bio": "American engineer and science YouTuber who previously worked at NASA’s Jet Propulsion Laboratory.",
+  "biography": "Mark Rober studied mechanical engineering at Brigham Young University and worked for nine years at NASA’s Jet Propulsion Laboratory, where he was involved in the Curiosity rover mission. He then worked at Apple.\n\nHe became widely known for a 2018 video about a package designed to release glitter on parcel thieves. In 2019 he co-launched the tree-planting campaign Team Trees with MrBeast.\n\nIn 2020 he founded CrunchLabs, which sells kits for children.",
+  "awards": [
+    {
+      "title": "Silver Play Button",
+      "year": 2014
+    },
+    {
+      "title": "Gold Play Button",
+      "year": 2016
+    },
+    {
+      "title": "Diamond Play Button",
+      "year": 2019
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "Glitter bomb trap video",
+      "year": 2018,
+      "note": "YouTube video"
+    },
+    {
+      "title": "Team Trees",
+      "year": 2019,
+      "note": "Co-launched with MrBeast"
+    },
+    {
+      "title": "CrunchLabs",
+      "year": 2020,
+      "note": "Founded"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "2018",
+      "title": "Publishes his glitter bomb video"
+    },
+    {
+      "date": "2019",
+      "title": "Co-launches Team Trees"
+    },
+    {
+      "date": "2020",
+      "title": "Founds CrunchLabs"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q24088544"
+    },
+    {
+      "label": "Wikipedia: Mark Rober",
+      "url": "https://en.wikipedia.org/wiki/Mark_Rober"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

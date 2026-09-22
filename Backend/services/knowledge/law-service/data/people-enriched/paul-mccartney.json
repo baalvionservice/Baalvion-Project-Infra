@@ -1,0 +1,163 @@
+{
+  "slug": "paul-mccartney",
+  "category": "musicians",
+  "wikidata_id": "Q2599",
+  "full_name": "Paul McCartney",
+  "description": "English musician and member of the Beatles (born 1942)",
+  "birth_date": "1942-06-18",
+  "birth_place": "Walton Hospital",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "GB",
+  "citizenship": [
+    "United Kingdom"
+  ],
+  "occupations": [
+    "guitarist",
+    "singer-songwriter",
+    "painter",
+    "pianist",
+    "film score composer",
+    "bass guitarist",
+    "lyricist",
+    "recording artist",
+    "screenwriter",
+    "film producer",
+    "drummer",
+    "singer",
+    "composer",
+    "film actor",
+    "television actor",
+    "film director",
+    "television director",
+    "pop musician",
+    "children's writer"
+  ],
+  "education": [
+    {
+      "institution": "Liverpool Institute High School for Boys"
+    },
+    {
+      "institution": "Liverpool Institute for Performing Arts"
+    },
+    {
+      "institution": "West Kirby Grammar School"
+    }
+  ],
+  "positions": [],
+  "awards": [
+    {
+      "title": "Member of the Order of the British Empire",
+      "year": 1965
+    },
+    {
+      "title": "Grammy Lifetime Achievement Award",
+      "year": 1990
+    },
+    {
+      "title": "MusiCares Person of the Year",
+      "year": 2012
+    },
+    {
+      "title": "Grammy Award for Best Historical Album",
+      "year": 2011
+    },
+    {
+      "title": "Rock and Roll Hall of Fame",
+      "year": 1999
+    },
+    {
+      "title": "Academy Award for Best Original Score",
+      "year": 1971
+    },
+    {
+      "title": "Genesis Award"
+    },
+    {
+      "title": "Silver Clef Award"
+    },
+    {
+      "title": "Kennedy Center Honors"
+    },
+    {
+      "title": "Knight Bachelor",
+      "year": 1997
+    },
+    {
+      "title": "Polar Music Prize"
+    },
+    {
+      "title": "Gershwin Prize",
+      "year": 2010
+    },
+    {
+      "title": "Wolf Prize in Arts",
+      "year": 2018
+    },
+    {
+      "title": "Grand Cross of the Order of the Sun of Peru‎"
+    },
+    {
+      "title": "Fellow of the American Academy of Arts and Sciences"
+    },
+    {
+      "title": "Companion of Honour",
+      "year": 2017
+    },
+    {
+      "title": "Orden al Mérito Docente y Cultural Gabriela Mistral"
+    },
+    {
+      "title": "Officer of the Legion of Honour",
+      "year": 2012
+    },
+    {
+      "title": "honorary doctor of Yale University",
+      "year": 2008
+    },
+    {
+      "title": "star on Hollywood Walk of Fame"
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "Ram"
+    },
+    {
+      "title": "Band on the Run"
+    },
+    {
+      "title": "Maybe I'm Amazed"
+    },
+    {
+      "title": "Band on the Run"
+    },
+    {
+      "title": "Live and Let Die"
+    }
+  ],
+  "social": {
+    "x": "https://x.com/PaulMcCartney",
+    "instagram": "https://www.instagram.com/paulmccartney",
+    "facebook": "https://www.facebook.com/PaulMcCartney"
+  },
+  "official_website": "https://www.paulmccartney.com/",
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q2599"
+    }
+  ],
+  "photo": {
+    "file": "paul-mccartney.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 559,
+    "credit": "Raph_PH / Wikimedia Commons",
+    "license": "CC BY 2.0",
+    "license_url": "https://creativecommons.org/licenses/by/2.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:ACL18051018-122_(43716152470).jpg"
+  },
+  "fetched_at": "2026-09-21T19:17:37.474Z"
+}

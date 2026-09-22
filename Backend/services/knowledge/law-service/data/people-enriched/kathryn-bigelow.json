@@ -1,0 +1,91 @@
+{
+  "slug": "kathryn-bigelow",
+  "category": "directors",
+  "wikidata_id": "Q34816",
+  "full_name": "Kathryn Bigelow",
+  "description": "American filmmaker (born 1951)",
+  "birth_date": "1951-11-27",
+  "birth_place": "San Carlos",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "US",
+  "citizenship": [
+    "United States"
+  ],
+  "occupations": [
+    "screenwriter",
+    "film director",
+    "film producer",
+    "executive producer"
+  ],
+  "education": [
+    {
+      "institution": "Columbia University School of the Arts"
+    },
+    {
+      "institution": "San Francisco Art Institute"
+    },
+    {
+      "institution": "San Carlos High School"
+    },
+    {
+      "institution": "Sunny Hills High School"
+    }
+  ],
+  "positions": [],
+  "awards": [
+    {
+      "title": "Directors Guild of America Award"
+    },
+    {
+      "title": "Academy Award for Best Director",
+      "year": 2010
+    },
+    {
+      "title": "Academy Award for Best Picture",
+      "year": 2010
+    },
+    {
+      "title": "National Board of Review Award for Best Film"
+    },
+    {
+      "title": "BAFTA Award for Best Direction",
+      "year": 2010
+    },
+    {
+      "title": "Dallas-Fort Worth Film Critics Association Award for Best Director",
+      "year": 2012
+    },
+    {
+      "title": "Primetime Emmy Award for Exceptional Merit in Documentary Filmmaking"
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "Near Dark"
+    },
+    {
+      "title": "The Hurt Locker"
+    }
+  ],
+  "social": {},
+  "official_website": null,
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q34816"
+    }
+  ],
+  "photo": {
+    "file": "kathryn-bigelow.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1250,
+    "credit": "David Shankbone / Wikimedia Commons",
+    "license": "CC BY 2.0",
+    "license_url": "https://creativecommons.org/licenses/by/2.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Kathryn_Bigelow_by_David_Shankbone.jpg"
+  },
+  "fetched_at": "2026-09-21T19:18:21.225Z"
+}
