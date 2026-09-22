@@ -118,22 +118,20 @@ function AboutFallback() {
           </div>
 
           <div className="rounded-2xl border border-white/10 bg-card/40 p-6 md:p-8 flex flex-col md:flex-row md:items-center gap-6">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary/15 text-primary text-lg font-bold">
-              AK
-            </div>
             <div className="space-y-1.5">
               <Text variant="h3" className="text-lg font-bold">
-                Allen Krewz — Founder
+                Where we came from
               </Text>
               <Text variant="bodySmall" className="text-muted-foreground leading-relaxed">
-                Imperialpedia was founded and is maintained by Allen Krewz.
+                Imperialpedia began as an independent project on March 26, 2022, and found a legal
+                home when Baalvion Industries Private Limited was incorporated on March 11, 2025.
               </Text>
               <a
-                href="mailto:allenkrewzz@gmail.com"
+                href="/contact"
                 className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
               >
                 <Mail className="h-3.5 w-3.5" aria-hidden />
-                allenkrewzz@gmail.com
+                Contact us
               </a>
             </div>
           </div>
