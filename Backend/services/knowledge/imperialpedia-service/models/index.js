@@ -38,6 +38,7 @@ db.Payment = require('./payments')(sequelize, DataTypes);
 db.AffiliateProduct = require('./affiliate_products')(sequelize, DataTypes);
 db.AffiliateClick = require('./affiliate_clicks')(sequelize, DataTypes);
 db.NewsletterSubscriber = require('./newsletter_subscribers')(sequelize, DataTypes);
+db.ArticleEditorialReview = require('./article_editorial_reviews')(sequelize, DataTypes);
 
 // Associations
 // Plan -> Subscriptions / Payments -> Subscription (billing)
@@ -48,6 +49,9 @@ db.Payment.belongsTo(db.Subscription, { foreignKey: 'subscription_id', as: 'subs
 // Article -> CreatorProfile (author)
 db.Article.belongsTo(db.CreatorProfile, { foreignKey: 'author_id', targetKey: 'user_id', as: 'creatorProfile', constraints: false });
 db.CreatorProfile.hasMany(db.Article, { foreignKey: 'author_id', sourceKey: 'user_id', as: 'articles', constraints: false });
+// Article -> ArticleEditorialReview (Prompt 5 — human review/approval history)
+db.Article.hasMany(db.ArticleEditorialReview, { foreignKey: 'article_id', as: 'editorialReviews' });
+db.ArticleEditorialReview.belongsTo(db.Article, { foreignKey: 'article_id', as: 'article' });
 
 // AffiliateProduct -> Article (loose, optional — see models/affiliate_products.js)
 db.AffiliateProduct.belongsTo(db.Article, { foreignKey: 'article_id', as: 'article', constraints: false });
