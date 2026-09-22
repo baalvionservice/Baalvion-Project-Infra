@@ -93,7 +93,7 @@ export default async function SportsHubPage() {
         <div className="mx-auto max-w-[1080px] px-4 md:px-6">
           <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_300px]">
             <div>
-              <h1 className="font-headline font-black italic uppercase tracking-[-0.05em] leading-none text-black text-[52px] md:text-[68px]">
+              <h1 className="font-headline font-black italic uppercase tracking-[-0.05em] leading-none text-black text-[34px] sm:text-[52px] md:text-[68px]">
                 Sports
               </h1>
               <div className="h-[10px] w-full mt-1" style={{ background: YELLOW }} />
