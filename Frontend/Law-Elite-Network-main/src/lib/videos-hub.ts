@@ -54,6 +54,7 @@ export interface HubVideo {
   durationSeconds?: number;
   publishedAt?: string;
   featured: boolean;
+  peopleSlugs: string[];
 }
 
 export interface VideoHub {
@@ -87,6 +88,7 @@ export async function getVideoHub(): Promise<VideoHub> {
     thumbnailCredit: clean(v.thumbnail_credit), source: clean(v.source_name), showSlug: clean(v.show_slug), category: clean(v.category),
     scope: v.scope === 'international' ? 'international' : 'national', countryCode: clean(v.country_code),
     durationSeconds: typeof v.duration_seconds === 'number' ? v.duration_seconds : undefined, publishedAt: clean(v.published_at), featured: !!v.featured,
+    peopleSlugs: Array.isArray(v.people_slugs) ? v.people_slugs : [],
   }));
   return { shows, videos };
 }
@@ -108,3 +110,43 @@ export function formatDuration(sec?: number): string | null {
   const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
   return h ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}` : `${m}:${String(s).padStart(2, '0')}`;
 }
+
+export interface HubPerson {
+  slug: string;
+  showSlug: string;
+  name: string;
+  appearances: { season: number; year?: number; result?: string }[];
+  knownFor?: string;
+  overview: string;
+  hasProfile: boolean;
+  facts: { label: string; value: string }[];
+  faq: { q: string; a: string }[];
+  sources: { label: string; url: string }[];
+  seoTitle?: string;
+  seoDescription?: string;
+  reviewedAt?: string;
+  indexable: boolean;
+}
+
+const mapPerson = (p: any): HubPerson => ({
+  slug: p.slug, showSlug: p.show_slug, name: p.name,
+  appearances: Array.isArray(p.appearances) ? p.appearances.map((a: any) => ({ season: Number(a.season), year: typeof a.year === 'number' ? a.year : undefined, result: clean(a.result) })).sort((a: any, b: any) => a.season - b.season) : [],
+  knownFor: clean(p.known_for), overview: typeof p.overview === 'string' ? p.overview : '', hasProfile: p.has_profile === true || (typeof p.overview === 'string' && p.overview.trim().length > 0),
+  facts: Array.isArray(p.facts) ? p.facts.filter((f: any) => f?.label && f?.value) : [], faq: Array.isArray(p.faq) ? p.faq.filter((f: any) => f?.q && f?.a) : [],
+  sources: Array.isArray(p.sources) ? p.sources.filter((x: any) => x?.label && x?.url) : [], seoTitle: clean(p.seo_title), seoDescription: clean(p.seo_description),
+  reviewedAt: clean(p.reviewed_at), indexable: !!p.indexable,
+});
+
+/** Everyone who took part in a show (no write-ups), for season pages and links. */
+export async function getShowPeople(showSlug: string): Promise<HubPerson[]> {
+  const res = await fetchPublicApi('/videos/people', { show: showSlug });
+  return (Array.isArray(res?.data) ? res.data : []).map(mapPerson);
+}
+
+export async function getShowPerson(showSlug: string, slug: string): Promise<HubPerson | null> {
+  const res = await fetchPublicApi(`/videos/people/${showSlug}/${slug}`);
+  return res?.data ? mapPerson(res.data) : null;
+}
+
+export const seasonUrl = (showSlug: string, n: number) => `/videos/shows/${showSlug}/seasons/${n}`;
+export const personUrl = (showSlug: string, slug: string) => `/videos/shows/${showSlug}/people/${slug}`;

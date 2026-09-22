@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { VideoHubView } from '@/components/videos/VideoHubView';
-import { getVideoHub } from '@/lib/videos-hub';
+import { getShowPeople, getVideoHub } from '@/lib/videos-hub';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 
@@ -27,8 +27,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 
 export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
-  const hub = await getVideoHub();
   const { slug } = await params;
+  const [hub, people] = await Promise.all([getVideoHub(), getShowPeople(slug)]);
   const show = hub.shows.find((s) => s.slug === slug);
   if (!show) notFound();
   const ld = show.overview ? {
@@ -40,7 +40,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
     <>
       {ld && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />}
       {faq && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faq) }} />}
-      <VideoHubView hub={hub} show={show} />
+      <VideoHubView hub={hub} show={show} people={people} />
     </>
   );
 }

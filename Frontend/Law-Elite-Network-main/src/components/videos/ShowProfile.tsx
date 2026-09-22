@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { formatArticleDate } from '@/lib/format-date';
-import type { HubShow } from '@/lib/videos-hub';
+import { personUrl, seasonUrl, type HubPerson, type HubShow } from '@/lib/videos-hub';
 
 /** Written overview and at-a-glance facts, shown above a show's videos. */
 export function ShowIntro({ show }: { show: HubShow }) {
@@ -29,7 +29,9 @@ export function ShowIntro({ show }: { show: HubShow }) {
 const CHIP: Record<string, string> = { Winner: 'bg-black text-white', 'Runner-up': 'border border-black text-black' };
 
 /** Season-by-season results and housemates, and the closing questions and sources. */
-export function ShowDetails({ show }: { show: HubShow }) {
+export function ShowDetails({ show, people = [] }: { show: HubShow; people?: HubPerson[] }) {
+  const written = new Set(people.filter((p) => p.hasProfile).map((p) => p.name.toLowerCase()));
+  const slugOf = new Map(people.map((p) => [p.name.toLowerCase(), p.slug]));
   const withPeople = show.seasons.filter((s) => s.participants.length > 0);
   return (
     <>
@@ -46,7 +48,7 @@ export function ShowDetails({ show }: { show: HubShow }) {
               <tbody>
                 {show.seasons.map((s) => (
                   <tr key={s.number} className="border-b border-neutral-300 align-top">
-                    <td className="py-2.5 pr-3 font-headline text-[16px] font-black text-black">{s.number}</td>
+                    <td className="py-2.5 pr-3 font-headline text-[16px] font-black text-black"><Link href={seasonUrl(show.slug, s.number)} className="underline">{s.number}</Link></td>
                     <td className="pr-3">{s.year ?? '—'}</td>
                     <td className="pr-3">{s.host ?? '—'}</td>
                     <td className="pr-3 font-semibold text-black">{s.winner || (s.year && s.year >= 2026 ? 'On air now' : '—')}</td>
@@ -79,7 +81,7 @@ export function ShowDetails({ show }: { show: HubShow }) {
                   {s.participants.map((p, i) => (
                     <li key={`${p.name}-${i}`} className="flex items-baseline gap-2 text-[15px] text-neutral-800">
                       <span className="w-6 shrink-0 text-right text-[12px] tabular-nums text-neutral-400">{i + 1}</span>
-                      <span>{p.name}</span>
+                      {written.has(p.name.toLowerCase()) ? <Link href={personUrl(show.slug, slugOf.get(p.name.toLowerCase())!)} className="font-semibold underline">{p.name}</Link> : <span>{p.name}</span>}
                       {p.result && <span className={`px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${CHIP[p.result] ?? 'text-neutral-500'}`}>{p.result}</span>}
                     </li>
                   ))}

@@ -24,4 +24,24 @@ const getVideo = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
-module.exports = { hub, getVideo };
+/** Everyone who took part in a show, without their write-ups: for season pages and links. */
+const people = async (req, res, next) => {
+    try {
+        const where = { ...live };
+        if (req.query.show) where.show_slug = String(req.query.show);
+        const rows = await db.ShowParticipant.findAll({
+            where, attributes: ['slug', 'show_slug', 'name', 'appearances', 'known_for', 'indexable', 'reviewed_at', [db.sequelize.literal("(overview <> '')"), 'has_profile']],
+            order: [['name', 'ASC']], limit: 5000,
+        });
+        cache(res); return sendSuccess(req, res, rows);
+    } catch (err) { return next(err); }
+};
+const person = async (req, res, next) => {
+    try {
+        const row = await db.ShowParticipant.findOne({ where: { ...live, show_slug: req.params.show, slug: req.params.slug } });
+        if (!row) return next(new AppError('NOT_FOUND', 'Person not found', 404));
+        cache(res); return sendSuccess(req, res, row);
+    } catch (err) { return next(err); }
+};
+
+module.exports = { hub, getVideo, people, person };

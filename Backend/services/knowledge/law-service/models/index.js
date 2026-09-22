@@ -64,6 +64,7 @@ db.Topic = require('./topics')(sequelize, Sequelize.DataTypes);
 db.PodcastShow = require('./podcastShows')(sequelize, Sequelize.DataTypes);
 db.VideoShow = require('./videoShows')(sequelize, Sequelize.DataTypes);
 db.VideoItem = require('./videoItems')(sequelize, Sequelize.DataTypes);
+db.ShowParticipant = require('./showParticipants')(sequelize, Sequelize.DataTypes);
 db.MemberFollow       = require('./memberFollows')(sequelize, Sequelize.DataTypes);
 db.MemberSavedArticle = require('./memberSavedArticles')(sequelize, Sequelize.DataTypes);
 

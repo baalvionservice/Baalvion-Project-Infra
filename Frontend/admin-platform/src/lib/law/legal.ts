@@ -106,3 +106,10 @@ export interface PodcastShowRecord {
   episodes?: { title: string; url: string; note?: string; published_at?: string }[];
 }
 export const podcastShowsApi = resource<PodcastShowRecord>('podcast_shows');
+
+export interface ShowParticipantRecord {
+  id: number; slug: string; show_slug: string; name: string; appearances: { season: number; year?: number | null; result?: string }[]; known_for?: string | null;
+  overview: string; facts: { label: string; value: string }[]; faq: { q: string; a: string }[]; sources: { label: string; url: string }[];
+  seo_title?: string | null; seo_description?: string | null; reviewed_at?: string | null; indexable: boolean; published: boolean; archived: boolean; updated_at?: string;
+}
+export const showParticipantsApi = resource<ShowParticipantRecord>('show_participants');

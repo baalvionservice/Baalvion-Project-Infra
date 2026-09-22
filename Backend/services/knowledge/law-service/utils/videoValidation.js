@@ -42,7 +42,7 @@ function validateVideoItem(data, isCreate) {
     if ('people_slugs' in data && !Array.isArray(data.people_slugs)) fail('people_slugs must be a list');
 }
 
-module.exports = { SCOPES, validateVideoShow, validateVideoItem };
+
 
 function validatePodcastShow(data, isCreate) {
     common(data, isCreate, ['title']);
@@ -78,4 +78,18 @@ function validatePodcastShow(data, isCreate) {
     if ('seo_description' in data && String(data.seo_description || '').length > 320) fail('seo_description is too long');
     if (data.indexable === true && (data.overview === undefined ? false : String(data.overview).trim().split(/\s+/).length < 80)) fail('write at least about 80 words of overview before making the page indexable');
 }
-module.exports.validatePodcastShow = validatePodcastShow;
+
+function validateShowParticipant(data, isCreate) {
+    common(data, isCreate, ['name']);
+    if (isCreate || 'show_slug' in data) { if (!SLUG.test(String(data.show_slug || ''))) fail('show_slug must be lowercase letters, numbers and hyphens'); }
+    if ('appearances' in data) {
+        const a = data.appearances;
+        if (!Array.isArray(a) || a.length > 60 || a.some((x) => !x || !Number.isInteger(Number(x.season)))) fail('each appearance needs a season number');
+    }
+    if ('faq' in data && (!Array.isArray(data.faq) || data.faq.some((f) => !f || blank(f.q) || blank(f.a)))) fail('each FAQ needs a question and an answer');
+    if ('facts' in data && (!Array.isArray(data.facts) || data.facts.some((f) => !f || blank(f.label) || blank(f.value)))) fail('each fact needs a label and a value');
+    if ('sources' in data && (!Array.isArray(data.sources) || data.sources.some((x) => !x || blank(x.label) || !isHttps(x.url)))) fail('each source needs a label and a full https:// address');
+    if (data.indexable === true && data.overview !== undefined && String(data.overview).trim().split(/\s+/).length < 80) fail('write at least about 80 words of overview before making the page indexable');
+}
+
+module.exports = { SCOPES, validateVideoShow, validateVideoItem, validatePodcastShow, validateShowParticipant };

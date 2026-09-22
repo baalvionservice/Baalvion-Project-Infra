@@ -24,7 +24,7 @@ function Thumb({ id, alt }: { id: number; alt: string }) {
 }
 
 /** Photos of one podcast: licensed uploads only, each with the credit that is printed under it on the page. */
-export function PodcastPhotos({ slug, suggestions = [] }: { slug: string; suggestions?: string[] }) {
+export function PodcastPhotos({ slug, suggestions = [], entityType = 'podcast' }: { slug: string; suggestions?: string[]; entityType?: string }) {
   const qc = useQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
@@ -38,12 +38,12 @@ export function PodcastPhotos({ slug, suggestions = [] }: { slug: string; sugges
     onError: (e) => setError(normalizeError(e as AxiosError).message),
   });
   const importer = useMutation({
-    mutationFn: (c: CommonsCandidate) => imagesApi.commonsImport({ entity_type: 'podcast', entity_slug: slug, title: c.title }).then(() => c.title),
+    mutationFn: (c: CommonsCandidate) => imagesApi.commonsImport({ entity_type: entityType, entity_slug: slug, title: c.title }).then(() => c.title),
     onSuccess: (title) => { setError(null); setAdded((a) => new Set(a).add(title)); qc.invalidateQueries({ queryKey: ['law', 'images'] }); },
     onError: (e) => setError(normalizeError(e as AxiosError).message),
   });
-  const key = ['law', 'images', 'podcast', slug];
-  const { data, isLoading } = useQuery({ queryKey: key, queryFn: () => imagesApi.list({ page: 1, limit: 100, entity_type: 'podcast', entity_slug: slug }) });
+  const key = ['law', 'images', entityType, slug];
+  const { data, isLoading } = useQuery({ queryKey: key, queryFn: () => imagesApi.list({ page: 1, limit: 100, entity_type: entityType, entity_slug: slug }) });
   const rows = rowsOf<EntityPhotoRecord>(data);
   const refresh = () => qc.invalidateQueries({ queryKey: ['law', 'images'] });
   const fail = (e: unknown) => setError(e instanceof Error && !('response' in e) ? e.message : normalizeError(e as AxiosError).message);
@@ -58,7 +58,7 @@ export function PodcastPhotos({ slug, suggestions = [] }: { slug: string; sugges
       if (!file) throw new Error('Choose an image file first');
       const form = new FormData();
       form.append('file', file);
-      form.append('entity_type', 'podcast');
+      form.append('entity_type', entityType);
       form.append('entity_slug', slug);
       Object.entries(up).forEach(([k, v]) => { if (v) form.append(k, v); });
       return imagesApi.upload(form);

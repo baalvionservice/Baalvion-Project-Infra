@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { Story, Row, LinedHeading, MoreLink } from '@/components/videos/VideoBits';
 import { ShowDetails, ShowIntro } from '@/components/videos/ShowProfile';
-import { showUrl, type HubShow, type VideoHub, type VideoScope } from '@/lib/videos-hub';
+import { showUrl, type HubPerson, type HubShow, type VideoHub, type VideoScope } from '@/lib/videos-hub';
 
 type Tab = 'all' | VideoScope;
 const TABS: { key: Tab; label: string }[] = [
@@ -14,7 +14,7 @@ const TABS: { key: Tab; label: string }[] = [
   { key: 'international', label: 'International' },
 ];
 
-export function VideoHubView({ hub, show, title = 'Video' }: { hub: VideoHub; show?: HubShow; title?: string }) {
+export function VideoHubView({ hub, show, title = 'Video', people = [] }: { hub: VideoHub; show?: HubShow; title?: string; people?: HubPerson[] }) {
   const [tab, setTab] = useState<Tab>('all');
   const ok = (s: VideoScope) => tab === 'all' || tab === s;
   const videos = useMemo(() => hub.videos.filter((v) => ok(v.scope) && (!show || v.showSlug === show.slug)), [hub.videos, tab, show]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -104,7 +104,7 @@ export function VideoHubView({ hub, show, title = 'Video' }: { hub: VideoHub; sh
                   </ul>
                 </section>
               )}
-              {show && <ShowDetails show={show} />}
+              {show && <ShowDetails show={show} people={people} />}
             </div>
 
             <aside aria-label="Latest videos" className="hidden lg:block">

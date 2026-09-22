@@ -15,6 +15,8 @@ import { getMergedSportsTeams, getMergedSportsCompetitions } from '@/lib/sports-
 import { getMergedTopics } from '@/lib/topics-server';
 import { getTopicSlugsWithArticles, isTopicIndexable } from '@/lib/topics-indexing';
 import { COUNTRIES } from '@/lib/countries';
+import { getPodcastHub } from '@/lib/podcasts-hub';
+import { getShowPeople, getVideoHub, personUrl as showPersonUrl, seasonUrl, showUrl } from '@/lib/videos-hub';
 import { PERSON_CATEGORIES } from '@/types/person';
 
 // Render at request time, never at build time. This route fetches from law-service,
@@ -332,8 +334,28 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
     url: `${BASE_URL}/countries/${c.code.toLowerCase()}`,
   }));
 
+  // Podcasts and videos: only pages an editor has finished (indexable) or that have real videos. Thin pages stay out.
+  const [podcastHub, videoHub] = await Promise.all([getPodcastHub(), getVideoHub()]);
+  const podcastRoutes: MetadataRoute.Sitemap = [
+    ...(podcastHub.length > 0 ? [{ url: `${BASE_URL}/podcasts` }] : []),
+    ...podcastHub.filter((p) => p.indexable).map((p) => ({ url: `${BASE_URL}/podcasts/${p.slug}`, ...(p.reviewedAt ? { lastModified: new Date(p.reviewedAt) } : {}) })),
+  ];
+  const showsWithVideos = new Set(videoHub.videos.map((v) => v.showSlug));
+  const videoRoutes: MetadataRoute.Sitemap = [
+    ...(videoHub.videos.length > 0 ? [{ url: `${BASE_URL}/videos` }] : []),
+    ...videoHub.shows.filter((sh) => sh.indexable || showsWithVideos.has(sh.slug)).map((sh) => ({ url: `${BASE_URL}${showUrl(sh.slug)}`, ...(sh.reviewedAt ? { lastModified: new Date(sh.reviewedAt) } : {}) })),
+    ...videoHub.videos.map((v) => ({ url: `${BASE_URL}/videos/${v.slug}`, ...(v.publishedAt ? { lastModified: new Date(v.publishedAt) } : {}) })),
+  ];
+
+  const seasonRoutes: MetadataRoute.Sitemap = videoHub.shows.flatMap((sh) => sh.seasons.filter((x) => x.participants.length >= 8).map((x) => ({ url: `${BASE_URL}${seasonUrl(sh.slug, x.number)}` })));
+  const showPeopleRoutes: MetadataRoute.Sitemap = (await Promise.all(videoHub.shows.map(async (sh) => (await getShowPeople(sh.slug)).filter((p) => p.indexable).map((p) => ({ url: `${BASE_URL}${showPersonUrl(sh.slug, p.slug)}`, ...(p.reviewedAt ? { lastModified: new Date(p.reviewedAt) } : {}) }))))).flat();
+
   return [
     ...staticRoutes,
+    ...seasonRoutes,
+    ...showPeopleRoutes,
+    ...podcastRoutes,
+    ...videoRoutes,
     ...articleRoutes,
     ...categoryRoutes,
     ...authorRoutes,

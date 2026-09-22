@@ -10,7 +10,7 @@ export interface EntityPhotoInfo {
   sourceUrl?: string;
 }
 
-type EntityKind = 'person' | 'entertainment' | 'legal-case' | 'court' | 'sports-team' | 'sports-competition' | 'podcast';
+type EntityKind = 'person' | 'entertainment' | 'legal-case' | 'court' | 'sports-team' | 'sports-competition' | 'podcast' | 'show-participant';
 
 interface ApiPhoto {
   id: number; entity_type: EntityKind; entity_slug: string; alt_text?: string | null;
