@@ -34,11 +34,17 @@ describe("isRetiredPath", () => {
     expect(isRetiredPath("/economy?ref=nav")).toBe(true);
   });
 
+  it("matches a whole-prefix 410 removal (GONE_TOP_LEVEL_SLUGS) the same as a redirect", () => {
+    expect(isRetiredPath("/investing")).toBe(true);
+    expect(isRetiredPath("/personal-finance/understanding-the-stock-market")).toBe(true);
+    expect(isRetiredPath("/reviews")).toBe(true);
+    expect(isRetiredPath("/financial-intelligence/anything")).toBe(true);
+    expect(isRetiredPath("/articles/emergency-fund-guide")).toBe(true);
+  });
+
   it("leaves live paths alone", () => {
     expect(isRetiredPath("/")).toBe(false);
     expect(isRetiredPath("/stocks")).toBe(false);
-    expect(isRetiredPath("/investing")).toBe(false);
-    expect(isRetiredPath("/personal-finance/understanding-the-stock-market")).toBe(false);
     expect(isRetiredPath("/budgeting-basics/what-is-a-budget")).toBe(false);
     expect(isRetiredPath("/financial-tools/compound-interest")).toBe(false);
   });
@@ -70,15 +76,18 @@ describe("sanitizeRichHtml", () => {
 
 describe("canonicalizeInternalHref", () => {
   it("points a redirecting internal link at its destination", () => {
-    expect(canonicalizeInternalHref("/articles/emergency-fund-guide")).toBe(
-      "/financial-intelligence/emergency-fund-guide",
-    );
     expect(canonicalizeInternalHref("/budgeting")).toBe("/budgeting-basics");
+    expect(canonicalizeInternalHref("/creator-guides/x")).toBe("/creator-tools/x");
+    expect(canonicalizeInternalHref("/social-media-earnings")).toBe("/instagram-monetization");
   });
 
   it("leaves canonical and external links alone", () => {
     expect(canonicalizeInternalHref("/stocks/what-is-a-stock")).toBe("/stocks/what-is-a-stock");
     expect(canonicalizeInternalHref("https://example.com/articles/x")).toBe("https://example.com/articles/x");
+  });
+
+  it("no longer rewrites /articles — that whole namespace is 410'd, not redirected", () => {
+    expect(canonicalizeInternalHref("/articles/emergency-fund-guide")).toBe("/articles/emergency-fund-guide");
   });
 });
 

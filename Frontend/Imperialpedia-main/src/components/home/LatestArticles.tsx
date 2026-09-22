@@ -15,7 +15,8 @@ export function LatestArticles({ articles }: LatestArticlesProps) {
 
   return (
     <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 border-t-2 border-black dark:border-slate-800">
-      <HomeSectionHeading title="LATEST ARTICLES" href="/financial-intelligence" hrefLabel="ALL LATEST →" />
+      {/* /financial-intelligence (the previous target) is retired — see middleware.ts. */}
+      <HomeSectionHeading title="LATEST ARTICLES" href="/news" hrefLabel="ALL LATEST →" />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {articles.map((article) => (
           <ArticleCard key={article.href} article={article} />

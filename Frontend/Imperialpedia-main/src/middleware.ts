@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { GONE_TOP_LEVEL_SLUGS } from '@/lib/content/retired-paths';
 
 /**
  * Imperialpedia middleware — single source of truth (the duplicate root middleware.ts was removed).
@@ -191,34 +192,23 @@ const REMOVED_PATHS = new Set<string>([
   // "Japan" and "Generative AI"). Route + its dedicated components
   // (src/components/explore/) removed outright, same as /taxes and /income.
   '/explore',
-  // 2026-09-23: no redirect for these — a 301 still tells Google "there used to
-  // be content here," which is the wrong signal for pages that are simply gone
-  // (a banking-category gap, two content-free shells, and a duplicate). 410
-  // tells crawlers the removal is intentional and permanent, same as
-  // /companies etc. above. Every internal link that used to point at these was
-  // updated to go straight to the real destination instead of through a
-  // redirect — /savings has no live equivalent (it 410s outright, same as its
-  // already-410'd banking siblings); /scams-and-fraud-protection's real content
-  // lives at /fraud-protection (see retired-paths.ts's canonicalizeInternalHref).
-  '/datasets',
-  '/learning-paths',
 ]);
 
-// Bare-slug removals above cover the exact path; these four also have (or
-// had) [slug] sub-routes, so the whole prefix 410s the same way /companies
-// does above — otherwise an old article URL under one of these would fall
-// through to the catch-all route's slug lookup instead of getting a clean 410.
-const REMOVED_PATH_PREFIXES = [
-  '/savings',
-  '/scams-and-fraud-protection',
-  // Creator Economy consolidation (2026-09-23) — "Creator Business Guides"
-  // and "Social Media Earnings" merged into /creator-tools and
-  // /instagram-monetization respectively (see creator-economy-topics.ts).
-  // No redirect: every internal link was updated to point straight at the
-  // surviving page instead.
-  '/creator-guides',
-  '/social-media-earnings',
-];
+// Whole-category removals with no redirect target — 410 Gone, hub AND every
+// article under it, same treatment as /companies etc. above. Driven by
+// GONE_TOP_LEVEL_SLUGS in retired-paths.ts (one source of truth, so nav/
+// footer/homepage link-filtering via isRetiredPath can never disagree with
+// what actually 410s here) rather than a second hand-maintained list.
+//
+// A 301 still tells a crawler "there used to be content here," which is the
+// wrong signal for a page that's simply gone or merged with no address to
+// forward to — every internal link that used to point at one of these was
+// updated to go straight to its real destination (or dropped) instead of
+// routing through a redirect. Whole-prefix (not just the bare path) because
+// several of these have (or had) [slug] children — an old article URL falling
+// through to the catch-all route's slug lookup would otherwise land on a
+// wrong-status 404 instead of a clean 410.
+const REMOVED_PATH_PREFIXES = GONE_TOP_LEVEL_SLUGS.map((slug) => `/${slug}`);
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -403,7 +393,8 @@ export const config = {
     '/research-ai',
     '/knowledge-map',
     '/explore',
-    // 2026-09-23 removals — see REMOVED_PATHS / REMOVED_PATH_PREFIXES above.
+    // 2026-09-23 removals — see GONE_TOP_LEVEL_SLUGS in retired-paths.ts and
+    // REMOVED_PATH_PREFIXES above.
     '/datasets',
     '/learning-paths',
     '/savings',
@@ -414,5 +405,17 @@ export const config = {
     '/creator-guides/:path*',
     '/social-media-earnings',
     '/social-media-earnings/:path*',
+    '/articles',
+    '/articles/:path*',
+    // /investing/:path* and /personal-finance/:path* already covered by the
+    // matcher entries above (were there for the individual-article
+    // removals); only the bare hub paths are new here.
+    '/investing',
+    '/personal-finance',
+    '/reviews',
+    // /financial-intelligence/:path* already covered by the matcher entry
+    // above (was there for the individual-article removals); only the bare
+    // hub path is new here.
+    '/financial-intelligence',
   ],
 };

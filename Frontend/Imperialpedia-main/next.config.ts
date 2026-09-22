@@ -366,34 +366,15 @@ const nextConfig: NextConfig = {
       // real live feed at /latest/<slug> — two indexable URLs for the same
       // intent. Consolidated onto /latest, the one with real market data.
       { source: '/category/:slug', destination: '/latest/:slug', permanent: true },
-      // The entire articles section (hub + every individual article) moved to
-      // /financial-intelligence. Old thin-topic consolidations below resolve
-      // straight to their final destination in one hop; everything else under
-      // /articles/* falls through to the catch-all rule at the end.
-      { source: '/articles', destination: '/financial-intelligence', permanent: true },
-      // Consolidate near-duplicate article topics into one comprehensive guide
-      // each, instead of publishing several thin pages that would cannibalize
-      // the same search intent.
-      { source: '/articles/emergency-funds', destination: '/financial-intelligence/emergency-fund-guide', permanent: true },
-      { source: '/articles/gdp-growth', destination: '/financial-intelligence/complete-guide-to-gdp', permanent: true },
-      { source: '/articles/gdp-limitations', destination: '/financial-intelligence/complete-guide-to-gdp', permanent: true },
-      { source: '/articles/nominal-vs-real-gdp', destination: '/financial-intelligence/complete-guide-to-gdp', permanent: true },
-      { source: '/articles/economic-growth', destination: '/financial-intelligence/complete-guide-to-gdp', permanent: true },
-      { source: '/articles/loan-types-explained', destination: '/financial-intelligence/complete-guide-to-personal-loans', permanent: true },
-      { source: '/articles/loan-eligibility-and-approval', destination: '/financial-intelligence/complete-guide-to-personal-loans', permanent: true },
-      { source: '/articles/loan-repayment-strategies', destination: '/financial-intelligence/complete-guide-to-personal-loans', permanent: true },
-      { source: '/articles/managing-student-loan-debt', destination: '/financial-intelligence/student-loan-repayment-plans', permanent: true },
-      // Catch-all: any remaining /articles/<slug> hit (bookmarks, external
-      // backlinks, search-engine cache) 301s to its new home so nothing 404s
-      // and link equity carries over.
-      { source: '/articles/:slug*', destination: '/financial-intelligence/:slug*', permanent: true },
-      // These 3 guide/topic slugs no longer resolve to any live CMS article (Search
-      // Console still has them indexed as duplicate/canonicalized from before the
-      // content was retired) — redirect to the closest live hub instead of leaving
-      // a hard 404 for the residual crawl traffic and any external backlinks.
-      { source: '/financial-intelligence/high-risk-vs-low-risk-stocks', destination: '/stocks', permanent: true },
+      // 2026-09-23: /articles and /financial-intelligence (the entire articles
+      // section — hub + every individual article) are both permanently 410'd
+      // now (see GONE_TOP_LEVEL_SLUGS in retired-paths.ts / middleware.ts) —
+      // removed the whole block of /articles/* redirects that used to chain
+      // into /financial-intelligence/*, since a redirect into a 410 is the
+      // exact anti-pattern this file avoids everywhere else (see /industries
+      // and /research-ai below for the same reasoning). /articles/* and
+      // /financial-intelligence/* now 410 directly at the edge instead.
       { source: '/stocks/high-risk-vs-low-risk-stocks', destination: '/stocks', permanent: true },
-      { source: '/financial-intelligence/diversification', destination: '/financial-intelligence', permanent: true },
       // The entire /industries section (hub + every per-industry page) was retired —
       // only 3 industries were ever populated (finance/semiconductors/software), making
       // the whole section thin/near-empty content that AdSense review flags. This used

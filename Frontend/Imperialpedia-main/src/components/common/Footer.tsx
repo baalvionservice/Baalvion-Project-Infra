@@ -7,7 +7,7 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/
 import { PreferredSourceButton } from '@/components/common/PreferredSourceButton';
 import { withoutRetired } from '@/lib/content/retired-paths';
 import { withoutAdsenseHidden } from '@/config/adsense-cleanup';
-import { NEWS_SECTION_LIVE, REVIEWS_SECTION_LIVE } from '@/config/sections';
+import { NEWS_SECTION_LIVE } from '@/config/sections';
 
 // ─── Remove stubs and restore your real imports in production ─────────────────
 //   import { Container } from '@/design-system/layout/container';
@@ -46,7 +46,9 @@ const EXPLORE_COLUMN = {
       { label: 'Market News', href: '/market-news' },
       { label: 'Financial Tools', href: '/financial-tools' },
       ...(NEWS_SECTION_LIVE ? [{ label: 'News', href: '/news' }] : []),
-      ...(REVIEWS_SECTION_LIVE ? [{ label: 'Reviews', href: '/reviews' }] : []),
+      // /reviews permanently 410'd 2026-09-23 (see GONE_TOP_LEVEL_SLUGS in
+      // retired-paths.ts) — dropped outright rather than left behind a
+      // REVIEWS_SECTION_LIVE flag that can never flip back true.
     ])
   ),
 };
