@@ -31,7 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return buildMetadata({
     title: 'Cookie Policy',
     description:
-      'The categories of cookies Imperialpedia uses — essential, analytics, and advertising including Google AdSense — and how to control them in your browser.',
+      'The categories of cookies Imperialpedia uses — essential and analytics — plus how advertising cookies will work if Google AdSense goes live, and how to control cookies in your browser.',
     canonical: '/cookie-policy',
   });
 }
@@ -67,12 +67,13 @@ function CookiePolicyFallback() {
               1. Categories of cookies we use
             </Text>
             <Text variant="body" className="text-muted-foreground leading-relaxed">
-              {env.appName} uses three broad categories of cookies: strictly necessary cookies
-              (session handling, security, remembering your cookie preferences), analytics cookies
-              (understanding which pages and tools are useful, in aggregate), and advertising
-              cookies used by third-party networks such as Google AdSense and Google Analytics to
-              serve and measure ads. Strictly necessary cookies cannot be switched off, since the
-              site would not function correctly without them.
+              {env.appName} uses two categories of cookies today: strictly necessary cookies
+              (session handling, security, remembering your cookie preferences) and analytics
+              cookies (understanding which pages and tools are useful, in aggregate). We have
+              applied to display advertising through third-party networks such as Google AdSense;
+              if that advertising goes live, it will use its own cookies to serve and measure ads,
+              and this page will be updated to reflect it. Strictly necessary cookies cannot be
+              switched off, since the site would not function correctly without them.
             </Text>
           </div>
 
@@ -94,9 +95,8 @@ function CookiePolicyFallback() {
             </Text>
             <Text variant="body" className="text-muted-foreground leading-relaxed">
               Every major browser lets you view, block, or delete cookies through its settings.
-              Blocking analytics and advertising cookies will not stop the site from working, but it
-              may make ads less relevant and will limit the anonymized usage data we can see about
-              how the site is used.
+              Blocking analytics cookies will not stop the site from working; it only limits the
+              anonymized usage data we can see about how the site is used.
             </Text>
           </div>
 

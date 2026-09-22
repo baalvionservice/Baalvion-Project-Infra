@@ -18,7 +18,7 @@ import { structuredData } from "@/lib/seo/structured-data";
 import { extractFaqFromHtml } from "@/lib/seo/faq-extractor";
 import { staticArticleBySlug } from "@/services/data/static-content";
 import { canonicalService } from "@/modules/seo/services/canonical-service";
-import { getMeshGroupForSlug, MAJOR_CATEGORY_HUBS, SUBTOPIC_FEATURED_GUIDES } from "@/lib/topic-mesh";
+import { SUBTOPIC_FEATURED_GUIDES } from "@/lib/topic-mesh";
 import { topicCopy } from "@/lib/topic-config";
 import { sanitizeRichHtml } from "@/lib/sanitize";
 import { resolveAuthor, getContentRedirectSlug, getArticleFeedback, listArticleComments, getArticlePoll } from "@/services/data/cms-public";
@@ -259,10 +259,9 @@ export async function ArticleDetailContent({ article }: { article: Article }) {
     // is a "use client" component, so anything it imports directly (rather
     // than receiving as a prop) ships to every visitor's browser. topic-mesh/
     // topic-config hold every category's full editorial copy (~180KB
-    // gzipped); ArticleTopicMesh/InlineTopicCallout only ever needed the
-    // small computed result, not the source data.
+    // gzipped); InlineTopicCallout only ever needed the small computed
+    // result, not the source data.
     const meshTopicSlug = article.categorySlug || "creator-economy";
-    const meshGroup = getMeshGroupForSlug(meshTopicSlug);
     const inlineTopicGuides = SUBTOPIC_FEATURED_GUIDES[meshTopicSlug];
     const inlineTopicLabel = article.category || topicCopy(meshTopicSlug).title;
 
@@ -291,8 +290,6 @@ export async function ArticleDetailContent({ article }: { article: Article }) {
             relatedArticles={relatedArticles}
             marketWidget={marketWidget}
             inlineChart={inlineChart}
-            meshGroup={meshGroup}
-            majorHubs={MAJOR_CATEGORY_HUBS}
             inlineTopicGuides={inlineTopicGuides}
             inlineTopicLabel={inlineTopicLabel}
             inlineTopicHref={`/${meshTopicSlug}`}

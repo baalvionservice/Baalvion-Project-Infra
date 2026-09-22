@@ -65,17 +65,6 @@ export const authors: AuthorProfile[] = [
     bio: 'Yarilet Perez is an editorial fact-checker with extensive experience in verifying economic indicators, banking disclosures, and investment data against primary regulatory sources.',
   },
   {
-    slug: 'allen-krewzz',
-    name: 'Allen Krewzz',
-    title: 'Financial Writer & Analyst',
-    role: 'writer',
-    bio: 'Allen Krewzz is a Financial Writer & Analyst at Imperialpedia, covering personal finance, markets, and the financial products people rely on every day. His writing focuses on breaking down loans, credit, investing, and banking topics into clear, actionable guidance grounded in how these decisions actually play out for everyday readers.',
-    social: {
-      twitter: 'https://x.com/allenkrewzzz',
-      linkedin: 'https://www.linkedin.com/in/allenkrewzz/',
-    },
-  },
-  {
     slug: 'tamanna-shaikh',
     name: 'Tamanna Shaikh',
     title: 'Senior Editor',

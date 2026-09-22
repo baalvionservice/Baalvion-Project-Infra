@@ -134,15 +134,16 @@ function DisclaimerFallback() {
               5. Third-party links and advertising
             </Text>
             <Text variant="body" className="text-muted-foreground leading-relaxed">
-              This site contains links to third-party websites and displays advertising, including ads
-              served by third-party networks such as Google AdSense. We do not control and are not
-              responsible for third-party content, products, or services, and the presence of an ad or
-              link is not an endorsement. See our{' '}
+              This site contains links to third-party websites. We have applied to display advertising
+              through third-party networks such as Google AdSense; once and if advertising goes live,
+              this section and our{' '}
               <Link href="/privacy-policy" className="text-primary hover:underline">
                 Privacy Policy
               </Link>{' '}
-              for how advertising cookies are used. Where we have an affiliate relationship, it does not
-              influence our editorial coverage.
+              will be updated to explain how it works and how advertising cookies are used. We do not
+              control and are not responsible for third-party content, products, or services, and the
+              presence of a link is not an endorsement. Where we have an affiliate relationship, it does
+              not influence our editorial coverage.
             </Text>
           </div>
 
