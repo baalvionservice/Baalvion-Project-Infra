@@ -33,7 +33,6 @@ const ENTERTAINMENT_LINKS = [
   { href: '/entertainment', label: 'Entertainment Hub' },
   { href: '/movies', label: 'Movies' },
   { href: '/music', label: 'Music' },
-  { href: '/television', label: 'Television' },
   { href: '/streaming', label: 'Streaming' },
   { href: '/celebrity-news', label: 'Celebrity News' },
 ];

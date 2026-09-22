@@ -41,7 +41,6 @@ export const PRIMARY_NAV: NavSection[] = [
     href: '/entertainment',
     children: [
       { label: 'Movies', href: '/movies' },
-      { label: 'TV Shows', href: '/television' },
       { label: 'Streaming', href: '/streaming' },
       { label: 'Music', href: '/music' },
       { label: 'Celebrity News', href: '/celebrity-news' },
