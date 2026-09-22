@@ -313,6 +313,76 @@ const workflowArrow: IconDef = {
   ],
 };
 
+// ── Entertainment / sports (LEN pivot — celebrity, film, music, athletics) ─
+const camera: IconDef = {
+  id: 'camera',
+  elements: [
+    el('rect', { x: 2, y: 7, width: 20, height: 13, rx: 2 }),
+    el('rect', { x: 9, y: 4, width: 6, height: 3, rx: 1 }),
+    el('circle', { cx: 12, cy: 13.5, r: 4 }),
+    el('circle', { cx: 12, cy: 13.5, r: 1.4 }),
+  ],
+};
+
+const filmClap: IconDef = {
+  id: 'filmClap',
+  elements: [
+    el('rect', { x: 3, y: 12, width: 18, height: 9 }),
+    el('rect', { x: 3, y: 5, width: 18, height: 4 }),
+    el('line', { x1: 6, y1: 5, x2: 8, y2: 9 }),
+    el('line', { x1: 11, y1: 5, x2: 13, y2: 9 }),
+    el('line', { x1: 16, y1: 5, x2: 18, y2: 9 }),
+  ],
+};
+
+const microphone: IconDef = {
+  id: 'microphone',
+  elements: [
+    el('rect', { x: 9, y: 2, width: 6, height: 11, rx: 3 }),
+    el('path', { d: 'M6,10 a6,6 0 0 0 12,0' }),
+    el('line', { x1: 12, y1: 16, x2: 12, y2: 20 }),
+    el('line', { x1: 8, y1: 20, x2: 16, y2: 20 }),
+  ],
+};
+
+const star: IconDef = {
+  id: 'star',
+  elements: [
+    el('polyline', {
+      points:
+        '12,3 14.7,9.5 21,9.9 16,14.4 17.6,20.6 12,17 6.4,20.6 8,14.4 3,9.9 9.3,9.5 12,3',
+    }),
+  ],
+};
+
+const trophy: IconDef = {
+  id: 'trophy',
+  elements: [
+    el('path', { d: 'M8,3 H16 V8 C16,11 14.2,13 12,13 C9.8,13 8,11 8,8 Z' }),
+    el('path', { d: 'M8,4.5 C5.5,4.5 4,6 4,7.2 C4,9 6,10 8,9.8' }),
+    el('path', { d: 'M16,4.5 C18.5,4.5 20,6 20,7.2 C20,9 18,10 16,9.8' }),
+    el('line', { x1: 12, y1: 13, x2: 12, y2: 17 }),
+    el('rect', { x: 8, y: 17, width: 8, height: 2.5 }),
+  ],
+};
+
+const sportsBall: IconDef = {
+  id: 'sportsBall',
+  elements: [
+    el('circle', { cx: 12, cy: 12, r: 9 }),
+    el('path', { d: 'M12,3 C9,7 9,17 12,21' }),
+    el('path', { d: 'M3,12 C7,9 17,9 21,12' }),
+  ],
+};
+
+const medal: IconDef = {
+  id: 'medal',
+  elements: [
+    el('polyline', { points: '9,3 12,12 15,3' }),
+    el('circle', { cx: 12, cy: 16, r: 5 }),
+  ],
+};
+
 export const FINANCE_ICONS: IconDef[] = [
   house, percent, chartUp, chartDown, coinStack, wallet, bank,
   growthArrow, pieChart, calculator, creditCard, piggyBank, invoice,
@@ -327,7 +397,14 @@ export const GENERIC_ICONS: IconDef[] = [
   server, cloud, database, apiNode, team, report, workflowArrow,
 ];
 
-export const ALL_ICONS: IconDef[] = [...FINANCE_ICONS, ...LAW_ICONS, ...GENERIC_ICONS];
+export const ENTERTAINMENT_ICONS: IconDef[] = [camera, filmClap, microphone, star];
+
+export const SPORTS_ICONS: IconDef[] = [trophy, sportsBall, medal, star];
+
+export const ALL_ICONS: IconDef[] = [
+  ...FINANCE_ICONS, ...LAW_ICONS, ...GENERIC_ICONS,
+  ...ENTERTAINMENT_ICONS, ...SPORTS_ICONS,
+];
 
 const ICON_BY_ID = new Map(ALL_ICONS.map((icon) => [icon.id, icon]));
 

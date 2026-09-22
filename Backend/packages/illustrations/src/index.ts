@@ -4,8 +4,8 @@ import { paletteGroupForCategory, type Palette } from './palette';
 import { LAYOUTS, type LayoutInput } from './layouts';
 
 export type { ArticleInput } from './keywords';
-export { FINANCE_ICONS, LAW_ICONS, GENERIC_ICONS, ALL_ICONS } from './icons';
-export { FINANCE_PALETTES, LAW_PALETTES, NEUTRAL_PALETTES } from './palette';
+export { FINANCE_ICONS, LAW_ICONS, GENERIC_ICONS, ENTERTAINMENT_ICONS, SPORTS_ICONS, ALL_ICONS } from './icons';
+export { FINANCE_PALETTES, LAW_PALETTES, NEUTRAL_PALETTES, ENTERTAINMENT_PALETTES, SPORTS_PALETTES } from './palette';
 export { personSilhouetteDataUri, initialsBadgeDataUri } from './avatars';
 
 const ICON_LABELS: Record<string, string> = {
@@ -18,6 +18,8 @@ const ICON_LABELS: Record<string, string> = {
   stamp: 'an official stamp', bookStatute: 'a statute book', briefcase: 'a briefcase',
   server: 'a server', cloud: 'a cloud', database: 'a database', apiNode: 'connected nodes',
   team: 'a team', report: 'a bar chart report', workflowArrow: 'a workflow diagram',
+  camera: 'a camera', filmClap: 'a film clapperboard', microphone: 'a microphone', star: 'a star',
+  trophy: 'a trophy', sportsBall: 'a sports ball', medal: 'a medal',
 };
 
 export interface GeneratedArt {
