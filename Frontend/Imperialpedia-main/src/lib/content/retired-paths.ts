@@ -9,6 +9,12 @@
  * source of truth those surfaces filter against instead of each keeping its own
  * hand-maintained copy. Keep in sync with next.config.ts — retired-paths.test.ts
  * fails if the two drift.
+ *
+ * This list is redirect-based retirements ONLY. A page with nothing to
+ * redirect to (no live equivalent worth sending a reader or crawler toward)
+ * is 410'd instead — see REMOVED_PATHS in middleware.ts — and does not belong
+ * here; those pages are removed from nav/footer/sitemap by hand at the same
+ * time they're added to REMOVED_PATHS; rather than through this filter.
  */
 export const RETIRED_TOP_LEVEL_SLUGS: readonly string[] = [
   "advanced-budgeting",
@@ -28,7 +34,6 @@ export const RETIRED_TOP_LEVEL_SLUGS: readonly string[] = [
   "credit-cards",
   "crypto",
   "cryptocurrency",
-  "datasets",
   "debt",
   "earnings",
   "economy",
@@ -45,7 +50,6 @@ export const RETIRED_TOP_LEVEL_SLUGS: readonly string[] = [
   "indicators",
   "inflation",
   "interest-rates",
-  "learning-paths",
   "live-market-news",
   "loan-reviews",
   "loans",
@@ -64,7 +68,6 @@ export const RETIRED_TOP_LEVEL_SLUGS: readonly string[] = [
   "real-estate",
   "retirement",
   "saving-money",
-  "savings",
   "student-budget",
   "student-loans",
   "tax-software",

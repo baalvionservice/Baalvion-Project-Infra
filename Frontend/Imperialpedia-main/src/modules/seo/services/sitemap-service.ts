@@ -293,9 +293,14 @@ export const sitemapService = {
       "advanced-budgeting", "app-reviews", "auto-loans", "banking-reviews",
       "brokers", "budget-rules", "budgeting-apps", "budgeting-basics", "calendar",
       "cd-rates", "checking", "credit-cards", "crypto",
-      // New category & subtopics (2026-09-11) — Creator Economy hub & subcategories.
+      // New category & subtopics (2026-09-11) — Creator Economy hub &
+      // subcategories. "social-media-earnings" and "creator-guides" removed
+      // 2026-09-23 (merged into instagram-monetization / creator-tools, see
+      // creator-economy-topics.ts) — both are now permanently 410 in
+      // middleware.ts REMOVED_PATH_PREFIXES, same reasoning as
+      // income/insurance/taxes below.
       "creator-economy", "youtube-monetization", "instagram-monetization",
-      "website-monetization", "social-media-earnings", "creator-guides", "creator-tools",
+      "website-monetization", "creator-tools",
       "cryptocurrency", "debt", "earnings", "emergency-fund",
       "family-budget", "fed", "financial-calculators", "financial-independence",
       // New category (2026-09-04), no articles published yet — gated the same
@@ -305,13 +310,14 @@ export const sitemapService = {
       // "income", "insurance", and "taxes" removed — none has a live route
       // (all permanently 410 in middleware.ts REMOVED_PATHS), so checking
       // categoryHasLiveContent for them could submit URLs to the sitemap that
-      // 410 the moment Google fetches them.
+      // 410 the moment Google fetches them. "savings" removed 2026-09-23 for
+      // the same reason — see middleware.ts REMOVED_PATH_PREFIXES.
       "fiscal-policy", "gdp", "global", "government", "indicators",
       "inflation", "interest-rates", "live-market-news",
       "loan-reviews", "loans", "monetary-policy", "money-management",
       "money-market", "monthly-budget", "mortgages",
       "planning", "politics", "portfolio", "real-estate", "retirement",
-      "saving-money", "savings", "student-budget", "student-loans",
+      "saving-money", "student-budget", "student-loans",
       "tax-software", "unemployment",
     ] as const;
     // categoryHasLiveContent answers "does the CMS still have articles filed

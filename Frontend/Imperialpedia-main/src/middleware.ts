@@ -191,7 +191,34 @@ const REMOVED_PATHS = new Set<string>([
   // "Japan" and "Generative AI"). Route + its dedicated components
   // (src/components/explore/) removed outright, same as /taxes and /income.
   '/explore',
+  // 2026-09-23: no redirect for these — a 301 still tells Google "there used to
+  // be content here," which is the wrong signal for pages that are simply gone
+  // (a banking-category gap, two content-free shells, and a duplicate). 410
+  // tells crawlers the removal is intentional and permanent, same as
+  // /companies etc. above. Every internal link that used to point at these was
+  // updated to go straight to the real destination instead of through a
+  // redirect — /savings has no live equivalent (it 410s outright, same as its
+  // already-410'd banking siblings); /scams-and-fraud-protection's real content
+  // lives at /fraud-protection (see retired-paths.ts's canonicalizeInternalHref).
+  '/datasets',
+  '/learning-paths',
 ]);
+
+// Bare-slug removals above cover the exact path; these four also have (or
+// had) [slug] sub-routes, so the whole prefix 410s the same way /companies
+// does above — otherwise an old article URL under one of these would fall
+// through to the catch-all route's slug lookup instead of getting a clean 410.
+const REMOVED_PATH_PREFIXES = [
+  '/savings',
+  '/scams-and-fraud-protection',
+  // Creator Economy consolidation (2026-09-23) — "Creator Business Guides"
+  // and "Social Media Earnings" merged into /creator-tools and
+  // /instagram-monetization respectively (see creator-economy-topics.ts).
+  // No redirect: every internal link was updated to point straight at the
+  // surviving page instead.
+  '/creator-guides',
+  '/social-media-earnings',
+];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -247,6 +274,12 @@ export function middleware(request: NextRequest) {
     pathname === '/technologies' || pathname.startsWith('/technologies/') ||
     pathname === '/industries' || pathname.startsWith('/industries/')
   ) {
+    return goneResponse();
+  }
+
+  // REMOVED_PATH_PREFIXES coverage (see the array above) — same whole-prefix
+  // 410 treatment as /companies etc. above, for routes that had [slug] children.
+  if (REMOVED_PATH_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
     return goneResponse();
   }
 
@@ -370,5 +403,16 @@ export const config = {
     '/research-ai',
     '/knowledge-map',
     '/explore',
+    // 2026-09-23 removals — see REMOVED_PATHS / REMOVED_PATH_PREFIXES above.
+    '/datasets',
+    '/learning-paths',
+    '/savings',
+    '/savings/:path*',
+    '/scams-and-fraud-protection',
+    '/scams-and-fraud-protection/:path*',
+    '/creator-guides',
+    '/creator-guides/:path*',
+    '/social-media-earnings',
+    '/social-media-earnings/:path*',
   ],
 };

@@ -13,12 +13,12 @@ const DISALLOW = [
   '/auth/',
   '/maintenance',
   '/pricing',
-  '/datasets',
 ];
 
-// Dead paths (/calculators/, /terms, /topics, /learning-paths) are deliberately
-// not disallowed: blocking a URL Google already indexed stops it from
-// re-crawling to see the 404/410, so it never leaves the index.
+// Dead paths (/calculators/, /terms, /topics, /learning-paths, /datasets,
+// /savings, /creator-guides, /social-media-earnings, /scams-and-fraud-protection)
+// are deliberately not disallowed: blocking a URL Google already indexed stops
+// it from re-crawling to see the 404/410, so it never leaves the index.
 
 export default function robots(): MetadataRoute.Robots {
   const baseUrl = env.siteUrl || 'https://imperialpedia.com';

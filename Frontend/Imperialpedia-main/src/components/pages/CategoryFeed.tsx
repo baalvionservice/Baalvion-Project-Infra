@@ -12,8 +12,6 @@ import { EditorialSpotlight } from "@/components/pages/EditorialSpotlight";
 import { EditorialArticleGuide } from "@/components/pages/EditorialArticleGuide";
 import { ImperialpediaKeyTerms } from "@/components/pages/ImperialpediaKeyTerms";
 import { ImperialpediaFaqBox } from "@/components/pages/ImperialpediaFaqBox";
-import { ArticleTopicMesh } from "@/components/article/ArticleTopicMesh";
-import { getMeshGroupForSlug, MAJOR_CATEGORY_HUBS } from "@/lib/topic-mesh";
 import { getKeyTermsForTopic } from "@/lib/topic-key-terms";
 import { env } from "@/config/env";
 import { newsArticleHref } from "@/lib/data/article-url";
@@ -215,14 +213,6 @@ export async function CategoryFeed({ slug }: Props) {
           keyTakeaways={copy.keyTakeaways}
           sections={copy.sections}
           introParagraphs={introParagraphs}
-        />
-
-        {/* 360-Degree Internal Link Mesh for SEO Indexation */}
-        <ArticleTopicMesh
-          group={getMeshGroupForSlug(slug)}
-          majorHubs={MAJOR_CATEGORY_HUBS}
-          categorySlug={slug}
-          categoryName={copy.title}
         />
 
         {(() => {

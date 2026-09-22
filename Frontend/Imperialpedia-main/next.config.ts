@@ -136,10 +136,6 @@ const nextConfig: NextConfig = {
       { source: '/crypto/:path*', destination: '/', permanent: true },
       { source: '/cryptocurrency', destination: '/', permanent: true },
       { source: '/cryptocurrency/:path*', destination: '/', permanent: true },
-      // 2026-09-23: zero page-specific content — 151 words of pure nav/footer
-      // chrome and nothing else, under a real-looking title.
-      { source: '/datasets', destination: '/', permanent: true },
-      { source: '/datasets/:path*', destination: '/', permanent: true },
       { source: '/debt', destination: '/', permanent: true },
       { source: '/debt/:path*', destination: '/', permanent: true },
       { source: '/earnings', destination: '/', permanent: true },
@@ -172,9 +168,6 @@ const nextConfig: NextConfig = {
       { source: '/inflation/:path*', destination: '/', permanent: true },
       { source: '/interest-rates', destination: '/', permanent: true },
       { source: '/interest-rates/:path*', destination: '/', permanent: true },
-      // 2026-09-23: zero page-specific content, same as /datasets above.
-      { source: '/learning-paths', destination: '/', permanent: true },
-      { source: '/learning-paths/:path*', destination: '/', permanent: true },
       { source: '/live-market-news', destination: '/', permanent: true },
       { source: '/live-market-news/:path*', destination: '/', permanent: true },
       { source: '/loan-reviews', destination: '/', permanent: true },
@@ -211,14 +204,6 @@ const nextConfig: NextConfig = {
       { source: '/retirement/:path*', destination: '/', permanent: true },
       { source: '/saving-money', destination: '/', permanent: true },
       { source: '/saving-money/:path*', destination: '/', permanent: true },
-      // 2026-09-23: /savings is a banking-category page that was missed by the
-      // 2026-09-03 retirement pass — every one of its sibling banking pages
-      // (/checking, /cd-rates, /money-market, /credit-cards, /loans,
-      // /mortgages, /auto-loans, /student-loans, /banking-reviews, /banking
-      // itself) is in this block already; /savings alone was left live and
-      // indexable. Same fix.
-      { source: '/savings', destination: '/', permanent: true },
-      { source: '/savings/:path*', destination: '/', permanent: true },
       { source: '/student-budget', destination: '/', permanent: true },
       { source: '/student-budget/:path*', destination: '/', permanent: true },
       { source: '/student-loans', destination: '/', permanent: true },
@@ -304,28 +289,6 @@ const nextConfig: NextConfig = {
       // live category) is the permanent home for this content.
       { source: '/budgeting', destination: '/budgeting-basics', permanent: true },
       { source: '/budgeting/:path*', destination: '/budgeting-basics', permanent: true },
-
-      // 2026-09-23: Creator Economy consolidation — see the matching comment
-      // in retired-paths.ts. "Creator Business Guides" and "Creator Tools &
-      // Calculators" were two overlapping category buckets over the same
-      // 21-article CMS pool; merged into one "Creator Business & Tools" page
-      // at /creator-tools. Not retired — the content lives on, just under one
-      // URL instead of two.
-      { source: '/creator-guides', destination: '/creator-tools', permanent: true },
-      { source: '/creator-guides/:path*', destination: '/creator-tools', permanent: true },
-      // "Social Media Earnings" folded into Instagram Monetization for the
-      // same reason.
-      { source: '/social-media-earnings', destination: '/instagram-monetization', permanent: true },
-      { source: '/social-media-earnings/:path*', destination: '/instagram-monetization', permanent: true },
-
-      // 2026-09-23: /scams-and-fraud-protection was a byte-identical duplicate
-      // of /fraud-protection, dual-rendering the same 984-word page at two
-      // URLs instead of redirecting — self-canonicalized so Google wouldn't
-      // flag it as duplicate content, but a direct visit (or crawler ignoring
-      // the canonical tag) still got a full second copy. /fraud-protection is
-      // the real, live page; this one just points there now.
-      { source: '/scams-and-fraud-protection', destination: '/fraud-protection', permanent: true },
-      { source: '/scams-and-fraud-protection/:path*', destination: '/fraud-protection', permanent: true },
 
       { source: '/admin', destination: `${admin}/dashboard`, permanent: false },
       { source: '/admin/:path*', destination: `${admin}/dashboard`, permanent: false },
