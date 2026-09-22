@@ -1,0 +1,64 @@
+{
+  "slug": "jack-smith",
+  "category": "lawyers",
+  "wikidata_id": "Q115271256",
+  "full_name": "Jack Smith",
+  "description": "American lawyer and special counsel (born 1969)",
+  "birth_date": "1969-06-05",
+  "birth_place": null,
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "US",
+  "citizenship": [
+    "United States"
+  ],
+  "occupations": [
+    "lawyer",
+    "prosecutor"
+  ],
+  "education": [
+    {
+      "institution": "Harvard Law School"
+    },
+    {
+      "institution": "State University of New York at Oneonta"
+    },
+    {
+      "institution": "Liverpool High School"
+    }
+  ],
+  "positions": [
+    {
+      "title": "United States Attorney for the Middle District of Tennessee",
+      "start": 2017,
+      "end": 2017
+    },
+    {
+      "title": "special prosecutor",
+      "start": 2022,
+      "end": 2025
+    }
+  ],
+  "awards": [],
+  "notable_works": [],
+  "social": {},
+  "official_website": null,
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q115271256"
+    }
+  ],
+  "photo": {
+    "file": "jack-smith.png",
+    "mime": "image/png",
+    "width": 1000,
+    "height": 1244,
+    "credit": "United States Department of Justice / Wikimedia Commons",
+    "license": "Public domain",
+    "license_url": null,
+    "source_url": "https://commons.wikimedia.org/wiki/File:Jack_Smith_2023.png"
+  },
+  "fetched_at": "2026-09-21T19:24:07.642Z"
+}

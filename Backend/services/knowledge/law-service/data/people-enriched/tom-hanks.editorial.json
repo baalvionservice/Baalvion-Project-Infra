@@ -1,0 +1,132 @@
+{
+  "display_name": null,
+  "short_bio": "Actor and producer who won consecutive Best Actor Oscars for Philadelphia and Forrest Gump.",
+  "biography": "Tom Hanks grew up in the San Francisco Bay Area and went from the sitcom Bosom Buddies (1980–1982) to film comedy with Splash in 1984. Big, in 1988, earned him the first of his Academy Award nominations.\n\nIn 1994 he won the Best Actor Oscar for Philadelphia and a year later won again for Forrest Gump, making him the second performer after Spencer Tracy to take the award in consecutive years. He also voiced Woody in Toy Story (1995) and starred in Saving Private Ryan (1998) and Cast Away (2000).\n\nWith Gary Goetzman he co-founded the production company Playtone in 1998; its credits include the HBO miniseries Band of Brothers and The Pacific. He received the Presidential Medal of Freedom in 2016.",
+  "awards": [
+    {
+      "title": "Golden Globe Award for Best Actor – Motion Picture Musical or Comedy",
+      "year": 1989
+    },
+    {
+      "title": "Academy Award for Best Actor",
+      "year": 1994
+    },
+    {
+      "title": "Golden Globe Award for Best Actor – Motion Picture Drama",
+      "year": 1994
+    },
+    {
+      "title": "Silver Bear",
+      "year": 1994
+    },
+    {
+      "title": "Academy Award for Best Actor",
+      "year": 1995
+    },
+    {
+      "title": "Screen Actors Guild Award for Outstanding Performance by a Male Actor in a Leading Role",
+      "year": 1995
+    },
+    {
+      "title": "Golden Globe Award for Best Actor – Motion Picture Drama",
+      "year": 1995
+    },
+    {
+      "title": "Screen Actors Guild Award for Outstanding Performance by a Cast in a Motion Picture",
+      "year": 1996
+    },
+    {
+      "title": "Golden Globe Award for Best Actor – Motion Picture Drama",
+      "year": 2001
+    },
+    {
+      "title": "AFI Life Achievement Award",
+      "year": 2002
+    },
+    {
+      "title": "Britannia Awards",
+      "year": 2004
+    },
+    {
+      "title": "Theatre World Award",
+      "year": 2013
+    },
+    {
+      "title": "Kennedy Center Honors",
+      "year": 2014
+    },
+    {
+      "title": "Presidential Medal of Freedom",
+      "year": 2016
+    },
+    {
+      "title": "Knight of the Legion of Honour",
+      "year": 2016
+    },
+    {
+      "title": "Golden Globe Cecil B. DeMille Award",
+      "year": 2020
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "Philadelphia",
+      "year": 1993,
+      "note": "Best Actor Oscar"
+    },
+    {
+      "title": "Forrest Gump",
+      "year": 1994,
+      "note": "Best Actor Oscar"
+    },
+    {
+      "title": "Saving Private Ryan",
+      "year": 1998,
+      "note": "Oscar-nominated performance"
+    },
+    {
+      "title": "Cast Away",
+      "year": 2000,
+      "note": "Lead role"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1956-07-09",
+      "title": "Born in Concord, California"
+    },
+    {
+      "date": "1984",
+      "title": "Breaks through in film with Splash"
+    },
+    {
+      "date": "1994",
+      "title": "Wins the Best Actor Oscar for Philadelphia"
+    },
+    {
+      "date": "1995",
+      "title": "Wins a second consecutive Best Actor Oscar for Forrest Gump"
+    },
+    {
+      "date": "1998",
+      "title": "Co-founds Playtone"
+    },
+    {
+      "date": "2016",
+      "title": "Receives the Presidential Medal of Freedom"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q2263"
+    },
+    {
+      "label": "Wikipedia: Tom Hanks",
+      "url": "https://en.wikipedia.org/wiki/Tom_Hanks"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

@@ -1,0 +1,96 @@
+{
+  "slug": "sonia-sotomayor",
+  "category": "judges",
+  "wikidata_id": "Q11107",
+  "full_name": "Sonia Sotomayor",
+  "description": "US Supreme Court justice since 2009",
+  "birth_date": "1954-06-25",
+  "birth_place": "The Bronx",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "US",
+  "citizenship": [
+    "United States"
+  ],
+  "occupations": [
+    "judge",
+    "lawyer",
+    "university teacher",
+    "prosecutor",
+    "jurist"
+  ],
+  "education": [
+    {
+      "institution": "Princeton University"
+    },
+    {
+      "institution": "Yale Law School"
+    },
+    {
+      "institution": "Cardinal Spellman High School"
+    }
+  ],
+  "positions": [
+    {
+      "title": "Judge of the United States District Court for the Southern District of New York",
+      "start": 1992,
+      "end": 1998
+    },
+    {
+      "title": "Judge of the United States Court of Appeals for the Second Circuit",
+      "start": 1998,
+      "end": 2009
+    },
+    {
+      "title": "Associate Justice of the Supreme Court of the United States",
+      "start": 2009
+    }
+  ],
+  "awards": [
+    {
+      "title": "honorary doctor of the Howard University",
+      "year": 2010
+    },
+    {
+      "title": "honorary doctorate from Princeton University",
+      "year": 2001
+    },
+    {
+      "title": "honorary doctor of Yale University",
+      "year": 2013
+    },
+    {
+      "title": "honorary doctor of the Hofstra University",
+      "year": 2006
+    },
+    {
+      "title": "Schneider Family Book Award",
+      "year": 2020
+    },
+    {
+      "title": "honorary doctorate of Paris Nanterre University",
+      "year": 2010
+    }
+  ],
+  "notable_works": [],
+  "social": {},
+  "official_website": null,
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q11107"
+    }
+  ],
+  "photo": {
+    "file": "sonia-sotomayor.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1250,
+    "credit": "Stacey Ilyse / Wikimedia Commons",
+    "license": "CC BY 3.0",
+    "license_url": "https://creativecommons.org/licenses/by/3.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Sonia_Sotomayor_7_in_robe,_2009.jpg"
+  },
+  "fetched_at": "2026-09-21T19:21:50.695Z"
+}

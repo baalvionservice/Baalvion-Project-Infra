@@ -30,8 +30,11 @@ export async function getMergedCourtBySlug(slug: string) {
   return (await getMergedCourts()).find((c) => c.slug === slug.toLowerCase()) ?? null;
 }
 
+/** Every case that has ever passed through this court -- its primary court or any step in its timeline. */
 export async function getMergedCasesForCourt(slug: string) {
-  return (await getMergedLegalCases()).filter((c) => c.courtSlug === slug);
+  return (await getMergedLegalCases()).filter(
+    (c) => c.courtSlug === slug || c.timeline?.some((t) => t.courtSlug === slug),
+  );
 }
 
 /** Every case a person appears on as a party, lawyer or judge. */
@@ -41,10 +44,19 @@ export async function getMergedLegalCasesForPerson(personSlug: string) {
 
 const participantSlugs = (c: LegalCase) => Array.from(new Set([...c.parties, ...c.lawyers, ...c.judges].map((p) => p.personSlug).filter((s): s is string => !!s)));
 
-/** Every person and the court this case is genuinely, explicitly connected to (its parties/lawyers/judges, its court). */
+/**
+ * Every person and every court this case is genuinely, explicitly connected
+ * to -- its parties/lawyers/judges, its primary court, and any other court
+ * named in its timeline (an appeal, a cert. grant, ...). `courtSlug` is
+ * optional (a case can exist before any court is on record), and a
+ * timeline step's own `courtSlug` is included even if it's never set as the
+ * primary one, so a case's real path through multiple courts connects on
+ * every court's page, not just its first/current one.
+ */
 function getRelatedEntitiesForCase(legalCase: LegalCase): EntityReference[] {
   const refs: EntityReference[] = participantSlugs(legalCase).map((slug) => ({ entityType: 'person', slug }));
-  refs.push({ entityType: 'court', slug: legalCase.courtSlug });
+  const courtSlugs = new Set([legalCase.courtSlug, ...(legalCase.timeline ?? []).map((t) => t.courtSlug)].filter((s): s is string => !!s));
+  courtSlugs.forEach((slug) => refs.push({ entityType: 'court', slug }));
   return refs;
 }
 

@@ -186,7 +186,15 @@ async function clusterSignals(websiteId, { windowHours = 72, dryRun = false } = 
         raw: true,
     });
 
-    const prepared = signals.map((signal) => ({
+    // Items a source has already tied to one topic are grouped by that, not guessed from wording.
+    const topical = new Map();
+    const untied = [];
+    for (const s of signals) {
+        if (s.topicKey) (topical.get(s.topicKey) || topical.set(s.topicKey, []).get(s.topicKey)).push(s);
+        else untied.push(s);
+    }
+
+    const prepared = untied.map((signal) => ({
         signal,
         tokens: contentTokens(`${signal.title} ${signal.summary || ''}`),
         titleTokens: contentTokens(signal.title),
@@ -225,6 +233,12 @@ async function clusterSignals(websiteId, { windowHours = 72, dryRun = false } = 
                 members: [signal],
             });
         }
+    }
+
+    for (const [topicKey, members] of topical) {
+        const day = new Date(members[0].publishedAt || Date.now()).toISOString().slice(0, 10);
+        const slug = topicKey.replace(/^trend:/, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
+        clusters.push({ key: `${day}-${slug}`, tokens: new Set(), distinct: new Set(), figures: new Set(), members });
     }
 
     if (!dryRun) {

@@ -138,7 +138,7 @@ async function main() {
 
     const sheet = {
         slug, category, wikidata_id: qid,
-        full_name: entity.labels.en.value,
+        full_name: (entity.labels.en || entity.labels.mul || { value: name }).value,
         description: entity.descriptions?.en?.value || null,
         birth_date: birth ? timeToIso(birth.value) : null,
         birth_place: birthPlaceIds[0] ? lab(birthPlaceIds[0]) : null,
@@ -162,4 +162,4 @@ async function main() {
     console.log(JSON.stringify(sheet, null, 2));
 }
 
-main().catch((e) => { console.error('enrich failed:', e.message); process.exit(1); });
+main().catch((e) => { console.error('enrich failed:', e.stack); process.exit(1); });

@@ -1,0 +1,104 @@
+{
+  "display_name": null,
+  "short_bio": "Film director of the Dark Knight trilogy, Inception, Interstellar and Oppenheimer.",
+  "biography": "Christopher Nolan was born in London and studied English literature at University College London, where he began making films. His first feature was Following (1998), and Memento (2000) brought him wide notice.\n\nHe directed the Batman films Batman Begins (2005), The Dark Knight (2008) and The Dark Knight Rises (2012), then Inception (2010), Interstellar (2014), Dunkirk (2017) and Tenet (2020). His wife Emma Thomas produces his films.\n\nOppenheimer (2023) won seven Academy Awards including Best Picture and his first for Best Director.",
+  "awards": [
+    {
+      "title": "The Waldo Salt Screenwriting Award",
+      "year": 2001
+    },
+    {
+      "title": "Edgar Awards",
+      "year": 2002
+    },
+    {
+      "title": "Indiana Film Journalists Association Award for Best Director",
+      "year": 2010
+    },
+    {
+      "title": "Hugo Award for Best Dramatic Presentation, Long Form",
+      "year": 2011
+    },
+    {
+      "title": "Commander of the Order of the British Empire",
+      "year": 2019
+    },
+    {
+      "title": "Golden Globe Award for Best Director",
+      "year": 2024
+    },
+    {
+      "title": "Academy Award for Best Director",
+      "year": 2024
+    },
+    {
+      "title": "Academy Award for Best Picture",
+      "year": 2024
+    },
+    {
+      "title": "BAFTA Award for Best Direction",
+      "year": 2024
+    },
+    {
+      "title": "Knight Bachelor",
+      "year": 2024
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "Memento",
+      "year": 2000,
+      "note": "Directed"
+    },
+    {
+      "title": "The Dark Knight",
+      "year": 2008,
+      "note": "Directed"
+    },
+    {
+      "title": "Inception",
+      "year": 2010,
+      "note": "Directed"
+    },
+    {
+      "title": "Oppenheimer",
+      "year": 2023,
+      "note": "Won Best Picture and Best Director"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1970-07-30",
+      "title": "Born in London"
+    },
+    {
+      "date": "1998",
+      "title": "Directs his first feature, Following"
+    },
+    {
+      "date": "2000",
+      "title": "Directs Memento"
+    },
+    {
+      "date": "2008",
+      "title": "Directs The Dark Knight"
+    },
+    {
+      "date": "2024-03-10",
+      "title": "Wins Best Director for Oppenheimer"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q25191"
+    },
+    {
+      "label": "Wikipedia: Christopher Nolan",
+      "url": "https://en.wikipedia.org/wiki/Christopher_Nolan"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

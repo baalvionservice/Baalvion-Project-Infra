@@ -32,8 +32,13 @@ export function buildRelations(people: Person[], cases: LegalCase[], entertainme
 
   cases.forEach((c) => {
     const me: EntityReference = { entityType: 'legal-case', slug: c.slug };
-    // One way: a case points to its court, but naming a court should not offer every case it ever heard.
-    add(me, { entityType: 'court', slug: c.courtSlug });
+    // One way: a case points to its court(s), but naming a court should not
+    // offer every case it ever heard. `courtSlug` is optional (a case can
+    // exist before any court is on record); timeline entries can each name
+    // their own court too (an appeal heard elsewhere), so every court a case
+    // actually passed through gets linked, not just its primary one.
+    const courtSlugs = new Set([c.courtSlug, ...(c.timeline ?? []).map((t) => t.courtSlug)].filter((s): s is string => !!s));
+    courtSlugs.forEach((slug) => add(me, { entityType: 'court', slug }));
     [...c.parties, ...c.lawyers, ...c.judges].forEach((x) => x.personSlug && link(me, person(x.personSlug)));
   });
 

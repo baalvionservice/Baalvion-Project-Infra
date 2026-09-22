@@ -304,7 +304,7 @@ async function evaluatePublish(websiteId, {
     }
 
     const words = countWords(contentBlocks);
-    const rule = (Array.isArray(policy.wordCountRules) ? policy.wordCountRules : []).find((r) => r.format === format);
+    const rule = require('./wordBudgets').ruleFor(policy.wordCountRules, format);
     if (rule) {
         if (Number.isFinite(Number(rule.min)) && words < Number(rule.min)) {
             violations.push({ rule: 'wordCountMin', message: `${words} words; ${format} needs at least ${rule.min}.` });

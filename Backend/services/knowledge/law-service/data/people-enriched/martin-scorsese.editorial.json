@@ -1,0 +1,124 @@
+{
+  "display_name": null,
+  "short_bio": "Film director of Taxi Driver, Raging Bull, Goodfellas and The Departed.",
+  "biography": "Martin Scorsese grew up in New York’s Little Italy and studied film at New York University. Mean Streets (1973) marked him out, and Taxi Driver (1976) won the Palme d’Or at Cannes.\n\nRaging Bull (1980) and Goodfellas (1990) are regularly ranked among the great American films. He won Best Director and Best Picture for The Departed (2006).\n\nLater work includes Hugo (2011), The Wolf of Wall Street (2013), Silence (2016), The Irishman (2019) and Killers of the Flower Moon (2023). In 1990 he founded The Film Foundation to preserve older films.",
+  "awards": [
+    {
+      "title": "Palme d'Or",
+      "year": 1976
+    },
+    {
+      "title": "Cannes Best Director Award",
+      "year": 1986
+    },
+    {
+      "title": "Silver Lion",
+      "year": 1990
+    },
+    {
+      "title": "BAFTA Award for Best Film",
+      "year": 1991
+    },
+    {
+      "title": "Britannia Awards",
+      "year": 1993
+    },
+    {
+      "title": "Golden Bear",
+      "year": 1995
+    },
+    {
+      "title": "AFI Life Achievement Award",
+      "year": 1997
+    },
+    {
+      "title": "Light of Truth Award",
+      "year": 1998
+    },
+    {
+      "title": "Golden Globe Awards",
+      "year": 2003
+    },
+    {
+      "title": "Grammy Award for Best New New Jack Swing Artist",
+      "year": 2005
+    },
+    {
+      "title": "Golden Globe Award for Best Director",
+      "year": 2006
+    },
+    {
+      "title": "Academy Award for Best Director",
+      "year": 2007
+    },
+    {
+      "title": "Golden Globe Cecil B. DeMille Award",
+      "year": 2010
+    },
+    {
+      "title": "Golden Globe Award for Best Director",
+      "year": 2011
+    },
+    {
+      "title": "Praemium Imperiale",
+      "year": 2016
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "Taxi Driver",
+      "year": 1976,
+      "note": "Won the Palme d’Or"
+    },
+    {
+      "title": "Raging Bull",
+      "year": 1980,
+      "note": "Directed"
+    },
+    {
+      "title": "Goodfellas",
+      "year": 1990,
+      "note": "Directed"
+    },
+    {
+      "title": "The Departed",
+      "year": 2006,
+      "note": "Won Best Picture and Best Director"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1942-11-17",
+      "title": "Born in Queens, New York"
+    },
+    {
+      "date": "1973",
+      "title": "Directs Mean Streets"
+    },
+    {
+      "date": "1976",
+      "title": "Taxi Driver wins the Palme d’Or"
+    },
+    {
+      "date": "1990",
+      "title": "Founds The Film Foundation and directs Goodfellas"
+    },
+    {
+      "date": "2007-02-25",
+      "title": "Wins Best Director for The Departed"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q41148"
+    },
+    {
+      "label": "Wikipedia: Martin Scorsese",
+      "url": "https://en.wikipedia.org/wiki/Martin_Scorsese"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

@@ -1,0 +1,79 @@
+{
+  "display_name": null,
+  "short_bio": "Swedish YouTuber Felix Kjellberg, whose channel was the most subscribed on YouTube for years.",
+  "biography": "Felix Kjellberg was born in Gothenburg, Sweden, and studied at Chalmers University of Technology before leaving to pursue YouTube. He started posting in 2010, mainly gameplay videos with running commentary, of games including Amnesia: The Dark Descent.\n\nHis channel became the most-subscribed on the platform in 2013 and stayed there until India’s T-Series overtook it in 2019. In 2017 Disney’s Maker Studios cut ties with him and YouTube dropped him from a premium programme after a Wall Street Journal report on jokes he had made in his videos.\n\nHe married Marzia Bisognin in 2019 and they later moved to Japan.",
+  "awards": [
+    {
+      "title": "Shorty Awards",
+      "year": 1989
+    },
+    {
+      "title": "Silver Play Button",
+      "year": 2012
+    },
+    {
+      "title": "Gold Play Button",
+      "year": 2012
+    },
+    {
+      "title": "Diamond Play Button",
+      "year": 2013
+    },
+    {
+      "title": "Teen Choice Award for Choice Web Star - Gaming",
+      "year": 2014
+    },
+    {
+      "title": "Custom Play Button",
+      "year": 2016
+    },
+    {
+      "title": "Red Diamond Creator Award",
+      "year": 2019
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "Let’s Play videos",
+      "year": 2010,
+      "note": "Channel begins"
+    },
+    {
+      "title": "Most-subscribed YouTube channel",
+      "year": 2013,
+      "note": "Held until 2019"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1989-10-24",
+      "title": "Born in Gothenburg, Sweden"
+    },
+    {
+      "date": "2010",
+      "title": "Begins posting gaming videos"
+    },
+    {
+      "date": "2013",
+      "title": "His channel becomes the most-subscribed on YouTube"
+    },
+    {
+      "date": "2019",
+      "title": "T-Series overtakes his channel"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q13423853"
+    },
+    {
+      "label": "Wikipedia: PewDiePie",
+      "url": "https://en.wikipedia.org/wiki/PewDiePie"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true,
+  "official_website": ""
+}

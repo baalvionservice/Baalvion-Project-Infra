@@ -1,0 +1,65 @@
+{
+  "slug": "marques-brownlee",
+  "category": "creators",
+  "wikidata_id": "Q15994958",
+  "full_name": "Marques Brownlee",
+  "description": "American technology reviewer, YouTuber and Internet personality",
+  "birth_date": "1993-12-03",
+  "birth_place": "Maplewood",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "US",
+  "citizenship": [
+    "United States"
+  ],
+  "occupations": [
+    "YouTuber",
+    "television producer"
+  ],
+  "education": [
+    {
+      "institution": "Stevens Institute of Technology"
+    },
+    {
+      "institution": "Columbia High School"
+    },
+    {
+      "institution": "Johns Hopkins Center for Talented Youth"
+    }
+  ],
+  "positions": [],
+  "awards": [
+    {
+      "title": "Forbes 30 Under 30",
+      "year": 2021
+    },
+    {
+      "title": "honorary doctorate"
+    }
+  ],
+  "notable_works": [],
+  "social": {
+    "x": "https://x.com/MKBHD",
+    "instagram": "https://www.instagram.com/mkbhd",
+    "facebook": "https://www.facebook.com/marquesbrownlee"
+  },
+  "official_website": "https://mkbhd.com/",
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q15994958"
+    }
+  ],
+  "photo": {
+    "file": "marques-brownlee.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 500,
+    "credit": "Marques Brownlee / Wikimedia Commons",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:MARQUES_BROWNLEE_Profile_Picture.jpg"
+  },
+  "fetched_at": "2026-09-21T19:20:20.119Z"
+}

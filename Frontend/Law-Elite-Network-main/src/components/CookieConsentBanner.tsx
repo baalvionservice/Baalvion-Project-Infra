@@ -55,8 +55,8 @@ export function CookieConsentBanner() {
       aria-label="Cookie consent"
       className="fixed inset-x-0 bottom-0 z-[100] border-t border-slate-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 shadow-[0_-4px_24px_rgba(0,0,0,0.08)]"
     >
-      <div className="mx-auto flex max-w-6xl flex-col gap-3 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-slate-600">
+      <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-3 sm:gap-3 sm:px-6 sm:py-4 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-xs sm:text-sm leading-snug text-slate-600">
           We use cookies for analytics and to show relevant ads. Read our{" "}
           <Link href="/cookie-policy" className="underline underline-offset-2 hover:text-blue-700">
             Cookie Policy
@@ -67,7 +67,7 @@ export function CookieConsentBanner() {
           </Link>
           .
         </p>
-        <div className="flex shrink-0 gap-2">
+        <div className="grid grid-cols-2 sm:flex shrink-0 gap-2">
           <Button variant="outline" size="sm" onClick={() => decide(false)}>
             Decline
           </Button>

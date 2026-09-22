@@ -219,71 +219,35 @@ export default async function RootLayout({
             on top of download time. */}
         <link rel="preconnect" href="https://api.baalvion.com" />
         <link rel="preconnect" href="https://firebasestorage.googleapis.com" crossOrigin="anonymous" />
-        {/* Google Consent Mode v2 -- must run BEFORE gtag('js', ...)/gtag('config', ...)
-            (in GoogleAnalytics below) and before the AdSense loader, so no GA/ads cookie
-            is set for a visitor who hasn't chosen yet. CookieConsentBanner updates these
-            to 'granted' on accept; until then every visitor (EEA or not) defaults to
-            denied, satisfying Google's EU User Consent Policy for AdSense/Analytics.
-
-            This is a plain literal <script>, not next/script's <Script> component --
-            confirmed live that next/script (including strategy="beforeInteractive")
-            does not reliably execute before a hoisted <script async src> AdSense
-            loader: it registers the code in a self.__next_s.push([...]) bootstrap
-            array rather than emitting a literal synchronously-executing tag in place.
-
-            IMPORTANT: positioning this script earlier than other <head> children does
-            NOT by itself guarantee it runs first either. React 19 hoists any
-            <script async src="..."> (and every <meta>/<link>) to <head> ahead of
-            ordinary content regardless of JSX order -- confirmed live: this script was
-            rendering dead last in the actual HTML despite being declared first. And
-            even fixing position wouldn't be a hard guarantee: `+ "`async`" + ` scripts
-            have no cross-script execution-order guarantee at all -- that's what async
-            means, in any browser, React or not. So instead of racing the AdSense
-            loader against this script, this script now creates the AdSense loader
-            itself (see below) -- same-script sequencing instead of a document-order
-            bet. */}
-        <script
-          id="consent-default"
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              window.gtag = gtag;
-              gtag('consent', 'default', {
-                ad_storage: 'denied',
-                ad_user_data: 'denied',
-                ad_personalization: 'denied',
-                analytics_storage: 'denied',
-                wait_for_update: 500,
-              });
-            `,
-          }}
-        />
-        {/* Google's AdSense "code snippet" site-verification method does a raw-HTML
-            fetch looking for this exact literal tag -- it does not execute the page's
-            JS, so the previous document.createElement-based loader (which satisfied
-            the *consent-ordering* requirement but never appears in server-rendered
-            HTML) failed that check with "Couldn't verify your site". `defer` (not
-            Google's own `async`) is what makes both requirements satisfiable by one
-            tag: unlike async, defer is NOT part of React 19's async+src hoisting (see
-            the removed comment above this used to carry) -- a deferred script keeps
-            its authored document position and, per the HTML spec, always executes
-            after every earlier synchronous script has already run, so this still
-            loads strictly after the consent-default script above sets denied
-            defaults. Confirm this ordering with a live view-source check after any
-            future edit near here, the same way the original bug was found. */}
-        {ADSENSE_CLIENT && (
-          <script
-            defer
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
-            crossOrigin="anonymous"
-          />
-        )}
         <GoogleAnalytics />
         <meta name="theme-color" content="#1e3a5f" />
         {ADSENSE_CLIENT && (
           <meta name="google-adsense-account" content={ADSENSE_CLIENT} />
         )}
+      </head>
+      <body className="font-body antialiased selection:bg-blue-100 selection:text-blue-900 bg-background text-foreground overflow-x-hidden">
+        {/* Google Consent Mode v2 defaults + the AdSense loader, emitted as one raw HTML string.
+            Both tags are literal in the server HTML, in this order: the consent script runs first at
+            parse time and the `defer` AdSense tag runs after it, and Google's raw-HTML site check still
+            sees the tag (the google-adsense-account meta in <head> is the other verification path).
+            They are deliberately NOT React children. AdSense's loader injects its own <script> next to
+            the first script in the document, and when these two were JSX in <head> React could not match
+            that extra node on hydration: error #418 on every page and a client re-render of the whole
+            tree. dangerouslySetInnerHTML content is never reconciled, so hydration ignores it.
+            Order matters here: keep consent first, and re-check view-source after any edit. */}
+        <div
+          hidden
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{
+            __html:
+              `<script id="consent-default">window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}window.gtag=gtag;gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied',wait_for_update:500});</script>` +
+              (ADSENSE_CLIENT
+                ? `<script defer src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${encodeURIComponent(ADSENSE_CLIENT)}" crossorigin="anonymous"></script>`
+                : ''),
+          }}
+        />
+        {/* Structured data lives in the body, after the raw block above, so no React-owned <script>
+            sits in <head> for AdSense's injected loader to land beside (see the hydration note above). */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
@@ -292,8 +256,6 @@ export default async function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteJsonLd) }}
         />
-      </head>
-      <body className="font-body antialiased selection:bg-blue-100 selection:text-blue-900 bg-background text-foreground overflow-x-hidden">
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-6 focus:py-3 focus:bg-blue-700 focus:text-white focus:rounded-xl focus:font-bold focus:shadow-2xl"

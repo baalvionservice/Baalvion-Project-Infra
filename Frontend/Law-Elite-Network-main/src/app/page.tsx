@@ -9,6 +9,8 @@ import { MissionAndBoardSection } from '@/components/knowledge/MissionAndBoardSe
 import { TrustSection } from '@/components/knowledge/TrustSection';
 import { HomepageDisclaimer } from '@/components/knowledge/HomepageDisclaimer';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
+import { getHomeWidgets } from '@/lib/home-widgets';
+import { BreakingBar, TickerBar, AudioBriefing, DocketRail, PhotoRail, ShortsRail } from '@/components/home/LiveWidgets';
 import { AdSlot } from '@/components/ads/AdSlot';
 import {
   BreakingStrip,
@@ -69,6 +71,12 @@ function deriveCategories(pool: any[]): { id: string; name: string; slug: string
 // featured image) lives in the CMS, so the homepage silently showed only the bundled/static
 // placeholder set no matter what was published. cmsGetArticles() already carries featuredImage
 // through (see lib/cms.ts's CmsArticle.featuredImage comment); this just wires it into the pool.
+import { TabbedStoryBox } from '@/components/home/TabbedStoryBox';
+import { NewsletterBanner } from '@/components/home/NewsletterBanner';
+import { ConfidentialTipLine } from '@/components/home/ConfidentialTipLine';
+import { FreeNewsAlertCard } from '@/components/monetization/FreeNewsAlertCard';
+import { NewsPublisherSchema } from '@/components/seo/NewsPublisherSchema';
+
 export default async function KnowledgeHomePage() {
   const [cmsArticles, apiCategoriesRaw, apiArticles, editorialBoard] = await Promise.all([
     cmsGetArticles().catch(() => []),
@@ -81,15 +89,6 @@ export default async function KnowledgeHomePage() {
   ]);
   const apiCategories = apiCategoriesRaw;
 
-  // AdSense-readiness retirement (see category-slugs.ts's CURRENT_CATEGORY_SLUGS
-  // comment): filtered here, before any pool/source is built from it, so every
-  // downstream homepage feed (lead story, "Latest Guides" grid, "Most Viewed")
-  // is covered in one place -- mergeArticles() below unconditionally backfills
-  // every bundled article, including the 8 legacy practice areas now retired,
-  // so filtering only the live sources and not the merged pool would still
-  // leak them back in. Each of those feeds links out via articleUrl(), which
-  // would otherwise point a still-live, indexed homepage straight into a
-  // retired category's /article/{slug} gap.
   const currentSlugSetForPool = new Set<string>(CURRENT_CATEGORY_SLUGS);
   const isKeptCategoryArticle = (a: any) => {
     const rawSlug = categorySlugOf(a);
@@ -97,8 +96,6 @@ export default async function KnowledgeHomePage() {
   };
   const cmsArticlesKept = cmsArticles.filter(isKeptCategoryArticle);
 
-  // CMS is the authoritative admin-managed source, so it wins on a slug collision;
-  // mergeArticles() then fills any remaining gap with the bundled/static set.
   const seenSlugs = new Set<string>();
   const combinedSource = [...cmsArticlesKept, ...apiArticles].filter((a: any) => {
     if (!a?.slug || seenSlugs.has(a.slug)) return false;
@@ -108,11 +105,9 @@ export default async function KnowledgeHomePage() {
   const pool = mergeArticles(combinedSource).filter(isKeptCategoryArticle);
 
   const feed = await getHomeFeed(pool);
-  const [videos, interviews] = await Promise.all([getAllMedia('video'), getAllMedia('interview')]);
+  const [videos, interviews, widgets] = await Promise.all([getAllMedia('video'), getAllMedia('interview'), getHomeWidgets()]);
   const trendingCounts = new Map(feed.trendingPeople.map((t) => [t.person.slug, t.articleCount]));
 
-  // TopicTicker links every entry unconditionally, so restrict to the curated
-  // practice-area hubs (stray CMS/API slugs would be dead links).
   const currentSlugSet = new Set<string>(CURRENT_CATEGORY_SLUGS);
   const rawCategories = apiCategories.length > 0
     ? apiCategories.map((c: any) => ({ id: c.id, name: c.name, slug: toNewCategorySlug(c.slug) }))
@@ -121,8 +116,6 @@ export default async function KnowledgeHomePage() {
     currentSlugSet.has(c.slug),
   );
 
-  // Only published authors: the fallback used to list profiles with no
-  // reachable article (AdSense second-rejection finding).
   const publishedAuthorSlugs = new Set(
     Array.from((await getPublishedArticleCountsByAuthorSlug()).entries())
       .filter(([, count]) => count > 0)
@@ -135,12 +128,44 @@ export default async function KnowledgeHomePage() {
 
   return (
     <div className="min-h-screen bg-white pt-[60px] lg:pt-[100px]">
+      <TickerBar items={widgets.ticker} />
+      <BreakingBar items={widgets.breaking} />
       <BreakingStrip articles={feed.breaking} />
 
       <main className="container mx-auto px-4 sm:px-6 max-w-7xl">
         <h1 className="sr-only">Law Elite Network: people, entertainment, sports and legal news</h1>
 
+
+        <AudioBriefing items={widgets.audio} />
+
         <FrontPage articles={feed.latest} />
+
+        <DocketRail items={widgets.docket} />
+
+
+
+
+
+
+        {/* Multi-Tab Interactive Media Box */}
+        <TabbedStoryBox
+          popular={feed.trending}
+          exclusives={feed.celebrity}
+          legal={feed.legal}
+          profiles={feed.latest.slice(0, 4)}
+        />
+
+
+        {/* 🕵️‍♂️ Confidential Tip Line Box */}
+        <ConfidentialTipLine />
+
+
+        {/* ⚡ 100% Free Daily Scoop & Breaking Alerts Card */}
+        <ShortsRail items={widgets.shorts} />
+        <PhotoRail items={widgets.gallery} />
+
+        <FreeNewsAlertCard />
+        <NewsPublisherSchema />
 
         {(feed.trending.length > 0 || feed.celebrity.length > 0) && (
           <section className="py-8 border-t border-slate-200 grid grid-cols-1 lg:grid-cols-12 gap-10">
@@ -148,10 +173,13 @@ export default async function KnowledgeHomePage() {
               <TrendingList articles={feed.trending} />
             </div>
             <div className="lg:col-span-7">
-              <PillarColumn title="Celebrity news" href="/celebrity-news" articles={feed.celebrity} />
+              <PillarColumn title="Celebrity News" href="/celebrity-news" articles={feed.celebrity} />
             </div>
           </section>
         )}
+
+        {/* High-Converting Daily Newsletter Subscription Box */}
+        <NewsletterBanner />
 
         <div className="py-6">
           <AdSlot slotId={AD_SLOT_ID} format="horizontal" placement="homepage-mid-feed" fullWidthResponsive minHeight="100px" />
@@ -161,14 +189,14 @@ export default async function KnowledgeHomePage() {
           <section className="py-8 border-t border-slate-200 grid grid-cols-1 lg:grid-cols-3 gap-10">
             <PillarColumn title="Entertainment" href="/entertainment" articles={feed.entertainment} />
             <PillarColumn title="Sports" href="/sports" articles={feed.sports} />
-            <PillarColumn title="Legal" href="/legal/cases" articles={feed.legal} />
+            <PillarColumn title="Legal Battles" href="/legal/cases" articles={feed.legal} />
           </section>
         )}
 
-        <PeopleRail title="Trending people" href="/people" people={feed.trendingPeople.map((t) => t.person)} counts={trendingCounts} />
-        <PeopleRail title="Featured people" href="/people" people={feed.featuredPeople} />
-        <MediaRail title="Videos" href="/videos" items={videos.slice(0, 4)} />
-        <MediaRail title="Interviews" href="/interviews" items={interviews.slice(0, 4)} />
+        <PeopleRail title="Trending People & Stars" href="/people" people={feed.trendingPeople.map((t) => t.person)} counts={trendingCounts} />
+        <PeopleRail title="Featured Profiles" href="/people" people={feed.featuredPeople} />
+        <MediaRail title="Videos & Law Elite TV" href="/videos" items={videos.slice(0, 4)} />
+        <MediaRail title="Interviews & Exclusives" href="/interviews" items={interviews.slice(0, 4)} />
         <PopularTopics topics={feed.popularTopics} />
 
         <div id="practice-areas" className="border-t border-slate-200 py-4">

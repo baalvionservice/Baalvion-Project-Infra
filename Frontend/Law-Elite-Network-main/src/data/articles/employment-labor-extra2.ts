@@ -26,7 +26,7 @@ export const employmentLaborExtra2Articles: LawArticle[] = [
     imageSeed: 'at-will-employment-explained',
     content: `<p>At-will employment is an arrangement in which either the employer or the employee can end the working relationship at any time, with or without notice, and for almost any reason — or no reason at all. It is the default model in the United States and shapes how millions of jobs operate there. But "at any reason" is not the same as "for any reason whatsoever": a web of legal exceptions means employers still cannot fire someone for unlawful reasons such as discrimination or retaliation. Understanding both the freedom and its limits is essential for workers and employers alike.</p>
 
-<div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>At-will employment lets either side end the job at any time, generally without cause.</li><li>It is the default in most US states but is not how most other countries work.</li><li>Important exceptions forbid firing for illegal reasons like discrimination or retaliation.</li><li>Contracts, policies, and implied promises can limit or override at-will status.</li><li>Outside the US, many systems require a valid reason and notice to dismiss.</li></ul></div>
+<div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>At-will employment lets either side end the job at any time, generally without cause.</li><li>It is the default in every US state except Montana, but is not how most other countries work.</li><li>Important exceptions forbid firing for illegal reasons like discrimination or retaliation.</li><li>Contracts, policies, and implied promises can limit or override at-will status.</li><li>Outside the US, many systems require a valid reason and notice to dismiss.</li></ul></div>
 
 <h2>What "At-Will" Really Means</h2>
 <p>The core idea is mutual freedom to walk away. An employee can quit whenever they like, and an employer can dismiss them whenever they like, without having to show "just cause". This contrasts sharply with systems where dismissal requires a legitimate reason and a fair process. In an at-will relationship, the absence of a fixed term or a "for cause" requirement is the defining feature.</p>
@@ -51,7 +51,7 @@ export const employmentLaborExtra2Articles: LawArticle[] = [
 
 <h2>How This Compares Around the World</h2>
 <ul>
-<li><strong>United States:</strong> At-will employment is the default in most states, subject to the exceptions above; a few jurisdictions narrow it further.</li>
+<li><strong>United States:</strong> At-will employment is the default in every state except Montana, subject to the exceptions above; a number of states narrow it further.</li>
 <li><strong>United Kingdom:</strong> Employees with qualifying service gain protection from unfair dismissal, requiring a fair reason and process — there is no broad at-will rule.</li>
 <li><strong>European Union:</strong> Member states generally require valid grounds and notice for dismissal, often with strong worker protections.</li>
 <li><strong>India:</strong> Employment is governed by contract and labour legislation, with procedural requirements for terminating many categories of workers.</li>

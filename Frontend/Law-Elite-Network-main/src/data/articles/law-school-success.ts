@@ -35,11 +35,11 @@ export const lawSchoolSuccessArticles: LawArticle[] = [
 <h2>What the ABA's Formula Actually Adds Up To</h2>
 <p>First-year credit loads vary by school, but they cluster in a narrow band. Georgetown Law's required 1L curriculum totals 30 credits across the year -- roughly 15 per semester. The University of Georgia runs 16 credits in the fall and about 12.5 in the spring. Wake Forest caps first-years at 16 credits per term. Take a representative 15-credit semester and apply Standard 310 directly:</p>
 <ul>
-<li>15 hours of class time per week (the classroom half of the formula)</li>
+<li>15 hours of class time per week, if each credit is a full 60-minute hour (the classroom half of the formula; the ABA counts a 50-minute class period as an hour, which would make it 12.5)</li>
 <li>30 hours of "out-of-class student work" per week (the two-hour multiplier)</li>
-<li>45 hours per week, minimum, by the ABA's own accreditation math</li>
+<li>45 hours per week (about 42.5 if classes run 50-minute periods), by the ABA's own accreditation math</li>
 </ul>
-<p>That is not a study tip or a suggestion from an academic support office. It is the floor a law school's curriculum has to clear to keep its accreditation. A 16-credit semester pushes the same formula past 48 hours a week.</p>
+<p>That is not a study tip or a suggestion from an academic support office. It is the minimum amount of work a credit hour has to reasonably approximate for a law school to keep its accreditation. A 16-credit semester pushes the same formula to roughly 45 to 48 hours a week.</p>
 
 <h2>What Students Actually Report</h2>
 <p>The regulatory floor and lived experience turn out to be two different numbers. The Law School Survey of Student Engagement -- run by Indiana University's Center for Postsecondary Research and covering more than 13,000 students across 75 law schools in its 2023 administration -- asked first-year students to report their own weekly hours directly. Non-first-generation 1Ls reported studying 31 hours a week; first-generation 1Ls reported 32, alongside seven hours of paid work per week versus five for their non-first-generation classmates.</p>
@@ -68,20 +68,23 @@ export const lawSchoolSuccessArticles: LawArticle[] = [
 
 <h2>Frequently Asked Questions</h2>
 <h3>Is 45 hours a week normal for a 1L?</h3>
-<p>It's the ABA's accreditation-formula ceiling for a 15-credit semester, not a report of what most students actually spend. Treat it as an upper-bound planning number for your first few weeks, before your reading speed catches up.</p>
+<p>It's the ABA's accreditation-formula figure for a 15-credit semester, not a report of what most students actually spend. Treat it as a conservative planning number for your first few weeks, before your reading speed catches up.</p>
 <h3>Does the number of hours matter more than which hours?</h3>
 <p>The 2023 survey measures total weekly hours, not when they happen, but case-reading and outlining are both tasks where consistent daily time outperforms the same total hours crammed into two long sessions -- spaced repetition of the material is what actually builds exam recall.</p>
 <h3>Do 2L and 3L students study as much as 1Ls?</h3>
 <p>The 2023 Law School Survey of Student Engagement data cited here covers first-year students specifically; it doesn't report a 2L/3L breakdown, so there isn't a directly comparable sourced figure for upper-level students in this dataset.</p>`,
     author: 'Law Elite Editorial Team',
     updatedAt: 'September 16, 2026',
+    modifiedAt: '2026-09-21',
     readingTime: 6,
     views: 0,
     featured: false,
     imageSeed: 'how-many-hours-should-you-study-in-law-school',
     primarySources: [
       { label: 'ABA Standard 310, Determination of Credit Hours', url: 'https://www.americanbar.org/groups/legal_education/resources/standards/' },
-      { label: '2023 Law School Survey of Student Engagement (LSSE), Indiana University Center for Postsecondary Research' },
+      { label: 'Law School Survey of Student Engagement (LSSSE), Indiana University Center for Postsecondary Research — annual results', url: 'https://lssse.indiana.edu/annual-results/' },
+      { label: 'ABA Journal: First-generation law students study and work more hours, rack up more student debt', url: 'https://www.abajournal.com/news/article/first-generation-law-students-study-and-work-more-hours-rack-up-more-student-debt' },
+      { label: 'University of New Mexico School of Law: ABA Standard 310 (credit-hour definition and Interpretation 310-1)', url: 'https://lawschool.unm.edu/academics/aba-standard-310.html' },
     ],
   },
   ...article1LSurvivalGuide,

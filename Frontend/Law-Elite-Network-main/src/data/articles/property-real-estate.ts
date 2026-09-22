@@ -96,6 +96,7 @@ export const propertyRealEstateArticles: LawArticle[] = [
       'An overview of the core legal protections tenants enjoy under a rental agreement, from deposits and repairs to privacy and eviction.',
     author: 'Daniel Okafor',
     updatedAt: 'February 2, 2026',
+    modifiedAt: '2026-09-21',
     readingTime: 8,
     views: 0,
     featured: false,
@@ -124,7 +125,7 @@ export const propertyRealEstateArticles: LawArticle[] = [
 <p>Even where a landlord has valid grounds, ending a tenancy is a legal process, not a private act. Typically the landlord must give written notice for the correct period and, if you do not leave, obtain a court or tribunal order before any removal by an authorised officer. So-called <strong>self-help evictions</strong> — changing locks, removing belongings, or intimidation — are prohibited in most systems. Tenants facing notice should seek advice quickly, as strict deadlines often apply to challenging it.</p>
 
 <h2>Fixed-Term vs Periodic Tenancies</h2>
-<p>The type of tenancy you hold significantly affects your rights when it comes to renewal, rent increases, and ending the arrangement. A fixed-term tenancy runs for a set period (commonly six or twelve months) and generally cannot be ended early by either side without cause or a break clause. Once the fixed term expires without a new agreement, many jurisdictions automatically convert it into a periodic (often month-to-month) tenancy, under which either side typically owes only a shorter statutory notice period to end things. Rent increases usually cannot happen mid-fixed-term unless the contract specifically allows it, but become easier for a landlord to propose once the tenancy is periodic — understanding which type currently applies to you is essential before assuming a right you don't actually have.</p>
+<p>The type of tenancy you hold significantly affects your rights when it comes to renewal, rent increases, and ending the arrangement. A fixed-term tenancy runs for a set period (commonly six or twelve months) and generally cannot be ended early by either side without cause or a break clause. Once the fixed term expires without a new agreement, many jurisdictions automatically convert it into a periodic (often month-to-month) tenancy, under which either side typically owes only a shorter statutory notice period to end things. Rent increases usually cannot happen mid-fixed-term unless the contract specifically allows it, but become easier for a landlord to propose once the tenancy is periodic — understanding which type currently applies to you is essential before assuming a right you don't actually have. In England, this is now different: under the Renters' Rights Act 2025, from 1 May 2026 existing assured and assured shorthold tenancies became periodic, new fixed terms can no longer be agreed, and section 21 "no-fault" notices were abolished, so a landlord must generally rely on a statutory ground for possession.</p>
 
 <h2>Frequently Asked Questions</h2>
 <p><strong>Can my landlord raise the rent whenever they want?</strong> Generally no — most jurisdictions require advance written notice of a rent increase and, in rent-controlled areas, cap how much and how often it can rise; a mid-fixed-term increase without a contractual basis is usually not enforceable.</p>
@@ -146,6 +147,7 @@ export const propertyRealEstateArticles: LawArticle[] = [
     primarySources: [
       { label: 'Housing Act 1988 (UK)', url: 'https://www.legislation.gov.uk/ukpga/1988/50/contents' },
       { label: 'Renters\' Rights Act 2025 (UK)', url: 'https://www.legislation.gov.uk/ukpga/2025/26/contents' },
+      { label: 'The Renters\' Rights Act 2025 (Commencement No. 2 and Transitional and Saving Provisions) Regulations 2026', url: 'https://www.legislation.gov.uk/uksi/2026/421/made' },
       { label: 'HUD, rental assistance tenant rights', url: 'https://www.hud.gov/topics/rental_assistance/tenantrights' },
       { label: 'India, Model Tenancy Act 2021' },
       { label: 'European Union Agency for Fundamental Rights, Fundamental Rights Report 2025', url: 'https://fra.europa.eu/en/publication/2025/fundamental-rights-report-2025' },

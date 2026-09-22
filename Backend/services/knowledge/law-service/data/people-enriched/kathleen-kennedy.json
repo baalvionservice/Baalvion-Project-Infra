@@ -1,0 +1,67 @@
+{
+  "slug": "kathleen-kennedy",
+  "category": "producers",
+  "wikidata_id": "Q237207",
+  "full_name": "Kathleen Kennedy",
+  "description": "American film producer (born 1953)",
+  "birth_date": "1953-06-05",
+  "birth_place": "Berkeley",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "US",
+  "citizenship": [
+    "United States"
+  ],
+  "occupations": [
+    "film producer",
+    "television producer",
+    "executive producer",
+    "film editor"
+  ],
+  "education": [
+    {
+      "institution": "San Diego State University"
+    },
+    {
+      "institution": "Shasta High School"
+    }
+  ],
+  "positions": [],
+  "awards": [
+    {
+      "title": "Crystal Award",
+      "year": 1995
+    },
+    {
+      "title": "Fellow of the American Academy of Arts and Sciences"
+    },
+    {
+      "title": "Irving G. Thalberg Memorial Award",
+      "year": 2019
+    },
+    {
+      "title": "The George Pal Memorial Award"
+    }
+  ],
+  "notable_works": [],
+  "social": {},
+  "official_website": null,
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q237207"
+    }
+  ],
+  "photo": {
+    "file": "kathleen-kennedy.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1497,
+    "credit": "Gage Skidmore / Wikimedia Commons",
+    "license": "CC BY-SA 3.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Kathleen_Kennedy_by_Gage_Skidmore_(cropped).jpg"
+  },
+  "fetched_at": "2026-09-21T19:23:40.962Z"
+}

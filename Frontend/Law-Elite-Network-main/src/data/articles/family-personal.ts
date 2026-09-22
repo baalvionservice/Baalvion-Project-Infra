@@ -20,6 +20,7 @@ export const familyPersonalArticles: LawArticle[] = [
       'A practical overview of how divorce proceedings begin, what the law typically decides, and how couples can reduce conflict, cost, and delay.',
     author: 'Sofia Almeida',
     updatedAt: 'March 14, 2026',
+    modifiedAt: '2026-09-21',
     readingTime: 10,
     views: 0,
     featured: true,
@@ -49,7 +50,7 @@ export const familyPersonalArticles: LawArticle[] = [
 <p>An <strong>uncontested divorce</strong>, where spouses agree on all terms, is typically quicker and far less expensive. A <strong>contested divorce</strong> requires the court to decide disputed issues and can take months or years. Many couples use <strong>mediation</strong> or <strong>collaborative divorce</strong>, structured processes that keep decisions in the couple's hands and out of a courtroom.</p>
 
 <h2>Prenuptial and Postnuptial Agreements</h2>
-<p>Many divorces are shaped years in advance by an agreement signed before or during the marriage. A prenuptial agreement, signed before the wedding, and a postnuptial agreement, signed afterward, let a couple define in advance how property will be divided and whether spousal support will be paid if the marriage ends — often overriding the default equitable-distribution or community-property rules that would otherwise apply. Courts in most jurisdictions will enforce these agreements provided both sides had independent legal advice, made full financial disclosure to each other, and were not pressured into signing at the last minute (a common challenge to prenups signed the night before the wedding). An agreement that leaves one spouse with unconscionably little, or that tries to override child support (which belongs to the child, not the parents, and generally cannot be waived), is likely to be struck down or narrowed even where the rest of the agreement holds.</p>
+<p>Many divorces are shaped years in advance by an agreement signed before or during the marriage. A prenuptial agreement, signed before the wedding, and a postnuptial agreement, signed afterward, let a couple define in advance how property will be divided and whether spousal support will be paid if the marriage ends — often overriding the default equitable-distribution or community-property rules that would otherwise apply. Courts in many jurisdictions will enforce these agreements (in England and Wales they are not automatically binding but can carry significant weight) provided both sides had independent legal advice, made full financial disclosure to each other, and were not pressured into signing at the last minute (a common challenge to prenups signed the night before the wedding). An agreement that leaves one spouse with unconscionably little, or that tries to override child support (which belongs to the child, not the parents, and generally cannot be waived), is likely to be struck down or narrowed even where the rest of the agreement holds.</p>
 
 <h2>Frequently Asked Questions</h2>
 <p><strong>Do I need my spouse's agreement to get divorced?</strong> No, in most no-fault systems one spouse can proceed even if the other objects, though a contested case will typically take longer than one where both sides cooperate.</p>

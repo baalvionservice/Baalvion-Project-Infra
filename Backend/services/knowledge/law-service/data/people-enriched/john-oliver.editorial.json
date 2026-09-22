@@ -1,0 +1,50 @@
+{
+  "display_name": null,
+  "short_bio": "English-born comedian and host of HBO’s Last Week Tonight.",
+  "biography": "John Oliver was born in Birmingham, England, and studied English at Christ’s College, Cambridge, where he was part of the Footlights comedy club. He worked on British panel shows and stand-up before moving to the United States.\n\nHe joined The Daily Show as a correspondent in 2006 and fronted the programme during Jon Stewart’s 2013 summer break.\n\nLast Week Tonight premiered on HBO in 2014; each episode leads with a long segment on a single subject, from civil forfeiture to the regulation of the debt-collection industry.",
+  "awards": [
+    {
+      "title": "Great Immigrants Award",
+      "year": 2021
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "The Daily Show",
+      "year": 2006,
+      "note": "Correspondent"
+    },
+    {
+      "title": "Last Week Tonight with John Oliver",
+      "year": 2014,
+      "note": "Host and executive producer"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1977-04-23",
+      "title": "Born in Birmingham, England"
+    },
+    {
+      "date": "2006",
+      "title": "Joins The Daily Show"
+    },
+    {
+      "date": "2014",
+      "title": "Launches Last Week Tonight on HBO"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q1701254"
+    },
+    {
+      "label": "Wikipedia: John Oliver",
+      "url": "https://en.wikipedia.org/wiki/John_Oliver"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

@@ -1,0 +1,138 @@
+{
+  "slug": "meryl-streep",
+  "category": "actors",
+  "wikidata_id": "Q873",
+  "full_name": "Meryl Streep",
+  "description": "American actress",
+  "birth_date": "1949-06-22",
+  "birth_place": "Summit",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "US",
+  "citizenship": [
+    "United States"
+  ],
+  "occupations": [
+    "film actor",
+    "stage actor",
+    "television actor",
+    "voice actor",
+    "actor",
+    "film producer",
+    "television producer"
+  ],
+  "education": [
+    {
+      "institution": "Vassar College"
+    },
+    {
+      "institution": "Yale University"
+    },
+    {
+      "institution": "Yale School of Drama"
+    },
+    {
+      "institution": "Bernards High School"
+    }
+  ],
+  "positions": [],
+  "awards": [
+    {
+      "title": "Academy Award for Best Actress",
+      "year": 1983
+    },
+    {
+      "title": "Academy Award for Best Supporting Actress",
+      "year": 1980
+    },
+    {
+      "title": "National Medal of Arts"
+    },
+    {
+      "title": "Donostia Award",
+      "year": 2008
+    },
+    {
+      "title": "Academy Award for Best Actress",
+      "year": 2012
+    },
+    {
+      "title": "Golden Globe Award for Best Actress in a Motion Picture – Musical or Comedy",
+      "year": 2006
+    },
+    {
+      "title": "Golden Globe Award for Best Actress in a Motion Picture – Musical or Comedy",
+      "year": 2009
+    },
+    {
+      "title": "AACTA Award for Best Actress in a Leading Role",
+      "year": 1989
+    },
+    {
+      "title": "Satellite Award for Best Actress – Motion Picture Musical or Comedy",
+      "year": 2006
+    },
+    {
+      "title": "Screen Actors Guild Award for Outstanding Performance by a Female Actor in a Leading Role",
+      "year": 2009
+    },
+    {
+      "title": "London Film Critics Circle Award for Actress of the Year",
+      "year": 2006
+    },
+    {
+      "title": "Theatre World Award",
+      "year": 1976
+    },
+    {
+      "title": "Golden Globe Cecil B. DeMille Award",
+      "year": 2017
+    },
+    {
+      "title": "New Jersey Hall of Fame",
+      "year": 2024
+    },
+    {
+      "title": "Presidential Medal of Freedom",
+      "year": 2014
+    },
+    {
+      "title": "Kennedy Center Honors"
+    },
+    {
+      "title": "AFI Life Achievement Award",
+      "year": 2004
+    },
+    {
+      "title": "Rungstedlund Award",
+      "year": 1993
+    },
+    {
+      "title": "honorary doctorate from Princeton University"
+    },
+    {
+      "title": "Commandeur des Arts et des Lettres‎"
+    }
+  ],
+  "notable_works": [],
+  "social": {},
+  "official_website": null,
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q873"
+    }
+  ],
+  "photo": {
+    "file": "meryl-streep.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1333,
+    "credit": "Ministry of culture, sports and Tourism- Lee Jeong-woo / Wikimedia Commons",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Meryl_Streep-_Press_conference_for_the_film_%22The_Devil_Wears_Prada_2%22_-_55194765350_(cropped1).jpg"
+  },
+  "fetched_at": "2026-09-21T19:26:07.724Z"
+}

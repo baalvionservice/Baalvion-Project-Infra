@@ -26,7 +26,7 @@ export const articleLegalResearchBeginners: LawArticle[] = [
 <p>Two features matter here. After you open an opinion, click "How cited" near the top -- it lists every later case that cited the one you're reading, with the specific quoted language pulled out. That's not a full citator like Shepard's or KeyCite, and it won't flag a case as overruled the way those do, but it's the closest free equivalent for seeing how a case has been treated since. Second, use "Select courts" before you search to limit results to your jurisdiction; searching all courts by default buries relevant state cases under federal ones.</p>
 
 <h2>CourtListener for Depth and Alerts</h2>
-<p>CourtListener (courtlistener.com) is run by the nonprofit Free Law Project and indexes more than eight million opinions across roughly 470 courts, plus RECAP, a crowdsourced archive of federal court dockets normally locked behind PACER's per-page fees. Its search supports Boolean operators and a semantic "search using natural language" mode, which helps when you don't know the right legal term yet.</p>
+<p>CourtListener (courtlistener.com) is run by the nonprofit Free Law Project and indexes millions of opinions from federal, state and other courts (its coverage page gives current counts), plus RECAP, a crowdsourced archive of federal court dockets normally locked behind PACER's per-page fees. Its search supports Boolean operators and a semantic "search using natural language" mode, which helps when you don't know the right legal term yet.</p>
 <p>Create a free account and you can save a search as an alert -- useful if you're tracking a pending case rather than researching a closed one. It also hosts oral argument audio for the Supreme Court and federal appellate courts, which is worth listening to before a moot court argument: you hear which questions actually moved a real bench, not which ones a study guide guessed at.</p>
 
 <h2>Justia for State Codes and Fast Lookups</h2>
@@ -49,7 +49,7 @@ export const articleLegalResearchBeginners: LawArticle[] = [
 <h2>Key Takeaways</h2>
 <ul>
 <li>Google Scholar's "Case law" search (scholar.google.com) is free, covers federal and state opinions, and its "How cited" link shows later citing cases -- a partial, free substitute for a paid citator.</li>
-<li>CourtListener (courtlistener.com) indexes over eight million opinions across roughly 470 courts and includes RECAP, a free archive of federal dockets otherwise locked behind PACER fees.</li>
+<li>CourtListener (courtlistener.com) indexes millions of court opinions (see its coverage page for current counts) and includes RECAP, a free archive of federal dockets otherwise locked behind PACER fees.</li>
 <li>Justia (law.justia.com) is the fastest free path to a specific state statute, organized by state, title, and chapter.</li>
 <li>Cornell's Legal Information Institute (law.cornell.edu) hosts the full U.S. Code and e-CFR free, plus Wex, a plain-language legal dictionary worth checking before you read the statute itself.</li>
 <li>govinfo.gov holds the authenticated official text of bills, statutes, and regulations; congress.gov tracks a bill's real-time status and legislative history -- use them together, not interchangeably.</li>
@@ -64,6 +64,7 @@ export const articleLegalResearchBeginners: LawArticle[] = [
 <p>No account is required to search or read on any of them. CourtListener is the one exception worth setting up, since a free account lets you save search alerts so you don't have to re-run the same search manually every week.</p>`,
     author: 'Law Elite Editorial Team',
     updatedAt: 'September 16, 2026',
+    modifiedAt: '2026-09-21',
     readingTime: 7,
     views: 0,
     featured: false,
@@ -75,6 +76,7 @@ export const articleLegalResearchBeginners: LawArticle[] = [
       { label: 'Cornell Law School Legal Information Institute', url: 'https://www.law.cornell.edu/' },
       { label: 'GovInfo (U.S. Government Publishing Office)', url: 'https://www.govinfo.gov/' },
       { label: 'Congress.gov (Library of Congress)', url: 'https://www.congress.gov/' },
+      { label: 'CourtListener: Data coverage', url: 'https://courtlistener.com/help/coverage/' },
       { label: 'California Legislative Information', url: 'https://leginfo.legislature.ca.gov/' },
       { label: 'California Courts, Supreme Court and Appellate Opinions', url: 'https://www.courts.ca.gov/opinions.htm' },
     ],

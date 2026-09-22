@@ -56,6 +56,10 @@ export const PRIMARY_NAV: NavSection[] = [
     ],
   },
   {
+    label: 'Fashion',
+    href: '/fashion',
+  },
+  {
     label: 'Legal',
     href: '/legal/cases',
     children: [

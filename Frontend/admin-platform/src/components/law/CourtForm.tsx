@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
 import { normalizeError } from '@/lib/api/client';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { COURT_LEVELS, courtsApi, slugify, type CourtRecord } from '@/lib/law/legal';
+import { COURT_LEVELS, courtsApi, rowsOf, slugify, type CourtRecord } from '@/lib/law/legal';
 
 const SELECT = 'h-9 w-full rounded-md border border-input bg-background px-3 text-sm';
 const EMPTY: Partial<CourtRecord> = { slug: '', name: '', level: 'other', description: '', published: false, indexable: false, archived: false };
@@ -26,6 +26,8 @@ export function CourtForm({ court }: { court?: CourtRecord }) {
   const [saved, setSaved] = useState(false);
   const set = <K extends keyof CourtRecord>(k: K, val: CourtRecord[K] | null) => { setSaved(false); setV((p) => ({ ...p, [k]: val })); };
   const text = (k: keyof CourtRecord) => (v[k] as string | null | undefined) ?? '';
+
+  const { data: courts = [] } = useQuery({ queryKey: ['law', 'courts', 'all'], queryFn: () => courtsApi.list({ limit: 200 }).then((d) => rowsOf<CourtRecord>(d)) });
 
   const save = useMutation({
     mutationFn: () => {
@@ -53,6 +55,14 @@ export function CourtForm({ court }: { court?: CourtRecord }) {
           </div>
           <div className="space-y-1.5"><Label htmlFor="level">Level</Label><select id="level" className={SELECT} value={text('level')} onChange={(e) => set('level', e.target.value)}>{COURT_LEVELS.map((l) => <option key={l}>{l}</option>)}</select></div>
           <div className="space-y-1.5"><Label htmlFor="country_code">Country (2-letter code)</Label><Input id="country_code" maxLength={2} value={text('country_code')} onChange={(e) => set('country_code', e.target.value.toUpperCase() || null)} /></div>
+          <div className="space-y-1.5 md:col-span-2">
+            <Label htmlFor="appeals_from_court_slug">Appeals from</Label>
+            <select id="appeals_from_court_slug" className={SELECT} value={text('appeals_from_court_slug')} onChange={(e) => set('appeals_from_court_slug', e.target.value || null)}>
+              <option value="">None — this isn&apos;t an appellate/supreme court over another one listed here</option>
+              {courts.filter((c) => c.slug !== v.slug).map((c) => <option key={c.slug} value={c.slug}>{c.name}</option>)}
+            </select>
+            <p className="text-xs text-muted-foreground">The court whose rulings this one reviews on appeal. Leave blank for a trial court, or when the court below isn&apos;t listed yet.</p>
+          </div>
           <div className="space-y-1.5 md:col-span-2"><Label htmlFor="url">Official website (https)</Label><Input id="url" value={text('url')} onChange={(e) => set('url', e.target.value || null)} /></div>
           <div className="space-y-1.5 md:col-span-2">
             <Label htmlFor="description">Description</Label>

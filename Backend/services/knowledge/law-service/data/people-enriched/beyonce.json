@@ -1,0 +1,141 @@
+{
+  "slug": "beyonce",
+  "category": "musicians",
+  "wikidata_id": "Q36153",
+  "full_name": "Beyoncé",
+  "description": "American singer-songwriter (born 1981)",
+  "birth_date": "1981-09-04",
+  "birth_place": "Houston",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "US",
+  "citizenship": [
+    "United States"
+  ],
+  "occupations": [
+    "singer",
+    "songwriter",
+    "record producer",
+    "dancer",
+    "actor",
+    "businessperson",
+    "composer",
+    "musician"
+  ],
+  "education": [
+    {
+      "institution": "High School for the Performing and Visual Arts"
+    },
+    {
+      "institution": "Alief Elsik High School"
+    }
+  ],
+  "positions": [],
+  "awards": [
+    {
+      "title": "Grammy Award for Best R&B Song",
+      "year": 2004
+    },
+    {
+      "title": "MTV Movie Award for Best Fight",
+      "year": 2010
+    },
+    {
+      "title": "Grammy Award for Best Melodic Rap Performance",
+      "year": 2004
+    },
+    {
+      "title": "Grammy Award for Best R&B Performance by a Duo or Group with Vocals",
+      "year": 2001
+    },
+    {
+      "title": "Grammy Award for Best R&B Song",
+      "year": 2001
+    },
+    {
+      "title": "Grammy Award for Best R&B Performance by a Duo or Group with Vocals",
+      "year": 2002
+    },
+    {
+      "title": "Grammy Award for Best Contemporary R&B Album",
+      "year": 2004
+    },
+    {
+      "title": "Grammy Award for Best R&B Performance by a Duo or Group with Vocals",
+      "year": 2004
+    },
+    {
+      "title": "Grammy Award for Best Female R&B Vocal Performance",
+      "year": 2004
+    },
+    {
+      "title": "Grammy Award for Best R&B Performance by a Duo or Group with Vocals",
+      "year": 2006
+    },
+    {
+      "title": "Grammy Award for Best Contemporary R&B Album",
+      "year": 2007
+    },
+    {
+      "title": "Grammy Award for Best Contemporary R&B Album",
+      "year": 2010
+    },
+    {
+      "title": "Grammy Award for Best Female Pop Vocal Performance",
+      "year": 2010
+    },
+    {
+      "title": "Grammy Award for Song of the Year",
+      "year": 2010
+    },
+    {
+      "title": "Grammy Award for Best R&B Song",
+      "year": 2010
+    },
+    {
+      "title": "Grammy Award for Best Female R&B Vocal Performance",
+      "year": 2010
+    },
+    {
+      "title": "Grammy Award for Best Traditional R&B Performance",
+      "year": 2010
+    },
+    {
+      "title": "Grammy Award for Best Traditional R&B Performance",
+      "year": 2013
+    },
+    {
+      "title": "Grammy Award for Best Immersive Audio Album",
+      "year": 2015
+    },
+    {
+      "title": "Grammy Award for Best R&B Performance",
+      "year": 2015
+    }
+  ],
+  "notable_works": [],
+  "social": {
+    "x": "https://x.com/Beyonce",
+    "instagram": "https://www.instagram.com/beyonce",
+    "facebook": "https://www.facebook.com/beyonce"
+  },
+  "official_website": "https://beyonce.com",
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q36153"
+    }
+  ],
+  "photo": {
+    "file": "beyonce.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1333,
+    "credit": "Raph_PH / Wikimedia Commons",
+    "license": "CC BY 2.0",
+    "license_url": "https://creativecommons.org/licenses/by/2.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Beyonc%C3%A9_-_Tottenham_Hotspur_Stadium_-_1st_June_2023_(10_of_118)_(52946364598)_(best_crop).jpg"
+  },
+  "fetched_at": "2026-09-21T19:26:23.842Z"
+}

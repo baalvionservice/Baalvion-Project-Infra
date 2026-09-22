@@ -1,0 +1,138 @@
+{
+  "slug": "taylor-swift",
+  "category": "musicians",
+  "wikidata_id": "Q26876",
+  "full_name": "Taylor Swift",
+  "description": "American singer-songwriter (born 1989)",
+  "birth_date": "1989-12-13",
+  "birth_place": "West Reading",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "US",
+  "citizenship": [
+    "United States"
+  ],
+  "occupations": [
+    "singer-songwriter",
+    "singer",
+    "lyricist",
+    "musician",
+    "composer"
+  ],
+  "education": [
+    {
+      "institution": "Hendersonville High School"
+    },
+    {
+      "institution": "Wyomissing Area Junior/Senior High School"
+    }
+  ],
+  "positions": [],
+  "awards": [
+    {
+      "title": "Dick Clark Award for Excellence",
+      "year": 2014
+    },
+    {
+      "title": "MTV Video Music Award for Best Female Video",
+      "year": 2009
+    },
+    {
+      "title": "American Music Award for Favorite Country Female Artist",
+      "year": 2008
+    },
+    {
+      "title": "American Music Award for Artist of the Year",
+      "year": 2009
+    },
+    {
+      "title": "American Music Award for Favorite Pop/Rock Female Artist",
+      "year": 2009
+    },
+    {
+      "title": "American Music Award for Favorite Country Female Artist",
+      "year": 2009
+    },
+    {
+      "title": "Favorite Adult Contemporary New Artiste",
+      "year": 2009
+    },
+    {
+      "title": "American Music Award for Favorite Country Album",
+      "year": 2009
+    },
+    {
+      "title": "American Music Award for Favorite Country Female Artist",
+      "year": 2010
+    },
+    {
+      "title": "American Music Award for Favorite Country Female Artist",
+      "year": 2011
+    },
+    {
+      "title": "American Music Award for Artist of the Year",
+      "year": 2011
+    },
+    {
+      "title": "American Music Award for Favorite Country Album",
+      "year": 2011
+    },
+    {
+      "title": "American Music Award for Favorite Country Female Artist",
+      "year": 2012
+    },
+    {
+      "title": "American Music Award for Favorite Country Female Artist",
+      "year": 2013
+    },
+    {
+      "title": "American Music Award for Artist of the Year",
+      "year": 2013
+    },
+    {
+      "title": "American Music Award for Favorite Pop/Rock Female Artist",
+      "year": 2013
+    },
+    {
+      "title": "American Music Award for Favorite Country Album",
+      "year": 2013
+    },
+    {
+      "title": "Favorite Adult Contemporary New Artiste",
+      "year": 2015
+    },
+    {
+      "title": "American Music Award for Favorite Pop/Rock Album",
+      "year": 2015
+    },
+    {
+      "title": "American Music Award for Single of the Year",
+      "year": 2015
+    }
+  ],
+  "notable_works": [],
+  "social": {
+    "x": "https://x.com/taylorswift13",
+    "instagram": "https://www.instagram.com/taylorswift",
+    "facebook": "https://www.facebook.com/TaylorSwift"
+  },
+  "official_website": "https://taylorswift.com",
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q26876"
+    }
+  ],
+  "photo": {
+    "file": "taylor-swift.png",
+    "mime": "image/png",
+    "width": 1000,
+    "height": 1421,
+    "credit": "iHeartRadioCA / Wikimedia Commons",
+    "license": "CC BY 3.0",
+    "license_url": "https://creativecommons.org/licenses/by/3.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Taylor_Swift_at_the_2023_MTV_Video_Music_Awards_(3).png"
+  },
+  "fetched_at": "2026-09-21T19:17:01.244Z"
+}

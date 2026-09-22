@@ -60,7 +60,7 @@ export const JUDGES = buildRoster('judges', [
   'Bora Laskin|CA|Canadian jurist and 14th Chief Justice of Canada|d',
   'Bertha Wilson|CA|Canadian jurist and first woman on the Supreme Court of Canada|d',
   'Michael Kirby|AU|Australian jurist who served on the High Court of Australia|r',
-  'Anthony Mason|AU|Australian jurist and former Chief Justice of the High Court of Australia|r',
+  'Anthony Mason|AU|Australian jurist and former Chief Justice of the High Court of Australia|d',
   'Owen Dixon|AU|Australian jurist and Chief Justice of the High Court of Australia|d',
   'Sian Elias|NZ|New Zealand jurist and former Chief Justice of New Zealand|r',
   'Arthur Chaskalson|ZA|South African jurist and first President of the Constitutional Court|d',
@@ -102,5 +102,5 @@ export const JUDGES = buildRoster('judges', [
   'Robert Badinter|FR|French jurist and former President of the Constitutional Council|d',
   'Sophia Akuffo|GH|Ghanaian jurist and former Chief Justice of Ghana|r',
   'Susan Denham|IE|Irish jurist and former Chief Justice of Ireland|r',
-  'Ronan Keane|IE|Irish jurist and former Chief Justice of Ireland|d',
+  'Ronan Keane|IE|Irish jurist and former Chief Justice of Ireland',
 ]);

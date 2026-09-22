@@ -17,10 +17,13 @@ type Article = any;
 
 export function SectionHeader({ title, href, id }: { title: string; href?: string; id?: string }) {
   return (
-    <div id={id} className="flex items-end justify-between gap-4 border-b-2 border-[#0F2440] pb-2 mb-6 scroll-mt-28">
-      <h2 className="font-headline text-xl md:text-2xl font-extrabold tracking-tight text-[#0F2440]">{title}</h2>
+    <div id={id} className="flex items-center justify-between gap-4 border-b-4 border-[#E13131] pb-2.5 mb-6 scroll-mt-28">
+      <div className="flex items-center gap-2.5">
+        <span className="w-3.5 h-7 bg-[#E13131] inline-block" />
+        <h2 className="font-serif text-2xl md:text-3xl font-black tracking-tight text-slate-900 uppercase">{title}</h2>
+      </div>
       {href && (
-        <Link href={href} className="inline-flex items-center gap-1 text-[12px] font-bold uppercase tracking-wider text-slate-500 hover:text-[#E13131] transition-colors">
+        <Link href={href} className="inline-flex items-center gap-1 text-[12px] font-black uppercase tracking-wider text-[#E13131] hover:text-slate-900 transition-colors bg-slate-100 hover:bg-slate-200 px-3 py-2.5 sm:py-1 rounded-sm">
           See all <ArrowRight className="w-3.5 h-3.5" />
         </Link>
       )}
@@ -32,12 +35,14 @@ export function SectionHeader({ title, href, id }: { title: string; href?: strin
 export function BreakingStrip({ articles }: { articles: Article[] }) {
   if (articles.length === 0) return null;
   return (
-    <div className="bg-[#0F2440] text-white">
+    <div className="bg-[#111111] text-white border-b-2 border-[#E13131] shadow-sm">
       <div className="container mx-auto px-4 sm:px-6 max-w-7xl flex items-center gap-4 py-2.5 overflow-x-auto no-scrollbar">
-        <span className="shrink-0 bg-[#E13131] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.18em]">Breaking</span>
+        <span className="shrink-0 bg-[#E13131] text-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] rounded-sm animate-pulse shadow-sm">
+          LAW ELITE BREAKING
+        </span>
         {articles.map((a) => (
-          <Link key={a.slug} href={articleUrl(a)} className="shrink-0 text-[13px] font-semibold hover:text-[#C8A24A] transition-colors">
-            {a.title}
+          <Link key={a.slug} href={articleUrl(a)} className="shrink-0 text-[13.5px] font-bold hover:text-[#E13131] transition-colors flex items-center gap-2">
+            <span className="text-[#E13131]">▶</span> {a.title}
           </Link>
         ))}
       </div>
@@ -52,12 +57,12 @@ export function FrontPage({ articles }: { articles: Article[] }) {
   const rail = rest.slice(2, 7);
   return (
     <section className="py-8 md:py-10">
-      <SectionHeader id="latest" title="Latest news" />
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
+      <SectionHeader id="latest" title="Top Stories & Celebrity Coverage" />
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
         <div className="lg:col-span-8 space-y-9">
           <StoryCard article={lead} variant="lead" priority />
           {secondary.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-7 pt-2 border-t border-slate-100">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-7 pt-4">
               {secondary.map((a) => (
                 <StoryCard key={a.slug} article={a} />
               ))}
@@ -65,7 +70,11 @@ export function FrontPage({ articles }: { articles: Article[] }) {
           )}
         </div>
         {rail.length > 0 && (
-          <aside className="lg:col-span-4 lg:border-l lg:border-slate-100 lg:pl-8 space-y-6">
+          <aside className="lg:col-span-4 bg-slate-50/80 border-2 border-slate-900 p-5 rounded-sm shadow-sm space-y-4">
+            <div className="flex items-center justify-between border-b-2 border-[#E13131] pb-2 mb-4">
+              <h3 className="font-serif text-lg font-black uppercase tracking-tight text-slate-900">HOT NEWS RAIL</h3>
+              <span className="text-[10px] font-black uppercase tracking-widest bg-[#E13131] text-white px-2 py-0.5">EXCLUSIVES</span>
+            </div>
             {rail.map((a) => (
               <StoryCard key={a.slug} article={a} variant="horizontal" />
             ))}
@@ -79,15 +88,24 @@ export function FrontPage({ articles }: { articles: Article[] }) {
 export function TrendingList({ articles }: { articles: Article[] }) {
   if (articles.length === 0) return null;
   return (
-    <div>
-      <SectionHeader id="trending" title="Trending stories" />
-      <ol className="space-y-5">
+    <div className="bg-slate-900 text-white p-6 rounded-sm border-t-4 border-[#E13131] shadow-md">
+      <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-5">
+        <h2 className="font-serif text-2xl font-black uppercase tracking-tight text-white flex items-center gap-2">
+          <span className="w-2.5 h-6 bg-[#E13131] inline-block" /> TRENDING STORIES
+        </h2>
+        <span className="text-[10px] font-black uppercase tracking-widest text-[#E13131] bg-slate-800 px-2 py-1">MOST READ</span>
+      </div>
+      <ol className="space-y-4">
         {articles.map((a, i) => (
-          <li key={a.slug} className="flex gap-4">
-            <span className="font-headline text-3xl font-extrabold leading-none text-[#C8A24A] w-7 shrink-0">{i + 1}</span>
+          <li key={a.slug} className="flex gap-4 pb-4 border-b border-slate-800 last:border-0 last:pb-0">
+            <span className="font-headline text-3xl font-black leading-none text-[#E13131] w-7 shrink-0">{i + 1}</span>
             <Link href={articleUrl(a)} className="group min-w-0">
-              {a.category?.name && <span className="kicker mb-1">{a.category.name}</span>}
-              <span className="block font-headline text-[15px] font-bold leading-snug text-slate-900 group-hover:text-news-600 transition-colors">
+              {a.category?.name && (
+                <span className="inline-block bg-[#E13131] text-white text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 mb-1 rounded-xs">
+                  {a.category.name}
+                </span>
+              )}
+              <span className="block font-serif text-[15px] font-bold leading-snug text-slate-100 group-hover:text-[#E13131] transition-colors">
                 {a.title}
               </span>
             </Link>
@@ -103,11 +121,14 @@ export function PillarColumn({ title, href, articles }: { title: string; href: s
   if (articles.length === 0) return null;
   const [lead, ...rest] = articles;
   return (
-    <div>
+    <div className="bg-white border border-slate-200 p-4 rounded-sm hover:border-slate-400 transition-colors shadow-sm">
       <SectionHeader title={title} href={href} />
-      <StoryCard article={lead} />
+      {/* Auto-height wrapper: the card is h-full, which would otherwise stretch to the grid row and push `rest` out of the box. */}
+      <div>
+        <StoryCard article={lead} />
+      </div>
       {rest.length > 0 && (
-        <div className="mt-6 pt-6 border-t border-slate-100 space-y-5">
+        <div className="mt-5 pt-4 border-t border-slate-100 space-y-3">
           {rest.map((a) => (
             <StoryCard key={a.slug} article={a} variant="horizontal" />
           ))}
@@ -130,14 +151,14 @@ export function PeopleRail({
 }) {
   if (people.length === 0) return null;
   return (
-    <section className="py-8 border-t border-slate-200">
+    <section className="py-8 border-t-2 border-slate-900 my-6">
       <SectionHeader title={title} href={href} />
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-x-5 gap-y-8">
         {people.map((p) => (
-          <div key={p.slug}>
+          <div key={p.slug} className="group">
             <PersonCard person={p} />
             {counts?.get(p.slug) ? (
-              <p className="mt-1 text-[12px] text-slate-400 font-medium">
+              <p className="mt-1 text-[11px] font-black uppercase tracking-wider text-[#E13131]">
                 {counts.get(p.slug)} {counts.get(p.slug) === 1 ? 'story' : 'stories'}
               </p>
             ) : null}

@@ -1,0 +1,131 @@
+{
+  "display_name": null,
+  "short_bio": "Pakistani education activist and, at 17, the youngest Nobel Peace Prize laureate.",
+  "biography": "Malala Yousafzai was born in Mingora, in Pakistan’s Swat Valley. When the Taliban restricted girls’ schooling she wrote a blog for the BBC under a pseudonym.\n\nOn 9 October 2012 a Taliban gunman shot her on her school bus. She was taken to Birmingham, England, for treatment. In 2013 she co-founded the Malala Fund and published I Am Malala.\n\nShe shared the 2014 Nobel Peace Prize with Kailash Satyarthi and graduated from Lady Margaret Hall, Oxford, in 2020.",
+  "awards": [
+    {
+      "title": "National Malala Peace Prize",
+      "year": 2011
+    },
+    {
+      "title": "Commander of the Order of Bravery",
+      "year": 2012
+    },
+    {
+      "title": "Sakharov Prize",
+      "year": 2013
+    },
+    {
+      "title": "Simone de Beauvoir Prize",
+      "year": 2013
+    },
+    {
+      "title": "Anna Politkovskaya Award",
+      "year": 2013
+    },
+    {
+      "title": "United Nations Prize in the Field of Human Rights",
+      "year": 2013
+    },
+    {
+      "title": "European Human Rights Prize",
+      "year": 2013
+    },
+    {
+      "title": "International Children's Peace Prize",
+      "year": 2013
+    },
+    {
+      "title": "Index Award",
+      "year": 2013
+    },
+    {
+      "title": "Ambassador of Conscience Award",
+      "year": 2013
+    },
+    {
+      "title": "Secularist of the Year",
+      "year": 2013
+    },
+    {
+      "title": "Catalonia International Prize",
+      "year": 2013
+    },
+    {
+      "title": "Humanitarian of the Year",
+      "year": 2013
+    },
+    {
+      "title": "Nobel Peace Prize",
+      "year": 2014
+    },
+    {
+      "title": "Philadelphia Liberty Medal",
+      "year": 2014
+    },
+    {
+      "title": "Order of the Smile",
+      "year": 2016
+    },
+    {
+      "title": "Ellis Island Medal of Honor",
+      "year": 2017
+    },
+    {
+      "title": "BBC 100 Women",
+      "year": 2021
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "I Am Malala",
+      "year": 2013,
+      "note": "Memoir"
+    },
+    {
+      "title": "Malala Fund",
+      "year": 2013,
+      "note": "Co-founded"
+    },
+    {
+      "title": "Nobel Peace Prize",
+      "year": 2014,
+      "note": "Shared with Kailash Satyarthi"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1997-07-12",
+      "title": "Born in Mingora, Pakistan"
+    },
+    {
+      "date": "2012-10-09",
+      "title": "Shot by a Taliban gunman"
+    },
+    {
+      "date": "2013",
+      "title": "Founds the Malala Fund"
+    },
+    {
+      "date": "2014",
+      "title": "Awarded the Nobel Peace Prize"
+    },
+    {
+      "date": "2020",
+      "title": "Graduates from Oxford"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q32732"
+    },
+    {
+      "label": "Wikipedia: Malala Yousafzai",
+      "url": "https://en.wikipedia.org/wiki/Malala_Yousafzai"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

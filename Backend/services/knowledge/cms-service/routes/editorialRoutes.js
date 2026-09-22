@@ -20,6 +20,7 @@ router.get('/quota', loadCmsRole, requireCmsRole('cms_viewer'), ctrl.getQuota);
 // Stage 1-2.
 router.get('/signals', loadCmsRole, requireCmsRole('cms_viewer'), ctrl.listSignals);
 router.post('/intake', loadCmsRole, requireCmsRole('cms_editor'), ctrl.runIntake);
+router.post('/trends', loadCmsRole, requireCmsRole('cms_editor'), ctrl.runTrends);
 router.post('/cluster', loadCmsRole, requireCmsRole('cms_editor'), ctrl.runClustering);
 
 // Stage 3 — briefs.
@@ -33,6 +34,10 @@ router.get('/drafts/:draftId', loadCmsRole, requireCmsRole('cms_viewer'), ctrl.g
 router.post('/drafts', loadCmsRole, requireCmsRole('cms_editor'), ctrl.runDrafting);
 
 // Stage 4b — original art, without which the publish gate refuses every draft.
+router.get('/photos/search', loadCmsRole, requireCmsRole('cms_editor'), ctrl.searchPhotos);
+router.get('/drafts/:draftId/claims', loadCmsRole, requireCmsRole('cms_viewer'), ctrl.claimCheck);
+router.get('/drafts/:draftId/art', loadCmsRole, requireCmsRole('cms_viewer'), ctrl.listDraftArt);
+router.post('/drafts/:draftId/photo', loadCmsRole, requireCmsRole('cms_editor'), ctrl.attachPhoto);
 router.post('/art', loadCmsRole, requireCmsRole('cms_editor'), ctrl.runArt);
 
 // Stage 5 — gates. Evaluating is a read of the rules and stays at viewer level so

@@ -1,0 +1,187 @@
+{
+  "slug": "stephen-hawking",
+  "category": "other",
+  "wikidata_id": "Q17714",
+  "full_name": "Stephen Hawking",
+  "description": "British theoretical physicist, cosmologist and author (1942–2018)",
+  "birth_date": "1942-01-08",
+  "birth_place": "Oxford",
+  "death_date": "2018-03-14",
+  "death_place": "Cambridge",
+  "status": "deceased",
+  "country_code": "GB",
+  "citizenship": [
+    "United Kingdom"
+  ],
+  "occupations": [
+    "theoretical physicist",
+    "cosmologist",
+    "astrophysicist",
+    "mathematician",
+    "pedagogue",
+    "science writer",
+    "university teacher",
+    "writer",
+    "physicist",
+    "non-fiction writer",
+    "astronomer",
+    "television actor",
+    "autobiographer",
+    "science fiction writer",
+    "Trekkie",
+    "scientist"
+  ],
+  "education": [
+    {
+      "institution": "University College, Oxford"
+    },
+    {
+      "institution": "Trinity Hall"
+    },
+    {
+      "institution": "St Albans School"
+    },
+    {
+      "institution": "University of Cambridge"
+    },
+    {
+      "institution": "St Albans High School for Girls"
+    },
+    {
+      "institution": "Byron House School"
+    }
+  ],
+  "positions": [
+    {
+      "title": "Lucasian Professor of Mathematics",
+      "start": 1979,
+      "end": 2009
+    }
+  ],
+  "awards": [
+    {
+      "title": "Albert Einstein Medal",
+      "year": 1979
+    },
+    {
+      "title": "Wolf Prize in Physics",
+      "year": 1988
+    },
+    {
+      "title": "Copley Medal",
+      "year": 2006
+    },
+    {
+      "title": "Presidential Medal of Freedom",
+      "year": 2009
+    },
+    {
+      "title": "Special Breakthrough Prize in Fundamental Physics",
+      "year": 2013
+    },
+    {
+      "title": "Companion of Honour",
+      "year": 1989
+    },
+    {
+      "title": "Eddington Medal",
+      "year": 1975
+    },
+    {
+      "title": "Gold Medal of the Royal Astronomical Society",
+      "year": 1985
+    },
+    {
+      "title": "Commander of the Order of the British Empire",
+      "year": 1982
+    },
+    {
+      "title": "Naylor Prize and Lectureship",
+      "year": 1999
+    },
+    {
+      "title": "Oskar Klein Medal",
+      "year": 2003
+    },
+    {
+      "title": "Hughes Medal",
+      "year": 1976
+    },
+    {
+      "title": "Royal Society Science Books Prize",
+      "year": 2002
+    },
+    {
+      "title": "Albert Medal",
+      "year": 1999
+    },
+    {
+      "title": "Michelson–Morley Award",
+      "year": 2003
+    },
+    {
+      "title": "Fonseca Prize",
+      "year": 2008
+    },
+    {
+      "title": "Pius XI Medal",
+      "year": 1975
+    },
+    {
+      "title": "Maxwell Medal and Prize",
+      "year": 1976
+    },
+    {
+      "title": "IOP Dirac Medal",
+      "year": 1987
+    },
+    {
+      "title": "Adams Prize",
+      "year": 1966
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "A Brief History of Time"
+    },
+    {
+      "title": "Black Holes and Baby Universes and Other Essays"
+    },
+    {
+      "title": "The Universe in a Nutshell"
+    },
+    {
+      "title": "On the Shoulders of Giants"
+    },
+    {
+      "title": "God Created the Integers"
+    },
+    {
+      "title": "The Dreams That Stuff Is Made of: The Most Astounding Papers of Quantum Physics and How They Shook the Scientific World"
+    },
+    {
+      "title": "My Brief History"
+    }
+  ],
+  "social": {
+    "facebook": "https://www.facebook.com/stephenhawking"
+  },
+  "official_website": "https://hawking.org.uk",
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q17714"
+    }
+  ],
+  "photo": {
+    "file": "stephen-hawking.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1436,
+    "credit": "NASA / Wikimedia Commons",
+    "license": "Public domain",
+    "license_url": null,
+    "source_url": "https://commons.wikimedia.org/wiki/File:Stephen_Hawking.StarChild.jpg"
+  },
+  "fetched_at": "2026-09-21T19:22:19.838Z"
+}

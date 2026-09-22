@@ -52,24 +52,24 @@ export function PublicNavbar() {
 
       {/* ── Tier 1: brand + utilities ─────────────────────────────── */}
       <div className="border-b border-slate-200">
-        <div className="container mx-auto px-4 sm:px-6 max-w-7xl h-[60px] flex items-center justify-between gap-4">
+        <div className="container mx-auto px-4 sm:px-6 max-w-7xl h-[60px] flex items-center justify-between gap-2 sm:gap-4">
           
           {/* Left: SECTIONS + links */}
           <div className="flex items-center gap-5 shrink-0">
             <button
               onClick={() => (isMobileMenuOpen ? closeMobileMenu() : setIsMobileMenuOpen(true))}
-              className="flex items-center gap-2 text-slate-900 hover:text-[#E13131] transition-colors"
+              className="flex items-center gap-2 -ml-2 px-2 h-11 text-slate-900 hover:text-[#E13131] transition-colors"
               aria-label="Sections menu"
             >
               <Menu className="w-5 h-5 text-slate-900" />
-              <span className="text-xs font-black uppercase tracking-wider">SECTIONS</span>
+              <span className="hidden sm:inline text-xs font-black uppercase tracking-wider">SECTIONS</span>
             </button>
           </div>
 
           {/* Center: Logo — scales mark + LAW ELITE NETWORK wordmark */}
-          <Link href="/" className="flex items-center gap-2.5 shrink-0" aria-label="Law Elite Network – Home">
+          <Link href="/" className="flex items-center gap-2 sm:gap-2.5 shrink-0" aria-label="Law Elite Network – Home">
             {/* Scales of Justice mark */}
-            <svg viewBox="0 0 64 64" className="h-9 w-9 flex-shrink-0" aria-hidden="true">
+            <svg viewBox="0 0 64 64" className="h-8 w-8 sm:h-9 sm:w-9 flex-shrink-0" aria-hidden="true">
               <rect x="0" y="0" width="64" height="64" fill="#0F2440" rx="4"/>
               <rect x="8" y="17" width="48" height="6" fill="#F6F4EF"/>
               <rect x="29" y="23" width="6" height="14" fill="#F6F4EF"/>
@@ -82,7 +82,7 @@ export function PublicNavbar() {
             </svg>
             {/* Wordmark */}
             <span className="flex flex-col leading-none">
-              <span className="font-headline text-xl font-black tracking-tight text-[#0F2440] uppercase leading-none">
+              <span className="font-headline text-lg sm:text-xl font-black tracking-tight text-[#0F2440] uppercase leading-none">
                 LAW ELITE
               </span>
               <span className="bg-[#E13131] text-white text-[9px] font-black uppercase tracking-[0.18em] px-1.5 py-[2px] mt-0.5 leading-none">
@@ -92,10 +92,10 @@ export function PublicNavbar() {
           </Link>
 
           {/* Right: Search, TIPS, SIGN IN */}
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-1 sm:gap-3 shrink-0">
             <button
               onClick={() => setMobileSearchOpen((v) => !v)}
-              className="w-8 h-8 flex items-center justify-center text-slate-800 hover:text-[#E13131] transition-colors"
+              className="w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center text-slate-800 hover:text-[#E13131] transition-colors"
               aria-label="Search"
             >
               <SearchIcon className="w-4 h-4" />
@@ -103,7 +103,7 @@ export function PublicNavbar() {
 
             <Link
               href="/contact-us"
-              className="bg-[#E13131] hover:bg-red-700 text-white font-black text-xs uppercase px-4 py-1.5 tracking-wider transition-colors"
+              className="bg-[#E13131] hover:bg-red-700 text-white font-black text-xs uppercase px-3 sm:px-4 py-2 sm:py-1.5 tracking-wider transition-colors"
             >
               TIPS
             </Link>
@@ -118,7 +118,7 @@ export function PublicNavbar() {
             )}
 
             {isAuthenticated ? (
-              <Link href={dashboardHref}>
+              <Link href={dashboardHref} className="hidden sm:block">
                 <button className="border border-slate-300 hover:border-slate-900 text-slate-900 font-bold text-xs uppercase px-3 py-1.5 tracking-wider transition-colors">
                   DASHBOARD
                 </button>
@@ -126,7 +126,7 @@ export function PublicNavbar() {
             ) : (
               <button
                 onClick={() => window.location.assign(sharedSignInUrl())}
-                className="border border-slate-300 hover:border-slate-900 text-slate-900 font-bold text-xs uppercase px-3 py-1.5 tracking-wider transition-colors"
+                className="hidden sm:block border border-slate-300 hover:border-slate-900 text-slate-900 font-bold text-xs uppercase px-3 py-1.5 tracking-wider transition-colors"
               >
                 SIGN IN
               </button>

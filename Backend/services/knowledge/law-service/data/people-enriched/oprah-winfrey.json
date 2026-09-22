@@ -1,0 +1,180 @@
+{
+  "slug": "oprah-winfrey",
+  "category": "tv-personalities",
+  "wikidata_id": "Q55800",
+  "full_name": "Oprah Winfrey",
+  "description": "American talk show host, actress, producer, and author (born 1954)",
+  "birth_date": "1954-01-29",
+  "birth_place": "Kosciusko",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "US",
+  "citizenship": [
+    "United States"
+  ],
+  "occupations": [
+    "television presenter",
+    "patron of the arts",
+    "television producer",
+    "film producer",
+    "businessperson",
+    "actor",
+    "voice actor",
+    "writer",
+    "talk show host",
+    "autobiographer",
+    "journalist",
+    "podcaster"
+  ],
+  "education": [
+    {
+      "institution": "Tennessee State University"
+    },
+    {
+      "institution": "Lincoln High School"
+    },
+    {
+      "institution": "Nicolet High School"
+    },
+    {
+      "institution": "East Nashville Magnet High School"
+    },
+    {
+      "institution": "University of Tennessee"
+    }
+  ],
+  "positions": [],
+  "awards": [
+    {
+      "title": "Presidential Medal of Freedom",
+      "year": 2013
+    },
+    {
+      "title": "Peabody Awards",
+      "year": 1995
+    },
+    {
+      "title": "honorary doctor of Harvard University",
+      "year": 2013
+    },
+    {
+      "title": "Time 100: The Most Important People of the Century"
+    },
+    {
+      "title": "Time 100",
+      "year": 2004
+    },
+    {
+      "title": "Spingarn Medal",
+      "year": 2000
+    },
+    {
+      "title": "Bob Hope Humanitarian Award",
+      "year": 2002
+    },
+    {
+      "title": "Jefferson Awards for Public Service",
+      "year": 1998
+    },
+    {
+      "title": "NAACP Image Award for Outstanding News, Talk or Information – Series or Special",
+      "year": 1993
+    },
+    {
+      "title": "NAACP Image Award for Entertainer of the Year",
+      "year": 1991
+    },
+    {
+      "title": "NAACP Image Award – Hall of Fame Award",
+      "year": 2005
+    },
+    {
+      "title": "People's Choice Awards",
+      "year": 1988
+    },
+    {
+      "title": "Primetime Emmy Award for Outstanding Television Movie"
+    },
+    {
+      "title": "Producers Guild of America Awards",
+      "year": 1999
+    },
+    {
+      "title": "Marian Anderson Award",
+      "year": 2003
+    },
+    {
+      "title": "National Women's Hall of Fame",
+      "year": 1994
+    },
+    {
+      "title": "Horatio Alger Award",
+      "year": 1993
+    },
+    {
+      "title": "Kennedy Center Honors",
+      "year": 2010
+    },
+    {
+      "title": "Disney Legends",
+      "year": 2017
+    },
+    {
+      "title": "Anisfield-Wolf Book Awards",
+      "year": 2010
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "The Oprah Winfrey Show"
+    },
+    {
+      "title": "The Women of Brewster Place"
+    },
+    {
+      "title": "The Color Purple"
+    },
+    {
+      "title": "Beloved"
+    },
+    {
+      "title": "Their Eyes Were Watching God"
+    },
+    {
+      "title": "Charlotte's Web"
+    },
+    {
+      "title": "Bee Movie"
+    },
+    {
+      "title": "The Princess and the Frog"
+    },
+    {
+      "title": "The Butler"
+    }
+  ],
+  "social": {
+    "x": "https://x.com/Oprah",
+    "instagram": "https://www.instagram.com/oprah",
+    "facebook": "https://www.facebook.com/oprahwinfrey"
+  },
+  "official_website": "https://oprah.com",
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q55800"
+    }
+  ],
+  "photo": {
+    "file": "oprah-winfrey.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1398,
+    "credit": "Maryland GovPics / Wikimedia Commons",
+    "license": "CC BY 2.0",
+    "license_url": "https://creativecommons.org/licenses/by/2.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Pre_Inaugural_Reception_(52639556983)_(cropped).jpg"
+  },
+  "fetched_at": "2026-09-21T19:19:05.447Z"
+}

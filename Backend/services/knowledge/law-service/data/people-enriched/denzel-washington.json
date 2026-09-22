@@ -1,0 +1,122 @@
+{
+  "slug": "denzel-washington",
+  "category": "actors",
+  "wikidata_id": "Q42101",
+  "full_name": "Denzel Washington",
+  "description": "American actor (born 1954)",
+  "birth_date": "1954-12-28",
+  "birth_place": "Mount Vernon",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "US",
+  "citizenship": [
+    "United States"
+  ],
+  "occupations": [
+    "film director",
+    "film producer",
+    "film actor",
+    "stage actor",
+    "television actor",
+    "actor"
+  ],
+  "education": [
+    {
+      "institution": "Fordham University"
+    },
+    {
+      "institution": "Pennington-Grimes Elementary School"
+    },
+    {
+      "institution": "Oakland Military Academy"
+    },
+    {
+      "institution": "Mainland High School"
+    },
+    {
+      "institution": "Mount Vernon High School"
+    },
+    {
+      "institution": "The Center for Early Education"
+    }
+  ],
+  "positions": [],
+  "awards": [
+    {
+      "title": "Donostia Award",
+      "year": 2014
+    },
+    {
+      "title": "Academy Award for Best Supporting Actor",
+      "year": 1990
+    },
+    {
+      "title": "Academy Award for Best Actor",
+      "year": 2002
+    },
+    {
+      "title": "Tony Award for Best Actor in a Play",
+      "year": 2010
+    },
+    {
+      "title": "MTV Movie Award for Best Villain",
+      "year": 2002
+    },
+    {
+      "title": "Horatio Alger Award",
+      "year": 2009
+    },
+    {
+      "title": "Golden Globe Award for Best Supporting Actor – Motion Picture",
+      "year": 1990
+    },
+    {
+      "title": "Silver Bear for Best Actor",
+      "year": 1993
+    },
+    {
+      "title": "Golden Globe Award for Best Actor – Motion Picture Drama",
+      "year": 2000
+    },
+    {
+      "title": "Silver Bear for Best Actor",
+      "year": 2000
+    },
+    {
+      "title": "Presidential Medal of Freedom",
+      "year": 2022
+    },
+    {
+      "title": "Presidential Medal of Freedom",
+      "year": 2025
+    },
+    {
+      "title": "Jane Fonda Humanitarian Award",
+      "year": 2001
+    },
+    {
+      "title": "Honorary Palme d'Or"
+    }
+  ],
+  "notable_works": [],
+  "social": {},
+  "official_website": null,
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q42101"
+    }
+  ],
+  "photo": {
+    "file": "denzel-washington.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1400,
+    "credit": "Gabriel Hutchinson / Wikimedia Commons",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Denzel_Washington_at_the_2025_Cannes_Film_Festival.jpg"
+  },
+  "fetched_at": "2026-09-21T19:26:13.554Z"
+}

@@ -54,9 +54,9 @@ export const familyPersonalExtra2Articles: LawArticle[] = [
 
 <h2>How Spousal Support Works Around the World</h2>
 <ul>
-<li><strong>United States:</strong> Approaches vary by state; some use guidelines, others give judges broad discretion, and long-term awards have become less common. Property division is a separate question decided alongside support — see <a href="/family-law/community-property-vs-equitable-distribution-us">Community Property vs. Equitable Distribution in U.S. Divorce</a>.</li>
-<li><strong>United Kingdom:</strong> Courts have wide discretion over "financial provision", aiming at fairness and, where possible, a clean break between the parties — see <a href="/family-law/financial-settlements-divorce-england-wales">Financial Settlements on Divorce in England and Wales</a> for how the wider settlement, not just maintenance, is actually structured.</li>
-<li><strong>Australia:</strong> Spousal maintenance is assessed separately from the property settlement itself, which follows its own process — see <a href="/family-law/property-settlement-after-separation-australia">Property Settlement After Separation in Australia</a>.</li>
+<li><strong>United States:</strong> Approaches vary by state; some use guidelines, others give judges broad discretion, and long-term awards have become less common. Property division is a separate question decided alongside support — see <a href="/article/community-property-vs-equitable-distribution-us">Community Property vs. Equitable Distribution in U.S. Divorce</a>.</li>
+<li><strong>United Kingdom:</strong> Courts have wide discretion over "financial provision", aiming at fairness and, where possible, a clean break between the parties — see <a href="/article/financial-settlements-divorce-england-wales">Financial Settlements on Divorce in England and Wales</a> for how the wider settlement, not just maintenance, is actually structured.</li>
+<li><strong>Australia:</strong> Spousal maintenance is assessed separately from the property settlement itself, which follows its own process — see <a href="/article/property-settlement-after-separation-australia">Property Settlement After Separation in Australia</a>.</li>
 <li><strong>European Union:</strong> Member states have their own maintenance laws, and cross-border cases are coordinated through EU rules on jurisdiction and enforcement.</li>
 <li><strong>India:</strong> Maintenance can be claimed under personal laws and general provisions, with courts considering need, conduct, and the husband's or wife's means.</li>
 </ul>

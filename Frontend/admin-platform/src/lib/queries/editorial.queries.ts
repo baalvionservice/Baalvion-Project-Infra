@@ -149,6 +149,18 @@ const useEditorialMutation = <TArgs, TData>(
   });
 };
 
+export const useRunTrends = (websiteId: string) =>
+  useEditorialMutation(
+    websiteId,
+    (_: void) => editorialApi.runTrends(websiteId).then((r) => r.data.data),
+    (r) => {
+      const found = r.report.topics.length;
+      if (found === 0) return 'No trending entertainment topics found right now.';
+      if (r.accepted === 0) return `${found} trending ${found === 1 ? 'topic' : 'topics'} found, but none match this site's editorial charter. Add entertainment to the charter's beats to accept them.`;
+      return `${found} trending ${found === 1 ? 'topic' : 'topics'} found: ${r.accepted} items on beat, ${r.rejected} rejected. Run the pipeline to build briefs.`;
+    },
+  );
+
 export const useRunPipeline = (websiteId: string) =>
   useEditorialMutation(
     websiteId,
@@ -178,7 +190,7 @@ export const useRunBriefing = (websiteId: string) =>
 export const useRunDrafting = (websiteId: string) =>
   useEditorialMutation(
     websiteId,
-    (body: { briefId?: string; limit?: number } = {}) =>
+    (body: { briefId?: string; limit?: number; format?: 'news' | 'brief' } = {}) =>
       editorialPipelineApi.runDrafting(websiteId, body).then((r) => r.data.data),
     () => 'Drafting run complete',
   );

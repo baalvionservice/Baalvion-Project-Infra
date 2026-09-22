@@ -1,0 +1,40 @@
+{
+  "display_name": null,
+  "short_bio": "Italian fashion entrepreneur who built a business from her blog The Blonde Salad.",
+  "biography": "Chiara Ferragni was born in Cremona, Italy. In October 2009 she started the fashion blog The Blonde Salad with her then-boyfriend Riccardo Pozzoli.\n\nThe blog grew into a business, and her footwear line, the Chiara Ferragni Collection, became its main earner. She also collaborated with established houses, including a collection for Tod’s.\n\nShe married the rapper Fedez in 2018.",
+  "awards": [],
+  "notable_works": [
+    {
+      "title": "The Blonde Salad",
+      "year": 2009,
+      "note": "Founded fashion blog"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1987-05-07",
+      "title": "Born in Cremona, Italy"
+    },
+    {
+      "date": "2009",
+      "title": "Starts The Blonde Salad"
+    },
+    {
+      "date": "2018",
+      "title": "Marries the rapper Fedez"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q8933801"
+    },
+    {
+      "label": "Wikipedia: Chiara Ferragni",
+      "url": "https://en.wikipedia.org/wiki/Chiara_Ferragni"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

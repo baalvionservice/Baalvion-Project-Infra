@@ -1,0 +1,55 @@
+{
+  "slug": "khaby-lame",
+  "category": "influencers",
+  "wikidata_id": "Q106839925",
+  "full_name": "Khaby Lame",
+  "description": "Senegalese-Italian social media personality (born 2000)",
+  "birth_date": "2000-03-09",
+  "birth_place": "Dakar",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "SN",
+  "citizenship": [
+    "Senegal",
+    "Italy"
+  ],
+  "occupations": [
+    "TikToker",
+    "Internet celebrity",
+    "influencer",
+    "philanthropist",
+    "comedian"
+  ],
+  "education": [],
+  "positions": [
+    {
+      "title": "UNICEF Goodwill Ambassador",
+      "start": 2025
+    }
+  ],
+  "awards": [],
+  "notable_works": [],
+  "social": {
+    "x": "https://x.com/KhabyLame",
+    "instagram": "https://www.instagram.com/khaby00"
+  },
+  "official_website": null,
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q106839925"
+    }
+  ],
+  "photo": {
+    "file": "khaby-lame.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1647,
+    "credit": "Gilzetbase / Wikimedia Commons",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:KhabyLame.jpg"
+  },
+  "fetched_at": "2026-09-21T19:19:32.922Z"
+}

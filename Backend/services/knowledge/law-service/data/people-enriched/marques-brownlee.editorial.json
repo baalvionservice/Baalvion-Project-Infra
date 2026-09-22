@@ -1,0 +1,50 @@
+{
+  "display_name": null,
+  "short_bio": "American technology reviewer behind the MKBHD YouTube channel.",
+  "biography": "Marques Brownlee grew up in New Jersey and began posting tech reviews on YouTube in 2008. He studied at Stevens Institute of Technology.\n\nHis channel, MKBHD, is known for polished reviews of smartphones and other consumer technology.\n\nIn August 2019 he began co-hosting the podcast Waveform: The MKBHD Podcast, which combines product reviews with interviews of people influential in the technology industry.",
+  "awards": [
+    {
+      "title": "Forbes 30 Under 30",
+      "year": 2021
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "MKBHD",
+      "year": 2008,
+      "note": "YouTube channel"
+    },
+    {
+      "title": "Waveform",
+      "year": 2019,
+      "note": "Podcast"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1993-12-03",
+      "title": "Born in Maplewood, New Jersey"
+    },
+    {
+      "date": "2008",
+      "title": "Begins posting tech reviews on YouTube"
+    },
+    {
+      "date": "2019",
+      "title": "Launches the Waveform podcast"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q15994958"
+    },
+    {
+      "label": "Wikipedia: Marques Brownlee",
+      "url": "https://en.wikipedia.org/wiki/Marques_Brownlee"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

@@ -1,0 +1,131 @@
+{
+  "slug": "cristiano-ronaldo",
+  "category": "athletes",
+  "wikidata_id": "Q11571",
+  "full_name": "Cristiano Ronaldo",
+  "description": "Portuguese association football player (born 1985)",
+  "birth_date": "1985-02-05",
+  "birth_place": "Funchal",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "PT",
+  "citizenship": [
+    "Portugal"
+  ],
+  "occupations": [
+    "association football player",
+    "fashion entrepreneur",
+    "model",
+    "athlete",
+    "actor"
+  ],
+  "education": [],
+  "positions": [],
+  "awards": [
+    {
+      "title": "Ballon d'Or",
+      "year": 2008
+    },
+    {
+      "title": "FIFA Ballon d'Or",
+      "year": 2013
+    },
+    {
+      "title": "FIFA Ballon d'Or",
+      "year": 2014
+    },
+    {
+      "title": "UEFA Team of the Year",
+      "year": 2004
+    },
+    {
+      "title": "PFA Team of the Year",
+      "year": 2005
+    },
+    {
+      "title": "Bravo Award",
+      "year": 2004
+    },
+    {
+      "title": "Premier League Player of the Month",
+      "year": 2006
+    },
+    {
+      "title": "Premier League Player of the Month",
+      "year": 2006
+    },
+    {
+      "title": "PFA Players' Player of the Year",
+      "year": 2006
+    },
+    {
+      "title": "Sir Matt Busby Player of the Year",
+      "year": 2006
+    },
+    {
+      "title": "PFA Team of the Year",
+      "year": 2006
+    },
+    {
+      "title": "Footballer of the Year in England",
+      "year": 2006
+    },
+    {
+      "title": "PFA Young Player of the Year",
+      "year": 2006
+    },
+    {
+      "title": "Premier League Player of the Season",
+      "year": 2006
+    },
+    {
+      "title": "FWA Footballer of the Year",
+      "year": 2006
+    },
+    {
+      "title": "UEFA Club Footballer of the Year",
+      "year": 2007
+    },
+    {
+      "title": "Premier League Player of the Season",
+      "year": 2007
+    },
+    {
+      "title": "FWA Footballer of the Year",
+      "year": 2007
+    },
+    {
+      "title": "Sir Matt Busby Player of the Year",
+      "year": 2007
+    },
+    {
+      "title": "PFA Players' Player of the Year",
+      "year": 2007
+    }
+  ],
+  "notable_works": [],
+  "social": {
+    "x": "https://x.com/Cristiano",
+    "instagram": "https://www.instagram.com/cristiano",
+    "facebook": "https://www.facebook.com/Cristiano"
+  },
+  "official_website": "https://cristianoronaldo.com",
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q11571"
+    }
+  ],
+  "photo": {
+    "file": "cristiano-ronaldo.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1499,
+    "credit": "Bryan Berlin / Wikimedia Commons",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Cristiano_Ronaldo_Croatia_v_Portugal_2_July_2026-075_(cropped).jpg"
+  },
+  "fetched_at": "2026-09-21T19:20:39.143Z"
+}

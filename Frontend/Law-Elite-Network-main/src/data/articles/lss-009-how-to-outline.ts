@@ -92,7 +92,7 @@ export const articleHowToOutline: LawArticle[] = [
     primarySources: [
       { label: 'American Bar Association, "An In-Depth Guide to Outlining in Law School"', url: 'https://www.americanbar.org/groups/law_students/resources/student-lawyer/student-essentials/guide-outlining-in-law-school/' },
       { label: 'Restatement (Second) of Torts § 281 (elements of a negligence claim)' },
-      { label: 'Palsgraf v. Long Island R.R. Co., 248 N.Y. 339 (1928)' },
+      { label: 'Palsgraf v. Long Island R.R. Co., 248 N.Y. 339 (1928)', url: 'https://www.courtlistener.com/opinion/3604358/palsgraf-v-long-island-railroad-company/' },
     ],
   },
 ];

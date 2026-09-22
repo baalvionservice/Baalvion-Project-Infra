@@ -30,6 +30,7 @@ export const criminalLawJurisdictionArticles: LawArticle[] = [
       "Miranda warnings are only required before custodial interrogation, not at arrest — and skipping them doesn't automatically get a case thrown out.",
     author: 'Aisha Rahman',
     updatedAt: 'August 9, 2026',
+    modifiedAt: '2026-09-21',
     readingTime: 10,
     views: 0,
     featured: false,
@@ -46,7 +47,7 @@ export const criminalLawJurisdictionArticles: LawArticle[] = [
 <div class="key-takeaways"><h4>Key Takeaways</h4><ul><li>Miranda warnings are only constitutionally required before "custodial interrogation" — being arrested alone does not trigger them.</li><li>There is no single mandatory script; the Supreme Court requires the substance of four warnings, not exact wording.</li><li>You must unambiguously invoke your right to silence or to a lawyer — simply staying quiet is not enough to stop questioning under current law.</li><li>A Miranda violation generally makes the unwarned statement inadmissible, but it does not automatically dismiss the case, and it does not by itself support a civil lawsuit against police.</li><li>A narrow "public safety" exception lets police ask unwarned questions when there is an immediate danger to resolve first.</li></ul></div>
 
 <h2>Where Miranda Actually Comes From</h2>
-<p>Miranda rights take their name from <em>Miranda v. Arizona</em> (1966), in which the U.S. Supreme Court held that the Fifth Amendment privilege against self-incrimination requires police to warn a suspect of specific rights before "custodial interrogation," because that setting is inherently coercive even without physical force. The warning is a procedural safeguard for two constitutional rights at once: the Fifth Amendment right not to incriminate yourself, and the Sixth Amendment right to counsel.</p>
+<p>Miranda rights take their name from <em>Miranda v. Arizona</em> (1966), in which the U.S. Supreme Court held that the Fifth Amendment privilege against self-incrimination requires police to warn a suspect of specific rights before "custodial interrogation," because that setting is inherently coercive even without physical force. The warning is a procedural safeguard for the Fifth Amendment privilege against self-incrimination, including the right to have a lawyer present during custodial questioning; the separate Sixth Amendment right to counsel attaches later, once formal charges begin.</p>
 
 <h2>What the Warning Must Actually Cover</h2>
 <p>There is no single legally required script. The Supreme Court held in <em>California v. Prysock</em> (1981) that no "talismanic incantation" is required — officers do not have to recite the exact words from the original 1966 opinion, only convey the substance. In practice, that substance has four elements: you have the right to remain silent; anything you say can and will be used against you in court; you have the right to an attorney; and if you cannot afford one, one will be appointed for you before any questioning, if you wish. Departments vary the exact phrasing (and add local requirements — some require asking whether the suspect understands each right), but all four elements must be conveyed in substance.</p>
@@ -94,7 +95,7 @@ export const criminalLawJurisdictionArticles: LawArticle[] = [
 </ul>
 
 <h2>Practical Next Steps</h2>
-<p>If you are ever questioned in custody, the two sentences worth memorizing are simple: "I am invoking my right to remain silent" and "I want a lawyer." Say them clearly, once, and then stop talking — repeating yourself or trying to explain your position afterward can undo the protection you just invoked. If you believe police questioned you in custody without a warning, or kept questioning after you clearly invoked your rights, write down everything you remember as soon as possible and raise it with a criminal defense lawyer, since whether a statement gets suppressed often turns on exactly these facts. For the broader, worldwide picture of what happens when you're arrested, see <a href="/criminal-law/your-rights-if-you-are-arrested">What Are Your Rights If You Are Arrested?</a></p>
+<p>If you are ever questioned in custody, the two sentences worth memorizing are simple: "I am invoking my right to remain silent" and "I want a lawyer." Say them clearly, once, and then stop talking — repeating yourself or trying to explain your position afterward can undo the protection you just invoked. If you believe police questioned you in custody without a warning, or kept questioning after you clearly invoked your rights, write down everything you remember as soon as possible and raise it with a criminal defense lawyer, since whether a statement gets suppressed often turns on exactly these facts. For the broader, worldwide picture of what happens when you're arrested, see <a href="/article/your-rights-if-you-are-arrested">What Are Your Rights If You Are Arrested?</a></p>
 
 <p><em>This article is general legal information, not legal advice. Criminal procedure varies by state and changes over time — consult a criminal defense lawyer licensed in your state before acting.</em></p>`,
   },
@@ -159,7 +160,7 @@ export const criminalLawJurisdictionArticles: LawArticle[] = [
 </ul>
 
 <h2>Practical Next Steps</h2>
-<p>If you are arrested or asked to attend a voluntary interview under caution, ask for a solicitor before answering substantive questions — it is free, it is your right, and it materially affects how any later silence is assessed. If you're unsure whether to answer a specific question, that uncertainty is itself a reason to get advice first rather than guess. For the general, worldwide picture of what happens when you're arrested, see <a href="/criminal-law/your-rights-if-you-are-arrested">What Are Your Rights If You Are Arrested?</a></p>
+<p>If you are arrested or asked to attend a voluntary interview under caution, ask for a solicitor before answering substantive questions — it is free, it is your right, and it materially affects how any later silence is assessed. If you're unsure whether to answer a specific question, that uncertainty is itself a reason to get advice first rather than guess. For the general, worldwide picture of what happens when you're arrested, see <a href="/article/your-rights-if-you-are-arrested">What Are Your Rights If You Are Arrested?</a></p>
 
 <p><em>This article is general legal information, not legal advice, and covers England and Wales specifically — Scotland and Northern Ireland have their own separate criminal procedure. Consult a solicitor before acting on anything here.</em></p>`,
   },
@@ -232,7 +233,7 @@ export const criminalLawJurisdictionArticles: LawArticle[] = [
 </ul>
 
 <h2>Practical Next Steps</h2>
-<p>If you are detained or arrested in Canada, ask clearly and immediately to speak with a lawyer — free preliminary legal advice is available through duty counsel regardless of your ability to pay, and police are required to hold off trying to get evidence from you until you've had a reasonable opportunity to call. If you believe your section 10 rights were breached during an investigation, note the timeline in detail as soon as you can and raise it with a criminal defence lawyer, since whether evidence gets excluded turns heavily on the specific facts. For the general, worldwide picture of what happens when you're arrested, see <a href="/criminal-law/your-rights-if-you-are-arrested">What Are Your Rights If You Are Arrested?</a></p>
+<p>If you are detained or arrested in Canada, ask clearly and immediately to speak with a lawyer — free preliminary legal advice is available through duty counsel regardless of your ability to pay, and police are required to hold off trying to get evidence from you until you've had a reasonable opportunity to call. If you believe your section 10 rights were breached during an investigation, note the timeline in detail as soon as you can and raise it with a criminal defence lawyer, since whether evidence gets excluded turns heavily on the specific facts. For the general, worldwide picture of what happens when you're arrested, see <a href="/article/your-rights-if-you-are-arrested">What Are Your Rights If You Are Arrested?</a></p>
 
 <p><em>This article is general legal information, not legal advice. Criminal procedure can vary by province in practice and changes over time — consult a criminal defence lawyer licensed in the relevant jurisdiction before acting.</em></p>`,
   },
@@ -294,7 +295,7 @@ export const criminalLawJurisdictionArticles: LawArticle[] = [
 </ul>
 
 <h2>Practical Next Steps</h2>
-<p>If you're questioned by police anywhere in Australia, ask for a lawyer before answering substantive questions, and don't assume the rules you've read about one state apply automatically in another — criminal procedure genuinely differs across jurisdictions here. If you're in New South Wales and are given a formal special caution, treat that moment as significant: the law specifically requires you to have had a chance to consult a lawyer about what it means before it can have any legal effect. For the general, worldwide picture of what happens when you're arrested, see <a href="/criminal-law/your-rights-if-you-are-arrested">What Are Your Rights If You Are Arrested?</a></p>
+<p>If you're questioned by police anywhere in Australia, ask for a lawyer before answering substantive questions, and don't assume the rules you've read about one state apply automatically in another — criminal procedure genuinely differs across jurisdictions here. If you're in New South Wales and are given a formal special caution, treat that moment as significant: the law specifically requires you to have had a chance to consult a lawyer about what it means before it can have any legal effect. For the general, worldwide picture of what happens when you're arrested, see <a href="/article/your-rights-if-you-are-arrested">What Are Your Rights If You Are Arrested?</a></p>
 
 <p><em>This article is general legal information, not legal advice. Criminal procedure varies by Australian state and territory and changes over time — consult a criminal lawyer licensed in the relevant jurisdiction before acting.</em></p>`,
   },

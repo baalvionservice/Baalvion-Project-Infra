@@ -49,15 +49,15 @@ export function CategoryContent({ categorySlug, categoryId, cmsArticles = [], bu
 
   return (
     <div className="container mx-auto px-4 sm:px-6 max-w-7xl pt-10">
-      <div className="flex items-center justify-between border-b-2 border-slate-900 pb-2 mb-8">
+      <div className="flex items-center justify-between border-b-4 border-[#E13131] pb-2.5 mb-8">
         <div className="flex items-center gap-3">
-          <span className="w-1.5 h-6 bg-news-600 rounded-sm" />
-          <h2 className="font-headline text-xl md:text-2xl font-extrabold text-slate-900 m-0">
-            Guides &amp; Explainers
+          <span className="w-3 h-7 bg-[#E13131] inline-block" />
+          <h2 className="font-serif text-2xl md:text-3xl font-black text-slate-900 uppercase tracking-tight m-0">
+            LATEST ARTICLES &amp; REPORTS
           </h2>
         </div>
-        <span className="text-[12px] font-bold uppercase tracking-wider text-slate-500">
-          {articles.length} {articles.length === 1 ? 'article' : 'articles'}
+        <span className="text-[11px] font-black uppercase tracking-widest bg-slate-900 text-white px-3 py-1 rounded-sm">
+          {articles.length} {articles.length === 1 ? 'STORY' : 'STORIES'}
         </span>
       </div>
 

@@ -1,0 +1,91 @@
+{
+  "slug": "mrbeast",
+  "category": "creators",
+  "wikidata_id": "Q57618112",
+  "full_name": "MrBeast",
+  "description": "American YouTuber, media personality and businessman (born 1998)",
+  "birth_date": "1998-05-07",
+  "birth_place": "Wichita",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "US",
+  "citizenship": [
+    "United States"
+  ],
+  "occupations": [
+    "YouTuber",
+    "entrepreneur"
+  ],
+  "education": [
+    {
+      "institution": "East Carolina University"
+    }
+  ],
+  "positions": [],
+  "awards": [
+    {
+      "title": "Silver Play Button",
+      "year": 2016
+    },
+    {
+      "title": "Gold Play Button",
+      "year": 2017
+    },
+    {
+      "title": "Diamond Play Button",
+      "year": 2018
+    },
+    {
+      "title": "Custom Play Button",
+      "year": 2021
+    },
+    {
+      "title": "Forbes 30 Under 30",
+      "year": 2021
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "MrBeast"
+    },
+    {
+      "title": "Team Trees"
+    },
+    {
+      "title": "Team Seas"
+    },
+    {
+      "title": "Feastables"
+    },
+    {
+      "title": "MrBeast Burger"
+    },
+    {
+      "title": "Beast Philanthropy"
+    }
+  ],
+  "social": {
+    "x": "https://x.com/MrBeast",
+    "instagram": "https://www.instagram.com/mrbeast",
+    "facebook": "https://www.facebook.com/MrBeast6000"
+  },
+  "official_website": null,
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q57618112"
+    }
+  ],
+  "photo": {
+    "file": "mrbeast.png",
+    "mime": "image/png",
+    "width": 1000,
+    "height": 1334,
+    "credit": "Tyren Redd / Wikimedia Commons",
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:MrBeast_in_2026_(cropped_4).png"
+  },
+  "fetched_at": "2026-09-21T19:20:06.543Z"
+}

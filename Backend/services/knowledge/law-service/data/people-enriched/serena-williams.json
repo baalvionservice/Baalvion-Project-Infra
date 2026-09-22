@@ -1,0 +1,147 @@
+{
+  "slug": "serena-williams",
+  "category": "athletes",
+  "wikidata_id": "Q11459",
+  "full_name": "Serena Williams",
+  "description": "American tennis player (born 1981)",
+  "birth_date": "1981-09-26",
+  "birth_place": "Saginaw",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "US",
+  "citizenship": [
+    "United States"
+  ],
+  "occupations": [
+    "tennis player",
+    "autobiographer",
+    "actor",
+    "businessperson",
+    "writer",
+    "designer",
+    "athlete"
+  ],
+  "education": [
+    {
+      "institution": "The Art Institute of Fort Lauderdale"
+    },
+    {
+      "institution": "homeschooling"
+    },
+    {
+      "institution": "Isenberg School of Management"
+    }
+  ],
+  "positions": [
+    {
+      "title": "UNICEF Goodwill Ambassador"
+    }
+  ],
+  "awards": [
+    {
+      "title": "Laureus World Sports Award for Sportswoman of the Year",
+      "year": 2000
+    },
+    {
+      "title": "Best Female Tennis Player ESPY Award",
+      "year": 2003
+    },
+    {
+      "title": "Laureus World Sports Award for Sportswoman of the Year",
+      "year": 2003
+    },
+    {
+      "title": "Best Female Athlete ESPY Award",
+      "year": 2003
+    },
+    {
+      "title": "NAACP Image Award – President's Award",
+      "year": 2003
+    },
+    {
+      "title": "Best Female Tennis Player ESPY Award",
+      "year": 2004
+    },
+    {
+      "title": "Laureus World Sports Award for Comeback of the Year",
+      "year": 2007
+    },
+    {
+      "title": "Best Female Tennis Player ESPY Award",
+      "year": 2009
+    },
+    {
+      "title": "Best Female Tennis Player ESPY Award",
+      "year": 2010
+    },
+    {
+      "title": "Laureus World Sports Award for Sportswoman of the Year",
+      "year": 2010
+    },
+    {
+      "title": "Best Female Tennis Player ESPY Award",
+      "year": 2011
+    },
+    {
+      "title": "Best Female Tennis Player ESPY Award",
+      "year": 2013
+    },
+    {
+      "title": "Best Female Athlete ESPY Award",
+      "year": 2013
+    },
+    {
+      "title": "Best Female Tennis Player ESPY Award",
+      "year": 2015
+    },
+    {
+      "title": "Michigan Women's Hall of Fame",
+      "year": 2012
+    },
+    {
+      "title": "California Hall of Fame",
+      "year": 2010
+    },
+    {
+      "title": "L'Équipe Champion of Champions",
+      "year": 2015
+    },
+    {
+      "title": "Associated Press Athlete of the Year",
+      "year": 2002
+    },
+    {
+      "title": "Associated Press Athlete of the Year",
+      "year": 2009
+    },
+    {
+      "title": "Associated Press Athlete of the Year",
+      "year": 2013
+    }
+  ],
+  "notable_works": [],
+  "social": {
+    "x": "https://x.com/serenawilliams",
+    "instagram": "https://www.instagram.com/serenawilliams",
+    "facebook": "https://www.facebook.com/SerenaWilliams"
+  },
+  "official_website": "https://www.serenawilliams.com",
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q11459"
+    }
+  ],
+  "photo": {
+    "file": "serena-williams.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1318,
+    "credit": "Edwin Martinez / Wikimedia Commons",
+    "license": "CC BY 2.0",
+    "license_url": "https://creativecommons.org/licenses/by/2.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Serena_Williams_at_2013_US_Open.jpg"
+  },
+  "fetched_at": "2026-09-21T19:21:04.692Z"
+}

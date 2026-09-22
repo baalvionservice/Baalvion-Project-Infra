@@ -1,0 +1,116 @@
+{
+  "display_name": null,
+  "short_bio": "Actor and director who won Oscars for Glory and Training Day.",
+  "biography": "Denzel Washington was raised in Mount Vernon, New York, and studied at Fordham University. Television came first: he played Dr. Phillip Chandler on St. Elsewhere from 1982 to 1988.\n\nHe won the Best Supporting Actor Oscar for Glory (1989), was nominated for Malcolm X (1992), and won Best Actor for Training Day (2001). He played the football coach Herman Boone in Remember the Titans (2000).\n\nHe directed and starred in Fences (2016), adapted from August Wilson’s play, and received the Presidential Medal of Freedom in 2022.",
+  "awards": [
+    {
+      "title": "Academy Award for Best Supporting Actor",
+      "year": 1990
+    },
+    {
+      "title": "Golden Globe Award for Best Supporting Actor – Motion Picture",
+      "year": 1990
+    },
+    {
+      "title": "Silver Bear for Best Actor",
+      "year": 1993
+    },
+    {
+      "title": "Golden Globe Award for Best Actor – Motion Picture Drama",
+      "year": 2000
+    },
+    {
+      "title": "Silver Bear for Best Actor",
+      "year": 2000
+    },
+    {
+      "title": "Jane Fonda Humanitarian Award",
+      "year": 2001
+    },
+    {
+      "title": "Academy Award for Best Actor",
+      "year": 2002
+    },
+    {
+      "title": "MTV Movie Award for Best Villain",
+      "year": 2002
+    },
+    {
+      "title": "Horatio Alger Award",
+      "year": 2009
+    },
+    {
+      "title": "Tony Award for Best Actor in a Play",
+      "year": 2010
+    },
+    {
+      "title": "Donostia Award",
+      "year": 2014
+    },
+    {
+      "title": "Presidential Medal of Freedom",
+      "year": 2022
+    },
+    {
+      "title": "Presidential Medal of Freedom",
+      "year": 2025
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "Glory",
+      "year": 1989,
+      "note": "Won Best Supporting Actor"
+    },
+    {
+      "title": "Malcolm X",
+      "year": 1992,
+      "note": "Title role"
+    },
+    {
+      "title": "Training Day",
+      "year": 2001,
+      "note": "Won Best Actor"
+    },
+    {
+      "title": "Fences",
+      "year": 2016,
+      "note": "Directed and starred"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1954-12-28",
+      "title": "Born in Mount Vernon, New York"
+    },
+    {
+      "date": "1982",
+      "title": "Joins the cast of St. Elsewhere"
+    },
+    {
+      "date": "1989",
+      "title": "Wins the Oscar for Best Supporting Actor for Glory"
+    },
+    {
+      "date": "2001",
+      "title": "Wins the Oscar for Best Actor for Training Day"
+    },
+    {
+      "date": "2022",
+      "title": "Receives the Presidential Medal of Freedom"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q42101"
+    },
+    {
+      "label": "Wikipedia: Denzel Washington",
+      "url": "https://en.wikipedia.org/wiki/Denzel_Washington"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

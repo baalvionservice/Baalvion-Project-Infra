@@ -13,6 +13,7 @@ export const businessCorporateArticles: LawArticle[] = [
     summary: 'A shareholder agreement is a private contract among a company\'s owners that governs how they share control, profits, and exit rights.',
     author: 'Elena Rossi',
     updatedAt: 'May 14, 2026',
+    modifiedAt: '2026-09-21',
     readingTime: 10,
     views: 0,
     featured: true,
@@ -46,7 +47,7 @@ export const businessCorporateArticles: LawArticle[] = [
 <p>Without contractual protection, a minority stake can be worth little in practice because the majority controls dividends, salaries, and the timing of any sale. Reserved matters, information rights, and tag-along clauses are the usual tools for rebalancing this. Some jurisdictions also offer statutory remedies for "unfair prejudice" or oppression, but litigation is slow and costly, so a clear agreement is the better first line of defense.</p>
 
 <h2>How Rules Vary Across Jurisdictions</h2>
-<p>The concept exists worldwide, but the detail differs. In the United States, shareholder agreements are common in closely held corporations and LLC operating agreements, with rules varying by state. In the United Kingdom, the agreement sits alongside the articles, and a conflict between them is usually resolved by amending the articles by special resolution. Across the European Union, member states apply their own company-law codes, so formalities and enforceability are not uniform. In India, the agreement operates with the Companies Act, and courts have generally enforced transfer restrictions only when they are also reflected in the company\'s articles. The practical lesson is that a clause valid in one country may be unenforceable in another.</p>
+<p>The concept exists worldwide, but the detail differs. In the United States, shareholder agreements are common in closely held corporations and LLC operating agreements, with rules varying by state. In the United Kingdom, the agreement sits alongside the articles, and a conflict between them is usually resolved by amending the articles by special resolution. Across the European Union, member states apply their own company-law codes, so formalities and enforceability are not uniform. In India, the agreement operates alongside the Companies Act, and Indian courts have historically been cautious about transfer restrictions that are not also reflected in the company\'s articles, so enforceability should be checked with Indian counsel. The practical lesson is that a clause valid in one country may be unenforceable in another.</p>
 
 <h2>Common Pitfalls</h2>
 <ul>
@@ -62,7 +63,7 @@ export const businessCorporateArticles: LawArticle[] = [
 <h2>Frequently Asked Questions</h2>
 <p><strong>Do I need a shareholder agreement if the company already has articles of association?</strong> Yes. Articles are typically a public, fairly generic template; a shareholder agreement is private and can go into far more detail on deadlock, valuation, and exit than most standard articles ever address.</p>
 <p><strong>What happens if a new investor never signs the existing agreement?</strong> They are simply not bound by it. Well-drafted agreements require every incoming shareholder to sign a deed of adherence before shares are transferred or newly issued to them, closing this gap.</p>
-<p><strong>Can a shareholder agreement override statutory minority-shareholder protections?</strong> No. It can add extra protection on top of the law, but it cannot remove statutory remedies — such as relief for unfair prejudice or oppression — that legislation grants directly to shareholders.</p>
+<p><strong>Can a shareholder agreement override statutory minority-shareholder protections?</strong> Generally not. It can add extra protection on top of the law, but in most jurisdictions it cannot remove statutory remedies — such as relief for unfair prejudice or oppression — that legislation grants directly to shareholders.</p>
 
 <h2>Sources & Further Reading</h2>
 <ul>
@@ -95,6 +96,7 @@ export const businessCorporateArticles: LawArticle[] = [
     summary: 'Company formation is the legal process of registering a business as a separate entity, choosing a structure that fits liability, tax, and growth needs.',
     author: 'Marcus Hale',
     updatedAt: 'April 22, 2026',
+    modifiedAt: '2026-09-21',
     readingTime: 9,
     views: 0,
     featured: false,
@@ -108,7 +110,7 @@ export const businessCorporateArticles: LawArticle[] = [
 <ul>
 <li><strong>Sole proprietorship:</strong> simplest to start, but the owner is personally liable for all debts.</li>
 <li><strong>Partnership:</strong> two or more owners share profits and, in a general partnership, personal liability.</li>
-<li><strong>Limited liability company:</strong> a flexible entity (an <a href="/business/how-to-form-an-llc-step-by-step">LLC</a> in the US, a private limited company elsewhere) that caps owner liability.</li>
+<li><strong>Limited liability company:</strong> a flexible entity (an <a href="/article/how-to-form-an-llc-step-by-step">LLC</a> in the US, a private limited company elsewhere) that caps owner liability.</li>
 <li><strong>Corporation:</strong> a more formal entity suited to raising capital and issuing shares to many investors.</li>
 </ul>
 <p>Owners weigh limited liability, tax treatment, administrative burden, and credibility with customers and investors when deciding.</p>
@@ -133,7 +135,7 @@ export const businessCorporateArticles: LawArticle[] = [
 </ul>
 
 <h2>How Jurisdictions Differ</h2>
-<p>In the United States, companies are formed under state law, and Delaware is a popular choice for its developed corporate case law; eligible corporations may also elect S corporation tax status for pass-through treatment (see <a href="/business/what-is-an-s-corporation">What Is an S Corporation? How the Tax Election Actually Works</a>). The United Kingdom offers fast, low-cost online incorporation through a single national registry — see <a href="/business/uk-company-formation-companies-house">Forming a Private Limited Company in the UK via Companies House</a> for the Companies House process itself. Canada splits incorporation authority between the federal government and the provinces, a choice with real consequences for where the company can operate (see <a href="/business/federal-vs-provincial-incorporation-canada">Federal vs. Provincial Incorporation in Canada</a>). Australia runs company registration through its national regulator (see <a href="/business/company-registration-australia-asic">Registering a Company in Australia: The ASIC Process</a>). Across the European Union, each member state has its own rules, though several directives have harmonized aspects of disclosure. In India, incorporation is largely digital but involves obtaining director identification and digital signatures first. Founders operating internationally should not assume the cheapest or fastest registry is best; tax residence, where customers are, and where staff sit often matter more.</p>
+<p>In the United States, companies are formed under state law, and Delaware is a popular choice for its developed corporate case law; eligible corporations may also elect S corporation tax status for pass-through treatment (see <a href="/article/what-is-an-s-corporation">What Is an S Corporation? How the Tax Election Actually Works</a>). The United Kingdom offers fast, low-cost online incorporation through a single national registry — see <a href="/article/uk-company-formation-companies-house">Forming a Private Limited Company in the UK via Companies House</a> for the Companies House process itself. Canada splits incorporation authority between the federal government and the provinces, a choice with real consequences for where the company can operate (see <a href="/article/federal-vs-provincial-incorporation-canada">Federal vs. Provincial Incorporation in Canada</a>). Australia runs company registration through its national regulator (see <a href="/article/company-registration-australia-asic">Registering a Company in Australia: The ASIC Process</a>). Across the European Union, each member state has its own rules, though several directives have harmonized aspects of disclosure. In India, incorporation is largely digital and requires digital signature certificates for the proposed directors; director identification numbers can be applied for within the incorporation form itself. Founders operating internationally should not assume the cheapest or fastest registry is best; tax residence, where customers are, and where staff sit often matter more.</p>
 
 <h2>Common Pitfalls</h2>
 <ul>

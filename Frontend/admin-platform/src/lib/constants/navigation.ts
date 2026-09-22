@@ -278,6 +278,7 @@ export const NAVIGATION: NavGroup[] = [
           { title: 'Videos', href: '/law/videos', iconName: 'Clapperboard' },
           { title: 'Podcasts', href: '/law/podcasts', iconName: 'Mic' },
           { title: 'Show people', href: '/law/show-people', iconName: 'Users' },
+          { title: 'Homepage', href: '/law/home-widgets', iconName: 'Image' },
           { title: 'Images',   href: '/law/images', iconName: 'Image' },
         ],
       },

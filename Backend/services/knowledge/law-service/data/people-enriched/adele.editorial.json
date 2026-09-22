@@ -1,0 +1,140 @@
+{
+  "display_name": null,
+  "short_bio": "English singer-songwriter whose albums 21 and 25 were among the best-selling of their decade.",
+  "biography": "Adele Adkins was born in Tottenham, north London, and attended the BRIT School. Her debut album 19 came out in 2008 and she won the Grammy for Best New Artist the following year.\n\n21 (2011) produced Rolling in the Deep and Someone Like You. 25 (2015) opened with Hello. She co-wrote Skyfall, the theme of the 2012 James Bond film, which took the Oscar for Best Original Song.\n\n30 followed in 2021, and she performed a Las Vegas residency, Weekends with Adele, at Caesars Palace from 2022.",
+  "awards": [
+    {
+      "title": "Grammy Award for Best New Artist",
+      "year": 2009
+    },
+    {
+      "title": "Grammy Award for Best Female Pop Vocal Performance",
+      "year": 2009
+    },
+    {
+      "title": "Grammy Award for Best Pop Solo Performance",
+      "year": 2012
+    },
+    {
+      "title": "Grammy Award for Record of the Year",
+      "year": 2012
+    },
+    {
+      "title": "Grammy Award for Album of the Year",
+      "year": 2012
+    },
+    {
+      "title": "Grammy Award for Best Pop Vocal Album",
+      "year": 2012
+    },
+    {
+      "title": "Grammy Award for Best Music Video",
+      "year": 2012
+    },
+    {
+      "title": "Grammy Award for Song of the Year",
+      "year": 2012
+    },
+    {
+      "title": "Broadcast Film Critics Association Award for Best Song",
+      "year": 2012
+    },
+    {
+      "title": "Member of the Order of the British Empire",
+      "year": 2013
+    },
+    {
+      "title": "Academy Award for Best Original Song",
+      "year": 2013
+    },
+    {
+      "title": "Golden Globe Award for Best Original Song",
+      "year": 2013
+    },
+    {
+      "title": "Grammy Award for Best Pop Solo Performance",
+      "year": 2013
+    },
+    {
+      "title": "Grammy Award for Best Song Written for Visual Media",
+      "year": 2014
+    },
+    {
+      "title": "Brit Award for British Female Solo Artist",
+      "year": 2016
+    },
+    {
+      "title": "Grammy Award for Album of the Year",
+      "year": 2017
+    },
+    {
+      "title": "Grammy Award for Best Pop Vocal Album",
+      "year": 2017
+    },
+    {
+      "title": "Grammy Award for Record of the Year",
+      "year": 2017
+    },
+    {
+      "title": "Time 100",
+      "year": 2022
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "19",
+      "year": 2008,
+      "note": "Debut album"
+    },
+    {
+      "title": "21",
+      "year": 2011,
+      "note": "Album"
+    },
+    {
+      "title": "Skyfall",
+      "year": 2012,
+      "note": "Won the Oscar for Best Original Song"
+    },
+    {
+      "title": "30",
+      "year": 2021,
+      "note": "Album"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1988-05-05",
+      "title": "Born in Tottenham, London"
+    },
+    {
+      "date": "2008",
+      "title": "Releases her debut album, 19"
+    },
+    {
+      "date": "2011",
+      "title": "Releases 21"
+    },
+    {
+      "date": "2013",
+      "title": "Skyfall wins the Oscar for Best Original Song"
+    },
+    {
+      "date": "2022",
+      "title": "Begins her Las Vegas residency"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q23215"
+    },
+    {
+      "label": "Wikipedia: Adele",
+      "url": "https://en.wikipedia.org/wiki/Adele"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

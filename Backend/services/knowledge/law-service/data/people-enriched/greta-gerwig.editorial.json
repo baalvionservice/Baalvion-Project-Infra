@@ -1,0 +1,88 @@
+{
+  "display_name": null,
+  "short_bio": "Actor-turned-director of Lady Bird, Little Women and Barbie.",
+  "biography": "Greta Gerwig was born in Sacramento, California, and studied at Barnard College. She first worked with the director Noah Baumbach on Frances Ha (2012), which they co-wrote.\n\nLady Bird (2017), her first film as sole director, earned Oscar nominations for Best Picture and Best Director, and she followed it with Little Women (2019). With Baumbach she co-wrote Barbie (2023), which she directed and which took more than a billion dollars at the box office.\n\nShe was president of the jury at the 2024 Berlin International Film Festival.",
+  "awards": [
+    {
+      "title": "National Board of Review Award for Best Director",
+      "year": 2017
+    },
+    {
+      "title": "Independent Spirit Award for Best Screenplay",
+      "year": 2018
+    },
+    {
+      "title": "Time 100",
+      "year": 2018
+    },
+    {
+      "title": "Critics' Choice Movie Award for Best Original and Adapted Screenplay",
+      "year": 2020
+    },
+    {
+      "title": "Critics' Choice Movie Award for Best Original and Adapted Screenplay",
+      "year": 2024
+    },
+    {
+      "title": "Women of the Year",
+      "year": 2024
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "Frances Ha",
+      "year": 2012,
+      "note": "Co-wrote and starred"
+    },
+    {
+      "title": "Lady Bird",
+      "year": 2017,
+      "note": "Directed and wrote"
+    },
+    {
+      "title": "Little Women",
+      "year": 2019,
+      "note": "Directed and adapted"
+    },
+    {
+      "title": "Barbie",
+      "year": 2023,
+      "note": "Directed and co-wrote"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1983-08-04",
+      "title": "Born in Sacramento, California"
+    },
+    {
+      "date": "2012",
+      "title": "Co-writes and stars in Frances Ha"
+    },
+    {
+      "date": "2017",
+      "title": "Directs Lady Bird"
+    },
+    {
+      "date": "2019",
+      "title": "Directs Little Women"
+    },
+    {
+      "date": "2023",
+      "title": "Directs Barbie"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q271967"
+    },
+    {
+      "label": "Wikipedia: Greta Gerwig",
+      "url": "https://en.wikipedia.org/wiki/Greta_Gerwig"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

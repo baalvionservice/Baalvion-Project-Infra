@@ -8,6 +8,9 @@ module.exports = (sequelize, DataTypes) =>
         country_code: DataTypes.STRING(2),
         description: { type: DataTypes.TEXT, defaultValue: '' },
         url: DataTypes.STRING(500),
+        // The court whose rulings this one reviews on appeal -- optional,
+        // one level at a time (walk it repeatedly for a full chain).
+        appeals_from_court_slug: DataTypes.STRING(200),
         published: { type: DataTypes.BOOLEAN, defaultValue: false },
         indexable: { type: DataTypes.BOOLEAN, defaultValue: false },
         archived: { type: DataTypes.BOOLEAN, defaultValue: false },

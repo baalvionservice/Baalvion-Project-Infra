@@ -1,0 +1,87 @@
+{
+  "slug": "hank-green",
+  "category": "creators",
+  "wikidata_id": "Q550996",
+  "full_name": "Hank Green",
+  "description": "American author, vlogger, and science communicator",
+  "birth_date": "1980-05-05",
+  "birth_place": "Birmingham",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "US",
+  "citizenship": [
+    "United States"
+  ],
+  "occupations": [
+    "YouTuber",
+    "podcaster",
+    "songwriter",
+    "businessperson",
+    "teacher",
+    "inventor",
+    "writer",
+    "novelist",
+    "environmentalist",
+    "television producer",
+    "science communicator",
+    "blogger",
+    "entrepreneur",
+    "singer",
+    "comedian",
+    "writer"
+  ],
+  "education": [
+    {
+      "institution": "Eckerd College"
+    },
+    {
+      "institution": "University of Montana"
+    },
+    {
+      "institution": "Winter Park High School"
+    }
+  ],
+  "positions": [],
+  "awards": [],
+  "notable_works": [
+    {
+      "title": "Vlogbrothers"
+    },
+    {
+      "title": "Crash Course"
+    },
+    {
+      "title": "SciShow"
+    },
+    {
+      "title": "An Absolutely Remarkable Thing"
+    },
+    {
+      "title": "A Beautifully Foolish Endeavor"
+    }
+  ],
+  "social": {
+    "x": "https://x.com/hankgreen",
+    "instagram": "https://www.instagram.com/hankgreen",
+    "facebook": "https://www.facebook.com/hankgreen"
+  },
+  "official_website": "http://hankgreen.com/",
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q550996"
+    }
+  ],
+  "photo": {
+    "file": "hank-green.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1250,
+    "credit": "Tessa Bury / Wikimedia Commons",
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Hank_Green_Headshot.jpg"
+  },
+  "fetched_at": "2026-09-21T19:24:01.889Z"
+}

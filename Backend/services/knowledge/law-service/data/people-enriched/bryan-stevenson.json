@@ -1,0 +1,112 @@
+{
+  "slug": "bryan-stevenson",
+  "category": "lawyers",
+  "wikidata_id": "Q2698978",
+  "full_name": "Bryan Stevenson",
+  "description": "American lawyer, social reformer and academic",
+  "birth_date": "1959-11-14",
+  "birth_place": "Milton",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "US",
+  "citizenship": [
+    "United States"
+  ],
+  "occupations": [
+    "jurist",
+    "lawyer",
+    "writer",
+    "founder",
+    "social reformer",
+    "academic",
+    "university teacher"
+  ],
+  "education": [
+    {
+      "institution": "John F. Kennedy School of Government"
+    },
+    {
+      "institution": "Harvard Law School"
+    },
+    {
+      "institution": "Eastern University"
+    },
+    {
+      "institution": "Cape Henlopen High School"
+    }
+  ],
+  "positions": [],
+  "awards": [
+    {
+      "title": "MacArthur Fellows Program",
+      "year": 1995
+    },
+    {
+      "title": "Olof Palme Prize",
+      "year": 2000
+    },
+    {
+      "title": "Four Freedoms Award – Freedom from Fear"
+    },
+    {
+      "title": "Gruber Prize for Justice",
+      "year": 2009
+    },
+    {
+      "title": "Reebok Human Rights Award",
+      "year": 1989
+    },
+    {
+      "title": "Lannan Cultural Freedom Prize",
+      "year": 2014
+    },
+    {
+      "title": "honorary doctor of Harvard University",
+      "year": 2015
+    },
+    {
+      "title": "Right Livelihood Award",
+      "year": 2020
+    },
+    {
+      "title": "honorary doctor of the University of Miami",
+      "year": 2019
+    },
+    {
+      "title": "honorary doctorate from Princeton University"
+    },
+    {
+      "title": "honorary degree from Spelman College",
+      "year": 2018
+    },
+    {
+      "title": "National Humanities Medal",
+      "year": 2021
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "Just Mercy"
+    }
+  ],
+  "social": {},
+  "official_website": "http://bryanstevenson.com/",
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q2698978"
+    }
+  ],
+  "photo": {
+    "file": "bryan-stevenson.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1417,
+    "credit": "James Duncan Davidson / Wikimedia Commons",
+    "license": "CC BY-SA 3.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Bryan_Stevenson_in_2012_(cropped).jpg"
+  },
+  "fetched_at": "2026-09-21T19:27:16.040Z"
+}

@@ -73,10 +73,11 @@ export function CaseForm({ legalCase }: { legalCase?: CaseRecord }) {
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="court_slug">Court</Label>
-            <select id="court_slug" required className={SELECT} value={text('court_slug')} onChange={(e) => set('court_slug', e.target.value)}>
-              <option value="">Choose a court…</option>
+            <select id="court_slug" className={SELECT} value={text('court_slug')} onChange={(e) => set('court_slug', e.target.value || null)}>
+              <option value="">Not yet known / none</option>
               {courts.map((c) => <option key={c.slug} value={c.slug}>{c.name}</option>)}
             </select>
+            <p className="text-xs text-muted-foreground">Optional — leave blank for something like an arrest, before any court is on record. Add it once known, and use the timeline below if the case later moves to another court.</p>
           </div>
           <div className="space-y-1.5"><Label htmlFor="status">Status</Label><select id="status" className={SELECT} value={text('status')} onChange={(e) => set('status', e.target.value)}>{CASE_STATUSES.map((s) => <option key={s}>{s}</option>)}</select></div>
           <div className="space-y-1.5"><Label htmlFor="country_code">Country (2-letter code)</Label><Input id="country_code" maxLength={2} value={text('country_code')} onChange={(e) => set('country_code', e.target.value.toUpperCase() || null)} /></div>
@@ -102,7 +103,18 @@ export function CaseForm({ legalCase }: { legalCase?: CaseRecord }) {
         <CardHeader><CardTitle>Dates and documents</CardTitle></CardHeader>
         <CardContent className="space-y-6">
           <ListEditor label="Important dates" hint="YYYY, YYYY-MM or YYYY-MM-DD." columns={[{ key: 'date', label: 'Date', width: 'w-36' }, { key: 'label', label: 'e.g. Decided' }]} rows={(v.important_dates ?? []) as Row[]} onChange={(r) => set('important_dates', r)} />
-          <ListEditor label="Timeline" columns={[{ key: 'date', label: 'Date', width: 'w-36' }, { key: 'title', label: 'What happened' }, { key: 'description', label: 'Detail (optional)' }]} rows={(v.timeline ?? []) as Row[]} onChange={(r) => set('timeline', r)} />
+          <ListEditor
+            label="Timeline"
+            hint="Set a court on a step when it happened at a different court than the one above (e.g. an appeal) — that's what lets a case's real path through multiple courts show up on each court's own page."
+            columns={[
+              { key: 'date', label: 'Date', width: 'w-36' },
+              { key: 'title', label: 'What happened' },
+              { key: 'description', label: 'Detail (optional)' },
+              { key: 'courtSlug', label: 'Court for this step (optional)', type: 'select', width: 'w-56', options: courts.map((c) => ({ value: c.slug, label: c.name })) },
+            ]}
+            rows={(v.timeline ?? []) as Row[]}
+            onChange={(r) => set('timeline', r)}
+          />
           <ListEditor label="Documents" hint="Only real, public sources: judgments, filings, rulings. https links only." columns={[{ key: 'title', label: 'Title' }, { key: 'type', label: 'Type, e.g. Opinion', width: 'w-44' }, { key: 'url', label: 'https://…', type: 'url' }]} rows={(v.documents ?? []) as Row[]} onChange={(r) => set('documents', r)} />
           <div className="space-y-1.5">
             <Label htmlFor="related">Related articles (slugs, comma separated)</Label>

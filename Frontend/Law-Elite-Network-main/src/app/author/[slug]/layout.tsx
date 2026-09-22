@@ -92,7 +92,8 @@ export default async function AuthorLayout(
     '@type': 'Person',
     name: a.name,
     url,
-    image,
+    // A data: URI is not a fetchable image URL for structured data (bundled authors have no portrait).
+    image: image && !image.startsWith('data:') ? image : undefined,
     jobTitle: a.title || undefined,
     description: a.bio || undefined,
     knowsAbout: a.expertise && a.expertise.length ? a.expertise : undefined,

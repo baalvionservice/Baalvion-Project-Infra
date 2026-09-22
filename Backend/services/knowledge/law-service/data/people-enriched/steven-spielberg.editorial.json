@@ -1,0 +1,128 @@
+{
+  "display_name": null,
+  "short_bio": "Film director and producer of Jaws, E.T., Schindler’s List and Saving Private Ryan.",
+  "biography": "Steven Spielberg was born in Cincinnati, Ohio, and made amateur films as a boy. After the television film Duel (1971) and The Sugarland Express (1974), Jaws (1975) established the summer blockbuster.\n\nClose Encounters of the Third Kind came in 1977, then Raiders of the Lost Ark in 1981 and E.T. in 1982. Schindler’s List (1993) won Best Picture and Best Director, and he won Best Director again for Saving Private Ryan (1998).\n\nIn 1994 he co-founded DreamWorks with Jeffrey Katzenberg and David Geffen and also set up the Shoah Foundation, which records testimony from Holocaust survivors. The Fabelmans (2022) draws on his own childhood.",
+  "awards": [
+    {
+      "title": "National Society of Film Critics Award for Best Director",
+      "year": 1982
+    },
+    {
+      "title": "Boston Society of Film Critics Award for Best Director",
+      "year": 1983
+    },
+    {
+      "title": "BAFTA Award for Best Film",
+      "year": 1993
+    },
+    {
+      "title": "New York Film Critics Circle Award for Best Film",
+      "year": 1993
+    },
+    {
+      "title": "National Society of Film Critics Award for Best Director",
+      "year": 1993
+    },
+    {
+      "title": "Academy Award for Best Director",
+      "year": 1994
+    },
+    {
+      "title": "Academy Award for Best Picture",
+      "year": 1994
+    },
+    {
+      "title": "Saturn Award for Best Director",
+      "year": 1994
+    },
+    {
+      "title": "Knight Commander's Cross of the Order of Merit of the Federal Republic of Germany",
+      "year": 1998
+    },
+    {
+      "title": "Golden Globe Award for Best Director",
+      "year": 1998
+    },
+    {
+      "title": "National Humanities Medal",
+      "year": 1999
+    },
+    {
+      "title": "Academy Award for Best Director",
+      "year": 1999
+    },
+    {
+      "title": "Critics' Choice Movie Award for Best Director",
+      "year": 2002
+    },
+    {
+      "title": "Saturn Award for Best Director",
+      "year": 2003
+    },
+    {
+      "title": "Kennedy Center Honors",
+      "year": 2006
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "Jaws",
+      "year": 1975,
+      "note": "Directed"
+    },
+    {
+      "title": "E.T. the Extra-Terrestrial",
+      "year": 1982,
+      "note": "Directed"
+    },
+    {
+      "title": "Schindler’s List",
+      "year": 1993,
+      "note": "Won Best Picture and Best Director"
+    },
+    {
+      "title": "Saving Private Ryan",
+      "year": 1998,
+      "note": "Won Best Director"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1946-12-18",
+      "title": "Born in Cincinnati, Ohio"
+    },
+    {
+      "date": "1975",
+      "title": "Directs Jaws"
+    },
+    {
+      "date": "1993",
+      "title": "Wins Best Picture and Best Director for Schindler’s List"
+    },
+    {
+      "date": "1994",
+      "title": "Co-founds DreamWorks and the Shoah Foundation"
+    },
+    {
+      "date": "1998",
+      "title": "Wins Best Director for Saving Private Ryan"
+    },
+    {
+      "date": "2022",
+      "title": "Releases The Fabelmans"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q8877"
+    },
+    {
+      "label": "Wikipedia: Steven Spielberg",
+      "url": "https://en.wikipedia.org/wiki/Steven_Spielberg"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

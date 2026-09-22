@@ -1,0 +1,83 @@
+{
+  "slug": "clarence-thomas",
+  "category": "judges",
+  "wikidata_id": "Q11142",
+  "full_name": "Clarence Thomas",
+  "description": "Associate Justice of the Supreme Court of the United States since 1991",
+  "birth_date": "1948-06-23",
+  "birth_place": "Pin Point",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "US",
+  "citizenship": [
+    "United States"
+  ],
+  "occupations": [
+    "judge",
+    "lawyer",
+    "politician",
+    "jurist"
+  ],
+  "education": [
+    {
+      "institution": "Conception Abbey"
+    },
+    {
+      "institution": "College of the Holy Cross"
+    },
+    {
+      "institution": "Yale Law School"
+    },
+    {
+      "institution": "St. Pius X Catholic High School"
+    },
+    {
+      "institution": "Saint Louis University School of Law"
+    }
+  ],
+  "positions": [
+    {
+      "title": "Judge of the United States Court of Appeals for the D.C. Circuit",
+      "start": 1990
+    },
+    {
+      "title": "Associate Justice of the Supreme Court of the United States",
+      "start": 1991
+    }
+  ],
+  "awards": [
+    {
+      "title": "Francis Boyer Award",
+      "year": 2001
+    },
+    {
+      "title": "Horatio Alger Award",
+      "year": 1992
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "My Grandfather's Son"
+    }
+  ],
+  "social": {},
+  "official_website": null,
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q11142"
+    }
+  ],
+  "photo": {
+    "file": "clarence-thomas.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1375,
+    "credit": "Steve Petteway, Collection of the Supreme Court of the United States / Wikimedia Commons",
+    "license": "Public domain",
+    "license_url": null,
+    "source_url": "https://commons.wikimedia.org/wiki/File:Clarence_Thomas_official_SCOTUS_portrait.jpg"
+  },
+  "fetched_at": "2026-09-21T19:24:33.924Z"
+}

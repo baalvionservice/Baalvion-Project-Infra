@@ -1,0 +1,77 @@
+{
+  "slug": "jimmy-fallon",
+  "category": "tv-personalities",
+  "wikidata_id": "Q335680",
+  "full_name": "Jimmy Fallon",
+  "description": "American talk show host and comedian (born 1974)",
+  "birth_date": "1974-09-19",
+  "birth_place": "Brooklyn",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "US",
+  "citizenship": [
+    "United States"
+  ],
+  "occupations": [
+    "actor",
+    "television presenter",
+    "writer",
+    "comedian",
+    "television actor",
+    "screenwriter",
+    "film actor",
+    "voice actor",
+    "television producer",
+    "talk show host",
+    "filmmaker",
+    "singer",
+    "musician"
+  ],
+  "education": [
+    {
+      "institution": "The College of Saint Rose"
+    },
+    {
+      "institution": "Saugerties High School"
+    }
+  ],
+  "positions": [],
+  "awards": [
+    {
+      "title": "Primetime Emmy Award for Outstanding Guest Actor in a Comedy Series",
+      "year": 2012
+    },
+    {
+      "title": "Primetime Emmy Award for Outstanding Guest Actor in a Comedy Series",
+      "year": 2014
+    },
+    {
+      "title": "Diamond Play Button"
+    }
+  ],
+  "notable_works": [],
+  "social": {
+    "x": "https://x.com/jimmyfallon",
+    "instagram": "https://www.instagram.com/jimmyfallon",
+    "facebook": "https://www.facebook.com/JimmyFallon"
+  },
+  "official_website": null,
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q335680"
+    }
+  ],
+  "photo": {
+    "file": "jimmy-fallon.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1425,
+    "credit": "Montclair Film Festival / Wikimedia Commons",
+    "license": "CC BY 2.0",
+    "license_url": "https://creativecommons.org/licenses/by/2.0",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Jimmy_Fallon,_Montclair_Film_Festival,_2013.jpg"
+  },
+  "fetched_at": "2026-09-21T19:19:12.109Z"
+}

@@ -1,0 +1,124 @@
+{
+  "display_name": null,
+  "short_bio": "Songwriter who received the 2016 Nobel Prize in Literature.",
+  "biography": "Bob Dylan was born Robert Allen Zimmerman in Duluth, Minnesota, in 1941 and moved to New York City in 1961. His second album, The Freewheelin’ Bob Dylan (1963), carried songs that became anthems of the civil rights era.\n\nIn 1965 he moved to electric instruments with Bringing It All Back Home and Highway 61 Revisited, and his amplified set at that year’s Newport Folk Festival divided the audience. A motorcycle accident in 1966 interrupted his touring. Blood on the Tracks followed in 1975.\n\nThe Swedish Academy gave him the 2016 Nobel Prize in Literature, the first time the prize went to a songwriter, for the poetry he had brought to American song. He received the Presidential Medal of Freedom in 2012.",
+  "awards": [
+    {
+      "title": "Grammy Award for Album of the Year",
+      "year": 1973
+    },
+    {
+      "title": "Grammy Award for Best Male Rock Vocal Performance",
+      "year": 1980
+    },
+    {
+      "title": "Rock and Roll Hall of Fame",
+      "year": 1988
+    },
+    {
+      "title": "Grammy Award for Best Rock Performance by a Duo or Group with Vocal",
+      "year": 1990
+    },
+    {
+      "title": "Grammy Lifetime Achievement Award",
+      "year": 1991
+    },
+    {
+      "title": "Grammy Award for Best Traditional Folk Album",
+      "year": 1995
+    },
+    {
+      "title": "Kennedy Center Honors",
+      "year": 1997
+    },
+    {
+      "title": "Grammy Award for Best Contemporary Folk Album",
+      "year": 1998
+    },
+    {
+      "title": "Grammy Award for Album of the Year",
+      "year": 1998
+    },
+    {
+      "title": "Grammy Award for Best Male Rock Vocal Performance",
+      "year": 1998
+    },
+    {
+      "title": "Academy Award for Best Original Song",
+      "year": 2001
+    },
+    {
+      "title": "Princess of Asturias Award for the Arts",
+      "year": 2007
+    },
+    {
+      "title": "National Medal of Arts",
+      "year": 2009
+    },
+    {
+      "title": "Presidential Medal of Freedom",
+      "year": 2012
+    },
+    {
+      "title": "Nobel Prize in Literature",
+      "year": 2016
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "The Freewheelin’ Bob Dylan",
+      "year": 1963,
+      "note": "Album"
+    },
+    {
+      "title": "Highway 61 Revisited",
+      "year": 1965,
+      "note": "Album"
+    },
+    {
+      "title": "Blood on the Tracks",
+      "year": 1975,
+      "note": "Album"
+    },
+    {
+      "title": "Chronicles: Volume One",
+      "year": 2004,
+      "note": "Memoir"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1941-05-24",
+      "title": "Born in Duluth, Minnesota"
+    },
+    {
+      "date": "1961",
+      "title": "Moves to New York City"
+    },
+    {
+      "date": "1965",
+      "title": "Plays an electric set at the Newport Folk Festival"
+    },
+    {
+      "date": "2012",
+      "title": "Receives the Presidential Medal of Freedom"
+    },
+    {
+      "date": "2016",
+      "title": "Awarded the Nobel Prize in Literature"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q392"
+    },
+    {
+      "label": "Wikipedia: Bob Dylan",
+      "url": "https://en.wikipedia.org/wiki/Bob_Dylan"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

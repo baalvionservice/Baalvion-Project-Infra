@@ -1,0 +1,140 @@
+{
+  "display_name": null,
+  "short_bio": "British broadcaster and naturalist whose BBC series have defined the nature documentary.",
+  "biography": "David Attenborough studied natural sciences at Clare College, Cambridge, and joined the BBC in 1952. Zoo Quest, which began in 1954, took him on animal-collecting expeditions.\n\nAs controller of BBC Two from 1965 he helped launch colour television in Britain. He left management to make Life on Earth (1979), followed by The Living Planet, The Blue Planet (2001), Planet Earth (2006) and Blue Planet II (2017).\n\nHe was later knighted. His brother was the actor and director Richard Attenborough.",
+  "awards": [
+    {
+      "title": "Cherry Kearton Medal and Award",
+      "year": 1972
+    },
+    {
+      "title": "Commander of the Order of the British Empire",
+      "year": 1974
+    },
+    {
+      "title": "Kalinga Prize",
+      "year": 1981
+    },
+    {
+      "title": "Founder’s Medal",
+      "year": 1985
+    },
+    {
+      "title": "Benjamin Franklin Medal",
+      "year": 1990
+    },
+    {
+      "title": "Commander of the Royal Victorian Order",
+      "year": 1991
+    },
+    {
+      "title": "Companion of Honour",
+      "year": 1996
+    },
+    {
+      "title": "Natural World Book Prize",
+      "year": 1998
+    },
+    {
+      "title": "Fellow of the Zoological Society of London",
+      "year": 1998
+    },
+    {
+      "title": "Fellow of the Linnean Society of London",
+      "year": 1999
+    },
+    {
+      "title": "International Cosmos Prize",
+      "year": 2000
+    },
+    {
+      "title": "Fellow of the Royal Society of Biology",
+      "year": 2000
+    },
+    {
+      "title": "Michael Faraday Prize",
+      "year": 2003
+    },
+    {
+      "title": "Nierenberg Prize",
+      "year": 2005
+    },
+    {
+      "title": "Order of Merit",
+      "year": 2005
+    },
+    {
+      "title": "Linnean Tercentenary Medal",
+      "year": 2007
+    },
+    {
+      "title": "Fellow of the Society of Antiquaries",
+      "year": 2007
+    },
+    {
+      "title": "Corresponding Member of the Australian Academy of Science",
+      "year": 2008
+    },
+    {
+      "title": "Princess of Asturias Award for Social Sciences",
+      "year": 2009
+    },
+    {
+      "title": "Bodley Medal",
+      "year": 2015
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "Zoo Quest",
+      "year": 1954,
+      "note": "BBC series"
+    },
+    {
+      "title": "Life on Earth",
+      "year": 1979,
+      "note": "BBC series"
+    },
+    {
+      "title": "Planet Earth",
+      "year": 2006,
+      "note": "BBC series"
+    },
+    {
+      "title": "Blue Planet II",
+      "year": 2017,
+      "note": "BBC series"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "1926-05-08",
+      "title": "Born in Isleworth, London"
+    },
+    {
+      "date": "1952",
+      "title": "Joins the BBC"
+    },
+    {
+      "date": "1965",
+      "title": "Becomes controller of BBC Two"
+    },
+    {
+      "date": "1979",
+      "title": "Life on Earth is broadcast"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q183337"
+    },
+    {
+      "label": "Wikipedia: David Attenborough",
+      "url": "https://en.wikipedia.org/wiki/David_Attenborough"
+    }
+  ],
+  "source_note": "Facts drawn from Wikidata and cross-checked against Wikipedia; biography written for Law Elite Network. Photo licensed via Wikimedia Commons, credit shown on the page.",
+  "published": true,
+  "indexable": true
+}

@@ -34,6 +34,24 @@ export const SPORTS_TEAMS: SportsTeam[] = [
     url: 'https://www.nba.com/heat',
     verification: { verified: true, sourceNote: 'Long-settled public record — independent reference entry, not affiliated with the team or the NBA.' },
   },
+  {
+    slug: 'inter-miami-cf',
+    name: 'Inter Miami CF',
+    sport: 'Soccer',
+    countryCode: 'US',
+    description: 'Major League Soccer club based in Fort Lauderdale, Florida, featuring landmark international player equity contracts.',
+    url: 'https://www.intermiamicf.com',
+    verification: { verified: true, sourceNote: 'Official MLS records.' },
+  },
+  {
+    slug: 'real-madrid-cf',
+    name: 'Real Madrid CF',
+    sport: 'Soccer',
+    countryCode: 'ES',
+    description: 'Renowned Spanish football club operating landmark international image rights and UEFA competition frameworks.',
+    url: 'https://www.realmadrid.com',
+    verification: { verified: true, sourceNote: 'Official La Liga & UEFA records.' },
+  },
 ];
 
 export function getAllSportsTeams(): SportsTeam[] {

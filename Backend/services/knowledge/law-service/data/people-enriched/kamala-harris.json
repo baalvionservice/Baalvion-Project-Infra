@@ -1,0 +1,136 @@
+{
+  "slug": "kamala-harris",
+  "category": "lawyers",
+  "wikidata_id": "Q10853588",
+  "full_name": "Kamala Harris",
+  "description": "Vice President of the United States from 2021 to 2025",
+  "birth_date": "1964-10-20",
+  "birth_place": "Oakland Medical Center",
+  "death_date": null,
+  "death_place": null,
+  "status": "active",
+  "country_code": "US",
+  "citizenship": [
+    "United States"
+  ],
+  "occupations": [
+    "politician",
+    "lawyer",
+    "prosecutor",
+    "writer",
+    "presidential candidate",
+    "jurist",
+    "public prosecutor general"
+  ],
+  "education": [
+    {
+      "institution": "University of California College of the Law, San Francisco"
+    },
+    {
+      "institution": "Howard University"
+    },
+    {
+      "institution": "Westmount High School"
+    },
+    {
+      "institution": "F.A.C.E. School"
+    }
+  ],
+  "positions": [
+    {
+      "title": "justice minister"
+    },
+    {
+      "title": "deputy district attorney",
+      "start": 1990,
+      "end": 1998
+    },
+    {
+      "title": "San Francisco District Attorney",
+      "start": 2004,
+      "end": 2011
+    },
+    {
+      "title": "Attorney General of California",
+      "start": 2011,
+      "end": 2017
+    },
+    {
+      "title": "United States senator",
+      "start": 2017,
+      "end": 2019
+    },
+    {
+      "title": "United States senator",
+      "start": 2019,
+      "end": 2021
+    },
+    {
+      "title": "vice-president-elect",
+      "start": 2020,
+      "end": 2021
+    },
+    {
+      "title": "United States senator",
+      "start": 2021,
+      "end": 2021
+    },
+    {
+      "title": "Vice President of the United States",
+      "start": 2021,
+      "end": 2025
+    }
+  ],
+  "awards": [
+    {
+      "title": "Thurgood Marshall Award",
+      "year": 2005
+    },
+    {
+      "title": "honorary doctor of the University of Southern California",
+      "year": 2015
+    },
+    {
+      "title": "honorary doctor of the Howard University",
+      "year": 2017
+    },
+    {
+      "title": "Time 100",
+      "year": 2021
+    }
+  ],
+  "notable_works": [
+    {
+      "title": "The Truths We Hold"
+    },
+    {
+      "title": "Superheroes Are Everywhere"
+    },
+    {
+      "title": "Smart on Crime"
+    }
+  ],
+  "social": {
+    "x": "https://x.com/KamalaHarris",
+    "instagram": "https://www.instagram.com/kamalaharris",
+    "facebook": "https://www.facebook.com/KamalaHarris"
+  },
+  "official_website": "https://www.whitehouse.gov/administration/vice-president-harris/",
+  "sources": [
+    {
+      "label": "Wikidata",
+      "url": "https://www.wikidata.org/wiki/Q10853588"
+    }
+  ],
+  "photo": {
+    "file": "kamala-harris.jpg",
+    "mime": "image/jpeg",
+    "width": 1000,
+    "height": 1250,
+    "credit": "Lawrence Jackson / Wikimedia Commons",
+    "license": "Public domain",
+    "license_url": null,
+    "source_url": "https://commons.wikimedia.org/wiki/File:Kamala_Harris_Vice_Presidential_Portrait.jpg"
+  },
+  "fetched_at": "2026-09-21T19:26:55.155Z"
+}
