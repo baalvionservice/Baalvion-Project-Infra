@@ -26,6 +26,15 @@ export function CategoryContent({ categorySlug, categoryId, cmsArticles = [], bu
   const [articlesLoading, setArticlesLoading] = useState(true);
 
   useEffect(() => {
+    // CMS-only categories (entertainment pillar: movies, music, television, streaming,
+    // celebrity-news) use a synthetic string id like "cms-cat-movies" -- there is no
+    // matching numeric category_id in law-service's legacy Article model, so this
+    // fetch would always 500 there. Skip it; cmsArticles/bundledArticles already
+    // cover those categories.
+    if (!categoryId || !Number.isFinite(Number(categoryId))) {
+      setArticlesLoading(false);
+      return;
+    }
     articlesPublicApi
       .list({ categoryId, sortBy: 'views', order: 'desc', status: 'published' })
       .then((r) => setApiArticles(r.data?.data?.items || r.data?.data || []))

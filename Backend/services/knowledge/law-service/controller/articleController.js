@@ -19,8 +19,12 @@ const listArticles = async (req, res, next) => {
         }
 
         if (alphabet) where.alphabet = alphabet.toUpperCase().charAt(0);
-        if (categoryId) where.category_id = Number(categoryId);
-        if (subcategoryId) where.subcategory_id = Number(subcategoryId);
+        // Number(categoryId) on a non-numeric id (e.g. a CMS-only category's synthetic
+        // "cms-cat-movies" string) produces NaN, which Postgres rejects when Sequelize
+        // binds it -- crashing the whole request with a 500 instead of just finding no
+        // rows. Only apply the filter when it actually resolves to a real integer id.
+        if (categoryId && Number.isFinite(Number(categoryId))) where.category_id = Number(categoryId);
+        if (subcategoryId && Number.isFinite(Number(subcategoryId))) where.subcategory_id = Number(subcategoryId);
         if (search) {
             where[Op.or] = [
                 { title: { [Op.iLike]: `%${search}%` } },
