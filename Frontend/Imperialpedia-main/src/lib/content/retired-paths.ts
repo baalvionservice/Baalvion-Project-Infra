@@ -28,6 +28,7 @@ export const RETIRED_TOP_LEVEL_SLUGS: readonly string[] = [
   "credit-cards",
   "crypto",
   "cryptocurrency",
+  "datasets",
   "debt",
   "earnings",
   "economy",
@@ -44,6 +45,7 @@ export const RETIRED_TOP_LEVEL_SLUGS: readonly string[] = [
   "indicators",
   "inflation",
   "interest-rates",
+  "learning-paths",
   "live-market-news",
   "loan-reviews",
   "loans",
@@ -62,6 +64,7 @@ export const RETIRED_TOP_LEVEL_SLUGS: readonly string[] = [
   "real-estate",
   "retirement",
   "saving-money",
+  "savings",
   "student-budget",
   "student-loans",
   "tax-software",
@@ -109,6 +112,18 @@ export function withoutRetired<T extends { href: string }>(items: readonly T[]):
 const CANONICAL_PREFIX_REWRITES: ReadonlyArray<[RegExp, string]> = [
   [/^\/articles\/(?=.)/, "/financial-intelligence/"],
   [/^\/budgeting(?=\/|$)/, "/budgeting-basics"],
+  [/^\/scams-and-fraud-protection(?=\/|$)/, "/fraud-protection"],
+  // 2026-09-23: Creator Economy consolidation — "Creator Business Guides" and
+  // "Creator Tools & Calculators" were two thin, overlapping category buckets
+  // slicing the same 21-article pool (see creator-economy-topics.ts); merged
+  // into one "Creator Business & Tools" page at the surviving /creator-tools
+  // slug. Content isn't retired, just consolidated — same treatment as
+  // /budgeting above.
+  [/^\/creator-guides(?=\/|$)/, "/creator-tools"],
+  // "Social Media Earnings" (TikTok/Facebook/X) folded into Instagram
+  // Monetization for the same reason — same pool, overlapping keywords, not
+  // enough genuinely distinct articles to stand alone.
+  [/^\/social-media-earnings(?=\/|$)/, "/instagram-monetization"],
 ];
 
 /**

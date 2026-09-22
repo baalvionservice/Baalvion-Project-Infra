@@ -67,15 +67,16 @@ const ALL_NAV: NavCategory[] = [
     label: "Creator Economy",
     // Added 2026-09-11 — top-level hub for YouTube/Instagram/website earnings,
     // monetization guides, and platform policy coverage.
+    // 2026-09-23: consolidated from 6 subtopics to 4 — "Social Media Earnings"
+    // folded into Instagram, "Creator Business Guides" folded into Tools —
+    // see creator-economy-topics.ts and next.config.ts's redirects.
     href: "/creator-economy",
     links: [
       { label: "Creator Economy Hub", href: "/creator-economy" },
       { label: "YouTube Earnings & Monetization", href: "/youtube-monetization" },
-      { label: "Instagram Earnings & Monetization", href: "/instagram-monetization" },
+      { label: "Instagram & Social Media Earnings", href: "/instagram-monetization" },
       { label: "Website Earnings & Monetization", href: "/website-monetization" },
-      { label: "Social Media Earnings", href: "/social-media-earnings" },
-      { label: "Creator Business Guides", href: "/creator-guides" },
-      { label: "Tools & Calculators", href: "/creator-tools" },
+      { label: "Creator Business & Tools", href: "/creator-tools" },
     ],
   },
 ];

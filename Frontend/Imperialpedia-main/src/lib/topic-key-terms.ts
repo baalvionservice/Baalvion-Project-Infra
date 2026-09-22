@@ -1016,6 +1016,22 @@ export const TOPIC_KEY_TERMS: Record<string, KeyTermItem[]> = {
       definition: "The percentage of a creator's follower base that actively likes, comments, saves, or shares content—a primary metric used by brands to calculate deal rates.",
       href: "/how-instagram-pays-creators",
     },
+    // 2026-09-23: absorbed from the former "social-media-earnings" bucket.
+    {
+      term: "TikTok Creator Rewards Program",
+      definition: "TikTok's monetization program that pays creators for original, high-quality videos over 1 minute long based on qualified views and watch time.",
+      href: "/how-much-do-tiktok-creators-make",
+    },
+    {
+      term: "X (Twitter) Creator Revenue Sharing",
+      definition: "A program distributing ad revenue from ads served in replies to verified X Premium subscribers based on organic impression thresholds.",
+      href: "/instagram-monetization",
+    },
+    {
+      term: "Facebook In-Stream Ads",
+      definition: "Ads inserted directly before, during, or after public Facebook videos, sharing ad revenue with creators who meet page eligibility rules.",
+      href: "/how-much-do-facebook-creators-earn",
+    },
   ],
 
   "website-monetization": [
@@ -1046,62 +1062,10 @@ export const TOPIC_KEY_TERMS: Record<string, KeyTermItem[]> = {
     },
   ],
 
-  "social-media-earnings": [
-    {
-      term: "TikTok Creator Rewards Program",
-      definition: "TikTok's monetization program that pays creators for original, high-quality videos over 1 minute long based on qualified views and watch time.",
-      href: "/how-much-do-tiktok-creators-make",
-    },
-    {
-      term: "X (Twitter) Creator Revenue Sharing",
-      definition: "A program distributing ad revenue from ads served in replies to verified X Premium subscribers based on organic impression thresholds.",
-      href: "/social-media-earnings",
-    },
-    {
-      term: "Facebook In-Stream Ads",
-      definition: "Ads inserted directly before, during, or after public Facebook videos, sharing ad revenue with creators who meet page eligibility rules.",
-      href: "/how-much-do-facebook-creators-earn",
-    },
-    {
-      term: "Creator Fund",
-      definition: "A fixed pool of money distributed to creators based on relative view volume—historically replaced by dynamic RPM models on major platforms.",
-      href: "/how-much-do-tiktok-creators-make",
-    },
-    {
-      term: "Micropayments & Virtual Tipping",
-      definition: "Platform-native digital currency (e.g. TikTok Coins, X Tips) bought by fans and sent to creators during live streams or on posts.",
-      href: "/social-media-earnings",
-    },
-  ],
-
-  "creator-guides": [
-    {
-      term: "FTC Link Disclosure",
-      definition: "Federal Trade Commission guidelines requiring creators to clearly and conspicuously disclose paid sponsorships, free gifted products, and affiliate links.",
-      href: "/how-creator-sponsorships-and-brand-deals-work",
-    },
-    {
-      term: "Cookie Window",
-      definition: "The designated duration (e.g. 24 hours to 90 days) during which an affiliate link stays active to attribute a customer purchase to the creator.",
-      href: "/how-affiliate-marketing-works-for-content-creators",
-    },
-    {
-      term: "Scope of Work (SOW)",
-      definition: "A formal contract clause in sponsorship agreements specifying exact deliverable counts, formats, posting schedules, and revision rights.",
-      href: "/how-creator-sponsorships-and-brand-deals-work",
-    },
-    {
-      term: "Digital Product Margin",
-      definition: "The profit percentage earned on digital assets (e.g. eBooks, templates, courses) after payment processing fees, usually 90%+.",
-      href: "/how-to-price-digital-products-as-a-creator",
-    },
-    {
-      term: "Media Kit",
-      definition: "A professional summary document highlighting a creator's audience demographics, reach across platforms, engagement metrics, and baseline sponsorship rates.",
-      href: "/how-to-build-multiple-creator-income-streams",
-    },
-  ],
-
+  // "social-media-earnings" merged into "instagram-monetization" above, and
+  // "creator-guides" merged into "creator-tools" below — 2026-09-23,
+  // consolidating 6 thin Creator Economy subtopics down to 4 (see
+  // creator-economy-topics.ts and next.config.ts's redirects).
   "creator-tools": [
     {
       term: "RPM Calculator",
@@ -1127,6 +1091,22 @@ export const TOPIC_KEY_TERMS: Record<string, KeyTermItem[]> = {
       term: "Net Payout Threshold",
       definition: "The minimum earnings accumulated in a creator account (e.g., $100 for AdSense and YouTube) before a direct deposit is issued.",
       href: "/how-google-adsense-works",
+    },
+    // 2026-09-23: absorbed from the former "creator-guides" bucket.
+    {
+      term: "FTC Link Disclosure",
+      definition: "Federal Trade Commission guidelines requiring creators to clearly and conspicuously disclose paid sponsorships, free gifted products, and affiliate links.",
+      href: "/how-creator-sponsorships-and-brand-deals-work",
+    },
+    {
+      term: "Scope of Work (SOW)",
+      definition: "A formal contract clause in sponsorship agreements specifying exact deliverable counts, formats, posting schedules, and revision rights.",
+      href: "/how-creator-sponsorships-and-brand-deals-work",
+    },
+    {
+      term: "Media Kit",
+      definition: "A professional summary document highlighting a creator's audience demographics, reach across platforms, engagement metrics, and baseline sponsorship rates.",
+      href: "/how-to-build-multiple-creator-income-streams",
     },
   ],
 };
