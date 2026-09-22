@@ -6,7 +6,7 @@ import { getShowPeople, getVideoHub, seasonUrl } from '@/lib/videos-hub';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 
-export const revalidate = 300;
+export const revalidate = 900;
 export const dynamicParams = true;
 
 export async function generateStaticParams() {

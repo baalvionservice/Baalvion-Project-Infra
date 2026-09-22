@@ -7,7 +7,7 @@ import { PodcastDirectory } from '@/components/podcasts/PodcastDirectory';
 import { getPodcastHub } from '@/lib/podcasts-hub';
 import { fetchEntityPhotos } from '@/lib/photos-api';
 
-export const revalidate = 300;
+export const revalidate = 900;
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 

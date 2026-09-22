@@ -57,5 +57,8 @@ USER nextjs
 EXPOSE 3030
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
     CMD node -e "require('http').get('http://127.0.0.1:'+(process.env.PORT||3030),r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"
-# Next standalone emits the workspace server.js under the package path.
-CMD ["node", "Frontend/admin-platform/server.js"]
+# WORKDIR is already the package path, so server.js is right here -- not
+# Frontend/admin-platform/server.js again (that duplicated path doesn't exist
+# and was never actually caught before because nothing had run this image;
+# CI only builds and CVE-scans it, it never starts the container).
+CMD ["node", "server.js"]

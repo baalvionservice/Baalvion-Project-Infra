@@ -14,7 +14,7 @@ import { getMergedPeople } from '@/lib/people-server';
 import { personUrl } from '@/lib/person-url';
 import { fetchPhotosFor } from '@/lib/photos-api';
 
-export const revalidate = 300;
+export const revalidate = 900;
 export const dynamicParams = true;
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';

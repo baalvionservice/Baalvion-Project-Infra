@@ -73,6 +73,13 @@ const ALLOW = {
   // Opt-in only: `revalidate: false` is passed explicitly by the draft-preview
   // caller, and preview is confined to /article/:slug*, which is dynamic anyway.
   'Frontend/Law-Elite-Network-main/src/lib/cms.ts': 'no-store',
+  // Every caller is a Route Handler under /api/studio/*, never a render tree —
+  // a per-request staff auth check that must never be cached across users.
+  'Frontend/Law-Elite-Network-main/src/lib/editorial/auth.ts': 'no-store',
+  // Same: only called from /api/studio/* Route Handlers, proxying the editor's
+  // own bearer token to the CMS write API. Caching this would leak one
+  // editor's write response to another.
+  'Frontend/Law-Elite-Network-main/src/lib/editorial/cms-client.ts': 'no-store',
   // Live visitor presence, read from a client component — never server-rendered.
   'Frontend/AmariseMaisonAvenue-main/src/lib/presence.ts': 'no-store',
   // Both consumers (useMarkets.ts, store.tsx) are "use client", so this runs in
