@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
@@ -12,6 +12,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
+import { ContentIntelligencePanel } from './ContentIntelligencePanel';
+import { findLocateRange, lineAtOffset } from '@/lib/content-intelligence/locate';
 import { Lock, Loader2, Send, Archive } from 'lucide-react';
 
 export interface ArticleValue {
@@ -56,8 +58,23 @@ export function ArticleForm({ initial, meta }: Props) {
   const [value, setValue] = useState<ArticleValue>(initial ?? EMPTY);
   const [tagsText, setTagsText] = useState((initial?.tags ?? []).join(', '));
   const [error, setError] = useState<string | null>(null);
+  const contentRef = useRef<HTMLTextAreaElement | null>(null);
 
   const isEdit = Boolean(meta);
+
+  // Best-effort "click an issue → jump to it in the editor" (spec §19). Falls back to a no-op
+  // when the phrase can't be found — the panel never assumes it will always locate a match.
+  const locateInContent = (needle: string) => {
+    const el = contentRef.current;
+    if (!el) return;
+    const range = findLocateRange(el.value, needle);
+    if (!range) return;
+    el.focus();
+    el.setSelectionRange(range.start, range.end);
+    const lineHeight = 20;
+    const line = lineAtOffset(el.value, range.start);
+    el.scrollTop = Math.max(0, (line - 3) * lineHeight);
+  };
   const set = <K extends keyof ArticleValue>(key: K, v: ArticleValue[K]) =>
     setValue((prev) => ({ ...prev, [key]: v }));
 
@@ -113,6 +130,7 @@ export function ArticleForm({ initial, meta }: Props) {
   };
 
   return (
+    <div className="grid gap-6 lg:grid-cols-[1fr_320px] lg:items-start">
     <form onSubmit={submit} className="space-y-6">
       {error && (
         <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
@@ -182,7 +200,7 @@ export function ArticleForm({ initial, meta }: Props) {
           </div>
           <div className="md:col-span-2 space-y-1.5">
             <Label htmlFor="content">Content</Label>
-            <Textarea id="content" rows={12} value={value.content} onChange={(e) => set('content', e.target.value)} />
+            <Textarea id="content" ref={contentRef} rows={12} value={value.content} onChange={(e) => set('content', e.target.value)} />
           </div>
         </CardContent>
       </Card>
@@ -213,5 +231,18 @@ export function ArticleForm({ initial, meta }: Props) {
         </Button>
       </div>
     </form>
+    <ContentIntelligencePanel
+      input={{
+        articleId: meta?.id,
+        title: value.title,
+        content: value.content,
+        summary: value.summary,
+        slug: meta?.slug,
+        status: meta?.status,
+        category: value.category,
+      }}
+      onLocate={locateInContent}
+    />
+    </div>
   );
 }
