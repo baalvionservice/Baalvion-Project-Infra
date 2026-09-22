@@ -95,7 +95,7 @@ export function VideoShowForm({ item }: { item?: VideoShowRecord }) {
                     <Input aria-label="Housemates" type="number" placeholder="Housemates" value={sn.housemates ?? ''} onChange={(e) => upd({ housemates: e.target.value ? Number(e.target.value) : null })} />
                   </div>
                   <Input aria-label="Notes" placeholder="Note about this season (optional)" value={sn.notes ?? ''} onChange={(e) => upd({ notes: e.target.value })} />
-                  <Textarea aria-label="Participants" rows={5} placeholder={'One person per line, in the order they entered. Add | Winner or | Runner-up after a name.'}
+                  <Textarea aria-label="Participants" rows={5} placeholder={'One person per line, in the order they entered. After a name add | and a status, e.g. | Winner, | Runner-up, | Evicted day 21, | Walked out, | In the house.'}
                     value={(sn.participants ?? []).map((p) => (p.result ? `${p.name} | ${p.result}` : p.name)).join('\n')}
                     onChange={(e) => upd({ participants: e.target.value.split('\n').map((l) => l.trim()).filter(Boolean).map((l) => { const [name, result] = l.split('|').map((x) => x.trim()); return result ? { name, result } : { name }; }) })} />
                 </div>

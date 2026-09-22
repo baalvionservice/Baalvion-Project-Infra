@@ -21,6 +21,7 @@ export interface HubShow {
   seoTitle?: string;
   seoDescription?: string;
   reviewedAt?: string;
+  updatedAt?: string;
   indexable: boolean;
 }
 
@@ -81,7 +82,7 @@ export async function getVideoHub(): Promise<VideoHub> {
       winner: clean(x.winner), runnerUp: clean(x.runner_up), notes: clean(x.notes), source: clean(x.source),
       participants: Array.isArray(x.participants) ? x.participants.filter((p: any) => p?.name).map((p: any) => ({ name: p.name, result: clean(p.result) })) : [],
     })).sort((a: HubSeason, b: HubSeason) => a.number - b.number) : [],
-    seoTitle: clean(s.seo_title), seoDescription: clean(s.seo_description), reviewedAt: clean(s.reviewed_at), indexable: !!s.indexable,
+    seoTitle: clean(s.seo_title), seoDescription: clean(s.seo_description), reviewedAt: clean(s.reviewed_at), updatedAt: clean(s.updated_at ?? s.updatedAt), indexable: !!s.indexable,
   }));
   const videos: HubVideo[] = (Array.isArray(d?.videos) ? d.videos : []).map((v: any) => ({
     slug: v.slug, title: v.title, description: v.description || '', url: v.video_url, thumbnailUrl: clean(v.thumbnail_url) ?? autoThumbnail(v.video_url),
@@ -150,3 +151,15 @@ export async function getShowPerson(showSlug: string, slug: string): Promise<Hub
 
 export const seasonUrl = (showSlug: string, n: number) => `/videos/shows/${showSlug}/seasons/${n}`;
 export const personUrl = (showSlug: string, slug: string) => `/videos/shows/${showSlug}/people/${slug}`;
+
+const sameName = (a?: string, b?: string) => !!a && !!b && (a.toLowerCase() === b.toLowerCase() || a.toLowerCase().includes(b.toLowerCase()) || b.toLowerCase().includes(a.toLowerCase()));
+
+/** Winner or runner-up for one person in one season. Setting the season's winner or runner-up name is enough; no per-person flag needed. */
+export function resultFor(season: HubSeason | undefined, name: string, stored?: string): string | undefined {
+  if (!season) return stored;
+  const own = season.participants.find((p) => sameName(p.name, name))?.result;
+  if (own) return own;
+  if (sameName(season.winner, name)) return 'Winner';
+  if (sameName(season.runnerUp, name)) return 'Runner-up';
+  return stored;
+}

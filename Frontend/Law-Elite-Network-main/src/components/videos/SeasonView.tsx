@@ -1,7 +1,8 @@
 import Link from 'next/link';
+import { formatArticleDate } from '@/lib/format-date';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { Story } from '@/components/videos/VideoBits';
-import { personUrl, seasonUrl, showUrl, type HubPerson, type HubSeason, type HubShow, type HubVideo } from '@/lib/videos-hub';
+import { personUrl, resultFor, seasonUrl, showUrl, type HubPerson, type HubSeason, type HubShow, type HubVideo } from '@/lib/videos-hub';
 
 const CHIP: Record<string, string> = { Winner: 'bg-black text-white', 'Runner-up': 'border border-black text-black' };
 
@@ -15,7 +16,7 @@ function Fact({ label, value }: { label: string; value?: string | number | null 
   );
 }
 
-export function SeasonView({ show, season, all, people, videos }: { show: HubShow; season: HubSeason; all: HubSeason[]; people: HubPerson[]; videos: HubVideo[] }) {
+export function SeasonView({ show, season, all, people, videos, updatedAt }: { show: HubShow; season: HubSeason; all: HubSeason[]; people: HubPerson[]; videos: HubVideo[]; updatedAt?: string }) {
   const prev = all.find((s) => s.number === season.number - 1);
   const next = all.find((s) => s.number === season.number + 1);
   const bySlug = new Map(people.map((p) => [p.name.toLowerCase(), p]));
@@ -36,7 +37,11 @@ export function SeasonView({ show, season, all, people, videos }: { show: HubSho
 
         <div className="mt-6 grid gap-8 md:grid-cols-[minmax(0,1fr)_280px]">
           <div className="min-w-0">
-            {season.notes && <p className="text-[18px] leading-relaxed text-neutral-800">{season.notes}</p>}
+            {season.notes && (
+              <section aria-label="The season so far" className="space-y-4 text-[18px] leading-relaxed text-neutral-800">
+                {season.notes.split(/\n{2,}/).map((t, i) => <p key={i}>{t}</p>)}
+              </section>
+            )}
             {season.winner && (
               <p className="mt-4 text-[18px] leading-relaxed text-neutral-800">
                 <strong className="font-black">{named(season.winner)}</strong> won season {season.number}{season.runnerUp ? <>, with <strong className="font-black">{named(season.runnerUp)}</strong> as runner-up</> : ''}.
@@ -46,16 +51,17 @@ export function SeasonView({ show, season, all, people, videos }: { show: HubSho
 
             {season.participants.length > 0 && (
               <section className="mt-10" aria-label="Housemates">
-                <h2 className="border-b-[3px] border-black pb-2 font-headline text-[22px] font-black uppercase text-black">Housemates</h2>
-                <p className="mt-2 text-[13px] text-neutral-500">In the order they entered. Names with an underline have their own profile.</p>
+                <h2 className="border-b-[3px] border-black pb-2 font-headline text-[22px] font-black uppercase text-black">{show.name} {season.number} contestants: full list</h2>
+                <p className="mt-2 text-[13px] text-neutral-500">All {season.participants.length} housemates, in the order they entered. Names with an underline have their own profile.{updatedAt && <> Updated {formatArticleDate(updatedAt)}.</>}</p>
                 <ol className="mt-3 grid gap-x-8 gap-y-2 sm:grid-cols-2">
                   {season.participants.map((p, i) => {
                     const person = bySlug.get(p.name.toLowerCase());
+                    const result = resultFor(season, p.name, p.result);
                     return (
                       <li key={`${p.name}-${i}`} className="flex items-baseline gap-2 text-[16px] text-neutral-800">
                         <span className="w-6 shrink-0 text-right text-[12px] tabular-nums text-neutral-400">{i + 1}</span>
                         {person?.hasProfile ? <Link href={personUrl(show.slug, person.slug)} className="font-semibold underline">{p.name}</Link> : <span>{p.name}</span>}
-                        {p.result && <span className={`px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${CHIP[p.result] ?? 'text-neutral-500'}`}>{p.result}</span>}
+                        {result && <span className={`px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${CHIP[result] ?? 'text-neutral-500'}`}>{result}</span>}
                       </li>
                     );
                   })}

@@ -3,11 +3,14 @@ import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { Story } from '@/components/videos/VideoBits';
 import { formatArticleDate } from '@/lib/format-date';
 import type { EntityPhotoInfo } from '@/lib/photos-api';
-import { personUrl, seasonUrl, showUrl, type HubPerson, type HubShow, type HubVideo } from '@/lib/videos-hub';
+import { personUrl, resultFor, seasonUrl, showUrl, type HubPerson, type HubShow, type HubVideo } from '@/lib/videos-hub';
 
 const CHIP: Record<string, string> = { Winner: 'bg-black text-white', 'Runner-up': 'border border-black text-black' };
 
-export function PersonView({ show, person, photos, videos, costars }: { show: HubShow; person: HubPerson; photos: EntityPhotoInfo[]; videos: HubVideo[]; costars: { season: number; people: HubPerson[] }[] }) {
+export function PersonView({ show: showIn, person: personIn, photos, videos, costars }: { show: HubShow; person: HubPerson; photos: EntityPhotoInfo[]; videos: HubVideo[]; costars: { season: number; people: HubPerson[] }[] }) {
+  const show = showIn;
+  // Results come from the season data, so setting a season's winner updates every person page.
+  const person = { ...personIn, appearances: personIn.appearances.map((a) => ({ ...a, result: resultFor(show.seasons.find((x) => x.number === a.season), personIn.name, a.result) })) };
   const paras = person.overview.split(/\n{2,}/).map((x) => x.trim()).filter(Boolean);
   const [main, ...more] = photos;
   return (

@@ -23,10 +23,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug, n } = await params;
   const { show, season } = await load(slug, n);
   if (!show || !season) return { robots: { index: false } };
-  const title = `${show.name} ${season.number}${season.year ? ` (${season.year})` : ''}: ${season.winner ? 'winner, ' : ''}housemates and highlights`;
+  const count = season.participants.length;
+  // Written for the searches people actually type: "<show> <n> contestants", "participants", "housemates", "winner".
+  const title = `${show.name} ${season.number} contestants list${season.year ? ` (${season.year})` : ''}: all ${count || ''} housemates${season.winner ? ', winner' : ''} and highlights`.replace('  ', ' ');
   const description = [
-    season.winner ? `${season.winner} won ${show.name} season ${season.number}${season.runnerUp ? `, with ${season.runnerUp} as runner-up` : ''}.` : `${show.name} season ${season.number}${season.year ? `, ${season.year}` : ''}.`,
-    season.host ? `Hosted by ${season.host}.` : '', season.participants.length ? `See all ${season.participants.length} housemates.` : '',
+    `Full list of ${show.name} ${season.number} contestants${count ? `: all ${count} housemates in the order they entered` : ''}.`,
+    season.winner ? `${season.winner} won${season.runnerUp ? `, with ${season.runnerUp} as runner-up` : ''}.` : (season.year && season.year >= new Date().getFullYear() ? 'Season on air now, updated as it airs.' : ''),
+    season.host ? `Hosted by ${season.host}.` : '',
   ].filter(Boolean).join(' ');
   return {
     title, description, alternates: { canonical: `${SITE}${seasonUrl(show.slug, season.number)}` },
@@ -44,13 +47,14 @@ export default async function Page({ params }: { params: Promise<{ slug: string;
   const videos = hub.videos.filter((v) => v.showSlug === slug && v.category === `Season ${season.number}`);
   const ld = {
     '@context': 'https://schema.org', '@type': 'TVSeason', name: `${show.name} ${season.number}`, seasonNumber: season.number,
+    ...(season.participants.length ? { about: { '@type': 'ItemList', name: `${show.name} ${season.number} contestants`, numberOfItems: season.participants.length, itemListElement: season.participants.map((p, i) => ({ '@type': 'ListItem', position: i + 1, name: p.name })) } } : {}),
     partOfSeries: { '@type': 'TVSeries', name: show.name, url: `${SITE}/videos/shows/${show.slug}` },
     ...(season.firstAired ? { datePublished: season.firstAired } : {}), url: `${SITE}${seasonUrl(show.slug, season.number)}`,
   };
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
-      <SeasonView show={show} season={season} all={show.seasons} people={people} videos={videos} />
+      <SeasonView show={show} season={season} all={show.seasons} people={people} videos={videos} updatedAt={show.updatedAt} />
     </>
   );
 }

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { formatArticleDate } from '@/lib/format-date';
-import { personUrl, seasonUrl, type HubPerson, type HubShow } from '@/lib/videos-hub';
+import { personUrl, resultFor, seasonUrl, type HubPerson, type HubShow } from '@/lib/videos-hub';
 
 /** Written overview and at-a-glance facts, shown above a show's videos. */
 export function ShowIntro({ show }: { show: HubShow }) {
@@ -78,13 +78,13 @@ export function ShowDetails({ show, people = [] }: { show: HubShow; people?: Hub
                 </summary>
                 {s.notes && <p className="mt-2 text-[14px] text-neutral-700">{s.notes}</p>}
                 <ol className="mt-3 grid gap-x-8 gap-y-1.5 sm:grid-cols-2 lg:grid-cols-3">
-                  {s.participants.map((p, i) => (
+                  {s.participants.map((p, i) => { const result = resultFor(s, p.name, p.result); return (
                     <li key={`${p.name}-${i}`} className="flex items-baseline gap-2 text-[15px] text-neutral-800">
                       <span className="w-6 shrink-0 text-right text-[12px] tabular-nums text-neutral-400">{i + 1}</span>
                       {written.has(p.name.toLowerCase()) ? <Link href={personUrl(show.slug, slugOf.get(p.name.toLowerCase())!)} className="font-semibold underline">{p.name}</Link> : <span>{p.name}</span>}
-                      {p.result && <span className={`px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${CHIP[p.result] ?? 'text-neutral-500'}`}>{p.result}</span>}
+                      {result && <span className={`px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${CHIP[result] ?? 'text-neutral-500'}`}>{result}</span>}
                     </li>
-                  ))}
+                  ); })}
                 </ol>
                 {s.source && <p className="mt-3 text-[12px] text-neutral-500"><a href={s.source} target="_blank" rel="noopener noreferrer" className="underline">Season {s.number} reference page</a></p>}
               </details>
