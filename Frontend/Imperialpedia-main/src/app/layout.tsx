@@ -61,10 +61,6 @@ export const metadata: Metadata = {
 
   authors: [
     {
-      name: "Allen Krewzz",
-      url: `${env.siteUrl}/authors/allen-krewzz`,
-    },
-    {
       name: "Tamanna Shaikh",
       url: `${env.siteUrl}/authors/tamanna-shaikh`,
     },
