@@ -34,8 +34,17 @@ export async function getMergedPeople(): Promise<Person[]> {
   });
   // A stored photo lights up the card and the profile; it does not make a stub any deeper, so `thin` is untouched.
   return [...merged, ...apiBySlug.values()].map((p) => {
-    const photo = p.photo ?? photos.get(`person:${p.slug}`);
-    return photo && !p.photo ? { ...p, photo, avatarUrl: p.avatarUrl ?? photo.url } : p;
+    // DB photo first, bundled second: a bundled `photo` is a hand-typed direct
+    // Wikimedia hotlink (data/people.ts) with no way to notice when Commons renames
+    // or deletes the file -- it 404s silently forever after (caught on Taylor Swift's
+    // entry this way). The harvester-verified DB photo is re-checked against a live
+    // license lookup each time it's (re)written, so it's the more durable source.
+    const photo = photos.get(`person:${p.slug}`) ?? p.photo;
+    // Previously only ran when `!p.photo`, so a bundled profile that already had a
+    // hardcoded `photo` object never got `avatarUrl` set at all -- PersonCard reads
+    // `avatarUrl`, not `photo.url`, so that card silently fell back to initials
+    // despite (nominally) having a photo.
+    return photo ? { ...p, photo, avatarUrl: p.avatarUrl ?? photo.url } : p;
   });
 }
 

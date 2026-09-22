@@ -32,9 +32,13 @@ function siteHostname(): string {
 // host here once it's a confirmed, trusted image source — keep in sync with
 // the hosts documented in next.config.ts's former remotePatterns.
 const ALLOWED_HOSTS = new Set(
-  [siteHostname(), 'api.baalvion.com', 'firebasestorage.googleapis.com', 'lh3.googleusercontent.com'].filter(
-    Boolean,
-  ),
+  [
+    siteHostname(), 'api.baalvion.com', 'firebasestorage.googleapis.com', 'lh3.googleusercontent.com',
+    // Bundled Person profiles (data/people.ts) hardcode a handful of real, licensed
+    // Wikimedia Commons photos as direct hotlinks (e.g. Taylor Swift) -- same
+    // no-fabrication sourcing as the entity-photo harvester, just not DB-stored.
+    'upload.wikimedia.org',
+  ].filter(Boolean),
 );
 
 // Must match next.config.ts images.deviceSizes + imageSizes exactly — next/image
