@@ -24,9 +24,9 @@ import { FeaturedKnowledge } from "@/components/home/FeaturedKnowledge";
 // description, canonical, OG, and Twitter card instead of the layout defaults.
 export async function generateMetadata(): Promise<Metadata> {
   return buildMetadata({
-    title: "Imperialpedia — Personal Finance & Creator Economy Explained",
+    title: "Imperialpedia — Stocks, Budgeting & Creator Economy Explained",
     description:
-      "Independent, reviewed articles on personal finance, stock market investing fundamentals, fraud protection, and the creator economy — written by named contributors with cited sources.",
+      "Independent, reviewed articles on stock market fundamentals, personal budgeting, fraud protection, and the creator economy — written by named contributors with cited sources.",
     canonical: "/",
     ogType: "website",
     absoluteTitle: true,

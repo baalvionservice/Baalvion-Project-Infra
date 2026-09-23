@@ -27,10 +27,11 @@ type NavCategory = {
 const ALL_NAV: NavCategory[] = [
   {
     id: "investing",
-    label: "Investing",
-    // /investing is one of the categories retired pending AdSense review
-    // (see next.config.ts) — it 301s to /. Points at /stocks, the only real
-    // destination in this menu, so the label itself is never a dead click.
+    // 2026-09-23: relabeled from "Investing" — /investing itself is
+    // permanently 410'd (see GONE_TOP_LEVEL_SLUGS in retired-paths.ts), and
+    // this menu's only real content is Stocks, so the label now says what it
+    // actually links to instead of naming a page that no longer exists.
+    label: "Stocks",
     href: "/stocks",
     links: [
       { label: "Stocks", href: "/stocks" },
@@ -46,10 +47,12 @@ const ALL_NAV: NavCategory[] = [
   },
   {
     id: "personal-finance",
-    label: "Personal Finance",
-    // /personal-finance is also retired (301s to /) — points at /budgeting-basics,
-    // the larger of this menu's two real destinations, so the label is never a
-    // dead click.
+    // 2026-09-23: relabeled from "Personal Finance" — that category is
+    // permanently 410'd (see GONE_TOP_LEVEL_SLUGS in retired-paths.ts), and
+    // this menu's real content is Budgeting + Scams & Fraud Protection, so
+    // the label now names the larger of the two instead of a page that no
+    // longer exists.
+    label: "Budgeting",
     href: "/budgeting-basics",
     links: [
       // /budgeting isn't a real CMS category (0 articles) — it was silently
