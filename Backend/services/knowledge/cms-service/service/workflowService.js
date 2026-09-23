@@ -47,7 +47,7 @@ function resolveLevel(req) {
     return CMS_ROLE_LEVEL[req.cmsRole] || 0;
 }
 
-async function transition(websiteId, contentId, userId, userLevel, action, notes, scheduledAt) {
+async function transition(websiteId, contentId, userId, userLevel, action, notes, scheduledAt, publishedAtOverride) {
     const def = TRANSITIONS[action];
     if (!def) throw new AppError('WORKFLOW_INVALID_ACTION', `Unknown workflow action: ${action}`, 400);
 
@@ -78,7 +78,15 @@ async function transition(websiteId, contentId, userId, userLevel, action, notes
         if (action === 'submit_for_review') { wfUpdate.submittedBy = userId; wfUpdate.submittedAt = now; }
         if (action === 'approve') { wfUpdate.approvedBy = userId; wfUpdate.approvedAt = now; }
         if (action === 'request_changes') { wfUpdate.reviewedBy = userId; wfUpdate.reviewedAt = now; wfUpdate.comments = notes; }
-        if (action === 'publish') { wfUpdate.publishedBy = userId; wfUpdate.publishedAt = now; contentUpdate.publishedAt = now; }
+        if (action === 'publish') {
+            // Optional override so a bulk-publish script can stagger a batch's
+            // dates across a natural range instead of every item landing on
+            // this same instant — see scripts/lib/staggerPublishDates.cjs and
+            // the comment on transitionSchema's publishedAt field. Defaults to
+            // `now`, which is correct for normal one-at-a-time publishing.
+            const publishedAt = publishedAtOverride ? new Date(publishedAtOverride) : now;
+            wfUpdate.publishedBy = userId; wfUpdate.publishedAt = publishedAt; contentUpdate.publishedAt = publishedAt;
+        }
         if (action === 'schedule') {
             wfUpdate.scheduledPublishAt = scheduledAt;
             contentUpdate.scheduledAt = scheduledAt;

@@ -27,7 +27,16 @@
  * AUTH : CMS_TOKEN = prod super_admin (or cms_editor) bearer from
  *        admin.baalvion.com (DevTools -> any /cms/ request), ~15 min TTL.
  * BASE : defaults to the prod management ingress admin.baalvion.com/api-bff.
+ *
+ * Standing procedure (decided 2026-09-23): re-run this after any future
+ * bulk-publish batch to fold the new articles into the spread. For NEW
+ * batches, prefer preventing the clustering at publish time instead — see
+ * scripts/lib/staggerPublishDates.cjs, whose spreadDates() this script also
+ * uses, and workflowSchemas.js's transitionSchema, which now accepts an
+ * explicit publishedAt override on the "publish" action for exactly this.
  */
+
+const { spreadDates, toDateOnly, fmtDate } = require('./lib/staggerPublishDates.cjs');
 
 const SITE = process.env.WEBSITE_SLUG || 'imperialpedia';
 const TARGET_BASE = process.env.TARGET_CMS_BASE || 'https://admin.baalvion.com/api-bff/knowledge/cms/api/v1';
@@ -59,34 +68,6 @@ async function allPublishedArticles() {
     if (!pg || !pg.hasNext || pageItems.length === 0) break;
   }
   return items;
-}
-
-const DAY_MS = 24 * 60 * 60 * 1000;
-function toDateOnly(iso) {
-  const d = new Date(iso);
-  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
-}
-function fmtDate(d) {
-  return d.toISOString().slice(0, 10);
-}
-
-/** Evenly spread N dates across [start, end] (both Date, UTC-midnight), strictly increasing, never past `end`. */
-function spreadDates(startDate, endDate, count) {
-  const totalDays = Math.round((endDate - startDate) / DAY_MS);
-  const assigned = [];
-  for (let i = 0; i < count; i++) {
-    const frac = count > 1 ? i / (count - 1) : 0;
-    const offset = Math.round(frac * totalDays);
-    assigned.push(new Date(startDate.getTime() + offset * DAY_MS));
-  }
-  for (let i = 1; i < assigned.length; i++) {
-    if (assigned[i] <= assigned[i - 1]) assigned[i] = new Date(assigned[i - 1].getTime() + DAY_MS);
-  }
-  const overflow = assigned[assigned.length - 1] - endDate;
-  if (overflow > 0) {
-    for (let i = 0; i < assigned.length; i++) assigned[i] = new Date(assigned[i].getTime() - overflow);
-  }
-  return assigned;
 }
 
 async function main() {
