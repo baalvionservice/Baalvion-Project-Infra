@@ -41,6 +41,7 @@ import { useWebsite } from '@/lib/queries/cms-websites.queries';
 import { useUIStore } from '@/lib/store/uiStore';
 import { useCmsStore } from '@/lib/store/cmsStore';
 import type { WebsiteCategory, CategoryTree as CategoryTreeType } from '@/lib/types/cms-taxonomy.types';
+import { LEN_WEBSITE_SLUG, isLenCategorySlugLive } from '@/lib/constants/len-category-status';
 
 interface CategoryForm {
   name: string;
@@ -54,6 +55,21 @@ interface CategoryForm {
   ogImage: string;
   noIndex: boolean;
   isActive: boolean;
+}
+
+/** Prunes a category tree down to nodes matching `predicate` (checked against each node's slug), keeping ancestors of any matching descendant so the tree stays navigable. */
+function filterTreeByLiveStatus(
+  nodes: CategoryTreeType[],
+  predicate: (slug: string) => boolean
+): CategoryTreeType[] {
+  const out: CategoryTreeType[] = [];
+  for (const node of nodes) {
+    const children = filterTreeByLiveStatus(node.children ?? [], predicate);
+    if (predicate(node.slug) || children.length > 0) {
+      out.push({ ...node, children });
+    }
+  }
+  return out;
 }
 
 const DEFAULT_FORM: CategoryForm = {
@@ -95,6 +111,16 @@ export default function WebsiteCategoriesPage({
   const [form, setForm] = useState<CategoryForm>(DEFAULT_FORM);
   const [forcedParentId, setForcedParentId] = useState<string>('');
   const [newTag, setNewTag] = useState('');
+  const [onlyNotLive, setOnlyNotLive] = useState(false);
+
+  const isLenSite = websiteId === LEN_WEBSITE_SLUG;
+  const notLiveCount = isLenSite
+    ? (flatCategories ?? []).filter((c) => !isLenCategorySlugLive(c.slug)).length
+    : 0;
+
+  const displayTree = isLenSite && onlyNotLive
+    ? filterTreeByLiveStatus(tree ?? [], (slug) => !isLenCategorySlugLive(slug))
+    : tree;
 
   useEffect(() => {
     setBreadcrumbs([
@@ -216,15 +242,27 @@ export default function WebsiteCategoriesPage({
         </TabsList>
 
         <TabsContent value="categories" className="mt-4">
+          {isLenSite && (
+            <div className="mb-2 flex items-center justify-between rounded-md border p-2.5">
+              <div>
+                <Label className="text-xs">Show only not-live categories</Label>
+                <p className="text-[10px] text-muted-foreground">
+                  {notLiveCount} of {flatCategories?.length ?? 0} categories exist in the CMS but aren&apos;t on the live site
+                </p>
+              </div>
+              <Switch checked={onlyNotLive} onCheckedChange={setOnlyNotLive} />
+            </div>
+          )}
           <Card>
             <CardContent className="p-2">
               <CategoryTree
-                tree={tree ?? []}
+                tree={displayTree ?? []}
                 isLoading={loadingTree}
                 onEdit={openEdit}
                 onDelete={(id) => deleteCategory(id)}
                 onAddChild={(parentId) => openCreate(parentId)}
                 onToggleActive={handleToggleActive}
+                isLive={isLenSite ? isLenCategorySlugLive : undefined}
               />
             </CardContent>
           </Card>
