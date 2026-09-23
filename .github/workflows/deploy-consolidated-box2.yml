@@ -814,7 +814,7 @@ jobs:
               sh -lc "cd /app/Backend/services/marketplace/marketplace-service && npm run migrate"
             echo "::notice title=Migrations applied::commerce/inventory/fulfillment/marketplace schemas current."
 
-      - name: Apply cms-service + news-service migrations (idempotent, pre-roll)
+      - name: Apply cms-service + news-service + imperialpedia-service migrations (idempotent, pre-roll)
         if: steps.gate.outputs.ready == 'true'
         uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
@@ -829,6 +829,16 @@ jobs:
           # already-live fix for the same underlying gap), so this is redundant-but-harmless
           # belt-and-suspenders for news-service specifically; it's the real fix for cms-service.
           #
+          # imperialpedia-service is the same class of gap: it ships real sequelize-cli
+          # migrations (including 20260007-create-article-editorial-reviews.js, the Prompt 5
+          # human-review table) but this pipeline never ran `npm run migrate` for it either --
+          # without this, the new /articles/:id/editorial-review* endpoints (and the
+          # human-review gate now added to /articles/:id/publish) would 500 with 'relation
+          # "imperialpedia.article_editorial_reviews" does not exist' the moment this release
+          # rolls. Same container (app-platform) as cms/news-service, same idempotent
+          # sequelize-cli SequelizeMeta tracking, so it's added to this existing step rather
+          # than as a fourth near-identical one.
+          #
           # Pre-roll one-off container and hard-fail, for the same reasons as the step above.
           script: |
             set -euo pipefail
@@ -842,7 +852,9 @@ jobs:
               sh -lc "cd /app/Backend/services/knowledge/cms-service && npm run migrate"
             $COMPOSE run --rm --no-deps -T -e PGSSLMODE=require app-platform \
               sh -lc "cd /app/Backend/services/knowledge/news-service && npm run migrate"
-            echo "::notice title=Migrations applied::cms-service + news-service schemas current."
+            $COMPOSE run --rm --no-deps -T -e PGSSLMODE=require app-platform \
+              sh -lc "cd /app/Backend/services/knowledge/imperialpedia-service && npm run migrate"
+            echo "::notice title=Migrations applied::cms-service + news-service + imperialpedia-service schemas current."
 
       # Only reached when every migration above succeeded -- see those steps for why.
       - name: Roll box2
