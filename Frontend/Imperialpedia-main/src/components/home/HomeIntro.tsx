@@ -4,7 +4,7 @@ export const homeFaqItems: { question: string; answer: string }[] = [
   {
     question: "What is Imperialpedia?",
     answer:
-      "Imperialpedia is an independent financial education platform covering personal finance, stock market investing fundamentals, and the creator economy. It explains complex financial topics clearly, connects related concepts, and provides practical tools to help readers make better-informed financial decisions.",
+      "Imperialpedia is an independent financial education platform covering stock market fundamentals, personal budgeting, and the creator economy. It explains complex financial topics clearly, connects related concepts, and provides practical tools to help readers make better-informed financial decisions.",
   },
   {
     question: "What topics does Imperialpedia cover?",
@@ -40,15 +40,15 @@ export function HomeIntro() {
         </div>
 
         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-black dark:text-white tracking-tighter uppercase font-serif leading-none">
-          Personal Finance &amp; the Creator Economy — Explained Clearly
+          Stocks, Budgeting &amp; the Creator Economy — Explained Clearly
         </h1>
 
         <div className="mt-6 border-l-6 border-[#c8102e] bg-white dark:bg-slate-900 p-6 border-3 border-black dark:border-slate-700 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] dark:shadow-[6px_6px_0px_0px_rgba(200,16,46,0.3)]">
           <p className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 leading-relaxed font-sans">
-            Imperialpedia is an independent financial education platform covering personal
-            finance, stock market investing fundamentals, and the creator economy. We explain
-            complex financial topics clearly, connect related concepts, and provide practical
-            tools to help readers make better-informed financial decisions.
+            Imperialpedia is an independent financial education platform covering stock market
+            fundamentals, personal budgeting, and the creator economy. We explain complex
+            financial topics clearly, connect related concepts, and provide practical tools to
+            help readers make better-informed financial decisions.
           </p>
         </div>
       </div>

@@ -42,9 +42,12 @@ export const SUBTOPIC_FEATURED_GUIDES: Record<string, FeaturedGuide[]> = {
     { title: 'YouTube Shorts Monetization vs Long-Form Payout Rates', href: '/creator-economy/youtube-shorts-monetization-vs-long-form-payout-rates' },
     { title: 'AdSense Payment Schedules & Threshold Rules', href: '/creator-economy/adsense-payment-schedules-and-threshold-rules' },
   ],
+  // 2026-09-23: absorbed the former "social-media-earnings" bucket — see
+  // creator-economy-topics.ts and next.config.ts's /social-media-earnings redirect.
   'instagram-monetization': [
     { title: 'Instagram Creator Subscriptions & Reel Bonus Rules', href: '/creator-economy/instagram-creator-subscriptions-and-reel-bonus-rules' },
     { title: 'Sponsored Post Rate Benchmarks for Micro-Influencers', href: '/creator-economy/sponsored-post-rate-benchmarks-for-micro-influencers' },
+    { title: 'Cross-Platform Payout Comparison: TikTok, YouTube & X', href: '/creator-economy/cross-platform-payout-comparison-tiktok-youtube-and-x' },
     { title: 'Creator Contract Essentials & Invoice Payment Terms', href: '/creator-economy/creator-contract-essentials-and-invoice-payment-terms' },
   ],
   'website-monetization': [
@@ -52,20 +55,13 @@ export const SUBTOPIC_FEATURED_GUIDES: Record<string, FeaturedGuide[]> = {
     { title: 'Affiliate Marketing Commission Structures & Tracking', href: '/creator-economy/affiliate-marketing-commission-structures-and-tracking' },
     { title: 'Calculating Page RPM & Session Revenue', href: '/creator-economy/calculating-page-rpm-and-session-revenue' },
   ],
-  'social-media-earnings': [
-    { title: 'Cross-Platform Payout Comparison: TikTok, YouTube & X', href: '/creator-economy/cross-platform-payout-comparison-tiktok-youtube-and-x' },
-    { title: 'How Platform Creator Funds Calculate RPM', href: '/creator-economy/how-platform-creator-funds-calculate-rpm' },
-    { title: 'Ad Revenue Sharing Models & CPM Trends', href: '/creator-economy/ad-revenue-sharing-models-and-cpm-trends' },
-  ],
-  'creator-guides': [
-    { title: 'Taxes for Creators: Deductions, Quarterly Estimates & LLCs', href: '/creator-economy/taxes-for-creators-deductions-quarterly-estimates-and-llcs' },
-    { title: 'Building a Sustainable Digital Media Business', href: '/creator-economy/building-a-sustainable-digital-media-business' },
-    { title: 'Rate Sheets & Media Kit Templates for Creators', href: '/creator-economy/rate-sheets-and-media-kit-templates-for-creators' },
-  ],
+  // 2026-09-23: absorbed the former "creator-guides" bucket — see
+  // creator-economy-topics.ts and next.config.ts's /creator-guides redirect.
   'creator-tools': [
     { title: 'RPM & CPM Calculator for YouTube & Web Creators', href: '/creator-economy/rpm-and-cpm-calculator-for-youtube-and-web-creators' },
     { title: 'Sponsorship Rate Estimator Tool', href: '/creator-economy/sponsorship-rate-estimator-tool' },
-    { title: 'Platform Payout Comparison Chart', href: '/creator-economy/platform-payout-comparison-chart' },
+    { title: 'Taxes for Creators: Deductions, Quarterly Estimates & LLCs', href: '/creator-economy/taxes-for-creators-deductions-quarterly-estimates-and-llcs' },
+    { title: 'Building a Sustainable Digital Media Business', href: '/creator-economy/building-a-sustainable-digital-media-business' },
   ],
 
   // Banking
@@ -126,7 +122,7 @@ export function getMeshGroupForSlug(categorySlug?: string): MeshGroup {
   // If this IS a top-level hub (not a child), try treating slug as its own group "root"
   if (!siblings) {
     const FALLBACK_GROUPS: Record<string, string[]> = {
-      'creator-economy': ['creator-economy', 'youtube-monetization', 'instagram-monetization', 'website-monetization', 'social-media-earnings', 'creator-guides', 'creator-tools'],
+      'creator-economy': ['creator-economy', 'youtube-monetization', 'instagram-monetization', 'website-monetization', 'creator-tools'],
       banking: ['savings', 'checking', 'cd-rates', 'money-market', 'credit-cards', 'loans', 'mortgages', 'auto-loans', 'student-loans'],
       'personal-finance': ['budgeting-basics', 'debt', 'credit', 'planning'],
     };

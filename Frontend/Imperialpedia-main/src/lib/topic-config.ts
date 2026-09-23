@@ -3335,16 +3335,18 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaDescription: 'How YouTube creators earn money through RPM, CPM, YPP requirements, YouTube Shorts revenue pool, and channel monetization strategies.',
   },
   'instagram-monetization': {
-    tag: 'INSTAGRAM EARNINGS',
-    title: 'Instagram Earnings & Monetization',
+    tag: 'INSTAGRAM & SOCIAL EARNINGS',
+    title: 'Instagram & Social Media Earnings',
     description:
-      'How Instagram creators make money through subscriptions, brand deals, affiliate marketing, gifts, and creator programs.',
+      'How creators make money on Instagram and across social media — subscriptions, brand deals, affiliate marketing, gifts, creator programs, and platform-by-platform payout rules for TikTok, Facebook, and X.',
     keyTakeaways: [
       'Instagram does not offer a universal pay-per-view ad revenue split like YouTube AdSense — creator monetization relies primarily on brand partnerships, affiliate sales, and creator subscriptions.',
       'Sponsorship rates on Instagram are priced per post or Reel based on follower count, engagement rate (likes + comments / followers), and audience geography benchmarks.',
       'Micro-influencers (10k–50k followers) command $250 to $750 per sponsored Reel or carousel, while mid-tier creators (50k–250k) command $800 to $2,500.',
       'Instagram Creator Subscriptions allow eligible creators to set up monthly recurring fees ($0.99 to $99.99/mo) for subscriber badges, exclusive Stories/Reels, and private broadcast channels.',
-      'Contracts for Instagram brand deals should always specify paid media usage rights (whitelisting) and exclusivity terms, which justify 30% to 100% higher fee structures.',
+      'TikTok\'s Creator Rewards Program requires 10,000 followers and 100,000 video views in the last 30 days, paying $0.15 to $1.20 per 1,000 qualified views on videos over 1 minute.',
+      'Facebook In-Stream Ads split 55% of ad revenue to creators meeting 10,000 followers and 600,000 watch minutes in 60 days; X Creator Revenue Sharing requires X Premium and 5 million impressions in 3 months.',
+      'Contracts for brand deals should always specify paid media usage rights (whitelisting) and exclusivity terms, which justify 30% to 100% higher fee structures.',
     ],
     sections: [
       {
@@ -3389,6 +3391,20 @@ const OVERRIDES: Record<string, TopicCopy> = {
           'Exclusivity clauses (preventing you from working with competing brands for 30 to 90 days) restrict your earning capacity and should always command a 20% to 50% rate premium on top of base deliverable pricing.',
         ],
       },
+      {
+        heading: 'Beyond Instagram: TikTok, Facebook & X Monetization Rules',
+        body: [
+          'TikTok replaced its legacy Creator Fund with the TikTok Creator Rewards Program: creators must be 18+, have at least 10,000 followers, and have accumulated 100,000 valid views in the past 30 days. The program only monetizes original videos longer than 1 minute, paying $0.15 to $1.20 per 1,000 qualified views based on watch time, completion rate, and audience location.',
+          'Meta also offers Facebook In-Stream Ads, sharing 55% of revenue from ads placed in public long-form videos, with eligibility requiring 10,000 page followers and 600,000 total eligible watch minutes over 60 days. X (formerly Twitter) shares ad revenue through Creator Revenue Sharing: creators need an active X Premium subscription, 500+ followers, and 5 million organic impressions across posts in the past 3 months, with payouts disbursed via Stripe once earnings pass $10.',
+        ],
+      },
+      {
+        heading: 'Short-Form vs. Long-Form Monetization Economics',
+        body: [
+          'Short-form content (TikTok, Instagram Reels, YouTube Shorts) delivers rapid audience growth but lower native ad RPMs ($0.02–$0.80/1k views). Long-form content (YouTube, Facebook Videos, Podcasts) delivers higher native RPMs ($3–$25+/1k views).',
+          'A balanced creator strategy uses short-form clips to build brand awareness, and converts short-form viewers into long-form subscribers and newsletter members where monetization rates are 10x higher. A single long-form video can be repurposed into several short-form clips, a text thread, and an article, spreading distribution across multiple platforms\' monetization engines at once.',
+        ],
+      },
     ],
     faqs: [
       {
@@ -3404,12 +3420,20 @@ const OVERRIDES: Record<string, TopicCopy> = {
         answer: 'Creators set a monthly subscription price ($0.99–$99.99/mo). Subscribers receive a distinctive badge, access to subscriber-only Reels, Stories, broadcast channels, and private group chats.',
       },
       {
-        question: 'What is Instagram Partnership Ad Whitelisting?',
-        answer: 'Whitelisting (Partnership Ads) allows a brand to run paid advertisements through your Instagram handle. Creators should charge brands a separate monthly licensing fee (30%–100% of base rate) for ad usage rights.',
-      },
-      {
         question: 'What is a good engagement rate on Instagram?',
         answer: 'An engagement rate (total likes + comments divided by total followers) between 2% and 5% is considered good for Instagram accounts. Rates above 5% are exceptional and command premium sponsorship rates.',
+      },
+      {
+        question: 'What are the requirements for the TikTok Creator Rewards Program?',
+        answer: 'Creators must be at least 18 years old, have 10,000+ followers, 100,000+ views in the last 30 days, and publish original videos over 1 minute in length.',
+      },
+      {
+        question: 'How do you qualify for X (Twitter) Creator Revenue Sharing?',
+        answer: 'You must have an active X Premium subscription, at least 500 followers, and 5 million organic impressions across your posts in the last 3 months.',
+      },
+      {
+        question: 'How does Facebook pay video creators?',
+        answer: 'Facebook pays through In-Stream Ads (55% creator revenue split on videos over 1 minute) and the invite-only Performance Bonus program for post engagement.',
       },
     ],
     relatedReading: [
@@ -3417,10 +3441,12 @@ const OVERRIDES: Record<string, TopicCopy> = {
       { slug: 'creator-economy/instagram-creator-subscriptions-and-reel-bonus-rules', anchor: 'Instagram Creator Subscriptions & Reel Bonus Rules' },
       { slug: 'creator-economy/sponsored-post-rate-benchmarks-for-micro-influencers', anchor: 'Sponsored Post Rate Benchmarks for Micro-Influencers' },
       { slug: 'creator-economy/creator-contract-essentials-and-invoice-payment-terms', anchor: 'Creator Contract Essentials & Invoice Payment Terms' },
-      { slug: 'creator-economy/sponsorship-rate-estimator-tool', anchor: 'Interactive Sponsorship Rate Estimator Tool' },
+      { slug: 'creator-economy/cross-platform-payout-comparison-tiktok-youtube-and-x', anchor: 'Cross-Platform Payout Comparison: TikTok, YouTube & X' },
+      { slug: 'creator-economy/how-platform-creator-funds-calculate-rpm', anchor: 'How Platform Creator Funds Calculate RPM' },
+      { slug: 'creator-economy/ad-revenue-sharing-models-and-cpm-trends', anchor: 'Ad Revenue Sharing Models & CPM Trends' },
     ],
-    metaTitle: 'Instagram Earnings & Monetization — Reels, Gifts & Sponsorships | Imperialpedia',
-    metaDescription: 'Complete breakdown of Instagram monetization, creator subscriptions, brand deal pricing, and Reels bonus eligibility.',
+    metaTitle: 'Instagram & Social Media Earnings — Reels, TikTok, Facebook & X | Imperialpedia',
+    metaDescription: 'Complete breakdown of Instagram monetization, creator subscriptions, brand deal pricing, and how TikTok, Facebook, and X pay creators.',
   },
   'website-monetization': {
     tag: 'WEBSITE EARNINGS',
@@ -3510,105 +3536,22 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaTitle: 'Website Earnings & Monetization — AdSense, RPMs & Traffic Rates | Imperialpedia',
     metaDescription: 'How website owners earn money from Google AdSense, display ad networks, affiliate links, and digital product sales.',
   },
-  'social-media-earnings': {
-    tag: 'SOCIAL MEDIA EARNINGS',
-    title: 'Social Media Earnings',
+  // 'social-media-earnings' merged into 'instagram-monetization' 2026-09-23 —
+  // see the comment on that entry above and next.config.ts's redirect.
+  // 'creator-guides' merged into 'creator-tools' below, same date — both were
+  // thin buckets slicing the same 21-article pool.
+  'creator-tools': {
+    tag: 'CREATOR TOOLS & GUIDES',
+    title: 'Creator Business & Tools',
     description:
-      'Creator monetization programs, revenue sharing, eligibility rules, and earnings potential across TikTok, Facebook, X, and LinkedIn.',
+      'Interactive calculators to estimate YouTube RPM, ad revenue, website traffic income, and sponsorship rates — plus the business fundamentals every creator needs: taxes, LLCs, contracts, and FTC disclosure rules.',
     keyTakeaways: [
-      'Monetization mechanics vary across social platforms: TikTok uses the Creator Rewards Program (paying per 1k qualified views on 1+ minute videos), Facebook offers In-Stream Ads, and X shares reply thread ad revenue.',
-      'TikTok Creator Rewards Program requires 10,000 followers and 100,000 video views in the last 30 days, paying $0.20 to $1.00+ RPM on videos longer than 60 seconds.',
-      'Facebook In-Stream Ads split ad revenue 55% to long-form video creators who meet 10,000 followers and 600,000 total eligible watch minutes within 60 days.',
-      'X (Twitter) Creator Revenue Sharing requires X Premium subscription and 5 million organic impressions over 3 months, paying out ad revenue generated in post reply streams.',
-      'Cross-platform creators achieve maximum financial leverage by repurposing core content across YouTube, Reels, TikTok, and X while driving traffic to an owned email list.',
-    ],
-    sections: [
-      {
-        heading: 'Cross-Platform Creator Monetization Overview',
-        body: [
-          'Social media monetization has evolved from fixed creator funds to dynamic revenue-sharing programs. Each platform (TikTok, Facebook, X, LinkedIn) uses a distinct commercial model to incentivize high-retention content creation.',
-          'While short-form video algorithms generate massive reach, their per-view ad revenue remains lower than long-form platforms. Top creators treat social media reach as a top-of-funnel discovery engine for higher-margin monetization.',
-        ],
-      },
-      {
-        heading: 'TikTok Creator Rewards Program: Qualified Views & 1-Minute Video Rules',
-        body: [
-          'TikTok replaced its legacy Creator Fund with the TikTok Creator Rewards Program. To qualify, creators must be 18+, have at least 10,000 followers, and have accumulated 100,000 valid views in the past 30 days.',
-          'The program exclusively monetizes original videos longer than 1 minute. Earnings are calculated using a dynamic RPM algorithm that evaluates video watch time, completion rate, audience country location, and search value. RPMs range from $0.15 to $1.20 per 1,000 qualified views.',
-        ],
-      },
-      {
-        heading: 'Facebook In-Stream Ads & Performance Bonus Programs',
-        body: [
-          'Meta offers robust monetization on Facebook through In-Stream Ads for long-form video and the Facebook Performance Bonus. In-Stream Ads allow creators to share 55% of revenue from ads placed in public videos.',
-          'Eligibility requires 10,000 page followers and 600,000 total eligible watch minutes over the last 60 days. The Performance Bonus pays creators for high-engagement text, photo, and link posts on Facebook Pages.',
-        ],
-      },
-      {
-        heading: 'X (Twitter) Creator Revenue Sharing Requirements',
-        body: [
-          'X (formerly Twitter) shares ad revenue with eligible creators through its Creator Revenue Sharing program. To qualify, creators must subscribe to X Premium or Premium+, have at least 500 followers, and accumulate 5 million organic impressions across all posts in the past 3 months.',
-          'Revenue is calculated based on ads served directly within the reply threads of the creator’s posts to verified X Premium subscribers. Payments are disbursed via Stripe once earnings pass $10.',
-        ],
-      },
-      {
-        heading: 'Short-Form vs. Long-Form Monetization Economics',
-        body: [
-          'Short-form content (TikTok, Instagram Reels, YouTube Shorts) delivers rapid audience growth but lower native ad RPMs ($0.02–$0.80/1k views). Long-form content (YouTube, Facebook Videos, Podcasts) delivers higher native RPMs ($3–$25+/1k views).',
-          'A balanced creator strategy uses short-form clips to build brand awareness, and converts short-form viewers into long-form subscribers and newsletter members where monetization rates are 10x higher.',
-        ],
-      },
-      {
-        heading: 'Building a Cross-Platform Content Distribution Pipeline',
-        body: [
-          'To maximize return on content creation time, establish an efficient repurposing pipeline. A single 12-minute long-form YouTube video can be edited into 3 short-form vertical clips for TikTok and Reels, a text thread for X, and an article for your website.',
-          'Repurposing spreads distribution across multiple platform monetization engines while building multi-channel resilience against single-platform algorithm updates.',
-        ],
-      },
-    ],
-    faqs: [
-      {
-        question: 'Which social media platform pays creators the highest ad revenue?',
-        answer: 'YouTube offers the highest consistent ad revenue share (55%) with long-form RPMs averaging $2.00 to $15.00+ per 1,000 views. Facebook In-Stream Ads rank second for long-form video, while short-form platforms (TikTok, Reels, Shorts) yield lower ad RPMs ($0.02–$0.80/1k views).',
-      },
-      {
-        question: 'What are the requirements for the TikTok Creator Rewards Program?',
-        answer: 'Creators must be at least 18 years old, have 10,000+ followers, 100,000+ views in the last 30 days, and publish original videos over 1 minute in length.',
-      },
-      {
-        question: 'How do you qualify for X (Twitter) Creator Revenue Sharing?',
-        answer: 'You must have an active X Premium subscription, at least 500 followers, and 5 million organic impressions across your posts in the last 3 months.',
-      },
-      {
-        question: 'How does Facebook pay video creators?',
-        answer: 'Facebook pays through In-Stream Ads (55% creator revenue split on videos over 1 minute) and the invite-only Performance Bonus program for post engagement.',
-      },
-      {
-        question: 'Why do short-form videos pay less per view than long-form videos?',
-        answer: 'Short-form ad inventory runs between videos in a feed rather than inside individual uploads, requiring revenue pooling across all platform views and music licensing costs.',
-      },
-    ],
-    relatedReading: [
-      { slug: 'creator-economy/cross-platform-payout-comparison-tiktok-youtube-and-x', anchor: 'Cross-Platform Payout Comparison: TikTok, YouTube & X' },
-      { slug: 'creator-economy/how-platform-creator-funds-calculate-rpm', anchor: 'How Platform Creator Funds Calculate RPM' },
-      { slug: 'creator-economy/ad-revenue-sharing-models-and-cpm-trends', anchor: 'Ad Revenue Sharing Models & CPM Trends' },
-      { slug: 'creator-economy/youtube-shorts-monetization-vs-long-form-payout-rates', anchor: 'YouTube Shorts Monetization vs Long-Form Payout Rates' },
-      { slug: 'creator-economy/platform-payout-comparison-chart', anchor: 'Interactive Platform Payout Comparison Chart' },
-    ],
-    metaTitle: 'Social Media Earnings — TikTok, Facebook & X Creator Programs | Imperialpedia',
-    metaDescription: 'Earnings breakdown for TikTok Creator Rewards, Facebook Reels bonuses, X revenue sharing, and social media monetization.',
-  },
-  'creator-guides': {
-    tag: 'CREATOR GUIDES',
-    title: 'Creator Business Guides',
-    description:
-      'Strategic guides on creator business models, multiple revenue streams, sponsorship negotiations, and monetization diversification.',
-    keyTakeaways: [
-      'Treating content creation as a formal business — forming an LLC, separating business accounts, and filing quarterly taxes — is essential for financial stability.',
+      'Interactive RPM calculators allow creators to model potential monthly and annual ad earnings based on traffic volume, niche CPM ranges, and platform splits.',
+      'Audience geography weighting is a critical variable in earnings estimation — US, UK, CA, and AU viewers yield 3x to 5x higher CPMs than international traffic.',
+      'Sponsorship rate estimators calculate integration pricing by combining average video views with niche CPM baselines ($20–$40 CPM).',
+      'Treating content creation as a formal business — forming an LLC, separating business accounts, and filing quarterly taxes — is essential for financial stability once income exceeds $10,000–$15,000/year.',
       'Sponsorship contracts must explicitly outline Scope of Work (SOW), revision limits, Net-30 payment terms, and paid media usage rights (whitelisting).',
-      'The Federal Trade Commission (FTC) mandates clear and conspicuous disclosures (e.g. #ad, #sponsored) on all sponsored content and affiliate links.',
-      'Digital products (eBooks, templates, masterclasses) deliver industry-leading profit margins exceeding 85% to 92% after payment processing fees.',
-      'Full-time creators protect against algorithm updates by building an owned email newsletter list to maintain direct access to their audience.',
+      'The FTC mandates clear and conspicuous disclosures (e.g. #ad, #sponsored) on all sponsored content and affiliate links — generic tags like #sp are insufficient.',
     ],
     sections: [
       {
@@ -3653,52 +3596,6 @@ const OVERRIDES: Record<string, TopicCopy> = {
           'Disclosures must be visible before a user clicks "see more" in descriptions, voiced aloud in video integrations, and displayed as on-screen text overlays during sponsored segments. Generic tags like #sp or #partner are insufficient — use clear tags like #ad or #sponsored.',
         ],
       },
-    ],
-    faqs: [
-      {
-        question: 'Should a content creator form an LLC?',
-        answer: 'Forming a single-member LLC is recommended once your annual creator income exceeds $10,000–$15,000. An LLC protects personal assets from business liabilities and simplifies business expense tracking.',
-      },
-      {
-        question: 'How do estimated quarterly taxes work for creators?',
-        answer: 'Because platforms and brands do not withhold taxes from 1099 payouts, self-employed creators must pay estimated federal and state income taxes quarterly (April 15, June 15, Sept 15, Jan 15) to avoid IRS underpayment penalties.',
-      },
-      {
-        question: 'What expenses can a YouTuber or blogger write off on taxes?',
-        answer: 'Creators can deduct necessary business expenses including camera gear, microphones, computer hardware, editing software subscriptions (Adobe, Canva), website hosting, home office space, and contractor fees.',
-      },
-      {
-        question: 'What are Net-30 payment terms in creator contracts?',
-        answer: 'Net-30 means the brand has 30 calendar days from the invoice date (or publication date) to disburse payment. Creators should specify late fees for overdue payments in their contract.',
-      },
-      {
-        question: 'What are the FTC disclosure rules for sponsored videos and posts?',
-        answer: 'The FTC requires clear, conspicuous disclosures on all sponsored content and affiliate links. Disclosures (#ad or #sponsored) must be easily seen/heard before links or integrations, not hidden at the end of long captions.',
-      },
-    ],
-    relatedReading: [
-      { slug: 'creator-economy/taxes-for-creators-deductions-quarterly-estimates-and-llcs', anchor: 'Taxes for Creators: Deductions, Quarterly Estimates & LLCs' },
-      { slug: 'creator-economy/building-a-sustainable-digital-media-business', anchor: 'Building a Sustainable Digital Media Business' },
-      { slug: 'creator-economy/rate-sheets-and-media-kit-templates-for-creators', anchor: 'Rate Sheets & Media Kit Templates for Creators' },
-      { slug: 'creator-economy/creator-contract-essentials-and-invoice-payment-terms', anchor: 'Creator Contract Essentials & Invoice Payment Terms' },
-      { slug: 'creator-economy/diversifying-income-sponsorships-ad-revenue-digital-goods', anchor: 'Diversifying Income: Sponsorships, Ad Revenue & Digital Goods' },
-    ],
-    metaTitle: 'Creator Business Guides — Sponsorships, Revenue Streams & Strategy | Imperialpedia',
-    metaDescription: 'Business guides for content creators: sponsorship negotiation, affiliate marketing, digital products, and income diversification.',
-  },
-  'creator-tools': {
-    tag: 'CREATOR TOOLS',
-    title: 'Creator Tools & Calculators',
-    description:
-      'Interactive calculators and tools to estimate YouTube RPM, ad revenue, website traffic income, and sponsorship potential.',
-    keyTakeaways: [
-      'Interactive RPM calculators allow creators to model potential monthly and annual ad earnings based on traffic volume, niche CPM ranges, and platform splits.',
-      'Audience geography weighting is a critical variable in earnings estimation — US, UK, CA, and AU viewers yield 3x to 5x higher CPMs than international traffic.',
-      'Ad-block usage reduces monetized impression volume by 15% to 35% on desktop traffic; accurate earnings models adjust gross view figures accordingly.',
-      'Sponsorship rate estimators calculate integration pricing by combining average video views with niche CPM baselines ($20–$40 CPM).',
-      'Understanding platform payout thresholds ($100 for AdSense/YouTube, $25 for Instagram Gifts, $10 for X) ensures predictable cash-flow planning.',
-    ],
-    sections: [
       {
         heading: 'Why Creators Need Data-Driven Financial Modeling',
         body: [
@@ -3744,6 +3641,22 @@ const OVERRIDES: Record<string, TopicCopy> = {
     ],
     faqs: [
       {
+        question: 'Should a content creator form an LLC?',
+        answer: 'Forming a single-member LLC is recommended once your annual creator income exceeds $10,000–$15,000. An LLC protects personal assets from business liabilities and simplifies business expense tracking.',
+      },
+      {
+        question: 'How do estimated quarterly taxes work for creators?',
+        answer: 'Because platforms and brands do not withhold taxes from 1099 payouts, self-employed creators must pay estimated federal and state income taxes quarterly (April 15, June 15, Sept 15, Jan 15) to avoid IRS underpayment penalties.',
+      },
+      {
+        question: 'What expenses can a YouTuber or blogger write off on taxes?',
+        answer: 'Creators can deduct necessary business expenses including camera gear, microphones, computer hardware, editing software subscriptions (Adobe, Canva), website hosting, home office space, and contractor fees.',
+      },
+      {
+        question: 'What are the FTC disclosure rules for sponsored videos and posts?',
+        answer: 'The FTC requires clear, conspicuous disclosures on all sponsored content and affiliate links. Disclosures (#ad or #sponsored) must be easily seen/heard before links or integrations, not hidden at the end of long captions.',
+      },
+      {
         question: 'How do creator earnings calculators estimate RPM?',
         answer: 'Calculators combine expected view or visitor volume with estimated niche CPM ranges, geographic audience weighting, and platform revenue splits (e.g. 55/45 for YouTube, 68/32 for AdSense) to project estimated net earnings.',
       },
@@ -3759,20 +3672,19 @@ const OVERRIDES: Record<string, TopicCopy> = {
         question: 'What are the minimum payout thresholds for AdSense, Meta, and X?',
         answer: 'Google AdSense requires a $100 minimum balance for electronic monthly payout; Meta (Instagram/Facebook) requires $25; and X (Twitter) requires $10 for Stripe payouts.',
       },
-      {
-        question: 'How do I calculate fair sponsorship pricing for my channel?',
-        answer: 'Calculate your average views over your last 10 videos, divide by 1,000, and multiply by a baseline CPM rate ($20–$40 CPM for integrations, $50–$100 CPM for dedicated videos). Add 30%–100% extra if the brand requests ad usage rights.',
-      },
     ],
     relatedReading: [
       { slug: 'creator-economy/rpm-and-cpm-calculator-for-youtube-and-web-creators', anchor: 'RPM & CPM Calculator for YouTube & Web Creators' },
       { slug: 'creator-economy/sponsorship-rate-estimator-tool', anchor: 'Sponsorship Rate Estimator Tool' },
       { slug: 'creator-economy/platform-payout-comparison-chart', anchor: 'Platform Payout Comparison Chart' },
-      { slug: 'creator-economy/youtube-rpm-vs-cpm-explained', anchor: 'YouTube RPM vs CPM Breakdown' },
       { slug: 'creator-economy/calculating-page-rpm-and-session-revenue', anchor: 'Calculating Page RPM & Session Revenue' },
+      { slug: 'creator-economy/taxes-for-creators-deductions-quarterly-estimates-and-llcs', anchor: 'Taxes for Creators: Deductions, Quarterly Estimates & LLCs' },
+      { slug: 'creator-economy/building-a-sustainable-digital-media-business', anchor: 'Building a Sustainable Digital Media Business' },
+      { slug: 'creator-economy/rate-sheets-and-media-kit-templates-for-creators', anchor: 'Rate Sheets & Media Kit Templates for Creators' },
+      { slug: 'creator-economy/creator-contract-essentials-and-invoice-payment-terms', anchor: 'Creator Contract Essentials & Invoice Payment Terms' },
     ],
-    metaTitle: 'Creator Tools & Calculators — YouTube RPM & Revenue Estimators | Imperialpedia',
-    metaDescription: 'Free creator tools and calculators to estimate YouTube earnings, website AdSense revenue, and brand deal rates.',
+    metaTitle: 'Creator Business & Tools — RPM Calculators, Taxes & Contracts | Imperialpedia',
+    metaDescription: 'Free creator tools and calculators to estimate YouTube and AdSense earnings, plus business fundamentals: LLCs, quarterly taxes, sponsorship contracts, and FTC disclosure rules.',
   },
   'budgeting-basics': {
     tag: 'BUDGETING BASICS',
@@ -6419,8 +6331,6 @@ const CATEGORY_GROUPS: CategoryGroup[] = [
       'youtube-monetization',
       'instagram-monetization',
       'website-monetization',
-      'social-media-earnings',
-      'creator-guides',
       'creator-tools',
     ],
   },

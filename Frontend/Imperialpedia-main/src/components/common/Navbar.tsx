@@ -27,10 +27,11 @@ type NavCategory = {
 const ALL_NAV: NavCategory[] = [
   {
     id: "investing",
-    label: "Investing",
-    // /investing is one of the categories retired pending AdSense review
-    // (see next.config.ts) — it 301s to /. Points at /stocks, the only real
-    // destination in this menu, so the label itself is never a dead click.
+    // 2026-09-23: relabeled from "Investing" — /investing itself is
+    // permanently 410'd (see GONE_TOP_LEVEL_SLUGS in retired-paths.ts), and
+    // this menu's only real content is Stocks, so the label now says what it
+    // actually links to instead of naming a page that no longer exists.
+    label: "Stocks",
     href: "/stocks",
     links: [
       { label: "Stocks", href: "/stocks" },
@@ -46,10 +47,12 @@ const ALL_NAV: NavCategory[] = [
   },
   {
     id: "personal-finance",
-    label: "Personal Finance",
-    // /personal-finance is also retired (301s to /) — points at /budgeting-basics,
-    // the larger of this menu's two real destinations, so the label is never a
-    // dead click.
+    // 2026-09-23: relabeled from "Personal Finance" — that category is
+    // permanently 410'd (see GONE_TOP_LEVEL_SLUGS in retired-paths.ts), and
+    // this menu's real content is Budgeting + Scams & Fraud Protection, so
+    // the label now names the larger of the two instead of a page that no
+    // longer exists.
+    label: "Budgeting",
     href: "/budgeting-basics",
     links: [
       // /budgeting isn't a real CMS category (0 articles) — it was silently
@@ -67,15 +70,16 @@ const ALL_NAV: NavCategory[] = [
     label: "Creator Economy",
     // Added 2026-09-11 — top-level hub for YouTube/Instagram/website earnings,
     // monetization guides, and platform policy coverage.
+    // 2026-09-23: consolidated from 6 subtopics to 4 — "Social Media Earnings"
+    // folded into Instagram, "Creator Business Guides" folded into Tools —
+    // see creator-economy-topics.ts and next.config.ts's redirects.
     href: "/creator-economy",
     links: [
       { label: "Creator Economy Hub", href: "/creator-economy" },
       { label: "YouTube Earnings & Monetization", href: "/youtube-monetization" },
-      { label: "Instagram Earnings & Monetization", href: "/instagram-monetization" },
+      { label: "Instagram & Social Media Earnings", href: "/instagram-monetization" },
       { label: "Website Earnings & Monetization", href: "/website-monetization" },
-      { label: "Social Media Earnings", href: "/social-media-earnings" },
-      { label: "Creator Business Guides", href: "/creator-guides" },
-      { label: "Tools & Calculators", href: "/creator-tools" },
+      { label: "Creator Business & Tools", href: "/creator-tools" },
     ],
   },
 ];

@@ -17,7 +17,6 @@ import { isRetiredPath } from "@/lib/content/retired-paths";
 import { isPathHiddenByAdsenseCleanup } from "@/config/adsense-cleanup";
 import {
   MARKETS_SECTION_LIVE,
-  REVIEWS_SECTION_LIVE,
   STOCK_REFERENCE_PAGES_LIVE,
   newsHubIsLive,
 } from "@/config/sections";
@@ -135,19 +134,24 @@ export const sitemapService = {
     // review (see the redirect block in next.config.ts and Navbar.tsx), so
     // submitting them here would list URLs that now just 301 to /. Restore
     // once each category's articles are republished.
-    // 2026-09-10: "/reviews" removed — the hub has published zero reviews and
+    // 2026-09-10: "/reviews" removed — the hub had published zero reviews and
     // rendered "No reviews published yet" under a "0 + Reviews & Comparisons"
-    // counter, so this was submitting an under-construction page. It comes back
-    // automatically via REVIEWS_SECTION_LIVE (config/sections.ts), which also
-    // drives the page's own noindex, so the two can't disagree.
-    // "/authors" added in the same pass: 34 real contributor profiles were
+    // counter, so this was submitting an under-construction page.
+    // 2026-09-23: "/reviews" (and REVIEWS_SECTION_LIVE's gate on it) is now moot
+    // — the whole category is permanently 410'd, not just pending content, so
+    // it's dropped outright instead of staying behind a flag that could never
+    // flip back true. "/investing" and "/personal-finance" (never listed here
+    // directly — they only ever appeared via TOPIC_HUB_SLUGS/CATEGORY_GROUPS,
+    // both already updated) and "/financial-intelligence" (the entire articles
+    // section — hub + every individual article) are permanently 410'd the same
+    // day for the same reason (see GONE_TOP_LEVEL_SLUGS in retired-paths.ts).
+    // "/authors" added 2026-09-10: 34 real contributor profiles were
     // crawlable and linked from the footer but had never been submitted, which
     // held back the site's strongest expertise signal.
     const corePages = [
       "",
       "/about",
       "/authors",
-      "/financial-intelligence",
       // /budgeting removed 2026-09-04: not a real category (0 articles, was
       // serving bundled demo content), now redirects to /budgeting-basics,
       // which is already submitted below via TOPIC_HUB_SLUGS.
@@ -164,7 +168,6 @@ export const sitemapService = {
       // URL — the exact contradiction Search Console reports as "Submitted URL
       // marked noindex", and the reason the rest of this list is conditional.
       "/privacy-policy",
-      ...(REVIEWS_SECTION_LIVE ? ["/reviews"] : []),
       "/stocks",
       "/terms-of-service",
       "/transparency",
@@ -293,9 +296,14 @@ export const sitemapService = {
       "advanced-budgeting", "app-reviews", "auto-loans", "banking-reviews",
       "brokers", "budget-rules", "budgeting-apps", "budgeting-basics", "calendar",
       "cd-rates", "checking", "credit-cards", "crypto",
-      // New category & subtopics (2026-09-11) — Creator Economy hub & subcategories.
+      // New category & subtopics (2026-09-11) — Creator Economy hub &
+      // subcategories. "social-media-earnings" and "creator-guides" removed
+      // 2026-09-23 (merged into instagram-monetization / creator-tools, see
+      // creator-economy-topics.ts) — both are now permanently 410 in
+      // middleware.ts REMOVED_PATH_PREFIXES, same reasoning as
+      // income/insurance/taxes below.
       "creator-economy", "youtube-monetization", "instagram-monetization",
-      "website-monetization", "social-media-earnings", "creator-guides", "creator-tools",
+      "website-monetization", "creator-tools",
       "cryptocurrency", "debt", "earnings", "emergency-fund",
       "family-budget", "fed", "financial-calculators", "financial-independence",
       // New category (2026-09-04), no articles published yet — gated the same
@@ -305,13 +313,14 @@ export const sitemapService = {
       // "income", "insurance", and "taxes" removed — none has a live route
       // (all permanently 410 in middleware.ts REMOVED_PATHS), so checking
       // categoryHasLiveContent for them could submit URLs to the sitemap that
-      // 410 the moment Google fetches them.
+      // 410 the moment Google fetches them. "savings" removed 2026-09-23 for
+      // the same reason — see middleware.ts REMOVED_PATH_PREFIXES.
       "fiscal-policy", "gdp", "global", "government", "indicators",
       "inflation", "interest-rates", "live-market-news",
       "loan-reviews", "loans", "monetary-policy", "money-management",
       "money-market", "monthly-budget", "mortgages",
       "planning", "politics", "portfolio", "real-estate", "retirement",
-      "saving-money", "savings", "student-budget", "student-loans",
+      "saving-money", "student-budget", "student-loans",
       "tax-software", "unemployment",
     ] as const;
     // categoryHasLiveContent answers "does the CMS still have articles filed

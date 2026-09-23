@@ -7,7 +7,7 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/
 import { PreferredSourceButton } from '@/components/common/PreferredSourceButton';
 import { withoutRetired } from '@/lib/content/retired-paths';
 import { withoutAdsenseHidden } from '@/config/adsense-cleanup';
-import { NEWS_SECTION_LIVE, REVIEWS_SECTION_LIVE } from '@/config/sections';
+import { NEWS_SECTION_LIVE } from '@/config/sections';
 
 // ─── Remove stubs and restore your real imports in production ─────────────────
 //   import { Container } from '@/design-system/layout/container';
@@ -46,21 +46,28 @@ const EXPLORE_COLUMN = {
       { label: 'Market News', href: '/market-news' },
       { label: 'Financial Tools', href: '/financial-tools' },
       ...(NEWS_SECTION_LIVE ? [{ label: 'News', href: '/news' }] : []),
-      ...(REVIEWS_SECTION_LIVE ? [{ label: 'Reviews', href: '/reviews' }] : []),
+      // /reviews permanently 410'd 2026-09-23 (see GONE_TOP_LEVEL_SLUGS in
+      // retired-paths.ts) — dropped outright rather than left behind a
+      // REVIEWS_SECTION_LIVE flag that can never flip back true.
     ])
   ),
 };
 
+// 2026-09-23: consolidated from 6 links to 4 — "Social Media Earnings" folded
+// into Instagram, "Creator Business Guides" folded into Tools (see
+// creator-economy-topics.ts and next.config.ts's redirects). Still wrapped in
+// withoutRetired for consistency with every other column in this file, and
+// FOOTER_COLUMNS below drops the column entirely if it ever hits zero links.
 const CREATOR_ECONOMY_COLUMN = {
   label: 'Creator Economy',
-  links: withoutAdsenseHidden([
-    { label: 'YouTube Monetization', href: '/youtube-monetization' },
-    { label: 'Instagram Monetization', href: '/instagram-monetization' },
-    { label: 'Website Monetization', href: '/website-monetization' },
-    { label: 'Social Media Earnings', href: '/social-media-earnings' },
-    { label: 'Creator Business Guides', href: '/creator-guides' },
-    { label: 'Creator Tools & Calculators', href: '/creator-tools' },
-  ]),
+  links: withoutAdsenseHidden(
+    withoutRetired([
+      { label: 'YouTube Monetization', href: '/youtube-monetization' },
+      { label: 'Instagram & Social Media Earnings', href: '/instagram-monetization' },
+      { label: 'Website Monetization', href: '/website-monetization' },
+      { label: 'Creator Business & Tools', href: '/creator-tools' },
+    ])
+  ),
 };
 
 const FOOTER_COLUMNS = [
@@ -93,7 +100,7 @@ const FOOTER_COLUMNS = [
       { label: 'Sitemap', href: '/sitemap.xml' },
     ]),
   },
-];
+].filter((col) => col.links.length > 0);
 
 // Shared outlined-pill CTA button — bold, small, uppercase, tracked-out, matching
 // the promo-box treatment below (deliberately louder than the calm nav links).

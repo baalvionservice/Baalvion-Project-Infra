@@ -42,20 +42,18 @@ export const metadata: Metadata = {
   },
 
   title: {
-    default: "Imperialpedia — Personal Finance & Creator Economy Explained",
+    default: "Imperialpedia — Stocks, Budgeting & Creator Economy Explained",
     template: "%s | Imperialpedia",
   },
 
   description:
-    'Imperialpedia is an independent financial education platform covering personal finance, stock market investing fundamentals, fraud protection, and the creator economy — written by named contributors with cited sources.',
+    'Imperialpedia is an independent financial education platform covering stock market fundamentals, personal budgeting, fraud protection, and the creator economy — written by named contributors with cited sources.',
   keywords: [
-    "personal finance",
     "stock market investing",
     "budgeting",
     "fraud protection",
     "creator economy",
     "financial glossary",
-    "investing",
     "Imperialpedia",
   ],
 
@@ -78,9 +76,9 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: env.siteUrl,
     siteName: "Imperialpedia",
-    title: "Imperialpedia — Personal Finance & Creator Economy Explained",
+    title: "Imperialpedia — Stocks, Budgeting & Creator Economy Explained",
     description:
-      'Independent, reviewed articles on personal finance, stock market investing fundamentals, fraud protection, and the creator economy.',
+      'Independent, reviewed articles on stock market fundamentals, personal budgeting, fraud protection, and the creator economy.',
     images: [
       {
         url: `${env.siteUrl}/og-image.png`,
@@ -95,9 +93,9 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     site: "@imperialpedia",
     creator: "@imperialpedia",
-    title: "Imperialpedia — Personal Finance & Creator Economy Explained",
+    title: "Imperialpedia — Stocks, Budgeting & Creator Economy Explained",
     description:
-      'Independent, reviewed articles on personal finance, stock market investing fundamentals, fraud protection, and the creator economy.',
+      'Independent, reviewed articles on stock market fundamentals, personal budgeting, fraud protection, and the creator economy.',
     images: [`${env.siteUrl}/og-image.png`],
   },
 
