@@ -113,6 +113,11 @@ export default function WebsiteContentPage({
   const [selectAllMatchingMode, setSelectAllMatchingMode] = useState(false);
   const [bulkProgress, setBulkProgress] = useState<{ done: number; total: number } | null>(null);
   const [confirmBulkAction, setConfirmBulkAction] = useState<'archive' | 'delete' | null>(null);
+  // Single-item delete used to fire straight off the dropdown with no checkpoint at
+  // all (bulk delete already had one) — that asymmetry is the most likely way to
+  // lose an item by a stray click. Delete itself is a soft delete (see Trash link
+  // in the header), so this confirms the action, not permanence.
+  const [confirmDeleteFor, setConfirmDeleteFor] = useState<ContentItem | null>(null);
 
   const { data: website } = useWebsite(websiteId);
   const permissions = useCmsPermissions(websiteId);
@@ -449,7 +454,7 @@ export default function WebsiteContentPage({
                 <>
                   <DropdownMenuItem
                     className="text-destructive"
-                    onClick={() => remove(item.id)}
+                    onClick={() => setConfirmDeleteFor(item)}
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
                     Delete
@@ -518,6 +523,16 @@ export default function WebsiteContentPage({
           }
           actions={
             <div className="flex gap-2">
+              {/* Trash's routes (GET /trash, restore) are gated at cms_editor on the
+                  backend, same as Delete — reuse canDelete so this never just 403s. */}
+              {permissions.canDelete && (
+                <Button size="sm" variant="outline" asChild>
+                  <Link href={`/cms/websites/${websiteId}/content/trash`}>
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Trash
+                  </Link>
+                </Button>
+              )}
               <Button size="sm" variant="outline" onClick={() => setImportOpen(true)}>
                 <Upload className="mr-2 h-4 w-4" />
                 Import
@@ -839,7 +854,7 @@ export default function WebsiteContentPage({
             </AlertDialogTitle>
             <AlertDialogDescription>
               {confirmBulkAction === 'delete'
-                ? 'This permanently removes every matching item. If any of them are still published, the server rejects the whole action — archive them first, then delete.'
+                ? 'This moves every matching item to Trash. If any of them are still published, the server rejects the whole action — archive them first, then delete. Trashed items can be restored, or purged for good, from the Trash view.'
                 : 'This takes every matching item off the public site immediately. It stays fully reversible — republish any of them any time.'}
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -855,6 +870,32 @@ export default function WebsiteContentPage({
               }}
             >
               {confirmBulkAction === 'delete' ? 'Delete' : 'Archive'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Single-item delete confirm — mirrors the bulk-delete checkpoint above so a
+          stray dropdown click can no longer remove an item with zero warning. */}
+      <AlertDialog open={!!confirmDeleteFor} onOpenChange={(o) => !o && setConfirmDeleteFor(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete &quot;{confirmDeleteFor?.title}&quot;?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This moves it to Trash — it stays recoverable there until someone restores it or
+              purges it for good.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (confirmDeleteFor) remove(confirmDeleteFor.id);
+                setConfirmDeleteFor(null);
+              }}
+            >
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

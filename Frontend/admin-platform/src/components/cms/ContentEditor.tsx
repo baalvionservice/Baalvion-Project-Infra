@@ -28,6 +28,7 @@ import QuizPanel from './QuizPanel';
 import PollPanel from './PollPanel';
 import ContentWorkflowBadge from './ContentWorkflowBadge';
 import RelatedContentSuggestions from './newsroom/RelatedContentSuggestions';
+import { computeContentScore, computeKeywordScore } from '@/lib/cms/seoScore';
 import { useUpdateContent, useAutosave } from '@/lib/queries/cms-content.queries';
 import { useWorkflowTransition } from '@/lib/queries/cms-workflow.queries';
 import { useWebsiteCategoryTree } from '@/lib/queries/cms-taxonomy.queries';
@@ -88,6 +89,20 @@ export default function ContentEditor({ content, userRole, canPublish, websiteTi
 
   const { data: categoryTree } = useWebsiteCategoryTree(content.websiteId);
   const flatCategories = useMemo(() => flattenCategoryTree(categoryTree ?? []), [categoryTree]);
+
+  // Live scores for the toolbar badge — the same computation SeoPanel uses, so a writer
+  // sees the number without having to discover and open the (closed-by-default) SEO
+  // side panel first.
+  const contentScoreValue = useMemo(
+    () => computeContentScore({ title, metaDescription: seo.description ?? '', blocks }).score,
+    [title, seo.description, blocks],
+  );
+  const keywordScoreValue = useMemo(() => {
+    const kw = seo.keywords?.[0];
+    if (!kw) return null;
+    return computeKeywordScore({ focusKeyword: kw, title, slug, metaDescription: seo.description ?? '', blocks })?.score ?? null;
+  }, [seo.keywords, title, slug, seo.description, blocks]);
+  const scoreTone = (v: number) => (v >= 80 ? 'text-emerald-600' : v >= 50 ? 'text-amber-600' : 'text-red-600');
 
   // Client-side estimate shown as a placeholder in the panel — the server recomputes
   // the authoritative value from contentBlocks on save when the field is left blank.
@@ -222,9 +237,14 @@ export default function ContentEditor({ content, userRole, canPublish, websiteTi
               size="sm"
               className="h-7 gap-1.5 text-xs"
               onClick={() => toggleSidePanel('seo')}
+              title="Open the SEO panel: search-result preview, Content Score, Keyword Score"
             >
               <Search className="h-3.5 w-3.5" />
               SEO
+              <span className={`font-semibold ${scoreTone(contentScoreValue)}`}>{contentScoreValue}</span>
+              {keywordScoreValue != null && (
+                <span className={`font-semibold ${scoreTone(keywordScoreValue)}`}>· {keywordScoreValue}</span>
+              )}
             </Button>
             <Button
               variant="ghost"
@@ -320,7 +340,7 @@ export default function ContentEditor({ content, userRole, canPublish, websiteTi
 
       {/* Side panel */}
       {activeSidePanel && (
-        <div className="w-80 shrink-0 border-l flex flex-col overflow-hidden">
+        <div className="w-96 shrink-0 border-l flex flex-col overflow-hidden">
           <div className="flex items-center justify-between border-b px-4 py-2.5">
             <span className="text-sm font-medium capitalize">{activeSidePanel}</span>
             <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => toggleSidePanel(activeSidePanel)}>
@@ -334,6 +354,10 @@ export default function ContentEditor({ content, userRole, canPublish, websiteTi
                 value={seo}
                 onChange={(s) => { setSeo(s); markUnsaved(); }}
                 titleSuffix={websiteTitleSuffix}
+                slug={slug}
+                blocks={blocks}
+                websiteDomain={websiteDomain}
+                pathPrefix={flatCategories.find((c) => c.id === categoryIds[0])?.slug}
               />
             )}
             {activeSidePanel === 'versions' && (

@@ -55,7 +55,28 @@ const duplicate = async (req, res, next) => {
 
 const remove = async (req, res, next) => {
     try {
-        await contentService.deleteContent(req.params.websiteId, req.params.contentId);
+        await contentService.deleteContent(req.params.websiteId, req.params.contentId, req.user.id);
+        return sendSuccess(req, res, null);
+    } catch (err) { return next(err); }
+};
+
+const listTrash = async (req, res, next) => {
+    try {
+        const result = await contentService.listTrash(req.params.websiteId, req.query);
+        return sendPaginated(req, res, result);
+    } catch (err) { return next(err); }
+};
+
+const restore = async (req, res, next) => {
+    try {
+        const content = await contentService.restoreContent(req.params.websiteId, req.params.contentId);
+        return sendSuccess(req, res, content);
+    } catch (err) { return next(err); }
+};
+
+const permanentlyDelete = async (req, res, next) => {
+    try {
+        await contentService.permanentlyDeleteContent(req.params.websiteId, req.params.contentId);
         return sendSuccess(req, res, null);
     } catch (err) { return next(err); }
 };
@@ -63,7 +84,10 @@ const remove = async (req, res, next) => {
 const importWire = async (req, res, next) => {
     try {
         const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 50));
-        const result = await wireImportService.importWireNews(req.params.websiteId, req.user.id, limit);
+        // Optional — lets a site scoped to one beat (e.g. Law Elite Network → 'Legal')
+        // pull only matching wire items instead of the whole undifferentiated feed.
+        const category = typeof req.query.category === 'string' ? req.query.category : undefined;
+        const result = await wireImportService.importWireNews(req.params.websiteId, req.user.id, limit, category);
         return sendSuccess(req, res, result);
     } catch (err) { return next(err); }
 };
@@ -120,5 +144,6 @@ const deletePoll = async (req, res, next) => {
 module.exports = {
     list, create, getOne, getPreviewToken, update, autosave, duplicate, remove, bulk, importWire,
     listDeletionRequests, requestDeletion, dismissDeletionRequest,
+    listTrash, restore, permanentlyDelete,
     getPoll, putPoll, deletePoll,
 };

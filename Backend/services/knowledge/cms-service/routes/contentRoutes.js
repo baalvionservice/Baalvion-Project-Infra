@@ -29,12 +29,20 @@ router.patch('/comments/:commentId/moderate', loadCmsRole, requireCmsRole('cms_r
 // can't DELETE (requires cms_editor+ below); this is their alternative + the editor's queue.
 router.get('/deletion-requests', loadCmsRole, requireCmsRole('cms_editor'), ctrl.listDeletionRequests);
 
+// Trash — /cms/websites/:websiteId/content/trash. Soft-deleted items (see DELETE /:contentId
+// below); restore brings one back exactly as it was, permanent-delete is a real DELETE FROM
+// and requires cms_admin since there is no undo past that point.
+router.get('/trash', loadCmsRole, requireCmsRole('cms_editor'), ctrl.listTrash);
+router.post('/trash/:contentId/restore', loadCmsRole, requireCmsRole('cms_editor'), ctrl.restore);
+router.delete('/trash/:contentId', loadCmsRole, requireCmsRole('cms_admin'), ctrl.permanentlyDelete);
+
 // Single content — /cms/websites/:websiteId/content/:contentId
 router.get('/:contentId', loadCmsRole, requireCmsRole('cms_viewer'), ctrl.getOne);
 router.get('/:contentId/preview-token', loadCmsRole, requireCmsRole('cms_viewer'), ctrl.getPreviewToken);
 router.patch('/:contentId', loadCmsRole, requireCmsRole('cms_contributor'), validate(updateContentSchema), ctrl.update);
 router.put('/:contentId/autosave', loadCmsRole, requireCmsRole('cms_contributor'), validate(autosaveContentSchema), ctrl.autosave);
 router.post('/:contentId/duplicate', loadCmsRole, requireCmsRole('cms_contributor'), ctrl.duplicate);
+// Soft delete — moves the item to trash (GET /trash above), fully restorable.
 router.delete('/:contentId', loadCmsRole, requireCmsRole('cms_editor'), ctrl.remove);
 router.post('/:contentId/request-deletion', loadCmsRole, requireCmsRole('cms_contributor'), validate(requestDeletionSchema), ctrl.requestDeletion);
 router.post('/:contentId/dismiss-deletion-request', loadCmsRole, requireCmsRole('cms_editor'), ctrl.dismissDeletionRequest);

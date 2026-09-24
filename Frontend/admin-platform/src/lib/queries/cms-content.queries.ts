@@ -21,6 +21,7 @@ export const contentKeys = {
   detail: (id: string) => [...contentKeys.all, 'detail', id] as const,
   revisions: (id: string) => [...contentKeys.all, 'revisions', id] as const,
   deletionRequests: (websiteId: string) => [...contentKeys.all, 'deletion-requests', websiteId] as const,
+  trash: (websiteId: string, params?: { page?: number }) => [...contentKeys.all, 'trash', websiteId, params] as const,
 };
 
 export const useContentList = (params: ContentListParams, options?: { refetchInterval?: number }) =>
@@ -87,7 +88,7 @@ export const useDeleteContent = () => {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: contentKeys.all });
       qc.invalidateQueries({ queryKey: websiteKeys.all });
-      toast.success('Content deleted');
+      toast.success('Moved to Trash — restore it any time from the Trash view');
     },
     onError: (e: { message: string }) => toast.error(e.message),
   });
@@ -198,6 +199,40 @@ export const useRescheduleContent = () => {
       qc.setQueryData(contentKeys.detail(res.data.data.id), res.data.data);
       qc.invalidateQueries({ queryKey: contentKeys.all });
       toast.success('Rescheduled');
+    },
+    onError: (e: { message: string }) => toast.error(e.message),
+  });
+};
+
+export const useTrashList = (websiteId: string, params: { page?: number; limit?: number } = {}) =>
+  useQuery({
+    queryKey: contentKeys.trash(websiteId, params),
+    queryFn: () => cmsContentApi.trash.list(websiteId, params).then((r) => r.data),
+    placeholderData: keepPreviousData,
+    enabled: !!websiteId,
+  });
+
+export const useRestoreContent = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => cmsContentApi.trash.restore(id),
+    onSuccess: (res) => {
+      qc.setQueryData(contentKeys.detail(res.data.data.id), res.data.data);
+      qc.invalidateQueries({ queryKey: contentKeys.all });
+      qc.invalidateQueries({ queryKey: websiteKeys.all });
+      toast.success('Restored');
+    },
+    onError: (e: { message: string }) => toast.error(e.message),
+  });
+};
+
+export const usePermanentlyDeleteContent = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => cmsContentApi.trash.permanentlyDelete(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: contentKeys.all });
+      toast.success('Permanently deleted');
     },
     onError: (e: { message: string }) => toast.error(e.message),
   });

@@ -26,6 +26,11 @@ const WIRE_CATEGORY_TO_TOPIC = {
     AI: 'Tech', Technology: 'Tech', Cybersecurity: 'Tech',
     Business: 'Business', Startups: 'Business',
     Finance: 'Finance', World: 'World', Science: 'Health & Science',
+    // Unmapped on Imperialpedia (no Legal topic there), but this is a real
+    // news-service category — JURIST/SCOTUSblog/Above the Law/DOJ/FTC/etc — so a
+    // legal-focused site (Law Elite Network) gets a real "Legal" bucket instead
+    // of everything falling through to the generic 'World' default below.
+    Legal: 'Legal',
 };
 
 // news-service's `country` → Imperialpedia's 6 regions. news-service's own seed
@@ -51,10 +56,11 @@ const WORLD_REGION = { label: 'World', slug: 'world' };
 // surfaces `error` back to the (already role-gated) admin caller so a
 // misconfigured NEWS_SERVICE_URL/INTERNAL_API_KEY is diagnosable from the
 // button click itself, not just silently "0 imported".
-async function fetchWireArticles(limit) {
+async function fetchWireArticles(limit, category) {
     if (!INTERNAL_API_KEY) return { articles: [], error: 'INTERNAL_API_KEY not set on cms-service' };
     try {
-        const res = await fetch(`${NEWS_SERVICE_URL}/internal/v1/news?limit=${limit}`, {
+        const qs = new URLSearchParams({ limit: String(limit), ...(category ? { category } : {}) });
+        const res = await fetch(`${NEWS_SERVICE_URL}/internal/v1/news?${qs}`, {
             headers: { 'X-Internal-Key': INTERNAL_API_KEY },
         });
         if (!res.ok) {
@@ -91,12 +97,12 @@ async function uniqueSlug(websiteId, base) {
     return `${clean}-${Date.now()}`;
 }
 
-async function importWireNews(websiteId, userId, limit = 50) {
+async function importWireNews(websiteId, userId, limit = 50, category) {
     if (!INTERNAL_API_KEY) {
         return { imported: 0, skipped: 0, total: 0, configured: false, error: 'INTERNAL_API_KEY not set on cms-service' };
     }
 
-    const { articles, error } = await fetchWireArticles(limit);
+    const { articles, error } = await fetchWireArticles(limit, category);
     if (!articles.length) return { imported: 0, skipped: 0, total: 0, configured: true, error };
 
     // Resolve/create the 13 topic + 6 region categories once, on demand, as
