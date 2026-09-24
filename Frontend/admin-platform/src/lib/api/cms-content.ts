@@ -34,6 +34,7 @@ interface RawContent {
   visibility?: string; scheduledAt?: string | null; publishedAt?: string | null;
   viewCount?: string | number; revisionCount?: number; customFields?: Record<string, unknown>;
   deletionRequestedBy?: number | string | null; deletionRequestedAt?: string | null; deletionRequestNote?: string | null;
+  deletedAt?: string | null; deletedBy?: number | string | null;
   createdAt: string; updatedAt: string;
 }
 
@@ -79,6 +80,8 @@ const toContentItem = (r: RawContent): ContentItem => ({
   deletionRequestedBy: r.deletionRequestedBy != null ? Number(r.deletionRequestedBy) : null,
   deletionRequestedAt: r.deletionRequestedAt ?? null,
   deletionRequestNote: r.deletionRequestNote ?? null,
+  deletedAt: r.deletedAt ?? null,
+  deletedBy: r.deletedBy != null ? Number(r.deletedBy) : null,
   createdAt: r.createdAt,
   updatedAt: r.updatedAt,
 });
@@ -234,5 +237,26 @@ export const cmsContentApi = {
       const res = await cmsApiClient.post<ApiResponse<RawContent>>(`/cms/websites/${wid()}/content/${id}/dismiss-deletion-request`);
       return { ...res, data: { ...res.data, data: toContentItem(res.data.data) } };
     },
+  },
+
+  // Trash — soft-deleted content (delete() above no longer hard-removes a row; it sets
+  // deletedAt). Listed here, restorable, and only permanently removable as an explicit
+  // second step (cms_admin-gated on the backend).
+  trash: {
+    list: async (websiteId: string, params: { page?: number; limit?: number } = {}) => {
+      const res = await cmsApiClient.get<PaginatedResponse<RawContent>>(
+        `/cms/websites/${websiteId}/content/trash`, { params },
+      );
+      const items = (res.data.data ?? []).map(toContentItem);
+      return { ...res, data: { ...res.data, data: items } as PaginatedResponse<ContentItem> };
+    },
+
+    restore: async (id: string) => {
+      const res = await cmsApiClient.post<ApiResponse<RawContent>>(`/cms/websites/${wid()}/content/trash/${id}/restore`);
+      return { ...res, data: { ...res.data, data: toContentItem(res.data.data) } };
+    },
+
+    permanentlyDelete: (id: string) =>
+      cmsApiClient.delete<ApiResponse<void>>(`/cms/websites/${wid()}/content/trash/${id}`),
   },
 };

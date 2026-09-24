@@ -125,6 +125,9 @@ export interface ContentItem {
   deletionRequestedBy?: number | null;
   deletionRequestedAt?: string | null;
   deletionRequestNote?: string | null;
+  // Set once this item is soft-deleted (moved to Trash) — cleared again on restore.
+  deletedAt?: string | null;
+  deletedBy?: number | null;
   createdAt: string;
   updatedAt: string;
 }

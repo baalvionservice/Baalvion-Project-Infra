@@ -388,7 +388,7 @@ async function duplicateContent(websiteId, contentId, userId) {
     return clone.toJSON();
 }
 
-async function deleteContent(websiteId, contentId) {
+async function deleteContent(websiteId, contentId, userId) {
     const content = await CmsContent.findOne({ where: { id: contentId, websiteId } });
     if (!content) throw new AppError('NOT_FOUND', 'Content not found', 404);
 
@@ -400,6 +400,10 @@ async function deleteContent(websiteId, contentId) {
     if (content.categoryIds?.length) await _incrementCategoryCount(websiteId, content.categoryIds, -1);
 
     const plainContent = content.toJSON();
+    // Soft delete (model is paranoid: true) — this sets deleted_at, it does not remove
+    // the row. Recoverable via restoreContent() until someone explicitly purges it with
+    // permanentlyDeleteContent().
+    await content.update({ deletedBy: userId ?? null });
     await content.destroy();
     await cache.del(cache.keys.content(contentId));
 
@@ -420,6 +424,61 @@ async function deleteContent(websiteId, contentId) {
     })();
 }
 
+// Trash — everything soft-deleted for this website, most recently deleted first.
+// paranoid: false is required to see rows Sequelize would otherwise filter out by default.
+async function listTrash(websiteId, query = {}) {
+    const { page, limit, offset } = parsePagination(query);
+    const { rows, count } = await CmsContent.findAndCountAll({
+        where: { websiteId, deletedAt: { [Op.ne]: null } },
+        paranoid: false,
+        limit, offset,
+        order: [['deletedAt', 'DESC']],
+        attributes: { exclude: ['contentBlocks'] },
+    });
+    return buildPaginated(rows, count, { page, limit });
+}
+
+// Brings a soft-deleted item back exactly as it was (status is untouched by delete,
+// so a restored draft is still a draft, a restored archived item is still archived).
+async function restoreContent(websiteId, contentId) {
+    const content = await CmsContent.findOne({ where: { id: contentId, websiteId }, paranoid: false });
+    if (!content) throw new AppError('NOT_FOUND', 'Content not found', 404);
+    if (!content.deletedAt) throw new AppError('VALIDATION_ERROR', 'Content is not deleted', 400);
+
+    // The slug's unique index only guards live rows (see migration 20260046), so a new
+    // item can freely reuse a trashed item's old slug — meaning a restore can now collide
+    // with something that claimed that same slug in the meantime. Suffix rather than fail
+    // the restore outright; an editor can always rename it back if they want the bare slug.
+    const collision = await CmsContent.findOne({ where: { websiteId, slug: content.slug, id: { [Op.ne]: content.id } } });
+    if (collision) {
+        let candidate = `${content.slug}-restored`;
+        for (let n = 2; await CmsContent.findOne({ where: { websiteId, slug: candidate } }); n++) {
+            candidate = `${content.slug}-restored-${n}`;
+        }
+        content.slug = candidate;
+    }
+
+    await content.restore();
+    await content.update({ deletedBy: null, slug: content.slug });
+
+    if (content.tagIds?.length) await _incrementTagUsage(websiteId, content.tagIds, 1);
+    if (content.categoryIds?.length) await _incrementCategoryCount(websiteId, content.categoryIds, 1);
+
+    return content.toJSON();
+}
+
+// Irreversible — a real DELETE FROM. Only reachable for something that has already
+// been through the (recoverable) soft delete, so a permanent purge is always a
+// deliberate second step, never a single click from a live/draft item.
+async function permanentlyDeleteContent(websiteId, contentId) {
+    const content = await CmsContent.findOne({ where: { id: contentId, websiteId }, paranoid: false });
+    if (!content) throw new AppError('NOT_FOUND', 'Content not found', 404);
+    if (!content.deletedAt) throw new AppError('FORBIDDEN', 'Content must be deleted (in trash) before it can be permanently removed.', 403);
+
+    await content.destroy({ force: true });
+    await cache.del(cache.keys.content(contentId));
+}
+
 async function bulkUpdate(websiteId, userId, { ids, action, categoryId }) {
     const contents = await CmsContent.findAll({ where: { id: { [Op.in]: ids }, websiteId } });
     if (!contents.length) throw new AppError('NOT_FOUND', 'No content found for given IDs', 404);
@@ -436,6 +495,9 @@ async function bulkUpdate(websiteId, userId, { ids, action, categoryId }) {
         case 'delete': {
             const publishedIds = contents.filter((c) => c.status === 'published').map((c) => c.id);
             if (publishedIds.length) throw new AppError('FORBIDDEN', 'Cannot bulk-delete published content. Archive first.', 403);
+            // Soft delete (paranoid: true) — stamp who trashed each row before destroy()
+            // marks deleted_at, so the trash view can show it.
+            await CmsContent.update({ deletedBy: userId }, { where: { id: { [Op.in]: ids }, websiteId } });
             await CmsContent.destroy({ where: { id: { [Op.in]: ids }, websiteId } });
             break;
         }
@@ -544,4 +606,5 @@ function _normalizeCategoryIds(categoryIds, categoryId) {
 module.exports = {
     listContent, getContent, getPreviewToken, createContent, updateContent, autosaveContent, duplicateContent, deleteContent,
     bulkUpdate, incrementViewCount, requestDeletion, dismissDeletionRequest, listDeletionRequests,
+    listTrash, restoreContent, permanentlyDeleteContent,
 };
