@@ -15,6 +15,10 @@ export default {
     // news body). It was missing, so a utility used only there generated no CSS
     // and silently did nothing — the class landed in the HTML and never applied.
     "./src/lib/**/*.{js,ts,jsx,tsx,mdx}",
+    // src/config holds color-token maps (e.g. prompt-categories.ts's per-category
+    // badge colors) — same missing-content-glob failure mode as src/lib above:
+    // a class used only here (winter's bg-sky-50/text-sky-600) compiled to nothing.
+    "./src/config/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     extend: {
@@ -114,10 +118,20 @@ export default {
             height: "0",
           },
         },
+        "marquee-up": {
+          from: { transform: "translateY(0)" },
+          to: { transform: "translateY(-50%)" },
+        },
+        "marquee-down": {
+          from: { transform: "translateY(-50%)" },
+          to: { transform: "translateY(0)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "marquee-up": "marquee-up 32s linear infinite",
+        "marquee-down": "marquee-down 32s linear infinite",
       },
     },
   },

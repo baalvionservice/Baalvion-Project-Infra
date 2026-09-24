@@ -54,14 +54,11 @@ const ALL_NAV: NavCategory[] = [
     // longer exists.
     label: "Budgeting",
     href: "/budgeting-basics",
+    // No "Budgeting" dropdown entry duplicating the parent — the parent link
+    // itself already goes to /budgeting-basics (same bug as old "Stocks").
+    // Published to the CMS 2026-09-04 (category + all 5 articles are real,
+    // live content — this is no longer a local-only draft link).
     links: [
-      // /budgeting isn't a real CMS category (0 articles) — it was silently
-      // serving bundled demo content under a "Fact-Checked & Expert Reviewed"
-      // badge (see next.config.ts's /budgeting redirect, added 2026-09-04).
-      // budgeting-basics is the real, live category.
-      { label: "Budgeting", href: "/budgeting-basics" },
-      // Published to the CMS 2026-09-04 (category + all 5 articles are real,
-      // live content now — this is no longer a local-only draft link).
       { label: "Scams & Fraud Protection", href: "/fraud-protection" },
     ],
   },
@@ -74,12 +71,28 @@ const ALL_NAV: NavCategory[] = [
     // folded into Instagram, "Creator Business Guides" folded into Tools —
     // see creator-economy-topics.ts and next.config.ts's redirects.
     href: "/creator-economy",
+    // No "Creator Economy Hub" entry duplicating the parent — same href as
+    // the parent link itself, so it read as the same destination twice
+    // (same bug pattern as the old Stocks/Budgeting/AI Prompts submenus).
     links: [
-      { label: "Creator Economy Hub", href: "/creator-economy" },
       { label: "YouTube Earnings & Monetization", href: "/youtube-monetization" },
       { label: "Instagram & Social Media Earnings", href: "/instagram-monetization" },
       { label: "Website Earnings & Monetization", href: "/website-monetization" },
       { label: "Creator Business & Tools", href: "/creator-tools" },
+    ],
+  },
+  {
+    id: "prompts",
+    label: "AI Prompts",
+    // Added 2026-09-24 — AI image-prompt gallery (real prompt text + real
+    // example output images). /trending-prompts is a curated, editorially-
+    // ranked subset of the same /prompts/[slug] detail pages, not a separate
+    // content set. No "All Prompts" entry here — the parent link itself
+    // already goes to /prompts, so a dropdown item pointing at the same URL
+    // would just repeat it (same bug as the old "Stocks" submenu).
+    href: "/prompts",
+    links: [
+      { label: "Trending Prompts", href: "/trending-prompts" },
     ],
   },
 ];
@@ -91,6 +104,12 @@ const NAV: NavCategory[] = ALL_NAV
     links: withoutAdsenseHidden(withoutRetired(cat.links)),
   }))
   .filter((cat) => cat.links.length > 0);
+
+/** True only when a category's dropdown would show something beyond what the top-level link
+ * already goes to — e.g. "Stocks" has exactly one link, itself, pointing at the same /stocks
+ * href as the parent, so opening it just repeats "Stocks" back at the visitor for no reason.
+ * Those categories render as a plain link with no chevron/dropdown at all. */
+const hasDropdown = (cat: NavCategory) => cat.links.some((l) => l.href !== cat.href);
 
 export const Navbar = () => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -192,40 +211,43 @@ export const Navbar = () => {
         >
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <ul className="flex items-stretch gap-1">
-              {NAV.map((cat) => (
-                <li
-                  key={cat.id}
-                  className="relative"
-                  onMouseEnter={() => handleOpenMenu(cat)}
-                >
-                  <Link
-                    href={cat.href}
-                    className={cn(
-                      "flex items-center gap-1 h-11 px-3 text-[13px] font-bold uppercase tracking-wide transition-colors border-b-2",
-                      isActive(cat.href)
-                        ? "text-primary border-accent"
-                        : "text-foreground border-transparent hover:text-primary"
-                    )}
+              {NAV.map((cat) => {
+                const dropdown = hasDropdown(cat);
+                return (
+                  <li
+                    key={cat.id}
+                    className="relative"
+                    onMouseEnter={() => dropdown && handleOpenMenu(cat)}
                   >
-                    {cat.label}
-                    <ChevronDown className="h-3.5 w-3.5 opacity-60" />
-                  </Link>
+                    <Link
+                      href={cat.href}
+                      className={cn(
+                        "flex items-center gap-1 h-11 px-3 text-[13px] font-bold uppercase tracking-wide transition-colors border-b-2",
+                        isActive(cat.href)
+                          ? "text-primary border-accent"
+                          : "text-foreground border-transparent hover:text-primary"
+                      )}
+                    >
+                      {cat.label}
+                      {dropdown && <ChevronDown className="h-3.5 w-3.5 opacity-60" />}
+                    </Link>
 
-                  {openMenu === cat.id && (
-                    <div className="absolute left-0 top-full z-50 w-64 bg-background border border-border shadow-lg rounded-b-sm py-2">
-                      {cat.links.map((l) => (
-                        <Link
-                          key={l.href}
-                          href={l.href}
-                          className="block px-4 py-2 text-sm text-foreground hover:bg-secondary hover:text-primary transition-colors"
-                        >
-                          {l.label}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </li>
-              ))}
+                    {dropdown && openMenu === cat.id && (
+                      <div className="absolute left-0 top-full z-50 w-64 bg-background border border-border shadow-lg rounded-b-sm py-2">
+                        {cat.links.map((l) => (
+                          <Link
+                            key={l.href}
+                            href={l.href}
+                            className="block px-4 py-2 text-sm text-foreground hover:bg-secondary hover:text-primary transition-colors"
+                          >
+                            {l.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </nav>
@@ -254,39 +276,53 @@ export const Navbar = () => {
               </button>
             </div>
             <div className="py-2">
-              {NAV.map((cat) => (
-                <div key={cat.id} className="border-b border-border">
-                  <button
-                    type="button"
-                    className="flex w-full items-center justify-between px-4 py-3 text-sm font-bold uppercase tracking-wide"
-                    onClick={() => {
-                      setOpenMobileSection((p) => (p === cat.id ? null : cat.id));
-                      cat.links.forEach((l) => router.prefetch(l.href));
-                    }}
-                  >
-                    {cat.label}
-                    <ChevronDown
-                      className={cn(
-                        "h-4 w-4 transition-transform",
-                        openMobileSection === cat.id && "rotate-180"
-                      )}
-                    />
-                  </button>
-                  {openMobileSection === cat.id && (
-                    <div className="pb-2">
-                      {cat.links.map((l) => (
-                        <Link
-                          key={l.href}
-                          href={l.href}
-                          className="block px-6 py-2 text-sm text-muted-foreground hover:text-primary"
-                        >
-                          {l.label}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
+              {NAV.map((cat) => {
+                if (!hasDropdown(cat)) {
+                  return (
+                    <Link
+                      key={cat.id}
+                      href={cat.href}
+                      className="block border-b border-border px-4 py-3 text-sm font-bold uppercase tracking-wide"
+                      onClick={() => setIsMobileOpen(false)}
+                    >
+                      {cat.label}
+                    </Link>
+                  );
+                }
+                return (
+                  <div key={cat.id} className="border-b border-border">
+                    <button
+                      type="button"
+                      className="flex w-full items-center justify-between px-4 py-3 text-sm font-bold uppercase tracking-wide"
+                      onClick={() => {
+                        setOpenMobileSection((p) => (p === cat.id ? null : cat.id));
+                        cat.links.forEach((l) => router.prefetch(l.href));
+                      }}
+                    >
+                      {cat.label}
+                      <ChevronDown
+                        className={cn(
+                          "h-4 w-4 transition-transform",
+                          openMobileSection === cat.id && "rotate-180"
+                        )}
+                      />
+                    </button>
+                    {openMobileSection === cat.id && (
+                      <div className="pb-2">
+                        {cat.links.map((l) => (
+                          <Link
+                            key={l.href}
+                            href={l.href}
+                            className="block px-6 py-2 text-sm text-muted-foreground hover:text-primary"
+                          >
+                            {l.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

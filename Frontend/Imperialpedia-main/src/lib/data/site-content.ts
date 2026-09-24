@@ -29,7 +29,8 @@ export type SiteContentType =
   | "stock-list"
   | "market-index"
   | "topic-hub"
-  | "latest-category";
+  | "latest-category"
+  | "feature-flag";
 
 const BASE_ENTITY_FIELDS = new Set([
   "id", "type", "name", "slug", "description", "category", "country",
@@ -72,4 +73,17 @@ export async function getSiteContent<T extends Record<string, unknown>>(
   } catch {
     return null;
   }
+}
+
+/**
+ * A `feature-flag` site-content record is admin-managed on/off switch for a page or section
+ * that isn't ready to go public yet — created (or left absent) from Imperialpedia > Site
+ * Content in the admin panel, type "feature-flag", slug matching the flag name, content
+ * `{ "enabled": true }`. Default is OFF: no record, a fetch failure, or `enabled` missing/false
+ * all read as disabled, so a flag can only turn a page ON by an explicit admin action — never
+ * silently ON because a record failed to load.
+ */
+export async function isFeatureEnabled(flag: string): Promise<boolean> {
+  const record = await getSiteContent<{ enabled?: boolean }>("feature-flag", flag);
+  return record?.enabled === true;
 }

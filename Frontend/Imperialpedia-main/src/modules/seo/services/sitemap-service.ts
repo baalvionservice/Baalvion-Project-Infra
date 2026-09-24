@@ -21,6 +21,7 @@ import {
   newsHubIsLive,
 } from "@/config/sections";
 import { getPublicAuthors } from "@/services/data/cms-public";
+import { fetchAllPrompts, promptRealImage } from "@/lib/data/prompts-live";
 import { MARKET_QUOTES_LIVE } from "@/config/market-quotes";
 import stockIndexes from "@/data/indexes/indexes.json";
 import stockLists from "@/data/stock-lists/stock-lists.json";
@@ -168,6 +169,8 @@ export const sitemapService = {
       // URL — the exact contradiction Search Console reports as "Submitted URL
       // marked noindex", and the reason the rest of this list is conditional.
       "/privacy-policy",
+      "/prompts",
+      "/trending-prompts",
       "/stocks",
       "/terms-of-service",
       "/transparency",
@@ -449,6 +452,31 @@ export const sitemapService = {
     (reviewSlugs || []).forEach((slug) =>
       entries.push({ loc: `${base}/${slug}`, changefreq: "weekly", priority: 0.8 }),
     );
+    // Individual prompt detail pages — walk every page since fetchAllPrompts caps at
+    // one page per call, same reasoning as listAllPages above.
+    try {
+      const first = await fetchAllPrompts({ page: 1, limit: 100 });
+      const allPrompts = [...first.items];
+      const totalPromptPages = Math.ceil(first.total / 100);
+      for (let page = 2; page <= totalPromptPages; page++) {
+        allPrompts.push(...(await fetchAllPrompts({ page, limit: 100 })).items);
+      }
+      // No image sitemap entry while a post is still carrying the "example image pending"
+      // placeholder (articleImage returns undefined for a falsy url) — submitting that
+      // graphic to Google Images reads as thin content and leaves a stale image signal
+      // once the real photo replaces it.
+      allPrompts.forEach((p) =>
+        entries.push({ loc: `${base}/prompts/${p.slug}`, changefreq: "weekly", priority: 0.6, image: articleImage(promptRealImage(p)?.url, p.title) }),
+      );
+      // Dedicated category section pages (Page Six-style) — one per distinct category actually
+      // in use, so nothing here can point at an empty page.
+      const promptCategories = Array.from(new Set(allPrompts.map((p) => p.category).filter((c): c is string => Boolean(c))));
+      promptCategories.forEach((cat) =>
+        entries.push({ loc: `${base}/prompts/category/${cat}`, changefreq: "weekly", priority: 0.6 }),
+      );
+    } catch {
+      /* prompts sitemap entries are additive — never fail the whole sitemap over them */
+    }
     (news || []).forEach((n) => {
       // Canonical is the dated /YYYY/MM/DD/slug path, or the nested
       // /world/<region>/<country>/... permalink for world-tagged news (see
