@@ -52,6 +52,35 @@ export interface Prompt {
 
 interface ListResult { items: Prompt[]; total: number }
 
+/** Only an absolute http(s) URL or a same-origin root-relative path (and explicitly not a
+ * protocol-relative `//host/...` one, which is an absolute URL to whatever host follows the
+ * `//`) is safe to hand to an `<img src>` — every image URL here is admin-authored (a pasted
+ * URL or upload result) and flows straight into the DOM, so a `javascript:`/`data:`/other
+ * scheme slipped into that field must never reach a render sink unsanitized. */
+function isSafeImageUrl(url: string | null | undefined): url is string {
+  if (!url) return false;
+  if (url.startsWith('/') && !url.startsWith('//')) return true;
+  try {
+    return ['http:', 'https:'].includes(new URL(url).protocol);
+  } catch {
+    return false;
+  }
+}
+
+/** Drops any image whose URL isn't `isSafeImageUrl` — applied once, right where prompt data
+ * enters the app, so every downstream consumer (cards, marquee, detail page, sitemap, OG tags)
+ * only ever sees a validated URL without having to re-check it itself. */
+function sanitizePrompt(p: Prompt): Prompt {
+  return {
+    ...p,
+    hero_image: isSafeImageUrl(p.hero_image) ? p.hero_image : null,
+    items: (p.items ?? []).map((item) => ({
+      ...item,
+      images: (item.images ?? []).filter((img) => isSafeImageUrl(img.url)),
+    })),
+  };
+}
+
 async function fetchList(params: Record<string, string>): Promise<ListResult> {
   try {
     const qs = new URLSearchParams(params).toString();
@@ -61,7 +90,7 @@ async function fetchList(params: Record<string, string>): Promise<ListResult> {
     });
     if (!res.ok) return { items: [], total: 0 };
     const body = await res.json();
-    const items = (body?.data?.items ?? []) as Prompt[];
+    const items = ((body?.data?.items ?? []) as Prompt[]).map(sanitizePrompt);
     const total = body?.data?.pagination?.total ?? items.length;
     return { items, total };
   } catch {
@@ -110,7 +139,8 @@ export async function fetchPromptBySlug(slug: string): Promise<Prompt | undefine
     });
     if (!res.ok) return undefined;
     const body = await res.json();
-    return body?.data as Prompt | undefined;
+    const prompt = body?.data as Prompt | undefined;
+    return prompt ? sanitizePrompt(prompt) : undefined;
   } catch {
     return undefined;
   }
