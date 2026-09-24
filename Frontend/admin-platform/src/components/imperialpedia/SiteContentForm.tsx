@@ -25,6 +25,7 @@ export const SITE_CONTENT_TYPES = [
   'market-index',
   'topic-hub',
   'latest-category',
+  'feature-flag',
 ] as const;
 export type SiteContentType = (typeof SITE_CONTENT_TYPES)[number];
 
@@ -37,6 +38,7 @@ const SLUG_HINT: Record<SiteContentType, string> = {
   'market-index': 'e.g. "sp-500" (must match the /stocks/indexes/<slug> route)',
   'topic-hub': 'e.g. "inflation" (must match the topic page slug, e.g. /inflation)',
   'latest-category': 'lowercase LiveCategory value, e.g. "markets", "personalfinance"',
+  'feature-flag': 'the flag name a page checks, e.g. "trending-prompts"',
 };
 
 // Starter JSON shown when switching type on a new record, so the admin doesn't
@@ -66,6 +68,9 @@ const ATTRIBUTES_TEMPLATE: Record<SiteContentType, unknown> = {
   'latest-category': {
     title: 'Live <Category> News',
     intro: 'A real paragraph on what this live feed covers and how to use it.',
+  },
+  'feature-flag': {
+    enabled: false,
   },
 };
 

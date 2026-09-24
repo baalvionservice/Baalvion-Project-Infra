@@ -112,6 +112,41 @@ const createAffiliateProductSchema = z.object({
 
 const updateAffiliateProductSchema = createAffiliateProductSchema.partial();
 
+const promptImageSchema = z.object({
+    url: z.string().url().refine((u) => /^https?:\/\//i.test(u), 'Only http/https URLs are allowed'),
+    alt: z.string().max(300).optional(),
+    credit: z.string().max(200).optional(),
+});
+
+// One individual prompt inside a roundup post (e.g. one of the 5 in "5 Best Gemini
+// Halloween Photo Prompts for Men") — its own heading, real example image(s), full
+// prompt text, and optional platform quick-launch links.
+const promptItemSchema = z.object({
+    heading: z.string().min(1).max(300),
+    subtitle: z.string().max(500).optional(),
+    prompt_text: z.string().min(1),
+    model: z.string().max(150).optional(),
+    images: z.array(promptImageSchema).min(1, 'At least one example image is required'),
+    chatgpt_url: z.string().url().optional(),
+    gemini_url: z.string().url().optional(),
+});
+
+const createPromptSchema = z.object({
+    slug: z.string().min(1).max(200).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens'),
+    title: z.string().min(1).max(300),
+    intro: z.string().optional(),
+    hero_image: z.string().url().optional(),
+    category: z.string().max(100).optional(),
+    tags: z.array(z.string()).default([]),
+    items: z.array(promptItemSchema).min(1, 'At least one prompt is required'),
+    pro_tips: z.string().optional(),
+    is_trending: z.boolean().default(false),
+    trending_order: z.coerce.number().int().optional(),
+    status: z.enum(['active', 'archived']).default('active'),
+});
+
+const updatePromptSchema = createPromptSchema.partial();
+
 module.exports = {
     paginationSchema,
     createArticleSchema,
@@ -129,4 +164,6 @@ module.exports = {
     loanSchema,
     createAffiliateProductSchema,
     updateAffiliateProductSchema,
+    createPromptSchema,
+    updatePromptSchema,
 };

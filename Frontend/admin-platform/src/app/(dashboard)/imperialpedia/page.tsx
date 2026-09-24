@@ -280,6 +280,15 @@ export default function ImperialpediaAdminPage() {
             CTA links with click tracking + a revenue-estimate report by merchant, category, or content type.
           </p>
         </Link>
+        <Link
+          href="/imperialpedia/prompts"
+          className="rounded-lg border bg-card p-4 transition-colors hover:border-primary/50 hover:bg-accent"
+        >
+          <div className="font-semibold">Prompts →</div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            AI image-prompt gallery with real example outputs — powers /prompts and the curated /trending-prompts.
+          </p>
+        </Link>
       </div>
 
       <Card>

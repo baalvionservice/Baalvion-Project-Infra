@@ -177,4 +177,18 @@ export const structuredData = {
       priceCurrency: 'USD',
     },
   }),
+
+  /** Ranked/ordered listing of pages — used by /prompts and /trending-prompts so each card's
+   * position in the grid is machine-readable, not just visual. */
+  itemList: (items: { name: string; url: string; image?: string }[]): StructuredData => ({
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    itemListElement: items.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      url: item.url,
+      name: item.name,
+      ...(item.image && { image: item.image }),
+    })),
+  }),
 };
