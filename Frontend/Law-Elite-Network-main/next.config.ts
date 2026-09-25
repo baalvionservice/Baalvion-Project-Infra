@@ -174,11 +174,14 @@ const nextConfig: NextConfig = {
       // cms-only-categories.ts) -- /tv is the shorter form readers actually
       // type/link, so it redirects rather than existing as a second,
       // competing route to the same content.
-      { source: '/tv', destination: '/television', permanent: true },
-      // Public case/court directories live under /legal (/cases is the
-      // signed-in client dashboard, so it is deliberately not redirected).
-      { source: '/courts', destination: '/legal/courts', permanent: true },
-      { source: '/legal', destination: '/legal/cases', permanent: true },
+      // /tv, /courts and /legal used to redirect into now-retired pages
+      // (/television, /legal/courts, /legal/cases -- all three fall under
+      // the third-retirement-pass block below and 308 to / themselves).
+      // Pointed straight at / to avoid a two-hop redirect chain; repoint
+      // these at their real destinations once that block comes out.
+      { source: '/tv', destination: '/', permanent: true },
+      { source: '/courts', destination: '/', permanent: true },
+      { source: '/legal', destination: '/', permanent: true },
       // /world pulled the exact same cmsGetNews() feed as /news with no real
       // geographic filter (its "cross-border"/"every region" copy wasn't
       // backed by any actual filtering) -- a near-duplicate competing for the

@@ -1,7 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { ArrowUpRight, Camera, Gavel, Play, Radio } from 'lucide-react';
+import { ArrowUpRight, Gavel, Radio } from 'lucide-react';
 import type { HomeWidgetItem } from '@/lib/home-widgets';
 
 /**
@@ -96,53 +95,3 @@ export function DocketRail({ items }: { items: HomeWidgetItem[] }) {
   );
 }
 
-export function PhotoRail({ items }: { items: HomeWidgetItem[] }) {
-  const photos = items.filter((i) => i.image_url);
-  if (photos.length === 0) return null;
-  return (
-    <section className="py-8 my-6 border border-slate-200 rounded-sm p-4 sm:p-6 bg-white">
-      <div className="flex items-center gap-3 border-b-4 border-[#E13131] pb-3 mb-6">
-        <span className="bg-[#E13131] text-white p-2 rounded-sm"><Camera className="w-5 h-5" aria-hidden="true" /></span>
-        <h2 className="font-serif text-2xl md:text-3xl font-black uppercase tracking-tight text-slate-900">Photos</h2>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {photos.map((p) => (
-          <figure key={p.id} className="border border-slate-200 rounded-sm p-3 bg-slate-50">
-            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-sm bg-slate-200">
-              <Image src={p.image_url!} alt={p.title} fill unoptimized sizes="(max-width: 640px) 100vw, 25vw" className="object-cover" />
-            </div>
-            <figcaption className="mt-3">
-              <span className="block font-serif text-base font-bold text-slate-900 leading-snug">{p.title}</span>
-              {p.summary && <span className="block mt-1 text-[12px] text-slate-600">{p.summary}</span>}
-              <span className="block mt-2 text-[11px] font-semibold text-slate-500">
-                {p.url ? <a href={p.url} {...external} className="hover:underline">Photo: {p.credit}</a> : <>Photo: {p.credit}</>}
-              </span>
-            </figcaption>
-          </figure>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-export function ShortsRail({ items }: { items: HomeWidgetItem[] }) {
-  if (items.length === 0) return null;
-  return (
-    <section className="py-8 my-6 bg-slate-950 text-white rounded-2xl p-4 sm:p-6 border border-slate-800">
-      <h2 className="text-xl sm:text-2xl font-black font-serif mb-5 pb-3 border-b border-slate-800">Video</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {items.map((v) => (
-          <a key={v.id} href={v.url!} {...external} className="group relative block h-[260px] sm:h-[320px] rounded-xl overflow-hidden border border-slate-800 hover:border-red-500/80 bg-slate-900">
-            {v.image_url && <Image src={v.image_url} alt="" fill unoptimized sizes="(max-width: 640px) 100vw, 25vw" className="object-cover opacity-75 group-hover:scale-105 transition duration-500" />}
-            <span className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent" />
-            <span className="absolute inset-0 flex items-center justify-center"><span className="w-14 h-14 rounded-full bg-black/60 group-hover:bg-red-600 flex items-center justify-center"><Play className="w-5 h-5 fill-white" aria-hidden="true" /></span></span>
-            <span className="absolute bottom-0 p-4">
-              <span className="block font-bold text-sm leading-snug line-clamp-3">{v.title}</span>
-              {v.source_name && <span className="block mt-1 text-[11px] text-slate-400">{v.source_name}</span>}
-            </span>
-          </a>
-        ))}
-      </div>
-    </section>
-  );
-}

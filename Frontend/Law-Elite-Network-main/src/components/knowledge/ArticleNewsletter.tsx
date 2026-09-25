@@ -6,11 +6,23 @@ import { Mail, Check } from 'lucide-react';
 export function ArticleNewsletter() {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email.trim()) {
+    if (!email.trim()) return;
+    setError('');
+    try {
+      const res = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) throw new Error(data.message || 'Something went wrong.');
       setSubscribed(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
     }
   };
 
@@ -52,6 +64,7 @@ export function ArticleNewsletter() {
             </button>
           </form>
         )}
+        {error && <p className="text-xs text-red-400">{error}</p>}
         
         <p className="text-[11px] text-slate-400">
           By subscribing, you agree to our Terms of Service and Privacy Policy. Unsubscribe anytime.
