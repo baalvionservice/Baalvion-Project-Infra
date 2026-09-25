@@ -25,8 +25,9 @@ const RETIRED_ROOT_SLUGS = new Set([
   'law-enforcement-in-1900s-america',
 ]);
 
-/** The four reference/newsroom sections retired alongside those guides. */
-const RETIRED_SECTIONS = new Set(['news', 'case-law', 'legislation', 'law-changes', 'world', 'plans']);
+/** The reference/newsroom sections retired alongside those guides. /news
+ * un-retired 2026-09-25 at explicit request -- see next.config.ts. */
+const RETIRED_SECTIONS = new Set(['case-law', 'legislation', 'law-changes', 'world', 'plans']);
 
 /**
  * Practice areas retired in the AdSense-readiness pass, in both their current

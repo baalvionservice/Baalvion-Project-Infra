@@ -17,9 +17,7 @@ import {
   ExploreBand,
   FrontPage,
   MediaRail,
-  PeopleRail,
   PillarColumn,
-  PopularTopics,
   TrendingList,
 } from '@/components/home/HomeSections';
 import { getHomeFeed } from '@/lib/home-feed';
@@ -106,7 +104,6 @@ export default async function KnowledgeHomePage() {
 
   const feed = await getHomeFeed(pool);
   const [videos, interviews, widgets] = await Promise.all([getAllMedia('video'), getAllMedia('interview'), getHomeWidgets()]);
-  const trendingCounts = new Map(feed.trendingPeople.map((t) => [t.person.slug, t.articleCount]));
 
   const currentSlugSet = new Set<string>(CURRENT_CATEGORY_SLUGS);
   const rawCategories = apiCategories.length > 0
@@ -167,14 +164,12 @@ export default async function KnowledgeHomePage() {
         <FreeNewsAlertCard />
         <NewsPublisherSchema />
 
-        {(feed.trending.length > 0 || feed.celebrity.length > 0) && (
-          <section className="py-8 border-t border-slate-200 grid grid-cols-1 lg:grid-cols-12 gap-10">
-            <div className="lg:col-span-5">
-              <TrendingList articles={feed.trending} />
-            </div>
-            <div className="lg:col-span-7">
-              <PillarColumn title="Celebrity News" href="/celebrity-news" articles={feed.celebrity} />
-            </div>
+        {/* Celebrity News column dropped 2026-09-25 (third AdSense-readiness
+            retirement pass, see category-slugs.ts) -- /celebrity-news now
+            301s to /. Restore alongside CURRENT_CATEGORY_SLUGS. */}
+        {feed.trending.length > 0 && (
+          <section className="py-8 border-t border-slate-200">
+            <TrendingList articles={feed.trending} />
           </section>
         )}
 
@@ -185,19 +180,23 @@ export default async function KnowledgeHomePage() {
           <AdSlot slotId={AD_SLOT_ID} format="horizontal" placement="homepage-mid-feed" fullWidthResponsive minHeight="100px" />
         </div>
 
-        {(feed.entertainment.length > 0 || feed.sports.length > 0 || feed.legal.length > 0) && (
-          <section className="py-8 border-t border-slate-200 grid grid-cols-1 lg:grid-cols-3 gap-10">
-            <PillarColumn title="Entertainment" href="/entertainment" articles={feed.entertainment} />
-            <PillarColumn title="Sports" href="/sports" articles={feed.sports} />
-            <PillarColumn title="Legal Battles" href="/legal/cases" articles={feed.legal} />
+        {/* Entertainment/Sports columns and both People rails dropped
+            2026-09-25 (third AdSense-readiness retirement pass, see
+            category-slugs.ts) -- /entertainment, /sports, and /people all
+            now 301 to /. Restore alongside CURRENT_CATEGORY_SLUGS.
+            Legal Battles (feed.legal -- articles in the practice-area
+            categories, not the still-retired /legal/cases directory) added
+            back in the same pass its 4 categories were, pointed at
+            /personal-injury-lawyer instead of the retired /legal/cases. */}
+        {feed.legal.length > 0 && (
+          <section className="py-8 border-t border-slate-200">
+            <PillarColumn title="Practice Area Guides" href="/personal-injury-lawyer" articles={feed.legal} />
           </section>
         )}
-
-        <PeopleRail title="Trending People & Stars" href="/people" people={feed.trendingPeople.map((t) => t.person)} counts={trendingCounts} />
-        <PeopleRail title="Featured Profiles" href="/people" people={feed.featuredPeople} />
         <MediaRail title="Videos & Law Elite TV" href="/videos" items={videos.slice(0, 4)} />
         <MediaRail title="Interviews & Exclusives" href="/interviews" items={interviews.slice(0, 4)} />
-        <PopularTopics topics={feed.popularTopics} />
+        {/* PopularTopics dropped in the same pass as above -- /topics still
+            301s to /, and each topic card links to /topics/{slug}. */}
 
         <div id="practice-areas" className="border-t border-slate-200 py-4">
           <TopicTicker categories={categories} />

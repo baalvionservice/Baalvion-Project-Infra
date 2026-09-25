@@ -7,17 +7,11 @@ import { articleUrl, ROOT_FLAT_ARTICLE_SLUGS } from '@/lib/article-url';
 import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
 import { cmsGetArticles } from '@/lib/cms';
 import { CONTENT_CACHE_TAG } from '@/lib/cache-tags';
-import { getMergedPeople } from '@/lib/people-server';
-import { isPersonIndexable } from '@/lib/person-indexing';
-import { getMergedEntertainmentEntities } from '@/lib/entertainment-server';
-import { getMergedLegalCases, getMergedCourts } from '@/lib/legal-server';
-import { getMergedSportsTeams, getMergedSportsCompetitions } from '@/lib/sports-server';
-import { getMergedTopics } from '@/lib/topics-server';
-import { getTopicSlugsWithArticles, isTopicIndexable } from '@/lib/topics-indexing';
-import { COUNTRIES } from '@/lib/countries';
 import { getPodcastHub } from '@/lib/podcasts-hub';
 import { getShowPeople, getVideoHub, personUrl as showPersonUrl, seasonUrl, showUrl } from '@/lib/videos-hub';
-import { PERSON_CATEGORIES } from '@/types/person';
+// People/Entertainment/Legal/Sports/Topics/Countries sitemap imports removed
+// 2026-09-25 alongside the routes below -- see the retirement comment
+// further down this file. Restore together. Podcasts/Videos were kept live.
 
 // Render at request time, never at build time. This route fetches from law-service,
 // and a build-time fetch against an unreachable API blocks `next build` (CI timeout).
@@ -108,19 +102,19 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
   // not indexable content.
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${BASE_URL}/` },
-    // /news, /case-law, /legislation, /law-changes deliberately omitted:
-    // all four now 301 to / (next.config.ts) -- see retired-links.ts's
-    // RETIRED_SECTIONS for why.
+    // /case-law, /legislation, /law-changes still 301 to / (next.config.ts)
+    // -- see retired-links.ts's RETIRED_SECTIONS. /news un-retired
+    // 2026-09-25 at explicit request (1 published article today, more
+    // expected as drafts get approved).
+    { url: `${BASE_URL}/news` },
     { url: `${BASE_URL}/about-us` },
-    { url: `${BASE_URL}/people` },
-    { url: `${BASE_URL}/entertainment` },
-    { url: `${BASE_URL}/legal/cases` },
-    { url: `${BASE_URL}/legal/courts` },
-    { url: `${BASE_URL}/sports` },
-    { url: `${BASE_URL}/sports/teams` },
-    { url: `${BASE_URL}/sports/competitions` },
-    { url: `${BASE_URL}/topics` },
-    { url: `${BASE_URL}/countries` },
+    // /people, /entertainment, /legal/cases, /legal/courts, /sports (+
+    // /sports/teams, /sports/competitions), /topics, /countries dropped
+    // 2026-09-25: all now 301 to / (next.config.ts, third retirement pass) --
+    // submitting a URL that immediately redirects is exactly what
+    // REDIRECTED_ARTICLE_SLUGS below exists to prevent for articles, so the
+    // same reasoning applies to these hubs. Restore alongside
+    // CURRENT_CATEGORY_SLUGS once AdSense clears.
     { url: `${BASE_URL}/authors` },
     { url: `${BASE_URL}/editorial-standards` },
     { url: `${BASE_URL}/corrections` },
@@ -288,52 +282,14 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
       };
     });
 
-  // Only profiles with real depth are submitted. Discovery stubs (one
-  // sentence, no photo) stay reachable and searchable but out of the sitemap
-  // and noindex; see isPersonIndexable.
-  const allPeople = await getMergedPeople();
-  const peopleRoutes: MetadataRoute.Sitemap = allPeople.filter(isPersonIndexable).map((p) => ({
-    url: `${BASE_URL}/people/${p.slug}`,
-  }));
-
-  // Category directories (/people/actors, /people/lawyers, ...) -- only ones
-  // with at least one profile.
-  const activePersonCategories = new Set(allPeople.map((p) => p.category));
-  const personCategoryRoutes: MetadataRoute.Sitemap = PERSON_CATEGORIES.filter((c) =>
-    activePersonCategories.has(c.slug),
-  ).map((c) => ({ url: `${BASE_URL}/people/${c.slug}` }));
-
-  const entertainmentRoutes: MetadataRoute.Sitemap = (await getMergedEntertainmentEntities()).filter((e) => e.indexable !== false).map((e) => ({
-    url: `${BASE_URL}/entertainment/${e.slug}`,
-  }));
-
-  const legalCaseRoutes: MetadataRoute.Sitemap = (await getMergedLegalCases()).filter((c) => c.indexable !== false).map((c) => ({
-    url: `${BASE_URL}/legal/cases/${c.slug}`,
-  }));
-
-  const courtRoutes: MetadataRoute.Sitemap = (await getMergedCourts()).filter((c) => c.indexable !== false).map((c) => ({
-    url: `${BASE_URL}/legal/courts/${c.slug}`,
-  }));
-
-  const teamRoutes: MetadataRoute.Sitemap = (await getMergedSportsTeams()).filter((t) => t.indexable !== false).map((t) => ({
-    url: `${BASE_URL}/sports/teams/${t.slug}`,
-  }));
-
-  const competitionRoutes: MetadataRoute.Sitemap = (await getMergedSportsCompetitions()).filter((c) => c.indexable !== false).map((c) => ({
-    url: `${BASE_URL}/sports/competitions/${c.slug}`,
-  }));
-
-  const topicsWithArticles = await getTopicSlugsWithArticles();
-  const topicRoutes: MetadataRoute.Sitemap = (await getMergedTopics()).filter((t) => isTopicIndexable(t, topicsWithArticles)).map((t) => ({
-    url: `${BASE_URL}/topics/${t.slug}`,
-  }));
-
-  // Only countries something on the network is actually connected to — same
-  // reasoning as src/app/countries/page.tsx: no thin, empty country pages.
-  const activeCountryCodes = new Set(allPeople.map((p) => p.countryCode).filter(Boolean));
-  const countryRoutes: MetadataRoute.Sitemap = COUNTRIES.filter((c) => activeCountryCodes.has(c.code)).map((c) => ({
-    url: `${BASE_URL}/countries/${c.code.toLowerCase()}`,
-  }));
+  // People, Entertainment, Legal cases/courts, Sports, Topics, and Countries
+  // routes dropped from the sitemap 2026-09-25 (third retirement pass -- see
+  // CURRENT_CATEGORY_SLUGS's comment): all of those pillars now 301 to /
+  // (next.config.ts), so submitting their URLs here would resubmit pages
+  // that immediately redirect, same problem REDIRECTED_ARTICLE_SLUGS exists
+  // to prevent for articles. Restore this block once AdSense approves the
+  // Fashion-only site. Podcasts and Videos were kept live (real content) and
+  // stay in the sitemap below.
 
   // Podcasts and videos: only pages an editor has finished (indexable) or that have real videos. Thin pages stay out.
   const [podcastHub, videoHub] = await Promise.all([getPodcastHub(), getVideoHub()]);
@@ -360,15 +316,6 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
     ...articleRoutes,
     ...categoryRoutes,
     ...authorRoutes,
-    ...peopleRoutes,
-    ...personCategoryRoutes,
-    ...entertainmentRoutes,
-    ...legalCaseRoutes,
-    ...courtRoutes,
-    ...teamRoutes,
-    ...competitionRoutes,
-    ...topicRoutes,
-    ...countryRoutes,
   ];
 }
 

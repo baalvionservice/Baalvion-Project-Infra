@@ -17,45 +17,32 @@ import { AD_PLACEMENTS } from '@/components/ads/AdManager';
 // RETIRED_SECTIONS) -- the "Explore" link column that pointed at them is
 // gone rather than left linking into redirects.
 
-// AdSense-readiness retirement (see category-slugs.ts's CURRENT_CATEGORY_SLUGS
-// comment): shrunk to the 3 live practice areas -- the other 13 are retired
-// (301 to / via next.config.ts), so linking them here would send readers
-// straight into a redirect instead of a page.
+// Third AdSense-readiness retirement pass, 2026-09-25 (see
+// category-slugs.ts's CURRENT_CATEGORY_SLUGS comment): narrowed further to
+// Fashion, Videos, Podcasts, and (added back in the same pass) the original
+// Practice Areas -- Entertainment, Sports, People, Topics, Countries, and
+// Legal Cases/Courts stay retired (301 to / via next.config.ts), so linking
+// them here would send readers straight into a redirect instead of a page.
+// Restore the rest alongside CURRENT_CATEGORY_SLUGS once AdSense approves
+// the site as it stands.
 const PRACTICE_AREA_LINKS = [
+  { href: '/personal-injury-lawyer', label: 'Personal Injury Law' },
   { href: '/maritime-offshore-injury-law', label: 'Maritime & Offshore Injury' },
   { href: '/cruise-ship-passenger-vessel-accidents', label: 'Cruise Ship & Vessel Accidents' },
-  { href: '/personal-injury-lawyer', label: 'Personal Injury Law' },
-  { href: '/legal/cases', label: 'Legal Cases' },
-  { href: '/legal/courts', label: 'Courts' },
+  { href: '/law-school-success', label: 'Law School Success' },
 ];
 
-const ENTERTAINMENT_LINKS = [
-  { href: '/entertainment', label: 'Entertainment Hub' },
-  { href: '/movies', label: 'Movies' },
-  { href: '/music', label: 'Music' },
-  { href: '/streaming', label: 'Streaming' },
-  { href: '/celebrity-news', label: 'Celebrity News' },
+const FASHION_LINKS = [
+  { href: '/fashion', label: 'Fashion Hub' },
 ];
 
-const SPORTS_LINKS = [
-  { href: '/sports', label: 'Sports Hub' },
-  { href: '/sports/teams', label: 'Teams' },
-  { href: '/sports/competitions', label: 'Competitions' },
-];
-
-const PEOPLE_LINKS = [
-  { href: '/people', label: 'All People' },
-  { href: '/people/actors', label: 'Actors' },
-  { href: '/people/musicians', label: 'Musicians' },
-  { href: '/people/athletes', label: 'Athletes' },
-  { href: '/people/lawyers', label: 'Lawyers' },
-  { href: '/people/creators', label: 'Creators' },
+const MEDIA_LINKS = [
+  { href: '/videos', label: 'Videos' },
+  { href: '/podcasts', label: 'Podcasts' },
 ];
 
 const ABOUT_LINKS = [
   { href: '/about-us', label: 'About Us' },
-  { href: '/topics', label: 'Topics' },
-  { href: '/countries', label: 'Countries' },
   { href: '/authors', label: 'Contributors' },
   { href: '/editorial-standards', label: 'Editorial Standards' },
   { href: '/editorial-process', label: 'Editorial Process' },
@@ -133,11 +120,10 @@ export function PublicFooter() {
 
             <FooterLinkColumn
               colSpan="md:col-span-2"
-              title="Entertainment & Sports"
+              title="Fashion & Media"
               sections={[
-                { heading: 'Entertainment', links: ENTERTAINMENT_LINKS },
-                { heading: 'Sports', links: SPORTS_LINKS },
-                { heading: 'People', links: PEOPLE_LINKS },
+                { heading: 'Fashion', links: FASHION_LINKS },
+                { heading: 'Media', links: MEDIA_LINKS },
               ]}
             />
 

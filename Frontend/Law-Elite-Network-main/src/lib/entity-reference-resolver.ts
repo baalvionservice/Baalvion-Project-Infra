@@ -31,7 +31,20 @@ interface Lookups { showRefs: Map<string, { name: string; url: string }>; topics
  * "Connections" list on an article page. Returns null for a slug that no
  * longer resolves (e.g. an entity later removed) rather than a broken link.
  */
+// Third AdSense-readiness retirement pass, 2026-09-25 (see
+// category-slugs.ts's CURRENT_CATEGORY_SLUGS comment): person, entertainment,
+// legal-case, court, sports-team, sports-competition, country, and topic all
+// resolve to a hub under a now-retired pillar (/people, /entertainment,
+// /legal, /sports, /countries, /topics all 301 to /) -- an article's
+// "Connections" list would otherwise link straight into a redirect.
+// video-show/show-person stay resolvable since Videos/Podcasts are still
+// live. Restore this set alongside CURRENT_CATEGORY_SLUGS.
+const RETIRED_ENTITY_TYPES = new Set<EntityReference['entityType']>([
+  'person', 'entertainment', 'legal-case', 'court', 'sports-team', 'sports-competition', 'country', 'topic',
+]);
+
 function resolveWith(ref: EntityReference, lk: Lookups): ResolvedEntityReference | null {
+  if (RETIRED_ENTITY_TYPES.has(ref.entityType)) return null;
   switch (ref.entityType) {
     case 'person': {
       const p = lk.people.get(ref.slug);
