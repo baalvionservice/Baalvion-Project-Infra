@@ -51,6 +51,31 @@ Frontend/auth-baalvion/.turbo
 Frontend/admin-platform/node_modules
 Frontend/admin-platform/.next
 Frontend/admin-platform/.turbo
+# .dockerignore matches like .gitignore -- last match wins. Every `!Frontend/X`
+# re-include above re-includes X's ENTIRE tree, which silently un-excludes the
+# **/.env* rules (lines 13-15) for anything under it too, since those come
+# earlier in the file. Confirmed live: Frontend/Law-Elite-Network-main/.env.local
+# (a real local-dev file pointing CMS_PUBLIC_URL at localhost:3018) was leaking
+# into every one of these 5 apps' Docker build contexts and getting picked up
+# by Next's own env loading during static generation -- baking dev URLs into
+# prod ISR pages regardless of the Dockerfile's own ENV/ARG values. Re-exclude
+# env files for every re-included app, the same way node_modules/.next/.turbo
+# already are above.
+Frontend/Law-Elite-Network-main/.env
+Frontend/Law-Elite-Network-main/.env.local
+Frontend/Law-Elite-Network-main/.env.*.local
+Frontend/auth-baalvion/.env
+Frontend/auth-baalvion/.env.local
+Frontend/auth-baalvion/.env.*.local
+Frontend/admin-platform/.env
+Frontend/admin-platform/.env.local
+Frontend/admin-platform/.env.*.local
+Frontend/Baalvion-Jobs-Portal-main/.env
+Frontend/Baalvion-Jobs-Portal-main/.env.local
+Frontend/Baalvion-Jobs-Portal-main/.env.*.local
+Frontend/baalvion-stack/.env
+Frontend/baalvion-stack/.env.local
+Frontend/baalvion-stack/.env.*.local
 e2e
 docs
 *.md
