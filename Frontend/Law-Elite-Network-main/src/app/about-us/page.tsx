@@ -131,9 +131,7 @@ export default function AboutUsPage() {
               <p>
                 We treat the law as a living thing. Statutes are amended, cases are decided, and guidance is revised, so
                 we revisit and update our material on a recurring basis and date our pages so readers can see how current
-                a piece is. Where we use AI-assisted tooling to help with research or drafting, that output is always
-                reviewed and verified by a human editor before it is published — automation supports our team, it does
-                not replace its judgment. The full details of this process are set out in our{' '}
+                a piece is. The full details of this process are set out in our{' '}
                 <Link href="/editorial-standards">Editorial Standards</Link>.
               </p>
             </Block>
