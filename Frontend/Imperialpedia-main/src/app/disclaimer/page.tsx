@@ -84,8 +84,8 @@ function DisclaimerFallback() {
               1. Informational purpose only
             </Text>
             <Text variant="body" className="text-muted-foreground leading-relaxed">
-              The articles, analysis, market data, glossary entries, calculators, and AI-generated
-              insights on {env.appName} are intended to inform and educate. They are not tailored to
+              The articles, analysis, market data, glossary entries, and calculators on {env.appName}
+              are intended to inform and educate. They are not tailored to
               your personal financial situation, objectives, or risk tolerance, and should not be
               relied upon as the basis for any financial decision.
             </Text>
@@ -120,18 +120,7 @@ function DisclaimerFallback() {
 
           <div className="space-y-4">
             <Text variant="h3" className="text-xl font-bold">
-              4. AI-generated content
-            </Text>
-            <Text variant="body" className="text-muted-foreground leading-relaxed">
-              Some summaries and insights are produced or assisted by automated tools. AI output may
-              contain errors or omissions and is not reviewed for suitability to your circumstances.
-              Treat it as a starting point for your own research, not as professional advice.
-            </Text>
-          </div>
-
-          <div className="space-y-4">
-            <Text variant="h3" className="text-xl font-bold">
-              5. Third-party links and advertising
+              4. Third-party links and advertising
             </Text>
             <Text variant="body" className="text-muted-foreground leading-relaxed">
               This site contains links to third-party websites. We have applied to display advertising
@@ -149,7 +138,7 @@ function DisclaimerFallback() {
 
           <div className="space-y-4">
             <Text variant="h3" className="text-xl font-bold">
-              6. Limitation of liability
+              5. Limitation of liability
             </Text>
             <Text variant="body" className="text-muted-foreground leading-relaxed">
               To the fullest extent permitted by law, {env.appName} and its team shall not be liable for
@@ -164,7 +153,7 @@ function DisclaimerFallback() {
 
           <div className="space-y-4">
             <Text variant="h3" className="text-xl font-bold">
-              7. Contact
+              6. Contact
             </Text>
             <Text variant="body" className="text-muted-foreground leading-relaxed">
               Questions about this disclaimer:{' '}
