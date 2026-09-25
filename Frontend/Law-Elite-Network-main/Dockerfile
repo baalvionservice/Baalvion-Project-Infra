@@ -33,9 +33,24 @@ RUN pnpm install --no-frozen-lockfile
 ARG NEXT_PUBLIC_API_BASE_URL
 ARG NEXT_PUBLIC_APP_URL
 ARG NEXT_PUBLIC_GA_ID
+# src/lib/cms.ts's server-side CMS client falls back to a localhost dev CMS URL
+# whenever `process.env.NODE_ENV !== 'production'` -- true at RUNTIME (this
+# stage's own `ENV NODE_ENV=production` below), but NOT reliably true inside
+# `next build`'s own static-generation child process (spawned via `pnpm turbo
+# run build` -> `next build`), which does not always inherit NODE_ENV from this
+# layer. That silently sent every CMS fetch during static generation to
+# unreachable localhost:3018, so every ISR page needing CMS data (/authors,
+# every /author/[slug]) baked in as empty ("No contributors match" / "No
+# published guides yet") -- correct code, correct CMS, wrong URL, and it stuck
+# for the page's full revalidate window regardless. Passing these explicitly
+# here means cms.ts never needs to detect prod-vs-dev for the URL at all.
+ARG CMS_PUBLIC_URL=https://api.baalvion.com/api/v1/public
+ARG CMS_WEBSITE_SLUG=law-elite-network
 ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
 ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
 ENV NEXT_PUBLIC_GA_ID=$NEXT_PUBLIC_GA_ID
+ENV CMS_PUBLIC_URL=$CMS_PUBLIC_URL
+ENV CMS_WEBSITE_SLUG=$CMS_WEBSITE_SLUG
 ENV NEXT_TELEMETRY_DISABLED=1 NODE_ENV=production
 COPY --from=pruner /app/out/full/ ./
 # Shared tsconfig chain is not part of the pruned output → copy it for the TS build.
@@ -44,7 +59,8 @@ RUN pnpm dlx turbo@2.9.14 run build --filter=law-elite-network-web
 
 # 4) Minimal runner (Next standalone server).
 FROM base AS runner
-ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=9002 HOSTNAME=0.0.0.0
+ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=9002 HOSTNAME=0.0.0.0 \
+    CMS_PUBLIC_URL=https://api.baalvion.com/api/v1/public CMS_WEBSITE_SLUG=law-elite-network
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
 WORKDIR /app/Frontend/Law-Elite-Network-main
 COPY --from=installer --chown=nextjs:nodejs /app/Frontend/Law-Elite-Network-main/.next/standalone /app
