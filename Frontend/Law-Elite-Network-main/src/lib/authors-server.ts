@@ -1,4 +1,4 @@
-import { LAW_AUTHORS, authorNameToSlug, type LawAuthor } from '@/data/authors';
+import { ACTIVE_LAW_AUTHORS, authorNameToSlug, type LawAuthor } from '@/data/authors';
 import { cmsGetAuthors, cmsGetAuthorBySlug, cmsGetArticles, type CmsAuthor } from '@/lib/cms';
 import { mergeArticles } from '@/data/law-content';
 import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
@@ -33,13 +33,13 @@ function fromCms(a: CmsAuthor): LawAuthor {
 export async function getMergedAuthors(): Promise<LawAuthor[]> {
   const cms = await cmsGetAuthors().catch(() => []);
   const bySlug = new Map<string, LawAuthor>();
-  LAW_AUTHORS.forEach((a) => bySlug.set(a.slug, a));
+  ACTIVE_LAW_AUTHORS.forEach((a) => bySlug.set(a.slug, a));
   cms.forEach((a) => bySlug.set(a.slug, fromCms(a)));
   return Array.from(bySlug.values());
 }
 
 export async function getMergedAuthorBySlug(slug: string): Promise<LawAuthor | null> {
-  const bundled = LAW_AUTHORS.find((a) => a.slug === slug) ?? null;
+  const bundled = ACTIVE_LAW_AUTHORS.find((a) => a.slug === slug) ?? null;
   try {
     const cms = await cmsGetAuthorBySlug(slug, true);
     if (cms) return fromCms(cms);
