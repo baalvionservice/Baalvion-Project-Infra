@@ -114,6 +114,12 @@ export function listSupportTickets(): Promise<SupportTicket[]> {
   return listResource<SupportTicket>('support-tickets');
 }
 
+/** The logged-in customer's OWN support tickets (storefront concierge page). Auth required —
+ * never falls back to any other customer's tickets (server matches by verified JWT subject). */
+export function getMySupportTickets(): Promise<SupportTicket[]> {
+  return listResource<SupportTicket>('support-tickets/mine');
+}
+
 /**
  * Submit the general contact form as a real support ticket (public-create — see
  * crm-service/routes/v1.js `mountEntity('/crm/support-tickets', ..., { publicCreate: true })`).

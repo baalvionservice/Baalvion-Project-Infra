@@ -58,7 +58,6 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'placehold.co', pathname: '/**' },
       { protocol: 'https', hostname: 'images.unsplash.com', pathname: '/**' },
       { protocol: 'https', hostname: 'picsum.photos', pathname: '/**' },
-      { protocol: 'https', hostname: 'madisonavenuecouture.com', pathname: '/**' },
       ...(MEDIA_HOST ? [{ protocol: 'https' as const, hostname: MEDIA_HOST, pathname: '/**' }] : []),
       // Admin CMS media origin (covers gateway / cms-service uploads).
       ...(CMS_HOST
@@ -133,7 +132,7 @@ const nextConfig: NextConfig = {
       default-src 'self';
       script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://api.baalvion.com https://www.googletagmanager.com https://www.google-analytics.com https://checkout.razorpay.com https://js.stripe.com;
       style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-      img-src 'self' blob: data: https://picsum.photos https://images.unsplash.com https://placehold.co https://madisonavenuecouture.com https://www.google-analytics.com https://www.googletagmanager.com https://www.google.com https://www.google.co.in https://www.google.co.uk https://www.google.ae https://www.google.com.sg ${MEDIA_HOST ? `https://${MEDIA_HOST}` : ''} ${cmsImgSrc} ${devImgSrc};
+      img-src 'self' blob: data: https://picsum.photos https://images.unsplash.com https://placehold.co https://www.google-analytics.com https://www.googletagmanager.com https://www.google.com https://www.google.co.in https://www.google.co.uk https://www.google.ae https://www.google.com.sg ${MEDIA_HOST ? `https://${MEDIA_HOST}` : ''} ${cmsImgSrc} ${devImgSrc};
       font-src 'self' data: https://fonts.gstatic.com;
       object-src 'none';
       base-uri 'self';

@@ -32,10 +32,10 @@ const inquiries = makeController(db.Inquiry, { searchable: ['customerName', 'ema
  * validate the create body before the controller runs — used on the anonymous create surfaces
  * so unauthenticated public input is checked at the boundary.
  */
-function mountEntity(base, ctrl, { publicCreate = false, createValidator = null } = {}) {
+function mountEntity(base, ctrl, { publicCreate = false, createValidator = null, preCreate = [] } = {}) {
     router.get(`${base}`, authMiddleware, ctrl.list);
     router.get(`${base}/:id`, authMiddleware, ctrl.getOne);
-    const createChain = [publicCreate ? optionalAuth : authMiddleware];
+    const createChain = [publicCreate ? optionalAuth : authMiddleware, ...preCreate];
     if (createValidator) createChain.push(createValidator);
     createChain.push(ctrl.create);
     router.post(`${base}`, ...createChain);
@@ -98,8 +98,26 @@ mountEntity('/crm/appointments', appointments, {
     publicCreate: true,
     createValidator: validateBody(appointmentCreateSchema),
 });
+// The logged-in customer's own support tickets (storefront concierge page). Matched by
+// customerId, which is ALWAYS stamped server-side from the verified JWT on create (see
+// preCreate below) and never trusted from client input, so a caller can only ever see
+// tickets they themselves raised — same ownership pattern as GET /crm/vip-clients/me.
+router.get('/crm/support-tickets/mine', authMiddleware, async (req, res) => {
+    const brandId = req.query.brandId || DEFAULT_BRAND;
+    if (!req.user?.id) throw new AppError('BAD_REQUEST', 'No identity to resolve support tickets', 400);
+    const rows = await db.SupportTicket.findAll({
+        where: { brandId, customerId: String(req.user.id) },
+        order: [['updated_at', 'DESC']],
+    });
+    return sendSuccess(req, res, rows);
+});
+
 mountEntity('/crm/support-tickets', supportTickets, {
     publicCreate: true,
+    // Overwrite any client-supplied customerId with the verified token subject (or null for a
+    // guest) BEFORE validation/create — closes off impersonation of another customer's ticket
+    // history via /support-tickets/mine above.
+    preCreate: [(req, _res, next) => { req.body.customerId = req.user?.id ? String(req.user.id) : null; next(); }],
     createValidator: validateBody(supportTicketCreateSchema),
 });
 mountEntity('/crm/inquiries', inquiries, {
