@@ -71,12 +71,21 @@ export default async function SportsHubPage() {
     .sort((a, b) => dateVal(b.articles[0]) - dateVal(a.articles[0]));
 
   const all = groups.flatMap((g) => g.articles);
-  const byViews = [...all].sort((a, b) => (b.views || 0) - (a.views || 0));
-  const popular = byViews.slice(0, 5);
-  const trending = byViews.slice(5, 10);
   const [top, ...others] = all;
   const topSide = others.slice(0, 2);
   const usedTop = new Set([top, ...topSide].filter(Boolean).map((a: any) => a.slug));
+
+  // Sidebar rails only draw from articles not already shown in the hero above
+  // them, so nothing appears twice on the page.
+  const rest = all.filter((a: any) => !usedTop.has(a.slug));
+  const byViews = [...rest].sort((a, b) => (b.views || 0) - (a.views || 0));
+  const popular = byViews.slice(0, 5);
+  // "Trending Now" reflects the admin's Trending flag (CMS -> content ->
+  // Media tab) instead of a leftover view-count slice, so editors control it
+  // directly -- falls back to the next most-viewed articles only until an
+  // editor has flagged something trending.
+  const flaggedTrending = rest.filter((a: any) => a.isTrending && !popular.some((p: any) => p.slug === a.slug));
+  const trending = (flaggedTrending.length > 0 ? flaggedTrending : byViews.slice(popular.length)).slice(0, 5);
   const sections = groups
     .map((g) => ({ ...g, articles: g.articles.filter((a: any) => !usedTop.has(a.slug)) }))
     .filter((g) => g.articles.length > 0);

@@ -81,6 +81,28 @@ function buildSystemPrompt(charter, budget, sectionCount = 0) {
     ];
     if (charter.voice) lines.push('', `VOICE: ${charter.voice}`);
 
+    // Left unconstrained, the model defaults to a recognizable pattern: every
+    // paragraph the same length, a topic sentence that just restates the
+    // heading, triads of examples in parallel form, and stock connectors
+    // ("Moreover," "Furthermore," "It is important to note that," "In
+    // today's fast-paced world") stitching every idea together. None of that
+    // is wrong, but it reads as machine-written and both human readers and
+    // AI-detection tools key off exactly this rhythm. This is a style
+    // instruction, not a sourcing one — it changes how the facts above are
+    // phrased, never what facts get used.
+    lines.push(
+        '',
+        'HOW TO WRITE THIS, SO IT READS AS HUMAN-WRITTEN:',
+        "- Vary sentence length on purpose. Follow a long, clause-heavy sentence with a short one. Don't let every sentence in a paragraph run the same shape.",
+        '- Do not open a paragraph by restating its heading in different words. Start from a fact, a consequence, or a concrete detail instead.',
+        '- Cut stock connective tissue: "Moreover," "Furthermore," "Additionally," "It is important to note that," "In today\'s world," "When it comes to," "At the end of the day." If a sentence needs one of these to make sense, rewrite the sentence instead.',
+        '- Avoid symmetrical triads and parallel-structure lists dressed up as prose ("X involves A, B, and C" repeated section after section). State things plainly, the way a reporter explaining this to a colleague would.',
+        "- Don't hedge every claim into mush. Say what the source supports directly; reserve qualifiers (\"typically,\" \"in most cases\") for where the source itself is qualified.",
+        '- One idea can end a section instead of a summary sentence restating what was just said. Not every paragraph needs a wrap-up line.',
+        '- A contraction here and there ("doesn\'t," "isn\'t") reads more natural than none at all, as long as it fits the outlet\'s register.',
+        '- This applies to the FAQ section too: answers should sound like a knowledgeable person answering the question, not a template ("No — it requires X; it does not mandate Y") repeated with the nouns swapped.'
+    );
+
     if ((charter.stanceRules || []).length) {
         lines.push('', 'STANCE RULES — these are absolute:');
         for (const rule of charter.stanceRules) lines.push(`- ${rule}`);

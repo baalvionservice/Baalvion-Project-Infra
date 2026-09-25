@@ -113,6 +113,12 @@ interface CmsContent {
   // BIGINT column -- the API actually returns this as a numeric string (see
   // toArticle()'s `views` mapping below), not a number.
   viewCount?: number | string;
+  /** Admin-set homepage/section flags (ContentEditor's Media tab -> NewsMetaPanel), not derived from traffic. */
+  isTrending?: boolean;
+  isFeatured?: boolean;
+  isBreaking?: boolean;
+  isEditorsPick?: boolean;
+  isPremium?: boolean;
 }
 
 export interface CmsSitePage {
@@ -339,6 +345,8 @@ export interface CmsArticle {
   featuredImage?: string;
   /** View count, when the CMS tracks it — omit from UI when absent rather than fabricating a number. */
   views?: number;
+  /** Admin-toggled "Trending" flag (ContentEditor -> Media -> NewsMetaPanel), independent of view count. */
+  isTrending?: boolean;
   /** Raw CMS custom fields (e.g. `breaking`, `videoUrl`) passed through for data-gated UI like the breaking ticker and video carousel. */
   customFields?: Record<string, any>;
   /** Country this guide is jurisdiction-specific to (customFields.country), e.g. "United States". Absent for worldwide-general content. */
@@ -463,6 +471,7 @@ function toArticle(c: CmsContent): CmsArticle {
     // BIGINT column -- pg serializes it as a string ("58"), so the old strict
     // `typeof === 'number'` check here silently nulled out every view count.
     views: c.viewCount != null ? Number(c.viewCount) : undefined,
+    isTrending: !!c.isTrending,
     customFields: c.customFields ?? undefined,
     country: typeof cf.country === 'string' ? cf.country : undefined,
     primarySources: readPrimarySources(cf.citations) ?? attachedSource(c),
