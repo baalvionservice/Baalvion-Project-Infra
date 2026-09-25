@@ -4,12 +4,29 @@ const apiKeyService = require('./apiKeyService');
 const redis = require('../config/redis');
 const logger = require('../utils/logger');
 const { AppError } = require('../utils/errors');
+const cmsVault = require('../service/cmsVault');
 
 let RazorpaySdk = null;
-function client() {
-    if (!config.razorpay.keyId || !config.razorpay.keySecret) return null;
+
+// CMS vault first (admin-panel managed, no redeploy to rotate), env as dev-only fallback —
+// same precedence every other payment-spine service uses.
+async function resolveRazorpayCreds() {
+    const vault = await cmsVault.getPaymentCreds('razorpay').catch(() => null);
+    if (vault && vault.secrets.keyId && vault.secrets.keySecret) {
+        return {
+            keyId: vault.secrets.keyId,
+            keySecret: vault.secrets.keySecret,
+            webhookSecret: vault.secrets.webhookSecret || config.razorpay.webhookSecret,
+        };
+    }
+    return { keyId: config.razorpay.keyId, keySecret: config.razorpay.keySecret, webhookSecret: config.razorpay.webhookSecret };
+}
+
+async function client() {
+    const creds = await resolveRazorpayCreds();
+    if (!creds.keyId || !creds.keySecret) return null;
     if (!RazorpaySdk) RazorpaySdk = require('razorpay'); // lazy: boots fine with billing unconfigured
-    return new RazorpaySdk({ key_id: config.razorpay.keyId, key_secret: config.razorpay.keySecret });
+    return { sdk: new RazorpaySdk({ key_id: creds.keyId, key_secret: creds.keySecret }), keyId: creds.keyId };
 }
 
 // Must stay in sync with Frontend/baalvion-intelligence/src/lib/plans.ts (marketed price) and
@@ -55,7 +72,7 @@ async function createCheckoutOrder({ orgId, planSlug, customerEmail }) {
     const plan = PLANS[planSlug];
     if (!plan) throw new AppError('PLAN_NOT_FOUND', `Unknown plan "${planSlug}"`, 404);
 
-    const rzp = client();
+    const rzp = await client();
     if (!rzp) throw new AppError('BILLING_NOT_CONFIGURED', 'Billing is not configured yet', 503);
 
     const offerAvailable = (await launchOfferRemaining()) > 0;
@@ -64,14 +81,14 @@ async function createCheckoutOrder({ orgId, planSlug, customerEmail }) {
     // notes carries the fulfillment key — the webhook reads these straight back off the paid
     // entity, no separate lookup table needed. `discounted` records whether THIS order was priced
     // with the launch offer, so the webhook only claims a slot for orders that actually used it.
-    const order = await rzp.orders.create({
+    const order = await rzp.sdk.orders.create({
         amount,
         currency: config.razorpay.currency,
         notes: { orgId, planSlug, discounted: offerAvailable ? 'true' : 'false' },
     });
 
     return {
-        keyId: config.razorpay.keyId,
+        keyId: rzp.keyId,
         orderId: order.id,
         amount,
         currency: config.razorpay.currency,
@@ -110,4 +127,7 @@ async function handleWebhookEvent(event) {
     await require('./paymentSpine').reportPlanPayment(entity, { orgId, planSlug });
 }
 
-module.exports = { PLANS, createCheckoutOrder, handleWebhookEvent, launchOfferRemaining, LAUNCH_OFFER_MAX };
+module.exports = {
+    PLANS, createCheckoutOrder, handleWebhookEvent, launchOfferRemaining, LAUNCH_OFFER_MAX,
+    resolveRazorpayCreds, upgradeOrgKeys, claimLaunchOfferSlot,
+};

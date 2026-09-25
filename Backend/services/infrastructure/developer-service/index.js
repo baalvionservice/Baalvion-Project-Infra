@@ -28,10 +28,14 @@ app.use(helmet());
 // Global IP rate limiter (express-rate-limit, CodeQL-recognized) — generous DoS ceiling.
 app.use(rateLimit({ windowMs: 60_000, max: Number(process.env.IP_RATE_LIMIT_MAX) || 1000, standardHeaders: true, legacyHeaders: false, message: { success: false, error: { code: 'RATE_LIMITED', message: 'Too many requests' } } }));
 app.use(cors({ origin: config.corsOrigins, credentials: true }));
-// Razorpay webhook needs the RAW body for signature verification — registered before
+// Razorpay/Cashfree webhooks need the RAW body for signature verification — registered before
 // express.json() below, which would otherwise consume and parse it first. Public (no
-// authenticate/requireDeveloper): Razorpay calls this directly, authenticated only by signature.
+// authenticate/requireDeveloper): the provider calls these directly, authenticated only by signature.
 app.post('/v1/billing/razorpay-webhook', express.raw({ type: 'application/json' }), billingController.handleRazorpayWebhook);
+app.post('/v1/billing/cashfree-webhook', express.raw({ type: 'application/json' }), billingController.handleCashfreeWebhook);
+// PayU has no signature header — it form-POSTs the result back (verified by reverse SHA-512
+// hash), so this route needs urlencoded body parsing, not JSON.
+app.post('/v1/billing/payu-webhook', express.urlencoded({ extended: false }), billingController.handlePayuReturn);
 app.use(express.json({ limit: '2mb' }));
 app.use(requestContext);
 

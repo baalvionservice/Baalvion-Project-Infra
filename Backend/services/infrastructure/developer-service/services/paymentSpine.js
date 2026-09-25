@@ -18,9 +18,10 @@ const pcl = () => require('@baalvion/payment-consistency');
 
 const SITE_ID = 'signal';
 
-// The only rail this site is granted. An unmapped provider returns undefined and the spine
-// refuses the record rather than filing it under a rail the payment did not use.
-const PROVIDER_RAIL = { razorpay: 'razorpay' };
+// PayU and Cashfree were added alongside Razorpay. An unmapped provider returns undefined and
+// the spine refuses the record rather than filing it under a rail the payment did not use —
+// keep this in sync with the registry's `rails` entry for site 'signal'.
+const PROVIDER_RAIL = { razorpay: 'razorpay', payu: 'payu', cashfree: 'cashfree' };
 const railFor = (provider) => PROVIDER_RAIL[String(provider || '').toLowerCase()];
 
 function isEnabled() {
@@ -43,20 +44,21 @@ function spine() {
  * signature — so this records a payment that is already proven, rather than deciding anything.
  * Never throws: the webhook must still 200 so Razorpay stops redelivering an event we accepted.
  */
-async function reportPlanPayment(entity, { orgId, planSlug } = {}) {
+async function reportPlanPayment(entity, { orgId, planSlug, provider } = {}) {
     if (!isEnabled()) return null;
     if (!entity || !orgId) return null;
 
     try {
-        // Razorpay reports `amount` and `fee` in MINOR units already, so there is no conversion
-        // and no float hop. `fee` is its GST-inclusive cut and is absent on an authorization —
-        // left absent rather than zeroed, because "no fee" and "fee unknown" differ on a report.
+        // Razorpay/PayU/Cashfree all report `amount`/`fee` in MINOR units already here (PayU and
+        // Cashfree callers convert major->minor before calling), so there is no conversion and no
+        // float hop. `fee` is absent on an authorization — left absent rather than zeroed, because
+        // "no fee" and "fee unknown" differ on a report.
         const amountMinor = entity.amount != null ? Number(entity.amount) : null;
         if (amountMinor == null) return null;
 
         return await spine().recordCapture({
             paymentId: String(entity.id || entity.order_id),
-            provider: 'razorpay',
+            provider: String(provider || 'razorpay').toLowerCase(),
             transactionId: String(entity.id || entity.order_id),
             amountMinor,
             currency: String(entity.currency || 'INR').toUpperCase(),

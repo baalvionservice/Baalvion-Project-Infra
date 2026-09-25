@@ -6,7 +6,10 @@ const { decodeEmailFromRequest } = require('../middleware/authMiddleware');
 const { AppError } = require('../utils/errors');
 const { z } = require('zod');
 
-const checkoutSchema = z.object({ asset: z.enum(['USDT_TRC20', 'ETH_BEP20', 'BTC']) });
+const checkoutSchema = z.object({
+    provider: z.enum(['crypto', 'razorpay', 'payu', 'cashfree']).default('crypto'),
+    asset: z.enum(['USDT_TRC20', 'ETH_BEP20', 'BTC']).optional(),
+}).refine((v) => v.provider !== 'crypto' || !!v.asset, { message: 'asset is required for provider=crypto', path: ['asset'] });
 
 const checkout = async (req, res, next) => {
     try {
@@ -15,7 +18,7 @@ const checkout = async (req, res, next) => {
         const community = await db.Community.findOne({ where: { slug: req.params.slug, is_active: true } });
         if (!community) throw new AppError('NOT_FOUND', 'Community not found', 404);
         const email = decodeEmailFromRequest(req);
-        const result = await billingService.checkout(community, req.auth.userId, email, parsed.data.asset);
+        const result = await billingService.checkout(community, req.auth.userId, email, parsed.data.provider, parsed.data.asset);
         return sendSuccess(req, res, result, 201);
     } catch (err) { return next(err); }
 };
