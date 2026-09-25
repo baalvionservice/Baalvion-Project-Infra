@@ -177,6 +177,53 @@ async function bulkUpdate(storeId, userId, { ids, action, categoryId }) {
     return { updated: products.length };
 }
 
+// Bulk import (CSV-on-the-client → JSON here). Each row creates independently — one bad row
+// (unknown category, duplicate slug) never aborts the rest of the batch, since a seller/operator
+// uploading 200 rows needs to know exactly which ones failed and why, not just "import failed".
+// Category is resolved against THIS store's real taxonomy (slug or name, case-insensitive) —
+// never trusts a caller-supplied categoryId — so a typo reports as a clear per-row error instead
+// of silently filing a product under the wrong department or none at all.
+async function importProducts(storeId, userId, rows) {
+    const categories = await CommerceCategory.findAll({ where: { storeId }, attributes: ['id', 'name', 'slug'] });
+    const bySlug = new Map(categories.map((c) => [c.slug.toLowerCase(), c.id]));
+    const byName = new Map(categories.map((c) => [c.name.toLowerCase(), c.id]));
+
+    const results = [];
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        try {
+            const key = row.category.trim().toLowerCase();
+            const categoryId = bySlug.get(key) || byName.get(key);
+            if (!categoryId) throw new AppError('VALIDATION_ERROR', `Unknown category "${row.category}" — check it matches an existing Commerce → Categories slug or name`, 400);
+
+            const product = await createProduct(storeId, userId, {
+                name: row.name,
+                categoryId,
+                shortDescription: row.shortDescription,
+                description: row.description,
+                sku: row.sku,
+                price: row.price,
+                currencyCode: row.currencyCode || 'USD',
+                condition: row.condition,
+                conditionNotes: row.conditionNotes,
+                materials: row.materials || [],
+                tags: row.tags || [],
+                stockQuantity: row.stockQuantity,
+                customFields: { basePrice: row.price },
+            });
+            results.push({ row: i, success: true, productId: product.id, name: product.name });
+        } catch (err) {
+            results.push({ row: i, success: false, name: row.name, error: err.message || 'Import failed' });
+        }
+    }
+    return {
+        total: rows.length,
+        created: results.filter((r) => r.success).length,
+        failed: results.filter((r) => !r.success).length,
+        results,
+    };
+}
+
 // Cross-store admin view — mirrors categoryService.listCategoriesAcrossStores exactly (same
 // admin-list convention, same CommerceStore include for the store name/country column).
 async function listProductsAcrossStores({ storeId, search, status, page: pageIn, limit: limitIn } = {}) {
@@ -195,4 +242,4 @@ async function listProductsAcrossStores({ storeId, search, status, page: pageIn,
     return buildPaginated(rows.map((r) => r.toJSON()), count, { page, limit });
 }
 
-module.exports = { listProducts, getProduct, createProduct, updateProduct, deleteProduct, publishProduct, duplicateProduct, bulkUpdate, listProductsAcrossStores, moderateProduct, listPendingModeration };
+module.exports = { listProducts, getProduct, createProduct, updateProduct, deleteProduct, publishProduct, duplicateProduct, bulkUpdate, importProducts, listProductsAcrossStores, moderateProduct, listPendingModeration };
