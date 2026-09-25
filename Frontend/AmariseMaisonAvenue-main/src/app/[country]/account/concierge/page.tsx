@@ -1,14 +1,16 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useAppStore } from '@/lib/store';
-import { 
-  LifeBuoy, 
-  ChevronRight, 
-  Plus, 
-  Search, 
-  Clock, 
-  MessageSquare, 
+import React, { useEffect, useState } from 'react';
+import { useAuth } from '@/lib/auth-context';
+import { createSupportTicket, getMySupportTickets } from '@/lib/crm-client';
+import type { SupportTicket } from '@/lib/types';
+import {
+  LifeBuoy,
+  ChevronRight,
+  Plus,
+  Search,
+  Clock,
+  MessageSquare,
   CheckCircle2,
   HelpCircle,
   ShieldCheck,
@@ -36,17 +38,54 @@ import { useToast } from '@/hooks/use-toast';
 export default function ConciergeTicketsPage() {
   const { country } = useParams();
   const countryCode = (country as string) || 'us';
-  const { supportTickets, currentUser } = useAppStore();
+  const { user } = useAuth();
   const { toast } = useToast();
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [supportTickets, setSupportTickets] = useState<SupportTicket[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [subject, setSubject] = useState('');
+  const [category, setCategory] = useState('Provenance Inquiry');
+  const [message, setMessage] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const loadTickets = React.useCallback(async () => {
+    setLoading(true);
+    const tickets = await getMySupportTickets();
+    setSupportTickets(tickets);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    loadTickets();
+  }, [loadTickets]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) {
+      toast({ title: "Sign in required", description: "Please sign in to reach the concierge desk." });
+      return;
+    }
+    setSubmitting(true);
+    const created = await createSupportTicket({
+      customerName: user.name || user.email,
+      customerEmail: user.email,
+      subject,
+      category,
+      message,
+    });
+    setSubmitting(false);
+    if (!created) {
+      toast({ title: "Request failed", description: "We couldn't reach the concierge desk — please try again." });
+      return;
+    }
     toast({
       title: "Concierge Request Registered",
       description: "A Maison care specialist will review your inquiry within 2 business hours.",
     });
+    setSubject('');
+    setMessage('');
     setIsFormOpen(false);
+    await loadTickets();
   };
 
   return (
@@ -84,19 +123,19 @@ export default function ConciergeTicketsPage() {
               <div className="space-y-6">
                  <div className="space-y-2">
                     <Label className="text-[10px] uppercase font-bold tracking-widest text-slate-500">Inquiry Subject</Label>
-                    <Input required className="rounded-none border-slate-200 h-12 text-sm italic font-light" placeholder="e.g., Sourcing request for a Birkin 30 in black togo..." />
+                    <Input required value={subject} onChange={(e) => setSubject(e.target.value)} className="rounded-none border-slate-200 h-12 text-sm italic font-light" placeholder="e.g., Sourcing request for a Birkin 30 in black togo..." />
                  </div>
                  <div className="space-y-2">
                     <Label className="text-[10px] uppercase font-bold tracking-widest text-slate-500">Service Category</Label>
-                    <Select defaultValue="Product Query">
+                    <Select value={category} onValueChange={setCategory}>
                        <SelectTrigger className="rounded-none border-slate-200 h-12">
                           <SelectValue />
                        </SelectTrigger>
                        <SelectContent className="bg-white border-border shadow-luxury">
-                          <SelectItem value="Order Issue" className="text-xs">Order Assistance</SelectItem>
-                          <SelectItem value="Product Query" className="text-xs">Provenance Inquiry</SelectItem>
-                          <SelectItem value="Return/Exchange" className="text-xs">Restoration Logistics</SelectItem>
-                          <SelectItem value="VIP Request" className="text-xs">Bespoke Curation</SelectItem>
+                          <SelectItem value="Order Assistance" className="text-xs">Order Assistance</SelectItem>
+                          <SelectItem value="Provenance Inquiry" className="text-xs">Provenance Inquiry</SelectItem>
+                          <SelectItem value="Restoration Logistics" className="text-xs">Restoration Logistics</SelectItem>
+                          <SelectItem value="Bespoke Curation" className="text-xs">Bespoke Curation</SelectItem>
                        </SelectContent>
                     </Select>
                  </div>
@@ -104,11 +143,11 @@ export default function ConciergeTicketsPage() {
               <div className="space-y-6">
                  <div className="space-y-2">
                     <Label className="text-[10px] uppercase font-bold tracking-widest text-slate-500">Detailed Message</Label>
-                    <Textarea required className="rounded-none border-slate-200 min-h-[120px] text-xs px-4 py-4 italic font-light" placeholder="Please describe your requirements in detail..." />
+                    <Textarea required value={message} onChange={(e) => setMessage(e.target.value)} className="rounded-none border-slate-200 min-h-[120px] text-xs px-4 py-4 italic font-light" placeholder="Please describe your requirements in detail..." />
                  </div>
                  <div className="pt-4 flex justify-end">
-                    <Button type="submit" className="rounded-none bg-black text-white hover:bg-plum h-12 px-12 text-[10px] font-bold uppercase tracking-[0.3em] transition-all shadow-xl">
-                       TRANSMIT REQUEST <Send className="w-3 h-3 ml-3" />
+                    <Button type="submit" disabled={submitting} className="rounded-none bg-black text-white hover:bg-plum h-12 px-12 text-[10px] font-bold uppercase tracking-[0.3em] transition-all shadow-xl">
+                       {submitting ? 'SENDING...' : 'TRANSMIT REQUEST'} <Send className="w-3 h-3 ml-3" />
                     </Button>
                  </div>
               </div>
@@ -117,7 +156,12 @@ export default function ConciergeTicketsPage() {
       )}
 
       <div className="grid grid-cols-1 gap-6">
-        {supportTickets.map(ticket => (
+        {loading && (
+          <div className="py-40 text-center opacity-30">
+             <p className="text-sm font-bold uppercase tracking-widest italic">Loading your requests…</p>
+          </div>
+        )}
+        {!loading && supportTickets.map(ticket => (
           <Card key={ticket.id} className="bg-white border-border shadow-sm group hover:border-plum transition-all overflow-hidden rounded-none p-8 flex flex-col md:flex-row items-center justify-between gap-8">
              <div className="flex items-center space-x-8 flex-1">
                 <div className={cn(
@@ -152,7 +196,7 @@ export default function ConciergeTicketsPage() {
           </Card>
         ))}
 
-        {supportTickets.length === 0 && (
+        {!loading && supportTickets.length === 0 && (
           <div className="py-40 text-center opacity-30">
              <ShieldCheck className="w-12 h-12 mx-auto mb-4" />
              <p className="text-sm font-bold uppercase tracking-widest italic">All curatorial care items are currently resolved.</p>

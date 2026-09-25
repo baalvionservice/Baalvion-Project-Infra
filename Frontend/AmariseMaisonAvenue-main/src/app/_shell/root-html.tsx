@@ -133,7 +133,6 @@ export function RootHtml({
       <head>
         <GoogleAnalytics />
         <link rel="preconnect" href="https://picsum.photos" />
-        <link rel="preconnect" href="https://madisonavenuecouture.com" />
         {/* Organization + WebSite knowledge-graph entities (server-rendered, static). */}
         <script
           type="application/ld+json"

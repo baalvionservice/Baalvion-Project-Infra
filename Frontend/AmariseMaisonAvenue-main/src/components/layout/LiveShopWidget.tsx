@@ -9,7 +9,7 @@ import { BrandImage } from '@/components/ui/BrandImage';
 import { cn } from '@/lib/utils';
 
 /**
- * MadAveLiveWidget: Persistent storefront live-stream preview.
+ * LiveShopWidget: Persistent storefront live-stream preview.
  *
  * GATED: the live experience (/account/live) is mock-backed (no real streaming service), so this
  * widget is disabled by default and never surfaces the mock "live" surface to visitors. Re-enable
@@ -17,7 +17,7 @@ import { cn } from '@/lib/utils';
  */
 const LIVE_SHOP_ENABLED = process.env.NEXT_PUBLIC_ENABLE_LIVE_SHOP === 'true';
 
-export function MadAveLiveWidget() {
+export function LiveShopWidget() {
   const [isVisible, setIsVisible] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [isPlaying, setIsPlaying] = useState(true);

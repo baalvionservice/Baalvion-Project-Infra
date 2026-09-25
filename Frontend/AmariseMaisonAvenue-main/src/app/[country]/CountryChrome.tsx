@@ -3,7 +3,7 @@
 import React, { useEffect } from "react";
 import { Header } from "@/components/layout/Header";
 import { useParams, usePathname } from "next/navigation";
-import { MadAveLiveWidget } from "@/components/layout/MadAveLiveWidget";
+import { LiveShopWidget } from "@/components/layout/LiveShopWidget";
 import { CartSheet } from "@/components/layout/CartSheet";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import Link from "next/link";
@@ -56,7 +56,7 @@ export function CountryChrome({
       <PresenceBeacon />
       {/* MaisonPopup renders from the root layout (./layout.tsx) — it needs
           server-side CMS access, which this client component can't provide. */}
-      {/* <MadAveLiveWidget /> */}
+      {/* <LiveShopWidget /> */}
 
       {/*......... We will enable it when we integrate backend for AI Chat .........*/}
 

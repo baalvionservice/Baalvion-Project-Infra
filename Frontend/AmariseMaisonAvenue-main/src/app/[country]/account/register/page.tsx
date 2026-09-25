@@ -10,10 +10,6 @@ import { Label } from '@/components/ui/label';
 import { authClient } from '@/lib/auth';
 import { SocialLogin } from '@/components/account/SocialLogin';
 
-/**
- * RegisterPage: Replicated "Create An Account" Portal.
- * Designed to match the provided Madison Avenue Couture reference image.
- */
 export default function RegisterPage() {
   const { country } = useParams();
   const countryCode = (country as string) || 'us';
