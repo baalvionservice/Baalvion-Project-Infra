@@ -58,10 +58,9 @@ export default function TermsOfServicePage() {
               2. What we provide
             </Text>
             <Text variant="body" className="text-muted-foreground leading-relaxed">
-              {env.appName} offers financial education, articles, tools, and related features (including
-              AI-assisted summaries or analysis where available). Content is for general information only.
-              Features and availability may change. We may suspend or discontinue any part of the Services
-              with reasonable notice where practicable.
+              {env.appName} offers financial education, articles, tools, and related features. Content is
+              for general information only. Features and availability may change. We may suspend or
+              discontinue any part of the Services with reasonable notice where practicable.
             </Text>
           </div>
 
@@ -137,8 +136,8 @@ export default function TermsOfServicePage() {
               THE SERVICES ARE PROVIDED “AS IS” AND “AS AVAILABLE.” TO THE MAXIMUM EXTENT PERMITTED BY LAW,
               WE DISCLAIM ALL WARRANTIES, WHETHER EXPRESS OR IMPLIED, INCLUDING MERCHANTABILITY, FITNESS FOR
               A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. WE DO NOT WARRANT THAT THE SERVICES WILL BE
-              UNINTERRUPTED, ERROR-FREE, OR FREE OF HARMFUL COMPONENTS. AI-GENERATED OUTPUT MAY BE INACCURATE
-              OR INCOMPLETE — VERIFY IMPORTANT INFORMATION INDEPENDENTLY.
+              UNINTERRUPTED, ERROR-FREE, OR FREE OF HARMFUL COMPONENTS. VERIFY IMPORTANT INFORMATION
+              INDEPENDENTLY BEFORE RELYING ON IT.
             </Text>
           </div>
 

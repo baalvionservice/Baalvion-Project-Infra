@@ -33,7 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return buildMetadata({
     title: 'About Us',
     description:
-      'Imperialpedia explains who we are: a financial education and research platform covering markets, tools, and AI-assisted analysis.',
+      'Imperialpedia explains who we are: a financial education and research platform covering markets, tools, and calculators.',
     canonical: '/about',
     noIndex: false,
   });
@@ -100,7 +100,7 @@ function AboutFallback() {
               </Text>
               <Text variant="bodySmall" className="text-muted-foreground leading-relaxed">
                 Articles and structured pages on stocks, funds, real estate, credit, taxes, and more — plus
-                calculators and AI-assisted features designed to summarize and explore topics responsibly.
+                calculators designed to help you explore topics responsibly.
               </Text>
             </div>
             <div className="space-y-4 rounded-2xl border border-white/10 bg-card/40 p-6">

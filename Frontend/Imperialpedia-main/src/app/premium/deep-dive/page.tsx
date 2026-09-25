@@ -4,7 +4,7 @@ import { FeatureUnavailable } from '@/components/system/FeatureUnavailable';
 
 export const metadata: Metadata = buildMetadata({
   title: 'Portfolio Deep-Dive | Imperialpedia',
-  description: 'AI-assisted portfolio deep-dive analysis is in development for Imperialpedia.',
+  description: 'Portfolio deep-dive analysis is in development for Imperialpedia.',
 });
 
 /**
