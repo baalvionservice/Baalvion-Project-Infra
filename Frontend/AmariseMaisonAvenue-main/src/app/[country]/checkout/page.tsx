@@ -43,7 +43,6 @@ import { getProductById } from "@/lib/catalog";
 import { getMembershipPlans } from "@/lib/cms";
 import { PaymentGateway, CountryCode } from "@/lib/types";
 import { formatAmount, normalizeCountry } from "@/lib/i18n/countries";
-import { RiskEngine } from "@/lib/fraud/risk-engine";
 
 function CheckoutPageInner() {
   const {
@@ -53,7 +52,6 @@ function CheckoutPageInner() {
     paymentPlans,
     countryConfigs,
     fxRates,
-    recordFraudLog,
     catalogSource,
   } = useAppStore();
   const { country } = useParams();
@@ -159,7 +157,6 @@ function CheckoutPageInner() {
   const [orderNumberRef, setOrderNumberRef] = useState("");
   const [inventoryLockId, setInventoryLockId] = useState<string | null>(null);
   const [lockedFXRate, setLockedFXRate] = useState<number | null>(null);
-  const [fraudBlocked, setFraudBlocked] = useState(false);
   // Optional gift note captured on the cart page (per market) → threaded into the order metadata.
   const [giftNote, setGiftNote] = useState("");
   // Bank-transfer / concierge: wire instructions shown on the confirmation step (order reserved, unpaid).
@@ -399,43 +396,7 @@ function CheckoutPageInner() {
         return;
       }
 
-      toast({
-        title: "Security Check",
-        description: "Verifying your order…",
-      });
-
-      // 1. Evaluate Fraud Risk
-      const riskAnalysis = RiskEngine.evaluateAcquisitionRisk(
-        null, // No VIP session mock
-        cart,
-        countryCode as CountryCode,
-        { attemptCount: 1, ipHub: countryCode.toUpperCase() }
-      );
-
-      recordFraudLog(
-        RiskEngine.createLog(currentUser?.id || "guest", riskAnalysis)
-      );
-
-      if (riskAnalysis.action === "block") {
-        setFraudBlocked(true);
-        toast({
-          variant: "destructive",
-          title: "Order on Hold",
-          description:
-            "This order has been flagged by our security team. Please contact a specialist.",
-        });
-        return;
-      }
-
-      if (riskAnalysis.action === "flag") {
-        toast({
-          title: "Enhanced Verification",
-          description:
-            "Due to the value of this order, a specialist review is active.",
-        });
-      }
-
-      // 2. Lock Inventory
+      // Lock Inventory
       toast({
         title: "Reserving Your Pieces",
         description: "Confirming availability in our global registry…",
@@ -889,32 +850,6 @@ function CheckoutPageInner() {
           className="rounded-none bg-black hover:bg-plum px-16 h-14 text-[10px] font-bold uppercase tracking-[0.35em]"
         >
           Return to Maison
-        </Button>
-      </div>
-    );
-  }
-
-  if (fraudBlocked) {
-    return (
-      <div className="container mx-auto px-6 py-40 flex flex-col items-center justify-center space-y-10 animate-fade-in text-center">
-        <div className="p-12 bg-red-50 border border-red-100 rounded-full text-red-600">
-          <AlertTriangle className="w-16 h-16" strokeWidth={1.25} />
-        </div>
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl md:text-5xl font-headline tracking-tight">
-            Order on Hold
-          </h1>
-          <p className="text-gray-500 font-light max-w-md mx-auto">
-            For your security, this order requires a private conversation with
-            our concierge before it can be completed.
-          </p>
-        </div>
-        <Button
-          onClick={() => router.push(`/${countryCode}/contact`)}
-          size="lg"
-          className="rounded-none bg-black hover:bg-plum px-16 h-14 text-[10px] font-bold uppercase tracking-[0.35em] transition-all"
-        >
-          Contact Concierge
         </Button>
       </div>
     );
