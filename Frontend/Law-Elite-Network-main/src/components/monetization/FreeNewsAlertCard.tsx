@@ -5,11 +5,24 @@ import React, { useState } from 'react';
 export function FreeNewsAlertCard() {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) return;
-    setSubscribed(true);
+    setError('');
+    try {
+      const res = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) throw new Error(data.message || 'Something went wrong.');
+      setSubscribed(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
+    }
   };
 
   return (
@@ -29,7 +42,7 @@ export function FreeNewsAlertCard() {
 
         {subscribed ? (
           <div className="p-4 bg-emerald-950/80 border border-emerald-500/60 rounded-xl text-emerald-400 font-bold text-sm max-w-md mx-auto animate-fadeIn">
-            ✓ You are subscribed to Law Elite Daily Scoop! Check your inbox for morning digests.
+            ✓ Thanks — we've got your email. We'll be in touch once the daily scoop is live.
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row items-center justify-center gap-3 max-w-md mx-auto">
@@ -49,6 +62,7 @@ export function FreeNewsAlertCard() {
             </button>
           </form>
         )}
+        {error && <p className="text-xs text-red-400 -mt-2">{error}</p>}
 
         <div className="text-[11px] text-slate-400 font-mono pt-2">
           <span>🔒 Zero spam. Unsubscribe at any time with one click.</span>

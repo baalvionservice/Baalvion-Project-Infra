@@ -6,11 +6,24 @@ import { Mail, CheckCircle, ShieldCheck } from 'lucide-react';
 export function NewsletterBanner() {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !email.includes('@')) return;
-    setSubmitted(true);
+    setError('');
+    try {
+      const res = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) throw new Error(data.message || 'Something went wrong.');
+      setSubmitted(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
+    }
   };
 
   return (
@@ -25,7 +38,7 @@ export function NewsletterBanner() {
             GET THE EXCLUSIVE SCOOP IN YOUR INBOX
           </h2>
           <p className="text-slate-300 font-serif text-base max-w-xl">
-            Join over <strong className="text-white font-bold">250,000+ readers</strong> receiving breaking court decisions, celebrity sightings, and exclusive high-stakes legal reports every morning.
+            Get breaking court decisions, celebrity sightings, and exclusive high-stakes legal reports every morning.
           </p>
           <div className="flex items-center justify-center md:justify-start gap-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider pt-1">
             <span className="flex items-center gap-1"><ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> Free Daily Briefing</span>
@@ -40,8 +53,8 @@ export function NewsletterBanner() {
           {submitted ? (
             <div className="bg-emerald-950/80 border-2 border-emerald-500 p-6 rounded-sm text-center space-y-2">
               <CheckCircle className="w-10 h-10 text-emerald-400 mx-auto" />
-              <h3 className="font-serif text-xl font-bold text-white">YOU’RE ON THE LIST!</h3>
-              <p className="text-xs text-emerald-200">Check your email inbox for your first Law Elite Daily edition.</p>
+              <h3 className="font-serif text-xl font-bold text-white">THANKS — WE'VE GOT YOUR EMAIL</h3>
+              <p className="text-xs text-emerald-200">We'll be in touch once the daily scoop is live.</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="flex flex-col gap-3">
@@ -53,6 +66,7 @@ export function NewsletterBanner() {
                 placeholder="Enter your email address..."
                 className="w-full px-4 py-3.5 bg-slate-900 border-2 border-slate-700 text-white placeholder-slate-400 text-sm focus:outline-none focus:border-[#E13131] rounded-sm"
               />
+              {error && <p className="text-xs text-red-400">{error}</p>}
               <button
                 type="submit"
                 className="w-full bg-[#E13131] hover:bg-red-700 text-white font-black text-sm uppercase tracking-widest py-3.5 rounded-sm transition-all shadow-md active:scale-[0.99]"

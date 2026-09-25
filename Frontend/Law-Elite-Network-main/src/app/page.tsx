@@ -10,7 +10,7 @@ import { TrustSection } from '@/components/knowledge/TrustSection';
 import { HomepageDisclaimer } from '@/components/knowledge/HomepageDisclaimer';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { getHomeWidgets } from '@/lib/home-widgets';
-import { BreakingBar, TickerBar, AudioBriefing, DocketRail, PhotoRail, ShortsRail } from '@/components/home/LiveWidgets';
+import { BreakingBar, TickerBar, AudioBriefing, DocketRail } from '@/components/home/LiveWidgets';
 import { AdSlot } from '@/components/ads/AdSlot';
 import {
   BreakingStrip,
@@ -71,7 +71,6 @@ function deriveCategories(pool: any[]): { id: string; name: string; slug: string
 // through (see lib/cms.ts's CmsArticle.featuredImage comment); this just wires it into the pool.
 import { TabbedStoryBox } from '@/components/home/TabbedStoryBox';
 import { NewsletterBanner } from '@/components/home/NewsletterBanner';
-import { ConfidentialTipLine } from '@/components/home/ConfidentialTipLine';
 import { FreeNewsAlertCard } from '@/components/monetization/FreeNewsAlertCard';
 import { NewsPublisherSchema } from '@/components/seo/NewsPublisherSchema';
 
@@ -153,14 +152,7 @@ export default async function KnowledgeHomePage() {
         />
 
 
-        {/* 🕵️‍♂️ Confidential Tip Line Box */}
-        <ConfidentialTipLine />
-
-
         {/* ⚡ 100% Free Daily Scoop & Breaking Alerts Card */}
-        <ShortsRail items={widgets.shorts} />
-        <PhotoRail items={widgets.gallery} />
-
         <FreeNewsAlertCard />
         <NewsPublisherSchema />
 
