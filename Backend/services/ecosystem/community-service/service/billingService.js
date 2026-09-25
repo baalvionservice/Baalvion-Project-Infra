@@ -14,6 +14,12 @@ const { AppError } = require('../utils/errors');
 
 const PAYMENT_SERVICE_URL = process.env.PAYMENT_SERVICE_URL || 'http://app-payments:3015';
 
+// This site's CMS "Integrations & Keys" vault tenant — payment-service resolves per-provider
+// Razorpay/PayU/Cashfree credentials for THIS slug via its own CmsIntegrationsClient (same vault
+// every other payment-spine service reads). Crypto needs no vault entry — the merchant wallet
+// config lives on the payment-service side, unrelated to per-site PSP keys.
+const SITE_SLUG = process.env.PAYMENT_SITE_SLUG || 'baalvion-communities';
+
 // Must stay in sync with CryptoGateway's ASSET_SPECS keys on the payment-service side
 // (Backend/services/commerce/financial-services-java/payment-service/.../CryptoGateway.java) —
 // this is just the client-facing validation gate, not the source of truth for what's supported.
@@ -22,24 +28,39 @@ const SUPPORTED_CRYPTO_ASSETS = [
     'USDT_ERC20', 'USDC_ERC20', 'ETH', 'BNB', 'USDT_BEP20',
 ];
 
-async function checkout(community, userId, email, asset) {
+// Card/UPI/bank-transfer providers, added alongside crypto (not replacing it) so members can pay
+// with whichever rail is convenient. Each resolves its own keys from the CMS vault by SITE_SLUG.
+const SUPPORTED_CARD_PROVIDERS = ['razorpay', 'payu', 'cashfree'];
+
+async function checkout(community, userId, email, provider, asset) {
     if (community.access_model !== 'paid') {
         throw new AppError('NOT_PAID_COMMUNITY', 'This community does not have a paid tier', 400);
     }
     if (!community.price_usd_cents || community.price_usd_cents <= 0) {
         throw new AppError('NOT_CONFIGURED', 'This community has no price configured yet', 503);
     }
-    const normalizedAsset = String(asset || '').toUpperCase();
-    if (!SUPPORTED_CRYPTO_ASSETS.includes(normalizedAsset)) {
-        throw new AppError('VALIDATION_ERROR', `asset must be one of: ${SUPPORTED_CRYPTO_ASSETS.join(', ')}`, 422);
+
+    const normalizedProvider = String(provider || 'crypto').toLowerCase();
+    const isCrypto = normalizedProvider === 'crypto';
+    if (!isCrypto && !SUPPORTED_CARD_PROVIDERS.includes(normalizedProvider)) {
+        throw new AppError('VALIDATION_ERROR', `provider must be one of: crypto, ${SUPPORTED_CARD_PROVIDERS.join(', ')}`, 422);
+    }
+
+    let normalizedAsset = null;
+    if (isCrypto) {
+        normalizedAsset = String(asset || '').toUpperCase();
+        if (!SUPPORTED_CRYPTO_ASSETS.includes(normalizedAsset)) {
+            throw new AppError('VALIDATION_ERROR', `asset must be one of: ${SUPPORTED_CRYPTO_ASSETS.join(', ')}`, 422);
+        }
     }
 
     const idempotencyKey = crypto.randomUUID();
     const orderRef = `community:${community.slug}:${userId}`;
+    const url = `${PAYMENT_SERVICE_URL}/v1/gateway/payments${isCrypto ? '' : `?site=${encodeURIComponent(SITE_SLUG)}`}`;
 
     let response;
     try {
-        response = await fetch(`${PAYMENT_SERVICE_URL}/v1/gateway/payments`, {
+        response = await fetch(url, {
             method: 'POST',
             headers: {
                 'content-type': 'application/json',
@@ -48,17 +69,17 @@ async function checkout(community, userId, email, asset) {
                 'x-internal-service': 'community-service',
             },
             body: JSON.stringify({
-                provider: 'crypto',
+                provider: normalizedProvider,
                 amount: community.price_usd_cents,
                 currency: 'USD',
-                method: 'CRYPTO',
+                method: isCrypto ? 'CRYPTO' : 'CARD',
                 orderRef,
                 metadata: {
                     fulfillTarget: 'community',
                     userId,
                     email: email || '',
                     communitySlug: community.slug,
-                    cryptoAsset: normalizedAsset,
+                    ...(isCrypto ? { cryptoAsset: normalizedAsset } : {}),
                 },
             }),
         });
@@ -72,25 +93,32 @@ async function checkout(community, userId, email, asset) {
     }
 
     const clientParams = body.clientParams || {};
-    return {
-        chargeId: body.id,
-        asset: clientParams.asset || normalizedAsset,
-        network: clientParams.network,
-        address: clientParams.address,
-        amountValue: clientParams.amountValue,
-        amountDisplay: clientParams.amountDisplay,
-        expiresAt: clientParams.expiresAt,
-    };
+    if (isCrypto) {
+        return {
+            chargeId: body.id,
+            provider: normalizedProvider,
+            asset: clientParams.asset || normalizedAsset,
+            network: clientParams.network,
+            address: clientParams.address,
+            amountValue: clientParams.amountValue,
+            amountDisplay: clientParams.amountDisplay,
+            expiresAt: clientParams.expiresAt,
+        };
+    }
+    // Card/UPI providers return gateway-specific checkout params (e.g. Razorpay orderId + keyId
+    // for opening Razorpay Checkout client-side) — pass them through rather than guessing shape.
+    return { chargeId: body.id, provider: normalizedProvider, ...clientParams };
 }
 
 // Called by payment-service's BillingFulfillmentClient after a CAPTURED + amount-validated
 // crypto webhook. Mirrors proxy-service/controller/internalFulfillController.js's contract:
 // verify secret -> durable idempotency claim -> apply -> mark-applied. 200 = applied/duplicate
 // (no retry); 400 = permanently malformed (no retry); 503 = transient (payment-service retries).
-async function fulfill({ eventId, metadata, amountMinor, currency, providerRef }) {
+async function fulfill({ provider, eventId, metadata, amountMinor, currency, providerRef }) {
     if (!eventId) {
         throw new AppError('VALIDATION_ERROR', 'eventId is required', 400);
     }
+    const normalizedProvider = String(provider || 'crypto').toLowerCase();
     const userId = metadata && metadata.userId;
     const communitySlug = metadata && metadata.communitySlug;
     if (!userId || !communitySlug) {
@@ -100,8 +128,8 @@ async function fulfill({ eventId, metadata, amountMinor, currency, providerRef }
     }
 
     const [claim, created] = await db.CommunityBillingWebhookEvent.findOrCreate({
-        where: { provider: 'crypto', event_id: eventId },
-        defaults: { provider: 'crypto', event_id: eventId, status: 'claimed', payload: { metadata, amountMinor, currency, providerRef } },
+        where: { provider: normalizedProvider, event_id: eventId },
+        defaults: { provider: normalizedProvider, event_id: eventId, status: 'claimed', payload: { metadata, amountMinor, currency, providerRef } },
     });
     if (!created && claim.status === 'applied') {
         return { applied: true, duplicate: true };
@@ -152,6 +180,7 @@ async function fulfill({ eventId, metadata, amountMinor, currency, providerRef }
     // failure must not turn a paid membership into a 503 that payment-service retries.
     await paymentSpine.reportMembershipPayment({
         eventId, communitySlug, userId, amountMinor, currency, providerRef,
+        provider: normalizedProvider,
         email: metadata && metadata.email,
     }).catch((err) => {
         console.warn(JSON.stringify({ evt: 'payment_spine.report_failed', eventId, msg: err.message }));
