@@ -89,6 +89,12 @@ async function createPayuCheckoutOrder({ orgId, planSlug, customerEmail }) {
     };
 }
 
+// This account's Cashfree product is domestic-only (no IPG/international approval yet), so a
+// USD-priced plan must be charged in INR here specifically — Razorpay/PayU stay USD as marketed.
+// The rate is an operator-set env var, not fabricated: keep it current until IPG is approved and
+// this conversion can be dropped. Cashfree's minimum unit is 2-decimal INR, same as PayU above.
+const CASHFREE_USD_TO_INR_RATE = Number(process.env.CASHFREE_USD_TO_INR_RATE || 88);
+
 async function createCashfreeCheckoutOrder({ orgId, planSlug, customerEmail }) {
     const plan = PLANS[planSlug];
     if (!plan) throw new AppError('PLAN_NOT_FOUND', `Unknown plan "${planSlug}"`, 404);
@@ -96,10 +102,10 @@ async function createCashfreeCheckoutOrder({ orgId, planSlug, customerEmail }) {
     if (!cfg) throw new AppError('BILLING_NOT_CONFIGURED', 'Billing is not configured yet', 503);
 
     const offerAvailable = (await launchOfferRemaining()) > 0;
-    const amountMinor = pricedAmount(plan, offerAvailable);
+    const amountMinorUsd = pricedAmount(plan, offerAvailable);
     const base = safeProviderBase(cfg.baseUrl, CASHFREE_BASES, cfg.mode === 'test' ? 'https://sandbox.cashfree.com' : 'https://api.cashfree.com');
     const cfOrderId = `dev_${crypto.randomBytes(12).toString('hex')}`;
-    const amountMajor = Number((amountMinor / 100).toFixed(2));
+    const amountMajorInr = Number(((amountMinorUsd / 100) * CASHFREE_USD_TO_INR_RATE).toFixed(2));
     const notifyUrl = process.env.CASHFREE_NOTIFY_URL || 'https://developer-api.baalvion.com/v1/billing/cashfree-webhook';
 
     const res = await fetch(`${base}/pg/orders`, {
@@ -107,15 +113,17 @@ async function createCashfreeCheckoutOrder({ orgId, planSlug, customerEmail }) {
         headers: { 'content-type': 'application/json', 'x-client-id': cfg.clientId, 'x-client-secret': cfg.clientSecret, 'x-api-version': CASHFREE_API_VERSION },
         body: JSON.stringify({
             order_id: cfOrderId,
-            order_amount: amountMajor,
-            order_currency: 'USD',
+            order_amount: amountMajorInr,
+            order_currency: 'INR',
             customer_details: {
                 customer_id: `cust_${crypto.createHash('sha256').update(String(orgId)).digest('hex').slice(0, 24)}`,
                 customer_email: customerEmail || 'billing@baalvion.com',
                 customer_phone: process.env.CASHFREE_DEFAULT_PHONE || '9999999999',
             },
             order_meta: { notify_url: notifyUrl },
-            order_tags: { orgId: String(orgId || ''), planSlug, discounted: offerAvailable ? 'true' : 'false' },
+            // usdMinor lets the webhook report the ORIGINAL USD amount onto the payment spine
+            // (never re-derived from the INR conversion, which would drift from what was quoted).
+            order_tags: { orgId: String(orgId || ''), planSlug, discounted: offerAvailable ? 'true' : 'false', usdMinor: String(amountMinorUsd) },
         }),
     });
     const text = await res.text();
@@ -129,7 +137,11 @@ async function createCashfreeCheckoutOrder({ orgId, planSlug, customerEmail }) {
     const mode = base.includes('sandbox') ? 'sandbox' : 'production';
     return {
         provider: 'cashfree', orderId: cfRef, paymentSessionId: data.payment_session_id, mode,
-        amount: amountMinor, currency: 'USD', planSlug, discounted: offerAvailable, prefillEmail: customerEmail || '',
+        // The checkout widget charges INR (chargeAmount/chargeCurrency); amount/currency report
+        // what the plan is actually marketed at, so the client can still show "$19.00".
+        amount: amountMinorUsd, currency: 'USD',
+        chargeAmount: amountMajorInr, chargeCurrency: 'INR',
+        planSlug, discounted: offerAvailable, prefillEmail: customerEmail || '',
     };
 }
 
@@ -183,16 +195,18 @@ async function verifyAndHandleCashfreeWebhook({ rawBody, headers }) {
     const order = (evt.data && evt.data.order) || {};
     const payment = (evt.data && evt.data.payment) || {};
     const tags = order.order_tags || {};
-    const { orgId, planSlug, discounted } = tags;
+    const { orgId, planSlug, discounted, usdMinor } = tags;
     if (!orgId || !planSlug) {
         logger.warn({ orderId: order.order_id }, '[cashfree-billing] webhook missing orgId/planSlug in order_tags');
         return { handled: false };
     }
     await upgradeOrgKeys(orgId, planSlug);
     if (discounted === 'true') await claimLaunchOfferSlot();
-    const amountMinor = order.order_amount != null ? Math.round(Number(order.order_amount) * 100) : null;
+    // Report what the plan was actually marketed/settled in USD — never re-derive it from
+    // order_amount, which is the INR conversion charged at the gateway, not the quoted price.
+    const amountMinor = usdMinor != null ? Number(usdMinor) : (order.order_amount != null ? Math.round(Number(order.order_amount) * 100) : null);
     await require('./paymentSpine').reportPlanPayment(
-        { id: payment.cf_payment_id || order.order_id, amount: amountMinor, currency: (order.order_currency || 'USD').toUpperCase(), notes: { orgId, planSlug } },
+        { id: payment.cf_payment_id || order.order_id, amount: amountMinor, currency: 'USD', notes: { orgId, planSlug } },
         { orgId, planSlug, provider: 'cashfree' },
     ).catch((err) => logger.warn({ msg: err.message }, '[cashfree-billing] spine report failed'));
     return { handled: true };

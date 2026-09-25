@@ -126,10 +126,13 @@ async function tiersFor(userId) {
  * check the captured amount against — without it a callback could name any amount and we would
  * have nothing to compare it to.
  */
-async function startCheckout({ userId, email, tier }) {
+const SUPPORTED_GATEWAY_PROVIDERS = ['razorpay', 'payu', 'cashfree'];
+
+async function startCheckout({ userId, email, tier, provider }) {
     if (!knownTier(tier)) {
         throw new AppError('BAD_REQUEST', 'Unknown membership tier', 400);
     }
+    const normalizedProvider = SUPPORTED_GATEWAY_PROVIDERS.includes(provider) ? provider : 'razorpay';
     const membership = await db().Membership.findOne({ where: { user_id: userId } });
     const quote = quoteTier(membership, tier);
     const money = quoteToMoney(quote);
@@ -139,6 +142,17 @@ async function startCheckout({ userId, email, tier }) {
         throw new AppError('BAD_REQUEST', 'Nothing to pay for this tier', 400);
     }
 
+    // This Cashfree account is domestic-only (no IPG/international approval yet), so a USD-priced
+    // membership must be charged in INR through Cashfree specifically — Razorpay/PayU stay USD.
+    // The rate is an operator-set env var, not fabricated; drop this once IPG is approved. Computed
+    // BEFORE the payment row is created so meta records what will actually be CHARGED (the amount
+    // the fulfilment callback's integrity check must compare against), separately from the quoted
+    // USD price (amount_usd / amount_minor), which the Membership record still uses.
+    const CASHFREE_USD_TO_INR_RATE = Number(process.env.CASHFREE_USD_TO_INR_RATE || 88);
+    const isCashfree = normalizedProvider === 'cashfree';
+    const chargeAmount = isCashfree ? Math.round(Number(money.minor) * CASHFREE_USD_TO_INR_RATE) : Number(money.minor);
+    const chargeCurrency = isCashfree ? 'INR' : CURRENCY;
+
     const payment = await db().Payment.create({
         user_id: userId,
         provider: 'gateway',
@@ -147,7 +161,10 @@ async function startCheckout({ userId, email, tier }) {
         currency: CURRENCY,
         status: 'created',
         proration: quote.proration,
-        meta: { full_price: quote.full_price, note: quote.note, amount_minor: money.minor.toString() },
+        meta: {
+            full_price: quote.full_price, note: quote.note, amount_minor: money.minor.toString(),
+            charge_minor: String(chargeAmount), charge_currency: chargeCurrency,
+        },
     });
 
     // Idempotency is keyed on OUR payment row, so a double-submit from the browser reuses the
@@ -156,19 +173,23 @@ async function startCheckout({ userId, email, tier }) {
 
     let res;
     try {
-        res = await fetch(`${PAYMENT_SERVICE_URL}/v1/gateway/payments`, {
+        // `site` MUST be a query param — payment-service's InitiateGatewayPaymentRequest has no
+        // websiteSlug body field, and `provider`/`method` are required; the previous body shape
+        // (websiteSlug in body, no provider/method) 400'd on every real checkout attempt.
+        res = await fetch(`${PAYMENT_SERVICE_URL}/v1/gateway/payments?site=${encodeURIComponent(SITE_SLUG)}`, {
             method: 'POST',
             headers: {
                 'content-type': 'application/json',
+                'idempotency-key': idempotencyKey,
                 'x-internal-secret': internalSecret(),
                 'x-internal-service': 'insiders-service',
             },
             body: JSON.stringify({
-                websiteSlug: SITE_SLUG,
-                amount: Number(money.minor),
-                currency: CURRENCY,
-                idempotencyKey,
-                receipt: `insiders_${payment.id}`,
+                provider: normalizedProvider,
+                method: 'CARD',
+                amount: chargeAmount,
+                currency: chargeCurrency,
+                orderRef: `insiders_${payment.id}`,
                 metadata: {
                     // Routes the fulfilment callback back to this service.
                     fulfillTarget: 'insiders',
@@ -176,6 +197,9 @@ async function startCheckout({ userId, email, tier }) {
                     tier,
                     paymentId: String(payment.id),
                     email: email || null,
+                    // The webhook reports what the membership actually costs in USD, never
+                    // re-derived from the INR conversion (which would drift from the quoted price).
+                    ...(isCashfree ? { usdMinor: String(money.minor) } : {}),
                 },
             }),
         });
@@ -191,21 +215,24 @@ async function startCheckout({ userId, email, tier }) {
         throw new AppError('PAYMENT_GATEWAY_UNAVAILABLE', 'Payment could not be started', res.status === 503 ? 503 : 502);
     }
 
-    const data = body.data || {};
+    // The gateway-checkout response is flat (id/provider/providerRef/clientParams at the top
+    // level), not wrapped in a `data` envelope — a prior version of this code assumed a wrapper
+    // that payment-service has never actually sent, so provider/orderId were silently lost.
+    const mockRef = /mock/i.test(String(body.providerRef || ''));
     await payment.update({
-        provider: String(data.provider || 'gateway').toLowerCase(),
-        provider_order_id: data.providerOrderId || null,
+        provider: String(body.provider || normalizedProvider).toLowerCase(),
+        provider_order_id: body.providerRef || null,
     });
 
     return {
         paymentId: payment.id,
-        provider: data.provider,
-        mode: data.mode,
-        orderId: data.providerOrderId,
-        amount: Number(money.minor),
-        currency: CURRENCY,
+        provider: body.provider || normalizedProvider,
+        mode: mockRef ? 'mock' : 'live',
+        orderId: body.providerRef,
+        amount: chargeAmount,
+        currency: chargeCurrency,
         quote,
-        clientParams: data.clientParams || {},
+        clientParams: body.clientParams || {},
     };
 }
 
@@ -252,7 +279,14 @@ async function fulfill({ eventId, provider, metadata, amountMinor, currency, pro
                 // The order belongs to someone else — never activate across users.
                 throw new AppError('VALIDATION_ERROR', 'payment does not belong to this user', 400);
             }
-            const expected = Money.of(BigInt(payment.meta?.amount_minor ?? '0'), payment.currency || CURRENCY);
+            // Compare against what was actually CHARGED (meta.charge_minor/charge_currency — the
+            // INR conversion for Cashfree, the USD quote otherwise), never the USD quote alone —
+            // a Cashfree capture legitimately arrives in INR and would false-positive as tampered
+            // if compared to the USD amount. Falls back to amount_minor/USD for pre-conversion rows.
+            const expected = Money.of(
+                BigInt(payment.meta?.charge_minor ?? payment.meta?.amount_minor ?? '0'),
+                payment.meta?.charge_currency || payment.currency || CURRENCY,
+            );
             const match = checkCapturedAmount(expected, amountMinor ?? 0, String(currency || CURRENCY).toUpperCase());
             if (!match.ok) {
                 await payment.update({ status: 'failed', meta: { ...payment.meta, amountMismatch: match.difference.toDecimalString() } });
@@ -263,19 +297,25 @@ async function fulfill({ eventId, provider, metadata, amountMinor, currency, pro
 
         const now = new Date();
         const expires = new Date(now.getTime() + MEMBERSHIP_DAYS * 864e5);
-        const amountUsd = Money.of(BigInt(amountMinor ?? 0), String(currency || CURRENCY).toUpperCase()).toDecimalString();
+        // What the member was actually QUOTED in USD — never re-derived from an INR capture, which
+        // would record the membership at a currency-converted (and rate-drifted) dollar figure.
+        const usdMinorFromMeta = md.usdMinor != null ? md.usdMinor : (payment ? payment.meta?.amount_minor : null);
+        const amountUsd = usdMinorFromMeta != null
+            ? Money.of(BigInt(usdMinorFromMeta), CURRENCY).toDecimalString()
+            : Money.of(BigInt(amountMinor ?? 0), String(currency || CURRENCY).toUpperCase()).toDecimalString();
+        const membershipCurrency = usdMinorFromMeta != null ? CURRENCY : String(currency || CURRENCY).toUpperCase();
         const [m] = await db().Membership.findOrCreate({
             where: { user_id: userId },
             defaults: {
                 user_id: userId, plan: tier, status: 'active', amount_usd: amountUsd,
-                currency: String(currency || CURRENCY).toUpperCase(),
+                currency: membershipCurrency,
                 started_at: now, expires_at: expires, payment_ref: providerRef || String(eventId),
             },
         });
         // A new tier starts now, which also resets the upgrade grace window.
         await m.update({
             plan: tier, status: 'active', amount_usd: amountUsd,
-            currency: String(currency || CURRENCY).toUpperCase(),
+            currency: membershipCurrency,
             started_at: now, expires_at: expires, payment_ref: providerRef || String(eventId),
         });
 

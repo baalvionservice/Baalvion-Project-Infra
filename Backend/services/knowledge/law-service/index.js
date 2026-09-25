@@ -29,6 +29,9 @@ app.use(cors({ origin: config.corsOrigins, credentials: true }));
 // JSON parser so its bytes aren't consumed/re-encoded.
 const paymentController = require('./controller/paymentController');
 app.post(['/v1/payments/webhook', '/api/v1/payments/webhook'], rateLimit(), express.raw({ type: '*/*' }), paymentController.webhookHandler);
+// Cashfree also needs the raw body for HMAC verification. PayU has no signature header — it
+// form-POSTs the result back, parsed fine by the urlencoded parser mounted just below.
+app.post(['/v1/payments/cashfree-webhook', '/api/v1/payments/cashfree-webhook'], rateLimit(), express.raw({ type: '*/*' }), paymentController.cashfreeWebhookHandler);
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: '2mb' }));
 app.use(cookieParser());

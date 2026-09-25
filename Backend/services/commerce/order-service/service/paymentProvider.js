@@ -20,7 +20,7 @@ const { getPaymentCreds } = require('./cmsVault');
 // `Math.round(Number(amount) * 100)` hardcoded a 2-decimal world: correct for the five
 // markets live today, a 100x overcharge the day a zero-decimal currency (JPY, KRW) is
 // added to config/markets.js.
-const { Money, toRazorpayAmount, toStripeAmount, toPayUAmount } = require('@baalvion/money');
+const { Money, toRazorpayAmount, toStripeAmount, toPayUAmount, toCashfreeAmount } = require('@baalvion/money');
 
 // In-memory intent store for the MOCK provider — NON-PRODUCTION (not durable, single-process).
 const mockIntents = new Map();
@@ -487,6 +487,117 @@ function payuParseReturn(body) {
   return { status, txnid: (body && body.txnid) || null, mihpayid: (body && body.mihpayid) || null, amount: body && body.amount, currency: (body && body.currency) || 'INR' };
 }
 
+// ── Cashfree (REAL) ───────────────────────────────────────────────────────────
+// Order + payment-session + hosted-redirect flow. Create the order server-side (x-client-id/
+// secret), hand the browser the non-secret payment_session_id for the v3 SDK. Settlement is via
+// the HMAC-verified webhook (confirmPayment), never a client-asserted status. Faithful port of
+// ctm-service/service/payments.js's Cashfree adapter.
+const CASHFREE_API_VERSION = '2023-08-01';
+const CASHFREE_BASES = ['https://api.cashfree.com', 'https://sandbox.cashfree.com'];
+function safeCashfreeBase(baseUrl, fallback) {
+  const b = String(baseUrl || '').replace(/\/+$/, '');
+  return CASHFREE_BASES.includes(b) ? b : fallback;
+}
+async function cashfreeCreds() {
+  const v = await getPaymentCreds('cashfree');
+  const clientId = (v && v.secrets.clientId) || process.env.CASHFREE_CLIENT_ID;
+  const clientSecret = (v && v.secrets.clientSecret) || process.env.CASHFREE_CLIENT_SECRET;
+  const baseUrl = safeCashfreeBase((v && v.config && v.config.baseUrl) || process.env.CASHFREE_BASE_URL, 'https://api.cashfree.com');
+  if (!clientId || !clientSecret) {
+    throw new Error("payment provider 'cashfree' is not configured (set keys in the admin panel, or CASHFREE_CLIENT_ID + CASHFREE_CLIENT_SECRET)");
+  }
+  return { clientId, clientSecret, baseUrl };
+}
+async function cashfreeFetch(path, creds, options = {}) {
+  const res = await fetch(`${creds.baseUrl}${path}`, {
+    ...options,
+    headers: { 'content-type': 'application/json', 'x-client-id': creds.clientId, 'x-client-secret': creds.clientSecret, 'x-api-version': CASHFREE_API_VERSION, ...(options.headers || {}) },
+  });
+  const text = await res.text();
+  let body = {};
+  try { body = text ? JSON.parse(text) : {}; } catch { /* non-JSON */ }
+  if (!res.ok) {
+    console.warn(JSON.stringify({ evt: 'cashfree_api_error', path, status: res.status, code: body && (body.code || body.type) }));
+    const err = new Error(`cashfree request failed (${res.status})`);
+    err.providerStatus = res.status;
+    throw err;
+  }
+  return body;
+}
+
+const cashfreeProvider = {
+  name: 'cashfree',
+  PRODUCTION: true,
+  async createPaymentIntent({ orderId, amount, currencyCode }) {
+    const creds = await cashfreeCreds();
+    const amountMoney = Money.fromDatabaseValue(amount, currencyCode || 'INR');
+    if (!amountMoney.isPositive()) throw new Error('cashfree: invalid order amount');
+    const cfOrderId = `cfo_${crypto.randomBytes(12).toString('hex')}`;
+    const notifyUrl = process.env.CASHFREE_NOTIFY_URL || 'http://localhost:3013/api/v1/orders/webhooks/cashfree';
+    const order = await cashfreeFetch('/pg/orders', creds, {
+      method: 'POST',
+      body: JSON.stringify({
+        order_id: cfOrderId,
+        order_amount: toCashfreeAmount(amountMoney),
+        order_currency: (currencyCode || 'INR').toUpperCase(),
+        customer_details: {
+          customer_id: `cust_${crypto.createHash('sha256').update(String(orderId)).digest('hex').slice(0, 24)}`,
+          customer_email: process.env.CASHFREE_DEFAULT_EMAIL || 'orders@baalvion.test',
+          customer_phone: process.env.CASHFREE_DEFAULT_PHONE || '9999999999',
+        },
+        order_meta: { notify_url: notifyUrl },
+        order_tags: { orderId: String(orderId) },
+      }),
+    });
+    const cfRef = order.order_id || cfOrderId;
+    const mode = creds.baseUrl.includes('sandbox') ? 'sandbox' : 'production';
+    return { intentId: cfRef, status: 'requires_action', sessionId: order.payment_session_id, mode, amount: toCashfreeAmount(amountMoney), currency: (currencyCode || 'INR').toUpperCase() };
+  },
+  // Settlement is via the HMAC-verified Cashfree webhook — a client confirm never captures.
+  async confirmPayment() { return { status: 'pending', transactionId: null, reason: 'awaiting_cashfree_webhook' }; },
+  // Reconciliation poll (read-only): ask Cashfree for the authoritative order status.
+  async getPaymentStatus({ intentId }) {
+    if (!intentId) return { status: 'pending' };
+    const creds = await cashfreeCreds();
+    const order = await cashfreeFetch(`/pg/orders/${encodeURIComponent(intentId)}`, creds);
+    if (!order || order.order_status !== 'PAID') return { status: 'pending' };
+    const payments = await cashfreeFetch(`/pg/orders/${encodeURIComponent(intentId)}/payments`, creds).catch(() => []);
+    const captured = Array.isArray(payments) ? payments.find((p) => p.payment_status === 'SUCCESS') : null;
+    return {
+      status: 'captured',
+      transactionId: captured ? String(captured.cf_payment_id) : null,
+      amountMinor: order.order_amount != null ? Number(Money.fromDatabaseValue(order.order_amount, order.order_currency || 'INR').minor) : null,
+      currency: (order.order_currency || '').toUpperCase() || null,
+    };
+  },
+  async failPayment() { return { status: 'failed' }; },
+  async cancelPayment() { return { status: 'voided' }; },
+  async refundPayment({ transactionId, amount, currencyCode, reason }) {
+    const creds = await cashfreeCreds();
+    if (!transactionId) throw new Error('cashfree: refund requires the captured payment id');
+    const amountMoney = amount != null ? Money.fromDatabaseValue(amount, currencyCode || 'INR') : null;
+    const data = await cashfreeFetch(`/pg/orders/refunds`, creds, {
+      method: 'POST',
+      body: JSON.stringify({
+        refund_amount: amountMoney ? toCashfreeAmount(amountMoney) : undefined,
+        refund_id: `rf_${crypto.randomBytes(10).toString('hex')}`,
+        refund_note: reason || 'refund',
+      }),
+    });
+    return { status: 'refunded', provider: 'cashfree', refundId: data.refund_id, amount };
+  },
+};
+
+// Cashfree webhook signature: base64(HMAC-SHA256(timestamp + rawBody, clientSecret)).
+async function cashfreeVerifyWebhook({ rawBody, signature, timestamp }) {
+  let clientSecret;
+  try { ({ clientSecret } = await cashfreeCreds()); } catch { return false; } // unconfigured → fail closed
+  const tsSeconds = Number.parseInt(String(timestamp), 10);
+  if (!Number.isFinite(tsSeconds) || Math.abs(Date.now() / 1000 - tsSeconds) > 300) return false;
+  const expected = crypto.createHmac('sha256', clientSecret).update(String(timestamp) + rawBody.toString('utf8')).digest('base64');
+  return timingSafeHex(signature, expected);
+}
+
 // Future real adapters — interface-compatible, intentionally unimplemented until configured.
 const unconfigured = (name) => ({
   name,
@@ -519,6 +630,7 @@ function getProvider(selectedGateway = null) {
     case 'bank': case 'bank_transfer': return bankTransferProvider;
     case 'crypto': case 'crypto_manual': return cryptoManualProvider;
     case 'payu':                    return payuProvider;
+    case 'cashfree':                return cashfreeProvider;
     case 'paypal':                  return unconfigured('paypal');
     case 'mock':
       // Explicit opt-in required everywhere. A developer who wants it says so; nobody gets it by
@@ -551,6 +663,7 @@ async function configuredGateways() {
     ['razorpay', razorpayKeys],
     ['stripe', stripeCreds],
     ['payu', payuCreds],
+    ['cashfree', cashfreeCreds],
   ];
   const available = [];
   for (const [name, resolve] of checks) {
@@ -574,4 +687,4 @@ async function configuredGateways() {
   return { gateways: available, preferred };
 }
 
-module.exports = { getProvider, payuVerifyReturn, payuParseReturn, configuredGateways };
+module.exports = { getProvider, payuVerifyReturn, payuParseReturn, cashfreeVerifyWebhook, configuredGateways };

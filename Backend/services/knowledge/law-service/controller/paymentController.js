@@ -5,6 +5,8 @@ const { sendSuccess, sendPaginated } = require('../utils/response');
 const { AppError } = require('../utils/errors');
 const { ensureClient } = require('../utils/provision');
 const razorpay = require('../service/razorpay');
+const payu = require('../service/payu');
+const cashfree = require('../service/cashfree');
 const mailer = require('../service/mailer');
 const ledger = require('../service/ledger');
 const paymentSpine = require('../service/paymentSpine');
@@ -72,10 +74,11 @@ const listPayments = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
-// Step 1: create the payment + (if Razorpay configured) a Razorpay Order to open Checkout.
+// Step 1: create the payment + a gateway order/checkout to open. `provider` selects which PSP —
+// razorpay (default), payu, or cashfree — each resolving its own keys from the CMS vault.
 const createPayment = async (req, res, next) => {
     try {
-        const { booking_id, lawyer_id, amount, currency = 'INR', provider } = req.body;
+        const { booking_id, lawyer_id, amount, currency = 'INR', provider: requestedProvider } = req.body;
         const client = await ensureClient(req);
         if (!client) return next(new AppError('UNAUTHORIZED', 'Authentication required', 401));
 
@@ -92,8 +95,27 @@ const createPayment = async (req, res, next) => {
             amount: Number(amount),
             currency,
             status: 'pending',
-            provider: provider || 'card',
+            provider: requestedProvider || 'card',
         });
+
+        const gateway = ['payu', 'cashfree'].includes(requestedProvider) ? requestedProvider : 'razorpay';
+
+        if (gateway === 'payu' && await payu.isConfigured()) {
+            const order = await payu.createOrder({
+                amount: payment.amount, currency: payment.currency, receipt: `pay_${payment.id}`,
+                customerEmail: client.email, customerName: client.name,
+            });
+            await payment.update({ provider: 'payu', provider_tx_id: order.txnid });
+            return sendSuccess(req, res, { ...payment.toJSON(), gateway: 'payu', payu: order }, 201);
+        }
+
+        if (gateway === 'cashfree' && await cashfree.isConfigured()) {
+            const order = await cashfree.createOrder({
+                amount: payment.amount, currency: payment.currency, receipt: `pay_${payment.id}`, customerEmail: client.email,
+            });
+            await payment.update({ provider: 'cashfree', provider_tx_id: order.orderId });
+            return sendSuccess(req, res, { ...payment.toJSON(), gateway: 'cashfree', cashfree: order }, 201);
+        }
 
         if (await razorpay.isConfigured()) {
             // Real gateway: open Razorpay Checkout on the client with this order (all payment
@@ -214,6 +236,49 @@ const webhookHandler = async (req, res) => {
     }
 };
 
+// PayU has no signature header — it form-POSTs the settlement result back, verified by the
+// REVERSE SHA-512 hash over the posted fields (see service/payu.js verifyReturn).
+const payuWebhookHandler = async (req, res) => {
+    try {
+        const body = req.body || {};
+        const ok = await payu.verifyReturn(body);
+        if (!ok) return res.status(401).json({ error: 'invalid signature' });
+        const paid = String(body.status || '').toLowerCase() === 'success';
+        const payment = body.txnid ? await db.Payment.findOne({ where: { provider_tx_id: body.txnid } }) : null;
+        if (payment) {
+            await payment.update({ status: paid ? 'succeeded' : 'failed' });
+            if (paid) await settleBooking(payment, { provider: 'payu' });
+        }
+        return res.json({ received: true });
+    } catch (e) {
+        return res.status(400).json({ error: 'webhook processing failed' });
+    }
+};
+
+// Cashfree webhook: raw body registered before the JSON parser, signature verified via HMAC.
+const cashfreeWebhookHandler = async (req, res) => {
+    try {
+        const raw = Buffer.isBuffer(req.body) ? req.body : Buffer.from(JSON.stringify(req.body || {}));
+        const signature = req.headers['x-webhook-signature'];
+        const timestamp = req.headers['x-webhook-timestamp'];
+        if (!(await cashfree.verifyWebhookSignature(raw, signature, timestamp))) {
+            return res.status(401).json({ error: 'invalid signature' });
+        }
+        const evt = JSON.parse(raw.toString('utf8'));
+        const type = String(evt.type || '');
+        const paid = type.toUpperCase().startsWith('PAYMENT_SUCCESS');
+        const order = (evt.data && evt.data.order) || {};
+        const payment = order.order_id ? await db.Payment.findOne({ where: { provider_tx_id: order.order_id } }) : null;
+        if (payment) {
+            await payment.update({ status: paid ? 'succeeded' : 'failed' });
+            if (paid) await settleBooking(payment, { provider: 'cashfree' });
+        }
+        return res.json({ received: true });
+    } catch (e) {
+        return res.status(400).json({ error: 'webhook processing failed' });
+    }
+};
+
 const getPayment = async (req, res, next) => {
     try {
         const payment = await db.Payment.findByPk(req.params.id, {
@@ -235,4 +300,4 @@ const getPayment = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
-module.exports = { listPayments, createPayment, verifyPayment, webhookHandler, getPayment };
+module.exports = { listPayments, createPayment, verifyPayment, webhookHandler, payuWebhookHandler, cashfreeWebhookHandler, getPayment };

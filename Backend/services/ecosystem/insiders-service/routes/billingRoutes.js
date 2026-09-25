@@ -30,10 +30,12 @@ router.get('/tiers', authMiddleware, async (req, res, next) => {
 router.post('/checkout', authMiddleware, async (req, res, next) => {
     try {
         const tier = req.body && req.body.tier;
+        const provider = req.body && req.body.provider;
         const data = await billing.startCheckout({
             userId: req.auth.userId,
             email: req.auth.email || null,
             tier,
+            provider,
         });
         return res.json({ success: true, data });
     } catch (err) { return next(err); }
