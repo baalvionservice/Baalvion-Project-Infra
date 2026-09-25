@@ -27,7 +27,6 @@ import {
   MaisonMetric,
   MaisonAlert,
   SystemHealthScore,
-  FraudLog,
   DynamicPrice,
   CMSSection,
   Collection,
@@ -108,7 +107,6 @@ interface AppContextType {
   scopedWorkflows: WorkflowTask[];
   scopedShipments: Shipment[];
   scopedAuditLogs: AuditLogEntry[];
-  scopedFraudLogs: FraudLog[];
   scopedPricingOptimizations: DynamicPrice[];
   scopedEvents: any[];
   scopedJobs: BackgroundJob[];
@@ -153,7 +151,6 @@ interface AppContextType {
     reason: string
   ) => void;
   recordMetric: (m: Omit<MaisonMetric, "id" | "timestamp">) => void;
-  recordFraudLog: (l: Omit<FraudLog, "id">) => void;
   updateAIModule: (id: string, enabled: boolean, level: any) => void;
   addAILog: (log: AIActionLog) => void;
   upsertAISuggestion: (sug: AISuggestion) => void;
@@ -298,7 +295,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [maisonErrors, setMaisonErrors] = useState<MaisonError[]>([]);
   const [alerts, setAlerts] = useState<MaisonAlert[]>([]);
   const [metrics, setMetrics] = useState<MaisonMetric[]>([]);
-  const [fraudLogs, setFraudLogs] = useState<FraudLog[]>([]);
   const [pricingOptimizations, setPricingOptimizations] = useState<
     DynamicPrice[]
   >([]);
@@ -610,14 +606,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [auditLogs, activeHub]
   );
 
-  const scopedFraudLogs = useMemo(
-    () =>
-      activeHub === "global"
-        ? fraudLogs
-        : fraudLogs.filter((l) => l.metadata?.hub === activeHub),
-    [fraudLogs, activeHub]
-  );
-
   const scopedPricingOptimizations = useMemo(
     () =>
       activeHub === "global"
@@ -695,7 +683,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     scopedWorkflows: [],
     scopedShipments: shipments,
     scopedAuditLogs,
-    scopedFraudLogs,
     scopedPricingOptimizations,
     scopedEvents,
     scopedJobs,
@@ -865,8 +852,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           ...prev,
         ].slice(0, 100)
       ),
-    recordFraudLog: (l) =>
-      setFraudLogs((prev) => [{ ...l, id: `f-${Date.now()}` }, ...prev]),
     updateAIModule: (id, enabled, level) =>
       setAiModules((prev) =>
         prev.map((m) => (m.id === id ? { ...m, enabled, level } : m))
