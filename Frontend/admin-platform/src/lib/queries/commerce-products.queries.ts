@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { commerceProductsApi } from '@/lib/api/commerce-products';
+import { commerceProductsApi, type ImportProductRow } from '@/lib/api/commerce-products';
 import type { PaginationParams } from '@/lib/types/common.types';
 import type { CreateProductPayload, ProductVariant } from '@/lib/types/commerce.types';
 
@@ -100,6 +100,20 @@ export const useBulkUpdateProducts = (storeId: string) => {
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: productKeys.all(storeId) });
       toast.success(`${vars.ids.length} products updated`);
+    },
+    onError: (e: { message: string }) => toast.error(e.message),
+  });
+};
+
+export const useImportProducts = (storeId: string) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (rows: ImportProductRow[]) => commerceProductsApi.import(storeId, rows),
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: productKeys.all(storeId) });
+      const { created, failed, total } = res.data.data;
+      if (failed === 0) toast.success(`Imported ${created} of ${total} products`);
+      else toast.warning(`Imported ${created} of ${total} — ${failed} row(s) failed, see details below`);
     },
     onError: (e: { message: string }) => toast.error(e.message),
   });

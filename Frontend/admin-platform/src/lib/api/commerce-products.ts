@@ -4,6 +4,28 @@ import type { Product, ProductVariant, CreateProductPayload } from '@/lib/types/
 
 const client = serviceClients.commerce;
 
+export interface ImportProductRow {
+  name: string;
+  category: string;
+  shortDescription?: string;
+  description?: string;
+  sku?: string;
+  price: number;
+  currencyCode?: string;
+  condition?: 'pristine' | 'excellent' | 'very_good' | 'good' | 'fair' | 'vintage';
+  conditionNotes?: string;
+  materials?: string[];
+  tags?: string[];
+  stockQuantity?: number;
+}
+
+export interface ImportProductsResult {
+  total: number;
+  created: number;
+  failed: number;
+  results: { row: number; success: boolean; name: string; productId?: string; error?: string }[];
+}
+
 export const commerceProductsApi = {
   list: (storeId: string, params?: PaginationParams & { status?: string; productType?: string; categoryId?: string; isFeatured?: boolean }) =>
     client.get<PaginatedResponse<Product>>(`/commerce/stores/${storeId}/products`, { params }),
@@ -28,6 +50,9 @@ export const commerceProductsApi = {
 
   bulkUpdate: (storeId: string, payload: { ids: string[]; action: 'publish' | 'archive' | 'delete' | 'assign_category'; categoryId?: string }) =>
     client.post<ApiResponse<{ updated: number }>>(`/commerce/stores/${storeId}/products/bulk`, payload),
+
+  import: (storeId: string, rows: ImportProductRow[]) =>
+    client.post<ApiResponse<ImportProductsResult>>(`/commerce/stores/${storeId}/products/import`, { rows }),
 
   variants: {
     list: (storeId: string, productId: string) =>
