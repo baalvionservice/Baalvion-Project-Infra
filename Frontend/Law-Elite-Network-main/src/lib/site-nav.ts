@@ -1,5 +1,3 @@
-import { PERSON_CATEGORIES } from '@/types/person';
-
 /**
  * The one definition of LEN's primary navigation. The desktop bar, its
  * dropdowns and the mobile drawer all render from this, so growing the site
@@ -16,64 +14,34 @@ export interface NavSection extends NavLink {
   children?: NavLink[];
 }
 
-const PEOPLE_SHOWN_IN_MENU = ['actors', 'musicians', 'athletes', 'creators', 'lawyers', 'judges'];
-
+// Third AdSense-readiness retirement pass, 2026-09-25 (see
+// category-slugs.ts's CURRENT_CATEGORY_SLUGS comment): People, Entertainment,
+// Sports, and Topics sections removed -- every link they held now 301s to /
+// (next.config.ts). The Legal section is back to its original 3-category
+// form (personal injury, maritime injury, cruise ship accidents) plus Law
+// School Success -- no Cases/Courts/Lawyers/Judges children, since that
+// directory is still retired. News un-retired at explicit request (see
+// next.config.ts). Restore the removed sections alongside
+// CURRENT_CATEGORY_SLUGS once AdSense approves the site as it stands.
 export const PRIMARY_NAV: NavSection[] = [
   {
     label: 'News',
-    href: '/#latest',
-    children: [
-      { label: 'Latest', href: '/#latest' },
-      { label: 'Trending', href: '/#trending' },
-      { label: 'Celebrity News', href: '/celebrity-news' },
-    ],
-  },
-  {
-    label: 'People',
-    href: '/people',
-    children: PERSON_CATEGORIES.filter((c) => PEOPLE_SHOWN_IN_MENU.includes(c.slug)).map((c) => ({
-      label: c.plural,
-      href: `/people/${c.slug}`,
-    })),
-  },
-  {
-    label: 'Entertainment',
-    href: '/entertainment',
-    children: [
-      { label: 'Movies', href: '/movies' },
-      { label: 'Streaming', href: '/streaming' },
-      { label: 'Music', href: '/music' },
-      { label: 'Celebrity News', href: '/celebrity-news' },
-    ],
-  },
-  {
-    label: 'Sports',
-    href: '/sports',
-    children: [
-      { label: 'Teams', href: '/sports/teams' },
-      { label: 'Competitions', href: '/sports/competitions' },
-      { label: 'Athletes', href: '/people/athletes' },
-    ],
-  },
-  {
-    label: 'Fashion',
-    href: '/fashion',
+    href: '/news',
   },
   {
     label: 'Legal',
-    href: '/legal/cases',
+    href: '/personal-injury-lawyer',
     children: [
-      { label: 'Cases', href: '/legal/cases' },
-      { label: 'Courts', href: '/legal/courts' },
-      { label: 'Lawyers', href: '/people/lawyers' },
-      { label: 'Judges', href: '/people/judges' },
       { label: 'Personal Injury', href: '/personal-injury-lawyer' },
       { label: 'Maritime Injury', href: '/maritime-offshore-injury-law' },
       { label: 'Cruise Ship Accidents', href: '/cruise-ship-passenger-vessel-accidents' },
       { label: 'Law School Success', href: '/law-school-success' },
     ],
   },
-  { label: 'Topics', href: '/topics' },
+  {
+    label: 'Fashion',
+    href: '/fashion',
+  },
   {
     label: 'Videos',
     href: '/videos',

@@ -187,14 +187,17 @@ const nextConfig: NextConfig = {
       // (see the four-section block below) -- redirecting into another dead
       // section would just move the soft-404 one hop deeper.
       { source: '/world', destination: '/', permanent: true },
-      // AdSense second-rejection finding: these four "finished-looking"
-      // sections (an eight-tab newsroom over 3 articles, and two reference
-      // indexes pointing exclusively at articles whose practice areas were
-      // already retired above) read to a reviewer as the site under
-      // construction. retired-links.ts's RETIRED_SECTIONS already declared
-      // the intent to retire them and unwraps any in-prose link into one --
-      // this is the redirect half of that fix, which had never been added.
-      { source: '/news', destination: '/', permanent: true },
+      // AdSense second-rejection finding: these "finished-looking" sections
+      // (two reference indexes pointing exclusively at articles whose
+      // practice areas were already retired above) read to a reviewer as the
+      // site under construction. retired-links.ts's RETIRED_SECTIONS already
+      // declared the intent to retire them and unwraps any in-prose link
+      // into one -- this is the redirect half of that fix, which had never
+      // been added. /news was un-retired 2026-09-25 (removed from this
+      // block and from RETIRED_SECTIONS) at the same explicit request as the
+      // legal categories above -- it currently has only 1 published article
+      // against 40 unapproved drafts, a real thin-section risk that was
+      // flagged and accepted anyway rather than silently fixed.
       { source: '/case-law', destination: '/', permanent: true },
       { source: '/legislation', destination: '/', permanent: true },
       { source: '/law-changes', destination: '/', permanent: true },
@@ -294,6 +297,35 @@ const nextConfig: NextConfig = {
       { source: '/boating-accident-liability-and-fault', destination: '/', permanent: true },
       { source: '/best-car-accident-lawyer', destination: '/', permanent: true },
       { source: '/what-does-a-car-accident-lawyer-do', destination: '/', permanent: true },
+      // Third retirement pass, 2026-09-25 (see src/lib/category-slugs.ts's
+      // CURRENT_CATEGORY_SLUGS comment): narrowed the live site further,
+      // while still mid-AdSense-review. Of the previously-live set, the 5
+      // entertainment hubs stay retired; personal-injury-lawyer,
+      // maritime-offshore-injury-law, cruise-ship-passenger-vessel-accidents,
+      // and law-school-success were explicitly asked back in and are live
+      // again (removed from this redirect block, added back to
+      // CURRENT_CATEGORY_SLUGS). Their CMS content was never touched, these
+      // are 301s, and this block comes out entirely once AdSense approves
+      // the site and the rest is restored.
+      { source: '/movies/:path*', destination: '/', permanent: true },
+      { source: '/music/:path*', destination: '/', permanent: true },
+      { source: '/television/:path*', destination: '/', permanent: true },
+      { source: '/streaming/:path*', destination: '/', permanent: true },
+      { source: '/celebrity-news/:path*', destination: '/', permanent: true },
+      // Same pass: the standalone content pillars (people/entertainment/
+      // sports/countries/topics/legal cases+courts) also stay up but drop
+      // out of indexing/sitemap below -- these aren't
+      // CURRENT_CATEGORY_SLUGS-driven category hubs, so they need their own
+      // redirect rather than falling out of that list automatically.
+      // Videos and Podcasts were kept live (real content: Stuff You Should
+      // Know, Desert Island Discs, The Rest Is Football; real Bigg Boss
+      // episodes) -- not retired here, see sitemap.ts.
+      { source: '/entertainment/:path*', destination: '/', permanent: true },
+      { source: '/sports/:path*', destination: '/', permanent: true },
+      { source: '/people/:path*', destination: '/', permanent: true },
+      { source: '/countries/:path*', destination: '/', permanent: true },
+      { source: '/topics/:path*', destination: '/', permanent: true },
+      { source: '/legal/:path*', destination: '/', permanent: true },
     ];
   },
 

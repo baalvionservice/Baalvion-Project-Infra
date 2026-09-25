@@ -19,34 +19,32 @@ export function toNewCategorySlug(oldSlug: string): string {
 }
 
 // AdSense-readiness retirement (see next.config.ts redirects() for the same
-// list): shrunk from 16 to 5, then narrowed further to these 3 -- the
-// deepest, most purpose-built content in the personal-injury/maritime-injury
-// vertical (dedicated pillar pages, geo-targeted content), verified not
-// attributed to any of the fabricated-bio authors that triggered the
-// rejection. Boating Accidents and Car Accidents (shallower, 4 and 2
-// articles) were retired in the same pass as the other 11 (business,
-// criminal-law, family-law, real-estate-law, tax-finance, employment-law,
-// tech-ip, disputes, us-law-and-constitution, religion-law-and-weird-laws,
-// legal-education-and-history) -- none deleted, this list is what to restore
-// once resubmission succeeds.
-// 'law-school-success' added September 2026 -- a new evergreen vertical
-// aimed at law students (study skills, casebook reading, exam prep), not
-// part of the AdSense-retirement narrowing above -- kept separate from that
-// list's restore-later intent.
-// Entertainment pillar (LEN master IA, September 2026) -- 5 new hubs added
-// alongside the 4 legal ones above, not part of the AdSense-retirement
-// narrowing or its restore-later list. See cms-only-categories.ts for each
-// one's copy and `pillar: 'entertainment'` marker.
+// list): shrunk from 16 to 5, then to 3 (maritime-offshore-injury-law,
+// cruise-ship-passenger-vessel-accidents, personal-injury-lawyer), then the
+// LEN master-IA build added 'law-school-success' and 5 entertainment hubs
+// (movies, music, television, streaming, celebrity-news) alongside those 3 --
+// none of that additional build was part of the original AdSense-retirement
+// restore-later list.
+//
+// 2026-09-25: none of that has cleared AdSense review yet, and the site kept
+// growing (Fashion, Sports, the wider Entertainment/People layers) while
+// still mid-review -- the exact failure mode documented in
+// law-elite-hold-deploy-until-adsense. Narrowed to Fashion alone first, then
+// the original 3 personal-injury/maritime-injury categories plus
+// law-school-success were explicitly asked back in the same pass -- all real,
+// finished content, none thin, none attributed to a fabricated bio. Movies,
+// music, television, streaming, celebrity-news, and every other retired
+// pillar (Entertainment hub, Sports, People, Countries, Topics, Legal
+// cases/courts) stay out. Videos and Podcasts were never retired (see
+// next.config.ts / sitemap.ts). Every slug removed here still exists with
+// real content -- this list controls indexing/nav/sitemap eligibility, not
+// deletion -- and gets restored once AdSense approves the site as it stands.
 export const CURRENT_CATEGORY_SLUGS = [
+  'fashion',
+  'personal-injury-lawyer',
   'maritime-offshore-injury-law',
   'cruise-ship-passenger-vessel-accidents',
-  'personal-injury-lawyer',
   'law-school-success',
-  'movies',
-  'music',
-  'television',
-  'streaming',
-  'celebrity-news',
 ] as const;
 
 /** Every slug the /law/{slug} URL shape ever used, for validating old redirect requests. */
