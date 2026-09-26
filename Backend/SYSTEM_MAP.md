@@ -118,7 +118,6 @@ Backend/services/
 | `about-service` | 3020 | `about` | ✅ | about.baalvion.com (CMS-backed) |
 | `insiders-service` | 3050 | `insiders` | ✅ | For Investors & Founders (+ Protocol sub-app) |
 | `elite-circle-service` | 3051 | `elite_circle` | ✅ | baalvion-elite-circle twin (+ Protocol) |
-| `law-elite` | — | (own) | ✅ | acquired multi-service legal sub-stack (own gateway+services) |
 | `agent-service` | 3044 | `agent` | ✅ | agents/hierarchy, commission plans+tracker, leaderboard, training |
 
 ### 3.7 commerce/financial-services-java ☕ — the Java/Spring finance suite
@@ -176,7 +175,7 @@ Catalog descriptors, mostly event consumers (see `index.json.eventConsumers`):
 | `company-unified-Dashboard-main` | Next.js | dashboard-service (BFF) | ✅ browser-verified; some pages still mock |
 | `testrank-baalvion` | — | ctm-service | ✅ live (keys→.env, commit pending) |
 | `Global-Trade-Infrastructure-main` | Next.js | trade-service | 🟡 Marketplace+RFQ real; rest mock |
-| `Imperialpedia-main` | Next.js | imperialpedia + cms | ✅ live editorial + structured |
+| `Imperialpedia-nextjs-main` | Next.js | imperialpedia + cms | ✅ live editorial + structured |
 | `IR-Baalvion-main` | Next.js | ir-service + cms | 🟡 editorial live; KYC/deal-room pending |
 | `Baalvion-Jobs-Portal-main` | Next.js | jobs-service | 🟡 conversion in progress |
 | `Law-Elite-Network-main` | Next.js | law-service | ✅ admin console live (needs JWT_PUBLIC_KEY) |

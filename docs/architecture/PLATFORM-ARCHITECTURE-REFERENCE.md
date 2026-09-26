@@ -33,7 +33,7 @@
 | 1 | baalvion.com / trade.baalvion.com (see R-C3) | `Global-Trade-Infrastructure-main` | `Baalvion-Core` | trade-service:3025 + Java finance | Firebase App Hosting | domain ambiguity open |
 | 2 | admin.baalvion.com | `admin-platform` | `Baalvion-Admin` | admin-service:3021 (+19 svc) | Docker (compose `admin` profile) + PM2 | active |
 | 3 | amarisemaisonavenue.com | `AmariseMaisonAvenue-main` | `AmariseMaisonAvenue` | commerce-service:3012 | Firebase + Docker + PM2 | active |
-| 4 | imperialpedia.com | `Imperialpedia-main` | `Imperialpedia` | imperialpedia-service:3004 | Firebase + PM2 | active |
+| 4 | imperialpedia.com | `Imperialpedia-nextjs-main` | `Imperialpedia` | imperialpedia-service:3004 | Firebase + PM2 | active |
 | 5 | proxy.baalvionstack.com | `Proxy-BaalvionStack` | `BaalvionStack-Web` | proxy-service:4000 | PM2 (Vite SPA) | active |
 | 6 | lawelitenetwork.com | `Law-Elite-Network-main` | `LawEliteNetwork` | law-service:3015 + law-elite-gateway:8090 | Firebase + Docker | active |
 | 7 | controlthemarket.com | `testrank-baalvion` | `ControlTheMarket` | ctm-service:3017 | Firebase + PM2 + CI | active |
@@ -54,7 +54,7 @@
 | `Global-Trade-Infrastructure-main` | `baalvion-eternal-absolute-singularity` | Next 15.0.3 | 9003 | nested repo (own `.git`) |
 | `admin-platform` | `baalvion-admin-platform` | Next 15.5.18 | 3030 | plain |
 | `AmariseMaisonAvenue-main` | `amarise-maison-avenue-web` | Next 15.5.18 | 3033 | plain |
-| `Imperialpedia-main` | `imperialpedia-web` | Next 15.5.18 | 3029 | plain |
+| `Imperialpedia-nextjs-main` | `imperialpedia-web` | Next 15.5.18 | 3029 | plain |
 | `Proxy-BaalvionStack` | `proxy-baalvionstack-web` | Vite 6 + React 18 | 8080 | plain |
 | `Law-Elite-Network-main` | `law-elite-network-web` | Next 15.5.18 | 9002 | plain |
 | `testrank-baalvion` | `testrank-baalvion-web` | Next 15.5.18 | 3034 | plain |
@@ -161,7 +161,7 @@
 | `Global-Trade-Infrastructure-main` | `Baalvion-Core` |
 | `admin-platform` | `Baalvion-Admin` |
 | `AmariseMaisonAvenue-main` | `AmariseMaisonAvenue` |
-| `Imperialpedia-main` | `Imperialpedia` |
+| `Imperialpedia-nextjs-main` | `Imperialpedia` |
 | `Proxy-BaalvionStack` | `BaalvionStack-Web` |
 | `Law-Elite-Network-main` | `LawEliteNetwork` |
 | `testrank-baalvion` | `ControlTheMarket` |

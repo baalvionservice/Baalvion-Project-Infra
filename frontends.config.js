@@ -33,7 +33,7 @@ module.exports = {
     next('mining-web',       'Mining.Baalvion-main',             3028),
     // Absent until 2026-09: CI derives its frontend build matrix from this list,
     // so Imperialpedia was the one production site CI never built.
-    next('imperialpedia-web','Imperialpedia-main',               3029),
+    next('imperialpedia-web','Imperialpedia-nextjs-main',               3029),
     next('canwemarry-web',   'CanWeMarry-main',                  3071),
 
     // --- Vite SPAs ---

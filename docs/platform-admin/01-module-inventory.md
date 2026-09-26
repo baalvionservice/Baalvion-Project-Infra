@@ -46,7 +46,7 @@ Source: `Frontend/admin-platform/src/app/(dashboard)/*` + `src/lib/constants/nav
 
 ---
 
-## B. Imperialpedia — `Imperialpedia-main` (→ `/admin/products/imperialpedia/*`)
+## B. Imperialpedia — `Imperialpedia-nextjs-main` (→ `/admin/products/imperialpedia/*`)
 
 Real routes under `src/app/admin/*` (~80). Backed by `imperialpedia-service` + `cms-service`. Full per-page design exists in `docs/admin-cms/prd/`.
 

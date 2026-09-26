@@ -1,7 +1,7 @@
 'use strict';
 /**
  * Pure transform: cms-service `contentBlocks` -> Imperialpedia frontend's
- * `TermsBodyBlock[]` shape (Frontend/Imperialpedia-main/src/lib/data/terms.ts).
+ * `TermsBodyBlock[]` shape (Frontend/Imperialpedia-nextjs-main/src/lib/data/terms.ts).
  *
  * cms-service's `contentBlocks[].content` has no enforced per-type shape
  * (validators/contentSchemas.js types it as z.record(z.unknown())) — every read
