@@ -21,8 +21,13 @@ export interface NavSection extends NavLink {
 // form (personal injury, maritime injury, cruise ship accidents) plus Law
 // School Success -- no Cases/Courts/Lawyers/Judges children, since that
 // directory is still retired. News un-retired at explicit request (see
-// next.config.ts). Restore the removed sections alongside
-// CURRENT_CATEGORY_SLUGS once AdSense approves the site as it stands.
+// next.config.ts). Videos/Podcasts nav section removed in a follow-up pass
+// (2026-09-27, after the third rejection): the content behind it was real
+// but entirely off-topic for a legal-guides site (general entertainment
+// clips/podcasts), so the whole Media pillar is retired, not just relabeled
+// -- see next.config.ts redirects and sitemap.ts. Restore the removed
+// sections alongside CURRENT_CATEGORY_SLUGS once AdSense approves the site
+// as it stands.
 export const PRIMARY_NAV: NavSection[] = [
   {
     label: 'News',
@@ -41,12 +46,5 @@ export const PRIMARY_NAV: NavSection[] = [
   {
     label: 'Fashion',
     href: '/fashion',
-  },
-  {
-    label: 'Videos',
-    href: '/videos',
-    children: [
-      { label: 'Podcasts', href: '/podcasts' },
-    ],
   },
 ];

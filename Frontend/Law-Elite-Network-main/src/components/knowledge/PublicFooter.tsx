@@ -23,8 +23,10 @@ import { AD_PLACEMENTS } from '@/components/ads/AdManager';
 // Practice Areas -- Entertainment, Sports, People, Topics, Countries, and
 // Legal Cases/Courts stay retired (301 to / via next.config.ts), so linking
 // them here would send readers straight into a redirect instead of a page.
-// Restore the rest alongside CURRENT_CATEGORY_SLUGS once AdSense approves
-// the site as it stands.
+// Videos/Podcasts retired too in a follow-up pass (2026-09-27, after the
+// third rejection) -- real but off-topic content for a legal-guides site
+// under review. Restore everything alongside CURRENT_CATEGORY_SLUGS once
+// AdSense approves the site as it stands.
 const PRACTICE_AREA_LINKS = [
   { href: '/personal-injury-lawyer', label: 'Personal Injury Law' },
   { href: '/maritime-offshore-injury-law', label: 'Maritime & Offshore Injury' },
@@ -34,11 +36,6 @@ const PRACTICE_AREA_LINKS = [
 
 const FASHION_LINKS = [
   { href: '/fashion', label: 'Fashion Hub' },
-];
-
-const MEDIA_LINKS = [
-  { href: '/videos', label: 'Videos' },
-  { href: '/podcasts', label: 'Podcasts' },
 ];
 
 const ABOUT_LINKS = [
@@ -120,11 +117,8 @@ export function PublicFooter() {
 
             <FooterLinkColumn
               colSpan="md:col-span-2"
-              title="Fashion & Media"
-              sections={[
-                { heading: 'Fashion', links: FASHION_LINKS },
-                { heading: 'Media', links: MEDIA_LINKS },
-              ]}
+              title="Fashion"
+              sections={[{ heading: 'Fashion', links: FASHION_LINKS }]}
             />
 
             <FooterLinkColumn

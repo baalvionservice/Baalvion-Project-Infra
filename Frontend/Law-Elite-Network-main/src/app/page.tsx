@@ -16,12 +16,10 @@ import {
   BreakingStrip,
   ExploreBand,
   FrontPage,
-  MediaRail,
   PillarColumn,
   TrendingList,
 } from '@/components/home/HomeSections';
 import { getHomeFeed } from '@/lib/home-feed';
-import { getAllMedia } from '@/lib/media-server';
 import type { Metadata } from 'next';
 import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
 
@@ -102,7 +100,7 @@ export default async function KnowledgeHomePage() {
   const pool = mergeArticles(combinedSource).filter(isKeptCategoryArticle);
 
   const feed = await getHomeFeed(pool);
-  const [videos, interviews, widgets] = await Promise.all([getAllMedia('video'), getAllMedia('interview'), getHomeWidgets()]);
+  const widgets = await getHomeWidgets();
 
   const currentSlugSet = new Set<string>(CURRENT_CATEGORY_SLUGS);
   const rawCategories = apiCategories.length > 0
@@ -180,8 +178,6 @@ export default async function KnowledgeHomePage() {
             <PillarColumn title="Practice Area Guides" href="/personal-injury-lawyer" articles={feed.legal} />
           </section>
         )}
-        <MediaRail title="Videos & Law Elite TV" href="/videos" items={videos.slice(0, 4)} />
-        <MediaRail title="Interviews & Exclusives" href="/interviews" items={interviews.slice(0, 4)} />
         {/* PopularTopics dropped in the same pass as above -- /topics still
             301s to /, and each topic card links to /topics/{slug}. */}
 

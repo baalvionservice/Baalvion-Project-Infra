@@ -320,15 +320,22 @@ const nextConfig: NextConfig = {
       // out of indexing/sitemap below -- these aren't
       // CURRENT_CATEGORY_SLUGS-driven category hubs, so they need their own
       // redirect rather than falling out of that list automatically.
-      // Videos and Podcasts were kept live (real content: Stuff You Should
-      // Know, Desert Island Discs, The Rest Is Football; real Bigg Boss
-      // episodes) -- not retired here, see sitemap.ts.
       { source: '/entertainment/:path*', destination: '/', permanent: true },
       { source: '/sports/:path*', destination: '/', permanent: true },
       { source: '/people/:path*', destination: '/', permanent: true },
       { source: '/countries/:path*', destination: '/', permanent: true },
       { source: '/topics/:path*', destination: '/', permanent: true },
       { source: '/legal/:path*', destination: '/', permanent: true },
+      // Follow-up pass, 2026-09-27, after the third AdSense rejection: Videos
+      // and Podcasts were kept live in the pass above (real content: Stuff
+      // You Should Know, Desert Island Discs, The Rest Is Football; real
+      // Bigg Boss episodes), but it's genuinely off-topic for a legal-guides
+      // site under review, not just thin -- retired alongside Interviews
+      // (which had zero real content). Their content was never touched, this
+      // is a 301, and the block comes out once AdSense approves the site.
+      { source: '/videos/:path*', destination: '/', permanent: true },
+      { source: '/podcasts/:path*', destination: '/', permanent: true },
+      { source: '/interviews/:path*', destination: '/', permanent: true },
     ];
   },
 

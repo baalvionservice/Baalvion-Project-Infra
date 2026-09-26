@@ -7,11 +7,9 @@ import { articleUrl, ROOT_FLAT_ARTICLE_SLUGS } from '@/lib/article-url';
 import { CURRENT_CATEGORY_SLUGS, toNewCategorySlug } from '@/lib/category-slugs';
 import { cmsGetArticles } from '@/lib/cms';
 import { CONTENT_CACHE_TAG } from '@/lib/cache-tags';
-import { getPodcastHub } from '@/lib/podcasts-hub';
-import { getShowPeople, getVideoHub, personUrl as showPersonUrl, seasonUrl, showUrl } from '@/lib/videos-hub';
-// People/Entertainment/Legal/Sports/Topics/Countries sitemap imports removed
-// 2026-09-25 alongside the routes below -- see the retirement comment
-// further down this file. Restore together. Podcasts/Videos were kept live.
+// People/Entertainment/Legal/Sports/Topics/Countries/Podcasts/Videos sitemap
+// imports removed 2026-09-25 and 2026-09-27 alongside the routes below --
+// see the retirement comment further down this file. Restore together.
 
 // Render at request time, never at build time. This route fetches from law-service,
 // and a build-time fetch against an unreachable API blocks `next build` (CI timeout).
@@ -288,31 +286,14 @@ async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
   // (next.config.ts), so submitting their URLs here would resubmit pages
   // that immediately redirect, same problem REDIRECTED_ARTICLE_SLUGS exists
   // to prevent for articles. Restore this block once AdSense approves the
-  // Fashion-only site. Podcasts and Videos were kept live (real content) and
-  // stay in the sitemap below.
-
-  // Podcasts and videos: only pages an editor has finished (indexable) or that have real videos. Thin pages stay out.
-  const [podcastHub, videoHub] = await Promise.all([getPodcastHub(), getVideoHub()]);
-  const podcastRoutes: MetadataRoute.Sitemap = [
-    ...(podcastHub.length > 0 ? [{ url: `${BASE_URL}/podcasts` }] : []),
-    ...podcastHub.filter((p) => p.indexable).map((p) => ({ url: `${BASE_URL}/podcasts/${p.slug}`, ...(p.reviewedAt ? { lastModified: new Date(p.reviewedAt) } : {}) })),
-  ];
-  const showsWithVideos = new Set(videoHub.videos.map((v) => v.showSlug));
-  const videoRoutes: MetadataRoute.Sitemap = [
-    ...(videoHub.videos.length > 0 ? [{ url: `${BASE_URL}/videos` }] : []),
-    ...videoHub.shows.filter((sh) => sh.indexable || showsWithVideos.has(sh.slug)).map((sh) => ({ url: `${BASE_URL}${showUrl(sh.slug)}`, ...(sh.reviewedAt ? { lastModified: new Date(sh.reviewedAt) } : {}) })),
-    ...videoHub.videos.map((v) => ({ url: `${BASE_URL}/videos/${v.slug}`, ...(v.publishedAt ? { lastModified: new Date(v.publishedAt) } : {}) })),
-  ];
-
-  const seasonRoutes: MetadataRoute.Sitemap = videoHub.shows.flatMap((sh) => sh.seasons.filter((x) => x.participants.length >= 8).map((x) => ({ url: `${BASE_URL}${seasonUrl(sh.slug, x.number)}` })));
-  const showPeopleRoutes: MetadataRoute.Sitemap = (await Promise.all(videoHub.shows.map(async (sh) => (await getShowPeople(sh.slug)).filter((p) => p.indexable).map((p) => ({ url: `${BASE_URL}${showPersonUrl(sh.slug, p.slug)}`, ...(p.reviewedAt ? { lastModified: new Date(p.reviewedAt) } : {}) }))))).flat();
+  // Fashion-only site. Podcasts and Videos, initially kept live because their
+  // content was real (not thin), were retired here too in a follow-up pass
+  // (2026-09-27, after the third rejection) -- real but off-topic
+  // entertainment content on a legal-guides site under review. See
+  // next.config.ts's /videos, /podcasts, /interviews redirects.
 
   return [
     ...staticRoutes,
-    ...seasonRoutes,
-    ...showPeopleRoutes,
-    ...podcastRoutes,
-    ...videoRoutes,
     ...articleRoutes,
     ...categoryRoutes,
     ...authorRoutes,
