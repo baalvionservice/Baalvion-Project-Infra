@@ -10,7 +10,7 @@ WORKDIR /app
 # 1) Prune the monorepo to just this app + its workspace deps
 FROM base AS pruner
 COPY . .
-RUN npx turbo prune amarise-maison-avenue-web --docker
+RUN npx turbo@2.9.16 prune amarise-maison-avenue-web --docker
 
 # 2) Install pruned deps.
 # --no-frozen-lockfile (not --frozen): the root pins a version-selector pnpm override

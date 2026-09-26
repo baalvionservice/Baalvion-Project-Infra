@@ -81,6 +81,21 @@ for (const path of dockerfiles) {
     }
   }
 
+  // An UNPINNED `npx turbo` / `pnpm dlx turbo` (no `@version`) is the same floating-tag
+  // danger as `node:26-alpine` — it resolves whatever's newest on every rebuild. Caught
+  // live: 4 Dockerfiles on bare `npx turbo prune` broke the instant npx resolved turbo
+  // 2.11.4 instead of the 2.9.16 every pinned Dockerfile uses, with no file changed to
+  // explain it. `(?!@)` excludes the already-pinned form matched above.
+  const unpinnedTurboRe = /\b(npx turbo|pnpm dlx turbo)(?!@)\b/g;
+  const unpinnedMatches = [...text.matchAll(unpinnedTurboRe)];
+  for (const [, invocation] of unpinnedMatches) {
+    findings.push({ file: rel, kind: 'turbo-unpinned', found: invocation, expected: `${invocation}@${canonicalTurbo}` });
+    if (FIX) {
+      text = text.replaceAll(invocation, `${invocation}@${canonicalTurbo}`);
+      changed = true;
+    }
+  }
+
   if (changed) writeFileSync(path, text);
 }
 
